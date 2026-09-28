@@ -10,6 +10,7 @@ use App\Models\HiringCampaign;
 use App\Models\PublicRecruitmentLink;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentCampaignInvite;
+use App\Services\Monitoring\SecurityMonitor;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -302,6 +303,8 @@ class RecruitmentApplicationSubmissionService
                     try {
                         $stored[] = $this->files->store($application, $upload, $key, $field['rules']);
                     } catch (UnsafeRecruitmentFileException $exception) {
+                        app(SecurityMonitor::class)->uploadRejected($exception->reason, $key);
+
                         throw ValidationException::withMessages(['answers.'.$key => $exception->getMessage()]);
                     }
                 }

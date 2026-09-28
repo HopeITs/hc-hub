@@ -2,8 +2,12 @@
 
 namespace App\Livewire\Recruitment\Offers;
 
+use App\Enums\HiringCampaignStatus;
 use App\Enums\RecruitmentJobOfferStatus as Status;
+use App\Models\HiringCampaign;
 use App\Models\RecruitmentJobOffer;
+use App\Models\Vacancy;
+use App\Services\HiringCampaignStateMachine;
 use App\Services\RecruitmentJobOfferService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -113,10 +117,17 @@ class Show extends Component
             'creator.profile',
             'responseRecordedBy.profile',
             'cancelledBy.profile',
-            'hiringConversion',
+            'hiringConversion.employee',
+            'hiringConversion.convertedBy.profile',
         ]);
+        $conversion = $offer->hiringConversion;
 
         return view('livewire.recruitment.offers.show', [
+            'conversion' => $conversion,
+            'canConvert' => $conversion !== null && ! $conversion->isConverted() && Gate::allows('convert', $conversion),
+            'campaignsStillOpen' => $conversion?->isConverted() && $offer->vacancy?->status === Vacancy::FILLED
+                ? $this->campaignsStillOpen($offer->vacancy)
+                : [],
             'offer' => $offer,
             'canManage' => Gate::allows('manage', $offer),
             'canSeeSalary' => Gate::allows('viewSalary', $offer),
@@ -125,6 +136,26 @@ class Show extends Component
             'canRevise' => $offers->canRevise($offer),
             'cancellationReasons' => $offers->cancellationReasons(),
         ]);
+    }
+
+    /**
+     * Task 10: campaigns on a filled vacancy that still take — or may yet
+     * take — applications, which the hire did not close for HR.
+     *
+     * @return array<int, int>
+     */
+    private function campaignsStillOpen(Vacancy $vacancy): array
+    {
+        $states = app(HiringCampaignStateMachine::class);
+
+        return HiringCampaign::query()
+            ->where('vacancy_id', $vacancy->getKey())
+            ->whereIn('status', [HiringCampaignStatus::Open, HiringCampaignStatus::Published])
+            ->get()
+            ->filter(fn (HiringCampaign $campaign): bool => in_array($states->effective($campaign), [HiringCampaignStatus::Open, HiringCampaignStatus::Published], true))
+            ->map(fn (HiringCampaign $campaign): int => (int) $campaign->getKey())
+            ->values()
+            ->all();
     }
 
     private function openPanel(string $panel): void

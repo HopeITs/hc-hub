@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Services\Monitoring\SecurityMonitor;
 use App\Services\RecruitmentFileScanService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -39,6 +40,11 @@ class ScanRecruitmentApplicantFile implements ShouldQueue
         Log::warning('Recruitment file scan gave up; the file stays in quarantine until the next sweep.', [
             'file_id' => $this->fileId,
             'reason' => $exception?->getMessage(),
+        ]);
+
+        app(SecurityMonitor::class)->record(SecurityMonitor::SCAN_GAVE_UP, [
+            'file_id' => $this->fileId,
+            'exception' => $exception === null ? null : class_basename($exception),
         ]);
     }
 }

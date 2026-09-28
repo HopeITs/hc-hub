@@ -306,6 +306,31 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Hiring conversion (Phase 2 Task 10)
+    |--------------------------------------------------------------------------
+    |
+    | The contract takes every term the accepted offer carries. These fill
+    | only what an offer does not carry, with the values the contract composer
+    | itself starts a new contract from (ContractForm), so a converted hire's
+    | contract reads like one HR typed in; HR adjusts the schedule afterwards
+    | on the ordinary contract page if needed.
+    |
+    | weekly_hours: when the offer left weekly hours empty (a service
+    | contract, the one category allowed 0, gets 0).
+    | term: when the offer left the end date empty — a trial contract runs
+    | trial_months, anything else to the end of the year it starts in.
+    |
+    */
+
+    'conversions' => [
+        'weekly_hours' => 40,
+        'work_hours_from' => '09:00',
+        'work_hours_to' => '17:00',
+        'trial_months' => 3,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | CV analysis
     |--------------------------------------------------------------------------
     |

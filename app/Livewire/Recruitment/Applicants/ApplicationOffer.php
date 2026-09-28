@@ -29,7 +29,7 @@ class ApplicationOffer extends Component
     public function render()
     {
         $application = $this->resolveApplication();
-        $offer = RecruitmentJobOffer::query()->where('application_id', $application->getKey())->with('currentVersion')->first();
+        $offer = RecruitmentJobOffer::query()->where('application_id', $application->getKey())->with(['currentVersion', 'hiringConversion'])->first();
 
         return view('livewire.recruitment.applicants.application-offer', [
             'visible' => Gate::allows('viewAny', RecruitmentJobOffer::class),

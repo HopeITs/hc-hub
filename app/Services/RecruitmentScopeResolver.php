@@ -342,6 +342,33 @@ class RecruitmentScopeResolver
             ->exists();
     }
 
+    /**
+     * Is every part of this applicant inside the user's scope?
+     *
+     * canAccessApplicant() answers "may they see this person", which one
+     * application in scope is enough for. Acting on the whole person — erasing
+     * them — needs more: every application they made must be visible too, or a
+     * governorate would be deleting another governorate's records.
+     */
+    public function coversWholeApplicant(User $user, RecruitmentApplicant $applicant): bool
+    {
+        if (! $this->canAccessApplicant($user, $applicant)) {
+            return false;
+        }
+
+        if ($this->scopeType($user) === RecruitmentScopeType::Organization) {
+            return true;
+        }
+
+        $total = $applicant->applications()->count();
+
+        if ($total === 0) {
+            return $this->ownsApplicantRecord($user, $applicant);
+        }
+
+        return $applicant->applications()->visibleTo($user)->count() === $total;
+    }
+
     public function canAccessApplication(User $user, RecruitmentApplication $application): bool
     {
         return $this->scopeApplications(RecruitmentApplication::query(), $user)

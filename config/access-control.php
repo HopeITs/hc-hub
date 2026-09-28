@@ -23,6 +23,13 @@ return [
     'never_granted_to_roles' => [
         'recruitment-requests.approve-finance',
         'recruitment-requests.submit-without-manager',
+        // Not person-identifying, but held back from every bulk grant for the
+        // same reason: candidate export and erasure are answerable acts, so a
+        // new HR role must not arrive able to do either. They are read with
+        // User::hasExplicitPermission(), which also refuses the administrator
+        // bypass — an administrator is granted them like anyone else.
+        'recruitment-applicants.export',
+        'recruitment-applicants.request-erasure',
     ],
 
     'system_roles' => [
@@ -146,6 +153,15 @@ return [
             // Phase 2 Task 9: follow job offers / write them. Writing also
             // needs User::canViewSalary(), checked by the policy.
             'view-offers', 'manage-offers',
+            // Phase 2 Task 10: turn an accepted offer into an employee and a
+            // contract. The policy also needs contracts.create and
+            // canViewSalary(), and the employee side is checked against
+            // EmployeePolicy.
+            'convert-hires',
+            // Phase 2 Task 11: take candidate data out of the system as a
+            // file, and anonymize an applicant who asked to be forgotten.
+            // Neither is attached to any role — see never_granted_to_roles.
+            'export', 'request-erasure',
         ],
     ],
 
@@ -429,6 +445,7 @@ return [
         // query and asks the policy (manage: permission + scope +
         // canViewSalary) again; the service authorizes a third time.
         'recruitment.offers.form' => ['save' => 'recruitment-applicants.manage-offers'],
+        'recruitment.offers.revise' => ['save' => 'recruitment-applicants.manage-offers'],
         'recruitment.offers.show' => [
             'beginSend' => 'recruitment-applicants.manage-offers',
             'send' => 'recruitment-applicants.manage-offers',
@@ -437,6 +454,10 @@ return [
             'beginCancel' => 'recruitment-applicants.manage-offers',
             'cancelOffer' => 'recruitment-applicants.manage-offers',
         ],
+        // Phase 2 Task 10. save() re-resolves the offer through the scoped
+        // query and asks the policy (convert) again; the service authorizes a
+        // third time, and again for the employee it creates or links.
+        'recruitment.offers.convert' => ['save' => 'recruitment-applicants.convert-hires'],
     ],
 
     /*

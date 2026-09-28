@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\PublicRecruitmentSubmissionException;
 use App\Exceptions\PublicRecruitmentUnavailableException;
 use App\Services\InternalRecruitmentApplicantService;
+use App\Services\Monitoring\SecurityMonitor;
 use App\Services\PublicRecruitmentApplicationService;
 use App\Services\PublicRecruitmentLinkService;
 use Illuminate\Http\RedirectResponse;
@@ -15,13 +16,15 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 
 class PublicCareerController extends Controller
 {
-    public function show(Request $request, string $token, PublicRecruitmentLinkService $service): Response
+    public function show(Request $request, string $token, PublicRecruitmentLinkService $service, SecurityMonitor $monitor): Response
     {
         $locale = $this->setLocale($request);
 
         try {
             $page = $service->publicPage($token);
         } catch (PublicRecruitmentUnavailableException) {
+            $monitor->tokenProbe($request, $token);
+
             return $this->unavailable();
         }
 
@@ -39,13 +42,15 @@ class PublicCareerController extends Controller
      * "Sign in to apply" on an internal campaign: HC-HR's own login, then
      * straight back to the vacancy, which now opens with their details.
      */
-    public function signIn(Request $request, string $token, PublicRecruitmentLinkService $service): RedirectResponse|Response
+    public function signIn(Request $request, string $token, PublicRecruitmentLinkService $service, SecurityMonitor $monitor): RedirectResponse|Response
     {
         $locale = $this->setLocale($request);
 
         try {
             $service->publicPage($token);
         } catch (PublicRecruitmentUnavailableException) {
+            $monitor->tokenProbe($request, $token);
+
             return $this->unavailable();
         }
 
@@ -64,6 +69,7 @@ class PublicCareerController extends Controller
         string $token,
         PublicRecruitmentLinkService $links,
         PublicRecruitmentApplicationService $applications,
+        SecurityMonitor $monitor,
     ): Response {
         $locale = $this->setLocale($request);
 
@@ -78,6 +84,8 @@ class PublicCareerController extends Controller
         } catch (PublicRecruitmentUnavailableException|PublicRecruitmentSubmissionException $exception) {
             $reason = $exception instanceof PublicRecruitmentSubmissionException ? $exception->reason : 'link_expired';
             $message = __("careers.errors.{$reason}");
+
+            $monitor->submissionFailed($request, $reason, $token);
 
             try {
                 $page = $links->publicPage($token);

@@ -7,6 +7,9 @@
                 <a href="{{ route('recruitment.offers.show', ['offerId' => $offer->id]) }}" wire:navigate class="flex items-center gap-2 hover:underline">
                     <span class="text-secondary-medium">v{{ $offer->currentVersion?->version_no }}</span>
                     <span class="rounded-control px-2 py-0.5 text-xs font-semibold {{ RecruitmentJobOfferStatus::classes($offer->status) }}">{{ __('recruitment-applicant.offers.statuses.'.$offer->status) }}</span>
+                    @if ($offer->hiringConversion?->isConverted())
+                        <span class="rounded-control bg-green-50 px-2 py-0.5 text-xs font-semibold text-green-700">{{ __('recruitment-applicant.statuses.hired') }}</span>
+                    @endif
                 </a>
             @else
                 <a href="{{ route('recruitment.offers.create', ['applicationId' => $application->id]) }}" wire:navigate

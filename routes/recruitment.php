@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\RecruitmentApplicantErasureController;
+use App\Http\Controllers\RecruitmentApplicantExportController;
 use App\Http\Controllers\RecruitmentApplicantFileController;
 use App\Livewire\Recruitment\Applicants\Index as ApplicantIndex;
 use App\Livewire\Recruitment\Applicants\Show as ApplicantShow;
@@ -11,8 +13,10 @@ use App\Livewire\Recruitment\Campaigns\Show as CampaignShow;
 use App\Livewire\Recruitment\Interviews\Form as InterviewForm;
 use App\Livewire\Recruitment\Interviews\Index as InterviewIndex;
 use App\Livewire\Recruitment\Interviews\Show as InterviewShow;
+use App\Livewire\Recruitment\Offers\Convert as OfferConvert;
 use App\Livewire\Recruitment\Offers\Form as OfferForm;
 use App\Livewire\Recruitment\Offers\Index as OfferIndex;
+use App\Livewire\Recruitment\Offers\Revise as OfferRevise;
 use App\Livewire\Recruitment\Offers\Show as OfferShow;
 use App\Livewire\Recruitment\Requests\Create;
 use App\Livewire\Recruitment\Requests\Details;
@@ -89,14 +93,32 @@ Route::prefix('recruitment/offers')->name('recruitment.offers.')
         Route::get('/{offerId}', OfferShow::class)->whereNumber('offerId')->name('show');
         Route::get('/{offerId}/edit', OfferForm::class)->whereNumber('offerId')
             ->middleware('active_permission:recruitment-applicants.manage-offers')->name('edit');
-        Route::get('/{offerId}/revise', OfferForm::class)->whereNumber('offerId')->defaults('mode', 'revise')
+        // Its own component, not a route default on OfferForm: see OfferForm::mount().
+        Route::get('/{offerId}/revise', OfferRevise::class)->whereNumber('offerId')
             ->middleware('active_permission:recruitment-applicants.manage-offers')->name('revise');
+        // Phase 2 Task 10: hire the candidate who accepted — employee and
+        // contract. The component asks the conversion policy (convert) too.
+        Route::get('/{offerId}/convert', OfferConvert::class)->whereNumber('offerId')
+            ->middleware('active_permission:recruitment-applicants.convert-hires')->name('convert');
     });
 
 Route::get('recruitment/applications/{applicationId}/offer/create', OfferForm::class)
     ->whereNumber('applicationId')
     ->middleware('active_permission:recruitment-applicants.manage-offers')
     ->name('recruitment.offers.create');
+
+// Phase 2 Task 11. Outside the group above, with no permission middleware, for
+// the same reason as the file download below: the policy enforces the explicit
+// export / erasure permission inside the controller, so a refused attempt is
+// audited instead of being stopped at the door. Both are POST (CSRF-protected).
+Route::post('recruitment/applicants/export', RecruitmentApplicantExportController::class)
+    ->middleware('throttle:10,1')
+    ->name('recruitment.applicants.export');
+
+Route::post('recruitment/applicants/{applicant}/erasure', [RecruitmentApplicantErasureController::class, 'store'])
+    ->whereNumber('applicant')
+    ->middleware('throttle:10,1')
+    ->name('recruitment.applicants.erasure');
 
 // No permission middleware on purpose: the policy enforces it, so a refused
 // attempt still reaches the controller and lands in the download audit.

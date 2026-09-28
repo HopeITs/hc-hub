@@ -85,6 +85,8 @@ class RecruitmentApplicant extends Model
             'last_seen_at' => 'datetime',
             'retention_until' => 'datetime',
             'anonymized_at' => 'datetime',
+            'privacy_accepted_at' => 'datetime',
+            'erasure_requested_at' => 'datetime',
         ];
     }
 }

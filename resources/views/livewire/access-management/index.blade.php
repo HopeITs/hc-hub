@@ -416,7 +416,7 @@
                         </div>
 
                         <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] gap-3 p-[clamp(1rem,2vw,1.5rem)]">
-                            @foreach ($permissionGroups as $group)
+                            @foreach ($rolePermissionGroups as $group)
                                 <fieldset class="min-w-0 rounded-lg border border-gray-200 p-3.5">
                                     <legend class="px-1 text-xs font-bold uppercase tracking-wide text-gray-700">
                                         {{ $group['label'] }}

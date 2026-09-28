@@ -64,11 +64,18 @@ class RecruitmentApplicantFile extends Model implements HasMedia
         return $this->file_type === self::TYPE_CV;
     }
 
+    /** The bytes were removed on purpose (anonymization); the row stays as history. */
+    public function isPurged(): bool
+    {
+        return $this->purged_at !== null;
+    }
+
     protected function casts(): array
     {
         return [
             'uploaded_at' => 'datetime',
             'archived_at' => 'datetime',
+            'purged_at' => 'datetime',
         ];
     }
 }

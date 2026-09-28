@@ -2,6 +2,7 @@
 
 use App\Models\Permission;
 use App\Models\Role;
+use App\Support\AccessPermissionCatalog;
 use Illuminate\Database\Migrations\Migration;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -36,9 +37,13 @@ return new class extends Migration
             Permission::findOrCreate($name, 'web');
         }
 
+        // Live config again: keep whatever is held back from roles (export,
+        // erasure) out of the grant, or a fresh database would hand it to HR.
+        $grantable = array_values(array_diff($names, AccessPermissionCatalog::personLevelNames()));
+
         // super-admin and HR-SYR hold everything the system offers.
         foreach (config('access-control.administrator_roles', []) as $roleName) {
-            Role::findOrCreate($roleName, 'web')->givePermissionTo($names);
+            Role::findOrCreate($roleName, 'web')->givePermissionTo($grantable);
         }
 
         // Governorate HR runs the ATS for campaigns raised inside its own
@@ -47,7 +52,7 @@ return new class extends Migration
             ->where('name', 'like', 'HR-%')
             ->where('name', '!=', 'HR-SYR')
             ->get()
-            ->each(fn (Role $role) => $role->givePermissionTo($names));
+            ->each(fn (Role $role) => $role->givePermissionTo($grantable));
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
