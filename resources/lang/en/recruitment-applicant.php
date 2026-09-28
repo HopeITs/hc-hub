@@ -327,6 +327,7 @@ return [
             'profile' => 'applicant record',
             'residence' => 'place of residence',
         ],
+        'default_minimum' => 'The minimum set in the matching rules',
         'levels' => [
             'institute' => 'Institute', 'university' => 'University',
             'master' => 'Master', 'doctorate' => 'Doctorate',
@@ -353,6 +354,8 @@ return [
             'qualification_answer_unrecognised' => 'The answer “:value” is not a known education level.',
             'qualification_met' => 'Stated :answer; the requirement names :required (“:keyword”).',
             'qualification_below' => 'Stated :answer; the requirement names :required (“:keyword”).',
+            'qualification_met_default' => 'Stated :answer; the minimum set in the matching rules is :required.',
+            'qualification_below_default' => 'Stated :answer; the minimum set in the matching rules is :required.',
             'industry_declared' => 'Declared experience in :field. Self-reported, not checked against the CV.',
             'industry_none_declared' => 'Declared no experience in the field (:field).',
             'industry_described_only' => 'Described their experience but did not state a field. Read the answer.',

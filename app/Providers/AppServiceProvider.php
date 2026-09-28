@@ -65,6 +65,7 @@ use App\Services\Recruitment\Privacy\RetentionPolicy;
 use App\Services\Recruitment\Scanning\ClamdScanner;
 use App\Services\Recruitment\Scanning\DisabledScanner;
 use App\Services\Recruitment\Scanning\RecruitmentFileScanner;
+use App\Services\RecruitmentIndicatorRules;
 use App\Services\SalaryCipher;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Query\Builder;
@@ -98,6 +99,8 @@ class AppServiceProvider extends ServiceProvider
         // figures" warning that goes with it - is built once per request
         // rather than once per contract row rendered.
         $this->app->singleton(SalaryCipher::class);
+        // One instance, so a save is seen at once by everything that evaluates indicators.
+        $this->app->singleton(RecruitmentIndicatorRules::class);
 
         // Anything but "clamd" leaves every upload in quarantine; there is no
         // driver that clears a file without scanning it.

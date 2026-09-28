@@ -2,6 +2,7 @@
 
 namespace App\Services\Recruitment\Cv;
 
+use App\Services\RecruitmentIndicatorRules;
 use Illuminate\Support\Str;
 
 /**
@@ -33,6 +34,9 @@ class CvAnalyzer
         // Already in normalized form (ى→ي, ة→ه, no hamza on alef).
         'في', 'من', 'علي', 'الي', 'مع', 'عن', 'او', 'جيد', 'جيده', 'ممتاز', 'ممتازه', 'مهارات', 'مهاره', 'القدره', 'قدره', 'معرفه',
     ];
+
+    /** Null (the unit tests) reads the shipped config; the container passes the saved rules. */
+    public function __construct(private readonly ?RecruitmentIndicatorRules $rules = null) {}
 
     /**
      * @return array{
@@ -76,6 +80,11 @@ class CvAnalyzer
         $text = strtr($text, ['أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا', 'ٱ' => 'ا', 'ة' => 'ه', 'ى' => 'ي', 'ؤ' => 'و', 'ئ' => 'ي', '–' => '-', '—' => '-']);
 
         return mb_strtolower($text);
+    }
+
+    private function rule(string $key): array
+    {
+        return $this->rules?->get($key, []) ?? config('recruitment.indicators.'.$key, []);
     }
 
     // ------------------------------------------------------------------
@@ -206,10 +215,10 @@ class CvAnalyzer
      */
     private function levels(string $text): array
     {
-        $ranks = config('recruitment.indicators.education_ranks', []);
+        $ranks = $this->rule('education_ranks');
         $found = [];
 
-        foreach (config('recruitment.indicators.qualification_keywords', []) as $level => $keywords) {
+        foreach ($this->rule('qualification_keywords') as $level => $keywords) {
             if (! isset($ranks[$level])) {
                 continue;
             }
@@ -292,7 +301,7 @@ class CvAnalyzer
             return ['outcome' => 'unknown', 'required' => $required['level']];
         }
 
-        $ranks = config('recruitment.indicators.education_ranks', []);
+        $ranks = $this->rule('education_ranks');
 
         return [
             'outcome' => $ranks[$education['level']] >= $ranks[$required['level']] ? 'met' : 'not_met',

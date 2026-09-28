@@ -490,6 +490,14 @@ return [
 
         // experience_field answers that mean "no experience in the field".
         'no_experience_answers' => ['none', 'no'],
+
+        // Minimums used only when a request names none of its own. Null means
+        // "no fallback": the criterion stays not applicable, as before.
+        'default_required_experience_years' => null,
+        'default_required_qualification' => null, // a key of education_ranks
+
+        // Indicator keys switched off; they drop out of the list and the count.
+        'disabled' => [],
     ],
 
 ];
