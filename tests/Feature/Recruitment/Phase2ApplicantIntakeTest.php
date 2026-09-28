@@ -33,6 +33,7 @@ use App\Policies\RecruitmentApplicantPolicy;
 use App\Policies\RecruitmentApplicationPolicy;
 use App\Policies\RecruitmentCampaignInvitePolicy;
 use App\Services\PublicRecruitmentLinkService;
+use App\Services\RecruitmentApplicantIdentityService;
 use App\Services\RecruitmentCampaignInviteService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -163,6 +164,100 @@ class Phase2ApplicantIntakeTest extends TestCase
         $this->assertSame(2, RecruitmentApplication::query()->count());
     }
 
+    /**
+     * The form cannot tell the owner of an email from someone typing it, so a
+     * second submission must not rewrite the person HR already has on file —
+     * otherwise applying to any campaign with a known address would redirect
+     * that person's interview call to someone else's phone.
+     */
+    public function test_a_later_submission_cannot_rewrite_an_existing_applicants_name_or_phone(): void
+    {
+        [, , $first] = $this->campaignWithLink();
+        [, , $second] = $this->campaignWithLink();
+
+        $this->submit($first, $this->answers('victim@example.com', 'Real Person', '+963 111 111 111'))->assertStatus(202);
+        $this->submit($second, $this->answers('VICTIM@example.com', 'Someone Else', '+963 999 999 999'))->assertStatus(202);
+
+        $applicant = RecruitmentApplicant::query()->sole();
+        $this->assertSame('Real Person', $applicant->full_name);
+        $this->assertSame('+963111111111', $applicant->phone_normalized);
+        $this->assertSame(2, $applicant->applications()->count());
+    }
+
+    /** Refusing the overwrite must not lose what the second submission said. */
+    public function test_a_refused_overwrite_still_keeps_the_submission_answers(): void
+    {
+        [, , $first] = $this->campaignWithLink();
+        [, , $second] = $this->campaignWithLink();
+
+        $this->submit($first, $this->answers('kept@example.com', 'Real Person', '+963 111 111 111'))->assertStatus(202);
+        $this->submit($second, $this->answers('kept@example.com', 'Someone Else', '+963 999 999 999'))->assertStatus(202);
+
+        $latest = RecruitmentApplication::query()->latest('id')->first();
+        $this->assertSame(['value' => 'Someone Else'], $latest->answers()->where('field_key', 'full_name')->sole()->answer_json);
+        $this->assertSame(['value' => '+963 999 999 999'], $latest->answers()->where('field_key', 'phone')->sole()->answer_json);
+    }
+
+    /** Only what the record has no value for is filled in. */
+    public function test_a_later_submission_fills_a_missing_phone_but_nothing_else(): void
+    {
+        [, , $first] = $this->campaignWithLink();
+        [, , $second] = $this->campaignWithLink();
+
+        $this->submit($first, $this->answers('gap@example.com', 'Real Person', '+963 111 111 111'))->assertStatus(202);
+        RecruitmentApplicant::query()->sole()->forceFill(['phone_normalized' => null])->save();
+
+        $this->submit($second, $this->answers('gap@example.com', 'Someone Else', '+963 999 999 999'))->assertStatus(202);
+
+        $applicant = RecruitmentApplicant::query()->sole();
+        $this->assertSame('Real Person', $applicant->full_name);
+        $this->assertSame('+963999999999', $applicant->phone_normalized);
+    }
+
+    /** A new application restarts the retention clock, but never cancels an erasure request. */
+    public function test_a_later_submission_keeps_a_pending_erasure_request_and_its_date(): void
+    {
+        [, , $first] = $this->campaignWithLink();
+        [, , $second] = $this->campaignWithLink();
+        [, , $third] = $this->campaignWithLink();
+
+        $this->submit($first, $this->answers('erase@example.com'))->assertStatus(202);
+        $requested = now()->subDay()->startOfSecond();
+        $applicant = RecruitmentApplicant::query()->sole();
+        $applicant->forceFill(['retention_until' => now()->addDays(30)])->save();
+
+        // No erasure request: the clock restarts, as before.
+        $this->submit($second, $this->answers('erase@example.com'))->assertStatus(202);
+        $this->assertNull($applicant->fresh()->retention_until);
+
+        $applicant->forceFill(['erasure_requested_at' => $requested, 'retention_until' => $requested])->save();
+        $this->submit($third, $this->answers('erase@example.com'))->assertStatus(202);
+
+        $applicant = $applicant->fresh();
+        $this->assertTrue($requested->equalTo($applicant->erasure_requested_at));
+        $this->assertTrue($requested->equalTo($applicant->retention_until));
+    }
+
+    /** Team 2's intake service writes the same record, so it follows the same rule. */
+    public function test_the_shared_identity_service_only_fills_blanks_for_an_existing_applicant(): void
+    {
+        $identity = app(RecruitmentApplicantIdentityService::class);
+        $identity->findOrCreate(['full_name' => 'Real Person', 'email' => 'shared@example.com', 'phone' => '+963 111 111 111', 'source' => 'public_link']);
+
+        $identity->findOrCreate(['full_name' => 'Someone Else', 'email' => ' SHARED@example.com', 'phone' => '+963 999 999 999', 'source' => 'public_link']);
+
+        $applicant = RecruitmentApplicant::query()->sole();
+        $this->assertSame('Real Person', $applicant->full_name);
+        $this->assertSame('+963111111111', $applicant->phone_normalized);
+
+        $applicant->forceFill(['phone_normalized' => null])->save();
+        $identity->findOrCreate(['full_name' => 'Someone Else', 'email' => 'shared@example.com', 'phone' => '+963 999 999 999', 'source' => 'public_link']);
+
+        $applicant = $applicant->fresh();
+        $this->assertSame('Real Person', $applicant->full_name);
+        $this->assertSame('+963999999999', $applicant->phone_normalized);
+    }
+
     /** Task 1: two people with the same name are never merged. */
     public function test_two_people_with_the_same_name_stay_two_applicants(): void
     {
@@ -191,7 +286,12 @@ class Phase2ApplicantIntakeTest extends TestCase
         $this->assertSame($owner->id, $relative->possible_duplicate_of_applicant_id);
     }
 
-    /** Task 1: email the same, phone different — one applicant, latest phone kept. */
+    /**
+     * Task 1: email the same, phone different — one applicant. The phone on
+     * file stays: nothing proves the second submitter owns the email (see
+     * test_a_later_submission_cannot_rewrite_an_existing_applicants_name_or_phone),
+     * so the new number lives on that application's answers, not on the person.
+     */
     public function test_the_same_email_with_a_new_phone_is_the_same_applicant(): void
     {
         [, , $first] = $this->campaignWithLink();
@@ -201,7 +301,11 @@ class Phase2ApplicantIntakeTest extends TestCase
         $this->submit($second, $this->answers('moved@example.com', 'Moved', '0955000222'))->assertStatus(202);
 
         $applicant = RecruitmentApplicant::query()->sole();
-        $this->assertStringContainsString('0955000222', $applicant->phone_normalized);
+        $this->assertSame('0944000111', $applicant->phone_normalized);
+        $this->assertSame(
+            ['value' => '0955000222'],
+            RecruitmentApplication::query()->latest('id')->first()->answers()->where('field_key', 'phone')->sole()->answer_json,
+        );
     }
 
     /** Task 2: the public cannot set status, campaign_id or score; honeypot trips. */
