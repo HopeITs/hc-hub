@@ -121,42 +121,45 @@
         @foreach ($fieldsBySection as $sectionKey => $sectionFields)
             @php $section = $sections->get($sectionKey); @endphp
             <section
-                class="overflow-hidden rounded-[16px] border border-neutral-200 bg-white shadow-e1"
+                class="space-y-3"
                 data-wizard-step
                 data-section-label="{{ $section['label'][$locale] ?? $section['label']['en'] ?? '' }}"
                 @if (! $loop->first) hidden @endif
             >
-                <header class="bg-primary px-6 py-4 text-white sm:px-9">
+                <header class="overflow-hidden rounded-[16px] bg-primary px-6 py-4 text-white shadow-e1 sm:px-9">
                     <h2 class="text-subtitle font-bold">{{ $section['label'][$locale] ?? $section['label']['en'] ?? '' }}</h2>
                     @if ($description = ($section['description'][$locale] ?? $section['description']['en'] ?? ''))
                         <p class="mt-1 text-small text-white/80">{{ $description }}</p>
                     @endif
                 </header>
 
-                <div class="divide-y divide-neutral-100">
+                <div class="space-y-3">
                     @foreach ($sectionFields as $field)
                         @php
                             $key = $field['key'];
                             $label = $field['label'][$locale] ?: $field['label']['en'];
                             $help = $field['help'][$locale] ?: $field['help']['en'];
                         @endphp
-                        <div class="px-6 py-5 sm:px-9">
-                            <label class="block font-semibold text-neutral-900" @if (!in_array($field['type'], ['radio', 'checkbox'], true)) for="field-{{ $key }}" @endif>
+                        <div class="rounded-[8px] border border-neutral-200 bg-white px-6 py-6 shadow-e1 sm:px-9">
+                            <label id="field-{{ $key }}-label" class="block font-medium text-neutral-900" @if (!in_array($field['type'], ['radio', 'checkbox'], true)) for="field-{{ $key }}" @endif>
                                 {{ $label }} @if ($field['required']) <span class="text-primary">*</span> @endif
                             </label>
                             @if ($help) <p class="mt-1 text-small leading-5 text-neutral-500">{{ $help }}</p> @endif
 
                             @switch($field['type'])
                                 @case('textarea')
-                                    <textarea id="field-{{ $key }}" name="answers[{{ $key }}]" rows="4" class="mt-3 w-full rounded-control border border-neutral-300 px-3 py-2 text-body" @if ($field['required']) required @endif></textarea>
+                                    <textarea id="field-{{ $key }}" name="answers[{{ $key }}]" rows="1" placeholder="{{ __('careers.your_answer') }}" class="mt-2 block min-h-9 w-full max-w-xl field-sizing-content resize-none rounded-none border-0 border-b border-neutral-300 bg-transparent px-0 py-1 text-body shadow-none outline-none placeholder:text-neutral-500 focus:border-primary focus:ring-0" @if ($field['required']) required @endif></textarea>
                                     @break
                                 @case('select')
-                                    <select id="field-{{ $key }}" name="answers[{{ $key }}]" class="mt-3 w-full cursor-pointer rounded-control border border-neutral-300 bg-white px-3 py-2 text-body sm:max-w-md" @if ($field['required']) required @endif>
-                                        <option value="">{{ __('careers.choose') }}</option>
-                                        @foreach ($field['options'] as $option)
-                                            <option value="{{ $option['value'] }}">{{ $option['label'][$locale] ?: $option['label']['en'] }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="public-career-select-wrap mt-4 w-full max-w-52">
+                                        <select id="field-{{ $key }}" name="answers[{{ $key }}]" class="public-career-select block w-full cursor-pointer rounded-control border border-neutral-300 bg-white px-3 py-3 text-body shadow-e1 outline-none focus:border-primary focus:ring-1 focus:ring-primary" @if ($field['required']) required @endif>
+                                            <option value="">{{ __('careers.choose') }}</option>
+                                            @foreach ($field['options'] as $option)
+                                                <option value="{{ $option['value'] }}">{{ $option['label'][$locale] ?: $option['label']['en'] }}</option>
+                                            @endforeach
+                                        </select>
+                                        <p id="field-{{ $key }}-error" data-public-select-error class="mt-2 text-small text-primary" role="alert" hidden>{{ __('careers.choose_an_option') }}</p>
+                                    </div>
                                     @break
                                 @case('radio')
                                     <div class="mt-3 space-y-2">
@@ -200,7 +203,8 @@
                                         type="{{ in_array($field['type'], ['email', 'tel', 'number', 'date', 'url'], true) ? $field['type'] : 'text' }}"
                                         name="answers[{{ $key }}]"
                                         value="{{ $prefill[$key] ?? '' }}"
-                                        class="mt-3 w-full rounded-control border border-neutral-300 px-3 py-2 text-body sm:max-w-xl {{ $workEmail ? 'cursor-not-allowed bg-neutral-50 text-neutral-600' : '' }}"
+                                        placeholder="{{ $field['type'] === 'date' ? '' : __('careers.your_answer') }}"
+                                        class="mt-4 block w-full max-w-sm rounded-none border-0 border-b border-neutral-300 bg-transparent px-0 py-2 text-body shadow-none outline-none placeholder:text-neutral-500 focus:border-primary focus:ring-0 {{ in_array($field['type'], ['email', 'tel'], true) ? 'rtl:text-right' : '' }} {{ $workEmail ? 'cursor-not-allowed text-neutral-600' : '' }}"
                                         @if ($field['type'] === 'email' || $field['type'] === 'tel') dir="ltr" @endif
                                         @if ($workEmail) readonly aria-describedby="field-{{ $key }}-note" @endif
                                         @if ($field['required']) required @endif
@@ -215,7 +219,7 @@
                     @endforeach
                 </div>
 
-                <footer class="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 bg-neutral-50 px-6 py-4 sm:px-9">
+                <footer class="flex flex-wrap items-center justify-between gap-3 rounded-[8px] border border-neutral-200 bg-white px-6 py-4 shadow-e1 sm:px-9">
                     <div>
                         @if (! $loop->first)
                             <button type="button" data-wizard-previous class="cursor-pointer rounded-control border border-neutral-300 bg-white px-5 py-2.5 font-semibold text-neutral-700 hover:bg-neutral-100">
@@ -255,6 +259,34 @@
         const currentSection = form.querySelector('[data-current-section]');
         let activeStep = 0;
 
+        if (window.jQuery?.fn?.select2) {
+            window.jQuery(form).find('.public-career-select').each((_, element) => {
+                const select = window.jQuery(element);
+                select.select2({
+                    width: '100%',
+                    dir: form.closest('[dir]')?.dir || document.documentElement.dir || 'ltr',
+                    minimumResultsForSearch: Infinity,
+                    dropdownCssClass: 'public-career-dropdown',
+                });
+
+                const selection = element.nextElementSibling?.querySelector('.select2-selection');
+                selection?.setAttribute('aria-labelledby', `${element.id}-label select2-${element.id}-container`);
+
+                select.on('change', () => {
+                    const error = element.parentElement.querySelector('[data-public-select-error]');
+                    if (error) error.hidden = true;
+                    selection?.removeAttribute('aria-invalid');
+                    selection?.removeAttribute('aria-describedby');
+                });
+            });
+
+            form.noValidate = true;
+        }
+
+        const visibleControl = (control) => control?.matches('.public-career-select')
+            ? control.nextElementSibling?.querySelector('.select2-selection') ?? control
+            : control;
+
         const showStep = (index, focus = true) => {
             activeStep = Math.max(0, Math.min(index, steps.length - 1));
             steps.forEach((step, stepIndex) => { step.hidden = stepIndex !== activeStep; });
@@ -267,7 +299,7 @@
 
             if (focus) {
                 steps[activeStep]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                steps[activeStep]?.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled])')?.focus({ preventScroll: true });
+                visibleControl(steps[activeStep]?.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled])'))?.focus({ preventScroll: true });
             }
         };
 
@@ -277,6 +309,18 @@
             if (!invalid) return true;
 
             showStep(index, false);
+            if (invalid.matches('.public-career-select') && window.jQuery?.fn?.select2) {
+                const selection = visibleControl(invalid);
+                const error = invalid.parentElement.querySelector('[data-public-select-error]');
+                if (error) error.hidden = false;
+                selection?.setAttribute('aria-invalid', 'true');
+                selection?.setAttribute('aria-describedby', `${invalid.id}-error`);
+                selection?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                selection?.focus({ preventScroll: true });
+                window.jQuery(invalid).select2('open');
+                return false;
+            }
+
             invalid.reportValidity();
             invalid.focus({ preventScroll: true });
             invalid.scrollIntoView({ behavior: 'smooth', block: 'center' });

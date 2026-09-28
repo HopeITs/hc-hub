@@ -12,6 +12,8 @@ return [
     'responsibilities' => 'Responsibilities',
     'qualifications' => 'Qualifications',
     'choose' => 'Choose',
+    'choose_an_option' => 'Choose an option to continue.',
+    'your_answer' => 'Your answer',
     'add_file' => 'Add file',
     'no_file_selected' => 'No file selected',
     'step' => 'Step',

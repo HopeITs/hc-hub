@@ -12,6 +12,8 @@ return [
     'responsibilities' => 'المسؤوليات',
     'qualifications' => 'المؤهلات',
     'choose' => 'اختر',
+    'choose_an_option' => 'اختر أحد الخيارات للمتابعة.',
+    'your_answer' => 'إجابتك',
     'add_file' => 'إضافة ملف',
     'no_file_selected' => 'لم يتم اختيار ملف',
     'step' => 'الخطوة',
