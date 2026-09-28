@@ -126,7 +126,11 @@
                                 </x-forms.select2-input>
                             @else
                                 @php($inputType = in_array($type, ['email', 'tel', 'date', 'number', 'url'], true) ? $type : 'text')
-                                <x-forms.input :id="$key" :type="$inputType" wire:model="answers.{{ $key }}" :dir="in_array($type, ['email', 'tel'], true) ? 'ltr' : null" />
+                                @if (in_array($type, ['email', 'tel'], true))
+                                    <x-forms.input :id="$key" :type="$inputType" wire:model="answers.{{ $key }}" dir="ltr" class="rtl:text-right" />
+                                @else
+                                    <x-forms.input :id="$key" :type="$inputType" wire:model="answers.{{ $key }}" />
+                                @endif
                             @endif
 
                             <x-forms.input-error :field="'answers.'.$key" :input-id="$key" />

@@ -382,6 +382,12 @@ class PublicRecruitmentLinkTest extends TestCase
         ]));
         $this->assertStringContainsString('Application received', $receipt->render());
         $this->assertStringContainsString('receipt@example.com', $receipt->render());
+
+        $application->forceFill(['consent_payload_json' => ['response_copy' => true, 'locale' => 'ar']]);
+        $arabicReceipt = new RecruitmentResponseReceiptMail($application);
+        $arabicHtml = $arabicReceipt->render();
+        $this->assertStringContainsString('dir="rtl"', $arabicHtml);
+        $this->assertStringContainsString('text-align: right;', $arabicHtml);
     }
 
     public function test_failed_secure_upload_rolls_back_the_complete_application(): void
