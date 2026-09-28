@@ -12,6 +12,7 @@ use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentCampaignInvite;
 use App\Models\User;
+use App\Services\Monitoring\SecurityMonitor;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -180,6 +181,12 @@ class PublicRecruitmentApplicationService
                     'email_normalized' => $email,
                     'phone_normalized' => $phone,
                     'last_seen_at' => now(),
+                    // The latest consent the person gave (each application also
+                    // keeps its own), and a new application restarts the
+                    // retention clock: whatever was counting down is void.
+                    'privacy_notice_version' => $link->formVersion->privacy_notice_version,
+                    'privacy_accepted_at' => now(),
+                    'retention_until' => null,
                     // Signing in proved who they are; keep the link to their record.
                     ...($employee ? [
                         'employee_id' => $employee->getKey(),
@@ -265,6 +272,8 @@ class PublicRecruitmentApplicationService
         } catch (ValidationException $exception) {
             throw PublicRecruitmentSubmissionException::because('validation', $exception->errors());
         } catch (UnsafeRecruitmentFileException $exception) {
+            app(SecurityMonitor::class)->uploadRejected($exception->reason);
+
             throw PublicRecruitmentSubmissionException::because('file_rejected', ['file' => [$exception->getMessage()]]);
         } catch (Throwable $exception) {
             report($exception);

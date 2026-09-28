@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\RecruitmentApplicantErasureController;
+use App\Http\Controllers\RecruitmentApplicantExportController;
 use App\Http\Controllers\RecruitmentApplicantFileController;
 use App\Livewire\Recruitment\Applicants\Index as ApplicantIndex;
 use App\Livewire\Recruitment\Applicants\Show as ApplicantShow;
@@ -101,6 +103,19 @@ Route::get('recruitment/applications/{applicationId}/offer/create', OfferForm::c
     ->whereNumber('applicationId')
     ->middleware('active_permission:recruitment-applicants.manage-offers')
     ->name('recruitment.offers.create');
+
+// Phase 2 Task 11. Outside the group above, with no permission middleware, for
+// the same reason as the file download below: the policy enforces the explicit
+// export / erasure permission inside the controller, so a refused attempt is
+// audited instead of being stopped at the door. Both are POST (CSRF-protected).
+Route::post('recruitment/applicants/export', RecruitmentApplicantExportController::class)
+    ->middleware('throttle:10,1')
+    ->name('recruitment.applicants.export');
+
+Route::post('recruitment/applicants/{applicant}/erasure', [RecruitmentApplicantErasureController::class, 'store'])
+    ->whereNumber('applicant')
+    ->middleware('throttle:10,1')
+    ->name('recruitment.applicants.erasure');
 
 // No permission middleware on purpose: the policy enforces it, so a refused
 // attempt still reaches the controller and lands in the download audit.

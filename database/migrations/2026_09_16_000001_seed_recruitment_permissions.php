@@ -2,6 +2,7 @@
 
 use App\Models\Permission;
 use App\Models\Role;
+use App\Support\AccessPermissionCatalog;
 use Illuminate\Database\Migrations\Migration;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -31,7 +32,10 @@ return new class extends Migration
             Permission::findOrCreate($name, 'web');
         }
 
-        $userLevel = $this->userLevelPermissionNames();
+        // Also subtract what access-control keeps from every bulk grant: this
+        // reads the live catalog, so it would otherwise pick up permissions
+        // added to a recruitment group long after it first ran.
+        $userLevel = [...$this->userLevelPermissionNames(), ...AccessPermissionCatalog::personLevelNames()];
         $roleGrantable = array_values(array_diff($names, $userLevel));
 
         // super-admin and HR-SYR hold everything the system offers.

@@ -59,6 +59,9 @@ use App\Policies\RecruitmentTagPolicy;
 use App\Policies\RecruitmentWorkflowInstanceStepPolicy;
 use App\Policies\VacancyPolicy;
 use App\Services\ActivityLogger;
+use App\Services\Monitoring\SecurityMonitor;
+use App\Services\Recruitment\Privacy\ConfiguredRetentionPolicy;
+use App\Services\Recruitment\Privacy\RetentionPolicy;
 use App\Services\Recruitment\Scanning\ClamdScanner;
 use App\Services\Recruitment\Scanning\DisabledScanner;
 use App\Services\Recruitment\Scanning\RecruitmentFileScanner;
@@ -83,6 +86,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ActivityLogger::class, function ($app) {
             return new ActivityLogger;
         });
+
+        // Its dedupe counters live in the cache, so one instance is plenty.
+        $this->app->singleton(SecurityMonitor::class);
+
+        // The seam for the organization's retention decision: bind another
+        // RetentionPolicy here once the periods are confirmed.
+        $this->app->bind(RetentionPolicy::class, ConfiguredRetentionPolicy::class);
 
         // Singleton so the Encrypter - and the "this host cannot read the
         // figures" warning that goes with it - is built once per request

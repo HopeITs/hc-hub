@@ -6,6 +6,7 @@ use App\Enums\RecruitmentFileScanStatus;
 use App\Exceptions\RecruitmentScannerUnavailableException;
 use App\Jobs\AnalyzeRecruitmentCv;
 use App\Models\RecruitmentApplicantFile;
+use App\Services\Monitoring\SecurityMonitor;
 use App\Services\Recruitment\Scanning\RecruitmentFileScanner;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Storage;
@@ -42,6 +43,7 @@ class RecruitmentFileScanService
         private readonly RecruitmentFileScanner $scanner,
         private readonly RecruitmentApplicantFileService $files,
         private readonly ActivityLogger $activity,
+        private readonly SecurityMonitor $monitor,
     ) {}
 
     /**
@@ -127,6 +129,13 @@ class RecruitmentFileScanService
             logName: self::AUDIT_LOG,
         );
 
+        $this->monitor->record(SecurityMonitor::SCAN_INFECTED, [
+            'file_id' => $file->getKey(),
+            'application_id' => $file->application_id,
+            'file_type' => $file->file_type,
+            'signature' => $metadata['signature'] ?? null,
+        ]);
+
         return self::INFECTED;
     }
 
@@ -145,6 +154,12 @@ class RecruitmentFileScanService
             properties: ['application_id' => $file->application_id, 'message' => $metadata['message'] ?? null],
             logName: self::AUDIT_LOG,
         );
+
+        $this->monitor->record(SecurityMonitor::SCAN_FAILED, [
+            'file_id' => $file->getKey(),
+            'application_id' => $file->application_id,
+            'file_type' => $file->file_type,
+        ]);
 
         return self::FAILED;
     }

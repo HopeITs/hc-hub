@@ -23,6 +23,13 @@ return [
     'never_granted_to_roles' => [
         'recruitment-requests.approve-finance',
         'recruitment-requests.submit-without-manager',
+        // Not person-identifying, but held back from every bulk grant for the
+        // same reason: candidate export and erasure are answerable acts, so a
+        // new HR role must not arrive able to do either. They are read with
+        // User::hasExplicitPermission(), which also refuses the administrator
+        // bypass — an administrator is granted them like anyone else.
+        'recruitment-applicants.export',
+        'recruitment-applicants.request-erasure',
     ],
 
     'system_roles' => [
@@ -151,6 +158,10 @@ return [
             // canViewSalary(), and the employee side is checked against
             // EmployeePolicy.
             'convert-hires',
+            // Phase 2 Task 11: take candidate data out of the system as a
+            // file, and anonymize an applicant who asked to be forgotten.
+            // Neither is attached to any role — see never_granted_to_roles.
+            'export', 'request-erasure',
         ],
     ],
 

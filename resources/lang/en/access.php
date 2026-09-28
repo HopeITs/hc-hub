@@ -111,5 +111,6 @@ return [
         'view-offers' => 'View job offers',
         'manage-offers' => 'Create and manage job offers',
         'convert-hires' => 'Hire accepted candidates (create the employee and contract)',
+        'request-erasure' => 'Anonymize an applicant\'s data on their request',
     ],
 ];

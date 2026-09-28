@@ -9,6 +9,7 @@ use App\Console\Commands\RedispatchRecruitmentRejectionNotices;
 use App\Console\Commands\ScanRecruitmentFiles;
 use App\Console\Commands\SendContractExpirationWarnings;
 use App\Console\Commands\SendRecruitmentInterviewReminders;
+use App\Console\Commands\SweepRecruitmentRetention;
 use App\Console\Commands\SyncRecruitmentCampaignStates;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -39,6 +40,10 @@ Schedule::command(SendRecruitmentInterviewReminders::class)->everyFiveMinutes()-
 Schedule::command(ExpireRecruitmentJobOffers::class)->everyFifteenMinutes()->withoutOverlapping();
 // Rejection emails committed as queued whose job never reached the queue.
 Schedule::command(RedispatchRecruitmentRejectionNotices::class)->everyFiveMinutes()->withoutOverlapping();
+// Phase 2 Task 11: keep applicant retention dates current and carry out
+// erasure requests. Automatic time-based anonymization stays off until
+// RECRUITMENT_RETENTION_ENFORCE is set (config/recruitment-privacy.php).
+Schedule::command(SweepRecruitmentRetention::class)->dailyAt('02:15')->withoutOverlapping();
 Schedule::call(function () {
     Log::info('الكرون جوب يعمل بنجاح!');
 })->daily();
