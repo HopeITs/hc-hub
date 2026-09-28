@@ -73,6 +73,20 @@ class RecruitmentApplicationStatusService
 
     public const REASON_OFFER = 'job_offer';
 
+    /*
+    |--------------------------------------------------------------------------
+    | Task 10 (hiring conversion) — added by Team 2, to review with Rita
+    |--------------------------------------------------------------------------
+    |
+    | Same rule again: an application is "hired" exactly when its accepted
+    | offer has been converted into an employee and a contract, so only
+    | RecruitmentHiringConversionService makes that move, through
+    | applyConversionTransition(), and the decision panel never offers it.
+    |
+    */
+
+    public const REASON_CONVERSION = 'hiring_conversion';
+
     /** @var array<string, array<int, string>> */
     private const TRANSITIONS = [
         Status::Submitted => [Status::UnderReview, Status::Shortlisted, Status::Rejected],
@@ -92,6 +106,8 @@ class RecruitmentApplicationStatusService
         // revised offer can be sent, or HR rejects the candidate by hand.
         Status::OfferSent => [Status::OfferAccepted, Status::OfferRejected, Status::Selected],
         Status::OfferRejected => [Status::OfferSent, Status::Rejected],
+        // Task 10: the accepted offer became an employee and a contract.
+        Status::OfferAccepted => [Status::Hired],
         Status::Rejected => [Status::UnderReview],
     ];
 
@@ -110,6 +126,11 @@ class RecruitmentApplicationStatusService
         [Status::OfferSent, Status::OfferRejected],  // the candidate refused
         [Status::OfferSent, Status::Selected],       // the offer expired or was cancelled
         [Status::OfferRejected, Status::OfferSent],  // a revised offer after a refusal
+    ];
+
+    /** @var array<int, array{0: string, 1: string}> [from, to] */
+    private const CONVERSION_DRIVEN = [
+        [Status::OfferAccepted, Status::Hired],      // employee and contract created
     ];
 
     public function __construct(
@@ -145,6 +166,16 @@ class RecruitmentApplicationStatusService
     public function applyOfferTransition(User $actor, RecruitmentApplication $locked, string $to): RecruitmentApplicationDecision
     {
         return $this->applySystemTransition($actor, $locked, $to, self::OFFER_DRIVEN, self::REASON_OFFER);
+    }
+
+    /**
+     * Task 10: offer accepted → hired, when the hiring conversion creates the
+     * employee and the contract. For RecruitmentHiringConversionService only,
+     * on the application row it already locked, inside its transaction.
+     */
+    public function applyConversionTransition(User $actor, RecruitmentApplication $locked, string $to): RecruitmentApplicationDecision
+    {
+        return $this->applySystemTransition($actor, $locked, $to, self::CONVERSION_DRIVEN, self::REASON_CONVERSION);
     }
 
     /** @return array<int, string> the moves this user may make from here */
@@ -364,7 +395,7 @@ class RecruitmentApplicationStatusService
     }
 
     /**
-     * Tasks 7 and 9: TRANSITIONS minus the interview- and offer-driven moves.
+     * Tasks 7, 9 and 10: TRANSITIONS minus the system-driven moves.
      *
      * @return array<int, string>
      */
@@ -376,11 +407,12 @@ class RecruitmentApplicationStatusService
         ));
     }
 
-    /** Tasks 7 and 9: moves only the interview or offer services make. */
+    /** Tasks 7, 9 and 10: moves only the interview, offer or conversion services make. */
     private function isSystemDriven(string $from, string $to): bool
     {
         return in_array([$from, $to], self::INTERVIEW_DRIVEN, true)
-            || in_array([$from, $to], self::OFFER_DRIVEN, true);
+            || in_array([$from, $to], self::OFFER_DRIVEN, true)
+            || in_array([$from, $to], self::CONVERSION_DRIVEN, true);
     }
 
     /**
@@ -425,7 +457,7 @@ class RecruitmentApplicationStatusService
         ?string $reasonCode,
         ?string $reason,
         bool $bulk = false,
-        ?string $systemReasonCode = null, // Tasks 7 and 9: set by applySystemTransition()
+        ?string $systemReasonCode = null, // Tasks 7, 9 and 10: set by applySystemTransition()
     ): RecruitmentApplicationDecision {
         RecruitmentApplication::applyDecision($locked, $to);
 

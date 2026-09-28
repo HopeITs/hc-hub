@@ -11,6 +11,7 @@ use App\Livewire\Recruitment\Campaigns\Show as CampaignShow;
 use App\Livewire\Recruitment\Interviews\Form as InterviewForm;
 use App\Livewire\Recruitment\Interviews\Index as InterviewIndex;
 use App\Livewire\Recruitment\Interviews\Show as InterviewShow;
+use App\Livewire\Recruitment\Offers\Convert as OfferConvert;
 use App\Livewire\Recruitment\Offers\Form as OfferForm;
 use App\Livewire\Recruitment\Offers\Index as OfferIndex;
 use App\Livewire\Recruitment\Offers\Revise as OfferRevise;
@@ -87,6 +88,10 @@ Route::prefix('recruitment/offers')->name('recruitment.offers.')
         // Its own component, not a route default on OfferForm: see OfferForm::mount().
         Route::get('/{offerId}/revise', OfferRevise::class)->whereNumber('offerId')
             ->middleware('active_permission:recruitment-applicants.manage-offers')->name('revise');
+        // Phase 2 Task 10: hire the candidate who accepted — employee and
+        // contract. The component asks the conversion policy (convert) too.
+        Route::get('/{offerId}/convert', OfferConvert::class)->whereNumber('offerId')
+            ->middleware('active_permission:recruitment-applicants.convert-hires')->name('convert');
     });
 
 Route::get('recruitment/applications/{applicationId}/offer/create', OfferForm::class)

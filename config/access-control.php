@@ -146,6 +146,11 @@ return [
             // Phase 2 Task 9: follow job offers / write them. Writing also
             // needs User::canViewSalary(), checked by the policy.
             'view-offers', 'manage-offers',
+            // Phase 2 Task 10: turn an accepted offer into an employee and a
+            // contract. The policy also needs contracts.create and
+            // canViewSalary(), and the employee side is checked against
+            // EmployeePolicy.
+            'convert-hires',
         ],
     ],
 
@@ -438,6 +443,10 @@ return [
             'beginCancel' => 'recruitment-applicants.manage-offers',
             'cancelOffer' => 'recruitment-applicants.manage-offers',
         ],
+        // Phase 2 Task 10. save() re-resolves the offer through the scoped
+        // query and asks the policy (convert) again; the service authorizes a
+        // third time, and again for the employee it creates or links.
+        'recruitment.offers.convert' => ['save' => 'recruitment-applicants.convert-hires'],
     ],
 
     /*

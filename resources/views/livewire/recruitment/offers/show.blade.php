@@ -60,8 +60,34 @@
                 @if ($canManage && $offer->response_note)
                     <p class="mt-1 whitespace-pre-line text-secondary-medium">{{ $offer->response_note }}</p>
                 @endif
-                @if ($offer->status === Status::Accepted)
-                    <p class="mt-2 font-medium text-green-800">{{ __('recruitment-applicant.offers.conversion_ready', ['status' => $offer->hiringConversion?->status ?? '—']) }}</p>
+                @if ($offer->status === Status::Accepted && $conversion)
+                    {{-- Task 10: the hire itself --}}
+                    <div class="mt-3 space-y-2 border-t border-neutral-200 pt-3 print:hidden">
+                        <p class="font-medium {{ $conversion->isConverted() ? 'text-green-800' : ($conversion->status === \App\Models\RecruitmentHiringConversion::STATUS_FAILED ? 'text-primary' : 'text-secondary-dark') }}">
+                            {{ __('recruitment-applicant.conversions.statuses.'.$conversion->status) }}
+                        </p>
+                        @if ($conversion->isConverted())
+                            <p>{{ __('recruitment-applicant.conversions.converted_by', ['name' => $personName($conversion->convertedBy), 'date' => $conversion->converted_at?->format('Y-m-d H:i')]) }}</p>
+                            <div class="flex flex-wrap gap-3">
+                                @if ($conversion->employee?->username)
+                                    <a href="{{ route('employees.show', $conversion->employee->username) }}" class="font-medium text-primary hover:underline">{{ __('recruitment-applicant.conversions.open_employee') }}: {{ $conversion->employee->name }}</a>
+                                @endif
+                                @if ($conversion->contract_id)
+                                    <a href="{{ route('contracts.show', $conversion->contract_id) }}" class="font-medium text-primary hover:underline">{{ __('recruitment-applicant.conversions.open_contract') }} #{{ $conversion->contract_id }}</a>
+                                @endif
+                            </div>
+                            @if ($campaignsStillOpen !== [])
+                                <p class="text-secondary-medium">{{ __('recruitment-applicant.conversions.campaigns_still_open', ['ids' => implode(', ', array_map(fn ($id) => '#'.$id, $campaignsStillOpen))]) }}</p>
+                            @endif
+                        @else
+                            @if ($conversion->status === \App\Models\RecruitmentHiringConversion::STATUS_FAILED && $conversion->failure_reason)
+                                <p>{{ __('recruitment-applicant.conversions.last_failure', ['count' => $conversion->attempt_count, 'reason' => __('recruitment-applicant.conversions.errors.'.$conversion->failure_reason)]) }}</p>
+                            @endif
+                            @if ($canConvert)
+                                <a href="{{ route('recruitment.offers.convert', ['offerId' => $offer->id]) }}" wire:navigate class="inline-block rounded-control bg-primary px-3 py-1.5 text-sm font-semibold text-white">{{ __('recruitment-applicant.conversions.open') }}</a>
+                            @endif
+                        @endif
+                    </div>
                 @endif
             </div>
         @elseif ($offer->status === Status::Cancelled)
