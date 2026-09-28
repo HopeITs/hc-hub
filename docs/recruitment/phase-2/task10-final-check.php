@@ -211,9 +211,10 @@ try {
     $check('A user outside scope cannot create the employee/contract', ! $mirna->can('convert', $c3)
         && $errorOf(fn () => $conversions->convert($mirna, $c3, ['mode' => 'create', 'employee' => $person()])) === '403');
     echo '  INFO No separate approval step: the seat was approved with the recruitment request and the terms with the offer.'.PHP_EOL;
-    $auditJson = Activity::query()->where('log_name', Conversions::AUDIT_LOG)->get()->pluck('properties')->toJson();
-    $check('Audit required (every hire and every failed attempt), never the salary', Activity::query()->where('log_name', Conversions::AUDIT_LOG)->where('description', 'recruitment_hiring_conversion.converted')->count() === 2
-        && ! str_contains($auditJson, '1500'));
+    // This script's own hires only: the real database may hold real ones.
+    $ours = Activity::query()->where('log_name', Conversions::AUDIT_LOG)->whereIn('subject_id', [$c1->id, $c2->id]);
+    $check('Audit required (every hire and every failed attempt), never the salary', (clone $ours)->where('description', 'recruitment_hiring_conversion.converted')->count() === 2
+        && ! str_contains(Activity::query()->where('log_name', Conversions::AUDIT_LOG)->get()->pluck('properties')->toJson(), '1500'));
 
     echo PHP_EOL.'الحالات الاستثنائية — exceptional cases'.PHP_EOL;
     $phoneEmployee = Employee::findOrFail($phoneEmployeeId);
@@ -302,8 +303,10 @@ try {
     $check('Offer page shows the hire and its links', str_contains(Livewire::actingAs($hr)->test(Show::class, ['offerId' => $c1->job_offer_id])->html(), route('contracts.show', $c1->contract_id)));
     $check('Hire page refused to super-admin (salary-blind)', rescue(fn () => Livewire::actingAs($rafi)->test(Convert::class, ['offerId' => $sent->job_offer_id])->assertForbidden() !== null, false, false));
     if ($realPending !== null) {
-        $check('Real pending offer '.$realPending->job_offer_id.': the hire page lists why it cannot be hired yet', $realBlockers !== []
-            && collect($realBlockers)->every(fn ($code) => str_contains($realHtml, e($msg($code)))), implode(', ', $realBlockers));
+        // Whatever stops it is listed on the page; with nothing in the way, the form is ready.
+        $check('Real waiting offer '.$realPending->job_offer_id.': the hire page shows exactly what stops it', $realBlockers === []
+            ? ! str_contains($realHtml, e(__('recruitment-applicant.conversions.blockers_title')))
+            : collect($realBlockers)->every(fn ($code) => str_contains($realHtml, e($msg($code)))), implode(', ', $realBlockers) ?: 'nothing: ready to hire');
     }
 
     echo PHP_EOL.'المخرجات — output'.PHP_EOL;
