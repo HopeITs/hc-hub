@@ -102,12 +102,15 @@ class RecruitmentJobOfferService
                     throw $this->error('offer', 'application_rejected');
                 }
 
-                if ($locked->status !== AppStatus::Selected) {
-                    throw $this->error('offer', 'not_selected');
-                }
-
+                // Before the status check: an application whose offer is out
+                // (offer_sent, offer_rejected…) is "not selected" too, but the
+                // useful answer is that it already has an offer to revise.
                 if (Offer::query()->where('application_id', $locked->getKey())->exists()) {
                     throw $this->error('offer', 'already_exists');
+                }
+
+                if ($locked->status !== AppStatus::Selected) {
+                    throw $this->error('offer', 'not_selected');
                 }
 
                 $vacancy = $locked->vacancy()->first() ?? $locked->campaign?->vacancy;

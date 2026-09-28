@@ -152,7 +152,8 @@ class RecruitmentJobOfferTest extends TestCase
         $this->assertValidationError(fn () => $this->create($submitted->fresh()), 'offer', 'application_rejected');
 
         $selected = $this->selected('Selected One');
-        $this->create($selected);
+        $this->send($this->create($selected));
+        // Its offer is out (offer_sent): the answer names the existing offer, not "not selected".
         $this->assertValidationError(fn () => $this->create($selected->fresh()), 'offer', 'already_exists');
         $this->assertSame(1, Offer::query()->count());
 
