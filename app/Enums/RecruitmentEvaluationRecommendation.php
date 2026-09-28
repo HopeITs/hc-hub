@@ -12,7 +12,14 @@ namespace App\Enums;
  */
 final class RecruitmentEvaluationRecommendation
 {
+    /**
+     * Retired scale points. They are no longer offered or accepted, but
+     * evaluation history written while they existed still carries them, so
+     * they keep a label and a colour.
+     */
     public const StrongYes = 'strong_yes';
+
+    public const StrongNo = 'strong_no';
 
     public const Yes = 'yes';
 
@@ -20,12 +27,10 @@ final class RecruitmentEvaluationRecommendation
 
     public const No = 'no';
 
-    public const StrongNo = 'strong_no';
-
-    /** @return array<int, string> strongest in favour first */
+    /** @return array<int, string> in favour first */
     public static function values(): array
     {
-        return [self::StrongYes, self::Yes, self::Maybe, self::No, self::StrongNo];
+        return [self::Yes, self::Maybe, self::No];
     }
 
     public static function classes(?string $value): string
