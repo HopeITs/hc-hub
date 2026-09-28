@@ -429,6 +429,7 @@ return [
         // query and asks the policy (manage: permission + scope +
         // canViewSalary) again; the service authorizes a third time.
         'recruitment.offers.form' => ['save' => 'recruitment-applicants.manage-offers'],
+        'recruitment.offers.revise' => ['save' => 'recruitment-applicants.manage-offers'],
         'recruitment.offers.show' => [
             'beginSend' => 'recruitment-applicants.manage-offers',
             'send' => 'recruitment-applicants.manage-offers',

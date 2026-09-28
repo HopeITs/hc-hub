@@ -13,6 +13,7 @@ use App\Livewire\Recruitment\Interviews\Index as InterviewIndex;
 use App\Livewire\Recruitment\Interviews\Show as InterviewShow;
 use App\Livewire\Recruitment\Offers\Form as OfferForm;
 use App\Livewire\Recruitment\Offers\Index as OfferIndex;
+use App\Livewire\Recruitment\Offers\Revise as OfferRevise;
 use App\Livewire\Recruitment\Offers\Show as OfferShow;
 use App\Livewire\Recruitment\Requests\Create;
 use App\Livewire\Recruitment\Requests\Details;
@@ -83,7 +84,8 @@ Route::prefix('recruitment/offers')->name('recruitment.offers.')
         Route::get('/{offerId}', OfferShow::class)->whereNumber('offerId')->name('show');
         Route::get('/{offerId}/edit', OfferForm::class)->whereNumber('offerId')
             ->middleware('active_permission:recruitment-applicants.manage-offers')->name('edit');
-        Route::get('/{offerId}/revise', OfferForm::class)->whereNumber('offerId')->defaults('mode', 'revise')
+        // Its own component, not a route default on OfferForm: see OfferForm::mount().
+        Route::get('/{offerId}/revise', OfferRevise::class)->whereNumber('offerId')
             ->middleware('active_permission:recruitment-applicants.manage-offers')->name('revise');
     });
 

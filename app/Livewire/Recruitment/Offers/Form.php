@@ -65,7 +65,15 @@ class Form extends Component
     /** Revise only: why this version differs from the last. Internal. */
     public string $reason = '';
 
-    public function mount(?int $applicationId = null, ?int $offerId = null, string $mode = 'create'): void
+    /**
+     * The create route passes applicationId, the edit route offerId — and
+     * nothing else. Keep it that way: when a route supplies fewer values than
+     * mount() has optional parameters, Laravel splices the missing defaults
+     * in by position and Livewire then binds them positionally, so a third
+     * optional parameter lands in the wrong place (that was the 500 on
+     * /revise). Revising has its own entry point: Revise.
+     */
+    public function mount(?int $applicationId = null, ?int $offerId = null): void
     {
         if ($offerId === null) {
             abort_if($applicationId === null, 404);
@@ -78,25 +86,10 @@ class Form extends Component
 
         $offer = $this->resolveOffer($offerId);
         Gate::authorize('manage', $offer);
-        $this->mode = $mode === 'revise' ? 'revise' : 'edit';
-        abort_if($this->mode === 'edit' && ! $offer->isEditable(), 404);
-        abort_if($this->mode === 'revise' && ! app(RecruitmentJobOfferService::class)->canRevise($offer), 404);
+        abort_unless($offer->isEditable(), 404);
 
-        $version = $offer->currentVersion()->firstOrFail();
-        $this->offerId = $offer->getKey();
-        $this->applicationId = $offer->application_id;
-        $this->expectedVersionId = $version->getKey();
-        $this->contractTypeId = (int) $version->contract_type_id;
-        $this->salary = (string) $version->salary_amount;
-        $this->currency = (int) $version->currency;
-        $this->salaryPer = (int) $version->salary_per;
-        $this->startDate = (string) $version->start_date?->toDateString();
-        $this->endDate = (string) $version->end_date?->toDateString();
-        $this->weeklyHours = (string) $version->weekly_hours;
-        $this->probationDays = (int) $version->probation_days;
-        $this->employmentType = (string) ($version->terms_json['employment_type'] ?? '');
-        $this->place = (string) ($version->terms_json['place'] ?? '');
-        $this->notes = (string) ($version->terms_json['notes'] ?? '');
+        $this->mode = 'edit';
+        $this->loadCurrentVersion($offer);
     }
 
     public function save(RecruitmentJobOfferService $offers): void
@@ -154,7 +147,27 @@ class Form extends Component
         ]);
     }
 
-    private function resolveApplication(int $applicationId): RecruitmentApplication
+    /** Fills the form from the offer's current version — the terms being edited or revised. */
+    protected function loadCurrentVersion(RecruitmentJobOffer $offer): void
+    {
+        $version = $offer->currentVersion()->firstOrFail();
+        $this->offerId = $offer->getKey();
+        $this->applicationId = $offer->application_id;
+        $this->expectedVersionId = $version->getKey();
+        $this->contractTypeId = (int) $version->contract_type_id;
+        $this->salary = (string) $version->salary_amount;
+        $this->currency = (int) $version->currency;
+        $this->salaryPer = (int) $version->salary_per;
+        $this->startDate = (string) $version->start_date?->toDateString();
+        $this->endDate = (string) $version->end_date?->toDateString();
+        $this->weeklyHours = (string) $version->weekly_hours;
+        $this->probationDays = (int) $version->probation_days;
+        $this->employmentType = (string) ($version->terms_json['employment_type'] ?? '');
+        $this->place = (string) ($version->terms_json['place'] ?? '');
+        $this->notes = (string) ($version->terms_json['notes'] ?? '');
+    }
+
+    protected function resolveApplication(int $applicationId): RecruitmentApplication
     {
         $application = RecruitmentApplication::query()->visibleTo(auth()->user())->findOrFail($applicationId);
         Gate::authorize('view', $application);
@@ -162,7 +175,7 @@ class Form extends Component
         return $application;
     }
 
-    private function resolveOffer(int $offerId): RecruitmentJobOffer
+    protected function resolveOffer(int $offerId): RecruitmentJobOffer
     {
         $offer = RecruitmentJobOffer::query()->visibleTo(auth()->user())->findOrFail($offerId);
         Gate::authorize('view', $offer);
