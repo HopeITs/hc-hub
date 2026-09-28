@@ -842,6 +842,7 @@ return [
             'possible_duplicate' => 'This candidate matches an existing employee. Link to them, or confirm they are a different person.',
             'internal_must_link' => 'This candidate applied as an existing employee and can only be linked to that employee.',
             'employee_not_matched' => 'Choose one of the employees listed above.',
+            'already_on_position' => 'This employee already has an active contract on this position. That is a renewal (on the contract page), not a new hire.',
             'employee_out_of_scope' => 'This employee is outside the city you manage.',
             'session_duration_required' => 'The pay is per session: choose the session length.',
             'offer_not_accepted' => 'Only the accepted version of an accepted offer can be hired.',

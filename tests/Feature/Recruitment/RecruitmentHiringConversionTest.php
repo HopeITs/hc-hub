@@ -321,6 +321,28 @@ class RecruitmentHiringConversionTest extends TestCase
         $this->assertTrue(Activity::query()->where('description', 'recruitment_hiring_conversion.converted')->sole()->properties['employee_reactivated']);
     }
 
+    /** edge + integrity: an employee already holding this position is renewed, not hired onto it a second time. */
+    public function test_an_employee_already_on_the_position_is_not_hired_onto_it_again(): void
+    {
+        [$application, $offer, $conversion] = $this->accepted();
+        $holder = $this->makeEmployee($this->homs, 'seat.holder', ['personal_email' => $application->email_normalized, 'work_phone' => '0944555666']);
+        Contract::query()->create([
+            'employee_id' => $holder->id, 'position_id' => $offer->position_id, 'contract_type_id' => self::ANNUAL,
+            'start_date' => '2026-01-01', 'end_date' => '2026-12-31', 'currency' => Currency::USD, 'salary_per' => SalaryPer::Month,
+            'salary' => 900, 'weekly_hours' => 40, 'is_active' => true,
+        ]);
+        $contracts = Contract::query()->count();
+
+        $this->assertValidationError(fn () => $this->hire($conversion, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $holder->id]), 'employeeId', 'already_on_position');
+        $this->assertSame([$contracts, Conversion::STATUS_PENDING], [Contract::query()->count(), $conversion->fresh()->status]);
+
+        // On another position they can be hired: a second post is a real hire.
+        [$other, , $elsewhere] = $this->accepted('Other One', [], $this->makeCampaignIn($this->homs));
+        $other->applicant->forceFill(['phone_normalized' => '+963944555666'])->save();
+        $this->hire($elsewhere, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $holder->id]);
+        $this->assertSame($holder->id, $elsewhere->fresh()->employee_id);
+    }
+
     /** security: only a matched employee can be linked, and only one in the city HR manages. */
     public function test_linking_is_limited_to_matched_employees_in_scope(): void
     {

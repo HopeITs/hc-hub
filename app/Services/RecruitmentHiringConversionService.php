@@ -297,7 +297,7 @@ class RecruitmentHiringConversionService
 
         [$employee, $reactivated] = $mode === self::MODE_CREATE
             ? [$this->createEmployee($actor, $locked, $position, $person, $confirmNotDuplicate), false]
-            : $this->linkEmployee($actor, $locked, $applicant, $employeeId, $nationalNumber);
+            : $this->linkEmployee($actor, $locked, $applicant, $position, $employeeId, $nationalNumber);
 
         $contract = new Contract($this->contractAttributes($employee, $offer, $version, $sessionDuration));
         $contract->save();
@@ -451,7 +451,7 @@ class RecruitmentHiringConversionService
     }
 
     /** @return array{0: Employee, 1: bool} the employee, and whether they were reactivated */
-    private function linkEmployee(User $actor, Conversion $conversion, RecruitmentApplicant $applicant, mixed $employeeId, ?string $nationalNumber): array
+    private function linkEmployee(User $actor, Conversion $conversion, RecruitmentApplicant $applicant, Position $position, mixed $employeeId, ?string $nationalNumber): array
     {
         $id = filter_var($employeeId, FILTER_VALIDATE_INT);
 
@@ -468,6 +468,19 @@ class RecruitmentHiringConversionService
 
         if (Gate::forUser($actor)->denies('update', $employee)) {
             throw $this->error('employeeId', 'employee_out_of_scope');
+        }
+
+        // Already on this position with a live contract: that is a renewal,
+        // not a hire — a second contract would count one person twice.
+        $onPosition = Contract::query()
+            ->where('employee_id', $employee->getKey())
+            ->where('position_id', $position->getKey())
+            ->where('is_active', true)
+            ->where(fn ($query) => $query->whereNull('end_date')->orWhereDate('end_date', '>=', today()))
+            ->exists();
+
+        if ($onPosition) {
+            throw $this->error('employeeId', 'already_on_position');
         }
 
         // Someone who left and is hired back is an active employee again.

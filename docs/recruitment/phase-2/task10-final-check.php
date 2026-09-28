@@ -93,7 +93,8 @@ $statuses = app(RecruitmentApplicationStatusService::class);
 $conversions = app(Conversions::class);
 $template = RecruitmentApplication::query()->where('campaign_id', $campaignId)->firstOrFail();
 $otherTemplate = RecruitmentApplication::query()->where('campaign_id', $otherCampaignId)->firstOrFail();
-$realPending = Conversion::query()->where('status', Conversion::STATUS_PENDING)->first();
+// The real accepted offer still waiting to be hired (pending, or with failed attempts).
+$realPending = Conversion::query()->where('status', '!=', Conversion::STATUS_CONVERTED)->orderBy('id')->first();
 $realPendingBefore = $realPending?->only(['status', 'attempt_count', 'employee_id', 'contract_id']);
 
 DB::beginTransaction();
@@ -200,8 +201,8 @@ try {
         && DB::table('recruitment_request_events')->where('meta->campaign_id', $campaign->id)->where('meta->reason', Conversions::CAMPAIGN_CLOSE_REASON)->exists());
 
     echo PHP_EOL.'الأمان والصلاحيات — security'.PHP_EOL;
-    // The second vacancy needs three people: three candidates can accept.
-    Vacancy::whereKey($otherTemplate->vacancy_id)->update(['needed_count' => 3]);
+    // The second vacancy needs four people: four candidates can accept.
+    Vacancy::whereKey($otherTemplate->vacancy_id)->update(['needed_count' => 4]);
     $c3 = $accepted('Check Three', $otherTemplate);
     $check('Conversion needs a clear permission (convert-hires + contracts.create + pay visibility)', $hr->can('convert', $c3)
         && ! $judy->can('convert', $c3) && ! $rafi->can('convert', $c3)
@@ -223,6 +224,11 @@ try {
     $c4 = $hire($c4, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $phoneEmployee->id]);
     $check('Employee already exists with the same email/phone: linked, not duplicated', $dupError === $msg('possible_duplicate')
         && Employee::count() === $employeesBefore && $c4->employee_id === $phoneEmployee->id, 'matched '.$phoneEmployee->username.' by phone');
+
+    // The same person accepted a second offer for the position they now hold.
+    $c5 = $accepted('Check Five', $otherTemplate, [], $phone);
+    $check('The same person is never hired onto a position they already hold', $errorOf(fn () => $hire($c5, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $phoneEmployee->id])) === $msg('already_on_position')
+        && $c5->fresh()->status === Conversion::STATUS_PENDING);
 
     $failing = true;
     Contract::creating(function () use (&$failing): void {
