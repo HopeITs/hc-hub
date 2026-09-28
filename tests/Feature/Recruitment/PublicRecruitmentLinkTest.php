@@ -8,7 +8,9 @@ use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentRequestType;
+use App\Jobs\SendRecruitmentResponseReceipt;
 use App\Livewire\Recruitment\PublicLinks\Manager;
+use App\Mail\RecruitmentResponseReceiptMail;
 use App\Models\ApplicationForm;
 use App\Models\Department;
 use App\Models\HiringCampaign;
@@ -27,6 +29,8 @@ use App\Services\HiringCampaignService;
 use App\Services\PublicRecruitmentLinkService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -319,9 +323,13 @@ class PublicRecruitmentLinkTest extends TestCase
         $response->assertUnprocessable()
             ->assertSee('href="'.$arabicPage.'"', false)
             ->assertDontSee('href="'.$wrongPostUrl.'"', false);
-        $this->get($arabicPage)
+        $arabicResponse = $this->get($arabicPage);
+        $arabicResponse
             ->assertOk()
             ->assertSee('dir="rtl"', false);
+
+        $this->assertMatchesRegularExpression('/id="field-email"[^>]*dir="ltr"/s', $arabicResponse->getContent());
+        $this->assertMatchesRegularExpression('/id="field-phone"[^>]*dir="ltr"/s', $arabicResponse->getContent());
     }
 
     public function test_same_email_cannot_submit_twice_with_a_different_idempotency_key(): void
@@ -345,6 +353,35 @@ class PublicRecruitmentLinkTest extends TestCase
 
         $this->assertDatabaseCount('recruitment_applicants', 1);
         $this->assertDatabaseCount('recruitment_applications', 1);
+    }
+
+    public function test_an_applicant_can_request_a_queued_copy_of_their_responses(): void
+    {
+        [$campaign] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $this->makeUser($campaign->vacancy->position->city, 'HR-HMS'),
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+        Queue::fake();
+        $payload = $this->validSubmission('receipt@example.com');
+        $payload['answers']['response_copy'] = '1';
+
+        $this->post(route('careers.submit', $result['token']), $payload)->assertStatus(202);
+
+        $application = RecruitmentApplication::query()->where('email_normalized', 'receipt@example.com')->sole();
+        Queue::assertPushed(SendRecruitmentResponseReceipt::class, fn (SendRecruitmentResponseReceipt $job): bool => $job->applicationId === $application->id);
+
+        Mail::fake();
+        (new SendRecruitmentResponseReceipt($application->id))->handle();
+        Mail::assertSent(RecruitmentResponseReceiptMail::class);
+
+        $receipt = new RecruitmentResponseReceiptMail($application->load([
+            'applicant', 'campaign.vacancy.position', 'formVersion', 'answers', 'files',
+        ]));
+        $this->assertStringContainsString('Application received', $receipt->render());
+        $this->assertStringContainsString('receipt@example.com', $receipt->render());
     }
 
     public function test_failed_secure_upload_rolls_back_the_complete_application(): void
@@ -809,6 +846,7 @@ class PublicRecruitmentLinkTest extends TestCase
             'fields_json' => [
                 ['key' => 'full_name'],
                 ['key' => 'email'],
+                ['key' => 'response_copy'],
             ],
             'privacy_notice_version' => 'v1',
             'status' => 'published',

@@ -130,7 +130,7 @@ class ApplicationFormBuilderTest extends TestCase
     {
         [$campaign, $hr] = $this->makeCampaign();
 
-        Livewire::actingAs($hr)
+        $component = Livewire::actingAs($hr)
             ->test(Editor::class, ['campaign' => $campaign])
             ->call('applyReferenceTemplate')
             ->assertSet('previewSection', 'vacancy')
@@ -146,6 +146,11 @@ class ApplicationFormBuilderTest extends TestCase
             ->assertSet('customLabelEn', '')
             ->assertSet('customType', 'text')
             ->assertCount('fields', count(RecruitmentApplicationFormService::FIELD_CATALOG) + 1);
+
+        $component
+            ->assertSee('الاسم الكامل')
+            ->assertSee('إجابة قصيرة')
+            ->assertSee('طريقة التواصل المفضلة');
 
         $version = $campaign->fresh()->applicationForm->versions()->firstOrFail();
         $unsafe = [...$version->fields_json, [

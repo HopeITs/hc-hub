@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\RecruitmentApplicationStatus;
 use App\Exceptions\PublicRecruitmentSubmissionException;
 use App\Exceptions\UnsafeRecruitmentFileException;
+use App\Jobs\SendRecruitmentResponseReceipt;
 use App\Models\HiringCampaign;
 use App\Models\PublicRecruitmentLink;
 use App\Models\RecruitmentApplicant;
@@ -102,7 +103,7 @@ class PublicRecruitmentApplicationService
         }
 
         try {
-            return DB::transaction(function () use (
+            $result = DB::transaction(function () use (
                 $token,
                 $resolvedLink,
                 $submissionHash,
@@ -260,6 +261,12 @@ class PublicRecruitmentApplicationService
 
                 return ['application' => $application->fresh(), 'idempotent' => false];
             }, 3);
+
+            if (! $result['idempotent'] && data_get($result['application']->consent_payload_json, 'response_copy', false)) {
+                rescue(fn () => SendRecruitmentResponseReceipt::dispatch($result['application']->getKey()));
+            }
+
+            return $result;
         } catch (PublicRecruitmentSubmissionException $exception) {
             throw $exception;
         } catch (ValidationException $exception) {

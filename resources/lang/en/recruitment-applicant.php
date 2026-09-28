@@ -156,6 +156,22 @@ return [
         ],
     ],
 
+    'response_receipt' => [
+        'subject' => 'Application received — :position',
+        'heading' => 'Application received',
+        'greeting' => 'Hello :name,',
+        'intro' => 'Thank you for applying. Here is a copy of the responses you submitted.',
+        'position' => 'Position',
+        'submitted_at' => 'Submitted',
+        'responses' => 'Your responses',
+        'file_uploaded' => 'File uploaded',
+        'no_answer' => 'No answer',
+        'yes' => 'Yes',
+        'no' => 'No',
+        'footer' => 'This is an automated confirmation. Please keep this email for your records.',
+        'signature' => 'Human Resources, Christian Hope Center',
+    ],
+
     'cv_analysis' => [
         'title' => 'CV analysis (automatic)',
         'disclaimer' => 'Read automatically from the CV on this server. A reading aid only: check it against the CV itself. Nothing is ranked, filtered or decided by it.',

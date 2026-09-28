@@ -125,7 +125,8 @@
                                     @endforeach
                                 </x-forms.select2-input>
                             @else
-                                <x-forms.input :id="$key" :type="in_array($type, ['email', 'tel', 'date', 'number', 'url'], true) ? $type : 'text'" wire:model="answers.{{ $key }}" />
+                                @php($inputType = in_array($type, ['email', 'tel', 'date', 'number', 'url'], true) ? $type : 'text')
+                                <x-forms.input :id="$key" :type="$inputType" wire:model="answers.{{ $key }}" :dir="in_array($type, ['email', 'tel'], true) ? 'ltr' : null" />
                             @endif
 
                             <x-forms.input-error :field="'answers.'.$key" :input-id="$key" />
