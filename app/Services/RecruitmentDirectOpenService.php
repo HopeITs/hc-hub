@@ -34,9 +34,9 @@ use Illuminate\Validation\ValidationException;
  *
  *   The confirmations are recorded as external, never as approvals. The
  *   timeline must never show that somebody pressed a button they did not
- *   press. The manager and finance steps say who confirmed them, by what means
- *   and when — or that they did not apply. The HR step is the direct-opening
- *   action and is never entered a second time.
+ *   press. The applicable manager and finance steps say who confirmed them,
+ *   by what means and when — or that they did not apply. The HR step is the
+ *   direct-opening action and is never entered a second time.
  *
  *   Who opens it decides whether it still needs a decision. HR Syria's own
  *   direct opening is final, because there is nobody above them to ask. A
@@ -162,14 +162,15 @@ class RecruitmentDirectOpenService
      * The generated lines an opener is asked to fill in.
      *
      * Manager and, for requests that spend money, finance, reflecting the
-     * decisions made before HR records the opening. Closing an empty approved
-     * seat has no finance line because finance is not part of that flow.
+     * decisions made before HR records the opening. Closing a position or an
+     * empty approved seat has no finance line because finance is not part of
+     * either flow.
      *
      * @return array<int, int> step keys
      */
     public function confirmableSteps(?int $requestType = null): array
     {
-        if ($requestType === Type::CloseVacancy) {
+        if (in_array($requestType, [Type::ClosePosition, Type::CloseVacancy], true)) {
             return [WorkflowStepKey::ManagerApproval];
         }
 
