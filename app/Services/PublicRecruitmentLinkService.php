@@ -430,6 +430,10 @@ class PublicRecruitmentLinkService
             'job_post' => $this->jobPosts->publicSnapshot($campaign, (int) $link->job_post_version_id),
             'form' => $this->applicationForms->publicSchema($campaign, (int) $link->form_version_id),
             'context' => $this->applicationForms->formContext($campaign),
+            'age_range' => [
+                'minimum' => $campaign->minimum_age,
+                'maximum' => $campaign->maximum_age,
+            ],
             'link_mode' => $campaign->link_mode,
             'accepting_applications' => $this->acceptingApplications($campaign),
             'opens_at' => $campaign->starts_at?->toIso8601String(),

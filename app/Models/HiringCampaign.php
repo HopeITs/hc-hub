@@ -112,6 +112,8 @@ class HiringCampaign extends Model
     {
         return [
             'status' => 'integer',
+            'minimum_age' => 'integer',
+            'maximum_age' => 'integer',
             'starts_at' => 'datetime', 'ends_at' => 'datetime'];
     }
 }

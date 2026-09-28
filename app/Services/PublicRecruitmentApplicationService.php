@@ -13,6 +13,7 @@ use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentCampaignInvite;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -70,6 +71,10 @@ class PublicRecruitmentApplicationService
             throw PublicRecruitmentSubmissionException::because('invalid_request');
         }
 
+        if (array_key_exists('phone', $answers) && is_string($answers['phone'])) {
+            $answers['phone'] = en_digits(trim($answers['phone']));
+        }
+
         $employee = null;
         if ($resolvedLink->campaign->isInternal()) {
             $employee = $this->internal->employeeFor($actor);
@@ -98,9 +103,11 @@ class PublicRecruitmentApplicationService
         if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw PublicRecruitmentSubmissionException::because('invalid_email');
         }
-        if ($phone === '') {
+        if (preg_match('/\A09[0-9]{8}\z/', $phone) !== 1) {
             throw PublicRecruitmentSubmissionException::because('invalid_phone');
         }
+
+        $this->assertAgeEligible($resolvedLink->campaign, $validated['date_of_birth'] ?? null);
 
         try {
             $result = DB::transaction(function () use (
@@ -313,8 +320,32 @@ class PublicRecruitmentApplicationService
 
     private function normalizePhone(string $phone): string
     {
-        $phone = preg_replace('/(?!^\+)[^0-9]/', '', trim($phone)) ?? '';
+        $phone = trim(en_digits($phone));
 
         return Str::limit($phone, 50, '');
+    }
+
+    private function assertAgeEligible(HiringCampaign $campaign, mixed $dateOfBirth): void
+    {
+        if ($campaign->minimum_age === null && $campaign->maximum_age === null) {
+            return;
+        }
+
+        if (! is_string($dateOfBirth) || $dateOfBirth === '') {
+            throw PublicRecruitmentSubmissionException::because('age_not_eligible');
+        }
+
+        try {
+            $birthDate = CarbonImmutable::createFromFormat('Y-m-d', $dateOfBirth);
+            $age = $birthDate === false ? null : $birthDate->age;
+        } catch (Throwable) {
+            throw PublicRecruitmentSubmissionException::because('age_not_eligible');
+        }
+
+        if ($age === null
+            || ($campaign->minimum_age !== null && $age < $campaign->minimum_age)
+            || ($campaign->maximum_age !== null && $age > $campaign->maximum_age)) {
+            throw PublicRecruitmentSubmissionException::because('age_not_eligible');
+        }
     }
 }

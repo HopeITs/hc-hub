@@ -42,6 +42,10 @@ class Show extends Component
 
     public string $linkMode = HiringCampaign::PUBLIC_OPEN;
 
+    public string $minimumAge = '';
+
+    public string $maximumAge = '';
+
     public bool $editingDetails = false;
 
     public function mount(int $campaignId): void
@@ -97,6 +101,7 @@ class Show extends Component
 
             $this->reason = '';
             $this->successToast(__('recruitment-campaign.done_'.$action));
+            $this->dispatch('campaign-status-changed');
         });
     }
 
@@ -123,6 +128,8 @@ class Show extends Component
                 'starts_at' => $this->startsAt,
                 'ends_at' => $this->endsAt,
                 'link_mode' => $this->linkMode,
+                'minimum_age' => $this->minimumAge,
+                'maximum_age' => $this->maximumAge,
             ]);
         } catch (ValidationException $exception) {
             // Field problems stay next to the field they are about.
@@ -131,6 +138,8 @@ class Show extends Component
                     'starts_at' => 'startsAt',
                     'ends_at' => 'endsAt',
                     'link_mode' => 'linkMode',
+                    'minimum_age' => 'minimumAge',
+                    'maximum_age' => 'maximumAge',
                     default => $field,
                 }, $messages[0]);
             }
@@ -255,6 +264,8 @@ class Show extends Component
         $this->startsAt = $campaign->starts_at?->format('Y-m-d') ?? '';
         $this->endsAt = $campaign->ends_at?->format('Y-m-d') ?? '';
         $this->linkMode = $campaign->link_mode ?: HiringCampaign::PUBLIC_OPEN;
+        $this->minimumAge = $campaign->minimum_age === null ? '' : (string) $campaign->minimum_age;
+        $this->maximumAge = $campaign->maximum_age === null ? '' : (string) $campaign->maximum_age;
     }
 
     /** Re-resolved through the visibility boundary on every update. */

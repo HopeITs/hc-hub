@@ -86,7 +86,7 @@ class ApplicationFormBuilderTest extends TestCase
             $state['application_form'], $minimalFields, 'v1', $hr, $state['version']->id, $state['fingerprint'],
         );
         $answers = [
-            'full_name' => 'Applicant Name', 'email' => 'applicant@example.com', 'phone' => '+963999000000',
+            'full_name' => 'Applicant Name', 'email' => 'applicant@example.com', 'phone' => '0944123456',
             'cv' => UploadedFile::fake()->create('cv.pdf', 100, 'application/pdf'),
             'privacy_consent' => 'yes',
             $customField['key'] => 'full_time',

@@ -73,7 +73,27 @@
             <x-error-span>{{ $errors->first('link_mode') }}</x-error-span>
         </section>
 
-        {{-- 3. When --}}
+        {{-- 3. Applicant age --}}
+        <section class="rounded-surface border border-neutral-200 bg-white p-5 shadow-e1 sm:p-6" aria-labelledby="create-age-heading">
+            <h2 id="create-age-heading" class="text-subtitle font-bold text-neutral-800">{{ __('recruitment-campaign.age_range') }}</h2>
+            <p class="mt-1 text-body text-secondary-medium">{{ __('recruitment-campaign.age_range_hint') }}</p>
+            <div class="mt-4 grid gap-4 sm:grid-cols-2">
+                <div>
+                    <x-forms.input-label for="minimumAge">{{ __('recruitment-campaign.minimum_age') }}</x-forms.input-label>
+                    <input id="minimumAge" type="number" min="0" max="120" inputmode="numeric" wire:model="minimumAge"
+                        class="mt-1 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
+                    <x-error-span>{{ $errors->first('minimum_age') }}</x-error-span>
+                </div>
+                <div>
+                    <x-forms.input-label for="maximumAge">{{ __('recruitment-campaign.maximum_age') }}</x-forms.input-label>
+                    <input id="maximumAge" type="number" min="0" max="120" inputmode="numeric" wire:model="maximumAge"
+                        class="mt-1 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
+                    <x-error-span>{{ $errors->first('maximum_age') }}</x-error-span>
+                </div>
+            </div>
+        </section>
+
+        {{-- 4. When --}}
         <section class="rounded-surface border border-neutral-200 bg-white p-5 shadow-e1 sm:p-6" aria-labelledby="create-window-heading">
             <h2 id="create-window-heading" class="text-subtitle font-bold text-neutral-800">{{ __('recruitment-campaign.window') }}</h2>
             <p class="mt-1 text-body text-secondary-medium">{{ __('recruitment-campaign.window_hint') }}</p>

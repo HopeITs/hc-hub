@@ -38,6 +38,10 @@ class Create extends Component
 
     public string $endsAt = '';
 
+    public string $minimumAge = '';
+
+    public string $maximumAge = '';
+
     public function mount(?int $vacancyId = null): void
     {
         $this->sourceVacancyId = $vacancyId ?? request()->integer('vacancyId') ?: null;
@@ -65,6 +69,8 @@ class Create extends Component
                 'link_mode' => $this->linkMode,
                 'starts_at' => $this->startsAt,
                 'ends_at' => $this->endsAt,
+                'minimum_age' => $this->minimumAge,
+                'maximum_age' => $this->maximumAge,
             ]);
         } catch (ValidationException $exception) {
             // The service owns every rule; this only shows what it said.

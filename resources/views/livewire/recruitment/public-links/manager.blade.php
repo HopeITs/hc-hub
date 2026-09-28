@@ -7,10 +7,18 @@
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <p class="flex items-center gap-2 text-body font-semibold text-neutral-800">
                     <svg class="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg>
-                    {{ __('recruitment.public_link.active_until', ['date' => $fmt($activeLink->expires_at)]) }}
+                    {{ __($acceptsSubmissions ? 'recruitment.public_link.active_until' : 'recruitment.public_link.view_only_until', ['date' => $fmt($activeLink->expires_at)]) }}
                 </p>
-                <span class="rounded-full bg-primary px-2.5 py-0.5 text-small font-semibold text-white">{{ __('recruitment.public_link.active') }}</span>
+                <span @class([
+                    'rounded-full px-2.5 py-0.5 text-small font-semibold',
+                    'bg-primary text-white' => $acceptsSubmissions,
+                    'bg-neutral-200 text-neutral-700' => ! $acceptsSubmissions,
+                ])>{{ __($acceptsSubmissions ? 'recruitment.public_link.active' : 'recruitment.public_link.view_only') }}</span>
             </div>
+
+            @if (! $acceptsSubmissions)
+                <p class="mt-2 text-small text-neutral-600">{{ __('recruitment.public_link.view_only_notice') }}</p>
+            @endif
 
             @if ($shareUrl)
                 <div class="mt-3 flex flex-col gap-2 sm:flex-row" x-data="{ copied: false }">

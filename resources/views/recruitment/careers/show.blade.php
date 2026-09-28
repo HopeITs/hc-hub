@@ -48,6 +48,9 @@
                 @if ($job_post['program']) <p><strong>{{ __('careers.program') }}:</strong> {{ $job_post['program'] }}</p> @endif
                 @if ($context['weekly_hours']) <p><strong>{{ __('careers.working_hours') }}:</strong> {{ $context['weekly_hours'] }}</p> @endif
                 @if ($context['deadline']) <p><strong>{{ __('careers.deadline') }}:</strong> {{ $context['deadline'] }}</p> @endif
+                @if ($age_range['minimum'] !== null && $age_range['maximum'] !== null)
+                    <p><strong>{{ __('careers.age_requirement') }}:</strong> {{ __('careers.age_requirement_value', ['minimum' => $age_range['minimum'], 'maximum' => $age_range['maximum']]) }}</p>
+                @endif
             </div>
 
             @if ($body)
@@ -85,7 +88,13 @@
             @endif
         </div>
     @endif
-    @if ($showForm)
+    @if (! $accepting_applications)
+        <div class="mt-4 rounded-[16px] border border-neutral-200 bg-white p-5 text-body text-neutral-700 shadow-e1" role="status">
+            <p class="font-semibold text-neutral-900">{{ __('careers.not_accepting') }}</p>
+            <p class="mt-1">{{ __('careers.view_only_notice') }}</p>
+        </div>
+    @endif
+    @if ($showForm && $accepting_applications)
     <form
         method="POST"
         action="{{ route('careers.submit', ['token' => request()->route('token')]) }}"
@@ -197,7 +206,12 @@
                                     <p class="mt-2 text-small text-neutral-500" data-file-name>{{ __('careers.no_file_selected') }}</p>
                                     @break
                                 @default
-                                    @php $workEmail = $internal && $key === 'email'; @endphp
+                                    @php
+                                        $workEmail = $internal && $key === 'email';
+                                        $isPhone = $key === 'phone';
+                                        $isBirthDate = $key === 'date_of_birth';
+                                        $hasAgeRange = $age_range['minimum'] !== null && $age_range['maximum'] !== null;
+                                    @endphp
                                     <input
                                         id="field-{{ $key }}"
                                         type="{{ in_array($field['type'], ['email', 'tel', 'number', 'date', 'url'], true) ? $field['type'] : 'text' }}"
@@ -206,10 +220,39 @@
                                         placeholder="{{ $field['type'] === 'date' ? '' : __('careers.your_answer') }}"
                                         class="mt-4 block w-full max-w-sm rounded-none border-0 border-b border-neutral-300 bg-transparent px-0 py-2 text-body shadow-none outline-none placeholder:text-neutral-500 focus:border-primary focus:ring-0 {{ in_array($field['type'], ['email', 'tel'], true) ? 'rtl:text-right' : '' }} {{ $workEmail ? 'cursor-not-allowed text-neutral-600' : '' }}"
                                         @if ($field['type'] === 'email' || $field['type'] === 'tel') dir="ltr" @endif
+                                        @if ($isPhone)
+                                            inputmode="numeric"
+                                            pattern="09[0-9]{8}"
+                                            minlength="10"
+                                            maxlength="10"
+                                            autocomplete="tel"
+                                            data-phone-input
+                                        @endif
+                                        @if ($isBirthDate)
+                                            max="{{ today()->toDateString() }}"
+                                            data-birthdate-input
+                                            data-birthdate-error-message="{{ __('careers.errors.invalid_birth_date') }}"
+                                            @if ($hasAgeRange)
+                                                data-minimum-age="{{ $age_range['minimum'] }}"
+                                                data-maximum-age="{{ $age_range['maximum'] }}"
+                                                data-age-error-message="{{ __('careers.age_ineligible', ['minimum' => $age_range['minimum'], 'maximum' => $age_range['maximum']]) }}"
+                                            @endif
+                                        @endif
                                         @if ($workEmail) readonly aria-describedby="field-{{ $key }}-note" @endif
                                         @if ($field['required']) required @endif
                                     >
-                                    @if ($workEmail)
+                                    @if ($isPhone)
+                                        <p class="mt-2 text-small text-neutral-500">{{ __('careers.phone_help') }}</p>
+                                        <p id="field-{{ $key }}-format-error" data-phone-format-error class="mt-1 text-small text-primary" role="alert" hidden>{{ __('careers.errors.invalid_phone') }}</p>
+                                    @elseif ($isBirthDate)
+                                        @if ($hasAgeRange)
+                                            <p class="mt-2 text-small text-neutral-500">{{ __('careers.age_help', ['minimum' => $age_range['minimum'], 'maximum' => $age_range['maximum']]) }}</p>
+                                        @endif
+                                        <p id="field-{{ $key }}-birthdate-error" data-birthdate-error class="mt-1 text-small text-primary" role="alert" hidden>{{ __('careers.errors.invalid_birth_date') }}</p>
+                                        @if ($hasAgeRange)
+                                            <p id="field-{{ $key }}-age-error" data-age-error class="mt-1 text-small text-primary" role="alert" hidden>{{ __('careers.age_ineligible', ['minimum' => $age_range['minimum'], 'maximum' => $age_range['maximum']]) }}</p>
+                                        @endif
+                                    @elseif ($workEmail)
                                         <p id="field-{{ $key }}-note" class="mt-2 text-small text-neutral-500">{{ __('careers.internal.work_email_note') }}</p>
                                     @elseif (isset($prefill[$key]))
                                         <p class="mt-2 text-small text-neutral-500">{{ __('careers.internal.from_record') }}</p>
@@ -247,6 +290,7 @@
 </main>
 @endsection
 
+@if ($showForm && $accepting_applications)
 @push('scripts')
 <script nonce="{{ Vite::cspNonce() }}">
     document.addEventListener('DOMContentLoaded', () => {
@@ -287,6 +331,90 @@
             ? control.nextElementSibling?.querySelector('.select2-selection') ?? control
             : control;
 
+        const validatePhone = (input) => {
+            if (!input) return true;
+
+            const valid = input.value === '' || /^09[0-9]{8}$/.test(input.value);
+            const error = input.parentElement?.querySelector('[data-phone-format-error]');
+            input.setCustomValidity(valid ? '' : @json(__('careers.errors.invalid_phone')));
+            if (error) error.hidden = valid;
+
+            return valid;
+        };
+
+        const ageOnDate = (dateValue) => {
+            const parts = dateValue.split('-').map(Number);
+            if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+
+            const birthDate = new Date(parts[0], parts[1] - 1, parts[2]);
+            if (birthDate.getFullYear() !== parts[0] || birthDate.getMonth() !== parts[1] - 1 || birthDate.getDate() !== parts[2]) return null;
+
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const birthdayHasPassed = today.getMonth() > birthDate.getMonth()
+                || (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+            if (!birthdayHasPassed) age -= 1;
+
+            return age;
+        };
+
+        const validateBirthDate = (input) => {
+            if (!input || input.value === '') return true;
+
+            const ageError = input.parentElement?.querySelector('[data-age-error]');
+            const dateError = input.parentElement?.querySelector('[data-birthdate-error]');
+            const clear = () => { if (ageError) ageError.hidden = true; if (dateError) dateError.hidden = true; };
+
+            const age = ageOnDate(input.value);
+            const parts = input.value.split('-').map(Number);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const picked = parts.length === 3 && !parts.some(Number.isNaN)
+                ? new Date(parts[0], parts[1] - 1, parts[2])
+                : null;
+
+            // A real calendar date, strictly before today.
+            if (age === null || picked === null || picked >= today) {
+                clear();
+                input.setCustomValidity(input.dataset.birthdateErrorMessage);
+                if (dateError) dateError.hidden = false;
+                return false;
+            }
+
+            // Age range, only when the campaign fixed one.
+            if ((input.dataset.minimumAge ?? '') !== '') {
+                const minimum = Number(input.dataset.minimumAge);
+                const maximum = Number(input.dataset.maximumAge);
+                if (age < minimum || age > maximum) {
+                    clear();
+                    input.setCustomValidity(input.dataset.ageErrorMessage);
+                    if (ageError) ageError.hidden = false;
+                    return false;
+                }
+            }
+
+            clear();
+            input.setCustomValidity('');
+            return true;
+        };
+
+        form.querySelectorAll('[data-phone-input]').forEach((input) => {
+            input.addEventListener('input', () => {
+                input.value = input.value
+                    .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+                    .replace(/[^0-9]/g, '')
+                    .slice(0, 10);
+                validatePhone(input);
+            });
+            input.addEventListener('blur', () => validatePhone(input));
+        });
+
+        form.querySelectorAll('[data-birthdate-input]').forEach((input) => {
+            input.addEventListener('change', () => validateBirthDate(input));
+            input.addEventListener('blur', () => validateBirthDate(input));
+        });
+
         const showStep = (index, focus = true) => {
             activeStep = Math.max(0, Math.min(index, steps.length - 1));
             steps.forEach((step, stepIndex) => { step.hidden = stepIndex !== activeStep; });
@@ -305,6 +433,8 @@
 
         const validateStep = (index) => {
             const controls = Array.from(steps[index]?.querySelectorAll('input:not([disabled]), select:not([disabled]), textarea:not([disabled])') ?? []);
+            controls.filter((control) => control.matches('[data-phone-input]')).forEach(validatePhone);
+            controls.filter((control) => control.matches('[data-birthdate-input]')).forEach(validateBirthDate);
             const invalid = controls.find((control) => !control.checkValidity());
             if (!invalid) return true;
 
@@ -359,3 +489,4 @@
     });
 </script>
 @endpush
+@endif

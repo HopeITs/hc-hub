@@ -120,6 +120,25 @@
                             @endif
                         </fieldset>
 
+                        <fieldset>
+                            <legend class="text-body font-semibold text-neutral-800">{{ __('recruitment-campaign.age_range') }}</legend>
+                            <p class="mt-1 text-small text-secondary-medium">{{ __('recruitment-campaign.age_range_hint') }}</p>
+                            <div class="mt-3 grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <x-forms.input-label for="minimumAge">{{ __('recruitment-campaign.minimum_age') }}</x-forms.input-label>
+                                    <input id="minimumAge" type="number" min="0" max="120" inputmode="numeric" wire:model="minimumAge"
+                                        class="mt-1 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
+                                    <x-error-span>{{ $errors->first('minimumAge') }}</x-error-span>
+                                </div>
+                                <div>
+                                    <x-forms.input-label for="maximumAge">{{ __('recruitment-campaign.maximum_age') }}</x-forms.input-label>
+                                    <input id="maximumAge" type="number" min="0" max="120" inputmode="numeric" wire:model="maximumAge"
+                                        class="mt-1 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
+                                    <x-error-span>{{ $errors->first('maximumAge') }}</x-error-span>
+                                </div>
+                            </div>
+                        </fieldset>
+
                         <div class="grid gap-4 sm:grid-cols-2">
                             <div>
                                 <x-forms.input-label for="startsAt">{{ __('recruitment-campaign.starts_at') }}</x-forms.input-label>
@@ -152,6 +171,10 @@
                             {{ __('recruitment-campaign.modes.'.$campaign->link_mode) }}
                             <span aria-hidden="true">·</span>
                             {{ __('recruitment-campaign.mode_hints.'.$campaign->link_mode) }}
+                            @if ($campaign->minimum_age !== null && $campaign->maximum_age !== null)
+                                <span aria-hidden="true">·</span>
+                                {{ __('recruitment-campaign.age_range_value', ['minimum' => $campaign->minimum_age, 'maximum' => $campaign->maximum_age]) }}
+                            @endif
                         </p>
                         @if ($mayEdit)
                             <button type="button" wire:click="editDetails"

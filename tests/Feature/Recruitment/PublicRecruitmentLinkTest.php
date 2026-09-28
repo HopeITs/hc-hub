@@ -185,6 +185,7 @@ class PublicRecruitmentLinkTest extends TestCase
 
         $this->get(route('careers.show', $result['token']))
             ->assertOk()
+            ->assertSee('assets/recruitment/hope-center/logo.svg', false)
             ->assertSee('data-recruitment-wizard', false)
             ->assertSee('data-wizard-step', false)
             ->assertSee('data-wizard-next', false)
@@ -195,6 +196,70 @@ class PublicRecruitmentLinkTest extends TestCase
             ->assertSee('required', false)
             ->assertSee(__('careers.add_file'))
             ->assertDontSee('Secure file uploads will be enabled');
+    }
+
+    public function test_mobile_number_must_be_ten_digits_and_start_with_09(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+
+        $page = $this->get(route('careers.show', $result['token']));
+        $page->assertOk();
+        $this->assertMatchesRegularExpression('/id="field-phone"[^>]*pattern="09\[0-9\]\{8\}"[^>]*maxlength="10"/s', $page->getContent());
+
+        $payload = $this->validSubmission('invalid-phone@example.com');
+        $payload['answers']['phone'] = '+963944123456';
+
+        $this->post(route('careers.submit', $result['token']), $payload)
+            ->assertUnprocessable()
+            ->assertSee(__('careers.errors.invalid_phone'));
+
+        $this->assertDatabaseCount('recruitment_applications', 0);
+    }
+
+    public function test_age_range_is_shown_and_blocks_an_ineligible_applicant(): void
+    {
+        [$campaign, $hr, , , $form] = $this->makePublishedCampaign();
+        $campaign->forceFill(['minimum_age' => 18, 'maximum_age' => 35])->save();
+        $form->currentVersion->forceFill(['fields_json' => [
+            ['key' => 'full_name'],
+            ['key' => 'email'],
+            ['key' => 'phone'],
+            ['key' => 'date_of_birth', 'required' => true],
+            ['key' => 'cv'],
+            ['key' => 'privacy_consent'],
+        ]])->save();
+
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign->fresh(),
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+
+        $this->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee(__('careers.age_requirement_value', ['minimum' => 18, 'maximum' => 35]))
+            ->assertSee('data-minimum-age="18"', false)
+            ->assertSee('data-maximum-age="35"', false);
+
+        $ineligible = $this->validSubmission('too-young@example.com');
+        $ineligible['answers']['date_of_birth'] = now()->subYears(17)->format('Y-m-d');
+
+        $this->post(route('careers.submit', $result['token']), $ineligible)
+            ->assertUnprocessable()
+            ->assertSee(__('careers.errors.age_not_eligible'));
+
+        $eligible = $this->validSubmission('eligible@example.com');
+        $eligible['answers']['date_of_birth'] = now()->subYears(18)->format('Y-m-d');
+        $this->post(route('careers.submit', $result['token']), $eligible)->assertStatus(202);
+
+        $this->assertDatabaseCount('recruitment_applications', 1);
     }
 
     public function test_invalid_disabled_expired_and_draft_campaign_links_share_a_generic_response(): void
@@ -469,6 +534,19 @@ class PublicRecruitmentLinkTest extends TestCase
         );
         $campaign->forceFill(['status' => HiringCampaignStatus::Closed])->save();
 
+        $this->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee(__('careers.view_only_notice'))
+            ->assertDontSee('data-recruitment-wizard', false)
+            ->assertDontSee('name="submission_key"', false);
+
+        $this->assertSame(PublicRecruitmentLink::STATUS_ACTIVE, $result['link']->fresh()->status);
+
+        Livewire::actingAs($hr)
+            ->test(Manager::class, ['campaign' => $campaign->fresh()])
+            ->assertSee(__('recruitment.public_link.view_only'))
+            ->assertSee(__('recruitment.public_link.view_only_notice'));
+
         $this->post(
             route('careers.submit', $result['token']),
             $this->validSubmission('applicant@example.com'),
@@ -551,8 +629,8 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->assertTrue($campaign->fresh()->isInvitationOnly());
     }
 
-    /** Coming back to the page, the person who made the link can still copy it. */
-    public function test_the_creator_can_copy_the_link_again_in_the_same_session(): void
+    /** The encrypted stored address remains recoverable after the session is cleared. */
+    public function test_the_creator_can_copy_the_link_again_after_returning(): void
     {
         [$campaign, $hr] = $this->makePublishedCampaign();
 
@@ -570,8 +648,8 @@ class PublicRecruitmentLinkTest extends TestCase
 
         Livewire::actingAs($hr)
             ->test(Manager::class, ['campaign' => $campaign->fresh()])
-            ->assertDontSee($url)
-            ->assertSee(__('recruitment.public_link.hash_only_notice'));
+            ->assertSee($url)
+            ->assertDontSee(__('recruitment.public_link.hash_only_notice'));
     }
 
     /** A corrected advert reaches the shared link without changing its address. */
@@ -875,7 +953,7 @@ class PublicRecruitmentLinkTest extends TestCase
             'answers' => [
                 'full_name' => $fullName,
                 'email' => $email,
-                'phone' => '+963 999 123 456',
+                'phone' => '0944123456',
                 'cv' => UploadedFile::fake()->createWithContent(
                     'cv.pdf',
                     "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<<>>\n%%EOF\n",

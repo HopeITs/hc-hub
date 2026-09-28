@@ -5,6 +5,7 @@ namespace App\Livewire\Recruitment\PublicLinks;
 use App\Models\HiringCampaign;
 use App\Models\PublicRecruitmentLink;
 use App\Models\RecruitmentCampaignInvite;
+use App\Services\HiringCampaignService;
 use App\Services\PublicRecruitmentLinkService;
 use App\Traits\WithAlerts;
 use DomainException;
@@ -69,6 +70,12 @@ class Manager extends Component
         if (! $this->customExpiry) {
             $this->resetExpiry();
         }
+    }
+
+    #[On('campaign-status-changed')]
+    public function refreshCampaignStatus(): void
+    {
+        $this->campaign->refresh();
     }
 
     public function generate(PublicRecruitmentLinkService $service): void
@@ -165,7 +172,7 @@ class Manager extends Component
         $this->resetExpiry();
     }
 
-    public function render(PublicRecruitmentLinkService $service)
+    public function render(PublicRecruitmentLinkService $service, HiringCampaignService $campaigns)
     {
         $this->campaign->loadMissing(['jobPost.currentVersion', 'applicationForm.currentVersion']);
         $activeLink = $this->activeLink();
@@ -174,6 +181,7 @@ class Manager extends Component
             'activeLink' => $activeLink,
             'shareUrl' => $this->generatedUrl ?: ($activeLink ? $this->recalledUrl($activeLink) : ''),
             'linkCurrent' => $activeLink === null || $service->isCurrent($activeLink, $this->campaign),
+            'acceptsSubmissions' => $campaigns->acceptsSubmissions($this->campaign),
             'mayManage' => $activeLink
                 ? Gate::allows('update', $activeLink)
                 : Gate::allows('create', [PublicRecruitmentLink::class, $this->campaign]),
