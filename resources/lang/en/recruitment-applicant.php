@@ -170,6 +170,8 @@ return [
         'no' => 'No',
         'footer' => 'This is an automated confirmation. Please keep this email for your records.',
         'signature' => 'Human Resources, Christian Hope Center',
+        'no_reply' => 'This is an automated confirmation. Please keep this email for your records. Please do not reply to this email.',
+        'org' => 'Christian Hope Center',
     ],
 
     'cv_analysis' => [

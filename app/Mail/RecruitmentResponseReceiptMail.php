@@ -29,7 +29,7 @@ class RecruitmentResponseReceiptMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            markdown: 'mail.recruitment.response-receipt',
+            view: 'mail.recruitment.response-receipt',
             with: [
                 'locale' => $this->preferredLocale(),
                 'name' => $this->application->applicant?->full_name,
