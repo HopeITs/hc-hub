@@ -168,10 +168,69 @@ class TeamStaffingScreenTest extends TestCase
 
         // The pool is a real container, and the leaf is inside it while the
         // branch is not: the branch appears before the pool's own wrapper opens.
-        $pool = strpos($html, 'max-w-[44rem]');
+        // Its signature is the column count it lays itself out in.
+        $pool = strpos($html, 'grid-template-columns');
         $this->assertNotFalse($pool, 'the leaf pool was not rendered');
         $this->assertLessThan($pool, strpos($html, 'Branch report'));
         $this->assertGreaterThan($pool, strpos($html, 'Leaf report'));
+    }
+
+    /**
+     * A small team keeps its single row.
+     *
+     * The pool's shape used to come from a fixed maximum width, so four posts
+     * wrapped exactly as badly as forty. It comes from the count now.
+     */
+    public function test_a_handful_of_posts_stays_on_one_row(): void
+    {
+        for ($i = 0; $i < 4; $i++) {
+            $this->openPost('Leaf '.$i, filled: 0, capacity: 1);
+        }
+
+        $this->assertStringContainsString(
+            'repeat(4, minmax(0, max-content))',
+            $this->chart('positions'),
+        );
+    }
+
+    /** A big one folds into a block about as wide as it is tall, not a ribbon. */
+    public function test_a_large_team_folds_into_a_balanced_block(): void
+    {
+        for ($i = 0; $i < 12; $i++) {
+            $this->openPost('Leaf '.$i, filled: 0, capacity: 1);
+        }
+
+        // Twelve across would run off the side; twelve down is the complaint.
+        $this->assertStringContainsString(
+            'repeat(4, minmax(0, max-content))',
+            $this->chart('positions'),
+        );
+    }
+
+    /**
+     * A manager's box grows with its subtree instead of strangling it.
+     *
+     * The positions view fixes a card's width so posts can be compared, and once
+     * the reports moved inside their manager's box that width capped the whole
+     * subtree to one column — which is why a level of posts came out stacked one
+     * under another. The width belongs to the card's own content only.
+     */
+    public function test_the_positions_view_does_not_cap_the_width_of_a_subtree(): void
+    {
+        $branch = $this->openPost('Branch report', filled: 0, capacity: 1);
+        $under = $this->openPost('Under the branch', filled: 0, capacity: 1);
+        $under->update(['direct_manager_id' => $branch->getKey()]);
+
+        $html = $this->chart('positions');
+
+        // The fixed width is on a content column, never on a box that wraps
+        // children: every occurrence of it carries mx-auto with it.
+        $this->assertStringContainsString('w-52 mx-auto', $html);
+        $this->assertSame(
+            substr_count($html, 'w-52'),
+            substr_count($html, 'w-52 mx-auto'),
+            'a fixed width escaped onto a box that contains a subtree',
+        );
     }
 
     /** The filter that the page is really for: where is the establishment short. */
@@ -239,6 +298,14 @@ class TeamStaffingScreenTest extends TestCase
 
         Livewire::actingAs($this->manager)->test(TeamStaffing::class)
             ->assertDontSee('vacancy_id=', escape: false);
+    }
+
+    /** The chart's rendered markup in one of its two views. */
+    private function chart(string $view): string
+    {
+        return Livewire::actingAs($this->manager)->test(TeamStaffing::class)
+            ->call('setView', $view)
+            ->html();
     }
 
     /**

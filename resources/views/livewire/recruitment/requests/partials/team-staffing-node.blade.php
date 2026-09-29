@@ -21,11 +21,21 @@
     $gap = $compact ? 'gap-2' : 'gap-4';
     $stem = $compact ? 'h-4' : 'h-5';
 
-    // A report that manages nobody is a leaf. Leaves pool into a wrapped grid
-    // below the branch row instead of stretching the level into one endless
-    // line — again the organisation chart's own answer to a wide team.
+    // A report that manages nobody is a leaf. Leaves pool below the branch row
+    // instead of stretching the level into one endless line — the organisation
+    // chart's own answer to a wide team.
     $branches = $children->filter(fn (array $child): bool => count($child['children']) > 0)->values();
     $leaves = $children->reject(fn (array $child): bool => count($child['children']) > 0)->values();
+
+    // How many across. A fixed maximum width decided this before, which meant
+    // the shape came from the card's width rather than from how many cards there
+    // are: four posts wrapped exactly as badly as forty. Counting instead, a
+    // small team keeps its single row and only a big one folds, into a block
+    // roughly as wide as it is tall rather than a long thin ribbon.
+    $leafCount = $leaves->count();
+    $leafColumns = $leafCount <= 5
+        ? max(1, $leafCount)
+        : min(6, (int) ceil(sqrt($leafCount)));
 @endphp
 
 <section wire:key="staffing-node-{{ $positionId }}"
@@ -81,7 +91,11 @@
                         <div class="relative flex w-full flex-col items-center pt-4">
                             <span aria-hidden="true" class="absolute start-1/2 top-0 {{ $stem }} {{ $trunk }}"></span>
 
-                            <div class="flex w-full flex-wrap content-start items-start justify-center {{ $gap }} rounded-surface border border-neutral-100 bg-neutral-50/40 {{ $compact ? 'max-w-[36rem] p-2' : 'max-w-[44rem] p-3' }}">
+                            {{-- The column count is data, not a class, so it is
+                                 set inline: Tailwind reads class names as
+                                 literal text and never sees a built-up one. --}}
+                            <div class="grid items-start justify-center {{ $gap }} rounded-surface border border-neutral-100 bg-neutral-50/40 {{ $compact ? 'p-2' : 'p-3' }}"
+                                 style="grid-template-columns: repeat({{ $leafColumns }}, minmax(0, max-content))">
                                 @foreach ($leaves as $child)
                                     @include('livewire.recruitment.requests.partials.team-staffing-node', [
                                         'node' => $child,

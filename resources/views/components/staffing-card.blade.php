@@ -32,8 +32,12 @@
 
     // Only the positions view fixes a column width: a chart of posts is read by
     // comparing them, and a ragged set of widths is what makes that hard. The
-    // staff view is as wide as its people need, and wraps rather than running
-    // off the side.
+    // staff view is as wide as its people need.
+    //
+    // It is set on the card's own content and never on the box, because the box
+    // now holds this manager's whole subtree: a fixed width there strangled
+    // every descendant down to one column, which is why a level of posts came
+    // out stacked one under another instead of side by side.
     $width = $isStaff ? '' : ($compact ? 'w-44' : 'w-52');
 @endphp
 
@@ -44,10 +48,11 @@
          anywhere. Only the links and the toggles opt out, so a click on one is a
          click and not the start of a pan. --}}
     class="rounded-surface border bg-white shadow-e1 transition
-           {{ $frame }} {{ $width }}
+           {{ $frame }}
            {{ $passthrough ? 'opacity-55 hover:opacity-100' : '' }}
            {{ $compact ? 'p-2' : 'p-3' }}"
 >
+  <div class="{{ $width }} mx-auto">
     {{-- ---------- Seats and standing ---------- --}}
     <div class="flex items-center justify-between gap-2 pb-2">
         @if ($capacity > 0 && $capacity <= 6)
@@ -181,6 +186,9 @@
         </ul>
     @endif
 
-    {{-- The reports, drawn inside this box by the node partial. --}}
+  </div>
+
+    {{-- The reports, drawn inside this box by the node partial and deliberately
+         outside the column above: they are as wide as the team is. --}}
     {{ $slot }}
 </div>
