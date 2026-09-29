@@ -61,7 +61,7 @@
                     </div>
                 </div>
 
-                {{-- ---------- Camera + reading ---------- --}}
+                {{-- ---------- Reading ---------- --}}
                 <div class="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-100 px-4 py-2">
                     {{-- The establishment in one line. Not a row of tiles: these
                          are four numbers a manager glances at, not the subject
@@ -89,24 +89,7 @@
                     </p>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <div class="flex items-center overflow-hidden rounded-control border border-neutral-200 bg-neutral-50">
-                            <button type="button" wire:click="zoomOut" title="{{ __('general.zoom-out') }}"
-                                    class="flex size-7 items-center justify-center text-h4 font-bold leading-none text-secondary-medium transition hover:bg-white hover:text-primary">
-                                <span aria-hidden="true">−</span>
-                                <span class="sr-only">{{ __('general.zoom-out') }}</span>
-                            </button>
-                            <span class="min-w-12 border-x border-neutral-200 bg-white px-1 py-1.5 text-center text-caption font-semibold tabular-nums text-secondary-dark">
-                                {{ round($scale * 100) }}%
-                            </span>
-                            <button type="button" wire:click="zoomIn" title="{{ __('general.zoom-in') }}"
-                                    class="flex size-7 items-center justify-center text-h4 font-bold leading-none text-secondary-medium transition hover:bg-white hover:text-primary">
-                                <span aria-hidden="true">+</span>
-                                <span class="sr-only">{{ __('general.zoom-in') }}</span>
-                            </button>
-                        </div>
-
                         @foreach ([
-                            ['action' => 'fitToScreen', 'label' => __('general.fit-to-screen'), 'dispatch' => null],
                             ['action' => 'expandAll', 'label' => __('general.expand-all'), 'dispatch' => 'staffing-expand-all'],
                             ['action' => 'collapseAll', 'label' => __('general.collapse-all'), 'dispatch' => 'staffing-collapse-all'],
                         ] as $control)
@@ -130,96 +113,13 @@
                     </div>
                 </div>
 
-                <div
-                    x-ref="viewport"
-                    x-data="{
-                        scale: @entangle('scale').live,
-                        translateX: 0,
-                        translateY: 0,
-                        dragging: false,
-                        pointerId: null,
-                        lastX: 0,
-                        lastY: 0,
-
-                        transformStyle() {
-                            return `transform: translate3d(${this.translateX}px, ${this.translateY}px, 0) scale(${this.scale})`
-                        },
-
-                        zoomAt(clientX, clientY, delta) {
-                            const rect = this.$refs.viewport.getBoundingClientRect()
-                            const x = clientX - rect.left
-                            const y = clientY - rect.top
-                            const prev = this.scale
-                            const next = Math.min(1.6, Math.max(0.4, +(prev + delta).toFixed(2)))
-                            if (next === prev) return
-                            const ratio = next / prev
-                            this.translateX = x - (x - this.translateX) * ratio
-                            this.translateY = y - (y - this.translateY) * ratio
-                            this.scale = next
-                        },
-
-                        onWheel(event) {
-                            if (event.ctrlKey || event.metaKey) {
-                                this.zoomAt(event.clientX, event.clientY, event.deltaY < 0 ? 0.06 : -0.06)
-                                return
-                            }
-                            const factor = event.deltaMode === 1 ? 16 : 1
-                            this.translateX -= event.deltaX * factor
-                            this.translateY -= event.deltaY * factor
-                        },
-
-                        onPointerDown(event) {
-                            if (event.button !== 0 || event.target.closest('button, a, input, select, textarea, [data-no-pan]')) return
-                            this.dragging = true
-                            this.pointerId = event.pointerId
-                            this.lastX = event.clientX
-                            this.lastY = event.clientY
-                            this.$refs.viewport.setPointerCapture(event.pointerId)
-                        },
-
-                        onPointerMove(event) {
-                            if (! this.dragging || event.pointerId !== this.pointerId) return
-                            this.translateX += event.clientX - this.lastX
-                            this.translateY += event.clientY - this.lastY
-                            this.lastX = event.clientX
-                            this.lastY = event.clientY
-                        },
-
-                        onPointerUp(event) {
-                            if (! this.dragging || event.pointerId !== this.pointerId) return
-                            this.dragging = false
-                            this.$refs.viewport.releasePointerCapture(event.pointerId)
-                        },
-
-                        resetPan() {
-                            this.translateX = 0
-                            this.translateY = 0
-                        },
-                    }"
-                    @wheel.prevent="onWheel($event)"
-                    @pointerdown="onPointerDown($event)"
-                    @pointermove="onPointerMove($event)"
-                    @pointerup="onPointerUp($event)"
-                    @pointercancel="onPointerUp($event)"
-                    x-on:reset-pan.window="resetPan()"
-                    :class="dragging ? 'cursor-grabbing' : 'cursor-grab'"
-                    class="relative min-h-[min(72vh,820px)] w-full touch-none select-none overflow-hidden overscroll-none bg-[radial-gradient(circle_at_center,_#e5e7eb_1px,_transparent_1px)] [background-size:22px_22px]"
-                >
-                    <p class="pointer-events-none absolute bottom-3 start-3 z-10 rounded-control border border-neutral-200/80 bg-white/90 px-2 py-1 text-caption font-medium text-secondary-light shadow-e1 backdrop-blur-sm">
-                        {{ __('general.org-chart-nav-hint') }}
-                    </p>
-
-                    <div class="origin-top-left will-change-transform" :style="transformStyle()">
-                        <div class="flex min-w-max flex-col items-center {{ $compact ? 'px-8 py-8' : 'px-16 py-12' }}">
-                            @include('livewire.recruitment.requests.partials.team-staffing-node', [
-                                'node' => $root,
-                                'compact' => $compact,
-                                'view' => $view,
-                                'isFirst' => true,
-                                'isLast' => true,
-                                'isRootLevel' => true,
-                            ])
-                        </div>
+                <div class="p-4 sm:p-6">
+                    <div class="flex flex-col items-center">
+                        @include('livewire.recruitment.requests.partials.team-staffing-node', [
+                            'node' => $root,
+                            'compact' => $compact,
+                            'view' => $view,
+                        ])
                     </div>
                 </div>
             </div>

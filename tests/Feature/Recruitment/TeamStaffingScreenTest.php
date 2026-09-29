@@ -143,68 +143,43 @@ class TeamStaffingScreenTest extends TestCase
     }
 
     /**
-     * A report who manages nobody pools; one who manages somebody keeps a column.
+     * Sibling posts flow: one wrapping row, never a fixed column count.
      *
-     * A level drawn as one endless row is unreadable by about the sixth card, so
-     * the leaves wrap inside a pool below the branch row — the organisation
-     * chart's own answer, reused rather than reinvented.
+     * Four posts sit side by side while the canvas is wide enough and fold onto
+     * the next line when it is not, so the count of columns is never in the
+     * markup. Managers come before the reports who manage nobody.
      */
-    public function test_reports_without_reports_of_their_own_pool_below_the_branches(): void
+    public function test_sibling_posts_wrap_by_available_width_in_both_views(): void
     {
         $branch = $this->openPost('Branch report', filled: 0, capacity: 1);
         $this->openPost('Leaf report', filled: 0, capacity: 1);
 
-        // Something below the branch is what makes it a branch.
         $under = $this->openPost('Under the branch', filled: 0, capacity: 1);
         $under->update(['direct_manager_id' => $branch->getKey()]);
 
-        $html = Livewire::actingAs($this->manager)->test(TeamStaffing::class)
-            ->call('setView', 'positions')
-            ->html();
+        foreach (['positions', 'staff'] as $view) {
+            $html = $this->chart($view);
 
-        foreach (['Branch report', 'Leaf report', 'Under the branch'] as $title) {
-            $this->assertStringContainsString($title, $html);
+            $this->assertStringContainsString('flex flex-wrap items-start justify-center', $html);
+            $this->assertStringNotContainsString('grid-template-columns', $html);
+            $this->assertLessThan(strpos($html, 'Leaf report'), strpos($html, 'Branch report'));
         }
-
-        // The pool is a real container, and the leaf is inside it while the
-        // branch is not: the branch appears before the pool's own wrapper opens.
-        // Its signature is the column count it lays itself out in.
-        $pool = strpos($html, 'grid-template-columns');
-        $this->assertNotFalse($pool, 'the leaf pool was not rendered');
-        $this->assertLessThan($pool, strpos($html, 'Branch report'));
-        $this->assertGreaterThan($pool, strpos($html, 'Leaf report'));
     }
 
-    /**
-     * A small team keeps its single row.
-     *
-     * The pool's shape used to come from a fixed maximum width, so four posts
-     * wrapped exactly as badly as forty. It comes from the count now.
-     */
-    public function test_a_handful_of_posts_stays_on_one_row(): void
+    /** Several people in one post stay together as one wrapping group. */
+    public function test_several_holders_of_one_post_stay_in_one_wrapping_group(): void
     {
-        for ($i = 0; $i < 4; $i++) {
-            $this->openPost('Leaf '.$i, filled: 0, capacity: 1);
+        $shared = $this->openPost('Shared post', filled: 0, capacity: 3);
+        $first = $this->place($shared);
+        $second = $this->place($shared);
+
+        $staff = $this->chart('staff');
+
+        foreach ([$first->name, $second->name] as $name) {
+            $this->assertStringContainsString(e($name), $staff);
         }
 
-        $this->assertStringContainsString(
-            'repeat(4, minmax(0, max-content))',
-            $this->chart('positions'),
-        );
-    }
-
-    /** A big one folds into a block about as wide as it is tall, not a ribbon. */
-    public function test_a_large_team_folds_into_a_balanced_block(): void
-    {
-        for ($i = 0; $i < 12; $i++) {
-            $this->openPost('Leaf '.$i, filled: 0, capacity: 1);
-        }
-
-        // Twelve across would run off the side; twelve down is the complaint.
-        $this->assertStringContainsString(
-            'repeat(4, minmax(0, max-content))',
-            $this->chart('positions'),
-        );
+        $this->assertStringContainsString('flex flex-wrap items-start justify-center gap-2', $staff);
     }
 
     /**

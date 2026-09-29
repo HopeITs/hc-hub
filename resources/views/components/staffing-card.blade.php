@@ -39,6 +39,14 @@
     // every descendant down to one column, which is why a level of posts came
     // out stacked one under another instead of side by side.
     $width = $isStaff ? '' : ($compact ? 'w-44' : 'w-52');
+
+    // A post with reports draws two things in one box: the post itself and the
+    // team beneath it. The post gets its own hairline frame so it reads as the
+    // manager of what is below, and the team stays a separate, tinted panel. A
+    // post with nobody under it is already a single card and needs no second one.
+    $managerFrame = trim((string) $slot) !== ''
+        ? 'rounded-control border border-secondary-light/60 bg-white '.($compact ? 'p-2' : 'p-3')
+        : '';
 @endphp
 
 <div
@@ -52,7 +60,7 @@
            {{ $passthrough ? 'opacity-55 hover:opacity-100' : '' }}
            {{ $compact ? 'p-2' : 'p-3' }}"
 >
-  <div class="{{ $width }} mx-auto">
+  <div class="{{ $width }} mx-auto {{ $managerFrame }}">
     {{-- ---------- Seats and standing ---------- --}}
     <div class="flex items-center justify-between gap-2 pb-2">
         @if ($capacity > 0 && $capacity <= 6)
@@ -88,9 +96,9 @@
     @if ($isStaff)
         {{-- One card per person and one per empty seat, exactly as the
              organisation chart draws a post. This view is read to find somebody,
-             and "+2 more in this position" is not somebody. They wrap rather than
-             running along one line, so a post held by six people is six cards in
-             two rows and not a card six wide. --}}
+             and "+2 more in this position" is not somebody. They stay together
+             as one group inside their post and wrap to the width that post has,
+             so a small team is a short row and a big one folds by itself. --}}
         <div class="flex flex-wrap items-start justify-center gap-2">
             @foreach ($holders as $person)
                 <x-org-node :key="'holder-'.$person->getKey()"

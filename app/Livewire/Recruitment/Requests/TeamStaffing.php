@@ -57,8 +57,6 @@ class TeamStaffing extends Component
 
     public string $density = 'comfortable';
 
-    public float $scale = 1.0;
-
     public function boot(): void
     {
         Gate::authorize('create', RecruitmentRequest::class);
@@ -102,22 +100,6 @@ class TeamStaffing extends Component
     public function toggleDensity(): void
     {
         $this->density = $this->density === 'compact' ? 'comfortable' : 'compact';
-    }
-
-    public function zoomIn(): void
-    {
-        $this->scale = min(1.6, round($this->scale + 0.1, 2));
-    }
-
-    public function zoomOut(): void
-    {
-        $this->scale = max(0.4, round($this->scale - 0.1, 2));
-    }
-
-    public function fitToScreen(): void
-    {
-        $this->scale = 1.0;
-        $this->dispatch('reset-pan');
     }
 
     public function render(): View
