@@ -12,7 +12,7 @@
                  x-on:recruitment-evaluations-changed.window="dirty = false"
                  x-on:recruitment-evaluation-reloaded.window="dirty = false"
                  x-on:beforeunload.window="if (dirty) { $event.preventDefault(); $event.returnValue = ''; }"
-                 x-on:livewire:navigate.document="if (dirty && ! confirm(@js(__('recruitment-applicant.evaluations.unsaved_leave')))) $event.preventDefault()">
+                 x-on:livewire:navigate.document="if (dirty && ! $event.detail?.history && ! confirm(@js(__('recruitment-applicant.evaluations.unsaved_leave')))) $event.preventDefault()">
             <div class="flex flex-wrap items-start justify-between gap-2">
                 <div>
                     <h2 id="my-evaluation-title" tabindex="-1" class="scroll-mt-24 text-h4 font-semibold">{{ __('recruitment-applicant.evaluations.my_title') }}</h2>
@@ -65,11 +65,12 @@
                     </fieldset>
 
                     @foreach (['pros', 'cons', 'notes'] as $field)
-                        {{-- The count appears only near the limit, where it helps. --}}
-                        <div wire:key="evaluation-field-{{ $field }}" x-data="{ length: {{ mb_strlen($this->{$field}) }} }" x-on:input="length = $event.target.value.length">
+                        {{-- The count appears only near the limit, where it helps. Not a live region: it would speak every keystroke. maxlength stops the overrun. --}}
+                        <div wire:key="evaluation-field-{{ $field }}" x-data="{ length: {{ mb_strlen($this->{$field}) }} }" x-on:input="length = $event.target.value.length"
+                             x-on:recruitment-evaluation-reloaded.window="$nextTick(() => length = $el.querySelector('textarea').value.length)">
                             <x-forms.input-label :for="'evaluation-'.$field" :value="__('recruitment-applicant.evaluations.'.$field)" />
                             <x-forms.textarea :id="'evaluation-'.$field" wire:model="{{ $field }}" rows="3" maxlength="{{ $maxLength }}" />
-                            <p x-cloak x-show="length > {{ (int) floor($maxLength * 0.8) }}" aria-live="polite" class="mt-1 text-xs text-secondary-medium"
+                            <p x-cloak x-show="length > {{ (int) floor($maxLength * 0.8) }}" class="mt-1 text-xs text-secondary-medium"
                                x-text="@js(__('recruitment-applicant.evaluations.length', ['count' => '__count__', 'max' => $maxLength])).replace('__count__', length)"></p>
                             <x-forms.input-error :field="$field" :input-id="'evaluation-'.$field" />
                         </div>

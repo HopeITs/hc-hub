@@ -10,6 +10,7 @@ use App\Traits\WithAlerts;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
@@ -60,6 +61,10 @@ class Show extends Component
             $this->successToast($message);
         }
     }
+
+    /** The viewer saved their evaluation on this page: re-render so the "evaluation due" note goes. */
+    #[On('recruitment-evaluations-changed')]
+    public function refreshEvaluationDue(): void {}
 
     public function beginCancel(): void
     {
