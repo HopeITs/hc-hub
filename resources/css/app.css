@@ -422,6 +422,27 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
         width: 100%;
     }
 
+    .request-field--locked .select2-container {
+        cursor: not-allowed !important;
+        pointer-events: none;
+    }
+
+    .request-field--locked .select2-container--default .select2-selection--single {
+        color: var(--color-neutral-700) !important;
+        background-color: #ffffff !important;
+        border-color: var(--color-neutral-300) !important;
+        box-shadow: none !important;
+        cursor: not-allowed !important;
+    }
+
+    .request-field--locked .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: var(--color-neutral-700) !important;
+    }
+
+    .request-field--locked .select2-container--default .select2-selection--single .select2-selection__arrow {
+        opacity: 0.45;
+    }
+
 
     .select2-container--default.select2-container--focus .select2-selection--single,
     .select2-container--default.select2-container--open .select2-selection--single {

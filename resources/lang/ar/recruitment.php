@@ -491,6 +491,11 @@ return [
     'fields_you_may_edit' => 'ما يحقّ لك تعديله',
     'fields_you_may_edit_hint' => 'بقية الطلب تبقى كما ووفق عليها.',
     'field_locked_here' => 'مقفل — لم يطلب الموافِق تعديله.',
+    'field_locked_no_changes_requested' => 'مقفل — لا توجد تعديلات مطلوبة.',
+    'field_change_requested' => 'تعديل مطلوب',
+    'changes_requested_edit_title' => 'تعديلات مطلوبة',
+    'changes_requested_edit_hint' => 'عدّل الحقول المميزة فقط. بقية الطلب مقفلة حتى تبقى الأجزاء المعتمدة كما هي.',
+    'approver_comment' => 'ملاحظة الموافِق',
     'request_is_locked' => 'هذا الطلب مقفل، ولا يُعدّل إلا بعد أن يطلب موافِق تعديلاً.',
 
     // نصوص البريد. مقتضبة بقصد: رقم وما حدث ورابط.

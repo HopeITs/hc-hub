@@ -365,7 +365,7 @@ class RequestTable extends LivewireTable
     {
         return Blade::render(
             '<a href="{{ $url }}" wire:navigate @class(['
-            .'"inline-flex min-h-9 items-center rounded-control px-3 py-1.5 text-sm font-semibold transition", '
+            .'"inline-flex min-h-9 w-40 items-center justify-center rounded-control px-3 py-1.5 text-center text-sm font-semibold transition", '
             .'"border border-primary text-primary hover:bg-neutral-50" => $outlined, '
             .'"bg-primary text-white hover:bg-primary-600" => ! $outlined, '
             .'])>{{ $label }}</a>',
