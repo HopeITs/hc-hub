@@ -68,13 +68,16 @@ use App\Services\Recruitment\Scanning\DisabledScanner;
 use App\Services\Recruitment\Scanning\RecruitmentFileScanner;
 use App\Services\RecruitmentIndicatorRules;
 use App\Services\SalaryCipher;
+use App\Support\Permissions\PermissionCacheGeneration;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Cache\Events\KeyForgotten;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
@@ -114,6 +117,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Spatie forgets its cache key on every grant or revocation; User drops
+        // its memoized roles and permissions when the generation moves on.
+        Event::listen(function (KeyForgotten $event): void {
+            if ($event->key === config('permission.cache.key')) {
+                PermissionCacheGeneration::bump();
+            }
+        });
+
         RateLimiter::for('careers-view', fn (Request $request) => Limit::perMinute(60)
             ->by($request->ip()));
         RateLimiter::for('careers-submit', fn (Request $request) => [

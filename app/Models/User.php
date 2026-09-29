@@ -40,6 +40,9 @@ class User extends Authenticatable
      */
     private array $requestMemo = [];
 
+    /** The registrar generation the memo and loaded roles/permissions belong to. */
+    private ?int $memoGeneration = null;
+
     public function profile(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'employee_id');
@@ -48,6 +51,8 @@ class User extends Authenticatable
     /** @template T @param \Closure(): T $resolve @return T */
     public function remember(string $key, Closure $resolve): mixed
     {
+        $this->dropStaleAccess();
+
         return array_key_exists($key, $this->requestMemo)
             ? $this->requestMemo[$key]
             : $this->requestMemo[$key] = $resolve();
@@ -124,6 +129,8 @@ class User extends Authenticatable
     {
         // Loaded once; setActiveRole() and Spatie's assign/remove keep the
         // loaded relation current, so this never outlives a role change.
+        $this->dropStaleAccess();
+
         return $this->loadMissing('roles')->roles
             ->firstWhere(fn ($r) => (bool) ($r->pivot->is_active ?? false));
     }
@@ -230,6 +237,8 @@ class User extends Authenticatable
      */
     public function hasExplicitPermission(string $permission): bool
     {
+        $this->dropStaleAccess();
+
         if ($this->loadMissing('permissions')->permissions->contains('name', $permission)) {
             return true;
         }
@@ -328,5 +337,21 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * A grant or revocation anywhere clears Spatie's cache; from then on the
+     * memo and the loaded roles and permissions may describe the old state.
+     */
+    private function dropStaleAccess(): void
+    {
+        $generation = \App\Support\Permissions\PermissionCacheGeneration::current();
+
+        if ($this->memoGeneration !== $generation) {
+            $this->memoGeneration = $generation;
+            $this->requestMemo = [];
+            $this->unsetRelation('roles');
+            $this->unsetRelation('permissions');
+        }
     }
 }

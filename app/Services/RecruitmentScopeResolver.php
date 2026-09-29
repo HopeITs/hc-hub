@@ -108,7 +108,7 @@ class RecruitmentScopeResolver
         ));
 
         if ($assigned !== []) {
-            $ids = array_merge($ids, $user->remember('governorate-city-ids:'.$role, fn (): array => City::query()
+            $ids = array_merge($ids, $user->remember('governorate-city-ids:'.$role.':'.implode(',', $assigned), fn (): array => City::query()
                 ->whereIn('slug', $assigned)
                 ->pluck('id')
                 ->map(fn ($id): int => (int) $id)
@@ -742,7 +742,7 @@ class RecruitmentScopeResolver
      */
     public function isFinanceApprover(User $user): bool
     {
-        return $user->remember('finance-approver', fn (): bool => in_array((int) $user->getKey(), array_map('intval', $this->financeApproverUserIds()), true));
+        return in_array((int) $user->getKey(), array_map('intval', $this->financeApproverUserIds()), true);
     }
 
     public function financeApproverUserIds(): array
