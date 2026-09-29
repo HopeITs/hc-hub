@@ -17,14 +17,14 @@
         <p role="status" class="rounded-control border border-green-200 bg-green-50 p-4 text-green-800">{{ session('recruitment_saved') }}</p>
     @endif
 
-    <a href="{{ route('recruitment.interviews.index') }}" wire:navigate class="text-sm font-medium text-primary hover:underline">&larr; {{ __('recruitment-applicant.interviews.all') }}</a>
+    <a href="{{ route('recruitment.interviews.index') }}" wire:navigate class="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-secondary-dark transition hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-0"><svg class="size-4 rtl:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12.5 15 7.5 10l5-5"/></svg> {{ __('recruitment-applicant.interviews.all') }}</a>
 
     @error('interview')
-        <p role="alert" class="rounded-control border border-primary bg-primary/5 p-3 text-sm text-primary">{{ $message }}</p>
+        <p role="alert" class="rounded-control border border-primary bg-white p-3 text-sm text-primary">{{ $message }}</p>
     @enderror
 
     {{-- Summary --}}
-    <section class="rounded-surface border border-neutral-200 bg-white p-6">
+    <section class="rounded-surface border border-neutral-200 bg-white p-6 shadow-e1">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
                 <h1 class="text-h3 font-semibold">
@@ -34,7 +34,7 @@
                 <p class="mt-1 text-sm text-secondary-medium">
                     {{ $application?->campaign?->vacancy?->position?->title ?? __('recruitment-applicant.no_vacancy') }}
                     @if ($canSeeApplicant)
-                        &middot; <a href="{{ route('recruitment.applicants.show', ['applicantId' => $application->applicant_id]) }}" wire:navigate class="text-primary hover:underline">{{ __('recruitment-applicant.interviews.open_applicant') }}</a>
+                        &middot; <a href="{{ route('recruitment.applicants.show', ['applicantId' => $application->applicant_id]) }}" wire:navigate class="font-medium text-neutral-900 underline decoration-neutral-300 underline-offset-4 transition hover:decoration-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">{{ __('recruitment-applicant.interviews.open_applicant') }}</a>
                     @endif
                 </p>
             </div>
@@ -60,7 +60,7 @@
                     @endif
                     @if ($interview->location_type === RecruitmentInterviewLocationType::Online)
                         @if ($meetingUrl)
-                            <a href="{{ $meetingUrl }}" target="_blank" rel="noopener noreferrer" class="block break-all font-normal text-primary hover:underline">{{ $meetingUrl }}</a>
+                            <a href="{{ $meetingUrl }}" target="_blank" rel="noopener noreferrer" class="block break-all font-medium text-neutral-900 underline decoration-neutral-300 underline-offset-4 transition hover:decoration-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">{{ $meetingUrl }}</a>
                         @else
                             <span class="block text-xs font-normal text-secondary-medium">{{ __('recruitment-applicant.interviews.meeting_url_hidden') }}</span>
                         @endif
@@ -105,7 +105,7 @@
         @if ($canManage && $interview->isOpen())
             <div class="mt-6 flex flex-wrap gap-2 border-t border-neutral-100 pt-4">
                 <a href="{{ route('recruitment.interviews.edit', ['interviewId' => $interview->id]) }}" wire:navigate
-                   class="rounded-control border border-primary px-3 py-1.5 text-sm font-semibold text-primary hover:bg-primary/5">
+                   class="rounded-control border border-primary px-3 py-1.5 text-sm font-semibold text-primary transition hover:bg-selection focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
                     {{ __('recruitment-applicant.interviews.actions.edit') }}
                 </a>
                 @if ($hasStarted)
@@ -116,7 +116,7 @@
                         {{ __('recruitment-applicant.interviews.actions.no_show') }}
                     </button>
                 @endif
-                <button type="button" wire:click="beginCancel" class="rounded-control border border-neutral-300 px-3 py-1.5 text-sm text-primary hover:bg-primary/5">
+                <button type="button" wire:click="beginCancel" class="rounded-control border border-neutral-300 px-3 py-1.5 text-sm text-primary transition hover:bg-selection">
                     {{ __('recruitment-applicant.interviews.actions.cancel') }}
                 </button>
             </div>
@@ -126,12 +126,12 @@
         @endif
 
         @if ($panel === 'cancel')
-            <div class="mt-4 space-y-3 rounded-control border border-primary/40 bg-primary/5 p-4">
+            <div class="mt-4 space-y-3 rounded-control border border-neutral-300 bg-neutral-50 p-4">
                 <h3 class="font-semibold">{{ __('recruitment-applicant.interviews.cancel_title') }}</h3>
                 <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.interviews.cancel_hint') }}</p>
                 <div>
                     <x-forms.input-label for="cancelReason" required :value="__('recruitment-applicant.interviews.cancel_reason')" />
-                    <select id="cancelReason" wire:model.live="cancelReason" class="w-full rounded-control border border-neutral-300 bg-white px-3 py-2 text-body">
+                    <select id="cancelReason" wire:model.live="cancelReason" class="w-full rounded-control border border-neutral-300 bg-white px-3 py-2 text-body shadow-e1 transition focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary">
                         <option value="">{{ __('recruitment.choose') }}</option>
                         @foreach ($cancellationReasons as $code)
                             <option value="{{ $code }}">{{ __('recruitment-applicant.interviews.cancellation_reasons.'.$code) }}</option>
@@ -147,7 +147,7 @@
                 </div>
                 @unless ($hasStarted)
                     <label class="flex items-start gap-2 text-sm">
-                        <input type="checkbox" wire:model="notifyCandidate" class="mt-0.5 size-4 rounded-inset border-neutral-300 text-primary focus:ring-primary">
+                        <input type="checkbox" wire:model="notifyCandidate" class="mt-0.5 size-4 rounded-inset border-neutral-300 text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
                         <span>{{ __('recruitment-applicant.interviews.notify_candidate_cancel') }}
                             <span class="block text-xs text-secondary-medium">{{ __('recruitment-applicant.interviews.notify_candidate_hint') }}</span>
                         </span>
@@ -176,7 +176,7 @@
     </section>
 
     {{-- Participants --}}
-    <section class="rounded-surface border border-neutral-200 bg-white p-6">
+    <section class="rounded-surface border border-neutral-200 bg-white p-6 shadow-e1">
         <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.interviews.participants') }}</h2>
         @if ($interview->participants->isEmpty())
             <p class="mt-2 text-sm text-secondary-medium">{{ __('recruitment-applicant.interviews.no_participants') }}</p>
@@ -188,7 +188,7 @@
                             <span class="font-medium {{ $participant->removed_at ? 'line-through' : '' }}">{{ $personName($participant->user) }}</span>
                             <span class="text-secondary-medium">&middot; {{ __('recruitment-applicant.interviews.roles.'.$participant->role) }}</span>
                             @unless (RecruitmentInterviewSchedulingService::isActiveUser($participant->user))
-                                <span class="ms-2 rounded-control bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700">{{ __('recruitment-applicant.interviews.inactive') }}</span>
+                                <span class="ms-2 rounded-control bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">{{ __('recruitment-applicant.interviews.inactive') }}</span>
                             @endunless
                             @if ($participant->removed_at)
                                 <span class="ms-2 text-xs">{{ __('recruitment-applicant.interviews.removed_on', ['date' => $participant->removed_at->format('Y-m-d H:i')]) }}</span>
@@ -213,7 +213,7 @@
 
     {{-- Reschedule history --}}
     @if ($interview->reschedules->isNotEmpty())
-        <section class="rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="rounded-surface border border-neutral-200 bg-white p-6 shadow-e1">
             <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.interviews.history') }}</h2>
             <ol class="mt-3 space-y-3 text-sm">
                 @foreach ($interview->reschedules as $change)
@@ -225,7 +225,7 @@
                                 <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs font-normal">{{ __('recruitment-applicant.interviews.location_changed') }}</span>
                             @endif
                             @if ($change->reminder_already_sent)
-                                <span class="ms-1 rounded-control bg-amber-50 px-2 py-0.5 text-xs font-normal text-amber-700">{{ __('recruitment-applicant.interviews.after_reminder') }}</span>
+                                <span class="ms-1 rounded-control bg-amber-50 px-2 py-0.5 text-xs font-normal text-amber-800">{{ __('recruitment-applicant.interviews.after_reminder') }}</span>
                             @endif
                         </p>
                         <p class="text-secondary-medium">{{ $personName($change->rescheduledBy) }} &middot; {{ $change->rescheduled_at->format('Y-m-d H:i') }}</p>
@@ -238,7 +238,7 @@
 
     {{-- Candidate emails: HR only --}}
     @if ($canManage)
-        <section class="rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="rounded-surface border border-neutral-200 bg-white p-6 shadow-e1">
             <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.interviews.candidate_emails') }}</h2>
             @if ($notices->isEmpty())
                 <p class="mt-2 text-sm text-secondary-medium">{{ __('recruitment-applicant.interviews.no_candidate_emails') }}</p>

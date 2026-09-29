@@ -1,7 +1,7 @@
 @php use App\Enums\RecruitmentEvaluationRecommendation as Recommendation; @endphp
 <div>
     @if ($canEvaluate)
-        <section class="rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="rounded-surface border border-neutral-200 bg-white p-6 shadow-e1">
             <div class="flex flex-wrap items-start justify-between gap-2">
                 <div>
                     <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.evaluations.my_title') }}</h2>
@@ -19,7 +19,7 @@
             @endif
 
             @error('evaluation')
-                <div role="alert" class="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-control border border-primary bg-primary/5 p-3 text-sm text-primary">
+                <div role="alert" class="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-control border border-primary bg-white p-3 text-sm text-primary">
                     <span>{{ $message }}</span>
                     <button type="button" wire:click="reload" class="font-semibold underline">{{ __('recruitment-applicant.evaluations.reload') }}</button>
                 </div>
@@ -34,12 +34,19 @@
                 @endif
             @else
                 <form wire:submit="save" class="mt-4 space-y-4">
-                    <fieldset>
-                        <legend class="text-body font-medium text-neutral-800">{{ __('recruitment-applicant.evaluations.recommendation') }} <span class="text-primary">*</span></legend>
+                    @php $recommendationInvalid = $errors->has('recommendation'); @endphp
+                    <fieldset role="radiogroup" aria-required="true"
+                              @if ($recommendationInvalid) aria-invalid="true" aria-describedby="recommendation-error" @endif>
+                        <legend class="text-body font-medium text-neutral-800">
+                            {{ __('recruitment-applicant.evaluations.recommendation') }}
+                            <span class="text-primary ltr:ml-1 rtl:mr-1" aria-hidden="true">*</span>
+                            <span class="sr-only">({{ __('general.a11y.required-field') }})</span>
+                        </legend>
                         <div class="mt-2 flex flex-wrap gap-2">
                             @foreach (Recommendation::values() as $value)
-                                <label class="inline-flex cursor-pointer items-center gap-2 rounded-control border px-3 py-1.5 text-sm {{ $recommendation === $value ? 'border-primary bg-primary/5' : 'border-neutral-300' }}">
-                                    <input type="radio" wire:model.live="recommendation" value="{{ $value }}" class="text-primary focus:ring-primary">
+                                <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-control border px-3 text-sm transition sm:min-h-9 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary
+                                              {{ $recommendation === $value ? 'border-neutral-900 bg-selection font-semibold text-neutral-900' : 'border-neutral-300 hover:bg-neutral-50' }}">
+                                    <input type="radio" wire:model.live="recommendation" value="{{ $value }}" class="text-primary focus:ring-0">
                                     {{ __('recruitment-applicant.evaluations.recommendations.'.$value) }}
                                 </label>
                             @endforeach

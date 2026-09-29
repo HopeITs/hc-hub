@@ -395,6 +395,7 @@ return [
         'mine_filter' => 'Participation',
         'mine' => 'Interviews I am on',
         'none_yet' => 'No interviews yet.',
+        'none_this_month' => 'No interviews this month.',
         'previous_month' => 'Previous month',
         'next_month' => 'Next month',
         'today' => 'Today',
