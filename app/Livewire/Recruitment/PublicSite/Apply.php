@@ -118,7 +118,11 @@ class Apply extends Component
             'city_id' => $this->city_id ?: null,
             'privacy_notice_version' => $this->link->formVersion?->privacy_notice_version,
             'privacy_accepted_at' => true,
-            'consent_payload_json' => ['accepted_at' => now()->toIso8601String()],
+            'consent_payload_json' => [
+                'accepted_at' => now()->toIso8601String(),
+                'response_copy' => (bool) ($this->answers['response_copy'] ?? false),
+                'locale' => app()->getLocale(),
+            ],
             'answers' => $this->answers,
             'files' => $this->uploads,
         ], [

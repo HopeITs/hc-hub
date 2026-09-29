@@ -15,8 +15,8 @@ use Livewire\Component;
  *
  * The seat is chosen first and everything else follows from it, because a
  * campaign with no seat advertises nothing. Several campaigns may run on one
- * seat and usually do, in sequence: round the organisation first, then out to
- * everybody, and sometimes to a named list.
+ * seat in sequence: round the organisation first, then out to everybody, and
+ * sometimes to a named list.
  */
 class Create extends Component
 {
@@ -37,6 +37,10 @@ class Create extends Component
     public string $startsAt = '';
 
     public string $endsAt = '';
+
+    public string $minimumAge = '';
+
+    public string $maximumAge = '';
 
     public function mount(?int $vacancyId = null): void
     {
@@ -65,6 +69,8 @@ class Create extends Component
                 'link_mode' => $this->linkMode,
                 'starts_at' => $this->startsAt,
                 'ends_at' => $this->endsAt,
+                'minimum_age' => $this->minimumAge,
+                'maximum_age' => $this->maximumAge,
             ]);
         } catch (ValidationException $exception) {
             // The service owns every rule; this only shows what it said.
@@ -97,6 +103,7 @@ class Create extends Component
     private function availableVacancies()
     {
         return Vacancy::query()->available()
+            ->whereDoesntHave('campaigns', fn ($query) => $query->ongoing())
             ->visibleTo(auth()->user())
             ->when($this->sourceVacancyId !== null, fn ($query) => $query->whereKey($this->sourceVacancyId))
             ->with(['position.city', 'position.program', 'createdFromRequest'])

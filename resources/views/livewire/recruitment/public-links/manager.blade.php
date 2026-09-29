@@ -1,4 +1,4 @@
-@php $fmt = fn ($date) => $date?->translatedFormat('j M Y, H:i'); @endphp
+@php $fmt = fn ($date) => $date?->translatedFormat('j M Y'); @endphp
 
 <div class="space-y-4" data-public-link-manager>
     @if ($activeLink)
@@ -7,10 +7,18 @@
             <div class="flex flex-wrap items-center justify-between gap-2">
                 <p class="flex items-center gap-2 text-body font-semibold text-neutral-800">
                     <svg class="size-4 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg>
-                    {{ __('recruitment.public_link.active_until', ['date' => $fmt($activeLink->expires_at)]) }}
+                    {{ __($acceptsSubmissions ? 'recruitment.public_link.active_until' : 'recruitment.public_link.view_only_until', ['date' => $fmt($activeLink->expires_at)]) }}
                 </p>
-                <span class="rounded-full bg-primary px-2.5 py-0.5 text-small font-semibold text-white">{{ __('recruitment.public_link.active') }}</span>
+                <span @class([
+                    'rounded-full px-2.5 py-0.5 text-small font-semibold',
+                    'bg-primary text-white' => $acceptsSubmissions,
+                    'bg-neutral-200 text-neutral-700' => ! $acceptsSubmissions,
+                ])>{{ __($acceptsSubmissions ? 'recruitment.public_link.active' : 'recruitment.public_link.view_only') }}</span>
             </div>
+
+            @if (! $acceptsSubmissions)
+                <p class="mt-2 text-small text-neutral-600">{{ __('recruitment.public_link.view_only_notice') }}</p>
+            @endif
 
             @if ($shareUrl)
                 <div class="mt-3 flex flex-col gap-2 sm:flex-row" x-data="{ copied: false }">
@@ -68,7 +76,7 @@
         <div x-data="{ custom: $wire.entangle('customExpiry') }" class="space-y-3">
             <div x-cloak x-show="custom" class="max-w-sm">
                 <x-forms.input-label for="public-link-expiry">{{ __('recruitment.public_link.expires_at') }}</x-forms.input-label>
-                <input id="public-link-expiry" type="datetime-local" wire:model="expiresAt"
+                <input id="public-link-expiry" type="date" wire:model="expiresAt"
                     class="mt-1 w-full rounded-control border border-neutral-300 bg-white px-3 py-2 text-body focus:border-primary focus:ring-primary">
                 <x-error-span>{{ $errors->first('expiresAt') }}</x-error-span>
                 <button type="button" wire:click="useCampaignExpiry" class="mt-1 cursor-pointer text-small font-semibold text-primary underline-offset-4 hover:underline">
@@ -124,7 +132,7 @@
             <p class="mt-1 text-small text-secondary-medium">{{ __('recruitment.public_link.invites_help') }}</p>
 
             @if ($mayManage)
-                <form wire:submit="addInvite" class="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end">
+                <form wire:submit="addInvite" class="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-start">
                     <div>
                         <x-forms.input-label for="invite-name" required>{{ __('recruitment.public_link.full_name') }}</x-forms.input-label>
                         <input id="invite-name" type="text" wire:model="inviteName" autocomplete="off"
@@ -138,7 +146,7 @@
                         <x-error-span>{{ $errors->first('inviteEmail') }}</x-error-span>
                     </div>
                     <button type="submit" wire:loading.attr="disabled" wire:target="addInvite"
-                        class="cursor-pointer rounded-control border border-primary bg-white px-4 py-2 text-body font-semibold text-primary transition hover:bg-neutral-50 md:mb-[1.35rem]">
+                        class="cursor-pointer rounded-control border border-primary bg-white px-4 py-2 text-body font-semibold text-primary transition hover:bg-neutral-50 md:mt-[1.65rem]">
                         {{ __('recruitment.public_link.add_invite') }}
                     </button>
                 </form>

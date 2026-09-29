@@ -174,11 +174,27 @@ class RecruitmentRequestListTest extends TestCase
             ->all();
 
         foreach (['request_number', 'request_type', 'status', 'mode',
-            'requester_user_id', 'scope_city_id', 'target_position_id'] as $column) {
+            'priority', 'requester_user_id', 'scope_city_id', 'target_position_id'] as $column) {
             $this->assertContains($column, $searchable, "{$column} should be filterable.");
         }
 
         $this->assertNotContains('created_at', $searchable);
+    }
+
+    public function test_priority_is_shown_and_filters_requests_from_their_payload(): void
+    {
+        [$hr, $request] = $this->seeded();
+        $urgent = $this->copy($request, Status::UnderReview);
+        $urgent->forceFill(['draft_payload_json' => ['priority' => 'urgent']])->save();
+        $normal = $this->copy($request, Status::UnderReview);
+        $normal->forceFill(['draft_payload_json' => ['priority' => 'normal']])->save();
+
+        Livewire::actingAs($hr)
+            ->test(RequestTable::class)
+            ->set('search.priority', 'urgent')
+            ->assertSee($urgent->request_number)
+            ->assertSee(__('recruitment.priority_urgent'))
+            ->assertDontSee($normal->request_number);
     }
 
     /** The list orders by columns that exist — sqlite would not say otherwise. */

@@ -66,7 +66,10 @@ trait BuildsRecruitmentRequests
         }
 
         if ($type === Type::CloseVacancy) {
-            $values['reason'] = 'No longer recruiting.';
+            $values += [
+                'reason' => 'No longer recruiting.',
+                'effective_date' => '2026-12-01',
+            ];
         }
 
         return array_merge($values, $overrides);
@@ -82,10 +85,12 @@ trait BuildsRecruitmentRequests
         return $screen;
     }
 
-    /** Any contract type will do; the tests are not about which. */
+    /** Use one of the two contract types recruitment is allowed to propose. */
     protected function recruitmentContractTypeId(): int
     {
-        return (int) (ContractType::query()->value('id')
-            ?? ContractType::query()->create(['name_en' => 'Annual', 'name_ar' => 'سنوي'])->id);
+        return (int) ContractType::query()->firstOrCreate(
+            ['name_en' => 'Trial Volunteer Contract'],
+            ['name_ar' => 'عقد تطوّع تجريبي'],
+        )->id;
     }
 }

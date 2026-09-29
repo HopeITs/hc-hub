@@ -150,6 +150,13 @@ return [
             'remote',
         ],
 
+        // Only these agreements may be proposed by a recruitment request.
+        // The general volunteer agreement is no longer offered for new hires.
+        'contract_types' => [
+            'Specific Voluntary Service Contract',
+            'Trial Volunteer Contract',
+        ],
+
         /*
         | A new position must name the centre it sits in, with two exceptions.
         |

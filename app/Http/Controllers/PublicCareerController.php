@@ -64,13 +64,22 @@ class PublicCareerController extends Controller
             ->to(LaravelLocalization::getLocalizedURL($locale, route('login')));
     }
 
+    public function submitted(Request $request, string $token): Response
+    {
+        $locale = $this->setLocale($request);
+
+        return response()->view('recruitment.careers.submitted', [
+            'locale' => $locale,
+        ]);
+    }
+
     public function store(
         Request $request,
         string $token,
         PublicRecruitmentLinkService $links,
         PublicRecruitmentApplicationService $applications,
         SecurityMonitor $monitor,
-    ): Response {
+    ): RedirectResponse|Response {
         $locale = $this->setLocale($request);
 
         try {
@@ -110,10 +119,10 @@ class PublicCareerController extends Controller
             ], 422);
         }
 
-        return response()->view('recruitment.careers.submitted', [
-            'locale' => $locale,
-            'idempotent' => $result['idempotent'],
-        ], 202);
+        return redirect()->route('careers.submitted', [
+            'token' => $token,
+            'lang' => $locale,
+        ], 303);
     }
 
     /**

@@ -58,6 +58,23 @@ class RecruitmentRequestRevalidator
             }
         }
 
+        if ($type === Type::CloseVacancy && $position !== null) {
+            if ((int) $position->exist_emp >= (int) $position->max_emp) {
+                $this->refuse('data.position_id', 'recruitment.no_vacant_position');
+            }
+
+            $hasActiveCampaign = HiringCampaign::query()
+                ->whereIn('status', [HiringCampaignStatus::Published, HiringCampaignStatus::Open])
+                ->whereHas('vacancy', fn ($vacancies) => $vacancies
+                    ->where('position_id', $position->getKey())
+                    ->available())
+                ->exists();
+
+            if ($hasActiveCampaign) {
+                $this->refuse('data.position_id', 'recruitment.campaign_still_active');
+            }
+        }
+
         // RV-5 — a post with somebody in it is not closed out from under them.
         if ($type === Type::ClosePosition && $position !== null
             && ((int) $position->exist_emp > 0 || $position->activeContracts()->exists())) {
@@ -97,19 +114,6 @@ class RecruitmentRequestRevalidator
             $this->refuse('data.vacancy_id', 'recruitment.invalid_vacancy');
         }
 
-        // D40 — an open campaign means people are mid-application, and what
-        // becomes of them is a human decision rather than a side effect of
-        // approving somebody else's request.
-        if ($type === Type::CloseVacancy) {
-            $active = HiringCampaign::query()
-                ->where('vacancy_id', $request->target_vacancy_id)
-                ->whereIn('status', [HiringCampaignStatus::Published, HiringCampaignStatus::Open])
-                ->exists();
-
-            if ($active) {
-                $this->refuse('data.vacancy_id', 'recruitment.campaign_still_active');
-            }
-        }
     }
 
     private function refuse(string $field, string $message): never

@@ -374,7 +374,7 @@ class RecruitmentMonitoringTest extends TestCase
             'answers' => [
                 'full_name' => 'Applicant Name',
                 'email' => $email,
-                'phone' => '+963 999 123 456',
+                'phone' => '0999123456',
                 'cv' => $cv ?? $this->pdf(),
                 'privacy_consent' => '1',
             ],

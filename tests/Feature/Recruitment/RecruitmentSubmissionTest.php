@@ -49,7 +49,10 @@ class RecruitmentSubmissionTest extends TestCase
             'web',
         ));
         $this->seed(RecruitmentWorkflowSeeder::class);
-        $this->contractType = ContractType::query()->create(['name_en' => 'Annual', 'name_ar' => 'سنوي']);
+        $this->contractType = ContractType::query()->create([
+            'name_en' => 'Trial Volunteer Contract',
+            'name_ar' => 'عقد تطوّع تجريبي',
+        ]);
 
         $this->root = Position::query()->create([
             'city_id' => $city->id,
@@ -192,21 +195,24 @@ class RecruitmentSubmissionTest extends TestCase
         $this->assertSame(Status::Submitted, (int) $second->status);
     }
 
-    /** Filling a vacancy and closing it are contradictory intentions. */
-    public function test_fill_and_close_cannot_both_be_active_on_one_vacancy(): void
+    /** Filling and removing an empty approved seat are contradictory intentions. */
+    public function test_fill_and_close_cannot_both_be_active_on_one_position(): void
     {
         $vacancy = Vacancy::query()->sole();
 
         $fill = $this->draft(array_merge($this->complete(), ['vacancy_id' => $vacancy->id]));
         $this->submit($fill);
 
-        $close = $this->draft(['vacancy_id' => $vacancy->id, 'reason' => 'No longer needed'], Type::CloseVacancy);
+        $close = $this->draft([
+            'reason' => 'No longer needed',
+            'effective_date' => '2026-12-01',
+        ], Type::CloseVacancy);
 
         try {
             $this->submit($close);
-            $this->fail('Closing a vacancy that is being filled should be refused.');
+            $this->fail('Removing an approved seat that is being filled should be refused.');
         } catch (ValidationException $exception) {
-            $this->assertArrayHasKey('data.vacancy_id', $exception->errors());
+            $this->assertArrayHasKey('data.position_id', $exception->errors());
         }
     }
 
@@ -215,9 +221,12 @@ class RecruitmentSubmissionTest extends TestCase
     {
         $this->target->forceFill(['exist_emp' => 4, 'max_emp' => 5])->save();
 
-        $request = $this->draft(['reduce_by' => 3, 'reason' => 'Restructure', 'effective_date' => '2026-12-01'], Type::DecreaseHeadcount);
-
         try {
+            $request = $this->draft([
+                'reduce_by' => 3,
+                'reason' => 'Restructure',
+                'effective_date' => '2026-12-01',
+            ], Type::DecreaseHeadcount);
             $this->submit($request);
             $this->fail('Reducing below the existing employees should be refused.');
         } catch (ValidationException $exception) {

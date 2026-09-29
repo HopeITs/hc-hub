@@ -222,7 +222,7 @@ class RecruitmentRequestSubmissionService
                 'max_emp', 'direct_manager_id',
             ], $recruiting),
             Type::ClosePosition => ['reason', 'effective_date'],
-            Type::CloseVacancy => ['reason'],
+            Type::CloseVacancy => ['reason', 'effective_date'],
             default => [],
         };
     }
@@ -230,11 +230,10 @@ class RecruitmentRequestSubmissionService
     /**
      * One active request per subject per type.
      *
-     * The subject is the vacancy for the two vacancy types and the position for
-     * the rest, so a manager may legitimately have a fill-vacancy and an
-     * increase-headcount open on the same position at once. Filling a vacancy
-     * and closing it, however, are contradictory intentions and are refused
-     * against each other.
+     * A fill request tied to a specific vacancy uses that vacancy as its
+     * subject. Every other request uses the position. Filling an unassigned
+     * seat and removing an approved empty seat from the same position are
+     * contradictory intentions and are refused against each other.
      *
      * Rejected and cancelled requests are final and release the subject at once,
      * which is why they are not in self::ACTIVE.
@@ -242,7 +241,7 @@ class RecruitmentRequestSubmissionService
     private function assertNoActiveDuplicate(RecruitmentRequest $request): void
     {
         $type = (int) $request->request_type;
-        $vacancyScoped = in_array($type, [Type::FillVacancy, Type::CloseVacancy], true);
+        $vacancyScoped = $type === Type::FillVacancy;
 
         $base = RecruitmentRequest::query()
             ->whereKeyNot($request->getKey())
@@ -266,9 +265,13 @@ class RecruitmentRequestSubmissionService
             return;
         }
 
+        $positionTypes = in_array($type, [Type::FillVacancy, Type::CloseVacancy], true)
+            ? [Type::FillVacancy, Type::CloseVacancy]
+            : [$type];
+
         $clash = $base
             ->where('target_position_id', $request->target_position_id)
-            ->where('request_type', $type)
+            ->whereIn('request_type', $positionTypes)
             ->exists();
 
         if ($clash) {
@@ -294,6 +297,7 @@ class RecruitmentRequestSubmissionService
         $requested = match ((int) $request->request_type) {
             Type::IncreaseHeadcount => $current + (int) ($payload['additional_count'] ?? 0),
             Type::DecreaseHeadcount => $current - (int) ($payload['reduce_by'] ?? 0),
+            Type::CloseVacancy => $current - 1,
             Type::CreatePosition => (int) ($payload['max_emp'] ?? 1),
             default => $current,
         };

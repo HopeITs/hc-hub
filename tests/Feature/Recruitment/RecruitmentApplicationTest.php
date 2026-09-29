@@ -179,19 +179,25 @@ class RecruitmentApplicationTest extends TestCase
         $this->assertNotNull($seat->fresh()->closed_at);
     }
 
-    public function test_closing_a_vacancy_touches_nothing_but_the_seat(): void
+    public function test_closing_a_vacant_position_removes_one_approved_seat_and_its_card(): void
     {
-        ['request' => $request, 'position' => $position] = $this->approved(Type::CloseVacancy);
+        ['request' => $request, 'position' => $position] = $this->approved(
+            Type::CloseVacancy,
+            ['reason' => 'No longer needed', 'effective_date' => now()->toDateString()],
+        );
         $seat = $this->seat($request, $position);
-        $this->rewriteSnapshot($request, ['request_type' => Type::CloseVacancy, 'vacancy_id' => $seat->id, 'reason' => 'Not now']);
+        $this->rewriteSnapshot($request, [
+            'request_type' => Type::CloseVacancy,
+            'reason' => 'No longer needed',
+            'effective_date' => now()->toDateString(),
+        ]);
 
         $this->applications->apply($request->fresh());
 
         $this->assertSame(Vacancy::CLOSED, $seat->fresh()->status);
-        $this->assertSame('Not now', $seat->fresh()->close_reason);
-        // The post stays approved and active: this is "not now", not "not ever".
+        $this->assertSame('No longer needed', $seat->fresh()->close_reason);
         $this->assertTrue((bool) $position->fresh()->is_active);
-        $this->assertSame(2, (int) $position->fresh()->max_emp);
+        $this->assertSame(1, (int) $position->fresh()->max_emp);
     }
 
     /** Approved is not carried out. A future date means the post stays as it is. */
