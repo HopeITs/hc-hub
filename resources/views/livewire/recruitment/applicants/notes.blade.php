@@ -1,7 +1,7 @@
 {{-- Internal only. Nothing in this panel can change an application's status. --}}
 <section class="rounded-surface border border-neutral-200 bg-white p-6">
     <div class="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.notes.title') }}</h2>
+        <h2 id="notes-title" tabindex="-1" class="scroll-mt-24 text-h4 font-semibold">{{ __('recruitment-applicant.notes.title') }}</h2>
         <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.notes.internal_hint') }}</p>
     </div>
 
@@ -9,7 +9,9 @@
         <form wire:submit="addNote" class="mt-4 space-y-3">
             <div>
                 <x-forms.input-label for="noteApplication" :required="! $mayAddUnattached">{{ __('recruitment-applicant.notes.about') }}</x-forms.input-label>
-                <select id="noteApplication" wire:model="applicationId" class="mt-1 w-full rounded-control border-neutral-300">
+                <select id="noteApplication" wire:model="applicationId" @if (! $mayAddUnattached) aria-required="true" @endif
+                    @error('applicationId') aria-invalid="true" aria-describedby="noteApplication-error" @enderror
+                    class="mt-1 w-full rounded-control border-neutral-300">
                     @if ($mayAddUnattached)
                         <option value="">{{ __('recruitment-applicant.notes.about_applicant') }}</option>
                     @else
@@ -22,13 +24,14 @@
                         </option>
                     @endforeach
                 </select>
-                @error('applicationId') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+                <x-forms.input-error field="applicationId" input-id="noteApplication" />
             </div>
             <div>
                 <x-forms.input-label for="noteBody" required>{{ __('recruitment-applicant.notes.body') }}</x-forms.input-label>
-                <textarea id="noteBody" wire:model="body" rows="3" maxlength="{{ \App\Services\RecruitmentApplicantNoteService::MAX_BODY }}"
+                <textarea id="noteBody" wire:model="body" rows="3" maxlength="{{ \App\Services\RecruitmentApplicantNoteService::MAX_BODY }}" aria-required="true"
+                    @error('body') aria-invalid="true" aria-describedby="noteBody-error" @enderror
                     class="mt-1 w-full rounded-control border-neutral-300"></textarea>
-                @error('body') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+                <x-forms.input-error field="body" input-id="noteBody" />
             </div>
             <label class="flex items-center gap-2 text-sm">
                 <input type="checkbox" wire:model="sensitive" class="rounded border-neutral-300">
@@ -44,7 +47,7 @@
         @forelse ($notes as $note)
             <li wire:key="note-{{ $note->id }}" class="rounded-control border border-neutral-200 p-4">
                 <div class="flex flex-wrap items-start justify-between gap-2 text-sm">
-                    <p class="text-secondary-medium">
+                    <p class="min-w-0 text-secondary-medium">
                         <span class="font-semibold text-secondary-dark">{{ $note->actor?->profile?->name ?? $note->actor?->name ?? '—' }}</span>
                         &middot; {{ $note->created_at?->format('Y-m-d H:i') }}
                         &middot; {{ $note->application?->campaign?->vacancy?->position?->title ?? __('recruitment-applicant.notes.about_applicant') }}
@@ -57,20 +60,24 @@
                             <span class="rounded-control bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-800">{{ __('recruitment-applicant.notes.sensitive_badge') }}</span>
                         @endif
                         @can('delete', $note)
-                            <button type="button" wire:click="confirmDelete({{ $note->id }})" class="cursor-pointer text-xs font-semibold text-red-700 hover:underline">
+                            <button type="button" id="note-{{ $note->id }}-delete" wire:click="confirmDelete({{ $note->id }})" class="cursor-pointer text-xs font-semibold text-red-700 hover:underline">
                                 {{ __('recruitment-applicant.notes.delete') }}
                             </button>
                         @endcan
                     </div>
                 </div>
-                <p class="mt-2 whitespace-pre-line">{{ $note->body }}</p>
+                {{-- A pasted link or reference number has no spaces to break at. --}}
+                <p class="mt-2 whitespace-pre-line wrap-break-word">{{ $note->body }}</p>
 
                 @if ($deletingNote?->id === $note->id)
                     <div class="mt-3 rounded-control border border-red-200 bg-red-50 p-3">
-                        <p class="text-sm text-red-800">{{ __('recruitment-applicant.notes.delete_hint') }}</p>
+                        <p id="deletionReason-hint" class="text-sm text-red-800">{{ __('recruitment-applicant.notes.delete_hint') }}</p>
                         <x-forms.input-label for="deletionReason" class="mt-2" :required="$note->is_sensitive">{{ __('recruitment-applicant.notes.deletion_reason') }}</x-forms.input-label>
-                        <textarea id="deletionReason" wire:model="deletionReason" rows="2" class="mt-1 w-full rounded-control border-neutral-300"></textarea>
-                        @error('deletionReason') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+                        {{-- Focus lands on the field; the hint is read with it. --}}
+                        <textarea id="deletionReason" wire:model="deletionReason" rows="2" @if ($note->is_sensitive) aria-required="true" @endif
+                            aria-describedby="deletionReason-hint @error('deletionReason') deletionReason-error @enderror" @error('deletionReason') aria-invalid="true" @enderror
+                            class="mt-1 w-full scroll-mt-24 rounded-control border-neutral-300"></textarea>
+                        <x-forms.input-error field="deletionReason" input-id="deletionReason" />
                         <div class="mt-3 flex flex-wrap gap-3">
                             <button type="button" wire:click="deleteNote" wire:loading.attr="disabled" wire:target="deleteNote"
                                 class="cursor-pointer rounded-control bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">

@@ -1,6 +1,6 @@
 {{-- Internal labels. Nothing here can change an application's status. --}}
 <div class="mt-4">
-    <h4 class="text-sm font-semibold">{{ __('recruitment-applicant.tags.title') }}</h4>
+    <h4 id="tags-{{ $applicationId }}-title" tabindex="-1" class="scroll-mt-24 text-sm font-semibold">{{ __('recruitment-applicant.tags.title') }}</h4>
 
     <ul class="mt-2 flex flex-wrap gap-2">
         @forelse ($assignments as $assignment)
@@ -9,7 +9,7 @@
                     'name' => $assignment->creator?->profile?->name ?? $assignment->creator?->name ?? '—',
                     'date' => $assignment->created_at?->format('Y-m-d H:i') ?? '—',
                 ]) }}"
-                class="inline-flex items-center gap-1 rounded-control px-2 py-0.5 text-xs font-semibold {{ $assignment->tag->classes() }}">
+                class="inline-flex max-w-full items-center gap-1 rounded-control px-2 py-0.5 text-xs font-semibold wrap-anywhere {{ $assignment->tag->classes() }}">
                 {{ $assignment->tag->name }}
                 <span class="font-normal opacity-75">&middot; {{ $assignment->creator?->profile?->name ?? $assignment->creator?->name ?? '—' }}, {{ $assignment->created_at?->format('Y-m-d') }}</span>
                 @if ($mayTag)
@@ -27,7 +27,9 @@
             @if ($available->isNotEmpty())
                 <div>
                     <label for="tag-{{ $applicationId }}" class="sr-only">{{ __('recruitment-applicant.tags.tag') }}</label>
-                    <select id="tag-{{ $applicationId }}" wire:model="tagId" class="rounded-control border-neutral-300 text-sm">
+                    <select id="tag-{{ $applicationId }}" wire:model="tagId"
+                        @error('tagId') aria-invalid="true" aria-describedby="tag-{{ $applicationId }}-error" @enderror
+                        class="rounded-control border-neutral-300 text-sm">
                         <option value="">{{ __('recruitment-applicant.tags.choose') }}</option>
                         @foreach ($available as $tag)
                             <option value="{{ $tag->id }}">{{ $tag->name }}</option>
@@ -44,9 +46,12 @@
                 <form wire:submit="createAndAttach" class="flex flex-wrap items-end gap-2">
                     <label for="new-tag-{{ $applicationId }}" class="sr-only">{{ __('recruitment-applicant.tags.new_name') }}</label>
                     <input id="new-tag-{{ $applicationId }}" type="text" wire:model="newTagName" maxlength="{{ config('recruitment.tags.max_length') }}"
+                        @error('tagName') aria-invalid="true" aria-describedby="new-tag-{{ $applicationId }}-error" @enderror
                         placeholder="{{ __('recruitment-applicant.tags.new_name') }}" class="rounded-control border-neutral-300 text-sm">
                     <label for="new-tag-color-{{ $applicationId }}" class="sr-only">{{ __('recruitment-applicant.tags.color') }}</label>
-                    <select id="new-tag-color-{{ $applicationId }}" wire:model="newTagColor" class="rounded-control border-neutral-300 text-sm">
+                    <select id="new-tag-color-{{ $applicationId }}" wire:model="newTagColor"
+                        @error('tagColor') aria-invalid="true" aria-describedby="new-tag-color-{{ $applicationId }}-error" @enderror
+                        class="rounded-control border-neutral-300 text-sm">
                         @foreach ($palette as $color)
                             <option value="{{ $color }}">{{ __('recruitment-applicant.tags.colors.'.$color) }}</option>
                         @endforeach
@@ -58,8 +63,8 @@
                 </form>
             @endif
         </div>
-        @error('tagId') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-        @error('tagName') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-        @error('tagColor') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+        <x-forms.input-error field="tagId" :input-id="'tag-'.$applicationId" />
+        <x-forms.input-error field="tagName" :input-id="'new-tag-'.$applicationId" />
+        <x-forms.input-error field="tagColor" :input-id="'new-tag-color-'.$applicationId" />
     @endif
 </div>

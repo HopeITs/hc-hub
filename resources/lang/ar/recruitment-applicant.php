@@ -22,6 +22,8 @@ return [
     'open_campaign' => 'فتح الحملة',
     'download' => 'تنزيل',
     'cancel' => 'إلغاء',
+    'transition_to' => 'إلى',
+    'list_separator' => '، ',
     'unattached_files' => 'ملفات بلا طلب',
     'unattached_files_hint' => 'هذه الملفات غير مرتبطة بأي شاغر.',
 

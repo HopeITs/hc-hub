@@ -48,6 +48,8 @@ class TagManager extends Component
         $this->renamingId = $tag->getKey();
         $this->renameName = $tag->name;
         $this->renameColor = $tag->color ?? 'neutral';
+
+        $this->dispatch('focus-element', id: 'renameName');
     }
 
     public function rename(RecruitmentTagService $tags): void
@@ -57,15 +59,19 @@ class TagManager extends Component
         $tag = RecruitmentTag::query()->findOrFail($this->renamingId);
         Gate::authorize('update', $tag);
 
-        if ($this->run(fn () => $tags->rename(auth()->user(), $tag, $this->renameName, $this->renameColor), 'renameName')) {
+        if ($this->run(fn () => $tags->rename(auth()->user(), $tag, $this->renameName, $this->renameColor), 'renameName', 'renameColor')) {
             $this->cancelRename();
         }
     }
 
+    /** Also the end of a successful rename: back to the button that began it. */
     public function cancelRename(): void
     {
+        $opener = 'tag-'.$this->renamingId.'-rename';
+
         $this->reset('renamingId', 'renameName', 'renameColor');
         $this->resetErrorBag();
+        $this->dispatch('focus-element', id: $opener);
     }
 
     public function delete(RecruitmentTagService $tags, int $tagId): void
@@ -73,7 +79,10 @@ class TagManager extends Component
         $tag = RecruitmentTag::query()->findOrFail($tagId);
         Gate::authorize('delete', $tag);
 
-        $this->run(fn () => $tags->delete(auth()->user(), $tag));
+        // A deleted tag stays listed, with restore in place of its buttons.
+        if ($this->run(fn () => $tags->delete(auth()->user(), $tag))) {
+            $this->dispatch('focus-element', id: 'tag-'.$tag->getKey().'-restore');
+        }
     }
 
     public function restore(RecruitmentTagService $tags, int $tagId): void
@@ -81,7 +90,9 @@ class TagManager extends Component
         $tag = RecruitmentTag::onlyTrashed()->findOrFail($tagId);
         Gate::authorize('restore', $tag);
 
-        $this->run(fn () => $tags->restore(auth()->user(), $tag));
+        if ($this->run(fn () => $tags->restore(auth()->user(), $tag))) {
+            $this->dispatch('focus-element', id: 'tag-'.$tag->getKey().'-rename');
+        }
     }
 
     public function render()
@@ -104,7 +115,7 @@ class TagManager extends Component
     }
 
     /** Validation errors from the service land on the field they concern. */
-    private function run(callable $action, string $nameField = 'tagName'): bool
+    private function run(callable $action, string $nameField = 'tagName', string $colorField = 'tagColor'): bool
     {
         $this->resetErrorBag();
 
@@ -112,7 +123,11 @@ class TagManager extends Component
             $action();
         } catch (ValidationException $exception) {
             foreach ($exception->errors() as $field => $messages) {
-                $this->addError($field === 'tagName' ? $nameField : $field, $messages[0]);
+                $this->addError(match ($field) {
+                    'tagName' => $nameField,
+                    'tagColor' => $colorField,
+                    default => $field,
+                }, $messages[0]);
             }
 
             return false;

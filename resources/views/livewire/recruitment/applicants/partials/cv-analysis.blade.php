@@ -74,7 +74,7 @@
             <div>
                 <dt class="font-medium">{{ __('recruitment-applicant.cv_analysis.languages') }}</dt>
                 <dd class="mt-1">
-                    {{ collect($facts['languages'] ?? [])->map(fn ($l) => __('recruitment-applicant.cv_analysis.language_names.'.$l))->implode('، ') ?: __('recruitment-applicant.cv_analysis.not_found') }}
+                    {{ collect($facts['languages'] ?? [])->map(fn ($l) => __('recruitment-applicant.cv_analysis.language_names.'.$l))->implode(__('recruitment-applicant.list_separator')) ?: __('recruitment-applicant.cv_analysis.not_found') }}
                 </dd>
             </div>
 

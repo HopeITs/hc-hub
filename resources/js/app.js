@@ -113,6 +113,20 @@ document.addEventListener('livewire:navigated', () => {
     initClockTimepickers();
 });
 
+// A Livewire action that opens or closes an inline panel names the element
+// that should hold focus next: `$this->dispatch('focus-element', id: '…')`.
+// Without it, removing the button that had focus drops a keyboard user back
+// to the top of the page. Livewire fires dispatches after the DOM is patched,
+// so the target already exists; scrolling goes through scrollIntoView so the
+// target's scroll-margin clears the fixed top bar.
+window.addEventListener('focus-element', (event) => {
+    const target = document.getElementById(event.detail?.id);
+    if (!target) return;
+
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ block: 'nearest' });
+});
+
 // When a Select2 dropdown opens, flag its results list with `.results--scroll`
 // only if it actually scrolls, so the hover highlight can be trimmed on the
 // scrollbar side (see `.results--scroll` rule in app.css).

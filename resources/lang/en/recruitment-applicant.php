@@ -22,6 +22,8 @@ return [
     'open_campaign' => 'Open campaign',
     'download' => 'Download',
     'cancel' => 'Cancel',
+    'transition_to' => 'to',
+    'list_separator' => ', ',
     'unattached_files' => 'Files without an application',
     'unattached_files_hint' => 'These files are not linked to any vacancy.',
 
