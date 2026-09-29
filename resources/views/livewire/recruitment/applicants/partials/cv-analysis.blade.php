@@ -5,7 +5,7 @@
     $outcomeClasses = [
         'met' => 'bg-green-50 text-green-800',
         'not_met' => 'bg-red-50 text-red-800',
-        'unknown' => 'bg-neutral-100 text-secondary-medium',
+        'unknown' => 'bg-neutral-100 text-secondary-dark',
     ];
 @endphp
 
@@ -32,10 +32,10 @@
                     {{ $years === null ? __('recruitment-applicant.cv_analysis.not_found') : trans_choice('recruitment-applicant.cv_analysis.years', $years, ['count' => $years]) }}
                     @php $exp = $comparison['experience'] ?? ['outcome' => 'not_applicable']; @endphp
                     @if ($exp['outcome'] !== 'not_applicable')
-                        <span class="ms-1 rounded-control px-2 py-0.5 text-xs font-semibold {{ $outcomeClasses[$exp['outcome']] ?? '' }}">
+                        <x-recruitment.pill :tone="$outcomeClasses[$exp['outcome']] ?? ''" class="ms-1">
                             {{ __('recruitment-applicant.cv_analysis.outcomes.'.$exp['outcome']) }}
                             &middot; {{ __('recruitment-applicant.cv_analysis.required_years', ['count' => $exp['required'] ?? 0]) }}
-                        </span>
+                        </x-recruitment.pill>
                     @endif
                     @if (! empty($facts['experience']['ranges']))
                         <span class="block text-xs text-secondary-medium" dir="ltr">
@@ -60,12 +60,12 @@
                     @endif
                     @php $edu = $comparison['education'] ?? ['outcome' => 'not_applicable']; @endphp
                     @if ($edu['outcome'] !== 'not_applicable')
-                        <span class="ms-1 rounded-control px-2 py-0.5 text-xs font-semibold {{ $outcomeClasses[$edu['outcome']] ?? '' }}">
+                        <x-recruitment.pill :tone="$outcomeClasses[$edu['outcome']] ?? ''" class="ms-1">
                             {{ __('recruitment-applicant.cv_analysis.outcomes.'.$edu['outcome']) }}
                             @isset($edu['required'])
                                 &middot; {{ __('recruitment-applicant.cv_analysis.required_level', ['level' => __('recruitment-applicant.indicators.levels.'.$edu['required'])]) }}
                             @endisset
-                        </span>
+                        </x-recruitment.pill>
                     @endif
                 </dd>
             </div>
@@ -74,7 +74,7 @@
             <div>
                 <dt class="font-medium">{{ __('recruitment-applicant.cv_analysis.languages') }}</dt>
                 <dd class="mt-1">
-                    {{ collect($facts['languages'] ?? [])->map(fn ($l) => __('recruitment-applicant.cv_analysis.language_names.'.$l))->implode('، ') ?: __('recruitment-applicant.cv_analysis.not_found') }}
+                    {{ collect($facts['languages'] ?? [])->map(fn ($l) => __('recruitment-applicant.cv_analysis.language_names.'.$l))->implode(__('recruitment-applicant.list_separator')) ?: __('recruitment-applicant.cv_analysis.not_found') }}
                 </dd>
             </div>
 

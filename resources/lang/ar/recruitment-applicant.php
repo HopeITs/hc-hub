@@ -22,6 +22,8 @@ return [
     'open_campaign' => 'فتح الحملة',
     'download' => 'تنزيل',
     'cancel' => 'إلغاء',
+    'transition_to' => 'إلى',
+    'list_separator' => '، ',
     'unattached_files' => 'ملفات بلا طلب',
     'unattached_files_hint' => 'هذه الملفات غير مرتبطة بأي شاغر.',
 
@@ -345,6 +347,7 @@ return [
             'profile' => 'سجل المتقدم',
             'residence' => 'مكان الإقامة',
         ],
+        'default_minimum' => 'الحد الأدنى في قواعد المطابقة',
         'levels' => [
             'institute' => 'معهد', 'university' => 'جامعة',
             'master' => 'ماجستير', 'doctorate' => 'دكتوراه',
@@ -371,6 +374,8 @@ return [
             'qualification_answer_unrecognised' => 'الإجابة «:value» ليست مستوى تعليمياً معروفاً.',
             'qualification_met' => 'ذكر :answer؛ المتطلب يذكر :required («:keyword»).',
             'qualification_below' => 'ذكر :answer؛ المتطلب يذكر :required («:keyword»).',
+            'qualification_met_default' => 'ذكر :answer؛ الحد الأدنى في قواعد المطابقة هو :required.',
+            'qualification_below_default' => 'ذكر :answer؛ الحد الأدنى في قواعد المطابقة هو :required.',
             'industry_declared' => 'صرّح بخبرة في :field. تصريح ذاتي لم يُتحقق منه في السيرة الذاتية.',
             'industry_none_declared' => 'صرّح بعدم وجود خبرة في المجال (:field).',
             'industry_described_only' => 'وصف خبرته دون تحديد المجال. اقرأ الإجابة.',

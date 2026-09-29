@@ -30,6 +30,10 @@ return [
         // bypass — an administrator is granted them like anyone else.
         'recruitment-applicants.export',
         'recruitment-applicants.request-erasure',
+        // Rewrites what "met" means on every applicant's screen, so a new HR
+        // role must not arrive able to. Administrator roles pass without it;
+        // anyone else is granted it per user from Access Management.
+        'recruitment-indicators.manage',
     ],
 
     'system_roles' => [
@@ -128,6 +132,8 @@ return [
         'recruitment-job-posts' => ['view', 'manage'],
         'recruitment-forms' => ['view', 'manage'],
         'recruitment-links' => ['view', 'manage'],
+        // The rules behind the matching indicators shown on every application.
+        'recruitment-indicators' => ['manage'],
 
         /*
          * Applicant records. Each sensitive act is its own permission rather
@@ -415,6 +421,10 @@ return [
             'rename' => 'recruitment-applicants.manage-tags',
             'delete' => 'recruitment-applicants.manage-tags',
             'restore' => 'recruitment-applicants.manage-tags',
+        ],
+        'recruitment.indicators.rules' => [
+            'save' => 'recruitment-indicators.manage',
+            'resetToDefaults' => 'recruitment-indicators.manage',
         ],
         'recruitment.applicants.notes' => [
             'addNote' => 'recruitment-applicants.add-notes',

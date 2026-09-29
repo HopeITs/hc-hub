@@ -130,13 +130,14 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         $this->assertSame(Evaluation::ACTION_CREATED, $evaluation->revisions()->sole()->action);
     }
 
-    /** scope: the five recommendation values; anything else, or none, is refused. */
-    public function test_the_recommendation_is_one_of_five_values_and_required(): void
+    /** scope: the three recommendation values; anything else, or none, is refused. */
+    public function test_the_recommendation_is_one_of_three_values_and_required(): void
     {
-        $this->assertSame(['strong_yes', 'yes', 'maybe', 'no', 'strong_no'], Recommendation::values());
+        $this->assertSame(['yes', 'maybe', 'no'], Recommendation::values());
         $this->atInterviewTime();
 
         $this->assertValidationError(fn () => $this->evaluate($this->reviewerA, ['recommendation' => 'hire']), 'recommendation');
+        $this->assertValidationError(fn () => $this->evaluate($this->reviewerA, ['recommendation' => 'strong_yes']), 'recommendation');
         $this->assertValidationError(fn () => $this->evaluate($this->reviewerA, ['recommendation' => null]), 'recommendation');
         $this->assertValidationError(fn () => $this->evaluate($this->reviewerA, ['pros' => str_repeat('x', 5001)]), 'pros');
         $this->assertSame(0, Evaluation::query()->count());
@@ -146,12 +147,12 @@ class RecruitmentInterviewEvaluationTest extends TestCase
     public function test_several_reviewers_each_keep_their_own_evaluation_and_hr_sees_the_aggregate(): void
     {
         $this->atInterviewTime();
-        $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::StrongYes, 'pros' => self::PROS_A]);
+        $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::Yes, 'pros' => self::PROS_A]);
         $this->evaluate($this->reviewerB, ['recommendation' => Recommendation::No, 'notes' => self::NOTES_B]);
 
         $this->assertSame(2, $this->interview->evaluations()->count());
         $this->assertSame(
-            ['total' => 2, 'counts' => ['strong_yes' => 1, 'yes' => 0, 'maybe' => 0, 'no' => 1, 'strong_no' => 0]],
+            ['total' => 2, 'counts' => ['yes' => 1, 'maybe' => 0, 'no' => 1]],
             app(RecruitmentInterviewEvaluationService::class)->summary($this->interview),
         );
 
@@ -159,7 +160,7 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         Livewire::test(EvaluationSummary::class, ['interviewId' => $this->interview->id])
             ->assertSee(self::PROS_A)
             ->assertSee(self::NOTES_B)
-            ->assertSee(__('recruitment-applicant.evaluations.recommendations.strong_yes').': 1')
+            ->assertSee(__('recruitment-applicant.evaluations.recommendations.yes').': 1')
             ->assertSee(__('recruitment-applicant.evaluations.advisory'));
 
         // The applicant profile shows HR the tally per interview.
@@ -197,25 +198,25 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         $this->atInterviewTime();
         $decisionsBefore = RecruitmentApplicationDecision::query()->count();
 
-        $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::StrongNo]);
-        $this->evaluate($this->reviewerB, ['recommendation' => Recommendation::StrongNo]);
+        $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::No]);
+        $this->evaluate($this->reviewerB, ['recommendation' => Recommendation::No]);
         $this->outcome(Status::Completed);
         $statusAfterInterview = $this->application->fresh()->status;
         $this->assertSame(AppStatus::Interviewed, $statusAfterInterview, 'Interviewed comes from the interview outcome (Task 7), not from the recommendations.');
 
         $evaluation = Evaluation::query()->where('reviewer_user_id', $this->reviewerA->id)->sole();
-        app(RecruitmentInterviewEvaluationService::class)->correct($this->hr, $evaluation, 1, ['recommendation' => Recommendation::StrongYes], 'Reviewer mis-clicked the recommendation');
+        app(RecruitmentInterviewEvaluationService::class)->correct($this->hr, $evaluation, 1, ['recommendation' => Recommendation::Yes], 'Reviewer mis-clicked the recommendation');
 
         // Nothing the evaluations did created a decision or moved the application.
         $this->assertSame($decisionsBefore + 1, RecruitmentApplicationDecision::query()->count(), 'Only the completion transition was recorded.');
         $this->assertSame($statusAfterInterview, $this->application->fresh()->status);
 
-        // Unanimous "strong no" still leaves the decision entirely to HR.
+        // Unanimous "no" still leaves the decision entirely to HR.
         $statuses = app(RecruitmentApplicationStatusService::class);
         $this->assertContains(AppStatus::Selected, $statuses->targets($this->application->fresh()));
         $statuses->change($this->hr, $this->application->fresh(), AppStatus::Interviewed, AppStatus::Selected, null);
         $this->assertSame(AppStatus::Selected, $this->application->fresh()->status);
-        $this->assertSame(Recommendation::StrongNo, Evaluation::query()->where('reviewer_user_id', $this->reviewerB->id)->value('recommendation'));
+        $this->assertSame(Recommendation::No, Evaluation::query()->where('reviewer_user_id', $this->reviewerB->id)->value('recommendation'));
     }
 
     // ------------------------------------------------------------------
@@ -334,7 +335,7 @@ class RecruitmentInterviewEvaluationTest extends TestCase
     {
         Mail::fake();
         $this->atInterviewTime(); // 2026-10-06 11:00
-        $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::StrongNo, 'pros' => self::PROS_A, 'cons' => self::CONS_A]);
+        $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::No, 'pros' => self::PROS_A, 'cons' => self::CONS_A]);
 
         // The candidate hears about a further interview; nothing of the evaluation travels with it.
         $second = $this->scheduleInterview($this->application->fresh(), '2026-10-09T10:00');
@@ -346,7 +347,7 @@ class RecruitmentInterviewEvaluationTest extends TestCase
             $html = $mail->render();
             $count++;
 
-            foreach ([self::PROS_A, self::CONS_A, __('recruitment-applicant.evaluations.recommendations.strong_no', [], 'en'), __('recruitment-applicant.evaluations.recommendations.strong_no', [], 'ar')] as $secret) {
+            foreach ([self::PROS_A, self::CONS_A] as $secret) {
                 $this->assertStringNotContainsString($secret, $html);
             }
 
@@ -434,35 +435,35 @@ class RecruitmentInterviewEvaluationTest extends TestCase
     public function test_hr_corrects_a_mistake_with_a_reason_and_keeps_the_history(): void
     {
         $this->atInterviewTime();
-        $evaluation = $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::StrongNo, 'pros' => self::PROS_A]);
+        $evaluation = $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::No, 'pros' => self::PROS_A]);
 
-        $this->assertValidationError(fn () => $this->service()->correct($this->hr, $evaluation, 1, ['recommendation' => Recommendation::StrongYes, 'pros' => self::PROS_A], 'short'), 'reason');
-        $this->assertValidationError(fn () => $this->service()->correct($this->hr, $evaluation, 1, ['recommendation' => Recommendation::StrongNo, 'pros' => self::PROS_A], 'no change at all here'), 'evaluation');
-        $this->assertValidationError(fn () => $this->service()->correct($this->hr, $evaluation, 7, ['recommendation' => Recommendation::StrongYes], 'reviewer mis-clicked'), 'evaluation');
+        $this->assertValidationError(fn () => $this->service()->correct($this->hr, $evaluation, 1, ['recommendation' => Recommendation::Yes, 'pros' => self::PROS_A], 'short'), 'reason');
+        $this->assertValidationError(fn () => $this->service()->correct($this->hr, $evaluation, 1, ['recommendation' => Recommendation::No, 'pros' => self::PROS_A], 'no change at all here'), 'evaluation');
+        $this->assertValidationError(fn () => $this->service()->correct($this->hr, $evaluation, 7, ['recommendation' => Recommendation::Yes], 'reviewer mis-clicked'), 'evaluation');
 
         $this->actingAs($this->hr);
         Livewire::test(EvaluationSummary::class, ['interviewId' => $this->interview->id])
             ->call('beginCorrect', $evaluation->id)
-            ->assertSet('recommendation', Recommendation::StrongNo)
-            ->set('recommendation', Recommendation::StrongYes)
+            ->assertSet('recommendation', Recommendation::No)
+            ->set('recommendation', Recommendation::Yes)
             ->set('reason', 'Reviewer confirmed by phone they mis-clicked')
             ->call('saveCorrection')
             ->assertHasNoErrors()
             ->assertSee(__('recruitment-applicant.evaluations.corrected_badge'));
 
         $evaluation->refresh();
-        $this->assertSame(Recommendation::StrongYes, $evaluation->recommendation);
+        $this->assertSame(Recommendation::Yes, $evaluation->recommendation);
         $this->assertSame(2, $evaluation->version);
         $this->assertSame($this->hr->id, $evaluation->updated_by_user_id);
         $this->assertSame($this->reviewerA->id, $evaluation->reviewer_user_id, 'It stays the reviewer’s evaluation.');
 
         [$original, $correction] = $evaluation->revisions()->orderBy('version')->get()->all();
-        $this->assertSame([Evaluation::ACTION_CREATED, Recommendation::StrongNo, $this->reviewerA->id], [$original->action, $original->recommendation, $original->changed_by_user_id]);
-        $this->assertSame([Evaluation::ACTION_CORRECTED, Recommendation::StrongYes, $this->hr->id], [$correction->action, $correction->recommendation, $correction->changed_by_user_id]);
+        $this->assertSame([Evaluation::ACTION_CREATED, Recommendation::No, $this->reviewerA->id], [$original->action, $original->recommendation, $original->changed_by_user_id]);
+        $this->assertSame([Evaluation::ACTION_CORRECTED, Recommendation::Yes, $this->hr->id], [$correction->action, $correction->recommendation, $correction->changed_by_user_id]);
         $this->assertSame('Reviewer confirmed by phone they mis-clicked', $correction->reason);
 
         // The reviewer's stale form cannot silently undo the correction.
-        $this->assertValidationError(fn () => $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::StrongNo], 1), 'evaluation');
+        $this->assertValidationError(fn () => $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::No], 1), 'evaluation');
     }
 
     // ------------------------------------------------------------------
@@ -530,10 +531,10 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::Yes, 'pros' => 'second'], 1);
         $evaluation = $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::Yes, 'pros' => 'second'], 2);
         $this->assertSame(2, $evaluation->version, 'Saving the same content again is not a change.');
-        $evaluation = $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::StrongYes, 'pros' => 'third'], 2);
+        $evaluation = $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::No, 'pros' => 'third'], 2);
 
         $this->assertSame(
-            [[1, 'created', 'first', 'maybe'], [2, 'updated', 'second', 'yes'], [3, 'updated', 'third', 'strong_yes']],
+            [[1, 'created', 'first', 'maybe'], [2, 'updated', 'second', 'yes'], [3, 'updated', 'third', 'no']],
             $evaluation->revisions()->orderBy('version')->get()->map(fn ($r) => [$r->version, $r->action, $r->pros, $r->recommendation])->all(),
         );
 
@@ -542,7 +543,7 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         $this->assertSame(['pros', 'recommendation'], $audit->last()->properties['changed_fields']);
         foreach ($audit as $entry) {
             $this->assertStringNotContainsString('third', json_encode($entry->properties));
-            $this->assertStringNotContainsString('strong_yes', json_encode($entry->properties));
+            $this->assertStringNotContainsString('"no"', json_encode($entry->properties));
         }
 
         // History is append-only.
@@ -565,7 +566,7 @@ class RecruitmentInterviewEvaluationTest extends TestCase
     public function test_evaluations_are_withdrawn_with_audit_never_deleted(): void
     {
         $this->atInterviewTime();
-        $evaluation = $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::StrongNo, 'pros' => self::PROS_A]);
+        $evaluation = $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::No, 'pros' => self::PROS_A]);
         $this->evaluate($this->reviewerB, ['recommendation' => Recommendation::Yes]);
 
         $this->assertThrows(fn () => $evaluation->delete(), LogicException::class);
@@ -588,7 +589,7 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         $this->assertSame(self::PROS_A, $evaluation->pros, 'The content stays.');
         $this->assertSame(Evaluation::ACTION_WITHDRAWN, $evaluation->revisions()->orderByDesc('version')->first()->action);
         $this->assertTrue(Activity::query()->where('description', 'recruitment_interview_evaluation.withdrawn')->where('subject_id', $evaluation->id)->exists());
-        $this->assertSame(['total' => 1, 'counts' => ['strong_yes' => 0, 'yes' => 1, 'maybe' => 0, 'no' => 0, 'strong_no' => 0]], $this->service()->summary($this->interview));
+        $this->assertSame(['total' => 1, 'counts' => ['yes' => 1, 'maybe' => 0, 'no' => 0]], $this->service()->summary($this->interview));
 
         // The reviewer cannot undo the withdrawal by saving again.
         $this->assertValidationError(fn () => $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::Yes], 2), 'evaluation');

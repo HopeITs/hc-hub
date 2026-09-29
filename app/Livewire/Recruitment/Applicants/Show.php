@@ -71,7 +71,7 @@ class Show extends Component
         Gate::authorize('changeStatus', $application);
         abort_unless(in_array($target, $statuses->targetsFor(auth()->user(), $application), true), 403);
 
-        $this->cancelArchive();
+        $this->closeArchivePanel();
         $this->resetErrorBag();
         $this->statusApplicationId = $application->getKey();
         $this->statusFrom = (string) $application->status;
@@ -79,6 +79,8 @@ class Show extends Component
         $this->statusReasonCode = '';
         $this->statusReason = '';
         $this->statusNotify = true;
+
+        $this->dispatch('focus-element', id: 'decision-panel-'.$application->getKey());
     }
 
     public function changeStatus(RecruitmentApplicationStatusService $statuses): void
@@ -104,14 +106,21 @@ class Show extends Component
             return;
         }
 
-        $this->cancelStatusChange();
+        $this->closeStatusPanel();
         session()->flash('recruitment_saved', __('recruitment-applicant.status_change.changed'));
+
+        // The button that confirmed is gone, and the one that opened the panel
+        // may be too once the status has moved: the application itself is next.
+        $this->dispatch('focus-element', id: 'application-'.$application->getKey().'-title');
     }
 
+    /** Back to the decision button that opened the panel. */
     public function cancelStatusChange(): void
     {
-        $this->reset('statusApplicationId', 'statusFrom', 'statusTarget', 'statusReasonCode', 'statusReason', 'statusNotify');
-        $this->resetErrorBag(['statusTarget', 'statusReasonCode', 'statusReason']);
+        $opener = 'decide-'.$this->statusApplicationId.'-'.$this->statusTarget;
+
+        $this->closeStatusPanel();
+        $this->dispatch('focus-element', id: $opener);
     }
 
     public function beginArchive(int $fileId): void
@@ -119,10 +128,12 @@ class Show extends Component
         $file = $this->resolveFile($fileId);
         Gate::authorize('archive', $file);
 
-        $this->cancelStatusChange();
+        $this->closeStatusPanel();
         $this->resetErrorBag();
         $this->archiveFileId = $file->getKey();
         $this->archiveReason = '';
+
+        $this->dispatch('focus-element', id: 'archive-panel-'.$file->getKey());
     }
 
     public function archiveCv(RecruitmentCvArchiveService $archive): void
@@ -140,15 +151,21 @@ class Show extends Component
             return;
         }
 
-        $this->cancelArchive();
+        $this->closeArchivePanel();
         $this->dispatch('recruitment-notes-changed');
         session()->flash('recruitment_saved', __('recruitment-applicant.cv_archive.archived'));
+
+        // An archived CV loses its archive button; its row is what changed.
+        $this->dispatch('focus-element', id: 'file-'.$file->getKey());
     }
 
+    /** Back to the archive button that opened the panel. */
     public function cancelArchive(): void
     {
-        $this->reset('archiveFileId', 'archiveReason');
-        $this->resetErrorBag('archiveReason');
+        $opener = 'archive-'.$this->archiveFileId;
+
+        $this->closeArchivePanel();
+        $this->dispatch('focus-element', id: $opener);
     }
 
     public function render(
@@ -202,6 +219,18 @@ class Show extends Component
             // Read-only: evaluating indicators never touches the application.
             'indicatorSets' => $indicators->evaluateMany($applications),
         ]);
+    }
+
+    private function closeStatusPanel(): void
+    {
+        $this->reset('statusApplicationId', 'statusFrom', 'statusTarget', 'statusReasonCode', 'statusReason', 'statusNotify');
+        $this->resetErrorBag(['statusTarget', 'statusReasonCode', 'statusReason']);
+    }
+
+    private function closeArchivePanel(): void
+    {
+        $this->reset('archiveFileId', 'archiveReason');
+        $this->resetErrorBag('archiveReason');
     }
 
     /** @return array<int, array<int, string>> keyed by application id */

@@ -77,7 +77,7 @@ final class RecruitmentJobOfferStatus
             self::Sent => 'bg-blue-50 text-blue-700',
             self::Accepted => 'bg-green-50 text-green-700',
             self::Rejected, self::Expired => 'bg-red-50 text-red-700',
-            default => 'bg-neutral-100 text-secondary-medium',
+            default => 'bg-neutral-100 text-secondary-dark',
         };
     }
 }

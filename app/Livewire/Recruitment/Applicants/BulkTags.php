@@ -50,6 +50,9 @@ class BulkTags extends Component
             ->values()
             ->all();
         $this->open = true;
+
+        // The panel sits above the table, often out of sight of the action that opened it.
+        $this->dispatch('focus-element', id: 'bulk-tags-title');
     }
 
     public function apply(RecruitmentTagService $tags): void
@@ -77,12 +80,14 @@ class BulkTags extends Component
         $this->result = __('recruitment-applicant.tags.bulk_'.$this->mode.'_done', $outcome);
         $this->reset('applicationIds', 'open', 'tagId');
         $this->dispatch('recruitment-tags-changed');
+        $this->dispatch('focus-element', id: 'bulk-tags-result');
     }
 
     public function cancel(): void
     {
         $this->reset('applicationIds', 'open', 'tagId', 'mode', 'result');
         $this->resetErrorBag();
+        $this->dispatch('focus-element', id: 'applicants-title');
     }
 
     public function render(RecruitmentTagService $tags)

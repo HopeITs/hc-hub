@@ -5,7 +5,7 @@
 
         @if ($canSchedule)
             <a href="{{ route('recruitment.interviews.create', ['applicationId' => $application->id]) }}" wire:navigate
-               class="rounded-control border border-primary px-3 py-1 text-sm font-semibold text-primary hover:bg-primary/5">
+               class="rounded-control border border-primary px-3 py-1 text-sm font-semibold text-primary hover:bg-selection">
                 {{ __('recruitment-applicant.interviews.schedule') }}
             </a>
         @endif
@@ -32,9 +32,9 @@
                             &middot; {{ trans_choice('recruitment-applicant.interviews.participant_count', $interview->participants_count, ['count' => $interview->participants_count]) }}
                         </span>
                     </a>
-                    <span class="rounded-control px-2 py-0.5 text-xs font-semibold {{ RecruitmentInterviewStatus::classes($interview->status) }}">
+                    <x-recruitment.pill :tone="RecruitmentInterviewStatus::classes($interview->status)">
                         {{ __('recruitment-applicant.interviews.statuses.'.$interview->status) }}
-                    </span>
+                    </x-recruitment.pill>
                     @if (isset($tallies[$interview->id]) && $tallies[$interview->id]['total'] > 0)
                         <div class="flex w-full flex-wrap items-center gap-1 text-xs">
                             <span class="text-secondary-medium">{{ trans_choice('recruitment-applicant.evaluations.count', $tallies[$interview->id]['total'], ['count' => $tallies[$interview->id]['total']]) }}:</span>

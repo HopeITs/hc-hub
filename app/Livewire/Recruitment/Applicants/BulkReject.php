@@ -53,6 +53,9 @@ class BulkReject extends Component
         $this->reason = '';
         $this->notify = true;
         $this->open = true;
+
+        // The panel sits above the table, often out of sight of the action that opened it.
+        $this->dispatch('focus-element', id: 'bulk-reject-title');
     }
 
     public function apply(RecruitmentApplicationStatusService $statuses): void
@@ -72,12 +75,14 @@ class BulkReject extends Component
 
         $this->reset('applicationIds', 'open', 'reasonCode', 'reason', 'notify');
         $this->dispatch('recruitment-decisions-changed');
+        $this->dispatch('focus-element', id: 'bulk-reject-result');
     }
 
     public function cancel(): void
     {
         $this->reset('applicationIds', 'open', 'reasonCode', 'reason', 'notify', 'result');
         $this->resetErrorBag();
+        $this->dispatch('focus-element', id: 'applicants-title');
     }
 
     public function render(RecruitmentApplicationStatusService $statuses)

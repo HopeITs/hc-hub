@@ -28,6 +28,7 @@ class PublicRecruitmentApplicationService
         private readonly RecruitmentApplicationFormService $forms,
         private readonly RecruitmentApplicantFileService $files,
         private readonly InternalRecruitmentApplicantService $internal,
+        private readonly RecruitmentApplicantIdentityService $identity,
     ) {}
 
     /**
@@ -184,17 +185,25 @@ class PublicRecruitmentApplicationService
                     ->where('identity_key_hash', $identityHash)
                     ->lockForUpdate()
                     ->firstOrFail();
+                // Only a signed-in member of staff has proven the email is
+                // theirs. Anyone else may fill blanks on a record that already
+                // exists but never rewrite it: the record is the person's, and
+                // this form cannot tell the person from someone typing their
+                // address. (A row inserted just above has only its consent
+                // blank, so it is filled in the same pass.) Each application
+                // keeps its own answers and consent either way.
                 $applicant->forceFill([
-                    'full_name' => $fullName,
-                    'email_normalized' => $email,
-                    'phone_normalized' => $phone,
+                    ...$this->identity->writableFields($applicant, [
+                        'full_name' => $fullName,
+                        'phone_normalized' => $phone,
+                        'privacy_notice_version' => $link->formVersion->privacy_notice_version,
+                        'privacy_accepted_at' => now(),
+                    ], verified: $employee !== null),
                     'last_seen_at' => now(),
-                    // The latest consent the person gave (each application also
-                    // keeps its own), and a new application restarts the
-                    // retention clock: whatever was counting down is void.
-                    'privacy_notice_version' => $link->formVersion->privacy_notice_version,
-                    'privacy_accepted_at' => now(),
-                    'retention_until' => null,
+                    // A new application restarts the retention clock, but never
+                    // undoes an erasure request: that date was set to the
+                    // moment of the request and the sweep will not restore it.
+                    ...($applicant->erasure_requested_at === null ? ['retention_until' => null] : []),
                     // Signing in proved who they are; keep the link to their record.
                     ...($employee ? [
                         'employee_id' => $employee->getKey(),

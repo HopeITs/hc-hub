@@ -90,6 +90,8 @@ class Notes extends Component
         $this->resetErrorBag();
         $this->deletingNoteId = $note->getKey();
         $this->deletionReason = '';
+
+        $this->dispatch('focus-element', id: 'deletionReason');
     }
 
     public function deleteNote(RecruitmentApplicantNoteService $notes): void
@@ -109,13 +111,19 @@ class Notes extends Component
             return;
         }
 
-        $this->cancelDelete();
+        $this->closeDeletePanel();
+
+        // The note, and every button on it, is gone.
+        $this->dispatch('focus-element', id: 'notes-title');
     }
 
+    /** Back to the delete button that opened the panel. */
     public function cancelDelete(): void
     {
-        $this->reset('deletingNoteId', 'deletionReason');
-        $this->resetErrorBag('deletionReason');
+        $opener = 'note-'.$this->deletingNoteId.'-delete';
+
+        $this->closeDeletePanel();
+        $this->dispatch('focus-element', id: $opener);
     }
 
     /** The profile archived a CV, which may have written a note. */
@@ -145,6 +153,12 @@ class Notes extends Component
             'mayAddUnattached' => ! $hasApplications && $scopes->ownsApplicantRecord($user, $applicant),
             'deletingNote' => $this->deletingNoteId === null ? null : $notes->firstWhere('id', $this->deletingNoteId),
         ]);
+    }
+
+    private function closeDeletePanel(): void
+    {
+        $this->reset('deletingNoteId', 'deletionReason');
+        $this->resetErrorBag('deletionReason');
     }
 
     private function visibleApplications()

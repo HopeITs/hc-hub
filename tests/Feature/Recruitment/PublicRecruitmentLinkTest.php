@@ -806,6 +806,38 @@ class PublicRecruitmentLinkTest extends TestCase
             ->assertDontSee('name="submission_key"', false);
     }
 
+    /** The one submitter who has proven the email is theirs may correct the record under it. */
+    public function test_a_signed_in_staff_application_corrects_a_stale_record_under_their_work_email(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::Internal,
+        );
+        $staff = $this->staffMember();
+
+        // Made earlier by someone typing the address into a public form.
+        RecruitmentApplicant::query()->forceCreate([
+            'full_name' => 'Typed By Someone Else',
+            'email_normalized' => 'rami.haddad@hopecenter.test',
+            'phone_normalized' => '+963111000999',
+            'identity_key_hash' => hash_hmac('sha256', 'rami.haddad@hopecenter.test', (string) config('app.key')),
+            'source' => 'public_link',
+        ]);
+
+        $this->actingAs($staff)
+            ->post(route('careers.submit', $result['token']), $this->validSubmission('ignored@example.com', 'Rami Haddad'))
+            ->assertStatus(202);
+
+        $applicant = RecruitmentApplicant::query()->sole();
+        $this->assertSame('Rami Haddad', $applicant->full_name);
+        $this->assertSame('+963999123456', $applicant->phone_normalized);
+        $this->assertSame($staff->employee_id, (int) $applicant->employee_id);
+        $this->assertNotNull($applicant->identity_verified_at);
+    }
+
     public function test_an_internal_campaign_refuses_applications_from_anyone_not_signed_in(): void
     {
         [$campaign, $hr] = $this->makePublishedCampaign();

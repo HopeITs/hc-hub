@@ -64,7 +64,7 @@ class RecruitmentAuthorizationTest extends TestCase
         $recruitment = collect(AccessPermissionCatalog::names())
             ->filter(fn (string $name): bool => str_starts_with($name, 'recruitment-'));
 
-        $this->assertCount(41, $recruitment);
+        $this->assertCount(42, $recruitment);
         $this->assertSame(
             $recruitment->sort()->values()->all(),
             Permission::query()

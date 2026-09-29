@@ -38,7 +38,7 @@ final class RecruitmentIndicatorOutcome
             self::Partial => 'bg-amber-50 text-amber-800',
             self::NotMet => 'bg-red-50 text-red-800',
             self::Info => 'bg-blue-50 text-blue-800',
-            default => 'bg-neutral-100 text-secondary-medium',
+            default => 'bg-neutral-100 text-secondary-dark',
         };
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Livewire\Recruitment\Applicants;
 
 use App\Enums\HiringCampaignStatus;
+use App\Enums\RecruitmentApplicationStatus;
 use App\Enums\RecruitmentCvAvailability;
 use App\Enums\RecruitmentIndicatorOutcome;
 use App\Models\RecruitmentApplicant;
@@ -182,7 +183,7 @@ class ApplicationTable extends LivewireTable
                 if ($application->campaign !== null) {
                     $effective = $states->effective($application->campaign);
                     if (! in_array($effective, [HiringCampaignStatus::Published, HiringCampaignStatus::Open], true)) {
-                        $title .= ' <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs text-secondary-medium">'
+                        $title .= ' <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs text-secondary-dark">'
                             .e(HiringCampaignStatus::getLocalizedName($effective)['value']).'</span>';
                     }
                 }
@@ -196,7 +197,9 @@ class ApplicationTable extends LivewireTable
 
             Column::make(__('recruitment-applicant.status'), 'status')
                 ->sortable()
-                ->displayUsing(fn ($value): string => __('recruitment-applicant.statuses.'.$value)),
+                ->displayUsing(fn ($value): string => '<span class="rounded-control px-2 py-0.5 text-xs font-semibold '
+                    .RecruitmentApplicationStatus::classes($value).'">'.e(__('recruitment-applicant.statuses.'.$value)).'</span>')
+                ->asHtml(),
 
             Column::make(__('recruitment-applicant.source'), 'applicant.source')
                 ->displayUsing(fn ($value): string => RecruitmentApplicant::sourceLabel($value)),
@@ -262,8 +265,10 @@ class ApplicationTable extends LivewireTable
     }
 
     /**
-     * "n of m met", with every indicator named in the tooltip — the count
-     * alone is never shown without what it counts.
+     * "n of m met", with every indicator named — the count alone is never
+     * shown without what it counts. A tooltip only reaches a mouse, so the
+     * same list is also in the cell as text for a screen reader; the full
+     * breakdown is on the profile the row links to.
      */
     private function indicatorSummary(RecruitmentApplication $application): string
     {
@@ -273,15 +278,15 @@ class ApplicationTable extends LivewireTable
             return '';
         }
 
-        $details = collect($set->indicators)
-            ->map(fn (MatchingIndicator $indicator): string => $indicator->label().': '.__('recruitment-applicant.indicators.outcomes.'.$indicator->outcome))
-            ->implode("\n");
+        $lines = collect($set->indicators)
+            ->map(fn (MatchingIndicator $indicator): string => $indicator->label().': '.__('recruitment-applicant.indicators.outcomes.'.$indicator->outcome));
 
         $summary = $set->assessedCount() === 0
             ? __('recruitment-applicant.indicators.none_assessed')
             : __('recruitment-applicant.indicators.summary', ['met' => $set->metCount(), 'assessed' => $set->assessedCount()]);
 
-        return '<span title="'.e($details).'" class="cursor-help rounded-control px-2 py-0.5 text-xs font-semibold '
-            .RecruitmentIndicatorOutcome::classes(RecruitmentIndicatorOutcome::Unknown).'">'.e($summary).'</span>';
+        return '<span title="'.e($lines->implode("\n")).'" class="cursor-help rounded-control px-2 py-0.5 text-xs font-semibold '
+            .RecruitmentIndicatorOutcome::classes(RecruitmentIndicatorOutcome::Unknown).'">'.e($summary).'</span>'
+            .($lines->isEmpty() ? '' : '<span class="sr-only"> ('.e($lines->implode(__('recruitment-applicant.list_separator'))).')</span>');
     }
 }

@@ -28,6 +28,7 @@ use App\Models\RecruitmentRequestEvent;
 use App\Models\RecruitmentTag;
 use App\Models\RecruitmentWorkflowInstanceStep;
 use App\Models\Vacancy;
+use App\Notifications\Messages\BrandedMailMessage;
 use App\Observers\ContractObserver;
 use App\Observers\EmployeeObserver;
 use App\Observers\RecruitmentApplicantObserver;
@@ -65,12 +66,18 @@ use App\Services\Recruitment\Privacy\RetentionPolicy;
 use App\Services\Recruitment\Scanning\ClamdScanner;
 use App\Services\Recruitment\Scanning\DisabledScanner;
 use App\Services\Recruitment\Scanning\RecruitmentFileScanner;
+use App\Services\RecruitmentIndicatorRules;
 use App\Services\SalaryCipher;
+use App\Support\Permissions\PermissionCacheGeneration;
+use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Cache\Events\KeyForgotten;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
@@ -98,6 +105,8 @@ class AppServiceProvider extends ServiceProvider
         // figures" warning that goes with it - is built once per request
         // rather than once per contract row rendered.
         $this->app->singleton(SalaryCipher::class);
+        // One instance, so a save is seen at once by everything that evaluates indicators.
+        $this->app->singleton(RecruitmentIndicatorRules::class);
 
         // Anything but "clamd" leaves every upload in quarantine; there is no
         // driver that clears a file without scanning it.
@@ -108,6 +117,14 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Spatie forgets its cache key on every grant or revocation; User drops
+        // its memoized roles and permissions when the generation moves on.
+        Event::listen(function (KeyForgotten $event): void {
+            if ($event->key === config('permission.cache.key')) {
+                PermissionCacheGeneration::bump();
+            }
+        });
+
         RateLimiter::for('careers-view', fn (Request $request) => Limit::perMinute(60)
             ->by($request->ip()));
         RateLimiter::for('careers-submit', fn (Request $request) => [
@@ -236,5 +253,34 @@ class AppServiceProvider extends ServiceProvider
         RecruitmentApplicant::observe(RecruitmentApplicantObserver::class);
         RecruitmentApplication::observe(RecruitmentApplicationObserver::class);
         RecruitmentCampaignInvite::observe(RecruitmentCampaignInviteObserver::class);
+
+        $this->brandAuthEmails();
+    }
+
+    /**
+     * Laravel's password-reset and verify-email messages, rebuilt from the
+     * lang files with the security note the branded template shows. The
+     * links are the ones Laravel would build itself.
+     */
+    private function brandAuthEmails(): void
+    {
+        ResetPassword::toMailUsing(fn (object $notifiable, string $token) => (new BrandedMailMessage)
+            ->subject(__('mail.reset_password.subject'))
+            ->preheader(__('mail.reset_password.preheader'))
+            ->line(__('mail.reset_password.intro', ['app' => config('app.name')]))
+            ->action(__('mail.reset_password.action'), url(route('password.reset', [
+                'token' => $token,
+                'email' => $notifiable->getEmailForPasswordReset(),
+            ], false)))
+            ->line(trans_choice('mail.reset_password.expires', (int) config('auth.passwords.'.config('auth.defaults.passwords').'.expire')))
+            ->notice(__('mail.reset_password.notice')));
+
+        VerifyEmail::toMailUsing(fn (object $notifiable, string $url) => (new BrandedMailMessage)
+            ->subject(__('mail.verify_email.subject'))
+            ->preheader(__('mail.verify_email.preheader'))
+            ->line(__('mail.verify_email.intro'))
+            ->action(__('mail.verify_email.action'), $url)
+            ->line(trans_choice('mail.verify_email.expires', (int) config('auth.verification.expire', 60)))
+            ->notice(__('mail.verify_email.notice', ['app' => config('app.name')])));
     }
 }

@@ -52,7 +52,10 @@ class ApplicationTags extends Component
         $application = $this->resolveApplication();
         Gate::authorize('tag', $application);
 
-        $this->run(fn () => $tags->detach(auth()->user(), $application, $tagId));
+        // The remove button went with the tag.
+        if ($this->run(fn () => $tags->detach(auth()->user(), $application, $tagId))) {
+            $this->dispatch('focus-element', id: 'tags-'.$this->applicationId.'-title');
+        }
     }
 
     /** A new name goes on the shared tag list, so this also needs manage-tags. */
