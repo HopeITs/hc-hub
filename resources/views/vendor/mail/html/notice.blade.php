@@ -4,7 +4,7 @@
 @php($side = app()->getLocale() === 'ar' ? 'right' : 'left')
 <table class="notice" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
 <tr>
-<td class="notice-content" bgcolor="#fef2f2" style="border-{{ $side }}: 4px solid #be1f24; text-align: {{ $side }};">
+<td class="notice-content" bgcolor="#dcddde" style="border-{{ $side }}: 4px solid #be1f24; text-align: {{ $side }};">
 @if (filled($title))
 <p class="notice-title">{{ $title }}</p>
 @endif

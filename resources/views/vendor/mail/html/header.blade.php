@@ -4,7 +4,7 @@
 <tr>
 <td class="header" align="center">
 <a href="{{ $url }}" target="_blank" rel="noopener" style="display: inline-block;">
-<img src="cid:{{ App\Listeners\EmbedMailLogo::NAME }}" class="logo" width="176" height="60" alt="{{ trim($slot) }}">
+<img src="cid:{{ App\Listeners\EmbedMailLogo::NAME }}" class="logo" width="176" height="47" alt="{{ trim($slot) }}">
 </a>
 </td>
 </tr>
