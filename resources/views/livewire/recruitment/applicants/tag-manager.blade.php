@@ -44,13 +44,13 @@
                                     @endforeach
                                 </select>
                                 <x-primary-button type="submit">{{ __('recruitment-applicant.tags.save') }}</x-primary-button>
-                                <button type="button" wire:click="cancelRename" class="cursor-pointer rounded-control border border-neutral-300 px-3 py-2 font-semibold hover:bg-neutral-50">{{ __('recruitment-applicant.cancel') }}</button>
+                                <x-secondary-button wire:click="cancelRename">{{ __('recruitment-applicant.cancel') }}</x-secondary-button>
                                 <x-forms.input-error field="renameName" input-id="renameName" class="w-full" />
                                 <x-forms.input-error field="renameColor" input-id="renameColor" class="w-full" />
                             </form>
                         @else
                             <div class="flex min-w-0 flex-wrap items-center gap-2">
-                                <span class="max-w-full rounded-control px-2 py-0.5 text-xs font-semibold wrap-anywhere {{ $tag->classes() }} {{ $tag->trashed() ? 'line-through opacity-60' : '' }}">{{ $tag->name }}</span>
+                                <x-recruitment.pill :tone="$tag->classes()" :class="'max-w-full wrap-anywhere '.($tag->trashed() ? 'line-through opacity-60' : '')">{{ $tag->name }}</x-recruitment.pill>
                                 <span class="text-secondary-medium">{{ trans_choice('recruitment-applicant.tags.usage', $tag->visible_count, ['count' => $tag->visible_count]) }}</span>
                                 @if ($tag->trashed())
                                     <span class="text-xs text-secondary-medium">&middot; {{ __('recruitment-applicant.tags.deleted') }}</span>

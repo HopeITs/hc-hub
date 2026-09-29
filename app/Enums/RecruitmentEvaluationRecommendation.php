@@ -41,7 +41,7 @@ final class RecruitmentEvaluationRecommendation
             self::Maybe => 'bg-amber-50 text-amber-700',
             self::No => 'bg-red-50 text-red-700',
             self::StrongNo => 'bg-red-100 text-red-800',
-            default => 'bg-neutral-100 text-secondary-medium',
+            default => 'bg-neutral-100 text-secondary-dark',
         };
     }
 }

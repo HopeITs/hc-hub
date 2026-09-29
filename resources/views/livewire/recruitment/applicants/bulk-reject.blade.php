@@ -61,9 +61,9 @@
                     class="cursor-pointer rounded-control bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-50">
                     {{ __('recruitment-applicant.decisions.bulk_apply') }}
                 </button>
-                <button type="button" wire:click="cancel" class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
+                <x-secondary-button wire:click="cancel">
                     {{ __('recruitment-applicant.cancel') }}
-                </button>
+                </x-secondary-button>
             </div>
         </section>
     @endif

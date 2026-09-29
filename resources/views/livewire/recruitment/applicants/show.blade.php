@@ -36,7 +36,7 @@
                     <span class="rounded-control bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-800">{{ __('recruitment-applicant.previous_applicant_flag') }}</span>
                 @endif
                 @if ($applicant->anonymized_at)
-                    <span class="rounded-control bg-neutral-100 px-3 py-1 text-sm font-semibold text-secondary-medium">{{ __('recruitment-applicant.anonymized') }}</span>
+                    <span class="rounded-control bg-neutral-100 px-3 py-1 text-sm font-semibold text-secondary-dark">{{ __('recruitment-applicant.anonymized') }}</span>
                 @endif
             </div>
         </div>
@@ -81,7 +81,7 @@
                         <h3 id="application-{{ $application->id }}-title" tabindex="-1" class="scroll-mt-24 font-semibold wrap-break-word">
                             {{ $campaign?->vacancy?->position?->title ?? __('recruitment-applicant.no_vacancy') }}
                             @if ($effective !== null && ! $campaignOpen)
-                                <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs font-normal text-secondary-medium">{{ HiringCampaignStatus::getLocalizedName($effective)['value'] }}</span>
+                                <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs font-normal text-secondary-dark">{{ HiringCampaignStatus::getLocalizedName($effective)['value'] }}</span>
                             @endif
                         </h3>
                         <p class="mt-1 text-sm text-secondary-medium">
@@ -95,8 +95,8 @@
                         </p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="rounded-control px-2 py-0.5 text-xs font-semibold {{ RecruitmentCvAvailability::classes($availability) }}">{{ __('recruitment-applicant.cv_availability.'.$availability) }}</span>
-                        <span class="rounded-control bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">{{ __('recruitment-applicant.statuses.'.$application->status) }}</span>
+                        <x-recruitment.pill :tone="RecruitmentCvAvailability::classes($availability)">{{ __('recruitment-applicant.cv_availability.'.$availability) }}</x-recruitment.pill>
+                        <span class="rounded-control px-3 py-1 text-sm font-semibold {{ ApplicationStatus::classes($application->status) }}">{{ __('recruitment-applicant.statuses.'.$application->status) }}</span>
                     </div>
                 </div>
 
@@ -134,7 +134,7 @@
                 @if (! empty($targets))
                     @if ($statusApplicationId === $application->id)
                         {{-- Keyed apart from the buttons it replaces, so each is swapped in whole. --}}
-                        <div wire:key="decision-panel-{{ $application->id }}" class="mt-4 rounded-control border p-4 {{ $statusTarget === ApplicationStatus::Rejected ? 'border-red-200 bg-red-50/50' : 'border-primary/30 bg-primary/5' }}">
+                        <div wire:key="decision-panel-{{ $application->id }}" class="mt-4 rounded-control border p-4 {{ $statusTarget === ApplicationStatus::Rejected ? 'border-red-200 bg-red-50/50' : 'border-neutral-200 bg-neutral-50' }}">
                             <h4 id="decision-panel-{{ $application->id }}" tabindex="-1" class="scroll-mt-24 font-semibold">
                                 {{ __('recruitment-applicant.decisions.titles.'.$statusTarget) }}
                                 <span class="font-normal text-secondary-medium">
@@ -187,9 +187,9 @@
                                     wire:confirm="{{ __('recruitment-applicant.status_change.confirm') }}">
                                     {{ __('recruitment-applicant.decisions.confirm.'.$statusTarget) }}
                                 </x-primary-button>
-                                <button type="button" wire:click="cancelStatusChange" class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
+                                <x-secondary-button wire:click="cancelStatusChange">
                                     {{ __('recruitment-applicant.cancel') }}
-                                </button>
+                                </x-secondary-button>
                             </div>
                         </div>
                     @else
@@ -199,7 +199,7 @@
                                     $style = match ($target) {
                                         ApplicationStatus::Rejected => 'border-red-300 text-red-700 hover:bg-red-50',
                                         ApplicationStatus::Selected => 'border-green-300 text-green-800 hover:bg-green-50',
-                                        ApplicationStatus::Shortlisted => 'border-primary/40 text-primary hover:bg-primary/5',
+                                        ApplicationStatus::Shortlisted => 'border-neutral-300 text-primary hover:bg-selection',
                                         default => 'border-neutral-300 hover:bg-neutral-50',
                                     };
                                     $label = $application->status === ApplicationStatus::Rejected

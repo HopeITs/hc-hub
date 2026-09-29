@@ -36,10 +36,9 @@
                         @endforeach
                     </select>
                 </div>
-                <button type="button" wire:click="attach" wire:loading.attr="disabled" wire:target="attach"
-                    class="cursor-pointer rounded-control border border-neutral-300 px-3 py-2 text-sm font-semibold hover:bg-neutral-50">
+                <x-secondary-button wire:click="attach" wire:target="attach">
                     {{ __('recruitment-applicant.tags.add') }}
-                </button>
+                </x-secondary-button>
             @endif
 
             @if ($mayCreate)
@@ -56,10 +55,9 @@
                             <option value="{{ $color }}">{{ __('recruitment-applicant.tags.colors.'.$color) }}</option>
                         @endforeach
                     </select>
-                    <button type="submit" wire:loading.attr="disabled" wire:target="createAndAttach"
-                        class="cursor-pointer rounded-control border border-neutral-300 px-3 py-2 text-sm font-semibold hover:bg-neutral-50">
+                    <x-secondary-button type="submit" wire:target="createAndAttach">
                         {{ __('recruitment-applicant.tags.create_and_add') }}
-                    </button>
+                    </x-secondary-button>
                 </form>
             @endif
         </div>

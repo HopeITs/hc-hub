@@ -58,7 +58,7 @@ final class RecruitmentInterviewStatus
             self::Rescheduled => 'bg-amber-50 text-amber-700',
             self::Completed => 'bg-green-50 text-green-700',
             self::NoShow => 'bg-red-50 text-red-700',
-            default => 'bg-neutral-100 text-secondary-medium',
+            default => 'bg-neutral-100 text-secondary-dark',
         };
     }
 }

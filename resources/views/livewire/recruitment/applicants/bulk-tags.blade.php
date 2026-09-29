@@ -8,7 +8,7 @@
     @endif
 
     @if ($open)
-        <section class="rounded-surface border border-primary/30 bg-primary/5 p-6">
+        <section class="rounded-surface border border-neutral-200 bg-neutral-50 p-6">
             <h2 id="bulk-tags-title" tabindex="-1" class="scroll-mt-24 text-h4 font-semibold">{{ __('recruitment-applicant.tags.bulk_title') }}</h2>
             <p class="mt-1 text-sm text-secondary-medium">
                 {{ trans_choice('recruitment-applicant.tags.bulk_selected', count($applicationIds), ['count' => count($applicationIds)]) }}
@@ -50,9 +50,9 @@
                 <x-primary-button type="button" wire:click="apply" wire:loading.attr="disabled" wire:target="apply">
                     {{ __('recruitment-applicant.tags.bulk_apply') }}
                 </x-primary-button>
-                <button type="button" wire:click="cancel" class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
+                <x-secondary-button wire:click="cancel">
                     {{ __('recruitment-applicant.cancel') }}
-                </button>
+                </x-secondary-button>
             </div>
         </section>
     @endif

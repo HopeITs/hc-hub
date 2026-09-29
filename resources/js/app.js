@@ -125,6 +125,11 @@ window.addEventListener('focus-element', (event) => {
 
     target.focus({ preventScroll: true });
     target.scrollIntoView({ block: 'nearest' });
+
+    // A target without its own scroll-margin can still land under the bar.
+    const bar = document.querySelector('nav.fixed')?.getBoundingClientRect().bottom ?? 0;
+    const top = target.getBoundingClientRect().top;
+    if (top < bar) window.scrollBy({ top: top - bar - 16 });
 });
 
 // When a Select2 dropdown opens, flag its results list with `.results--scroll`

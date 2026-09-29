@@ -17,7 +17,7 @@
             <span class="ms-1 rounded-control bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">{{ __('recruitment-applicant.scan.'.$scan) }}</span>
         @endif
         @if ($file->isArchived())
-            <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-secondary-medium">
+            <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-secondary-dark">
                 {{ __('recruitment-applicant.cv_archive.archived_on', ['date' => $file->archived_at->format('Y-m-d'), 'name' => $file->archivedBy?->profile?->name ?? $file->archivedBy?->name ?? '—']) }}
             </span>
         @endif
@@ -37,7 +37,7 @@
     </div>
 
     @if ($archiveFile?->id === $file->id)
-        <div wire:key="archive-panel-{{ $file->id }}" class="w-full rounded-control border border-primary/30 bg-primary/5 p-4">
+        <div wire:key="archive-panel-{{ $file->id }}" class="w-full rounded-control border border-neutral-200 bg-neutral-50 p-4">
             <{{ $panelHeading }} id="archive-panel-{{ $file->id }}" tabindex="-1" class="scroll-mt-24 font-semibold">{{ __('recruitment-applicant.cv_archive.archive_title') }}</{{ $panelHeading }}>
             <p id="archiveReason-hint" class="mt-1 text-secondary-medium">
                 {{ $archiveNeedsReason ? __('recruitment-applicant.cv_archive.archive_hint_no_vacancy') : __('recruitment-applicant.cv_archive.archive_hint') }}
@@ -53,9 +53,9 @@
                 <x-primary-button type="button" wire:click="archiveCv" wire:loading.attr="disabled" wire:target="archiveCv">
                     {{ __('recruitment-applicant.cv_archive.archive_confirm') }}
                 </x-primary-button>
-                <button type="button" wire:click="cancelArchive" class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
+                <x-secondary-button wire:click="cancelArchive">
                     {{ __('recruitment-applicant.cancel') }}
-                </button>
+                </x-secondary-button>
             </div>
         </div>
     @endif

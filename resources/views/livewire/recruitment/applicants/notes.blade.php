@@ -54,7 +54,7 @@
                     </p>
                     <div class="flex flex-wrap items-center gap-2">
                         @if ($note->note_type === \App\Models\RecruitmentApplicantNote::TYPE_CV_ARCHIVE)
-                            <span class="rounded-control bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-secondary-medium">{{ __('recruitment-applicant.notes.type_cv_archive') }}</span>
+                            <span class="rounded-control bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-secondary-dark">{{ __('recruitment-applicant.notes.type_cv_archive') }}</span>
                         @endif
                         @if ($note->is_sensitive)
                             <span class="rounded-control bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-800">{{ __('recruitment-applicant.notes.sensitive_badge') }}</span>
@@ -83,9 +83,9 @@
                                 class="cursor-pointer rounded-control bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">
                                 {{ __('recruitment-applicant.notes.delete_confirm') }}
                             </button>
-                            <button type="button" wire:click="cancelDelete" class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
+                            <x-secondary-button wire:click="cancelDelete">
                                 {{ __('recruitment-applicant.cancel') }}
-                            </button>
+                            </x-secondary-button>
                         </div>
                     </div>
                 @endif

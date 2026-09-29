@@ -3,6 +3,7 @@
 namespace App\Livewire\Recruitment\Applicants;
 
 use App\Enums\HiringCampaignStatus;
+use App\Enums\RecruitmentApplicationStatus;
 use App\Enums\RecruitmentCvAvailability;
 use App\Enums\RecruitmentIndicatorOutcome;
 use App\Models\RecruitmentApplicant;
@@ -182,7 +183,7 @@ class ApplicationTable extends LivewireTable
                 if ($application->campaign !== null) {
                     $effective = $states->effective($application->campaign);
                     if (! in_array($effective, [HiringCampaignStatus::Published, HiringCampaignStatus::Open], true)) {
-                        $title .= ' <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs text-secondary-medium">'
+                        $title .= ' <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs text-secondary-dark">'
                             .e(HiringCampaignStatus::getLocalizedName($effective)['value']).'</span>';
                     }
                 }
@@ -196,7 +197,9 @@ class ApplicationTable extends LivewireTable
 
             Column::make(__('recruitment-applicant.status'), 'status')
                 ->sortable()
-                ->displayUsing(fn ($value): string => __('recruitment-applicant.statuses.'.$value)),
+                ->displayUsing(fn ($value): string => '<span class="rounded-control px-2 py-0.5 text-xs font-semibold '
+                    .RecruitmentApplicationStatus::classes($value).'">'.e(__('recruitment-applicant.statuses.'.$value)).'</span>')
+                ->asHtml(),
 
             Column::make(__('recruitment-applicant.source'), 'applicant.source')
                 ->displayUsing(fn ($value): string => RecruitmentApplicant::sourceLabel($value)),
