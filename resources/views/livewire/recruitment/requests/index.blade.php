@@ -3,7 +3,7 @@
 <div class="space-y-6">
     <div class="flex flex-wrap items-center justify-between gap-4">
         <div>
-            <h1 class="text-h2 font-semibold text-neutral-900">{{ __('recruitment.requests') }}</h1>
+            <h1 class="text-h2 font-semibold text-secondary-dark">{{ __('recruitment.requests') }}</h1>
             <p class="mt-2 text-secondary-medium">{{ __('recruitment.list_description') }}</p>
         </div>
         <div class="flex flex-wrap gap-3">

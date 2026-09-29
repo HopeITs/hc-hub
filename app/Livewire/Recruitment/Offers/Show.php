@@ -9,6 +9,7 @@ use App\Models\RecruitmentJobOffer;
 use App\Models\Vacancy;
 use App\Services\HiringCampaignStateMachine;
 use App\Services\RecruitmentJobOfferService;
+use App\Traits\WithAlerts;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -29,6 +30,8 @@ use Livewire\Component;
  */
 class Show extends Component
 {
+    use WithAlerts;
+
     #[Locked]
     public int $offerId;
 
@@ -54,6 +57,10 @@ class Show extends Component
     {
         $this->offerId = $offerId;
         $this->resolveOffer();
+
+        if ($message = session()->pull('recruitment_toast')) {
+            $this->successToast($message);
+        }
     }
 
     public function beginSend(): void
@@ -182,7 +189,7 @@ class Show extends Component
         }
 
         $this->closePanel();
-        session()->flash('recruitment_saved', __('recruitment-applicant.offers.'.$messageKey));
+        $this->successToast(__('recruitment-applicant.offers.'.$messageKey));
     }
 
     private function authorizedOffer(): RecruitmentJobOffer

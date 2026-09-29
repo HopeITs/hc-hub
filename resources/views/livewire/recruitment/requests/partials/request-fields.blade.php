@@ -10,7 +10,7 @@
     convenience, never the guard: the service re-derives the same sets and
     refuses anything outside them.
 --}}
-        <section class="space-y-5 rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="space-y-5 rounded-surface border border-secondary-soft bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.request_scope') }}</h2>
             @php
                 $type = (int) ($data['request_type'] ?? 0);
@@ -28,7 +28,7 @@
             @endif
         </section>
         @if ($newPosition)
-            <section class="space-y-5 rounded-surface border border-neutral-200 bg-white p-6">
+            <section class="space-y-5 rounded-surface border border-secondary-soft bg-white p-6">
                 <h2 class="text-h4 font-semibold">{{ __('recruitment.proposed_position') }}</h2>
                 <div class="grid gap-5 sm:grid-cols-2">
                     @include('livewire.recruitment.requests.partials.select', ['field' => 'city_id', 'label' => 'city', 'options' => $cities->pluck('name', 'id')->all(), 'required' => true])
@@ -46,7 +46,7 @@
                 @endforeach
             </section>
         @endif
-        <section class="space-y-5 rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="space-y-5 rounded-surface border border-secondary-soft bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.request_content') }}</h2>
             @if (in_array($type, [1, 2, 4], true))
                 @php

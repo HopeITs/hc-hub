@@ -400,27 +400,11 @@ return [
             'beginArchive' => 'recruitment-applicants.archive-cv',
             'archiveCv' => 'recruitment-applicants.archive-cv',
         ],
-        'recruitment.applicants.bulk-tags' => [
-            'open' => 'recruitment-applicants.bulk-tag',
-            'apply' => 'recruitment-applicants.bulk-tag',
-        ],
         // The selection is re-scoped in RecruitmentApplicationStatusService,
         // which also asks the bulkReject policy itself.
         'recruitment.applicants.bulk-reject' => [
             'open' => 'recruitment-applicants.bulk-reject',
             'apply' => 'recruitment-applicants.bulk-reject',
-        ],
-        'recruitment.applicants.application-tags' => [
-            'attach' => 'recruitment-applicants.tag',
-            'detach' => 'recruitment-applicants.tag',
-            'createAndAttach' => 'recruitment-applicants.manage-tags',
-        ],
-        'recruitment.applicants.tag-manager' => [
-            'create' => 'recruitment-applicants.manage-tags',
-            'beginRename' => 'recruitment-applicants.manage-tags',
-            'rename' => 'recruitment-applicants.manage-tags',
-            'delete' => 'recruitment-applicants.manage-tags',
-            'restore' => 'recruitment-applicants.manage-tags',
         ],
         'recruitment.indicators.rules' => [
             'save' => 'recruitment-indicators.manage',
@@ -501,16 +485,11 @@ return [
         'recruitment.applicants.notes' => ['cancelDelete', 'refreshNotes'],
         // Re-render through the same scoped query; they write nothing.
         // selectTable() reads ids through the same scoped, filtered query.
-        // executeAction/executeItemAction carry two actions (bulk tag, bulk
-        // reject) with different permissions, so one name here would be wrong
-        // for one of them; each authorizes its own action code by policy.
+        // executeAction/executeItemAction authorize their action code by policy.
         'recruitment.applicants.application-table' => [
-            'refreshTags', 'refreshDecisions', 'selectTable', 'executeAction', 'executeItemAction',
+            'refreshDecisions', 'selectTable', 'executeAction', 'executeItemAction',
         ],
-        'recruitment.applicants.bulk-tags' => ['cancel'],
         'recruitment.applicants.bulk-reject' => ['cancel'],
-        'recruitment.applicants.application-tags' => ['refreshTags'],
-        'recruitment.applicants.tag-manager' => ['cancelRename'],
         // Phase 2 Task 7. Form-only state: the participant list is validated
         // user by user (exists, active) by the scheduling service on save,
         // which is the mapped action. closePanel clears component state only.

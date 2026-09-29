@@ -10,13 +10,10 @@
 @endphp
 
 <div class="space-y-6 p-6 print:p-0">
-    @if (session('recruitment_saved'))
-        <p role="status" class="rounded-control border border-green-200 bg-green-50 p-4 text-green-800 print:hidden">{{ session('recruitment_saved') }}</p>
-    @endif
 
     <div class="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <a href="{{ route('recruitment.offers.index') }}" wire:navigate class="text-sm font-medium text-primary hover:underline">&larr; {{ __('recruitment-applicant.offers.all') }}</a>
-        <button type="button" onclick="window.print()" class="rounded-control border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-50">{{ __('recruitment-applicant.offers.print') }}</button>
+        <button type="button" onclick="window.print()" class="rounded-control border border-secondary-light px-3 py-1.5 text-sm hover:bg-secondary-soft/30">{{ __('recruitment-applicant.offers.print') }}</button>
     </div>
 
     @error('offer')
@@ -24,7 +21,7 @@
     @enderror
 
     {{-- The offer document: the current version's terms --}}
-    <section class="rounded-surface border border-neutral-200 bg-white p-6">
+    <section class="rounded-surface border border-secondary-soft bg-white p-6">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
                 <p class="text-xs uppercase tracking-wide text-secondary-medium">{{ __('recruitment-applicant.offers.document_title') }} &middot; v{{ $current?->version_no }}</p>
@@ -43,7 +40,7 @@
             @include('livewire.recruitment.offers.partials.terms', ['version' => $current])
         @endif
 
-        <dl class="mt-6 grid grid-cols-1 gap-3 border-t border-neutral-100 pt-4 text-sm md:grid-cols-3">
+        <dl class="mt-6 grid grid-cols-1 gap-3 border-t border-secondary-soft pt-4 text-sm md:grid-cols-3">
             <div><dt class="text-secondary-medium">{{ __('recruitment-applicant.offers.created_by') }}</dt><dd>{{ $personName($offer->creator) }} &middot; {{ $offer->created_at?->format('Y-m-d') }}</dd></div>
             @if ($offer->sent_at)
                 <div><dt class="text-secondary-medium">{{ __('recruitment-applicant.offers.sent_at') }}</dt><dd>{{ $offer->sent_at->format('Y-m-d H:i') }}</dd></div>
@@ -55,15 +52,15 @@
 
         {{-- How it ended --}}
         @if (in_array($offer->status, [Status::Accepted, Status::Rejected], true))
-            <div class="mt-4 rounded-control bg-neutral-50 p-4 text-sm">
+            <div class="mt-4 rounded-control bg-secondary-soft/30 p-4 text-sm">
                 {{ __('recruitment-applicant.offers.response_on', ['response' => __('recruitment-applicant.offers.statuses.'.$offer->status), 'date' => ($offer->accepted_at ?? $offer->rejected_at)?->format('Y-m-d H:i'), 'by' => $personName($offer->responseRecordedBy)]) }}
                 @if ($canManage && $offer->response_note)
                     <p class="mt-1 whitespace-pre-line text-secondary-medium">{{ $offer->response_note }}</p>
                 @endif
                 @if ($offer->status === Status::Accepted && $conversion)
                     {{-- Task 10: the hire itself --}}
-                    <div class="mt-3 space-y-2 border-t border-neutral-200 pt-3 print:hidden">
-                        <p class="font-medium {{ $conversion->isConverted() ? 'text-green-800' : ($conversion->status === \App\Models\RecruitmentHiringConversion::STATUS_FAILED ? 'text-primary' : 'text-secondary-dark') }}">
+                    <div class="mt-3 space-y-2 border-t border-secondary-soft pt-3 print:hidden">
+                        <p class="font-medium {{ $conversion->isConverted() ? 'text-primary' : ($conversion->status === \App\Models\RecruitmentHiringConversion::STATUS_FAILED ? 'text-primary' : 'text-secondary-dark') }}">
                             {{ __('recruitment-applicant.conversions.statuses.'.$conversion->status) }}
                         </p>
                         @if ($conversion->isConverted())
@@ -92,7 +89,7 @@
             </div>
         @elseif ($offer->status === Status::Cancelled)
             @php $reasonKey = 'recruitment-applicant.offers.cancellation_reasons.'.$offer->cancellation_reason; @endphp
-            <div class="mt-4 rounded-control bg-neutral-50 p-4 text-sm">
+            <div class="mt-4 rounded-control bg-secondary-soft/30 p-4 text-sm">
                 {{ __('recruitment-applicant.offers.cancelled_on', ['date' => $offer->cancelled_at?->format('Y-m-d H:i'), 'by' => $offer->cancelledBy ? $personName($offer->cancelledBy) : __('recruitment-applicant.interviews.system')]) }}
                 — {{ Lang::has($reasonKey) ? __($reasonKey) : $offer->cancellation_reason }}
                 @if ($canManage && $offer->cancellation_note)
@@ -100,7 +97,7 @@
                 @endif
             </div>
         @elseif ($offer->status === Status::Expired)
-            <p class="mt-4 rounded-control bg-neutral-50 p-4 text-sm">{{ __('recruitment-applicant.offers.expired_on', ['date' => $offer->expired_at?->format('Y-m-d H:i')]) }}</p>
+            <p class="mt-4 rounded-control bg-secondary-soft/30 p-4 text-sm">{{ __('recruitment-applicant.offers.expired_on', ['date' => $offer->expired_at?->format('Y-m-d H:i')]) }}</p>
         @endif
 
         {{-- Rule reminder: an offer never touches the vacancy by itself --}}
@@ -113,20 +110,20 @@
 
         {{-- HR actions --}}
         @if ($canManage)
-            <div class="mt-6 flex flex-wrap gap-2 border-t border-neutral-100 pt-4 print:hidden">
+            <div class="mt-6 flex flex-wrap gap-2 border-t border-secondary-soft pt-4 print:hidden">
                 @if ($offer->isEditable())
                     <a href="{{ route('recruitment.offers.edit', ['offerId' => $offer->id]) }}" wire:navigate class="rounded-control border border-primary px-3 py-1.5 text-sm font-semibold text-primary hover:bg-primary/5">{{ __('recruitment-applicant.offers.actions.edit') }}</a>
                     <button type="button" wire:click="beginSend" class="rounded-control bg-primary px-3 py-1.5 text-sm font-semibold text-white">{{ __('recruitment-applicant.offers.actions.send') }}</button>
                 @endif
                 @if ($offer->status === Status::Sent)
-                    <button type="button" wire:click="beginResponse('{{ Status::Accepted }}')" class="rounded-control border border-green-600 px-3 py-1.5 text-sm font-semibold text-green-700 hover:bg-green-50">{{ __('recruitment-applicant.offers.actions.accepted') }}</button>
-                    <button type="button" wire:click="beginResponse('{{ Status::Rejected }}')" class="rounded-control border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-50">{{ __('recruitment-applicant.offers.actions.rejected') }}</button>
+                    <button type="button" wire:click="beginResponse('{{ Status::Accepted }}')" class="rounded-control border border-primary px-3 py-1.5 text-sm font-semibold text-primary hover:bg-primary/5">{{ __('recruitment-applicant.offers.actions.accepted') }}</button>
+                    <button type="button" wire:click="beginResponse('{{ Status::Rejected }}')" class="rounded-control border border-secondary-light px-3 py-1.5 text-sm hover:bg-secondary-soft/30">{{ __('recruitment-applicant.offers.actions.rejected') }}</button>
                 @endif
                 @if ($canRevise)
-                    <a href="{{ route('recruitment.offers.revise', ['offerId' => $offer->id]) }}" wire:navigate class="rounded-control border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-50">{{ __('recruitment-applicant.offers.actions.revise') }}</a>
+                    <a href="{{ route('recruitment.offers.revise', ['offerId' => $offer->id]) }}" wire:navigate class="rounded-control border border-secondary-light px-3 py-1.5 text-sm hover:bg-secondary-soft/30">{{ __('recruitment-applicant.offers.actions.revise') }}</a>
                 @endif
                 @if (Status::canMove($offer->status, Status::Cancelled))
-                    <button type="button" wire:click="beginCancel" class="rounded-control border border-neutral-300 px-3 py-1.5 text-sm text-primary hover:bg-primary/5">{{ __('recruitment-applicant.offers.actions.cancel') }}</button>
+                    <button type="button" wire:click="beginCancel" class="rounded-control border border-secondary-light px-3 py-1.5 text-sm text-primary hover:bg-primary/5">{{ __('recruitment-applicant.offers.actions.cancel') }}</button>
                 @endif
             </div>
 
@@ -166,7 +163,7 @@
                     <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.offers.cancel_hint') }}</p>
                     <div>
                         <x-forms.input-label for="cancelReason" required :value="__('recruitment-applicant.interviews.cancel_reason')" />
-                        <select id="cancelReason" wire:model.live="cancelReason" class="w-full rounded-control border border-neutral-300 bg-white px-3 py-2 text-body">
+                        <select id="cancelReason" wire:model.live="cancelReason" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
                             <option value="">{{ __('recruitment.choose') }}</option>
                             @foreach ($cancellationReasons as $code)
                                 <option value="{{ $code }}">{{ __('recruitment-applicant.offers.cancellation_reasons.'.$code) }}</option>
@@ -189,11 +186,11 @@
     </section>
 
     {{-- History: every version exactly as it was offered --}}
-    <section class="rounded-surface border border-neutral-200 bg-white p-6 print:hidden">
+    <section class="rounded-surface border border-secondary-soft bg-white p-6 print:hidden">
         <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.offers.history') }}</h2>
         <ol class="mt-3 space-y-4">
             @foreach ($offer->versions as $version)
-                <li class="border-s-2 border-neutral-200 ps-3 text-sm" wire:key="version-{{ $version->id }}">
+                <li class="border-s-2 border-secondary-soft ps-3 text-sm" wire:key="version-{{ $version->id }}">
                     <p class="font-medium">
                         v{{ $version->version_no }} &middot; {{ __('recruitment-applicant.offers.version_statuses.'.$version->status) }}
                         <span class="font-normal text-secondary-medium">

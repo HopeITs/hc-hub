@@ -54,10 +54,10 @@ final class RecruitmentInterviewStatus
     public static function classes(?string $status): string
     {
         return match ($status) {
-            self::Scheduled => 'bg-blue-50 text-blue-700',
-            self::Rescheduled => 'bg-amber-50 text-amber-700',
-            self::Completed => 'bg-green-50 text-green-700',
-            self::NoShow => 'bg-red-50 text-red-700',
+            self::Scheduled => 'bg-blue-50 text-blue-800',
+            self::Rescheduled => 'bg-amber-50 text-amber-800',
+            self::Completed => 'bg-green-50 text-green-800',
+            self::NoShow => 'bg-red-50 text-red-800',
             default => 'bg-neutral-100 text-secondary-dark',
         };
     }

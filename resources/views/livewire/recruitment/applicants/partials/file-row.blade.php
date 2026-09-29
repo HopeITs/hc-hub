@@ -14,10 +14,10 @@
         <span class="font-medium">{{ $typeLabel }}</span>
         <span class="text-secondary-medium">&middot; {{ $file->uploaded_at?->format('Y-m-d') }}</span>
         @if ($scan !== \App\Enums\RecruitmentFileScanStatus::Clean)
-            <span class="ms-1 rounded-control bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-800">{{ __('recruitment-applicant.scan.'.$scan) }}</span>
+            <span class="ms-1 rounded-control bg-secondary-soft/60 px-2 py-0.5 text-xs font-semibold text-secondary-dark">{{ __('recruitment-applicant.scan.'.$scan) }}</span>
         @endif
         @if ($file->isArchived())
-            <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-secondary-dark">
+            <span class="ms-1 rounded-control bg-secondary-soft/60 px-2 py-0.5 text-xs font-semibold text-secondary-dark">
                 {{ __('recruitment-applicant.cv_archive.archived_on', ['date' => $file->archived_at->format('Y-m-d'), 'name' => $file->archivedBy?->profile?->name ?? $file->archivedBy?->name ?? '—']) }}
             </span>
         @endif
@@ -37,7 +37,7 @@
     </div>
 
     @if ($archiveFile?->id === $file->id)
-        <div wire:key="archive-panel-{{ $file->id }}" class="w-full rounded-control border border-neutral-200 bg-neutral-50 p-4">
+        <div wire:key="archive-panel-{{ $file->id }}" class="w-full rounded-control border border-secondary-soft bg-secondary-soft/30 p-4">
             <{{ $panelHeading }} id="archive-panel-{{ $file->id }}" tabindex="-1" class="scroll-mt-24 font-semibold">{{ __('recruitment-applicant.cv_archive.archive_title') }}</{{ $panelHeading }}>
             <p id="archiveReason-hint" class="mt-1 text-secondary-medium">
                 {{ $archiveNeedsReason ? __('recruitment-applicant.cv_archive.archive_hint_no_vacancy') : __('recruitment-applicant.cv_archive.archive_hint') }}
@@ -46,7 +46,7 @@
                 <x-forms.input-label for="archiveReason" :required="$archiveNeedsReason">{{ __('recruitment-applicant.cv_archive.reason') }}</x-forms.input-label>
                 <textarea id="archiveReason" wire:model="archiveReason" rows="3" @if ($archiveNeedsReason) aria-required="true" @endif
                     aria-describedby="archiveReason-hint @error('archiveReason') archiveReason-error @enderror" @error('archiveReason') aria-invalid="true" @enderror
-                    class="mt-1 w-full rounded-control border-neutral-300"></textarea>
+                    class="mt-1 w-full rounded-control border-secondary-light"></textarea>
                 <x-forms.input-error field="archiveReason" input-id="archiveReason" />
             </div>
             <div class="mt-4 flex flex-wrap gap-3">

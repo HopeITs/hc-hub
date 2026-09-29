@@ -96,7 +96,7 @@ class Convert extends Component
             return null;
         }
 
-        session()->flash('recruitment_saved', __('recruitment-applicant.conversions.converted'));
+        session()->flash('recruitment_toast', __('recruitment-applicant.conversions.converted'));
 
         return $this->redirectRoute('recruitment.offers.show', ['offerId' => $this->offerId], navigate: true);
     }

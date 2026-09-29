@@ -9,6 +9,7 @@ use App\Services\RecruitmentApplicationStatusService;
 use App\Services\RecruitmentCvArchiveService;
 use App\Services\RecruitmentMatchingIndicators;
 use App\Services\RecruitmentScopeResolver;
+use App\Traits\WithAlerts;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -32,6 +33,8 @@ use Livewire\Component;
  */
 class Show extends Component
 {
+    use WithAlerts;
+
     #[Locked]
     public int $applicantId;
 
@@ -107,7 +110,7 @@ class Show extends Component
         }
 
         $this->closeStatusPanel();
-        session()->flash('recruitment_saved', __('recruitment-applicant.status_change.changed'));
+        $this->successToast(__('recruitment-applicant.status_change.changed'));
 
         // The button that confirmed is gone, and the one that opened the panel
         // may be too once the status has moved: the application itself is next.
@@ -153,7 +156,7 @@ class Show extends Component
 
         $this->closeArchivePanel();
         $this->dispatch('recruitment-notes-changed');
-        session()->flash('recruitment_saved', __('recruitment-applicant.cv_archive.archived'));
+        $this->successToast(__('recruitment-applicant.cv_archive.archived'));
 
         // An archived CV loses its archive button; its row is what changed.
         $this->dispatch('focus-element', id: 'file-'.$file->getKey());

@@ -6,10 +6,7 @@ use App\Enums\RecruitmentApplicationStatus as Status;
 use App\Enums\RecruitmentFileScanStatus;
 use App\Enums\RecruitmentIndicatorOutcome as Outcome;
 use App\Livewire\Recruitment\Applicants\ApplicationTable;
-use App\Livewire\Recruitment\Applicants\ApplicationTags;
-use App\Livewire\Recruitment\Applicants\BulkTags;
 use App\Livewire\Recruitment\Applicants\Show;
-use App\Livewire\Recruitment\Applicants\TagManager;
 use App\Models\City;
 use App\Models\HiringCampaign;
 use App\Models\RecruitmentApplicantFile;
@@ -162,73 +159,6 @@ class RecruitmentAtsTest extends TestCase
         $this->assertSame($first->id, (int) $removal->properties['applied_by_user_id']);
     }
 
-    public function test_tagging_one_application_needs_the_tag_permission_and_scope(): void
-    {
-        $homsApplication = $this->applyTo($this->makeCampaignIn($this->homs), $this->makeApplicant());
-        $damascusApplication = $this->applyTo($this->makeCampaignIn($this->damascus), $this->makeApplicant());
-        $hr = $this->hr($this->homs);
-        $tag = app(RecruitmentTagService::class)->create($hr, 'Priority');
-        $this->actingAs($hr);
-
-        Livewire::test(ApplicationTags::class, ['applicationId' => $damascusApplication->id])->assertNotFound();
-
-        Livewire::test(ApplicationTags::class, ['applicationId' => $homsApplication->id])
-            ->set('tagId', (string) $tag->id)
-            ->call('attach')
-            ->assertHasNoErrors()
-            ->assertSee('Priority');
-
-        $this->without($hr, ['recruitment-applicants.tag']);
-        Livewire::test(ApplicationTags::class, ['applicationId' => $homsApplication->id])
-            ->call('detach', $tag->id)
-            ->assertForbidden();
-        $this->assertSame(1, RecruitmentApplicationTag::query()->count());
-    }
-
-    public function test_bulk_tagging_needs_its_own_permission_and_skips_out_of_scope_ids(): void
-    {
-        $campaign = $this->makeCampaignIn($this->homs);
-        $mine = [
-            $this->applyTo($campaign, $this->makeApplicant('One')),
-            $this->applyTo($campaign, $this->makeApplicant('Two')),
-        ];
-        $theirs = $this->applyTo($this->makeCampaignIn($this->damascus), $this->makeApplicant('Three'));
-        $hr = $this->hr($this->homs);
-        $tag = app(RecruitmentTagService::class)->create($hr, 'Batch');
-        $ids = [$mine[0]->id, $mine[1]->id, $theirs->id];
-
-        // Tagging one at a time does not imply tagging many.
-        $this->without($hr, ['recruitment-applicants.bulk-tag']);
-        $this->actingAs($hr);
-        Livewire::test(BulkTags::class)->call('open', $ids)->assertForbidden();
-        Livewire::test(BulkTags::class)->set('applicationIds', $ids)->set('tagId', (string) $tag->id)->call('apply')->assertForbidden();
-        Livewire::test(ApplicationTable::class)->set('selected', array_map('strval', $ids))->call('executeAction', ApplicationTable::BULK_TAG)->assertForbidden();
-        $this->assertSame(0, RecruitmentApplicationTag::query()->count());
-
-        Role::findByName($hr->myRole(), 'web')->givePermissionTo('recruitment-applicants.bulk-tag');
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-        $hr = $hr->fresh();
-        $this->actingAs($hr);
-
-        Livewire::test(BulkTags::class)
-            ->call('open', $ids)
-            ->set('tagId', (string) $tag->id)
-            ->call('apply')
-            ->assertHasNoErrors()
-            ->assertDispatched('recruitment-tags-changed');
-
-        $this->assertEqualsCanonicalizing(
-            [$mine[0]->id, $mine[1]->id],
-            RecruitmentApplicationTag::query()->pluck('application_id')->map(fn ($id) => (int) $id)->all(),
-        );
-        $this->assertSame($hr->id, (int) RecruitmentApplicationTag::query()->value('created_by_user_id'));
-
-        // Removing in bulk logs who had applied each one.
-        $result = app(RecruitmentTagService::class)->bulkDetach($hr, $ids, $tag->id);
-        $this->assertSame(['changed' => 2, 'unchanged' => 0], $result);
-        $this->assertCount(2, Activity::query()->where('description', 'recruitment_tag.bulk_detached')->sole()->properties['removed']);
-    }
-
     public function test_bulk_tagging_refuses_an_oversized_or_empty_selection(): void
     {
         config(['recruitment.tags.bulk_limit' => 2]);
@@ -316,24 +246,6 @@ class RecruitmentAtsTest extends TestCase
         // Arabic names and spacing are normalized, not refused.
         $this->assertSame('مرشح قوي', $tags->create($hr, '  مرشح   قوي ')->name);
         $this->assertSame(0, RecruitmentTag::query()->where('name', 'like', '%script%')->count());
-    }
-
-    public function test_the_tag_list_needs_manage_tags(): void
-    {
-        $hr = $this->hr($this->homs);
-        $this->actingAs($hr);
-
-        Livewire::test(TagManager::class)
-            ->set('tagName', 'Managed')
-            ->call('create')
-            ->assertHasNoErrors();
-        $this->assertTrue(RecruitmentTag::query()->where('name', 'Managed')->exists());
-
-        $this->without($hr, ['recruitment-applicants.manage-tags']);
-        Livewire::test(TagManager::class)
-            ->set('tagName', 'Refused')
-            ->call('create')
-            ->assertForbidden();
     }
 
     // ------------------------------------------------------------------
