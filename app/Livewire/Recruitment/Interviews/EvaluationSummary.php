@@ -115,10 +115,15 @@ class EvaluationSummary extends Component
         );
     }
 
-    public function cancelPanel(): void
+    /** The user backs out: the panel closes and focus returns to the button that opened it. */
+    public function dismissPanel(): void
     {
-        $this->reset('panel', 'evaluationId', 'expectedVersion', 'recommendation', 'pros', 'cons', 'notes', 'reason');
-        $this->resetErrorBag();
+        $opener = $this->panel !== null && $this->evaluationId !== null
+            ? 'evaluation-'.$this->evaluationId.'-'.$this->panel
+            : 'evaluations-title';
+
+        $this->cancelPanel();
+        $this->dispatch('focus-element', id: $opener);
     }
 
     /** A reviewer saved on the same page: re-render through the same scoped query. */
@@ -147,6 +152,7 @@ class EvaluationSummary extends Component
                 && $interview->status === \App\Enums\RecruitmentInterviewStatus::Completed
                 && $interview->evaluations_closed_at === null,
             'closedReason' => $evaluations->closedReason($interview),
+            'timezone' => $interview->timezone ?: config('app.timezone'),
         ]);
     }
 
@@ -156,6 +162,14 @@ class EvaluationSummary extends Component
         $this->panel = $panel;
         $this->evaluationId = $evaluation->getKey();
         $this->expectedVersion = $evaluation->version;
+
+        $this->dispatch('focus-element', id: 'evaluation-panel-title');
+    }
+
+    private function cancelPanel(): void
+    {
+        $this->reset('panel', 'evaluationId', 'expectedVersion', 'recommendation', 'pros', 'cons', 'notes', 'reason');
+        $this->resetErrorBag();
     }
 
     private function attempt(callable $action, string $message): void
@@ -174,6 +188,9 @@ class EvaluationSummary extends Component
 
         $this->cancelPanel();
         $this->successToast($message);
+
+        // The panel and its buttons are gone: the evaluations, as they now stand, are next.
+        $this->dispatch('focus-element', id: 'evaluations-title');
     }
 
     /** Out of reach is a 404, like everywhere else on these pages. */

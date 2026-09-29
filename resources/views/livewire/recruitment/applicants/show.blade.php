@@ -123,8 +123,6 @@
                     @endif
                 @endforeach
 
-                <livewire:recruitment.applicants.application-tags :application-id="$application->id" :key="'tags-'.$application->id" />
-
                 {{-- Decisions: one button per move this user may make. The button
                      only picks the target; the service checks it all again. --}}
                 @php $targets = $statusTargets[$application->id] ?? []; @endphp
