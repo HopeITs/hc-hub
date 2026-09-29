@@ -19,6 +19,7 @@
         'token' => request()->route('token'),
         'lang' => $language,
     ]);
+    $canonicalUrl = $careerUrl($locale);
 @endphp
 
 <main dir="{{ $direction }}" class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
@@ -296,6 +297,11 @@
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.querySelector('[data-recruitment-wizard]');
         if (!form) return;
+
+        const canonicalUrl = @json($canonicalUrl);
+        if (window.location.pathname.endsWith('/applications') && window.history?.replaceState) {
+            window.history.replaceState({}, document.title, canonicalUrl);
+        }
 
         const steps = Array.from(form.querySelectorAll('[data-wizard-step]'));
         const segments = Array.from(form.querySelectorAll('[data-progress-segment]'));

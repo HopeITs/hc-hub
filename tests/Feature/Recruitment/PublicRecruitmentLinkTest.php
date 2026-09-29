@@ -257,7 +257,7 @@ class PublicRecruitmentLinkTest extends TestCase
 
         $eligible = $this->validSubmission('eligible@example.com');
         $eligible['answers']['date_of_birth'] = now()->subYears(18)->format('Y-m-d');
-        $this->post(route('careers.submit', $result['token']), $eligible)->assertStatus(202);
+        $this->post(route('careers.submit', $result['token']), $eligible)->assertRedirect();
 
         $this->assertDatabaseCount('recruitment_applications', 1);
     }
@@ -303,7 +303,9 @@ class PublicRecruitmentLinkTest extends TestCase
         $safe = $this->validSubmission('applicant@example.com', 'Applicant Name');
 
         $this->post(route('careers.submit', $result['token']), $safe)
-            ->assertStatus(202)
+            ->assertRedirect(route('careers.submitted', ['token' => $result['token'], 'lang' => 'en']));
+        $this->get(route('careers.submitted', ['token' => $result['token'], 'lang' => 'en']))
+            ->assertOk()
             ->assertSee(__('careers.submitted_title'));
         $this->assertSame(1, RecruitmentApplicant::query()->count());
         $this->assertSame(1, RecruitmentApplication::query()->count());
@@ -344,7 +346,7 @@ class PublicRecruitmentLinkTest extends TestCase
         $payload = $this->validSubmission('applicant@example.com');
         $payload['answers']['recommendations'] = [null];
 
-        $this->post(route('careers.submit', $result['token']), $payload)->assertStatus(202);
+        $this->post(route('careers.submit', $result['token']), $payload)->assertRedirect();
         $this->assertDatabaseCount('recruitment_applicant_files', 1);
     }
 
@@ -386,6 +388,7 @@ class PublicRecruitmentLinkTest extends TestCase
         $arabicPage = route('careers.show', ['token' => $result['token'], 'lang' => 'ar']);
         $wrongPostUrl = route('careers.submit', ['token' => $result['token'], 'lang' => 'ar']);
         $response->assertUnprocessable()
+            ->assertSee('window.history.replaceState', false)
             ->assertSee('href="'.$arabicPage.'"', false)
             ->assertDontSee('href="'.$wrongPostUrl.'"', false);
         $arabicResponse = $this->get($arabicPage);
@@ -395,6 +398,30 @@ class PublicRecruitmentLinkTest extends TestCase
 
         $this->assertMatchesRegularExpression('/id="field-email"[^>]*dir="ltr"/s', $arabicResponse->getContent());
         $this->assertMatchesRegularExpression('/id="field-phone"[^>]*dir="ltr"/s', $arabicResponse->getContent());
+    }
+
+    public function test_successful_submission_redirects_to_a_get_confirmation_page(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+        $payload = $this->validSubmission('arabic-success@example.com');
+        $payload['locale'] = 'ar';
+
+        $this->post(route('careers.submit', $result['token']), $payload)
+            ->assertRedirect(route('careers.submitted', ['token' => $result['token'], 'lang' => 'ar']));
+
+        $this->get(route('careers.submitted', ['token' => $result['token'], 'lang' => 'ar']))
+            ->assertOk()
+            ->assertSee('dir="rtl"', false)
+            ->assertSee(__('careers.submitted_title', [], 'ar'));
+
+        $this->get(route('careers.submit', ['token' => $result['token'], 'lang' => 'ar']))
+            ->assertStatus(405);
     }
 
     public function test_same_email_cannot_submit_twice_with_a_different_idempotency_key(): void
@@ -410,7 +437,7 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->post(
             route('careers.submit', $result['token']),
             $this->validSubmission('applicant@example.com'),
-        )->assertStatus(202);
+        )->assertRedirect();
         $this->post(
             route('careers.submit', $result['token']),
             $this->validSubmission(' APPLICANT@example.com ', 'Duplicate Applicant'),
@@ -433,7 +460,7 @@ class PublicRecruitmentLinkTest extends TestCase
         $payload = $this->validSubmission('receipt@example.com');
         $payload['answers']['response_copy'] = '1';
 
-        $this->post(route('careers.submit', $result['token']), $payload)->assertStatus(202);
+        $this->post(route('careers.submit', $result['token']), $payload)->assertRedirect();
 
         $application = RecruitmentApplication::query()->where('email_normalized', 'receipt@example.com')->sole();
         Queue::assertPushed(SendRecruitmentResponseReceipt::class, fn (SendRecruitmentResponseReceipt $job): bool => $job->applicationId === $application->id);
@@ -511,7 +538,7 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->post(
             route('careers.submit', $result['token']),
             $this->validSubmission('  INVITED@example.com ', 'Invited Person'),
-        )->assertStatus(202);
+        )->assertRedirect();
 
         $this->post(
             route('careers.submit', $result['token']),
@@ -570,7 +597,7 @@ class PublicRecruitmentLinkTest extends TestCase
             $this->post(
                 route('careers.submit', $result['token']),
                 $this->validSubmission('applicant@example.com', submissionKey: $submissionKey),
-            )->assertStatus(202);
+            )->assertRedirect();
         }
 
         $this->post(
@@ -760,7 +787,7 @@ class PublicRecruitmentLinkTest extends TestCase
         // Whatever address is posted, the application belongs to the account.
         $this->actingAs($staff)
             ->post(route('careers.submit', $result['token']), $this->validSubmission('someone.else@example.com', 'Rami H.'))
-            ->assertStatus(202);
+            ->assertRedirect();
 
         $application = RecruitmentApplication::query()->sole();
         $applicant = $application->applicant;
@@ -815,7 +842,7 @@ class PublicRecruitmentLinkTest extends TestCase
 
         $this->actingAs($staff)
             ->post(route('careers.submit', $result['token']), $this->validSubmission('personal@example.com'))
-            ->assertStatus(202);
+            ->assertRedirect();
 
         $applicant = RecruitmentApplication::query()->sole()->applicant;
         $this->assertSame('personal@example.com', $applicant->email_normalized);
