@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,11 +26,6 @@ class User extends Authenticatable
 
     protected $hidden = ['password', 'remember_token'];
 
-    public function profile(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class, 'employee_id');
-    }
-
     /**
      * Include the application's active-role flag whenever roles are eager loaded.
      *
@@ -37,6 +33,31 @@ class User extends Authenticatable
      * this override, activeRole() cannot inspect is_active on a loaded roles
      * collection and may incorrectly fall back to the first assigned role.
      */
+    /**
+     * Answers derived from this user's roles and grants, kept for the life of
+     * this instance (one request). A profile page asks the same policy
+     * questions hundreds of times; each used to go back to the database.
+     */
+    private array $requestMemo = [];
+
+    public function profile(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
+
+    /** @template T @param \Closure(): T $resolve @return T */
+    public function remember(string $key, Closure $resolve): mixed
+    {
+        return array_key_exists($key, $this->requestMemo)
+            ? $this->requestMemo[$key]
+            : $this->requestMemo[$key] = $resolve();
+    }
+
+    public function forgetRemembered(): void
+    {
+        $this->requestMemo = [];
+    }
+
     public function roles(): BelongsToMany
     {
         $registrar = app(PermissionRegistrar::class);
@@ -101,17 +122,16 @@ class User extends Authenticatable
 
     public function activeRole(): ?Role
     {
-        if ($this->relationLoaded('roles')) {
-            return $this->roles->firstWhere(fn ($r) => (bool) ($r->pivot->is_active ?? false));
-        }
-
-        return $this->roles()->wherePivot('is_active', true)->first();
+        // Loaded once; setActiveRole() and Spatie's assign/remove keep the
+        // loaded relation current, so this never outlives a role change.
+        return $this->loadMissing('roles')->roles
+            ->firstWhere(fn ($r) => (bool) ($r->pivot->is_active ?? false));
     }
 
     public function myRole(): ?string
     {
         return $this->activeRole()?->name
-            ?? $this->roles()->first()?->name
+            ?? $this->roles->first()?->name
             ?? null;
     }
 
@@ -210,7 +230,7 @@ class User extends Authenticatable
      */
     public function hasExplicitPermission(string $permission): bool
     {
-        if ($this->permissions()->where('name', $permission)->exists()) {
+        if ($this->loadMissing('permissions')->permissions->contains('name', $permission)) {
             return true;
         }
 
@@ -231,7 +251,7 @@ class User extends Authenticatable
 
         $slug = Str::after($roleName, 'HR-');
 
-        return City::where('slug', $slug)->value('id');
+        return $this->remember('city-id:'.$slug, fn (): ?int => City::where('slug', $slug)->value('id'));
     }
 
     public function inactiveRoles()
@@ -266,6 +286,7 @@ class User extends Authenticatable
             }
 
             $this->roles()->updateExistingPivot($roleId, ['is_active' => true]);
+            $this->forgetRemembered();
 
             if ($this->relationLoaded('roles')) {
                 $this->roles->each(function ($r) use ($roleId) {
