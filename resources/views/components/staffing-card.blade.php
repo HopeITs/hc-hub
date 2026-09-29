@@ -1,4 +1,4 @@
-@props(['node', 'compact' => false])
+@props(['node', 'compact' => false, 'view' => 'staff'])
 
 @php
     $position = $node['position'];
@@ -8,40 +8,48 @@
     $isRoot = $node['isRoot'];
     $passthrough = $node['passthrough'] ?? false;
 
-    $available = collect($node['actions'])->filter(fn (array $action): bool => $action['available']);
-    $blocked = collect($node['actions'])->filter(
-        fn (array $action): bool => ! $action['available'] && $action['reason'] !== null,
-    );
+    $holders = $position->activeContracts->map(fn ($contract) => $contract->employee)->filter()->values();
 
-    // The frame leads with the one thing the manager is scanning for: a seat
-    // standing open. Red edge means "you can act here"; a request already in
-    // flight mutes it back down, because the action has been taken.
-    $accent = match (true) {
-        $openSeats > 0 && $node['requests']->isEmpty() => 'bg-primary',
-        $node['requests']->isNotEmpty() => 'bg-secondary-light',
-        default => 'bg-neutral-200',
+    // Blocked actions are not listed. A manager reading the chart wants the one
+    // request they can start, and a paragraph explaining the four they cannot
+    // turned every card into an argument with itself.
+    $available = collect($node['actions'])->filter(fn (array $action): bool => $action['available']);
+
+    $isStaff = $view === 'staff';
+
+    // The organisation chart's box, and it earns the nesting the way that chart
+    // does: a manager's reports are drawn inside it, so the box is what makes a
+    // subtree's containment visible without a single extra line.
+    //
+    // Its border carries the one state worth colouring here — a seat standing
+    // open. A request already in flight mutes it back down, because the action
+    // has been taken and the card says so on its own line.
+    $frame = match (true) {
+        $isRoot => 'border-secondary-dark',
+        $openSeats > 0 && $node['requests']->isEmpty() => 'border-primary',
+        default => 'border-neutral-200',
     };
 
-    // The cards themselves are the organisation chart's own ID cards, unchanged.
-    // Everything around them is the staffing frame.
-    $minWidth = $compact ? 'min-w-36' : 'min-w-44';
+    // Only the positions view fixes a column width: a chart of posts is read by
+    // comparing them, and a ragged set of widths is what makes that hard. The
+    // staff view is as wide as its people need, and wraps rather than running
+    // off the side.
+    $width = $isStaff ? '' : ($compact ? 'w-44' : 'w-52');
 @endphp
 
 <div
     x-data="{ menu: false }"
-    x-on:click.outside="menu = false"
-    x-on:keydown.escape.window="menu = false"
-    {{-- No data-no-pan here on purpose: the frame stays draggable so the canvas
-         can be panned from anywhere. Only the menu opts out. --}}
-    class="relative {{ $minWidth }} shrink-0 rounded-surface border bg-white shadow-e1 transition
-           {{ $isRoot ? 'border-secondary-dark' : 'border-neutral-200' }}
-           {{ $passthrough ? 'opacity-60 hover:opacity-100' : '' }}
+    x-on:keydown.escape="menu = false"
+    {{-- No data-no-pan on the box on purpose: the canvas stays draggable from
+         anywhere. Only the links and the toggles opt out, so a click on one is a
+         click and not the start of a pan. --}}
+    class="rounded-surface border bg-white shadow-e1 transition
+           {{ $frame }} {{ $width }}
+           {{ $passthrough ? 'opacity-55 hover:opacity-100' : '' }}
            {{ $compact ? 'p-2' : 'p-3' }}"
 >
-    <span class="absolute inset-y-0 start-0 w-1 rounded-s-surface {{ $accent }}" aria-hidden="true"></span>
-
-    {{-- ---------- Seats ---------- --}}
-    <div class="mb-2 flex items-center justify-between gap-2 ps-1">
+    {{-- ---------- Seats and standing ---------- --}}
+    <div class="flex items-center justify-between gap-2 pb-2">
         @if ($capacity > 0 && $capacity <= 6)
             <div class="flex items-center gap-1" role="img"
                  aria-label="{{ __('recruitment.team_staffing.seats_label', ['filled' => $filled, 'capacity' => $capacity]) }}">
@@ -54,46 +62,67 @@
                 @endfor
             </div>
         @else
-            <span class="text-caption font-bold tabular-nums text-secondary-medium">
+            <span class="text-caption font-bold tabular-nums text-secondary-medium"
+                  aria-label="{{ __('recruitment.team_staffing.seats_label', ['filled' => $filled, 'capacity' => $capacity]) }}">
                 {{ $filled }}<span class="text-secondary-light">/{{ $capacity }}</span>
             </span>
         @endif
 
         @if ($isRoot)
-            <span class="rounded-full bg-secondary-dark px-2 py-0.5 text-caption font-bold uppercase tracking-wide text-white">
+            <span class="rounded-inset bg-secondary-dark px-2 py-0.5 text-caption font-bold uppercase tracking-wide text-white">
                 {{ __('recruitment.team_staffing.you') }}
             </span>
         @elseif ($openSeats > 0)
-            <span class="rounded-full bg-primary/10 px-2 py-0.5 text-caption font-bold text-primary">
+            <span class="rounded-inset bg-primary/10 px-2 py-0.5 text-caption font-bold text-primary">
                 {{ __('recruitment.team_staffing.open_capacity_count', ['count' => $openSeats]) }}
             </span>
         @endif
     </div>
 
-    {{-- ---------- The organisation chart's own card ----------
-         One card per position, never one per holder: a frame that grows with
-         its headcount would make every row a different width, and the chart
-         is read by comparing positions, not people. The seat strip above
-         already carries how many of them there are. --}}
-    <div class="flex justify-center">
-        @php($holder = $position->activeContracts->first()?->employee)
-        @if ($holder)
-            <x-org-node :position="$position" :employee="$holder"
-                        :is-manager="count($node['children']) > 0" :compact="$compact" />
-        @else
-            <x-org-empty-node :position="$position" :compact="$compact" />
-        @endif
-    </div>
+    {{-- ---------- The body, which is what the two views disagree about ---------- --}}
+    @if ($isStaff)
+        {{-- One card per person and one per empty seat, exactly as the
+             organisation chart draws a post. This view is read to find somebody,
+             and "+2 more in this position" is not somebody. They wrap rather than
+             running along one line, so a post held by six people is six cards in
+             two rows and not a card six wide. --}}
+        <div class="flex flex-wrap items-start justify-center gap-2">
+            @foreach ($holders as $person)
+                <x-org-node :key="'holder-'.$person->getKey()"
+                            :position="$position" :employee="$person"
+                            :is-manager="count($node['children']) > 0" :compact="$compact" />
+            @endforeach
 
-    @if ($filled > 1)
-        <p class="mt-1.5 text-center text-caption font-semibold text-secondary-light">
-            {{ __('recruitment.team_staffing.more_holders', ['count' => $filled - 1]) }}
-        </p>
+            @for ($seat = 0; $seat < max($openSeats, $holders->isEmpty() ? 1 : 0); $seat++)
+                <x-org-empty-node :key="'seat-'.$node['id'].'-'.$seat"
+                                  :position="$position" :compact="$compact" />
+            @endfor
+        </div>
+    @else
+        {{-- The establishment. No photograph: this view is read by comparing
+             posts, and a face is the loudest thing on a card that is not about
+             faces. --}}
+        <div>
+            <p class="text-small font-semibold leading-snug text-secondary-dark" dir="auto">
+                {{ $position->title }}
+            </p>
+            <p class="mt-1 truncate text-caption text-secondary-light" dir="auto"
+               title="{{ $position->program?->name }}">
+                {{ $position->program?->name }}
+            </p>
+            <p class="text-caption text-secondary-light" dir="auto">
+                @if ($holders->isNotEmpty())
+                    {{ $holders->first()->name }}@if ($holders->count() > 1)<span> {{ __('recruitment.team_staffing.more_holders', ['count' => $holders->count() - 1]) }}</span>@endif
+                @else
+                    <span class="font-semibold text-primary">{{ __('general.vacant-position') }}</span>
+                @endif
+            </p>
+        </div>
     @endif
 
-    {{-- ---------- Request in flight ---------- --}}
+    {{-- ---------- Requests already moving ---------- --}}
     @if ($node['requests']->isNotEmpty())
-        <div class="mt-2 space-y-1">
+        <ul class="mt-2 space-y-1">
             @foreach ($node['requests'] as $request)
                 @php($status = \App\Enums\RecruitmentRequestStatus::getLocalizedName((int) $request->status))
                 {{-- Literal classes: the colour name comes from the enum, and a
@@ -103,72 +132,55 @@
                     'secondary-medium' => 'bg-secondary-medium',
                     default => 'bg-secondary-light',
                 })
-                <a href="{{ route('recruitment.requests.show', ['requestId' => $request->id]) }}" wire:navigate
-                   class="flex items-center gap-1.5 rounded-control bg-neutral-50 px-2 py-1 text-caption font-semibold text-secondary-medium transition hover:bg-secondary-soft hover:text-primary">
-                    <span class="size-1.5 shrink-0 rounded-full {{ $dot }}" aria-hidden="true"></span>
-                    <span class="truncate">
-                        {{ \App\Enums\RecruitmentRequestType::getLocalizedName((int) $request->request_type)['value'] }}
-                        <span class="text-secondary-light">·</span> {{ $status['value'] }}
-                    </span>
-                </a>
+                <li wire:key="staffing-request-{{ $request->id }}">
+                    <a href="{{ route('recruitment.requests.show', ['requestId' => $request->id]) }}" wire:navigate
+                       data-no-pan
+                       class="flex items-center gap-1.5 rounded-inset bg-neutral-50 px-2 py-1 text-caption font-semibold text-secondary-medium transition hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
+                        <span class="size-1.5 shrink-0 rounded-full {{ $dot }}" aria-hidden="true"></span>
+                        <span class="truncate">
+                            {{ \App\Enums\RecruitmentRequestType::getLocalizedName((int) $request->request_type)['value'] }}
+                            <span class="text-secondary-light">·</span> {{ $status['value'] }}
+                        </span>
+                    </a>
+                </li>
             @endforeach
-        </div>
+        </ul>
     @endif
 
-    {{-- ---------- Action trigger ---------- --}}
-    @if ($available->isNotEmpty() || $blocked->isNotEmpty())
-        <button type="button" x-on:click="menu = ! menu" :aria-expanded="menu" aria-haspopup="menu"
-                @disabled($available->isEmpty())
-                class="mt-2 flex w-full items-center justify-between gap-1 rounded-control px-2 py-1.5 text-caption font-bold transition
-                       {{ $available->isNotEmpty()
-                           ? 'bg-primary text-white hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1'
-                           : 'cursor-not-allowed bg-neutral-100 text-secondary-light' }}">
+    {{-- ---------- Starting a request ----------
+         The list opens in place rather than as an absolute dropdown: the canvas
+         clips its own overflow, so a menu hanging off a card near the edge was
+         cut in half. Nothing is rendered at all when there is nothing to start —
+         a disabled control that will not say why is worse than no control. --}}
+    @if ($available->isNotEmpty())
+        <button type="button" x-on:click="menu = ! menu" :aria-expanded="menu" data-no-pan
+                class="mt-2 flex w-full items-center justify-between gap-1 rounded-control bg-primary px-2 py-1.5 text-caption font-bold text-white transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
             <span class="flex min-w-0 items-center gap-1">
                 <svg class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
                 </svg>
-                <span class="truncate">
-                    {{ $available->isNotEmpty()
-                        ? __('recruitment.team_staffing.open_request')
-                        : __('recruitment.team_staffing.no_action_available') }}
-                </span>
+                <span class="truncate">{{ __('recruitment.team_staffing.open_request') }}</span>
             </span>
-            @if ($available->isNotEmpty())
-                <svg class="size-3 shrink-0 transition-transform" :class="menu ? 'rotate-180' : ''"
-                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
-                </svg>
-            @endif
+            <svg class="size-3 shrink-0 transition-transform duration-200" :class="menu ? 'rotate-180' : ''"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6" />
+            </svg>
         </button>
-    @endif
 
-    {{-- ---------- Action menu ---------- --}}
-    @if ($available->isNotEmpty())
-        <div x-show="menu" x-cloak x-transition.origin.top data-no-pan role="menu"
-             class="absolute inset-x-0 top-full z-30 mt-1 min-w-48 overflow-hidden rounded-surface border border-neutral-200 bg-white text-start shadow-e3">
-            @foreach ($available as $action)
-                <a href="{{ $action['url'] }}" wire:navigate role="menuitem"
-                   class="flex items-center gap-2 border-b border-neutral-100 px-3 py-2.5 text-small font-semibold text-secondary-dark transition last:border-b-0 hover:bg-secondary-soft hover:text-primary">
-                    <span class="size-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
-                    {{ $action['label'] }}
-                </a>
+        <ul x-show="menu" x-cloak x-collapse data-no-pan
+            class="mt-1 overflow-hidden rounded-control border border-neutral-200 bg-white">
+            @foreach ($available as $type => $action)
+                <li wire:key="staffing-action-{{ $node['id'] }}-{{ $type }}">
+                    <a href="{{ $action['url'] }}" wire:navigate
+                       class="flex items-center gap-2 border-b border-neutral-100 px-2 py-2 text-caption font-semibold text-secondary-dark transition last:border-b-0 hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary">
+                        <span class="size-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true"></span>
+                        <span class="leading-snug">{{ $action['label'] }}</span>
+                    </a>
+                </li>
             @endforeach
-
-            @if ($blocked->isNotEmpty())
-                <div class="border-t border-neutral-200 bg-neutral-50 px-3 py-2">
-                    <p class="text-caption font-bold uppercase tracking-wide text-secondary-light">
-                        {{ __('recruitment.team_staffing.unavailable_actions') }}
-                    </p>
-                    <ul class="mt-1.5 space-y-1">
-                        @foreach ($blocked as $blockedAction)
-                            <li class="text-caption leading-snug text-secondary-light">
-                                <span class="font-bold text-secondary-medium">{{ $blockedAction['label'] }}:</span>
-                                {{ $blockedAction['reason'] }}
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-        </div>
+        </ul>
     @endif
+
+    {{-- The reports, drawn inside this box by the node partial. --}}
+    {{ $slot }}
 </div>

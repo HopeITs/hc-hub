@@ -253,10 +253,14 @@ class RecruitmentRequestSubmissionService
             $clash = (clone $base)
                 ->where('target_vacancy_id', $request->target_vacancy_id)
                 ->whereIn('request_type', [Type::FillVacancy, Type::CloseVacancy])
-                ->exists();
+                ->first(['request_number']);
 
-            if ($clash) {
-                throw ValidationException::withMessages(['data.vacancy_id' => __('recruitment.duplicate_vacancy_request')]);
+            if ($clash !== null) {
+                throw ValidationException::withMessages([
+                    'data.vacancy_id' => __('recruitment.duplicate_vacancy_request', [
+                        'number' => $clash->request_number,
+                    ]),
+                ]);
             }
 
             return;
@@ -269,10 +273,14 @@ class RecruitmentRequestSubmissionService
         $clash = $base
             ->where('target_position_id', $request->target_position_id)
             ->where('request_type', $type)
-            ->exists();
+            ->first(['request_number']);
 
-        if ($clash) {
-            throw ValidationException::withMessages(['data.position_id' => __('recruitment.duplicate_position_request')]);
+        if ($clash !== null) {
+            throw ValidationException::withMessages([
+                'data.position_id' => __('recruitment.duplicate_position_request', [
+                    'number' => $clash->request_number,
+                ]),
+            ]);
         }
     }
 

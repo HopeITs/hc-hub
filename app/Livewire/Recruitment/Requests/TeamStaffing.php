@@ -32,12 +32,28 @@ class TeamStaffing extends Component
     public array $collapsed = [];
 
     /**
-     * Prune the chart to the branches that lead somewhere actionable — a seat
-     * standing open, or a request already moving. A manager of forty positions
-     * opens this page to find the few that need them, not to read the roster.
+     * Prune the chart to the branches that lead to an unfilled seat.
+     *
+     * A manager of forty positions opens this page to find the few that need
+     * them, not to read the roster. The filter that replaced "needs action" is
+     * narrower on purpose: a request already in flight is visible on its own
+     * card and needs no filter of its own, while an empty seat is the thing
+     * this page exists to find.
      */
-    #[Url(as: 'needs', except: false)]
-    public bool $needsActionOnly = false;
+    #[Url(as: 'vacant', except: false)]
+    public bool $vacantOnly = false;
+
+    /**
+     * Which face of the chart is showing.
+     *
+     * The same tree either way — the shape of the team is the point of the page
+     * — but a manager asks two different questions of it. "Who works for me"
+     * wants a card per person; "where is the establishment short" wants a card
+     * per post, with its seats, requests and the action that fixes it. One
+     * chart answering both at once answered neither clearly.
+     */
+    #[Url(as: 'view', except: 'staff')]
+    public string $view = 'staff';
 
     public string $density = 'comfortable';
 
@@ -67,10 +83,20 @@ class TeamStaffing extends Component
         }
     }
 
-    public function toggleNeedsAction(): void
+    public function toggleVacantOnly(): void
     {
-        $this->needsActionOnly = ! $this->needsActionOnly;
+        $this->vacantOnly = ! $this->vacantOnly;
         $this->collapsed = [];
+    }
+
+    /** @param  'staff'|'positions'  $view */
+    public function setView(string $view): void
+    {
+        if (! in_array($view, ['staff', 'positions'], true)) {
+            return;
+        }
+
+        $this->view = $view;
     }
 
     public function toggleDensity(): void
@@ -186,17 +212,35 @@ class TeamStaffing extends Component
                 in_array($positionId, $proposedManagerIds, true),
             );
 
+            // Everything the chart already knows travels to the form, so the
+            // form never asks again what the card was clicked on. A vacancy
+            // only rides along when there is exactly one to mean: with two
+            // open, which one is a real question and the form asks it.
+            $vacancies = $openVacancies->get($positionId, collect());
+            $onlyVacancyId = $vacancies->count() === 1 ? (int) $vacancies->first()->getKey() : null;
+
             $actionItems = [];
             foreach ($availability as $type => $item) {
                 $isCreate = $type === 'create_position';
+                $vacancyScoped = in_array((int) $type, [
+                    RecruitmentRequestType::FillVacancy,
+                    RecruitmentRequestType::CloseVacancy,
+                ], true);
+
+                $parameters = $isCreate
+                    ? ['type' => RecruitmentRequestType::CreatePosition, 'direct_manager_id' => $positionId]
+                    : ['type' => $type, 'position_id' => $positionId];
+
+                if ($vacancyScoped && $onlyVacancyId !== null) {
+                    $parameters['vacancy_id'] = $onlyVacancyId;
+                }
+
                 $actionItems[$type] = [
                     ...$item,
                     'label' => $isCreate
                         ? __('recruitment.team_staffing.create_position')
                         : RecruitmentRequestType::getLocalizedName((int) $type)['value'],
-                    'url' => $isCreate
-                        ? route('recruitment.requests.create', ['type' => RecruitmentRequestType::CreatePosition, 'direct_manager_id' => $positionId])
-                        : route('recruitment.requests.create', ['type' => $type, 'position_id' => $positionId]),
+                    'url' => route('recruitment.requests.create', $parameters),
                 ];
             }
 
@@ -213,9 +257,6 @@ class TeamStaffing extends Component
                 'openVacancies' => $openVacancies->get($positionId, collect()),
                 'actions' => $actionItems,
                 'openSeats' => $openSeats,
-                // What draws the manager's eye: a seat standing open, or a
-                // request already in flight that they may need to chase.
-                'needsAction' => $openSeats > 0 || $requests->isNotEmpty(),
                 // Filled in by the prune pass below, which can see the subtree.
                 'subtreeOpenSeats' => 0,
                 'passthrough' => false,
@@ -223,7 +264,7 @@ class TeamStaffing extends Component
         };
 
         $tree = $this->summarise($build($root, 0));
-        $visible = $this->needsActionOnly ? $this->prune($tree) : $tree;
+        $visible = $this->vacantOnly ? $this->prune($tree) : $tree;
 
         $summary = [
             'positions' => $positions->count(),
@@ -253,23 +294,22 @@ class TeamStaffing extends Component
         $node['children'] = $children;
         $node['subtreeOpenSeats'] = $node['openSeats']
             + array_sum(array_column($children, 'subtreeOpenSeats'));
-        $node['subtreeNeedsAction'] = $node['needsAction']
-            || collect($children)->contains(fn (array $child): bool => $child['subtreeNeedsAction']);
 
         return $node;
     }
 
     /**
-     * Drop every branch that leads nowhere actionable. A node that needs nothing
-     * itself but carries an actionable descendant is kept as a passthrough, so
-     * the reporting line stays readable instead of the chart re-parenting itself.
+     * Drop every branch with no unfilled seat anywhere inside it. A node that is
+     * fully staffed itself but carries a short descendant is kept as a
+     * passthrough, so the reporting line stays readable instead of the chart
+     * re-parenting itself onto a grandchild.
      *
      * @param  array<string, mixed>  $node
      * @return array<string, mixed>|null
      */
     private function prune(array $node): ?array
     {
-        if (! ($node['subtreeNeedsAction'] ?? false) && ! $node['isRoot']) {
+        if (($node['subtreeOpenSeats'] ?? 0) < 1 && ! $node['isRoot']) {
             return null;
         }
 
@@ -278,7 +318,7 @@ class TeamStaffing extends Component
             ->filter()
             ->values()
             ->all();
-        $node['passthrough'] = ! $node['needsAction'] && ! $node['isRoot'];
+        $node['passthrough'] = $node['openSeats'] < 1 && ! $node['isRoot'];
 
         return $node;
     }

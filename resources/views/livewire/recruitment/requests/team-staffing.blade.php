@@ -2,131 +2,127 @@
 
 <x-slot:title>{{ __('recruitment.team_staffing.title') }}</x-slot:title>
 
-<div class="space-y-4 pb-8">
+<div class="space-y-6 pb-8">
+    <x-recruitment.requests-header
+        current="team"
+        :title="__('recruitment.team_staffing.title')"
+        :description="__('recruitment.team_staffing.description')" />
+
     <section class="isolate overflow-hidden rounded-surface border border-neutral-200 bg-white shadow-e1">
-
-        {{-- ---------- Header + summary ---------- --}}
-        <div class="relative bg-secondary-dark px-6 py-6 text-white">
-            <div class="relative flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
-                <div>
-                    <div class="mb-2 flex items-center gap-2 text-caption font-semibold uppercase tracking-wider text-white/70">
-                        <x-icons.code-fork class="size-4" />
-                        {{ __('recruitment.requests') }}
-                    </div>
-                    <h1 class="text-h3 font-bold leading-tight tracking-tight sm:text-h2">
-                        {{ __('recruitment.team_staffing.title') }}
-                    </h1>
-                    <p class="mt-2 max-w-2xl text-body leading-relaxed text-white/75">
-                        {{ __('recruitment.team_staffing.description') }}
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    @foreach ([
-                        ['value' => $summary['positions'], 'label' => __('recruitment.team_staffing.positions'), 'accent' => false],
-                        ['value' => $summary['capacity'], 'label' => __('recruitment.team_staffing.approved_headcount'), 'accent' => false],
-                        ['value' => $summary['filled'], 'label' => __('recruitment.team_staffing.filled_headcount'), 'accent' => false],
-                        ['value' => $summary['vacancies'], 'label' => __('recruitment.team_staffing.open_capacity'), 'accent' => true],
-                    ] as $stat)
-                        <div class="relative min-w-28 overflow-hidden rounded-surface border border-white/10 bg-white/10 px-4 py-3">
-                            @if ($stat['accent'])
-                                <span class="absolute inset-y-0 start-0 w-1 bg-primary" aria-hidden="true"></span>
-                            @endif
-                            <div class="text-h3 font-bold tabular-nums">{{ number_format($stat['value']) }}</div>
-                            <div class="mt-1 text-caption font-medium leading-snug text-white/80">{{ $stat['label'] }}</div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        {{-- ---------- Tabs ---------- --}}
-        <nav class="flex items-center gap-1 border-b border-neutral-200 bg-white px-4 pt-3"
-             aria-label="{{ __('recruitment.requests') }}">
-            <a href="{{ route('recruitment.requests.index') }}" wire:navigate
-               class="flex items-center gap-2 rounded-t-xl border-b-2 border-transparent px-4 py-2 text-body font-semibold text-secondary-light transition hover:text-secondary-dark">
-                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h18M3 12h18M3 19h18" />
-                </svg>
-                {{ __('recruitment.navigation_requests') }}
-            </a>
-            <span class="flex items-center gap-2 rounded-t-xl border-b-2 border-primary px-4 py-2 text-body font-semibold text-primary"
-                  aria-current="page">
-                <x-icons.code-fork class="size-4" />
-                {{ __('recruitment.team_staffing.tab') }}
-            </span>
-        </nav>
-
         @if ($root)
-            {{-- ---------- Toolbar ---------- --}}
-            <div class="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 bg-white/95 px-4 py-2 backdrop-blur">
-                <div class="flex flex-wrap items-center gap-2">
-                    {{-- The one filter a manager actually wants: hide everything
-                         that is fully staffed and quiet. Goes solid red while on,
-                         so the chart never silently omits cards. --}}
-                    <button type="button" wire:click="toggleNeedsAction"
-                            aria-pressed="{{ $needsActionOnly ? 'true' : 'false' }}"
-                            class="flex items-center gap-2 rounded-surface border px-3 py-2 text-small font-semibold transition
-                                   {{ $needsActionOnly
-                                       ? 'border-primary bg-primary text-white hover:opacity-90'
-                                       : 'border-neutral-200 bg-white text-secondary-medium hover:border-secondary-light hover:bg-secondary-soft hover:text-primary' }}">
-                        <svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 5h18l-7 8v6l-4 2v-8L3 5Z" />
-                        </svg>
-                        {{ __('recruitment.team_staffing.needs_action_only') }}
-                        @if ($summary['vacancies'] > 0)
-                            <span class="flex size-5 items-center justify-center rounded-full text-caption font-bold
-                                         {{ $needsActionOnly ? 'bg-white text-primary' : 'bg-primary text-white' }}">
-                                {{ $summary['vacancies'] }}
-                            </span>
-                        @endif
-                    </button>
+            {{-- ---------- Toolbar ----------
+                 Two rows on purpose. The top row decides what the chart is
+                 about — which face, how much of it, how dense — and the bottom
+                 row only moves the camera. Mixing them put "show me the posts
+                 that are short" beside "zoom in", which are not the same kind
+                 of decision. --}}
+            <div class="sticky top-0 z-20 border-b border-neutral-200 bg-white/95 backdrop-blur">
+                <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5">
+                    {{-- The two faces of the same tree. A segmented control
+                         rather than tabs: it changes what the cards say, not
+                         which page you are on, and the page already has a tab
+                         strip above that does the other thing. --}}
+                    <div class="flex items-center rounded-control border border-neutral-200 bg-neutral-50 p-0.5"
+                         role="group" aria-label="{{ __('recruitment.team_staffing.view_label') }}">
+                        @foreach (['staff', 'positions'] as $mode)
+                            <button type="button" wire:click="setView('{{ $mode }}')"
+                                    aria-pressed="{{ $view === $mode ? 'true' : 'false' }}"
+                                    class="rounded-inset px-3 py-1.5 text-small font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1
+                                           {{ $view === $mode
+                                               ? 'bg-white text-secondary-dark shadow-e1'
+                                               : 'text-secondary-medium hover:text-secondary-dark' }}">
+                                {{ __('recruitment.team_staffing.views.'.$mode) }}
+                            </button>
+                        @endforeach
+                    </div>
 
-                    @if ($needsActionOnly && $hidden > 0)
-                        <span class="text-small font-medium text-secondary-light">
-                            {{ __('recruitment.team_staffing.hidden_positions', ['count' => $hidden]) }}
-                        </span>
-                    @endif
-
-                    <button type="button" wire:click="toggleDensity"
-                            class="flex items-center gap-2 rounded-surface border border-neutral-200 bg-white px-3 py-2 text-small font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
-                        <x-icons.code-fork class="size-3.5" />
-                        {{ $compact ? __('general.comfortable-view') : __('general.compact-view') }}
-                    </button>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-2">
-                    <div class="flex items-center overflow-hidden rounded-surface border border-neutral-200 bg-neutral-50">
-                        <button type="button" wire:click="zoomOut" title="{{ __('general.zoom-out') }}"
-                                class="flex size-8 items-center justify-center text-secondary-medium transition hover:bg-white hover:text-primary">
-                            <span class="text-h4 font-bold">-</span>
+                    <div class="flex flex-wrap items-center gap-2">
+                        {{-- Goes solid while on, so the chart never silently
+                             omits cards without saying it is doing so. --}}
+                        <button type="button" wire:click="toggleVacantOnly"
+                                aria-pressed="{{ $vacantOnly ? 'true' : 'false' }}"
+                                class="flex items-center gap-2 rounded-control border px-3 py-1.5 text-small font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1
+                                       {{ $vacantOnly
+                                           ? 'border-primary bg-primary text-white hover:bg-primary-hover'
+                                           : 'border-neutral-200 bg-white text-secondary-medium hover:border-secondary-light hover:bg-secondary-soft hover:text-primary' }}">
+                            {{ __('recruitment.team_staffing.vacant_only') }}
+                            @if ($summary['vacancies'] > 0)
+                                <span class="flex min-w-5 items-center justify-center rounded-full px-1 text-caption font-bold tabular-nums
+                                             {{ $vacantOnly ? 'bg-white text-primary' : 'bg-primary text-white' }}">
+                                    {{ $summary['vacancies'] }}
+                                </span>
+                            @endif
                         </button>
-                        <span class="min-w-12 border-x border-neutral-200 bg-white px-1 py-2 text-center text-small font-semibold tabular-nums text-secondary-dark">
-                            {{ round($scale * 100) }}%
-                        </span>
-                        <button type="button" wire:click="zoomIn" title="{{ __('general.zoom-in') }}"
-                                class="flex size-8 items-center justify-center text-secondary-medium transition hover:bg-white hover:text-primary">
-                            <span class="text-h4 font-bold">+</span>
+
+                        <button type="button" wire:click="toggleDensity"
+                                class="rounded-control border border-neutral-200 bg-white px-3 py-1.5 text-small font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
+                            {{ $compact ? __('general.comfortable-view') : __('general.compact-view') }}
                         </button>
                     </div>
-                    <button type="button" wire:click="fitToScreen"
-                            class="rounded-surface border border-neutral-200 bg-white px-3 py-2 text-small font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary">
-                        {{ __('general.fit-to-screen') }}
-                    </button>
-                    <button type="button" wire:click="expandAll" x-on:click="$dispatch('staffing-expand-all')"
-                            class="rounded-surface border border-neutral-200 bg-white px-3 py-2 text-small font-semibold text-secondary-medium transition hover:bg-neutral-50">
-                        {{ __('general.expand-all') }}
-                    </button>
-                    <button type="button" wire:click="collapseAll" x-on:click="$dispatch('staffing-collapse-all')"
-                            class="rounded-surface bg-primary px-3 py-2 text-small font-semibold text-white transition hover:opacity-90">
-                        {{ __('general.collapse-all') }}
-                    </button>
+                </div>
+
+                {{-- ---------- Camera + reading ---------- --}}
+                <div class="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-100 px-4 py-2">
+                    {{-- The establishment in one line. Not a row of tiles: these
+                         are four numbers a manager glances at, not the subject
+                         of the page. --}}
+                    <p class="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-secondary-light">
+                        @foreach ([
+                            ['value' => $summary['positions'], 'label' => __('recruitment.team_staffing.positions'), 'accent' => false],
+                            ['value' => $summary['capacity'], 'label' => __('recruitment.team_staffing.approved_headcount'), 'accent' => false],
+                            ['value' => $summary['filled'], 'label' => __('recruitment.team_staffing.filled_headcount'), 'accent' => false],
+                            ['value' => $summary['vacancies'], 'label' => __('recruitment.team_staffing.open_capacity'), 'accent' => true],
+                        ] as $index => $stat)
+                            @if ($index > 0)
+                                <span aria-hidden="true" class="text-neutral-300">·</span>
+                            @endif
+                            <span class="{{ $stat['accent'] && $stat['value'] > 0 ? 'font-semibold text-primary' : '' }}">
+                                <span class="font-semibold tabular-nums {{ $stat['accent'] && $stat['value'] > 0 ? '' : 'text-secondary-dark' }}">{{ number_format($stat['value']) }}</span>
+                                {{ $stat['label'] }}
+                            </span>
+                        @endforeach
+
+                        @if ($vacantOnly && $hidden > 0)
+                            <span aria-hidden="true" class="text-neutral-300">·</span>
+                            <span class="font-medium">{{ __('recruitment.team_staffing.hidden_positions', ['count' => $hidden]) }}</span>
+                        @endif
+                    </p>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div class="flex items-center overflow-hidden rounded-control border border-neutral-200 bg-neutral-50">
+                            <button type="button" wire:click="zoomOut" title="{{ __('general.zoom-out') }}"
+                                    class="flex size-7 items-center justify-center text-h4 font-bold leading-none text-secondary-medium transition hover:bg-white hover:text-primary">
+                                <span aria-hidden="true">−</span>
+                                <span class="sr-only">{{ __('general.zoom-out') }}</span>
+                            </button>
+                            <span class="min-w-12 border-x border-neutral-200 bg-white px-1 py-1.5 text-center text-caption font-semibold tabular-nums text-secondary-dark">
+                                {{ round($scale * 100) }}%
+                            </span>
+                            <button type="button" wire:click="zoomIn" title="{{ __('general.zoom-in') }}"
+                                    class="flex size-7 items-center justify-center text-h4 font-bold leading-none text-secondary-medium transition hover:bg-white hover:text-primary">
+                                <span aria-hidden="true">+</span>
+                                <span class="sr-only">{{ __('general.zoom-in') }}</span>
+                            </button>
+                        </div>
+
+                        @foreach ([
+                            ['action' => 'fitToScreen', 'label' => __('general.fit-to-screen'), 'dispatch' => null],
+                            ['action' => 'expandAll', 'label' => __('general.expand-all'), 'dispatch' => 'staffing-expand-all'],
+                            ['action' => 'collapseAll', 'label' => __('general.collapse-all'), 'dispatch' => 'staffing-collapse-all'],
+                        ] as $control)
+                            <button type="button" wire:click="{{ $control['action'] }}"
+                                    @if ($control['dispatch']) x-on:click="$dispatch('{{ $control['dispatch'] }}')" @endif
+                                    class="rounded-control border border-neutral-200 bg-white px-2.5 py-1.5 text-caption font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
+                                {{ $control['label'] }}
+                            </button>
+                        @endforeach
+                    </div>
                 </div>
             </div>
 
             {{-- ---------- Canvas ---------- --}}
             <div class="relative">
-                <div wire:loading.flex wire:target="toggleNeedsAction,toggleDensity,expandAll,collapseAll"
+                <div wire:loading.flex wire:target="toggleVacantOnly,toggleDensity,setView,expandAll,collapseAll"
                      class="absolute inset-0 z-30 items-center justify-center bg-white/75 backdrop-blur-[1px]">
                     <div class="flex items-center gap-2 rounded-surface border border-neutral-200 bg-white px-4 py-3 text-body font-semibold text-secondary-medium shadow-e3">
                         <x-icons.spinner class="size-5 animate-spin text-primary" />
@@ -209,7 +205,7 @@
                     :class="dragging ? 'cursor-grabbing' : 'cursor-grab'"
                     class="relative min-h-[min(72vh,820px)] w-full touch-none select-none overflow-hidden overscroll-none bg-[radial-gradient(circle_at_center,_#e5e7eb_1px,_transparent_1px)] [background-size:22px_22px]"
                 >
-                    <p class="pointer-events-none absolute bottom-3 start-3 z-10 rounded-surface border border-neutral-200/80 bg-white/90 px-2 py-1 text-caption font-medium text-secondary-light shadow-e1 backdrop-blur-sm">
+                    <p class="pointer-events-none absolute bottom-3 start-3 z-10 rounded-control border border-neutral-200/80 bg-white/90 px-2 py-1 text-caption font-medium text-secondary-light shadow-e1 backdrop-blur-sm">
                         {{ __('general.org-chart-nav-hint') }}
                     </p>
 
@@ -218,6 +214,7 @@
                             @include('livewire.recruitment.requests.partials.team-staffing-node', [
                                 'node' => $root,
                                 'compact' => $compact,
+                                'view' => $view,
                                 'isFirst' => true,
                                 'isLast' => true,
                                 'isRootLevel' => true,
@@ -245,7 +242,7 @@
         @endif
     </section>
 
-    {{-- The chart's cards are the organisation chart's own, so clicking one
+    {{-- The people view uses the organisation chart's own cards, so clicking one
          opens the same employee profile it opens there. --}}
     <livewire:position.profile-drawer />
 </div>

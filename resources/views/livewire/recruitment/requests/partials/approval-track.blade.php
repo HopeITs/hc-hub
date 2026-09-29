@@ -3,34 +3,49 @@
 
     A request sent back for changes becomes a new version and takes the road
     again from the start (D58), so its history is several short journeys rather
-    than one long one. Each version gets its own line, and everything that
-    happened to that version sits on it: what the requester changed, who
-    decided each stop and what they said, and how the version ended.
+    than one long one. Each version gets its own rail, and everything that
+    happened to that version sits on it: what the requester changed, who decided
+    each stop and what they said, and how the version ended.
 
-    The line carries the progress, not the circles. A segment darkens as the
-    request reaches the stop beyond it, so the track reads as a road travelled
-    rather than as a row of ticks.
+    The rail carries the progress, not the dots. It is one continuous track of a
+    single weight, filled up to how far the version travelled — the earlier
+    version drew each segment separately at two different thicknesses, so the
+    line visibly stepped at every stop and the eye read the steps instead of the
+    journey.
 --}}
+@php
+    $states = \App\Services\RecruitmentApprovalTrack::class;
+@endphp
+
 <section class="space-y-4" aria-label="{{ __('recruitment.track.title') }}">
     <h2 class="text-h4 font-semibold">{{ __('recruitment.track.title') }}</h2>
 
     @foreach ($track as $round)
-        @php $stops = array_merge($round['stops'], [$round['outcome']]); @endphp
+        @php
+            $stops = array_merge($round['stops'], [$round['outcome']]);
 
-        <article class="rounded-surface border border-neutral-200 bg-white p-6"
-            wire:key="round-{{ $round['version'] ?? 'draft' }}">
+            $reached = fn (?array $stop): bool => $stop !== null && in_array($stop['state'], [
+                $states::DONE, $states::CURRENT, $states::SKIPPED,
+            ], true);
+        @endphp
 
-            <header class="flex flex-wrap items-baseline justify-between gap-2">
-                <h3 class="text-sm font-semibold">
+        <article class="rounded-surface border border-neutral-200 bg-white p-5 sm:p-6"
+                 wire:key="round-{{ $round['version'] ?? 'draft' }}">
+
+            <header class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <h3 class="text-small font-semibold text-secondary-dark">
                     @if ($round['version'])
                         {{ __('recruitment.version_no', ['no' => $round['version']]) }}
                     @else
                         {{ __('recruitment.track.draft') }}
                     @endif
                 </h3>
-                <p class="text-xs text-secondary-medium">
+                <p class="text-caption text-secondary-light">
                     @if ($round['author']){{ $round['author'] }}@endif
-                    @if ($round['created']) &middot; {{ $round['created'] }}@endif
+                    @if ($round['created'])
+                        <span aria-hidden="true" class="text-neutral-300">·</span>
+                        <span class="tabular-nums">{{ $round['created'] }}</span>
+                    @endif
                 </p>
             </header>
 
@@ -38,79 +53,91 @@
                  reading it needs to know whether their own approval still
                  stands, and "edited" alone does not answer that (RV-1b). --}}
             @if ($round['edits'])
-                <ul class="mt-4 space-y-1 rounded-control bg-neutral-50 p-3 text-xs">
+                <ul class="mt-4 divide-y divide-neutral-100 rounded-control border border-neutral-100 text-caption">
                     @foreach ($round['edits'] as $edit)
-                        <li dir="auto">
-                            <span class="font-medium">{{ __('recruitment.fields.'.$edit['field']) }}</span>
-                            <span class="text-secondary-medium">
-                                {{ \Illuminate\Support\Str::limit((string) ($edit['from'] ?? '—'), 40) }}
-                                &rarr;
-                                {{ \Illuminate\Support\Str::limit((string) ($edit['to'] ?? '—'), 40) }}
+                        <li class="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 px-3 py-2" dir="auto">
+                            <span class="font-semibold text-secondary-dark">{{ __('recruitment.fields.'.$edit['field']) }}</span>
+                            <span class="text-secondary-light">
+                                <span class="line-through">{{ \Illuminate\Support\Str::limit((string) ($edit['from'] ?? '—'), 40) }}</span>
+                                <span aria-hidden="true" class="px-0.5">&rarr;</span>
+                                <span class="font-medium text-secondary-dark">{{ \Illuminate\Support\Str::limit((string) ($edit['to'] ?? '—'), 40) }}</span>
                             </span>
                         </li>
                     @endforeach
                 </ul>
             @endif
 
-            <ol class="mt-6 flex items-start justify-between gap-2" role="list">
+            <ol class="mt-6 flex items-start" role="list">
                 @foreach ($stops as $index => $stop)
                     @php
-                        $reached = in_array($stop['state'], [
-                            \App\Services\RecruitmentApprovalTrack::DONE,
-                            \App\Services\RecruitmentApprovalTrack::CURRENT,
-                            \App\Services\RecruitmentApprovalTrack::SKIPPED,
-                        ], true);
+                        $isReached = $reached($stop);
+                        // The segment after this dot belongs to the next stop:
+                        // the road is only travelled once the next stop is.
+                        $nextReached = $reached($stops[$index + 1] ?? null);
 
                         // Written out rather than interpolated: Tailwind reads
                         // class names as literal text, so a built-up string
                         // would generate nothing at all.
-                        $ring = match ($stop['state']) {
-                            \App\Services\RecruitmentApprovalTrack::DONE => 'border-neutral-900 bg-neutral-900',
-                            \App\Services\RecruitmentApprovalTrack::CURRENT => 'border-neutral-900 bg-white',
-                            \App\Services\RecruitmentApprovalTrack::SKIPPED => 'border-neutral-300 border-dashed bg-white',
-                            default => 'border-neutral-300 bg-white',
+                        $dot = match ($stop['state']) {
+                            $states::DONE => 'bg-secondary-dark',
+                            $states::CURRENT => 'bg-white ring-2 ring-primary',
+                            $states::SKIPPED => 'border border-dashed border-neutral-400 bg-white',
+                            default => 'bg-neutral-200',
                         };
                     @endphp
 
-                    <li class="relative flex flex-1 flex-col items-center text-center"
+                    <li class="flex flex-1 flex-col items-center text-center"
                         wire:key="stop-{{ $round['version'] ?? 'draft' }}-{{ $index }}">
 
-                        @if ($index > 0)
-                            <span aria-hidden="true"
-                                class="absolute top-[0.4rem] end-1/2 w-full
-                                    {{ $reached ? 'border-t-2 border-neutral-900' : 'border-t border-neutral-200' }}"></span>
-                        @endif
+                        {{-- ---------- The rail ---------- --}}
+                        <div class="relative flex h-3 w-full items-center justify-center">
+                            @unless ($loop->first)
+                                <span aria-hidden="true"
+                                      class="absolute start-0 end-1/2 h-0.5 {{ $isReached ? 'bg-secondary-dark' : 'bg-neutral-200' }}"></span>
+                            @endunless
+                            @unless ($loop->last)
+                                <span aria-hidden="true"
+                                      class="absolute start-1/2 end-0 h-0.5 {{ $nextReached ? 'bg-secondary-dark' : 'bg-neutral-200' }}"></span>
+                            @endunless
 
-                        <span class="relative z-10 grid size-3.5 place-items-center rounded-full border-2 {{ $ring }}">
-                            <span class="sr-only">{{ __('recruitment.track.states.'.$stop['state']) }}</span>
-                        </span>
+                            <span class="relative z-10 size-2.5 shrink-0 rounded-full {{ $dot }}">
+                                <span class="sr-only">{{ __('recruitment.track.states.'.$stop['state']) }}</span>
+                            </span>
+                        </div>
 
-                        <p class="mt-3 text-xs font-semibold {{ $reached ? 'text-neutral-900' : 'text-secondary-medium' }}">
-                            {{ $stop['label'] }}
-                        </p>
+                        {{-- ---------- What happened here ---------- --}}
+                        <div class="mt-3 w-full px-1.5">
+                            <p class="text-caption font-semibold leading-snug {{ $isReached ? 'text-secondary-dark' : 'text-secondary-light' }}">
+                                {{ $stop['label'] }}
+                            </p>
 
-                        <div class="mt-1 space-y-0.5 px-1 text-xs text-secondary-medium">
-                            @if ($stop['by'])<p class="font-medium text-neutral-800">{{ $stop['by'] }}</p>@endif
+                            @if ($stop['by'] || $stop['at'] || ! empty($stop['role']))
+                                <p class="mt-1 text-caption leading-snug text-secondary-light">
+                                    @if ($stop['by'])<span class="block font-medium text-secondary-medium">{{ $stop['by'] }}</span>@endif
 
-                            {{-- The role as it was recorded on the decision, not
-                                 the one the person holds today: reading an old
-                                 approval through this week's roles would
-                                 misstate who made it (task 10). --}}
-                            @if (! empty($stop['role']))<p>{{ $stop['role'] }}</p>@endif
+                                    {{-- The role as it was recorded on the
+                                         decision, never the one the person holds
+                                         today: reading an old approval through
+                                         this week's roles would misstate who
+                                         made it (task 10). --}}
+                                    @if (! empty($stop['role']))<span class="block">{{ $stop['role'] }}</span>@endif
 
-                            @if ($stop['at'])<p>{{ $stop['at'] }}</p>@endif
+                                    @if ($stop['at'])<span class="block tabular-nums">{{ $stop['at'] }}</span>@endif
+                                </p>
+                            @endif
 
                             @if (! empty($stop['comment']))
-                                <p class="whitespace-pre-wrap break-words text-neutral-800" dir="auto">{{ $stop['comment'] }}</p>
+                                <p class="mt-1.5 whitespace-pre-wrap break-words rounded-control bg-neutral-50 px-2 py-1.5 text-caption leading-snug text-secondary-dark"
+                                   dir="auto">{{ $stop['comment'] }}</p>
                             @endif
 
                             {{-- The fields this stop opened for editing. They
                                  are the reason the next version exists, so they
                                  belong at the stop that asked for them. --}}
                             @if (! empty($stop['fields']))
-                                <ul class="flex flex-wrap justify-center gap-1 pt-1">
+                                <ul class="mt-1.5 flex flex-wrap justify-center gap-1">
                                     @foreach ($stop['fields'] as $field)
-                                        <li class="rounded-control border border-neutral-200 px-1.5 py-0.5 text-neutral-800">
+                                        <li class="rounded-control border border-neutral-200 px-1.5 py-0.5 text-caption text-secondary-medium">
                                             {{ __('recruitment.fields.'.$field) }}
                                         </li>
                                     @endforeach

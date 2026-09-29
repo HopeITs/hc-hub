@@ -143,6 +143,20 @@ class RecruitmentDirectOpenService
             return $request->fresh();
         });
 
+        // A governorate's opening waits on HR Syria, and until now it waited
+        // silently: the normal submission path announced its workflow and this
+        // one never did, so the approver had to happen to look. Announced here
+        // rather than inside the transaction, for the same reason as there — a
+        // rollback must not leave somebody holding a notice about a request
+        // that does not exist.
+        //
+        // Safe for HR Syria's own opening too: that instance is already
+        // complete, so there is no step waiting on anybody and nothing is sent.
+        app(RecruitmentNotifier::class)->workflowStarted(
+            $request,
+            $request->workflowInstances()->latest('id')->first(),
+        );
+
         // HR Syria has no electronic step, so its opening reaches Approved in
         // the transaction above. Apply the business effect afterwards: a
         // failed vacancy/position write must not erase the approval trail.
