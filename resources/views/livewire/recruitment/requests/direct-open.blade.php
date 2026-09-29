@@ -3,12 +3,12 @@
 <div class="mx-auto max-w-5xl space-y-6">
     <a class="text-primary hover:underline" href="{{ route('recruitment.requests.index') }}">{{ __('recruitment.back') }}</a>
     <header>
-        <h1 class="text-h2 font-semibold text-neutral-900">{{ __('recruitment.direct_open.title') }}</h1>
+        <h1 class="text-h2 font-semibold text-secondary-dark">{{ __('recruitment.direct_open.title') }}</h1>
         <p class="mt-2 text-secondary-medium">{{ __('recruitment.direct_open.hint') }}</p>
     </header>
 
     <form wire:submit="save" class="space-y-6">
-        <section class="space-y-5 rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="space-y-5 rounded-surface border border-secondary-soft bg-white p-6">
             <div>
                 <h2 class="text-h4 font-semibold">{{ __('recruitment.direct_open.title') }}</h2>
                 <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment.direct_open.hint') }}</p>
@@ -28,7 +28,7 @@
                         <option value="{{ $requester->id }}">{{ $requesterLabel }}</option>
                     @endforeach
                 </x-forms.select2-input>
-                <p class="mt-1 text-sm text-red-600">
+                <p class="mt-1 text-sm text-primary">
                     @error('actual_requester_user_id'){{ $message }}@enderror
                     @error('actual_requester_name'){{ $message }}@enderror
                 </p>
@@ -38,8 +38,8 @@
             <div>
                 <x-forms.input-label for="directOpenReason" required>{{ __('recruitment.direct_open.reason') }}</x-forms.input-label>
                 <textarea id="directOpenReason" rows="3" wire:model="documentation.direct_open_reason"
-                    class="mt-1 w-full rounded-control border-neutral-300" dir="auto"></textarea>
-                <p class="mt-1 text-sm text-red-600">@error('direct_open_reason'){{ $message }}@enderror</p>
+                    class="mt-1 w-full rounded-control border-secondary-light" dir="auto"></textarea>
+                <p class="mt-1 text-sm text-primary">@error('direct_open_reason'){{ $message }}@enderror</p>
             </div>
         </section>
 
@@ -47,7 +47,7 @@
              the approvals, never the facts. --}}
         @include('livewire.recruitment.requests.partials.request-fields')
 
-        <section class="space-y-5 rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="space-y-5 rounded-surface border border-secondary-soft bg-white p-6">
             <div>
                 <h2 class="text-h4 font-semibold">{{ __('recruitment.direct_open.confirmations') }}</h2>
                 <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment.direct_open.confirmations_hint') }}</p>
@@ -58,7 +58,7 @@
                  the direct opening. --}}
             @foreach ($steps as $stepKey)
                 @php $decision = (int) ($documentation['confirmations'][$stepKey]['decision'] ?? 0); @endphp
-                <fieldset class="rounded-control border border-neutral-200 p-4" wire:key="confirm-{{ $stepKey }}">
+                <fieldset class="rounded-control border border-secondary-soft p-4" wire:key="confirm-{{ $stepKey }}">
                     <legend class="px-1 text-sm font-semibold">
                         {{ \App\Enums\WorkflowStepKey::getLocalizedName($stepKey)['value'] }}
                     </legend>
@@ -68,20 +68,20 @@
                             <label class="flex items-center gap-2 text-sm">
                                 <input type="radio" value="{{ $value }}"
                                     wire:model.live="documentation.confirmations.{{ $stepKey }}.decision"
-                                    class="border-neutral-300 text-primary">
+                                    class="border-secondary-light text-primary">
                                 <span>{{ __('recruitment.direct_open.decisions.'.$value) }}</span>
                             </label>
                         @endforeach
                     </div>
-                    <p class="mt-1 text-sm text-red-600">@error('confirmations.'.$stepKey.'.decision'){{ $message }}@enderror</p>
+                    <p class="mt-1 text-sm text-primary">@error('confirmations.'.$stepKey.'.decision'){{ $message }}@enderror</p>
 
                     @if ($decision === \App\Enums\ExternalConfirmationDecision::NotApplicable)
                         <div class="mt-4">
                             <x-forms.input-label for="na-{{ $stepKey }}" required>{{ __('recruitment.direct_open.not_applicable_reason') }}</x-forms.input-label>
                             <textarea id="na-{{ $stepKey }}" rows="2"
                                 wire:model="documentation.confirmations.{{ $stepKey }}.not_applicable_reason"
-                                class="mt-1 w-full rounded-control border-neutral-300" dir="auto"></textarea>
-                            <p class="mt-1 text-sm text-red-600">@error('confirmations.'.$stepKey.'.not_applicable_reason'){{ $message }}@enderror</p>
+                                class="mt-1 w-full rounded-control border-secondary-light" dir="auto"></textarea>
+                            <p class="mt-1 text-sm text-primary">@error('confirmations.'.$stepKey.'.not_applicable_reason'){{ $message }}@enderror</p>
                         </div>
                     @elseif ($decision === \App\Enums\ExternalConfirmationDecision::Approved)
                         <div class="mt-4 grid gap-4 sm:grid-cols-3">
@@ -103,7 +103,7 @@
                                 @if (($confirmationCandidates[$stepKey] ?? collect())->isEmpty())
                                     <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment.direct_open.no_confirmer_candidates') }}</p>
                                 @endif
-                                <p class="mt-1 text-sm text-red-600">
+                                <p class="mt-1 text-sm text-primary">
                                     @error('confirmations.'.$stepKey.'.confirmer_user_id'){{ $message }}@enderror
                                 </p>
                             </div>
@@ -111,34 +111,34 @@
                                 <x-forms.input-label for="how-{{ $stepKey }}" required>{{ __('recruitment.direct_open.method') }}</x-forms.input-label>
                                 <select id="how-{{ $stepKey }}"
                                     wire:model="documentation.confirmations.{{ $stepKey }}.method"
-                                    class="h-[37.6px] w-full rounded-control border-neutral-300">
+                                    class="h-[37.6px] w-full rounded-control border-secondary-light">
                                     <option value="">—</option>
                                     @foreach ($methods as $method)
                                         <option value="{{ $method }}">{{ __('recruitment.direct_open.methods.'.$method) }}</option>
                                     @endforeach
                                 </select>
-                                <p class="mt-1 text-sm text-red-600">@error('confirmations.'.$stepKey.'.method'){{ $message }}@enderror</p>
+                                <p class="mt-1 text-sm text-primary">@error('confirmations.'.$stepKey.'.method'){{ $message }}@enderror</p>
                             </div>
                             <div>
                                 <x-forms.input-label for="when-{{ $stepKey }}" required>{{ __('recruitment.direct_open.confirmed_at') }}</x-forms.input-label>
                                 <input id="when-{{ $stepKey }}" type="datetime-local"
                                     wire:model="documentation.confirmations.{{ $stepKey }}.confirmed_at"
-                                    class="h-[37.6px] w-full rounded-control border-neutral-300">
-                                <p class="mt-1 text-sm text-red-600">@error('confirmations.'.$stepKey.'.confirmed_at'){{ $message }}@enderror</p>
+                                    class="h-[37.6px] w-full rounded-control border-secondary-light">
+                                <p class="mt-1 text-sm text-primary">@error('confirmations.'.$stepKey.'.confirmed_at'){{ $message }}@enderror</p>
                             </div>
                         </div>
                         <div class="mt-4">
                             <x-forms.input-label for="notes-{{ $stepKey }}">{{ __('recruitment.direct_open.notes') }}</x-forms.input-label>
                             <textarea id="notes-{{ $stepKey }}" rows="2"
                                 wire:model="documentation.confirmations.{{ $stepKey }}.notes"
-                                class="mt-1 w-full rounded-control border-neutral-300" dir="auto"></textarea>
+                                class="mt-1 w-full rounded-control border-secondary-light" dir="auto"></textarea>
                         </div>
                     @endif
                 </fieldset>
             @endforeach
         </section>
 
-        <footer class="flex flex-wrap items-center justify-between gap-4 rounded-surface border border-neutral-200 bg-white p-5">
+        <footer class="flex flex-wrap items-center justify-between gap-4 rounded-surface border border-secondary-soft bg-white p-5">
             <p class="text-sm text-secondary-medium">{{ __('recruitment.direct_open.hint') }}</p>
             <x-primary-button type="submit" wire:loading.attr="disabled" wire:target="save">
                 {{ __('recruitment.direct_open.open') }}

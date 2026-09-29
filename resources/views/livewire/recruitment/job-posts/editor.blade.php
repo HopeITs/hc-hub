@@ -30,12 +30,12 @@
         :next="$nextStep"
     />
 
-    <div class="grid overflow-hidden rounded-card border border-neutral-200 bg-white shadow-e1 xl:grid-cols-[360px_minmax(0,1fr)]">
-        <section class="border-b border-neutral-200 p-5 xl:border-b-0 xl:border-e" aria-label="{{ __('recruitment.job_post.title') }}">
+    <div class="grid overflow-hidden rounded-card border border-secondary-soft bg-white shadow-e1 xl:grid-cols-[360px_minmax(0,1fr)]">
+        <section class="border-b border-secondary-soft p-5 xl:border-b-0 xl:border-e" aria-label="{{ __('recruitment.job_post.title') }}">
             <div class="space-y-4">
                 <div>
                     <x-forms.input-label for="job-post-city" required>{{ __('recruitment.job_post.city') }}</x-forms.input-label>
-                    <select id="job-post-city" wire:model.live="city" class="w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary" required>
+                    <select id="job-post-city" wire:model.live="city" class="w-full rounded-control border-secondary-light text-body focus:border-primary focus:ring-primary" required>
                         @foreach ($cityOptions as $option)
                             <option value="{{ $option }}">{{ $option }}</option>
                         @endforeach
@@ -45,7 +45,7 @@
 
                 <div>
                     <x-forms.input-label for="job-post-program" required>{{ __('recruitment.job_post.project') }}</x-forms.input-label>
-                    <select id="job-post-program" wire:model.live="program" class="w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary" required>
+                    <select id="job-post-program" wire:model.live="program" class="w-full rounded-control border-secondary-light text-body focus:border-primary focus:ring-primary" required>
                         @foreach ($programOptions as $option)
                             <option value="{{ $option }}">{{ $option }}</option>
                         @endforeach
@@ -79,7 +79,7 @@
                 <button
                     type="button"
                     x-on:click="format = 'story'"
-                    x-bind:class="format === 'story' ? 'border-primary bg-primary text-white' : 'border-neutral-300 bg-white text-neutral-500'"
+                    x-bind:class="format === 'story' ? 'border-primary bg-primary text-white' : 'border-secondary-light bg-white text-secondary-medium'"
                 class="cursor-pointer rounded-control border px-3 py-2 text-body font-semibold transition"
                 >
                     {{ __('recruitment.job_post.story') }}
@@ -87,7 +87,7 @@
                 <button
                     type="button"
                     x-on:click="format = 'post'"
-                    x-bind:class="format === 'post' ? 'border-primary bg-primary text-white' : 'border-neutral-300 bg-white text-neutral-500'"
+                    x-bind:class="format === 'post' ? 'border-primary bg-primary text-white' : 'border-secondary-light bg-white text-secondary-medium'"
                     class="cursor-pointer rounded-control border px-3 py-2 text-body font-semibold transition"
                 >
                     {{ __('recruitment.job_post.post') }}
@@ -107,7 +107,7 @@
                         message: @js(__('recruitment.job_post.publish_confirm')),
                         confirmLabel: @js(__('recruitment.job_post.publish')),
                     })"
-                    class="flex w-full cursor-pointer items-center justify-center rounded-control bg-neutral-800 px-4 py-2 text-body font-semibold text-white shadow-e1 transition hover:bg-neutral-700"
+                    class="flex w-full cursor-pointer items-center justify-center rounded-control bg-secondary-dark px-4 py-2 text-body font-semibold text-white shadow-e1 transition hover:bg-secondary-dark"
                 >
                     {{ __('recruitment.job_post.publish') }}
                 </button>
@@ -122,7 +122,7 @@
                             confirmLabel: @js(__('recruitment.job_post.unpublish')),
                             tone: 'danger',
                         })"
-                    class="flex w-full cursor-pointer items-center justify-center rounded-control border border-primary bg-white px-4 py-2 text-body font-semibold text-primary transition hover:bg-neutral-50"
+                    class="flex w-full cursor-pointer items-center justify-center rounded-control border border-primary bg-white px-4 py-2 text-body font-semibold text-primary transition hover:bg-secondary-soft/30"
                     >
                         {{ __('recruitment.job_post.unpublish') }}
                     </button>
@@ -149,7 +149,7 @@
                 </button>
             </div>
 
-            <p class="mt-3 text-small text-neutral-500">{{ __('recruitment.job_post.download_help') }}</p>
+            <p class="mt-3 text-small text-secondary-medium">{{ __('recruitment.job_post.download_help') }}</p>
 
             @if ($hasConflict)
                 <button type="button" wire:click="reloadLatest" class="mt-4 cursor-pointer text-small font-semibold text-primary underline">
@@ -160,13 +160,13 @@
             <p x-show="downloadMessage" x-text="downloadMessage" class="mt-3 text-small text-secondary-medium" role="status" aria-live="polite"></p>
         </section>
 
-        <section class="flex min-h-[640px] flex-col bg-neutral-100 p-4 sm:p-6" aria-label="{{ __('recruitment.job_post.preview') }}">
+        <section class="flex min-h-[640px] flex-col bg-secondary-soft/60 p-4 sm:p-6" aria-label="{{ __('recruitment.job_post.preview') }}">
             <div class="mb-3 flex items-center justify-between gap-3">
                 <div>
-                    <h2 class="text-subtitle font-bold text-neutral-900">{{ __('recruitment.job_post.preview') }}</h2>
-                    <p class="text-small text-neutral-500">{{ __('recruitment.job_post.exact_template') }}</p>
+                    <h2 class="text-subtitle font-bold text-secondary-dark">{{ __('recruitment.job_post.preview') }}</h2>
+                    <p class="text-small text-secondary-medium">{{ __('recruitment.job_post.exact_template') }}</p>
                 </div>
-                <span class="rounded-full bg-white px-3 py-1 text-small font-semibold text-neutral-600 shadow-e1" x-text="format === 'story' ? '2160 × 3840' : '2160 × 2160'"></span>
+                <span class="rounded-full bg-white px-3 py-1 text-small font-semibold text-secondary-medium shadow-e1" x-text="format === 'story' ? '2160 × 3840' : '2160 × 2160'"></span>
             </div>
 
             <div class="flex min-h-0 flex-1 items-center justify-center overflow-auto rounded-control">

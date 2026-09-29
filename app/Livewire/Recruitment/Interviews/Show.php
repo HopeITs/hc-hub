@@ -5,6 +5,7 @@ namespace App\Livewire\Recruitment\Interviews;
 use App\Enums\RecruitmentInterviewStatus;
 use App\Models\RecruitmentInterview;
 use App\Services\RecruitmentInterviewSchedulingService;
+use App\Traits\WithAlerts;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -24,6 +25,8 @@ use Livewire\Component;
  */
 class Show extends Component
 {
+    use WithAlerts;
+
     #[Locked]
     public int $interviewId;
 
@@ -51,6 +54,10 @@ class Show extends Component
     {
         $this->interviewId = $interviewId;
         $this->resolveInterview();
+
+        if ($message = session()->pull('recruitment_toast')) {
+            $this->successToast($message);
+        }
     }
 
     public function beginCancel(): void
@@ -159,7 +166,7 @@ class Show extends Component
         }
 
         $this->closePanel();
-        session()->flash('recruitment_saved', $message);
+        $this->successToast($message);
     }
 
     /** Out of reach is a 404, not a 403: guessing ids reveals nothing. */

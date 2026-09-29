@@ -146,13 +146,13 @@ class Form extends Component
                     $this->reason,
                     $this->notifyCandidate,
                 );
-                session()->flash('recruitment_saved', __('recruitment-applicant.interviews.updated'));
+                session()->flash('recruitment_toast', __('recruitment-applicant.interviews.updated'));
             } else {
                 $application = $this->resolveApplication((int) $this->applicationId);
                 Gate::authorize('schedule', [RecruitmentInterview::class, $application]);
 
                 $interview = $scheduling->schedule(auth()->user(), $application, $input, $this->notifyCandidate);
-                session()->flash('recruitment_saved', __('recruitment-applicant.interviews.scheduled'));
+                session()->flash('recruitment_toast', __('recruitment-applicant.interviews.scheduled'));
             }
         } catch (ValidationException $exception) {
             foreach ($exception->errors() as $field => $messages) {

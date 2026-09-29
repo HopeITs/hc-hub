@@ -10,22 +10,19 @@
         ]"
     />
 
-    @if (session('campaign_notice'))
-        <div class="mb-5 rounded-control border border-neutral-200 bg-neutral-50 p-4 text-body text-neutral-800" role="status">{{ session('campaign_notice') }}</div>
-    @endif
 
-    <section class="mb-5 rounded-card border border-neutral-200 bg-white p-5 shadow-e1">
+    <section class="mb-5 rounded-card border border-secondary-soft bg-white p-5 shadow-e1">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
                 <p class="text-small font-semibold uppercase tracking-wide text-primary">{{ __('recruitment.job_post.campaign') }} #{{ $campaign->id }}</p>
-                <h1 class="mt-1 text-title font-bold text-neutral-900">{{ $campaign->vacancy->position->title ?? $campaign->vacancy->position->title_en ?? __('recruitment.publishing.title') }}</h1>
-                <p class="mt-2 text-body text-neutral-600">{{ __('recruitment.job_post.approved_request') }}: {{ $campaign->vacancy->createdFromRequest->request_number }}</p>
+                <h1 class="mt-1 text-title font-bold text-secondary-dark">{{ $campaign->vacancy->position->title ?? $campaign->vacancy->position->title_en ?? __('recruitment.publishing.title') }}</h1>
+                <p class="mt-2 text-body text-secondary-medium">{{ __('recruitment.job_post.approved_request') }}: {{ $campaign->vacancy->createdFromRequest->request_number }}</p>
             </div>
-            <span class="rounded-full bg-neutral-100 px-3 py-1 text-small font-semibold text-neutral-700">{{ $campaignStatus }}</span>
+            <span class="rounded-full bg-secondary-soft/60 px-3 py-1 text-small font-semibold text-secondary-dark">{{ $campaignStatus }}</span>
         </div>
     </section>
 
-    <div class="mb-5 rounded-control border border-neutral-200 bg-neutral-50 p-4 text-body text-neutral-700">
+    <div class="mb-5 rounded-control border border-secondary-soft bg-secondary-soft/30 p-4 text-body text-secondary-dark">
         {{ __('recruitment.publishing.help') }}
     </div>
 

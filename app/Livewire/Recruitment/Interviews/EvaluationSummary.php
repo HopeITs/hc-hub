@@ -5,6 +5,7 @@ namespace App\Livewire\Recruitment\Interviews;
 use App\Models\RecruitmentInterview;
 use App\Models\RecruitmentInterviewEvaluation;
 use App\Services\RecruitmentInterviewEvaluationService;
+use App\Traits\WithAlerts;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
@@ -25,6 +26,8 @@ use Livewire\Component;
  */
 class EvaluationSummary extends Component
 {
+    use WithAlerts;
+
     #[Locked]
     public int $interviewId;
 
@@ -170,7 +173,7 @@ class EvaluationSummary extends Component
         }
 
         $this->cancelPanel();
-        session()->flash('recruitment_evaluation_summary_saved', $message);
+        $this->successToast($message);
     }
 
     /** Out of reach is a 404, like everywhere else on these pages. */

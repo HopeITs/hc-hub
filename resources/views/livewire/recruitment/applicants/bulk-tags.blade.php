@@ -1,14 +1,14 @@
 {{-- Opened from the table's bulk action. Every id is re-scoped before anything is written. --}}
 <div>
     @if ($result)
-        <p id="bulk-tags-result" role="status" tabindex="-1" class="scroll-mt-24 rounded-control border border-green-200 bg-green-50 p-4 text-green-800">
+        <p id="bulk-tags-result" role="status" tabindex="-1" class="scroll-mt-24 rounded-control border border-primary/30 bg-primary/5 p-4 text-primary">
             {{ $result }}
             <button type="button" wire:click="cancel" class="ms-2 cursor-pointer text-sm font-semibold underline">{{ __('recruitment-applicant.tags.dismiss') }}</button>
         </p>
     @endif
 
     @if ($open)
-        <section class="rounded-surface border border-neutral-200 bg-neutral-50 p-4 sm:p-6">
+        <section class="rounded-surface border border-secondary-soft bg-secondary-soft/30 p-4 sm:p-6">
             <h2 id="bulk-tags-title" tabindex="-1" class="scroll-mt-24 text-h4 font-semibold">{{ __('recruitment-applicant.tags.bulk_title') }}</h2>
             <p class="mt-1 text-sm text-secondary-medium">
                 {{ trans_choice('recruitment-applicant.tags.bulk_selected', count($applicationIds), ['count' => count($applicationIds)]) }}
@@ -20,11 +20,11 @@
                     <legend class="text-sm font-medium">{{ __('recruitment-applicant.tags.bulk_mode') }}</legend>
                     <div class="mt-2 flex gap-4 text-sm">
                         <label class="flex items-center gap-2">
-                            <input type="radio" wire:model="mode" value="{{ \App\Livewire\Recruitment\Applicants\BulkTags::ATTACH }}" class="border-neutral-300">
+                            <input type="radio" wire:model="mode" value="{{ \App\Livewire\Recruitment\Applicants\BulkTags::ATTACH }}" class="border-secondary-light">
                             {{ __('recruitment-applicant.tags.bulk_attach') }}
                         </label>
                         <label class="flex items-center gap-2">
-                            <input type="radio" wire:model="mode" value="{{ \App\Livewire\Recruitment\Applicants\BulkTags::DETACH }}" class="border-neutral-300">
+                            <input type="radio" wire:model="mode" value="{{ \App\Livewire\Recruitment\Applicants\BulkTags::DETACH }}" class="border-secondary-light">
                             {{ __('recruitment-applicant.tags.bulk_detach') }}
                         </label>
                     </div>
@@ -35,7 +35,7 @@
                     <x-forms.input-label for="bulkTagId" required>{{ __('recruitment-applicant.tags.tag') }}</x-forms.input-label>
                     <select id="bulkTagId" wire:model="tagId" aria-required="true"
                         @error('tagId') aria-invalid="true" aria-describedby="bulkTagId-error" @enderror
-                        class="mt-1 w-full rounded-control border-neutral-300">
+                        class="mt-1 w-full rounded-control border-secondary-light">
                         <option value="">—</option>
                         @foreach ($tags as $tag)
                             <option value="{{ $tag->id }}">{{ $tag->name }}</option>

@@ -1,5 +1,5 @@
 @php use App\Enums\RecruitmentEvaluationRecommendation as Recommendation; @endphp
-<section class="rounded-surface border border-neutral-200 bg-white p-6 shadow-e1">
+<section class="rounded-surface border border-secondary-soft bg-white p-6 shadow-e1">
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
             <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.evaluations.summary_title') }}</h2>
@@ -8,7 +8,7 @@
         @if ($canClose)
             <button type="button"
                     x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'interview-evaluations', action: 'closeEvaluations', message: @js(__('recruitment-applicant.evaluations.close_confirm')), confirmLabel: @js(__('recruitment-applicant.evaluations.close')) })"
-                    class="min-h-11 cursor-pointer rounded-control border border-neutral-300 bg-white px-3 text-sm shadow-e1 transition hover:bg-selection sm:min-h-9 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                    class="min-h-11 cursor-pointer rounded-control border border-secondary-light bg-white px-3 text-sm shadow-e1 transition hover:bg-selection sm:min-h-9 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
                 {{ __('recruitment-applicant.evaluations.close') }}
             </button>
         @elseif ($interview->evaluations_closed_at)
@@ -16,9 +16,6 @@
         @endif
     </div>
 
-    @if (session('recruitment_evaluation_summary_saved'))
-        <p role="status" class="mt-4 rounded-control border border-green-200 bg-green-50 p-3 text-sm text-green-800">{{ session('recruitment_evaluation_summary_saved') }}</p>
-    @endif
     @error('evaluation')
         <p role="alert" class="mt-4 rounded-control border border-primary bg-white p-3 text-sm text-primary">{{ $message }}</p>
     @enderror
@@ -43,7 +40,7 @@
     @else
         <ul class="mt-4 space-y-4">
             @foreach ($evaluations as $evaluation)
-                <li class="rounded-control border border-neutral-200 p-4 {{ $evaluation->isWithdrawn() ? 'bg-neutral-50 text-secondary-medium' : '' }}" wire:key="evaluation-{{ $evaluation->id }}">
+                <li class="rounded-control border border-secondary-soft p-4 {{ $evaluation->isWithdrawn() ? 'bg-secondary-soft/30 text-secondary-medium' : '' }}" wire:key="evaluation-{{ $evaluation->id }}">
                     <div class="flex flex-wrap items-start justify-between gap-2">
                         <p class="font-semibold">
                             {{ $evaluation->reviewer?->profile?->name ?? $evaluation->reviewer?->email }}
@@ -55,7 +52,7 @@
                             {{ __('recruitment-applicant.evaluations.submitted_on', ['date' => $evaluation->submitted_at?->format('Y-m-d H:i')]) }}
                             &middot; v{{ $evaluation->version }}
                             @if ($evaluation->revisions->contains('action', \App\Models\RecruitmentInterviewEvaluation::ACTION_CORRECTED))
-                                &middot; <span class="font-semibold text-amber-800">{{ __('recruitment-applicant.evaluations.corrected_badge') }}</span>
+                                &middot; <span class="font-semibold text-secondary-dark">{{ __('recruitment-applicant.evaluations.corrected_badge') }}</span>
                             @endif
                         </span>
                     </div>
@@ -72,21 +69,21 @@
                     @if (! $evaluation->isWithdrawn())
                         @can('correct', $evaluation)
                             <div class="mt-3 flex gap-3 text-sm">
-                                <button type="button" wire:click="beginCorrect({{ $evaluation->id }})" class="font-medium text-neutral-900 underline decoration-neutral-300 underline-offset-4 hover:decoration-neutral-900">{{ __('recruitment-applicant.evaluations.correct') }}</button>
+                                <button type="button" wire:click="beginCorrect({{ $evaluation->id }})" class="font-medium text-secondary-dark underline decoration-secondary-light underline-offset-4 hover:decoration-secondary-dark">{{ __('recruitment-applicant.evaluations.correct') }}</button>
                                 <button type="button" wire:click="beginWithdraw({{ $evaluation->id }})" class="text-secondary-dark hover:underline">{{ __('recruitment-applicant.evaluations.withdraw') }}</button>
                             </div>
                         @endcan
                     @endif
 
                     @if ($panel !== null && $evaluationId === $evaluation->id)
-                        <div class="mt-3 space-y-3 rounded-control border border-neutral-300 bg-neutral-50 p-4">
+                        <div class="mt-3 space-y-3 rounded-control border border-secondary-light bg-secondary-soft/30 p-4">
                             <h3 class="font-semibold">{{ __('recruitment-applicant.evaluations.'.$panel.'_title') }}</h3>
 
                             @if ($panel === 'correct')
                                 <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="{{ __('recruitment-applicant.evaluations.recommendation') }}"
                                      @if ($errors->has('recommendation')) aria-invalid="true" aria-describedby="correct-recommendation-error" @endif>
                                     @foreach (Recommendation::values() as $value)
-                                        <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-control border border-neutral-300 bg-white px-3 text-sm sm:min-h-9 has-[:checked]:border-neutral-900 has-[:checked]:bg-selection has-[:checked]:font-semibold has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary">
+                                        <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-control border border-secondary-light bg-white px-3 text-sm sm:min-h-9 has-[:checked]:border-secondary-dark has-[:checked]:bg-selection has-[:checked]:font-semibold has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary">
                                             <input type="radio" wire:model="recommendation" value="{{ $value }}" class="text-primary focus:ring-0">
                                             {{ __('recruitment-applicant.evaluations.recommendations.'.$value) }}
                                         </label>

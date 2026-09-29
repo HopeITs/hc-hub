@@ -14,7 +14,7 @@
                 <span class="font-normal opacity-75">&middot; {{ $assignment->creator?->profile?->name ?? $assignment->creator?->name ?? '—' }}, {{ $assignment->created_at?->format('Y-m-d') }}</span>
                 @if ($mayTag)
                     <button type="button" wire:click="detach({{ $assignment->tag_id }})" wire:loading.attr="disabled"
-                        class="-my-1 -me-1 ms-0.5 inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full hover:bg-black/10 disabled:opacity-50" aria-label="{{ __('recruitment-applicant.tags.remove', ['name' => $assignment->tag->name]) }}"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg></button>
+                        class="-my-1 -me-1 ms-0.5 inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full hover:bg-secondary-dark/10 disabled:opacity-50" aria-label="{{ __('recruitment-applicant.tags.remove', ['name' => $assignment->tag->name]) }}"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg></button>
                 @endif
             </li>
         @empty
@@ -29,7 +29,7 @@
                     <label for="tag-{{ $applicationId }}" class="sr-only">{{ __('recruitment-applicant.tags.tag') }}</label>
                     <select id="tag-{{ $applicationId }}" wire:model="tagId"
                         @error('tagId') aria-invalid="true" aria-describedby="tag-{{ $applicationId }}-error" @enderror
-                        class="rounded-control border-neutral-300 text-sm">
+                        class="rounded-control border-secondary-light text-sm">
                         <option value="">{{ __('recruitment-applicant.tags.choose') }}</option>
                         @foreach ($available as $tag)
                             <option value="{{ $tag->id }}">{{ $tag->name }}</option>
@@ -46,11 +46,11 @@
                     <label for="new-tag-{{ $applicationId }}" class="sr-only">{{ __('recruitment-applicant.tags.new_name') }}</label>
                     <input id="new-tag-{{ $applicationId }}" type="text" wire:model="newTagName" maxlength="{{ config('recruitment.tags.max_length') }}"
                         @error('tagName') aria-invalid="true" aria-describedby="new-tag-{{ $applicationId }}-error" @enderror
-                        placeholder="{{ __('recruitment-applicant.tags.new_name') }}" class="rounded-control border-neutral-300 text-sm">
+                        placeholder="{{ __('recruitment-applicant.tags.new_name') }}" class="rounded-control border-secondary-light text-sm">
                     <label for="new-tag-color-{{ $applicationId }}" class="sr-only">{{ __('recruitment-applicant.tags.color') }}</label>
                     <select id="new-tag-color-{{ $applicationId }}" wire:model="newTagColor"
                         @error('tagColor') aria-invalid="true" aria-describedby="new-tag-color-{{ $applicationId }}-error" @enderror
-                        class="rounded-control border-neutral-300 text-sm">
+                        class="rounded-control border-secondary-light text-sm">
                         @foreach ($palette as $color)
                             <option value="{{ $color }}">{{ __('recruitment-applicant.tags.colors.'.$color) }}</option>
                         @endforeach

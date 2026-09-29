@@ -16,7 +16,7 @@
     @enderror
 
     <form wire:submit="save" class="space-y-6">
-        <section class="space-y-4 rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="space-y-4 rounded-surface border border-secondary-soft bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.offers.pay') }}</h2>
             <p class="text-xs text-secondary-medium">{{ __('recruitment-applicant.offers.salary_confidential') }}</p>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -27,7 +27,7 @@
                 </div>
                 <div>
                     <x-forms.input-label for="currency" required :value="__('recruitment-applicant.offers.currency')" />
-                    <select id="currency" wire:model="currency" class="w-full rounded-control border border-neutral-300 bg-white px-3 py-2 text-body">
+                    <select id="currency" wire:model="currency" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
                         @foreach ($currencies as $value)
                             <option value="{{ $value }}">{{ OfferTerms::currency($value) }}</option>
                         @endforeach
@@ -36,7 +36,7 @@
                 </div>
                 <div>
                     <x-forms.input-label for="salaryPer" required :value="__('recruitment-applicant.offers.salary_per')" />
-                    <select id="salaryPer" wire:model="salaryPer" class="w-full rounded-control border border-neutral-300 bg-white px-3 py-2 text-body">
+                    <select id="salaryPer" wire:model="salaryPer" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
                         @foreach ($salaryPers as $value)
                             <option value="{{ $value }}">{{ OfferTerms::salaryPer($value) }}</option>
                         @endforeach
@@ -46,12 +46,12 @@
             </div>
         </section>
 
-        <section class="space-y-4 rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="space-y-4 rounded-surface border border-secondary-soft bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.offers.contract_details') }}</h2>
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                     <x-forms.input-label for="contractTypeId" required :value="__('recruitment-applicant.offers.contract_type')" />
-                    <select id="contractTypeId" wire:model="contractTypeId" class="w-full rounded-control border border-neutral-300 bg-white px-3 py-2 text-body">
+                    <select id="contractTypeId" wire:model="contractTypeId" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
                         <option value="">{{ __('recruitment.choose') }}</option>
                         @foreach ($contractTypes as $type)
                             <option value="{{ $type->id }}">{{ $type->name }}</option>
@@ -61,7 +61,7 @@
                 </div>
                 <div>
                     <x-forms.input-label for="employmentType" :value="__('recruitment-applicant.offers.employment_type')" />
-                    <select id="employmentType" wire:model="employmentType" class="w-full rounded-control border border-neutral-300 bg-white px-3 py-2 text-body">
+                    <select id="employmentType" wire:model="employmentType" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
                         <option value="">—</option>
                         @foreach ($employmentTypes as $value)
                             <option value="{{ $value }}">{{ OfferTerms::employmentType($value) }}</option>
@@ -71,7 +71,7 @@
                 </div>
                 <div>
                     <x-forms.input-label for="place" :value="__('recruitment-applicant.offers.place')" />
-                    <select id="place" wire:model="place" class="w-full rounded-control border border-neutral-300 bg-white px-3 py-2 text-body">
+                    <select id="place" wire:model="place" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
                         <option value="">—</option>
                         @foreach ($places as $value)
                             <option value="{{ $value }}">{{ OfferTerms::place($value) }}</option>
@@ -107,7 +107,7 @@
             </div>
         </section>
 
-        <section class="space-y-4 rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="space-y-4 rounded-surface border border-secondary-soft bg-white p-6">
             @if ($mode === 'revise')
                 <div>
                     <x-forms.input-label for="reason" required :value="__('recruitment-applicant.offers.revision_reason')" />

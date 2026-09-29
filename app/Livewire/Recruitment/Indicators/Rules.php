@@ -4,6 +4,7 @@ namespace App\Livewire\Recruitment\Indicators;
 
 use App\Services\RecruitmentIndicatorRules;
 use App\Services\RecruitmentMatchingIndicators;
+use App\Traits\WithAlerts;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
@@ -16,6 +17,8 @@ use Livewire\Component;
  */
 class Rules extends Component
 {
+    use WithAlerts;
+
     /** @var array<string, bool> indicator key => switched on */
     public array $enabled = [];
 
@@ -60,7 +63,7 @@ class Rules extends Component
         }
 
         $this->load($rules);
-        session()->flash('rules-status', __('recruitment-indicator-rules.saved', ['version' => app(RecruitmentMatchingIndicators::class)->criteriaVersion()]));
+        $this->successToast(__('recruitment-indicator-rules.saved', ['version' => app(RecruitmentMatchingIndicators::class)->criteriaVersion()]));
     }
 
     public function resetToDefaults(RecruitmentIndicatorRules $rules): void
@@ -70,7 +73,7 @@ class Rules extends Component
 
         $rules->reset(auth()->user());
         $this->load($rules);
-        session()->flash('rules-status', __('recruitment-indicator-rules.reset_done'));
+        $this->successToast(__('recruitment-indicator-rules.reset_done'));
     }
 
     public function render(RecruitmentIndicatorRules $rules, RecruitmentMatchingIndicators $indicators)

@@ -6,9 +6,9 @@
     <x-forms.input-label :for="$field" :required="$required ?? true">{{ __('recruitment.'.$field) }}</x-forms.input-label>
     <x-forms.textarea :id="$field" wire:model="data.{{ $field }}"
         :disabled="$isLocked"
-        :class="$isLocked ? 'cursor-not-allowed border-neutral-200 bg-neutral-100 text-neutral-400' : ''" aria-describedby="{{ $field }}-error" aria-invalid="{{ $errors->has('data.'.$field) ? 'true' : 'false' }}" />
+        :class="$isLocked ? 'cursor-not-allowed border-secondary-soft bg-secondary-soft/60 text-secondary-light' : ''" aria-describedby="{{ $field }}-error" aria-invalid="{{ $errors->has('data.'.$field) ? 'true' : 'false' }}" />
     @if ($isLocked)
         <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment.field_locked_here') }}</p>
     @endif
-    <p id="{{ $field }}-error" class="mt-1 text-sm text-red-600">@error('data.'.$field){{ $message }}@enderror</p>
+    <p id="{{ $field }}-error" class="mt-1 text-sm text-primary">@error('data.'.$field){{ $message }}@enderror</p>
 </div>

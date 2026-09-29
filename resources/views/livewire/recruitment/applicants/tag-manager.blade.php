@@ -1,6 +1,6 @@
 <div>
     @if ($mayManage)
-        <details class="rounded-surface border border-neutral-200 bg-white p-4 sm:p-6">
+        <details class="rounded-surface border border-secondary-soft bg-white p-4 sm:p-6">
             <summary class="cursor-pointer text-h4 font-semibold">{{ __('recruitment-applicant.tags.manage_title') }}</summary>
             <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.tags.manage_hint') }}</p>
 
@@ -9,13 +9,13 @@
                     <x-forms.input-label for="tagName" required>{{ __('recruitment-applicant.tags.new_name') }}</x-forms.input-label>
                     <input id="tagName" type="text" wire:model="tagName" maxlength="{{ config('recruitment.tags.max_length') }}" aria-required="true"
                         @error('tagName') aria-invalid="true" aria-describedby="tagName-error" @enderror
-                        class="mt-1 rounded-control border-neutral-300">
+                        class="mt-1 rounded-control border-secondary-light">
                 </div>
                 <div>
                     <x-forms.input-label for="tagColor">{{ __('recruitment-applicant.tags.color') }}</x-forms.input-label>
                     <select id="tagColor" wire:model="tagColor"
                         @error('tagColor') aria-invalid="true" aria-describedby="tagColor-error" @enderror
-                        class="mt-1 rounded-control border-neutral-300">
+                        class="mt-1 rounded-control border-secondary-light">
                         @foreach ($palette as $color)
                             <option value="{{ $color }}">{{ __('recruitment-applicant.tags.colors.'.$color) }}</option>
                         @endforeach
@@ -26,7 +26,7 @@
             <x-forms.input-error field="tagName" input-id="tagName" />
             <x-forms.input-error field="tagColor" input-id="tagColor" />
 
-            <ul class="mt-6 divide-y divide-neutral-100 text-sm">
+            <ul class="mt-6 divide-y divide-secondary-soft text-sm">
                 @forelse ($tags as $tag)
                     <li wire:key="tag-{{ $tag->id }}" class="flex flex-wrap items-center justify-between gap-3 py-3">
                         @if ($renamingId === $tag->id)
@@ -34,11 +34,11 @@
                                 <label for="renameName" class="sr-only">{{ __('recruitment-applicant.tags.new_name') }}</label>
                                 <input id="renameName" type="text" wire:model="renameName" maxlength="{{ config('recruitment.tags.max_length') }}" aria-required="true"
                                     @error('renameName') aria-invalid="true" aria-describedby="renameName-error" @enderror
-                                    class="rounded-control border-neutral-300 text-sm">
+                                    class="rounded-control border-secondary-light text-sm">
                                 <label for="renameColor" class="sr-only">{{ __('recruitment-applicant.tags.color') }}</label>
                                 <select id="renameColor" wire:model="renameColor"
                                     @error('renameColor') aria-invalid="true" aria-describedby="renameColor-error" @enderror
-                                    class="rounded-control border-neutral-300 text-sm">
+                                    class="rounded-control border-secondary-light text-sm">
                                     @foreach ($palette as $color)
                                         <option value="{{ $color }}">{{ __('recruitment-applicant.tags.colors.'.$color) }}</option>
                                     @endforeach
@@ -63,7 +63,7 @@
                                 @else
                                     <button type="button" id="tag-{{ $tag->id }}-rename" wire:click="beginRename({{ $tag->id }})" class="cursor-pointer font-semibold text-primary hover:underline">{{ __('recruitment-applicant.tags.rename') }}<span class="sr-only">: {{ $tag->name }}</span></button>
                                     <button type="button" wire:click="delete({{ $tag->id }})" wire:confirm="{{ __('recruitment-applicant.tags.delete_confirm') }}"
-                                        class="cursor-pointer font-semibold text-red-700 hover:underline">{{ __('recruitment-applicant.tags.delete') }}<span class="sr-only">: {{ $tag->name }}</span></button>
+                                        class="cursor-pointer font-semibold text-primary hover:underline">{{ __('recruitment-applicant.tags.delete') }}<span class="sr-only">: {{ $tag->name }}</span></button>
                                 @endif
                             </div>
                         @endif
