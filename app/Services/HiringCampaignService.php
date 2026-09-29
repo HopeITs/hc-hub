@@ -35,15 +35,15 @@ class HiringCampaignService
 {
     public function __construct(
         private readonly HiringCampaignStateMachine $states,
+        private readonly RecruitmentApplicationFormService $applicationForms,
     ) {}
 
     /**
      * Open a campaign against a seat that is actually being recruited for.
      *
      * It starts as a draft: nothing is public until the advert and the form
-     * exist and somebody publishes it. Several campaigns may run on one
-     * vacancy — a public one and an invited one, say — so no uniqueness is
-     * imposed here.
+     * exist and somebody publishes it. A vacancy may have several campaigns
+     * over time, but only one may be in progress at once.
      */
     public function create(User $actor, Vacancy $vacancy, array $attributes = []): HiringCampaign
     {
@@ -58,7 +58,12 @@ class HiringCampaignService
                 throw $this->refuse('vacancy', 'recruitment-campaign.vacancy_not_available');
             }
 
+            if ($locked->campaigns()->ongoing()->exists()) {
+                throw $this->refuse('vacancy', 'recruitment-campaign.campaign_in_progress');
+            }
+
             [$startsAt, $endsAt] = $this->window($attributes);
+            [$minimumAge, $maximumAge] = $this->ageRange($attributes);
             $linkMode = $attributes['link_mode'] ?? HiringCampaign::PUBLIC_OPEN;
             $linkMode = $linkMode === HiringCampaign::LEGACY_INVITE_ONLY ? HiringCampaign::INVITE_ONLY : $linkMode;
 
@@ -70,6 +75,8 @@ class HiringCampaignService
                 'vacancy_id' => $locked->getKey(),
                 'status' => Status::Draft,
                 'link_mode' => $linkMode,
+                'minimum_age' => $minimumAge,
+                'maximum_age' => $maximumAge,
                 'starts_at' => $startsAt,
                 'ends_at' => $endsAt,
                 'created_by_user_id' => $actor->getKey(),
@@ -97,18 +104,23 @@ class HiringCampaignService
             }
 
             [$startsAt, $endsAt] = $this->window($attributes, $locked);
+            [$minimumAge, $maximumAge] = $this->ageRange($attributes, $locked);
             $linkMode = $this->audience($attributes, $locked);
 
             $locked->forceFill([
                 'starts_at' => $startsAt,
                 'ends_at' => $endsAt,
                 'link_mode' => $linkMode,
+                'minimum_age' => $minimumAge,
+                'maximum_age' => $maximumAge,
             ])->save();
 
             $this->record($locked, $actor, null, (int) $locked->status, 'window_changed', [
                 'starts_at' => $startsAt?->toDateTimeString(),
                 'ends_at' => $endsAt?->toDateTimeString(),
                 'link_mode' => $linkMode,
+                'minimum_age' => $minimumAge,
+                'maximum_age' => $maximumAge,
             ]);
 
             return $locked;
@@ -413,6 +425,21 @@ class HiringCampaignService
         if (! $hasPost || ! $hasForm) {
             throw $this->refuse('campaign', 'recruitment-campaign.needs_post_and_form');
         }
+
+        if ($campaign->minimum_age === null && $campaign->maximum_age === null) {
+            return;
+        }
+
+        $formVersion = $campaign->applicationForm()
+            ->with('currentVersion')
+            ->first()
+            ?->currentVersion;
+        $birthDate = collect($this->applicationForms->normalizeFields((array) $formVersion?->fields_json))
+            ->firstWhere('key', 'date_of_birth');
+
+        if (! is_array($birthDate) || ! $birthDate['required']) {
+            throw $this->refuse('campaign', 'recruitment-campaign.age_range_requires_birth_date');
+        }
     }
 
     /** Opening applications requires both frozen assets and a usable link. */
@@ -463,7 +490,7 @@ class HiringCampaignService
             : ($current?->starts_at === null ? null : Carbon::parse($current->starts_at));
 
         $endsAt = array_key_exists('ends_at', $attributes)
-            ? $this->toDate($attributes['ends_at'])
+            ? $this->toDate($attributes['ends_at'], endOfDay: true)
             : ($current?->ends_at === null ? null : Carbon::parse($current->ends_at));
 
         if ($startsAt !== null && $endsAt !== null && $endsAt->lessThanOrEqualTo($startsAt)) {
@@ -475,6 +502,47 @@ class HiringCampaignService
         }
 
         return [$startsAt, $endsAt];
+    }
+
+    /**
+     * The applicant eligibility range. Both ends are required together so the
+     * public form can state one clear rule instead of implying a missing end.
+     *
+     * @param  array<string, mixed>  $attributes
+     * @return array{0: ?int, 1: ?int}
+     */
+    private function ageRange(array $attributes, ?HiringCampaign $current = null): array
+    {
+        $minimumAge = array_key_exists('minimum_age', $attributes)
+            ? $this->ageValue($attributes['minimum_age'], 'minimum_age')
+            : $current?->minimum_age;
+        $maximumAge = array_key_exists('maximum_age', $attributes)
+            ? $this->ageValue($attributes['maximum_age'], 'maximum_age')
+            : $current?->maximum_age;
+
+        if (($minimumAge === null) !== ($maximumAge === null)) {
+            throw $this->refuse('minimum_age', 'recruitment-campaign.age_range_both');
+        }
+
+        if ($minimumAge !== null && $maximumAge !== null && $minimumAge > $maximumAge) {
+            throw $this->refuse('maximum_age', 'recruitment-campaign.age_range_order');
+        }
+
+        return [$minimumAge, $maximumAge];
+    }
+
+    private function ageValue(mixed $value, string $field): ?int
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $age = filter_var($value, FILTER_VALIDATE_INT);
+        if ($age === false || $age < 0 || $age > 120) {
+            throw $this->refuse($field, 'recruitment-campaign.age_invalid');
+        }
+
+        return $age;
     }
 
     /**
@@ -508,9 +576,15 @@ class HiringCampaignService
         return $requested;
     }
 
-    private function toDate(mixed $value): ?Carbon
+    private function toDate(mixed $value, bool $endOfDay = false): ?Carbon
     {
-        return blank($value) ? null : Carbon::parse($value);
+        if (blank($value)) {
+            return null;
+        }
+
+        $date = Carbon::parse($value);
+
+        return $endOfDay ? $date->endOfDay() : $date->startOfDay();
     }
 
     /**

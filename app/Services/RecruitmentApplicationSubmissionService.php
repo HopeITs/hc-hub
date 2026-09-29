@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\RecruitmentApplicationStatus;
 use App\Enums\RecruitmentCampaignLinkMode;
 use App\Exceptions\UnsafeRecruitmentFileException;
+use App\Jobs\SendRecruitmentResponseReceipt;
 use App\Models\ApplicationFormVersion;
 use App\Models\HiringCampaign;
 use App\Models\PublicRecruitmentLink;
@@ -54,7 +55,7 @@ class RecruitmentApplicationSubmissionService
     {
         $emailNormalized = $this->identity->normalizeEmail($input['email']);
 
-        return DB::transaction(function () use ($link, $input, $meta, $emailNormalized) {
+        $application = DB::transaction(function () use ($link, $input, $meta, $emailNormalized) {
             $link = PublicRecruitmentLink::query()
                 ->whereKey($link->getKey())
                 ->with('campaign')
@@ -161,6 +162,12 @@ class RecruitmentApplicationSubmissionService
 
             return $application;
         });
+
+        if (data_get($application->consent_payload_json, 'response_copy', false)) {
+            rescue(fn () => SendRecruitmentResponseReceipt::dispatch($application->getKey()));
+        }
+
+        return $application;
     }
 
     /**

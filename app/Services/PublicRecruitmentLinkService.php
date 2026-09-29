@@ -43,10 +43,10 @@ class PublicRecruitmentLinkService
         // Without an explicit expiry the link lives exactly as long as the
         // campaign window, which is what HR means almost every time.
         $expiresAt = match (true) {
-            $expiresAt instanceof CarbonInterface => CarbonImmutable::instance($expiresAt),
-            filled($expiresAt) => CarbonImmutable::parse($expiresAt),
-            $campaign->ends_at !== null && $campaign->ends_at->isFuture() => CarbonImmutable::instance($campaign->ends_at),
-            default => CarbonImmutable::now()->addDays((int) config('recruitment.public_link_default_days', 30)),
+            $expiresAt instanceof CarbonInterface => CarbonImmutable::instance($expiresAt)->endOfDay(),
+            filled($expiresAt) => CarbonImmutable::parse($expiresAt)->endOfDay(),
+            $campaign->ends_at !== null && $campaign->ends_at->isFuture() => CarbonImmutable::instance($campaign->ends_at)->endOfDay(),
+            default => CarbonImmutable::now()->addDays((int) config('recruitment.public_link_default_days', 30))->endOfDay(),
         };
 
         if ($expiresAt->lessThanOrEqualTo(now())) {
@@ -430,6 +430,10 @@ class PublicRecruitmentLinkService
             'job_post' => $this->jobPosts->publicSnapshot($campaign, (int) $link->job_post_version_id),
             'form' => $this->applicationForms->publicSchema($campaign, (int) $link->form_version_id),
             'context' => $this->applicationForms->formContext($campaign),
+            'age_range' => [
+                'minimum' => $campaign->minimum_age,
+                'maximum' => $campaign->maximum_age,
+            ],
             'link_mode' => $campaign->link_mode,
             'accepting_applications' => $this->acceptingApplications($campaign),
             'opens_at' => $campaign->starts_at?->toIso8601String(),

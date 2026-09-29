@@ -8,7 +8,9 @@ use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentRequestType;
+use App\Jobs\SendRecruitmentResponseReceipt;
 use App\Livewire\Recruitment\PublicLinks\Manager;
+use App\Mail\RecruitmentResponseReceiptMail;
 use App\Models\ApplicationForm;
 use App\Models\Department;
 use App\Models\HiringCampaign;
@@ -27,6 +29,8 @@ use App\Services\HiringCampaignService;
 use App\Services\PublicRecruitmentLinkService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -181,6 +185,7 @@ class PublicRecruitmentLinkTest extends TestCase
 
         $this->get(route('careers.show', $result['token']))
             ->assertOk()
+            ->assertSee('assets/recruitment/hope-center/logo.svg', false)
             ->assertSee('data-recruitment-wizard', false)
             ->assertSee('data-wizard-step', false)
             ->assertSee('data-wizard-next', false)
@@ -191,6 +196,70 @@ class PublicRecruitmentLinkTest extends TestCase
             ->assertSee('required', false)
             ->assertSee(__('careers.add_file'))
             ->assertDontSee('Secure file uploads will be enabled');
+    }
+
+    public function test_mobile_number_must_be_ten_digits_and_start_with_09(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+
+        $page = $this->get(route('careers.show', $result['token']));
+        $page->assertOk();
+        $this->assertMatchesRegularExpression('/id="field-phone"[^>]*pattern="09\[0-9\]\{8\}"[^>]*maxlength="10"/s', $page->getContent());
+
+        $payload = $this->validSubmission('invalid-phone@example.com');
+        $payload['answers']['phone'] = '+963944123456';
+
+        $this->post(route('careers.submit', $result['token']), $payload)
+            ->assertUnprocessable()
+            ->assertSee(__('careers.errors.invalid_phone'));
+
+        $this->assertDatabaseCount('recruitment_applications', 0);
+    }
+
+    public function test_age_range_is_shown_and_blocks_an_ineligible_applicant(): void
+    {
+        [$campaign, $hr, , , $form] = $this->makePublishedCampaign();
+        $campaign->forceFill(['minimum_age' => 18, 'maximum_age' => 35])->save();
+        $form->currentVersion->forceFill(['fields_json' => [
+            ['key' => 'full_name'],
+            ['key' => 'email'],
+            ['key' => 'phone'],
+            ['key' => 'date_of_birth', 'required' => true],
+            ['key' => 'cv'],
+            ['key' => 'privacy_consent'],
+        ]])->save();
+
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign->fresh(),
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+
+        $this->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee(__('careers.age_requirement_value', ['minimum' => 18, 'maximum' => 35]))
+            ->assertSee('data-minimum-age="18"', false)
+            ->assertSee('data-maximum-age="35"', false);
+
+        $ineligible = $this->validSubmission('too-young@example.com');
+        $ineligible['answers']['date_of_birth'] = now()->subYears(17)->format('Y-m-d');
+
+        $this->post(route('careers.submit', $result['token']), $ineligible)
+            ->assertUnprocessable()
+            ->assertSee(__('careers.errors.age_not_eligible'));
+
+        $eligible = $this->validSubmission('eligible@example.com');
+        $eligible['answers']['date_of_birth'] = now()->subYears(18)->format('Y-m-d');
+        $this->post(route('careers.submit', $result['token']), $eligible)->assertRedirect();
+
+        $this->assertDatabaseCount('recruitment_applications', 1);
     }
 
     public function test_invalid_disabled_expired_and_draft_campaign_links_share_a_generic_response(): void
@@ -234,7 +303,9 @@ class PublicRecruitmentLinkTest extends TestCase
         $safe = $this->validSubmission('applicant@example.com', 'Applicant Name');
 
         $this->post(route('careers.submit', $result['token']), $safe)
-            ->assertStatus(202)
+            ->assertRedirect(route('careers.submitted', ['token' => $result['token'], 'lang' => 'en']));
+        $this->get(route('careers.submitted', ['token' => $result['token'], 'lang' => 'en']))
+            ->assertOk()
             ->assertSee(__('careers.submitted_title'));
         $this->assertSame(1, RecruitmentApplicant::query()->count());
         $this->assertSame(1, RecruitmentApplication::query()->count());
@@ -275,7 +346,7 @@ class PublicRecruitmentLinkTest extends TestCase
         $payload = $this->validSubmission('applicant@example.com');
         $payload['answers']['recommendations'] = [null];
 
-        $this->post(route('careers.submit', $result['token']), $payload)->assertStatus(202);
+        $this->post(route('careers.submit', $result['token']), $payload)->assertRedirect();
         $this->assertDatabaseCount('recruitment_applicant_files', 1);
     }
 
@@ -301,6 +372,58 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->assertSame(0, RecruitmentApplication::query()->count());
     }
 
+    public function test_language_switch_after_a_rejected_submission_returns_to_the_public_page(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+        $payload = $this->validSubmission('not-an-email');
+
+        $response = $this->post(route('careers.submit', $result['token']), $payload);
+
+        $arabicPage = route('careers.show', ['token' => $result['token'], 'lang' => 'ar']);
+        $wrongPostUrl = route('careers.submit', ['token' => $result['token'], 'lang' => 'ar']);
+        $response->assertUnprocessable()
+            ->assertSee('window.history.replaceState', false)
+            ->assertSee('href="'.$arabicPage.'"', false)
+            ->assertDontSee('href="'.$wrongPostUrl.'"', false);
+        $arabicResponse = $this->get($arabicPage);
+        $arabicResponse
+            ->assertOk()
+            ->assertSee('dir="rtl"', false);
+
+        $this->assertMatchesRegularExpression('/id="field-email"[^>]*dir="ltr"/s', $arabicResponse->getContent());
+        $this->assertMatchesRegularExpression('/id="field-phone"[^>]*dir="ltr"/s', $arabicResponse->getContent());
+    }
+
+    public function test_successful_submission_redirects_to_a_get_confirmation_page(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $hr,
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+        $payload = $this->validSubmission('arabic-success@example.com');
+        $payload['locale'] = 'ar';
+
+        $this->post(route('careers.submit', $result['token']), $payload)
+            ->assertRedirect(route('careers.submitted', ['token' => $result['token'], 'lang' => 'ar']));
+
+        $this->get(route('careers.submitted', ['token' => $result['token'], 'lang' => 'ar']))
+            ->assertOk()
+            ->assertSee('dir="rtl"', false)
+            ->assertSee(__('careers.submitted_title', [], 'ar'));
+
+        $this->get(route('careers.submit', ['token' => $result['token'], 'lang' => 'ar']))
+            ->assertStatus(405);
+    }
+
     public function test_same_email_cannot_submit_twice_with_a_different_idempotency_key(): void
     {
         [$campaign, $hr] = $this->makePublishedCampaign();
@@ -314,7 +437,7 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->post(
             route('careers.submit', $result['token']),
             $this->validSubmission('applicant@example.com'),
-        )->assertStatus(202);
+        )->assertRedirect();
         $this->post(
             route('careers.submit', $result['token']),
             $this->validSubmission(' APPLICANT@example.com ', 'Duplicate Applicant'),
@@ -322,6 +445,41 @@ class PublicRecruitmentLinkTest extends TestCase
 
         $this->assertDatabaseCount('recruitment_applicants', 1);
         $this->assertDatabaseCount('recruitment_applications', 1);
+    }
+
+    public function test_an_applicant_can_request_a_queued_copy_of_their_responses(): void
+    {
+        [$campaign] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)->generate(
+            $campaign,
+            $this->makeUser($campaign->vacancy->position->city, 'HR-HMS'),
+            now()->addDays(10),
+            RecruitmentCampaignLinkMode::PublicOpen,
+        );
+        Queue::fake();
+        $payload = $this->validSubmission('receipt@example.com');
+        $payload['answers']['response_copy'] = '1';
+
+        $this->post(route('careers.submit', $result['token']), $payload)->assertRedirect();
+
+        $application = RecruitmentApplication::query()->where('email_normalized', 'receipt@example.com')->sole();
+        Queue::assertPushed(SendRecruitmentResponseReceipt::class, fn (SendRecruitmentResponseReceipt $job): bool => $job->applicationId === $application->id);
+
+        Mail::fake();
+        (new SendRecruitmentResponseReceipt($application->id))->handle();
+        Mail::assertSent(RecruitmentResponseReceiptMail::class);
+
+        $receipt = new RecruitmentResponseReceiptMail($application->load([
+            'applicant', 'campaign.vacancy.position', 'formVersion', 'answers', 'files',
+        ]));
+        $this->assertStringContainsString('Application received', $receipt->render());
+        $this->assertStringContainsString('receipt@example.com', $receipt->render());
+
+        $application->forceFill(['consent_payload_json' => ['response_copy' => true, 'locale' => 'ar']]);
+        $arabicReceipt = new RecruitmentResponseReceiptMail($application);
+        $arabicHtml = $arabicReceipt->render();
+        $this->assertStringContainsString('dir="rtl"', $arabicHtml);
+        $this->assertStringContainsString('text-align: right;', $arabicHtml);
     }
 
     public function test_failed_secure_upload_rolls_back_the_complete_application(): void
@@ -380,7 +538,7 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->post(
             route('careers.submit', $result['token']),
             $this->validSubmission('  INVITED@example.com ', 'Invited Person'),
-        )->assertStatus(202);
+        )->assertRedirect();
 
         $this->post(
             route('careers.submit', $result['token']),
@@ -402,6 +560,19 @@ class PublicRecruitmentLinkTest extends TestCase
             RecruitmentCampaignLinkMode::PublicOpen,
         );
         $campaign->forceFill(['status' => HiringCampaignStatus::Closed])->save();
+
+        $this->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee(__('careers.view_only_notice'))
+            ->assertDontSee('data-recruitment-wizard', false)
+            ->assertDontSee('name="submission_key"', false);
+
+        $this->assertSame(PublicRecruitmentLink::STATUS_ACTIVE, $result['link']->fresh()->status);
+
+        Livewire::actingAs($hr)
+            ->test(Manager::class, ['campaign' => $campaign->fresh()])
+            ->assertSee(__('recruitment.public_link.view_only'))
+            ->assertSee(__('recruitment.public_link.view_only_notice'));
 
         $this->post(
             route('careers.submit', $result['token']),
@@ -426,7 +597,7 @@ class PublicRecruitmentLinkTest extends TestCase
             $this->post(
                 route('careers.submit', $result['token']),
                 $this->validSubmission('applicant@example.com', submissionKey: $submissionKey),
-            )->assertStatus(202);
+            )->assertRedirect();
         }
 
         $this->post(
@@ -447,6 +618,8 @@ class PublicRecruitmentLinkTest extends TestCase
             ->set('customExpiry', true)
             ->set('customExpiry', true)
             ->set('expiresAt', now()->addDays(5)->format('Y-m-d\TH:i'))
+            ->assertSee('id="public-link-expiry" type="date"', false)
+            ->assertDontSee('datetime-local', false)
             ->call('generate')
             ->assertSet('notice', __('recruitment.public_link.generated'))
             ->assertSet('generatedUrl', fn ($url) => str_contains($url, '/careers/'))
@@ -483,8 +656,8 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->assertTrue($campaign->fresh()->isInvitationOnly());
     }
 
-    /** Coming back to the page, the person who made the link can still copy it. */
-    public function test_the_creator_can_copy_the_link_again_in_the_same_session(): void
+    /** The encrypted stored address remains recoverable after the session is cleared. */
+    public function test_the_creator_can_copy_the_link_again_after_returning(): void
     {
         [$campaign, $hr] = $this->makePublishedCampaign();
 
@@ -502,8 +675,8 @@ class PublicRecruitmentLinkTest extends TestCase
 
         Livewire::actingAs($hr)
             ->test(Manager::class, ['campaign' => $campaign->fresh()])
-            ->assertDontSee($url)
-            ->assertSee(__('recruitment.public_link.hash_only_notice'));
+            ->assertSee($url)
+            ->assertDontSee(__('recruitment.public_link.hash_only_notice'));
     }
 
     /** A corrected advert reaches the shared link without changing its address. */
@@ -614,7 +787,7 @@ class PublicRecruitmentLinkTest extends TestCase
         // Whatever address is posted, the application belongs to the account.
         $this->actingAs($staff)
             ->post(route('careers.submit', $result['token']), $this->validSubmission('someone.else@example.com', 'Rami H.'))
-            ->assertStatus(202);
+            ->assertRedirect();
 
         $application = RecruitmentApplication::query()->sole();
         $applicant = $application->applicant;
@@ -701,7 +874,7 @@ class PublicRecruitmentLinkTest extends TestCase
 
         $this->actingAs($staff)
             ->post(route('careers.submit', $result['token']), $this->validSubmission('personal@example.com'))
-            ->assertStatus(202);
+            ->assertRedirect();
 
         $applicant = RecruitmentApplication::query()->sole()->applicant;
         $this->assertSame('personal@example.com', $applicant->email_normalized);
@@ -816,6 +989,7 @@ class PublicRecruitmentLinkTest extends TestCase
             'fields_json' => [
                 ['key' => 'full_name'],
                 ['key' => 'email'],
+                ['key' => 'response_copy'],
             ],
             'privacy_notice_version' => 'v1',
             'status' => 'published',
@@ -838,7 +1012,7 @@ class PublicRecruitmentLinkTest extends TestCase
             'answers' => [
                 'full_name' => $fullName,
                 'email' => $email,
-                'phone' => '+963 999 123 456',
+                'phone' => '0944123456',
                 'cv' => UploadedFile::fake()->createWithContent(
                     'cv.pdf',
                     "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<<>>\n%%EOF\n",

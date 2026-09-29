@@ -2,6 +2,7 @@
 
 <div class="space-y-6">
     <a class="text-primary hover:underline" href="{{ route('recruitment.requests.index') }}">{{ __('recruitment.back') }}</a>
+
     <header class="flex flex-wrap items-start justify-between gap-4">
         <div>
             <p class="text-secondary-medium">{{ __('recruitment.details') }}</p>
@@ -28,7 +29,6 @@
             @endif
         </div>
     </header>
-    @include('livewire.recruitment.requests.partials.approval-track')
 
     @if ($pendingStep)
         {{-- Shown only to the approver this step is waiting on. The service asks
@@ -101,6 +101,9 @@
             @endif
         </section>
     @endif
+
+    @include('livewire.recruitment.requests.partials.approval-track')
+
     @if ($unlockedFields && (int) $request->status === \App\Enums\RecruitmentRequestStatus::ChangesRequested)
         {{-- The requester's side of the same ask: everything else on the
              request stays locked, and the server refuses it either way. --}}

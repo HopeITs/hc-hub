@@ -149,12 +149,12 @@
                     </div>
                     <div>
                         <x-forms.input-label for="custom-label-en" required>{{ __('recruitment.application_form.label_en') }}</x-forms.input-label>
-                        <x-forms.input id="custom-label-en" model="customLabelEn" dir="ltr" required />
+                        <x-forms.input id="custom-label-en" model="customLabelEn" dir="ltr" :placeholder="__('recruitment.application_form.label_en_placeholder')" required />
                         <x-error-span>{{ $errors->first('customLabelEn') }}</x-error-span>
                     </div>
                     <div>
                         <x-forms.input-label for="custom-label-ar" required>{{ __('recruitment.application_form.label_ar') }}</x-forms.input-label>
-                        <x-forms.input id="custom-label-ar" model="customLabelAr" dir="rtl" required />
+                        <x-forms.input id="custom-label-ar" model="customLabelAr" dir="rtl" :placeholder="__('recruitment.application_form.label_ar_placeholder')" required />
                         <x-error-span>{{ $errors->first('customLabelAr') }}</x-error-span>
                     </div>
                     <div>
@@ -212,7 +212,8 @@
                         @forelse ($sectionFields as $index => $field)
                             <article wire:key="form-field-{{ $field['key'] }}" class="rounded-lg border border-secondary-soft border-s-4 border-s-primary bg-white p-4 shadow-sm">
                                 <div class="flex flex-wrap items-center justify-between gap-3">
-                                    <div class="flex items-center gap-2">
+                                    <div class="flex min-w-0 flex-wrap items-center gap-2">
+                                        <span class="font-semibold text-secondary-dark">{{ $field['label'][app()->getLocale()] ?? $field['label']['en'] }}</span>
                                         <span class="rounded-full bg-secondary-soft/60 px-2.5 py-1 text-small font-medium text-secondary-medium">{{ $types[$field['type']]['label'][app()->getLocale()] ?? $types[$field['type']]['label']['en'] }}</span>
                                         @if ($field['locked'])
                                             <span class="inline-flex items-center gap-1 text-small text-secondary-light">

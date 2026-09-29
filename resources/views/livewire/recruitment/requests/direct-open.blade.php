@@ -47,16 +47,17 @@
              the approvals, never the facts. --}}
         @include('livewire.recruitment.requests.partials.request-fields')
 
-        <section class="space-y-5 rounded-surface border border-secondary-soft bg-white p-6">
-            <div>
-                <h2 class="text-h4 font-semibold">{{ __('recruitment.direct_open.confirmations') }}</h2>
-                <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment.direct_open.confirmations_hint') }}</p>
-            </div>
+        @if ($steps !== [])
+            <section class="space-y-5 rounded-surface border border-secondary-soft bg-white p-6">
+                <div>
+                    <h2 class="text-h4 font-semibold">{{ __('recruitment.direct_open.confirmations') }}</h2>
+                    <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment.direct_open.confirmations_hint') }}</p>
+                </div>
 
-            {{-- Only decisions made outside the system belong here. The HR
-                 action is already recorded by the signed-in user who creates
-                 the direct opening. --}}
-            @foreach ($steps as $stepKey)
+                {{-- Only decisions made outside the system belong here. The HR
+                     action is already recorded by the signed-in user who creates
+                     the direct opening. --}}
+                @foreach ($steps as $stepKey)
                 @php $decision = (int) ($documentation['confirmations'][$stepKey]['decision'] ?? 0); @endphp
                 <fieldset class="rounded-control border border-secondary-soft p-4" wire:key="confirm-{{ $stepKey }}">
                     <legend class="px-1 text-sm font-semibold">
@@ -121,7 +122,7 @@
                             </div>
                             <div>
                                 <x-forms.input-label for="when-{{ $stepKey }}" required>{{ __('recruitment.direct_open.confirmed_at') }}</x-forms.input-label>
-                                <input id="when-{{ $stepKey }}" type="datetime-local"
+                                <input id="when-{{ $stepKey }}" type="date"
                                     wire:model="documentation.confirmations.{{ $stepKey }}.confirmed_at"
                                     class="h-[37.6px] w-full rounded-control border-secondary-light">
                                 <p class="mt-1 text-sm text-primary">@error('confirmations.'.$stepKey.'.confirmed_at'){{ $message }}@enderror</p>
@@ -135,8 +136,9 @@
                         </div>
                     @endif
                 </fieldset>
-            @endforeach
-        </section>
+                @endforeach
+            </section>
+        @endif
 
         <footer class="flex flex-wrap items-center justify-between gap-4 rounded-surface border border-secondary-soft bg-white p-5">
             <p class="text-sm text-secondary-medium">{{ __('recruitment.direct_open.hint') }}</p>

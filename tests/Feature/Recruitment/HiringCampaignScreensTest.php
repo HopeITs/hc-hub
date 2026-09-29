@@ -47,6 +47,8 @@ class HiringCampaignScreensTest extends TestCase
             ->test(Create::class)
             ->set('vacancyId', $vacancy->id)
             ->set('linkMode', HiringCampaign::INTERNAL)
+            ->set('minimumAge', '18')
+            ->set('maximumAge', '35')
             ->set('endsAt', now()->addMonth()->format('Y-m-d\TH:i'))
             ->call('save')
             ->assertHasNoErrors();
@@ -54,6 +56,8 @@ class HiringCampaignScreensTest extends TestCase
         $campaign = HiringCampaign::query()->sole();
 
         $this->assertSame(HiringCampaign::INTERNAL, $campaign->link_mode);
+        $this->assertSame(18, $campaign->minimum_age);
+        $this->assertSame(35, $campaign->maximum_age);
         $this->assertSame(Status::Draft, (int) $campaign->status);
     }
 
@@ -66,7 +70,10 @@ class HiringCampaignScreensTest extends TestCase
             ->test(Create::class)
             ->assertSee(__('recruitment-campaign.modes.internal'))
             ->assertSee(__('recruitment-campaign.modes.public_open'))
-            ->assertSee(__('recruitment-campaign.modes.invitation_only'));
+            ->assertSee(__('recruitment-campaign.modes.invitation_only'))
+            ->assertSee('id="startsAt" type="date"', false)
+            ->assertSee('id="endsAt" type="date"', false)
+            ->assertDontSee('datetime-local', false);
     }
 
     /** With a single seat on offer there is nothing to choose, so it is chosen. */
@@ -141,6 +148,7 @@ class HiringCampaignScreensTest extends TestCase
             ->assertSee(__('recruitment-campaign.page.launch_blocked'))
             ->assertSee('disabled data-campaign-launch', false)
             ->assertSee(__('recruitment-campaign.act.disable'))
+            ->assertSee(__('recruitment-campaign.confirm.disable'))
             ->assertSee('data-recruitment-confirmation-modal="campaign-actions"', false)
             ->assertSee('requireReason: true', false)
             ->assertDontSee('wire:confirm', false)
@@ -205,6 +213,22 @@ class HiringCampaignScreensTest extends TestCase
             ->test(Show::class, ['campaignId' => $campaign->getKey()])
             ->call('launch')
             ->call('act', 'publish');
+
+        $this->assertSame(Status::Draft, (int) $campaign->fresh()->status);
+    }
+
+    public function test_an_age_restricted_campaign_requires_a_required_birth_date_field_before_launch(): void
+    {
+        [$hr, $vacancy] = $this->seat();
+        $campaign = app(HiringCampaignService::class)->create($hr, $vacancy, [
+            'minimum_age' => 18,
+            'maximum_age' => 35,
+        ]);
+        $this->prepareCampaignForOpening($campaign, $hr);
+
+        Livewire::actingAs($hr)
+            ->test(Show::class, ['campaignId' => $campaign->getKey()])
+            ->call('launch');
 
         $this->assertSame(Status::Draft, (int) $campaign->fresh()->status);
     }

@@ -2,13 +2,16 @@
 
 namespace App\Livewire\Recruitment\Requests;
 
+use App\Enums\HiringCampaignStatus;
 use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentRequestType;
 use App\Models\City;
+use App\Models\HiringCampaign;
 use App\Models\RecruitmentRequest;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Services\HiringCampaignStateMachine;
 use App\Services\RecruitmentRequestListQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +19,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
+use RamonRietdijk\LivewireTables\Enums\SearchScope;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
 class RequestTable extends LivewireTable
@@ -42,7 +46,13 @@ class RequestTable extends LivewireTable
 
         return app(RecruitmentRequestListQuery::class)
             ->forUser(auth()->user(), $this->viewFilter)
-            ->with(['requester.profile', 'scopeCity', 'targetPosition']);
+            ->with([
+                'requester.profile',
+                'scopeCity',
+                'targetPosition',
+                'latestVersion.positionDetail',
+                'vacancy.campaigns',
+            ]);
     }
 
     protected function link(Model $model): ?string
@@ -88,6 +98,18 @@ class RequestTable extends LivewireTable
                 ->displayUsing(fn ($value) => RecruitmentRequestMode::getLocalizedName((int) $value)['value'])
                 ->searchable(),
 
+            SelectColumn::make(
+                __('recruitment.priority'),
+                'latestVersion.positionDetail.priority',
+                'priority',
+            )
+                ->options($this->priorityOptions())
+                ->displayUsing(fn ($value, Model $request): string => $this->priorityLabel(
+                    $this->requestPriority($request),
+                ))
+                ->searchable(fn (Builder $query, mixed $search, SearchScope $scope) => $this
+                    ->applyPrioritySearch($query, $search, $scope)),
+
             SelectColumn::make(__('recruitment.requester'), 'requester_user_id')
                 ->options($this->requesterOptions())
                 ->displayUsing(fn ($value, Model $request): string => $this->requesterCell($request))
@@ -114,24 +136,8 @@ class RequestTable extends LivewireTable
             // The column is hidden outright from anybody who cannot run a
             // campaign, and each row only offers the link when the request has
             // actually produced a seat to advertise.
-            Column::make(__('recruitment-campaign.new_campaign'), 'id')
-                ->displayUsing(function ($value, Model $request): string {
-                    $vacancyId = $this->vacancyToAdvertise($request);
-
-                    if ($vacancyId === null) {
-                        return '';
-                    }
-
-                    return Blade::render(
-                        '<a href="{{ $url }}" wire:navigate '
-                        .'class="inline-block rounded-control bg-primary px-3 py-1.5 '
-                        .'text-sm font-semibold text-white hover:bg-primary-600">{{ $label }}</a>',
-                        [
-                            'url' => route('recruitment.campaigns.create', ['vacancyId' => $vacancyId]),
-                            'label' => __('recruitment-campaign.new_campaign'),
-                        ],
-                    );
-                })
+            Column::make(__('recruitment-campaign.campaign'), 'id')
+                ->displayUsing(fn ($value, Model $request): string => $this->campaignActions($request))
                 ->asHtml()
                 ->clickable(false)
                 ->visible($this->mayRunCampaigns()),
@@ -148,6 +154,66 @@ class RequestTable extends LivewireTable
             ->all();
     }
 
+    /** @return array<string, string> */
+    private function priorityOptions(): array
+    {
+        return $this->visible()
+            ->with('latestVersion.positionDetail')
+            ->get()
+            ->map(fn (RecruitmentRequest $request): ?string => $this->requestPriority($request))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->mapWithKeys(fn (string $priority): array => [
+                $priority => $this->priorityLabel($priority),
+            ])
+            ->all();
+    }
+
+    private function requestPriority(Model $request): ?string
+    {
+        return $request->latestVersion?->positionDetail?->priority
+            ?? data_get($request->draft_payload_json, 'priority');
+    }
+
+    private function priorityLabel(?string $priority): string
+    {
+        return $priority === null ? '—' : __('recruitment.priority_'.$priority);
+    }
+
+    private function applyPrioritySearch(
+        Builder $query,
+        mixed $search,
+        SearchScope $scope,
+    ): void {
+        $priorities = collect(config('recruitment.request_form.priorities', []));
+
+        if ($scope === SearchScope::Column) {
+            $priorities = $priorities->filter(
+                fn (string $priority): bool => $priority === (string) $search,
+            );
+        } else {
+            $needle = mb_strtolower((string) $search);
+            $priorities = $priorities->filter(fn (string $priority): bool => str_contains(
+                mb_strtolower($this->priorityLabel($priority)),
+                $needle,
+            ));
+        }
+
+        if ($priorities->isEmpty()) {
+            $query->whereRaw('0 = 1');
+
+            return;
+        }
+
+        $query->where(function (Builder $prioritized) use ($priorities): void {
+            $prioritized
+                ->whereIn('draft_payload_json->priority', $priorities->all())
+                ->orWhereHas('latestVersion.positionDetail', fn (Builder $details): Builder => $details
+                    ->whereIn('priority', $priorities->all()));
+        });
+    }
+
     private function requesterCell(Model $request): string
     {
         $mine = (int) $request->requester_user_id === (int) auth()->id();
@@ -156,12 +222,12 @@ class RequestTable extends LivewireTable
             <<<'BLADE'
                 <div class="space-y-1.5">
                     <div>{{ $name }}</div>
-                    <div class="flex flex-wrap gap-1.5">
-                        <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold {{ $mine ? 'border border-primary text-primary' : 'bg-neutral-100 text-secondary-medium' }}">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs leading-none font-semibold {{ $mine ? 'border border-primary text-primary' : 'bg-neutral-100 text-secondary-medium' }}">
                             {{ __($mine ? 'recruitment.my_request' : 'recruitment.team_request') }}
                         </span>
                         @if ($needsReview)
-                            <span class="inline-flex rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-white">
+                            <span class="inline-flex h-5 items-center rounded-full bg-primary px-2 text-xs leading-none font-semibold text-white">
                                 {{ __('recruitment.needs_my_review') }}
                             </span>
                         @endif
@@ -245,25 +311,73 @@ class RequestTable extends LivewireTable
         return (bool) auth()->user()?->hasActivePermission('recruitment-campaigns.manage');
     }
 
-    /**
-     * The seat this request produced, if it is still there to advertise.
-     *
-     * Only a decided request has one: before that nothing has been applied and
-     * there is no vacancy yet. A seat already filled or closed is not offered,
-     * because a campaign cannot be opened on it and the button would only lead
-     * to a refusal.
-     */
-    private function vacancyToAdvertise(Model $request): ?int
+    private function campaignActions(Model $request): string
     {
         if (! in_array((int) $request->status, [RecruitmentRequestStatus::Approved, RecruitmentRequestStatus::Applied], true)) {
-            return null;
+            return '';
         }
 
-        return Vacancy::query()->available()
-            ->where('created_from_request_id', $request->getKey())
-            ->value('id')
-            ?? Vacancy::query()->available()
-                ->where('position_id', $request->target_position_id)
-                ->value('id');
+        $vacancy = $request->vacancy;
+
+        if ($vacancy === null) {
+            return '';
+        }
+
+        $states = app(HiringCampaignStateMachine::class);
+        $campaigns = $vacancy->campaigns->sortByDesc('id');
+        $ongoing = $campaigns->first(fn (HiringCampaign $campaign): bool => in_array(
+            $states->effective($campaign),
+            [HiringCampaignStatus::Draft, HiringCampaignStatus::Published, HiringCampaignStatus::Open],
+            true,
+        ));
+
+        if ($ongoing !== null) {
+            return $this->campaignButton(
+                route('recruitment.campaigns.show', ['campaignId' => $ongoing->getKey()]),
+                (int) $ongoing->status === HiringCampaignStatus::Draft
+                    ? __('recruitment-campaign.continue_campaign')
+                    : __('recruitment-campaign.view_campaign'),
+            );
+        }
+
+        $buttons = [];
+        $latest = $campaigns->first();
+
+        if ($latest !== null) {
+            $buttons[] = $this->campaignButton(
+                route('recruitment.campaigns.show', ['campaignId' => $latest->getKey()]),
+                __('recruitment-campaign.view_campaign'),
+                outlined: true,
+            );
+        }
+
+        if ($this->vacancyIsAvailable($vacancy)) {
+            $buttons[] = $this->campaignButton(
+                route('recruitment.campaigns.create', ['vacancyId' => $vacancy->getKey()]),
+                __('recruitment-campaign.new_campaign'),
+            );
+        }
+
+        return $buttons === [] ? '' : '<div class="flex flex-wrap gap-2">'.implode('', $buttons).'</div>';
+    }
+
+    private function campaignButton(string $url, string $label, bool $outlined = false): string
+    {
+        return Blade::render(
+            '<a href="{{ $url }}" wire:navigate @class(['
+            .'"inline-flex min-h-9 w-40 items-center justify-center rounded-control px-3 py-1.5 text-center text-sm font-semibold transition", '
+            .'"border border-primary text-primary hover:bg-neutral-50" => $outlined, '
+            .'"bg-primary text-white hover:bg-primary-600" => ! $outlined, '
+            .'])>{{ $label }}</a>',
+            compact('url', 'label', 'outlined'),
+        );
+    }
+
+    private function vacancyIsAvailable(Vacancy $vacancy): bool
+    {
+        return $vacancy->status === Vacancy::OPEN
+            && $vacancy->closed_at === null
+            && ($vacancy->open_at === null || $vacancy->open_at->isPast())
+            && $vacancy->filled_count < $vacancy->needed_count;
     }
 }

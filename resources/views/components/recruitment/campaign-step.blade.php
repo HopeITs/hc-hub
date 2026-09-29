@@ -34,10 +34,15 @@
         </span>
 
         <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <h3 class="text-subtitle font-bold text-secondary-dark">{{ $title }}</h3>
+            <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                    <h3 class="text-subtitle font-bold text-secondary-dark">{{ $title }}</h3>
+                    @if ($summary)
+                        <p class="mt-1 text-body text-secondary-medium">{{ $summary }}</p>
+                    @endif
+                </div>
                 <span @class([
-                    'rounded-full px-2.5 py-0.5 text-small font-semibold',
+                    'shrink-0 rounded-full px-2.5 py-0.5 text-small font-semibold',
                     'bg-primary text-white' => $done,
                     'border border-primary text-primary' => ! $done && $current && ! $locked,
                     'bg-secondary-soft/60 text-secondary-medium' => ! $done && (! $current || $locked),
@@ -53,9 +58,6 @@
                     @endif
                 </span>
             </div>
-            @if ($summary)
-                <p class="mt-1 text-body text-secondary-medium">{{ $summary }}</p>
-            @endif
 
             <div class="mt-4">
                 {{ $slot }}

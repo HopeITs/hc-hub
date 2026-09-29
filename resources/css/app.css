@@ -286,6 +286,14 @@ select option:checked {
     color: #ffffff;
 }
 
+/* Public recruitment choices use the Hope Center neutral hover state. */
+select.public-career-select option:hover,
+select.public-career-select option:focus,
+select.public-career-select option:checked {
+    background-color: #e6e7e8;
+    color: #414042;
+}
+
 div:where(.swal2-icon).swal2-question {
     border-color: var(--color-primary) !important;
     color: var(--color-primary) !important;
@@ -414,6 +422,27 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
         width: 100%;
     }
 
+    .request-field--locked .select2-container {
+        cursor: not-allowed !important;
+        pointer-events: none;
+    }
+
+    .request-field--locked .select2-container--default .select2-selection--single {
+        color: var(--color-neutral-700) !important;
+        background-color: #ffffff !important;
+        border-color: var(--color-neutral-300) !important;
+        box-shadow: none !important;
+        cursor: not-allowed !important;
+    }
+
+    .request-field--locked .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: var(--color-neutral-700) !important;
+    }
+
+    .request-field--locked .select2-container--default .select2-selection--single .select2-selection__arrow {
+        opacity: 0.45;
+    }
+
 
     .select2-container--default.select2-container--focus .select2-selection--single,
     .select2-container--default.select2-container--open .select2-selection--single {
@@ -449,6 +478,50 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
        edge stays put; inline flow + dir handle RTL (scrollbar side flips too). */
     .select2-container--default .select2-results__options.results--scroll .select2-results__option--highlighted {
         width: 95% !important;
+    }
+
+    .public-career-select-wrap .select2-container--default .select2-selection--single {
+        height: 44px !important;
+        border-color: #bcbec0 !important;
+        border-radius: var(--radius-control) !important;
+        box-shadow: var(--shadow-e1) !important;
+        font-size: var(--text-body) !important;
+        cursor: pointer !important;
+    }
+
+    .public-career-select-wrap .select2-container--default.select2-container--focus .select2-selection--single,
+    .public-career-select-wrap .select2-container--default.select2-container--open .select2-selection--single,
+    .public-career-select-wrap .select2-selection--single:focus-visible {
+        border-color: var(--color-primary) !important;
+        outline: 2px solid var(--color-primary) !important;
+        outline-offset: 2px !important;
+    }
+
+    .select2-dropdown.public-career-dropdown {
+        overflow: hidden !important;
+        border: 1px solid #bcbec0 !important;
+        border-radius: var(--radius-control) !important;
+        box-shadow: var(--shadow-e2) !important;
+    }
+
+    .select2-container--default .public-career-dropdown .select2-results__option {
+        display: flex;
+        min-height: 44px;
+        align-items: center;
+        padding: 0.625rem 0.75rem !important;
+        background-color: #ffffff !important;
+        color: #414042 !important;
+        white-space: normal;
+    }
+
+    .select2-container--default .public-career-dropdown .select2-results__option--highlighted,
+    .select2-container--default .public-career-dropdown .select2-results__option--highlighted.select2-results__option--selectable {
+        background-color: #e6e7e8 !important;
+        color: #414042 !important;
+    }
+
+    .select2-container--default .public-career-dropdown .select2-results__options.results--scroll .select2-results__option--highlighted {
+        width: 100% !important;
     }
 
     /* Employee-chart range select — match its Select2 box to the original native
