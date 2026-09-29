@@ -56,11 +56,10 @@
             <x-forms.input-error field="applicationIds" input-id="bulk-reject-selection" />
 
             <div class="mt-4 flex flex-wrap gap-3">
-                <button type="button" wire:click="apply" wire:loading.attr="disabled" wire:target="apply"
-                    wire:confirm="{{ __('recruitment-applicant.decisions.bulk_confirm') }}"
-                    class="cursor-pointer rounded-control bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800 disabled:opacity-50">
+                <x-primary-button type="button" wire:click="apply" wire:target="apply"
+                    wire:confirm="{{ __('recruitment-applicant.decisions.bulk_confirm') }}">
                     {{ __('recruitment-applicant.decisions.bulk_apply') }}
-                </button>
+                </x-primary-button>
                 <x-secondary-button wire:click="cancel">
                     {{ __('recruitment-applicant.cancel') }}
                 </x-secondary-button>

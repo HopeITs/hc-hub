@@ -79,10 +79,9 @@
                             class="mt-1 w-full scroll-mt-24 rounded-control border-neutral-300"></textarea>
                         <x-forms.input-error field="deletionReason" input-id="deletionReason" />
                         <div class="mt-3 flex flex-wrap gap-3">
-                            <button type="button" wire:click="deleteNote" wire:loading.attr="disabled" wire:target="deleteNote"
-                                class="cursor-pointer rounded-control bg-red-700 px-4 py-2 text-sm font-semibold text-white hover:bg-red-800">
+                            <x-primary-button type="button" wire:click="deleteNote" wire:target="deleteNote">
                                 {{ __('recruitment-applicant.notes.delete_confirm') }}
-                            </button>
+                            </x-primary-button>
                             <x-secondary-button wire:click="cancelDelete">
                                 {{ __('recruitment-applicant.cancel') }}
                             </x-secondary-button>
