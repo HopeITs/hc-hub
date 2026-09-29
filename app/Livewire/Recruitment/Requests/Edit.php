@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Recruitment\Requests;
 
+use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestMode;
 use App\Models\Position;
 use App\Models\RecruitmentRequest;
@@ -58,8 +59,14 @@ class Edit extends Create
 
     public function render()
     {
+        $changeRequest = $this->latestChangeRequestContext();
+
         $view = parent::render();
-        $view->with('editing', true);
+        $view->with([
+            'editing' => true,
+            'changeRequest' => $changeRequest,
+            'requestedFields' => collect($changeRequest['fields'] ?? [])->pluck('key')->all(),
+        ]);
 
         return $view;
     }
@@ -96,6 +103,41 @@ class Edit extends Create
             array_keys((array) ($this->request()->draft_payload_json ?? [])),
             $permitted,
         ));
+    }
+
+    /**
+     * The latest approver ask shown above the edit form.
+     *
+     * @return array{comment: string|null, fields: array<int, array{key: string, label: string}>}|null
+     */
+    protected function latestChangeRequestContext(): ?array
+    {
+        $event = $this->request()->events()
+            ->where('event_type', RecruitmentEventType::ChangesRequested)
+            ->latest('id')
+            ->first();
+
+        if (! $event) {
+            return null;
+        }
+
+        $fields = $event->meta['requested_fields'] ?? [];
+
+        if (! is_array($fields) || $fields === []) {
+            return null;
+        }
+
+        return [
+            'comment' => $event->comment,
+            'fields' => collect($fields)
+                ->filter(fn ($field): bool => is_string($field) && $field !== '')
+                ->map(fn (string $field): array => [
+                    'key' => $field,
+                    'label' => __('recruitment.'.$field),
+                ])
+                ->values()
+                ->all(),
+        ];
     }
 
     /**

@@ -491,6 +491,11 @@ return [
     'fields_you_may_edit' => 'What you may change',
     'fields_you_may_edit_hint' => 'The rest of the request stays as it was approved.',
     'field_locked_here' => 'Locked — the approver did not ask for this one.',
+    'field_locked_no_changes_requested' => 'Locked — no changes requested.',
+    'field_change_requested' => 'Change requested',
+    'changes_requested_edit_title' => 'Changes requested',
+    'changes_requested_edit_hint' => 'Update only the highlighted fields. Everything else is locked so the approved parts stay unchanged.',
+    'approver_comment' => 'Approver comment',
     'request_is_locked' => 'This request is locked. It can only be edited after an approver asks for changes.',
 
     // Mail bodies. Deliberately thin: a number, what happened and a link.

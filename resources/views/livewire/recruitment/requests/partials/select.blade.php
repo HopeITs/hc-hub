@@ -15,6 +15,7 @@
 --}}
 @php
     $isLocked = in_array($field, $lockedFields ?? [], true);
+    $isChangeRequested = ! $isLocked && in_array($field, $requestedFields ?? [], true);
 
     // The searchable select keeps its own DOM under wire:ignore, so Livewire
     // never rewrites the options inside it. Lists that depend on another
@@ -24,8 +25,15 @@
     // re-initialises the select against the new list.
     $optionsKey = md5(json_encode(array_keys($options)));
 @endphp
-<div wire:key="field-{{ $field }}-{{ $optionsKey }}">
-    <x-forms.input-label :for="$field" :required="$required ?? true">{{ __('recruitment.'.$label) }}</x-forms.input-label>
+<div wire:key="field-{{ $field }}-{{ $optionsKey }}" @class([
+    'rounded-control transition',
+    'request-field--locked' => $isLocked,
+    'border-s-2 border-primary ps-3' => $isChangeRequested,
+])>
+    <div class="mb-1 flex flex-wrap items-center gap-2">
+        <x-forms.input-label :for="$field" :required="$required ?? true">{{ __('recruitment.'.$label) }}</x-forms.input-label>
+        @include('livewire.recruitment.requests.partials.field-state', ['isChangeRequested' => $isChangeRequested, 'isLocked' => false])
+    </div>
 
     <x-forms.select2-input
         :id="$field"
@@ -39,8 +47,6 @@
         @endforeach
     </x-forms.select2-input>
 
-    @if ($isLocked)
-        <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment.field_locked_here') }}</p>
-    @endif
+    @include('livewire.recruitment.requests.partials.field-state', ['isChangeRequested' => false, 'isLocked' => $isLocked])
     <p id="{{ $field }}-error" class="mt-1 text-sm text-red-600">@error('data.'.$field){{ $message }}@enderror</p>
 </div>
