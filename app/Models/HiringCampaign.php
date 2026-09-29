@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\HiringCampaignStatus;
 use App\Services\RecruitmentScopeResolver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -86,6 +87,25 @@ class HiringCampaign extends Model
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         return app(RecruitmentScopeResolver::class)->scopeCampaigns($query, $user);
+    }
+
+    /** Campaigns that still occupy the vacancy's current advertising cycle. */
+    public function scopeOngoing(Builder $query): Builder
+    {
+        return $query->where(function (Builder $ongoing): void {
+            $ongoing
+                ->where('status', HiringCampaignStatus::Draft)
+                ->orWhere(function (Builder $published): void {
+                    $published
+                        ->whereIn('status', [
+                            HiringCampaignStatus::Published,
+                            HiringCampaignStatus::Open,
+                        ])
+                        ->where(function (Builder $window): void {
+                            $window->whereNull('ends_at')->orWhere('ends_at', '>', now());
+                        });
+                });
+        });
     }
 
     /** Only a named list may apply; everybody else is turned away. */

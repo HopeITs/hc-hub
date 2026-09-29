@@ -131,12 +131,13 @@ class DirectOpen extends Component
         $requester = $requesters->first(
             fn ($candidate): bool => (int) $candidate->getKey() === (int) ($this->documentation['actual_requester_user_id'] ?? 0),
         );
+        $steps = $directOpen->confirmableStepsForRequester($requester, $type);
         $positions = $directOpen->positionsForRequester($user, $requester, $type);
         $vacancies = $this->vacanciesFor($type);
         $cityId = $this->targetCityId($positions);
         $confirmationCandidates = [];
         if ($requester !== null) {
-            foreach ($directOpen->confirmableSteps($type) as $stepKey) {
+            foreach ($steps as $stepKey) {
                 $confirmationCandidates[$stepKey] = $directOpen->confirmationCandidates($requester, $stepKey, $cityId);
             }
         }
@@ -159,7 +160,7 @@ class DirectOpen extends Component
                 ->orderBy(transColumn('name'))
                 ->get(),
             'centerRequired' => ! $newPosition || $this->centerIsRequired(),
-            'steps' => $directOpen->confirmableSteps($type),
+            'steps' => $steps,
             'confirmationCandidates' => $confirmationCandidates,
             'decisions' => [ExternalConfirmationDecision::Approved, ExternalConfirmationDecision::NotApplicable],
             'methods' => [

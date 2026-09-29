@@ -42,9 +42,8 @@ class HiringCampaignService
      * Open a campaign against a seat that is actually being recruited for.
      *
      * It starts as a draft: nothing is public until the advert and the form
-     * exist and somebody publishes it. Several campaigns may run on one
-     * vacancy — a public one and an invited one, say — so no uniqueness is
-     * imposed here.
+     * exist and somebody publishes it. A vacancy may have several campaigns
+     * over time, but only one may be in progress at once.
      */
     public function create(User $actor, Vacancy $vacancy, array $attributes = []): HiringCampaign
     {
@@ -57,6 +56,10 @@ class HiringCampaignService
             // would advertise work that is not there.
             if (! Vacancy::query()->available()->whereKey($locked->getKey())->exists()) {
                 throw $this->refuse('vacancy', 'recruitment-campaign.vacancy_not_available');
+            }
+
+            if ($locked->campaigns()->ongoing()->exists()) {
+                throw $this->refuse('vacancy', 'recruitment-campaign.campaign_in_progress');
             }
 
             [$startsAt, $endsAt] = $this->window($attributes);

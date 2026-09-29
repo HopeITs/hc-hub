@@ -132,7 +132,7 @@
             <p class="mt-1 text-small text-secondary-medium">{{ __('recruitment.public_link.invites_help') }}</p>
 
             @if ($mayManage)
-                <form wire:submit="addInvite" class="mt-4 grid gap-3 md:grid-cols-[1fr_1fr_auto] md:items-end">
+                <form wire:submit="addInvite" class="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-start">
                     <div>
                         <x-forms.input-label for="invite-name" required>{{ __('recruitment.public_link.full_name') }}</x-forms.input-label>
                         <input id="invite-name" type="text" wire:model="inviteName" autocomplete="off"
@@ -146,7 +146,7 @@
                         <x-error-span>{{ $errors->first('inviteEmail') }}</x-error-span>
                     </div>
                     <button type="submit" wire:loading.attr="disabled" wire:target="addInvite"
-                        class="cursor-pointer rounded-control border border-primary bg-white px-4 py-2 text-body font-semibold text-primary transition hover:bg-neutral-50 md:mb-[1.35rem]">
+                        class="cursor-pointer rounded-control border border-primary bg-white px-4 py-2 text-body font-semibold text-primary transition hover:bg-neutral-50 md:mt-[1.65rem]">
                         {{ __('recruitment.public_link.add_invite') }}
                     </button>
                 </form>

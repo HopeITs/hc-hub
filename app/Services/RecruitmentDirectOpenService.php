@@ -86,10 +86,17 @@ class RecruitmentDirectOpenService
         Gate::forUser($actor)->authorize('directOpen', RecruitmentRequest::class);
 
         $data = $this->drafts->validate($payload);
-        $this->assertDocumented($documentation, (int) $data['request_type']);
         $documentation = $this->normaliseDocumentation($actor, $data, $documentation);
+        $requester = isset($documentation['actual_requester_user_id'])
+            ? User::query()->find($documentation['actual_requester_user_id'])
+            : null;
+        $confirmationSteps = $this->confirmableStepsForRequester(
+            $requester,
+            (int) $data['request_type'],
+        );
+        $this->assertDocumented($documentation, $confirmationSteps);
 
-        $request = DB::transaction(function () use ($actor, $data, $documentation): RecruitmentRequest {
+        $request = DB::transaction(function () use ($actor, $data, $documentation, $confirmationSteps): RecruitmentRequest {
             $position = $this->targetWithinScope($actor, $data);
 
             $numbers = app(RecruitmentRequestNumber::class);
@@ -138,7 +145,7 @@ class RecruitmentDirectOpenService
                 $actor,
                 $request,
                 $documentation['confirmations'] ?? [],
-                (int) $data['request_type'],
+                $confirmationSteps,
             );
 
             // HR Syria's own opening completes here; a governorate's gets a
@@ -175,6 +182,25 @@ class RecruitmentDirectOpenService
         }
 
         return self::CONFIRMABLE;
+    }
+
+    /**
+     * The external decisions that apply to this requester.
+     *
+     * A manager decision cannot exist when the requester's position has no
+     * direct manager. Finance remains applicable for request types that use it.
+     *
+     * @return array<int, int> step keys
+     */
+    public function confirmableStepsForRequester(?User $requester, ?int $requestType = null): array
+    {
+        $steps = $this->confirmableSteps($requestType);
+
+        if ($requester === null || $this->scopes->position($requester)?->direct_manager_id !== null) {
+            return $steps;
+        }
+
+        return array_values(array_diff($steps, [WorkflowStepKey::ManagerApproval]));
     }
 
     /**
@@ -382,7 +408,7 @@ class RecruitmentDirectOpenService
      *
      * @param  array<string, mixed>  $documentation
      */
-    private function assertDocumented(array $documentation, int $requestType): void
+    private function assertDocumented(array $documentation, array $confirmationSteps): void
     {
         $errors = [];
 
@@ -400,7 +426,7 @@ class RecruitmentDirectOpenService
 
         $confirmations = $documentation['confirmations'] ?? [];
 
-        foreach ($this->confirmableSteps($requestType) as $stepKey) {
+        foreach ($confirmationSteps as $stepKey) {
             $line = $confirmations[$stepKey] ?? [];
             $decision = (int) ($line['decision'] ?? 0);
 
@@ -519,7 +545,7 @@ class RecruitmentDirectOpenService
 
         $errors = [];
 
-        foreach ($this->confirmableSteps((int) $data['request_type']) as $stepKey) {
+        foreach ($this->confirmableStepsForRequester($requester, (int) $data['request_type']) as $stepKey) {
             $line = $documentation['confirmations'][$stepKey] ?? [];
             if ((int) ($line['decision'] ?? 0) !== ExternalConfirmationDecision::Approved
                 || blank($line['confirmer_user_id'] ?? null)) {
@@ -564,9 +590,9 @@ class RecruitmentDirectOpenService
         User $actor,
         RecruitmentRequest $request,
         array $confirmations,
-        int $requestType,
+        array $confirmationSteps,
     ): void {
-        foreach ($this->confirmableSteps($requestType) as $stepKey) {
+        foreach ($confirmationSteps as $stepKey) {
             $line = $confirmations[$stepKey] ?? [];
             $decision = (int) ($line['decision'] ?? 0);
             $notApplicable = $decision === ExternalConfirmationDecision::NotApplicable;

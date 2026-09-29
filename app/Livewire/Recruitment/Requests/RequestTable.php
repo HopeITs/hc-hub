@@ -2,13 +2,16 @@
 
 namespace App\Livewire\Recruitment\Requests;
 
+use App\Enums\HiringCampaignStatus;
 use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentRequestType;
 use App\Models\City;
+use App\Models\HiringCampaign;
 use App\Models\RecruitmentRequest;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Services\HiringCampaignStateMachine;
 use App\Services\RecruitmentRequestListQuery;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -43,7 +46,13 @@ class RequestTable extends LivewireTable
 
         return app(RecruitmentRequestListQuery::class)
             ->forUser(auth()->user(), $this->viewFilter)
-            ->with(['requester.profile', 'scopeCity', 'targetPosition', 'latestVersion.positionDetail']);
+            ->with([
+                'requester.profile',
+                'scopeCity',
+                'targetPosition',
+                'latestVersion.positionDetail',
+                'vacancy.campaigns',
+            ]);
     }
 
     protected function link(Model $model): ?string
@@ -127,24 +136,8 @@ class RequestTable extends LivewireTable
             // The column is hidden outright from anybody who cannot run a
             // campaign, and each row only offers the link when the request has
             // actually produced a seat to advertise.
-            Column::make(__('recruitment-campaign.new_campaign'), 'id')
-                ->displayUsing(function ($value, Model $request): string {
-                    $vacancyId = $this->vacancyToAdvertise($request);
-
-                    if ($vacancyId === null) {
-                        return '';
-                    }
-
-                    return Blade::render(
-                        '<a href="{{ $url }}" wire:navigate '
-                        .'class="inline-block rounded-control bg-primary px-3 py-1.5 '
-                        .'text-sm font-semibold text-white hover:bg-primary-600">{{ $label }}</a>',
-                        [
-                            'url' => route('recruitment.campaigns.create', ['vacancyId' => $vacancyId]),
-                            'label' => __('recruitment-campaign.new_campaign'),
-                        ],
-                    );
-                })
+            Column::make(__('recruitment-campaign.campaign'), 'id')
+                ->displayUsing(fn ($value, Model $request): string => $this->campaignActions($request))
                 ->asHtml()
                 ->clickable(false)
                 ->visible($this->mayRunCampaigns()),
@@ -318,25 +311,73 @@ class RequestTable extends LivewireTable
         return (bool) auth()->user()?->hasActivePermission('recruitment-campaigns.manage');
     }
 
-    /**
-     * The seat this request produced, if it is still there to advertise.
-     *
-     * Only a decided request has one: before that nothing has been applied and
-     * there is no vacancy yet. A seat already filled or closed is not offered,
-     * because a campaign cannot be opened on it and the button would only lead
-     * to a refusal.
-     */
-    private function vacancyToAdvertise(Model $request): ?int
+    private function campaignActions(Model $request): string
     {
         if (! in_array((int) $request->status, [RecruitmentRequestStatus::Approved, RecruitmentRequestStatus::Applied], true)) {
-            return null;
+            return '';
         }
 
-        return Vacancy::query()->available()
-            ->where('created_from_request_id', $request->getKey())
-            ->value('id')
-            ?? Vacancy::query()->available()
-                ->where('position_id', $request->target_position_id)
-                ->value('id');
+        $vacancy = $request->vacancy;
+
+        if ($vacancy === null) {
+            return '';
+        }
+
+        $states = app(HiringCampaignStateMachine::class);
+        $campaigns = $vacancy->campaigns->sortByDesc('id');
+        $ongoing = $campaigns->first(fn (HiringCampaign $campaign): bool => in_array(
+            $states->effective($campaign),
+            [HiringCampaignStatus::Draft, HiringCampaignStatus::Published, HiringCampaignStatus::Open],
+            true,
+        ));
+
+        if ($ongoing !== null) {
+            return $this->campaignButton(
+                route('recruitment.campaigns.show', ['campaignId' => $ongoing->getKey()]),
+                (int) $ongoing->status === HiringCampaignStatus::Draft
+                    ? __('recruitment-campaign.continue_campaign')
+                    : __('recruitment-campaign.view_campaign'),
+            );
+        }
+
+        $buttons = [];
+        $latest = $campaigns->first();
+
+        if ($latest !== null) {
+            $buttons[] = $this->campaignButton(
+                route('recruitment.campaigns.show', ['campaignId' => $latest->getKey()]),
+                __('recruitment-campaign.view_campaign'),
+                outlined: true,
+            );
+        }
+
+        if ($this->vacancyIsAvailable($vacancy)) {
+            $buttons[] = $this->campaignButton(
+                route('recruitment.campaigns.create', ['vacancyId' => $vacancy->getKey()]),
+                __('recruitment-campaign.new_campaign'),
+            );
+        }
+
+        return $buttons === [] ? '' : '<div class="flex flex-wrap gap-2">'.implode('', $buttons).'</div>';
+    }
+
+    private function campaignButton(string $url, string $label, bool $outlined = false): string
+    {
+        return Blade::render(
+            '<a href="{{ $url }}" wire:navigate @class(['
+            .'"inline-flex min-h-9 items-center rounded-control px-3 py-1.5 text-sm font-semibold transition", '
+            .'"border border-primary text-primary hover:bg-neutral-50" => $outlined, '
+            .'"bg-primary text-white hover:bg-primary-600" => ! $outlined, '
+            .'])>{{ $label }}</a>',
+            compact('url', 'label', 'outlined'),
+        );
+    }
+
+    private function vacancyIsAvailable(Vacancy $vacancy): bool
+    {
+        return $vacancy->status === Vacancy::OPEN
+            && $vacancy->closed_at === null
+            && ($vacancy->open_at === null || $vacancy->open_at->isPast())
+            && $vacancy->filled_count < $vacancy->needed_count;
     }
 }
