@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\RecruitmentApplicantFile;
 use App\Services\ActivityLogger;
+use App\Services\Monitoring\SecurityMonitor;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
@@ -15,7 +16,10 @@ class RecruitmentApplicantFileController extends Controller
 {
     public const AUDIT_LOG = 'recruitment-file-download';
 
-    public function __construct(private readonly ActivityLogger $activity) {}
+    public function __construct(
+        private readonly ActivityLogger $activity,
+        private readonly SecurityMonitor $monitor,
+    ) {}
 
     /**
      * The file is resolved here, not by route model binding, and the permission
@@ -45,6 +49,16 @@ class RecruitmentApplicantFileController extends Controller
         }
 
         $this->audit($request, $file, $record, 'success');
+
+        // One person opening a great many CVs in a short while is what a
+        // copied-out candidate pool looks like; the route's own throttle (60 a
+        // minute) is far above what reviewing ever needs.
+        $this->monitor->burst(
+            SecurityMonitor::DOWNLOAD_REPEATED,
+            'downloads',
+            (string) $request->user()->getKey(),
+            config('recruitment-privacy.monitoring.downloads'),
+        );
 
         $response = response()->download($media->getPath(), $this->downloadName($record, $media), [
             // Detected from the bytes on upload; the browser's claim was never stored.

@@ -196,6 +196,20 @@ class User extends Authenticatable
             return true;
         }
 
+        return $this->hasExplicitPermission($permission);
+    }
+
+    /**
+     * The same check without the administrator bypass: a direct grant or the
+     * active role's own permission, and nothing else.
+     *
+     * For acts that must be granted on purpose to whoever performs them —
+     * exporting candidate data, erasing it — where "administrator" cannot mean
+     * "may do this". Salary is the precedent (canViewSalary refuses
+     * super-admin by name); this generalises it to a permission.
+     */
+    public function hasExplicitPermission(string $permission): bool
+    {
         if ($this->permissions()->where('name', $permission)->exists()) {
             return true;
         }
