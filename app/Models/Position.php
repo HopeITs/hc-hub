@@ -177,9 +177,12 @@ class Position extends Model
      */
     public function scopeInCity($query, int $cityId)
     {
+        // Qualify the columns: callers such as PositionTable join tables
+        // (centers, departments, ...) that also carry a city_id, which MySQL
+        // rejects as ambiguous.
         return $query->where(function ($q) use ($cityId) {
-            $q->where('city_id', $cityId)
-                ->orWhereHas('center', fn ($c) => $c->where('city_id', $cityId));
+            $q->where($q->qualifyColumn('city_id'), $cityId)
+                ->orWhereHas('center', fn ($c) => $c->where($c->qualifyColumn('city_id'), $cityId));
         });
     }
 
