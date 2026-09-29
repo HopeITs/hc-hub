@@ -229,12 +229,12 @@ class RequestTable extends LivewireTable
             <<<'BLADE'
                 <div class="space-y-1.5">
                     <div>{{ $name }}</div>
-                    <div class="flex flex-wrap gap-1.5">
-                        <span class="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold {{ $mine ? 'border border-primary text-primary' : 'bg-neutral-100 text-secondary-medium' }}">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs leading-none font-semibold {{ $mine ? 'border border-primary text-primary' : 'bg-neutral-100 text-secondary-medium' }}">
                             {{ __($mine ? 'recruitment.my_request' : 'recruitment.team_request') }}
                         </span>
                         @if ($needsReview)
-                            <span class="inline-flex rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-white">
+                            <span class="inline-flex h-5 items-center rounded-full bg-primary px-2 text-xs leading-none font-semibold text-white">
                                 {{ __('recruitment.needs_my_review') }}
                             </span>
                         @endif
