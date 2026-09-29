@@ -15,7 +15,7 @@
     @endif
 
     @if ($open)
-        <section class="rounded-surface border border-red-200 bg-red-50/50 p-6">
+        <section class="rounded-surface border border-red-200 bg-red-50/50 p-4 sm:p-6">
             <h2 id="bulk-reject-title" tabindex="-1" class="scroll-mt-24 text-h4 font-semibold">{{ __('recruitment-applicant.decisions.bulk_title') }}</h2>
             <p class="mt-1 text-sm text-secondary-medium">
                 {{ trans_choice('recruitment-applicant.tags.bulk_selected', count($applicationIds), ['count' => count($applicationIds)]) }}

@@ -14,7 +14,7 @@
                 <span class="font-normal opacity-75">&middot; {{ $assignment->creator?->profile?->name ?? $assignment->creator?->name ?? '—' }}, {{ $assignment->created_at?->format('Y-m-d') }}</span>
                 @if ($mayTag)
                     <button type="button" wire:click="detach({{ $assignment->tag_id }})" wire:loading.attr="disabled"
-                        class="ms-1 cursor-pointer font-bold hover:opacity-70" aria-label="{{ __('recruitment-applicant.tags.remove', ['name' => $assignment->tag->name]) }}">&times;</button>
+                        class="-my-1 -me-1 ms-0.5 inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full hover:bg-black/10 disabled:opacity-50" aria-label="{{ __('recruitment-applicant.tags.remove', ['name' => $assignment->tag->name]) }}"><svg class="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/></svg></button>
                 @endif
             </li>
         @empty

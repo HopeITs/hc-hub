@@ -1,6 +1,6 @@
 <div>
     @if ($mayManage)
-        <details class="rounded-surface border border-neutral-200 bg-white p-6">
+        <details class="rounded-surface border border-neutral-200 bg-white p-4 sm:p-6">
             <summary class="cursor-pointer text-h4 font-semibold">{{ __('recruitment-applicant.tags.manage_title') }}</summary>
             <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.tags.manage_hint') }}</p>
 

@@ -1,5 +1,5 @@
 {{-- Internal only. Nothing in this panel can change an application's status. --}}
-<section class="rounded-surface border border-neutral-200 bg-white p-6">
+<section class="rounded-surface border border-neutral-200 bg-white p-4 sm:p-6">
     <div class="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id="notes-title" tabindex="-1" class="scroll-mt-24 text-h4 font-semibold">{{ __('recruitment-applicant.notes.title') }}</h2>
         <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.notes.internal_hint') }}</p>

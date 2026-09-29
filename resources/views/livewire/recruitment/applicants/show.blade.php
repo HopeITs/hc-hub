@@ -9,7 +9,7 @@
     $states = app(\App\Services\HiringCampaignStateMachine::class);
 @endphp
 
-<div class="space-y-6 p-6">
+<div class="space-y-6 p-4 sm:p-6">
     @if (session('recruitment_saved'))
         <p role="status" class="rounded-control border border-green-200 bg-green-50 p-4 text-green-800">{{ session('recruitment_saved') }}</p>
     @endif
@@ -20,7 +20,7 @@
     </a>
 
     {{-- Who they are --}}
-    <section class="rounded-surface border border-neutral-200 bg-white p-6">
+    <section class="rounded-surface border border-neutral-200 bg-white p-4 sm:p-6">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="min-w-0">
                 <h1 class="text-h3 font-semibold wrap-break-word">{{ $applicant->full_name }}</h1>
@@ -58,7 +58,7 @@
     </section>
 
     {{-- Application history --}}
-    <section class="rounded-surface border border-neutral-200 bg-white p-6">
+    <section class="rounded-surface border border-neutral-200 bg-white p-4 sm:p-6">
         <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.history') }}</h2>
 
         @if ($hiddenApplications > 0)
@@ -262,7 +262,7 @@
 
     {{-- Files with no application behind them: talent pool, or an application since removed. --}}
     @if ($orphanFiles->isNotEmpty())
-        <section class="rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="rounded-surface border border-neutral-200 bg-white p-4 sm:p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.unattached_files') }}</h2>
             <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.unattached_files_hint') }}</p>
             <ul class="mt-4 divide-y divide-neutral-100 text-sm">
