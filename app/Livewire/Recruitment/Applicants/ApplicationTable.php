@@ -235,7 +235,7 @@ class ApplicationTable extends LivewireTable
 
             Column::make(__('recruitment-applicant.status'), 'status')
                 ->sortable()
-                ->displayUsing(fn ($value): string => '<span class="rounded-control px-2 py-0.5 text-xs font-semibold '
+                ->displayUsing(fn ($value): string => '<span class="recruitment-badge rounded-control px-2 py-0.5 text-xs font-semibold '
                     .RecruitmentApplicationStatus::classes($value).'">'.e(__('recruitment-applicant.statuses.'.$value)).'</span>')
                 ->asHtml(),
 
@@ -245,14 +245,14 @@ class ApplicationTable extends LivewireTable
             Column::make(__('recruitment-applicant.cv'), function (RecruitmentApplication $application): string {
                 $availability = RecruitmentCvAvailability::of($application->cvFiles);
 
-                return '<span class="rounded-control px-2 py-0.5 text-xs font-semibold '.RecruitmentCvAvailability::classes($availability).'">'
+                return '<span class="recruitment-badge rounded-control px-2 py-0.5 text-xs font-semibold '.RecruitmentCvAvailability::classes($availability).'">'
                     .e(__('recruitment-applicant.cv_availability.'.$availability)).'</span>';
             })->asHtml(),
 
             // A flag, never a decision: nothing is rejected for having applied before.
             Column::make(__('recruitment-applicant.previous_applicant'), function (RecruitmentApplication $application): string {
                 return $application->has_previous_application
-                    ? '<span class="rounded-control bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-800">'
+                    ? '<span class="recruitment-badge rounded-control bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-800">'
                         .e(__('recruitment-applicant.previous_applicant_flag')).'</span>'
                     : '';
             })->asHtml(),
@@ -272,12 +272,12 @@ class ApplicationTable extends LivewireTable
                 if (Gate::allows('schedule', [RecruitmentInterview::class, $application])
                     && in_array($application->status, RecruitmentInterviewSchedulingService::SCHEDULABLE, true)) {
                     return '<a href="'.e(route('recruitment.interviews.create', ['applicationId' => $application->id])).'" wire:navigate x-on:click.stop'
-                        .' class="inline-flex min-h-9 items-center rounded-control border border-primary px-3 py-1.5 text-sm font-semibold text-primary hover:bg-selection">'
+                        .' class="recruitment-action rounded-control border border-primary px-3 py-1.5 text-sm font-semibold text-primary hover:bg-selection">'
                         .e(__('recruitment-applicant.interviews.schedule')).'</a>';
                 }
 
                 return '<a href="'.e(route('recruitment.applicants.show', ['applicantId' => $application->applicant_id])).'" wire:navigate x-on:click.stop'
-                    .' class="inline-flex min-h-9 items-center rounded-control border border-neutral-300 px-3 py-1.5 text-sm font-semibold text-secondary-dark hover:bg-neutral-50">'
+                    .' class="recruitment-action rounded-control border border-neutral-300 px-3 py-1.5 text-sm font-semibold text-secondary-dark hover:bg-neutral-50">'
                     .e(__('recruitment-applicant.profile.open')).'</a>';
             })->asHtml(),
         ];
@@ -336,7 +336,7 @@ class ApplicationTable extends LivewireTable
             ? __('recruitment-applicant.indicators.none_assessed')
             : __('recruitment-applicant.indicators.summary', ['met' => $set->metCount(), 'assessed' => $set->assessedCount()]);
 
-        return '<span title="'.e($lines->implode("\n")).'" class="cursor-help rounded-control px-2 py-0.5 text-xs font-semibold '
+        return '<span title="'.e($lines->implode("\n")).'" class="recruitment-badge cursor-help rounded-control px-2 py-0.5 text-xs font-semibold '
             .RecruitmentIndicatorOutcome::classes(RecruitmentIndicatorOutcome::Unknown).'">'.e($summary).'</span>'
             .($lines->isEmpty() ? '' : '<span class="sr-only"> ('.e($lines->implode(__('recruitment-applicant.list_separator'))).')</span>');
     }

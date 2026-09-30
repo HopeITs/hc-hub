@@ -14,7 +14,7 @@
         <span class="font-medium">{{ $typeLabel }}</span>
         <span class="text-secondary-medium">&middot; {{ $file->uploaded_at?->format('Y-m-d') }}</span>
         @if ($scan !== \App\Enums\RecruitmentFileScanStatus::Clean)
-            <span class="ms-1 rounded-control border px-2 py-0.5 text-xs font-semibold {{ $scan === \App\Enums\RecruitmentFileScanStatus::Pending ? 'border-neutral-300 bg-neutral-100 text-secondary-dark' : 'border-primary bg-white text-primary' }}">{{ __('recruitment-applicant.scan.'.$scan) }}</span>
+            <span class="recruitment-badge ms-1 rounded-control border px-2 py-0.5 text-xs font-semibold {{ $scan === \App\Enums\RecruitmentFileScanStatus::Pending ? 'border-neutral-300 bg-neutral-100 text-secondary-dark' : 'border-primary bg-white text-primary' }}">{{ __('recruitment-applicant.scan.'.$scan) }}</span>
         @endif
         @if ($file->isArchived())
             <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-secondary-dark">

@@ -80,7 +80,7 @@
                                 <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.campaign_number', ['number' => $currentCampaign->id]) }}</p>
                             @endif
                         </div>
-                        <span class="shrink-0 rounded-control px-3 py-1 text-sm font-semibold {{ ApplicationStatus::classes($currentApplication->status) }}">{{ __('recruitment-applicant.statuses.'.$currentApplication->status) }}</span>
+                        <span class="recruitment-badge shrink-0 rounded-control px-3 py-1 text-sm font-semibold {{ ApplicationStatus::classes($currentApplication->status) }}">{{ __('recruitment-applicant.statuses.'.$currentApplication->status) }}</span>
                     </div>
                     <div class="mt-5 border-t border-neutral-200 pt-4">
                         <p class="text-xs font-medium uppercase tracking-wide text-secondary-medium">{{ __('recruitment-applicant.profile.next_step') }}</p>
@@ -158,8 +158,8 @@
                         </p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
-                        <x-recruitment.pill :tone="RecruitmentCvAvailability::classes($availability)">{{ __('recruitment-applicant.cv_availability.'.$availability) }}</x-recruitment.pill>
-                        <span class="rounded-control px-3 py-1 text-sm font-semibold {{ ApplicationStatus::classes($application->status) }}">{{ __('recruitment-applicant.statuses.'.$application->status) }}</span>
+                        <x-recruitment.pill :tone="RecruitmentCvAvailability::classes($availability)" class="recruitment-badge">{{ __('recruitment-applicant.cv_availability.'.$availability) }}</x-recruitment.pill>
+                        <span class="recruitment-badge rounded-control px-3 py-1 text-sm font-semibold {{ ApplicationStatus::classes($application->status) }}">{{ __('recruitment-applicant.statuses.'.$application->status) }}</span>
                     </div>
                 </div>
 
