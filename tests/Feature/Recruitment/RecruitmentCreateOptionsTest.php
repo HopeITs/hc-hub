@@ -350,8 +350,9 @@ class RecruitmentCreateOptionsTest extends TestCase
 
     public function test_close_position_only_lists_empty_positions_without_active_contracts(): void
     {
-        $occupied = $this->child($this->root, ['title_en' => 'Occupied position', 'exist_emp' => 1]);
-        $empty = $this->child($this->root, ['title_en' => 'Empty position', 'exist_emp' => 0]);
+        $occupied = $this->child($this->root, ['title_en' => 'Occupied position', 'max_emp' => 1, 'exist_emp' => 1]);
+        $empty = $this->child($this->root, ['title_en' => 'Empty position', 'max_emp' => 1, 'exist_emp' => 0]);
+        $manySeats = $this->child($this->root, ['title_en' => 'Many seat position', 'max_emp' => 3, 'exist_emp' => 0]);
         $occupant = $this->makeUser($this->root->city, 'employee');
 
         Contract::query()->create([
@@ -368,6 +369,8 @@ class RecruitmentCreateOptionsTest extends TestCase
 
         $this->screen(RecruitmentRequestType::ClosePosition)
             ->assertDontSee($occupied->title_en)
+            // A post with several seats gives them up one at a time.
+            ->assertDontSee($manySeats->title_en)
             ->assertSee($empty->title_en);
     }
 
@@ -383,10 +386,17 @@ class RecruitmentCreateOptionsTest extends TestCase
             'max_emp' => 1,
             'exist_emp' => 1,
         ]);
+        $single = $this->child($this->root, [
+            'title_en' => 'Single empty seat',
+            'max_emp' => 1,
+            'exist_emp' => 0,
+        ]);
 
         $this->screen(RecruitmentRequestType::CloseVacancy)
             ->assertSee($vacant->title_en)
             ->assertDontSee($full->title_en)
+            // The only seat of a post is closed by closing the post.
+            ->assertDontSee($single->title_en)
             ->assertDontSee('id="vacancy_id"', false);
     }
 
