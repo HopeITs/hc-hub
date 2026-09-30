@@ -298,6 +298,26 @@ class RecruitmentApprovalTest extends TestCase
         $this->assertSame(Status::Rejected, (int) $request->fresh()->status);
     }
 
+    /**
+     * HR Syria holds the step of a governorate that has no HR of its own.
+     *
+     * Aleppo is reviewed by HR Syria, so its requests carry a city-scoped step
+     * assigned to that role. The role is organisation-wide and therefore has no
+     * list of cities of its own, which used to make the step undecidable by the
+     * very person it was assigned to.
+     */
+    public function test_hr_syria_holds_the_city_scope_of_a_governorate_it_reviews(): void
+    {
+        $aleppo = $this->makeCity('ALP', (string) random_int(100, 449));
+        $latakia = $this->makeCity('TAR', (string) random_int(450, 899));
+        $hrSyria = $this->makeUser($aleppo, 'HR-SYR');
+        $scopes = app(\App\Services\RecruitmentScopeResolver::class);
+
+        $this->assertTrue($scopes->holdsScope($hrSyria, \App\Enums\RecruitmentScopeType::City, $aleppo->id));
+        // Tartous is reviewed by HR Latakia, not by HR Syria.
+        $this->assertFalse($scopes->holdsScope($hrSyria, \App\Enums\RecruitmentScopeType::City, $latakia->id));
+    }
+
     private function stepAt(RecruitmentWorkflowInstance $instance, int $order): RecruitmentWorkflowInstanceStep
     {
         return $instance->steps()

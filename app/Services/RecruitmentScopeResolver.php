@@ -101,17 +101,22 @@ class RecruitmentScopeResolver
             $ids[] = $own;
         }
 
-        // Cities this role reviews on another governorate's behalf.
-        $assigned = array_keys(array_filter(
+        // Cities this role reviews on another governorate's behalf: those the
+        // fallback sends to it and that have no HR of their own. Asked of the
+        // same resolver that routes the request, not of the map alone, so a
+        // governorate that gains an HR of its own leaves this role's scope.
+        $fallbacks = array_keys(array_filter(
             config('recruitment.governorate_hr.map', []),
             fn (string $reviewer): bool => strtoupper($reviewer) === $role,
         ));
 
-        if ($assigned !== []) {
-            $ids = array_merge($ids, $user->remember('governorate-city-ids:'.$role.':'.implode(',', $assigned), fn (): array => City::query()
-                ->whereIn('slug', $assigned)
+        if ($fallbacks !== []) {
+            $ids = array_merge($ids, $user->remember('governorate-city-ids:'.$role.':'.implode(',', $fallbacks), fn (): array => City::query()
+                ->whereIn('slug', $fallbacks)
                 ->pluck('id')
                 ->map(fn ($id): int => (int) $id)
+                ->filter(fn (int $cityId): bool => strtoupper($this->governorateHrRole($cityId)) === $role)
+                ->values()
                 ->all()));
         }
 
@@ -826,9 +831,17 @@ class RecruitmentScopeResolver
     /**
      * The HR role that reviews requests for a governorate.
      *
-     * Every city resolves to something: an explicit mapping first, then the
-     * fallback. A request is never stranded because its governorate has no HR
-     * of its own.
+     * The one rule everything else asks, so that who a request is routed to
+     * and who may then decide it can never disagree:
+     *
+     *  1. a governorate with an HR of its own (an active holder of HR-{SLUG})
+     *     is reviewed by it;
+     *  2. otherwise the fallback the map names: Tartous to Latakia, Homs Rural
+     *     to Homs;
+     *  3. otherwise the default, HR Syria.
+     *
+     * Every city resolves to something, so a request is never stranded because
+     * its governorate has no HR of its own.
      */
     public function governorateHrRole(?int $cityId): string
     {
@@ -845,14 +858,15 @@ class RecruitmentScopeResolver
             return $default;
         }
 
-        if (isset($map[$slug])) {
-            return $map[$slug];
-        }
-
-        // A governorate with its own HR role reviews its own requests.
+        // A governorate with its own HR reviews its own requests, whatever the
+        // fallback says: the fallback is for the absence of one.
         $own = "HR-{$slug}";
 
-        return $this->roleHasHolders($own) ? $own : $default;
+        if ($this->roleHasHolders($own)) {
+            return $own;
+        }
+
+        return $map[$slug] ?? $default;
     }
 
     /**
@@ -905,8 +919,12 @@ class RecruitmentScopeResolver
         return match ($scopeType) {
             RecruitmentScopeType::Organization => $this->isOrganizationWide($user),
 
+            // A city is held by the role governorateHrRole() resolves for it,
+            // the very answer the step was assigned under, and nothing broader.
+            // HR Syria is organisation-wide and so has no list of cities; it
+            // holds only the ones that fall back to it.
             RecruitmentScopeType::City => $scopeId !== null
-                && in_array($scopeId, $this->governorateCityIds($user), true),
+                && $this->isResolvedReviewer($user, $scopeId),
 
             // The scope of a manager step is the manager's own position.
             RecruitmentScopeType::DirectReports => $scopeId !== null
@@ -914,6 +932,15 @@ class RecruitmentScopeResolver
 
             default => false,
         };
+    }
+
+    /** Is this user's active role the one the city's requests are routed to? */
+    private function isResolvedReviewer(User $user, int $cityId): bool
+    {
+        $role = strtoupper(trim($user->myRole() ?? ''));
+
+        return Str::startsWith($role, 'HR-')
+            && strtoupper($this->governorateHrRole($cityId)) === $role;
     }
 
     private function hasOrganizationWideCreationScope(User $user): bool
@@ -970,11 +997,22 @@ class RecruitmentScopeResolver
             ->all();
     }
 
+    /**
+     * Whether somebody active actually holds the role.
+     *
+     * The same test the approver is picked by: a role nobody active holds would
+     * route requests to a step no one can decide.
+     */
     private function roleHasHolders(string $roleName): bool
     {
         return DB::table('model_has_roles')
             ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->join('users', 'users.id', '=', 'model_has_roles.model_id')
+            ->join('employees', 'employees.id', '=', 'users.employee_id')
+            ->where('model_has_roles.model_type', User::class)
+            ->where('model_has_roles.is_active', true)
             ->where('roles.name', $roleName)
+            ->where('employees.is_active', true)
             ->exists();
     }
 }
