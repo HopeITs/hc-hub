@@ -75,7 +75,7 @@ No `app/Http/Kernel.php`. Middleware aliases, routing, and exceptions are config
 - `AppServiceProvider` registers query Builder macros (`whereLikeAny`, `search`) and the `@glyph` Blade directive (Arabic glyph shaping).
 
 ### Brand / theming
-Brand primary red is `#c2151c`, defined as `--color-primary` plus a full ramp in `resources/css/app.css` (Tailwind 4 `@theme`). Fonts: SomarSans (with Lato fallback), preloaded in `resources/views/partials/head.blade.php`. Required form fields are marked with a red star via the `required` prop on `<x-forms.input-label>`.
+Brand palette is `--color-primary` `#be1f24` plus four greys (`--color-secondary-dark/medium/light/soft`) — the only colours allowed; every other token (neutral ramp, surfaces, hover) is derived from them in `resources/css/app.css` (Tailwind 4 `@theme`). Fonts: SomarSans (with Lato fallback), preloaded in `resources/views/partials/head.blade.php`. Required form fields are marked with a red star via the `required` prop on `<x-forms.input-label>`.
 
 ### Routes
 `routes/web.php` is the locale-wrapped entry point and `require`s the domain route files: `basic-project.php`, `projects-management.php`, `employees-management.php`, and `auth.php`.
