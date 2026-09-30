@@ -50,27 +50,31 @@ final class RecruitmentInterviewStatus
         return in_array($to, self::TRANSITIONS[$from] ?? [], true);
     }
 
-    /** Tailwind classes for the status badge. */
+    /**
+     * Tailwind classes for the status badge. Brand colours only: the two
+     * open states carry the red (Rescheduled as an outline, so the pair
+     * stays apart), and the final states step down the greys.
+     */
     public static function classes(?string $status): string
     {
         return match ($status) {
-            self::Scheduled => 'bg-blue-50 text-blue-800',
-            self::Rescheduled => 'bg-amber-50 text-amber-800',
-            self::Completed => 'bg-green-50 text-green-800',
-            self::NoShow => 'bg-red-50 text-red-800',
-            default => 'bg-neutral-100 text-secondary-dark',
+            self::Scheduled => 'bg-primary text-white',
+            self::Rescheduled => 'bg-white text-primary ring-1 ring-inset ring-primary',
+            self::Completed => 'bg-secondary-dark text-white',
+            self::NoShow => 'bg-neutral-100 text-secondary-dark',
+            default => 'bg-neutral-100 text-secondary-medium',
         };
     }
 
-    /** The same hues as classes(), solid, for a status dot or round marker. */
+    /** The same scheme as classes(), for a status dot or round marker. */
     public static function dotClasses(?string $status): string
     {
         return match ($status) {
-            self::Scheduled => 'bg-blue-600',
-            self::Rescheduled => 'bg-amber-500',
-            self::Completed => 'bg-green-600',
-            self::NoShow => 'bg-red-700',
-            default => 'bg-neutral-300',
+            self::Scheduled => 'bg-primary',
+            self::Rescheduled => 'bg-white ring-2 ring-inset ring-primary',
+            self::Completed => 'bg-secondary-dark',
+            self::NoShow => 'bg-secondary-light',
+            default => 'bg-secondary-soft',
         };
     }
 }

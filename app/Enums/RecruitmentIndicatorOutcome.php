@@ -34,10 +34,10 @@ final class RecruitmentIndicatorOutcome
     public static function classes(string $outcome): string
     {
         return match ($outcome) {
-            self::Met => 'bg-green-50 text-green-800',
-            self::Partial => 'bg-amber-50 text-amber-800',
-            self::NotMet => 'bg-red-50 text-red-800',
-            self::Info => 'bg-blue-50 text-blue-800',
+            self::Met => 'bg-primary text-white',
+            self::Partial => 'bg-white text-primary ring-1 ring-inset ring-primary',
+            self::NotMet => 'bg-secondary-dark text-white',
+            self::Info => 'bg-neutral-100 text-secondary-medium',
             default => 'bg-neutral-100 text-secondary-dark',
         };
     }

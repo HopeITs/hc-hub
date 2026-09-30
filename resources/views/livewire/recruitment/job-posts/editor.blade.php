@@ -177,7 +177,7 @@
                         :city="$city"
                         :program="$program"
                         :job-title="$jobTitle"
-                        class="block max-h-[72vh] w-auto max-w-full shadow-[0_10px_40px_rgba(0,0,0,.28)]"
+                        class="block max-h-[72vh] w-auto max-w-full shadow-[0_10px_40px_rgba(88,89,91,.28)]"
                     />
                 </div>
 
@@ -188,7 +188,7 @@
                         :city="$city"
                         :program="$program"
                         :job-title="$jobTitle"
-                        class="block max-h-[72vh] w-auto max-w-full shadow-[0_10px_40px_rgba(0,0,0,.28)]"
+                        class="block max-h-[72vh] w-auto max-w-full shadow-[0_10px_40px_rgba(88,89,91,.28)]"
                     />
                 </div>
             </div>

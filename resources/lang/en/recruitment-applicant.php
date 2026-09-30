@@ -320,8 +320,8 @@ return [
         'restore' => 'Restore',
         'dismiss' => 'Dismiss',
         'colors' => [
-            'neutral' => 'Grey', 'red' => 'Red', 'amber' => 'Amber',
-            'green' => 'Green', 'blue' => 'Blue', 'purple' => 'Purple',
+            'neutral' => 'Grey', 'primary' => 'Red outline', 'dark' => 'Dark grey',
+            'medium' => 'Medium grey', 'soft' => 'Light grey', 'outline' => 'Grey outline',
         ],
         'bulk_action' => 'Add or remove a tag',
         'bulk_title' => 'Tag selected applications',

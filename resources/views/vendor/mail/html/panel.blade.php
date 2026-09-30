@@ -1,6 +1,6 @@
 <table class="panel" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
 <tr>
-<td class="panel-content" bgcolor="#fafafa">
+<td class="panel-content" bgcolor="#ffffff">
 {{ Illuminate\Mail\Markdown::parse($slot) }}
 </td>
 </tr>

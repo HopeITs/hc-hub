@@ -252,7 +252,7 @@ class ApplicationTable extends LivewireTable
             // A flag, never a decision: nothing is rejected for having applied before.
             Column::make(__('recruitment-applicant.previous_applicant'), function (RecruitmentApplication $application): string {
                 return $application->has_previous_application
-                    ? '<span class="recruitment-badge rounded-control bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-800">'
+                    ? '<span class="recruitment-badge rounded-control bg-neutral-50 px-2 py-0.5 text-xs font-semibold text-neutral-800">'
                         .e(__('recruitment-applicant.previous_applicant_flag')).'</span>'
                     : '';
             })->asHtml(),

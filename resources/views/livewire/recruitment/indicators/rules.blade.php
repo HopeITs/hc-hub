@@ -166,7 +166,7 @@
                                                 'mt-1 inline-block size-3 rounded-round transition-colors duration-150',
                                                 'bg-neutral-800' => $kind === 'indicator',
                                                 'border-2 border-neutral-800 bg-white' => $kind === 'reading',
-                                                'bg-blue-600' => $kind === 'info',
+                                                'bg-neutral-600' => $kind === 'info',
                                             ]) :class="$wire.enabled['{{ $key }}'] ? '' : 'opacity-30'"></span>
                                         @endif
                                     </td>
@@ -182,7 +182,7 @@
             <p class="hidden flex-wrap gap-x-5 gap-y-1 border-t border-neutral-100 px-5 py-3 text-small text-secondary-medium sm:px-6 xl:flex" aria-hidden="true">
                 <span class="inline-flex items-center gap-2"><span aria-hidden="true" class="size-2.5 rounded-round bg-neutral-800"></span>{{ $t('source_kinds.indicator') }}</span>
                 <span class="inline-flex items-center gap-2"><span aria-hidden="true" class="size-2.5 rounded-round border-2 border-neutral-800"></span>{{ $t('source_kinds.reading') }}</span>
-                <span class="inline-flex items-center gap-2"><span aria-hidden="true" class="size-2.5 rounded-round bg-blue-600"></span>{{ $t('source_kinds.info') }}</span>
+                <span class="inline-flex items-center gap-2"><span aria-hidden="true" class="size-2.5 rounded-round bg-neutral-600"></span>{{ $t('source_kinds.info') }}</span>
             </p>
             @error('disabled') <p class="px-6 pb-4 text-body text-primary" role="alert">{{ $message }}</p> @enderror
         </section>

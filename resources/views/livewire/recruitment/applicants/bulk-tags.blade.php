@@ -1,7 +1,7 @@
 {{-- Opened from the table's bulk action. Every id is re-scoped before anything is written. --}}
 <div>
     @if ($result)
-        <p id="bulk-tags-result" role="status" tabindex="-1" class="scroll-mt-24 rounded-control border border-green-200 bg-green-50 p-4 text-green-800">
+        <p id="bulk-tags-result" role="status" tabindex="-1" class="scroll-mt-24 rounded-control border border-neutral-200 bg-neutral-50 p-4 text-neutral-800">
             {{ $result }}
             <button type="button" wire:click="cancel" class="ms-2 cursor-pointer text-sm font-semibold underline">{{ __('recruitment-applicant.tags.dismiss') }}</button>
         </p>

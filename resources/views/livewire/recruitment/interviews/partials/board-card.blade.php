@@ -170,7 +170,7 @@
             </div>
         @elseif ($submitted)
             <p class="mt-2.5 flex items-center gap-1 text-small text-secondary-dark">
-                <flux:icon.check-circle variant="micro" class="size-3.5 text-green-700" />
+                <flux:icon.check-circle variant="micro" class="size-3.5 text-neutral-700" />
                 {{ __('recruitment-applicant.evaluations.my_submitted') }}
             </p>
         @endif

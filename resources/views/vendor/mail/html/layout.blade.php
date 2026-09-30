@@ -37,9 +37,9 @@ table, td, th, p, a, h1, h2, h3, li, span, div { font-family: 'Segoe UI', Arial,
 <body dir="{{ $dir }}">
 @if (filled($preheader))
 {{-- The inbox preview line. The filler keeps clients from appending body text (a code, say) after it. --}}
-<div class="preheader" style="display: none; max-height: 0; max-width: 0; overflow: hidden; opacity: 0; mso-hide: all; font-size: 1px; line-height: 1px; color: #f4f4f5;">{{ $preheader }}{!! str_repeat('&#847;&zwnj;&nbsp;', 100) !!}</div>
+<div class="preheader" style="display: none; max-height: 0; max-width: 0; overflow: hidden; opacity: 0; mso-hide: all; font-size: 1px; line-height: 1px; color: #dcddde;">{{ $preheader }}{!! str_repeat('&#847;&zwnj;&nbsp;', 100) !!}</div>
 @endif
-<table class="wrapper" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" bgcolor="#f4f4f5" dir="{{ $dir }}">
+<table class="wrapper" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" bgcolor="#dcddde" dir="{{ $dir }}">
 <tr>
 <td class="wrapper-cell" align="center">
 <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->

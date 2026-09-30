@@ -5,7 +5,7 @@
 <table class="code" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation">
 <tr>
 <td align="center">
-<table class="code-box" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" bgcolor="#fafafa">
+<table class="code-box" width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" bgcolor="#ffffff">
 <tr>
 <td class="code-value" align="center" dir="ltr">{{ $code }}</td>
 </tr>

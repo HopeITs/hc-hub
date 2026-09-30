@@ -209,7 +209,7 @@
                 @if (! empty($targets))
                     @if ($statusApplicationId === $application->id)
                         {{-- Keyed apart from the buttons it replaces, so each is swapped in whole. --}}
-                        <div wire:key="decision-panel-{{ $application->id }}" class="mt-4 rounded-control border p-4 {{ $statusTarget === ApplicationStatus::Rejected ? 'border-red-200 bg-red-50/50' : 'border-neutral-200 bg-neutral-50' }}">
+                        <div wire:key="decision-panel-{{ $application->id }}" class="mt-4 rounded-control border p-4 {{ $statusTarget === ApplicationStatus::Rejected ? 'border-neutral-200 bg-neutral-50/50' : 'border-neutral-200 bg-neutral-50' }}">
                             <h4 id="decision-panel-{{ $application->id }}" tabindex="-1" class="scroll-mt-24 font-semibold">
                                 {{ __('recruitment-applicant.decisions.titles.'.$statusTarget) }}
                                 <span class="font-normal text-secondary-medium">
@@ -271,8 +271,8 @@
                             @foreach ($targets as $target)
                                 @php
                                     $style = match ($target) {
-                                        ApplicationStatus::Rejected => 'border-red-300 text-red-700 hover:bg-red-50',
-                                        ApplicationStatus::Selected => 'border-green-300 text-green-800 hover:bg-green-50',
+                                        ApplicationStatus::Rejected => 'border-primary text-primary-hover hover:bg-neutral-50',
+                                        ApplicationStatus::Selected => 'border-neutral-300 text-neutral-800 hover:bg-neutral-50',
                                         ApplicationStatus::Shortlisted => 'border-neutral-300 text-primary hover:bg-selection',
                                         default => 'border-neutral-300 hover:bg-neutral-50',
                                     };
