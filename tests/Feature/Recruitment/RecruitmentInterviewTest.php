@@ -955,10 +955,13 @@ class RecruitmentInterviewTest extends TestCase
 
         Livewire::test(Show::class, ['interviewId' => $interview->id])
             ->call('beginCancel')
+            ->assertSet('panelOpen', true)
+            ->assertSeeHtml('id="interviewActionModal"')
             ->assertDispatched('focus-element', id: 'interview-panel-title')
             ->assertSeeHtml('aria-expanded="true"')
             ->call('dismissPanel')
             ->assertSet('panel', null)
+            ->assertSet('panelOpen', false)
             ->assertDispatched('focus-element', id: 'interview-action-cancel');
 
         // A refusal from the service shows inside the open panel, with a way to reload.
@@ -968,6 +971,7 @@ class RecruitmentInterviewTest extends TestCase
             ->call('cancelInterview')
             ->assertHasErrors('interview')
             ->assertSet('panel', 'cancel')
+            ->assertSet('panelOpen', true)
             ->assertSee(__('recruitment-applicant.interviews.reload'));
 
         Livewire::test(Show::class, ['interviewId' => $interview->id])

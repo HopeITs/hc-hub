@@ -128,14 +128,14 @@ php artisan tinker --execute="require 'docs/recruitment/phase-2/phase2-integrati
 - **اختبارات:** `tests/Feature/Recruitment/Phase2ApplicantIntakeTest.php`
 
 **معدّلة (ملفاتنا):**
-- `RecruitmentCampaignInviteService`، و`RecruitmentApplicationSubmissionService`، و`RecruitmentApplicantIdentityService`
-- `InviteTable` (polling)، و`Apply` (نموذج الاختبار على `/careers-test/{token}`، ولا يعمل في الإنتاج؛ يرفع الـ CV عبر `RecruitmentApplicantFileService` الخاص بالفريق 1)
+- `RecruitmentCampaignInviteService`، و`RecruitmentApplicantIdentityService`
+- `InviteTable` (polling)
+- **حُذف (29 أيلول 2026):** نموذج الاختبار `/careers-test/{token}` (`Apply`، و`RecruitmentApplicationSubmissionService`، و`routes/recruitment-public.php`). منطق المهمتين 1 و2 صار كله في مسار الفريق 1 الحقيقي `POST /careers/{token}/applications`، و`Phase2ApplicantIntakeTest` يختبره هناك
 - Migration `2026_09_23` (تعمل على MySQL فقط)
 
 **مشتركة (إضافات فقط):**
 - `AppServiceProvider`: تسجيل الـ Policies والـ Observers.
 - `config/access-control.php`: تصنيف أفعالنا.
 - `routes/recruitment.php`: مسارنا بجانب مساراتهم.
-- `routes/web.php`: تحميل `routes/recruitment-public.php` (نموذجنا التجريبي).
 
 </div>

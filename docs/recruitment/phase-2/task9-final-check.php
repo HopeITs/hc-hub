@@ -83,7 +83,7 @@ $offers = app(RecruitmentJobOfferService::class);
 $statuses = app(RecruitmentApplicationStatusService::class);
 $template = RecruitmentApplication::query()->where('campaign_id', $campaignId)->firstOrFail();
 $otherTemplate = RecruitmentApplication::query()->where('campaign_id', $otherCampaignId)->firstOrFail();
-$contractTypeId = (int) ContractType::query()->orderBy('id')->value('id');
+$contractTypeId = (int) ContractType::query()->recruitmentOptions()->orderBy('id')->value('id'); // trial or service, as on the request
 
 DB::beginTransaction();
 $real = now();
@@ -116,9 +116,9 @@ try {
         return $application->fresh();
     };
     $terms = fn (array $o = []) => array_merge([
-        'contractTypeId' => $contractTypeId, 'salary' => '1500', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month,
+        'contractTypeId' => $contractTypeId, 'probationDays' => 90, 'salary' => '1500', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month,
         'startDate' => $real->copy()->addMonth()->startOfMonth()->toDateString(), 'endDate' => $real->copy()->addYear()->toDateString(),
-        'probationDays' => 90, 'weeklyHours' => 40, 'employmentType' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite,
+        'weeklyHours' => 40, 'employmentType' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite,
         'notes' => 'Transport allowance included.',
     ], $o);
     $create = fn (RecruitmentApplication $a, array $o = []) => $offers->create($hr, $a, $terms($o))->fresh();
@@ -136,7 +136,7 @@ try {
     $raw = (string) DB::table('recruitment_job_offer_versions')->where('id', $v1->id)->value('salary_amount');
     $check('Salary — saved, encrypted at rest', $v1->salary_amount === '1500.00' && ! str_contains($raw, '1500'), strlen($raw).' chars of ciphertext');
     $check('Start date', $v1->start_date->toDateString() === $real->copy()->addMonth()->startOfMonth()->toDateString());
-    $check('Probation period', $v1->probation_days === 90);
+    $check('Probation period (typed by HR)', $v1->probation_days === 90);
     $check('Contract details', $v1->contract_type_id === $contractTypeId && $v1->weekly_hours === 40 && $v1->currency === Currency::USD
         && $v1->salary_per === SalaryPer::Month && $v1->end_date !== null
         && ($v1->terms_json['employment_type'] ?? null) === EmploymentType::FullTime && ($v1->terms_json['notes'] ?? null) === 'Transport allowance included.');
@@ -153,7 +153,7 @@ try {
         && ! Status::canMove(Status::Accepted, Status::Revised) && ! Status::canMove(Status::Draft, Status::Accepted) && ! Status::canMove(Status::Expired, Status::Sent);
     $check('Offer status transitions', $matrixOk);
     $html = Livewire::actingAs($hr)->test(Show::class, ['offerId' => $o1->id])->html();
-    $check('Offer view / document (internal, printable)', str_contains($html, '1,600.00') && str_contains($html, __('recruitment-applicant.offers.print')));
+    $check('Offer view / document (internal view)', str_contains($html, '1,600.00') && str_contains($html, __('recruitment-applicant.offers.document_title')));
     $check('Revised offer handling', $o1->currentVersion->version_no === 2 && $o1->currentVersion->revision_reason !== null);
     $events = Activity::query()->where('log_name', RecruitmentJobOfferService::AUDIT_LOG)->where('subject_id', $o1->id)->orderBy('id')->pluck('description')->all();
     $check('Audit events', $events === ['recruitment_job_offer.created', 'recruitment_job_offer.sent', 'recruitment_job_offer.revised', 'recruitment_job_offer.sent'], implode(', ', $events));

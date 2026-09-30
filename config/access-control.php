@@ -451,7 +451,11 @@ return [
         // Phase 2 Task 10. save() re-resolves the offer through the scoped
         // query and asks the policy (convert) again; the service authorizes a
         // third time, and again for the employee it creates or links.
-        'recruitment.offers.convert' => ['save' => 'recruitment-applicants.convert-hires'],
+        // confirmHire() only asks first (a LivewireAlert question that runs save()).
+        'recruitment.offers.convert' => [
+            'confirmHire' => 'recruitment-applicants.convert-hires',
+            'save' => 'recruitment-applicants.convert-hires',
+        ],
     ],
 
     /*
@@ -494,7 +498,8 @@ return [
         // user by user (exists, active) by the scheduling service on save,
         // which is the mapped action. closePanel clears component state only.
         'recruitment.interviews.form' => ['addParticipant', 'removeParticipant'],
-        'recruitment.interviews.show' => ['closePanel'],
+        // dismissPanel closes the action popup: component state only.
+        'recruitment.interviews.show' => ['dismissPanel'],
         // Month navigation; re-renders through the same visibleTo() query.
         'recruitment.interviews.calendar' => ['previousMonth', 'nextMonth', 'thisMonth'],
         // Phase 2 Task 8. save() writes the caller's OWN evaluation, which
@@ -503,11 +508,16 @@ return [
         // again, under a row lock, in RecruitmentInterviewEvaluationService.
         // reload() only re-reads the caller's own row.
         'recruitment.interviews.evaluation-form' => ['save', 'reload'],
-        // Clears panel state; refreshEvaluations re-renders through the same
-        // scoped query and writes nothing.
-        'recruitment.interviews.evaluation-summary' => ['cancelPanel', 'refreshEvaluations'],
+        // dismissPanel closes the action popup (component state only);
+        // refreshEvaluations re-renders through the same scoped query and
+        // writes nothing.
+        'recruitment.interviews.evaluation-summary' => ['dismissPanel', 'refreshEvaluations'],
         // Phase 2 Task 9. Clears panel state only.
         'recruitment.offers.show' => ['closePanel'],
+        // Phase 2 Task 10. The post-hire message's buttons: redirects only,
+        // after re-resolving the offer through the scoped query; the employee
+        // and contract edit pages check their own permissions.
+        'recruitment.offers.convert' => ['openEmployee', 'openContract'],
 
         // --- Authentication -------------------------------------------------
         // Reached before a session exists, or acting only on the caller's own
@@ -523,13 +533,6 @@ return [
         // is already assigned to this user; it grants nothing new.
         'auth.role-switcher' => ['switchTo', 'refreshRoles'],
         'settings.password' => ['updatePassword'],
-
-        // --- Public recruitment (Team 2 test form, non-production only) -----
-        // The applicant has no account, so there is no role to check. The
-        // opaque link token is the credential; the submission service
-        // re-checks link, campaign state and window, and invitation, under a
-        // lock. The route is throttled and not registered in production.
-        'recruitment.public-site.apply' => ['submit'],
 
         // --- Confirmation dialogs -------------------------------------------
         // These only render a "are you sure?" prompt. The action it confirms

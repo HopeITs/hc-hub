@@ -78,7 +78,8 @@ class RecruitmentJobOfferTest extends TestCase
 
         $this->homs = $this->makeCity('HMS', '002');
         $this->hr = $this->hr($this->homs);
-        $this->contractType = ContractType::query()->forceCreate(['name_en' => 'Volunteer contract', 'name_ar' => 'عقد تطوع']);
+        // An offer is a trial or a service contract, as on the recruitment request.
+        $this->contractType = ContractType::query()->forceCreate(['id' => 3, 'name_en' => 'Trial Volunteer Contract', 'name_ar' => 'عقد تطوع تجريبي']);
         $this->campaign = $this->makeCampaignIn($this->homs);
     }
 
@@ -133,8 +134,7 @@ class RecruitmentJobOfferTest extends TestCase
             ->assertSee('1,500.00')
             ->assertSee('2026-11-01')
             ->assertSee(__('recruitment-applicant.offers.days', ['count' => 90]))
-            ->assertSee('Volunteer contract')
-            ->assertSee(__('recruitment-applicant.offers.print'));
+            ->assertSee('Trial Volunteer Contract');
     }
 
     /** rules + avoid: an offer only for a selected candidate, and one offer per application. */
@@ -171,16 +171,56 @@ class RecruitmentJobOfferTest extends TestCase
         $application = $this->selected();
 
         foreach ([
-            'salary' => ['salary' => '0'], 'currency' => ['currency' => 0], 'salaryPer' => ['salaryPer' => 9],
-            'contractTypeId' => ['contractTypeId' => 99999], 'startDate' => ['startDate' => '2026-02-30'],
-            'endDate' => ['endDate' => '2026-10-31'], 'probationDays' => ['probationDays' => 400],
-            'weeklyHours' => ['weeklyHours' => 90], 'employmentType' => ['employmentType' => EmploymentType::Draft],
-        ] as $field => $bad) {
+            ['salary', ['salary' => '0']], ['currency', ['currency' => 0]], ['salaryPer', ['salaryPer' => 9]],
+            ['contractTypeId', ['contractTypeId' => 99999]], ['startDate', ['startDate' => '2026-02-30']],
+            ['endDate', ['endDate' => '2026-10-31']], ['weeklyHours', ['weeklyHours' => 90]],
+            ['employmentType', ['employmentType' => EmploymentType::Draft]],
+        ] as [$field, $bad]) {
             $this->assertValidationError(fn () => $this->create($application, $bad), $field);
         }
 
-        $this->assertValidationError(fn () => $this->create($application, ['startDate' => '2026-10-04']), 'startDate', 'start_in_past');
+        // Point 3: every term the contract will need is required — the notes alone may stay blank.
+        $this->assertValidationError(fn () => $this->create($application, ['endDate' => '']), 'endDate', 'end_date');
+        $this->assertValidationError(fn () => $this->create($application, ['weeklyHours' => '']), 'weeklyHours');
+        $this->assertValidationError(fn () => $this->create($application, ['employmentType' => '']), 'employmentType', 'employment_type_required');
+        $this->assertValidationError(fn () => $this->create($application, ['place' => '']), 'place', 'place_required');
+
+        $this->assertValidationError(fn () => $this->create($application, ['startDate' => '2026-10-04', 'endDate' => '2027-10-03']), 'startDate', 'start_in_past');
         $this->assertSame(0, Offer::query()->count());
+    }
+
+    /**
+     * The probation is HR's to type, and is not checked: any whole number of
+     * days is kept, anything else (or nothing) is left empty.
+     */
+    public function test_the_probation_is_typed_freely(): void
+    {
+        foreach ([['90', 90], ['400', 400], ['0', 0], ['', null], ['-5', null], ['abc', null]] as $i => [$typed, $kept]) {
+            $offer = $this->create($this->selected('Probation '.$i), ['probationDays' => $typed]);
+            $this->assertSame($kept, $offer->currentVersion->probation_days, "typed '{$typed}'");
+        }
+
+        // A draft keeps what was typed when it is opened again.
+        $this->actingAs($this->hr);
+        Livewire::test(Form::class, ['offerId' => Offer::query()->oldest('id')->value('id')])
+            ->assertSet('probationDays', 90);
+    }
+
+    /** Only a trial or a service contract can be offered — the choices of the recruitment request. */
+    public function test_only_trial_or_service_contracts_are_offered(): void
+    {
+        $volunteer = ContractType::query()->forceCreate(['id' => 1, 'name_en' => 'Volunteer Contract', 'name_ar' => 'عقد تطوع']);
+        $service = ContractType::query()->forceCreate(['id' => 5, 'name_en' => 'Specific Voluntary Service Contract', 'name_ar' => 'عقد خدمة تطوعية']);
+
+        $this->assertValidationError(fn () => $this->create($this->selected('Volunteer One'), ['contractTypeId' => $volunteer->id]), 'contractTypeId', 'contract_type_required');
+        $offer = $this->create($this->selected('Service One'), ['contractTypeId' => $service->id, 'employmentType' => EmploymentType::Freelance]);
+        $this->assertSame($service->id, $offer->currentVersion->contract_type_id);
+
+        $this->actingAs($this->hr);
+        Livewire::test(Form::class, ['applicationId' => $this->selected('Form One')->id])
+            ->assertSeeHtml('value="'.$this->contractType->id.'"')
+            ->assertSeeHtml('value="'.$service->id.'"')
+            ->assertDontSee('>Volunteer Contract<', false);
     }
 
     // ------------------------------------------------------------------
@@ -601,14 +641,22 @@ class RecruitmentJobOfferTest extends TestCase
 
         Livewire::test(Show::class, ['offerId' => $offer->id])->call('beginResponse', 'maybe')->assertForbidden();
 
+        // Point 1: each action opens one popup (<x-modal.dialog>); a mistake keeps it open, success closes it.
+        // Point 2: the offer view no longer prints.
         $other = $this->create($this->selected('Other'));
         Livewire::test(Show::class, ['offerId' => $other->id])
+            ->assertDontSeeHtml('window.print()')
+            ->assertSet('panelOpen', false)
             ->call('beginCancel')
+            ->assertSet('panelOpen', true)
+            ->assertSeeHtml('id="offerActionModal"')
             ->call('cancelOffer')
             ->assertHasErrors('cancelReason')
+            ->assertSet('panelOpen', true)
             ->set('cancelReason', 'another_candidate_chosen')
             ->call('cancelOffer')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertSet('panelOpen', false);
         $this->assertSame(Status::Cancelled, $other->fresh()->status);
 
         Livewire::test(Revise::class, ['offerId' => $other->id])
@@ -694,9 +742,8 @@ class RecruitmentJobOfferTest extends TestCase
             'currency' => Currency::USD,
             'salaryPer' => SalaryPer::Month,
             'startDate' => '2026-11-01',
-            'endDate' => '',
+            'endDate' => '2027-10-31',
             'weeklyHours' => 40,
-            'probationDays' => 90,
             'employmentType' => EmploymentType::FullTime,
             'place' => ContractPlace::Onsite,
             'notes' => '',

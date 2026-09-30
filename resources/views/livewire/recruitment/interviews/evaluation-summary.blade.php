@@ -83,50 +83,6 @@
                         @endcan
                     @endif
 
-                    @if ($panel !== null && $evaluationId === $evaluation->id)
-                        <div role="region" aria-labelledby="evaluation-panel-title" class="mt-3 space-y-3 rounded-control border border-secondary-light bg-secondary-soft/30 p-4">
-                            <h3 id="evaluation-panel-title" tabindex="-1" class="scroll-mt-24 font-semibold">{{ __('recruitment-applicant.evaluations.'.$panel.'_title') }}</h3>
-
-                            @error('evaluation')
-                                <p role="alert" class="rounded-control border border-primary bg-white p-3 text-sm text-primary">{{ $message }}</p>
-                            @enderror
-
-                            @if ($panel === 'correct')
-                                <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="{{ __('recruitment-applicant.evaluations.recommendation') }}"
-                                     @if ($errors->has('recommendation')) aria-invalid="true" aria-describedby="correct-recommendation-error" @endif>
-                                    @foreach (Recommendation::values() as $value)
-                                        <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-control border border-secondary-light bg-white px-3 text-sm sm:min-h-9 has-[:checked]:border-secondary-dark has-[:checked]:bg-selection has-[:checked]:font-semibold has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary">
-                                            <input type="radio" wire:model="recommendation" value="{{ $value }}" class="text-primary focus:ring-0">
-                                            {{ __('recruitment-applicant.evaluations.recommendations.'.$value) }}
-                                        </label>
-                                    @endforeach
-                                </div>
-                                <x-forms.input-error field="recommendation" input-id="correct-recommendation" />
-                                @foreach (['pros', 'cons', 'notes'] as $field)
-                                    <div>
-                                        <x-forms.input-label :for="'correct-'.$field" :value="__('recruitment-applicant.evaluations.'.$field)" />
-                                        <x-forms.textarea :id="'correct-'.$field" wire:model="{{ $field }}" rows="2" />
-                                        <x-forms.input-error :field="$field" :input-id="'correct-'.$field" />
-                                    </div>
-                                @endforeach
-                            @endif
-
-                            <div>
-                                <x-forms.input-label for="evaluation-reason" required :value="__('recruitment-applicant.evaluations.reason')" />
-                                <x-forms.textarea id="evaluation-reason" wire:model="reason" rows="2" />
-                                <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.evaluations.reason_hint') }}</p>
-                                <x-forms.input-error field="reason" input-id="evaluation-reason" />
-                            </div>
-
-                            <div class="flex flex-wrap gap-3">
-                                <x-primary-button type="button" wire:click="{{ $panel === 'correct' ? 'saveCorrection' : 'withdraw' }}">
-                                    {{ __('recruitment-applicant.evaluations.'.$panel.'_confirm') }}
-                                </x-primary-button>
-                                <x-secondary-button wire:click="dismissPanel">{{ __('recruitment-applicant.cancel') }}</x-secondary-button>
-                            </div>
-                        </div>
-                    @endif
-
                     @if ($evaluation->revisions->count() > 1)
                         <details class="mt-3 text-sm">
                             <summary class="cursor-pointer font-medium">{{ __('recruitment-applicant.evaluations.history') }} ({{ $evaluation->revisions->count() }})</summary>
@@ -137,6 +93,64 @@
             @endforeach
         </ul>
     @endif
+
+    {{-- Correct and withdraw open one popup, like the Leaves decision popup (<x-modal.dialog>). Its title keeps the id focus moves to. --}}
+    @php $panelEvaluation = $evaluationId !== null ? $evaluations->firstWhere('id', $evaluationId) : null; @endphp
+    <x-modal.dialog id="evaluationActionModal" max-width="xl" wire:model.defer="panelOpen" wire:ignore.self>
+        <x-slot:title>
+            <span id="evaluation-panel-title" tabindex="-1" class="focus:outline-none">
+                @if ($panel !== null)
+                    {{ __('recruitment-applicant.evaluations.'.$panel.'_title') }}
+                @endif
+            </span>
+        </x-slot:title>
+        @if ($panel !== null)
+            <div class="space-y-3">
+                {{-- Whose evaluation: the popup is no longer under it. --}}
+                @if ($panelEvaluation)
+                    <p class="text-sm font-semibold">{{ $panelEvaluation->reviewer?->profile?->name ?? $panelEvaluation->reviewer?->email }}</p>
+                @endif
+
+                @error('evaluation')
+                    <p role="alert" class="rounded-control border border-primary bg-white p-3 text-sm text-primary">{{ $message }}</p>
+                @enderror
+
+                @if ($panel === 'correct')
+                    <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="{{ __('recruitment-applicant.evaluations.recommendation') }}"
+                         @if ($errors->has('recommendation')) aria-invalid="true" aria-describedby="correct-recommendation-error" @endif>
+                        @foreach (Recommendation::values() as $value)
+                            <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-control border border-secondary-light bg-white px-3 text-sm sm:min-h-9 has-[:checked]:border-secondary-dark has-[:checked]:bg-selection has-[:checked]:font-semibold has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary">
+                                <input type="radio" wire:model="recommendation" value="{{ $value }}" class="text-primary focus:ring-0">
+                                {{ __('recruitment-applicant.evaluations.recommendations.'.$value) }}
+                            </label>
+                        @endforeach
+                    </div>
+                    <x-forms.input-error field="recommendation" input-id="correct-recommendation" />
+                    @foreach (['pros', 'cons', 'notes'] as $field)
+                        <div>
+                            <x-forms.input-label :for="'correct-'.$field" :value="__('recruitment-applicant.evaluations.'.$field)" />
+                            <x-forms.textarea :id="'correct-'.$field" wire:model="{{ $field }}" rows="2" />
+                            <x-forms.input-error :field="$field" :input-id="'correct-'.$field" />
+                        </div>
+                    @endforeach
+                @endif
+
+                <div>
+                    <x-forms.input-label for="evaluation-reason" required :value="__('recruitment-applicant.evaluations.reason')" />
+                    <x-forms.textarea id="evaluation-reason" wire:model="reason" rows="2" />
+                    <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.evaluations.reason_hint') }}</p>
+                    <x-forms.input-error field="reason" input-id="evaluation-reason" />
+                </div>
+
+                <div class="flex flex-wrap gap-3">
+                    <x-primary-button type="button" wire:click="{{ $panel === 'correct' ? 'saveCorrection' : 'withdraw' }}">
+                        {{ __('recruitment-applicant.evaluations.'.$panel.'_confirm') }}
+                    </x-primary-button>
+                    <x-secondary-button wire:click="dismissPanel">{{ __('recruitment-applicant.cancel') }}</x-secondary-button>
+                </div>
+            </div>
+        @endif
+    </x-modal.dialog>
 
     <x-recruitment.confirmation-modal scope="interview-evaluations" />
 </section>

@@ -25,7 +25,6 @@ use App\Models\Vacancy;
 use App\Services\PublicRecruitmentApplicationService;
 use App\Services\PublicRecruitmentLinkService;
 use App\Services\RecruitmentApplicationFormService;
-use App\Services\RecruitmentApplicationSubmissionService;
 use App\Services\RecruitmentCampaignInviteService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -184,7 +183,7 @@ try {
     Livewire::actingAs($hr);
 
     echo PHP_EOL."== Task 1: duplicate phone via Team 1's path ==".PHP_EOL;
-    $d = $submit($tok = $makeCampaign(Mode::PublicOpen)[2], $answersFor($fields, 'other-person@example.com', '+963 950 018 480'));
+    $d = $submit($tok = $makeCampaign(Mode::PublicOpen)[2], $answersFor($fields, 'other-person@example.com', '0950018480'));
     $check('P-1 different email, same phone -> flagged to anchor 4', $d['application']->applicant->fresh()->possible_duplicate_of_applicant_id === 4);
 
     echo PHP_EOL.'== Team 2 screens after the merge =='.PHP_EOL;
@@ -206,32 +205,8 @@ try {
     [, , $htok] = $makeCampaign(Mode::PublicOpen);
     $check('H-1 GET /careers/{token} -> Team 1 real form 200', app()->handle(Request::create("/careers/$htok", 'GET'))->getStatusCode() === 200);
     $check('H-2 GET /careers/{bad} -> unavailable 404', app()->handle(Request::create('/careers/'.str_repeat('a', 64), 'GET'))->getStatusCode() === 404);
-    $check('H-3 GET /careers-test/{token} -> test form 200 on a Team-1 schema', app()->handle(Request::create("/careers-test/$htok", 'GET'))->getStatusCode() === 200);
-    [, $fl, $ftok] = $makeCampaign(Mode::PublicOpen, true);
-    $check('H-4 test form renders a form with file fields (no crash)', app()->handle(Request::create("/careers-test/$ftok", 'GET'))->getStatusCode() === 200);
-
-    echo PHP_EOL."== Team 2 test path on Team 1's schema (CV is locked-required) ==".PHP_EOL;
-    $svc = app(RecruitmentApplicationSubmissionService::class);
-    $answers = array_filter(
-        array_diff_key($answersFor($fields, 'tf@example.com'), array_flip(['full_name', 'email', 'phone', 'privacy_consent'])),
-        fn ($v) => ! $v instanceof Illuminate\Http\UploadedFile,
-    );
-    $errorsOf = function (callable $fn): array {
-        try {
-            $fn();
-
-            return [];
-        } catch (ValidationException $e) {
-            return $e->errors();
-        }
-    };
-    $errs = $errorsOf(fn () => $svc->submit($fl, ['full_name' => 'T', 'email' => 'tf@example.com', 'privacy_accepted_at' => true, 'answers' => $answers]));
-    $check('F-1 test form without a CV: refused under answers.cv', isset($errs['answers.cv']));
-    $check('F-1 ...and no application was created', ! RecruitmentApplication::where('email_normalized', 'tf@example.com')->exists());
-    $errs = $errorsOf(fn () => $svc->submit($fl, ['full_name' => 'T', 'email' => 'tf3@example.com', 'privacy_accepted_at' => false, 'answers' => $answers]));
-    $check('F-2 unticked consent is not taken as consent', isset($errs['answers.privacy_consent']));
-    $tfApp = $svc->submit($fl, ['full_name' => 'T', 'email' => 'tf4@example.com', 'phone' => '0944000444', 'privacy_accepted_at' => true, 'answers' => $answers, 'files' => ['cv' => $pdf()]]);
-    $check('F-3 test form with a CV: accepted, CV stored by Team 1 file service', App\Models\RecruitmentApplicantFile::where('application_id', $tfApp->id)->where('file_type', 'cv')->count() === 1);
+    // The Team 2 test form was removed once Team 1's form carried Tasks 1-2.
+    $check('H-3 GET /careers-test/{token} -> gone (404)', app()->handle(Request::create("/careers-test/$htok", 'GET'))->getStatusCode() === 404);
 } finally {
     DB::rollBack();
     $leftovers = array_diff($listFiles(), $filesBefore);

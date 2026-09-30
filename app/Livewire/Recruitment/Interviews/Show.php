@@ -22,8 +22,9 @@ use Livewire\Component;
  *
  * HR with schedule-interviews can cancel it (the candidate declined, someone
  * is unavailable, a mistake) or record how it went (held / no-show) once it
- * has started. Each action has an open / confirm pair; the status and time
- * the user saw are locked when the panel opens and checked by the service.
+ * has started. Each action has an open / confirm pair, shown in a popup (the
+ * Leaves decision popup, <x-modal.dialog>); the status and time the user saw
+ * are locked when the popup opens and checked by the service.
  */
 class Show extends Component
 {
@@ -35,6 +36,13 @@ class Show extends Component
     /** 'cancel' | 'completed' | 'no_show' | null */
     #[Locked]
     public ?string $panel = null;
+
+    /**
+     * Whether the popup is showing. Not locked: the popup closes itself on
+     * Escape or a click outside, and writes that back. Which action it holds
+     * is $panel, which stays locked.
+     */
+    public bool $panelOpen = false;
 
     #[Locked]
     public ?string $expectedStatus = null;
@@ -159,6 +167,7 @@ class Show extends Component
 
         $this->closePanel();
         $this->panel = $panel;
+        $this->panelOpen = true;
         $this->expectedStatus = $interview->status;
         $this->expectedStartsAt = $interview->scheduled_at->toIso8601String();
 
@@ -167,7 +176,7 @@ class Show extends Component
 
     private function closePanel(): void
     {
-        $this->reset('panel', 'expectedStatus', 'expectedStartsAt', 'cancelReason', 'cancelNote', 'notifyCandidate', 'outcomeNote');
+        $this->reset('panel', 'panelOpen', 'expectedStatus', 'expectedStartsAt', 'cancelReason', 'cancelNote', 'notifyCandidate', 'outcomeNote');
         $this->resetErrorBag();
     }
 
