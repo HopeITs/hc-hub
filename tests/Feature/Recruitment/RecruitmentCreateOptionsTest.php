@@ -437,6 +437,69 @@ class RecruitmentCreateOptionsTest extends TestCase
             ->call('save')->assertHasNoErrors();
     }
 
+    /**
+     * A governorate administered as one reaches all of it.
+     *
+     * Homs Rural is a row in `cities` but not a governorate of its own, so a
+     * project manager seated in Homs manages posts in both. Narrowing him to
+     * the city of his own chair cost him every report in the countryside — the
+     * half of his team he was asking about.
+     *
+     * The narrowing itself stays: Aleppo is a governorate of its own and is
+     * still refused in the same breath, so this widens one boundary rather
+     * than removing it.
+     */
+    public function test_project_manager_reaches_a_city_administered_as_part_of_his_governorate(): void
+    {
+        $homs = $this->makeCity('HMS', '002');
+        $countryside = $this->makeCity('RHO', '015');
+        $aleppo = $this->makeCity('ALP', '001');
+
+        $projectLevel = JobLevel::query()->firstOrCreate(
+            ['grade' => 3],
+            ['name_en' => 'Project Manager', 'name_ar' => 'مدير مشروع'],
+        );
+        $this->root->update(['city_id' => $homs->id, 'job_level_id' => $projectLevel->id]);
+
+        $inCountryside = $this->child($this->root, [
+            'city_id' => $countryside->id,
+            'program_id' => $this->root->program_id,
+            'title_en' => 'Countryside position',
+        ]);
+        $inAleppo = $this->child($this->root, [
+            'city_id' => $aleppo->id,
+            'program_id' => $this->root->program_id,
+            'title_en' => 'Aleppo position',
+        ]);
+
+        $this->screen()
+            ->assertSee($inCountryside->title_en)
+            ->assertDontSee($inAleppo->title_en)
+            // Both halves of his own governorate are offered as places to
+            // establish a post; another governorate is not.
+            ->assertViewHas('cities', fn ($cities): bool => $cities->contains('id', $homs->id)
+                && $cities->contains('id', $countryside->id)
+                && ! $cities->contains('id', $aleppo->id));
+
+        // And the validation agrees with the list it was built from.
+        $draft = app(RecruitmentRequestDraftService::class)->create($this->manager, array_merge(
+            $this->recruitmentFormDefaults(RecruitmentRequestType::FillVacancy),
+            ['request_type' => RecruitmentRequestType::FillVacancy, 'position_id' => $inCountryside->id],
+        ));
+
+        $this->assertSame($inCountryside->id, (int) $draft->target_position_id);
+
+        try {
+            app(RecruitmentRequestDraftService::class)->create($this->manager, array_merge(
+                $this->recruitmentFormDefaults(RecruitmentRequestType::FillVacancy),
+                ['request_type' => RecruitmentRequestType::FillVacancy, 'position_id' => $inAleppo->id],
+            ));
+            $this->fail('Another governorate should still be refused.');
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $this->assertArrayHasKey('data.position_id', $exception->errors());
+        }
+    }
+
     /** Changing the governorate clears the centre, so tests name a new one. */
     private function centerIn(int $cityId): int
     {
