@@ -61,4 +61,16 @@ final class RecruitmentInterviewStatus
             default => 'bg-neutral-100 text-secondary-dark',
         };
     }
+
+    /** The same hues as classes(), solid, for a status dot or round marker. */
+    public static function dotClasses(?string $status): string
+    {
+        return match ($status) {
+            self::Scheduled => 'bg-blue-600',
+            self::Rescheduled => 'bg-amber-500',
+            self::Completed => 'bg-green-600',
+            self::NoShow => 'bg-red-700',
+            default => 'bg-neutral-300',
+        };
+    }
 }

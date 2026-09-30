@@ -64,10 +64,10 @@
             @foreach ($weeks as $week)
                 <div class="grid grid-cols-7 border-b border-secondary-soft" wire:key="week-{{ $week[0]['date']->toDateString() }}">
                     @foreach ($week as $day)
-                        <div class="min-h-28 border-e border-secondary-soft p-1.5 last:border-e-0 {{ $day['inMonth'] ? '' : 'bg-secondary-soft/30' }}">
+                        <div class="min-h-28 border-e border-secondary-soft p-1.5 last:border-e-0 {{ $day['isToday'] ? 'bg-neutral-50' : ($day['inMonth'] ? '' : 'bg-neutral-100/60') }}">
                             <div class="mb-1 flex justify-end">
                                 <span aria-hidden="true" class="flex size-6 items-center justify-center rounded-full text-xs
-                                    {{ $day['isToday'] ? 'bg-secondary-dark font-semibold text-white' : ($day['inMonth'] ? 'text-secondary-dark' : 'text-secondary-light') }}">
+                                    {{ $day['isToday'] ? 'bg-neutral-900 font-semibold text-white' : ($day['inMonth'] ? 'text-secondary-dark' : 'text-secondary-light') }}">
                                     {{ $day['date']->day }}
                                 </span>
                             </div>
