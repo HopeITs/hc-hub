@@ -1,5 +1,5 @@
 @php use App\Enums\RecruitmentInterviewStatus; @endphp
-<div class="mt-4 rounded-control border border-neutral-200 p-3 text-sm">
+<div class="mt-4 rounded-control border border-secondary-soft p-3 text-sm">
     <div class="flex flex-wrap items-center justify-between gap-2">
         <h4 class="font-semibold">{{ __('recruitment-applicant.interviews.title') }} ({{ $interviews->count() }})</h4>
 
@@ -20,7 +20,7 @@
     @if ($interviews->isEmpty())
         <p class="mt-2 text-secondary-medium">{{ __('recruitment-applicant.interviews.none_yet') }}</p>
     @else
-        <ul class="mt-2 divide-y divide-neutral-100">
+        <ul class="mt-2 divide-y divide-secondary-soft">
             @foreach ($interviews as $interview)
                 @php $timezone = $interview->timezone ?: config('app.timezone'); @endphp
                 <li class="flex flex-wrap items-center justify-between gap-2 py-2" wire:key="application-interview-{{ $interview->id }}">

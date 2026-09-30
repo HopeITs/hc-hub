@@ -937,6 +937,42 @@ class RecruitmentInterviewTest extends TestCase
         Livewire::test(Show::class, ['interviewId' => $toClose->id])->call('beginOutcome', Status::Cancelled)->assertForbidden();
     }
 
+    /**
+     * The interview's inline panels move focus the way the applicant page does
+     * (a `focus-element` listener in app.js does the moving): into the panel on
+     * open, back to its opener on dismiss, and to the interview title once the
+     * action has closed the interview and its buttons are gone.
+     */
+    public function test_interview_panels_move_focus_and_keep_their_errors_inside(): void
+    {
+        $interview = $this->schedule($this->shortlisted());
+        $this->actingAs($this->hr);
+
+        Livewire::test(Show::class, ['interviewId' => $interview->id])
+            ->call('beginCancel')
+            ->assertDispatched('focus-element', id: 'interview-panel-title')
+            ->assertSeeHtml('aria-expanded="true"')
+            ->call('dismissPanel')
+            ->assertSet('panel', null)
+            ->assertDispatched('focus-element', id: 'interview-action-cancel');
+
+        // A refusal from the service shows inside the open panel, with a way to reload.
+        $page = Livewire::test(Show::class, ['interviewId' => $interview->id])->call('beginCancel');
+        DB::table('recruitment_interviews')->where('id', $interview->id)->update(['status' => Status::Rescheduled]);
+        $page->set('cancelReason', 'candidate_declined')
+            ->call('cancelInterview')
+            ->assertHasErrors('interview')
+            ->assertSet('panel', 'cancel')
+            ->assertSee(__('recruitment-applicant.interviews.reload'));
+
+        Livewire::test(Show::class, ['interviewId' => $interview->id])
+            ->call('beginCancel')
+            ->set('cancelReason', 'candidate_declined')
+            ->call('cancelInterview')
+            ->assertHasNoErrors()
+            ->assertDispatched('focus-element', id: 'interview-title');
+    }
+
     /** [9] [21] Rescheduling through the edit form keeps history; a missing reason is shown under the field. */
     public function test_hr_reschedules_from_the_edit_form(): void
     {

@@ -43,9 +43,12 @@ class Create extends Component
         'contract_type_id' => null,
     ];
 
+    public bool $queryPrefilled = false;
+
     public function boot(): void
     {
         $this->authorizeScreen();
+        $this->prefillFromQuery();
     }
 
     public function updatedDataRequestType(): void
@@ -198,6 +201,41 @@ class Create extends Component
     protected function proposableManagerPositions(User $user): Builder
     {
         return app(RecruitmentScopeResolver::class)->scopeProposedManagers(Position::query(), $user);
+    }
+
+    private function prefillFromQuery(): void
+    {
+        if ($this->queryPrefilled) {
+            return;
+        }
+
+        $this->queryPrefilled = true;
+        $type = filter_var(request()->query('type'), FILTER_VALIDATE_INT);
+        $positionId = filter_var(request()->query('position_id'), FILTER_VALIDATE_INT);
+        $parentPositionId = filter_var(request()->query('direct_manager_id'), FILTER_VALIDATE_INT);
+        $vacancyId = filter_var(request()->query('vacancy_id'), FILTER_VALIDATE_INT);
+        $types = array_values(array_diff(RecruitmentRequestType::getValues(), [RecruitmentRequestType::Unknown]));
+
+        if ($type !== false && in_array((int) $type, $types, true)) {
+            $this->data['request_type'] = (int) $type;
+        }
+
+        if ($positionId !== false && (int) $positionId > 0) {
+            $this->data['position_id'] = (int) $positionId;
+        }
+
+        if ($parentPositionId !== false && (int) $parentPositionId > 0) {
+            $this->data['direct_manager_id'] = (int) $parentPositionId;
+        }
+
+        // The staffing chart names the vacancy when the position has exactly
+        // one open, so the form does not ask a question the card already
+        // answered. Prefilling is a convenience only: the draft service
+        // re-derives which vacancies this requester may target and refuses
+        // anything outside them, so a hand-edited id gains nothing.
+        if ($vacancyId !== false && (int) $vacancyId > 0) {
+            $this->data['vacancy_id'] = (int) $vacancyId;
+        }
     }
 
     private function selectOnlyProgram(): void

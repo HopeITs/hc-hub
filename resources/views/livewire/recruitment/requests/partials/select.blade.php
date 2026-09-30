@@ -48,5 +48,5 @@
     </x-forms.select2-input>
 
     @include('livewire.recruitment.requests.partials.field-state', ['isChangeRequested' => false, 'isLocked' => $isLocked])
-    <p id="{{ $field }}-error" class="mt-1 text-sm text-red-600">@error('data.'.$field){{ $message }}@enderror</p>
+    <p id="{{ $field }}-error" class="mt-1 text-sm text-primary">@error('data.'.$field){{ $message }}@enderror</p>
 </div>

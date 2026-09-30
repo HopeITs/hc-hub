@@ -15,7 +15,7 @@
     </div>
     <x-forms.textarea :id="$field" wire:model="data.{{ $field }}"
         :disabled="$isLocked"
-        :class="$isLocked ? 'cursor-not-allowed border-neutral-300 bg-white text-neutral-700 shadow-none' : ''" aria-describedby="{{ $field }}-error" aria-invalid="{{ $errors->has('data.'.$field) ? 'true' : 'false' }}" />
+        :class="$isLocked ? 'cursor-not-allowed border-secondary-light bg-white text-secondary-dark shadow-none' : ''" aria-describedby="{{ $field }}-error" aria-invalid="{{ $errors->has('data.'.$field) ? 'true' : 'false' }}" />
     @include('livewire.recruitment.requests.partials.field-state', ['isChangeRequested' => false, 'isLocked' => $isLocked])
-    <p id="{{ $field }}-error" class="mt-1 text-sm text-red-600">@error('data.'.$field){{ $message }}@enderror</p>
+    <p id="{{ $field }}-error" class="mt-1 text-sm text-primary">@error('data.'.$field){{ $message }}@enderror</p>
 </div>

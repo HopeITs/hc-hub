@@ -4,7 +4,9 @@ namespace App\Livewire\Recruitment\Indicators;
 
 use App\Services\RecruitmentIndicatorRules;
 use App\Services\RecruitmentMatchingIndicators;
+use App\Traits\WithAlerts;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
@@ -16,6 +18,8 @@ use Livewire\Component;
  */
 class Rules extends Component
 {
+    use WithAlerts;
+
     /** @var array<string, bool> indicator key => switched on */
     public array $enabled = [];
 
@@ -28,6 +32,15 @@ class Rules extends Component
 
     /** @var array<string, string> level => comma-separated words */
     public array $keywords = [];
+
+    /**
+     * The values as last loaded, so the page can list unsaved changes
+     * without a round trip.
+     *
+     * @var array<string, mixed>
+     */
+    #[Locked]
+    public array $saved = [];
 
     public function mount(RecruitmentIndicatorRules $rules): void
     {
@@ -60,7 +73,7 @@ class Rules extends Component
         }
 
         $this->load($rules);
-        session()->flash('rules-status', __('recruitment-indicator-rules.saved', ['version' => app(RecruitmentMatchingIndicators::class)->criteriaVersion()]));
+        $this->successToast(__('recruitment-indicator-rules.saved', ['version' => app(RecruitmentMatchingIndicators::class)->criteriaVersion()]));
     }
 
     public function resetToDefaults(RecruitmentIndicatorRules $rules): void
@@ -70,14 +83,18 @@ class Rules extends Component
 
         $rules->reset(auth()->user());
         $this->load($rules);
-        session()->flash('rules-status', __('recruitment-indicator-rules.reset_done'));
+        $this->successToast(__('recruitment-indicator-rules.reset_done'));
     }
 
     public function render(RecruitmentIndicatorRules $rules, RecruitmentMatchingIndicators $indicators)
     {
+        $ranks = $rules->get('education_ranks', []);
+        asort($ranks);
+
         return view('livewire.recruitment.indicators.rules', [
             'indicatorKeys' => RecruitmentMatchingIndicators::KEYS,
-            'levels' => array_keys($rules->get('education_ranks', [])),
+            'levels' => array_keys($ranks),
+            'ranks' => $ranks,
             'customised' => $rules->hasOverrides(),
             'version' => $indicators->criteriaVersion(),
         ]);
@@ -100,6 +117,14 @@ class Rules extends Component
             ->only(array_keys($rules->get('education_ranks', [])))
             ->map(fn ($words): string => implode(', ', (array) $words))
             ->all();
+
+        $this->saved = [
+            'enabled' => $this->enabled,
+            'defaultYears' => $this->defaultYears,
+            'defaultLevel' => $this->defaultLevel,
+            'ranges' => $this->ranges,
+            'keywords' => $this->keywords,
+        ];
     }
 
     /** Service errors are keyed by rule; the form is keyed by property. */

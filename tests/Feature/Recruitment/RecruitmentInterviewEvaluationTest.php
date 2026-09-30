@@ -194,6 +194,50 @@ class RecruitmentInterviewEvaluationTest extends TestCase
             ->assertDontSee(self::NOTES_B);
     }
 
+    /** A reviewer who still owes an evaluation is pointed to it; once saved, the form says so in words. */
+    public function test_the_page_points_a_reviewer_to_an_evaluation_they_still_owe(): void
+    {
+        $due = __('recruitment-applicant.interviews.evaluation_due');
+
+        // Before the interview starts there is nothing to evaluate yet.
+        $this->actingAs($this->reviewerA);
+        Livewire::test(Show::class, ['interviewId' => $this->interview->id])->assertDontSee($due);
+
+        $this->atInterviewTime();
+        Livewire::test(Show::class, ['interviewId' => $this->interview->id])->assertSee($due);
+
+        Livewire::test(EvaluationForm::class, ['interviewId' => $this->interview->id])
+            ->set('recommendation', Recommendation::Yes)
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertSee(__('recruitment-applicant.evaluations.saved_on', ['date' => '2026-10-06 11:00']));
+        Livewire::test(Show::class, ['interviewId' => $this->interview->id])->assertDontSee($due);
+
+        // HR, who is not a reviewer here, is never told an evaluation is due.
+        $this->actingAs($this->hr);
+        Livewire::test(Show::class, ['interviewId' => $this->interview->id])->assertDontSee($due);
+    }
+
+    /** HR's correct / withdraw panels move focus in and back out, like the interview's own panels. */
+    public function test_evaluation_panels_move_focus(): void
+    {
+        $this->atInterviewTime();
+        $evaluation = $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::No]);
+        $this->actingAs($this->hr);
+
+        Livewire::test(EvaluationSummary::class, ['interviewId' => $this->interview->id])
+            ->call('beginWithdraw', $evaluation->id)
+            ->assertDispatched('focus-element', id: 'evaluation-panel-title')
+            ->call('dismissPanel')
+            ->assertSet('panel', null)
+            ->assertDispatched('focus-element', id: 'evaluation-'.$evaluation->id.'-withdraw')
+            ->call('beginWithdraw', $evaluation->id)
+            ->set('reason', 'Reviewer evaluated the wrong candidate')
+            ->call('withdraw')
+            ->assertHasNoErrors()
+            ->assertDispatched('focus-element', id: 'evaluations-title');
+    }
+
     /** acceptance + avoid: the recommendation never becomes the hiring decision. */
     public function test_recommendations_never_touch_the_application_decision(): void
     {

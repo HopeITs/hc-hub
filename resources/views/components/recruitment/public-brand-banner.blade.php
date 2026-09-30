@@ -1,4 +1,4 @@
-<div id="application-form-preview-banner" dir="ltr" {{ $attributes->class(['relative aspect-[4/1] overflow-hidden rounded-[16px] border border-neutral-300 bg-primary shadow-e2']) }}>
+<div id="application-form-preview-banner" dir="ltr" {{ $attributes->class(['relative aspect-[4/1] overflow-hidden rounded-[16px] border border-secondary-light bg-primary shadow-e2']) }}>
     <img src="{{ asset('assets/recruitment/hope-center/logo.svg') }}" alt="Hope Christian Hope Center" class="absolute start-[9.5%] top-1/2 z-10 w-[21%] -translate-y-[55%] object-contain">
     <img src="{{ asset('assets/recruitment/hope-center/hiring.svg') }}" alt="We're hiring" class="absolute end-[11%] top-[32%] z-10 w-[14.5%] object-contain">
 

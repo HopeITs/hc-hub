@@ -77,7 +77,7 @@
         <div
             x-show="open"
             x-transition.opacity
-            class="fixed inset-0 bg-neutral-900/60 backdrop-blur-[1px]"
+            class="fixed inset-0 bg-secondary-dark/60 backdrop-blur-[1px]"
             x-on:click="close()"
             aria-hidden="true"
         ></div>
@@ -92,7 +92,7 @@
                 x-transition:leave-start="translate-y-0 opacity-100 sm:scale-100"
                 x-transition:leave-end="translate-y-3 opacity-0 sm:scale-95"
                 x-on:click.stop
-                class="relative w-full max-w-md overflow-hidden rounded-surface border border-neutral-200 bg-white shadow-e3"
+                class="relative w-full max-w-md overflow-hidden rounded-surface border border-secondary-soft bg-white shadow-e3"
             >
                 <div class="flex items-start gap-4 p-5 sm:p-6">
                     {{-- Brand red in both tones: a destructive action is told
@@ -112,11 +112,11 @@
                     </div>
 
                     <div class="min-w-0 flex-1">
-                        <h2 id="{{ $scope }}-confirmation-title" class="text-h4 font-semibold text-neutral-900" x-text="title"></h2>
-                        <p class="mt-2 whitespace-pre-line text-body leading-6 text-neutral-600" x-text="message"></p>
+                        <h2 id="{{ $scope }}-confirmation-title" class="text-h4 font-semibold text-secondary-dark" x-text="title"></h2>
+                        <p class="mt-2 whitespace-pre-line text-body leading-6 text-secondary-medium" x-text="message"></p>
 
                         <div x-cloak x-show="requireReason" class="mt-5">
-                            <label for="{{ $scope }}-confirmation-reason" class="block text-body font-semibold text-neutral-800">
+                            <label for="{{ $scope }}-confirmation-reason" class="block text-body font-semibold text-secondary-dark">
                                 <span x-text="reasonLabel"></span>
                                 <span class="text-primary" aria-hidden="true">*</span>
                             </label>
@@ -128,20 +128,20 @@
                                 rows="3"
                                 x-bind:required="requireReason"
                                 x-bind:aria-invalid="reasonError ? 'true' : 'false'"
-                                class="mt-2 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary"
+                                class="mt-2 w-full rounded-control border-secondary-light text-body focus:border-primary focus:ring-primary"
                             ></textarea>
-                            <p class="mt-1 text-small text-neutral-500" x-text="reasonHint"></p>
+                            <p class="mt-1 text-small text-secondary-medium" x-text="reasonHint"></p>
                             <p x-cloak x-show="reasonError" role="alert" class="mt-1 text-small font-medium text-primary" x-text="reasonError"></p>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex flex-col-reverse gap-2 border-t border-neutral-200 bg-neutral-50 px-5 py-4 sm:flex-row sm:justify-end">
+                <div class="flex flex-col-reverse gap-2 border-t border-secondary-soft bg-secondary-soft/30 px-5 py-4 sm:flex-row sm:justify-end">
                     <button
                         type="button"
                         x-on:click="close()"
                         x-bind:disabled="busy"
-                        class="cursor-pointer rounded-control border border-neutral-300 bg-white px-4 py-2 text-body font-semibold text-neutral-700 transition hover:bg-neutral-100 disabled:cursor-wait disabled:opacity-60"
+                        class="cursor-pointer rounded-control border border-secondary-light bg-white px-4 py-2 text-body font-semibold text-secondary-dark transition hover:bg-secondary-soft/60 disabled:cursor-wait disabled:opacity-60"
                     >
                         {{ __('general.cancel') }}
                     </button>
@@ -151,7 +151,7 @@
                         x-on:click="confirm()"
                         x-bind:disabled="busy"
                         x-bind:class="tone === 'danger'
-                            ? 'border border-primary bg-white text-primary hover:bg-neutral-50'
+                            ? 'border border-primary bg-white text-primary hover:bg-secondary-soft/30'
                             : 'bg-primary text-white hover:bg-primary-hover'"
                         class="cursor-pointer rounded-control px-4 py-2 text-body font-semibold transition disabled:cursor-wait disabled:opacity-60"
                     >

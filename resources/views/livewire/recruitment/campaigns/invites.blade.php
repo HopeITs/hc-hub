@@ -2,7 +2,7 @@
 
 <div class="space-y-6">
     <div>
-        <h1 class="text-h2 font-semibold text-neutral-900">
+        <h1 class="text-h2 font-semibold text-secondary-dark">
             {{ __('recruitment-applicants.invites_title') }}
         </h1>
         <p class="mt-2 text-secondary-medium">
@@ -10,13 +10,8 @@
         </p>
     </div>
 
-    @if (session('recruitment_invite_added'))
-        <p role="status" class="rounded-control border border-green-200 bg-green-50 p-4 text-green-800">
-            {{ session('recruitment_invite_added') }}
-        </p>
-    @endif
 
-    <form wire:submit="add" class="flex flex-wrap items-end gap-4 rounded-control border border-neutral-200 bg-white p-4 shadow-e1">
+    <form wire:submit="add" class="flex flex-wrap items-end gap-4 rounded-control border border-secondary-soft bg-white p-4 shadow-e1">
         <div class="min-w-[220px]">
             <x-forms.input-label for="full_name" required :value="__('recruitment-applicants.invite_full_name')" />
             <x-forms.input id="full_name" model="full_name" required />

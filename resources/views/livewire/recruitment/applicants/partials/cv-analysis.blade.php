@@ -3,13 +3,13 @@
     $facts = $analysis->facts_json ?? [];
     $comparison = $analysis->comparison_json ?? [];
     $outcomeClasses = [
-        'met' => 'bg-green-50 text-green-800',
-        'not_met' => 'bg-red-50 text-red-800',
-        'unknown' => 'bg-neutral-100 text-secondary-dark',
+        'met' => 'bg-primary/5 text-primary',
+        'not_met' => 'bg-primary/5 text-primary',
+        'unknown' => 'bg-secondary-soft/60 text-secondary-dark',
     ];
 @endphp
 
-<details class="mt-4 rounded-control border border-neutral-200 p-4 text-sm" @if ($analysis->isCompleted()) open @endif>
+<details class="mt-4 rounded-control border border-secondary-soft p-4 text-sm" @if ($analysis->isCompleted()) open @endif>
     <summary class="cursor-pointer font-semibold">
         {{ __('recruitment-applicant.cv_analysis.title') }}
         <span class="ms-1 text-xs font-normal text-secondary-medium">
@@ -21,7 +21,7 @@
     <p class="mt-2 text-xs text-secondary-medium">{{ __('recruitment-applicant.cv_analysis.disclaimer') }}</p>
 
     @if (! $analysis->isCompleted())
-        <p class="mt-3 rounded-control bg-amber-50 p-3 text-amber-800">{{ __('recruitment-applicant.cv_analysis.statuses.'.$analysis->status) }}</p>
+        <p class="mt-3 rounded-control bg-secondary-soft/60 p-3 text-secondary-dark">{{ __('recruitment-applicant.cv_analysis.statuses.'.$analysis->status) }}</p>
     @else
         <dl class="mt-3 grid gap-4 sm:grid-cols-2">
             {{-- Experience --}}
@@ -83,7 +83,7 @@
                 <dt class="font-medium">{{ __('recruitment-applicant.cv_analysis.skills_detected') }}</dt>
                 <dd class="mt-1 flex flex-wrap gap-1">
                     @forelse ($facts['skills'] ?? [] as $skill)
-                        <span class="rounded-control bg-blue-50 px-2 py-0.5 text-xs text-blue-800">{{ $skill }}</span>
+                        <span class="rounded-control bg-secondary-soft/60 px-2 py-0.5 text-xs text-secondary-dark">{{ $skill }}</span>
                     @empty
                         {{ __('recruitment-applicant.cv_analysis.not_found') }}
                     @endforelse
@@ -101,7 +101,7 @@
                 <ul class="mt-2 space-y-1">
                     @foreach ($skills['items'] as $item)
                         <li class="flex items-start gap-2">
-                            <span @class(['font-bold', 'text-green-700' => $item['matched'], 'text-secondary-medium' => ! $item['matched']])>{{ $item['matched'] ? '✓' : '—' }}</span>
+                            <span @class(['font-bold', 'text-primary' => $item['matched'], 'text-secondary-medium' => ! $item['matched']])>{{ $item['matched'] ? '✓' : '—' }}</span>
                             <span>
                                 {{ $item['term'] }}
                                 @if ($item['matched'] && $item['evidence'])

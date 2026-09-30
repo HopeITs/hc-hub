@@ -13,7 +13,7 @@
     'inline-flex items-center gap-2 rounded-full px-3 py-1 text-small font-bold',
     'bg-primary text-white' => $open,
     'border border-primary bg-white text-primary' => $live && ! $open,
-    'border border-neutral-300 bg-neutral-50 text-neutral-700' => ! $live,
+    'border border-secondary-light bg-secondary-soft/30 text-secondary-dark' => ! $live,
 ]) }} data-campaign-status="{{ $labelKey }}">
     @if ($open)
         <span class="relative flex size-2" aria-hidden="true">

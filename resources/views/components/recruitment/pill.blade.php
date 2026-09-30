@@ -1,7 +1,7 @@
 @props([
     // Background and text classes from the status enum's classes(), or a
     // tag's classes(). Each hue carries one meaning across recruitment.
-    'tone' => 'bg-neutral-100 text-secondary-dark',
+    'tone' => 'bg-secondary-soft/60 text-secondary-dark',
 ])
 
 {{-- A short status or label chip. Layout extras (margin, shrink, wrapping) go in class. --}}

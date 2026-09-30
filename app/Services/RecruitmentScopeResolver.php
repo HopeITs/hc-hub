@@ -527,10 +527,55 @@ class RecruitmentScopeResolver
                 return $query;
             }
 
-            $query->inCity($cityId);
+            // The governorate, including any city administered as part of it.
+            // A manager in Homs with posts under him in Homs Rural was losing
+            // exactly the half of his team he was asking about, because Homs
+            // Rural is a separate row in `cities` but not a separate
+            // governorate.
+            $query->inCities($this->clusterCityIds($cityId));
         }
 
         return $query;
+    }
+
+    /**
+     * Every city administered as part of one governorate, including itself.
+     *
+     * Read from config rather than from the data: nothing in `cities` records
+     * that Homs Rural belongs to Homs, and inventing a column for it would put
+     * the same fact in two places (the HR map already states it).
+     *
+     * @return array<int, int>
+     */
+    public function clusterCityIds(?int $cityId): array
+    {
+        if ($cityId === null) {
+            return [];
+        }
+
+        $clusters = array_change_key_case(
+            array_map('strtoupper', config('recruitment.governorate_clusters', [])),
+            CASE_UPPER,
+        );
+
+        $slug = strtoupper((string) City::query()->whereKey($cityId)->value('slug'));
+
+        if ($slug === '') {
+            return [$cityId];
+        }
+
+        // The governorate this city answers to, which is itself when it is one.
+        $parent = $clusters[$slug] ?? $slug;
+
+        $slugs = array_values(array_unique(array_merge(
+            [$parent],
+            array_keys(array_filter($clusters, fn (string $to): bool => $to === $parent)),
+        )));
+
+        $ids = City::query()->whereIn('slug', $slugs)->pluck('id')
+            ->map(fn ($id): int => (int) $id)->all();
+
+        return $ids === [] ? [$cityId] : $ids;
     }
 
     /**
@@ -634,9 +679,12 @@ class RecruitmentScopeResolver
     {
         $query->where('is_active', true);
         if ($this->hasGovernorateCreationScope($user)) {
-            $cityId = $this->positionCityId($user);
+            // The whole governorate, so a post may be established in the
+            // countryside the requester already manages. The list and the
+            // validation behind it both read this, so the two cannot disagree.
+            $cityIds = $this->clusterCityIds($this->positionCityId($user));
 
-            return $cityId === null ? $query->whereRaw('0 = 1') : $query->whereKey($cityId);
+            return $cityIds === [] ? $query->whereRaw('0 = 1') : $query->whereKey($cityIds);
         }
 
         // Program managers may establish a position in any active governorate

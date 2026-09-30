@@ -4,10 +4,13 @@ namespace App\Livewire\Recruitment\Interviews;
 
 use App\Enums\RecruitmentInterviewStatus;
 use App\Models\RecruitmentInterview;
+use App\Services\RecruitmentInterviewEvaluationService;
 use App\Services\RecruitmentInterviewSchedulingService;
+use App\Traits\WithAlerts;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
@@ -24,6 +27,8 @@ use Livewire\Component;
  */
 class Show extends Component
 {
+    use WithAlerts;
+
     #[Locked]
     public int $interviewId;
 
@@ -51,7 +56,15 @@ class Show extends Component
     {
         $this->interviewId = $interviewId;
         $this->resolveInterview();
+
+        if ($message = session()->pull('recruitment_toast')) {
+            $this->successToast($message);
+        }
     }
+
+    /** The viewer saved their evaluation on this page: re-render so the "evaluation due" note goes. */
+    #[On('recruitment-evaluations-changed')]
+    public function refreshEvaluationDue(): void {}
 
     public function beginCancel(): void
     {
@@ -65,10 +78,13 @@ class Show extends Component
         $this->openPanel($outcome);
     }
 
-    public function closePanel(): void
+    /** The user backs out: the panel closes and focus returns to the button that opened it. */
+    public function dismissPanel(): void
     {
-        $this->reset('panel', 'expectedStatus', 'expectedStartsAt', 'cancelReason', 'cancelNote', 'notifyCandidate', 'outcomeNote');
-        $this->resetErrorBag();
+        $opener = $this->panel !== null ? 'interview-action-'.$this->panel : 'interview-title';
+
+        $this->closePanel();
+        $this->dispatch('focus-element', id: $opener);
     }
 
     public function cancelInterview(RecruitmentInterviewSchedulingService $scheduling): void
@@ -125,6 +141,7 @@ class Show extends Component
         return view('livewire.recruitment.interviews.show', [
             'interview' => $interview,
             'canManage' => $canManage,
+            'evaluationDue' => $this->evaluationDue($interview),
             'canSeeApplicant' => Gate::allows('view', $interview->application),
             // Rendered only when allowed; never stored on the component.
             'meetingUrl' => Gate::allows('viewMeetingLink', $interview) ? $interview->meeting_url : null,
@@ -144,6 +161,14 @@ class Show extends Component
         $this->panel = $panel;
         $this->expectedStatus = $interview->status;
         $this->expectedStartsAt = $interview->scheduled_at->toIso8601String();
+
+        $this->dispatch('focus-element', id: 'interview-panel-title');
+    }
+
+    private function closePanel(): void
+    {
+        $this->reset('panel', 'expectedStatus', 'expectedStartsAt', 'cancelReason', 'cancelNote', 'notifyCandidate', 'outcomeNote');
+        $this->resetErrorBag();
     }
 
     private function attempt(callable $action, string $message): void
@@ -159,7 +184,22 @@ class Show extends Component
         }
 
         $this->closePanel();
-        session()->flash('recruitment_saved', $message);
+        $this->successToast($message);
+
+        // The buttons that opened and confirmed the panel are gone once the
+        // interview is closed: the interview itself, with its new status, is next.
+        $this->dispatch('focus-element', id: 'interview-title');
+    }
+
+    /**
+     * The viewer may evaluate, evaluation is open, and they have not yet
+     * submitted: the page points them to their form from the top.
+     */
+    private function evaluationDue(RecruitmentInterview $interview): bool
+    {
+        return Gate::allows('evaluate', $interview)
+            && app(RecruitmentInterviewEvaluationService::class)->closedReason($interview) === null
+            && ! $interview->evaluations()->where('reviewer_user_id', auth()->id())->exists();
     }
 
     /** Out of reach is a 404, not a 403: guessing ids reveals nothing. */

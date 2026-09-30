@@ -37,7 +37,7 @@
 
     <div class="mx-auto w-full max-w-5xl space-y-6">
     {{-- Header: what this is, and the one-line state. --}}
-    <section class="rounded-surface border border-neutral-200 bg-white p-5 shadow-e1 sm:p-6">
+    <section class="rounded-surface border border-secondary-soft bg-white p-5 shadow-e1 sm:p-6">
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div class="min-w-0">
                 <p class="text-small font-semibold text-secondary-medium">
@@ -50,8 +50,8 @@
                         </a>
                     @endif
                 </p>
-                <h1 class="mt-1 text-h3 font-bold text-neutral-800">{{ $title }}</h1>
-                <dl class="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-body text-neutral-600">
+                <h1 class="mt-1 text-h3 font-bold text-secondary-dark">{{ $title }}</h1>
+                <dl class="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-body text-secondary-medium">
                     <div class="flex items-center gap-2">
                         <dt class="sr-only">{{ __('recruitment-campaign.link_mode') }}</dt>
                         <svg class="size-4 text-secondary-light" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 0 0-5-3.87M9 20H4v-2a4 4 0 0 1 5-3.87m6-4a4 4 0 1 1-8 0 4 4 0 0 1 8 0Zm6 2a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/></svg>
@@ -93,16 +93,16 @@
                 @if ($editingDetails)
                     <form wire:submit="saveDetails" class="space-y-5">
                         <fieldset>
-                            <legend class="text-body font-semibold text-neutral-800">{{ __('recruitment-campaign.link_mode') }}</legend>
+                            <legend class="text-body font-semibold text-secondary-dark">{{ __('recruitment-campaign.link_mode') }}</legend>
                             @if ($canChangeAudience)
                                 <div class="mt-3 grid gap-2 sm:grid-cols-3">
                                     @foreach ($linkModes as $mode)
                                         <label wire:key="details-mode-{{ $mode }}"
-                                            class="flex cursor-pointer items-start gap-3 rounded-control border p-3 transition has-[:checked]:border-primary has-[:checked]:bg-neutral-50 border-neutral-300">
+                                            class="flex cursor-pointer items-start gap-3 rounded-control border p-3 transition has-[:checked]:border-primary has-[:checked]:bg-secondary-soft/30 border-secondary-light">
                                             <input type="radio" value="{{ $mode }}" wire:model="linkMode"
-                                                class="mt-1 border-neutral-400 text-primary focus:ring-primary">
+                                                class="mt-1 border-secondary-light text-primary focus:ring-primary">
                                             <span>
-                                                <span class="block text-body font-semibold text-neutral-800">{{ __('recruitment-campaign.modes.'.$mode) }}</span>
+                                                <span class="block text-body font-semibold text-secondary-dark">{{ __('recruitment-campaign.modes.'.$mode) }}</span>
                                                 <span class="block text-small text-secondary-medium">{{ __('recruitment-campaign.mode_hints.'.$mode) }}</span>
                                             </span>
                                         </label>
@@ -112,8 +112,8 @@
                             @else
                                 {{-- Locked after publish: a read-only value, not dead radios that
                                      invite a click and do nothing. --}}
-                                <div class="mt-2 rounded-control border border-neutral-200 bg-neutral-50 p-3">
-                                    <span class="block text-body font-semibold text-neutral-800">{{ __('recruitment-campaign.modes.'.$campaign->link_mode) }}</span>
+                                <div class="mt-2 rounded-control border border-secondary-soft bg-secondary-soft/30 p-3">
+                                    <span class="block text-body font-semibold text-secondary-dark">{{ __('recruitment-campaign.modes.'.$campaign->link_mode) }}</span>
                                     <span class="block text-small text-secondary-medium">{{ __('recruitment-campaign.mode_hints.'.$campaign->link_mode) }}</span>
                                 </div>
                                 <p class="mt-2 text-small text-secondary-medium">{{ __('recruitment-campaign.page.audience_locked_hint') }}</p>
@@ -143,13 +143,13 @@
                             <div>
                                 <x-forms.input-label for="startsAt">{{ __('recruitment-campaign.starts_at') }}</x-forms.input-label>
                                 <input id="startsAt" type="date" wire:model="startsAt"
-                                    class="mt-1 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
+                                    class="mt-1 w-full rounded-control border-secondary-light text-body focus:border-primary focus:ring-primary">
                                 <x-error-span>{{ $errors->first('startsAt') }}</x-error-span>
                             </div>
                             <div>
                                 <x-forms.input-label for="endsAt">{{ __('recruitment-campaign.ends_at') }}</x-forms.input-label>
                                 <input id="endsAt" type="date" wire:model="endsAt"
-                                    class="mt-1 w-full rounded-control border-neutral-300 text-body focus:border-primary focus:ring-primary">
+                                    class="mt-1 w-full rounded-control border-secondary-light text-body focus:border-primary focus:ring-primary">
                                 <x-error-span>{{ $errors->first('endsAt') }}</x-error-span>
                             </div>
                         </div>
@@ -160,14 +160,14 @@
                                 {{ __('recruitment-campaign.page.save_details') }}
                             </x-primary-button>
                             <button type="button" wire:click="cancelDetails"
-                                class="cursor-pointer rounded-control border border-neutral-300 bg-white px-4 py-2 text-body font-semibold text-neutral-700 transition hover:bg-neutral-50">
+                                class="cursor-pointer rounded-control border border-secondary-light bg-white px-4 py-2 text-body font-semibold text-secondary-dark transition hover:bg-secondary-soft/30">
                                 {{ __('recruitment-campaign.cancel') }}
                             </button>
                         </div>
                     </form>
                 @else
                     <div class="flex flex-wrap items-center justify-between gap-3">
-                        <p class="text-body text-neutral-600">
+                        <p class="text-body text-secondary-medium">
                             {{ __('recruitment-campaign.modes.'.$campaign->link_mode) }}
                             <span aria-hidden="true">·</span>
                             {{ __('recruitment-campaign.mode_hints.'.$campaign->link_mode) }}
@@ -178,7 +178,7 @@
                         </p>
                         @if ($mayEdit)
                             <button type="button" wire:click="editDetails"
-                                class="cursor-pointer rounded-control border border-neutral-300 bg-white px-3 py-1.5 text-small font-semibold text-neutral-700 transition hover:bg-neutral-50">
+                                class="cursor-pointer rounded-control border border-secondary-light bg-white px-3 py-1.5 text-small font-semibold text-secondary-dark transition hover:bg-secondary-soft/30">
                                 {{ __('recruitment-campaign.page.edit') }}
                             </button>
                         @endif
@@ -191,7 +191,7 @@
                 :title="__('recruitment-campaign.page.step_post')"
                 :summary="__('recruitment-campaign.page.step_post_help')">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                    <p class="text-body text-neutral-600">
+                    <p class="text-body text-secondary-medium">
                         @if ($postReady)
                             {{ __('recruitment-campaign.page.published_version', ['version' => $jobPost->currentVersion->version_no]) }}
                         @elseif ($jobPost)
@@ -205,7 +205,7 @@
                             @class([
                                 'inline-flex cursor-pointer items-center gap-2 rounded-control px-4 py-2 text-body font-semibold transition',
                                 'bg-primary text-white hover:bg-primary-hover' => $current === 'post',
-                                'border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50' => $current !== 'post',
+                                'border border-secondary-light bg-white text-secondary-dark hover:bg-secondary-soft/30' => $current !== 'post',
                             ])>
                             {{ $jobPost ? __('recruitment-campaign.page.open_post') : __('recruitment-campaign.page.create_post') }}
                             <svg class="size-4 rtl:-scale-x-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/></svg>
@@ -219,7 +219,7 @@
                 :title="__('recruitment-campaign.page.step_form')"
                 :summary="__('recruitment-campaign.page.step_form_help')">
                 <div class="flex flex-wrap items-center justify-between gap-3">
-                    <p class="text-body text-neutral-600">
+                    <p class="text-body text-secondary-medium">
                         @if ($formReady)
                             {{ __('recruitment-campaign.page.published_version', ['version' => $form->currentVersion->version_no]) }}
                         @elseif ($form)
@@ -233,7 +233,7 @@
                             @class([
                                 'inline-flex cursor-pointer items-center gap-2 rounded-control px-4 py-2 text-body font-semibold transition',
                                 'bg-primary text-white hover:bg-primary-hover' => $current === 'form',
-                                'border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50' => $current !== 'form',
+                                'border border-secondary-light bg-white text-secondary-dark hover:bg-secondary-soft/30' => $current !== 'form',
                             ])>
                             {{ $form ? __('recruitment-campaign.page.open_form') : __('recruitment-campaign.page.create_form') }}
                             <svg class="size-4 rtl:-scale-x-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/></svg>
@@ -259,9 +259,9 @@
 
         {{-- Status panel --}}
         <aside class="order-first lg:order-none lg:sticky lg:top-24 lg:self-start" aria-labelledby="campaign-status-heading">
-            <section class="rounded-surface border border-neutral-200 bg-white p-5 shadow-e1">
-                <h2 id="campaign-status-heading" class="text-subtitle font-bold text-neutral-800">{{ __('recruitment-campaign.page.status_title') }}</h2>
-                <p class="mt-2 text-body leading-6 text-neutral-600">
+            <section class="rounded-surface border border-secondary-soft bg-white p-5 shadow-e1">
+                <h2 id="campaign-status-heading" class="text-subtitle font-bold text-secondary-dark">{{ __('recruitment-campaign.page.status_title') }}</h2>
+                <p class="mt-2 text-body leading-6 text-secondary-medium">
                     {{ __('recruitment-campaign.page.status_'.$statusKey.($statusKey === 'open' && ! $campaign->ends_at ? '_no_end' : ''), [
                         'start' => $fmt($campaign->starts_at),
                         'end' => $fmt($campaign->ends_at) ?? __('recruitment-campaign.page.no_deadline'),
@@ -270,17 +270,17 @@
 
                 @if ($isDraft)
                     <div class="mt-5">
-                        <div class="flex items-center justify-between text-small font-semibold text-neutral-700">
+                        <div class="flex items-center justify-between text-small font-semibold text-secondary-dark">
                             <span>{{ __('recruitment-campaign.page.ready_count', ['done' => $readyCount, 'total' => 4]) }}</span>
                         </div>
-                        <div class="mt-2 h-2 overflow-hidden rounded-full bg-neutral-200" role="progressbar"
+                        <div class="mt-2 h-2 overflow-hidden rounded-full bg-secondary-soft" role="progressbar"
                             aria-valuemin="0" aria-valuemax="4" aria-valuenow="{{ $readyCount }}"
                             aria-label="{{ __('recruitment-campaign.page.ready_count', ['done' => $readyCount, 'total' => 4]) }}">
                             <div class="h-full rounded-full bg-primary transition-all" style="width: {{ $readyCount * 25 }}%"></div>
                         </div>
                         <ul class="mt-4 space-y-2 text-small">
                             @foreach (['post' => $postReady, 'form' => $formReady, 'link' => $linkReady] as $key => $ok)
-                                <li class="flex items-center gap-2 {{ $ok ? 'text-neutral-700' : 'text-secondary-medium' }}" wire:key="ready-{{ $key }}">
+                                <li class="flex items-center gap-2 {{ $ok ? 'text-secondary-dark' : 'text-secondary-medium' }}" wire:key="ready-{{ $key }}">
                                     @if ($ok)
                                         <svg class="size-4 shrink-0 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
                                     @else
@@ -307,7 +307,7 @@
                                         : __('recruitment-campaign.page.launch_confirm_now')),
                                     confirmLabel: @js(__('recruitment-campaign.page.launch')),
                                 })"
-                                class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-control bg-primary px-4 py-2.5 text-body font-bold text-white shadow-e1 transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-neutral-200 disabled:text-secondary-light disabled:shadow-none">
+                                class="flex w-full cursor-pointer items-center justify-center gap-2 rounded-control bg-primary px-4 py-2.5 text-body font-bold text-white shadow-e1 transition hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-secondary-soft disabled:text-secondary-light disabled:shadow-none">
                                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6" class="rtl:-scale-x-100 origin-center"/></svg>
                                 {{ $startsInFuture ? __('recruitment-campaign.page.launch_scheduled') : __('recruitment-campaign.page.launch') }}
                             </button>
@@ -316,7 +316,7 @@
                             @endunless
                             @if ($canPublishOnly)
                                 <button type="button" wire:click="act('publish')" wire:loading.attr="disabled" wire:target="act"
-                                    class="w-full cursor-pointer rounded-control px-4 py-2 text-small font-semibold text-neutral-600 underline-offset-4 transition hover:text-neutral-800 hover:underline">
+                                    class="w-full cursor-pointer rounded-control px-4 py-2 text-small font-semibold text-secondary-medium underline-offset-4 transition hover:text-secondary-dark hover:underline">
                                     {{ __('recruitment-campaign.page.publish_only') }}
                                 </button>
                             @endif
@@ -325,7 +325,7 @@
                 @endif
 
                 @if ($available)
-                    <div class="mt-5 space-y-2 border-t border-neutral-200 pt-5">
+                    <div class="mt-5 space-y-2 border-t border-secondary-soft pt-5">
                         @foreach ($available as $action)
                             @php $danger = in_array($action, ['close', 'disable'], true); @endphp
                             <button type="button" wire:key="action-{{ $action }}" data-campaign-action="{{ $action }}"
@@ -355,9 +355,9 @@
                                 @endif
                                 @class([
                                     'flex w-full cursor-pointer items-center justify-center gap-2 rounded-control px-4 py-2 text-body font-semibold transition',
-                                    'border border-primary bg-white text-primary hover:bg-neutral-50' => $danger,
+                                    'border border-primary bg-white text-primary hover:bg-secondary-soft/30' => $danger,
                                     'bg-primary text-white hover:bg-primary-hover' => ! $danger && $loop->first,
-                                    'border border-neutral-300 bg-white text-neutral-700 hover:bg-neutral-50' => ! $danger && ! $loop->first,
+                                    'border border-secondary-light bg-white text-secondary-dark hover:bg-secondary-soft/30' => ! $danger && ! $loop->first,
                                 ])>
                                 @if ($danger)
                                     <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.9 2.7 17.1A2 2 0 0 0 4.4 20h15.2a2 2 0 0 0 1.7-2.9L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>

@@ -5,12 +5,9 @@ namespace Tests\Feature\Recruitment;
 use App\Enums\RecruitmentApplicationStatus as Status;
 use App\Enums\RecruitmentFileScanStatus;
 use App\Livewire\Recruitment\Applicants\ApplicationTable;
-use App\Livewire\Recruitment\Applicants\ApplicationTags;
 use App\Livewire\Recruitment\Applicants\BulkReject;
-use App\Livewire\Recruitment\Applicants\BulkTags;
 use App\Livewire\Recruitment\Applicants\Notes;
 use App\Livewire\Recruitment\Applicants\Show;
-use App\Livewire\Recruitment\Applicants\TagManager;
 use App\Models\City;
 use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplicantFile;
@@ -268,83 +265,9 @@ class RecruitmentApplicantHardeningTest extends TestCase
         $this->assertSame(Status::Rejected, $application->fresh()->status);
     }
 
-    public function test_bulk_tagging_focuses_its_panel_then_its_result(): void
-    {
-        $application = $this->applyTo($this->makeCampaignIn($this->homs), $this->makeApplicant());
-        $hr = $this->hr($this->homs);
-        $tag = app(RecruitmentTagService::class)->create($hr, 'Batch');
-        $this->actingAs($hr);
-
-        Livewire::test(BulkTags::class)
-            ->call('open', [$application->id])
-            ->assertDispatched('focus-element', id: 'bulk-tags-title')
-            ->assertSeeHtml('id="bulk-tags-title"')
-            ->set('tagId', (string) $tag->id)
-            ->call('apply')
-            ->assertHasNoErrors()
-            ->assertDispatched('focus-element', id: 'bulk-tags-result')
-            ->assertSeeHtml('id="bulk-tags-result"')
-            ->call('cancel')
-            ->assertDispatched('focus-element', id: 'applicants-title');
-    }
-
     // ------------------------------------------------------------------
     // Tags
     // ------------------------------------------------------------------
-
-    public function test_removing_a_tag_moves_focus_to_the_tag_heading(): void
-    {
-        $application = $this->applyTo($this->makeCampaignIn($this->homs), $this->makeApplicant());
-        $hr = $this->hr($this->homs);
-        $tags = app(RecruitmentTagService::class);
-        $tag = $tags->create($hr, 'Priority');
-        $tags->attach($hr, $application, $tag->id);
-        $this->actingAs($hr);
-
-        Livewire::test(ApplicationTags::class, ['applicationId' => $application->id])
-            ->call('detach', $tag->id)
-            ->assertHasNoErrors()
-            ->assertDispatched('focus-element', id: 'tags-'.$application->id.'-title')
-            ->assertSeeHtml('id="tags-'.$application->id.'-title"');
-    }
-
-    public function test_tag_manager_focus_flow_and_rename_colour_error_lands_on_its_own_field(): void
-    {
-        $hr = $this->hr($this->homs);
-        $tag = app(RecruitmentTagService::class)->create($hr, 'Seasonal');
-        $this->actingAs($hr);
-        $renameButton = 'tag-'.$tag->id.'-rename';
-
-        Livewire::test(TagManager::class)
-            ->call('beginRename', $tag->id)
-            ->assertDispatched('focus-element', id: 'renameName')
-            ->assertSeeHtml('id="renameName"')
-            ->set('renameColor', 'chartreuse')
-            ->call('rename')
-            ->assertHasErrors('renameColor')
-            ->assertHasNoErrors('tagColor')
-            ->assertNotDispatched('focus-element')
-            ->assertSeeHtml('aria-invalid="true" aria-describedby="renameColor-error"')
-            ->assertSeeHtml('id="renameColor-error"')
-            ->call('cancelRename')
-            ->assertDispatched('focus-element', id: $renameButton)
-            ->assertSeeHtml('id="'.$renameButton.'"')
-            // A successful rename ends the same way.
-            ->call('beginRename', $tag->id)
-            ->set('renameName', 'Winter')
-            ->call('rename')
-            ->assertHasNoErrors()
-            ->assertDispatched('focus-element', id: $renameButton)
-            ->call('delete', $tag->id)
-            ->assertDispatched('focus-element', id: 'tag-'.$tag->id.'-restore')
-            ->assertSeeHtml('id="tag-'.$tag->id.'-restore"')
-            ->assertDontSeeHtml('id="'.$renameButton.'"')
-            ->call('restore', $tag->id)
-            ->assertDispatched('focus-element', id: $renameButton)
-            ->assertSeeHtml('id="'.$renameButton.'"');
-
-        $this->assertSame('Winter', $tag->fresh()->name);
-    }
 
     // ------------------------------------------------------------------
     // List

@@ -2,7 +2,7 @@
     {{ $jobPostVersion->title_en ?? __('recruitment-applicants.public_apply_title') }}
 </x-slot:title>
 
-<section class="min-h-[86.7dvh] rtl:text-right bg-neutral-100 flex items-center justify-center px-4 py-10">
+<section class="min-h-[86.7dvh] rtl:text-right bg-secondary-soft/60 flex items-center justify-center px-4 py-10">
     <div class="w-full max-w-2xl">
 
         <div class="mb-6 flex items-center justify-between">
@@ -17,8 +17,8 @@
         <x-auth-card class="space-y-6">
 
             @if ($jobPostVersion)
-                <div class="space-y-2 border-b border-neutral-200 pb-4">
-                    <h1 class="text-2xl font-bold text-gray-900">
+                <div class="space-y-2 border-b border-secondary-soft pb-4">
+                    <h1 class="text-2xl font-bold text-secondary-dark">
                         {{ app()->getLocale() === 'ar' ? $jobPostVersion->title_ar : $jobPostVersion->title_en }}
                     </h1>
                     @if ($jobPostVersion->body_en || $jobPostVersion->body_ar)
@@ -31,7 +31,7 @@
 
             @if ($submitted)
                 <div class="text-center py-8 space-y-2">
-                    <h2 class="text-xl font-semibold text-gray-900">{{ __('recruitment-applicants.public_apply_thanks_title') }}</h2>
+                    <h2 class="text-xl font-semibold text-secondary-dark">{{ __('recruitment-applicants.public_apply_thanks_title') }}</h2>
                     <p class="text-body text-secondary-medium">{{ __('recruitment-applicants.public_apply_thanks_body') }}</p>
                 </div>
             @else
@@ -103,7 +103,7 @@
                                     wire:model="uploads.{{ $key }}"
                                     accept="{{ collect($field['accept'])->map(fn ($extension) => '.'.$extension)->implode(',') }}"
                                     @if ($field['multiple']) multiple @endif
-                                    class="block w-full text-body text-neutral-900 file:me-3 file:rounded-control file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white"
+                                    class="block w-full text-body text-secondary-dark file:me-3 file:rounded-control file:border-0 file:bg-primary file:px-3 file:py-2 file:text-white"
                                 />
                                 @if ($field['help'][$locale] ?? '')
                                     <p class="mt-1 text-body text-secondary-medium">{{ $field['help'][$locale] }}</p>
