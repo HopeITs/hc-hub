@@ -3,7 +3,7 @@
 return [
     'title' => 'Matching rules',
     'navigation' => 'Matching rules',
-    'hint' => 'These rules decide what “met” means in the matching indicators shown on every application. They are an aid for the reviewer, not a decision. Saving starts a new criteria version; snapshots saved earlier keep the version they were computed under.',
+    'hint' => 'These rules decide what “met” means in the matching indicators on every application. They are an aid for the reviewer, not a decision.',
     'version' => 'Current criteria version: :version',
     'version_short' => 'Criteria version',
     'customised' => 'Customised. Anything left untouched follows the system defaults.',
@@ -64,6 +64,10 @@ return [
         'cv_nothing' => 'no level, so the CV reading shows not assessed.',
         'cv_nothing_request' => 'no level, so the CV reading shows not assessed.',
     ],
+    'possible_outcomes' => 'What it can show',
+    'split_form' => 'form',
+    'split_cv' => 'CV',
+    'grid_keys' => 'Use the arrow keys to move between cells; Home and End jump to the row ends.',
     'legend_title' => 'Outcomes',
 
     'criteria_title' => 'Criteria in use',

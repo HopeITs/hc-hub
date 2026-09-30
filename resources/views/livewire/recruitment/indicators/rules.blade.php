@@ -103,15 +103,16 @@
                     <thead>
                         <tr class="border-y border-neutral-100 bg-neutral-50 text-caption font-semibold uppercase tracking-wide text-secondary-medium">
                             <th scope="col" class="w-16 px-5 py-2 text-start sm:ps-6"><span class="sr-only">{{ $t('on') }}</span></th>
-                            <th scope="col" class="py-2 pe-4 text-start">{{ $t('criterion') }}</th>
+                            <th scope="col" class="py-2 pe-4 text-start xl:w-[34%]">{{ $t('criterion') }}</th>
                             @foreach ($sourceIcons as $source => $icon)
-                                <th scope="col" class="hidden w-28 px-2 py-2 text-center xl:table-cell">
+                                <th scope="col" class="hidden w-24 px-2 py-2 text-center xl:table-cell">
                                     <span class="inline-flex flex-col items-center gap-1">
                                         <flux:icon :name="$icon" variant="micro" class="size-4 text-secondary-light" />
                                         <span class="normal-case tracking-normal">{{ $t('sources.'.$source) }}</span>
                                     </span>
                                 </th>
                             @endforeach
+                            <th scope="col" class="hidden py-2 pe-5 text-start xl:table-cell sm:pe-6">{{ $t('possible_outcomes') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100">
@@ -154,20 +155,7 @@
                                             </span>
                                         @endforeach
                                     </p>
-                                    {{-- The criterion's own truth table: every case it can produce --}}
-                                    <ul class="mt-2 flex flex-wrap gap-1.5" aria-label="{{ $t('cases_label', ['name' => $criterionName($key)]) }}">
-                                        @if (in_array($key, ['experience', 'qualification'], true))
-                                            <li><a href="#{{ $key }}-title" class="inline-flex items-center gap-1 rounded-control text-small font-semibold text-neutral-800 underline decoration-neutral-300 underline-offset-4 hover:decoration-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">{{ $t('see_table') }}<flux:icon.arrow-down variant="micro" class="size-3.5" aria-hidden="true" /></a></li>
-                                        @else
-                                            @foreach ($cases[$key] as [$outcome, $case])
-                                                <li @class(['inline-flex items-center gap-1 rounded-control px-1.5 py-0.5 text-caption font-semibold', Outcome::classes($outcome)])>
-                                                    @include('livewire.recruitment.indicators.partials.outcome-icon', ['outcome' => $outcome])
-                                                    <span class="sr-only">{{ __('recruitment-applicant.indicators.outcomes.'.$outcome) }}:</span>
-                                                    {{ $t('cases.'.$key.'.'.$case) }}
-                                                </li>
-                                            @endforeach
-                                        @endif
-                                    </ul>
+                                    @include('livewire.recruitment.indicators.partials.criterion-cases', ['key' => $key, 'name' => $criterionName($key), 'cases' => $cases[$key] ?? [], 'class' => 'mt-2 xl:hidden'])
                                 </td>
                                 @foreach (array_keys($sourceIcons) as $source)
                                     @php $kind = $sources[$key][$source] ?? null; @endphp
@@ -183,6 +171,9 @@
                                         @endif
                                     </td>
                                 @endforeach
+                                <td class="hidden py-3 pe-5 align-top xl:table-cell sm:pe-6">
+                                    @include('livewire.recruitment.indicators.partials.criterion-cases', ['key' => $key, 'name' => $criterionName($key), 'cases' => $cases[$key] ?? [], 'class' => 'max-w-md'])
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -195,6 +186,8 @@
             </p>
             @error('disabled') <p class="px-6 pb-4 text-body text-primary" role="alert">{{ $message }}</p> @enderror
         </section>
+
+        <p id="grid-keys-hint" class="sr-only">{{ $t('grid_keys') }}</p>
 
         {{-- Outcome legend, shared by both matrices --}}
         <div class="flex flex-wrap items-center gap-2 text-small" aria-hidden="true">
@@ -237,7 +230,7 @@
                 {{-- Matrix: each answer's range is edited in its own row header --}}
                 <div class="min-w-0">
                     <div class="overflow-x-auto pb-1">
-                        <table class="w-full min-w-[40rem] border-separate sm:min-w-[46rem] border-spacing-1 text-body" @mouseleave="hoverCol = null" @keydown="gridKey($event, 'exp')">
+                        <table class="w-full min-w-[40rem] border-separate sm:min-w-[46rem] border-spacing-1 text-body" @mouseleave="hoverCol = null" @keydown="gridKey($event, 'exp')" aria-describedby="grid-keys-hint">
                             <caption class="sr-only">{{ $t('experience_title') }}: {{ $t('years_axis') }}</caption>
                             <thead>
                                 <tr>
@@ -247,7 +240,7 @@
                                     </th>
                                 </tr>
                                 <tr>
-                                    <td class="sticky start-0 z-[1] w-40 bg-white sm:w-48 align-bottom pb-1 text-small text-secondary-medium">{{ $t('answer') }}</td>
+                                    <td class="sticky start-0 z-[1] w-28 bg-white sm:w-48 align-bottom pb-1 text-small text-secondary-medium">{{ $t('answer') }}</td>
                                     @foreach ($years as $year)
                                         <th scope="col" class="relative h-12 min-w-9 rounded-inset text-center align-top text-body font-semibold tabular-nums text-neutral-800 transition-colors duration-150"
                                             :class="colActive({{ $year }}) ? 'bg-selection' : ''">
@@ -270,14 +263,14 @@
                                         <th scope="row" class="sticky start-0 z-[1] rounded-inset px-2 py-1.5 text-start align-middle font-medium text-neutral-900 transition-colors duration-150"
                                             :class="selected?.kind === 'exp' && selected.option === '{{ $option }}' ? 'bg-selection' : 'bg-white'">
                                             <span class="block leading-tight">{{ $rangeLabel($option) }}</span>
-                                            <span class="mt-1 flex items-center gap-1.5 font-normal">
+                                            <span class="mt-1 flex flex-col items-start gap-1 font-normal sm:flex-row sm:items-center sm:gap-1.5">
                                                 <label class="sr-only" for="min-{{ $option }}">{{ $rangeLabel($option) }}: {{ $t('min_years') }}</label>
                                                 <input id="min-{{ $option }}" type="number" inputmode="numeric" min="0" max="50"
                                                        wire:model="ranges.{{ $option }}.min"
                                                        @focus="select({ kind: 'exp', option: '{{ $option }}', req: selected?.req ?? 3 })"
                                                        @if ($invalid) aria-invalid="true" aria-describedby="range-{{ $option }}-error" @endif
                                                        class="w-12 rounded-control border-neutral-300 bg-white px-1.5 py-0.5 text-body tabular-nums sm:w-16 sm:px-2 shadow-e1 focus:border-primary focus:ring-2 focus:ring-neutral-200">
-                                                <span aria-hidden="true" class="text-secondary-light">–</span>
+                                                <span aria-hidden="true" class="hidden text-secondary-light sm:inline">–</span>
                                                 <label class="sr-only" for="max-{{ $option }}">{{ $rangeLabel($option) }}: {{ $t('max_years') }} ({{ $t('open_ended') }})</label>
                                                 <input id="max-{{ $option }}" type="number" inputmode="numeric" min="0" max="50"
                                                        wire:model="ranges.{{ $option }}.max" placeholder="{{ $t('no_limit') }}"
@@ -315,7 +308,7 @@
                                     <th scope="row" class="sticky start-0 z-[1] rounded-inset px-2 py-1.5 text-start align-middle font-medium text-neutral-900"
                                         :class="selected?.kind === 'cv' ? 'bg-selection' : 'bg-white'">
                                         <label for="cvYears" class="sr-only">{{ $t('cv_years_label') }}</label>
-                                        <span class="flex items-center gap-1">
+                                        <span class="flex flex-wrap items-center gap-1">
                                             <button type="button" @click="cvYears = Math.max(0, cvYears - 1)"
                                                     class="grid size-7 cursor-pointer place-items-center rounded-control text-secondary-dark hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-primary"
                                                     aria-label="{{ $t('fewer_years') }}">
@@ -435,7 +428,7 @@
                 {{-- Level matrix --}}
                 <div class="min-w-0">
                     <div class="overflow-x-auto pb-1">
-                        <table class="w-full min-w-[32rem] border-separate border-spacing-1 text-body" @keydown="gridKey($event, 'qual')">
+                        <table class="w-full min-w-[32rem] border-separate border-spacing-1 text-body" @keydown="gridKey($event, 'qual')" aria-describedby="grid-keys-hint">
                             <caption class="sr-only">{{ $t('qualification_title') }}</caption>
                             <thead>
                                 <tr>
@@ -457,6 +450,10 @@
                                     @foreach (['no_text', 'no_level'] as $special)
                                         <th scope="col" class="rounded-inset border border-dashed border-neutral-300 px-1 py-1.5 text-center align-bottom text-small font-semibold text-secondary-dark">
                                             {{ $t($special) }}
+                                            <span class="mt-1 flex flex-col items-center gap-0.5 text-caption font-medium text-secondary-medium">
+                                                <span class="inline-flex items-center gap-1"><flux:icon.clipboard-document-list variant="micro" class="size-3" aria-hidden="true" />{{ $t('split_form') }}</span>
+                                                <span class="inline-flex items-center gap-1"><flux:icon.document-text variant="micro" class="size-3" aria-hidden="true" />{{ $t('split_cv') }}</span>
+                                            </span>
                                         </th>
                                     @endforeach
                                 </tr>
@@ -477,9 +474,9 @@
                                                 <button type="button" data-grid="qual" data-r="{{ $loop->parent->index }}" data-c="{{ $loop->index }}"
                                                         :tabindex="tabStop('qual', {{ $loop->parent->index }}, {{ $loop->index }})"
                                                         @class([
-                                                            'flex h-10 w-full overflow-hidden rounded-inset transition-[background-color,color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary',
-                                                            'flex-col' => $split,
-                                                            'items-center justify-center' => ! $split,
+                                                            'flex w-full overflow-hidden rounded-inset transition-[background-color,color,box-shadow] duration-200 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary',
+                                                            'h-12 flex-col' => $split,
+                                                            'h-10 items-center justify-center' => ! $split,
                                                         ])
                                                         :class="[{{ $split ? "''" : "toneFor(qualCell({$args}).form)" }}, isSelected('qual', '{{ $found }}', '{{ $col }}') ? 'ring-2 ring-neutral-900 ring-offset-1' : '']"
                                                         :aria-label="qualLabel({{ $args }})"
@@ -487,8 +484,7 @@
                                                         @click="select({ kind: 'qual', option: '{{ $found }}', req: '{{ $col }}' }, 'qual', {{ $loop->parent->index }}, {{ $loop->index }})">
                                                     @if ($split)
                                                         @foreach (['form' => 'clipboard-document-list', 'cv' => 'document-text'] as $part => $icon)
-                                                            <span class="flex flex-1 items-center justify-center gap-1" :class="toneFor(qualCell({{ $args }}).{{ $part }})">
-                                                                <flux:icon :name="$icon" variant="micro" class="size-3 opacity-60" aria-hidden="true" />
+                                                            <span class="flex flex-1 items-center justify-center" :class="toneFor(qualCell({{ $args }}).{{ $part }})">
                                                                 @include('livewire.recruitment.indicators.partials.outcome-icon', ['expr' => "qualCell({$args}).{$part}", 'size' => 'size-3'])
                                                             </span>
                                                         @endforeach
@@ -719,13 +715,23 @@
             const cell = event.target.closest('[data-grid="' + grid + '"]');
             if (! cell) return;
             const rtl = getComputedStyle(cell).direction === 'rtl';
-            const step = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, rtl ? 1 : -1], ArrowRight: [0, rtl ? -1 : 1] }[event.key];
-            if (! step) return;
             const cells = [...this.$root.querySelectorAll('[data-grid="' + grid + '"]')];
             const rows = [...new Set(cells.map((el) => +el.dataset.r))].sort((a, b) => a - b);
             const cols = [...new Set(cells.map((el) => +el.dataset.c))].sort((a, b) => a - b);
-            const r = rows[Math.min(rows.length - 1, Math.max(0, rows.indexOf(+cell.dataset.r) + step[0]))];
-            const c = cols[Math.min(cols.length - 1, Math.max(0, cols.indexOf(+cell.dataset.c) + step[1]))];
+            let ri = rows.indexOf(+cell.dataset.r);
+            let ci = cols.indexOf(+cell.dataset.c);
+            const far = 1000;
+            const step = {
+                ArrowUp: [-1, 0], ArrowDown: [1, 0],
+                ArrowLeft: [0, rtl ? 1 : -1], ArrowRight: [0, rtl ? -1 : 1],
+                Home: event.ctrlKey ? [-far, -far] : [0, -far],
+                End: event.ctrlKey ? [far, far] : [0, far],
+            }[event.key];
+            if (! step) return;
+            ri = Math.min(rows.length - 1, Math.max(0, ri + step[0]));
+            ci = Math.min(cols.length - 1, Math.max(0, ci + step[1]));
+            const r = rows[ri];
+            const c = cols[ci];
             const next = cells.find((el) => +el.dataset.r === r && +el.dataset.c === c);
             if (! next) return;
             event.preventDefault();
@@ -798,10 +804,6 @@
         },
 
         // ---- word tester ------------------------------------------------
-        // Request text: RecruitmentMatchingIndicators::requiredLevel() — plain
-        // lower-cased containment, lowest level wins.
-        // CV text: CvAnalyzer::levels() — folded Arabic, word-bounded Latin,
-        // highest level wins.
         // full = false: RecruitmentMatchingIndicators::requiredLevel(), plain
         // lower-cased containment. full = true: CvAnalyzer::levels(), folded
         // Arabic and word-bounded Latin.
