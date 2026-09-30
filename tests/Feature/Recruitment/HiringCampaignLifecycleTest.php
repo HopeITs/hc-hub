@@ -12,6 +12,7 @@ use App\Exceptions\PublicRecruitmentSubmissionException;
 use App\Livewire\Recruitment\Campaigns\CampaignTable;
 use App\Livewire\Recruitment\Campaigns\Create as CampaignCreate;
 use App\Livewire\Recruitment\Campaigns\Show as CampaignShow;
+use App\Livewire\Recruitment\Requests\RequestTable;
 use App\Models\ApplicationForm;
 use App\Models\Department;
 use App\Models\HiringCampaign;
@@ -38,7 +39,7 @@ class HiringCampaignLifecycleTest extends TestCase
 {
     use CreatesHrFixtures, RefreshDatabase;
 
-    public function test_scoped_hr_can_create_sequential_campaigns_for_an_available_vacancy(): void
+    public function test_scoped_hr_can_create_a_new_campaign_after_the_current_one_ends(): void
     {
         [$vacancy, $hr, $request] = $this->makeVacancy();
         $campaign = app(HiringCampaignService::class)->create($hr, $vacancy, [
@@ -55,6 +56,18 @@ class HiringCampaignLifecycleTest extends TestCase
             'actor_user_id' => $hr->id,
         ]);
 
+        try {
+            app(HiringCampaignService::class)->create($hr, $vacancy, [
+                'starts_at' => now(),
+                'ends_at' => now()->addDays(10),
+            ]);
+            $this->fail('A second campaign was created while the first was still in progress.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('vacancy', $exception->errors());
+            $this->assertSame(1, $vacancy->campaigns()->count());
+        }
+
+        $campaign->forceFill(['status' => HiringCampaignStatus::Closed])->save();
         app(HiringCampaignService::class)->create($hr, $vacancy, [
             'starts_at' => now(),
             'ends_at' => now()->addDays(10),
@@ -236,12 +249,82 @@ class HiringCampaignLifecycleTest extends TestCase
         Livewire::actingAs($localHr)
             ->test(CampaignTable::class)
             ->assertSee($localCampaign->vacancy->position->title)
+            ->assertSee($localCampaign->vacancy->createdFromRequest->request_number)
+            ->assertSee(route('recruitment.requests.show', [
+                'requestId' => $localCampaign->vacancy->created_from_request_id,
+            ]), false)
             ->assertDontSee($remoteVacancy->position->title);
 
         Livewire::actingAs($localHr)
             ->test(CampaignCreate::class)
             ->assertSee('value="'.$otherLocalVacancy->id.'"', false)
-            ->assertSee('value="'.$localVacancy->id.'"', false);
+            ->assertDontSee('value="'.$localVacancy->id.'"', false);
+    }
+
+    public function test_campaign_table_filters_rows_and_lists_newest_campaign_first(): void
+    {
+        $this->travelTo('2026-09-01 09:00:00');
+        [$vacancy, $hr, $request] = $this->makeVacancy();
+        $service = app(HiringCampaignService::class);
+
+        $older = $service->create($hr, $vacancy, [
+            'link_mode' => HiringCampaign::INTERNAL,
+            'ends_at' => now()->addWeek(),
+        ]);
+        $older->forceFill(['status' => HiringCampaignStatus::Closed])->save();
+
+        $this->travelTo('2026-09-02 09:00:00');
+        $newer = $service->create($hr, $vacancy, [
+            'link_mode' => HiringCampaign::PUBLIC_OPEN,
+            'ends_at' => now()->addWeek(),
+        ]);
+
+        Livewire::actingAs($hr)
+            ->test(CampaignTable::class)
+            ->assertSee($request->request_number)
+            ->assertSeeInOrder([
+                '2026-09-02 09:00',
+                '2026-09-01 09:00',
+            ]);
+
+        Livewire::actingAs($hr)
+            ->test(CampaignTable::class)
+            ->set('search.vacancy_createdFromRequest_request_number', $request->request_number)
+            ->assertSee($request->request_number);
+
+        Livewire::actingAs($hr)
+            ->test(CampaignTable::class)
+            ->set('search.link_mode', HiringCampaign::INTERNAL)
+            ->assertSee('2026-09-01 09:00')
+            ->assertDontSee('2026-09-02 09:00');
+
+        Livewire::actingAs($hr)
+            ->test(CampaignTable::class)
+            ->set('search.status', HiringCampaignStatus::Draft)
+            ->assertSee((string) $newer->created_at->format('Y-m-d H:i'))
+            ->assertDontSee('2026-09-01 09:00');
+    }
+
+    public function test_request_table_opens_the_current_campaign_and_allows_the_next_after_it_closes(): void
+    {
+        [$vacancy, $hr] = $this->makeVacancy();
+        $campaign = app(HiringCampaignService::class)->create($hr, $vacancy, [
+            'ends_at' => now()->addWeek(),
+        ]);
+
+        Livewire::actingAs($hr)
+            ->test(RequestTable::class)
+            ->assertSee(__('recruitment-campaign.continue_campaign'))
+            ->assertSee(route('recruitment.campaigns.show', ['campaignId' => $campaign->id]), false)
+            ->assertDontSee(__('recruitment-campaign.new_campaign'));
+
+        $campaign->forceFill(['status' => HiringCampaignStatus::Closed])->save();
+
+        Livewire::actingAs($hr)
+            ->test(RequestTable::class)
+            ->assertSee(__('recruitment-campaign.view_campaign'))
+            ->assertSee(__('recruitment-campaign.new_campaign'))
+            ->assertSee(route('recruitment.campaigns.create', ['vacancyId' => $vacancy->id]), false);
     }
 
     public function test_campaign_screen_creates_campaign_and_redirects_to_publishing(): void
@@ -265,9 +348,9 @@ class HiringCampaignLifecycleTest extends TestCase
             ->set('startsAt', now()->addHour()->format('Y-m-d\TH:i'))
             ->set('endsAt', now()->addWeek()->format('Y-m-d\TH:i'))
             ->call('save')
-            ->assertHasNoErrors();
+            ->assertHasErrors('vacancyId');
 
-        $this->assertDatabaseCount('hiring_campaigns', 2);
+        $this->assertDatabaseCount('hiring_campaigns', 1);
         $this->assertSame(HiringCampaignStatus::Draft, $campaign->status);
     }
 
@@ -379,6 +462,7 @@ class HiringCampaignLifecycleTest extends TestCase
             'open_at' => now()->subMinute(),
         ]);
         $hr = $this->makeUser($city, 'HR-'.$slug, [
+            'recruitment-requests.view',
             'recruitment-campaigns.view',
             'recruitment-campaigns.manage',
             'recruitment-links.view',

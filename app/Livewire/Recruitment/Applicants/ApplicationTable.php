@@ -3,11 +3,11 @@
 namespace App\Livewire\Recruitment\Applicants;
 
 use App\Enums\HiringCampaignStatus;
+use App\Enums\RecruitmentApplicationStatus;
 use App\Enums\RecruitmentCvAvailability;
 use App\Enums\RecruitmentIndicatorOutcome;
 use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplication;
-use App\Models\RecruitmentTag;
 use App\Services\HiringCampaignStateMachine;
 use App\Services\RecruitmentApplicationFilters;
 use App\Services\RecruitmentMatchingIndicators;
@@ -39,8 +39,6 @@ use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
  */
 class ApplicationTable extends LivewireTable
 {
-    public const BULK_TAG = 'bulk_tag';
-
     public const BULK_REJECT = 'bulk_reject';
 
     public string $sortColumn = 'submitted_at';
@@ -58,15 +56,13 @@ class ApplicationTable extends LivewireTable
     }
 
     /**
-     * Each bulk action hands the selected ids to its own panel without
-     * loading a model for each; the panel's service re-scopes every id. The
-     * two actions need different permissions, so each is authorized here by
-     * its own policy ability, and an unknown code is refused.
+     * The bulk action hands the selected ids to its panel without loading a
+     * model for each; the panel's service re-scopes every id. It is
+     * authorized here by its policy ability, and an unknown code is refused.
      */
     public function executeAction(string $code): mixed
     {
         [$ability, $event, $panel] = match ($code) {
-            self::BULK_TAG => ['bulkTag', 'recruitment-bulk-tag', BulkTags::class],
             self::BULK_REJECT => ['bulkReject', 'recruitment-bulk-reject', BulkReject::class],
             default => abort(403),
         };
@@ -97,7 +93,7 @@ class ApplicationTable extends LivewireTable
 
         $table = $this->appliedQuery()
             ->setEagerLoads([])
-            ->limit(app(\App\Services\RecruitmentTagService::class)->bulkLimit())
+            ->limit(app(\App\Services\RecruitmentApplicationStatusService::class)->bulkLimit())
             ->pluck('recruitment_applications.id')
             ->map(fn ($id): string => (string) $id);
 
@@ -109,12 +105,6 @@ class ApplicationTable extends LivewireTable
         $this->selectedPage = false;
 
         $this->updateSession();
-    }
-
-    #[On('recruitment-tags-changed')]
-    public function refreshTags(): void
-    {
-        $this->clearSelection();
     }
 
     #[On('recruitment-decisions-changed')]
@@ -132,7 +122,7 @@ class ApplicationTable extends LivewireTable
         return RecruitmentApplication::query()
             ->visibleTo(auth()->user())
             ->addSelect(['has_previous_application' => $filters->earlierApplication(RecruitmentApplication::query())])
-            ->with(['applicant', 'campaign.vacancy.position', 'cvFiles', 'tags']);
+            ->with(['applicant', 'campaign.vacancy.position', 'cvFiles']);
     }
 
     /** Indicators for the rows on this page, in one pass. */
@@ -155,9 +145,6 @@ class ApplicationTable extends LivewireTable
     protected function actions(): array
     {
         return [
-            Action::make(__('recruitment-applicant.tags.bulk_action'), fn () => null, self::BULK_TAG)
-                ->canSee(Gate::allows('bulkTag', RecruitmentApplication::class))
-                ->keepSelection(),
             Action::make(__('recruitment-applicant.decisions.bulk_action'), fn () => null, self::BULK_REJECT)
                 ->canSee(Gate::allows('bulkReject', RecruitmentApplication::class))
                 ->keepSelection(),
@@ -182,7 +169,7 @@ class ApplicationTable extends LivewireTable
                 if ($application->campaign !== null) {
                     $effective = $states->effective($application->campaign);
                     if (! in_array($effective, [HiringCampaignStatus::Published, HiringCampaignStatus::Open], true)) {
-                        $title .= ' <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs text-secondary-medium">'
+                        $title .= ' <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs text-secondary-dark">'
                             .e(HiringCampaignStatus::getLocalizedName($effective)['value']).'</span>';
                     }
                 }
@@ -196,7 +183,9 @@ class ApplicationTable extends LivewireTable
 
             Column::make(__('recruitment-applicant.status'), 'status')
                 ->sortable()
-                ->displayUsing(fn ($value): string => __('recruitment-applicant.statuses.'.$value)),
+                ->displayUsing(fn ($value): string => '<span class="rounded-control px-2 py-0.5 text-xs font-semibold '
+                    .RecruitmentApplicationStatus::classes($value).'">'.e(__('recruitment-applicant.statuses.'.$value)).'</span>')
+                ->asHtml(),
 
             Column::make(__('recruitment-applicant.source'), 'applicant.source')
                 ->displayUsing(fn ($value): string => RecruitmentApplicant::sourceLabel($value)),
@@ -214,13 +203,6 @@ class ApplicationTable extends LivewireTable
                     ? '<span class="rounded-control bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-800">'
                         .e(__('recruitment-applicant.previous_applicant_flag')).'</span>'
                     : '';
-            })->asHtml(),
-
-            Column::make(__('recruitment-applicant.tags.title'), function (RecruitmentApplication $application): string {
-                return $application->tags
-                    ->map(fn (RecruitmentTag $tag): string => '<span class="me-1 inline-block rounded-control px-2 py-0.5 text-xs font-semibold '
-                        .$tag->classes().'">'.e($tag->name).'</span>')
-                    ->implode('');
             })->asHtml(),
 
             Column::make(__('recruitment-applicant.indicators.column'), function (RecruitmentApplication $application): string {
@@ -250,8 +232,6 @@ class ApplicationTable extends LivewireTable
             SelectFilter::make(__('recruitment-applicant.source'), fn (Builder $query, $value) => $filters->source($query, $value), 'applicant_source')
                 ->options($filters->sourceOptions($user)),
 
-            SelectFilter::make(__('recruitment-applicant.tags.title'), fn (Builder $query, $value) => $filters->tag($query, $value), 'tag')
-                ->options($filters->tagOptions()),
 
             SelectFilter::make(__('recruitment-applicant.cv'), fn (Builder $query, $value) => $filters->cv($query, $value), 'cv')
                 ->options($filters->cvOptions()),
@@ -262,8 +242,10 @@ class ApplicationTable extends LivewireTable
     }
 
     /**
-     * "n of m met", with every indicator named in the tooltip — the count
-     * alone is never shown without what it counts.
+     * "n of m met", with every indicator named — the count alone is never
+     * shown without what it counts. A tooltip only reaches a mouse, so the
+     * same list is also in the cell as text for a screen reader; the full
+     * breakdown is on the profile the row links to.
      */
     private function indicatorSummary(RecruitmentApplication $application): string
     {
@@ -273,15 +255,15 @@ class ApplicationTable extends LivewireTable
             return '';
         }
 
-        $details = collect($set->indicators)
-            ->map(fn (MatchingIndicator $indicator): string => $indicator->label().': '.__('recruitment-applicant.indicators.outcomes.'.$indicator->outcome))
-            ->implode("\n");
+        $lines = collect($set->indicators)
+            ->map(fn (MatchingIndicator $indicator): string => $indicator->label().': '.__('recruitment-applicant.indicators.outcomes.'.$indicator->outcome));
 
         $summary = $set->assessedCount() === 0
             ? __('recruitment-applicant.indicators.none_assessed')
             : __('recruitment-applicant.indicators.summary', ['met' => $set->metCount(), 'assessed' => $set->assessedCount()]);
 
-        return '<span title="'.e($details).'" class="cursor-help rounded-control px-2 py-0.5 text-xs font-semibold '
-            .RecruitmentIndicatorOutcome::classes(RecruitmentIndicatorOutcome::Unknown).'">'.e($summary).'</span>';
+        return '<span title="'.e($lines->implode("\n")).'" class="cursor-help rounded-control px-2 py-0.5 text-xs font-semibold '
+            .RecruitmentIndicatorOutcome::classes(RecruitmentIndicatorOutcome::Unknown).'">'.e($summary).'</span>'
+            .($lines->isEmpty() ? '' : '<span class="sr-only"> ('.e($lines->implode(__('recruitment-applicant.list_separator'))).')</span>');
     }
 }

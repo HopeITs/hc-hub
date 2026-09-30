@@ -9,31 +9,31 @@
     $states = app(\App\Services\HiringCampaignStateMachine::class);
 @endphp
 
-<div class="space-y-6 p-6">
-    @if (session('recruitment_saved'))
-        <p role="status" class="rounded-control border border-green-200 bg-green-50 p-4 text-green-800">{{ session('recruitment_saved') }}</p>
-    @endif
+<div class="space-y-6 p-4 sm:p-6">
 
-    <a href="{{ route('recruitment.applicants.index') }}" wire:navigate class="text-sm font-medium text-primary hover:underline">
-        &larr; {{ __('recruitment-applicant.back_to_list') }}
+    <a href="{{ route('recruitment.applicants.index') }}" wire:navigate class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+        <svg class="size-4 rtl:-scale-x-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15 19-7-7 7-7"/></svg>
+        {{ __('recruitment-applicant.back_to_list') }}
     </a>
 
     {{-- Who they are --}}
-    <section class="rounded-surface border border-neutral-200 bg-white p-6">
+    <section class="rounded-surface border border-secondary-soft bg-white p-4 sm:p-6">
         <div class="flex flex-wrap items-start justify-between gap-4">
-            <div>
-                <h1 class="text-h3 font-semibold">{{ $applicant->full_name }}</h1>
-                <p class="mt-1 text-sm text-secondary-medium" dir="ltr">
-                    {{ $applicant->email_normalized }}@if ($applicant->phone_normalized) &middot; {{ $applicant->phone_normalized }}@endif
+            <div class="min-w-0">
+                <h1 class="text-h3 font-semibold wrap-break-word">{{ $applicant->full_name }}</h1>
+                {{-- Each value is isolated left-to-right on its own, so the line
+                     still starts on the reading side of an Arabic page. --}}
+                <p class="mt-1 text-sm text-secondary-medium wrap-anywhere">
+                    <bdi dir="ltr">{{ $applicant->email_normalized }}</bdi>@if ($applicant->phone_normalized) &middot; <bdi dir="ltr">{{ $applicant->phone_normalized }}</bdi>@endif
                 </p>
             </div>
             <div class="flex flex-wrap gap-2">
                 {{-- A flag for the reviewer, never a decision. --}}
                 @if ($isPreviousApplicant)
-                    <span class="rounded-control bg-blue-50 px-3 py-1 text-sm font-semibold text-blue-800">{{ __('recruitment-applicant.previous_applicant_flag') }}</span>
+                    <span class="rounded-control bg-secondary-soft/60 px-3 py-1 text-sm font-semibold text-secondary-dark">{{ __('recruitment-applicant.previous_applicant_flag') }}</span>
                 @endif
                 @if ($applicant->anonymized_at)
-                    <span class="rounded-control bg-neutral-100 px-3 py-1 text-sm font-semibold text-secondary-medium">{{ __('recruitment-applicant.anonymized') }}</span>
+                    <span class="rounded-control bg-secondary-soft/60 px-3 py-1 text-sm font-semibold text-secondary-dark">{{ __('recruitment-applicant.anonymized') }}</span>
                 @endif
             </div>
         </div>
@@ -55,7 +55,7 @@
     </section>
 
     {{-- Application history --}}
-    <section class="rounded-surface border border-neutral-200 bg-white p-6">
+    <section class="rounded-surface border border-secondary-soft bg-white p-4 sm:p-6">
         <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.history') }}</h2>
 
         @if ($hiddenApplications > 0)
@@ -71,35 +71,36 @@
                 $availability = RecruitmentCvAvailability::of($cvFiles);
             @endphp
 
-            <article wire:key="application-{{ $application->id }}" class="mt-4 rounded-control border border-neutral-200 p-4">
+            <article wire:key="application-{{ $application->id }}" class="mt-4 rounded-control border border-secondary-soft p-4">
                 <div class="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                        <h3 class="font-semibold">
+                    <div class="min-w-0">
+                        {{-- Focus lands here after a decision: the buttons that led to it are gone. --}}
+                        <h3 id="application-{{ $application->id }}-title" tabindex="-1" class="scroll-mt-24 font-semibold wrap-break-word">
                             {{ $campaign?->vacancy?->position?->title ?? __('recruitment-applicant.no_vacancy') }}
                             @if ($effective !== null && ! $campaignOpen)
-                                <span class="ms-1 rounded-control bg-neutral-100 px-2 py-0.5 text-xs font-normal text-secondary-medium">{{ HiringCampaignStatus::getLocalizedName($effective)['value'] }}</span>
+                                <span class="ms-1 rounded-control bg-secondary-soft/60 px-2 py-0.5 text-xs font-normal text-secondary-dark">{{ HiringCampaignStatus::getLocalizedName($effective)['value'] }}</span>
                             @endif
                         </h3>
                         <p class="mt-1 text-sm text-secondary-medium">
                             {{ __('recruitment-applicant.applied_at') }}: {{ $application->submitted_at?->format('Y-m-d H:i') ?? '—' }}
                             @if ($campaign)
-                                &middot;
                                 @can('view', $campaign)
+                                    &middot;
                                     <a href="{{ route('recruitment.campaigns.show', ['campaignId' => $campaign->id]) }}" wire:navigate class="text-primary hover:underline">{{ __('recruitment-applicant.open_campaign') }}</a>
                                 @endcan
                             @endif
                         </p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2">
-                        <span class="rounded-control px-2 py-0.5 text-xs font-semibold {{ RecruitmentCvAvailability::classes($availability) }}">{{ __('recruitment-applicant.cv_availability.'.$availability) }}</span>
-                        <span class="rounded-control bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">{{ __('recruitment-applicant.statuses.'.$application->status) }}</span>
+                        <x-recruitment.pill :tone="RecruitmentCvAvailability::classes($availability)">{{ __('recruitment-applicant.cv_availability.'.$availability) }}</x-recruitment.pill>
+                        <span class="rounded-control px-3 py-1 text-sm font-semibold {{ ApplicationStatus::classes($application->status) }}">{{ __('recruitment-applicant.statuses.'.$application->status) }}</span>
                     </div>
                 </div>
 
                 {{-- Files. The link appears only for users who may download,
                      but the download route asks the policy again regardless. --}}
                 @if ($application->files->isNotEmpty())
-                    <ul class="mt-4 divide-y divide-neutral-100 text-sm">
+                    <ul class="mt-4 divide-y divide-secondary-soft text-sm">
                         @foreach ($application->files as $file)
                             @include('livewire.recruitment.applicants.partials.file-row', ['file' => $file])
                         @endforeach
@@ -122,40 +123,43 @@
                     @endif
                 @endforeach
 
-                <livewire:recruitment.applicants.application-tags :application-id="$application->id" :key="'tags-'.$application->id" />
-
                 {{-- Decisions: one button per move this user may make. The button
                      only picks the target; the service checks it all again. --}}
                 @php $targets = $statusTargets[$application->id] ?? []; @endphp
                 @if (! empty($targets))
                     @if ($statusApplicationId === $application->id)
-                        <div class="mt-4 rounded-control border p-4 {{ $statusTarget === ApplicationStatus::Rejected ? 'border-red-200 bg-red-50/50' : 'border-primary/30 bg-primary/5' }}">
-                            <h4 class="font-semibold">
+                        {{-- Keyed apart from the buttons it replaces, so each is swapped in whole. --}}
+                        <div wire:key="decision-panel-{{ $application->id }}" class="mt-4 rounded-control border p-4 {{ $statusTarget === ApplicationStatus::Rejected ? 'border-primary/30 bg-primary/5' : 'border-secondary-soft bg-secondary-soft/30' }}">
+                            <h4 id="decision-panel-{{ $application->id }}" tabindex="-1" class="scroll-mt-24 font-semibold">
                                 {{ __('recruitment-applicant.decisions.titles.'.$statusTarget) }}
                                 <span class="font-normal text-secondary-medium">
-                                    &middot; {{ __('recruitment-applicant.statuses.'.$statusFrom) }} &rarr; {{ __('recruitment-applicant.statuses.'.$statusTarget) }}
+                                    &middot; {{ __('recruitment-applicant.statuses.'.$statusFrom) }} <x-recruitment.transition-arrow /> {{ __('recruitment-applicant.statuses.'.$statusTarget) }}
                                 </span>
                             </h4>
-                            @error('statusTarget') <p class="mt-2 text-sm text-red-700">{{ $message }}</p> @enderror
+                            <x-forms.input-error field="statusTarget" :input-id="'decision-'.$application->id" />
 
                             <div class="mt-3 grid gap-4 sm:grid-cols-2">
                                 @if ($statusTarget === ApplicationStatus::Rejected)
                                     <div>
                                         <x-forms.input-label for="statusReasonCode" required>{{ __('recruitment-applicant.decisions.reason_code') }}</x-forms.input-label>
-                                        <select id="statusReasonCode" wire:model.live="statusReasonCode" class="mt-1 w-full rounded-control border-neutral-300">
+                                        <select id="statusReasonCode" wire:model.live="statusReasonCode" aria-required="true"
+                                            @error('statusReasonCode') aria-invalid="true" aria-describedby="statusReasonCode-error" @enderror
+                                            class="mt-1 w-full rounded-control border-secondary-light">
                                             <option value="">—</option>
                                             @foreach ($rejectionReasons as $code)
                                                 <option value="{{ $code }}">{{ __('recruitment-applicant.decisions.rejection_reasons.'.$code) }}</option>
                                             @endforeach
                                         </select>
-                                        @error('statusReasonCode') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+                                        <x-forms.input-error field="statusReasonCode" input-id="statusReasonCode" />
                                     </div>
                                 @endif
                                 <div class="sm:col-span-2">
                                     <x-forms.input-label for="statusReason" :required="$statusNeedsReason">{{ __('recruitment-applicant.decisions.internal_note') }}</x-forms.input-label>
-                                    <textarea id="statusReason" wire:model="statusReason" rows="3" class="mt-1 w-full rounded-control border-neutral-300"></textarea>
-                                    <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.decisions.internal_note_hint') }}</p>
-                                    @error('statusReason') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
+                                    <textarea id="statusReason" wire:model="statusReason" rows="3" @if ($statusNeedsReason) aria-required="true" @endif
+                                        aria-describedby="statusReason-hint @error('statusReason') statusReason-error @enderror" @error('statusReason') aria-invalid="true" @enderror
+                                        class="mt-1 w-full rounded-control border-secondary-light"></textarea>
+                                    <p id="statusReason-hint" class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.decisions.internal_note_hint') }}</p>
+                                    <x-forms.input-error field="statusReason" input-id="statusReason" />
                                 </div>
                                 @if ($statusTarget === ApplicationStatus::Rejected)
                                     <div class="sm:col-span-2">
@@ -163,7 +167,7 @@
                                             <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.decisions.already_notified') }}</p>
                                         @else
                                             <label class="flex items-start gap-2 text-sm">
-                                                <input type="checkbox" wire:model="statusNotify" class="mt-0.5 rounded border-neutral-300">
+                                                <input type="checkbox" wire:model="statusNotify" class="mt-0.5 rounded border-secondary-light">
                                                 <span>
                                                     {{ __('recruitment-applicant.decisions.notify') }}
                                                     <span class="block text-xs text-secondary-medium">{{ __('recruitment-applicant.decisions.notify_hint') }}</span>
@@ -178,26 +182,26 @@
                                     wire:confirm="{{ __('recruitment-applicant.status_change.confirm') }}">
                                     {{ __('recruitment-applicant.decisions.confirm.'.$statusTarget) }}
                                 </x-primary-button>
-                                <button type="button" wire:click="cancelStatusChange" class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
+                                <x-secondary-button wire:click="cancelStatusChange">
                                     {{ __('recruitment-applicant.cancel') }}
-                                </button>
+                                </x-secondary-button>
                             </div>
                         </div>
                     @else
-                        <div class="mt-4 flex flex-wrap gap-2">
+                        <div wire:key="decisions-{{ $application->id }}" class="mt-4 flex flex-wrap gap-2">
                             @foreach ($targets as $target)
                                 @php
                                     $style = match ($target) {
-                                        ApplicationStatus::Rejected => 'border-red-300 text-red-700 hover:bg-red-50',
-                                        ApplicationStatus::Selected => 'border-green-300 text-green-800 hover:bg-green-50',
-                                        ApplicationStatus::Shortlisted => 'border-primary/40 text-primary hover:bg-primary/5',
-                                        default => 'border-neutral-300 hover:bg-neutral-50',
+                                        ApplicationStatus::Rejected => 'border-primary/30 text-primary hover:bg-primary/5',
+                                        ApplicationStatus::Selected => 'border-primary/30 text-primary hover:bg-primary/5',
+                                        ApplicationStatus::Shortlisted => 'border-secondary-light text-primary hover:bg-selection',
+                                        default => 'border-secondary-light hover:bg-secondary-soft/30',
                                     };
                                     $label = $application->status === ApplicationStatus::Rejected
                                         ? __('recruitment-applicant.decisions.actions.reopen')
                                         : __('recruitment-applicant.decisions.actions.'.$target);
                                 @endphp
-                                <button type="button" wire:key="decide-{{ $application->id }}-{{ $target }}" wire:click="beginStatusChange({{ $application->id }}, '{{ $target }}')"
+                                <button type="button" id="decide-{{ $application->id }}-{{ $target }}" wire:key="decide-{{ $application->id }}-{{ $target }}" wire:click="beginStatusChange({{ $application->id }}, '{{ $target }}')"
                                     class="cursor-pointer rounded-control border px-4 py-2 text-sm font-semibold {{ $style }}">
                                     {{ $label }}
                                 </button>
@@ -221,8 +225,8 @@
                         <summary class="cursor-pointer font-medium">{{ __('recruitment-applicant.status_change.history') }} ({{ $application->decisions->count() }})</summary>
                         <ol class="mt-2 space-y-2">
                             @foreach ($application->decisions as $decision)
-                                <li class="border-s-2 border-neutral-200 ps-3">
-                                    <span class="font-medium">{{ __('recruitment-applicant.statuses.'.$decision->from_status) }} &rarr; {{ __('recruitment-applicant.statuses.'.$decision->to_status) }}</span>
+                                <li class="border-s-2 border-secondary-soft ps-3">
+                                    <span class="font-medium">{{ __('recruitment-applicant.statuses.'.$decision->from_status) }} <x-recruitment.transition-arrow /> {{ __('recruitment-applicant.statuses.'.$decision->to_status) }}</span>
                                     <span class="text-secondary-medium">
                                         &middot; {{ $decision->decidedBy?->profile?->name ?? $decision->decidedBy?->name ?? '—' }}
                                         &middot; {{ $decision->decided_at?->format('Y-m-d H:i') }}
@@ -232,7 +236,7 @@
                                         <p class="mt-1">{{ __('recruitment-applicant.decisions.reason_code') }}: {{ Lang::has($reasonKey) ? __($reasonKey) : $decision->reason_code }}</p>
                                     @endif
                                     @if ($decision->reason_text)
-                                        <p class="mt-1 whitespace-pre-line text-secondary-medium">{{ $decision->reason_text }}</p>
+                                        <p class="mt-1 whitespace-pre-line text-secondary-medium wrap-break-word">{{ $decision->reason_text }}</p>
                                     @endif
                                 </li>
                             @endforeach
@@ -253,37 +257,14 @@
 
     {{-- Files with no application behind them: talent pool, or an application since removed. --}}
     @if ($orphanFiles->isNotEmpty())
-        <section class="rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="rounded-surface border border-secondary-soft bg-white p-4 sm:p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.unattached_files') }}</h2>
             <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.unattached_files_hint') }}</p>
-            <ul class="mt-4 divide-y divide-neutral-100 text-sm">
+            <ul class="mt-4 divide-y divide-secondary-soft text-sm">
                 @foreach ($orphanFiles as $file)
-                    @include('livewire.recruitment.applicants.partials.file-row', ['file' => $file])
+                    @include('livewire.recruitment.applicants.partials.file-row', ['file' => $file, 'panelHeading' => 'h3'])
                 @endforeach
             </ul>
-        </section>
-    @endif
-
-    {{-- Archiving a CV --}}
-    @if ($archiveFile)
-        <section class="rounded-surface border border-primary/30 bg-primary/5 p-6">
-            <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.cv_archive.archive_title') }}</h2>
-            <p class="mt-1 text-sm text-secondary-medium">
-                {{ $archiveNeedsReason ? __('recruitment-applicant.cv_archive.archive_hint_no_vacancy') : __('recruitment-applicant.cv_archive.archive_hint') }}
-            </p>
-            <div class="mt-4">
-                <x-forms.input-label for="archiveReason" :required="$archiveNeedsReason">{{ __('recruitment-applicant.cv_archive.reason') }}</x-forms.input-label>
-                <textarea id="archiveReason" wire:model="archiveReason" rows="3" class="mt-1 w-full rounded-control border-neutral-300"></textarea>
-                @error('archiveReason') <p class="mt-1 text-sm text-red-700">{{ $message }}</p> @enderror
-            </div>
-            <div class="mt-4 flex flex-wrap gap-3">
-                <x-primary-button type="button" wire:click="archiveCv" wire:loading.attr="disabled" wire:target="archiveCv">
-                    {{ __('recruitment-applicant.cv_archive.archive_confirm') }}
-                </x-primary-button>
-                <button type="button" wire:click="cancelArchive" class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
-                    {{ __('recruitment-applicant.cancel') }}
-                </button>
-            </div>
         </section>
     @endif
 

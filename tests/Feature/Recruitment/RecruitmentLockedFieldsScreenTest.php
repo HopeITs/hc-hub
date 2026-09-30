@@ -52,8 +52,11 @@ class RecruitmentLockedFieldsScreenTest extends TestCase
         Livewire::actingAs($requester)
             ->test(Edit::class, ['requestId' => $request->getKey()])
             ->assertOk()
+            ->assertSee(__('recruitment.changes_requested_edit_title'))
+            ->assertSee('State the hours.')
+            ->assertSee(__('recruitment.field_change_requested'))
             // The note appears for the fields nobody asked about.
-            ->assertSee(__('recruitment.field_locked_here'))
+            ->assertSee(__('recruitment.field_locked_no_changes_requested'))
             ->assertSee('cursor-not-allowed', escape: false);
     }
 
@@ -80,7 +83,8 @@ class RecruitmentLockedFieldsScreenTest extends TestCase
         Livewire::actingAs($requester)
             ->test(Edit::class, ['requestId' => $request->getKey()])
             ->assertOk()
-            ->assertDontSee(__('recruitment.field_locked_here'));
+            ->assertDontSee(__('recruitment.field_locked_no_changes_requested'))
+            ->assertDontSee(__('recruitment.field_change_requested'));
     }
 
     /**

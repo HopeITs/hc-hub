@@ -1,13 +1,13 @@
 {{-- An evaluation's revisions, newest first. Only for viewers allowed to see the evaluation itself. --}}
 <ol class="mt-2 space-y-3">
     @foreach ($revisions as $revision)
-        <li class="border-s-2 border-neutral-200 ps-3" wire:key="revision-{{ $revision->id }}">
+        <li class="border-s-2 border-secondary-soft ps-3" wire:key="revision-{{ $revision->id }}">
             <p class="font-medium">
                 {{ __('recruitment-applicant.evaluations.actions.'.$revision->action) }}
                 <span class="font-normal text-secondary-medium">
                     &middot; v{{ $revision->version }}
                     &middot; {{ $revision->changedBy?->profile?->name ?? $revision->changedBy?->email ?? '—' }}
-                    &middot; {{ $revision->changed_at?->format('Y-m-d H:i') }}
+                    &middot; {{ $revision->changed_at?->copy()->setTimezone($timezone ?? config('app.timezone'))->format('Y-m-d H:i') }}
                 </span>
             </p>
             @if ($revision->reason)

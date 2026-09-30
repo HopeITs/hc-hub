@@ -455,21 +455,27 @@ class RecruitmentApplicationFormService
                 continue;
             }
 
-            $rules[$path] = match ($field['type']) {
-                'email' => [...$presence, 'email:rfc', 'max:191'],
-                'tel' => [...$presence, 'string', 'max:40'],
-                'number' => [...$presence, 'numeric', 'min:0'],
-                'date' => [...$presence, 'date'],
-                'url' => [...$presence, 'url:http,https', 'max:2048'],
-                'select', 'radio' => [...$presence, Rule::in($options)],
-                'checkbox' => $field['required'] ? ['accepted'] : ['nullable', 'boolean'],
-                'file' => [...$presence, 'file', 'mimes:'.implode(',', $field['accept']), 'max:10240'],
-                'textarea' => [...$presence, 'string', 'max:5000'],
+            $rules[$path] = match (true) {
+                $field['key'] === 'phone' => [...$presence, 'regex:/\A09[0-9]{8}\z/'],
+                $field['key'] === 'date_of_birth' => [...$presence, 'date_format:Y-m-d', 'before:today'],
+                $field['type'] === 'email' => [...$presence, 'email:rfc', 'max:191'],
+                $field['type'] === 'tel' => [...$presence, 'string', 'max:40'],
+                $field['type'] === 'number' => [...$presence, 'numeric', 'min:0'],
+                $field['type'] === 'date' => [...$presence, 'date'],
+                $field['type'] === 'url' => [...$presence, 'url:http,https', 'max:2048'],
+                in_array($field['type'], ['select', 'radio'], true) => [...$presence, Rule::in($options)],
+                $field['type'] === 'checkbox' => $field['required'] ? ['accepted'] : ['nullable', 'boolean'],
+                $field['type'] === 'file' => [...$presence, 'file', 'mimes:'.implode(',', $field['accept']), 'max:10240'],
+                $field['type'] === 'textarea' => [...$presence, 'string', 'max:5000'],
                 default => [...$presence, 'string', 'max:255'],
             };
         }
 
-        return Validator::make(['answers' => $answers], $rules, [], $attributes)->validate()['answers'];
+        return Validator::make(['answers' => $answers], $rules, [
+            'answers.phone.regex' => __('careers.errors.invalid_phone'),
+            'answers.date_of_birth.before' => __('careers.errors.invalid_birth_date'),
+            'answers.date_of_birth.date_format' => __('careers.errors.invalid_birth_date'),
+        ], $attributes)->validate()['answers'];
     }
 
     /** @return array<int, array<string, mixed>> */

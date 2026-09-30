@@ -8,7 +8,7 @@
     $applicant = $offer->application?->applicant;
     $vacancy = $offer->vacancy;
     $position = $offer->position;
-    $selectClass = 'w-full rounded-control border border-neutral-300 bg-white px-3 py-2 text-body';
+    $selectClass = 'w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body';
     $field = fn (string $key) => 'employee.'.$key;
 @endphp
 
@@ -27,7 +27,7 @@
 
     @if ($converted)
         {{-- Done: what was created, and by whom --}}
-        <section class="space-y-3 rounded-surface border border-green-200 bg-green-50 p-6 text-sm text-green-900">
+        <section class="space-y-3 rounded-surface border border-primary/30 bg-primary/5 p-6 text-sm text-primary">
             <p class="font-semibold">{{ __('recruitment-applicant.conversions.statuses.converted') }}</p>
             <p>{{ __('recruitment-applicant.conversions.converted_by', ['name' => $conversion->convertedBy?->profile?->name ?? $conversion->convertedBy?->email ?? '—', 'date' => $conversion->converted_at?->format('Y-m-d H:i')]) }}</p>
             <div class="flex flex-wrap gap-3">
@@ -56,13 +56,13 @@
         @endif
 
         @if ($conversion->status === \App\Models\RecruitmentHiringConversion::STATUS_FAILED && $conversion->failure_reason)
-            <p class="rounded-control bg-neutral-50 p-3 text-sm">
+            <p class="rounded-control bg-secondary-soft/30 p-3 text-sm">
                 {{ __('recruitment-applicant.conversions.last_failure', ['count' => $conversion->attempt_count, 'reason' => __('recruitment-applicant.conversions.errors.'.$conversion->failure_reason)]) }}
             </p>
         @endif
 
         {{-- The accepted snapshot: the contract takes these, unchanged --}}
-        <section class="rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="rounded-surface border border-secondary-soft bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.conversions.accepted_terms') }}</h2>
             @if ($version)
                 @include('livewire.recruitment.offers.partials.terms', ['version' => $version])
@@ -78,13 +78,13 @@
 
         <form wire:submit="save" class="space-y-6">
             {{-- Who the employee is --}}
-            <section class="space-y-4 rounded-surface border border-neutral-200 bg-white p-6">
+            <section class="space-y-4 rounded-surface border border-secondary-soft bg-white p-6">
                 <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.conversions.employee_section') }}</h2>
 
                 <div class="space-y-2">
                     <h3 class="text-sm font-semibold">{{ __('recruitment-applicant.conversions.matches_title') }}</h3>
                     @forelse ($matches as $match)
-                        <label class="flex items-start gap-3 rounded-control border border-neutral-200 p-3 text-sm" wire:key="match-{{ $match['employee']->id }}">
+                        <label class="flex items-start gap-3 rounded-control border border-secondary-soft p-3 text-sm" wire:key="match-{{ $match['employee']->id }}">
                             <input type="radio" wire:model.live="employeeId" value="{{ $match['employee']->id }}" @disabled($mode !== Conversions::MODE_LINK) class="mt-1 text-primary">
                             <span>
                                 <span class="font-medium">{{ $match['employee']->name }}</span>
@@ -93,7 +93,7 @@
                                 </span>
                                 <span class="mt-1 flex flex-wrap gap-1">
                                     @foreach ($match['reasons'] as $reason)
-                                        <span class="rounded-control bg-neutral-100 px-2 py-0.5 text-xs">{{ __('recruitment-applicant.conversions.match_reasons.'.$reason) }}</span>
+                                        <span class="rounded-control bg-secondary-soft/60 px-2 py-0.5 text-xs">{{ __('recruitment-applicant.conversions.match_reasons.'.$reason) }}</span>
                                     @endforeach
                                 </span>
                             </span>
@@ -189,7 +189,7 @@
             </section>
 
             @if ($needsSessionDuration)
-                <section class="space-y-3 rounded-surface border border-neutral-200 bg-white p-6">
+                <section class="space-y-3 rounded-surface border border-secondary-soft bg-white p-6">
                     <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.conversions.contract_section') }}</h2>
                     <div class="max-w-xs">
                         <x-forms.input-label for="sessionDuration" required>{{ __('recruitment-applicant.conversions.session_duration') }}</x-forms.input-label>

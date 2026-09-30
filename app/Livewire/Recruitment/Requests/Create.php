@@ -109,6 +109,11 @@ class Create extends Component
                 ->where('exist_emp', 0)
                 ->whereDoesntHave('activeContracts');
         }
+        if ($type === RecruitmentRequestType::CloseVacancy) {
+            $positions
+                ->where('is_active', true)
+                ->whereColumn('exist_emp', '<', 'max_emp');
+        }
         $isFill = (int) ($this->data['request_type'] ?? 0) === RecruitmentRequestType::FillVacancy;
         if ($isFill) {
             // Room in the establishment, not an existing vacancies row: until a
@@ -143,7 +148,10 @@ class Create extends Component
             'jobLevels' => JobLevel::query()
                 ->whereIn('id', $scopes->creatableJobLevelIds($user))
                 ->orderBy('grade')->get(),
-            'contractTypes' => ContractType::query()->orderBy(transColumn('name'))->get(),
+            'contractTypes' => ContractType::query()
+                ->recruitmentOptions()
+                ->orderBy(transColumn('name'))
+                ->get(),
             // Nothing is locked while a request is being written; Edit says
             // otherwise once an approver has named what may change.
             'lockedFields' => $this->lockedFields(),

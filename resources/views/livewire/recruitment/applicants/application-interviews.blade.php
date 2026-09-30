@@ -1,11 +1,11 @@
 @php use App\Enums\RecruitmentInterviewStatus; @endphp
-<div class="mt-4 rounded-control border border-neutral-200 p-3 text-sm">
+<div class="mt-4 rounded-control border border-secondary-soft p-3 text-sm">
     <div class="flex flex-wrap items-center justify-between gap-2">
         <h4 class="font-semibold">{{ __('recruitment-applicant.interviews.title') }} ({{ $interviews->count() }})</h4>
 
         @if ($canSchedule)
             <a href="{{ route('recruitment.interviews.create', ['applicationId' => $application->id]) }}" wire:navigate
-               class="rounded-control border border-primary px-3 py-1 text-sm font-semibold text-primary hover:bg-primary/5">
+               class="rounded-control border border-primary px-3 py-1 text-sm font-semibold text-primary hover:bg-selection">
                 {{ __('recruitment-applicant.interviews.schedule') }}
             </a>
         @endif
@@ -20,7 +20,7 @@
     @if ($interviews->isEmpty())
         <p class="mt-2 text-secondary-medium">{{ __('recruitment-applicant.interviews.none_yet') }}</p>
     @else
-        <ul class="mt-2 divide-y divide-neutral-100">
+        <ul class="mt-2 divide-y divide-secondary-soft">
             @foreach ($interviews as $interview)
                 @php $timezone = $interview->timezone ?: config('app.timezone'); @endphp
                 <li class="flex flex-wrap items-center justify-between gap-2 py-2" wire:key="application-interview-{{ $interview->id }}">
@@ -32,9 +32,9 @@
                             &middot; {{ trans_choice('recruitment-applicant.interviews.participant_count', $interview->participants_count, ['count' => $interview->participants_count]) }}
                         </span>
                     </a>
-                    <span class="rounded-control px-2 py-0.5 text-xs font-semibold {{ RecruitmentInterviewStatus::classes($interview->status) }}">
+                    <x-recruitment.pill :tone="RecruitmentInterviewStatus::classes($interview->status)">
                         {{ __('recruitment-applicant.interviews.statuses.'.$interview->status) }}
-                    </span>
+                    </x-recruitment.pill>
                     @if (isset($tallies[$interview->id]) && $tallies[$interview->id]['total'] > 0)
                         <div class="flex w-full flex-wrap items-center gap-1 text-xs">
                             <span class="text-secondary-medium">{{ trans_choice('recruitment-applicant.evaluations.count', $tallies[$interview->id]['total'], ['count' => $tallies[$interview->id]['total']]) }}:</span>

@@ -131,7 +131,7 @@ class Form extends Component
             return;
         }
 
-        session()->flash('recruitment_saved', $message);
+        session()->flash('recruitment_toast', $message);
         $this->redirectRoute('recruitment.offers.show', ['offerId' => $offer->getKey()], navigate: true);
     }
 

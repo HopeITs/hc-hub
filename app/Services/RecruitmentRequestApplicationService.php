@@ -42,6 +42,7 @@ class RecruitmentRequestApplicationService
     private const DATED = [
         RecruitmentRequestType::DecreaseHeadcount,
         RecruitmentRequestType::ClosePosition,
+        RecruitmentRequestType::CloseVacancy,
     ];
 
     public function __construct(

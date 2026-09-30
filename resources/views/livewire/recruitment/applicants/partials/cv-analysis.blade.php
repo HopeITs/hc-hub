@@ -3,13 +3,13 @@
     $facts = $analysis->facts_json ?? [];
     $comparison = $analysis->comparison_json ?? [];
     $outcomeClasses = [
-        'met' => 'bg-green-50 text-green-800',
-        'not_met' => 'bg-red-50 text-red-800',
-        'unknown' => 'bg-neutral-100 text-secondary-medium',
+        'met' => 'bg-primary/5 text-primary',
+        'not_met' => 'bg-primary/5 text-primary',
+        'unknown' => 'bg-secondary-soft/60 text-secondary-dark',
     ];
 @endphp
 
-<details class="mt-4 rounded-control border border-neutral-200 p-4 text-sm" @if ($analysis->isCompleted()) open @endif>
+<details class="mt-4 rounded-control border border-secondary-soft p-4 text-sm" @if ($analysis->isCompleted()) open @endif>
     <summary class="cursor-pointer font-semibold">
         {{ __('recruitment-applicant.cv_analysis.title') }}
         <span class="ms-1 text-xs font-normal text-secondary-medium">
@@ -21,7 +21,7 @@
     <p class="mt-2 text-xs text-secondary-medium">{{ __('recruitment-applicant.cv_analysis.disclaimer') }}</p>
 
     @if (! $analysis->isCompleted())
-        <p class="mt-3 rounded-control bg-amber-50 p-3 text-amber-800">{{ __('recruitment-applicant.cv_analysis.statuses.'.$analysis->status) }}</p>
+        <p class="mt-3 rounded-control bg-secondary-soft/60 p-3 text-secondary-dark">{{ __('recruitment-applicant.cv_analysis.statuses.'.$analysis->status) }}</p>
     @else
         <dl class="mt-3 grid gap-4 sm:grid-cols-2">
             {{-- Experience --}}
@@ -32,10 +32,10 @@
                     {{ $years === null ? __('recruitment-applicant.cv_analysis.not_found') : trans_choice('recruitment-applicant.cv_analysis.years', $years, ['count' => $years]) }}
                     @php $exp = $comparison['experience'] ?? ['outcome' => 'not_applicable']; @endphp
                     @if ($exp['outcome'] !== 'not_applicable')
-                        <span class="ms-1 rounded-control px-2 py-0.5 text-xs font-semibold {{ $outcomeClasses[$exp['outcome']] ?? '' }}">
+                        <x-recruitment.pill :tone="$outcomeClasses[$exp['outcome']] ?? ''" class="ms-1">
                             {{ __('recruitment-applicant.cv_analysis.outcomes.'.$exp['outcome']) }}
                             &middot; {{ __('recruitment-applicant.cv_analysis.required_years', ['count' => $exp['required'] ?? 0]) }}
-                        </span>
+                        </x-recruitment.pill>
                     @endif
                     @if (! empty($facts['experience']['ranges']))
                         <span class="block text-xs text-secondary-medium" dir="ltr">
@@ -60,12 +60,12 @@
                     @endif
                     @php $edu = $comparison['education'] ?? ['outcome' => 'not_applicable']; @endphp
                     @if ($edu['outcome'] !== 'not_applicable')
-                        <span class="ms-1 rounded-control px-2 py-0.5 text-xs font-semibold {{ $outcomeClasses[$edu['outcome']] ?? '' }}">
+                        <x-recruitment.pill :tone="$outcomeClasses[$edu['outcome']] ?? ''" class="ms-1">
                             {{ __('recruitment-applicant.cv_analysis.outcomes.'.$edu['outcome']) }}
                             @isset($edu['required'])
                                 &middot; {{ __('recruitment-applicant.cv_analysis.required_level', ['level' => __('recruitment-applicant.indicators.levels.'.$edu['required'])]) }}
                             @endisset
-                        </span>
+                        </x-recruitment.pill>
                     @endif
                 </dd>
             </div>
@@ -74,7 +74,7 @@
             <div>
                 <dt class="font-medium">{{ __('recruitment-applicant.cv_analysis.languages') }}</dt>
                 <dd class="mt-1">
-                    {{ collect($facts['languages'] ?? [])->map(fn ($l) => __('recruitment-applicant.cv_analysis.language_names.'.$l))->implode('، ') ?: __('recruitment-applicant.cv_analysis.not_found') }}
+                    {{ collect($facts['languages'] ?? [])->map(fn ($l) => __('recruitment-applicant.cv_analysis.language_names.'.$l))->implode(__('recruitment-applicant.list_separator')) ?: __('recruitment-applicant.cv_analysis.not_found') }}
                 </dd>
             </div>
 
@@ -83,7 +83,7 @@
                 <dt class="font-medium">{{ __('recruitment-applicant.cv_analysis.skills_detected') }}</dt>
                 <dd class="mt-1 flex flex-wrap gap-1">
                     @forelse ($facts['skills'] ?? [] as $skill)
-                        <span class="rounded-control bg-blue-50 px-2 py-0.5 text-xs text-blue-800">{{ $skill }}</span>
+                        <span class="rounded-control bg-secondary-soft/60 px-2 py-0.5 text-xs text-secondary-dark">{{ $skill }}</span>
                     @empty
                         {{ __('recruitment-applicant.cv_analysis.not_found') }}
                     @endforelse
@@ -101,7 +101,7 @@
                 <ul class="mt-2 space-y-1">
                     @foreach ($skills['items'] as $item)
                         <li class="flex items-start gap-2">
-                            <span @class(['font-bold', 'text-green-700' => $item['matched'], 'text-secondary-medium' => ! $item['matched']])>{{ $item['matched'] ? '✓' : '—' }}</span>
+                            <span @class(['font-bold', 'text-primary' => $item['matched'], 'text-secondary-medium' => ! $item['matched']])>{{ $item['matched'] ? '✓' : '—' }}</span>
                             <span>
                                 {{ $item['term'] }}
                                 @if ($item['matched'] && $item['evidence'])

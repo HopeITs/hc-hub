@@ -15,7 +15,7 @@
 <div class="space-y-6">
     <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
         <div class="min-w-0">
-            <h1 class="text-h2 font-semibold text-neutral-900">{{ $title }}</h1>
+            <h1 class="text-h2 font-semibold text-secondary-dark">{{ $title }}</h1>
             <p class="mt-2 max-w-2xl text-secondary-medium">{{ $description }}</p>
         </div>
 

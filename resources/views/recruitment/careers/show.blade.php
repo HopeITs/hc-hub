@@ -15,12 +15,17 @@
     $internal ??= null;
     $showForm = $internal === null || $internal['state'] === 'ready';
     $prefill = $internal['prefill'] ?? [];
+    $careerUrl = fn (string $language): string => route('careers.show', [
+        'token' => request()->route('token'),
+        'lang' => $language,
+    ]);
+    $canonicalUrl = $careerUrl($locale);
 @endphp
 
 <main dir="{{ $direction }}" class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
     <div class="mb-4 flex justify-end gap-2 text-small font-semibold">
-        <a href="{{ request()->url() }}?lang=en" class="cursor-pointer rounded-full px-3 py-1.5 {{ $locale === 'en' ? 'bg-primary text-white' : 'bg-white text-neutral-600' }}">EN</a>
-        <a href="{{ request()->url() }}?lang=ar" class="cursor-pointer rounded-full px-3 py-1.5 {{ $locale === 'ar' ? 'bg-primary text-white' : 'bg-white text-neutral-600' }}">AR</a>
+        <a href="{{ $careerUrl('en') }}" class="cursor-pointer rounded-full px-3 py-1.5 {{ $locale === 'en' ? 'bg-primary text-white' : 'bg-white text-neutral-600' }}">EN</a>
+        <a href="{{ $careerUrl('ar') }}" class="cursor-pointer rounded-full px-3 py-1.5 {{ $locale === 'ar' ? 'bg-primary text-white' : 'bg-white text-neutral-600' }}">AR</a>
     </div>
 
     <x-recruitment.public-brand-banner />
@@ -44,6 +49,9 @@
                 @if ($job_post['program']) <p><strong>{{ __('careers.program') }}:</strong> {{ $job_post['program'] }}</p> @endif
                 @if ($context['weekly_hours']) <p><strong>{{ __('careers.working_hours') }}:</strong> {{ $context['weekly_hours'] }}</p> @endif
                 @if ($context['deadline']) <p><strong>{{ __('careers.deadline') }}:</strong> {{ $context['deadline'] }}</p> @endif
+                @if ($age_range['minimum'] !== null && $age_range['maximum'] !== null)
+                    <p><strong>{{ __('careers.age_requirement') }}:</strong> {{ __('careers.age_requirement_value', ['minimum' => $age_range['minimum'], 'maximum' => $age_range['maximum']]) }}</p>
+                @endif
             </div>
 
             @if ($body)
@@ -81,7 +89,13 @@
             @endif
         </div>
     @endif
-    @if ($showForm)
+    @if (! $accepting_applications)
+        <div class="mt-4 rounded-[16px] border border-neutral-200 bg-white p-5 text-body text-neutral-700 shadow-e1" role="status">
+            <p class="font-semibold text-neutral-900">{{ __('careers.not_accepting') }}</p>
+            <p class="mt-1">{{ __('careers.view_only_notice') }}</p>
+        </div>
+    @endif
+    @if ($showForm && $accepting_applications)
     <form
         method="POST"
         action="{{ route('careers.submit', ['token' => request()->route('token')]) }}"
@@ -117,42 +131,45 @@
         @foreach ($fieldsBySection as $sectionKey => $sectionFields)
             @php $section = $sections->get($sectionKey); @endphp
             <section
-                class="overflow-hidden rounded-[16px] border border-neutral-200 bg-white shadow-e1"
+                class="space-y-3"
                 data-wizard-step
                 data-section-label="{{ $section['label'][$locale] ?? $section['label']['en'] ?? '' }}"
                 @if (! $loop->first) hidden @endif
             >
-                <header class="bg-primary px-6 py-4 text-white sm:px-9">
+                <header class="overflow-hidden rounded-[16px] bg-primary px-6 py-4 text-white shadow-e1 sm:px-9">
                     <h2 class="text-subtitle font-bold">{{ $section['label'][$locale] ?? $section['label']['en'] ?? '' }}</h2>
                     @if ($description = ($section['description'][$locale] ?? $section['description']['en'] ?? ''))
                         <p class="mt-1 text-small text-white/80">{{ $description }}</p>
                     @endif
                 </header>
 
-                <div class="divide-y divide-neutral-100">
+                <div class="space-y-3">
                     @foreach ($sectionFields as $field)
                         @php
                             $key = $field['key'];
                             $label = $field['label'][$locale] ?: $field['label']['en'];
                             $help = $field['help'][$locale] ?: $field['help']['en'];
                         @endphp
-                        <div class="px-6 py-5 sm:px-9">
-                            <label class="block font-semibold text-neutral-900" @if (!in_array($field['type'], ['radio', 'checkbox'], true)) for="field-{{ $key }}" @endif>
+                        <div class="rounded-[8px] border border-neutral-200 bg-white px-6 py-6 shadow-e1 sm:px-9">
+                            <label id="field-{{ $key }}-label" class="block font-medium text-neutral-900" @if (!in_array($field['type'], ['radio', 'checkbox'], true)) for="field-{{ $key }}" @endif>
                                 {{ $label }} @if ($field['required']) <span class="text-primary">*</span> @endif
                             </label>
                             @if ($help) <p class="mt-1 text-small leading-5 text-neutral-500">{{ $help }}</p> @endif
 
                             @switch($field['type'])
                                 @case('textarea')
-                                    <textarea id="field-{{ $key }}" name="answers[{{ $key }}]" rows="4" class="mt-3 w-full rounded-control border border-neutral-300 px-3 py-2 text-body" @if ($field['required']) required @endif></textarea>
+                                    <textarea id="field-{{ $key }}" name="answers[{{ $key }}]" rows="1" placeholder="{{ __('careers.your_answer') }}" class="mt-2 block min-h-9 w-full max-w-xl field-sizing-content resize-none rounded-none border-0 border-b border-neutral-300 bg-transparent px-0 py-1 text-body shadow-none outline-none placeholder:text-neutral-500 focus:border-primary focus:ring-0" @if ($field['required']) required @endif></textarea>
                                     @break
                                 @case('select')
-                                    <select id="field-{{ $key }}" name="answers[{{ $key }}]" class="mt-3 w-full cursor-pointer rounded-control border border-neutral-300 bg-white px-3 py-2 text-body sm:max-w-md" @if ($field['required']) required @endif>
-                                        <option value="">{{ __('careers.choose') }}</option>
-                                        @foreach ($field['options'] as $option)
-                                            <option value="{{ $option['value'] }}">{{ $option['label'][$locale] ?: $option['label']['en'] }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="public-career-select-wrap mt-4 w-full max-w-52">
+                                        <select id="field-{{ $key }}" name="answers[{{ $key }}]" class="public-career-select block w-full cursor-pointer rounded-control border border-neutral-300 bg-white px-3 py-3 text-body shadow-e1 outline-none focus:border-primary focus:ring-1 focus:ring-primary" @if ($field['required']) required @endif>
+                                            <option value="">{{ __('careers.choose') }}</option>
+                                            @foreach ($field['options'] as $option)
+                                                <option value="{{ $option['value'] }}">{{ $option['label'][$locale] ?: $option['label']['en'] }}</option>
+                                            @endforeach
+                                        </select>
+                                        <p id="field-{{ $key }}-error" data-public-select-error class="mt-2 text-small text-primary" role="alert" hidden>{{ __('careers.choose_an_option') }}</p>
+                                    </div>
                                     @break
                                 @case('radio')
                                     <div class="mt-3 space-y-2">
@@ -190,18 +207,53 @@
                                     <p class="mt-2 text-small text-neutral-500" data-file-name>{{ __('careers.no_file_selected') }}</p>
                                     @break
                                 @default
-                                    @php $workEmail = $internal && $key === 'email'; @endphp
+                                    @php
+                                        $workEmail = $internal && $key === 'email';
+                                        $isPhone = $key === 'phone';
+                                        $isBirthDate = $key === 'date_of_birth';
+                                        $hasAgeRange = $age_range['minimum'] !== null && $age_range['maximum'] !== null;
+                                    @endphp
                                     <input
                                         id="field-{{ $key }}"
                                         type="{{ in_array($field['type'], ['email', 'tel', 'number', 'date', 'url'], true) ? $field['type'] : 'text' }}"
                                         name="answers[{{ $key }}]"
                                         value="{{ $prefill[$key] ?? '' }}"
-                                        class="mt-3 w-full rounded-control border border-neutral-300 px-3 py-2 text-body sm:max-w-xl {{ $workEmail ? 'cursor-not-allowed bg-neutral-50 text-neutral-600' : '' }}"
+                                        placeholder="{{ $field['type'] === 'date' ? '' : __('careers.your_answer') }}"
+                                        class="mt-4 block w-full max-w-sm rounded-none border-0 border-b border-neutral-300 bg-transparent px-0 py-2 text-body shadow-none outline-none placeholder:text-neutral-500 focus:border-primary focus:ring-0 {{ in_array($field['type'], ['email', 'tel'], true) ? 'rtl:text-right' : '' }} {{ $workEmail ? 'cursor-not-allowed text-neutral-600' : '' }}"
                                         @if ($field['type'] === 'email' || $field['type'] === 'tel') dir="ltr" @endif
+                                        @if ($isPhone)
+                                            inputmode="numeric"
+                                            pattern="09[0-9]{8}"
+                                            minlength="10"
+                                            maxlength="10"
+                                            autocomplete="tel"
+                                            data-phone-input
+                                        @endif
+                                        @if ($isBirthDate)
+                                            max="{{ today()->toDateString() }}"
+                                            data-birthdate-input
+                                            data-birthdate-error-message="{{ __('careers.errors.invalid_birth_date') }}"
+                                            @if ($hasAgeRange)
+                                                data-minimum-age="{{ $age_range['minimum'] }}"
+                                                data-maximum-age="{{ $age_range['maximum'] }}"
+                                                data-age-error-message="{{ __('careers.age_ineligible', ['minimum' => $age_range['minimum'], 'maximum' => $age_range['maximum']]) }}"
+                                            @endif
+                                        @endif
                                         @if ($workEmail) readonly aria-describedby="field-{{ $key }}-note" @endif
                                         @if ($field['required']) required @endif
                                     >
-                                    @if ($workEmail)
+                                    @if ($isPhone)
+                                        <p class="mt-2 text-small text-neutral-500">{{ __('careers.phone_help') }}</p>
+                                        <p id="field-{{ $key }}-format-error" data-phone-format-error class="mt-1 text-small text-primary" role="alert" hidden>{{ __('careers.errors.invalid_phone') }}</p>
+                                    @elseif ($isBirthDate)
+                                        @if ($hasAgeRange)
+                                            <p class="mt-2 text-small text-neutral-500">{{ __('careers.age_help', ['minimum' => $age_range['minimum'], 'maximum' => $age_range['maximum']]) }}</p>
+                                        @endif
+                                        <p id="field-{{ $key }}-birthdate-error" data-birthdate-error class="mt-1 text-small text-primary" role="alert" hidden>{{ __('careers.errors.invalid_birth_date') }}</p>
+                                        @if ($hasAgeRange)
+                                            <p id="field-{{ $key }}-age-error" data-age-error class="mt-1 text-small text-primary" role="alert" hidden>{{ __('careers.age_ineligible', ['minimum' => $age_range['minimum'], 'maximum' => $age_range['maximum']]) }}</p>
+                                        @endif
+                                    @elseif ($workEmail)
                                         <p id="field-{{ $key }}-note" class="mt-2 text-small text-neutral-500">{{ __('careers.internal.work_email_note') }}</p>
                                     @elseif (isset($prefill[$key]))
                                         <p class="mt-2 text-small text-neutral-500">{{ __('careers.internal.from_record') }}</p>
@@ -211,7 +263,7 @@
                     @endforeach
                 </div>
 
-                <footer class="flex flex-wrap items-center justify-between gap-3 border-t border-neutral-200 bg-neutral-50 px-6 py-4 sm:px-9">
+                <footer class="flex flex-wrap items-center justify-between gap-3 rounded-[8px] border border-neutral-200 bg-white px-6 py-4 shadow-e1 sm:px-9">
                     <div>
                         @if (! $loop->first)
                             <button type="button" data-wizard-previous class="cursor-pointer rounded-control border border-neutral-300 bg-white px-5 py-2.5 font-semibold text-neutral-700 hover:bg-neutral-100">
@@ -239,17 +291,135 @@
 </main>
 @endsection
 
+@if ($showForm && $accepting_applications)
 @push('scripts')
 <script nonce="{{ Vite::cspNonce() }}">
     document.addEventListener('DOMContentLoaded', () => {
         const form = document.querySelector('[data-recruitment-wizard]');
         if (!form) return;
 
+        const canonicalUrl = @json($canonicalUrl);
+        if (window.location.pathname.endsWith('/applications') && window.history?.replaceState) {
+            window.history.replaceState({}, document.title, canonicalUrl);
+        }
+
         const steps = Array.from(form.querySelectorAll('[data-wizard-step]'));
         const segments = Array.from(form.querySelectorAll('[data-progress-segment]'));
         const currentStep = form.querySelector('[data-current-step]');
         const currentSection = form.querySelector('[data-current-section]');
         let activeStep = 0;
+
+        if (window.jQuery?.fn?.select2) {
+            window.jQuery(form).find('.public-career-select').each((_, element) => {
+                const select = window.jQuery(element);
+                select.select2({
+                    width: '100%',
+                    dir: form.closest('[dir]')?.dir || document.documentElement.dir || 'ltr',
+                    minimumResultsForSearch: Infinity,
+                    dropdownCssClass: 'public-career-dropdown',
+                });
+
+                const selection = element.nextElementSibling?.querySelector('.select2-selection');
+                selection?.setAttribute('aria-labelledby', `${element.id}-label select2-${element.id}-container`);
+
+                select.on('change', () => {
+                    const error = element.parentElement.querySelector('[data-public-select-error]');
+                    if (error) error.hidden = true;
+                    selection?.removeAttribute('aria-invalid');
+                    selection?.removeAttribute('aria-describedby');
+                });
+            });
+
+            form.noValidate = true;
+        }
+
+        const visibleControl = (control) => control?.matches('.public-career-select')
+            ? control.nextElementSibling?.querySelector('.select2-selection') ?? control
+            : control;
+
+        const validatePhone = (input) => {
+            if (!input) return true;
+
+            const valid = input.value === '' || /^09[0-9]{8}$/.test(input.value);
+            const error = input.parentElement?.querySelector('[data-phone-format-error]');
+            input.setCustomValidity(valid ? '' : @json(__('careers.errors.invalid_phone')));
+            if (error) error.hidden = valid;
+
+            return valid;
+        };
+
+        const ageOnDate = (dateValue) => {
+            const parts = dateValue.split('-').map(Number);
+            if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+
+            const birthDate = new Date(parts[0], parts[1] - 1, parts[2]);
+            if (birthDate.getFullYear() !== parts[0] || birthDate.getMonth() !== parts[1] - 1 || birthDate.getDate() !== parts[2]) return null;
+
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const birthdayHasPassed = today.getMonth() > birthDate.getMonth()
+                || (today.getMonth() === birthDate.getMonth() && today.getDate() >= birthDate.getDate());
+
+            if (!birthdayHasPassed) age -= 1;
+
+            return age;
+        };
+
+        const validateBirthDate = (input) => {
+            if (!input || input.value === '') return true;
+
+            const ageError = input.parentElement?.querySelector('[data-age-error]');
+            const dateError = input.parentElement?.querySelector('[data-birthdate-error]');
+            const clear = () => { if (ageError) ageError.hidden = true; if (dateError) dateError.hidden = true; };
+
+            const age = ageOnDate(input.value);
+            const parts = input.value.split('-').map(Number);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const picked = parts.length === 3 && !parts.some(Number.isNaN)
+                ? new Date(parts[0], parts[1] - 1, parts[2])
+                : null;
+
+            // A real calendar date, strictly before today.
+            if (age === null || picked === null || picked >= today) {
+                clear();
+                input.setCustomValidity(input.dataset.birthdateErrorMessage);
+                if (dateError) dateError.hidden = false;
+                return false;
+            }
+
+            // Age range, only when the campaign fixed one.
+            if ((input.dataset.minimumAge ?? '') !== '') {
+                const minimum = Number(input.dataset.minimumAge);
+                const maximum = Number(input.dataset.maximumAge);
+                if (age < minimum || age > maximum) {
+                    clear();
+                    input.setCustomValidity(input.dataset.ageErrorMessage);
+                    if (ageError) ageError.hidden = false;
+                    return false;
+                }
+            }
+
+            clear();
+            input.setCustomValidity('');
+            return true;
+        };
+
+        form.querySelectorAll('[data-phone-input]').forEach((input) => {
+            input.addEventListener('input', () => {
+                input.value = input.value
+                    .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+                    .replace(/[^0-9]/g, '')
+                    .slice(0, 10);
+                validatePhone(input);
+            });
+            input.addEventListener('blur', () => validatePhone(input));
+        });
+
+        form.querySelectorAll('[data-birthdate-input]').forEach((input) => {
+            input.addEventListener('change', () => validateBirthDate(input));
+            input.addEventListener('blur', () => validateBirthDate(input));
+        });
 
         const showStep = (index, focus = true) => {
             activeStep = Math.max(0, Math.min(index, steps.length - 1));
@@ -263,16 +433,30 @@
 
             if (focus) {
                 steps[activeStep]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                steps[activeStep]?.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled])')?.focus({ preventScroll: true });
+                visibleControl(steps[activeStep]?.querySelector('input:not([disabled]), select:not([disabled]), textarea:not([disabled])'))?.focus({ preventScroll: true });
             }
         };
 
         const validateStep = (index) => {
             const controls = Array.from(steps[index]?.querySelectorAll('input:not([disabled]), select:not([disabled]), textarea:not([disabled])') ?? []);
+            controls.filter((control) => control.matches('[data-phone-input]')).forEach(validatePhone);
+            controls.filter((control) => control.matches('[data-birthdate-input]')).forEach(validateBirthDate);
             const invalid = controls.find((control) => !control.checkValidity());
             if (!invalid) return true;
 
             showStep(index, false);
+            if (invalid.matches('.public-career-select') && window.jQuery?.fn?.select2) {
+                const selection = visibleControl(invalid);
+                const error = invalid.parentElement.querySelector('[data-public-select-error]');
+                if (error) error.hidden = false;
+                selection?.setAttribute('aria-invalid', 'true');
+                selection?.setAttribute('aria-describedby', `${invalid.id}-error`);
+                selection?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                selection?.focus({ preventScroll: true });
+                window.jQuery(invalid).select2('open');
+                return false;
+            }
+
             invalid.reportValidity();
             invalid.focus({ preventScroll: true });
             invalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -311,3 +495,4 @@
     });
 </script>
 @endpush
+@endif

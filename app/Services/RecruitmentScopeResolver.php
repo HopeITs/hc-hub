@@ -108,11 +108,11 @@ class RecruitmentScopeResolver
         ));
 
         if ($assigned !== []) {
-            $ids = array_merge($ids, City::query()
+            $ids = array_merge($ids, $user->remember('governorate-city-ids:'.$role.':'.implode(',', $assigned), fn (): array => City::query()
                 ->whereIn('slug', $assigned)
                 ->pluck('id')
                 ->map(fn ($id): int => (int) $id)
-                ->all());
+                ->all()));
         }
 
         return array_values(array_unique($ids));

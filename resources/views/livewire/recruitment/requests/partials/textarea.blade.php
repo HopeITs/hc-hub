@@ -1,14 +1,21 @@
 {{-- Every field on this form is required to save a draft (D55); the
      centre is the one exception and passes its own flag. So the star
      defaults to on, and a field that is genuinely optional says so. --}}
-@php $isLocked = in_array($field, $lockedFields ?? [], true); @endphp
-<div wire:key="field-{{ $field }}">
-    <x-forms.input-label :for="$field" :required="$required ?? true">{{ __('recruitment.'.$field) }}</x-forms.input-label>
+@php
+    $isLocked = in_array($field, $lockedFields ?? [], true);
+    $isChangeRequested = ! $isLocked && in_array($field, $requestedFields ?? [], true);
+@endphp
+<div wire:key="field-{{ $field }}" @class([
+    'rounded-control transition',
+    'border-s-2 border-primary ps-3' => $isChangeRequested,
+])>
+    <div class="mb-1 flex flex-wrap items-center gap-2">
+        <x-forms.input-label :for="$field" :required="$required ?? true">{{ __('recruitment.'.$field) }}</x-forms.input-label>
+        @include('livewire.recruitment.requests.partials.field-state', ['isChangeRequested' => $isChangeRequested, 'isLocked' => false])
+    </div>
     <x-forms.textarea :id="$field" wire:model="data.{{ $field }}"
         :disabled="$isLocked"
-        :class="$isLocked ? 'cursor-not-allowed border-neutral-200 bg-neutral-100 text-neutral-400' : ''" aria-describedby="{{ $field }}-error" aria-invalid="{{ $errors->has('data.'.$field) ? 'true' : 'false' }}" />
-    @if ($isLocked)
-        <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment.field_locked_here') }}</p>
-    @endif
-    <p id="{{ $field }}-error" class="mt-1 text-sm text-red-600">@error('data.'.$field){{ $message }}@enderror</p>
+        :class="$isLocked ? 'cursor-not-allowed border-secondary-light bg-white text-secondary-dark shadow-none' : ''" aria-describedby="{{ $field }}-error" aria-invalid="{{ $errors->has('data.'.$field) ? 'true' : 'false' }}" />
+    @include('livewire.recruitment.requests.partials.field-state', ['isChangeRequested' => false, 'isLocked' => $isLocked])
+    <p id="{{ $field }}-error" class="mt-1 text-sm text-primary">@error('data.'.$field){{ $message }}@enderror</p>
 </div>

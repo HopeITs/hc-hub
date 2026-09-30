@@ -131,12 +131,13 @@ class DirectOpen extends Component
         $requester = $requesters->first(
             fn ($candidate): bool => (int) $candidate->getKey() === (int) ($this->documentation['actual_requester_user_id'] ?? 0),
         );
+        $steps = $directOpen->confirmableStepsForRequester($requester, $type);
         $positions = $directOpen->positionsForRequester($user, $requester, $type);
         $vacancies = $this->vacanciesFor($type);
         $cityId = $this->targetCityId($positions);
         $confirmationCandidates = [];
         if ($requester !== null) {
-            foreach ($directOpen->confirmableSteps() as $stepKey) {
+            foreach ($steps as $stepKey) {
                 $confirmationCandidates[$stepKey] = $directOpen->confirmationCandidates($requester, $stepKey, $cityId);
             }
         }
@@ -154,9 +155,12 @@ class DirectOpen extends Component
                 ->orderBy(transColumn('name'))->get(),
             'departments' => Department::query()->orderBy('name')->get(),
             'jobLevels' => JobLevel::query()->orderBy('grade')->get(),
-            'contractTypes' => ContractType::query()->orderBy(transColumn('name'))->get(),
+            'contractTypes' => ContractType::query()
+                ->recruitmentOptions()
+                ->orderBy(transColumn('name'))
+                ->get(),
             'centerRequired' => ! $newPosition || $this->centerIsRequired(),
-            'steps' => app(RecruitmentDirectOpenService::class)->confirmableSteps(),
+            'steps' => $steps,
             'confirmationCandidates' => $confirmationCandidates,
             'decisions' => [ExternalConfirmationDecision::Approved, ExternalConfirmationDecision::NotApplicable],
             'methods' => [
@@ -169,13 +173,13 @@ class DirectOpen extends Component
     /** @return \Illuminate\Support\Collection<int, Vacancy> */
     private function vacanciesFor(int $type)
     {
-        if (! in_array($type, [RecruitmentRequestType::FillVacancy, RecruitmentRequestType::CloseVacancy], true)
+        if ($type !== RecruitmentRequestType::FillVacancy
             || empty($this->data['position_id'])) {
             return collect();
         }
 
         return Vacancy::query()
-            ->when($type === RecruitmentRequestType::FillVacancy, fn ($query) => $query->available())
+            ->available()
             ->where('position_id', $this->data['position_id'])
             ->orderBy('id')
             ->get();

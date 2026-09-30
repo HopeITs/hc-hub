@@ -292,6 +292,19 @@ class RecruitmentMonitoringTest extends TestCase
         ));
     }
 
+    public function test_missing_monitoring_config_falls_back_instead_of_breaking_the_form(): void
+    {
+        $token = $this->publicLink();
+        // Every limit gone; only the capture channel is kept so the test can read the events.
+        config(['recruitment-privacy.monitoring' => ['channel' => 'security_capture']]);
+
+        $this->post(route('careers.submit', $token), [...$this->payload('bot@spam.test'), 'website' => 'x'])
+            ->assertUnprocessable();
+        $this->get(route('careers.show', 'unknown-token'))->assertNotFound();
+
+        $this->assertSame('invalid_request', $this->securityEvents(SecurityMonitor::SUBMISSION_FAILED)[0]['context']['reason']);
+    }
+
     public function test_monitoring_that_fails_never_breaks_the_request_it_watches(): void
     {
         $log = tempnam(sys_get_temp_dir(), 'monitor');
@@ -361,7 +374,7 @@ class RecruitmentMonitoringTest extends TestCase
             'answers' => [
                 'full_name' => 'Applicant Name',
                 'email' => $email,
-                'phone' => '+963 999 123 456',
+                'phone' => '0999123456',
                 'cv' => $cv ?? $this->pdf(),
                 'privacy_consent' => '1',
             ],

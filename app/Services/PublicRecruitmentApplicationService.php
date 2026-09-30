@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\RecruitmentApplicationStatus;
 use App\Exceptions\PublicRecruitmentSubmissionException;
 use App\Exceptions\UnsafeRecruitmentFileException;
+use App\Jobs\SendRecruitmentResponseReceipt;
 use App\Models\HiringCampaign;
 use App\Models\PublicRecruitmentLink;
 use App\Models\RecruitmentApplicant;
@@ -13,6 +14,7 @@ use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentCampaignInvite;
 use App\Models\User;
 use App\Services\Monitoring\SecurityMonitor;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -26,6 +28,7 @@ class PublicRecruitmentApplicationService
         private readonly RecruitmentApplicationFormService $forms,
         private readonly RecruitmentApplicantFileService $files,
         private readonly InternalRecruitmentApplicantService $internal,
+        private readonly RecruitmentApplicantIdentityService $identity,
     ) {}
 
     /**
@@ -70,6 +73,10 @@ class PublicRecruitmentApplicationService
             throw PublicRecruitmentSubmissionException::because('invalid_request');
         }
 
+        if (array_key_exists('phone', $answers) && is_string($answers['phone'])) {
+            $answers['phone'] = en_digits(trim($answers['phone']));
+        }
+
         $employee = null;
         if ($resolvedLink->campaign->isInternal()) {
             $employee = $this->internal->employeeFor($actor);
@@ -98,12 +105,14 @@ class PublicRecruitmentApplicationService
         if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw PublicRecruitmentSubmissionException::because('invalid_email');
         }
-        if ($phone === '') {
+        if (preg_match('/\A09[0-9]{8}\z/', $phone) !== 1) {
             throw PublicRecruitmentSubmissionException::because('invalid_phone');
         }
 
+        $this->assertAgeEligible($resolvedLink->campaign, $validated['date_of_birth'] ?? null);
+
         try {
-            return DB::transaction(function () use (
+            $result = DB::transaction(function () use (
                 $token,
                 $resolvedLink,
                 $submissionHash,
@@ -176,17 +185,25 @@ class PublicRecruitmentApplicationService
                     ->where('identity_key_hash', $identityHash)
                     ->lockForUpdate()
                     ->firstOrFail();
+                // Only a signed-in member of staff has proven the email is
+                // theirs. Anyone else may fill blanks on a record that already
+                // exists but never rewrite it: the record is the person's, and
+                // this form cannot tell the person from someone typing their
+                // address. (A row inserted just above has only its consent
+                // blank, so it is filled in the same pass.) Each application
+                // keeps its own answers and consent either way.
                 $applicant->forceFill([
-                    'full_name' => $fullName,
-                    'email_normalized' => $email,
-                    'phone_normalized' => $phone,
+                    ...$this->identity->writableFields($applicant, [
+                        'full_name' => $fullName,
+                        'phone_normalized' => $phone,
+                        'privacy_notice_version' => $link->formVersion->privacy_notice_version,
+                        'privacy_accepted_at' => now(),
+                    ], verified: $employee !== null),
                     'last_seen_at' => now(),
-                    // The latest consent the person gave (each application also
-                    // keeps its own), and a new application restarts the
-                    // retention clock: whatever was counting down is void.
-                    'privacy_notice_version' => $link->formVersion->privacy_notice_version,
-                    'privacy_accepted_at' => now(),
-                    'retention_until' => null,
+                    // A new application restarts the retention clock, but never
+                    // undoes an erasure request: that date was set to the
+                    // moment of the request and the sweep will not restore it.
+                    ...($applicant->erasure_requested_at === null ? ['retention_until' => null] : []),
                     // Signing in proved who they are; keep the link to their record.
                     ...($employee ? [
                         'employee_id' => $employee->getKey(),
@@ -267,6 +284,12 @@ class PublicRecruitmentApplicationService
 
                 return ['application' => $application->fresh(), 'idempotent' => false];
             }, 3);
+
+            if (! $result['idempotent'] && data_get($result['application']->consent_payload_json, 'response_copy', false)) {
+                rescue(fn () => SendRecruitmentResponseReceipt::dispatch($result['application']->getKey()));
+            }
+
+            return $result;
         } catch (PublicRecruitmentSubmissionException $exception) {
             throw $exception;
         } catch (ValidationException $exception) {
@@ -315,8 +338,32 @@ class PublicRecruitmentApplicationService
 
     private function normalizePhone(string $phone): string
     {
-        $phone = preg_replace('/(?!^\+)[^0-9]/', '', trim($phone)) ?? '';
+        $phone = trim(en_digits($phone));
 
         return Str::limit($phone, 50, '');
+    }
+
+    private function assertAgeEligible(HiringCampaign $campaign, mixed $dateOfBirth): void
+    {
+        if ($campaign->minimum_age === null && $campaign->maximum_age === null) {
+            return;
+        }
+
+        if (! is_string($dateOfBirth) || $dateOfBirth === '') {
+            throw PublicRecruitmentSubmissionException::because('age_not_eligible');
+        }
+
+        try {
+            $birthDate = CarbonImmutable::createFromFormat('Y-m-d', $dateOfBirth);
+            $age = $birthDate === false ? null : $birthDate->age;
+        } catch (Throwable) {
+            throw PublicRecruitmentSubmissionException::because('age_not_eligible');
+        }
+
+        if ($age === null
+            || ($campaign->minimum_age !== null && $age < $campaign->minimum_age)
+            || ($campaign->maximum_age !== null && $age > $campaign->maximum_age)) {
+            throw PublicRecruitmentSubmissionException::because('age_not_eligible');
+        }
     }
 }

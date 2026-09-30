@@ -69,6 +69,14 @@ class SecurityMonitor
         self::RETENTION_FAILED => 'error',
     ];
 
+    /** Used when config/recruitment-privacy.php does not supply a burst limit. */
+    private const DEFAULT_LIMITS = [
+        'downloads' => ['threshold' => 30, 'window' => 600],
+        'submission_failures' => ['threshold' => 10, 'window' => 900],
+        'token_probes' => ['threshold' => 15, 'window' => 600],
+        'rate_limit_hits' => ['threshold' => 20, 'window' => 600],
+    ];
+
     /** Submission failures a normal applicant causes by mistyping. */
     private const APPLICANT_MISTAKES = [
         'validation', 'missing_name', 'invalid_email', 'invalid_phone', 'generic', 'invalid_file', 'file_rejected',
@@ -109,12 +117,17 @@ class SecurityMonitor
      * Count one occurrence and record the event when the count reaches the
      * threshold — and again at every further multiple of it.
      *
-     * @param  array{threshold: int, window: int}  $limit
+     * The limit is read from config('recruitment-privacy.monitoring.{counter}')
+     * inside the guard, falling back to DEFAULT_LIMITS: a missing or malformed
+     * config key must degrade the monitor, never fail the request.
+     *
+     * @param  array{threshold: int, window: int}|null  $limit  overrides the configured one
      * @param  array<string, mixed>  $context
      */
-    public function burst(string $event, string $counter, string $key, array $limit, array $context = []): bool
+    public function burst(string $event, string $counter, string $key, ?array $limit = null, array $context = []): bool
     {
         try {
+            $limit ??= $this->limit($counter);
             $threshold = max(1, (int) $limit['threshold']);
             $count = $this->tick("burst:{$counter}:{$key}", (int) $limit['window']);
 
@@ -157,13 +170,7 @@ class SecurityMonitor
             );
         }
 
-        $this->burst(
-            self::PUBLIC_ABUSE,
-            'submission_failures',
-            $ip,
-            config('recruitment-privacy.monitoring.submission_failures'),
-            ['signal' => 'repeated_failed_submissions'],
-        );
+        $this->burst(self::PUBLIC_ABUSE, 'submission_failures', $ip, context: ['signal' => 'repeated_failed_submissions']);
     }
 
     /** A link token that resolves to nothing: a typo once, enumeration when it repeats. */
@@ -173,8 +180,7 @@ class SecurityMonitor
             self::PUBLIC_ABUSE,
             'token_probes',
             (string) $request->ip(),
-            config('recruitment-privacy.monitoring.token_probes'),
-            ['signal' => 'unknown_link_tokens', 'link' => $this->linkRef($token)],
+            context: ['signal' => 'unknown_link_tokens', 'link' => $this->linkRef($token)],
         );
     }
 
@@ -213,8 +219,7 @@ class SecurityMonitor
                 self::PUBLIC_ABUSE,
                 'rate_limit_hits',
                 (string) $request->ip(),
-                config('recruitment-privacy.monitoring.rate_limit_hits'),
-                ['signal' => 'rate_limit_exceeded', 'limited_route' => $route],
+                context: ['signal' => 'rate_limit_exceeded', 'limited_route' => $route],
             );
         }
     }
@@ -262,6 +267,18 @@ class SecurityMonitor
     private function linkRef(?string $token): ?string
     {
         return $token === null || $token === '' ? null : substr(hash('sha256', $token), 0, 12);
+    }
+
+    /** @return array{threshold: int, window: int} */
+    private function limit(string $counter): array
+    {
+        $configured = config("recruitment-privacy.monitoring.{$counter}");
+
+        if (is_array($configured) && isset($configured['threshold'], $configured['window'])) {
+            return ['threshold' => (int) $configured['threshold'], 'window' => (int) $configured['window']];
+        }
+
+        return self::DEFAULT_LIMITS[$counter] ?? ['threshold' => 20, 'window' => 600];
     }
 
     private function tick(string $key, int $window): int

@@ -371,16 +371,55 @@ class RecruitmentCreateOptionsTest extends TestCase
             ->assertSee($empty->title_en);
     }
 
-    public function test_close_vacancy_only_lists_currently_available_openings(): void
+    public function test_close_vacancy_only_lists_positions_with_an_empty_approved_seat(): void
     {
-        $target = $this->child($this->root, ['title_en' => 'Vacancy target']);
-        $open = $this->vacancy($target);
-        $closed = $this->vacancy($target, ['status' => 'closed', 'closed_at' => now()]);
+        $vacant = $this->child($this->root, [
+            'title_en' => 'Vacant approved seat',
+            'max_emp' => 2,
+            'exist_emp' => 1,
+        ]);
+        $full = $this->child($this->root, [
+            'title_en' => 'Fully occupied position',
+            'max_emp' => 1,
+            'exist_emp' => 1,
+        ]);
 
         $this->screen(RecruitmentRequestType::CloseVacancy)
-            ->set('data.position_id', $target->id)
-            ->assertViewHas('vacancies', fn ($vacancies) => $vacancies->contains('id', $open->id)
-                && ! $vacancies->contains('id', $closed->id));
+            ->assertSee($vacant->title_en)
+            ->assertDontSee($full->title_en)
+            ->assertDontSee('id="vacancy_id"', false);
+    }
+
+    public function test_the_form_offers_one_close_vacancy_choice(): void
+    {
+        $screen = Livewire::actingAs($this->manager)->test(Create::class);
+
+        $screen
+            ->assertSee('Close vacancy')
+            ->assertDontSee('Reduce approved headcount')
+            ->assertDontSee('Close recruitment opening');
+    }
+
+    public function test_only_the_two_recruitment_contract_types_are_offered(): void
+    {
+        ContractType::query()->create([
+            'name_en' => 'Volunteer Contract',
+            'name_ar' => 'عقد تطوّع',
+        ]);
+        ContractType::query()->create([
+            'name_en' => 'Specific Voluntary Service Contract',
+            'name_ar' => 'عقد تقديم خدمة تطوعية محددة',
+        ]);
+
+        $this->screen()
+            ->assertViewHas('contractTypes', fn ($types): bool => $types
+                ->pluck('name_en')
+                ->sort()
+                ->values()
+                ->all() === [
+                    'Specific Voluntary Service Contract',
+                    'Trial Volunteer Contract',
+                ]);
     }
 
     public function test_general_management_retains_its_existing_organization_options(): void

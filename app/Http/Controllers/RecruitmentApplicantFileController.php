@@ -53,12 +53,7 @@ class RecruitmentApplicantFileController extends Controller
         // One person opening a great many CVs in a short while is what a
         // copied-out candidate pool looks like; the route's own throttle (60 a
         // minute) is far above what reviewing ever needs.
-        $this->monitor->burst(
-            SecurityMonitor::DOWNLOAD_REPEATED,
-            'downloads',
-            (string) $request->user()->getKey(),
-            config('recruitment-privacy.monitoring.downloads'),
-        );
+        $this->monitor->burst(SecurityMonitor::DOWNLOAD_REPEATED, 'downloads', (string) $request->user()->getKey());
 
         $response = response()->download($media->getPath(), $this->downloadName($record, $media), [
             // Detected from the bytes on upload; the browser's claim was never stored.

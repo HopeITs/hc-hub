@@ -1,35 +1,39 @@
-@php use App\Enums\RecruitmentEvaluationRecommendation as Recommendation; @endphp
-<section class="rounded-surface border border-neutral-200 bg-white p-6">
+@php
+    use App\Enums\RecruitmentEvaluationRecommendation as Recommendation;
+
+    // Times read in the interview's own time zone, as on the rest of its page.
+    $at = fn ($date) => $date?->copy()->setTimezone($timezone)->format('Y-m-d H:i');
+@endphp
+<section class="rounded-surface border border-secondary-soft bg-white p-6 shadow-e1">
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
-            <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.evaluations.summary_title') }}</h2>
+            <h2 id="evaluations-title" tabindex="-1" class="scroll-mt-24 text-h4 font-semibold">{{ __('recruitment-applicant.evaluations.summary_title') }}</h2>
             <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.evaluations.summary_hint') }}</p>
         </div>
         @if ($canClose)
-            <button type="button" wire:click="closeEvaluations" wire:confirm="{{ __('recruitment-applicant.evaluations.close_confirm') }}"
-                    class="rounded-control border border-neutral-300 px-3 py-1.5 text-sm hover:bg-neutral-50">
+            <button type="button"
+                    x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'interview-evaluations', action: 'closeEvaluations', message: @js(__('recruitment-applicant.evaluations.close_confirm')), confirmLabel: @js(__('recruitment-applicant.evaluations.close')), tone: 'danger' })"
+                    class="min-h-11 cursor-pointer rounded-control border border-secondary-light bg-white px-3 text-sm shadow-e1 transition hover:bg-selection sm:min-h-9 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
                 {{ __('recruitment-applicant.evaluations.close') }}
             </button>
         @elseif ($interview->evaluations_closed_at)
-            <span class="text-xs text-secondary-medium">{{ __('recruitment-applicant.evaluations.closed_on', ['date' => $interview->evaluations_closed_at->format('Y-m-d H:i')]) }}</span>
+            <span class="text-xs text-secondary-medium">{{ __('recruitment-applicant.evaluations.closed_on', ['date' => $at($interview->evaluations_closed_at)]) }}</span>
         @endif
     </div>
 
-    @if (session('recruitment_evaluation_summary_saved'))
-        <p role="status" class="mt-4 rounded-control border border-green-200 bg-green-50 p-3 text-sm text-green-800">{{ session('recruitment_evaluation_summary_saved') }}</p>
+    {{-- With a panel open, its own error shows inside it, next to the action that caused it. --}}
+    @if ($panel === null)
+        @error('evaluation')
+            <p role="alert" class="mt-4 rounded-control border border-primary bg-white p-3 text-sm text-primary">{{ $message }}</p>
+        @enderror
     @endif
-    @error('evaluation')
-        <p role="alert" class="mt-4 rounded-control border border-primary bg-primary/5 p-3 text-sm text-primary">{{ $message }}</p>
-    @enderror
 
     {{-- Tally: advisory, never a score or a decision. --}}
     <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
         <span class="font-medium">{{ trans_choice('recruitment-applicant.evaluations.count', $summary['total'], ['count' => $summary['total']]) }}</span>
         @foreach ($summary['counts'] as $value => $count)
             @if ($count > 0)
-                <span class="rounded-control px-2 py-0.5 text-xs font-semibold {{ Recommendation::classes($value) }}">
-                    {{ __('recruitment-applicant.evaluations.recommendations.'.$value) }}: {{ $count }}
-                </span>
+                <x-recruitment.pill :tone="Recommendation::classes($value)">{{ __('recruitment-applicant.evaluations.recommendations.'.$value) }}: {{ $count }}</x-recruitment.pill>
             @endif
         @endforeach
     </div>
@@ -42,7 +46,7 @@
     @else
         <ul class="mt-4 space-y-4">
             @foreach ($evaluations as $evaluation)
-                <li class="rounded-control border border-neutral-200 p-4 {{ $evaluation->isWithdrawn() ? 'bg-neutral-50 text-secondary-medium' : '' }}" wire:key="evaluation-{{ $evaluation->id }}">
+                <li class="rounded-control border border-secondary-soft p-4 {{ $evaluation->isWithdrawn() ? 'bg-secondary-soft/30 text-secondary-medium' : '' }}" wire:key="evaluation-{{ $evaluation->id }}">
                     <div class="flex flex-wrap items-start justify-between gap-2">
                         <p class="font-semibold">
                             {{ $evaluation->reviewer?->profile?->name ?? $evaluation->reviewer?->email }}
@@ -51,17 +55,16 @@
                             @endif
                         </p>
                         <span class="text-xs text-secondary-medium">
-                            {{ __('recruitment-applicant.evaluations.submitted_on', ['date' => $evaluation->submitted_at?->format('Y-m-d H:i')]) }}
-                            &middot; v{{ $evaluation->version }}
+                            {{ __('recruitment-applicant.evaluations.submitted_on', ['date' => $at($evaluation->submitted_at)]) }}
                             @if ($evaluation->revisions->contains('action', \App\Models\RecruitmentInterviewEvaluation::ACTION_CORRECTED))
-                                &middot; <span class="font-semibold text-amber-700">{{ __('recruitment-applicant.evaluations.corrected_badge') }}</span>
+                                &middot; <span class="font-semibold text-secondary-dark">{{ __('recruitment-applicant.evaluations.corrected_badge') }}</span>
                             @endif
                         </span>
                     </div>
 
                     @if ($evaluation->isWithdrawn())
                         <p class="mt-2 text-sm">
-                            {{ __('recruitment-applicant.evaluations.withdrawn_on', ['date' => $evaluation->withdrawn_at->format('Y-m-d H:i'), 'by' => $evaluation->withdrawnBy?->profile?->name ?? $evaluation->withdrawnBy?->email]) }}
+                            {{ __('recruitment-applicant.evaluations.withdrawn_on', ['date' => $at($evaluation->withdrawn_at), 'by' => $evaluation->withdrawnBy?->profile?->name ?? $evaluation->withdrawnBy?->email]) }}
                             — {{ $evaluation->withdrawal_reason }}
                         </p>
                     @endif
@@ -71,21 +74,29 @@
                     @if (! $evaluation->isWithdrawn())
                         @can('correct', $evaluation)
                             <div class="mt-3 flex gap-3 text-sm">
-                                <button type="button" wire:click="beginCorrect({{ $evaluation->id }})" class="text-primary hover:underline">{{ __('recruitment-applicant.evaluations.correct') }}</button>
-                                <button type="button" wire:click="beginWithdraw({{ $evaluation->id }})" class="text-secondary-dark hover:underline">{{ __('recruitment-applicant.evaluations.withdraw') }}</button>
+                                @foreach (['correct' => 'beginCorrect', 'withdraw' => 'beginWithdraw'] as $action => $method)
+                                    <button type="button" id="evaluation-{{ $evaluation->id }}-{{ $action }}" wire:click="{{ $method }}({{ $evaluation->id }})"
+                                        aria-expanded="{{ $panel === $action && $evaluationId === $evaluation->id ? 'true' : 'false' }}"
+                                        class="min-h-11 cursor-pointer font-medium text-secondary-dark underline decoration-secondary-light underline-offset-4 transition hover:decoration-secondary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-0">{{ __('recruitment-applicant.evaluations.'.$action) }}</button>
+                                @endforeach
                             </div>
                         @endcan
                     @endif
 
                     @if ($panel !== null && $evaluationId === $evaluation->id)
-                        <div class="mt-3 space-y-3 rounded-control border border-primary/40 bg-primary/5 p-4">
-                            <h3 class="font-semibold">{{ __('recruitment-applicant.evaluations.'.$panel.'_title') }}</h3>
+                        <div role="region" aria-labelledby="evaluation-panel-title" class="mt-3 space-y-3 rounded-control border border-secondary-light bg-secondary-soft/30 p-4">
+                            <h3 id="evaluation-panel-title" tabindex="-1" class="scroll-mt-24 font-semibold">{{ __('recruitment-applicant.evaluations.'.$panel.'_title') }}</h3>
+
+                            @error('evaluation')
+                                <p role="alert" class="rounded-control border border-primary bg-white p-3 text-sm text-primary">{{ $message }}</p>
+                            @enderror
 
                             @if ($panel === 'correct')
-                                <div class="flex flex-wrap gap-2">
+                                <div class="flex flex-wrap gap-2" role="radiogroup" aria-label="{{ __('recruitment-applicant.evaluations.recommendation') }}"
+                                     @if ($errors->has('recommendation')) aria-invalid="true" aria-describedby="correct-recommendation-error" @endif>
                                     @foreach (Recommendation::values() as $value)
-                                        <label class="inline-flex items-center gap-2 rounded-control border border-neutral-300 bg-white px-3 py-1.5 text-sm">
-                                            <input type="radio" wire:model="recommendation" value="{{ $value }}" class="text-primary focus:ring-primary">
+                                        <label class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-control border border-secondary-light bg-white px-3 text-sm sm:min-h-9 has-[:checked]:border-secondary-dark has-[:checked]:bg-selection has-[:checked]:font-semibold has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary">
+                                            <input type="radio" wire:model="recommendation" value="{{ $value }}" class="text-primary focus:ring-0">
                                             {{ __('recruitment-applicant.evaluations.recommendations.'.$value) }}
                                         </label>
                                     @endforeach
@@ -107,11 +118,11 @@
                                 <x-forms.input-error field="reason" input-id="evaluation-reason" />
                             </div>
 
-                            <div class="flex gap-2">
-                                <x-primary-button type="button" wire:click="{{ $panel === 'correct' ? 'saveCorrection' : 'withdraw' }}" wire:loading.attr="disabled">
+                            <div class="flex flex-wrap gap-3">
+                                <x-primary-button type="button" wire:click="{{ $panel === 'correct' ? 'saveCorrection' : 'withdraw' }}">
                                     {{ __('recruitment-applicant.evaluations.'.$panel.'_confirm') }}
                                 </x-primary-button>
-                                <button type="button" wire:click="cancelPanel" class="px-3 py-1.5 text-sm text-secondary-dark hover:underline">{{ __('recruitment-applicant.cancel') }}</button>
+                                <x-secondary-button wire:click="dismissPanel">{{ __('recruitment-applicant.cancel') }}</x-secondary-button>
                             </div>
                         </div>
                     @endif
@@ -126,4 +137,6 @@
             @endforeach
         </ul>
     @endif
+
+    <x-recruitment.confirmation-modal scope="interview-evaluations" />
 </section>

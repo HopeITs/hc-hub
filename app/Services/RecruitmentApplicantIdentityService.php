@@ -55,6 +55,35 @@ class RecruitmentApplicantIdentityService
     }
 
     /**
+     * What a submission may write to an applicant that already exists.
+     *
+     * The applicant record belongs to a person, not to a submission: it is what
+     * HR reads, calls and exports. A public form cannot prove the submitter
+     * owns the email they typed, so anyone who knew an address could rewrite
+     * that person's name and phone by applying to another campaign with it.
+     *
+     * Unless the submitter signed in as the person the email belongs to
+     * (`$verified`, an internal campaign), they may only fill a field the
+     * record has no value for. What they typed is not lost: every application
+     * keeps its own answers.
+     *
+     * @param  array<string, mixed>  $incoming  column => submitted value
+     * @return array<string, mixed>
+     */
+    public function writableFields(RecruitmentApplicant $applicant, array $incoming, bool $verified): array
+    {
+        if ($verified) {
+            return $incoming;
+        }
+
+        return array_filter(
+            $incoming,
+            fn (mixed $value, string $column): bool => filled($value) && blank($applicant->getAttribute($column)),
+            ARRAY_FILTER_USE_BOTH,
+        );
+    }
+
+    /**
      * Find the applicant this email already belongs to, or create one.
      *
      * Locked so two submissions racing on the same email cannot each create
@@ -77,15 +106,14 @@ class RecruitmentApplicantIdentityService
                 ->first();
 
             if ($applicant !== null) {
-                // TODO (Business Rule): later submissions overwrite name/phone
-                // on the shared profile. Fine for an MVP where the applicant is
-                // the one supplying the data; revisit if HR ever edits this
-                // profile directly, since a later public submission would then
-                // clobber their correction.
+                // Nothing here proves the submitter owns this email, so they
+                // may only fill in what the profile is still missing.
                 $applicant->forceFill([
-                    'full_name' => $data['full_name'],
-                    'phone_normalized' => $phoneNormalized ?? $applicant->phone_normalized,
-                    'city_id' => $data['city_id'] ?? $applicant->city_id,
+                    ...$this->writableFields($applicant, [
+                        'full_name' => $data['full_name'],
+                        'phone_normalized' => $phoneNormalized,
+                        'city_id' => $data['city_id'] ?? null,
+                    ], verified: false),
                     'last_seen_at' => now(),
                 ])->save();
 

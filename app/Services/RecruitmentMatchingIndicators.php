@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
 /**
  * Explainable matching indicators: an aid for the reviewer, not a decision.
  *
- * Every indicator is a plain rule from config('recruitment.indicators') —
+ * Every indicator is a plain rule from RecruitmentIndicatorRules (config('recruitment.indicators') plus HR's saved changes) —
  * compare this answer with that requirement — and returns what it compared
  * and why it concluded what it did. There is no weighting and no model: the
  * only summary is "n of m assessable criteria met", and each of the n and m
@@ -57,7 +57,10 @@ class RecruitmentMatchingIndicators
     /** @var array<int, City>|null */
     private ?array $cities = null;
 
-    public function __construct(private readonly RecruitmentApplicationFilters $filters) {}
+    public function __construct(
+        private readonly RecruitmentApplicationFilters $filters,
+        private readonly RecruitmentIndicatorRules $rules,
+    ) {}
 
     // --------------------------------------------
     // Criteria
@@ -69,7 +72,7 @@ class RecruitmentMatchingIndicators
         return [
             'schema' => self::SCHEMA,
             'indicators' => self::KEYS,
-            'rules' => config('recruitment.indicators', []),
+            'rules' => $this->rules->rules(),
         ];
     }
 
@@ -105,14 +108,14 @@ class RecruitmentMatchingIndicators
         $version = $this->criteriaVersion();
 
         return $applications->mapWithKeys(fn (RecruitmentApplication $application): array => [
-            $application->getKey() => new MatchingIndicatorSet($version, [
-                $this->cityMatch($application),
-                $this->experience($application),
-                $this->qualification($application),
-                $this->industryExperience($application),
-                $this->previousApplicant(isset($previous[$application->getKey()])),
-                $this->cvAvailability($application),
-            ]),
+            $application->getKey() => new MatchingIndicatorSet($version, array_values(array_filter([
+                $this->rules->isEnabled('city_match') ? $this->cityMatch($application) : null,
+                $this->rules->isEnabled('experience') ? $this->experience($application) : null,
+                $this->rules->isEnabled('qualification') ? $this->qualification($application) : null,
+                $this->rules->isEnabled('industry_experience') ? $this->industryExperience($application) : null,
+                $this->rules->isEnabled('previous_applicant') ? $this->previousApplicant(isset($previous[$application->getKey()])) : null,
+                $this->rules->isEnabled('cv_availability') ? $this->cvAvailability($application) : null,
+            ]))),
         ])->all();
     }
 
@@ -200,7 +203,8 @@ class RecruitmentMatchingIndicators
     private function experience(RecruitmentApplication $application): MatchingIndicator
     {
         $key = 'experience';
-        $required = $this->detail($application)?->required_experience_years;
+        $required = $this->detail($application)?->required_experience_years
+            ?? $this->rules->get('default_required_experience_years');
 
         if ($required === null) {
             return new MatchingIndicator($key, Outcome::NotApplicable, 'experience_no_requirement');
@@ -216,7 +220,7 @@ class RecruitmentMatchingIndicators
             return new MatchingIndicator($key, Outcome::Unknown, 'experience_'.$state, ['required' => $required], ['required' => $required]);
         }
 
-        $range = config('recruitment.indicators.experience_ranges.'.$value);
+        $range = $this->rules->get('experience_ranges.'.$value);
         $label = $this->optionLabel($application, 'experience_years', $value);
         if (! is_array($range)) {
             return new MatchingIndicator($key, Outcome::Unknown, 'experience_unrecognised', ['value' => $label], ['applicant' => $label, 'required' => $required]);
@@ -242,19 +246,29 @@ class RecruitmentMatchingIndicators
     {
         $key = 'qualification';
         $text = trim((string) $this->detail($application)?->required_qualifications);
+        $ranks = $this->rules->get('education_ranks', []);
+
+        // The request's own words win; the saved minimum only fills a gap.
+        [$requiredLevel, $keyword] = $text === '' ? [null, null] : $this->requiredLevel($text);
+        $default = $this->rules->get('default_required_qualification');
+        $usesDefault = $requiredLevel === null && is_string($default) && isset($ranks[$default]);
+
+        if ($usesDefault) {
+            $requiredLevel = $default;
+            $keyword = null;
+            $text = $text === '' ? __('recruitment-applicant.indicators.default_minimum') : $text;
+        }
 
         if ($text === '') {
             return new MatchingIndicator($key, Outcome::NotApplicable, 'qualification_no_requirement');
         }
 
         $excerpt = Str::limit($text, 160);
-        [$requiredLevel, $keyword] = $this->requiredLevel($text);
 
         if ($requiredLevel === null) {
             return new MatchingIndicator($key, Outcome::Unknown, 'qualification_unrecognised', ['requirement' => $excerpt], ['requirement' => $excerpt]);
         }
 
-        $ranks = config('recruitment.indicators.education_ranks', []);
         $requiredLabel = __('recruitment-applicant.indicators.levels.'.$requiredLevel);
 
         [$state, $value] = $this->answer($application, 'education_level');
@@ -269,10 +283,11 @@ class RecruitmentMatchingIndicators
 
         $params = ['answer' => $label, 'required' => $requiredLabel, 'keyword' => $keyword];
         $evidence = ['applicant' => $label, 'required' => $requiredLabel, 'requirement' => $excerpt];
+        $suffix = $usesDefault ? '_default' : '';
 
         return $ranks[$value] >= $ranks[$requiredLevel]
-            ? new MatchingIndicator($key, Outcome::Met, 'qualification_met', $params, $evidence)
-            : new MatchingIndicator($key, Outcome::NotMet, 'qualification_below', $params, $evidence);
+            ? new MatchingIndicator($key, Outcome::Met, 'qualification_met'.$suffix, $params, $evidence)
+            : new MatchingIndicator($key, Outcome::NotMet, 'qualification_below'.$suffix, $params, $evidence);
     }
 
     /** Self-declared, and labelled as such: nothing here checks the CV. */
@@ -284,7 +299,7 @@ class RecruitmentMatchingIndicators
         if ($fieldState === 'answered') {
             $label = $this->optionLabel($application, 'experience_field', $field);
 
-            return in_array($field, config('recruitment.indicators.no_experience_answers', []), true)
+            return in_array($field, $this->rules->get('no_experience_answers', []), true)
                 ? new MatchingIndicator($key, Outcome::NotMet, 'industry_none_declared', ['field' => $label], ['applicant' => $label])
                 : new MatchingIndicator($key, Outcome::Met, 'industry_declared', ['field' => $label], ['applicant' => $label]);
         }
@@ -338,7 +353,7 @@ class RecruitmentMatchingIndicators
      */
     private function answer(RecruitmentApplication $application, string $role): array
     {
-        $fieldKey = (string) config('recruitment.indicators.fields.'.$role, $role);
+        $fieldKey = (string) $this->rules->get('fields.'.$role, $role);
         $answer = $application->answers->firstWhere('field_key', $fieldKey);
         $value = $answer?->answer_json['value'] ?? null;
 
@@ -369,7 +384,7 @@ class RecruitmentMatchingIndicators
     /** The option's label as the form version showed it, or the raw value. */
     private function optionLabel(RecruitmentApplication $application, string $role, string $value): string
     {
-        $field = $this->formField($application, (string) config('recruitment.indicators.fields.'.$role, $role));
+        $field = $this->formField($application, (string) $this->rules->get('fields.'.$role, $role));
 
         foreach ((array) ($field['options'] ?? []) as $option) {
             if (is_array($option) && (string) ($option['value'] ?? '') === $value) {
@@ -395,7 +410,7 @@ class RecruitmentMatchingIndicators
     {
         [$state, $preferred] = $this->answer($application, 'preferred_city');
         if ($state === 'answered') {
-            $slug = config('recruitment.indicators.city_answers.'.$preferred);
+            $slug = $this->rules->get('city_answers.'.$preferred);
             $city = is_string($slug) ? $this->cityBySlug($slug) : null;
 
             if ($city !== null) {
@@ -424,11 +439,11 @@ class RecruitmentMatchingIndicators
     private function requiredLevel(string $text): array
     {
         $haystack = mb_strtolower($text);
-        $ranks = config('recruitment.indicators.education_ranks', []);
+        $ranks = $this->rules->get('education_ranks', []);
         $found = null;
         $foundKeyword = null;
 
-        foreach (config('recruitment.indicators.qualification_keywords', []) as $level => $keywords) {
+        foreach ($this->rules->get('qualification_keywords', []) as $level => $keywords) {
             foreach ((array) $keywords as $keyword) {
                 if (! isset($ranks[$level]) || ! str_contains($haystack, mb_strtolower((string) $keyword))) {
                     continue;

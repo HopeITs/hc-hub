@@ -14,7 +14,7 @@
     };
 @endphp
 <x-mail::message>
-<div dir="rtl" style="text-align: right;">
+<div dir="rtl" lang="ar" style="text-align: right;">
 
 {{ $lines('ar')['greeting'] }}
 
@@ -40,6 +40,8 @@
 
 ---
 
+<div dir="ltr" lang="en" style="text-align: left;">
+
 {{ $lines('en')['greeting'] }}
 
 {{ $lines('en')['body'] }}
@@ -59,4 +61,6 @@
 {{ __('recruitment-applicant.interviews.mail.closing.'.$kind, [], 'en') }}
 
 {{ __('recruitment-applicant.interviews.mail.signature', [], 'en') }}
+
+</div>
 </x-mail::message>

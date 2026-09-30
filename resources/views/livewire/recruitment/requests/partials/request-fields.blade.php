@@ -10,12 +10,16 @@
     convenience, never the guard: the service re-derives the same sets and
     refuses anything outside them.
 --}}
-        <section class="space-y-5 rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="space-y-5 rounded-surface border border-secondary-soft bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.request_scope') }}</h2>
             @php
                 $type = (int) ($data['request_type'] ?? 0);
                 $newPosition = $type === \App\Enums\RecruitmentRequestType::CreatePosition;
-                $types = collect(\App\Enums\RecruitmentRequestType::getValues())->reject(fn ($value) => $value === 0)
+                $types = collect(\App\Enums\RecruitmentRequestType::getValues())
+                    ->reject(fn ($value) => in_array($value, [
+                        \App\Enums\RecruitmentRequestType::Unknown,
+                        \App\Enums\RecruitmentRequestType::DecreaseHeadcount,
+                    ], true))
                     ->mapWithKeys(fn ($value) => [$value => \App\Enums\RecruitmentRequestType::getLocalizedName($value)['value']])->all();
                 $positionOptions = $positions->mapWithKeys(fn ($position) => [$position->id => $position->title.' · '.$position->program?->name.' · '.$position->city?->name])->all();
             @endphp
@@ -23,12 +27,12 @@
             @include('livewire.recruitment.requests.partials.select', ['field' => $newPosition ? 'direct_manager_id' : 'position_id', 'label' => $newPosition ? 'parent_position' : 'position', 'options' => $positionOptions, 'required' => true])
             <p class="text-sm text-secondary-medium">{{ __($newPosition ? 'recruitment.parent_help' : 'recruitment.target_help') }}</p>
             @if ($positions->isEmpty())<p role="status" class="text-sm text-primary">{{ __('recruitment.no_targets') }}</p>@endif
-            @if ($type === \App\Enums\RecruitmentRequestType::CloseVacancy || ($type === \App\Enums\RecruitmentRequestType::FillVacancy && $vacancies->count() > 1))
+            @if ($type === \App\Enums\RecruitmentRequestType::FillVacancy && $vacancies->count() > 1)
                 @include('livewire.recruitment.requests.partials.select', ['field' => 'vacancy_id', 'label' => 'vacancy', 'options' => $vacancies->mapWithKeys(fn ($vacancy) => [$vacancy->id => __('recruitment.vacancy').' #'.$vacancy->id.' · '.__('recruitment.remaining_slots', ['count' => $vacancy->needed_count - $vacancy->filled_count])])->all(), 'required' => true])
             @endif
         </section>
         @if ($newPosition)
-            <section class="space-y-5 rounded-surface border border-neutral-200 bg-white p-6">
+            <section class="space-y-5 rounded-surface border border-secondary-soft bg-white p-6">
                 <h2 class="text-h4 font-semibold">{{ __('recruitment.proposed_position') }}</h2>
                 <div class="grid gap-5 sm:grid-cols-2">
                     @include('livewire.recruitment.requests.partials.select', ['field' => 'city_id', 'label' => 'city', 'options' => $cities->pluck('name', 'id')->all(), 'required' => true])
@@ -46,7 +50,7 @@
                 @endforeach
             </section>
         @endif
-        <section class="space-y-5 rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="space-y-5 rounded-surface border border-secondary-soft bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.request_content') }}</h2>
             @if (in_array($type, [1, 2, 4], true))
                 @php
@@ -76,7 +80,7 @@
             @if (in_array($type, [3, 5, 6], true))
                 @include('livewire.recruitment.requests.partials.textarea', ['field' => 'reason'])
             @endif
-            @if (in_array($type, [3, 5], true))
+            @if (in_array($type, [3, 5, 6], true))
                 @include('livewire.recruitment.requests.partials.input', ['field' => 'effective_date', 'inputType' => 'date'])
             @endif
             @if (in_array($type, [1, 2, 4], true))

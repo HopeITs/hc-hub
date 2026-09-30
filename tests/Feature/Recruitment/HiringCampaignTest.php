@@ -134,6 +134,21 @@ class HiringCampaignTest extends TestCase
         }
     }
 
+    public function test_date_windows_store_the_start_of_the_start_date_and_end_of_the_end_date(): void
+    {
+        [$hr, $vacancy] = $this->seat();
+        $start = now()->addDays(2)->toDateString();
+        $end = now()->addDays(20)->toDateString();
+
+        $campaign = $this->campaigns->create($hr, $vacancy, [
+            'starts_at' => $start,
+            'ends_at' => $end,
+        ]);
+
+        $this->assertSame($start.' 00:00:00', $campaign->starts_at->format('Y-m-d H:i:s'));
+        $this->assertSame($end.' 23:59:59', $campaign->ends_at->format('Y-m-d H:i:s'));
+    }
+
     public function test_opening_then_closing_a_campaign(): void
     {
         [$hr, $campaign] = $this->openCampaign();

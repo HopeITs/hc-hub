@@ -47,3 +47,8 @@ Schedule::command(SweepRecruitmentRetention::class)->dailyAt('02:15')->withoutOv
 Schedule::call(function () {
     Log::info('الكرون جوب يعمل بنجاح!');
 })->daily();
+// The queue worker, for hosting without Supervisor: every minute a worker
+// drains the queue and exits. Last in the file so the commands above are
+// never held up behind it. The lock outlives the slowest job
+// (AnalyzeRecruitmentCv, 300s timeout), so two workers never overlap.
+Schedule::command('queue:work --stop-when-empty --max-time=50')->everyMinute()->withoutOverlapping(10);

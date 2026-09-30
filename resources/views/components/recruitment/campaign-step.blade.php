@@ -15,14 +15,14 @@
 <li {{ $attributes->class([
     'scroll-mt-24 rounded-surface border bg-white p-5 shadow-e1 transition sm:p-6',
     'border-primary' => $current && ! $locked,
-    'border-neutral-200' => ! $current || $locked,
+    'border-secondary-soft' => ! $current || $locked,
 ]) }}>
     <div class="flex items-start gap-4">
         <span @class([
             'flex size-9 shrink-0 items-center justify-center rounded-full text-body font-bold',
             'bg-primary text-white' => $done,
             'border-2 border-primary bg-white text-primary' => ! $done && $current && ! $locked,
-            'border border-neutral-300 bg-neutral-50 text-secondary-light' => ! $done && (! $current || $locked),
+            'border border-secondary-light bg-secondary-soft/30 text-secondary-light' => ! $done && (! $current || $locked),
         ]) aria-hidden="true">
             @if ($done)
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="m5 13 4 4L19 7"/></svg>
@@ -34,13 +34,18 @@
         </span>
 
         <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <h3 class="text-subtitle font-bold text-neutral-800">{{ $title }}</h3>
+            <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                    <h3 class="text-subtitle font-bold text-secondary-dark">{{ $title }}</h3>
+                    @if ($summary)
+                        <p class="mt-1 text-body text-secondary-medium">{{ $summary }}</p>
+                    @endif
+                </div>
                 <span @class([
-                    'rounded-full px-2.5 py-0.5 text-small font-semibold',
+                    'shrink-0 rounded-full px-2.5 py-0.5 text-small font-semibold',
                     'bg-primary text-white' => $done,
                     'border border-primary text-primary' => ! $done && $current && ! $locked,
-                    'bg-neutral-100 text-secondary-medium' => ! $done && (! $current || $locked),
+                    'bg-secondary-soft/60 text-secondary-medium' => ! $done && (! $current || $locked),
                 ])>
                     @if ($done)
                         {{ __('recruitment-campaign.page.done') }}
@@ -53,9 +58,6 @@
                     @endif
                 </span>
             </div>
-            @if ($summary)
-                <p class="mt-1 text-body text-secondary-medium">{{ $summary }}</p>
-            @endif
 
             <div class="mt-4">
                 {{ $slot }}

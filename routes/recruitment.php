@@ -10,6 +10,7 @@ use App\Livewire\Recruitment\Campaigns\Create as CampaignCreate;
 use App\Livewire\Recruitment\Campaigns\Index as CampaignIndex;
 use App\Livewire\Recruitment\Campaigns\Invites;
 use App\Livewire\Recruitment\Campaigns\Show as CampaignShow;
+use App\Livewire\Recruitment\Indicators\Rules as IndicatorRules;
 use App\Livewire\Recruitment\Interviews\Form as InterviewForm;
 use App\Livewire\Recruitment\Interviews\Index as InterviewIndex;
 use App\Livewire\Recruitment\Interviews\Show as InterviewShow;
@@ -133,3 +134,10 @@ Route::get('recruitment/campaigns/{campaignId}/invites', Invites::class)
     ->whereNumber('campaignId')
     ->middleware('active_permission:recruitment-applicants.manage')
     ->name('recruitment.campaigns.invites');
+
+// HR's editor for the matching-indicator rules. The action methods are guarded
+// by the 'livewire' map in config/access-control.php, and the component checks
+// the permission itself as well.
+Route::get('recruitment/indicator-rules', IndicatorRules::class)
+    ->middleware('active_permission:recruitment-indicators.manage')
+    ->name('recruitment.indicator-rules');

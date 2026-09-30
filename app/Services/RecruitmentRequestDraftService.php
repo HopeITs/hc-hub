@@ -11,6 +11,7 @@ use App\Enums\RecruitmentScopeType;
 use App\Enums\SalaryPer;
 use App\Models\Center;
 use App\Models\City;
+use App\Models\ContractType;
 use App\Models\Position;
 use App\Models\Program;
 use App\Models\RecruitmentRequest;
@@ -210,12 +211,19 @@ class RecruitmentRequestDraftService
                 'salary_amount' => ['required', 'integer', 'min:0'],
                 'currency' => ['required', 'integer', Rule::in([Currency::SYP, Currency::USD, Currency::EUR])],
                 'salary_per' => ['required', 'integer', Rule::in([SalaryPer::Month, SalaryPer::Hour, SalaryPer::Session])],
-                'contract_type_id' => ['required', 'integer', 'exists:contract_types,id'],
+                'contract_type_id' => [
+                    'required',
+                    'integer',
+                    Rule::exists(ContractType::class, 'id')->whereIn(
+                        'name_en',
+                        config('recruitment.request_form.contract_types', []),
+                    ),
+                ],
                 'detailed_explanation' => ['required', 'string'],
             ];
         }
-        if (in_array($type, [Type::FillVacancy, Type::CloseVacancy], true)) {
-            $rules['vacancy_id'] = [$type === Type::CloseVacancy ? 'required' : 'nullable', 'integer'];
+        if ($type === Type::FillVacancy) {
+            $rules['vacancy_id'] = ['nullable', 'integer'];
         }
         if ($type === Type::IncreaseHeadcount) {
             $rules['additional_count'] = ['required', 'integer', 'min:1'];
@@ -226,7 +234,7 @@ class RecruitmentRequestDraftService
         if (in_array($type, [Type::DecreaseHeadcount, Type::ClosePosition, Type::CloseVacancy], true)) {
             $rules['reason'] = ['required', 'string'];
         }
-        if (in_array($type, [Type::DecreaseHeadcount, Type::ClosePosition], true)) {
+        if (in_array($type, [Type::DecreaseHeadcount, Type::ClosePosition, Type::CloseVacancy], true)) {
             $rules['effective_date'] = ['required', 'date_format:Y-m-d'];
         }
 
@@ -307,6 +315,13 @@ class RecruitmentRequestDraftService
             ]);
         }
 
+        if ($data['request_type'] === Type::CloseVacancy
+            && (int) $target->max_emp <= (int) $target->exist_emp) {
+            throw ValidationException::withMessages([
+                'data.position_id' => __('recruitment.no_vacant_position'),
+            ]);
+        }
+
         if ($data['request_type'] === Type::ClosePosition
             && ((int) $target->exist_emp > 0 || $target->activeContracts()->exists())) {
             throw ValidationException::withMessages([
@@ -339,7 +354,6 @@ class RecruitmentRequestDraftService
         } elseif (! empty($data['vacancy_id'])) {
             // Vacancy visibility is still D30/D42, independent of D49's position selector.
             $vacancy = Vacancy::query()->visibleTo($actor)
-                ->when($data['request_type'] === Type::CloseVacancy, fn ($query) => $query->available())
                 ->where('position_id', $target->id)
                 ->whereKey($data['vacancy_id'])->lockForUpdate()->first();
 

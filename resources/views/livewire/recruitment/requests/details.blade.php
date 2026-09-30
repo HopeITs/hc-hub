@@ -2,18 +2,19 @@
 
 <div class="space-y-6">
     <a class="text-primary hover:underline" href="{{ route('recruitment.requests.index') }}">{{ __('recruitment.back') }}</a>
+
     <header class="flex flex-wrap items-start justify-between gap-4">
         <div>
             <p class="text-secondary-medium">{{ __('recruitment.details') }}</p>
-            <h1 class="text-h2 font-semibold text-neutral-900" dir="auto">{{ $request->request_number }}</h1>
+            <h1 class="text-h2 font-semibold text-secondary-dark" dir="auto">{{ $request->request_number }}</h1>
         </div>
         <div class="flex flex-wrap items-center gap-3">
-            <span class="rounded-full bg-neutral-100 px-4 py-2 text-sm font-semibold">{{ \App\Enums\RecruitmentRequestStatus::getLocalizedName($request->status)['value'] }}</span>
+            <span class="rounded-full bg-secondary-soft/60 px-4 py-2 text-sm font-semibold">{{ \App\Enums\RecruitmentRequestStatus::getLocalizedName($request->status)['value'] }}</span>
             @can('update', $request)
-                <a class="rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50" href="{{ route('recruitment.requests.edit', ['requestId' => $request->id]) }}">{{ __('recruitment.edit') }}</a>
+                <a class="rounded-control border border-secondary-light px-4 py-2 text-sm font-semibold hover:bg-secondary-soft/30" href="{{ route('recruitment.requests.edit', ['requestId' => $request->id]) }}">{{ __('recruitment.edit') }}</a>
             @endcan
             @can('cancel', $request)
-                <button type="button" class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'cancelRequest', message: @js(__('recruitment.confirm_cancel')), confirmLabel: @js(__('recruitment.cancel_request')), tone: 'danger' })">{{ __('recruitment.cancel_request') }}</button>
+                <button type="button" class="cursor-pointer rounded-control border border-secondary-light px-4 py-2 text-sm font-semibold hover:bg-secondary-soft/30" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'cancelRequest', message: @js(__('recruitment.confirm_cancel')), confirmLabel: @js(__('recruitment.cancel_request')), tone: 'danger' })">{{ __('recruitment.cancel_request') }}</button>
             @endcan
             @can('submit', $request)
                 {{-- Disabled while in flight so a double click cannot fire twice; the
@@ -28,12 +29,11 @@
             @endif
         </div>
     </header>
-    @include('livewire.recruitment.requests.partials.approval-track')
 
     @if ($pendingStep)
         {{-- Shown only to the approver this step is waiting on. The service asks
              the same six questions again, so this is convenience, not a guard. --}}
-        <section class="rounded-surface border border-neutral-200 bg-white p-6" aria-label="{{ __('recruitment.your_decision') }}">
+        <section class="rounded-surface border border-secondary-soft bg-white p-6" aria-label="{{ __('recruitment.your_decision') }}">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.your_decision') }}</h2>
             <p class="mt-1 text-sm text-secondary-medium">{{ \App\Enums\WorkflowStepKey::getLocalizedName((int) $pendingStep->workflowStep?->step_key)['value'] }}</p>
 
@@ -49,19 +49,19 @@
                     </x-primary-button>
 
                     <button type="button"
-                        class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50"
+                        class="cursor-pointer rounded-control border border-secondary-light px-4 py-2 text-sm font-semibold hover:bg-secondary-soft/30"
                         wire:click="askForChanges">
                         {{ __('recruitment.request_changes') }}
                     </button>
 
                     <button type="button"
-                        class="cursor-pointer rounded-control border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50"
+                        class="cursor-pointer rounded-control border border-primary/30 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5"
                         x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'decide', args: ['reject'], message: @js(__('recruitment.confirm_reject')), confirmLabel: @js(__('recruitment.reject_action')), tone: 'danger' })">
                         {{ __('recruitment.reject_action') }}
                     </button>
                 </div>
 
-                <p class="mt-2 text-sm text-red-600">@error('step'){{ $message }}@enderror @error('version'){{ $message }}@enderror @error('request'){{ $message }}@enderror @error('comment'){{ $message }}@enderror</p>
+                <p class="mt-2 text-sm text-primary">@error('step'){{ $message }}@enderror @error('version'){{ $message }}@enderror @error('request'){{ $message }}@enderror @error('comment'){{ $message }}@enderror</p>
             @else
                 {{-- Step two: name the fields, say why, send it back. --}}
                 <fieldset class="mt-4">
@@ -71,19 +71,19 @@
                         @foreach ($selectableFields as $field)
                             <label class="flex items-center gap-2 text-sm" wire:key="unlock-{{ $field }}">
                                 <input type="checkbox" value="{{ $field }}" wire:model="requestedFields"
-                                    class="rounded border-neutral-300 text-primary">
+                                    class="rounded border-secondary-light text-primary">
                                 <span>{{ __('recruitment.fields.'.$field) }}</span>
                             </label>
                         @endforeach
                     </div>
-                    <p class="mt-1 text-sm text-red-600">@error('fields'){{ $message }}@enderror</p>
+                    <p class="mt-1 text-sm text-primary">@error('fields'){{ $message }}@enderror</p>
                 </fieldset>
 
                 <div class="mt-4">
                     <x-forms.input-label for="decisionComment" required>{{ __('recruitment.decision_comment') }}</x-forms.input-label>
                     <textarea id="decisionComment" rows="3" wire:model="decisionComment"
-                        class="mt-1 w-full rounded-control border-neutral-300" dir="auto"></textarea>
-                    <p class="mt-1 text-sm text-red-600">@error('comment'){{ $message }}@enderror @error('step'){{ $message }}@enderror @error('version'){{ $message }}@enderror @error('request'){{ $message }}@enderror</p>
+                        class="mt-1 w-full rounded-control border-secondary-light" dir="auto"></textarea>
+                    <p class="mt-1 text-sm text-primary">@error('comment'){{ $message }}@enderror @error('step'){{ $message }}@enderror @error('version'){{ $message }}@enderror @error('request'){{ $message }}@enderror</p>
                 </div>
 
                 <div class="mt-4 flex flex-wrap gap-3">
@@ -93,7 +93,7 @@
                     </x-primary-button>
 
                     <button type="button"
-                        class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50"
+                        class="cursor-pointer rounded-control border border-secondary-light px-4 py-2 text-sm font-semibold hover:bg-secondary-soft/30"
                         wire:click="cancelChangeRequest">
                         {{ __('recruitment.back_to_decisions') }}
                     </button>
@@ -101,15 +101,18 @@
             @endif
         </section>
     @endif
+
+    @include('livewire.recruitment.requests.partials.approval-track')
+
     @if ($unlockedFields && (int) $request->status === \App\Enums\RecruitmentRequestStatus::ChangesRequested)
         {{-- The requester's side of the same ask: everything else on the
              request stays locked, and the server refuses it either way. --}}
-        <section class="rounded-surface border border-neutral-200 bg-white p-6" aria-label="{{ __('recruitment.fields_you_may_edit') }}">
+        <section class="rounded-surface border border-secondary-soft bg-white p-6" aria-label="{{ __('recruitment.fields_you_may_edit') }}">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.fields_you_may_edit') }}</h2>
             <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment.fields_you_may_edit_hint') }}</p>
             <ul class="mt-2 flex flex-wrap gap-2">
                 @foreach ($unlockedFields as $field)
-                    <li class="rounded-control border border-neutral-200 px-2 py-1 text-sm font-medium">{{ __('recruitment.fields.'.$field) }}</li>
+                    <li class="rounded-control border border-secondary-soft px-2 py-1 text-sm font-medium">{{ __('recruitment.fields.'.$field) }}</li>
                 @endforeach
             </ul>
         </section>
@@ -118,15 +121,15 @@
         {{-- The decision is made; the change has not happened. A reduction or a
              closure dated ahead waits for that date, and until then the post is
              still open. Saying so here is the only place anyone would learn it. --}}
-        <section class="rounded-surface border border-blue-200 bg-blue-50 p-6" aria-label="{{ __('recruitment.awaiting_execution') }}">
-            <h2 class="text-h4 font-semibold text-blue-900">{{ __('recruitment.awaiting_execution') }}</h2>
+        <section class="rounded-surface border border-secondary-light bg-secondary-soft/60 p-6" aria-label="{{ __('recruitment.awaiting_execution') }}">
+            <h2 class="text-h4 font-semibold text-secondary-dark">{{ __('recruitment.awaiting_execution') }}</h2>
             @if ($effectiveDate)
-                <p class="mt-1 text-sm text-blue-800">{{ __('recruitment.effective_on', ['date' => $effectiveDate->toDateString()]) }}</p>
+                <p class="mt-1 text-sm text-secondary-dark">{{ __('recruitment.effective_on', ['date' => $effectiveDate->toDateString()]) }}</p>
             @endif
             @if ($mayExecuteNow)
                 <div class="mt-4">
                     <button type="button"
-                        class="rounded-control border border-blue-300 bg-white px-4 py-2 text-sm font-semibold text-blue-800 hover:bg-blue-100"
+                        class="rounded-control border border-secondary-light bg-white px-4 py-2 text-sm font-semibold text-secondary-dark hover:bg-secondary-soft/60"
                         x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'executeNow', message: @js(__('recruitment.confirm_execute_now')), confirmLabel: @js(__('recruitment.execute_now')) })">{{ __('recruitment.execute_now') }}</button>
                 </div>
             @endif
@@ -134,13 +137,13 @@
     @endif
     @if ($previousRejections->isNotEmpty())
         {{-- D61: context for whoever reads the request, never a reason to hide it. --}}
-        <section role="note" class="rounded-surface border border-neutral-200 bg-white p-6" aria-label="{{ __('recruitment.previous_rejections') }}">
-            <h2 class="text-h4 font-semibold text-amber-900">{{ __('recruitment.previous_rejections') }}</h2>
-            <p class="mt-1 text-sm text-amber-800">{{ __('recruitment.previous_rejections_help') }}</p>
+        <section role="note" class="rounded-surface border border-secondary-soft bg-white p-6" aria-label="{{ __('recruitment.previous_rejections') }}">
+            <h2 class="text-h4 font-semibold text-secondary-dark">{{ __('recruitment.previous_rejections') }}</h2>
+            <p class="mt-1 text-sm text-secondary-dark">{{ __('recruitment.previous_rejections_help') }}</p>
             <ul class="mt-4 space-y-3">
                 @foreach ($previousRejections as $rejected)
                     @php $decision = $rejected->events->first(); @endphp
-                    <li class="rounded-control border border-amber-200 bg-white p-4" wire:key="rejection-{{ $rejected->id }}">
+                    <li class="rounded-control border border-secondary-light bg-white p-4" wire:key="rejection-{{ $rejected->id }}">
                         <div class="flex flex-wrap items-baseline justify-between gap-2">
                             <span class="font-semibold" dir="auto">{{ $rejected->request_number }}</span>
                             <time class="text-sm text-secondary-medium" datetime="{{ ($decision?->created_at ?? $rejected->updated_at)?->toIso8601String() }}">{{ ($decision?->created_at ?? $rejected->updated_at)?->format('Y-m-d') }}</time>
@@ -161,7 +164,7 @@
             </ul>
         </section>
     @endif
-    <section class="rounded-surface border border-neutral-200 bg-white p-6" aria-label="{{ __('recruitment.details') }}">
+    <section class="rounded-surface border border-secondary-soft bg-white p-6" aria-label="{{ __('recruitment.details') }}">
         <dl class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             @foreach ([
                 'type' => \App\Enums\RecruitmentRequestType::getLocalizedName($request->request_type)['value'],
@@ -177,7 +180,7 @@
         </dl>
     </section>
     @if ($request->status === \App\Enums\RecruitmentRequestStatus::Draft)
-        <section class="rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="rounded-surface border border-secondary-soft bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.draft_content') }}</h2>
             <dl class="mt-4 grid gap-6 sm:grid-cols-2">
                 @php
@@ -201,7 +204,7 @@
         </section>
     @endif
     @if ($version?->positionDetail)
-        <section class="rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="rounded-surface border border-secondary-soft bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.version', ['number' => $version->version_no]) }}</h2>
             <dl class="mt-4 grid gap-6 sm:grid-cols-2">
                 @php
@@ -221,9 +224,9 @@
         </section>
     @endif
     <div class="grid items-start gap-6 lg:grid-cols-2">
-        <section class="rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="rounded-surface border border-secondary-soft bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.versions') }}</h2>
-            <ul class="mt-4 divide-y divide-neutral-100">
+            <ul class="mt-4 divide-y divide-secondary-soft">
                 @forelse ($request->versions as $savedVersion)
                     <li class="flex flex-wrap justify-between gap-2 py-3" wire:key="version-{{ $savedVersion->id }}">
                         <button type="button" class="text-primary hover:underline" wire:click="$set('versionId', {{ $savedVersion->id }})" aria-pressed="{{ $version?->id === $savedVersion->id ? 'true' : 'false' }}">{{ __('recruitment.version', ['number' => $savedVersion->version_no]) }}</button>
@@ -235,11 +238,11 @@
             </ul>
         </section>
     </div>
-    <section class="rounded-surface border border-neutral-200 bg-white p-6">
+    <section class="rounded-surface border border-secondary-soft bg-white p-6">
         <h2 class="text-h4 font-semibold">{{ __('recruitment.comments') }}</h2>
         <div class="mt-4 space-y-4">
             @forelse ($request->comments as $comment)
-                <article class="border-s-2 border-neutral-200 ps-4" wire:key="comment-{{ $comment->id }}">
+                <article class="border-s-2 border-secondary-soft ps-4" wire:key="comment-{{ $comment->id }}">
                     <p class="text-sm text-secondary-medium">{{ $comment->user?->profile?->name ?? $comment->user?->name }} · {{ $comment->created_at?->format('Y-m-d H:i') }}</p>
                     <p class="mt-2 whitespace-pre-wrap break-words" dir="auto">{{ $comment->body }}</p>
                 </article>
@@ -249,13 +252,13 @@
         </div>
     </section>
     @if ($request->mode === \App\Enums\RecruitmentRequestMode::DirectHr)
-        <section class="rounded-surface border border-neutral-200 bg-white p-6">
+        <section class="rounded-surface border border-secondary-soft bg-white p-6">
             <h2 class="text-h4 font-semibold">{{ __('recruitment.external_confirmations') }}</h2>
             <p class="mt-2 text-secondary-medium">{{ __('recruitment.external_description') }}</p>
             <p class="mt-4 whitespace-pre-wrap break-words" dir="auto">{{ $request->direct_open_reason }}</p>
             <ul class="mt-4 space-y-4">
                 @forelse ($request->externalConfirmations as $confirmation)
-                    <li class="border-s-2 border-neutral-200 ps-4" wire:key="confirmation-{{ $confirmation->id }}">
+                    <li class="border-s-2 border-secondary-soft ps-4" wire:key="confirmation-{{ $confirmation->id }}">
                         <p>{{ \App\Enums\ExternalConfirmationDecision::getLocalizedName($confirmation->decision)['value'] }}</p>
                         @if ($confirmation->decision === \App\Enums\ExternalConfirmationDecision::NotApplicable)
                             <p class="whitespace-pre-wrap break-words" dir="auto">{{ $confirmation->not_applicable_reason }}</p>

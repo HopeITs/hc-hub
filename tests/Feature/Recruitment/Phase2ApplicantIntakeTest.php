@@ -33,6 +33,7 @@ use App\Policies\RecruitmentApplicantPolicy;
 use App\Policies\RecruitmentApplicationPolicy;
 use App\Policies\RecruitmentCampaignInvitePolicy;
 use App\Services\PublicRecruitmentLinkService;
+use App\Services\RecruitmentApplicantIdentityService;
 use App\Services\RecruitmentCampaignInviteService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -100,7 +101,7 @@ class Phase2ApplicantIntakeTest extends TestCase
     {
         [$campaign, , $token] = $this->campaignWithLink();
 
-        $this->submit($token, $this->answers('Applicant@Example.com'))->assertStatus(202);
+        $this->submit($token, $this->answers('Applicant@Example.com'))->assertRedirect();
 
         $application = RecruitmentApplication::query()->sole();
         $this->assertSame(RecruitmentApplicationStatus::Submitted, $application->status);
@@ -117,7 +118,7 @@ class Phase2ApplicantIntakeTest extends TestCase
     public function test_a_submission_writes_an_audit_entry_without_personal_data(): void
     {
         [, , $token] = $this->campaignWithLink();
-        $this->submit($token, $this->answers('audit@example.com'))->assertStatus(202);
+        $this->submit($token, $this->answers('audit@example.com'))->assertRedirect();
 
         $entry = DB::table('activity_log')->where('description', 'recruitment_application_submitted')->sole();
         $this->assertSame(RecruitmentApplication::query()->sole()->id, (int) $entry->subject_id);
@@ -131,8 +132,8 @@ class Phase2ApplicantIntakeTest extends TestCase
         [, , $token] = $this->campaignWithLink();
         $key = bin2hex(random_bytes(32));
 
-        $this->submit($token, $this->answers('retry@example.com'), $key)->assertStatus(202);
-        $this->submit($token, $this->answers('retry@example.com'), $key)->assertStatus(202);
+        $this->submit($token, $this->answers('retry@example.com'), $key)->assertRedirect();
+        $this->submit($token, $this->answers('retry@example.com'), $key)->assertRedirect();
 
         $this->assertSame(1, RecruitmentApplication::query()->count());
     }
@@ -142,7 +143,7 @@ class Phase2ApplicantIntakeTest extends TestCase
     {
         [, , $token] = $this->campaignWithLink();
 
-        $this->submit($token, $this->answers('twice@example.com'))->assertStatus(202);
+        $this->submit($token, $this->answers('twice@example.com'))->assertRedirect();
         $this->submit($token, $this->answers('  TWICE@Example.com '))
             ->assertUnprocessable()
             ->assertSee(__('careers.generic_submission_error'));
@@ -156,11 +157,105 @@ class Phase2ApplicantIntakeTest extends TestCase
         [, , $first] = $this->campaignWithLink();
         [, , $second] = $this->campaignWithLink();
 
-        $this->submit($first, $this->answers('both@example.com'))->assertStatus(202);
-        $this->submit($second, $this->answers('Both@Example.com'))->assertStatus(202);
+        $this->submit($first, $this->answers('both@example.com'))->assertRedirect();
+        $this->submit($second, $this->answers('Both@Example.com'))->assertRedirect();
 
         $this->assertSame(1, RecruitmentApplicant::query()->count());
         $this->assertSame(2, RecruitmentApplication::query()->count());
+    }
+
+    /**
+     * The form cannot tell the owner of an email from someone typing it, so a
+     * second submission must not rewrite the person HR already has on file —
+     * otherwise applying to any campaign with a known address would redirect
+     * that person's interview call to someone else's phone.
+     */
+    public function test_a_later_submission_cannot_rewrite_an_existing_applicants_name_or_phone(): void
+    {
+        [, , $first] = $this->campaignWithLink();
+        [, , $second] = $this->campaignWithLink();
+
+        $this->submit($first, $this->answers('victim@example.com', 'Real Person', '+963 111 111 111'))->assertStatus(202);
+        $this->submit($second, $this->answers('VICTIM@example.com', 'Someone Else', '+963 999 999 999'))->assertStatus(202);
+
+        $applicant = RecruitmentApplicant::query()->sole();
+        $this->assertSame('Real Person', $applicant->full_name);
+        $this->assertSame('+963111111111', $applicant->phone_normalized);
+        $this->assertSame(2, $applicant->applications()->count());
+    }
+
+    /** Refusing the overwrite must not lose what the second submission said. */
+    public function test_a_refused_overwrite_still_keeps_the_submission_answers(): void
+    {
+        [, , $first] = $this->campaignWithLink();
+        [, , $second] = $this->campaignWithLink();
+
+        $this->submit($first, $this->answers('kept@example.com', 'Real Person', '+963 111 111 111'))->assertStatus(202);
+        $this->submit($second, $this->answers('kept@example.com', 'Someone Else', '+963 999 999 999'))->assertStatus(202);
+
+        $latest = RecruitmentApplication::query()->latest('id')->first();
+        $this->assertSame(['value' => 'Someone Else'], $latest->answers()->where('field_key', 'full_name')->sole()->answer_json);
+        $this->assertSame(['value' => '+963 999 999 999'], $latest->answers()->where('field_key', 'phone')->sole()->answer_json);
+    }
+
+    /** Only what the record has no value for is filled in. */
+    public function test_a_later_submission_fills_a_missing_phone_but_nothing_else(): void
+    {
+        [, , $first] = $this->campaignWithLink();
+        [, , $second] = $this->campaignWithLink();
+
+        $this->submit($first, $this->answers('gap@example.com', 'Real Person', '+963 111 111 111'))->assertStatus(202);
+        RecruitmentApplicant::query()->sole()->forceFill(['phone_normalized' => null])->save();
+
+        $this->submit($second, $this->answers('gap@example.com', 'Someone Else', '+963 999 999 999'))->assertStatus(202);
+
+        $applicant = RecruitmentApplicant::query()->sole();
+        $this->assertSame('Real Person', $applicant->full_name);
+        $this->assertSame('+963999999999', $applicant->phone_normalized);
+    }
+
+    /** A new application restarts the retention clock, but never cancels an erasure request. */
+    public function test_a_later_submission_keeps_a_pending_erasure_request_and_its_date(): void
+    {
+        [, , $first] = $this->campaignWithLink();
+        [, , $second] = $this->campaignWithLink();
+        [, , $third] = $this->campaignWithLink();
+
+        $this->submit($first, $this->answers('erase@example.com'))->assertStatus(202);
+        $requested = now()->subDay()->startOfSecond();
+        $applicant = RecruitmentApplicant::query()->sole();
+        $applicant->forceFill(['retention_until' => now()->addDays(30)])->save();
+
+        // No erasure request: the clock restarts, as before.
+        $this->submit($second, $this->answers('erase@example.com'))->assertStatus(202);
+        $this->assertNull($applicant->fresh()->retention_until);
+
+        $applicant->forceFill(['erasure_requested_at' => $requested, 'retention_until' => $requested])->save();
+        $this->submit($third, $this->answers('erase@example.com'))->assertStatus(202);
+
+        $applicant = $applicant->fresh();
+        $this->assertTrue($requested->equalTo($applicant->erasure_requested_at));
+        $this->assertTrue($requested->equalTo($applicant->retention_until));
+    }
+
+    /** Team 2's intake service writes the same record, so it follows the same rule. */
+    public function test_the_shared_identity_service_only_fills_blanks_for_an_existing_applicant(): void
+    {
+        $identity = app(RecruitmentApplicantIdentityService::class);
+        $identity->findOrCreate(['full_name' => 'Real Person', 'email' => 'shared@example.com', 'phone' => '+963 111 111 111', 'source' => 'public_link']);
+
+        $identity->findOrCreate(['full_name' => 'Someone Else', 'email' => ' SHARED@example.com', 'phone' => '+963 999 999 999', 'source' => 'public_link']);
+
+        $applicant = RecruitmentApplicant::query()->sole();
+        $this->assertSame('Real Person', $applicant->full_name);
+        $this->assertSame('+963111111111', $applicant->phone_normalized);
+
+        $applicant->forceFill(['phone_normalized' => null])->save();
+        $identity->findOrCreate(['full_name' => 'Someone Else', 'email' => 'shared@example.com', 'phone' => '+963 999 999 999', 'source' => 'public_link']);
+
+        $applicant = $applicant->fresh();
+        $this->assertSame('Real Person', $applicant->full_name);
+        $this->assertSame('+963999999999', $applicant->phone_normalized);
     }
 
     /** Task 1: two people with the same name are never merged. */
@@ -168,20 +263,20 @@ class Phase2ApplicantIntakeTest extends TestCase
     {
         [, , $token] = $this->campaignWithLink();
 
-        $this->submit($token, $this->answers('first@example.com', 'Sam Haddad', '0944000001'))->assertStatus(202);
-        $this->submit($token, $this->answers('second@example.com', 'Sam Haddad', '0944000002'))->assertStatus(202);
+        $this->submit($token, $this->answers('first@example.com', 'Sam Haddad', '0944000001'))->assertRedirect();
+        $this->submit($token, $this->answers('second@example.com', 'Sam Haddad', '0944000002'))->assertRedirect();
 
         $this->assertSame(2, RecruitmentApplicant::query()->count());
         $this->assertNull(RecruitmentApplicant::query()->where('email_normalized', 'second@example.com')->value('possible_duplicate_of_applicant_id'));
     }
 
-    /** Task 1: email different, phone the same (typed differently) — flagged, never merged. */
+    /** Task 1: email different, phone the same — flagged, never merged. */
     public function test_a_shared_phone_under_another_email_is_flagged_not_merged(): void
     {
         [, , $token] = $this->campaignWithLink();
 
-        $this->submit($token, $this->answers('owner@example.com', 'Phone Owner', '+963 944 123 456'))->assertStatus(202);
-        $this->submit($token, $this->answers('relative@example.com', 'Relative', '0944123456'))->assertStatus(202);
+        $this->submit($token, $this->answers('owner@example.com', 'Phone Owner', '0944123456'))->assertRedirect();
+        $this->submit($token, $this->answers('relative@example.com', 'Relative', '0944123456'))->assertRedirect();
 
         $owner = RecruitmentApplicant::query()->where('email_normalized', 'owner@example.com')->sole();
         $relative = RecruitmentApplicant::query()->where('email_normalized', 'relative@example.com')->sole();
@@ -191,17 +286,26 @@ class Phase2ApplicantIntakeTest extends TestCase
         $this->assertSame($owner->id, $relative->possible_duplicate_of_applicant_id);
     }
 
-    /** Task 1: email the same, phone different — one applicant, latest phone kept. */
+    /**
+     * Task 1: email the same, phone different — one applicant. The phone on
+     * file stays: nothing proves the second submitter owns the email (see
+     * test_a_later_submission_cannot_rewrite_an_existing_applicants_name_or_phone),
+     * so the new number lives on that application's answers, not on the person.
+     */
     public function test_the_same_email_with_a_new_phone_is_the_same_applicant(): void
     {
         [, , $first] = $this->campaignWithLink();
         [, , $second] = $this->campaignWithLink();
 
-        $this->submit($first, $this->answers('moved@example.com', 'Moved', '0944000111'))->assertStatus(202);
-        $this->submit($second, $this->answers('moved@example.com', 'Moved', '0955000222'))->assertStatus(202);
+        $this->submit($first, $this->answers('moved@example.com', 'Moved', '0944000111'))->assertRedirect();
+        $this->submit($second, $this->answers('moved@example.com', 'Moved', '0955000222'))->assertRedirect();
 
         $applicant = RecruitmentApplicant::query()->sole();
-        $this->assertStringContainsString('0955000222', $applicant->phone_normalized);
+        $this->assertSame('0944000111', $applicant->phone_normalized);
+        $this->assertSame(
+            ['value' => '0955000222'],
+            RecruitmentApplication::query()->latest('id')->first()->answers()->where('field_key', 'phone')->sole()->answer_json,
+        );
     }
 
     /** Task 2: the public cannot set status, campaign_id or score; honeypot trips. */
@@ -259,7 +363,7 @@ class Phase2ApplicantIntakeTest extends TestCase
         ]);
         $campaign->applicationForm->forceFill(['current_version_id' => $newer->id])->save();
 
-        $this->submit($token, $this->answers('frozen@example.com'))->assertStatus(202);
+        $this->submit($token, $this->answers('frozen@example.com'))->assertRedirect();
 
         $this->assertSame($frozen, (int) RecruitmentApplication::query()->sole()->form_version_id);
     }
@@ -274,7 +378,7 @@ class Phase2ApplicantIntakeTest extends TestCase
         [$campaign, $hr, $token] = $this->campaignWithLink(RecruitmentCampaignLinkMode::InvitationOnly);
         $invite = app(PublicRecruitmentLinkService::class)->addInvite($campaign->fresh(), $hr, 'Invited', 'Invited@Example.com');
 
-        $this->submit($token, $this->answers('  INVITED@example.COM '))->assertStatus(202);
+        $this->submit($token, $this->answers('  INVITED@example.COM '))->assertRedirect();
 
         $application = RecruitmentApplication::query()->sole();
         $this->assertSame($invite->id, (int) $application->campaign_invite_id);
@@ -294,7 +398,7 @@ class Phase2ApplicantIntakeTest extends TestCase
         $cancelled = $links->addInvite($campaign->fresh(), $hr, 'Cancelled', 'cancelled@example.com');
         $links->cancelInvite($cancelled, $hr);
 
-        $this->submit($token, $this->answers('used@example.com'))->assertStatus(202);
+        $this->submit($token, $this->answers('used@example.com'))->assertRedirect();
         $storedAfterTheOneValidSubmission = count(Storage::disk('recruitment-quarantine')->allFiles());
 
         foreach (['stranger@example.com', 'cancelled@example.com', 'used@example.com'] as $email) {
@@ -341,7 +445,7 @@ class Phase2ApplicantIntakeTest extends TestCase
         [$campaign, $hr, $token] = $this->campaignWithLink(RecruitmentCampaignLinkMode::InvitationOnly);
         $links = app(PublicRecruitmentLinkService::class);
         $invite = $links->addInvite($campaign->fresh(), $hr, 'Applied', 'applied@example.com');
-        $this->submit($token, $this->answers('applied@example.com'))->assertStatus(202);
+        $this->submit($token, $this->answers('applied@example.com'))->assertRedirect();
         $usedAt = $invite->fresh()->used_at;
 
         $this->assertThrows(fn () => $links->addInvite($campaign->fresh(), $hr, 'Again', 'applied@example.com'), ValidationException::class);
@@ -356,7 +460,7 @@ class Phase2ApplicantIntakeTest extends TestCase
     {
         [$campaign, $hr, $token] = $this->campaignWithLink(RecruitmentCampaignLinkMode::InvitationOnly);
         $invite = app(PublicRecruitmentLinkService::class)->addInvite($campaign->fresh(), $hr, 'Applied', 'applied@example.com');
-        $this->submit($token, $this->answers('applied@example.com'))->assertStatus(202);
+        $this->submit($token, $this->answers('applied@example.com'))->assertRedirect();
 
         Livewire::actingAs($hr)
             ->test(Manager::class, ['campaign' => $campaign->fresh()])
@@ -437,7 +541,7 @@ class Phase2ApplicantIntakeTest extends TestCase
     {
         [$campaign, $hr, $token] = $this->campaignWithLink(RecruitmentCampaignLinkMode::InvitationOnly);
         $invite = app(PublicRecruitmentLinkService::class)->addInvite($campaign->fresh(), $hr, 'Rel', 'rel@example.com');
-        $this->submit($token, $this->answers('rel@example.com'))->assertStatus(202);
+        $this->submit($token, $this->answers('rel@example.com'))->assertRedirect();
 
         $applicant = RecruitmentApplicant::query()->sole();
         $application = $applicant->applications()->sole();
@@ -453,7 +557,7 @@ class Phase2ApplicantIntakeTest extends TestCase
     public function test_the_stored_status_is_one_of_the_controlled_values(): void
     {
         [, , $token] = $this->campaignWithLink();
-        $this->submit($token, $this->answers('status@example.com'))->assertStatus(202);
+        $this->submit($token, $this->answers('status@example.com'))->assertRedirect();
 
         $this->assertContains(RecruitmentApplication::query()->sole()->status, RecruitmentApplicationStatus::values());
     }
@@ -496,7 +600,7 @@ class Phase2ApplicantIntakeTest extends TestCase
     public function test_applicant_data_is_visible_only_inside_the_hr_scope(): void
     {
         [, , $token] = $this->campaignWithLink();
-        $this->submit($token, $this->answers('pii@example.com'))->assertStatus(202);
+        $this->submit($token, $this->answers('pii@example.com'))->assertRedirect();
         $application = RecruitmentApplication::query()->sole();
 
         $sameCity = $this->makeUser($this->city, 'HR-HMS', ['recruitment-applicants.view', 'recruitment-applications.view']);
@@ -531,7 +635,7 @@ class Phase2ApplicantIntakeTest extends TestCase
         $links->addInvite($campaign->fresh(), $hr, 'Person', 'person@example.com');
 
         $this->submit($token, $this->answers('persn@example.com'))->assertUnprocessable();
-        $this->submit($token, $this->answers('person@example.com'))->assertStatus(202);
+        $this->submit($token, $this->answers('person@example.com'))->assertRedirect();
     }
 
     /** Task 1 data integrity: answers cannot exist without an application. */
@@ -653,7 +757,7 @@ class Phase2ApplicantIntakeTest extends TestCase
     }
 
     /** Answers for the fixture form: full_name, email + the locked phone, cv and consent. */
-    private function answers(string $email, string $name = 'Applicant Name', string $phone = '+963 999 123 456'): array
+    private function answers(string $email, string $name = 'Applicant Name', string $phone = '0944123456'): array
     {
         return [
             'full_name' => $name,
