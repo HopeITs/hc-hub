@@ -725,10 +725,11 @@ class RecruitmentHiringConversionTest extends TestCase
 
     private function selected(string $name = 'Candidate One', ?HiringCampaign $campaign = null): RecruitmentApplication
     {
-        $application = $this->applyTo($campaign ?? $this->campaign, $this->makeApplicant($name));
+        // This helper starts after a completed interview; interview coverage
+        // owns the earlier recruitment stages.
+        $application = $this->applyTo($campaign ?? $this->campaign, $this->makeApplicant($name), ['status' => AppStatus::Interviewed]);
         $statuses = app(RecruitmentApplicationStatusService::class);
-        $statuses->change($this->hr, $application, AppStatus::Submitted, AppStatus::Shortlisted, null);
-        $statuses->change($this->hr, $application->fresh(), AppStatus::Shortlisted, AppStatus::Selected, null);
+        $statuses->change($this->hr, $application, AppStatus::Interviewed, AppStatus::Selected, null);
 
         return $application->fresh();
     }

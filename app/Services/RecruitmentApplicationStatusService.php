@@ -89,10 +89,14 @@ class RecruitmentApplicationStatusService
 
     /** @var array<string, array<int, string>> */
     private const TRANSITIONS = [
-        Status::Submitted => [Status::UnderReview, Status::Shortlisted, Status::Rejected],
+        // A submission must be reviewed before it can be shortlisted. This
+        // prevents a recruiter from skipping the initial assessment step.
+        Status::Submitted => [Status::UnderReview, Status::Rejected],
         Status::UnderReview => [Status::Shortlisted, Status::Rejected],
         // Task 7: + InterviewScheduled (first interview scheduled).
-        Status::Shortlisted => [Status::UnderReview, Status::Selected, Status::Rejected, Status::InterviewScheduled],
+        // Selection follows a completed interview; scheduling owns the move
+        // into the interview state, and only Interviewed may be selected.
+        Status::Shortlisted => [Status::UnderReview, Status::Rejected, Status::InterviewScheduled],
         // Task 7: this state had no way out before. Interviewed / Shortlisted
         // are set by the interview service when the last open interview ends
         // or is cancelled; Rejected stays a manual screening decision.

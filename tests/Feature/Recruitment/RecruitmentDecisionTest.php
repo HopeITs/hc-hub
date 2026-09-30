@@ -58,7 +58,7 @@ class RecruitmentDecisionTest extends TestCase
     // Single decisions
     // ------------------------------------------------------------------
 
-    public function test_shortlist_then_accept_is_recorded_in_the_decision_history(): void
+    public function test_a_candidate_must_be_reviewed_before_shortlisting_and_interviewed_before_acceptance(): void
     {
         $applicant = $this->makeApplicant();
         $application = $this->applyTo($this->makeCampaignIn($this->homs), $applicant);
@@ -66,17 +66,22 @@ class RecruitmentDecisionTest extends TestCase
         $this->actingAs($hr);
 
         Livewire::test(Show::class, ['applicantId' => $applicant->id])
+            ->assertDontSee(__('recruitment-applicant.decisions.actions.shortlisted'))
+            ->call('beginStatusChange', $application->id, Status::UnderReview)
+            ->set('statusReason', 'Initial review of the submitted application.')
+            ->call('changeStatus')
+            ->assertHasNoErrors()
             ->call('beginStatusChange', $application->id, Status::Shortlisted)
+            ->set('statusReason', 'Candidate meets the requirements for an interview.')
             ->call('changeStatus')
             ->assertHasNoErrors()
+            ->assertDontSee(__('recruitment-applicant.decisions.actions.selected'))
             ->call('beginStatusChange', $application->id, Status::Selected)
-            ->call('changeStatus')
-            ->assertHasNoErrors()
-            ->assertSee(__('recruitment-applicant.statuses.selected'));
+            ->assertForbidden();
 
-        $this->assertSame(Status::Selected, $application->fresh()->status);
+        $this->assertSame(Status::Shortlisted, $application->fresh()->status);
         $this->assertSame(
-            [[Status::Submitted, Status::Shortlisted], [Status::Shortlisted, Status::Selected]],
+            [[Status::Submitted, Status::UnderReview], [Status::UnderReview, Status::Shortlisted]],
             RecruitmentApplicationDecision::query()->orderBy('id')->get()
                 ->map(fn ($decision): array => [$decision->from_status, $decision->to_status])->all(),
         );
@@ -86,7 +91,7 @@ class RecruitmentDecisionTest extends TestCase
     public function test_accepting_needs_its_own_permission_on_top_of_change_status(): void
     {
         $applicant = $this->makeApplicant();
-        $application = $this->applyTo($this->makeCampaignIn($this->homs), $applicant, ['status' => Status::Shortlisted]);
+        $application = $this->applyTo($this->makeCampaignIn($this->homs), $applicant, ['status' => Status::Interviewed]);
         $hr = $this->without($this->hr($this->homs), ['recruitment-applicants.accept']);
         $this->actingAs($hr);
 
@@ -99,7 +104,7 @@ class RecruitmentDecisionTest extends TestCase
 
         // The service refuses too, whoever calls it.
         $this->expectException(AuthorizationException::class);
-        app(RecruitmentApplicationStatusService::class)->change($hr, $application, Status::Shortlisted, Status::Selected, null);
+        app(RecruitmentApplicationStatusService::class)->change($hr, $application, Status::Interviewed, Status::Selected, null);
     }
 
     public function test_rejecting_requires_a_configured_reason(): void
@@ -110,6 +115,7 @@ class RecruitmentDecisionTest extends TestCase
 
         Livewire::test(Show::class, ['applicantId' => $applicant->id])
             ->call('beginStatusChange', $application->id, Status::Rejected)
+            ->set('statusReason', 'Application does not meet the required language level.')
             ->call('changeStatus')
             ->assertHasErrors('statusReasonCode')
             ->set('statusReasonCode', 'made_up_reason')
@@ -133,7 +139,7 @@ class RecruitmentDecisionTest extends TestCase
         // A tampered request cannot swap the target the button fixed.
         try {
             Livewire::test(Show::class, ['applicantId' => $applicant->id])
-                ->call('beginStatusChange', $application->id, Status::Shortlisted)
+                ->call('beginStatusChange', $application->id, Status::UnderReview)
                 ->set('statusTarget', Status::Hired);
             $this->fail('statusTarget must be locked.');
         } catch (CannotUpdateLockedPropertyException) {
