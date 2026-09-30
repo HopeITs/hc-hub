@@ -145,7 +145,8 @@ class RecruitmentJobOfferTest extends TestCase
         $submitted = $this->applyTo($this->campaign, $this->makeApplicant('Submitted One'));
         $this->assertValidationError(fn () => $this->create($submitted), 'offer', 'not_selected');
 
-        $statuses->change($this->hr, $submitted, AppStatus::Submitted, AppStatus::Shortlisted, null);
+        $statuses->change($this->hr, $submitted, AppStatus::Submitted, AppStatus::UnderReview, null);
+        $statuses->change($this->hr, $submitted->fresh(), AppStatus::UnderReview, AppStatus::Shortlisted, null);
         $this->assertValidationError(fn () => $this->create($submitted->fresh()), 'offer', 'not_selected');
 
         $statuses->change($this->hr, $submitted->fresh(), AppStatus::Shortlisted, AppStatus::Rejected, null, 'position_filled');
@@ -214,7 +215,7 @@ class RecruitmentJobOfferTest extends TestCase
 
         $this->assertSame(
             [
-                [AppStatus::Submitted, AppStatus::Shortlisted], [AppStatus::Shortlisted, AppStatus::Selected],
+                [AppStatus::Interviewed, AppStatus::Selected],
                 [AppStatus::Selected, AppStatus::OfferSent], [AppStatus::OfferSent, AppStatus::OfferRejected],
                 [AppStatus::OfferRejected, AppStatus::OfferSent], [AppStatus::OfferSent, AppStatus::OfferAccepted],
             ],
@@ -676,10 +677,11 @@ class RecruitmentJobOfferTest extends TestCase
     /** A selected application on the Homs campaign, moved there through the decision service. */
     private function selected(string $name = 'Candidate One'): RecruitmentApplication
     {
-        $application = $this->applyTo($this->campaign, $this->makeApplicant($name));
+        // This helper starts after a completed interview; interview coverage
+        // owns the earlier recruitment stages.
+        $application = $this->applyTo($this->campaign, $this->makeApplicant($name), ['status' => AppStatus::Interviewed]);
         $statuses = app(RecruitmentApplicationStatusService::class);
-        $statuses->change($this->hr, $application, AppStatus::Submitted, AppStatus::Shortlisted, null);
-        $statuses->change($this->hr, $application->fresh(), AppStatus::Shortlisted, AppStatus::Selected, null);
+        $statuses->change($this->hr, $application, AppStatus::Interviewed, AppStatus::Selected, null);
 
         return $application->fresh();
     }

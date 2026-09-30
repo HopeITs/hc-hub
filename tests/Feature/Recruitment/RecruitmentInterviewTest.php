@@ -828,7 +828,8 @@ class RecruitmentInterviewTest extends TestCase
 
         $this->assertSame(
             [
-                [AppStatus::Submitted, AppStatus::Shortlisted],
+                [AppStatus::Submitted, AppStatus::UnderReview],
+                [AppStatus::UnderReview, AppStatus::Shortlisted],
                 [AppStatus::Shortlisted, AppStatus::InterviewScheduled],
                 [AppStatus::InterviewScheduled, AppStatus::Interviewed],
                 [AppStatus::Interviewed, AppStatus::InterviewScheduled],
@@ -1053,7 +1054,9 @@ class RecruitmentInterviewTest extends TestCase
         $application = $this->applyTo($this->makeCampaignIn($city), $this->makeApplicant($name));
         $hr = $city->is($this->homs) ? $this->hr : $this->hr($city);
 
-        app(RecruitmentApplicationStatusService::class)->change($hr, $application, AppStatus::Submitted, AppStatus::Shortlisted, null);
+        $statuses = app(RecruitmentApplicationStatusService::class);
+        $statuses->change($hr, $application, AppStatus::Submitted, AppStatus::UnderReview, null);
+        $statuses->change($hr, $application->fresh(), AppStatus::UnderReview, AppStatus::Shortlisted, null);
 
         return $application->fresh();
     }

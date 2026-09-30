@@ -6,6 +6,7 @@ use App\Enums\HiringCampaignStatus;
 use App\Enums\RecruitmentApplicationStatus as Status;
 use App\Enums\RecruitmentFileScanStatus;
 use App\Livewire\Recruitment\Applicants\ApplicationTable;
+use App\Livewire\Recruitment\Applicants\Index;
 use App\Livewire\Recruitment\Applicants\Notes;
 use App\Livewire\Recruitment\Applicants\Show;
 use App\Models\City;
@@ -82,6 +83,7 @@ class RecruitmentApplicantProfileTest extends TestCase
         $second = $this->makeCampaignIn($this->homs, HiringCampaignStatus::Closed, 'Driver');
         $this->applyTo($first, $this->makeApplicant('Shortlisted Sami'), ['status' => Status::Shortlisted]);
         $this->applyTo($second, $this->makeApplicant('Submitted Suha', source: 'walk_in'));
+        $this->applyTo($second, $this->makeApplicant('Shortlisted Shadi'), ['status' => Status::Shortlisted]);
 
         $this->actingAs($this->hr($this->homs));
 
@@ -91,8 +93,30 @@ class RecruitmentApplicantProfileTest extends TestCase
             ->assertDontSee('Submitted Suha');
 
         Livewire::test(ApplicationTable::class)
+            ->call('filterByStatus', Status::Shortlisted)
+            ->assertSee('Shortlisted Sami')
+            ->assertDontSee('Submitted Suha')
+            ->assertSee(__('recruitment-applicant.campaign_number', ['number' => $first->id]));
+
+        Livewire::test(ApplicationTable::class, [
+            'stageStatus' => Status::Shortlisted,
+            'campaignFilter' => $first->id,
+        ])
+            ->assertSee('Shortlisted Sami')
+            ->assertDontSee('Shortlisted Shadi')
+            ->assertDontSee('Submitted Suha');
+
+        Livewire::test(Index::class)
+            ->assertSee(__('recruitment-applicant.campaign_number', ['number' => $first->id]))
+            ->call('filterByStatus', Status::Shortlisted)
+            ->set('activeCampaignId', $first->id)
+            ->assertSet('activeStatus', Status::Shortlisted)
+            ->assertSet('activeCampaignId', $first->id);
+
+        Livewire::test(ApplicationTable::class)
             ->set('filters.campaign_id', $second->id)
             ->assertSee('Submitted Suha')
+            ->assertSee('Shortlisted Shadi')
             // A closed campaign's applications stay listed, marked as closed.
             ->assertSee(HiringCampaignStatus::getLocalizedName(HiringCampaignStatus::Closed)['value'])
             ->assertDontSee('Shortlisted Sami');
@@ -282,12 +306,10 @@ class RecruitmentApplicantProfileTest extends TestCase
 
         Livewire::test(Show::class, ['applicantId' => $applicant->id])
             ->call('beginStatusChange', $application->id, Status::Rejected)
+            ->set('statusReason', 'Application does not meet the required language level.')
             ->call('changeStatus')
             ->assertHasErrors('statusReasonCode')
             ->set('statusReasonCode', 'other')
-            ->call('changeStatus')
-            ->assertHasErrors('statusReason')
-            ->set('statusReason', 'Does not meet the language requirement')
             ->call('changeStatus')
             ->assertHasNoErrors();
 
@@ -305,12 +327,13 @@ class RecruitmentApplicantProfileTest extends TestCase
         $this->actingAs($this->hr($this->homs));
 
         $screen = Livewire::test(Show::class, ['applicantId' => $applicant->id])
-            ->call('beginStatusChange', $application->id, Status::Shortlisted);
+            ->call('beginStatusChange', $application->id, Status::UnderReview);
 
         // Someone else moved it while this screen was open.
         DB::table('recruitment_applications')->where('id', $application->id)->update(['status' => Status::Hired]);
 
-        $screen->call('changeStatus')->assertHasErrors('statusTarget');
+        $screen->set('statusReason', 'Review was completed while this screen was open.')
+            ->call('changeStatus')->assertHasErrors('statusTarget');
         $this->assertSame(Status::Hired, $application->fresh()->status);
     }
 

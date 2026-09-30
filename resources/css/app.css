@@ -304,6 +304,28 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
 }
 
 @layer components {
+    /* Recruitment labels stay aligned even when their text changes by status
+       or locale. The width is sized for the longest workflow label. */
+    .recruitment-badge {
+        display: inline-flex;
+        min-width: 9rem;
+        min-height: 1.75rem;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .recruitment-action {
+        display: inline-flex;
+        min-width: 10rem;
+        min-height: 2.25rem;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        white-space: nowrap;
+    }
+
     clock-timepicker {
         display: block;
         width: 100%;

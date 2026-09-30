@@ -209,7 +209,8 @@ class RecruitmentApplicationFilters
             ->latest('id')
             ->get()
             ->mapWithKeys(fn (HiringCampaign $campaign): array => [
-                $campaign->getKey() => ($campaign->vacancy?->position?->title ?? '—')
+                $campaign->getKey() => __('recruitment-applicant.campaign_number', ['number' => $campaign->getKey()])
+                    .' · '.($campaign->vacancy?->position?->title ?? '—')
                     .($campaign->starts_at ? ' · '.$campaign->starts_at->format('Y-m-d') : ''),
             ])
             ->all();

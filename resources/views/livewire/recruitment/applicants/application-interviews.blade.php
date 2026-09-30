@@ -32,7 +32,7 @@
                             &middot; {{ trans_choice('recruitment-applicant.interviews.participant_count', $interview->participants_count, ['count' => $interview->participants_count]) }}
                         </span>
                     </a>
-                    <x-recruitment.pill :tone="RecruitmentInterviewStatus::classes($interview->status)">
+                    <x-recruitment.pill :tone="RecruitmentInterviewStatus::classes($interview->status)" class="recruitment-badge">
                         {{ __('recruitment-applicant.interviews.statuses.'.$interview->status) }}
                     </x-recruitment.pill>
                     @if (isset($tallies[$interview->id]) && $tallies[$interview->id]['total'] > 0)
@@ -40,7 +40,7 @@
                             <span class="text-secondary-medium">{{ trans_choice('recruitment-applicant.evaluations.count', $tallies[$interview->id]['total'], ['count' => $tallies[$interview->id]['total']]) }}:</span>
                             @foreach ($tallies[$interview->id]['counts'] as $value => $count)
                                 @if ($count > 0)
-                                    <span class="rounded-control px-1.5 py-0.5 font-semibold {{ \App\Enums\RecruitmentEvaluationRecommendation::classes($value) }}">{{ __('recruitment-applicant.evaluations.recommendations.'.$value) }} {{ $count }}</span>
+                                    <span class="recruitment-badge rounded-control px-1.5 py-0.5 font-semibold {{ \App\Enums\RecruitmentEvaluationRecommendation::classes($value) }}">{{ __('recruitment-applicant.evaluations.recommendations.'.$value) }} {{ $count }}</span>
                                 @endif
                             @endforeach
                         </div>
