@@ -67,7 +67,7 @@
     <header class="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
         <div class="max-w-3xl">
             <h1 class="text-h2 font-semibold text-neutral-900">{{ $t('title') }}</h1>
-            <p class="mt-2 text-body text-secondary-medium">{{ $t('hint') }}</p>
+            <p class="mt-2 text-body text-secondary-medium">{{ $t('hint') }} {{ $t('sources_statement') }}</p>
         </div>
         <dl class="flex flex-wrap items-center gap-2 text-small">
             <dt class="sr-only">{{ $t('version_short') }}</dt>
@@ -91,7 +91,7 @@
             <div class="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-5 pt-5 sm:px-6">
                 <div>
                     <h2 id="criteria-title" class="text-h4 font-semibold text-neutral-900">{{ $t('criteria_title') }}</h2>
-                    <p class="mt-1 max-w-2xl text-small text-secondary-medium">{{ $t('criteria_hint') }} {{ $t('sources_statement') }}</p>
+                    <p class="mt-1 max-w-2xl text-small text-secondary-medium">{{ $t('criteria_hint') }}</p>
                 </div>
                 <p class="text-body font-medium text-neutral-800" aria-live="polite" x-text="ui.counted[countedCount]">
                     {{ trans_choice('recruitment-indicator-rules.counted', count(array_filter($enabled)) - (($enabled['previous_applicant'] ?? false) ? 1 : 0), ['count' => count(array_filter($enabled)) - (($enabled['previous_applicant'] ?? false) ? 1 : 0)]) }}
@@ -103,9 +103,9 @@
                     <thead>
                         <tr class="border-y border-neutral-100 bg-neutral-50 text-caption font-semibold uppercase tracking-wide text-secondary-medium">
                             <th scope="col" class="w-16 px-5 py-2 text-start sm:ps-6"><span class="sr-only">{{ $t('on') }}</span></th>
-                            <th scope="col" class="py-2 pe-4 text-start xl:w-[34%]">{{ $t('criterion') }}</th>
+                            <th scope="col" class="py-2 pe-4 text-start xl:w-[28%]">{{ $t('criterion') }}</th>
                             @foreach ($sourceIcons as $source => $icon)
-                                <th scope="col" class="hidden w-24 px-2 py-2 text-center xl:table-cell">
+                                <th scope="col" class="hidden w-20 px-1 py-2 text-center xl:table-cell">
                                     <span class="inline-flex flex-col items-center gap-1">
                                         <flux:icon :name="$icon" variant="micro" class="size-4 text-secondary-light" />
                                         <span class="normal-case tracking-normal">{{ $t('sources.'.$source) }}</span>
@@ -172,7 +172,7 @@
                                     </td>
                                 @endforeach
                                 <td class="hidden py-3 pe-5 align-top xl:table-cell sm:pe-6">
-                                    @include('livewire.recruitment.indicators.partials.criterion-cases', ['key' => $key, 'name' => $criterionName($key), 'cases' => $cases[$key] ?? [], 'class' => 'max-w-md'])
+                                    @include('livewire.recruitment.indicators.partials.criterion-cases', ['key' => $key, 'name' => $criterionName($key), 'cases' => $cases[$key] ?? [], 'class' => ''])
                                 </td>
                             </tr>
                         @endforeach
@@ -230,17 +230,17 @@
                 {{-- Matrix: each answer's range is edited in its own row header --}}
                 <div class="min-w-0">
                     <div class="overflow-x-auto pb-1">
-                        <table class="w-full min-w-[40rem] border-separate sm:min-w-[46rem] border-spacing-1 text-body" @mouseleave="hoverCol = null" @keydown="gridKey($event, 'exp')" aria-describedby="grid-keys-hint">
+                        <table class="w-full min-w-[26rem] border-separate border-spacing-0.5 text-body sm:min-w-[38rem] sm:border-spacing-1" @mouseleave="hoverCol = null" @keydown="gridKey($event, 'exp')" aria-describedby="grid-keys-hint">
                             <caption class="sr-only">{{ $t('experience_title') }}: {{ $t('years_axis') }}</caption>
                             <thead>
                                 <tr>
                                     <td></td>
                                     <th scope="colgroup" colspan="{{ count($years) }}" class="pb-1 text-start text-caption font-semibold uppercase tracking-wide text-secondary-medium">
-                                        {{ $t('years_axis') }}
+                                        <span class="sticky start-28 inline-block max-w-48 sm:start-52 sm:max-w-none">{{ $t('years_axis') }}</span>
                                     </th>
                                 </tr>
                                 <tr>
-                                    <td class="sticky start-0 z-[1] w-28 bg-white sm:w-48 align-bottom pb-1 text-small text-secondary-medium">{{ $t('answer') }}</td>
+                                    <td class="sticky start-0 z-[1] w-20 bg-white sm:w-48 align-bottom pb-1 text-small text-secondary-medium">{{ $t('answer') }}</td>
                                     @foreach ($years as $year)
                                         <th scope="col" class="relative h-12 min-w-9 rounded-inset text-center align-top text-body font-semibold tabular-nums text-neutral-800 transition-colors duration-150"
                                             :class="colActive({{ $year }}) ? 'bg-selection' : ''">
@@ -263,20 +263,20 @@
                                         <th scope="row" class="sticky start-0 z-[1] rounded-inset px-2 py-1.5 text-start align-middle font-medium text-neutral-900 transition-colors duration-150"
                                             :class="selected?.kind === 'exp' && selected.option === '{{ $option }}' ? 'bg-selection' : 'bg-white'">
                                             <span class="block leading-tight">{{ $rangeLabel($option) }}</span>
-                                            <span class="mt-1 flex flex-col items-start gap-1 font-normal sm:flex-row sm:items-center sm:gap-1.5">
+                                            <span class="mt-1 flex items-center gap-1 font-normal sm:gap-1.5">
                                                 <label class="sr-only" for="min-{{ $option }}">{{ $rangeLabel($option) }}: {{ $t('min_years') }}</label>
                                                 <input id="min-{{ $option }}" type="number" inputmode="numeric" min="0" max="50"
                                                        wire:model="ranges.{{ $option }}.min"
                                                        @focus="select({ kind: 'exp', option: '{{ $option }}', req: selected?.req ?? 3 })"
                                                        @if ($invalid) aria-invalid="true" aria-describedby="range-{{ $option }}-error" @endif
-                                                       class="w-12 rounded-control border-neutral-300 bg-white px-1.5 py-0.5 text-body tabular-nums sm:w-16 sm:px-2 shadow-e1 focus:border-primary focus:ring-2 focus:ring-neutral-200">
-                                                <span aria-hidden="true" class="hidden text-secondary-light sm:inline">–</span>
+                                                       class="w-10 rounded-control border-neutral-300 bg-white px-1 py-0.5 text-body tabular-nums sm:w-16 sm:px-2 shadow-e1 focus:border-primary focus:ring-2 focus:ring-neutral-200">
+                                                <span aria-hidden="true" class="text-secondary-light">–</span>
                                                 <label class="sr-only" for="max-{{ $option }}">{{ $rangeLabel($option) }}: {{ $t('max_years') }} ({{ $t('open_ended') }})</label>
                                                 <input id="max-{{ $option }}" type="number" inputmode="numeric" min="0" max="50"
                                                        wire:model="ranges.{{ $option }}.max" placeholder="{{ $t('no_limit') }}"
                                                        @focus="select({ kind: 'exp', option: '{{ $option }}', req: selected?.req ?? 3 })"
                                                        @if ($invalid) aria-invalid="true" aria-describedby="range-{{ $option }}-error" @endif
-                                                       class="w-16 rounded-control border-neutral-300 bg-white px-1.5 py-0.5 text-body tabular-nums sm:w-20 sm:px-2 shadow-e1 placeholder:text-small placeholder:text-secondary-light focus:border-primary focus:ring-2 focus:ring-neutral-200">
+                                                       class="w-10 rounded-control border-neutral-300 bg-white px-1 py-0.5 text-body tabular-nums sm:w-20 sm:px-2 shadow-e1 placeholder:text-small placeholder:text-secondary-light focus:border-primary focus:ring-2 focus:ring-neutral-200">
                                             </span>
                                             @error('ranges.'.$option) <span id="range-{{ $option }}-error" class="mt-1 block text-small font-normal text-primary">{{ $message }}</span> @enderror
                                         </th>
@@ -284,7 +284,7 @@
                                             <td class="p-0">
                                                 <button type="button" data-grid="exp" data-r="{{ $loop->parent->index }}" data-c="{{ $year }}"
                                                         :tabindex="tabStop('exp', {{ $loop->parent->index }}, {{ $year }})"
-                                                        class="flex h-10 w-full min-w-9 items-center justify-center rounded-inset transition-[background-color,color,box-shadow] duration-200
+                                                        class="flex h-10 w-full min-w-8 items-center sm:min-w-9 justify-center rounded-inset transition-[background-color,color,box-shadow] duration-200
                                                                focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
                                                         :class="[toneFor(expOutcome('{{ $option }}', {{ $year }})), isSelected('exp', '{{ $option }}', {{ $year }}) ? 'ring-2 ring-neutral-900 ring-offset-1' : '']"
                                                         :aria-label="cellLabel(@js($rangeLabel($option)), {{ $year }}, expOutcome('{{ $option }}', {{ $year }}))"
@@ -308,16 +308,16 @@
                                     <th scope="row" class="sticky start-0 z-[1] rounded-inset px-2 py-1.5 text-start align-middle font-medium text-neutral-900"
                                         :class="selected?.kind === 'cv' ? 'bg-selection' : 'bg-white'">
                                         <label for="cvYears" class="sr-only">{{ $t('cv_years_label') }}</label>
-                                        <span class="flex flex-wrap items-center gap-1">
+                                        <span class="flex items-center gap-1">
                                             <button type="button" @click="cvYears = Math.max(0, cvYears - 1)"
-                                                    class="grid size-7 cursor-pointer place-items-center rounded-control text-secondary-dark hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-primary"
+                                                    class="grid size-6 cursor-pointer place-items-center rounded-control text-secondary-dark sm:size-7 hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-primary"
                                                     aria-label="{{ $t('fewer_years') }}">
                                                 <flux:icon.minus variant="micro" class="size-4" />
                                             </button>
                                             <input id="cvYears" type="number" min="0" max="50" x-model.number="cvYears"
-                                                   class="w-12 rounded-control border-neutral-300 px-1 py-1 text-center text-body tabular-nums focus:border-primary focus:ring-2 focus:ring-neutral-200">
+                                                   class="w-10 rounded-control border-neutral-300 px-1 py-1 text-center text-body tabular-nums sm:w-12 focus:border-primary focus:ring-2 focus:ring-neutral-200">
                                             <button type="button" @click="cvYears = Math.min(50, cvYears + 1)"
-                                                    class="grid size-7 cursor-pointer place-items-center rounded-control text-secondary-dark hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-primary"
+                                                    class="grid size-6 cursor-pointer place-items-center rounded-control text-secondary-dark sm:size-7 hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-primary"
                                                     aria-label="{{ $t('more_years') }}">
                                                 <flux:icon.plus variant="micro" class="size-4" />
                                             </button>
@@ -328,7 +328,7 @@
                                         <td class="p-0">
                                             <button type="button" data-grid="exp" data-r="{{ count($ranges) }}" data-c="{{ $year }}"
                                                     :tabindex="tabStop('exp', {{ count($ranges) }}, {{ $year }})"
-                                                    class="flex h-10 w-full min-w-9 items-center justify-center rounded-inset transition-[background-color,color,box-shadow] duration-200
+                                                    class="flex h-10 w-full min-w-8 items-center sm:min-w-9 justify-center rounded-inset transition-[background-color,color,box-shadow] duration-200
                                                            focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary"
                                                     :class="[toneFor(cvOutcome({{ $year }})), isSelected('cv', null, {{ $year }}) ? 'ring-2 ring-neutral-900 ring-offset-1' : '']"
                                                     :aria-label="cellLabel(ui.text.yearsShort.replace(':count', cvYears), {{ $year }}, cvOutcome({{ $year }}))"
@@ -562,37 +562,35 @@
                 </ul>
             </div>
 
-            <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center justify-between gap-3">
                 <div class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
                     <p class="text-body font-semibold text-neutral-900" aria-live="polite">
                         <span x-text="ui.changes[Math.min(changes.length, 40)]">{{ $t('no_changes') }}</span>
                     </p>
-                    <template x-if="changes.length">
-                        <span class="flex items-center gap-3 text-small">
-                            <button type="button" @click="showChanges = ! showChanges" :aria-expanded="showChanges"
-                                    class="cursor-pointer font-semibold text-neutral-800 underline decoration-neutral-300 underline-offset-4 hover:decoration-neutral-800 focus-visible:outline-2 focus-visible:outline-primary rounded-inset"
-                                    x-text="showChanges ? @js($t('hide_changes')) : @js($t('show_changes'))"></button>
-                            <button type="button" @click="discard()"
-                                    class="cursor-pointer text-secondary-medium underline decoration-neutral-300 underline-offset-4 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-primary rounded-inset">{{ $t('discard') }}</button>
+                    <span x-cloak x-show="changes.length" class="flex items-center gap-3 text-small">
+                        <button type="button" @click="showChanges = ! showChanges" :aria-expanded="showChanges"
+                                class="cursor-pointer rounded-inset font-semibold text-neutral-800 underline decoration-neutral-300 underline-offset-4 hover:decoration-neutral-800 focus-visible:outline-2 focus-visible:outline-primary"
+                                x-text="showChanges ? @js($t('hide_changes')) : @js($t('show_changes'))"></button>
+                        <button type="button" @click="discard()"
+                                class="cursor-pointer rounded-inset text-secondary-medium underline decoration-neutral-300 underline-offset-4 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-primary">{{ $t('discard') }}</button>
+                    </span>
+                    @if ($customised)
+                        <span x-show="! changes.length && ! confirmingReset" class="text-small">
+                            <button type="button" @click="confirmingReset = true"
+                                    class="cursor-pointer rounded-inset text-secondary-medium underline decoration-neutral-300 underline-offset-4 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-primary">{{ $t('reset') }}</button>
                         </span>
-                    </template>
-                    <p class="hidden basis-full text-small text-secondary-medium sm:block">{{ $t('form_hint') }}</p>
+                        <span x-cloak x-show="confirmingReset" class="flex flex-wrap items-center gap-x-3 gap-y-1 text-small" role="group" aria-label="{{ $t('reset') }}">
+                            <span class="text-neutral-800">{{ $t('reset_confirm') }}</span>
+                            <button type="button" wire:click="resetToDefaults" wire:loading.attr="disabled" wire:target="resetToDefaults" @click="confirmingReset = false"
+                                    class="cursor-pointer rounded-inset font-semibold text-neutral-900 underline decoration-neutral-400 underline-offset-4 focus-visible:outline-2 focus-visible:outline-primary">{{ $t('confirm_reset') }}</button>
+                            <button type="button" @click="confirmingReset = false"
+                                    class="cursor-pointer rounded-inset text-secondary-medium underline decoration-neutral-300 underline-offset-4 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-primary">{{ $t('cancel') }}</button>
+                        </span>
+                    @endif
+                    <p x-cloak x-show="changes.length" class="hidden basis-full text-small text-secondary-medium sm:block">{{ $t('form_hint') }}</p>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-2">
-                    @if ($customised)
-                        <div x-show="! confirmingReset">
-                            <x-secondary-button type="button" @click="confirmingReset = true">{{ $t('reset') }}</x-secondary-button>
-                        </div>
-                        <div x-cloak x-show="confirmingReset" class="flex flex-wrap items-center gap-2" role="group" aria-label="{{ $t('reset') }}">
-                            <span class="text-small text-neutral-800">{{ $t('reset_confirm') }}</span>
-                            <x-secondary-button type="button" @click="confirmingReset = false">{{ $t('cancel') }}</x-secondary-button>
-                            <x-secondary-button type="button" wire:click="resetToDefaults" wire:loading.attr="disabled" wire:target="resetToDefaults"
-                                                @click="confirmingReset = false">{{ $t('confirm_reset') }}</x-secondary-button>
-                        </div>
-                    @endif
-                    <x-primary-button type="submit" wire:target="save">{{ $t('save') }}</x-primary-button>
-                </div>
+                <x-primary-button type="submit" wire:target="save" class="shrink-0">{{ $t('save') }}</x-primary-button>
             </div>
         </div>
     </form>
