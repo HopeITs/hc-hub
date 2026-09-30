@@ -187,9 +187,25 @@ class Position extends Model
      */
     public function scopeInCity($query, int $cityId)
     {
-        return $query->where(function ($q) use ($cityId) {
-            $q->where('city_id', $cityId)
-                ->orWhereHas('center', fn ($c) => $c->where('city_id', $cityId));
+        return $this->scopeInCities($query, [$cityId]);
+    }
+
+    /**
+     * The same rule for several governorates at once.
+     *
+     * Some governorates are administered together — Homs Rural is the
+     * countryside of Homs, not a governorate of its own — so a caller sometimes
+     * has a set rather than one id. It delegates to the same predicate rather
+     * than restating it: a second copy of "city_id or the centre's city_id" is
+     * how the two drift apart.
+     *
+     * @param  array<int, int>  $cityIds
+     */
+    public function scopeInCities($query, array $cityIds)
+    {
+        return $query->where(function ($q) use ($cityIds) {
+            $q->whereIn('city_id', $cityIds)
+                ->orWhereHas('center', fn ($c) => $c->whereIn('city_id', $cityIds));
         });
     }
 

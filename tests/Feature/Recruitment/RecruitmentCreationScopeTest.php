@@ -8,6 +8,7 @@ use App\Enums\RecruitmentRequestType;
 use App\Livewire\Recruitment\Requests\Create;
 use App\Livewire\Recruitment\Requests\Details;
 use App\Livewire\Recruitment\Requests\Index;
+use App\Livewire\Recruitment\Requests\TeamStaffing;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Department;
@@ -93,6 +94,40 @@ class RecruitmentCreationScopeTest extends TestCase
         $this->assertSame([], app(RecruitmentScopeResolver::class)->manageablePositionIds($this->manager));
         $this->assertTrue(Gate::forUser($this->manager)->allows('createUnderPosition', [RecruitmentRequest::class, $this->root]));
         $this->assertFalse(Gate::forUser($this->manager)->allows('createForPosition', [RecruitmentRequest::class, $this->root]));
+    }
+
+    public function test_team_staffing_renders_only_the_manager_subtree_with_position_actions(): void
+    {
+        $child = $this->child($this->root, ['title_en' => 'Staffed child', 'max_emp' => 2]);
+        $outside = $this->child($this->root, ['direct_manager_id' => null, 'title_en' => 'Outside branch']);
+
+        Livewire::actingAs($this->manager)->test(TeamStaffing::class)
+            ->assertSee('Staffed child')
+            ->assertDontSee('Outside branch')
+            ->assertSee('Fill vacancy')
+            ->assertSee('Create position below');
+    }
+
+    public function test_team_staffing_is_not_available_to_hr_or_users_without_normal_request_access(): void
+    {
+        $this->manager->syncRoles('HR-SYR');
+        $this->manager->roles()->updateExistingPivot($this->manager->roles()->first()->id, ['is_active' => true]);
+
+        Livewire::actingAs($this->manager->fresh())->test(TeamStaffing::class)->assertForbidden();
+    }
+
+    public function test_team_staffing_action_links_prefill_the_existing_request_form(): void
+    {
+        $child = $this->child($this->root, ['title_en' => 'Prefilled child']);
+
+        $this->actingAs($this->manager);
+
+        Livewire::withQueryParams([
+            'type' => RecruitmentRequestType::IncreaseHeadcount,
+            'position_id' => $child->id,
+        ])->test(Create::class)
+            ->assertSet('data.request_type', RecruitmentRequestType::IncreaseHeadcount)
+            ->assertSet('data.position_id', $child->id);
     }
 
     public function test_an_imported_older_contract_does_not_replace_the_current_assignment(): void

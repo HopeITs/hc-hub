@@ -66,6 +66,26 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Governorates administered as one
+    |--------------------------------------------------------------------------
+    |
+    | Keys are city slugs that are part of the governorate their value names,
+    | rather than governorates in their own right. Everything that scopes by
+    | governorate reads this, so a manager seated in Homs reaches the posts his
+    | own chart puts in Homs Rural, and the city list offers him both.
+    |
+    | This is the same fact the governorate_hr map above states from HR's side:
+    | Homs Rural has no HR of its own because it is not a governorate of its
+    | own. Keeping it in one place stops the two halves from disagreeing.
+    |
+    */
+
+    'governorate_clusters' => [
+        'RHO' => 'HMS',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Permissions that belong to a person, never to a role
     |--------------------------------------------------------------------------
     |
