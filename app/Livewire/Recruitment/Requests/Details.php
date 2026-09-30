@@ -58,6 +58,14 @@ class Details extends Component
      */
     public bool $askingForChanges = false;
 
+    /**
+     * Whether the approver is part-way through rejecting.
+     *
+     * A rejection is refused without its reason (D60), so the reason has to be
+     * asked for before the decision is confirmed, not after it has failed.
+     */
+    public bool $rejecting = false;
+
     public function mount(int $requestId): void
     {
         $this->requestId = $requestId;
@@ -201,11 +209,19 @@ class Details extends Component
         $this->askingForChanges = true;
     }
 
+    /** Open the rejection's second step: the reason. */
+    public function askToReject(): void
+    {
+        $this->resetErrorBag();
+        $this->rejecting = true;
+    }
+
     /** Step back to the three decisions, keeping nothing half-typed. */
     public function cancelChangeRequest(): void
     {
         $this->resetErrorBag();
         $this->askingForChanges = false;
+        $this->rejecting = false;
         $this->requestedFields = [];
         $this->decisionComment = '';
     }
@@ -244,6 +260,7 @@ class Details extends Component
         $this->decisionComment = '';
         $this->requestedFields = [];
         $this->askingForChanges = false;
+        $this->rejecting = false;
         $this->toast(__('recruitment.decided'));
     }
 

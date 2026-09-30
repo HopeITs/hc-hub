@@ -289,12 +289,14 @@ class RecruitmentDirectOpenService
         if ($requestType === Type::ClosePosition) {
             $positions
                 ->where('exist_emp', 0)
+                ->where('max_emp', 1)
                 ->whereDoesntHave('activeContracts');
         }
 
         if ($requestType === Type::CloseVacancy) {
             $positions
                 ->where('is_active', true)
+                ->where('max_emp', '>', 1)
                 ->whereColumn('exist_emp', '<', 'max_emp');
         }
 

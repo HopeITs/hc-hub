@@ -59,6 +59,10 @@ class RecruitmentRequestRevalidator
         }
 
         if ($type === Type::CloseVacancy && $position !== null) {
+            if ((int) $position->max_emp <= 1) {
+                $this->refuse('data.position_id', 'recruitment.close_vacancy_many_seats_only');
+            }
+
             if ((int) $position->exist_emp >= (int) $position->max_emp) {
                 $this->refuse('data.position_id', 'recruitment.no_vacant_position');
             }
@@ -76,6 +80,10 @@ class RecruitmentRequestRevalidator
         }
 
         // RV-5 — a post with somebody in it is not closed out from under them.
+        if ($type === Type::ClosePosition && $position !== null && (int) $position->max_emp !== 1) {
+            $this->refuse('data.position_id', 'recruitment.close_position_single_seat_only');
+        }
+
         if ($type === Type::ClosePosition && $position !== null
             && ((int) $position->exist_emp > 0 || $position->activeContracts()->exists())) {
             $this->refuse('data.position_id', 'recruitment.position_has_contracts');

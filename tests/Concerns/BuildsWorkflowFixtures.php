@@ -38,9 +38,9 @@ trait BuildsWorkflowFixtures
      *   position: Position
      * }
      */
-    protected function workflow(): array
+    protected function workflow(string $citySlug = 'HMS', string $hrRole = 'HR-HMS'): array
     {
-        $city = $this->makeCity('HMS', (string) random_int(100, 899));
+        $city = $this->makeCity($citySlug, (string) random_int(100, 899));
 
         $requester = $this->makeUser($city, 'manager');
         $manager = $this->makeUser($city, 'manager');
@@ -48,7 +48,7 @@ trait BuildsWorkflowFixtures
         // CreatesHrFixtures builds roles through Spatie's class, which does not
         // run the automatic grant on App\Models\Role, so the governorate HR is
         // given its baseline here. manager comes with its own from the migration.
-        $hr = $this->makeUser($city, 'HR-HMS', AccessPermissionCatalog::roleGrantableNames());
+        $hr = $this->makeUser($city, $hrRole, AccessPermissionCatalog::roleGrantableNames());
 
         $department = Department::query()->forceCreate([
             'name' => 'Department '.uniqid(), 'code' => strtoupper(uniqid('D')),

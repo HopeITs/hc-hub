@@ -107,11 +107,13 @@ class Create extends Component
         if ($type === RecruitmentRequestType::ClosePosition) {
             $positions
                 ->where('exist_emp', 0)
+                ->where('max_emp', 1)
                 ->whereDoesntHave('activeContracts');
         }
         if ($type === RecruitmentRequestType::CloseVacancy) {
             $positions
                 ->where('is_active', true)
+                ->where('max_emp', '>', 1)
                 ->whereColumn('exist_emp', '<', 'max_emp');
         }
         $isFill = (int) ($this->data['request_type'] ?? 0) === RecruitmentRequestType::FillVacancy;
