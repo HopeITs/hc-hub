@@ -474,6 +474,7 @@ return [
     'vacancy_closed' => 'The vacancy was closed.',
     'close_position_single_seat_only' => 'A position is closed only when it has a single approved seat. Close a vacancy instead.',
     'close_vacancy_many_seats_only' => 'A single-seat position has no seat to close on its own; close the position instead.',
+    'rejection_reason' => 'Reason for rejection',
     'no_vacant_position' => 'This position no longer has an empty approved seat to close.',
     'awaiting_execution' => 'Approved — awaiting execution',
     'effective_on' => 'Takes effect on :date',

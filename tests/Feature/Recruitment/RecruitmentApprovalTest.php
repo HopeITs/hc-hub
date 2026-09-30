@@ -270,6 +270,34 @@ class RecruitmentApprovalTest extends TestCase
             ->assertDontSee(__('recruitment.fields_to_unlock'));
     }
 
+    /**
+     * A rejection needs a reason, so the screen asks for one before deciding.
+     *
+     * The service refuses a rejection with none, and the panel used to confirm
+     * the decision straight away, leaving the refusal with no field to answer.
+     */
+    public function test_rejecting_asks_for_its_reason_before_the_decision(): void
+    {
+        ['request' => $request, 'manager' => $manager] = $this->workflow();
+
+        $component = Livewire::actingAs($manager)
+            ->test(Details::class, ['requestId' => $request->getKey()]);
+
+        $component->assertDontSee(__('recruitment.rejection_reason'))
+            ->call('askToReject')
+            ->assertSet('rejecting', true)
+            ->assertSee(__('recruitment.rejection_reason'))
+            ->call('decide', 'reject')
+            ->assertHasErrors('comment');
+
+        $component->set('decisionComment', 'There is no budget for this.')
+            ->call('decide', 'reject')
+            ->assertHasNoErrors()
+            ->assertSet('rejecting', false);
+
+        $this->assertSame(Status::Rejected, (int) $request->fresh()->status);
+    }
+
     private function stepAt(RecruitmentWorkflowInstance $instance, int $order): RecruitmentWorkflowInstanceStep
     {
         return $instance->steps()
