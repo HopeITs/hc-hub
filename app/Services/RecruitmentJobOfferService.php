@@ -15,7 +15,6 @@ use App\Models\RecruitmentJobOffer as Offer;
 use App\Models\RecruitmentJobOfferVersion as Version;
 use App\Models\User;
 use App\Models\Vacancy;
-use DateTimeInterface;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -455,10 +454,13 @@ class RecruitmentJobOfferService
     }
 
     /**
-     * Every term the contract will need is required — the notes alone are
-     * optional — so an accepted offer can become a contract as it stands.
-     * The probation is not typed in: it follows from the contract type
-     * (probationDaysFor()).
+     * Every term the contract will need is required — the notes and the
+     * probation alone are optional — so an accepted offer can become a
+     * contract as it stands. The contract type is a trial or a service
+     * contract only, as on the recruitment request
+     * (ContractType::recruitmentOptions()). The probation is HR's to type as
+     * they see fit and is not checked: a whole number of days is kept,
+     * anything else is left empty.
      *
      * @param  array<string, mixed>  $input
      * @return array<string, mixed> version attributes
@@ -469,7 +471,7 @@ class RecruitmentJobOfferService
         $int = fn (string $key) => filter_var($input[$key] ?? null, FILTER_VALIDATE_INT);
 
         $contractTypeId = $int('contractTypeId');
-        $contractType = $contractTypeId === false ? null : ContractType::query()->find($contractTypeId);
+        $contractType = $contractTypeId === false ? null : ContractType::query()->recruitmentOptions()->find($contractTypeId);
         if ($contractType === null) {
             $errors['contractTypeId'] = __('recruitment-applicant.offers.errors.contract_type_required');
         }
@@ -503,11 +505,9 @@ class RecruitmentJobOfferService
             $errors['endDate'] = __('recruitment-applicant.offers.errors.end_date_too_far');
         }
 
-        $probation = $this->probationDaysFor($contractType, $startDate, isset($errors['endDate']) ? null : $endDate) ?? 0;
-        if ($probation > (int) config('recruitment.offers.max_probation_days')) {
-            // A trial contract is the probation, so its term is held to the cap.
-            $errors['endDate'] = __('recruitment-applicant.offers.errors.trial_too_long', ['max' => config('recruitment.offers.max_probation_days')]);
-        }
+        // Free: not required and not checked. Only what the column can hold is kept.
+        $probation = filter_var($input['probationDays'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 4294967295]]);
+        $probation = $probation === false ? null : $probation;
 
         // Only a service contract may say 0 hours, as ContractForm allows.
         $minHours = $contractType?->category === 'service' ? 0 : 1;
@@ -553,34 +553,6 @@ class RecruitmentJobOfferService
                 fn ($value) => $value !== null,
             ),
         ];
-    }
-
-    /**
-     * The probation, worked out rather than typed in: the HR system's
-     * probation is the trial contract (category "trial"), so a trial offer's
-     * probation is its term — start to end, in days — and any other contract
-     * type has none (0). Null while the type or a date is still missing.
-     */
-    public function probationDaysFor(ContractType|int|string|null $contractType, mixed $startDate, mixed $endDate): ?int
-    {
-        if (! $contractType instanceof ContractType) {
-            $id = filter_var($contractType, FILTER_VALIDATE_INT);
-            $contractType = $id === false ? null : ContractType::query()->find($id);
-        }
-
-        if ($contractType === null) {
-            return null;
-        }
-
-        if ($contractType->category !== 'trial') {
-            return 0;
-        }
-
-        $date = fn (mixed $value): ?Carbon => $value instanceof DateTimeInterface ? Carbon::instance($value)->startOfDay() : $this->parseDate($value);
-        $start = $date($startDate);
-        $end = $date($endDate);
-
-        return $start !== null && $end !== null && $end->gt($start) ? (int) $start->diffInDays($end) : null;
     }
 
     /** Expires one sent offer if its date has passed. Its own transaction. */

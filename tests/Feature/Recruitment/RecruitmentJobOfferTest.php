@@ -78,7 +78,8 @@ class RecruitmentJobOfferTest extends TestCase
 
         $this->homs = $this->makeCity('HMS', '002');
         $this->hr = $this->hr($this->homs);
-        $this->contractType = ContractType::query()->forceCreate(['name_en' => 'Volunteer contract', 'name_ar' => 'عقد تطوع']);
+        // An offer is a trial or a service contract, as on the recruitment request.
+        $this->contractType = ContractType::query()->forceCreate(['id' => 3, 'name_en' => 'Trial Volunteer Contract', 'name_ar' => 'عقد تطوع تجريبي']);
         $this->campaign = $this->makeCampaignIn($this->homs);
     }
 
@@ -106,6 +107,7 @@ class RecruitmentJobOfferTest extends TestCase
             ->set('salaryPer', SalaryPer::Month)
             ->set('startDate', '2026-11-01')
             ->set('endDate', '2027-10-31')
+            ->set('probationDays', 90)
             ->set('weeklyHours', 40)
             ->set('employmentType', EmploymentType::FullTime)
             ->set('place', ContractPlace::Onsite)
@@ -119,8 +121,7 @@ class RecruitmentJobOfferTest extends TestCase
         $this->assertSame([Status::Draft, 1, Version::STATUS_DRAFT], [$offer->status, $version->version_no, $version->status]);
         $this->assertSame([$application->id, $application->vacancy_id, $this->campaign->vacancy->position_id], [$offer->application_id, $offer->vacancy_id, $offer->position_id]);
         $this->assertSame('1500.00', $version->salary_amount);
-        // Not a trial contract, so no probation (Point 3: worked out, not typed in).
-        $this->assertSame([Currency::USD, SalaryPer::Month, 0, 40], [$version->currency, $version->salary_per, $version->probation_days, $version->weekly_hours]);
+        $this->assertSame([Currency::USD, SalaryPer::Month, 90, 40], [$version->currency, $version->salary_per, $version->probation_days, $version->weekly_hours]);
         $this->assertSame(['2026-11-01', '2027-10-31'], [$version->start_date->toDateString(), $version->end_date->toDateString()]);
         $this->assertSame($this->contractType->id, $version->contract_type_id);
         $this->assertSame(['employment_type' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite, 'notes' => 'Transport allowance included.'], $version->terms_json);
@@ -132,8 +133,8 @@ class RecruitmentJobOfferTest extends TestCase
         Livewire::test(Show::class, ['offerId' => $offer->id])
             ->assertSee('1,500.00')
             ->assertSee('2026-11-01')
-            ->assertSee(__('recruitment-applicant.offers.probation_none'))
-            ->assertSee('Volunteer contract');
+            ->assertSee(__('recruitment-applicant.offers.days', ['count' => 90]))
+            ->assertSee('Trial Volunteer Contract');
     }
 
     /** rules + avoid: an offer only for a selected candidate, and one offer per application. */
@@ -188,44 +189,37 @@ class RecruitmentJobOfferTest extends TestCase
     }
 
     /**
-     * Point 3 (Tasks 7-10 review): the probation follows from the contract
-     * type — a trial contract's term, and none for any other type — and is
-     * never typed in, not even by a client that sends one.
+     * The probation is HR's to type, and is not checked: any whole number of
+     * days is kept, anything else (or nothing) is left empty.
      */
-    public function test_the_probation_is_worked_out_from_the_contract_type(): void
+    public function test_the_probation_is_typed_freely(): void
     {
-        $trial = ContractType::query()->forceCreate(['id' => 3, 'name_en' => 'Trial contract', 'name_ar' => 'عقد تجربة']);
-        $this->assertSame('trial', $trial->category);
+        foreach ([['90', 90], ['400', 400], ['0', 0], ['', null], ['-5', null], ['abc', null]] as $i => [$typed, $kept]) {
+            $offer = $this->create($this->selected('Probation '.$i), ['probationDays' => $typed]);
+            $this->assertSame($kept, $offer->currentVersion->probation_days, "typed '{$typed}'");
+        }
 
-        // Not a trial contract: no probation, whatever the input says.
-        $annual = $this->create($this->selected('Annual One'), ['probationDays' => 90]);
-        $this->assertSame(0, $annual->currentVersion->probation_days);
-
-        // A trial contract: its term, start to end.
-        $offer = $this->create($this->selected('Trial One'), ['contractTypeId' => $trial->id, 'startDate' => '2026-11-01', 'endDate' => '2027-01-30', 'probationDays' => 5]);
-        $this->assertSame(90, $offer->currentVersion->probation_days);
-
-        // Changing the dates recomputes it.
-        $offer = $this->updateDraft($offer, ['contractTypeId' => $trial->id, 'startDate' => '2026-11-01', 'endDate' => '2026-12-01']);
-        $this->assertSame(30, $offer->currentVersion->probation_days);
-
-        // The trial is the probation, so its term is held to the probation cap.
-        $this->assertValidationError(
-            fn () => $this->create($this->selected('Trial Two'), ['contractTypeId' => $trial->id, 'startDate' => '2026-11-01', 'endDate' => '2027-06-01']),
-            'endDate',
-        );
-
-        // The form shows it, and follows the contract type and the dates.
+        // A draft keeps what was typed when it is opened again.
         $this->actingAs($this->hr);
-        Livewire::test(Form::class, ['applicationId' => $this->selected('Trial Three')->id])
-            ->assertSee(__('recruitment-applicant.offers.probation_pending'))
-            ->set('contractTypeId', $trial->id)
-            ->set('startDate', '2026-11-01')
-            ->set('endDate', '2027-01-30')
-            ->assertSee(__('recruitment-applicant.offers.probation_trial', ['count' => 90]))
-            ->set('contractTypeId', $this->contractType->id)
-            ->assertSee(__('recruitment-applicant.offers.probation_none'))
-            ->assertDontSee('id="probationDays" type="number"', false);
+        Livewire::test(Form::class, ['offerId' => Offer::query()->oldest('id')->value('id')])
+            ->assertSet('probationDays', 90);
+    }
+
+    /** Only a trial or a service contract can be offered — the choices of the recruitment request. */
+    public function test_only_trial_or_service_contracts_are_offered(): void
+    {
+        $volunteer = ContractType::query()->forceCreate(['id' => 1, 'name_en' => 'Volunteer Contract', 'name_ar' => 'عقد تطوع']);
+        $service = ContractType::query()->forceCreate(['id' => 5, 'name_en' => 'Specific Voluntary Service Contract', 'name_ar' => 'عقد خدمة تطوعية']);
+
+        $this->assertValidationError(fn () => $this->create($this->selected('Volunteer One'), ['contractTypeId' => $volunteer->id]), 'contractTypeId', 'contract_type_required');
+        $offer = $this->create($this->selected('Service One'), ['contractTypeId' => $service->id, 'employmentType' => EmploymentType::Freelance]);
+        $this->assertSame($service->id, $offer->currentVersion->contract_type_id);
+
+        $this->actingAs($this->hr);
+        Livewire::test(Form::class, ['applicationId' => $this->selected('Form One')->id])
+            ->assertSeeHtml('value="'.$this->contractType->id.'"')
+            ->assertSeeHtml('value="'.$service->id.'"')
+            ->assertDontSee('>Volunteer Contract<', false);
     }
 
     // ------------------------------------------------------------------

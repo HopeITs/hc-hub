@@ -54,6 +54,9 @@ class Form extends Component
 
     public int|string $weeklyHours = '';
 
+    /** Typed by HR as they see fit; not checked (see validateTerms()). */
+    public int|string $probationDays = '';
+
     public int|string $employmentType = '';
 
     public int|string $place = '';
@@ -101,6 +104,7 @@ class Form extends Component
             'startDate' => $this->startDate,
             'endDate' => $this->endDate,
             'weeklyHours' => $this->weeklyHours,
+            'probationDays' => $this->probationDays,
             'employmentType' => $this->employmentType,
             'place' => $this->place,
             'notes' => $this->notes,
@@ -132,13 +136,12 @@ class Form extends Component
         $this->redirectRoute('recruitment.offers.show', ['offerId' => $offer->getKey()], navigate: true);
     }
 
-    public function render(RecruitmentJobOfferService $offers)
+    public function render()
     {
         return view('livewire.recruitment.offers.form', [
-            // Worked out, never typed: see RecruitmentJobOfferService::probationDaysFor().
-            'probationDays' => $offers->probationDaysFor($this->contractTypeId, $this->startDate, $this->endDate),
             'application' => $this->resolveApplication((int) $this->applicationId)->loadMissing('applicant', 'campaign.vacancy.position'),
-            'contractTypes' => ContractType::query()->orderBy('id')->get(),
+            // Trial or service only, as Team 1's recruitment request offers (recruitment.request_form.contract_types).
+            'contractTypes' => ContractType::query()->recruitmentOptions()->orderBy('id')->get(),
             'currencies' => [Currency::USD, Currency::SYP, Currency::EUR],
             'salaryPers' => [SalaryPer::Month, SalaryPer::Hour, SalaryPer::Session],
             'employmentTypes' => [EmploymentType::FullTime, EmploymentType::PartTime, EmploymentType::Freelance],
@@ -153,13 +156,18 @@ class Form extends Component
         $this->offerId = $offer->getKey();
         $this->applicationId = $offer->application_id;
         $this->expectedVersionId = $version->getKey();
-        $this->contractTypeId = (int) $version->contract_type_id;
+        // An older version on a type no longer offered (the general volunteer
+        // contract) leaves the choice to HR instead of showing a wrong one.
+        $this->contractTypeId = ContractType::query()->recruitmentOptions()->whereKey($version->contract_type_id)->exists()
+            ? (int) $version->contract_type_id
+            : '';
         $this->salary = (string) $version->salary_amount;
         $this->currency = (int) $version->currency;
         $this->salaryPer = (int) $version->salary_per;
         $this->startDate = (string) $version->start_date?->toDateString();
         $this->endDate = (string) $version->end_date?->toDateString();
         $this->weeklyHours = (string) $version->weekly_hours;
+        $this->probationDays = $version->probation_days === null ? '' : (int) $version->probation_days;
         $this->employmentType = (string) ($version->terms_json['employment_type'] ?? '');
         $this->place = (string) ($version->terms_json['place'] ?? '');
         $this->notes = (string) ($version->terms_json['notes'] ?? '');

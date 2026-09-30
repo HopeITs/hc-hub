@@ -51,7 +51,7 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                     <x-forms.input-label for="contractTypeId" required :value="__('recruitment-applicant.offers.contract_type')" />
-                    <select id="contractTypeId" wire:model.live="contractTypeId" required class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
+                    <select id="contractTypeId" wire:model="contractTypeId" required class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
                         <option value="">{{ __('recruitment.choose') }}</option>
                         @foreach ($contractTypes as $type)
                             <option value="{{ $type->id }}">{{ $type->name }}</option>
@@ -81,27 +81,18 @@
                 </div>
                 <div>
                     <x-forms.input-label for="startDate" required :value="__('recruitment-applicant.offers.start_date')" />
-                    <x-forms.input id="startDate" type="date" model="startDate" update="blur" required />
+                    <x-forms.input id="startDate" type="date" model="startDate" required />
                     <x-forms.input-error field="startDate" input-id="startDate" />
                 </div>
                 <div>
                     <x-forms.input-label for="endDate" required :value="__('recruitment-applicant.offers.end_date')" />
-                    <x-forms.input id="endDate" type="date" model="endDate" update="blur" required />
+                    <x-forms.input id="endDate" type="date" model="endDate" required />
                     <x-forms.input-error field="endDate" input-id="endDate" />
                 </div>
                 <div>
-                    {{-- Worked out from the contract type and the dates, never typed in. --}}
                     <x-forms.input-label for="probationDays" :value="__('recruitment-applicant.offers.probation_days')" />
-                    <p id="probationDays" class="rounded-control border border-secondary-soft bg-secondary-soft/30 px-3 py-2 text-body" aria-live="polite">
-                        @if ($probationDays === null)
-                            <span class="text-secondary-medium">{{ __('recruitment-applicant.offers.probation_pending') }}</span>
-                        @elseif ($probationDays > 0)
-                            {{ __('recruitment-applicant.offers.probation_trial', ['count' => $probationDays]) }}
-                        @else
-                            {{ __('recruitment-applicant.offers.probation_none') }}
-                        @endif
-                    </p>
-                    <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.offers.probation_hint') }}</p>
+                    <x-forms.input id="probationDays" type="number" model="probationDays" min="0" />
+                    <x-forms.input-error field="probationDays" input-id="probationDays" />
                 </div>
                 <div>
                     <x-forms.input-label for="weeklyHours" required :value="__('recruitment-applicant.offers.weekly_hours')" />

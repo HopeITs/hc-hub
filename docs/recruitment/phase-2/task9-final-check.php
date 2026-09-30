@@ -83,7 +83,7 @@ $offers = app(RecruitmentJobOfferService::class);
 $statuses = app(RecruitmentApplicationStatusService::class);
 $template = RecruitmentApplication::query()->where('campaign_id', $campaignId)->firstOrFail();
 $otherTemplate = RecruitmentApplication::query()->where('campaign_id', $otherCampaignId)->firstOrFail();
-$contractTypeId = (int) ContractType::query()->orderBy('id')->value('id');
+$contractTypeId = (int) ContractType::query()->recruitmentOptions()->orderBy('id')->value('id'); // trial or service, as on the request
 
 DB::beginTransaction();
 $real = now();
@@ -116,7 +116,7 @@ try {
         return $application->fresh();
     };
     $terms = fn (array $o = []) => array_merge([
-        'contractTypeId' => $contractTypeId, 'salary' => '1500', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month,
+        'contractTypeId' => $contractTypeId, 'probationDays' => 90, 'salary' => '1500', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month,
         'startDate' => $real->copy()->addMonth()->startOfMonth()->toDateString(), 'endDate' => $real->copy()->addYear()->toDateString(),
         'weeklyHours' => 40, 'employmentType' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite,
         'notes' => 'Transport allowance included.',
@@ -136,8 +136,7 @@ try {
     $raw = (string) DB::table('recruitment_job_offer_versions')->where('id', $v1->id)->value('salary_amount');
     $check('Salary — saved, encrypted at rest', $v1->salary_amount === '1500.00' && ! str_contains($raw, '1500'), strlen($raw).' chars of ciphertext');
     $check('Start date', $v1->start_date->toDateString() === $real->copy()->addMonth()->startOfMonth()->toDateString());
-    // Worked out from the contract type (Tasks 7-10 review, Point 3): the trial contract's term, else none.
-    $check('Probation period (from the contract type)', $v1->probation_days === $offers->probationDaysFor($contractTypeId, $v1->start_date, $v1->end_date), $v1->probation_days.' days');
+    $check('Probation period (typed by HR)', $v1->probation_days === 90);
     $check('Contract details', $v1->contract_type_id === $contractTypeId && $v1->weekly_hours === 40 && $v1->currency === Currency::USD
         && $v1->salary_per === SalaryPer::Month && $v1->end_date !== null
         && ($v1->terms_json['employment_type'] ?? null) === EmploymentType::FullTime && ($v1->terms_json['notes'] ?? null) === 'Transport allowance included.');

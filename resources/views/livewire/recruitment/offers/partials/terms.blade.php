@@ -11,7 +11,7 @@
     </div>
     <div>
         <dt class="text-secondary-medium">{{ __('recruitment-applicant.offers.probation_days') }}</dt>
-        <dd class="font-medium">{{ $version->probation_days > 0 ? __('recruitment-applicant.offers.days', ['count' => (int) $version->probation_days]) : __('recruitment-applicant.offers.probation_none') }}</dd>
+        <dd class="font-medium">{{ $version->probation_days === null ? '—' : __('recruitment-applicant.offers.days', ['count' => (int) $version->probation_days]) }}</dd>
     </div>
     <div>
         <dt class="text-secondary-medium">{{ __('recruitment-applicant.offers.contract_type') }}</dt>

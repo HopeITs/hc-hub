@@ -120,7 +120,7 @@ try {
         $statuses->change($hr, $application->fresh(), AppStatus::Shortlisted, AppStatus::Selected, null);
 
         $offer = $offers->create($hr, $application->fresh(), array_merge([
-            'contractTypeId' => 1, 'salary' => '1500', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month,
+            'contractTypeId' => 3, 'probationDays' => 90, 'salary' => '1500', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month,
             'startDate' => now()->addMonth()->startOfMonth()->toDateString(), 'endDate' => now()->addMonth()->startOfMonth()->addMonths(11)->toDateString(),
             'weeklyHours' => 40, 'employmentType' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite, 'notes' => '',
         ], $terms))->fresh();
@@ -312,7 +312,7 @@ try {
         ]);
         $statuses->change($hr, $application, AppStatus::Submitted, AppStatus::Shortlisted, null);
         $statuses->change($hr, $application->fresh(), AppStatus::Shortlisted, AppStatus::Selected, null);
-        $offer = $offers->create($hr, $application->fresh(), ['contractTypeId' => 1, 'salary' => '900', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month, 'startDate' => now()->addMonth()->toDateString(), 'endDate' => now()->addMonths(6)->toDateString(), 'weeklyHours' => 40, 'employmentType' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite])->fresh();
+        $offer = $offers->create($hr, $application->fresh(), ['contractTypeId' => 3, 'salary' => '900', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month, 'startDate' => now()->addMonth()->toDateString(), 'endDate' => now()->addMonths(6)->toDateString(), 'weeklyHours' => 40, 'employmentType' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite])->fresh();
         $offer = $offers->send($hr, $offer, $offer->current_version_id, null)->fresh();
 
         return Conversion::query()->forceCreate([

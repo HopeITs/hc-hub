@@ -62,7 +62,7 @@ $hr = User::findOrFail($hrId);
 [$rafi, $mirna, $judy] = [User::findOrFail($rafiId), User::findOrFail($mirnaId), User::findOrFail($judyId)];
 $offers = app(RecruitmentJobOfferService::class);
 $statuses = app(RecruitmentApplicationStatusService::class);
-$contractTypeId = (int) ContractType::query()->orderBy('id')->value('id');
+$contractTypeId = (int) ContractType::query()->recruitmentOptions()->orderBy('id')->value('id'); // trial or service, as on the request
 
 $ok = fn (string $label, string $detail = '') => print '  OK       '.$label.($detail !== '' ? " — {$detail}" : '').PHP_EOL;
 $refused = function (string $label, callable $attempt): void {
@@ -104,6 +104,7 @@ $real = now();
 $startDate = $real->copy()->addMonth()->startOfMonth()->toDateString();
 $terms = fn (array $overrides = []) => array_merge([
     'contractTypeId' => $contractTypeId,
+    'probationDays' => 90,
     'salary' => '1200',
     'currency' => Currency::USD,
     'salaryPer' => SalaryPer::Month,

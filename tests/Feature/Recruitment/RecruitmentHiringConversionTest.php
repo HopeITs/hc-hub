@@ -99,7 +99,7 @@ class RecruitmentHiringConversionTest extends TestCase
         $this->homs = $this->makeCity('HMS', '002');
         $this->hr = $this->hr($this->homs);
 
-        foreach ([self::ANNUAL => 'Volunteer contract', self::TRIAL => 'Trial contract', self::SERVICE => 'Service contract'] as $id => $name) {
+        foreach ([self::ANNUAL => 'Volunteer Contract', self::TRIAL => 'Trial Volunteer Contract', self::SERVICE => 'Specific Voluntary Service Contract'] as $id => $name) {
             ContractType::query()->forceCreate(['id' => $id, 'name_en' => $name, 'name_ar' => $name]);
         }
 
@@ -158,7 +158,7 @@ class RecruitmentHiringConversionTest extends TestCase
 
         // The contract, on the position, from the accepted terms.
         $contract = Contract::query()->where('employee_id', $employee->id)->sole();
-        $this->assertSame([$position->id, self::ANNUAL, EmploymentType::FullTime, ContractPlace::Onsite], [$contract->position_id, $contract->contract_type_id, $contract->type, $contract->place]);
+        $this->assertSame([$position->id, self::TRIAL, EmploymentType::FullTime, ContractPlace::Onsite], [$contract->position_id, $contract->contract_type_id, $contract->type, $contract->place]);
         $this->assertSame(['2026-11-01', '2027-10-31', 40], [$contract->start_date->toDateString(), $contract->end_date->toDateString(), $contract->weekly_hours]);
         $this->assertSame([1500.0, Currency::USD, SalaryPer::Month, PayMode::Fixed, true], [(float) $contract->salary, $contract->currency, (int) $contract->salary_per, $contract->pay_mode, $contract->is_active]);
         $this->assertStringNotContainsString('1500', (string) DB::table('contracts')->where('id', $contract->id)->value('salary'), 'Encrypted at rest, like every contract.');
@@ -232,7 +232,7 @@ class RecruitmentHiringConversionTest extends TestCase
     public function test_terms_the_offer_does_not_carry_take_the_composer_defaults(): void
     {
         // Annual: to the end of the year it starts in; 40 hours; on site; full time.
-        $annual = $this->legacyTerms($this->accepted('Annual One')[2], ['end_date' => null, 'weekly_hours' => null], ['place', 'employment_type']);
+        $annual = $this->legacyTerms($this->accepted('Annual One')[2], ['contract_type_id' => self::ANNUAL, 'end_date' => null, 'weekly_hours' => null], ['place', 'employment_type']);
         $this->hire($annual, ['employee' => $this->person(['username' => 'annual.one', 'nationalNumber' => '01234567801'])]);
         $contract = $annual->fresh()->contract;
         $this->assertSame(['2026-11-01', '2026-12-31', 40, ContractPlace::Onsite, EmploymentType::FullTime],
@@ -867,7 +867,7 @@ class RecruitmentHiringConversionTest extends TestCase
     private function terms(array $overrides = []): array
     {
         return array_merge([
-            'contractTypeId' => self::ANNUAL,
+            'contractTypeId' => self::TRIAL,
             'salary' => self::SALARY,
             'currency' => Currency::USD,
             'salaryPer' => SalaryPer::Month,

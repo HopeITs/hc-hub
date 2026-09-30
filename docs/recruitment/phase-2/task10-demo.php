@@ -134,7 +134,7 @@ Vacancy::query()->whereKey($twoSeatVacancyId)->update(['needed_count' => 2]);
 $offer = $demo['A2']->fresh();
 $startDate = now()->addMonth()->startOfMonth();
 $offer = $offers->revise($hr, $offer, $offer->current_version_id, [
-    'contractTypeId' => 1, 'salary' => '1100', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month,
+    'contractTypeId' => 3, 'probationDays' => 90, 'salary' => '1100', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month,
     'startDate' => $startDate->toDateString(), 'endDate' => $startDate->copy()->endOfYear()->toDateString(),
     'weeklyHours' => 40, 'employmentType' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite, 'notes' => '',
 ], 'The vacancy was widened to two seats; this candidate is offered the second one.')->fresh();
