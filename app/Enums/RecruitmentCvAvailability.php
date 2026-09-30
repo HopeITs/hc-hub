@@ -49,9 +49,9 @@ final class RecruitmentCvAvailability
     public static function classes(string $availability): string
     {
         return match ($availability) {
-            self::Available => 'bg-green-50 text-green-800',
-            self::Archived, self::Pending => 'bg-amber-50 text-amber-800',
-            default => 'bg-red-50 text-red-800',
+            self::Available => 'border border-primary bg-primary text-white',
+            self::Archived, self::Pending => 'border border-neutral-300 bg-neutral-100 text-secondary-dark',
+            default => 'border border-primary bg-white text-primary',
         };
     }
 }

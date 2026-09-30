@@ -61,11 +61,11 @@ class RecruitmentApplicantHardeningTest extends TestCase
         $applicant = $this->makeApplicant();
         $application = $this->applyTo($this->makeCampaignIn($this->homs), $applicant);
         $this->actingAs($this->hr($this->homs));
-        $opener = 'decide-'.$application->id.'-'.Status::Shortlisted;
+        $opener = 'decide-'.$application->id.'-'.Status::UnderReview;
 
         Livewire::test(Show::class, ['applicantId' => $applicant->id])
             ->assertSeeHtml('id="'.$opener.'"')
-            ->call('beginStatusChange', $application->id, Status::Shortlisted)
+            ->call('beginStatusChange', $application->id, Status::UnderReview)
             ->assertDispatched('focus-element', id: 'decision-panel-'.$application->id)
             ->assertSeeHtml('id="decision-panel-'.$application->id.'"')
             ->assertDontSeeHtml('id="'.$opener.'"')
@@ -82,13 +82,14 @@ class RecruitmentApplicantHardeningTest extends TestCase
         $this->actingAs($this->hr($this->homs));
 
         Livewire::test(Show::class, ['applicantId' => $applicant->id])
-            ->call('beginStatusChange', $application->id, Status::Shortlisted)
+            ->call('beginStatusChange', $application->id, Status::UnderReview)
+            ->set('statusReason', 'Application is ready for the first recruiter review.')
             ->call('changeStatus')
             ->assertHasNoErrors()
             ->assertDispatched('focus-element', id: 'application-'.$application->id.'-title')
             ->assertSeeHtml('id="application-'.$application->id.'-title"');
 
-        $this->assertSame(Status::Shortlisted, $application->fresh()->status);
+        $this->assertSame(Status::UnderReview, $application->fresh()->status);
     }
 
     public function test_a_missing_rejection_reason_is_announced_on_its_field_and_keeps_focus(): void
@@ -99,6 +100,7 @@ class RecruitmentApplicantHardeningTest extends TestCase
 
         $screen = Livewire::test(Show::class, ['applicantId' => $applicant->id])
             ->call('beginStatusChange', $application->id, Status::Rejected)
+            ->set('statusReason', 'Candidate does not meet the mandatory language requirement.')
             ->assertDontSeeHtml('statusReasonCode-error')
             ->call('changeStatus')
             ->assertHasErrors('statusReasonCode')
@@ -109,8 +111,9 @@ class RecruitmentApplicantHardeningTest extends TestCase
 
         $this->assertMatchesRegularExpression('/<p id="statusReasonCode-error"\s+role="alert"/', $screen->html());
 
-        // "Other" needs a note; its error joins the hint in the description.
+        // The note is always required, including when the reason is "other".
         $screen->set('statusReasonCode', 'other')
+            ->set('statusReason', '')
             ->call('changeStatus')
             ->assertHasErrors('statusReason')
             ->assertSeeHtml('id="statusReason-error"');
@@ -124,7 +127,9 @@ class RecruitmentApplicantHardeningTest extends TestCase
         $applicant = $this->makeApplicant();
         $application = $this->applyTo($this->makeCampaignIn($this->homs), $applicant);
         $hr = $this->hr($this->homs);
-        app(RecruitmentApplicationStatusService::class)->change($hr, $application, Status::Submitted, Status::Shortlisted, null);
+        $statuses = app(RecruitmentApplicationStatusService::class);
+        $statuses->change($hr, $application, Status::Submitted, Status::UnderReview, null);
+        $statuses->change($hr, $application->fresh(), Status::UnderReview, Status::Shortlisted, null);
         $this->actingAs($hr);
 
         foreach (['en' => 'to', 'ar' => 'إلى'] as $locale => $word) {
@@ -139,7 +144,7 @@ class RecruitmentApplicantHardeningTest extends TestCase
 
             // From-state, flipping arrow, spoken word, to-state — in that order.
             $this->assertMatchesRegularExpression(
-                '/'.preg_quote(__('recruitment-applicant.statuses.'.Status::Submitted), '/')
+                '/'.preg_quote(__('recruitment-applicant.statuses.'.Status::UnderReview), '/')
                 .'\s*<svg class="[^"]*rtl:-scale-x-100[^"]*"[^>]*aria-hidden="true">.*?<\/svg><span class="sr-only">'.preg_quote($word, '/').'<\/span>\s*'
                 .preg_quote(__('recruitment-applicant.statuses.'.Status::Shortlisted), '/').'/su',
                 $html,

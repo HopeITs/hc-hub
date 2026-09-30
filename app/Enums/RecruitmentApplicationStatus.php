@@ -50,19 +50,14 @@ final class RecruitmentApplicationStatus
         ];
     }
 
-    /**
-     * Badge classes, one meaning per hue as in the interview and offer
-     * badges: blue in progress, green moving to a hire, red closed against
-     * the candidate, neutral waiting or set aside. Never a tint of the brand
-     * red, which reads as pink.
-     */
+    /** Hope Center brand red marks active outcomes; neutral tones mark waiting states. */
     public static function classes(?string $status): string
     {
         return match ($status) {
-            self::Shortlisted, self::InterviewScheduled, self::Interviewed => 'bg-blue-50 text-blue-800',
-            self::Selected, self::OfferSent, self::OfferAccepted, self::Hired => 'bg-green-50 text-green-800',
-            self::Rejected, self::OfferRejected => 'bg-red-50 text-red-800',
-            default => 'bg-neutral-100 text-secondary-dark',
+            self::Shortlisted, self::InterviewScheduled, self::Interviewed => 'border border-primary bg-white text-primary',
+            self::Selected, self::OfferSent, self::OfferAccepted, self::Hired => 'border border-primary bg-primary text-white',
+            self::Rejected, self::OfferRejected => 'border border-primary bg-white text-primary',
+            default => 'border border-neutral-300 bg-neutral-100 text-secondary-dark',
         };
     }
 }

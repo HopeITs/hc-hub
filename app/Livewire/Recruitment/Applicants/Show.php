@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -87,6 +88,10 @@ class Show extends Component
     {
         abort_if($this->statusApplicationId === null || $this->statusFrom === null, 404);
 
+        if (! $this->hasInternalNote()) {
+            return;
+        }
+
         $application = $this->resolveApplication($this->statusApplicationId);
         Gate::authorize('changeStatus', $application);
 
@@ -107,11 +112,30 @@ class Show extends Component
         }
 
         $this->closeStatusPanel();
-        session()->flash('recruitment_saved', __('recruitment-applicant.status_change.changed'));
+        $this->toast(__('recruitment-applicant.status_change.changed'));
 
         // The button that confirmed is gone, and the one that opened the panel
         // may be too once the status has moved: the application itself is next.
         $this->dispatch('focus-element', id: 'application-'.$application->getKey().'-title');
+    }
+
+    /** Opens the shared recruitment confirmation popup after the note is validated. */
+    public function openStatusConfirmation(): void
+    {
+        abort_if($this->statusApplicationId === null || $this->statusFrom === null || $this->statusTarget === '', 404);
+
+        if (! $this->hasInternalNote()) {
+            return;
+        }
+
+        $this->dispatch('open-recruitment-confirmation',
+            scope: 'applicant-profile',
+            action: 'changeStatus',
+            title: __('recruitment-applicant.status_change.change_title'),
+            message: __('recruitment-applicant.status_change.confirm'),
+            confirmLabel: __('recruitment-applicant.decisions.confirm.'.$this->statusTarget),
+            tone: $this->statusTarget === \App\Enums\RecruitmentApplicationStatus::Rejected ? 'danger' : 'primary',
+        );
     }
 
     /** Back to the decision button that opened the panel. */
@@ -153,7 +177,7 @@ class Show extends Component
 
         $this->closeArchivePanel();
         $this->dispatch('recruitment-notes-changed');
-        session()->flash('recruitment_saved', __('recruitment-applicant.cv_archive.archived'));
+        $this->toast(__('recruitment-applicant.cv_archive.archived'));
 
         // An archived CV loses its archive button; its row is what changed.
         $this->dispatch('focus-element', id: 'file-'.$file->getKey());
@@ -206,6 +230,7 @@ class Show extends Component
         return view('livewire.recruitment.applicants.show', [
             'applicant' => $applicant,
             'applications' => $applications,
+            'currentApplication' => $applications->first(),
             // A count only: what the other applications were stays out of scope.
             'hiddenApplications' => max(0, $totalApplications - $applications->count()),
             'isPreviousApplicant' => $totalApplications > 1,
@@ -247,7 +272,7 @@ class Show extends Component
     {
         $applicant = RecruitmentApplicant::query()
             ->visibleTo(auth()->user())
-            ->with('city')
+            ->with(['city', 'employee.media'])
             ->findOrFail($this->applicantId);
 
         Gate::authorize('view', $applicant);
@@ -294,5 +319,26 @@ class Show extends Component
         foreach ($exception->errors() as $field => $messages) {
             $this->addError($field, $messages[0]);
         }
+    }
+
+    private function hasInternalNote(): bool
+    {
+        if (trim($this->statusReason) !== '') {
+            return true;
+        }
+
+        $this->addError('statusReason', __('recruitment-applicant.decisions.internal_note_required'));
+
+        return false;
+    }
+
+    /** Uses the application-wide SweetAlert toast instead of moving page content. */
+    private function toast(string $message): void
+    {
+        LivewireAlert::title($message)
+            ->success()
+            ->toast()
+            ->position('top-start')
+            ->show();
     }
 }

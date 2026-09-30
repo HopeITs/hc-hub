@@ -8,9 +8,11 @@ use App\Enums\RecruitmentCvAvailability;
 use App\Enums\RecruitmentIndicatorOutcome;
 use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplication;
+use App\Models\RecruitmentInterview;
 use App\Models\RecruitmentTag;
 use App\Services\HiringCampaignStateMachine;
 use App\Services\RecruitmentApplicationFilters;
+use App\Services\RecruitmentInterviewSchedulingService;
 use App\Services\RecruitmentMatchingIndicators;
 use App\Support\Recruitment\MatchingIndicator;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -19,6 +21,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Reactive;
 use RamonRietdijk\LivewireTables\Actions\Action;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Filters\DateFilter;
@@ -47,6 +50,12 @@ class ApplicationTable extends LivewireTable
     public string $sortColumn = 'submitted_at';
 
     public string $sortDirection = 'desc';
+
+    #[Reactive]
+    public ?string $stageStatus = null;
+
+    #[Reactive]
+    public int|string|null $campaignFilter = null;
 
     protected string $model = RecruitmentApplication::class;
 
@@ -124,16 +133,40 @@ class ApplicationTable extends LivewireTable
         $this->clearSelection();
     }
 
+    #[On('recruitment-applicant-status-filter')]
+    public function filterByStatus(?string $status = null): void
+    {
+        $this->filters['status'] = in_array($status, RecruitmentApplicationStatus::values(), true) ? $status : null;
+        $this->clearSelection();
+    }
+
+    public function updatedStageStatus(): void
+    {
+        $this->clearSelection();
+        $this->resetPage();
+    }
+
+    public function updatedCampaignFilter(): void
+    {
+        $this->clearSelection();
+        $this->resetPage();
+    }
+
     protected function query(): Builder
     {
         Gate::authorize('viewAny', RecruitmentApplicant::class);
 
         $filters = app(RecruitmentApplicationFilters::class);
 
-        return RecruitmentApplication::query()
+        $query = RecruitmentApplication::query()
             ->visibleTo(auth()->user())
             ->addSelect(['has_previous_application' => $filters->earlierApplication(RecruitmentApplication::query())])
             ->with(['applicant', 'campaign.vacancy.position', 'cvFiles', 'tags']);
+
+        $filters->status($query, $this->stageStatus);
+        $filters->campaign($query, $this->campaignFilter);
+
+        return $query;
     }
 
     /** Indicators for the rows on this page, in one pass. */
@@ -177,6 +210,11 @@ class ApplicationTable extends LivewireTable
 
             Column::make(__('recruitment-applicant.campaign'), function (RecruitmentApplication $application) use ($states): string {
                 $title = e($application->campaign?->vacancy?->position?->title ?? __('recruitment-applicant.no_vacancy'));
+
+                if ($application->campaign !== null) {
+                    $title = '<span class="font-semibold">'.e(__('recruitment-applicant.campaign_number', ['number' => $application->campaign->id])).'</span>'
+                        .'<span class="block text-xs text-secondary-medium">'.$title.'</span>';
+                }
 
                 // A closed or expired campaign is still worth reviewing, but the
                 // reviewer should know nothing more will arrive.
@@ -228,6 +266,19 @@ class ApplicationTable extends LivewireTable
 
             Column::make(__('recruitment-applicant.indicators.column'), function (RecruitmentApplication $application): string {
                 return $this->indicatorSummary($application);
+            })->asHtml(),
+
+            Column::make(__('recruitment-applicant.next_action'), function (RecruitmentApplication $application): string {
+                if (Gate::allows('schedule', [RecruitmentInterview::class, $application])
+                    && in_array($application->status, RecruitmentInterviewSchedulingService::SCHEDULABLE, true)) {
+                    return '<a href="'.e(route('recruitment.interviews.create', ['applicationId' => $application->id])).'" wire:navigate x-on:click.stop'
+                        .' class="inline-flex min-h-9 items-center rounded-control border border-primary px-3 py-1.5 text-sm font-semibold text-primary hover:bg-selection">'
+                        .e(__('recruitment-applicant.interviews.schedule')).'</a>';
+                }
+
+                return '<a href="'.e(route('recruitment.applicants.show', ['applicantId' => $application->applicant_id])).'" wire:navigate x-on:click.stop'
+                    .' class="inline-flex min-h-9 items-center rounded-control border border-neutral-300 px-3 py-1.5 text-sm font-semibold text-secondary-dark hover:bg-neutral-50">'
+                    .e(__('recruitment-applicant.profile.open')).'</a>';
             })->asHtml(),
         ];
     }
