@@ -65,11 +65,15 @@ use Throwable;
  * attempt with its reason, and HR can retry once it is fixed; a mistake in
  * the form is simply shown.
  *
- * Existing people are never merged silently. A candidate already linked to
- * an employee (an internal applicant), or whose national number is on file,
- * can only be linked to that employee. One matching an employee's email or
- * phone can still be created as someone new, but only when HR confirms they
- * are a different person.
+ * Existing people are never merged silently, and never linked on a phone
+ * or an email alone (the identity rule, matches()). A candidate is linked to
+ * an employee only when they signed in as that member of staff, or when the
+ * national number, the email or the phone on file comes with the same name.
+ * A signed-in member of staff, or a national number on file under the same
+ * name, can only be linked; a same-name email or phone match can still be
+ * created as someone new once HR confirms they are a different person. An
+ * email or phone on file under another name is only a warning, and a
+ * national number on file under another name stops the hire.
  *
  * No separate approval: the seat was approved with the recruitment request
  * and the terms with the offer. The permission is its own
@@ -95,6 +99,13 @@ class RecruitmentHiringConversionService
     public const MATCH_EMAIL = 'email';
 
     public const MATCH_PHONE = 'phone';
+
+    /** What HR may do about a match (matches()): link it, only be warned, or stop. */
+    public const MATCH_LINKABLE = 'linkable';
+
+    public const MATCH_WARNING = 'warning';
+
+    public const MATCH_ID_CONFLICT = 'id_conflict';
 
     public function __construct(
         private readonly ActivityLogger $activity,
@@ -124,10 +135,23 @@ class RecruitmentHiringConversionService
     }
 
     /**
-     * Employees this candidate may already be, with why each matched. A
-     * national number is only known once HR types it.
+     * Employees this candidate may already be, with why each matched and what
+     * HR may do about it (the identity rule):
      *
-     * @return Collection<int, array{employee: Employee, reasons: array<int, string>}>
+     *   linkable     the same person: the member of staff the candidate
+     *                signed in as, or a national number, email or phone on
+     *                file together with the same name (nameMatches());
+     *   warning      an email or phone on file under another name: shown to
+     *                HR, never linked, and no reason to hold back a new
+     *                employee;
+     *   id_conflict  a national number on file under another name: the hire
+     *                stops until HR has checked it.
+     *
+     * An employee_id the applicant carries without having signed in proves
+     * nothing, so it is no match on its own. A national number is only known
+     * once HR types it.
+     *
+     * @return Collection<int, array{employee: Employee, reasons: array<int, string>, kind: string}>
      */
     public function matches(Conversion $conversion, ?string $nationalNumber = null): Collection
     {
@@ -138,7 +162,7 @@ class RecruitmentHiringConversionService
         $nationalNumber = $this->normalizeNationalNumber($nationalNumber);
         $found = [];
 
-        if ($applicant?->employee_id !== null) {
+        if ($applicant?->employee_id !== null && $applicant->identity_verified_at !== null) {
             $found[(int) $applicant->employee_id][] = self::MATCH_INTERNAL;
         }
 
@@ -168,10 +192,27 @@ class RecruitmentHiringConversionService
         }
 
         $employees = Employee::query()->with('city')->whereKey(array_keys($found))->get()->keyBy('id');
+        $names = array_values(array_unique(array_filter([
+            trim((string) ($payload['full_name'] ?? '')),
+            trim((string) $applicant?->full_name),
+        ])));
 
         return collect($found)
-            ->map(fn (array $reasons, int $id): array => ['employee' => $employees->get($id), 'reasons' => array_values(array_unique($reasons))])
-            ->filter(fn (array $match): bool => $match['employee'] !== null)
+            ->filter(fn (array $reasons, int $id): bool => $employees->has($id))
+            ->map(function (array $reasons, int $id) use ($employees, $names): array {
+                $employee = $employees->get($id);
+                $reasons = array_values(array_unique($reasons));
+
+                return [
+                    'employee' => $employee,
+                    'reasons' => $reasons,
+                    'kind' => match (true) {
+                        in_array(self::MATCH_INTERNAL, $reasons, true), $this->nameMatches($employee, $names) => self::MATCH_LINKABLE,
+                        in_array(self::MATCH_NATIONAL_NUMBER, $reasons, true) => self::MATCH_ID_CONFLICT,
+                        default => self::MATCH_WARNING,
+                    },
+                ];
+            })
             ->values();
     }
 
@@ -295,9 +336,18 @@ class RecruitmentHiringConversionService
 
         $applicant = RecruitmentApplicant::query()->whereKey($locked->applicant_id)->lockForUpdate()->firstOrFail();
 
+        // Who the candidate may already be, under the identity rule.
+        $matches = $this->matches($locked, $nationalNumber);
+
+        // Their national number is on file under another name: nothing is
+        // created until HR has checked it.
+        if ($conflict = $matches->firstWhere('kind', self::MATCH_ID_CONFLICT)) {
+            throw $this->error($mode === self::MODE_CREATE ? 'employee.nationalNumber' : 'employeeId', 'national_number_mismatch', ['name' => $conflict['employee']->name]);
+        }
+
         [$employee, $reactivated] = $mode === self::MODE_CREATE
-            ? [$this->createEmployee($actor, $locked, $position, $person, $confirmNotDuplicate), false]
-            : $this->linkEmployee($actor, $locked, $applicant, $position, $employeeId, $nationalNumber);
+            ? [$this->createEmployee($actor, $position, $person, $matches, $confirmNotDuplicate), false]
+            : $this->linkEmployee($actor, $position, $employeeId, $matches);
 
         $contract = new Contract($this->contractAttributes($employee, $offer, $version, $sessionDuration));
         $contract->save();
@@ -307,7 +357,10 @@ class RecruitmentHiringConversionService
 
         $this->statuses->applyConversionTransition($actor, $application, AppStatus::Hired);
 
-        if ($applicant->employee_id === null) {
+        // The candidate is now this employee: the one linked under the
+        // identity rule, or the one just created from their application. The
+        // link a member of staff made by signing in is never replaced.
+        if ($applicant->identity_verified_at === null || $applicant->employee_id === null) {
             $applicant->forceFill(['employee_id' => $employee->getKey()])->save();
         }
 
@@ -330,6 +383,10 @@ class RecruitmentHiringConversionService
             'mode' => $mode,
             'employee_id' => $employee->getKey(),
             'employee_reactivated' => $reactivated,
+            // Contact details found on someone else's record, shown to HR and not linked.
+            'identity_warnings' => $matches->where('kind', self::MATCH_WARNING)
+                ->map(fn (array $match): array => ['employee_id' => $match['employee']->getKey(), 'reasons' => $match['reasons']])
+                ->values()->all(),
             'contract_id' => $contract->getKey(),
             'vacancy_id' => $vacancy->getKey(),
             'vacancy_status' => $vacancyStatus,
@@ -417,14 +474,17 @@ class RecruitmentHiringConversionService
         return $blockers;
     }
 
-    /** @param  array<string, mixed>  $person */
-    private function createEmployee(User $actor, Conversion $conversion, Position $position, array $person, bool $confirmNotDuplicate): Employee
+    /**
+     * @param  array<string, mixed>  $person
+     * @param  Collection<int, array{employee: Employee, reasons: array<int, string>, kind: string}>  $matches
+     */
+    private function createEmployee(User $actor, Position $position, array $person, Collection $matches, bool $confirmNotDuplicate): Employee
     {
         $cityId = $this->workCityId($position);
         Gate::forUser($actor)->authorize('create', [Employee::class, $cityId]);
 
-        $matches = $this->matches($conversion, $person['national_number']);
-        $matchedBy = fn (string $reason): bool => $matches->contains(fn (array $match): bool => in_array($reason, $match['reasons'], true));
+        $linkable = $matches->where('kind', self::MATCH_LINKABLE);
+        $matchedBy = fn (string $reason): bool => $linkable->contains(fn (array $match): bool => in_array($reason, $match['reasons'], true));
 
         if ($matchedBy(self::MATCH_INTERNAL)) {
             throw $this->error('mode', 'internal_must_link');
@@ -434,7 +494,9 @@ class RecruitmentHiringConversionService
             throw $this->error('employee.nationalNumber', 'national_number_taken');
         }
 
-        if ($matches->isNotEmpty() && ! $confirmNotDuplicate) {
+        // The same name with the same email or phone: HR says it is someone
+        // else. A contact detail under another name is only a warning.
+        if ($linkable->isNotEmpty() && ! $confirmNotDuplicate) {
             throw $this->error('confirmNotDuplicate', 'possible_duplicate');
         }
 
@@ -450,17 +512,28 @@ class RecruitmentHiringConversionService
         }
     }
 
-    /** @return array{0: Employee, 1: bool} the employee, and whether they were reactivated */
-    private function linkEmployee(User $actor, Conversion $conversion, RecruitmentApplicant $applicant, Position $position, mixed $employeeId, ?string $nationalNumber): array
+    /**
+     * @param  Collection<int, array{employee: Employee, reasons: array<int, string>, kind: string}>  $matches
+     * @return array{0: Employee, 1: bool} the employee, and whether they were reactivated
+     */
+    private function linkEmployee(User $actor, Position $position, mixed $employeeId, Collection $matches): array
     {
         $id = filter_var($employeeId, FILTER_VALIDATE_INT);
+        $match = $id === false ? null : $matches->first(fn (array $match): bool => $match['employee']->getKey() === $id);
 
         // Only someone the candidate actually matches: a tampered id links nobody.
-        if ($id === false || ! $this->matches($conversion, $nationalNumber)->contains(fn (array $match): bool => $match['employee']->getKey() === $id)) {
+        if ($match === null) {
             throw $this->error('employeeId', 'employee_not_matched');
         }
 
-        if ($applicant->employee_id !== null && (int) $applicant->employee_id !== $id) {
+        // A phone or an email on someone else's record does not make them that person.
+        if ($match['kind'] !== self::MATCH_LINKABLE) {
+            throw $this->error('employeeId', 'name_mismatch');
+        }
+
+        // A member of staff who signed in to apply is that employee and no other.
+        $internal = $matches->first(fn (array $match): bool => in_array(self::MATCH_INTERNAL, $match['reasons'], true));
+        if ($internal !== null && $internal['employee']->getKey() !== $id) {
             throw $this->error('employeeId', 'internal_must_link');
         }
 
@@ -746,6 +819,50 @@ class RecruitmentHiringConversionService
         return preg_match('/^09\d{8}$/', $digits) === 1 ? $digits : null;
     }
 
+    /**
+     * Whether the employee's first and last name both appear in one of the
+     * candidate's names — the English pair or the Arabic pair, each name as
+     * whole words, compared after foldName().
+     *
+     * @param  array<int, string>  $candidateNames
+     */
+    private function nameMatches(Employee $employee, array $candidateNames): bool
+    {
+        $candidates = array_filter(array_map(fn (string $name): string => ' '.$this->foldName($name).' ', $candidateNames), fn (string $name): bool => trim($name) !== '');
+
+        foreach ([['first_name_en', 'last_name_en'], ['first_name_ar', 'last_name_ar']] as [$firstColumn, $lastColumn]) {
+            $first = $this->foldName((string) $employee->getAttribute($firstColumn));
+            $last = $this->foldName((string) $employee->getAttribute($lastColumn));
+
+            if ($first === '' || $last === '') {
+                continue;
+            }
+
+            foreach ($candidates as $candidate) {
+                if (str_contains($candidate, ' '.$first.' ') && str_contains($candidate, ' '.$last.' ')) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * A name as compared: lower case, without Arabic diacritics or tatweel,
+     * with the spellings people use interchangeably folded (أ إ آ → ا,
+     * ة → ه, ى → ي), and anything but letters and digits as one space.
+     */
+    private function foldName(string $name): string
+    {
+        $name = mb_strtolower($name);
+        $name = (string) preg_replace('/[\x{064B}-\x{065F}\x{0670}\x{0640}]/u', '', $name);
+        $name = strtr($name, ['أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا', 'ة' => 'ه', 'ى' => 'ي']);
+        $name = (string) preg_replace('/[^\p{L}\p{N}]+/u', ' ', $name);
+
+        return trim($name);
+    }
+
     private function normalizeNationalNumber(?string $value): ?string
     {
         $value = trim(en_digits((string) $value));
@@ -771,8 +888,9 @@ class RecruitmentHiringConversionService
         );
     }
 
-    private function error(string $field, string $key): ValidationException
+    /** @param  array<string, mixed>  $replace */
+    private function error(string $field, string $key, array $replace = []): ValidationException
     {
-        return ValidationException::withMessages([$field => __('recruitment-applicant.conversions.errors.'.$key)]);
+        return ValidationException::withMessages([$field => __('recruitment-applicant.conversions.errors.'.$key, $replace)]);
     }
 }

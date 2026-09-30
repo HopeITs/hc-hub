@@ -16,17 +16,19 @@ use Livewire\Attributes\Locked;
 use Livewire\Component;
 
 /**
- * Phase 2 Task 9: one job offer — the internal offer document (printable),
- * every version as it was offered, and what happened to it.
+ * Phase 2 Task 9: one job offer — the internal offer view, every version as
+ * it was offered, and what happened to it.
  *
  * Seen by users with view-offers in scope. The salary is rendered only for
  * those who may see pay figures (viewSalary) and never kept on the
  * component, so it never reaches another browser in a Livewire payload.
  *
  * HR with manage-offers can send the draft, record the candidate's answer,
- * cancel, and start a revision or edit the draft (on the form). Each action
- * locks the version the user was looking at; the service refuses if the
- * offer moved on since.
+ * cancel, and start a revision or edit the draft (on the form). Send, answer
+ * and cancel open in a popup — the Leaves decision popup, <x-modal.dialog> —
+ * and end with the same success toast (WithAlerts). Each action locks the
+ * version the user was looking at; the service refuses if the offer moved on
+ * since.
  */
 class Show extends Component
 {
@@ -41,6 +43,13 @@ class Show extends Component
 
     #[Locked]
     public ?int $expectedVersionId = null;
+
+    /**
+     * Whether the popup is showing. Not locked: the popup closes itself on
+     * Escape or a click outside, and writes that back. Which action it holds
+     * is $panel, which stays locked.
+     */
+    public bool $panelOpen = false;
 
     public string $expiresOn = '';
 
@@ -107,7 +116,7 @@ class Show extends Component
 
     public function closePanel(): void
     {
-        $this->reset('panel', 'expectedVersionId', 'expiresOn', 'response', 'responseNote', 'cancelReason', 'cancelNote');
+        $this->reset('panel', 'panelOpen', 'expectedVersionId', 'expiresOn', 'response', 'responseNote', 'cancelReason', 'cancelNote');
         $this->resetErrorBag();
     }
 
@@ -171,6 +180,7 @@ class Show extends Component
 
         $this->closePanel();
         $this->panel = $panel;
+        $this->panelOpen = true;
         $this->expectedVersionId = (int) $offer->current_version_id;
     }
 

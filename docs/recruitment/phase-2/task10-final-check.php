@@ -122,7 +122,7 @@ try {
         $offer = $offers->create($hr, $application->fresh(), array_merge([
             'contractTypeId' => 1, 'salary' => '1500', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month,
             'startDate' => now()->addMonth()->startOfMonth()->toDateString(), 'endDate' => now()->addMonth()->startOfMonth()->addMonths(11)->toDateString(),
-            'probationDays' => 90, 'weeklyHours' => 40, 'employmentType' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite, 'notes' => '',
+            'weeklyHours' => 40, 'employmentType' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite, 'notes' => '',
         ], $terms))->fresh();
         $offer = $offers->send($hr, $offer, $offer->current_version_id, null)->fresh();
         $offer = $offers->recordResponse($hr, $offer, $offer->current_version_id, OfferStatus::Accepted, null)->fresh();
@@ -219,15 +219,38 @@ try {
     echo PHP_EOL.'الحالات الاستثنائية — exceptional cases'.PHP_EOL;
     $phoneEmployee = Employee::findOrFail($phoneEmployeeId);
     $phone = '+963'.substr((string) $phoneEmployee->personal_phone, 1);
-    $c4 = $accepted('Check Four', $otherTemplate, [], $phone);
+    // The identity rule: the same person is the same name with the same phone.
+    $phoneName = trim($phoneEmployee->first_name_en.' '.$phoneEmployee->last_name_en) ?: trim($phoneEmployee->first_name_ar.' '.$phoneEmployee->last_name_ar);
+    $c4 = $accepted($phoneName, $otherTemplate, [], $phone);
     $employeesBefore = Employee::count();
     $dupError = $errorOf(fn () => $hire($c4));
     $c4 = $hire($c4, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $phoneEmployee->id]);
-    $check('Employee already exists with the same email/phone: linked, not duplicated', $dupError === $msg('possible_duplicate')
-        && Employee::count() === $employeesBefore && $c4->employee_id === $phoneEmployee->id, 'matched '.$phoneEmployee->username.' by phone');
+    $check('Employee already exists (same name and phone): linked, not duplicated', $dupError === $msg('possible_duplicate')
+        && Employee::count() === $employeesBefore && $c4->employee_id === $phoneEmployee->id, 'matched '.$phoneEmployee->username.' by name and phone');
+
+    // The identity rule: the same phone under another name is a warning, never a link.
+    Vacancy::whereKey($otherTemplate->vacancy_id)->update(['needed_count' => 5]); // one more accepted offer on it, rolled back
+    $c6 = $accepted('Check Six', $otherTemplate, [], $phone);
+    $c6Matches = $conversions->matches($c6);
+    $c6Html = Livewire::actingAs($hr)->test(Convert::class, ['offerId' => $c6->job_offer_id])->html();
+    $check('Same phone under another name: a warning, never a link, no tick asked', $c6Matches->contains(fn ($m) => $m['employee']->id === $phoneEmployee->id)
+        && $c6Matches->every(fn ($m) => $m['kind'] === Conversions::MATCH_WARNING)
+        && $errorOf(fn () => $hire($c6, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $phoneEmployee->id])) === $msg('name_mismatch')
+        && str_contains($c6Html, e(__('recruitment-applicant.conversions.warnings.phone', ['name' => $phoneEmployee->name])))
+        && ! str_contains($c6Html, e(__('recruitment-applicant.conversions.confirm_not_duplicate')))
+        && $c6->fresh()->status === Conversion::STATUS_PENDING, 'phone of '.$phoneEmployee->username);
+
+    // The identity rule: a national number on file under another name stops the hire.
+    $nnHolder = Employee::query()->whereRaw("national_number REGEXP '^[0-9]{11}$'")->whereKeyNot($phoneEmployee->id)->orderBy('id')->first();
+    if ($nnHolder !== null) {
+        $employeesBefore = Employee::count();
+        $nnError = $errorOf(fn () => $hire($c6, ['employee' => $person(['nationalNumber' => $nnHolder->national_number])]));
+        $check('National number on file under another name: the hire stops, nothing created', $nnError === __('recruitment-applicant.conversions.errors.national_number_mismatch', ['name' => $nnHolder->name])
+            && Employee::count() === $employeesBefore && $c6->fresh()->status === Conversion::STATUS_PENDING && $c6->fresh()->attempt_count === 0, 'number of '.$nnHolder->username);
+    }
 
     // The same person accepted a second offer for the position they now hold.
-    $c5 = $accepted('Check Five', $otherTemplate, [], $phone);
+    $c5 = $accepted($phoneName, $otherTemplate, [], $phone);
     $check('The same person is never hired onto a position they already hold', $errorOf(fn () => $hire($c5, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $phoneEmployee->id])) === $msg('already_on_position')
         && $c5->fresh()->status === Conversion::STATUS_PENDING);
 
@@ -289,7 +312,7 @@ try {
         ]);
         $statuses->change($hr, $application, AppStatus::Submitted, AppStatus::Shortlisted, null);
         $statuses->change($hr, $application->fresh(), AppStatus::Shortlisted, AppStatus::Selected, null);
-        $offer = $offers->create($hr, $application->fresh(), ['contractTypeId' => 1, 'salary' => '900', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month, 'startDate' => now()->addMonth()->toDateString(), 'probationDays' => 30])->fresh();
+        $offer = $offers->create($hr, $application->fresh(), ['contractTypeId' => 1, 'salary' => '900', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month, 'startDate' => now()->addMonth()->toDateString(), 'endDate' => now()->addMonths(6)->toDateString(), 'weeklyHours' => 40, 'employmentType' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite])->fresh();
         $offer = $offers->send($hr, $offer, $offer->current_version_id, null)->fresh();
 
         return Conversion::query()->forceCreate([

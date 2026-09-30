@@ -9,15 +9,14 @@
     $personName = fn ($user) => $user?->profile?->name ?? $user?->email ?? '—';
 @endphp
 
-<div class="space-y-6 p-6 print:p-0">
+<div class="space-y-6 p-6">
 
-    <div class="flex flex-wrap items-center justify-between gap-3 print:hidden">
+    <div class="flex flex-wrap items-center justify-between gap-3">
         <a href="{{ route('recruitment.offers.index') }}" wire:navigate class="text-sm font-medium text-primary hover:underline">&larr; {{ __('recruitment-applicant.offers.all') }}</a>
-        <button type="button" onclick="window.print()" class="rounded-control border border-secondary-light px-3 py-1.5 text-sm hover:bg-secondary-soft/30">{{ __('recruitment-applicant.offers.print') }}</button>
     </div>
 
     @error('offer')
-        <p role="alert" class="rounded-control border border-primary bg-primary/5 p-3 text-sm text-primary print:hidden">{{ $message }}</p>
+        <p role="alert" class="rounded-control border border-primary bg-primary/5 p-3 text-sm text-primary">{{ $message }}</p>
     @enderror
 
     {{-- The offer document: the current version's terms --}}
@@ -29,7 +28,7 @@
                 <p class="mt-1 text-sm text-secondary-medium">
                     {{ $offer->position?->title }}
                     @if ($canSeeApplicant)
-                        <span class="print:hidden">&middot; <a href="{{ route('recruitment.applicants.show', ['applicantId' => $application->applicant_id]) }}" wire:navigate class="text-primary hover:underline">{{ __('recruitment-applicant.interviews.open_applicant') }}</a></span>
+                        <span>&middot; <a href="{{ route('recruitment.applicants.show', ['applicantId' => $application->applicant_id]) }}" wire:navigate class="text-primary hover:underline">{{ __('recruitment-applicant.interviews.open_applicant') }}</a></span>
                     @endif
                 </p>
             </div>
@@ -59,7 +58,7 @@
                 @endif
                 @if ($offer->status === Status::Accepted && $conversion)
                     {{-- Task 10: the hire itself --}}
-                    <div class="mt-3 space-y-2 border-t border-secondary-soft pt-3 print:hidden">
+                    <div class="mt-3 space-y-2 border-t border-secondary-soft pt-3">
                         <p class="font-medium {{ $conversion->isConverted() ? 'text-primary' : ($conversion->status === \App\Models\RecruitmentHiringConversion::STATUS_FAILED ? 'text-primary' : 'text-secondary-dark') }}">
                             {{ __('recruitment-applicant.conversions.statuses.'.$conversion->status) }}
                         </p>
@@ -102,7 +101,7 @@
 
         {{-- Rule reminder: an offer never touches the vacancy by itself --}}
         @if ($offer->vacancy)
-            <p class="mt-4 text-xs text-secondary-medium print:hidden">
+            <p class="mt-4 text-xs text-secondary-medium">
                 {{ trans_choice('recruitment-applicant.offers.seats_left', $seatsLeft, ['count' => $seatsLeft]) }}
                 &middot; {{ __('recruitment-applicant.offers.vacancy_untouched') }}
             </p>
@@ -110,7 +109,7 @@
 
         {{-- HR actions --}}
         @if ($canManage)
-            <div class="mt-6 flex flex-wrap gap-2 border-t border-secondary-soft pt-4 print:hidden">
+            <div class="mt-6 flex flex-wrap gap-2 border-t border-secondary-soft pt-4">
                 @if ($offer->isEditable())
                     <a href="{{ route('recruitment.offers.edit', ['offerId' => $offer->id]) }}" wire:navigate class="rounded-control border border-primary px-3 py-1.5 text-sm font-semibold text-primary hover:bg-primary/5">{{ __('recruitment-applicant.offers.actions.edit') }}</a>
                     <button type="button" wire:click="beginSend" class="rounded-control bg-primary px-3 py-1.5 text-sm font-semibold text-white">{{ __('recruitment-applicant.offers.actions.send') }}</button>
@@ -127,66 +126,75 @@
                 @endif
             </div>
 
-            @if ($panel === 'send')
-                <div class="mt-4 space-y-3 rounded-control border border-primary/40 bg-primary/5 p-4 print:hidden">
-                    <h3 class="font-semibold">{{ __('recruitment-applicant.offers.send_title') }}</h3>
-                    <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.offers.send_hint') }}</p>
-                    <div class="max-w-xs">
-                        <x-forms.input-label for="expiresOn" required :value="__('recruitment-applicant.offers.expires_at')" />
-                        <x-forms.input id="expiresOn" type="date" model="expiresOn" required />
-                        <x-forms.input-error field="expiresOn" input-id="expiresOn" />
+            {{-- The three actions open one popup, like the Leaves decision popup (<x-modal.dialog>). --}}
+            @php
+                $modalTitle = match ($panel) {
+                    'send' => __('recruitment-applicant.offers.send_title'),
+                    'response' => __('recruitment-applicant.offers.response_title.'.($response ?: Status::Accepted)),
+                    'cancel' => __('recruitment-applicant.offers.cancel_title'),
+                    default => '',
+                };
+                [$action, $actionLabel] = match ($panel) {
+                    'send' => ['send', __('recruitment-applicant.offers.actions.send')],
+                    'response' => ['recordResponse', __('recruitment-applicant.offers.confirm')],
+                    default => ['cancelOffer', __('recruitment-applicant.offers.actions.cancel')],
+                };
+            @endphp
+            <x-modal.dialog id="offerActionModal" max-width="xl" :title="$modalTitle" wire:model.defer="panelOpen" wire:ignore.self>
+                @if ($panel !== null)
+                    <div class="space-y-4">
+                        @error('offer')
+                            <p role="alert" class="rounded-control border border-primary bg-primary/5 p-3 text-sm text-primary">{{ $message }}</p>
+                        @enderror
+
+                        @if ($panel === 'send')
+                            <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.offers.send_hint') }}</p>
+                            <div class="max-w-xs">
+                                <x-forms.input-label for="expiresOn" required :value="__('recruitment-applicant.offers.expires_at')" />
+                                <x-forms.input id="expiresOn" type="date" model="expiresOn" required />
+                                <x-forms.input-error field="expiresOn" input-id="expiresOn" />
+                            </div>
+                            <x-forms.input-error field="startDate" input-id="expiresOn" />
+                        @elseif ($panel === 'response')
+                            @if ($response === Status::Accepted)
+                                <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.offers.accept_hint') }}</p>
+                            @endif
+                            <div>
+                                <x-forms.input-label for="responseNote" :value="__('recruitment-applicant.offers.response_note')" />
+                                <x-forms.textarea id="responseNote" wire:model="responseNote" rows="2" />
+                            </div>
+                            <x-forms.input-error field="response" input-id="responseNote" />
+                        @else
+                            <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.offers.cancel_hint') }}</p>
+                            <div>
+                                <x-forms.input-label for="cancelReason" required :value="__('recruitment-applicant.interviews.cancel_reason')" />
+                                <select id="cancelReason" wire:model.live="cancelReason" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
+                                    <option value="">{{ __('recruitment.choose') }}</option>
+                                    @foreach ($cancellationReasons as $code)
+                                        <option value="{{ $code }}">{{ __('recruitment-applicant.offers.cancellation_reasons.'.$code) }}</option>
+                                    @endforeach
+                                </select>
+                                <x-forms.input-error field="cancelReason" input-id="cancelReason" />
+                            </div>
+                            <div>
+                                <x-forms.input-label for="cancelNote" :required="$cancelReason === RecruitmentJobOfferService::REASON_OTHER" :value="__('recruitment-applicant.interviews.internal_note')" />
+                                <x-forms.textarea id="cancelNote" wire:model="cancelNote" rows="2" />
+                                <x-forms.input-error field="cancelNote" input-id="cancelNote" />
+                            </div>
+                        @endif
+
+                        <div class="flex flex-wrap gap-2">
+                            <x-primary-button type="button" wire:click="{{ $action }}" wire:loading.attr="disabled" wire:target="{{ $action }}" class="!w-auto">{{ $actionLabel }}</x-primary-button>
+                            <x-primary-button type="button" wire:click="closePanel" class="!bg-secondary-light !w-auto">{{ __('recruitment-applicant.cancel') }}</x-primary-button>
+                        </div>
                     </div>
-                    <x-forms.input-error field="startDate" input-id="expiresOn" />
-                    <div class="flex gap-2">
-                        <x-primary-button type="button" wire:click="send" wire:loading.attr="disabled">{{ __('recruitment-applicant.offers.actions.send') }}</x-primary-button>
-                        <button type="button" wire:click="closePanel" class="px-3 py-1.5 text-sm hover:underline">{{ __('recruitment-applicant.cancel') }}</button>
-                    </div>
-                </div>
-            @elseif ($panel === 'response')
-                <div class="mt-4 space-y-3 rounded-control border border-primary/40 bg-primary/5 p-4 print:hidden">
-                    <h3 class="font-semibold">{{ __('recruitment-applicant.offers.response_title.'.$response) }}</h3>
-                    @if ($response === Status::Accepted)
-                        <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.offers.accept_hint') }}</p>
-                    @endif
-                    <div>
-                        <x-forms.input-label for="responseNote" :value="__('recruitment-applicant.offers.response_note')" />
-                        <x-forms.textarea id="responseNote" wire:model="responseNote" rows="2" />
-                    </div>
-                    <div class="flex gap-2">
-                        <x-primary-button type="button" wire:click="recordResponse" wire:loading.attr="disabled">{{ __('recruitment-applicant.offers.confirm') }}</x-primary-button>
-                        <button type="button" wire:click="closePanel" class="px-3 py-1.5 text-sm hover:underline">{{ __('recruitment-applicant.cancel') }}</button>
-                    </div>
-                </div>
-            @elseif ($panel === 'cancel')
-                <div class="mt-4 space-y-3 rounded-control border border-primary/40 bg-primary/5 p-4 print:hidden">
-                    <h3 class="font-semibold">{{ __('recruitment-applicant.offers.cancel_title') }}</h3>
-                    <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.offers.cancel_hint') }}</p>
-                    <div>
-                        <x-forms.input-label for="cancelReason" required :value="__('recruitment-applicant.interviews.cancel_reason')" />
-                        <select id="cancelReason" wire:model.live="cancelReason" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
-                            <option value="">{{ __('recruitment.choose') }}</option>
-                            @foreach ($cancellationReasons as $code)
-                                <option value="{{ $code }}">{{ __('recruitment-applicant.offers.cancellation_reasons.'.$code) }}</option>
-                            @endforeach
-                        </select>
-                        <x-forms.input-error field="cancelReason" input-id="cancelReason" />
-                    </div>
-                    <div>
-                        <x-forms.input-label for="cancelNote" :required="$cancelReason === RecruitmentJobOfferService::REASON_OTHER" :value="__('recruitment-applicant.interviews.internal_note')" />
-                        <x-forms.textarea id="cancelNote" wire:model="cancelNote" rows="2" />
-                        <x-forms.input-error field="cancelNote" input-id="cancelNote" />
-                    </div>
-                    <div class="flex gap-2">
-                        <x-primary-button type="button" wire:click="cancelOffer" wire:loading.attr="disabled">{{ __('recruitment-applicant.offers.actions.cancel') }}</x-primary-button>
-                        <button type="button" wire:click="closePanel" class="px-3 py-1.5 text-sm hover:underline">{{ __('recruitment-applicant.cancel') }}</button>
-                    </div>
-                </div>
-            @endif
+                @endif
+            </x-modal.dialog>
         @endif
     </section>
 
     {{-- History: every version exactly as it was offered --}}
-    <section class="rounded-surface border border-secondary-soft bg-white p-6 print:hidden">
+    <section class="rounded-surface border border-secondary-soft bg-white p-6">
         <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.offers.history') }}</h2>
         <ol class="mt-3 space-y-4">
             @foreach ($offer->versions as $version)

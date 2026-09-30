@@ -225,9 +225,12 @@ class RecruitmentInterviewEvaluationTest extends TestCase
 
         Livewire::test(EvaluationSummary::class, ['interviewId' => $this->interview->id])
             ->call('beginWithdraw', $evaluation->id)
+            ->assertSet('panelOpen', true)
+            ->assertSeeHtml('id="evaluationActionModal"')
             ->assertDispatched('focus-element', id: 'evaluation-panel-title')
             ->call('dismissPanel')
             ->assertSet('panel', null)
+            ->assertSet('panelOpen', false)
             ->assertDispatched('focus-element', id: 'evaluation-'.$evaluation->id.'-withdraw')
             ->call('beginWithdraw', $evaluation->id)
             ->set('reason', 'Reviewer evaluated the wrong candidate')

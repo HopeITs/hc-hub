@@ -54,8 +54,6 @@ class Form extends Component
 
     public int|string $weeklyHours = '';
 
-    public int|string $probationDays = 90;
-
     public int|string $employmentType = '';
 
     public int|string $place = '';
@@ -103,7 +101,6 @@ class Form extends Component
             'startDate' => $this->startDate,
             'endDate' => $this->endDate,
             'weeklyHours' => $this->weeklyHours,
-            'probationDays' => $this->probationDays,
             'employmentType' => $this->employmentType,
             'place' => $this->place,
             'notes' => $this->notes,
@@ -135,9 +132,11 @@ class Form extends Component
         $this->redirectRoute('recruitment.offers.show', ['offerId' => $offer->getKey()], navigate: true);
     }
 
-    public function render()
+    public function render(RecruitmentJobOfferService $offers)
     {
         return view('livewire.recruitment.offers.form', [
+            // Worked out, never typed: see RecruitmentJobOfferService::probationDaysFor().
+            'probationDays' => $offers->probationDaysFor($this->contractTypeId, $this->startDate, $this->endDate),
             'application' => $this->resolveApplication((int) $this->applicationId)->loadMissing('applicant', 'campaign.vacancy.position'),
             'contractTypes' => ContractType::query()->orderBy('id')->get(),
             'currencies' => [Currency::USD, Currency::SYP, Currency::EUR],
@@ -161,7 +160,6 @@ class Form extends Component
         $this->startDate = (string) $version->start_date?->toDateString();
         $this->endDate = (string) $version->end_date?->toDateString();
         $this->weeklyHours = (string) $version->weekly_hours;
-        $this->probationDays = (int) $version->probation_days;
         $this->employmentType = (string) ($version->terms_json['employment_type'] ?? '');
         $this->place = (string) ($version->terms_json['place'] ?? '');
         $this->notes = (string) ($version->terms_json['notes'] ?? '');

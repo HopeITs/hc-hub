@@ -149,63 +149,69 @@
             @endunless
         @endif
 
-        @if ($panel !== null)
-            <div id="interview-panel" role="region" aria-labelledby="interview-panel-title" class="mt-4 space-y-3 rounded-control border border-secondary-light bg-secondary-soft/30 p-4">
-                <h2 id="interview-panel-title" tabindex="-1" class="scroll-mt-24 font-semibold">
-                    {{ $panel === 'cancel' ? __('recruitment-applicant.interviews.cancel_title') : __('recruitment-applicant.interviews.outcome_title.'.$panel) }}
-                </h2>
+        {{-- The actions open one popup, like the Leaves decision popup (<x-modal.dialog>). Its title keeps the id focus moves to. --}}
+        <x-modal.dialog id="interviewActionModal" max-width="xl" wire:model.defer="panelOpen" wire:ignore.self>
+            <x-slot:title>
+                <span id="interview-panel-title" tabindex="-1" class="focus:outline-none">
+                    @if ($panel !== null)
+                        {{ $panel === 'cancel' ? __('recruitment-applicant.interviews.cancel_title') : __('recruitment-applicant.interviews.outcome_title.'.$panel) }}
+                    @endif
+                </span>
+            </x-slot:title>
+            @if ($panel !== null)
+                <div id="interview-panel" class="space-y-3">
+                    @error('interview')
+                        <div role="alert" class="flex flex-wrap items-center justify-between gap-2 rounded-control border border-primary bg-white p-3 text-sm text-primary">
+                            <span>{{ $message }}</span>
+                            <a href="{{ route('recruitment.interviews.show', ['interviewId' => $interview->id]) }}" wire:navigate class="font-semibold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">{{ __('recruitment-applicant.interviews.reload') }}</a>
+                        </div>
+                    @enderror
 
-                @error('interview')
-                    <div role="alert" class="flex flex-wrap items-center justify-between gap-2 rounded-control border border-primary bg-white p-3 text-sm text-primary">
-                        <span>{{ $message }}</span>
-                        <a href="{{ route('recruitment.interviews.show', ['interviewId' => $interview->id]) }}" wire:navigate class="font-semibold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">{{ __('recruitment-applicant.interviews.reload') }}</a>
-                    </div>
-                @enderror
-
-                @if ($panel === 'cancel')
-                    <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.interviews.cancel_hint') }}</p>
-                    <div>
-                        <x-forms.input-label for="cancelReason" required :value="__('recruitment-applicant.interviews.cancel_reason')" />
-                        <select id="cancelReason" wire:model.live="cancelReason" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body shadow-e1 transition focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary">
-                            <option value="">{{ __('recruitment.choose') }}</option>
-                            @foreach ($cancellationReasons as $code)
-                                <option value="{{ $code }}">{{ __('recruitment-applicant.interviews.cancellation_reasons.'.$code) }}</option>
-                            @endforeach
-                        </select>
-                        <x-forms.input-error field="cancelReason" input-id="cancelReason" />
-                    </div>
-                    <div>
-                        <x-forms.input-label for="cancelNote" :required="$cancelReason === RecruitmentInterviewSchedulingService::REASON_OTHER" :value="__('recruitment-applicant.interviews.internal_note')" />
-                        <x-forms.textarea id="cancelNote" wire:model="cancelNote" rows="2" />
-                        <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.interviews.internal_note_hint') }}</p>
-                        <x-forms.input-error field="cancelNote" input-id="cancelNote" />
-                    </div>
-                    @unless ($hasStarted)
-                        <label class="flex items-start gap-2 text-sm">
-                            <input type="checkbox" wire:model="notifyCandidate" class="mt-0.5 size-4 rounded-inset border-secondary-light text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
-                            <span>{{ __('recruitment-applicant.interviews.notify_candidate_cancel') }}
-                                <span class="block text-xs text-secondary-medium">{{ __('recruitment-applicant.interviews.notify_candidate_hint') }}</span>
-                            </span>
-                        </label>
-                    @endunless
-                    <div class="flex flex-wrap gap-3">
-                        <x-primary-button type="button" wire:click="cancelInterview" wire:target="cancelInterview">{{ __('recruitment-applicant.interviews.confirm_cancel') }}</x-primary-button>
-                        <x-secondary-button wire:click="dismissPanel">{{ __('recruitment-applicant.interviews.keep') }}</x-secondary-button>
-                    </div>
-                @else
-                    <div>
-                        <x-forms.input-label for="outcomeNote" :value="__('recruitment-applicant.interviews.internal_note')" />
-                        <x-forms.textarea id="outcomeNote" wire:model="outcomeNote" rows="2" />
-                        <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.interviews.outcome_note_hint') }}</p>
-                        <x-forms.input-error field="outcome" input-id="outcomeNote" />
-                    </div>
-                    <div class="flex flex-wrap gap-3">
-                        <x-primary-button type="button" wire:click="recordOutcome" wire:target="recordOutcome">{{ __('recruitment-applicant.interviews.confirm_outcome') }}</x-primary-button>
-                        <x-secondary-button wire:click="dismissPanel">{{ __('recruitment-applicant.interviews.back') }}</x-secondary-button>
-                    </div>
-                @endif
-            </div>
-        @endif
+                    @if ($panel === 'cancel')
+                        <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.interviews.cancel_hint') }}</p>
+                        <div>
+                            <x-forms.input-label for="cancelReason" required :value="__('recruitment-applicant.interviews.cancel_reason')" />
+                            <select id="cancelReason" wire:model.live="cancelReason" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body shadow-e1 transition focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary">
+                                <option value="">{{ __('recruitment.choose') }}</option>
+                                @foreach ($cancellationReasons as $code)
+                                    <option value="{{ $code }}">{{ __('recruitment-applicant.interviews.cancellation_reasons.'.$code) }}</option>
+                                @endforeach
+                            </select>
+                            <x-forms.input-error field="cancelReason" input-id="cancelReason" />
+                        </div>
+                        <div>
+                            <x-forms.input-label for="cancelNote" :required="$cancelReason === RecruitmentInterviewSchedulingService::REASON_OTHER" :value="__('recruitment-applicant.interviews.internal_note')" />
+                            <x-forms.textarea id="cancelNote" wire:model="cancelNote" rows="2" />
+                            <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.interviews.internal_note_hint') }}</p>
+                            <x-forms.input-error field="cancelNote" input-id="cancelNote" />
+                        </div>
+                        @unless ($hasStarted)
+                            <label class="flex items-start gap-2 text-sm">
+                                <input type="checkbox" wire:model="notifyCandidate" class="mt-0.5 size-4 rounded-inset border-secondary-light text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                                <span>{{ __('recruitment-applicant.interviews.notify_candidate_cancel') }}
+                                    <span class="block text-xs text-secondary-medium">{{ __('recruitment-applicant.interviews.notify_candidate_hint') }}</span>
+                                </span>
+                            </label>
+                        @endunless
+                        <div class="flex flex-wrap gap-3">
+                            <x-primary-button type="button" wire:click="cancelInterview" wire:target="cancelInterview">{{ __('recruitment-applicant.interviews.confirm_cancel') }}</x-primary-button>
+                            <x-secondary-button wire:click="dismissPanel">{{ __('recruitment-applicant.interviews.keep') }}</x-secondary-button>
+                        </div>
+                    @else
+                        <div>
+                            <x-forms.input-label for="outcomeNote" :value="__('recruitment-applicant.interviews.internal_note')" />
+                            <x-forms.textarea id="outcomeNote" wire:model="outcomeNote" rows="2" />
+                            <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.interviews.outcome_note_hint') }}</p>
+                            <x-forms.input-error field="outcome" input-id="outcomeNote" />
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <x-primary-button type="button" wire:click="recordOutcome" wire:target="recordOutcome">{{ __('recruitment-applicant.interviews.confirm_outcome') }}</x-primary-button>
+                            <x-secondary-button wire:click="dismissPanel">{{ __('recruitment-applicant.interviews.back') }}</x-secondary-button>
+                        </div>
+                    @endif
+                </div>
+            @endif
+        </x-modal.dialog>
     </section>
 
     {{--

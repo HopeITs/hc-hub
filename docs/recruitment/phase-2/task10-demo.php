@@ -136,7 +136,7 @@ $startDate = now()->addMonth()->startOfMonth();
 $offer = $offers->revise($hr, $offer, $offer->current_version_id, [
     'contractTypeId' => 1, 'salary' => '1100', 'currency' => Currency::USD, 'salaryPer' => SalaryPer::Month,
     'startDate' => $startDate->toDateString(), 'endDate' => $startDate->copy()->endOfYear()->toDateString(),
-    'probationDays' => 90, 'weeklyHours' => 40, 'employmentType' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite, 'notes' => '',
+    'weeklyHours' => 40, 'employmentType' => EmploymentType::FullTime, 'place' => ContractPlace::Onsite, 'notes' => '',
 ], 'The vacancy was widened to two seats; this candidate is offered the second one.')->fresh();
 $offer = $offers->send($hr, $offer, $offer->current_version_id, null)->fresh();
 $offer = $offers->recordResponse($hr, $offer, $offer->current_version_id, Status::Accepted, 'Accepted by phone (Task 10 demo).')->fresh();
