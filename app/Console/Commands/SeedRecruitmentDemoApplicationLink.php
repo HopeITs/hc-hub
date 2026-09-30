@@ -21,10 +21,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
- * Dev-only: builds one open campaign end to end and prints its link on both
- * Team 1's real form (/careers/{token}) and Team 2's test form
- * (/careers-test/{token}), for clicking through Phase 2 intake in a browser
- * without preparing a campaign through the management screens first.
+ * Dev-only: builds one open campaign end to end and prints its link on the
+ * real application form (/careers/{token}), for clicking through Phase 2
+ * intake in a browser without preparing a campaign through the management
+ * screens first.
  *
  * Not for production use — it fabricates a RecruitmentRequest/Vacancy chain
  * rather than going through the real approval workflow.
@@ -35,7 +35,7 @@ class SeedRecruitmentDemoApplicationLink extends Command
         {--invite-only : Create an invitation-only campaign instead of an open one}
         {--invite-email= : Email to pre-invite when --invite-only is used (defaults to demo-applicant@example.test)}';
 
-    protected $description = 'Seed a demo open campaign + published job post/form + public link, and print its /careers-test/{token} test-form URL';
+    protected $description = 'Seed a demo open campaign + published job post/form + public link, and print its /careers/{token} application URL';
 
     public function handle(): int
     {
@@ -106,8 +106,7 @@ class SeedRecruitmentDemoApplicationLink extends Command
                 'version_no' => 1,
                 // Team 1's standard field set, in their builder's shape. The
                 // CV is locked and required on every form (normalizeFields()
-                // re-adds it), so submitting needs the real form's upload;
-                // the Team 2 test form can only preview this campaign.
+                // re-adds it).
                 'fields_json' => app(RecruitmentApplicationFormService::class)->defaultFields(),
                 'status' => 'published',
                 'published_at' => now(),
@@ -144,10 +143,8 @@ class SeedRecruitmentDemoApplicationLink extends Command
 
         $this->newLine();
         $base = rtrim(config('app.url'), '/');
-        $this->info('Real application form (Team 1):');
+        $this->info('Application form:');
         $this->line("{$base}/careers/{$token}");
-        $this->info('Team 2 test form (non-production only):');
-        $this->line("{$base}/careers-test/{$token}");
 
         return self::SUCCESS;
     }

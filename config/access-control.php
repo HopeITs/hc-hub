@@ -524,13 +524,6 @@ return [
         'auth.role-switcher' => ['switchTo', 'refreshRoles'],
         'settings.password' => ['updatePassword'],
 
-        // --- Public recruitment (Team 2 test form, non-production only) -----
-        // The applicant has no account, so there is no role to check. The
-        // opaque link token is the credential; the submission service
-        // re-checks link, campaign state and window, and invitation, under a
-        // lock. The route is throttled and not registered in production.
-        'recruitment.public-site.apply' => ['submit'],
-
         // --- Confirmation dialogs -------------------------------------------
         // These only render a "are you sure?" prompt. The action it confirms
         // is the mapped one (delete / toggleItemStatusConfirmed), and that is
