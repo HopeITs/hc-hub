@@ -204,6 +204,7 @@ class Show extends Component
         $applications = $applicant->applications()
             ->visibleTo($user)
             ->with([
+                'campaign.vacancy.createdFromRequest.scopeCity',
                 'campaign.vacancy.position',
                 'files.archivedBy.profile',
                 'files.archiveNote',

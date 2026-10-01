@@ -113,19 +113,22 @@ return [
 
     'decisions' => [
         'actions' => [
+            'submitted' => 'Reopen application',
             'under_review' => 'Move to review',
             'shortlisted' => 'Shortlist',
             'selected' => 'Accept',
             'rejected' => 'Reject',
-            'reopen' => 'Reopen for review',
+            'reopen' => 'Reopen application',
         ],
         'titles' => [
+            'submitted' => 'Reopen application',
             'under_review' => 'Move back to review',
             'shortlisted' => 'Shortlist candidate',
             'selected' => 'Accept candidate',
             'rejected' => 'Reject candidate',
         ],
         'confirm' => [
+            'submitted' => 'Confirm reopen',
             'under_review' => 'Confirm move to review',
             'shortlisted' => 'Confirm shortlist',
             'selected' => 'Confirm acceptance',

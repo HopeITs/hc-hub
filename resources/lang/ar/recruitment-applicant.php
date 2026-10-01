@@ -113,19 +113,22 @@ return [
 
     'decisions' => [
         'actions' => [
+            'submitted' => 'إعادة فتح الطلب',
             'under_review' => 'نقل إلى المراجعة',
             'shortlisted' => 'إدراج في القائمة المختصرة',
             'selected' => 'قبول',
             'rejected' => 'رفض',
-            'reopen' => 'إعادة فتح للمراجعة',
+            'reopen' => 'إعادة فتح الطلب',
         ],
         'titles' => [
+            'submitted' => 'إعادة فتح الطلب',
             'under_review' => 'إعادة إلى المراجعة',
             'shortlisted' => 'إدراج المرشح في القائمة المختصرة',
             'selected' => 'قبول المرشح',
             'rejected' => 'رفض المرشح',
         ],
         'confirm' => [
+            'submitted' => 'تأكيد إعادة الفتح',
             'under_review' => 'تأكيد النقل إلى المراجعة',
             'shortlisted' => 'تأكيد الإدراج',
             'selected' => 'تأكيد القبول',

@@ -104,12 +104,14 @@ class Phase2ApplicantIntakeTest extends TestCase
         $this->submit($token, $this->answers('Applicant@Example.com'))->assertRedirect();
 
         $application = RecruitmentApplication::query()->sole();
+        $applicant = RecruitmentApplicant::query()->sole();
         $this->assertSame(RecruitmentApplicationStatus::Submitted, $application->status);
         $this->assertSame($campaign->id, (int) $application->campaign_id);
         $this->assertSame($campaign->vacancy_id, (int) $application->vacancy_id);
         $this->assertSame((int) $campaign->applicationForm->current_version_id, (int) $application->form_version_id);
         $this->assertSame('applicant@example.com', $application->email_normalized);
-        $this->assertSame($application->applicant_id, RecruitmentApplicant::query()->sole()->id);
+        $this->assertSame($application->applicant_id, $applicant->id);
+        $this->assertSame($this->city->id, (int) $applicant->city_id);
         $this->assertGreaterThan(0, $application->answers()->count());
         $this->assertSame(['value' => 'Applicant Name'], $application->answers()->where('field_key', 'full_name')->sole()->answer_json);
     }
@@ -770,7 +772,12 @@ class Phase2ApplicantIntakeTest extends TestCase
 
     private function payload(array $answers, ?string $key = null): array
     {
-        return ['locale' => 'en', 'submission_key' => $key ?? bin2hex(random_bytes(32)), 'answers' => $answers];
+        return [
+            'locale' => 'en',
+            'submission_key' => $key ?? bin2hex(random_bytes(32)),
+            'city_id' => isset($this->city) ? $this->city->id : null,
+            'answers' => $answers,
+        ];
     }
 
     private function submit(string $token, array $answers, ?string $key = null)

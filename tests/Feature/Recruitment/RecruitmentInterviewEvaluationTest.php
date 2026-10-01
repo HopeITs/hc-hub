@@ -87,8 +87,7 @@ class RecruitmentInterviewEvaluationTest extends TestCase
 
         $this->application = $this->applyTo($this->makeCampaignIn($this->homs), $this->makeApplicant('Candidate One'));
         $statuses = app(RecruitmentApplicationStatusService::class);
-        $statuses->change($this->hr, $this->application, AppStatus::Submitted, AppStatus::UnderReview, null);
-        $statuses->change($this->hr, $this->application->fresh(), AppStatus::UnderReview, AppStatus::Shortlisted, null);
+        $statuses->change($this->hr, $this->application, AppStatus::Submitted, AppStatus::Shortlisted, null);
         $this->interview = $this->scheduleInterview($this->application->fresh());
     }
 
