@@ -219,7 +219,7 @@ class RecruitmentAtsTest extends TestCase
 
         $this->assertValidationError(fn () => $tags->rename($hr, $tag, 'TAKEN'), 'tagName');
 
-        $tags->rename($hr, $tag, 'New name', 'green');
+        $tags->rename($hr, $tag, 'New name', 'dark');
         $this->assertSame(['New name'], $application->fresh()->tags->pluck('name')->all());
         $this->assertSame(
             'Old name',

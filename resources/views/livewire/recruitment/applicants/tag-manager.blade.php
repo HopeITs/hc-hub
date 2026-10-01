@@ -63,7 +63,7 @@
                                 @else
                                     <button type="button" id="tag-{{ $tag->id }}-rename" wire:click="beginRename({{ $tag->id }})" class="cursor-pointer font-semibold text-primary hover:underline">{{ __('recruitment-applicant.tags.rename') }}<span class="sr-only">: {{ $tag->name }}</span></button>
                                     <button type="button" wire:click="delete({{ $tag->id }})" wire:confirm="{{ __('recruitment-applicant.tags.delete_confirm') }}"
-                                        class="cursor-pointer font-semibold text-red-700 hover:underline">{{ __('recruitment-applicant.tags.delete') }}<span class="sr-only">: {{ $tag->name }}</span></button>
+                                        class="cursor-pointer font-semibold text-primary-hover hover:underline">{{ __('recruitment-applicant.tags.delete') }}<span class="sr-only">: {{ $tag->name }}</span></button>
                                 @endif
                             </div>
                         @endif

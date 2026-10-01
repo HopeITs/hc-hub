@@ -8,7 +8,7 @@ use App\Enums\RecruitmentInterviewStatus as Status;
 use App\Livewire\Recruitment\Applicants\Show as ApplicantShow;
 use App\Livewire\Recruitment\Interviews\EvaluationForm;
 use App\Livewire\Recruitment\Interviews\EvaluationSummary;
-use App\Livewire\Recruitment\Interviews\InterviewTable;
+use App\Livewire\Recruitment\Interviews\Index;
 use App\Livewire\Recruitment\Interviews\Show;
 use App\Mail\RecruitmentInterviewMail;
 use App\Models\City;
@@ -226,9 +226,12 @@ class RecruitmentInterviewEvaluationTest extends TestCase
 
         Livewire::test(EvaluationSummary::class, ['interviewId' => $this->interview->id])
             ->call('beginWithdraw', $evaluation->id)
+            ->assertSet('panelOpen', true)
+            ->assertSeeHtml('id="evaluationActionModal"')
             ->assertDispatched('focus-element', id: 'evaluation-panel-title')
             ->call('dismissPanel')
             ->assertSet('panel', null)
+            ->assertSet('panelOpen', false)
             ->assertDispatched('focus-element', id: 'evaluation-'.$evaluation->id.'-withdraw')
             ->call('beginWithdraw', $evaluation->id)
             ->set('reason', 'Reviewer evaluated the wrong candidate')
@@ -646,13 +649,24 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         $later = $this->scheduleInterview($this->application->fresh(), '2026-10-12T10:00');
         $this->atInterviewTime();
         $this->actingAs($this->reviewerA);
+        $evaluateLink = route('recruitment.interviews.show', ['interviewId' => $this->interview->id]).'#my-evaluation';
 
-        $pending = Livewire::test(InterviewTable::class)->set('filters.my_evaluation', 'pending');
-        $pending->assertSee('2026-10-06 10:00')->assertDontSee('2026-10-12 10:00');
+        // Started and not yet evaluated: waiting. The later one has not started.
+        $this->assertSame([$this->interview->id], RecruitmentInterview::query()->awaitingEvaluationBy($this->reviewerA)->pluck('id')->all());
+        Livewire::test(Index::class)
+            ->assertViewHas('waitingCount', 1)
+            ->assertSee('Candidate One')
+            ->assertSee($evaluateLink, false);
 
         $this->evaluate($this->reviewerA);
-        Livewire::test(InterviewTable::class)->set('filters.my_evaluation', 'pending')->assertDontSee('2026-10-06 10:00');
-        Livewire::test(InterviewTable::class)->set('filters.my_evaluation', 'submitted')->assertSee('2026-10-06 10:00');
+
+        $this->assertSame([], RecruitmentInterview::query()->awaitingEvaluationBy($this->reviewerA)->pluck('id')->all());
+        Livewire::test(Index::class)
+            ->assertViewHas('waitingCount', 0)
+            ->assertDontSee($evaluateLink, false);
+
+        // Reviewer B still owes theirs.
+        $this->assertSame([$this->interview->id], RecruitmentInterview::query()->awaitingEvaluationBy($this->reviewerB)->pluck('id')->all());
         $this->assertNotNull($later);
     }
 

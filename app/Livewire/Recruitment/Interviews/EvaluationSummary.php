@@ -21,8 +21,9 @@ use Livewire\Component;
  * hiring decision stays in the applicant's decision panel.
  *
  * HR with correct-evaluations can correct a mistake in an evaluation or
- * withdraw it, each with a reason kept in the evaluation's history; HR
- * managing the interview can close evaluation once it is completed.
+ * withdraw it, each with a reason kept in the evaluation's history, in a
+ * popup (the Leaves decision popup, <x-modal.dialog>); HR managing the
+ * interview can close evaluation once it is completed.
  */
 class EvaluationSummary extends Component
 {
@@ -34,6 +35,13 @@ class EvaluationSummary extends Component
     /** 'correct' | 'withdraw' | null */
     #[Locked]
     public ?string $panel = null;
+
+    /**
+     * Whether the popup is showing. Not locked: the popup closes itself on
+     * Escape or a click outside, and writes that back. Which action and
+     * evaluation it holds stay locked.
+     */
+    public bool $panelOpen = false;
 
     #[Locked]
     public ?int $evaluationId = null;
@@ -160,6 +168,7 @@ class EvaluationSummary extends Component
     {
         $this->cancelPanel();
         $this->panel = $panel;
+        $this->panelOpen = true;
         $this->evaluationId = $evaluation->getKey();
         $this->expectedVersion = $evaluation->version;
 
@@ -168,7 +177,7 @@ class EvaluationSummary extends Component
 
     private function cancelPanel(): void
     {
-        $this->reset('panel', 'evaluationId', 'expectedVersion', 'recommendation', 'pros', 'cons', 'notes', 'reason');
+        $this->reset('panel', 'panelOpen', 'evaluationId', 'expectedVersion', 'recommendation', 'pros', 'cons', 'notes', 'reason');
         $this->resetErrorBag();
     }
 

@@ -74,9 +74,9 @@ final class RecruitmentJobOfferStatus
     {
         return match ($status) {
             self::Draft, self::Revised => 'bg-neutral-100 text-secondary-dark',
-            self::Sent => 'bg-blue-50 text-blue-700',
-            self::Accepted => 'bg-green-50 text-green-700',
-            self::Rejected, self::Expired => 'bg-red-50 text-red-700',
+            self::Sent => 'bg-white text-primary ring-1 ring-inset ring-primary',
+            self::Accepted => 'bg-primary text-white',
+            self::Rejected, self::Expired => 'bg-secondary-dark text-white',
             default => 'bg-neutral-100 text-secondary-dark',
         };
     }

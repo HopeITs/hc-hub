@@ -67,9 +67,7 @@ php85 artisan recruitment:demo-application-link --invite-only --invite-email=me@
 # أو بدون --invite-only لحملة عامة
 ```
 
-يطبع:
-- `http://hc-hr.test/careers/{token}`: **النموذج الحقيقي (الفريق 1)**، استخدمه.
-- `http://hc-hr.test/careers-test/{token}`: نموذجنا التجريبي (غير متاح في الإنتاج). يرفع الـ CV والملفات عبر خدمة الملفات نفسها عند الفريق 1 (`RecruitmentApplicantFileService`).
+يطبع رابط النموذج الحقيقي `http://hc-hr.test/careers/{token}`. (نموذجنا التجريبي `/careers-test` حُذف في 29 أيلول 2026.)
 
 **الطريقة 2، الواجهة الحقيقية (الحملة 5):**
 1. افتح `https://hc-hr.test/en/recruitment/campaigns/5/publishing`.

@@ -7,10 +7,10 @@ use App\Enums\RecruitmentInterviewStatus as Status;
 use App\Enums\RecruitmentInterviewType;
 use App\Jobs\SendRecruitmentInterviewNotice;
 use App\Livewire\Recruitment\Applicants\Show as ApplicantShow;
+use App\Livewire\Recruitment\Interviews\Board;
 use App\Livewire\Recruitment\Interviews\Calendar;
 use App\Livewire\Recruitment\Interviews\Form;
 use App\Livewire\Recruitment\Interviews\Index;
-use App\Livewire\Recruitment\Interviews\InterviewTable;
 use App\Livewire\Recruitment\Interviews\Show;
 use App\Mail\RecruitmentInterviewMail;
 use App\Models\City;
@@ -228,18 +228,20 @@ class RecruitmentInterviewTest extends TestCase
 
         // HR in scope: both, in the list and in October's calendar.
         $this->actingAs($this->hr);
-        Livewire::test(InterviewTable::class)->assertSee('Candidate Visible')->assertSee('Candidate Hidden');
+        Livewire::test(Board::class)->assertSee('Candidate Visible')->assertSee('Candidate Hidden');
         Livewire::withQueryParams(['month' => '2026-10'])->test(Calendar::class)
             ->assertSee('Candidate Visible')
             ->assertSee('Candidate Hidden')
             ->assertSee('calendar-interview-'.$mine->id, false);
         Livewire::withQueryParams(['month' => '2026-11'])->test(Calendar::class)->assertDontSee('Candidate Visible');
-        Livewire::test(Index::class)->assertSeeLivewire(InterviewTable::class)
+        Livewire::test(Index::class)->assertSeeLivewire(Board::class)
             ->set('view', 'calendar')->assertSeeLivewire(Calendar::class);
+        // The retired list view of old bookmarks falls back to the board.
+        Livewire::withQueryParams(['view' => 'list'])->test(Index::class)->assertSet('view', 'board');
 
         // A participant with no recruitment permission: only their own.
         $this->actingAs($this->interviewer);
-        Livewire::test(InterviewTable::class)->assertSee('Candidate Visible')->assertDontSee('Candidate Hidden');
+        Livewire::test(Board::class)->assertSee('Candidate Visible')->assertDontSee('Candidate Hidden');
         Livewire::withQueryParams(['month' => '2026-10'])->test(Calendar::class)->assertSee('Candidate Visible')->assertDontSee('Candidate Hidden');
     }
 
@@ -250,7 +252,10 @@ class RecruitmentInterviewTest extends TestCase
         $this->cancel($interview, 'candidate_declined');
         $this->actingAs($this->hr);
 
-        Livewire::test(InterviewTable::class)->assertSee('Candidate Cancelled');
+        // On the board, in the cancelled / no-show lane.
+        $this->assertSame([$interview->id], Livewire::test(Board::class)
+            ->assertSee('Candidate Cancelled')
+            ->viewData('lanes')['closed']['items']->modelKeys());
         Livewire::withQueryParams(['month' => '2026-10'])->test(Calendar::class)
             ->assertDontSee('Candidate Cancelled')
             ->set('showCancelled', true)
@@ -773,7 +778,7 @@ class RecruitmentInterviewTest extends TestCase
             }
         }
 
-        foreach ([Form::class, Show::class, Index::class, Calendar::class, InterviewTable::class, RecruitmentInterviewSchedulingService::class, RecruitmentInterviewNoticeService::class] as $class) {
+        foreach ([Form::class, Show::class, Index::class, Calendar::class, Board::class, RecruitmentInterviewSchedulingService::class, RecruitmentInterviewNoticeService::class] as $class) {
             foreach ((new ReflectionClass($class))->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
                 if ($method->getDeclaringClass()->getName() === $class) {
                     $this->assertDoesNotMatchRegularExpression('/delete|destroy|remove(?!Participant)|purge/i', $method->getName(), "$class::{$method->getName()}");
@@ -949,10 +954,13 @@ class RecruitmentInterviewTest extends TestCase
 
         Livewire::test(Show::class, ['interviewId' => $interview->id])
             ->call('beginCancel')
+            ->assertSet('panelOpen', true)
+            ->assertSeeHtml('id="interviewActionModal"')
             ->assertDispatched('focus-element', id: 'interview-panel-title')
             ->assertSeeHtml('aria-expanded="true"')
             ->call('dismissPanel')
             ->assertSet('panel', null)
+            ->assertSet('panelOpen', false)
             ->assertDispatched('focus-element', id: 'interview-action-cancel');
 
         // A refusal from the service shows inside the open panel, with a way to reload.
@@ -962,6 +970,7 @@ class RecruitmentInterviewTest extends TestCase
             ->call('cancelInterview')
             ->assertHasErrors('interview')
             ->assertSet('panel', 'cancel')
+            ->assertSet('panelOpen', true)
             ->assertSee(__('recruitment-applicant.interviews.reload'));
 
         Livewire::test(Show::class, ['interviewId' => $interview->id])

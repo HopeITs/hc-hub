@@ -136,6 +136,66 @@ class RecruitmentInterview extends Model
         return $query->whereIn($query->qualifyColumn('status'), RecruitmentInterviewStatus::open());
     }
 
+    /** Still ahead, or under way right now: open and not yet at its end time. */
+    public function scopeUpcoming(Builder $query): Builder
+    {
+        return $query->open()->where(fn (Builder $ahead): Builder => $ahead
+            ->where($query->qualifyColumn('ends_at'), '>', now())
+            ->orWhere(fn (Builder $noEnd): Builder => $noEnd
+                ->whereNull($query->qualifyColumn('ends_at'))
+                ->where($query->qualifyColumn('scheduled_at'), '>', now())));
+    }
+
+    /** Took place, or its time is over: completed, or past its end without an outcome yet. */
+    public function scopeHeldOrPast(Builder $query): Builder
+    {
+        $grammar = $query->getQuery()->getGrammar();
+
+        return $query
+            ->whereNotIn($query->qualifyColumn('status'), [RecruitmentInterviewStatus::Cancelled, RecruitmentInterviewStatus::NoShow])
+            ->where(fn (Builder $past): Builder => $past
+                ->where($query->qualifyColumn('status'), RecruitmentInterviewStatus::Completed)
+                // Wrapped by the grammar, so raw SQL still gets the table prefix.
+                ->orWhereRaw('coalesce('.$grammar->wrap($query->qualifyColumn('ends_at')).', '.$grammar->wrap($query->qualifyColumn('scheduled_at')).') <= ?', [now()]));
+    }
+
+    /** The query twin of evaluationsClosed(): closed by HR, or by the auto-close policy. */
+    public function scopeEvaluationsClosed(Builder $query, bool $closed = true): Builder
+    {
+        $days = config('recruitment.evaluations.auto_close_days');
+
+        $condition = function (Builder $closedQuery) use ($query, $days): void {
+            $closedQuery->whereNotNull($query->qualifyColumn('evaluations_closed_at'));
+
+            if ($days !== null) {
+                $closedQuery->orWhere(fn (Builder $auto): Builder => $auto
+                    ->where($query->qualifyColumn('status'), RecruitmentInterviewStatus::Completed)
+                    // Not-null first, so the negated form never meets a NULL comparison.
+                    ->whereNotNull($query->qualifyColumn('outcome_recorded_at'))
+                    ->where($query->qualifyColumn('outcome_recorded_at'), '<', now()->subDays((int) $days)));
+            }
+        };
+
+        return $closed ? $query->where($condition) : $query->whereNot($condition);
+    }
+
+    /**
+     * Task 8: the interviews waiting on this user's own evaluation — they sit
+     * on it in a reviewer role, it has started, it was not cancelled or
+     * missed, evaluation is still open, and they have not written one yet.
+     */
+    public function scopeAwaitingEvaluationBy(Builder $query, User $user): Builder
+    {
+        return $query
+            ->whereHas('currentParticipants', fn (Builder $participants): Builder => $participants
+                ->where('user_id', $user->getKey())
+                ->whereIn('role', (array) config('recruitment.evaluations.reviewer_roles', [])))
+            ->whereNotIn($query->qualifyColumn('status'), [RecruitmentInterviewStatus::Cancelled, RecruitmentInterviewStatus::NoShow])
+            ->where($query->qualifyColumn('scheduled_at'), '<=', now())
+            ->evaluationsClosed(false)
+            ->whereDoesntHave('evaluations', fn (Builder $evaluations): Builder => $evaluations->where('reviewer_user_id', $user->getKey()));
+    }
+
     /** For the sidebar: is this user on any interview at all? */
     public static function hasAnyFor(User $user): bool
     {

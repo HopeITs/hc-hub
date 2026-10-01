@@ -52,6 +52,7 @@ import {
     Title,
     Tooltip,
 } from 'chart.js';
+import applyChartJsBrandDefaults from './charts/chartjs-brand.js';
 
 Chart.register(
     DoughnutController,
@@ -67,6 +68,8 @@ Chart.register(
     Legend,
     Title,
 );
+
+applyChartJsBrandDefaults(Chart);
 
 window.Chart = Chart;
 

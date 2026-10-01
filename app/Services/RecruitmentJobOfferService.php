@@ -454,6 +454,14 @@ class RecruitmentJobOfferService
     }
 
     /**
+     * Every term the contract will need is required — the notes and the
+     * probation alone are optional — so an accepted offer can become a
+     * contract as it stands. The contract type is a trial or a service
+     * contract only, as on the recruitment request
+     * (ContractType::recruitmentOptions()). The probation is HR's to type as
+     * they see fit and is not checked: a whole number of days is kept,
+     * anything else is left empty.
+     *
      * @param  array<string, mixed>  $input
      * @return array<string, mixed> version attributes
      */
@@ -463,7 +471,8 @@ class RecruitmentJobOfferService
         $int = fn (string $key) => filter_var($input[$key] ?? null, FILTER_VALIDATE_INT);
 
         $contractTypeId = $int('contractTypeId');
-        if ($contractTypeId === false || ! ContractType::query()->whereKey($contractTypeId)->exists()) {
+        $contractType = $contractTypeId === false ? null : ContractType::query()->recruitmentOptions()->find($contractTypeId);
+        if ($contractType === null) {
             $errors['contractTypeId'] = __('recruitment-applicant.offers.errors.contract_type_required');
         }
 
@@ -487,46 +496,38 @@ class RecruitmentJobOfferService
             $errors['startDate'] = __('recruitment-applicant.offers.errors.start_date');
         }
 
-        $endDate = null;
-        if (filled($input['endDate'] ?? null)) {
-            $endDate = $this->parseDate($input['endDate']);
-            if ($endDate === null || ($startDate !== null && ! $endDate->gt($startDate))) {
-                $errors['endDate'] = __('recruitment-applicant.offers.errors.end_date');
-            } elseif ($startDate !== null && $endDate->gt($startDate->copy()->addYear())) {
-                // Task 10: the contract this becomes is at most a year long
-                // (ContractForm), and an accepted offer cannot be changed.
-                $errors['endDate'] = __('recruitment-applicant.offers.errors.end_date_too_far');
-            }
+        $endDate = $this->parseDate($input['endDate'] ?? null);
+        if ($endDate === null || ($startDate !== null && ! $endDate->gt($startDate))) {
+            $errors['endDate'] = __('recruitment-applicant.offers.errors.end_date');
+        } elseif ($startDate !== null && $endDate->gt($startDate->copy()->addYear())) {
+            // Task 10: the contract this becomes is at most a year long
+            // (ContractForm), and an accepted offer cannot be changed.
+            $errors['endDate'] = __('recruitment-applicant.offers.errors.end_date_too_far');
         }
 
-        $probation = $int('probationDays');
-        if ($probation === false || $probation < 0 || $probation > (int) config('recruitment.offers.max_probation_days')) {
-            $errors['probationDays'] = __('recruitment-applicant.offers.errors.probation', ['max' => config('recruitment.offers.max_probation_days')]);
+        // Free: not required and not checked. Only what the column can hold is kept.
+        $probation = filter_var($input['probationDays'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 4294967295]]);
+        $probation = $probation === false ? null : $probation;
+
+        // Only a service contract may say 0 hours, as ContractForm allows.
+        $minHours = $contractType?->category === 'service' ? 0 : 1;
+        $weeklyHours = $int('weeklyHours');
+        if ($weeklyHours === false || $weeklyHours < $minHours || $weeklyHours > (int) config('recruitment.offers.max_weekly_hours')) {
+            $errors['weeklyHours'] = __('recruitment-applicant.offers.errors.weekly_hours', ['min' => $minHours, 'max' => config('recruitment.offers.max_weekly_hours')]);
         }
 
-        $weeklyHours = null;
-        if (filled($input['weeklyHours'] ?? null)) {
-            $weeklyHours = $int('weeklyHours');
-            if ($weeklyHours === false || $weeklyHours < 1 || $weeklyHours > (int) config('recruitment.offers.max_weekly_hours')) {
-                $errors['weeklyHours'] = __('recruitment-applicant.offers.errors.weekly_hours', ['max' => config('recruitment.offers.max_weekly_hours')]);
-            }
-        }
-
-        $employmentType = filled($input['employmentType'] ?? null) ? $int('employmentType') : null;
-        if ($employmentType !== null && ! in_array($employmentType, [EmploymentType::FullTime, EmploymentType::PartTime, EmploymentType::Freelance], true)) {
-            $errors['employmentType'] = __('recruitment-applicant.offers.errors.invalid');
-        } elseif ($employmentType !== null && ! isset($errors['contractTypeId'])) {
+        $employmentType = $int('employmentType');
+        if (! in_array($employmentType, [EmploymentType::FullTime, EmploymentType::PartTime, EmploymentType::Freelance], true)) {
+            $errors['employmentType'] = __('recruitment-applicant.offers.errors.employment_type_required');
+        } elseif ($contractType !== null && ($contractType->category === 'service') !== ($employmentType === EmploymentType::Freelance)) {
             // Task 10: freelance for a service contract and only for one, as
             // ContractForm::typeMatchesCategoryRule() requires of the contract.
-            $category = ContractType::query()->find($contractTypeId)?->category;
-            if ($category !== null && ($category === 'service') !== ($employmentType === EmploymentType::Freelance)) {
-                $errors['employmentType'] = __('recruitment-applicant.offers.errors.employment_type_mismatch');
-            }
+            $errors['employmentType'] = __('recruitment-applicant.offers.errors.employment_type_mismatch');
         }
 
-        $place = filled($input['place'] ?? null) ? $int('place') : null;
-        if ($place !== null && ! in_array($place, [ContractPlace::Onsite, ContractPlace::Online], true)) {
-            $errors['place'] = __('recruitment-applicant.offers.errors.invalid');
+        $place = $int('place');
+        if (! in_array($place, [ContractPlace::Onsite, ContractPlace::Online], true)) {
+            $errors['place'] = __('recruitment-applicant.offers.errors.place_required');
         }
 
         $notes = is_string($input['notes'] ?? null) ? (trim($input['notes']) ?: null) : null;
@@ -544,7 +545,7 @@ class RecruitmentJobOfferService
             'currency' => $currency,
             'salary_per' => $salaryPer,
             'start_date' => $startDate->toDateString(),
-            'end_date' => $endDate?->toDateString(),
+            'end_date' => $endDate->toDateString(),
             'weekly_hours' => $weeklyHours,
             'probation_days' => $probation,
             'terms_json' => array_filter(

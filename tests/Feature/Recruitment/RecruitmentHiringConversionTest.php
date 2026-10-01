@@ -43,6 +43,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Livewire;
 use LogicException;
 use Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter;
@@ -98,7 +99,7 @@ class RecruitmentHiringConversionTest extends TestCase
         $this->homs = $this->makeCity('HMS', '002');
         $this->hr = $this->hr($this->homs);
 
-        foreach ([self::ANNUAL => 'Volunteer contract', self::TRIAL => 'Trial contract', self::SERVICE => 'Service contract'] as $id => $name) {
+        foreach ([self::ANNUAL => 'Volunteer Contract', self::TRIAL => 'Trial Volunteer Contract', self::SERVICE => 'Specific Voluntary Service Contract'] as $id => $name) {
             ContractType::query()->forceCreate(['id' => $id, 'name_en' => $name, 'name_ar' => $name]);
         }
 
@@ -130,12 +131,24 @@ class RecruitmentHiringConversionTest extends TestCase
         $employeesBefore = Employee::query()->count();
         $this->actingAs($this->hr);
 
-        Livewire::test(Convert::class, ['offerId' => $offer->id])
+        // Point 1: asked first, like the Leaves page; nothing is created until HR confirms.
+        $page = Livewire::test(Convert::class, ['offerId' => $offer->id])
             ->assertSet('mode', Conversions::MODE_CREATE)
             ->set('employee', $this->person())
-            ->call('save')
+            ->call('confirmHire')
+            ->assertHasNoErrors();
+        $this->assertStringContainsString('"action":"save"', $this->alertScript($page));
+        $this->assertStringContainsString('"icon":"question"', $this->alertScript($page));
+        $this->assertSame($employeesBefore, Employee::query()->count());
+
+        // The confirm button runs save(); the page stays, now showing the hire.
+        // (The facade keeps the alert it resolved first, and with it the first
+        // request's component; in a browser every request starts afresh.)
+        LivewireAlert::clearResolvedInstance('livewire-alert');
+        $page->call('save')
             ->assertHasNoErrors()
-            ->assertRedirect(route('recruitment.offers.show', ['offerId' => $offer->id]));
+            ->assertNoRedirect()
+            ->assertSee(__('recruitment-applicant.conversions.statuses.converted'));
 
         // The employee, in the HR system.
         $this->assertSame($employeesBefore + 1, Employee::query()->count());
@@ -145,7 +158,7 @@ class RecruitmentHiringConversionTest extends TestCase
 
         // The contract, on the position, from the accepted terms.
         $contract = Contract::query()->where('employee_id', $employee->id)->sole();
-        $this->assertSame([$position->id, self::ANNUAL, EmploymentType::FullTime, ContractPlace::Onsite], [$contract->position_id, $contract->contract_type_id, $contract->type, $contract->place]);
+        $this->assertSame([$position->id, self::TRIAL, EmploymentType::FullTime, ContractPlace::Onsite], [$contract->position_id, $contract->contract_type_id, $contract->type, $contract->place]);
         $this->assertSame(['2026-11-01', '2027-10-31', 40], [$contract->start_date->toDateString(), $contract->end_date->toDateString(), $contract->weekly_hours]);
         $this->assertSame([1500.0, Currency::USD, SalaryPer::Month, PayMode::Fixed, true], [(float) $contract->salary, $contract->currency, (int) $contract->salary_per, $contract->pay_mode, $contract->is_active]);
         $this->assertStringNotContainsString('1500', (string) DB::table('contracts')->where('id', $contract->id)->value('salary'), 'Encrypted at rest, like every contract.');
@@ -175,6 +188,20 @@ class RecruitmentHiringConversionTest extends TestCase
 
         // Colleagues are welcomed, as for any first contract.
         Notification::assertSentTo($this->hr, NewEmployeeWelcome::class);
+
+        // Point 4: the message says what is next — a login account on the
+        // employee page, or the contract — and its buttons open them.
+        $script = $this->alertScript($page);
+        foreach (['"icon":"success"', '"action":"openEmployee"', '"action":"openContract"'] as $part) {
+            $this->assertStringContainsString($part, $script);
+        }
+        $page->assertSee(route('employees.edit', $employee->id))
+            ->assertSee(__('recruitment-applicant.conversions.no_account', ['label' => __('general.create_login_account')]))
+            ->call('openEmployee')
+            ->assertRedirect(route('employees.edit', $employee->id));
+        Livewire::test(Convert::class, ['offerId' => $offer->id])
+            ->call('openContract')
+            ->assertRedirect(route('contracts.edit', $contract->id));
     }
 
     /** rules + avoid: the contract is built from the accepted version — never an earlier one, never the live offer. */
@@ -197,11 +224,15 @@ class RecruitmentHiringConversionTest extends TestCase
         $this->assertThrows(fn () => $offer->currentVersion->forceFill(['salary_amount' => '9'])->save(), LogicException::class);
     }
 
-    /** rules: what the offer does not carry starts where the contract composer starts a new contract. */
+    /**
+     * rules: what the offer does not carry starts where the contract composer
+     * starts a new contract. A new offer carries every term (Point 3 of the
+     * Tasks 7-10 review), so only an offer accepted before that can lack one.
+     */
     public function test_terms_the_offer_does_not_carry_take_the_composer_defaults(): void
     {
         // Annual: to the end of the year it starts in; 40 hours; on site; full time.
-        $annual = $this->accepted('Annual One', ['endDate' => '', 'weeklyHours' => '', 'place' => '', 'employmentType' => ''])[2];
+        $annual = $this->legacyTerms($this->accepted('Annual One')[2], ['contract_type_id' => self::ANNUAL, 'end_date' => null, 'weekly_hours' => null], ['place', 'employment_type']);
         $this->hire($annual, ['employee' => $this->person(['username' => 'annual.one', 'nationalNumber' => '01234567801'])]);
         $contract = $annual->fresh()->contract;
         $this->assertSame(['2026-11-01', '2026-12-31', 40, ContractPlace::Onsite, EmploymentType::FullTime],
@@ -209,12 +240,13 @@ class RecruitmentHiringConversionTest extends TestCase
         $this->assertSame('09:00', substr((string) $contract->work_hours_from, 0, 5));
 
         // Trial: three months.
-        $trial = $this->accepted('Trial One', ['contractTypeId' => self::TRIAL, 'endDate' => ''], $this->makeCampaignIn($this->homs))[2];
+        $trial = $this->legacyTerms($this->accepted('Trial One', ['contractTypeId' => self::TRIAL, 'endDate' => '2027-01-15'], $this->makeCampaignIn($this->homs))[2], ['end_date' => null]);
         $this->hire($trial, ['employee' => $this->person(['username' => 'trial.one', 'nationalNumber' => '01234567802'])]);
         $this->assertSame('2027-02-01', $trial->fresh()->contract->end_date->toDateString());
 
         // Service: freelance, and 0 hours is allowed — and no leave clause.
-        $service = $this->accepted('Service One', ['contractTypeId' => self::SERVICE, 'employmentType' => '', 'weeklyHours' => ''], $this->makeCampaignIn($this->homs))[2];
+        $service = $this->accepted('Service One', ['contractTypeId' => self::SERVICE, 'employmentType' => EmploymentType::Freelance, 'weeklyHours' => 0], $this->makeCampaignIn($this->homs))[2];
+        $service = $this->legacyTerms($service, ['weekly_hours' => null], ['employment_type']);
         $this->hire($service, ['employee' => $this->person(['username' => 'service.one', 'nationalNumber' => '01234567803'])]);
         $contract = $service->fresh()->contract;
         $this->assertSame([EmploymentType::Freelance, 0], [$contract->type, $contract->weekly_hours]);
@@ -242,23 +274,30 @@ class RecruitmentHiringConversionTest extends TestCase
     // Existing people
     // ------------------------------------------------------------------
 
-    /** edge + avoid: a candidate with an existing employee's email or phone is never created twice silently. */
+    /**
+     * edge + avoid (the identity rule): an employee with the candidate's name
+     * and email is them, and is never created twice silently; an employee
+     * with only their phone, under another name, is not them.
+     */
     public function test_an_existing_employee_with_the_same_email_or_phone_is_linked_not_duplicated(): void
     {
         [$application, $offer, $conversion] = $this->accepted();
-        $existing = $this->makeEmployee($this->homs, 'already.here', ['personal_email' => strtoupper($application->email_normalized)]);
+        $existing = $this->makeEmployee($this->homs, 'already.here', ['first_name_en' => 'Candidate', 'last_name_en' => 'One', 'personal_email' => strtoupper($application->email_normalized)]);
         $byPhone = $this->makeEmployee($this->homs, 'same.phone', ['work_phone' => '0944111222']);
         $application->applicant->forceFill(['phone_normalized' => '+963944111222'])->save();
 
         $matches = $this->conversions()->matches($conversion->fresh());
-        $this->assertEqualsCanonicalizing([[$existing->id, ['email']], [$byPhone->id, ['phone']]],
-            $matches->map(fn (array $match): array => [$match['employee']->id, $match['reasons']])->all());
+        $this->assertEqualsCanonicalizing([[$existing->id, ['email'], Conversions::MATCH_LINKABLE], [$byPhone->id, ['phone'], Conversions::MATCH_WARNING]],
+            $matches->map(fn (array $match): array => [$match['employee']->id, $match['reasons'], $match['kind']])->all());
 
         // Creating someone new needs HR to say it is a different person.
         $employees = Employee::query()->count();
         $this->assertValidationError(fn () => $this->hire($conversion), 'confirmNotDuplicate', 'possible_duplicate');
         $this->assertSame($employees, Employee::query()->count());
         $this->assertSame([Conversion::STATUS_PENDING, 0], [$conversion->fresh()->status, $conversion->fresh()->attempt_count]);
+
+        // The phone alone does not make them the other employee.
+        $this->assertValidationError(fn () => $this->hire($conversion, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $byPhone->id]), 'employeeId', 'name_mismatch');
 
         // Linking: no new employee; the contract is theirs.
         $this->hire($conversion, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $existing->id]);
@@ -269,25 +308,30 @@ class RecruitmentHiringConversionTest extends TestCase
         $this->assertSame($existing->id, $application->applicant->fresh()->employee_id);
     }
 
-    /** edge: HR confirms the match is someone else, and a new employee is created. */
+    /** edge: HR confirms the same-name match is someone else, and a new employee is created. */
     public function test_confirming_a_different_person_creates_a_new_employee(): void
     {
         [$application, , $conversion] = $this->accepted();
-        $this->makeEmployee($this->homs, 'namesake', ['personal_email' => $application->email_normalized]);
+        $this->makeEmployee($this->homs, 'namesake', ['first_name_en' => 'Candidate', 'last_name_en' => 'One', 'personal_email' => $application->email_normalized]);
 
+        $this->assertValidationError(fn () => $this->hire($conversion), 'confirmNotDuplicate', 'possible_duplicate');
         $this->hire($conversion, ['confirmNotDuplicate' => true]);
 
         $this->assertSame('candidate.one', $conversion->fresh()->employee->username);
     }
 
-    /** edge: an internal applicant is that employee; a national number on file is that employee. Both can only be linked. */
+    /**
+     * edge: a member of staff who signed in to apply is that employee; a
+     * national number on file under the same name is that person. Both can
+     * only be linked.
+     */
     public function test_an_internal_applicant_or_a_known_national_number_can_only_be_linked(): void
     {
-        // Internal applicant: linking is preselected, creating is refused.
+        // Signed in as staff to apply: linking is preselected, creating is refused.
         [$application, $offer, $conversion] = $this->accepted();
         $staff = $this->makeEmployee($this->homs, 'staff.member');
-        $other = $this->makeEmployee($this->homs, 'other.one', ['personal_email' => $application->email_normalized]);
-        $application->applicant->forceFill(['employee_id' => $staff->id])->save();
+        $other = $this->makeEmployee($this->homs, 'other.one', ['first_name_en' => 'Candidate', 'last_name_en' => 'One', 'personal_email' => $application->email_normalized]);
+        $application->applicant->forceFill(['employee_id' => $staff->id, 'identity_verified_at' => now()])->save();
 
         $this->actingAs($this->hr);
         Livewire::test(Convert::class, ['offerId' => $offer->id])
@@ -300,9 +344,9 @@ class RecruitmentHiringConversionTest extends TestCase
         $this->hire($conversion, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $staff->id]);
         $this->assertSame($staff->id, $conversion->fresh()->employee_id);
 
-        // A national number already on file: that person, linked.
+        // A national number already on file, under the same name: that person, linked.
         $second = $this->accepted('Second One', [], $this->makeCampaignIn($this->homs))[2];
-        $known = $this->makeEmployee($this->homs, 'known.person', ['national_number' => '09876543210']);
+        $known = $this->makeEmployee($this->homs, 'known.person', ['first_name_en' => 'Second', 'last_name_en' => 'One', 'national_number' => '09876543210']);
         $this->assertValidationError(fn () => $this->hire($second, ['employee' => $this->person(['nationalNumber' => '09876543210', 'username' => 'second.one'])]), 'employee.nationalNumber', 'national_number_taken');
 
         $this->hire($second, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $known->id, 'employee' => ['nationalNumber' => '09876543210']]);
@@ -313,7 +357,7 @@ class RecruitmentHiringConversionTest extends TestCase
     public function test_a_former_employee_hired_back_is_reactivated(): void
     {
         [$application, , $conversion] = $this->accepted();
-        $former = $this->makeEmployee($this->homs, 'former.one', ['personal_email' => $application->email_normalized, 'is_active' => false]);
+        $former = $this->makeEmployee($this->homs, 'former.one', ['first_name_en' => 'Candidate', 'last_name_en' => 'One', 'personal_email' => $application->email_normalized, 'is_active' => false]);
 
         $this->hire($conversion, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $former->id]);
 
@@ -325,7 +369,7 @@ class RecruitmentHiringConversionTest extends TestCase
     public function test_an_employee_already_on_the_position_is_not_hired_onto_it_again(): void
     {
         [$application, $offer, $conversion] = $this->accepted();
-        $holder = $this->makeEmployee($this->homs, 'seat.holder', ['personal_email' => $application->email_normalized, 'work_phone' => '0944555666']);
+        $holder = $this->makeEmployee($this->homs, 'seat.holder', ['first_name_en' => 'Candidate', 'last_name_en' => 'One', 'personal_email' => $application->email_normalized, 'work_phone' => '0944555666']);
         Contract::query()->create([
             'employee_id' => $holder->id, 'position_id' => $offer->position_id, 'contract_type_id' => self::ANNUAL,
             'start_date' => '2026-01-01', 'end_date' => '2026-12-31', 'currency' => Currency::USD, 'salary_per' => SalaryPer::Month,
@@ -337,7 +381,7 @@ class RecruitmentHiringConversionTest extends TestCase
         $this->assertSame([$contracts, Conversion::STATUS_PENDING], [Contract::query()->count(), $conversion->fresh()->status]);
 
         // On another position they can be hired: a second post is a real hire.
-        [$other, , $elsewhere] = $this->accepted('Other One', [], $this->makeCampaignIn($this->homs));
+        [$other, , $elsewhere] = $this->accepted('Candidate One', [], $this->makeCampaignIn($this->homs));
         $other->applicant->forceFill(['phone_normalized' => '+963944555666'])->save();
         $this->hire($elsewhere, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $holder->id]);
         $this->assertSame($holder->id, $elsewhere->fresh()->employee_id);
@@ -348,7 +392,7 @@ class RecruitmentHiringConversionTest extends TestCase
     {
         [$application, , $conversion] = $this->accepted();
         $stranger = $this->makeEmployee($this->homs, 'stranger');
-        $elsewhere = $this->makeEmployee($this->makeCity('ALP', '001'), 'elsewhere', ['personal_email' => $application->email_normalized]);
+        $elsewhere = $this->makeEmployee($this->makeCity('ALP', '001'), 'elsewhere', ['first_name_en' => 'Candidate', 'last_name_en' => 'One', 'personal_email' => $application->email_normalized]);
 
         // A tampered id links nobody.
         $this->assertValidationError(fn () => $this->hire($conversion, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $stranger->id]), 'employeeId', 'employee_not_matched');
@@ -357,6 +401,93 @@ class RecruitmentHiringConversionTest extends TestCase
 
         $this->assertNull($conversion->fresh()->contract_id);
         $this->assertSame(0, Contract::query()->count());
+    }
+
+    /**
+     * The identity rule, as it happened on 2026-09-30: a candidate typed a
+     * phone number that is an employee's under another name. HR is told
+     * plainly, nothing offers to link them, and a new employee is created
+     * without any tick.
+     */
+    public function test_a_phone_on_file_under_another_name_is_a_warning_never_a_link(): void
+    {
+        [$application, $offer, $conversion] = $this->accepted('فريال نعمة');
+        $rafi = $this->makeEmployee($this->homs, 'rafi.louliki', [
+            'first_name_en' => 'Rafi', 'last_name_en' => 'Louliki', 'first_name_ar' => 'رافي', 'last_name_ar' => 'لوليكي',
+            'personal_phone' => '0993482692',
+        ]);
+        $application->applicant->forceFill(['phone_normalized' => '+963993482692'])->save();
+
+        $this->assertSame([[$rafi->id, ['phone'], Conversions::MATCH_WARNING]],
+            $this->conversions()->matches($conversion->fresh())->map(fn (array $match): array => [$match['employee']->id, $match['reasons'], $match['kind']])->all());
+
+        // Said plainly; no employee to pick, no link, no tick.
+        $this->actingAs($this->hr);
+        Livewire::test(Convert::class, ['offerId' => $offer->id])
+            ->assertSet('mode', Conversions::MODE_CREATE)
+            ->assertSet('employeeId', '')
+            ->assertSee(__('recruitment-applicant.conversions.warnings.phone', ['name' => $rafi->name]))
+            ->assertSee(__('recruitment-applicant.conversions.no_linkable'))
+            ->assertDontSeeHtml('wire:model.live="employeeId"')
+            ->assertDontSee(__('recruitment-applicant.conversions.confirm_not_duplicate'));
+
+        // Linking to him is refused, and creates nothing.
+        $this->assertValidationError(fn () => $this->hire($conversion, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $rafi->id]), 'employeeId', 'name_mismatch');
+        $this->assertSame(0, Contract::query()->count());
+
+        // A new employee, without any tick. The applicant is that employee, not him.
+        $this->hire($conversion);
+        $conversion->refresh();
+        $this->assertNotSame($rafi->id, $conversion->employee_id);
+        $this->assertSame($conversion->employee_id, $application->applicant->fresh()->employee_id);
+        $this->assertSame(0, Contract::query()->where('employee_id', $rafi->id)->count());
+        $this->assertSame([['employee_id' => $rafi->id, 'reasons' => ['phone']]],
+            Activity::query()->where('description', 'recruitment_hiring_conversion.converted')->sole()->properties['identity_warnings']);
+    }
+
+    /** The identity rule: a national number on file under another name stops the hire, and nothing is created. */
+    public function test_a_national_number_on_file_under_another_name_stops_the_hire(): void
+    {
+        [, $offer, $conversion] = $this->accepted();
+        $holder = $this->makeEmployee($this->homs, 'number.holder', ['national_number' => '09876543210']);
+        $employees = Employee::query()->count();
+        $mismatch = __('recruitment-applicant.conversions.errors.national_number_mismatch', ['name' => $holder->name]);
+
+        $errors = $this->assertValidationError(fn () => $this->hire($conversion, ['employee' => $this->person(['nationalNumber' => '09876543210'])]), 'employee.nationalNumber');
+        $this->assertSame($mismatch, $errors['employee.nationalNumber'][0]);
+        $errors = $this->assertValidationError(fn () => $this->hire($conversion, ['mode' => Conversions::MODE_LINK, 'employeeId' => (string) $holder->id, 'employee' => ['nationalNumber' => '09876543210']]), 'employeeId');
+        $this->assertSame($mismatch, $errors['employeeId'][0]);
+
+        $this->assertSame([$employees, 0], [Employee::query()->count(), Contract::query()->count()]);
+        $this->assertSame([Conversion::STATUS_PENDING, 0], [$conversion->fresh()->status, $conversion->fresh()->attempt_count]);
+
+        // The page says so as soon as the number is typed.
+        $this->actingAs($this->hr);
+        Livewire::test(Convert::class, ['offerId' => $offer->id])
+            ->set('employee.nationalNumber', '09876543210')
+            ->assertSee(__('recruitment-applicant.conversions.id_conflict_title'))
+            ->assertSee(__('recruitment-applicant.conversions.id_conflict', ['number' => '09876543210', 'name' => $holder->name]));
+    }
+
+    /** The identity rule: an employee_id the applicant carries without having signed in proves nothing. */
+    public function test_an_employee_id_without_a_sign_in_is_not_an_internal_applicant(): void
+    {
+        [$application, $offer, $conversion] = $this->accepted();
+        $wrong = $this->makeEmployee($this->homs, 'wrongly.linked');
+        $application->applicant->forceFill(['employee_id' => $wrong->id, 'identity_verified_at' => null])->save();
+
+        $this->assertTrue($this->conversions()->matches($conversion->fresh())->isEmpty());
+        $this->actingAs($this->hr);
+        Livewire::test(Convert::class, ['offerId' => $offer->id])
+            ->assertSet('mode', Conversions::MODE_CREATE)
+            ->assertSet('employeeId', '');
+
+        // Not staff: created as usual, and from now on the applicant is the new employee.
+        $this->hire($conversion);
+        $employee = $conversion->fresh()->employee;
+        $this->assertNotSame($wrong->id, $employee->id);
+        $this->assertSame($employee->id, $application->applicant->fresh()->employee_id);
+        $this->assertSame(0, Contract::query()->where('employee_id', $wrong->id)->count());
     }
 
     // ------------------------------------------------------------------
@@ -737,14 +868,13 @@ class RecruitmentHiringConversionTest extends TestCase
     private function terms(array $overrides = []): array
     {
         return array_merge([
-            'contractTypeId' => self::ANNUAL,
+            'contractTypeId' => self::TRIAL,
             'salary' => self::SALARY,
             'currency' => Currency::USD,
             'salaryPer' => SalaryPer::Month,
             'startDate' => '2026-11-01',
             'endDate' => '2027-10-31',
             'weeklyHours' => 40,
-            'probationDays' => 90,
             'employmentType' => EmploymentType::FullTime,
             'place' => ContractPlace::Onsite,
             'notes' => '',
@@ -770,6 +900,24 @@ class RecruitmentHiringConversionTest extends TestCase
         $offer = $this->offers()->recordResponse($this->hr, $offer, $offer->current_version_id, OfferStatus::Accepted, 'Accepted by phone.')->fresh();
 
         return [$application->fresh(), $offer, $offer->hiringConversion];
+    }
+
+    /**
+     * An offer accepted before every term was required: its version lacks
+     * some of them. Written straight to the table — the accepted version is
+     * frozen for the model, and that is how such a row already is.
+     *
+     * @param  array<string, mixed>  $columns
+     * @param  array<int, string>  $dropTerms  keys removed from terms_json
+     */
+    private function legacyTerms(Conversion $conversion, array $columns, array $dropTerms = []): Conversion
+    {
+        $row = DB::table('recruitment_job_offer_versions')->where('id', $conversion->job_offer_version_id)->first();
+        $terms = array_diff_key(json_decode((string) $row->terms_json, true) ?: [], array_flip($dropTerms));
+
+        DB::table('recruitment_job_offer_versions')->where('id', $row->id)->update([...$columns, 'terms_json' => json_encode($terms)]);
+
+        return $conversion->fresh();
     }
 
     /** The new-employee form, filled in. */
@@ -815,6 +963,16 @@ class RecruitmentHiringConversionTest extends TestCase
     }
 
     /** @return array<string, array<int, string>> */
+    /**
+     * The LivewireAlert of the last request. It ships as a Livewire `js`
+     * effect, so its SweetAlert options and actions are read back from the
+     * script (as EmployeeEditSaveFeedbackTest does).
+     */
+    private function alertScript($component): string
+    {
+        return collect($component->effects['xjs'] ?? [])->pluck('expression')->implode("\n");
+    }
+
     private function assertValidationError(callable $action, string $field, ?string $errorKey = null, string $section = 'conversions'): array
     {
         try {

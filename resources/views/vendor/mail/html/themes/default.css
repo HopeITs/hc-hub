@@ -13,8 +13,8 @@ body {
     padding: 0;
     width: 100% !important;
     height: 100%;
-    background-color: #f4f4f5;
-    color: #3f3f46;
+    background-color: #dcddde;
+    color: #58595b;
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, 'Helvetica Neue', Arial, Tahoma, sans-serif;
     -webkit-text-size-adjust: none;
     -ms-text-size-adjust: 100%;
@@ -46,7 +46,7 @@ img {
 
 h1 {
     margin: 0 0 16px;
-    color: #18181b;
+    color: #58595b;
     font-size: 22px;
     font-weight: 700;
     line-height: 30px;
@@ -54,7 +54,7 @@ h1 {
 
 h2 {
     margin: 0 0 12px;
-    color: #18181b;
+    color: #58595b;
     font-size: 18px;
     font-weight: 700;
     line-height: 26px;
@@ -62,7 +62,7 @@ h2 {
 
 h3 {
     margin: 0 0 8px;
-    color: #18181b;
+    color: #58595b;
     font-size: 16px;
     font-weight: 700;
     line-height: 24px;
@@ -70,13 +70,13 @@ h3 {
 
 p {
     margin: 0 0 16px;
-    color: #3f3f46;
+    color: #58595b;
     font-size: 15px;
     line-height: 24px;
 }
 
 strong {
-    color: #18181b;
+    color: #58595b;
     font-weight: 700;
 }
 
@@ -92,7 +92,7 @@ ul, ol {
 
 li {
     margin: 0 0 4px;
-    color: #3f3f46;
+    color: #58595b;
     font-size: 15px;
     line-height: 24px;
 }
@@ -100,7 +100,7 @@ li {
 hr {
     margin: 28px 0;
     border: 0;
-    border-top: 1px solid #e4e4e7;
+    border-top: 1px solid #dcddde;
     height: 0;
 }
 
@@ -114,7 +114,7 @@ hr {
     width: 100%;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f5;
+    background-color: #dcddde;
 }
 
 .wrapper-cell {
@@ -129,7 +129,7 @@ hr {
 
 .card-frame {
     background-color: #ffffff;
-    border: 1px solid #e4e4e7;
+    border: 1px solid #dcddde;
     border-top: 3px solid #be1f24;
     border-radius: 8px;
 }
@@ -166,21 +166,21 @@ hr {
 
 .footer-cell p {
     margin: 0 0 6px;
-    color: #71717a;
+    color: #6d6e71;
     font-size: 12px;
     line-height: 18px;
     text-align: center;
 }
 
 .footer-cell a {
-    color: #71717a;
+    color: #6d6e71;
 }
 
 /* Subcopy: the button's fallback link */
 
 .subcopy {
     margin-top: 8px;
-    border-top: 1px solid #e4e4e7;
+    border-top: 1px solid #dcddde;
 }
 
 .subcopy-cell {
@@ -189,7 +189,7 @@ hr {
 
 .subcopy-cell p {
     margin: 0;
-    color: #71717a;
+    color: #6d6e71;
     font-size: 12px;
     line-height: 18px;
 }
@@ -233,7 +233,7 @@ hr {
 
 .notice-content p {
     margin: 0 0 8px;
-    color: #3f3f46;
+    color: #58595b;
     font-size: 14px;
     line-height: 22px;
 }
@@ -250,15 +250,15 @@ hr {
 }
 
 .code-box {
-    background-color: #fafafa;
-    border: 1px solid #e4e4e7;
+    background-color: #ffffff;
+    border: 1px solid #dcddde;
     border-radius: 8px;
 }
 
 .code-value {
     /* The extra start padding offsets the letter-spacing trailing the last digit. */
     padding: 22px 16px 22px 26px;
-    color: #18181b;
+    color: #58595b;
     font-family: 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', 'Courier New', monospace;
     font-size: 34px;
     font-weight: 700;
@@ -269,7 +269,7 @@ hr {
 
 .code-expires {
     margin: 12px 0 0;
-    color: #71717a;
+    color: #6d6e71;
     font-size: 13px;
     line-height: 20px;
     text-align: center;
@@ -283,8 +283,8 @@ hr {
 
 .panel-content {
     padding: 16px 20px 0;
-    background-color: #fafafa;
-    border: 1px solid #e4e4e7;
+    background-color: #ffffff;
+    border: 1px solid #dcddde;
     border-radius: 6px;
 }
 
@@ -298,16 +298,16 @@ hr {
 
 .table th {
     padding: 8px 10px;
-    border-bottom: 2px solid #e4e4e7;
-    color: #18181b;
+    border-bottom: 2px solid #dcddde;
+    color: #58595b;
     font-size: 13px;
     font-weight: 700;
 }
 
 .table td {
     padding: 8px 10px;
-    border-bottom: 1px solid #f4f4f5;
-    color: #3f3f46;
+    border-bottom: 1px solid #dcddde;
+    color: #58595b;
     font-size: 14px;
     line-height: 20px;
 }

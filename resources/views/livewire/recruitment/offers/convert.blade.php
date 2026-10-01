@@ -10,6 +10,11 @@
     $position = $offer->position;
     $selectClass = 'w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body';
     $field = fn (string $key) => 'employee.'.$key;
+
+    // The identity rule (Conversions::matches()): only the same person can be linked.
+    $linkable = $matches->where('kind', Conversions::MATCH_LINKABLE);
+    $warnings = $matches->where('kind', Conversions::MATCH_WARNING);
+    $conflicts = $matches->where('kind', Conversions::MATCH_ID_CONFLICT);
 @endphp
 
 <div class="space-y-6 p-6">
@@ -37,7 +42,13 @@
                 @if ($conversion->contract)
                     <a href="{{ route('contracts.show', $conversion->contract->id) }}" class="font-medium text-primary hover:underline">{{ __('recruitment-applicant.conversions.open_contract') }} #{{ $conversion->contract->id }}</a>
                 @endif
+                @if ($conversion->employee)
+                    <a href="{{ route('employees.edit', $conversion->employee->id) }}" wire:navigate class="font-medium text-primary hover:underline">{{ __('recruitment-applicant.conversions.open_employee_edit') }}</a>
+                @endif
             </div>
+            @if ($conversion->employee && ! $conversion->employee->account)
+                <p>{{ __('recruitment-applicant.conversions.no_account', ['label' => __('general.create_login_account')]) }}</p>
+            @endif
         </section>
     @else
         <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.conversions.hint') }}</p>
@@ -76,14 +87,23 @@
             </p>
         </section>
 
-        <form wire:submit="save" class="space-y-6">
+        <form wire:submit="confirmHire" class="space-y-6">
             {{-- Who the employee is --}}
             <section class="space-y-4 rounded-surface border border-secondary-soft bg-white p-6">
                 <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.conversions.employee_section') }}</h2>
 
+                {{-- The national number is on file under another name: the hire stops. --}}
+                @foreach ($conflicts as $match)
+                    <div role="alert" class="rounded-control border border-primary bg-primary/5 p-3 text-sm text-primary" wire:key="conflict-{{ $match['employee']->id }}">
+                        <p class="font-semibold">{{ __('recruitment-applicant.conversions.id_conflict_title') }}</p>
+                        <p>{{ __('recruitment-applicant.conversions.id_conflict', ['number' => $employee['nationalNumber'] ?? '', 'name' => $match['employee']->name]) }}</p>
+                    </div>
+                @endforeach
+
                 <div class="space-y-2">
                     <h3 class="text-sm font-semibold">{{ __('recruitment-applicant.conversions.matches_title') }}</h3>
-                    @forelse ($matches as $match)
+                    <p class="text-xs text-secondary-medium">{{ __('recruitment-applicant.conversions.matches_hint') }}</p>
+                    @forelse ($linkable as $match)
                         <label class="flex items-start gap-3 rounded-control border border-secondary-soft p-3 text-sm" wire:key="match-{{ $match['employee']->id }}">
                             <input type="radio" wire:model.live="employeeId" value="{{ $match['employee']->id }}" @disabled($mode !== Conversions::MODE_LINK) class="mt-1 text-primary">
                             <span>
@@ -99,15 +119,27 @@
                             </span>
                         </label>
                     @empty
-                        <p class="text-sm text-secondary-medium">{{ __('recruitment-applicant.conversions.no_matches') }}</p>
+                        <p class="text-sm text-secondary-medium">{{ $matches->isEmpty() ? __('recruitment-applicant.conversions.no_matches') : __('recruitment-applicant.conversions.no_linkable') }}</p>
                     @endforelse
                     <x-forms.input-error field="employeeId" input-id="employeeId" />
                 </div>
 
+                {{-- An email or phone on someone else's record: said plainly, never linked. --}}
+                @if ($warnings->isNotEmpty())
+                    <div role="status" class="space-y-1 rounded-control border border-secondary-light bg-secondary-soft/30 p-3 text-sm">
+                        @foreach ($warnings as $match)
+                            @foreach (array_intersect([Conversions::MATCH_PHONE, Conversions::MATCH_EMAIL], $match['reasons']) as $reason)
+                                <p class="font-medium" wire:key="warning-{{ $match['employee']->id }}-{{ $reason }}">{{ __('recruitment-applicant.conversions.warnings.'.$reason, ['name' => $match['employee']->name]) }}</p>
+                            @endforeach
+                        @endforeach
+                        <p class="text-secondary-medium">{{ __('recruitment-applicant.conversions.warning_hint') }}</p>
+                    </div>
+                @endif
+
                 <fieldset class="flex flex-wrap gap-4 text-sm">
                     <legend class="sr-only">{{ __('recruitment-applicant.conversions.employee_section') }}</legend>
                     <label class="flex items-center gap-2"><input type="radio" wire:model.live="mode" value="{{ Conversions::MODE_CREATE }}" class="text-primary"> {{ __('recruitment-applicant.conversions.mode_create') }}</label>
-                    <label class="flex items-center gap-2"><input type="radio" wire:model.live="mode" value="{{ Conversions::MODE_LINK }}" @disabled($matches->isEmpty()) class="text-primary"> {{ __('recruitment-applicant.conversions.mode_link') }}</label>
+                    <label class="flex items-center gap-2"><input type="radio" wire:model.live="mode" value="{{ Conversions::MODE_LINK }}" @disabled($linkable->isEmpty()) class="text-primary"> {{ __('recruitment-applicant.conversions.mode_link') }}</label>
                 </fieldset>
                 <x-forms.input-error field="mode" input-id="mode" />
 
@@ -179,7 +211,7 @@
                         </div>
                     </div>
 
-                    @if ($matches->isNotEmpty())
+                    @if ($linkable->isNotEmpty())
                         <div>
                             <x-forms.input id="confirmNotDuplicate" type="checkbox" model="confirmNotDuplicate">{{ __('recruitment-applicant.conversions.confirm_not_duplicate') }}</x-forms.input>
                             <x-forms.input-error field="confirmNotDuplicate" input-id="confirmNotDuplicate" />

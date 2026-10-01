@@ -322,6 +322,18 @@ class RecruitmentRequestDraftService
             ]);
         }
 
+        if ($data['request_type'] === Type::CloseVacancy && (int) $target->max_emp <= 1) {
+            throw ValidationException::withMessages([
+                'data.position_id' => __('recruitment.close_vacancy_many_seats_only'),
+            ]);
+        }
+
+        if ($data['request_type'] === Type::ClosePosition && (int) $target->max_emp !== 1) {
+            throw ValidationException::withMessages([
+                'data.position_id' => __('recruitment.close_position_single_seat_only'),
+            ]);
+        }
+
         if ($data['request_type'] === Type::ClosePosition
             && ((int) $target->exist_emp > 0 || $target->activeContracts()->exists())) {
             throw ValidationException::withMessages([

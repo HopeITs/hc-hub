@@ -37,7 +37,7 @@
             <h2 class="text-h4 font-semibold">{{ __('recruitment.your_decision') }}</h2>
             <p class="mt-1 text-sm text-secondary-medium">{{ \App\Enums\WorkflowStepKey::getLocalizedName((int) $pendingStep->workflowStep?->step_key)['value'] }}</p>
 
-            @if (! $askingForChanges)
+            @if (! $askingForChanges && ! $rejecting)
                 {{-- The three decisions, and nothing else. Asking for changes is
                      a longer conversation than approving or rejecting, so its
                      fields appear once it is chosen rather than sitting open
@@ -56,12 +56,36 @@
 
                     <button type="button"
                         class="cursor-pointer rounded-control border border-primary/30 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5"
-                        x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'decide', args: ['reject'], message: @js(__('recruitment.confirm_reject')), confirmLabel: @js(__('recruitment.reject_action')), tone: 'danger' })">
+                        wire:click="askToReject">
                         {{ __('recruitment.reject_action') }}
                     </button>
                 </div>
 
                 <p class="mt-2 text-sm text-primary">@error('step'){{ $message }}@enderror @error('version'){{ $message }}@enderror @error('request'){{ $message }}@enderror @error('comment'){{ $message }}@enderror</p>
+            @elseif ($rejecting)
+                {{-- Step two of a rejection: the reason, which the decision
+                     cannot be recorded without. --}}
+                <div class="mt-4">
+                    <x-forms.input-label for="rejectionReason" required>{{ __('recruitment.rejection_reason') }}</x-forms.input-label>
+                    <textarea id="rejectionReason" rows="3" wire:model="decisionComment"
+                        class="mt-1 w-full rounded-control border-secondary-light" dir="auto"></textarea>
+                    <p class="mt-1 text-sm text-primary">@error('comment'){{ $message }}@enderror @error('step'){{ $message }}@enderror @error('version'){{ $message }}@enderror @error('request'){{ $message }}@enderror</p>
+                </div>
+
+                <div class="mt-4 flex flex-wrap gap-3">
+                    <button type="button"
+                        class="cursor-pointer rounded-control bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
+                        wire:loading.attr="disabled" wire:target="decide"
+                        x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'decide', args: ['reject'], message: @js(__('recruitment.confirm_reject')), confirmLabel: @js(__('recruitment.reject_action')), tone: 'danger' })">
+                        {{ __('recruitment.reject_action') }}
+                    </button>
+
+                    <button type="button"
+                        class="cursor-pointer rounded-control border border-secondary-light px-4 py-2 text-sm font-semibold hover:bg-secondary-soft/30"
+                        wire:click="cancelChangeRequest">
+                        {{ __('recruitment.back_to_decisions') }}
+                    </button>
+                </div>
             @else
                 {{-- Step two: name the fields, say why, send it back. --}}
                 <fieldset class="mt-4">

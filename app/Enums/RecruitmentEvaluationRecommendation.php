@@ -36,11 +36,11 @@ final class RecruitmentEvaluationRecommendation
     public static function classes(?string $value): string
     {
         return match ($value) {
-            self::StrongYes => 'bg-green-100 text-green-800',
-            self::Yes => 'bg-green-50 text-green-700',
-            self::Maybe => 'bg-amber-50 text-amber-700',
-            self::No => 'bg-red-50 text-red-700',
-            self::StrongNo => 'bg-red-100 text-red-800',
+            self::StrongYes => 'bg-primary text-white',
+            self::Yes => 'bg-white text-primary ring-1 ring-inset ring-primary',
+            self::Maybe => 'bg-neutral-100 text-secondary-dark',
+            self::No => 'bg-white text-secondary-dark ring-1 ring-inset ring-secondary-light',
+            self::StrongNo => 'bg-secondary-dark text-white',
             default => 'bg-neutral-100 text-secondary-dark',
         };
     }

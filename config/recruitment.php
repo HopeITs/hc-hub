@@ -445,13 +445,15 @@ return [
         'min_length' => 2,
         'max_length' => 40,
         'bulk_limit' => 500,
+        // Brand tones only — the visual identity allows the red and the four
+        // brand greys, nothing else.
         'palette' => [
-            'neutral' => 'bg-neutral-100 text-neutral-800',
-            'red' => 'bg-red-50 text-red-800',
-            'amber' => 'bg-amber-50 text-amber-800',
-            'green' => 'bg-green-50 text-green-800',
-            'blue' => 'bg-blue-50 text-blue-800',
-            'purple' => 'bg-purple-50 text-purple-800',
+            'neutral' => 'bg-neutral-100 text-secondary-dark',
+            'primary' => 'bg-white text-primary ring-1 ring-inset ring-primary',
+            'dark' => 'bg-secondary-dark text-white',
+            'medium' => 'bg-secondary-medium text-white',
+            'soft' => 'bg-secondary-soft text-secondary-dark',
+            'outline' => 'bg-white text-secondary-dark ring-1 ring-inset ring-secondary-light',
         ],
     ],
 

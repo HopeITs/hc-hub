@@ -88,32 +88,28 @@ class RecruitmentPositionActionService
                     : (! $position->is_active ? __('recruitment.position_inactive')
                         : ($hasPositionRequest(RecruitmentRequestType::IncreaseHeadcount) ? $pendingReason : null)),
             ],
-            RecruitmentRequestType::DecreaseHeadcount => [
-                'available' => ! $isRoot && $position->is_active
-                    && (int) $position->max_emp > (int) $position->exist_emp
-                    && ! $hasPositionRequest(RecruitmentRequestType::DecreaseHeadcount),
-                'reason' => $isRoot ? $rootReason
-                    : (! $position->is_active ? __('recruitment.position_inactive')
-                        : ((int) $position->max_emp <= (int) $position->exist_emp
-                            ? __('recruitment.team_staffing.no_reducible_capacity')
-                            : ($hasPositionRequest(RecruitmentRequestType::DecreaseHeadcount) ? $pendingReason : null))),
-            ],
             RecruitmentRequestType::ClosePosition => [
                 'available' => ! $isRoot && $position->is_active
+                    && (int) $position->max_emp === 1
                     && (int) $position->exist_emp === 0
                     && ! $hasPositionRequest(RecruitmentRequestType::ClosePosition),
                 'reason' => $isRoot ? $rootReason
                     : (! $position->is_active ? __('recruitment.position_inactive')
-                        : ((int) $position->exist_emp > 0
-                            ? __('recruitment.position_has_contracts')
-                            : ($hasPositionRequest(RecruitmentRequestType::ClosePosition) ? $pendingReason : null))),
+                        : ((int) $position->max_emp !== 1
+                            ? __('recruitment.close_position_single_seat_only')
+                            : ((int) $position->exist_emp > 0
+                                ? __('recruitment.position_has_contracts')
+                                : ($hasPositionRequest(RecruitmentRequestType::ClosePosition) ? $pendingReason : null)))),
             ],
             RecruitmentRequestType::CloseVacancy => [
-                'available' => ! $isRoot && $position->is_active && $closeVacancyCanTargetSeat,
+                'available' => ! $isRoot && $position->is_active
+                    && (int) $position->max_emp > 1 && $closeVacancyCanTargetSeat,
                 'reason' => $isRoot ? $rootReason
                     : (! $position->is_active ? __('recruitment.position_inactive')
-                        : ($openVacancies->isEmpty() ? __('recruitment.team_staffing.no_open_vacancy')
-                            : ($closeVacancyCanTargetSeat ? null : __('recruitment.team_staffing.vacancy_action_blocked')))),
+                        : ((int) $position->max_emp <= 1
+                            ? __('recruitment.close_vacancy_many_seats_only')
+                            : ($openVacancies->isEmpty() ? __('recruitment.team_staffing.no_open_vacancy')
+                                : ($closeVacancyCanTargetSeat ? null : __('recruitment.team_staffing.vacancy_action_blocked'))))),
             ],
             'create_position' => [
                 'available' => $canCreatePosition,

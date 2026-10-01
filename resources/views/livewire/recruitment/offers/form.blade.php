@@ -51,7 +51,7 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                     <x-forms.input-label for="contractTypeId" required :value="__('recruitment-applicant.offers.contract_type')" />
-                    <select id="contractTypeId" wire:model="contractTypeId" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
+                    <select id="contractTypeId" wire:model="contractTypeId" required class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
                         <option value="">{{ __('recruitment.choose') }}</option>
                         @foreach ($contractTypes as $type)
                             <option value="{{ $type->id }}">{{ $type->name }}</option>
@@ -60,9 +60,9 @@
                     <x-forms.input-error field="contractTypeId" input-id="contractTypeId" />
                 </div>
                 <div>
-                    <x-forms.input-label for="employmentType" :value="__('recruitment-applicant.offers.employment_type')" />
-                    <select id="employmentType" wire:model="employmentType" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
-                        <option value="">—</option>
+                    <x-forms.input-label for="employmentType" required :value="__('recruitment-applicant.offers.employment_type')" />
+                    <select id="employmentType" wire:model="employmentType" required class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
+                        <option value="">{{ __('recruitment.choose') }}</option>
                         @foreach ($employmentTypes as $value)
                             <option value="{{ $value }}">{{ OfferTerms::employmentType($value) }}</option>
                         @endforeach
@@ -70,9 +70,9 @@
                     <x-forms.input-error field="employmentType" input-id="employmentType" />
                 </div>
                 <div>
-                    <x-forms.input-label for="place" :value="__('recruitment-applicant.offers.place')" />
-                    <select id="place" wire:model="place" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
-                        <option value="">—</option>
+                    <x-forms.input-label for="place" required :value="__('recruitment-applicant.offers.place')" />
+                    <select id="place" wire:model="place" required class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
+                        <option value="">{{ __('recruitment.choose') }}</option>
                         @foreach ($places as $value)
                             <option value="{{ $value }}">{{ OfferTerms::place($value) }}</option>
                         @endforeach
@@ -85,18 +85,18 @@
                     <x-forms.input-error field="startDate" input-id="startDate" />
                 </div>
                 <div>
-                    <x-forms.input-label for="endDate" :value="__('recruitment-applicant.offers.end_date')" />
-                    <x-forms.input id="endDate" type="date" model="endDate" />
+                    <x-forms.input-label for="endDate" required :value="__('recruitment-applicant.offers.end_date')" />
+                    <x-forms.input id="endDate" type="date" model="endDate" required />
                     <x-forms.input-error field="endDate" input-id="endDate" />
                 </div>
                 <div>
-                    <x-forms.input-label for="probationDays" required :value="__('recruitment-applicant.offers.probation_days')" />
-                    <x-forms.input id="probationDays" type="number" model="probationDays" required />
+                    <x-forms.input-label for="probationDays" :value="__('recruitment-applicant.offers.probation_days')" />
+                    <x-forms.input id="probationDays" type="number" model="probationDays" min="0" />
                     <x-forms.input-error field="probationDays" input-id="probationDays" />
                 </div>
                 <div>
-                    <x-forms.input-label for="weeklyHours" :value="__('recruitment-applicant.offers.weekly_hours')" />
-                    <x-forms.input id="weeklyHours" type="number" model="weeklyHours" />
+                    <x-forms.input-label for="weeklyHours" required :value="__('recruitment-applicant.offers.weekly_hours')" />
+                    <x-forms.input id="weeklyHours" type="number" model="weeklyHours" required />
                     <x-forms.input-error field="weeklyHours" input-id="weeklyHours" />
                 </div>
             </div>
