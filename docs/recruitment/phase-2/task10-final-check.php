@@ -100,6 +100,10 @@ $realPendingBefore = $realPending?->only(['status', 'attempt_count', 'employee_i
 DB::beginTransaction();
 
 try {
+
+    // Offers accepted in the app keep their seats on the second vacancy; the
+    // checks get their own room on top of them (rolled back with the rest).
+    $heldOnOther = Offer::query()->where('vacancy_id', $otherTemplate->vacancy_id)->where('status', 'accepted')->count();
     auth()->login($hr);
 
     // A fresh selected application on a campaign, taken to an accepted offer.
@@ -202,7 +206,7 @@ try {
 
     echo PHP_EOL.'الأمان والصلاحيات — security'.PHP_EOL;
     // The second vacancy needs four people: four candidates can accept.
-    Vacancy::whereKey($otherTemplate->vacancy_id)->update(['needed_count' => 4]);
+    Vacancy::whereKey($otherTemplate->vacancy_id)->update(['needed_count' => 4 + $heldOnOther]);
     $c3 = $accepted('Check Three', $otherTemplate);
     $check('Conversion needs a clear permission (convert-hires + contracts.create + pay visibility)', $hr->can('convert', $c3)
         && ! $judy->can('convert', $c3) && ! $rafi->can('convert', $c3)
@@ -229,7 +233,7 @@ try {
         && Employee::count() === $employeesBefore && $c4->employee_id === $phoneEmployee->id, 'matched '.$phoneEmployee->username.' by name and phone');
 
     // The identity rule: the same phone under another name is a warning, never a link.
-    Vacancy::whereKey($otherTemplate->vacancy_id)->update(['needed_count' => 5]); // one more accepted offer on it, rolled back
+    Vacancy::whereKey($otherTemplate->vacancy_id)->update(['needed_count' => 5 + $heldOnOther]); // one more accepted offer on it, rolled back
     $c6 = $accepted('Check Six', $otherTemplate, [], $phone);
     $c6Matches = $conversions->matches($c6);
     $c6Html = Livewire::actingAs($hr)->test(Convert::class, ['offerId' => $c6->job_offer_id])->html();
