@@ -3,12 +3,15 @@
 namespace Tests\Feature\Recruitment;
 
 use App\Enums\RecruitmentApplicationStatus as AppStatus;
+use App\Enums\RecruitmentEvaluationRecommendation as Recommendation;
 use App\Enums\RecruitmentInterviewStatus as Status;
 use App\Enums\RecruitmentInterviewType;
 use App\Jobs\SendRecruitmentInterviewNotice;
 use App\Livewire\Recruitment\Applicants\Show as ApplicantShow;
 use App\Livewire\Recruitment\Interviews\Board;
 use App\Livewire\Recruitment\Interviews\Calendar;
+use App\Livewire\Recruitment\Interviews\EvaluationForm;
+use App\Livewire\Recruitment\Interviews\EvaluationSummary;
 use App\Livewire\Recruitment\Interviews\Form;
 use App\Livewire\Recruitment\Interviews\Index;
 use App\Livewire\Recruitment\Interviews\Show;
@@ -23,6 +26,7 @@ use App\Models\RecruitmentInterviewParticipant as Participant;
 use App\Models\User;
 use App\Notifications\RecruitmentInterviewParticipantNotice as ParticipantNotice;
 use App\Services\RecruitmentApplicationStatusService;
+use App\Services\RecruitmentInterviewEvaluationService;
 use App\Services\RecruitmentInterviewNoticeService;
 use App\Services\RecruitmentInterviewSchedulingService;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -1028,6 +1032,143 @@ class RecruitmentInterviewTest extends TestCase
         Queue::assertNotPushed(SendRecruitmentInterviewNotice::class, fn (SendRecruitmentInterviewNotice $job) => $job->noticeId === $fresh->id);
     }
 
+    /** A shortlisted application in $city (Homs by default), moved there through the decision service. */
+    // ------------------------------------------------------------------
+    // The manager who requested the position (read-only viewer)
+    // ------------------------------------------------------------------
+
+    /**
+     * The requester follows every interview of the position he asked for —
+     * every candidate, every round — read-only: the page, the meeting link,
+     * the applicant button and every evaluation, but no HR action and no
+     * evaluation form of his own.
+     */
+    public function test_the_requester_follows_every_interview_of_his_position_read_only(): void
+    {
+        $first = $this->shortlisted('Candidate One');
+        $second = $this->sameCampaign($first, 'Candidate Two');
+        $requester = $this->requesterOf($first);
+        $one = $this->schedule($first, ['participants' => [$this->interviewer->id => 'interviewer']]);
+        $two = $this->schedule($second);
+        $round2 = $this->schedule($first->fresh(), ['type' => RecruitmentInterviewType::Final, 'startsAt' => '2026-10-09T10:00']);
+        $elsewhere = $this->schedule($this->shortlisted('Someone Else'));
+
+        $this->assertTrue($requester->can('viewAny', RecruitmentInterview::class));
+        $this->assertEqualsCanonicalizing([$one->id, $two->id, $round2->id], RecruitmentInterview::query()->visibleTo($requester)->pluck('id')->all());
+
+        $this->actingAs($requester);
+        $this->get(route('recruitment.interviews.index'))->assertOk();
+        Livewire::test(Show::class, ['interviewId' => $one->id])
+            ->assertSee(self::MEETING_URL)
+            ->assertSee(route('recruitment.applicants.show', ['applicantId' => $first->applicant_id]))
+            ->assertDontSeeHtml('id="interview-action-cancel"')
+            ->assertSeeLivewire(EvaluationSummary::class)
+            ->call('beginCancel')->assertForbidden();
+        Livewire::test(EvaluationForm::class, ['interviewId' => $one->id])->assertDontSee(__('recruitment-applicant.evaluations.my_title'));
+        $this->get(route('recruitment.interviews.edit', ['interviewId' => $one->id]))->assertForbidden();
+        $this->get(route('recruitment.interviews.create', ['applicationId' => $first->id]))->assertForbidden();
+
+        // Every HR action is refused by the service as well, whatever the page shows.
+        $at = $one->scheduled_at->toIso8601String();
+        $this->assertThrows(fn () => $this->service()->schedule($requester, $first->fresh(), $this->input()), AuthorizationException::class);
+        $this->assertThrows(fn () => $this->service()->cancel($requester, $one, $one->status, $at, 'candidate_declined', null), AuthorizationException::class);
+        $this->assertThrows(fn () => $this->service()->update($requester, $one, $one->status, $at, $this->input(['startsAt' => '2026-10-10T10:00']), 'A reason long enough.'), AuthorizationException::class);
+        $this->assertThrows(fn () => $this->service()->recordOutcome($requester, $one, $one->status, $at, Status::Completed, null), AuthorizationException::class);
+
+        // Every evaluation, read-only; no form of his own to fill in.
+        $this->travelTo(Carbon::parse('2026-10-08 11:00:00'));
+        $this->evaluations()->submit($this->interviewer, $one->fresh(), ['recommendation' => Recommendation::No, 'notes' => self::SECRET_EVALUATION], null);
+        $evaluation = RecruitmentInterviewEvaluation::query()->sole();
+        Livewire::test(EvaluationSummary::class, ['interviewId' => $one->id])
+            ->assertSee(self::SECRET_EVALUATION)
+            ->assertDontSeeHtml('id="evaluation-'.$evaluation->id.'-correct"')
+            ->call('beginCorrect', $evaluation->id)->assertForbidden();
+        $this->assertFalse($requester->can('correct', $evaluation));
+        $this->assertThrows(fn () => $this->evaluations()->submit($requester, $one->fresh(), ['recommendation' => Recommendation::Yes], null), AuthorizationException::class);
+
+        // Another position's interview stays out of reach.
+        Livewire::test(Show::class, ['interviewId' => $elsewhere->id])->assertNotFound();
+    }
+
+    /** HR opened the position directly on his behalf: actual_requester_user_id makes him the requester. */
+    public function test_the_manager_a_position_was_opened_for_is_its_requester(): void
+    {
+        $application = $this->shortlisted();
+        $interview = $this->schedule($application);
+        $manager = $this->makeUser($this->homs, 'manager');
+        $this->assertFalse($manager->can('view', $interview));
+
+        $application->vacancy->createdFromRequest->forceFill(['actual_requester_user_id' => $manager->id])->save();
+
+        $this->assertTrue($manager->can('view', $interview->fresh()));
+        $this->assertTrue($manager->can('viewEvaluations', $interview->fresh()));
+    }
+
+    /**
+     * Requester and participant at once: both sets of rights. He follows the
+     * whole position and writes his own evaluation while evaluation is open —
+     * never anyone else's, and not after it closes.
+     */
+    public function test_a_requester_on_the_panel_has_both_sets_of_rights(): void
+    {
+        $application = $this->shortlisted();
+        $requester = $this->requesterOf($application);
+        $interview = $this->schedule($application, ['participants' => [$requester->id => 'interviewer', $this->interviewer->id => 'interviewer']]);
+        $other = $this->schedule($this->sameCampaign($application, 'Candidate Two'));
+
+        $this->assertEqualsCanonicalizing([$interview->id, $other->id], RecruitmentInterview::query()->visibleTo($requester)->pluck('id')->all());
+
+        $this->travelTo(Carbon::parse('2026-10-08 11:00:00'));
+        $theirs = $this->evaluations()->submit($this->interviewer, $interview->fresh(), ['recommendation' => Recommendation::Maybe], null);
+
+        $this->actingAs($requester);
+        Livewire::test(EvaluationForm::class, ['interviewId' => $interview->id])
+            ->set('recommendation', Recommendation::Yes)
+            ->set('pros', 'Strong on budgets')
+            ->call('save')
+            ->assertHasNoErrors();
+        $own = RecruitmentInterviewEvaluation::query()->where('reviewer_user_id', $requester->id)->sole();
+        Livewire::test(EvaluationForm::class, ['interviewId' => $interview->id])->assertSee(__('recruitment-applicant.evaluations.my_title'));
+        Livewire::test(Show::class, ['interviewId' => $interview->id])
+            ->assertSeeLivewire(EvaluationSummary::class)
+            ->assertDontSeeHtml('id="interview-action-cancel"');
+        $this->assertTrue($requester->can('update', $own));
+        $this->assertFalse($requester->can('update', $theirs));
+        $this->assertFalse($requester->can('correct', $theirs));
+
+        // Closed: no more saving through the form, for him as for everyone.
+        $held = $this->service()->recordOutcome($this->hr, $interview->fresh(), $interview->fresh()->status, $interview->scheduled_at->toIso8601String(), Status::Completed, null);
+        $this->evaluations()->close($this->hr, $held->fresh(), Status::Completed);
+        $this->assertThrows(fn () => $this->evaluations()->submit($requester, $interview->fresh(), ['recommendation' => Recommendation::No], $own->version), ValidationException::class);
+    }
+
+    /**
+     * A participant who is neither HR nor the requester: only his own
+     * interview and his own evaluation — no summary, no applicant button.
+     * Another manager reaches nothing.
+     */
+    public function test_a_participant_only_and_another_manager_stay_within_option_one(): void
+    {
+        $application = $this->shortlisted();
+        $interview = $this->schedule($application, ['participants' => [$this->interviewer->id => 'interviewer']]);
+        $sameCampaign = $this->schedule($this->sameCampaign($application, 'Candidate Two'));
+
+        $this->assertSame([$interview->id], RecruitmentInterview::query()->visibleTo($this->interviewer)->pluck('id')->all());
+        $this->actingAs($this->interviewer);
+        Livewire::test(Show::class, ['interviewId' => $interview->id])
+            ->assertSee(self::MEETING_URL)
+            ->assertDontSee(route('recruitment.applicants.show', ['applicantId' => $application->applicant_id]))
+            ->assertDontSeeLivewire(EvaluationSummary::class);
+        Livewire::test(EvaluationSummary::class, ['interviewId' => $interview->id])->assertForbidden();
+        Livewire::test(Show::class, ['interviewId' => $sameCampaign->id])->assertNotFound();
+
+        $manager = $this->makeUser($this->homs, 'manager');
+        $this->actingAs($manager);
+        $this->assertFalse($manager->can('viewAny', RecruitmentInterview::class));
+        Livewire::test(Show::class, ['interviewId' => $interview->id])->assertNotFound();
+        Livewire::test(EvaluationSummary::class, ['interviewId' => $interview->id])->assertNotFound();
+    }
+
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
@@ -1056,7 +1197,28 @@ class RecruitmentInterviewTest extends TestCase
         return app(RecruitmentInterviewSchedulingService::class);
     }
 
-    /** A shortlisted application in $city (Homs by default), moved there through the decision service. */
+    /** The user who raised the request behind this application's vacancy. */
+    private function requesterOf(RecruitmentApplication $application): User
+    {
+        return User::query()->findOrFail($application->vacancy->createdFromRequest->requester_user_id);
+    }
+
+    /** Another shortlisted candidate on the same campaign — the same position, the same requester. */
+    private function sameCampaign(RecruitmentApplication $application, string $name): RecruitmentApplication
+    {
+        $other = $this->applyTo($application->campaign, $this->makeApplicant($name));
+        $statuses = app(RecruitmentApplicationStatusService::class);
+        $statuses->change($this->hr, $other, AppStatus::Submitted, AppStatus::UnderReview, null);
+        $statuses->change($this->hr, $other->fresh(), AppStatus::UnderReview, AppStatus::Shortlisted, null);
+
+        return $other->fresh();
+    }
+
+    private function evaluations(): RecruitmentInterviewEvaluationService
+    {
+        return app(RecruitmentInterviewEvaluationService::class);
+    }
+
     private function shortlisted(string $name = 'Candidate One', ?City $city = null): RecruitmentApplication
     {
         $city ??= $this->homs;

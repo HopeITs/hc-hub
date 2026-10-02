@@ -150,7 +150,7 @@ class Show extends Component
             'interview' => $interview,
             'canManage' => $canManage,
             'evaluationDue' => $this->evaluationDue($interview),
-            'canSeeApplicant' => Gate::allows('view', $interview->application),
+            'canSeeApplicant' => Gate::allows('viewApplicant', $interview),
             // Rendered only when allowed; never stored on the component.
             'meetingUrl' => Gate::allows('viewMeetingLink', $interview) ? $interview->meeting_url : null,
             'notices' => $canManage ? $interview->notices()->latest('id')->get() : collect(),

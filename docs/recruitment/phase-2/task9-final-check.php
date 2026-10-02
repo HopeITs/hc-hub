@@ -89,6 +89,11 @@ DB::beginTransaction();
 $real = now();
 
 try {
+
+    // Offers accepted in the app keep their seats on the second vacancy; the
+    // checks get their own room on top of them (rolled back with the rest).
+    $heldOnOther = Offer::query()->where('vacancy_id', $otherTemplate->vacancy_id)->where('status', 'accepted')->count();
+    Vacancy::query()->whereKey($otherTemplate->vacancy_id)->increment('needed_count', $heldOnOther);
     auth()->login($hr);
 
     // A fresh application on the campaign's vacancy, moved to $to.

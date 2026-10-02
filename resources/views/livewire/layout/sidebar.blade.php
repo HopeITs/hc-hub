@@ -82,7 +82,7 @@
 
                     @php
                         // Task 7 (Team 2): participants see their interviews without any recruitment permission.
-                        $seesInterviews = auth()->user() && (auth()->user()->hasActivePermission('recruitment-applicants.view') || \App\Models\RecruitmentInterview::hasAnyFor(auth()->user()));
+                        $seesInterviews = (bool) auth()->user()?->can('viewAny', \App\Models\RecruitmentInterview::class);
                     @endphp
                     @if(auth()->user()?->hasActivePermission('recruitment-requests.view') || $canSeeRecruitmentApprovals || auth()->user()?->hasActivePermission('recruitment-campaigns.view') || auth()->user()?->hasActivePermission('recruitment-applicants.view') || auth()->user()?->hasActivePermission('recruitment-indicators.manage') || $seesInterviews)
                         {{-- Group: Recruitment --}}
