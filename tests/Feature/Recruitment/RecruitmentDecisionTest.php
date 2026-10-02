@@ -58,7 +58,7 @@ class RecruitmentDecisionTest extends TestCase
     // Single decisions
     // ------------------------------------------------------------------
 
-    public function test_a_candidate_must_be_reviewed_before_shortlisting_and_interviewed_before_acceptance(): void
+    public function test_a_candidate_can_be_shortlisted_directly_but_must_be_interviewed_before_acceptance(): void
     {
         $applicant = $this->makeApplicant();
         $application = $this->applyTo($this->makeCampaignIn($this->homs), $applicant);
@@ -66,11 +66,6 @@ class RecruitmentDecisionTest extends TestCase
         $this->actingAs($hr);
 
         Livewire::test(Show::class, ['applicantId' => $applicant->id])
-            ->assertDontSee(__('recruitment-applicant.decisions.actions.shortlisted'))
-            ->call('beginStatusChange', $application->id, Status::UnderReview)
-            ->set('statusReason', 'Initial review of the submitted application.')
-            ->call('changeStatus')
-            ->assertHasNoErrors()
             ->call('beginStatusChange', $application->id, Status::Shortlisted)
             ->set('statusReason', 'Candidate meets the requirements for an interview.')
             ->call('changeStatus')
@@ -81,7 +76,7 @@ class RecruitmentDecisionTest extends TestCase
 
         $this->assertSame(Status::Shortlisted, $application->fresh()->status);
         $this->assertSame(
-            [[Status::Submitted, Status::UnderReview], [Status::UnderReview, Status::Shortlisted]],
+            [[Status::Submitted, Status::Shortlisted]],
             RecruitmentApplicationDecision::query()->orderBy('id')->get()
                 ->map(fn ($decision): array => [$decision->from_status, $decision->to_status])->all(),
         );
@@ -105,6 +100,28 @@ class RecruitmentDecisionTest extends TestCase
         // The service refuses too, whoever calls it.
         $this->expectException(AuthorizationException::class);
         app(RecruitmentApplicationStatusService::class)->change($hr, $application, Status::Interviewed, Status::Selected, null);
+    }
+
+    public function test_selected_applications_move_forward_to_offer_not_back_to_screening(): void
+    {
+        $applicant = $this->makeApplicant();
+        $application = $this->applyTo($this->makeCampaignIn($this->homs), $applicant, ['status' => Status::Interviewed]);
+        $hr = $this->hr($this->homs);
+        $statuses = app(RecruitmentApplicationStatusService::class);
+        $this->actingAs($hr);
+
+        $statuses->change($hr, $application, Status::Interviewed, Status::Selected, null);
+        $application->refresh();
+
+        $this->assertSame(Status::Selected, $application->status);
+        $this->assertSame([], $statuses->targetsFor($hr, $application));
+
+        Livewire::test(Show::class, ['applicantId' => $applicant->id])
+            ->assertSee(__('recruitment-applicant.offers.create'))
+            ->assertDontSee(__('recruitment-applicant.decisions.actions.shortlisted'))
+            ->assertDontSee(__('recruitment-applicant.decisions.actions.rejected'))
+            ->call('beginStatusChange', $application->id, Status::Rejected)
+            ->assertForbidden();
     }
 
     public function test_rejecting_requires_a_configured_reason(): void
@@ -139,7 +156,7 @@ class RecruitmentDecisionTest extends TestCase
         // A tampered request cannot swap the target the button fixed.
         try {
             Livewire::test(Show::class, ['applicantId' => $applicant->id])
-                ->call('beginStatusChange', $application->id, Status::UnderReview)
+                ->call('beginStatusChange', $application->id, Status::Shortlisted)
                 ->set('statusTarget', Status::Hired);
             $this->fail('statusTarget must be locked.');
         } catch (CannotUpdateLockedPropertyException) {
@@ -187,8 +204,8 @@ class RecruitmentDecisionTest extends TestCase
         $this->assertSame(RecruitmentRejectionNotice::STATUS_SENT, $application->rejectionNotice()->sole()->status);
 
         // Reopen and reject again: a second decision, but no second email.
-        $statuses->change($hr, $application, Status::Rejected, Status::UnderReview, 'New references arrived for review');
-        $statuses->change($hr, $application, Status::UnderReview, Status::Rejected, null, 'stronger_candidates', notify: true);
+        $statuses->change($hr, $application, Status::Rejected, Status::Submitted, 'New references arrived for review');
+        $statuses->change($hr, $application, Status::Submitted, Status::Rejected, null, 'stronger_candidates', notify: true);
         $statuses->bulkReject($hr, [$application->id], 'stronger_candidates', null, notify: true);
 
         Mail::assertSentCount(1);
@@ -248,7 +265,7 @@ class RecruitmentDecisionTest extends TestCase
         $statuses->change($hr, $application, Status::Submitted, Status::Rejected, null, 'position_filled', notify: true);
         Queue::assertPushed(SendRecruitmentRejectionNotice::class, 1);
 
-        $statuses->change($hr, $application, Status::Rejected, Status::UnderReview, 'Rejected by mistake, reviewing again');
+        $statuses->change($hr, $application, Status::Rejected, Status::Submitted, 'Rejected by mistake, reviewing again');
         app()->call([new SendRecruitmentRejectionNotice($application->rejectionNotice->id), 'handle']);
 
         Mail::assertNothingSent();

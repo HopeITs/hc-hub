@@ -204,8 +204,8 @@ class Position extends Model
     public function scopeInCities($query, array $cityIds)
     {
         return $query->where(function ($q) use ($cityIds) {
-            $q->whereIn('city_id', $cityIds)
-                ->orWhereHas('center', fn ($c) => $c->whereIn('city_id', $cityIds));
+            $q->whereIn($q->qualifyColumn('city_id'), $cityIds)
+                ->orWhereHas('center', fn ($c) => $c->whereIn($c->qualifyColumn('city_id'), $cityIds));
         });
     }
 

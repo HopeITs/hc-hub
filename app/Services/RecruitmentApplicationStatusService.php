@@ -89,22 +89,23 @@ class RecruitmentApplicationStatusService
 
     /** @var array<string, array<int, string>> */
     private const TRANSITIONS = [
-        // A submission must be reviewed before it can be shortlisted. This
-        // prevents a recruiter from skipping the initial assessment step.
-        Status::Submitted => [Status::UnderReview, Status::Rejected],
+        // HR now decides directly from a new submission: shortlist or reject.
+        Status::Submitted => [Status::Shortlisted, Status::Rejected],
+        // Legacy records may still be under review; let HR clear them forward.
         Status::UnderReview => [Status::Shortlisted, Status::Rejected],
         // Task 7: + InterviewScheduled (first interview scheduled).
         // Selection follows a completed interview; scheduling owns the move
         // into the interview state, and only Interviewed may be selected.
-        Status::Shortlisted => [Status::UnderReview, Status::Rejected, Status::InterviewScheduled],
+        Status::Shortlisted => [Status::Rejected, Status::InterviewScheduled],
         // Task 7: this state had no way out before. Interviewed / Shortlisted
         // are set by the interview service when the last open interview ends
         // or is cancelled; Rejected stays a manual screening decision.
         Status::InterviewScheduled => [Status::Interviewed, Status::Rejected, Status::Shortlisted],
         // Task 7: + InterviewScheduled (an additional interview).
         Status::Interviewed => [Status::Selected, Status::Rejected, Status::InterviewScheduled],
-        // Task 9: + OfferSent (the offer went to the candidate).
-        Status::Selected => [Status::Shortlisted, Status::Rejected, Status::OfferSent],
+        // Task 9: + OfferSent (the offer went to the candidate). Once selected,
+        // the manual decision panel stops; offer actions own the next moves.
+        Status::Selected => [Status::OfferSent],
         // Task 9: the offer statuses had no way in or out before. All three
         // moves out of OfferSent follow the offer; from OfferRejected a
         // revised offer can be sent, or HR rejects the candidate by hand.
@@ -112,7 +113,7 @@ class RecruitmentApplicationStatusService
         Status::OfferRejected => [Status::OfferSent, Status::Rejected],
         // Task 10: the accepted offer became an employee and a contract.
         Status::OfferAccepted => [Status::Hired],
-        Status::Rejected => [Status::UnderReview],
+        Status::Rejected => [Status::Submitted],
     ];
 
     /** @var array<int, array{0: string, 1: string}> [from, to] */

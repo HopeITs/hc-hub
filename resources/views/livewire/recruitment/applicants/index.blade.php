@@ -8,7 +8,6 @@
         $reviewStatuses = [
             ['status' => null, 'label' => __('recruitment-applicant.filters.all')],
             ['status' => \App\Enums\RecruitmentApplicationStatus::Submitted, 'label' => __('recruitment-applicant.statuses.submitted')],
-            ['status' => \App\Enums\RecruitmentApplicationStatus::UnderReview, 'label' => __('recruitment-applicant.statuses.under_review')],
             ['status' => \App\Enums\RecruitmentApplicationStatus::Shortlisted, 'label' => __('recruitment-applicant.statuses.shortlisted')],
             ['status' => \App\Enums\RecruitmentApplicationStatus::InterviewScheduled, 'label' => __('recruitment-applicant.statuses.interview_scheduled')],
             ['status' => \App\Enums\RecruitmentApplicationStatus::Interviewed, 'label' => __('recruitment-applicant.statuses.interviewed')],

@@ -145,8 +145,7 @@ class RecruitmentJobOfferTest extends TestCase
         $submitted = $this->applyTo($this->campaign, $this->makeApplicant('Submitted One'));
         $this->assertValidationError(fn () => $this->create($submitted), 'offer', 'not_selected');
 
-        $statuses->change($this->hr, $submitted, AppStatus::Submitted, AppStatus::UnderReview, null);
-        $statuses->change($this->hr, $submitted->fresh(), AppStatus::UnderReview, AppStatus::Shortlisted, null);
+        $statuses->change($this->hr, $submitted, AppStatus::Submitted, AppStatus::Shortlisted, null);
         $this->assertValidationError(fn () => $this->create($submitted->fresh()), 'offer', 'not_selected');
 
         $statuses->change($this->hr, $submitted->fresh(), AppStatus::Shortlisted, AppStatus::Rejected, null, 'position_filled');
@@ -332,33 +331,29 @@ class RecruitmentJobOfferTest extends TestCase
     // Exceptional cases
     // ------------------------------------------------------------------
 
-    /** edge: selected, then rejected (or sent back) before the offer was sent — the draft is cancelled. */
-    public function test_a_candidate_rejected_before_the_offer_is_sent_cancels_the_draft(): void
+    /** edge: once selected, the candidate moves through offers rather than back to screening. */
+    public function test_a_selected_candidate_cannot_be_manually_rejected_or_sent_back_before_offer(): void
     {
         $statuses = app(RecruitmentApplicationStatusService::class);
 
         $rejected = $this->selected('Rejected Later');
         $draft = $this->create($rejected);
-        $statuses->change($this->hr, $rejected->fresh(), AppStatus::Selected, AppStatus::Rejected, 'References came back negative.', 'stronger_candidates');
+        $this->assertValidationError(
+            fn () => $statuses->change($this->hr, $rejected->fresh(), AppStatus::Selected, AppStatus::Rejected, 'References came back negative.', 'stronger_candidates'),
+            'statusTarget',
+        );
 
         $draft->refresh();
-        $this->assertSame([Status::Cancelled, Offer::CANCEL_APPLICATION_CLOSED], [$draft->status, $draft->cancellation_reason]);
-        $this->assertSame(Version::STATUS_CANCELLED, $draft->currentVersion->status);
-        $this->assertValidationError(fn () => $this->send($draft), 'offer', 'not_sendable');
-
-        // A cancelled offer can normally be revised — but not once its
-        // candidate is rejected: no button that could only fail, no form.
-        $this->assertFalse($this->service()->canRevise($draft));
-        $this->assertValidationError(fn () => $this->revise($draft), 'offer', 'not_selected');
-        $this->actingAs($this->hr);
-        Livewire::test(Show::class, ['offerId' => $draft->id])
-            ->assertDontSee(route('recruitment.offers.revise', ['offerId' => $draft->id]));
-        Livewire::test(Revise::class, ['offerId' => $draft->id])->assertNotFound();
+        $this->assertSame([Status::Draft, null], [$draft->status, $draft->cancellation_reason]);
+        $this->assertSame(Version::STATUS_DRAFT, $draft->currentVersion->status);
 
         $backToShortlist = $this->selected('Back To Shortlist');
         $second = $this->create($backToShortlist);
-        $statuses->change($this->hr, $backToShortlist->fresh(), AppStatus::Selected, AppStatus::Shortlisted, 'Wait for the second round.');
-        $this->assertSame(Status::Cancelled, $second->fresh()->status);
+        $this->assertValidationError(
+            fn () => $statuses->change($this->hr, $backToShortlist->fresh(), AppStatus::Selected, AppStatus::Shortlisted, 'Wait for the second round.'),
+            'statusTarget',
+        );
+        $this->assertSame(Status::Draft, $second->fresh()->status);
     }
 
     /** edge + avoid: HR changes the salary — a draft is edited (audited); a sent offer is only ever revised into a new version. */

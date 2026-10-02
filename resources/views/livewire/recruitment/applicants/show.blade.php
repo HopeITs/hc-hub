@@ -9,6 +9,7 @@
     $states = app(\App\Services\HiringCampaignStateMachine::class);
     $profilePhoto = $applicant->employee?->avatar_url ?: asset('images/default-avatar.png');
     $currentCampaign = $currentApplication?->campaign;
+    $profileCity = $applicant->city ?? $currentCampaign?->vacancy?->createdFromRequest?->scopeCity;
     $currentTargets = $currentApplication ? ($statusTargets[$currentApplication->id] ?? []) : [];
     $nextTarget = $currentTargets[0] ?? null;
 @endphp
@@ -55,7 +56,7 @@
                         @endif
                         <div class="min-w-0">
                             <dt class="text-xs font-medium uppercase tracking-wide text-secondary-medium">{{ __('recruitment-applicant.city') }}</dt>
-                            <dd class="mt-1 font-medium">{{ $applicant->city?->name ?? '—' }}</dd>
+                            <dd class="mt-1 font-medium">{{ $profileCity?->name ?? '—' }}</dd>
                         </div>
                         <div class="min-w-0">
                             <dt class="text-xs font-medium uppercase tracking-wide text-secondary-medium">{{ __('recruitment-applicant.source') }}</dt>
@@ -87,6 +88,8 @@
                         <div class="mt-2 text-sm leading-6">
                             @if ($currentApplication->status === ApplicationStatus::Shortlisted)
                                 <a href="#application-{{ $currentApplication->id }}-interviews" class="font-semibold text-primary hover:underline">{{ __('recruitment-applicant.interviews.schedule') }}</a>
+                            @elseif ($currentApplication->status === ApplicationStatus::Selected)
+                                <a href="#application-{{ $currentApplication->id }}-interviews" class="font-semibold text-primary hover:underline">{{ __('recruitment-applicant.offers.create') }}</a>
                             @elseif ($currentApplication->status === ApplicationStatus::InterviewScheduled)
                                 <span class="text-secondary-medium">{{ __('recruitment-applicant.profile.awaiting_interview') }}</span>
                             @elseif ($nextTarget)

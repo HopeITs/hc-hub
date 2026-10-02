@@ -184,6 +184,17 @@ class RecruitmentApplicantProfileTest extends TestCase
             ->assertDontSee('Damascus-only remark');
     }
 
+    public function test_profile_uses_campaign_city_when_the_applicant_city_is_blank(): void
+    {
+        $applicant = $this->makeApplicant('Cityless Clara');
+        $this->applyTo($this->makeCampaignIn($this->homs, title: 'Homs Role'), $applicant);
+        $this->actingAs($this->hr($this->homs));
+
+        Livewire::test(Show::class, ['applicantId' => $applicant->id])
+            ->assertSee('Cityless Clara')
+            ->assertSee($this->homs->name);
+    }
+
     // ------------------------------------------------------------------
     // Notes
     // ------------------------------------------------------------------
@@ -327,7 +338,7 @@ class RecruitmentApplicantProfileTest extends TestCase
         $this->actingAs($this->hr($this->homs));
 
         $screen = Livewire::test(Show::class, ['applicantId' => $applicant->id])
-            ->call('beginStatusChange', $application->id, Status::UnderReview);
+            ->call('beginStatusChange', $application->id, Status::Shortlisted);
 
         // Someone else moved it while this screen was open.
         DB::table('recruitment_applications')->where('id', $application->id)->update(['status' => Status::Hired]);

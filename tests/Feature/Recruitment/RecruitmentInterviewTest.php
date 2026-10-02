@@ -542,11 +542,11 @@ class RecruitmentInterviewTest extends TestCase
             ->assertSee(__('recruitment-applicant.interviews.errors.application_rejected'))
             ->assertDontSee(route('recruitment.interviews.create', ['applicationId' => $application->id]));
 
-        // Still refused while only back under review.
-        $statuses->change($this->hr, $application->fresh(), AppStatus::Rejected, AppStatus::UnderReview, 'Reopened after a second look at the CV');
+        // Still refused while only reopened.
+        $statuses->change($this->hr, $application->fresh(), AppStatus::Rejected, AppStatus::Submitted, 'Reopened after a second look at the CV');
         $this->assertValidationError(fn () => $this->schedule($application->fresh()), 'interview');
 
-        $statuses->change($this->hr, $application->fresh(), AppStatus::UnderReview, AppStatus::Shortlisted, null);
+        $statuses->change($this->hr, $application->fresh(), AppStatus::Submitted, AppStatus::Shortlisted, null);
         $this->assertSame(Status::Scheduled, $this->schedule($application->fresh())->status);
         $this->assertSame(0, RecruitmentInterview::query()->where('status', '!=', Status::Scheduled)->count());
     }
@@ -837,8 +837,7 @@ class RecruitmentInterviewTest extends TestCase
 
         $this->assertSame(
             [
-                [AppStatus::Submitted, AppStatus::UnderReview],
-                [AppStatus::UnderReview, AppStatus::Shortlisted],
+                [AppStatus::Submitted, AppStatus::Shortlisted],
                 [AppStatus::Shortlisted, AppStatus::InterviewScheduled],
                 [AppStatus::InterviewScheduled, AppStatus::Interviewed],
                 [AppStatus::Interviewed, AppStatus::InterviewScheduled],
@@ -1226,8 +1225,7 @@ class RecruitmentInterviewTest extends TestCase
         $hr = $city->is($this->homs) ? $this->hr : $this->hr($city);
 
         $statuses = app(RecruitmentApplicationStatusService::class);
-        $statuses->change($hr, $application, AppStatus::Submitted, AppStatus::UnderReview, null);
-        $statuses->change($hr, $application->fresh(), AppStatus::UnderReview, AppStatus::Shortlisted, null);
+        $statuses->change($hr, $application, AppStatus::Submitted, AppStatus::Shortlisted, null);
 
         return $application->fresh();
     }
