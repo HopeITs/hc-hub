@@ -1006,4 +1006,20 @@ return [
             'unexpected' => 'The hire could not be completed and nothing was saved. Try again; if it keeps failing, contact the administrator.',
         ],
     ],
+
+    'endorsement' => [
+        'title'           => 'Shortlist Endorsement',
+        'endorse'         => 'Endorse',
+        'retract'         => 'Retract Endorsement',
+        'endorsed'        => 'Endorsement recorded.',
+        'retracted'       => 'Endorsement retracted.',
+        'role_hr'         => 'HR',
+        'role_manager'    => 'Manager',
+        'groups_label'    => 'Endorsement Groups',
+        'groups_hint'     => 'Filter applicants by how many votes they have received.',
+        'group_preferred' => 'Preferred (2 votes)',
+        'group_alternative' => 'Alternative (1 vote)',
+        'group_unvoted'   => 'No votes',
+        'clear_group'     => 'Clear filter',
+    ],
 ];

@@ -187,13 +187,17 @@ class RecruitmentScopeResolver
                 $this->governorateCityIds($user),
             ),
 
-            // A manager sees his own requests and those of the people who
-            // report to him — nothing wider, because nothing wider is his to
-            // decide.
-            RecruitmentScopeType::DirectReports => $query->whereIn(
-                'requester_user_id',
-                $this->visibleRequesterUserIds($user),
-            ),
+            // A manager sees:
+            //  a) his own requests and those of his direct reports, AND
+            //  b) any request where he is or was an assigned workflow approver.
+            // (b) ensures managers see applicants from campaigns raised by
+            // positions outside their reporting line when the workflow routed
+            // an approval step to them.
+            RecruitmentScopeType::DirectReports => $query->where(function (Builder $manager) use ($user): void {
+                $manager->whereIn('requester_user_id', $this->visibleRequesterUserIds($user))
+                    ->orWhereHas('workflowInstances.steps', fn (Builder $steps): Builder => $steps
+                        ->where('assigned_user_id', $user->getKey()));
+            }),
 
             // Fail closed. A user the resolver cannot place sees nothing, and
             // whereRaw('0 = 1') keeps that an empty result rather than an

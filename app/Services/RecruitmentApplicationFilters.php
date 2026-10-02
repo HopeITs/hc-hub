@@ -306,6 +306,28 @@ class RecruitmentApplicationFilters
             ->where('recruitment_applicant_files.file_type', RecruitmentApplicantFile::TYPE_CV);
     }
 
+    /**
+     * Filter by endorsement group: 'preferred' (>=2), 'alternative' (1), 'unvoted' (0).
+     *
+     * Uses a subquery count so no joins are needed on the main query.
+     */
+    public function endorsementGroup(Builder $query, mixed $group): Builder
+    {
+        if (! in_array($group, ['preferred', 'alternative', 'unvoted'], true)) {
+            return $query;
+        }
+
+        $endorsementCount = \App\Models\RecruitmentApplicationEndorsement::query()
+            ->selectRaw('count(*)')
+            ->whereColumn('application_id', $query->qualifyColumn('id'));
+
+        return match ($group) {
+            'preferred'   => $query->whereRaw('(' . $endorsementCount->toSql() . ') >= 2', $endorsementCount->getBindings()),
+            'alternative' => $query->whereRaw('(' . $endorsementCount->toSql() . ') = 1', $endorsementCount->getBindings()),
+            'unvoted'     => $query->whereRaw('(' . $endorsementCount->toSql() . ') = 0', $endorsementCount->getBindings()),
+        };
+    }
+
     /** @return array<int, int> positive integer ids, de-duplicated and capped */
     private function ids(mixed $value): array
     {

@@ -6,6 +6,7 @@ use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
 use App\Services\RecruitmentApplicationStatusService;
+use App\Services\RecruitmentEndorsementService;
 use App\Services\RecruitmentCvArchiveService;
 use App\Services\RecruitmentMatchingIndicators;
 use App\Services\RecruitmentScopeResolver;
@@ -192,11 +193,26 @@ class Show extends Component
         $this->dispatch('focus-element', id: $opener);
     }
 
+    public function endorse(int $applicationId, RecruitmentEndorsementService $endorsements): void
+    {
+        $application = $this->resolveApplication($applicationId);
+        $endorsements->endorse(auth()->user(), $application);
+        $this->toast(__('recruitment-applicant.endorsement.endorsed'));
+    }
+
+    public function retractEndorsement(int $applicationId, RecruitmentEndorsementService $endorsements): void
+    {
+        $application = $this->resolveApplication($applicationId);
+        $endorsements->retract(auth()->user(), $application);
+        $this->toast(__('recruitment-applicant.endorsement.retracted'));
+    }
+
     public function render(
         RecruitmentScopeResolver $scopes,
         RecruitmentApplicationStatusService $statuses,
         RecruitmentCvArchiveService $archive,
         RecruitmentMatchingIndicators $indicators,
+        RecruitmentEndorsementService $endorsements,
     ) {
         $user = auth()->user();
         $applicant = $this->resolveApplicant();
@@ -209,6 +225,7 @@ class Show extends Component
                 'files.archivedBy.profile',
                 'files.archiveNote',
                 'files.cvAnalysis',
+                'endorsements',
                 'decisions' => fn ($decisions) => $decisions->latest('decided_at')->latest('id'),
                 'decisions.decidedBy.profile',
                 'indicatorSnapshot',
@@ -244,6 +261,8 @@ class Show extends Component
             'archiveNeedsReason' => $archiveFile !== null && $archive->requiresReason($archiveFile),
             // Read-only: evaluating indicators never touches the application.
             'indicatorSets' => $indicators->evaluateMany($applications),
+            'endorsementService' => $endorsements,
+            'canEndorse' => $user->can('recruitment-applicants.endorse'),
         ]);
     }
 

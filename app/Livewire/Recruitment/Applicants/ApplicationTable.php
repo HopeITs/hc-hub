@@ -57,6 +57,10 @@ class ApplicationTable extends LivewireTable
     #[Reactive]
     public int|string|null $campaignFilter = null;
 
+    /** 'preferred' | 'alternative' | 'unvoted' | null */
+    #[Reactive]
+    public ?string $endorsementGroup = null;
+
     protected string $model = RecruitmentApplication::class;
 
     /** @var array<int, \App\Support\Recruitment\MatchingIndicatorSet> for the current page */
@@ -165,6 +169,7 @@ class ApplicationTable extends LivewireTable
 
         $filters->status($query, $this->stageStatus);
         $filters->campaign($query, $this->campaignFilter);
+        $filters->endorsementGroup($query, $this->endorsementGroup);
 
         return $query;
     }

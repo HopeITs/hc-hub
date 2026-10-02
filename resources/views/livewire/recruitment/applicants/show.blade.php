@@ -204,6 +204,44 @@
                     <livewire:recruitment.applicants.application-tags :application-id="$application->id" :key="'tags-'.$application->id" />
                 </div>
 
+                {{-- Endorsement: HR and managers each cast one shortlist vote. --}}
+                @if ($canEndorse)
+                @php
+                    $myEndorsement = $endorsementService->hasEndorsed(auth()->user(), $application);
+                    $endorsementCount = $application->endorsements_count ?? $application->endorsements()->count();
+                    $hrVoted    = $application->endorsements->contains('voter_role', 'hr');
+                    $mgVoted    = $application->endorsements->contains('voter_role', 'manager');
+                @endphp
+                <section class="mt-4 rounded-control border border-neutral-200 bg-white p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h4 class="font-semibold">{{ __('recruitment-applicant.endorsement.title') }}</h4>
+                            <div class="mt-1 flex flex-wrap gap-2 text-xs">
+                                <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 {{ $hrVoted ? 'bg-primary/10 text-primary' : 'bg-neutral-100 text-secondary-medium' }}">
+                                    <span>{{ __('recruitment-applicant.endorsement.role_hr') }}</span>
+                                    @if ($hrVoted) <svg class="size-3" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg> @endif
+                                </span>
+                                <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 {{ $mgVoted ? 'bg-primary/10 text-primary' : 'bg-neutral-100 text-secondary-medium' }}">
+                                    <span>{{ __('recruitment-applicant.endorsement.role_manager') }}</span>
+                                    @if ($mgVoted) <svg class="size-3" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg> @endif
+                                </span>
+                            </div>
+                        </div>
+                        @if ($myEndorsement)
+                            <button type="button" wire:click="retractEndorsement({{ $application->id }})"
+                                class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
+                                {{ __('recruitment-applicant.endorsement.retract') }}
+                            </button>
+                        @else
+                            <button type="button" wire:click="endorse({{ $application->id }})"
+                                class="cursor-pointer rounded-control border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                                {{ __('recruitment-applicant.endorsement.endorse') }}
+                            </button>
+                        @endif
+                    </div>
+                </section>
+                @endif
+
                 {{-- Decisions: one button per move this user may make. The button
                      only picks the target; the service checks it all again. --}}
                 @php $targets = $statusTargets[$application->id] ?? []; @endphp

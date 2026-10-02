@@ -69,6 +69,8 @@ return [
             'recruitment-vacancies.view', 'recruitment-campaigns.view',
             'recruitment-job-posts.view', 'recruitment-forms.view',
             'recruitment-links.view',
+            // General managers endorse applicants for their campaigns.
+            'recruitment-applicants.view', 'recruitment-applicants.endorse',
         ],
         'manager' => [
             'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
@@ -86,6 +88,9 @@ return [
             'recruitment-requests.submit', 'recruitment-requests.cancel',
             'recruitment-requests.approve', 'recruitment-requests.reject',
             'recruitment-requests.request-changes', 'recruitment-requests.export',
+            // Managers see and endorse applicants for their campaigns.
+            'recruitment-vacancies.view', 'recruitment-campaigns.view',
+            'recruitment-applicants.view', 'recruitment-applicants.endorse',
         ],
         'employee' => [
             'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
@@ -146,7 +151,7 @@ return [
          * campaign invites.
          */
         'recruitment-applicants' => [
-            'view', 'manage', 'download-cv', 'add-notes', 'delete-notes', 'archive-cv', 'change-status',
+            'view', 'manage', 'download-cv', 'add-notes', 'delete-notes', 'archive-cv', 'change-status', 'endorse',
             'tag', 'bulk-tag', 'manage-tags', 'accept', 'bulk-reject',
             // Phase 2 Task 7: create / edit / reschedule / cancel interviews
             // and record their outcome. Participants need no permission.
@@ -395,6 +400,8 @@ return [
         // Each method re-resolves its record through the applicant scope and
         // asks the policy again; the permission here is only the outer wall.
         'recruitment.applicants.show' => [
+            'endorse' => 'recruitment-applicants.endorse',
+            'retractEndorsement' => 'recruitment-applicants.endorse',
             'beginStatusChange' => 'recruitment-applicants.change-status',
             'changeStatus' => 'recruitment-applicants.change-status',
             'beginArchive' => 'recruitment-applicants.archive-cv',
