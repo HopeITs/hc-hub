@@ -84,6 +84,12 @@ class RecruitmentInterview extends Model
         return $this->currentParticipants()->where('user_id', $user->getKey())->exists();
     }
 
+    /** Did this user request the position this interview is for? See scopeRequestedBy(). */
+    public function isRequestedBy(User $user): bool
+    {
+        return static::query()->whereKey($this->getKey())->requestedBy($user)->exists();
+    }
+
     public function evaluationsClosedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'evaluations_closed_by_user_id');
@@ -110,9 +116,10 @@ class RecruitmentInterview extends Model
     }
 
     /**
-     * What a user may see: interviews they are currently on, plus — for
-     * anyone who can read applicants — every interview of an application in
-     * their recruitment scope.
+     * What a user may see: interviews they are currently on, every interview
+     * of a position they requested, plus — for anyone who can read
+     * applicants — every interview of an application in their recruitment
+     * scope. The three add up; none takes away from another.
      */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
@@ -121,6 +128,8 @@ class RecruitmentInterview extends Model
                 'currentParticipants',
                 fn (Builder $participants): Builder => $participants->where('user_id', $user->getKey()),
             );
+
+            $visible->orWhere(fn (Builder $requested): Builder => $requested->requestedBy($user));
 
             if ($user->hasActivePermission('recruitment-applicants.view')) {
                 $visible->orWhereHas(
@@ -194,6 +203,21 @@ class RecruitmentInterview extends Model
             ->where($query->qualifyColumn('scheduled_at'), '<=', now())
             ->evaluationsClosed(false)
             ->whereDoesntHave('evaluations', fn (Builder $evaluations): Builder => $evaluations->where('reviewer_user_id', $user->getKey()));
+    }
+
+    /**
+     * The requester rule, in one place: interviews of a position this user
+     * asked for — he raised the request (requester_user_id), or HR opened it
+     * directly on his behalf (actual_requester_user_id). Not his line manager.
+     * A requester follows those interviews read-only; what he may do is the
+     * policy's call.
+     */
+    public function scopeRequestedBy(Builder $query, User $user): Builder
+    {
+        return $query->whereHas('application.vacancy.createdFromRequest', fn (Builder $requests): Builder => $requests
+            ->where(fn (Builder $requester): Builder => $requester
+                ->where($requester->qualifyColumn('requester_user_id'), $user->getKey())
+                ->orWhere($requester->qualifyColumn('actual_requester_user_id'), $user->getKey())));
     }
 
     /** For the sidebar: is this user on any interview at all? */

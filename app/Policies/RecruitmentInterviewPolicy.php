@@ -14,11 +14,15 @@ use App\Services\RecruitmentScopeResolver;
  * - Scheduling, editing, rescheduling, cancelling and recording an outcome:
  *   HR holding recruitment-applicants.schedule-interviews, on an application
  *   inside their recruitment scope. Nobody else, participants included.
- * - Seeing an interview: whoever is currently on it, or anyone who can read
- *   applicants and has the application in scope.
- * - The meeting link: whoever may manage the interview, or who is currently
- *   on it. An HR reader who is neither sees that the interview is online,
- *   not how to join it.
+ * - Seeing an interview: whoever is currently on it, the manager who
+ *   requested its position (RecruitmentInterview::scopeRequestedBy()), or
+ *   anyone who can read applicants and has the application in scope. These
+ *   add up: a requester who is also on the panel has both sets of rights.
+ * - The meeting link: whoever may manage the interview, is currently on it,
+ *   or requested its position. An HR reader who is none of these sees that
+ *   the interview is online, not how to join it.
+ * - Every evaluation and the summary: HR in scope, and the requester,
+ *   read-only — by ownership, not by a permission on the manager role.
  */
 class RecruitmentInterviewPolicy
 {
@@ -28,12 +32,13 @@ class RecruitmentInterviewPolicy
     public function viewAny(User $user): bool
     {
         return $user->hasActivePermission('recruitment-applicants.view')
-            || RecruitmentInterview::hasAnyFor($user);
+            || RecruitmentInterview::hasAnyFor($user)
+            || RecruitmentInterview::query()->requestedBy($user)->exists();
     }
 
     public function view(User $user, RecruitmentInterview $interview): bool
     {
-        if ($interview->isParticipant($user)) {
+        if ($interview->isParticipant($user) || $interview->isRequestedBy($user)) {
             return true;
         }
 
@@ -59,7 +64,20 @@ class RecruitmentInterviewPolicy
 
     public function viewMeetingLink(User $user, RecruitmentInterview $interview): bool
     {
-        return $this->manage($user, $interview) || $interview->isParticipant($user);
+        return $this->manage($user, $interview)
+            || $interview->isParticipant($user)
+            || $interview->isRequestedBy($user);
+    }
+
+    /**
+     * The link from the interview to the applicant page: HR who can read the
+     * application, and the requester. The applicant page keeps its own
+     * permission; this only decides whether the button is shown.
+     */
+    public function viewApplicant(User $user, RecruitmentInterview $interview): bool
+    {
+        return ($user->hasActivePermission('recruitment-applicants.view') && $this->inScope($user, $interview))
+            || $interview->isRequestedBy($user);
     }
 
     /**
@@ -77,12 +95,17 @@ class RecruitmentInterviewPolicy
                 ->exists();
     }
 
-    /** Task 8: the aggregated view of every reviewer's evaluation — HR in scope only. */
+    /**
+     * Task 8: the aggregated view of every reviewer's evaluation — HR in
+     * scope, and the requester of the position, read-only (correcting,
+     * withdrawing and closing keep their own HR checks).
+     */
     public function viewEvaluations(User $user, RecruitmentInterview $interview): bool
     {
-        return $user->hasActivePermission('recruitment-applicants.view-evaluations')
+        return ($user->hasActivePermission('recruitment-applicants.view-evaluations')
             && $user->hasActivePermission('recruitment-applicants.view')
-            && $this->inScope($user, $interview);
+            && $this->inScope($user, $interview))
+            || $interview->isRequestedBy($user);
     }
 
     /** Task 8: closing evaluation after completion is part of managing the interview. */
