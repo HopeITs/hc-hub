@@ -46,17 +46,16 @@ class Index extends Component
         // Endorsement group counts — only when a campaign is selected.
         $endorsementCounts = null;
         if ($this->activeCampaignId) {
-            $base = RecruitmentApplication::query()
+            $rows = RecruitmentApplication::query()
                 ->visibleTo($user)
                 ->where('campaign_id', $this->activeCampaignId)
-                ->withCount('endorsements');
-
-            $rows = $base->get(['id', 'endorsements_count']);
+                ->with('endorsements:id,application_id,voter_role')
+                ->get(['id']);
 
             $endorsementCounts = [
-                'preferred'   => $rows->where('endorsements_count', '>=', 2)->count(),
-                'alternative' => $rows->where('endorsements_count', 1)->count(),
-                'unvoted'     => $rows->where('endorsements_count', 0)->count(),
+                'preferred' => $rows->filter(fn (RecruitmentApplication $application): bool => $application->endorsements->pluck('voter_role')->unique()->count() >= 2)->count(),
+                'alternative' => $rows->filter(fn (RecruitmentApplication $application): bool => $application->endorsements->pluck('voter_role')->unique()->count() === 1)->count(),
+                'unvoted' => $rows->filter(fn (RecruitmentApplication $application): bool => $application->endorsements->pluck('voter_role')->unique()->count() === 0)->count(),
             ];
         }
 

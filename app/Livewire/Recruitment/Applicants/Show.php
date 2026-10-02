@@ -5,9 +5,10 @@ namespace App\Livewire\Recruitment\Applicants;
 use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
+use App\Services\RecruitmentApplicationFormService;
 use App\Services\RecruitmentApplicationStatusService;
-use App\Services\RecruitmentEndorsementService;
 use App\Services\RecruitmentCvArchiveService;
+use App\Services\RecruitmentEndorsementService;
 use App\Services\RecruitmentMatchingIndicators;
 use App\Services\RecruitmentScopeResolver;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -222,9 +223,12 @@ class Show extends Component
             ->with([
                 'campaign.vacancy.createdFromRequest.scopeCity',
                 'campaign.vacancy.position',
+                'formVersion',
+                'answers',
                 'files.archivedBy.profile',
                 'files.archiveNote',
                 'files.cvAnalysis',
+                'files.media',
                 'endorsements',
                 'decisions' => fn ($decisions) => $decisions->latest('decided_at')->latest('id'),
                 'decisions.decidedBy.profile',
@@ -254,6 +258,7 @@ class Show extends Component
             'isPreviousApplicant' => $totalApplications > 1,
             'orphanFiles' => $orphanFiles,
             'statusTargets' => $this->statusTargets($applications, $statuses),
+            'applicationAnswers' => $this->applicationAnswers($applications, app(RecruitmentApplicationFormService::class)),
             'statusNeedsReason' => $this->statusFrom !== null && $this->statusTarget !== ''
                 && $statuses->requiresReason($this->statusFrom, $this->statusTarget, $this->statusReasonCode ?: null),
             'rejectionReasons' => $statuses->rejectionReasons(),
@@ -262,8 +267,113 @@ class Show extends Component
             // Read-only: evaluating indicators never touches the application.
             'indicatorSets' => $indicators->evaluateMany($applications),
             'endorsementService' => $endorsements,
-            'canEndorse' => $user->can('recruitment-applicants.endorse'),
+            'canEndorse' => $user->can('recruitment-applicants.endorse')
+                && $endorsements->voterRole($user) !== null,
         ]);
+    }
+
+    /**
+     * @return array<int, array<int, array{key: string, label: string, answers: array<int, array{label: string, value: string}>}>>
+     */
+    private function applicationAnswers(Collection $applications, RecruitmentApplicationFormService $forms): array
+    {
+        $locale = app()->getLocale();
+
+        return $applications
+            ->mapWithKeys(fn (RecruitmentApplication $application): array => [
+                $application->getKey() => $this->answerSections($application, $forms, $locale),
+            ])
+            ->all();
+    }
+
+    /**
+     * @return array<int, array{key: string, label: string, answers: array<int, array{label: string, value: string}>}>
+     */
+    private function answerSections(RecruitmentApplication $application, RecruitmentApplicationFormService $forms, string $locale): array
+    {
+        $answers = $application->answers->keyBy('field_key');
+        $files = $application->files->groupBy('file_type');
+        $sections = [];
+
+        foreach ($forms->normalizeFields((array) ($application->formVersion?->fields_json ?? [])) as $field) {
+            if (in_array($field['key'], ['privacy_consent', 'response_copy'], true)) {
+                continue;
+            }
+
+            $sectionKey = (string) $field['section'];
+            $sections[$sectionKey] ??= [
+                'key' => $sectionKey,
+                'label' => $this->localized(
+                    RecruitmentApplicationFormService::SECTION_CATALOG[$sectionKey]['label'] ?? [],
+                    $locale,
+                ),
+                'answers' => [],
+            ];
+
+            $sections[$sectionKey]['answers'][] = [
+                'label' => $this->localized((array) $field['label'], $locale),
+                'value' => $field['type'] === 'file'
+                    ? $this->formatFiles($files->get($field['key'], collect()), $locale)
+                    : $this->formatAnswer($field, $answers->get($field['key'])?->answer_json['value'] ?? null, $locale),
+            ];
+        }
+
+        return array_values($sections);
+    }
+
+    /** @param array<string, mixed> $field */
+    private function formatAnswer(array $field, mixed $value, string $locale): string
+    {
+        if (is_bool($value)) {
+            return $value
+                ? __('recruitment-applicant.application_answers.yes')
+                : __('recruitment-applicant.application_answers.no');
+        }
+
+        if (is_array($value)) {
+            $formatted = collect($value)
+                ->map(fn (mixed $item): string => $this->formatOption((array) $field, $item, $locale))
+                ->filter(fn (string $item): bool => $item !== '')
+                ->implode(__('recruitment-applicant.list_separator'));
+
+            return $formatted !== '' ? $formatted : __('recruitment-applicant.application_answers.no_answer');
+        }
+
+        if (in_array($field['type'], ['select', 'radio', 'checkbox'], true)) {
+            $formatted = $this->formatOption($field, $value, $locale);
+
+            return $formatted !== '' ? $formatted : __('recruitment-applicant.application_answers.no_answer');
+        }
+
+        $formatted = trim((string) ($value ?? ''));
+
+        return $formatted !== '' ? $formatted : __('recruitment-applicant.application_answers.no_answer');
+    }
+
+    /** @param array<string, mixed> $field */
+    private function formatOption(array $field, mixed $value, string $locale): string
+    {
+        $option = collect($field['options'] ?? [])->firstWhere('value', $value);
+
+        return trim((string) ($option !== null
+            ? $this->localized((array) ($option['label'] ?? []), $locale)
+            : ($value ?? '')));
+    }
+
+    private function formatFiles(Collection $files, string $locale): string
+    {
+        $formatted = $files
+            ->map(fn (RecruitmentApplicantFile $file): string => (string) ($file->getFirstMedia('document')?->name ?: __('recruitment-applicant.application_answers.file_uploaded')))
+            ->filter(fn (string $file): bool => $file !== '')
+            ->implode(__('recruitment-applicant.list_separator'));
+
+        return $formatted !== '' ? $formatted : __('recruitment-applicant.application_answers.no_answer');
+    }
+
+    /** @param array<string, string> $text */
+    private function localized(array $text, string $locale): string
+    {
+        return (string) ($text[$locale] ?? $text['en'] ?? $text['ar'] ?? '');
     }
 
     private function closeStatusPanel(): void

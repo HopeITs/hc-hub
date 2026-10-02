@@ -165,7 +165,7 @@ class ApplicationTable extends LivewireTable
         $query = RecruitmentApplication::query()
             ->visibleTo(auth()->user())
             ->addSelect(['has_previous_application' => $filters->earlierApplication(RecruitmentApplication::query())])
-            ->with(['applicant', 'campaign.vacancy.position', 'cvFiles', 'tags']);
+            ->with(['applicant', 'campaign.vacancy.position', 'cvFiles', 'endorsements', 'tags']);
 
         $filters->status($query, $this->stageStatus);
         $filters->campaign($query, $this->campaignFilter);
@@ -244,6 +244,24 @@ class ApplicationTable extends LivewireTable
                     .RecruitmentApplicationStatus::classes($value).'">'.e(__('recruitment-applicant.statuses.'.$value)).'</span>')
                 ->asHtml(),
 
+            Column::make(__('recruitment-applicant.endorsement.column'), function (RecruitmentApplication $application): string {
+                $roles = $application->endorsements->pluck('voter_role')->unique()->values();
+                $count = $roles->count();
+                $group = match (true) {
+                    $count >= 2 => 'preferred',
+                    $count === 1 => 'alternative',
+                    default => 'unvoted',
+                };
+                $groupClasses = match ($group) {
+                    'preferred' => 'border-primary bg-primary text-white',
+                    'alternative' => 'border-primary bg-white text-primary',
+                    default => 'border-neutral-300 bg-neutral-100 text-secondary-dark',
+                };
+
+                return '<span class="recruitment-badge rounded-control border px-3 py-1 text-xs font-semibold '.$groupClasses.'">'
+                    .e(__('recruitment-applicant.endorsement.group_'.$group)).'</span>';
+            })->asHtml(),
+
             Column::make(__('recruitment-applicant.source'), 'applicant.source')
                 ->displayUsing(fn ($value): string => RecruitmentApplicant::sourceLabel($value)),
 
@@ -257,7 +275,7 @@ class ApplicationTable extends LivewireTable
             // A flag, never a decision: nothing is rejected for having applied before.
             Column::make(__('recruitment-applicant.previous_applicant'), function (RecruitmentApplication $application): string {
                 return $application->has_previous_application
-                    ? '<span class="recruitment-badge rounded-control bg-neutral-50 px-2 py-0.5 text-xs font-semibold text-neutral-800">'
+                    ? '<span class="recruitment-badge rounded-control bg-neutral-50 px-3 py-1 text-xs font-semibold text-neutral-800">'
                         .e(__('recruitment-applicant.previous_applicant_flag')).'</span>'
                     : '';
             })->asHtml(),

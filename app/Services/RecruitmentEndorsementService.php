@@ -9,7 +9,7 @@ use App\Models\User;
 /**
  * Manages endorsements ("shortlist votes") on recruitment applications.
  *
- * HR and managers each cast at most one endorsement per application. An
+ * Governorate HR and managers each cast at most one endorsement per application. An
  * application is "preferred" when both have endorsed it (2 votes), "alternative"
  * when exactly one has endorsed it (1 vote), and "unvoted" when neither has.
  *
@@ -20,13 +20,15 @@ use App\Models\User;
 class RecruitmentEndorsementService
 {
     public const ROLE_HR = 'hr';
+
     public const ROLE_MANAGER = 'manager';
 
     /**
      * Returns the voter role for this user, or null when they may not endorse.
      *
-     * Only HR (org-wide or city) and managers may endorse. Everyone else is
-     * refused before the DB is touched.
+     * Only governorate HR and managers may endorse. Organization-wide HR
+     * (HR-SYR) supervises the process but does not cast the governorate HR
+     * endorsement. Everyone else is refused before the DB is touched.
      */
     public function voterRole(User $user): ?string
     {
@@ -35,8 +37,7 @@ class RecruitmentEndorsementService
         $type = $scope->scopeType($user);
 
         return match (true) {
-            $type === \App\Enums\RecruitmentScopeType::Organization => self::ROLE_HR,
-            $type === \App\Enums\RecruitmentScopeType::City         => self::ROLE_HR,
+            $type === \App\Enums\RecruitmentScopeType::City => self::ROLE_HR,
             $type === \App\Enums\RecruitmentScopeType::DirectReports => self::ROLE_MANAGER,
             default => null,
         };
@@ -84,7 +85,7 @@ class RecruitmentEndorsementService
      */
     public function count(RecruitmentApplication $application): int
     {
-        return $application->endorsements()->count();
+        return $application->endorsements()->distinct('voter_role')->count('voter_role');
     }
 
     /**
