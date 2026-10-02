@@ -98,6 +98,9 @@ class PublicRecruitmentApplicationService
         $email = $this->links->normalizeEmail((string) ($validated['email'] ?? ''));
         $fullName = trim((string) ($validated['full_name'] ?? ''));
         $phone = $this->normalizePhone((string) ($validated['phone'] ?? ''));
+        $cityId = filter_var($input['city_id'] ?? null, FILTER_VALIDATE_INT, [
+            'options' => ['min_range' => 1],
+        ]) ?: null;
 
         if ($fullName === '') {
             throw PublicRecruitmentSubmissionException::because('missing_name');
@@ -121,6 +124,7 @@ class PublicRecruitmentApplicationService
                 $email,
                 $fullName,
                 $phone,
+                $cityId,
                 $input,
                 $ipAddress,
                 $userAgent,
@@ -175,6 +179,7 @@ class PublicRecruitmentApplicationService
                     'full_name' => $fullName,
                     'email_normalized' => $email,
                     'phone_normalized' => $phone,
+                    'city_id' => $cityId,
                     'identity_key_hash' => $identityHash,
                     'source' => $employee ? 'internal' : 'public_link',
                     'last_seen_at' => now(),
@@ -196,6 +201,7 @@ class PublicRecruitmentApplicationService
                     ...$this->identity->writableFields($applicant, [
                         'full_name' => $fullName,
                         'phone_normalized' => $phone,
+                        'city_id' => $cityId,
                         'privacy_notice_version' => $link->formVersion->privacy_notice_version,
                         'privacy_accepted_at' => now(),
                     ], verified: $employee !== null),
@@ -308,7 +314,7 @@ class PublicRecruitmentApplicationService
     /** @param array<string, mixed> $input */
     private function assertAllowedEnvelope(array $input): void
     {
-        $allowed = ['_token', 'answers', 'locale', 'website', 'submission_key'];
+        $allowed = ['_token', 'answers', 'city_id', 'locale', 'website', 'submission_key'];
         if (array_diff(array_keys($input), $allowed) !== [] || ! empty($input['website'])) {
             throw PublicRecruitmentSubmissionException::because('invalid_request');
         }

@@ -352,11 +352,30 @@ div:where(.swal2-container) button:where(.swal2-styled):where(.swal2-confirm) {
     .recruitment-action {
         display: inline-flex;
         min-width: 10rem;
-        min-height: 2.25rem;
+        height: 1.75rem;
+        min-height: 1.75rem;
         align-items: center;
         justify-content: center;
+        padding-top: 0;
+        padding-bottom: 0;
         text-align: center;
         white-space: nowrap;
+    }
+
+    .recruitment-applicants-page button:not(:disabled),
+    .recruitment-applicants-page [role='button'],
+    .recruitment-applicants-page summary,
+    .recruitment-applicants-page select:not(:disabled),
+    .recruitment-applicants-page a[href],
+    .recruitment-applicants-page input[type='checkbox']:not(:disabled),
+    .recruitment-applicants-page input[type='radio']:not(:disabled) {
+        cursor: pointer;
+    }
+
+    .recruitment-applicants-page button:disabled,
+    .recruitment-applicants-page select:disabled,
+    .recruitment-applicants-page input:disabled {
+        cursor: not-allowed;
     }
 
     clock-timepicker {

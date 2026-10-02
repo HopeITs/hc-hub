@@ -14,7 +14,8 @@
                         wire:key="request-view-{{ $view }}"
                         action="setRequestView"
                         :active="$viewFilter === $view"
-                        :active-tab="$view">
+                        :active-tab="$view"
+                        compact>
                         {{ __('recruitment.request_views.'.$view) }}
                         ({{ $viewCounts[$view] ?? 0 }})
                     </x-tabs-list-item>

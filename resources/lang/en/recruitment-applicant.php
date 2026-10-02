@@ -49,6 +49,19 @@ return [
         'no_action' => 'No action is currently needed.',
         'open' => 'Open profile',
         'applications_navigation' => 'Applications for this candidate',
+        'expand_application' => 'View details',
+        'collapse_application' => 'Hide details',
+    ],
+
+    'application_answers' => [
+        'title' => 'Application answers',
+        'hint' => 'The answers the applicant submitted in the application form, shown in the original form order.',
+        'form_version' => 'Form version :version',
+        'none' => 'No application answers were saved for this application.',
+        'no_answer' => 'No answer',
+        'file_uploaded' => 'File uploaded',
+        'yes' => 'Yes',
+        'no' => 'No',
     ],
 
     'statuses' => [
@@ -113,19 +126,22 @@ return [
 
     'decisions' => [
         'actions' => [
+            'submitted' => 'Reopen application',
             'under_review' => 'Move to review',
             'shortlisted' => 'Shortlist',
             'selected' => 'Accept',
             'rejected' => 'Reject',
-            'reopen' => 'Reopen for review',
+            'reopen' => 'Reopen application',
         ],
         'titles' => [
+            'submitted' => 'Reopen application',
             'under_review' => 'Move back to review',
             'shortlisted' => 'Shortlist candidate',
             'selected' => 'Accept candidate',
             'rejected' => 'Reject candidate',
         ],
         'confirm' => [
+            'submitted' => 'Confirm reopen',
             'under_review' => 'Confirm move to review',
             'shortlisted' => 'Confirm shortlist',
             'selected' => 'Confirm acceptance',
@@ -197,7 +213,7 @@ return [
         'no' => 'No',
         'footer' => 'This is an automated confirmation. Please keep this email for your records.',
         'signature' => 'Human Resources, Christian Hope Center',
-        'no_reply' => 'This is an automated confirmation. Please keep this email for your records. Please do not reply to this email.',
+        'no_reply' => 'Please do not reply to this email.',
         'org' => 'Christian Hope Center',
     ],
 
@@ -1002,5 +1018,24 @@ return [
             'contract_term_invalid' => 'The offer\'s term cannot be a contract: it must end after it starts, and within a year.',
             'unexpected' => 'The hire could not be completed and nothing was saved. Try again; if it keeps failing, contact the administrator.',
         ],
+    ],
+
+    'endorsement' => [
+        'title' => 'Shortlist Endorsement',
+        'column' => 'Shortlist votes',
+        'endorse' => 'Endorse',
+        'retract' => 'Retract Endorsement',
+        'endorsed' => 'Endorsement recorded.',
+        'retracted' => 'Endorsement retracted.',
+        'role_hr' => 'HR',
+        'role_manager' => 'Manager',
+        'role_hr_short' => 'HR',
+        'role_manager_short' => 'MGR',
+        'groups_label' => 'Endorsement Groups',
+        'groups_hint' => 'Filter applicants by shortlist votes for this campaign. Preferred means both HR and manager endorsed the candidate.',
+        'group_preferred' => 'Preferred list',
+        'group_alternative' => 'Alternative list',
+        'group_unvoted' => 'No votes',
+        'clear_group' => 'Clear filter',
     ],
 ];

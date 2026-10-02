@@ -16,7 +16,6 @@ use App\Models\User;
 use App\Services\RecruitmentApplicantNoteService;
 use App\Services\RecruitmentApplicationStatusService;
 use App\Services\RecruitmentMatchingIndicators;
-use App\Services\RecruitmentTagService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
@@ -58,11 +57,11 @@ class RecruitmentApplicantHardeningTest extends TestCase
         $applicant = $this->makeApplicant();
         $application = $this->applyTo($this->makeCampaignIn($this->homs), $applicant);
         $this->actingAs($this->hr($this->homs));
-        $opener = 'decide-'.$application->id.'-'.Status::UnderReview;
+        $opener = 'decide-'.$application->id.'-'.Status::Shortlisted;
 
         Livewire::test(Show::class, ['applicantId' => $applicant->id])
             ->assertSeeHtml('id="'.$opener.'"')
-            ->call('beginStatusChange', $application->id, Status::UnderReview)
+            ->call('beginStatusChange', $application->id, Status::Shortlisted)
             ->assertDispatched('focus-element', id: 'decision-panel-'.$application->id)
             ->assertSeeHtml('id="decision-panel-'.$application->id.'"')
             ->assertDontSeeHtml('id="'.$opener.'"')
@@ -79,14 +78,14 @@ class RecruitmentApplicantHardeningTest extends TestCase
         $this->actingAs($this->hr($this->homs));
 
         Livewire::test(Show::class, ['applicantId' => $applicant->id])
-            ->call('beginStatusChange', $application->id, Status::UnderReview)
+            ->call('beginStatusChange', $application->id, Status::Shortlisted)
             ->set('statusReason', 'Application is ready for the first recruiter review.')
             ->call('changeStatus')
             ->assertHasNoErrors()
             ->assertDispatched('focus-element', id: 'application-'.$application->id.'-title')
             ->assertSeeHtml('id="application-'.$application->id.'-title"');
 
-        $this->assertSame(Status::UnderReview, $application->fresh()->status);
+        $this->assertSame(Status::Shortlisted, $application->fresh()->status);
     }
 
     public function test_a_missing_rejection_reason_is_announced_on_its_field_and_keeps_focus(): void
@@ -125,8 +124,7 @@ class RecruitmentApplicantHardeningTest extends TestCase
         $application = $this->applyTo($this->makeCampaignIn($this->homs), $applicant);
         $hr = $this->hr($this->homs);
         $statuses = app(RecruitmentApplicationStatusService::class);
-        $statuses->change($hr, $application, Status::Submitted, Status::UnderReview, null);
-        $statuses->change($hr, $application->fresh(), Status::UnderReview, Status::Shortlisted, null);
+        $statuses->change($hr, $application, Status::Submitted, Status::Shortlisted, null);
         $this->actingAs($hr);
 
         foreach (['en' => 'to', 'ar' => 'إلى'] as $locale => $word) {
@@ -141,7 +139,7 @@ class RecruitmentApplicantHardeningTest extends TestCase
 
             // From-state, flipping arrow, spoken word, to-state — in that order.
             $this->assertMatchesRegularExpression(
-                '/'.preg_quote(__('recruitment-applicant.statuses.'.Status::UnderReview), '/')
+                '/'.preg_quote(__('recruitment-applicant.statuses.'.Status::Submitted), '/')
                 .'\s*<svg class="[^"]*rtl:-scale-x-100[^"]*"[^>]*aria-hidden="true">.*?<\/svg><span class="sr-only">'.preg_quote($word, '/').'<\/span>\s*'
                 .preg_quote(__('recruitment-applicant.statuses.'.Status::Shortlisted), '/').'/su',
                 $html,

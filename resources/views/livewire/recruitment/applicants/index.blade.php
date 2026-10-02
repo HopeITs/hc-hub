@@ -1,4 +1,4 @@
-<div class="space-y-6 p-4 sm:p-6">
+<div class="recruitment-applicants-page space-y-6 p-4 sm:p-6">
     <div>
         <h1 id="applicants-title" tabindex="-1" class="scroll-mt-24 text-h3 font-semibold">{{ __('recruitment-applicant.applicants') }}</h1>
         <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.applicants_hint') }}</p>
@@ -8,7 +8,6 @@
         $reviewStatuses = [
             ['status' => null, 'label' => __('recruitment-applicant.filters.all')],
             ['status' => \App\Enums\RecruitmentApplicationStatus::Submitted, 'label' => __('recruitment-applicant.statuses.submitted')],
-            ['status' => \App\Enums\RecruitmentApplicationStatus::UnderReview, 'label' => __('recruitment-applicant.statuses.under_review')],
             ['status' => \App\Enums\RecruitmentApplicationStatus::Shortlisted, 'label' => __('recruitment-applicant.statuses.shortlisted')],
             ['status' => \App\Enums\RecruitmentApplicationStatus::InterviewScheduled, 'label' => __('recruitment-applicant.statuses.interview_scheduled')],
             ['status' => \App\Enums\RecruitmentApplicationStatus::Interviewed, 'label' => __('recruitment-applicant.statuses.interviewed')],
@@ -23,7 +22,7 @@
             </div>
             <div class="w-full sm:w-72">
                 <label for="applicant-campaign-filter" class="mb-1 block text-sm font-semibold text-secondary-dark">{{ __('recruitment-applicant.filters.campaign') }}</label>
-                <select id="applicant-campaign-filter" wire:model.live="activeCampaignId" class="w-full rounded-control border-neutral-300 bg-white text-sm focus:border-primary focus:ring-primary">
+                <select id="applicant-campaign-filter" wire:model.live="activeCampaignId" class="w-full cursor-pointer rounded-control border-neutral-300 bg-white text-sm focus:border-primary focus:ring-primary">
                     <option value="">{{ __('recruitment-applicant.filters.all_campaigns') }}</option>
                     @foreach ($campaignOptions as $campaignId => $campaignLabel)
                         <option value="{{ $campaignId }}">{{ $campaignLabel }}</option>
@@ -35,24 +34,66 @@
                     @php
                         $status = $stage['status'];
                         $label = $stage['label'];
-                        $isActive = $activeStatus === $status;
+                        $isActive = $activeStatus === $status && $activeEndorsementGroup === null;
                         $count = $status === null ? $counts->sum() : (int) ($counts[$status] ?? 0);
                     @endphp
                     <button type="button" wire:click="filterByStatus(@js($status))"
-                        class="inline-flex min-h-9 items-center gap-1.5 rounded-control border px-3 py-1.5 text-sm font-semibold {{ $isActive ? 'border-primary bg-primary text-white' : 'border-neutral-300 bg-white text-secondary-dark hover:bg-neutral-50' }}">
+                        class="inline-flex h-7 min-h-7 cursor-pointer items-center gap-1.5 rounded-control border px-3 py-0 text-sm font-semibold {{ $isActive ? 'border-primary bg-primary text-white' : 'border-neutral-300 bg-white text-secondary-dark hover:bg-neutral-50' }}">
                         <span>{{ $label }}</span>
-                        <span class="rounded-full px-1.5 py-0.5 text-xs {{ $isActive ? 'bg-white/20 text-white' : 'bg-neutral-100 text-secondary-dark' }}">{{ $count }}</span>
+                        <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs {{ $isActive ? 'bg-white/20 text-white' : 'bg-neutral-100 text-secondary-dark' }}">{{ $count }}</span>
                     </button>
                 @endforeach
             </div>
         </div>
     </section>
 
+    {{-- Endorsement groups — only when a campaign is selected --}}
+    @if ($endorsementCounts !== null)
+    @php
+        $endorsementGroups = [
+            ['group' => 'preferred',   'label' => __('recruitment-applicant.endorsement.group_preferred'),   'color' => 'border-primary bg-white text-primary',          'activeColor' => 'border-primary bg-primary text-white'],
+            ['group' => 'alternative', 'label' => __('recruitment-applicant.endorsement.group_alternative'), 'color' => 'border-primary/50 bg-primary/5 text-primary',    'activeColor' => 'border-primary bg-primary text-white'],
+            ['group' => 'unvoted',     'label' => __('recruitment-applicant.endorsement.group_unvoted'),     'color' => 'border-neutral-300 bg-white text-secondary-dark', 'activeColor' => 'border-secondary-dark bg-secondary-dark text-white'],
+        ];
+    @endphp
+    <section aria-label="{{ __('recruitment-applicant.endorsement.groups_label') }}" class="rounded-surface border border-neutral-200 bg-white p-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <h2 class="font-semibold">{{ __('recruitment-applicant.endorsement.groups_label') }}</h2>
+                <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.endorsement.groups_hint') }}</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                @foreach ($endorsementGroups as $eg)
+                    @php
+                        $isActive = $activeEndorsementGroup === $eg['group'];
+                        $count = $endorsementCounts[$eg['group']] ?? 0;
+                    @endphp
+                    <button type="button" wire:click="filterByEndorsementGroup(@js($eg['group']))"
+                        class="inline-flex h-7 min-h-7 cursor-pointer items-center gap-1.5 rounded-control border px-3 py-0 text-sm font-semibold {{ $isActive ? $eg['activeColor'] : $eg['color'] }}">
+                        <span>{{ $eg['label'] }}</span>
+                        <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs {{ $isActive ? 'bg-white/20' : 'bg-black/5' }}">{{ $count }}</span>
+                    </button>
+                @endforeach
+                @if ($activeEndorsementGroup !== null)
+                    <button type="button" wire:click="filterByEndorsementGroup(null)"
+                        class="inline-flex h-7 min-h-7 cursor-pointer items-center rounded-control border border-neutral-300 bg-white px-3 py-0 text-sm text-secondary-dark hover:bg-neutral-50">
+                        {{ __('recruitment-applicant.endorsement.clear_group') }}
+                    </button>
+                @endif
+            </div>
+        </div>
+    </section>
+    @endif
+
     <livewire:recruitment.applicants.bulk-tags />
 
     <livewire:recruitment.applicants.bulk-reject />
 
-    <livewire:recruitment.applicants.application-table :stage-status="$activeStatus" :campaign-filter="$activeCampaignId" />
+    <livewire:recruitment.applicants.application-table
+        :stage-status="$activeStatus"
+        :campaign-filter="$activeCampaignId"
+        :endorsement-group="$activeEndorsementGroup"
+    />
 
     <livewire:recruitment.applicants.tag-manager />
 </div>

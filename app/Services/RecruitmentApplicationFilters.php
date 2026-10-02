@@ -298,6 +298,29 @@ class RecruitmentApplicationFilters
             ->limit(1);
     }
 
+    /**
+     * Filter by endorsement group: 'preferred' (HR + manager), 'alternative'
+     * (one side only), 'unvoted' (neither side).
+     *
+     * Uses a distinct-role subquery so two HR votes never count as preferred.
+     */
+    public function endorsementGroup(Builder $query, mixed $group): Builder
+    {
+        if (! in_array($group, ['preferred', 'alternative', 'unvoted'], true)) {
+            return $query;
+        }
+
+        $endorsementCount = \App\Models\RecruitmentApplicationEndorsement::query()
+            ->selectRaw('count(distinct voter_role)')
+            ->whereColumn('application_id', $query->qualifyColumn('id'));
+
+        return match ($group) {
+            'preferred' => $query->whereRaw('('.$endorsementCount->toSql().') >= 2', $endorsementCount->getBindings()),
+            'alternative' => $query->whereRaw('('.$endorsementCount->toSql().') = 1', $endorsementCount->getBindings()),
+            'unvoted' => $query->whereRaw('('.$endorsementCount->toSql().') = 0', $endorsementCount->getBindings()),
+        };
+    }
+
     private function cvFiles(Builder $query): QueryBuilder
     {
         return DB::table('recruitment_applicant_files')

@@ -20,10 +20,10 @@
         </div>
 
         {{-- The primary action stays here on both tabs, so it never moves as
-             the manager switches between the list and the chart. --}}
+            the manager switches between the list and the chart. --}}
         <div class="flex flex-wrap items-center gap-3">
             @can('create', \App\Models\RecruitmentRequest::class)
-                <x-primary-button :href="route('recruitment.requests.create')">
+                <x-primary-button :href="route('recruitment.requests.create')" class="!h-7 !py-0 !text-sm !shadow-none">
                     {{ __('recruitment.create') }}
                 </x-primary-button>
             @endcan
@@ -33,7 +33,7 @@
                  for the HR who holds this permission the direct opening is not
                  the lesser errand. --}}
             @can('directOpen', \App\Models\RecruitmentRequest::class)
-                <x-primary-button :href="route('recruitment.requests.direct-open')">
+                <x-primary-button :href="route('recruitment.requests.direct-open')" class="!h-7 !py-0 !text-sm !shadow-none">
                     {{ __('recruitment.direct_open.title') }}
                 </x-primary-button>
             @endcan
