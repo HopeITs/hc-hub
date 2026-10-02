@@ -502,6 +502,7 @@ return [
         'for_slot' => 'for :slot',
         'keep' => 'Keep interview',
         'join_meeting' => 'Join meeting',
+        'meeting_over' => 'Nothing left to join — the link is kept for the record.',
         'new_tab' => '(opens in a new tab)',
         'changed_to' => 'changed to',
         'reload' => 'Reload',
@@ -631,7 +632,6 @@ return [
         ],
 
         'errors' => [
-            'in_past' => 'The interview must start in the future.',
             'invalid_date' => 'Enter a valid date and time (YYYY-MM-DD HH:MM).',
             'type_required' => 'Choose the interview type.',
             'duration' => 'The duration must be between :min and :max minutes.',

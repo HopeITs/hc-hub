@@ -64,13 +64,17 @@
                         <span class="block font-normal wrap-break-word">{{ $interview->location_value }}</span>
                     @endif
                     @if ($interview->location_type === RecruitmentInterviewLocationType::Online)
-                        @if ($meetingUrl)
+                        @if ($meetingUrl && $canJoin)
                             <a href="{{ $meetingUrl }}" target="_blank" rel="noopener noreferrer" class="{{ $quiet }} mt-2 gap-1.5">
                                 {{ __('recruitment-applicant.interviews.join_meeting') }}
                                 <svg class="size-4 rtl:-scale-x-100" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4h5v5M16 4l-7 7M14 11.5V15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h3.5"/></svg>
                                 <span class="sr-only">{{ __('recruitment-applicant.interviews.new_tab') }}</span>
                             </a>
                             <span class="mt-1 block text-xs font-normal break-all text-secondary-medium" dir="ltr">{{ $meetingUrl }}</span>
+                        @elseif ($meetingUrl)
+                            {{-- Over: the link as plain text for the record, nothing to click. --}}
+                            <span class="mt-1 block text-xs font-normal break-all text-secondary-medium" dir="ltr">{{ $meetingUrl }}</span>
+                            <span class="block text-xs font-normal text-secondary-medium">{{ __('recruitment-applicant.interviews.meeting_over') }}</span>
                         @else
                             <span class="block text-xs font-normal text-secondary-medium">{{ __('recruitment-applicant.interviews.meeting_url_hidden') }}</span>
                         @endif

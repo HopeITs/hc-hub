@@ -492,18 +492,48 @@ class RecruitmentInterviewTest extends TestCase
     // Exceptional cases
     // ------------------------------------------------------------------
 
-    /** [14] A slot in the past is refused on create and on reschedule. */
-    public function test_a_slot_in_the_past_is_refused(): void
+    /**
+     * [14] HR picks any date and time, a past one included (an interview
+     * already held is recorded after the fact) — on create and on
+     * reschedule. The candidate is emailed only about a slot still ahead.
+     */
+    public function test_any_slot_may_be_chosen_and_only_a_future_one_is_emailed(): void
     {
         $application = $this->shortlisted();
 
-        $this->assertValidationError(fn () => $this->schedule($application, ['startsAt' => '2026-10-05T08:59']), 'startsAt');
-        $this->assertValidationError(fn () => $this->schedule($application, ['startsAt' => '2026-10-05T09:00']), 'startsAt');
-        $this->assertSame(0, RecruitmentInterview::query()->count());
+        $past = $this->schedule($application, ['startsAt' => '2026-10-01T10:00']);
+        $this->assertSame('2026-10-01 10:00', $past->fresh()->scheduled_at->format('Y-m-d H:i'));
+        $this->assertSame(0, $past->notices()->count(), 'No invitation to a slot already over.');
 
-        $interview = $this->schedule($application);
-        $this->assertValidationError(fn () => $this->reschedule($interview, ['startsAt' => '2026-10-01T10:00']), 'startsAt');
-        $this->assertSame('2026-10-08 10:00', $interview->fresh()->scheduled_at->format('Y-m-d H:i'));
+        $interview = $this->schedule($application->fresh());
+        $this->assertSame(1, $interview->notices()->where('kind', Notice::KIND_SCHEDULED)->count());
+        $this->reschedule($interview, ['startsAt' => '2026-10-02T10:00']);
+        $this->assertSame('2026-10-02 10:00', $interview->fresh()->scheduled_at->format('Y-m-d H:i'));
+        $this->assertSame(0, $interview->notices()->where('kind', Notice::KIND_RESCHEDULED)->count());
+
+        // A date that cannot exist is still refused, not rolled over.
+        $this->assertValidationError(fn () => $this->schedule($application->fresh(), ['startsAt' => '2026-02-30T10:00']), 'startsAt');
+    }
+
+    /**
+     * The join button is for an interview still to come. Once held,
+     * cancelled or a no-show the link stays as plain text, for the record.
+     */
+    public function test_the_join_button_goes_once_the_interview_is_over(): void
+    {
+        $interview = $this->schedule($this->shortlisted(), ['startsAt' => '2026-10-06T10:00']);
+        $this->actingAs($this->hr);
+        Livewire::test(Show::class, ['interviewId' => $interview->id])
+            ->assertSeeHtml('href="'.self::MEETING_URL.'"')
+            ->assertSee(__('recruitment-applicant.interviews.join_meeting'));
+
+        $this->travelTo(Carbon::parse('2026-10-06 11:00:00'));
+        $this->service()->recordOutcome($this->hr, $interview->fresh(), $interview->fresh()->status, $interview->scheduled_at->toIso8601String(), Status::Completed, null);
+        Livewire::test(Show::class, ['interviewId' => $interview->id])
+            ->assertSee(self::MEETING_URL)
+            ->assertSee(__('recruitment-applicant.interviews.meeting_over'))
+            ->assertDontSeeHtml('href="'.self::MEETING_URL.'"')
+            ->assertDontSee(__('recruitment-applicant.interviews.join_meeting'));
     }
 
     /** [15] An inactive employee cannot be added; one who becomes inactive stays on but is no longer notified. */
