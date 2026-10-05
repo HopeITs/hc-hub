@@ -50,6 +50,23 @@ class InviteTable extends LivewireTable
             ->show();
     }
 
+    public function sendInvite(int $id): void
+    {
+        $invite = RecruitmentCampaignInvite::query()
+            ->where('campaign_id', $this->campaignId)
+            ->findOrFail($id);
+
+        try {
+            app(RecruitmentCampaignInviteService::class)->send(auth()->user(), $invite);
+
+            LivewireAlert::title(__('recruitment-applicants.invite_sent_toast'))
+                ->success()->toast()->position('top-start')->show();
+        } catch (ValidationException $exception) {
+            LivewireAlert::title(collect($exception->errors())->collapse()->first())
+                ->error()->toast()->position('top-start')->show();
+        }
+    }
+
     public function cancelInvite(array $payload): void
     {
         $invite = RecruitmentCampaignInvite::query()
@@ -85,7 +102,9 @@ class InviteTable extends LivewireTable
             Column::make(__('recruitment-applicants.invite_full_name'), 'full_name')->sortable()->searchable(),
             Column::make(__('recruitment-applicants.invite_email'), 'email_normalized')->sortable()->searchable(),
             Column::make(__('recruitment-applicants.invite_status'), 'status')
-                ->displayUsing(fn ($value) => __('recruitment-applicants.invite_status_'.$value))
+                ->displayUsing(fn ($value, Model $invite): string => $invite->hasDeliveryFailed()
+                    ? __('recruitment-applicants.invite_status_failed').' — '.__('recruitment-applicants.invite_failure.'.$invite->failure_reason)
+                    : __('recruitment-applicants.invite_status_'.$value))
                 ->sortable(),
             Column::make(__('recruitment-applicants.invite_used_at'), 'used_at')
                 ->displayUsing(fn ($value) => $value?->format('d-m-Y H:i') ?? '—')
@@ -96,7 +115,11 @@ class InviteTable extends LivewireTable
                 }
 
                 return Blade::render(
-                    '<button type="button" wire:click="confirmCancel('.$invite->getKey().')" class="text-primary hover:underline text-body">{{ __(\'recruitment-applicants.invite_cancel\') }}</button>',
+                    '<div class="flex flex-wrap items-center gap-x-4 gap-y-1">'
+                    .'<button type="button" wire:click="sendInvite('.$invite->getKey().')" class="text-primary hover:underline text-body">{{ __(\'recruitment-applicants.invite_\'.($status === \'sent\' || $failed ? \'resend\' : \'send\')) }}</button>'
+                    .'<button type="button" wire:click="confirmCancel('.$invite->getKey().')" class="text-primary hover:underline text-body">{{ __(\'recruitment-applicants.invite_cancel\') }}</button>'
+                    .'</div>',
+                    ['status' => $invite->status, 'failed' => $invite->hasDeliveryFailed()],
                 );
             })->asHtml()->clickable(false),
         ];

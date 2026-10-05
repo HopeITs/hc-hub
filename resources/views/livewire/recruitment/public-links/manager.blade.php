@@ -167,7 +167,12 @@
                             <tr wire:key="campaign-invite-{{ $invite->id }}">
                                 <td class="px-3 py-2 text-secondary-dark">{{ $invite->full_name }}</td>
                                 <td class="px-3 py-2 text-secondary-dark"><bdi dir="ltr">{{ $invite->email_normalized }}</bdi></td>
-                                <td class="px-3 py-2 text-secondary-dark">{{ __('recruitment.public_link.invite_status_'.$invite->status) }}</td>
+                                <td class="px-3 py-2 text-secondary-dark">
+                                    {{ __('recruitment.public_link.invite_status_'.$invite->status) }}
+                                    @if ($invite->hasDeliveryFailed())
+                                        <span class="block text-small text-primary">{{ __('recruitment-applicants.invite_status_failed') }} — {{ __('recruitment-applicants.invite_failure.'.$invite->failure_reason) }}</span>
+                                    @endif
+                                </td>
                                 <td class="px-3 py-2 text-end">
                                     @if ($mayManage)
                                         <button type="button" wire:click="cancelInvite({{ $invite->id }})"
