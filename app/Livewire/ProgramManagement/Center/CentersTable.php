@@ -149,7 +149,7 @@ class CentersTable extends LivewireTable
     /**
      * Cities this user may filter by.
      *
-     * The dropdown and the row query are both derived from authorizedCityId(),
+     * The dropdown and the row query are both derived from authorizedCityIds(),
      * so a filter option can never select rows the query would exclude — and,
      * more importantly, the option list itself stops disclosing which other
      * cities exist and have centers.
@@ -157,9 +157,9 @@ class CentersTable extends LivewireTable
     protected function authorizedCities(): Builder
     {
         $query = City::query();
-        $cityId = $this->authorizedCityId();
+        $cityIds = $this->authorizedCityIds();
 
-        return $cityId === null ? $query : $query->whereKey($cityId);
+        return $cityIds === null ? $query : $query->whereKey($cityIds);
     }
 
     protected function columns(): array

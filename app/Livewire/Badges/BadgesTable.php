@@ -176,10 +176,10 @@ class BadgesTable extends LivewireTable
     {
         return Program::query()
             ->when(
-                auth()->user()->activeCityId(),
-                fn (Builder $query, int $cityId) => $query->whereHas(
+                auth()->user()->activeCityIds(),
+                fn (Builder $query, array $cityIds) => $query->whereHas(
                     'positions',
-                    fn (Builder $query) => $query->inCity($cityId),
+                    fn (Builder $query) => $query->inCity($cityIds),
                 ),
             )
             ->orderBy('name')
@@ -191,10 +191,10 @@ class BadgesTable extends LivewireTable
     {
         return Department::query()
             ->when(
-                auth()->user()->activeCityId(),
-                fn (Builder $query, int $cityId) => $query->whereHas(
+                auth()->user()->activeCityIds(),
+                fn (Builder $query, array $cityIds) => $query->whereHas(
                     'positions',
-                    fn (Builder $query) => $query->inCity($cityId),
+                    fn (Builder $query) => $query->inCity($cityIds),
                 ),
             )
             ->orderBy('name')

@@ -34,7 +34,7 @@ class EmployeeCreate extends Component
     /**
      * City the draft-position cascade is scoped to. Defaults to the employee's
      * own city; a nationwide HR role (HR-SYR, super-admin, general-manager —
-     * see User::activeCityId()) may change it, since their reach was never
+     * see User::activeCityIds()) may change it, since their reach was never
      * limited to the employee's own city elsewhere in the app either.
      */
     public ?int $draftCityId = null;
@@ -119,7 +119,7 @@ class EmployeeCreate extends Component
     /** Whether the acting user may point the draft-position cascade at a city other than the employee's own. */
     public function canPickAnyDraftCity(): bool
     {
-        return auth()->user()?->activeCityId() === null;
+        return auth()->user()?->activeCityIds() === null;
     }
 
     /**

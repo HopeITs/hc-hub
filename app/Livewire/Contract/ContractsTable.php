@@ -137,8 +137,8 @@ class ContractsTable extends LivewireTable
                 'terminationReason',
             ])
             ->when(
-                auth()->user()->activeCityId(),
-                fn (Builder $q, int $cityId) => $q->whereHas('employee', fn (Builder $e) => $e->where('city_id', $cityId)),
+                auth()->user()->activeCityIds(),
+                fn (Builder $q, array $cityIds) => $q->whereHas('employee', fn (Builder $e) => $e->whereIn('city_id', $cityIds)),
             );
     }
 

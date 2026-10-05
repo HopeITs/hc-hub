@@ -113,14 +113,14 @@ class ProfileDrawer extends Component
     /**
      * Restrict a position query to the viewer's city.
      *
-     * activeCityId() is null for roles that legitimately see every city
+     * activeCityIds() is null for roles that legitimately see every city
      * (super-admin, general-manager, HR-SYR), in which case the query is left
      * alone.
      */
     private function cityScoped($query)
     {
-        $cityId = auth()->user()?->activeCityId();
+        $cityIds = auth()->user()?->activeCityIds();
 
-        return $cityId === null ? $query : $query->inCity($cityId);
+        return $cityIds === null ? $query : $query->inCity($cityIds);
     }
 }

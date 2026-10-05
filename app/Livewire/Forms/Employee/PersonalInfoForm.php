@@ -367,8 +367,7 @@ class PersonalInfoForm extends Form
             Gate::authorize('create', [Employee::class, (int) $this->city_id]);
         }
 
-        $activeCityId = $user->activeCityId();
-        if ($activeCityId !== null && $activeCityId !== (int) $this->city_id) {
+        if (! $user->canAccessCity((int) $this->city_id)) {
             throw ValidationException::withMessages([
                 'city_id' => __('You may only manage employees in your active city.'),
             ]);

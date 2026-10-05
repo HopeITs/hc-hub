@@ -110,7 +110,7 @@ class CityIsolationTest extends TestCase
 
         $hq = $this->makeUser($syria, 'HR-SYR', ['centers.view']);
 
-        $this->assertNull($hq->activeCityId());
+        $this->assertNull($hq->activeCityIds());
 
         Livewire::actingAs($hq)
             ->test(CentersModule::class)

@@ -175,14 +175,19 @@ class Position extends Model
      * city, or assigned to a center that belongs to it. Single source of truth
      * for city scoping; keep contract create/edit filters aligned with it.
      */
-    public function scopeInCity($query, int $cityId)
+    /**
+     * @param  int|array<int, int>  $cityIds  one city, or every city a role covers
+     */
+    public function scopeInCity($query, int|array $cityIds)
     {
+        $cityIds = (array) $cityIds;
+
         // Qualify the columns: callers such as PositionTable join tables
         // (centers, departments, ...) that also carry a city_id, which MySQL
         // rejects as ambiguous.
-        return $query->where(function ($q) use ($cityId) {
-            $q->where($q->qualifyColumn('city_id'), $cityId)
-                ->orWhereHas('center', fn ($c) => $c->where($c->qualifyColumn('city_id'), $cityId));
+        return $query->where(function ($q) use ($cityIds) {
+            $q->whereIn($q->qualifyColumn('city_id'), $cityIds)
+                ->orWhereHas('center', fn ($c) => $c->whereIn($c->qualifyColumn('city_id'), $cityIds));
         });
     }
 

@@ -502,11 +502,11 @@ class Index extends Component
      */
     private function scopeToManagedCity(Builder $query): Builder
     {
-        $cityId = auth()->user()?->activeCityId();
+        $cityIds = auth()->user()?->activeCityIds();
 
-        return $cityId === null
+        return $cityIds === null
             ? $query
-            : $query->whereHas('profile', fn (Builder $profile): Builder => $profile->where('city_id', $cityId));
+            : $query->whereHas('profile', fn (Builder $profile): Builder => $profile->whereIn('city_id', $cityIds));
     }
 
     private function loadSelectedRole(): void

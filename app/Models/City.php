@@ -6,6 +6,7 @@ use App\Traits\HasTranslation;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -43,6 +44,39 @@ class City extends Model
                 ->whereKey($cityId)
                 ->where('slug', self::NATIONAL_SLUG)
                 ->exists();
+    }
+
+    /**
+     * City slugs a regional HR role is responsible for.
+     *
+     * Usually just the slug in the role name (HR-ALP → ALP), but a role may
+     * cover several cities — HR-HMS also covers Homs Rural.
+     *
+     * @return array<int, string>
+     */
+    public static function slugsForHrRole(string $roleName): array
+    {
+        $roleName = strtoupper(trim($roleName));
+
+        return config('access-control.hr_role_cities.'.$roleName)
+            ?? [Str::after($roleName, 'HR-')];
+    }
+
+    /**
+     * The regional HR roles responsible for the city with this slug — the
+     * reverse of slugsForHrRole(), for routing notifications.
+     *
+     * @return array<int, string>
+     */
+    public static function hrRolesForSlug(string $slug): array
+    {
+        $slug = strtoupper($slug);
+
+        $roles = collect(config('access-control.hr_role_cities', []))
+            ->filter(fn (array $slugs) => in_array($slug, $slugs, true))
+            ->keys();
+
+        return $roles->isNotEmpty() ? $roles->values()->all() : ['HR-'.$slug];
     }
 
     public function holidays()

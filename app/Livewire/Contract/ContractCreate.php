@@ -158,11 +158,11 @@ class ContractCreate extends Component
         abort_unless($user, 403);
         abort_unless($user->hasActivePermission($this->locationOptionsPermission()), 403);
 
-        $activeCityId = $user->activeCityId();
+        $activeCityIds = $user->activeCityIds();
 
         $employeeVisible = Employee::query()
             ->whereKey($employeeId)
-            ->when($activeCityId, fn ($query, int $cityId) => $query->where('city_id', $cityId))
+            ->when($activeCityIds !== null, fn ($query) => $query->whereIn('city_id', $activeCityIds))
             ->exists();
 
         if (! $employeeVisible) {

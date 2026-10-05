@@ -50,11 +50,11 @@ trait DrivesContractComposer
 
         // The preview must not leak entitlement figures for employees outside
         // the caller's city, so it is scoped exactly like the option lists are.
-        $activeCityId = $user->activeCityId();
+        $activeCityIds = $user->activeCityIds();
 
         $isVisible = Employee::query()
             ->whereKey($employeeId)
-            ->when($activeCityId, fn ($query, int $cityId) => $query->where('city_id', $cityId))
+            ->when($activeCityIds !== null, fn ($query) => $query->whereIn('city_id', $activeCityIds))
             ->exists();
 
         if (! $isVisible) {

@@ -204,10 +204,16 @@ class User extends Authenticatable
     }
 
     /**
-     * The city this user's active role is scoped to, or null when the role
+     * The cities this user's active role is scoped to, or null when the role
      * sees every city: super-admin, general-manager, and HR-SYR (headquarters).
+     *
+     * A regional role may cover several cities (HR-HMS covers Homs and Homs
+     * Rural, see City::slugsForHrRole). An empty array means a regional role
+     * whose city does not exist, which sees nothing rather than everything.
+     *
+     * @return array<int, int>|null
      */
-    public function activeCityId(): ?int
+    public function activeCityIds(): ?array
     {
         $roleName = strtoupper(trim($this->myRole() ?? ''));
 
@@ -215,9 +221,19 @@ class User extends Authenticatable
             return null;
         }
 
-        $slug = Str::after($roleName, 'HR-');
+        return City::query()
+            ->whereIn('slug', City::slugsForHrRole($roleName))
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
 
-        return City::where('slug', $slug)->value('id');
+    /** May the active role read and write records belonging to $cityId? */
+    public function canAccessCity(?int $cityId): bool
+    {
+        $cityIds = $this->activeCityIds();
+
+        return $cityIds === null || in_array((int) $cityId, $cityIds, true);
     }
 
     public function inactiveRoles()

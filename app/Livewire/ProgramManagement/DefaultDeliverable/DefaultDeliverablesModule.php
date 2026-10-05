@@ -34,14 +34,14 @@ class DefaultDeliverablesModule extends Component
      * The three role branches this method used to carry all computed the same
      * thing — "which city am I confined to" — by string-splitting the role
      * name, and `$roleArr[1]` was an undefined index for any role without a
-     * hyphen. activeCityId() answers that question once, and returns null for
+     * hyphen. activeCityIds() answers that question once, and returns null for
      * the roles that legitimately span every city.
      */
     public function render()
     {
         $locale = app()->getLocale();
         $cityCol = "name_{$locale}";
-        $cityId = $this->authorizedCityId();
+        $cityIds = $this->authorizedCityIds();
 
         $employeesQuery = Employee::whereHas('contracts', function ($query) {
             $query->whereHas('position', function ($subQuery) {
@@ -53,9 +53,9 @@ class DefaultDeliverablesModule extends Component
 
         $citiesQuery = City::whereHas('centers');
 
-        if ($cityId !== null) {
-            $employeesQuery->where('city_id', $cityId);
-            $citiesQuery->whereKey($cityId);
+        if ($cityIds !== null) {
+            $employeesQuery->whereIn('city_id', $cityIds);
+            $citiesQuery->whereKey($cityIds);
         }
 
         $employees = $employeesQuery

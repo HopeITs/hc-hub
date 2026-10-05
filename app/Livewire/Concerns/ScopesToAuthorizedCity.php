@@ -22,12 +22,14 @@ use Illuminate\Validation\ValidationException;
 trait ScopesToAuthorizedCity
 {
     /**
-     * The city the active role is confined to, or null when the role sees all
-     * cities (super-admin, general-manager, HR-SYR headquarters).
+     * The cities the active role is confined to, or null when the role sees
+     * all cities (super-admin, general-manager, HR-SYR headquarters).
+     *
+     * @return array<int, int>|null
      */
-    protected function authorizedCityId(): ?int
+    protected function authorizedCityIds(): ?array
     {
-        return auth()->user()?->activeCityId();
+        return auth()->user()?->activeCityIds();
     }
 
     /**
@@ -37,11 +39,11 @@ trait ScopesToAuthorizedCity
      */
     protected function scopeToAuthorizedCity(Builder $query, string $column = 'city_id'): Builder
     {
-        $cityId = $this->authorizedCityId();
+        $cityIds = $this->authorizedCityIds();
 
-        return $cityId === null
+        return $cityIds === null
             ? $query
-            : $query->where($query->qualifyColumn($column), $cityId);
+            : $query->whereIn($query->qualifyColumn($column), $cityIds);
     }
 
     /**
@@ -54,9 +56,9 @@ trait ScopesToAuthorizedCity
     protected function assertCityIsAuthorized(mixed $cityId, string $field = 'item.city_id'): int
     {
         $cityId = (int) $cityId;
-        $authorized = $this->authorizedCityId();
+        $authorized = $this->authorizedCityIds();
 
-        if ($authorized !== null && $cityId !== $authorized) {
+        if ($authorized !== null && ! in_array($cityId, $authorized, true)) {
             throw ValidationException::withMessages([
                 $field => __('validation.city_not_authorized'),
             ]);

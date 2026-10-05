@@ -14,10 +14,7 @@ class ContractExportController extends Controller
     {
         Gate::authorize('export', $contract);
 
-        $cityId = auth()->user()->activeCityId();
-        if ($cityId && $contract->employee?->city_id !== $cityId) {
-            abort(403);
-        }
+        abort_unless(auth()->user()->canAccessCity($contract->employee?->city_id), 403);
 
         return response($this->renderer->render($contract), 200, [
             'Content-Type' => 'application/pdf',
