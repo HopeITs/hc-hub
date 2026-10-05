@@ -153,6 +153,8 @@ class Show extends Component
             'canSeeApplicant' => Gate::allows('viewApplicant', $interview),
             // Rendered only when allowed; never stored on the component.
             'meetingUrl' => Gate::allows('viewMeetingLink', $interview) ? $interview->meeting_url : null,
+            // Held, cancelled or a no-show: nothing left to join, the link stays for the record.
+            'canJoin' => $interview->isOpen(),
             'notices' => $canManage ? $interview->notices()->latest('id')->get() : collect(),
             'cancellationReasons' => $scheduling->cancellationReasons(),
             'hasStarted' => ! $interview->scheduled_at->isFuture(),

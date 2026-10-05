@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\RecruitmentInterviewStatus;
 use App\Services\RecruitmentScopeResolver;
+use App\Support\Recruitment\PositionRequester;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -190,8 +191,8 @@ class RecruitmentInterview extends Model
 
     /**
      * Task 8: the interviews waiting on this user's own evaluation — they sit
-     * on it in a reviewer role, it has started, it was not cancelled or
-     * missed, evaluation is still open, and they have not written one yet.
+     * on it in a reviewer role, HR recorded it as held, evaluation is still
+     * open, and they have not written one yet.
      */
     public function scopeAwaitingEvaluationBy(Builder $query, User $user): Builder
     {
@@ -199,25 +200,18 @@ class RecruitmentInterview extends Model
             ->whereHas('currentParticipants', fn (Builder $participants): Builder => $participants
                 ->where('user_id', $user->getKey())
                 ->whereIn('role', (array) config('recruitment.evaluations.reviewer_roles', [])))
-            ->whereNotIn($query->qualifyColumn('status'), [RecruitmentInterviewStatus::Cancelled, RecruitmentInterviewStatus::NoShow])
-            ->where($query->qualifyColumn('scheduled_at'), '<=', now())
+            ->where($query->qualifyColumn('status'), RecruitmentInterviewStatus::Completed)
             ->evaluationsClosed(false)
             ->whereDoesntHave('evaluations', fn (Builder $evaluations): Builder => $evaluations->where('reviewer_user_id', $user->getKey()));
     }
 
     /**
-     * The requester rule, in one place: interviews of a position this user
-     * asked for — he raised the request (requester_user_id), or HR opened it
-     * directly on his behalf (actual_requester_user_id). Not his line manager.
-     * A requester follows those interviews read-only; what he may do is the
-     * policy's call.
+     * Interviews of a position this user requested (PositionRequester). He
+     * follows them read-only; what he may do is the policy's call.
      */
     public function scopeRequestedBy(Builder $query, User $user): Builder
     {
-        return $query->whereHas('application.vacancy.createdFromRequest', fn (Builder $requests): Builder => $requests
-            ->where(fn (Builder $requester): Builder => $requester
-                ->where($requester->qualifyColumn('requester_user_id'), $user->getKey())
-                ->orWhere($requester->qualifyColumn('actual_requester_user_id'), $user->getKey())));
+        return $query->whereHas('application.vacancy.createdFromRequest', fn (Builder $requests): Builder => PositionRequester::constrain($requests, $user));
     }
 
     /** For the sidebar: is this user on any interview at all? */

@@ -33,6 +33,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Notifications\NewEmployeeWelcome;
+use App\Notifications\RecruitmentCandidateHired;
 use App\Services\RecruitmentApplicationStatusService;
 use App\Services\RecruitmentHiringConversionService as Conversions;
 use App\Services\RecruitmentJobOfferService;
@@ -251,6 +252,95 @@ class RecruitmentHiringConversionTest extends TestCase
         $contract = $service->fresh()->contract;
         $this->assertSame([EmploymentType::Freelance, 0], [$contract->type, $contract->weekly_hours]);
         $this->assertSame(0, LeaveBalance::query()->where('contract_id', $contract->id)->count());
+    }
+
+    /**
+     * The Hire button opens the confirmation on the first click: it is locked
+     * only while the hire runs, not by the field update that leaving an input
+     * (the national number) sends just before the click.
+     */
+    public function test_the_hire_button_is_locked_only_by_the_hire_itself(): void
+    {
+        [, $offer] = $this->accepted();
+        $this->actingAs($this->hr);
+
+        $html = Livewire::test(Convert::class, ['offerId' => $offer->id])->html();
+        $this->assertMatchesRegularExpression('/<button[^>]*type="submit"[^>]*wire:target="confirmHire,save"/s', $html);
+        $this->assertMatchesRegularExpression('/wire:model\.blur="employee\.nationalNumber"/', $html, 'The field whose update used to swallow the click.');
+    }
+
+    /**
+     * The manager who requested the position is told once the hire is done,
+     * in the application, and the notice opens the offer — which he can read.
+     */
+    public function test_the_requester_is_notified_of_the_hire_and_the_notice_opens_the_offer(): void
+    {
+        Notification::fake();
+        [$application, $offer, $conversion] = $this->accepted();
+        $requester = User::query()->findOrFail($offer->vacancy->createdFromRequest->requester_user_id);
+
+        $this->hire($conversion);
+
+        $url = route('recruitment.offers.show', ['offerId' => $offer->id]);
+        Notification::assertSentTo($requester, RecruitmentCandidateHired::class, function (RecruitmentCandidateHired $notice) use ($requester, $url): bool {
+            $data = $notice->toArray($requester);
+
+            return $notice->via($requester) === ['database'] && $data['url'] === $url
+                && str_contains($data['body']['en'], 'Candidate One') && $data['title']['ar'] !== '';
+        });
+        Notification::assertNotSentTo($this->hr, RecruitmentCandidateHired::class);
+
+        // Following the link: the offer opens for him, read-only.
+        $this->actingAs($requester);
+        $this->get($url)->assertOk();
+        Livewire::test(Show::class, ['offerId' => $offer->id])->call('beginCancel')->assertForbidden();
+    }
+
+    /** Opened by HR on a manager's behalf: the manager is told, not HR; the HR who made the hire is never told of his own hire. */
+    public function test_the_manager_a_position_was_opened_for_is_the_one_notified(): void
+    {
+        Notification::fake();
+        [, $offer, $conversion] = $this->accepted();
+        $request = $offer->vacancy->createdFromRequest;
+        $raisedBy = User::query()->findOrFail($request->requester_user_id);
+        $manager = $this->makeUser($this->homs, 'manager');
+        $request->forceFill(['actual_requester_user_id' => $manager->id])->save();
+
+        $this->hire($conversion);
+
+        Notification::assertSentTo($manager, RecruitmentCandidateHired::class);
+        Notification::assertNotSentTo($raisedBy, RecruitmentCandidateHired::class);
+
+        // HR who requested the position himself and hired: nobody to tell.
+        [, $own, $ownConversion] = $this->accepted('Candidate Two', [], $this->makeCampaignIn($this->homs));
+        $own->vacancy->createdFromRequest->forceFill(['requester_user_id' => $this->hr->id, 'actual_requester_user_id' => null])->save();
+        $this->hire($ownConversion, ['employee' => $this->person(['firstNameEn' => 'Candidate', 'lastNameEn' => 'Two', 'username' => 'candidate.two', 'nationalNumber' => '01234567891'])]);
+        Notification::assertNotSentTo($this->hr, RecruitmentCandidateHired::class);
+    }
+
+    /** A hire that fails tells nobody: the notice goes out only after the commit. */
+    public function test_a_failed_hire_notifies_nobody(): void
+    {
+        Notification::fake();
+        [, $offer, $conversion] = $this->accepted();
+        $offer->position->forceFill(['max_emp' => 0])->save();
+
+        $this->assertBlocked($conversion, 'position_full');
+
+        Notification::assertNothingSentTo(User::query()->findOrFail($offer->vacancy->createdFromRequest->requester_user_id));
+    }
+
+    /** The hire page's dropdowns are the project's Select2 (x-forms.select2-input); none is a plain select. */
+    public function test_the_hire_page_uses_select2_for_every_dropdown(): void
+    {
+        [, $offer] = $this->accepted('Session Two', ['salaryPer' => SalaryPer::Session]);
+        $this->actingAs($this->hr);
+        $html = Livewire::test(Convert::class, ['offerId' => $offer->id])->html();
+
+        foreach (['nationality', 'gender', 'maritalStatus', 'sessionDuration'] as $id) {
+            $this->assertMatchesRegularExpression('/<select x-ref="select"[^>]*id="'.$id.'"/', $html, $id.' is a Select2 dropdown');
+        }
+        $this->assertSame(substr_count($html, '<select'), substr_count($html, '<select x-ref="select"'), 'No plain select is left.');
     }
 
     /** scope: pay per session needs the session length the offer does not carry. */
@@ -877,7 +967,8 @@ class RecruitmentHiringConversionTest extends TestCase
             'weeklyHours' => 40,
             'employmentType' => EmploymentType::FullTime,
             'place' => ContractPlace::Onsite,
-            'notes' => '',
+            'probationDays' => 90,
+            'notes' => 'Transport allowance included.',
         ], $overrides);
     }
 

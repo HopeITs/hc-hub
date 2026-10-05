@@ -164,6 +164,10 @@ return [
             // Phase 2 Task 9: follow job offers / write them. Writing also
             // needs User::canViewSalary(), checked by the policy.
             'view-offers', 'manage-offers',
+            // The pay figure of a sent offer, for the manager who requested
+            // the position (RecruitmentJobOfferPolicy::viewSalary). Granted on
+            // purpose — to the manager role or to one user — never by default.
+            'view-offer-salary',
             // Phase 2 Task 10: turn an accepted offer into an employee and a
             // contract. The policy also needs contracts.create and
             // canViewSalary(), and the employee side is checked against

@@ -34,9 +34,11 @@ use Throwable;
  * - Only a shortlisted (or already interviewing) candidate can be scheduled.
  *   A rejected one is refused until the decision is reopened through the
  *   decision panel (rejected -> under review -> shortlisted).
- * - No slot in the past, for a new interview or a moved one. Times are read
- *   in the application timezone, from a strict Y-m-d H:i format, and the
- *   timezone is stored on the interview and written in every email.
+ * - HR may choose any date and time, a past one included (recording an
+ *   interview already held); the candidate is emailed only about a slot
+ *   still ahead. Times are read in the application timezone, from a strict
+ *   Y-m-d H:i format, and the timezone is stored on the interview and
+ *   written in every email.
  * - A participant must be an active user (active employee record); one who
  *   became inactive later is kept on the record but not written to.
  * - Moving an interview (time or place) writes a reschedule history row with
@@ -109,7 +111,7 @@ class RecruitmentInterviewSchedulingService
     {
         Gate::forUser($actor)->authorize('schedule', [RecruitmentInterview::class, $application]);
 
-        $details = $this->validateDetails($input, requireFuture: true);
+        $details = $this->validateDetails($input);
         $participants = $this->validateParticipants($input['participants'] ?? [], []);
         $notices = [];
 
@@ -145,7 +147,10 @@ class RecruitmentInterviewSchedulingService
                 $this->statuses->applyInterviewTransition($actor, $locked, ApplicationStatus::InterviewScheduled);
             }
 
-            if ($notifyCandidate) {
+            // Any date may be chosen, a past one included (recording an
+            // interview already held); the candidate is invited only to a
+            // slot still ahead.
+            if ($notifyCandidate && $details['starts']->isFuture()) {
                 $notices[] = $this->notices->prepare($actor, $interview, Notice::KIND_SCHEDULED);
             }
 
@@ -160,7 +165,7 @@ class RecruitmentInterviewSchedulingService
                     'ends_at' => $details['ends']->toIso8601String(),
                     'location_type' => $details['location_type'],
                     'participant_ids' => array_keys($participants),
-                    'candidate_notified' => $notifyCandidate && $notices[0] !== null,
+                    'candidate_notified' => ($notices[0] ?? null) !== null,
                     'role' => $actor->myRole(),
                 ],
                 logName: self::AUDIT_LOG,
@@ -211,15 +216,9 @@ class RecruitmentInterviewSchedulingService
                 'meeting_url' => $locked->meeting_url,
             ];
 
-            // The past-slot check applies only when the time actually moves:
-            // correcting the participants of an interview under way is fine.
-            $details = $this->validateDetails($input, requireFuture: false);
+            $details = $this->validateDetails($input);
             $slotChanged = ! $details['starts']->equalTo($current['starts'])
                 || ! $current['ends']?->equalTo($details['ends']);
-
-            if ($slotChanged && ! $details['starts']->isFuture()) {
-                throw ValidationException::withMessages(['startsAt' => __('recruitment-applicant.interviews.errors.in_past')]);
-            }
 
             $locationChanged = $details['location_type'] !== $current['location_type']
                 || $details['location_value'] !== $current['location_value']
@@ -313,7 +312,7 @@ class RecruitmentInterviewSchedulingService
                 );
             }
 
-            if (($slotChanged || $locationChanged) && $notifyCandidate) {
+            if (($slotChanged || $locationChanged) && $notifyCandidate && $details['starts']->isFuture()) {
                 $notices[] = $this->notices->prepare($actor, $locked, Notice::KIND_RESCHEDULED);
             }
 
@@ -447,6 +446,14 @@ class RecruitmentInterviewSchedulingService
 
             $this->syncApplication($actor, $application);
 
+            // Held: evaluation is open now, and the reviewers are asked for theirs.
+            if ($outcome === Status::Completed) {
+                $reviewerIds = $locked->currentParticipants()
+                    ->whereIn('role', (array) config('recruitment.evaluations.reviewer_roles', []))
+                    ->pluck('user_id')->map(fn ($id): int => (int) $id)->all();
+                DB::afterCommit(fn () => $this->notifier->notify($locked, $reviewerIds, ParticipantNotice::EVALUATION_OPEN));
+            }
+
             $this->activity->log(
                 'recruitment_interview.'.$outcome,
                 subject: $locked,
@@ -512,7 +519,7 @@ class RecruitmentInterviewSchedulingService
      * @param  array<string, mixed>  $input
      * @return array{type: string, starts: Carbon, ends: Carbon, location_type: string, location_value: ?string, meeting_url: ?string}
      */
-    public function validateDetails(array $input, bool $requireFuture): array
+    public function validateDetails(array $input): array
     {
         $errors = [];
 
@@ -524,8 +531,6 @@ class RecruitmentInterviewSchedulingService
         $starts = $this->parseLocal($input['startsAt'] ?? null);
         if ($starts === null) {
             $errors['startsAt'] = __('recruitment-applicant.interviews.errors.invalid_date');
-        } elseif ($requireFuture && ! $starts->isFuture()) {
-            $errors['startsAt'] = __('recruitment-applicant.interviews.errors.in_past');
         }
 
         $min = (int) config('recruitment.interviews.min_duration_minutes', 15);

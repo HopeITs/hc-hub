@@ -84,11 +84,13 @@ Route::get('recruitment/applications/{applicationId}/interviews/create', Intervi
     ->middleware('active_permission:recruitment-applicants.schedule-interviews')
     ->name('recruitment.interviews.create');
 
-// Phase 2 Task 9 (Team 2): job offers. The permission is the outer wall; each
-// component re-resolves the offer through RecruitmentJobOffer::visibleTo() and
-// the policy (which also requires canViewSalary() to write one).
+// Phase 2 Task 9 (Team 2): job offers. The list and a single offer have no
+// permission middleware on purpose: the manager who requested the position
+// reads them without any recruitment permission. The components resolve every
+// offer through RecruitmentJobOffer::visibleTo() and the policy (a guessed id
+// is a 404); writing keeps its own permission, and the policy also requires
+// canViewSalary() to write one.
 Route::prefix('recruitment/offers')->name('recruitment.offers.')
-    ->middleware('active_permission:recruitment-applicants.view-offers')
     ->group(function () {
         Route::get('/', OfferIndex::class)->name('index');
         Route::get('/{offerId}', OfferShow::class)->whereNumber('offerId')->name('show');

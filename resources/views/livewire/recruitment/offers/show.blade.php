@@ -36,7 +36,7 @@
         </div>
 
         @if ($current)
-            @include('livewire.recruitment.offers.partials.terms', ['version' => $current])
+            @include('livewire.recruitment.offers.partials.terms', ['version' => $current, 'canSeeSalary' => auth()->user()->can('viewSalary', [$offer, $current])])
         @endif
 
         <dl class="mt-6 grid grid-cols-1 gap-3 border-t border-secondary-soft pt-4 text-sm md:grid-cols-3">
@@ -209,7 +209,7 @@
                     @if ($version->revision_reason && $canManage)
                         <p class="mt-1 text-secondary-medium">{{ __('recruitment-applicant.offers.revision_reason') }}: {{ $version->revision_reason }}</p>
                     @endif
-                    @include('livewire.recruitment.offers.partials.terms', ['version' => $version, 'compact' => true])
+                    @include('livewire.recruitment.offers.partials.terms', ['version' => $version, 'compact' => true, 'canSeeSalary' => auth()->user()->can('viewSalary', [$offer, $version])])
                 </li>
             @endforeach
         </ol>

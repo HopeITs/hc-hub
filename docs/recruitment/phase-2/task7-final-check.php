@@ -118,7 +118,8 @@ try {
     $submitted = $fresh('Check Submitted', AppStatus::Submitted);
     $check('A candidate not yet shortlisted cannot be scheduled', isset($errors(fn () => $interviews->schedule($hr, $submitted, $input()))['interview']));
     $check('"Interview scheduled" is never a manual decision', ! in_array(AppStatus::InterviewScheduled, $statuses->targets($fresh('Check Manual')), true));
-    $check('A past slot is refused', isset($errors(fn () => $interviews->schedule($hr, $fresh('Check Past'), $input(['startsAt' => $local($real->copy()->subHour())])))['startsAt']));
+    $past = $interviews->schedule($hr, $fresh('Check Past'), $input(['startsAt' => $local($real->copy()->subDay()->setTime(10, 0))]))->fresh();
+    $check('Any date may be chosen, a past one included; no invitation to a slot already over', $past->scheduled_at->isPast() && $past->notices()->count() === 0);
     $check('An impossible date (2026-02-30) is refused, not rolled over', isset($errors(fn () => $interviews->schedule($hr, $fresh('Check Date'), $input(['startsAt' => '2026-02-30T10:00'])))['startsAt']));
     $check('An inactive participant is refused', isset($errors(fn () => $interviews->schedule($hr, $fresh('Check Inactive'), $input(['participants' => [$inactive->id => 'interviewer']])))['participants']));
     $check('A meeting link that is not http(s) is refused', isset($errors(fn () => $interviews->schedule($hr, $fresh('Check Link'), $input(['meetingUrl' => 'javascript:alert(1)'])))['meetingUrl']));
@@ -173,7 +174,9 @@ try {
     $check('Cancel opens a popup (Leaves style) and closing it closes it', $opened && $page->get('panelOpen') === false && $page->get('panel') === null);
     $page->call('beginCancel')->set('cancelReason', $interviews->cancellationReasons()[0])->call('cancelInterview');
     $check('Cancelling from the popup cancels the interview', $i4->fresh()->status === Status::Cancelled && $page->get('panelOpen') === false);
-    $check('A participant sees the page and the link', str_contains(Livewire::actingAs($participant)->test(Show::class, ['interviewId' => $i1->id])->html(), 'task7-check'));
+    $held = Livewire::actingAs($participant)->test(Show::class, ['interviewId' => $i1->id])->html();
+    $check('His held interview: the link as plain text for the record, no join button', str_contains($held, 'task7-check')
+        && ! str_contains($held, 'href="https://teams.microsoft.com/l/meetup-join/task7-check"') && str_contains($held, e(__('recruitment-applicant.interviews.meeting_over'))));
     $check('Out of scope is a 404', rescue(fn () => Livewire::actingAs($mirna)->test(Show::class, ['interviewId' => $i1->id])->assertNotFound() !== null, false, false));
 
     echo PHP_EOL.'The manager who requested the position (read-only viewer)'.PHP_EOL;
