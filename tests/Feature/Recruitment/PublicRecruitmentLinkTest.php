@@ -1135,6 +1135,36 @@ class PublicRecruitmentLinkTest extends TestCase
     }
 
     /** A bounced email does not revoke the invitation: HR can still pass the link on by hand. */
+    public function test_an_invitation_whose_email_bounced_can_still_apply(): void
+    {
+        [$campaign, $hr, $invite] = $this->pendingInviteWithLink('bounced@example.org');
+        $invite->forceFill([
+            'failed_at' => now(),
+            'failure_reason' => RecruitmentCampaignInvite::FAILURE_NOT_SENT,
+        ])->save();
+        $token = $campaign->publicLinks()->where('status', PublicRecruitmentLink::STATUS_ACTIVE)->firstOrFail();
+        $url = \Illuminate\Support\Facades\Crypt::decryptString($token->url_encrypted);
+        $tokenValue = basename((string) parse_url($url, PHP_URL_PATH));
+
+        $this->post(route('careers.invitation', $tokenValue), ['invitee_email' => 'bounced@example.org'])
+            ->assertRedirect();
+    }
+
+    public function test_the_email_check_is_rate_limited(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)
+            ->generate($campaign, $hr, now()->addDays(10), RecruitmentCampaignLinkMode::InvitationOnly);
+
+        foreach (range(1, 6) as $attempt) {
+            $this->post(route('careers.invitation', $result['token']), ['invitee_email' => "guess{$attempt}@example.org"])
+                ->assertStatus(422);
+        }
+
+        $this->post(route('careers.invitation', $result['token']), ['invitee_email' => 'guess7@example.org'])
+            ->assertTooManyRequests();
+    }
+
     public function test_a_cancelled_invitation_is_not_sent_the_link(): void
     {
         Mail::fake();
@@ -1149,6 +1179,78 @@ class PublicRecruitmentLinkTest extends TestCase
 
         Mail::assertSentCount(1);
         $this->assertSame(RecruitmentCampaignInvite::STATUS_CANCELLED, $invite->fresh()->status);
+    }
+
+    public function test_an_invitation_only_page_asks_for_the_email_before_it_shows_the_form(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $links = app(PublicRecruitmentLinkService::class);
+        $result = $links->generate($campaign, $hr, now()->addDays(10), RecruitmentCampaignLinkMode::InvitationOnly);
+        $links->addInvite($campaign->fresh(), $hr, 'Invited Person', 'invited@example.com');
+        $key = 'careers.invitee.'.hash('sha256', $result['token']);
+
+        // Before: the question, and no form.
+        $this->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee(__('careers.invitation.title'))
+            ->assertDontSee('data-recruitment-wizard', false);
+
+        // An address that is not on the list is told so, and gets no form.
+        $this->post(route('careers.invitation', $result['token']), ['invitee_email' => 'stranger@example.com'])
+            ->assertStatus(422)
+            ->assertSee(__('careers.invitation.not_listed'))
+            ->assertDontSee('data-recruitment-wizard', false)
+            ->assertSessionMissing($key);
+
+        $this->post(route('careers.invitation', $result['token']), ['invitee_email' => 'not an email'])
+            ->assertStatus(422)
+            ->assertSee(__('careers.invitation.invalid_email'));
+
+        // The invited address, however it is typed, is let through.
+        $this->post(route('careers.invitation', $result['token']), ['invitee_email' => '  INVITED@example.com '])
+            ->assertRedirect()
+            ->assertSessionHas($key, 'invited@example.com');
+
+        // After: the form, with the address filled in and fixed.
+        $page = $this->withSession([$key => 'invited@example.com'])
+            ->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee('data-recruitment-wizard', false)
+            ->assertSee('value="invited@example.com"', false)
+            ->assertSee(__('careers.invitation.email_note'));
+        $this->assertStringContainsString('readonly', $page->getContent());
+    }
+
+    public function test_a_cancelled_invitation_closes_the_form_again(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $links = app(PublicRecruitmentLinkService::class);
+        $result = $links->generate($campaign, $hr, now()->addDays(10), RecruitmentCampaignLinkMode::InvitationOnly);
+        $invite = $links->addInvite($campaign->fresh(), $hr, 'Invited Person', 'invited@example.com');
+        $key = 'careers.invitee.'.hash('sha256', $result['token']);
+
+        $links->cancelInvite($invite, $hr);
+
+        $this->withSession([$key => 'invited@example.com'])
+            ->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee(__('careers.invitation.title'))
+            ->assertDontSee('data-recruitment-wizard', false);
+    }
+
+    public function test_the_email_check_changes_nothing_for_a_campaign_open_to_everyone(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)
+            ->generate($campaign, $hr, now()->addDays(10), RecruitmentCampaignLinkMode::PublicOpen);
+
+        $this->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertDontSee('data-invitation-state', false)
+            ->assertSee('data-recruitment-wizard', false);
+
+        $this->post(route('careers.invitation', $result['token']), ['invitee_email' => 'anyone@example.com'])
+            ->assertRedirect();
     }
 
     private function staffMember(): User
