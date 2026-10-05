@@ -27,6 +27,7 @@ use App\Models\RecruitmentJobOfferVersion as Version;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Notifications\NewEmployeeWelcome;
+use App\Notifications\RecruitmentCandidateHired;
 use App\Services\Recruitment\HiringConversionBlocked;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -405,7 +406,30 @@ class RecruitmentHiringConversionService
             }
         });
 
+        $this->notifyRequester($actor, $vacancy, $offer, $employee);
+
         return $locked;
+    }
+
+    /**
+     * The manager who asked for the position learns his hire is done, once
+     * it is committed, with a link to the offer. He is the manager HR opened
+     * the position for when there is one, otherwise whoever raised the
+     * request — and nobody when he made the hire himself. A notice that
+     * cannot be written is logged; it never undoes the hire.
+     */
+    private function notifyRequester(User $actor, Vacancy $vacancy, Offer $offer, Employee $employee): void
+    {
+        $request = $vacancy->createdFromRequest()->first();
+        $requesterId = $request?->actual_requester_user_id ?? $request?->requester_user_id;
+
+        if ($requesterId === null || (int) $requesterId === (int) $actor->getKey()) {
+            return;
+        }
+
+        DB::afterCommit(fn () => rescue(
+            fn () => User::query()->find($requesterId)?->notify(new RecruitmentCandidateHired($offer, $employee)),
+        ));
     }
 
     /**
