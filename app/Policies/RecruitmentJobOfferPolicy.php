@@ -6,11 +6,13 @@ use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentJobOffer;
 use App\Models\User;
 use App\Services\RecruitmentScopeResolver;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * Phase 2 Task 9.
  *
- * - view: view-offers, on an application in the user's recruitment scope.
+ * - view: view-offers, on an application in the user's recruitment scope;
+ *   or the manager who requested the position (PositionRequester), read-only.
  *   Status, dates and contract terms.
  * - viewSalary: the pay figure on top of that, only for users who may see
  *   salaries at all (User::canViewSalary() — active HR role, and never
@@ -23,15 +25,30 @@ class RecruitmentJobOfferPolicy
 {
     public function __construct(private readonly RecruitmentScopeResolver $scopes) {}
 
+    /** HR who read offers, and any manager who requested a position with offers (read-only). */
     public function viewAny(User $user): bool
     {
-        return $user->hasActivePermission('recruitment-applicants.view-offers')
-            && $user->hasActivePermission('recruitment-applicants.view');
+        return $this->readsOffers($user)
+            || RecruitmentJobOffer::query()->requestedBy($user)->exists();
     }
 
     public function view(User $user, RecruitmentJobOffer $offer): bool
     {
-        return $this->viewAny($user) && $this->inScope($user, $offer->application()->first());
+        return ($this->readsOffers($user) && $this->inScope($user, $offer->application()->first()))
+            || $offer->isRequestedBy($user);
+    }
+
+    /**
+     * The link from the offer to the applicant page: whoever may read the
+     * application (unchanged), and the position's requester. The applicant
+     * page keeps its own permission; this only decides whether the link shows.
+     */
+    public function viewApplicant(User $user, RecruitmentJobOffer $offer): bool
+    {
+        $application = $offer->application()->first();
+
+        return ($application !== null && Gate::forUser($user)->allows('view', $application))
+            || $offer->isRequestedBy($user);
     }
 
     public function viewSalary(User $user, RecruitmentJobOffer $offer): bool
@@ -51,10 +68,16 @@ class RecruitmentJobOfferPolicy
         return $this->canWrite($user) && $this->inScope($user, $offer->application()->first());
     }
 
+    private function readsOffers(User $user): bool
+    {
+        return $user->hasActivePermission('recruitment-applicants.view-offers')
+            && $user->hasActivePermission('recruitment-applicants.view');
+    }
+
     private function canWrite(User $user): bool
     {
         return $user->hasActivePermission('recruitment-applicants.manage-offers')
-            && $this->viewAny($user)
+            && $this->readsOffers($user)
             && $user->canViewSalary();
     }
 

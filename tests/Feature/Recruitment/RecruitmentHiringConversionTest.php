@@ -253,6 +253,21 @@ class RecruitmentHiringConversionTest extends TestCase
         $this->assertSame(0, LeaveBalance::query()->where('contract_id', $contract->id)->count());
     }
 
+    /**
+     * The Hire button opens the confirmation on the first click: it is locked
+     * only while the hire runs, not by the field update that leaving an input
+     * (the national number) sends just before the click.
+     */
+    public function test_the_hire_button_is_locked_only_by_the_hire_itself(): void
+    {
+        [, $offer] = $this->accepted();
+        $this->actingAs($this->hr);
+
+        $html = Livewire::test(Convert::class, ['offerId' => $offer->id])->html();
+        $this->assertMatchesRegularExpression('/<button[^>]*type="submit"[^>]*wire:target="confirmHire,save"/s', $html);
+        $this->assertMatchesRegularExpression('/wire:model\.blur="employee\.nationalNumber"/', $html, 'The field whose update used to swallow the click.');
+    }
+
     /** scope: pay per session needs the session length the offer does not carry. */
     public function test_pay_per_session_needs_the_session_length(): void
     {
@@ -877,7 +892,8 @@ class RecruitmentHiringConversionTest extends TestCase
             'weeklyHours' => 40,
             'employmentType' => EmploymentType::FullTime,
             'place' => ContractPlace::Onsite,
-            'notes' => '',
+            'probationDays' => 90,
+            'notes' => 'Transport allowance included.',
         ], $overrides);
     }
 

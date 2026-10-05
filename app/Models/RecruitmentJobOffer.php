@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\RecruitmentJobOfferStatus;
+use App\Support\Recruitment\PositionRequester;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -77,10 +78,31 @@ class RecruitmentJobOffer extends Model
         return in_array($this->status, RecruitmentJobOfferStatus::editable(), true);
     }
 
-    /** Offers visible to a user: those whose application is in their recruitment scope. */
+    /**
+     * Offers visible to a user: HR who can read offers, for applications in
+     * their recruitment scope; and the manager who requested the position,
+     * read-only. The recruitment scope alone is not enough — for a manager it
+     * also covers his direct reports' requests.
+     */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        return $query->whereHas('application', fn (Builder $applications): Builder => $applications->visibleTo($user));
+        $readsOffers = $user->hasActivePermission('recruitment-applicants.view-offers')
+            && $user->hasActivePermission('recruitment-applicants.view');
+
+        return $query->where(fn (Builder $visible): Builder => $visible
+            ->when($readsOffers, fn (Builder $hr): Builder => $hr->whereHas('application', fn (Builder $applications): Builder => $applications->visibleTo($user)))
+            ->orWhere(fn (Builder $requested): Builder => $requested->requestedBy($user)));
+    }
+
+    /** Offers of a position this user requested (PositionRequester). */
+    public function scopeRequestedBy(Builder $query, User $user): Builder
+    {
+        return $query->whereHas('vacancy.createdFromRequest', fn (Builder $requests): Builder => PositionRequester::constrain($requests, $user));
+    }
+
+    public function isRequestedBy(User $user): bool
+    {
+        return static::query()->whereKey($this->getKey())->requestedBy($user)->exists();
     }
 
     /** A query-level delete skips model events, so the builder refuses it too. */

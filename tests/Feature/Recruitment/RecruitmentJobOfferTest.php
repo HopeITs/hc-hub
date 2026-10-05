@@ -179,14 +179,28 @@ class RecruitmentJobOfferTest extends TestCase
             $this->assertValidationError(fn () => $this->create($application, $bad), $field);
         }
 
-        // Point 3: every term the contract will need is required — the notes alone may stay blank.
+        // Every field is required, the other terms (notes) and the probation included.
         $this->assertValidationError(fn () => $this->create($application, ['endDate' => '']), 'endDate', 'end_date');
         $this->assertValidationError(fn () => $this->create($application, ['weeklyHours' => '']), 'weeklyHours');
         $this->assertValidationError(fn () => $this->create($application, ['employmentType' => '']), 'employmentType', 'employment_type_required');
         $this->assertValidationError(fn () => $this->create($application, ['place' => '']), 'place', 'place_required');
-
-        $this->assertValidationError(fn () => $this->create($application, ['startDate' => '2026-10-04', 'endDate' => '2027-10-03']), 'startDate', 'start_in_past');
+        $this->assertValidationError(fn () => $this->create($application, ['notes' => '  ']), 'notes', 'notes_required');
+        $this->assertValidationError(fn () => $this->create($application, ['probationDays' => '']), 'probationDays', 'probation_required');
         $this->assertSame(0, Offer::query()->count());
+    }
+
+    /** The dates are HR's to choose — a start already past included — on create, edit and send. */
+    public function test_the_contract_dates_are_free_a_past_start_included(): void
+    {
+        $offer = $this->create($this->selected(), ['startDate' => '2026-09-01', 'endDate' => '2026-12-31']);
+        $this->assertSame('2026-09-01', $offer->currentVersion->start_date->toDateString());
+
+        $offer = $this->updateDraft($offer, ['startDate' => '2026-08-15', 'endDate' => '2027-08-14']);
+        $offer = $this->send($offer);
+        $this->assertSame([Status::Sent, '2026-08-15'], [$offer->status, $offer->currentVersion->start_date->toDateString()]);
+
+        // The end still follows the start, within the year a contract may run.
+        $this->assertValidationError(fn () => $this->create($this->selected('Other One'), ['startDate' => '2026-09-01', 'endDate' => '2026-08-01']), 'endDate', 'end_date');
     }
 
     /**
@@ -195,9 +209,12 @@ class RecruitmentJobOfferTest extends TestCase
      */
     public function test_the_probation_is_typed_freely(): void
     {
-        foreach ([['90', 90], ['400', 400], ['0', 0], ['', null], ['-5', null], ['abc', null]] as $i => [$typed, $kept]) {
+        foreach ([['90', 90], ['400', 400], ['0', 0]] as $i => [$typed, $kept]) {
             $offer = $this->create($this->selected('Probation '.$i), ['probationDays' => $typed]);
             $this->assertSame($kept, $offer->currentVersion->probation_days, "typed '{$typed}'");
+        }
+        foreach (['', '-5', 'abc'] as $typed) {
+            $this->assertValidationError(fn () => $this->create($this->selected('Probation '.$typed), ['probationDays' => $typed]), 'probationDays', 'probation_required');
         }
 
         // A draft keeps what was typed when it is opened again.
@@ -499,9 +516,9 @@ class RecruitmentJobOfferTest extends TestCase
             $this->assertStringNotContainsString('1500', json_encode($entry->properties));
         }
 
-        // Users without view-offers do not see the offer at all.
+        // Users without view-offers (and not the position's requester) do not see the offer at all.
         $reader = $this->without($this->hr, ['recruitment-applicants.view-offers']);
-        $this->actingAs($reader)->get(route('recruitment.offers.show', ['offerId' => $offer->id]))->assertForbidden();
+        $this->actingAs($reader)->get(route('recruitment.offers.show', ['offerId' => $offer->id]))->assertNotFound();
         Livewire::test(ApplicationOffer::class, ['applicationId' => $offer->application_id])->assertDontSee(__('recruitment-applicant.offers.job_offer'));
     }
 
@@ -518,6 +535,51 @@ class RecruitmentJobOfferTest extends TestCase
 
         $this->actingAs($this->hr);
         Livewire::test(OfferTable::class)->assertSee('Homs Candidate');
+    }
+
+    /**
+     * The manager who requested the position reads its offers — the list and
+     * each offer page, with the link to the applicant — and nothing more: no
+     * pay figure, no action, and no other position's offer.
+     */
+    public function test_the_requester_reads_his_positions_offers_only(): void
+    {
+        $application = $this->selected();
+        $offer = $this->send($this->create($application));
+        $requester = User::query()->findOrFail($application->vacancy->createdFromRequest->requester_user_id);
+        $elsewhere = $this->create($this->selected('Other Position', $this->makeCampaignIn($this->homs)));
+
+        $this->assertTrue($requester->can('viewAny', Offer::class));
+        $this->assertSame([$offer->id], Offer::query()->visibleTo($requester)->pluck('id')->all());
+
+        $this->actingAs($requester);
+        $this->get(route('recruitment.offers.index'))->assertOk();
+        $this->get(route('recruitment.offers.show', ['offerId' => $offer->id]))->assertOk();
+        Livewire::test(OfferTable::class)->assertSee('Candidate One')->assertDontSee('Other Position');
+        $applicantLink = route('recruitment.applicants.show', ['applicantId' => $application->applicant_id]);
+        Livewire::test(Show::class, ['offerId' => $offer->id])
+            ->assertSee($applicantLink)
+            ->assertSee(__('recruitment-applicant.offers.salary_hidden'))
+            ->assertDontSee('1,500.00')
+            ->assertDontSee(route('recruitment.offers.revise', ['offerId' => $offer->id]))
+            ->call('beginCancel')->assertForbidden();
+        $this->get(route('recruitment.offers.revise', ['offerId' => $offer->id]))->assertForbidden();
+        $this->assertThrows(fn () => $this->service()->cancel($requester, $offer->fresh(), $offer->current_version_id, 'another_candidate_chosen', null), AuthorizationException::class);
+        Livewire::test(Show::class, ['offerId' => $elsewhere->id])->assertNotFound();
+
+        // The link is shown; the applicant page itself keeps its own permission (Team 1's), untouched here.
+        $this->assertTrue($requester->can('viewApplicant', $offer));
+        $this->get($applicantLink)->assertForbidden();
+
+        // HR in scope still gets the link, as before.
+        $this->assertTrue($this->hr->can('viewApplicant', $offer));
+
+        // Another manager reaches nothing.
+        $manager = $this->makeUser($this->homs, 'manager');
+        $this->actingAs($manager);
+        $this->assertFalse($manager->can('viewAny', Offer::class));
+        $this->assertFalse($manager->can('viewApplicant', $offer));
+        Livewire::test(Show::class, ['offerId' => $offer->id])->assertNotFound();
     }
 
     /** security: there is no public offer endpoint; if one comes later it needs its own token, not an id. */
@@ -723,11 +785,11 @@ class RecruitmentJobOfferTest extends TestCase
     }
 
     /** A selected application on the Homs campaign, moved there through the decision service. */
-    private function selected(string $name = 'Candidate One'): RecruitmentApplication
+    private function selected(string $name = 'Candidate One', ?HiringCampaign $campaign = null): RecruitmentApplication
     {
         // This helper starts after a completed interview; interview coverage
         // owns the earlier recruitment stages.
-        $application = $this->applyTo($this->campaign, $this->makeApplicant($name), ['status' => AppStatus::Interviewed]);
+        $application = $this->applyTo($campaign ?? $this->campaign, $this->makeApplicant($name), ['status' => AppStatus::Interviewed]);
         $statuses = app(RecruitmentApplicationStatusService::class);
         $statuses->change($this->hr, $application, AppStatus::Interviewed, AppStatus::Selected, null);
 
@@ -746,7 +808,8 @@ class RecruitmentJobOfferTest extends TestCase
             'weeklyHours' => 40,
             'employmentType' => EmploymentType::FullTime,
             'place' => ContractPlace::Onsite,
-            'notes' => '',
+            'probationDays' => 90,
+            'notes' => 'Transport allowance included.',
         ], $overrides);
     }
 

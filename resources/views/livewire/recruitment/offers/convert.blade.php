@@ -237,7 +237,8 @@
             @endif
 
             <div class="flex flex-wrap items-center gap-3">
-                <x-primary-button type="submit" wire:loading.attr="disabled">{{ __('recruitment-applicant.conversions.confirm') }}</x-primary-button>
+                {{-- Disabled only while the hire itself runs: a field update fired by leaving an input (national number) must not disable it under the click. --}}
+                <x-primary-button type="submit" wire:target="confirmHire,save">{{ __('recruitment-applicant.conversions.confirm') }}</x-primary-button>
                 <p class="text-xs text-secondary-medium">{{ __('recruitment-applicant.conversions.confirm_hint') }}</p>
             </div>
         </form>

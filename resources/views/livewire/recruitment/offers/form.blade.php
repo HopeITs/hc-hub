@@ -90,8 +90,8 @@
                     <x-forms.input-error field="endDate" input-id="endDate" />
                 </div>
                 <div>
-                    <x-forms.input-label for="probationDays" :value="__('recruitment-applicant.offers.probation_days')" />
-                    <x-forms.input id="probationDays" type="number" model="probationDays" min="0" />
+                    <x-forms.input-label for="probationDays" required :value="__('recruitment-applicant.offers.probation_days')" />
+                    <x-forms.input id="probationDays" type="number" model="probationDays" min="0" required />
                     <x-forms.input-error field="probationDays" input-id="probationDays" />
                 </div>
                 <div>
@@ -101,8 +101,8 @@
                 </div>
             </div>
             <div>
-                <x-forms.input-label for="notes" :value="__('recruitment-applicant.offers.other_terms')" />
-                <x-forms.textarea id="notes" wire:model="notes" rows="3" />
+                <x-forms.input-label for="notes" required :value="__('recruitment-applicant.offers.other_terms')" />
+                <x-forms.textarea id="notes" wire:model="notes" rows="3" required />
                 <x-forms.input-error field="notes" input-id="notes" />
             </div>
         </section>
