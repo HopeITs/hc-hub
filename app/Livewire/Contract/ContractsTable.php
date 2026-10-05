@@ -76,6 +76,9 @@ class ContractsTable extends LivewireTable
     {
         $contract = Contract::findOrFail($payload['id']);
         Gate::authorize('manageAutoRenew', $contract);
+        // The toggle is not rendered for a terminated contract, and
+        // ContractObserver::saving() would force the flag straight back off.
+        abort_if($contract->isTerminated(), 403);
 
         $contract->update(['auto_renew' => ! $contract->auto_renew]);
 
@@ -131,6 +134,7 @@ class ContractsTable extends LivewireTable
                 'position.center.city',
                 'contractType',
                 'leaveBalances',
+                'terminationReason',
             ])
             ->when(
                 auth()->user()->activeCityId(),
@@ -256,12 +260,27 @@ class ContractsTable extends LivewireTable
 
             BooleanColumn::make(__('general.auto-renew'), 'auto_renew')->searchable(),
 
+            // The reason rides along as a tooltip rather than its own column:
+            // it only means something next to the date it explains.
+            Column::make(__('general.terminated-at'), 'terminated_at')
+                ->displayUsing(fn ($v, Model $m) => $m->isTerminated()
+                    ? Blade::render(
+                        '<span title="{{ $reason }}" class="whitespace-nowrap rounded-inset bg-red-100 px-2 py-1 text-small font-medium text-red-800">{{ $date }}</span>',
+                        [
+                            'date' => $m->terminated_at?->format('Y-m-d') ?? __('general.terminated-at'),
+                            'reason' => $m->terminationReason?->title ?? $m->reason_of_termination ?? '',
+                        ],
+                    )
+                    : '—')
+                ->sortable()
+                ->asHtml(),
+
             Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete, $canCreate, $canExport, $canManageAutoRenew): string {
                 $view = Blade::render('<x-table.show-btn :href="route(\'contracts.show\', $id)" />', ['id' => $m->getKey()]);
                 $edit = $canUpdate
                     ? Blade::render('<x-table.edit-btn :href="route(\'contracts.edit\', $id)" />', ['id' => $m->getKey()])
                     : '';
-                $autoRenew = $canManageAutoRenew
+                $autoRenew = $canManageAutoRenew && ! $m->isTerminated()
                     ? Blade::render(
                         '<x-forms.toggle-input class="p-2 text-xl" active="'.($m->auto_renew ? 1 : 0).'" :model-id="'.$m->getKey().'" wire-event="confirmToggleAutoRenew" title="'.e(__('general.auto-renew')).'" />',
                     )

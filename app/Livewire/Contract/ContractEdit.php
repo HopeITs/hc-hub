@@ -153,8 +153,9 @@ class ContractEdit extends Component
     /**
      * The termination trio is editable here, and recording one deactivates the
      * contract — the same rule ContractForm::saveTerms() has always applied.
-     * Clearing the date again does not reactivate: that is a decision for the
-     * contract list, not a side effect of tidying up a field.
+     * Clearing the date again does not reactivate, and does not switch
+     * auto-renew back on either: both are decisions for the contract list,
+     * not side effects of tidying up a field.
      */
     protected function applyComposerTermination(array $payload): void
     {
@@ -169,6 +170,13 @@ class ContractEdit extends Component
         $isTerminated = filled($this->form->terminated_at) || filled($this->form->termination_reason_id);
 
         $this->form->is_active = $isTerminated ? false : (bool) $this->contract->is_active;
+
+        // A terminated contract never rolls over. ContractObserver::saving()
+        // enforces this on every write; mirroring it here keeps the form state
+        // honest for whatever is rendered after the save.
+        if ($isTerminated) {
+            $this->form->auto_renew = false;
+        }
     }
 
     /** The termination fields belong to the section that owns them. */

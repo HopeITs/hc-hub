@@ -21,6 +21,8 @@ class ContractAutoRenewalService
             ->with(['position', 'payTiers'])
             ->where('auto_renew', true)
             ->where('is_active', false)
+            ->whereNull('terminated_at')
+            ->whereNull('termination_reason_id')
             ->whereDate('end_date', '<', $asOf->toDateString())
             ->orderBy('id')
             ->chunkById(100, function ($contracts) use ($renewed, $asOf): void {
@@ -48,6 +50,7 @@ class ContractAutoRenewalService
             if (
                 ! $source
                 || ! $source->auto_renew
+                || $source->isTerminated()
                 || $source->is_active
                 || ! $source->end_date
                 || $source->end_date->gte($asOf)
