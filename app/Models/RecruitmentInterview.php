@@ -191,8 +191,8 @@ class RecruitmentInterview extends Model
 
     /**
      * Task 8: the interviews waiting on this user's own evaluation — they sit
-     * on it in a reviewer role, it has started, it was not cancelled or
-     * missed, evaluation is still open, and they have not written one yet.
+     * on it in a reviewer role, HR recorded it as held, evaluation is still
+     * open, and they have not written one yet.
      */
     public function scopeAwaitingEvaluationBy(Builder $query, User $user): Builder
     {
@@ -200,8 +200,7 @@ class RecruitmentInterview extends Model
             ->whereHas('currentParticipants', fn (Builder $participants): Builder => $participants
                 ->where('user_id', $user->getKey())
                 ->whereIn('role', (array) config('recruitment.evaluations.reviewer_roles', [])))
-            ->whereNotIn($query->qualifyColumn('status'), [RecruitmentInterviewStatus::Cancelled, RecruitmentInterviewStatus::NoShow])
-            ->where($query->qualifyColumn('scheduled_at'), '<=', now())
+            ->where($query->qualifyColumn('status'), RecruitmentInterviewStatus::Completed)
             ->evaluationsClosed(false)
             ->whereDoesntHave('evaluations', fn (Builder $evaluations): Builder => $evaluations->where('reviewer_user_id', $user->getKey()));
     }

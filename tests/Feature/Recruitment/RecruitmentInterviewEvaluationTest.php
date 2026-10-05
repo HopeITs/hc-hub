@@ -19,6 +19,7 @@ use App\Models\RecruitmentInterviewEvaluation as Evaluation;
 use App\Models\RecruitmentInterviewParticipant as Participant;
 use App\Models\Role;
 use App\Models\User;
+use App\Notifications\RecruitmentInterviewParticipantNotice as ParticipantNotice;
 use App\Services\RecruitmentApplicationStatusService;
 use App\Services\RecruitmentInterviewEvaluationService;
 use App\Services\RecruitmentInterviewNoticeService;
@@ -29,6 +30,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use LogicException;
@@ -249,7 +251,6 @@ class RecruitmentInterviewEvaluationTest extends TestCase
 
         $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::No]);
         $this->evaluate($this->reviewerB, ['recommendation' => Recommendation::No]);
-        $this->outcome(Status::Completed);
         $statusAfterInterview = $this->application->fresh()->status;
         $this->assertSame(AppStatus::Interviewed, $statusAfterInterview, 'Interviewed comes from the interview outcome (Task 7), not from the recommendations.');
 
@@ -257,7 +258,7 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         app(RecruitmentInterviewEvaluationService::class)->correct($this->hr, $evaluation, 1, ['recommendation' => Recommendation::Yes], 'Reviewer mis-clicked the recommendation');
 
         // Nothing the evaluations did created a decision or moved the application.
-        $this->assertSame($decisionsBefore + 1, RecruitmentApplicationDecision::query()->count(), 'Only the completion transition was recorded.');
+        $this->assertSame($decisionsBefore, RecruitmentApplicationDecision::query()->count(), 'The evaluations recorded no decision.');
         $this->assertSame($statusAfterInterview, $this->application->fresh()->status);
 
         // Unanimous "no" still leaves the decision entirely to HR.
@@ -289,8 +290,9 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         $this->assertThrows(fn () => $this->evaluate($this->reviewerB), AuthorizationException::class);
         $this->evaluate($this->reviewerA);
 
-        // Taken off the interview: can no longer evaluate.
-        $this->reschedule(['participants' => [$this->reviewerB->id => Participant::ROLE_OBSERVER]]);
+        // Taken off the interview: can no longer evaluate. (A held interview
+        // is no longer edited, so the row is ended directly.)
+        Participant::query()->where('interview_id', $this->interview->id)->where('user_id', $this->reviewerA->id)->update(['removed_at' => now()]);
         $this->assertThrows(fn () => $this->evaluate($this->reviewerA, [], 1), AuthorizationException::class);
 
         // An inactive account cannot evaluate.
@@ -411,25 +413,35 @@ class RecruitmentInterviewEvaluationTest extends TestCase
     // Exceptional cases
     // ------------------------------------------------------------------
 
-    /** edge: evaluating before the interview time. */
-    public function test_evaluation_before_the_interview_starts_is_refused(): void
+    /**
+     * edge: evaluation opens when HR records the interview as held — not
+     * before its time, and not merely because its time has come.
+     */
+    public function test_evaluation_before_the_interview_is_held_is_refused(): void
     {
         $this->travelTo(Carbon::parse('2026-10-06 09:59:00'));
-        $this->assertValidationError(fn () => $this->evaluate($this->reviewerA), 'evaluation');
+        $errors = $this->assertValidationError(fn () => $this->evaluate($this->reviewerA), 'evaluation');
+        $this->assertSame(__('recruitment-applicant.evaluations.errors.not_held'), $errors['evaluation'][0]);
 
+        // Its time has come, but nobody has said it took place.
+        $this->travelTo(Carbon::parse('2026-10-06 10:00:00'));
+        $this->assertValidationError(fn () => $this->evaluate($this->reviewerA), 'evaluation');
         $this->actingAs($this->reviewerA);
         Livewire::test(EvaluationForm::class, ['interviewId' => $this->interview->id])
-            ->assertSee(__('recruitment-applicant.evaluations.errors.not_started'))
+            ->assertSee(__('recruitment-applicant.evaluations.errors.not_held'))
             ->assertDontSee(__('recruitment-applicant.evaluations.submit'));
+        $this->assertSame([], RecruitmentInterview::query()->awaitingEvaluationBy($this->reviewerA)->pluck('id')->all());
 
-        $this->travelTo(Carbon::parse('2026-10-06 10:00:00'));
+        // HR records it as held: evaluation opens.
+        $this->outcome(Status::Completed);
+        $this->assertSame([$this->interview->id], RecruitmentInterview::query()->awaitingEvaluationBy($this->reviewerA)->pluck('id')->all());
         $this->assertSame(1, $this->evaluate($this->reviewerA)->version);
     }
 
     /** edge + avoid: a cancelled interview (and a no-show) cannot be evaluated. */
     public function test_cancelled_and_no_show_interviews_cannot_be_evaluated(): void
     {
-        $this->atInterviewTime();
+        $this->travelTo(Carbon::parse('2026-10-06 11:00:00'));
         $this->scheduling()->cancel($this->hr, $this->interview->fresh(), Status::Scheduled, $this->interview->scheduled_at->toIso8601String(), 'candidate_declined', null);
 
         $errors = $this->assertValidationError(fn () => $this->evaluate($this->reviewerA), 'evaluation');
@@ -522,13 +534,12 @@ class RecruitmentInterviewEvaluationTest extends TestCase
     /** rules: evaluation can be closed after completion; reviewers then stop, HR can still correct. */
     public function test_evaluation_closes_after_completion(): void
     {
-        $this->atInterviewTime();
-        $evaluation = $this->evaluate($this->reviewerA);
-
+        $this->travelTo(Carbon::parse('2026-10-06 11:00:00'));
         $this->assertValidationError(fn () => $this->service()->close($this->hr, $this->interview->fresh(), Status::Scheduled), 'evaluation');
         $this->assertThrows(fn () => $this->service()->close($this->reviewerA, $this->interview->fresh(), Status::Scheduled), AuthorizationException::class);
 
         $this->outcome(Status::Completed);
+        $evaluation = $this->evaluate($this->reviewerA);
         $this->actingAs($this->hr);
         Livewire::test(EvaluationSummary::class, ['interviewId' => $this->interview->id])
             ->call('closeEvaluations')
@@ -563,7 +574,6 @@ class RecruitmentInterviewEvaluationTest extends TestCase
     {
         config(['recruitment.evaluations.auto_close_days' => 3]);
         $this->atInterviewTime();
-        $this->outcome(Status::Completed);
 
         $this->travelTo(Carbon::parse('2026-10-09 10:59:00'));
         $this->evaluate($this->reviewerA);
@@ -644,6 +654,20 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         $this->assertValidationError(fn () => $this->evaluate($this->reviewerA, ['recommendation' => Recommendation::Yes], 2), 'evaluation');
     }
 
+    /** Held: each reviewer is told their evaluation is needed, with a link straight to their form. */
+    public function test_reviewers_are_notified_when_the_interview_is_held(): void
+    {
+        Notification::fake();
+        $this->atInterviewTime();
+
+        $link = route('recruitment.interviews.show', ['interviewId' => $this->interview->id]).'#my-evaluation';
+        foreach ([$this->reviewerA, $this->reviewerB] as $reviewer) {
+            Notification::assertSentTo($reviewer, ParticipantNotice::class, fn (ParticipantNotice $notice): bool => $notice->kind === ParticipantNotice::EVALUATION_OPEN
+                && $notice->toArray($reviewer)['url'] === $link);
+        }
+        Notification::assertNotSentTo($this->hr, ParticipantNotice::class, fn (ParticipantNotice $notice): bool => $notice->kind === ParticipantNotice::EVALUATION_OPEN);
+    }
+
     /** scope: reviewers find the interviews waiting on their evaluation. */
     public function test_reviewers_can_list_the_interviews_waiting_for_their_evaluation(): void
     {
@@ -652,7 +676,7 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         $this->actingAs($this->reviewerA);
         $evaluateLink = route('recruitment.interviews.show', ['interviewId' => $this->interview->id]).'#my-evaluation';
 
-        // Started and not yet evaluated: waiting. The later one has not started.
+        // Held and not yet evaluated: waiting. The later one has not been held.
         $this->assertSame([$this->interview->id], RecruitmentInterview::query()->awaitingEvaluationBy($this->reviewerA)->pluck('id')->all());
         Livewire::test(Index::class)
             ->assertViewHas('waitingCount', 1)
@@ -734,9 +758,11 @@ class RecruitmentInterviewEvaluationTest extends TestCase
         ], $overrides), null);
     }
 
+    /** Evaluation opens when HR records the interview as held: after it, at 11:00. */
     private function atInterviewTime(): void
     {
         $this->travelTo(Carbon::parse('2026-10-06 11:00:00'));
+        $this->outcome(Status::Completed);
     }
 
     private function outcome(string $outcome): void

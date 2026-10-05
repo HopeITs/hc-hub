@@ -660,12 +660,14 @@ return [
                 'rescheduled' => 'An interview you are on has changed',
                 'cancelled' => 'An interview you are on was cancelled',
                 'removed' => 'You were removed from an interview',
+                'evaluation_open' => 'Your evaluation is needed',
             ],
             'line' => [
                 'scheduled' => 'You are a participant in an interview on :when.',
                 'rescheduled' => 'The interview is now on :when.',
                 'cancelled' => 'The interview on :when has been cancelled.',
                 'removed' => 'You are no longer a participant in the interview on :when.',
+                'evaluation_open' => 'The interview on :when was held. Please write your evaluation of the candidate.',
             ],
             'open' => 'Open in the system',
         ],
@@ -762,7 +764,7 @@ return [
             'withdrawn' => 'Withdrawn by HR',
         ],
         'errors' => [
-            'not_started' => 'The interview has not started yet; it can be evaluated from its start time.',
+            'not_held' => 'Evaluation opens once HR records the interview as held.',
             'cancelled' => 'This interview was cancelled and cannot be evaluated.',
             'no_show' => 'The candidate did not attend; there is nothing to evaluate.',
             'closed' => 'Evaluation of this interview is closed. HR can still correct a mistake.',

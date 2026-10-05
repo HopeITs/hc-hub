@@ -99,10 +99,15 @@ try {
 
     echo 'قواعد العمل — before the interview'.PHP_EOL;
     $early = $errors(fn () => $evaluations->submit($interviewer, $interview, ['recommendation' => Recommendation::Yes], null));
-    $check('No evaluation before the interview starts', $early !== [] && $evaluations->closedReason($interview) === 'not_started');
+    $check('No evaluation before the interview', $early !== [] && $evaluations->closedReason($interview) === 'not_held');
 
+    // Its time has come, but evaluation opens only when HR records it as held.
     Carbon::setTestNow($starts->copy()->addMinutes(70));
     $interview = $interview->fresh();
+    $check('Not at its start time either: evaluation waits until HR records it as held', $evaluations->closedReason($interview) === 'not_held'
+        && $errors(fn () => $evaluations->submit($interviewer, $interview, ['recommendation' => Recommendation::Yes], null)) !== []);
+    $interview = $scheduling->recordOutcome($hr, $interview, $interview->status, $interview->scheduled_at->toIso8601String(), Status::Completed, null)->fresh();
+    $check('Held: evaluation is open', $evaluations->closedReason($interview) === null);
 
     echo PHP_EOL.'نطاق التنفيذ — scope'.PHP_EOL;
     $statusBefore = $application->fresh()->status;
@@ -138,7 +143,7 @@ try {
     $check('Every save, correction and withdrawal is audited', count($audit) >= 3, implode(', ', $audit));
 
     echo PHP_EOL.'Closing evaluation'.PHP_EOL;
-    $held = $scheduling->recordOutcome($hr, $interview->fresh(), $interview->fresh()->status, $interview->fresh()->scheduled_at->toIso8601String(), Status::Completed, null)->fresh();
+    $held = $interview->fresh();
     $evaluations->close($hr, $held, $held->status);
     $check('Closed after the interview: reviewers can no longer save', $evaluations->closedReason($held->fresh()) === 'closed'
         && $errors(fn () => $evaluations->submit($interviewer, $held->fresh(), ['recommendation' => Recommendation::Maybe], 3)) !== []);

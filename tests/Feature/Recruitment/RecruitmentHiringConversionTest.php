@@ -330,6 +330,19 @@ class RecruitmentHiringConversionTest extends TestCase
         Notification::assertNothingSentTo(User::query()->findOrFail($offer->vacancy->createdFromRequest->requester_user_id));
     }
 
+    /** The hire page's dropdowns are the project's Select2 (x-forms.select2-input); none is a plain select. */
+    public function test_the_hire_page_uses_select2_for_every_dropdown(): void
+    {
+        [, $offer] = $this->accepted('Session Two', ['salaryPer' => SalaryPer::Session]);
+        $this->actingAs($this->hr);
+        $html = Livewire::test(Convert::class, ['offerId' => $offer->id])->html();
+
+        foreach (['nationality', 'gender', 'maritalStatus', 'sessionDuration'] as $id) {
+            $this->assertMatchesRegularExpression('/<select x-ref="select"[^>]*id="'.$id.'"/', $html, $id.' is a Select2 dropdown');
+        }
+        $this->assertSame(substr_count($html, '<select'), substr_count($html, '<select x-ref="select"'), 'No plain select is left.');
+    }
+
     /** scope: pay per session needs the session length the offer does not carry. */
     public function test_pay_per_session_needs_the_session_length(): void
     {

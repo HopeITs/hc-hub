@@ -1107,6 +1107,7 @@ class RecruitmentInterviewTest extends TestCase
 
         // Every evaluation, read-only; no form of his own to fill in.
         $this->travelTo(Carbon::parse('2026-10-08 11:00:00'));
+        $this->service()->recordOutcome($this->hr, $one->fresh(), $one->fresh()->status, $one->scheduled_at->toIso8601String(), Status::Completed, null);
         $this->evaluations()->submit($this->interviewer, $one->fresh(), ['recommendation' => Recommendation::No, 'notes' => self::SECRET_EVALUATION], null);
         $evaluation = RecruitmentInterviewEvaluation::query()->sole();
         Livewire::test(EvaluationSummary::class, ['interviewId' => $one->id])
@@ -1149,6 +1150,7 @@ class RecruitmentInterviewTest extends TestCase
         $this->assertEqualsCanonicalizing([$interview->id, $other->id], RecruitmentInterview::query()->visibleTo($requester)->pluck('id')->all());
 
         $this->travelTo(Carbon::parse('2026-10-08 11:00:00'));
+        $this->service()->recordOutcome($this->hr, $interview->fresh(), $interview->fresh()->status, $interview->scheduled_at->toIso8601String(), Status::Completed, null);
         $theirs = $this->evaluations()->submit($this->interviewer, $interview->fresh(), ['recommendation' => Recommendation::Maybe], null);
 
         $this->actingAs($requester);
@@ -1167,8 +1169,7 @@ class RecruitmentInterviewTest extends TestCase
         $this->assertFalse($requester->can('correct', $theirs));
 
         // Closed: no more saving through the form, for him as for everyone.
-        $held = $this->service()->recordOutcome($this->hr, $interview->fresh(), $interview->fresh()->status, $interview->scheduled_at->toIso8601String(), Status::Completed, null);
-        $this->evaluations()->close($this->hr, $held->fresh(), Status::Completed);
+        $this->evaluations()->close($this->hr, $interview->fresh(), Status::Completed);
         $this->assertThrows(fn () => $this->evaluations()->submit($requester, $interview->fresh(), ['recommendation' => Recommendation::No], $own->version), ValidationException::class);
     }
 

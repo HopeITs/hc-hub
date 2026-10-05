@@ -27,20 +27,20 @@
                 </div>
                 <div>
                     <x-forms.input-label for="currency" required :value="__('recruitment-applicant.offers.currency')" />
-                    <select id="currency" wire:model="currency" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
+                    <x-forms.select2-input id="currency" wire:model="currency" :hideSearch="true">
                         @foreach ($currencies as $value)
                             <option value="{{ $value }}">{{ OfferTerms::currency($value) }}</option>
                         @endforeach
-                    </select>
+                    </x-forms.select2-input>
                     <x-forms.input-error field="currency" input-id="currency" />
                 </div>
                 <div>
                     <x-forms.input-label for="salaryPer" required :value="__('recruitment-applicant.offers.salary_per')" />
-                    <select id="salaryPer" wire:model="salaryPer" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
+                    <x-forms.select2-input id="salaryPer" wire:model="salaryPer" :hideSearch="true">
                         @foreach ($salaryPers as $value)
                             <option value="{{ $value }}">{{ OfferTerms::salaryPer($value) }}</option>
                         @endforeach
-                    </select>
+                    </x-forms.select2-input>
                     <x-forms.input-error field="salaryPer" input-id="salaryPer" />
                 </div>
             </div>
@@ -51,32 +51,32 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                     <x-forms.input-label for="contractTypeId" required :value="__('recruitment-applicant.offers.contract_type')" />
-                    <select id="contractTypeId" wire:model="contractTypeId" required class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
+                    <x-forms.select2-input id="contractTypeId" wire:model="contractTypeId" required :hideSearch="true">
                         <option value="">{{ __('recruitment.choose') }}</option>
                         @foreach ($contractTypes as $type)
                             <option value="{{ $type->id }}">{{ $type->name }}</option>
                         @endforeach
-                    </select>
+                    </x-forms.select2-input>
                     <x-forms.input-error field="contractTypeId" input-id="contractTypeId" />
                 </div>
                 <div>
                     <x-forms.input-label for="employmentType" required :value="__('recruitment-applicant.offers.employment_type')" />
-                    <select id="employmentType" wire:model="employmentType" required class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
+                    <x-forms.select2-input id="employmentType" wire:model="employmentType" required :hideSearch="true">
                         <option value="">{{ __('recruitment.choose') }}</option>
                         @foreach ($employmentTypes as $value)
                             <option value="{{ $value }}">{{ OfferTerms::employmentType($value) }}</option>
                         @endforeach
-                    </select>
+                    </x-forms.select2-input>
                     <x-forms.input-error field="employmentType" input-id="employmentType" />
                 </div>
                 <div>
                     <x-forms.input-label for="place" required :value="__('recruitment-applicant.offers.place')" />
-                    <select id="place" wire:model="place" required class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body">
+                    <x-forms.select2-input id="place" wire:model="place" required :hideSearch="true">
                         <option value="">{{ __('recruitment.choose') }}</option>
                         @foreach ($places as $value)
                             <option value="{{ $value }}">{{ OfferTerms::place($value) }}</option>
                         @endforeach
-                    </select>
+                    </x-forms.select2-input>
                     <x-forms.input-error field="place" input-id="place" />
                 </div>
                 <div>

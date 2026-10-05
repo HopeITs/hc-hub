@@ -446,6 +446,14 @@ class RecruitmentInterviewSchedulingService
 
             $this->syncApplication($actor, $application);
 
+            // Held: evaluation is open now, and the reviewers are asked for theirs.
+            if ($outcome === Status::Completed) {
+                $reviewerIds = $locked->currentParticipants()
+                    ->whereIn('role', (array) config('recruitment.evaluations.reviewer_roles', []))
+                    ->pluck('user_id')->map(fn ($id): int => (int) $id)->all();
+                DB::afterCommit(fn () => $this->notifier->notify($locked, $reviewerIds, ParticipantNotice::EVALUATION_OPEN));
+            }
+
             $this->activity->log(
                 'recruitment_interview.'.$outcome,
                 subject: $locked,

@@ -8,7 +8,6 @@
     $applicant = $offer->application?->applicant;
     $vacancy = $offer->vacancy;
     $position = $offer->position;
-    $selectClass = 'w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body';
     $field = fn (string $key) => 'employee.'.$key;
 
     // The identity rule (Conversions::matches()): only the same person can be linked.
@@ -157,11 +156,11 @@
 
                         <div>
                             <x-forms.input-label for="nationality" required>{{ __('general.nationality') }}</x-forms.input-label>
-                            <select id="nationality" wire:model.live="employee.nationality" class="{{ $selectClass }}">
+                            <x-forms.select2-input id="nationality" wire:model.live="employee.nationality">
                                 @foreach (Nationality::getValues() as $value)
                                     <option value="{{ $value }}">{{ Nationality::getLocalizedName($value) }}</option>
                                 @endforeach
-                            </select>
+                            </x-forms.select2-input>
                             <x-forms.input-error field="employee.nationality" input-id="nationality" />
                         </div>
                         <div>
@@ -171,21 +170,21 @@
                         </div>
                         <div>
                             <x-forms.input-label for="gender" required>{{ __('general.gender') }}</x-forms.input-label>
-                            <select id="gender" wire:model="employee.gender" class="{{ $selectClass }}">
+                            <x-forms.select2-input id="gender" wire:model="employee.gender" :hideSearch="true">
                                 <option value="">{{ __('recruitment.choose') }}</option>
                                 <option value="{{ Gender::Male }}">{{ __('general.male') }}</option>
                                 <option value="{{ Gender::Female }}">{{ __('general.female') }}</option>
-                            </select>
+                            </x-forms.select2-input>
                             <x-forms.input-error field="employee.gender" input-id="gender" />
                         </div>
                         <div>
                             <x-forms.input-label for="maritalStatus" required>{{ __('general.marital_status') }}</x-forms.input-label>
-                            <select id="maritalStatus" wire:model="employee.maritalStatus" class="{{ $selectClass }}">
+                            <x-forms.select2-input id="maritalStatus" wire:model="employee.maritalStatus" :hideSearch="true">
                                 <option value="">{{ __('recruitment.choose') }}</option>
                                 @foreach (MaritalStatus::getValues() as $value)
                                     <option value="{{ $value }}">{{ MaritalStatus::getLocalizedName($value)['value'] }}</option>
                                 @endforeach
-                            </select>
+                            </x-forms.select2-input>
                             <x-forms.input-error field="employee.maritalStatus" input-id="maritalStatus" />
                         </div>
                         <div>
@@ -225,12 +224,12 @@
                     <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.conversions.contract_section') }}</h2>
                     <div class="max-w-xs">
                         <x-forms.input-label for="sessionDuration" required>{{ __('recruitment-applicant.conversions.session_duration') }}</x-forms.input-label>
-                        <select id="sessionDuration" wire:model="sessionDuration" class="{{ $selectClass }}">
+                        <x-forms.select2-input id="sessionDuration" wire:model="sessionDuration" :hideSearch="true">
                             <option value="">{{ __('recruitment.choose') }}</option>
                             @foreach ([SessionDuration::Hour, SessionDuration::HourAndHalf, SessionDuration::TwoHours] as $value)
                                 <option value="{{ $value }}">{{ SessionDuration::getLocalizedName($value)['value'] }}</option>
                             @endforeach
-                        </select>
+                        </x-forms.select2-input>
                         <x-forms.input-error field="sessionDuration" input-id="sessionDuration" />
                     </div>
                 </section>

@@ -632,6 +632,19 @@ class RecruitmentJobOfferTest extends TestCase
         Livewire::test(Show::class, ['offerId' => $offer->id])->assertNotFound();
     }
 
+    /** The offer form's dropdowns are the project's Select2 (x-forms.select2-input); none is a plain select. */
+    public function test_the_offer_form_uses_select2_for_every_dropdown(): void
+    {
+        $this->actingAs($this->hr);
+        $html = Livewire::test(Form::class, ['applicationId' => $this->selected()->id])->html();
+
+        foreach (['currency', 'salaryPer', 'contractTypeId', 'employmentType', 'place'] as $id) {
+            $this->assertMatchesRegularExpression('/<select x-ref="select"[^>]*id="'.$id.'"/', $html, $id.' is a Select2 dropdown');
+        }
+        $this->assertSame(substr_count($html, '<select'), substr_count($html, '<select x-ref="select"'), 'No plain select is left.');
+        $this->assertStringContainsString('initSelect2()', $html);
+    }
+
     /** security: there is no public offer endpoint; if one comes later it needs its own token, not an id. */
     public function test_no_offer_is_reachable_without_signing_in(): void
     {
