@@ -213,7 +213,7 @@ class RecruitmentRequestSubmissionService
         ], $money);
 
         return match ($type) {
-            Type::FillVacancy => $recruiting,
+            Type::FillVacancy => array_merge(['volunteers_required'], $recruiting),
             Type::IncreaseHeadcount => array_merge(['additional_count'], $recruiting),
             Type::DecreaseHeadcount => ['reduce_by', 'reason', 'effective_date'],
             Type::CreatePosition => array_merge([

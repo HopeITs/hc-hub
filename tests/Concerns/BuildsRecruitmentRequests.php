@@ -29,6 +29,7 @@ trait BuildsRecruitmentRequests
         if (in_array($type, [Type::FillVacancy, Type::IncreaseHeadcount, Type::CreatePosition], true)) {
             $values = [
                 'recruitment_reason' => 'operational_need',
+                'volunteers_required' => 1,
                 'priority' => 'normal',
                 'volunteer_type' => 'onsite',
                 'weekly_hours' => 40,

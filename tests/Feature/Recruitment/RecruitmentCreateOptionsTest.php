@@ -165,6 +165,26 @@ class RecruitmentCreateOptionsTest extends TestCase
             ->call('save')->assertHasErrors('data.vacancy_id');
     }
 
+    public function test_requested_volunteers_cannot_exceed_the_selected_vacancy_capacity(): void
+    {
+        $target = $this->child($this->root);
+        $vacancy = $this->vacancy($target, ['needed_count' => 2]);
+
+        $this->screen()
+            ->set('data.position_id', $target->id)
+            ->set('data.vacancy_id', $vacancy->id)
+            ->set('data.volunteers_required', 3)
+            ->call('save')
+            ->assertHasErrors('data.volunteers_required');
+
+        $this->screen()
+            ->set('data.position_id', $target->id)
+            ->set('data.vacancy_id', $vacancy->id)
+            ->set('data.volunteers_required', 2)
+            ->call('save')
+            ->assertHasNoErrors();
+    }
+
     public function test_availability_is_rechecked_on_save_and_edit(): void
     {
         $target = $this->child($this->root);
