@@ -166,7 +166,7 @@ class RecruitmentRequestDraftService
     {
         $type = Validator::make(['data' => $input], [
             'data.request_type' => ['required', 'integer', Rule::in(array_values(array_diff(Type::getValues(), [Type::Unknown])))],
-        ])->validate()['data']['request_type'];
+        ], [], ['data.request_type' => __('recruitment.fields.request_type')])->validate()['data']['request_type'];
         $type = (int) $type;
         $rules = ['request_type' => ['required', 'integer']];
         $rules['position_id'] = ['required', 'integer'];
@@ -222,6 +222,9 @@ class RecruitmentRequestDraftService
                 'detailed_explanation' => ['required', 'string'],
             ];
         }
+        if (in_array($type, [Type::FillVacancy, Type::CreatePosition], true)) {
+            $rules['volunteers_required'] = ['required', 'integer', 'min:1'];
+        }
         if ($type === Type::FillVacancy) {
             $rules['vacancy_id'] = ['nullable', 'integer'];
         }
@@ -245,8 +248,17 @@ class RecruitmentRequestDraftService
         foreach ($rules as $field => $rule) {
             $prefixed['data.'.$field] = $rule;
         }
-        $data = Validator::make(['data' => $input], $prefixed)->validate()['data'];
+        $attributes = collect(array_keys($rules))
+            ->mapWithKeys(fn (string $field): array => ['data.'.$field => __('recruitment.'.$field)])
+            ->all();
+        $data = Validator::make(['data' => $input], $prefixed, [], $attributes)->validate()['data'];
         $data['request_type'] = $type;
+
+        if ($type === Type::CreatePosition && (int) $data['volunteers_required'] > (int) $data['max_emp']) {
+            throw ValidationException::withMessages([
+                'data.volunteers_required' => __('recruitment.volunteers_required_exceeds_available', ['count' => $data['max_emp']]),
+            ]);
+        }
 
         return $data;
     }
@@ -354,6 +366,22 @@ class RecruitmentRequestDraftService
 
             if (! empty($data['vacancy_id']) && ! $available->contains('id', (int) $data['vacancy_id'])) {
                 throw ValidationException::withMessages(['data.vacancy_id' => __('recruitment.invalid_vacancy')]);
+            }
+
+            if (! empty($data['vacancy_id'])) {
+                $selectedVacancy = $available->firstWhere('id', (int) $data['vacancy_id']);
+                $availableSeats = $selectedVacancy
+                    ? max(0, (int) $selectedVacancy->needed_count - (int) $selectedVacancy->filled_count)
+                    : 0;
+            } else {
+                $availableSeats = $available->isNotEmpty()
+                    ? $available->sum(fn (Vacancy $vacancy): int => max(0, (int) $vacancy->needed_count - (int) $vacancy->filled_count))
+                    : max(0, (int) $target->max_emp - (int) $target->exist_emp);
+            }
+            if ((int) ($data['volunteers_required'] ?? 0) > $availableSeats) {
+                throw ValidationException::withMessages([
+                    'data.volunteers_required' => __('recruitment.volunteers_required_exceeds_available', ['count' => $availableSeats]),
+                ]);
             }
 
             // One open vacancy is picked for the requester; several mean he has

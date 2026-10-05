@@ -45,7 +45,11 @@ class FillVacancyHandler implements AppliesRecruitmentRequest
         $events = [];
 
         if ($vacancy === null) {
-            $vacancy = $this->openVacancy($request, (int) $position->getKey());
+            $vacancy = $this->openVacancy(
+                $request,
+                (int) $position->getKey(),
+                max(1, (int) ($snapshot['volunteers_required'] ?? 1)),
+            );
             $events[] = $this->vacancyCreated($vacancy);
         }
 

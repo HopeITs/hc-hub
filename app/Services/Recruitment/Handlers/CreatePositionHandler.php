@@ -60,7 +60,7 @@ class CreatePositionHandler implements AppliesRecruitmentRequest
         ]];
 
         $events[] = $this->vacancyCreated(
-            $this->openVacancy($request, (int) $position->getKey(), $maxEmp),
+            $this->openVacancy($request, (int) $position->getKey(), max(1, (int) ($snapshot['volunteers_required'] ?? $maxEmp))),
         );
 
         return $events;

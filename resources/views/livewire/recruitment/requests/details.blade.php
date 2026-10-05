@@ -219,7 +219,7 @@
                 @foreach ($draftContext as $label => $value)
                     <div><dt class="text-sm text-secondary-medium">{{ __('recruitment.'.$label) }}</dt><dd class="mt-1 break-words" dir="auto">{{ $value }}</dd></div>
                 @endforeach
-                @foreach (['title_en', 'title_ar', 'max_emp', 'qualifications', 'responsibilities', 'other_reason', 'reason', 'weekly_hours', 'needed_by_date', 'volunteer_period_start_date', 'volunteer_period_end_date', 'additional_count', 'reduce_by', 'effective_date', 'salary_amount', 'detailed_explanation'] as $field)
+                @foreach (['title_en', 'title_ar', 'max_emp', 'volunteers_required', 'qualifications', 'responsibilities', 'other_reason', 'reason', 'weekly_hours', 'needed_by_date', 'volunteer_period_start_date', 'volunteer_period_end_date', 'additional_count', 'reduce_by', 'effective_date', 'salary_amount', 'detailed_explanation'] as $field)
                     @if (isset($request->draft_payload_json[$field]) && is_scalar($request->draft_payload_json[$field]))
                         <div><dt class="text-sm text-secondary-medium">{{ __('recruitment.'.$field) }}</dt><dd class="mt-1 whitespace-pre-wrap break-words" dir="auto">{{ $request->draft_payload_json[$field] }}@if ($field === 'salary_amount') {{ \App\Enums\Currency::getLocalizedName((int) ($request->draft_payload_json['currency'] ?? 0))[app()->getLocale()] }} / {{ \App\Enums\SalaryPer::getLocalizedName((int) ($request->draft_payload_json['salary_per'] ?? 0))['value'] }}@endif</dd></div>
                     @endif
@@ -245,6 +245,16 @@
                     @endif
                 @endforeach
             </dl>
+            @php($versionSnapshot = (array) ($version->snapshot_json ?? []))
+            @if (isset($versionSnapshot['volunteers_required']) || isset($versionSnapshot['additional_count']))
+                <dl class="mt-6 grid gap-6 sm:grid-cols-2">
+                    @foreach (['volunteers_required', 'additional_count'] as $field)
+                        @if (isset($versionSnapshot[$field]))
+                            <div><dt class="text-sm text-secondary-medium">{{ __('recruitment.'.$field) }}</dt><dd class="mt-1 break-words" dir="auto">{{ $versionSnapshot[$field] }}</dd></div>
+                        @endif
+                    @endforeach
+                </dl>
+            @endif
         </section>
     @endif
     <div class="grid items-start gap-6 lg:grid-cols-2">

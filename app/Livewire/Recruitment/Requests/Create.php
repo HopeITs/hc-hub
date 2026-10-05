@@ -30,6 +30,7 @@ class Create extends Component
         'position_id' => null,
         'direct_manager_id' => null,
         'vacancy_id' => null,
+        'volunteers_required' => null,
         'city_id' => null,
         'program_id' => null,
         'center_id' => null,

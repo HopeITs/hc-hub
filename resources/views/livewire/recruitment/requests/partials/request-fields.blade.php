@@ -57,24 +57,49 @@
                     $form = config('recruitment.request_form');
                     $options = fn (string $group, string $prefix) => collect($form[$group])
                         ->mapWithKeys(fn ($value) => [$value => __('recruitment.'.$prefix.$value)])->all();
+                    $selectedPosition = $positions->firstWhere('id', (int) ($data['position_id'] ?? 0));
+                    $availableSeats = null;
+                    if ($type === \App\Enums\RecruitmentRequestType::CreatePosition) {
+                        $availableSeats = max(0, (int) ($data['max_emp'] ?? 0));
+                    } elseif ($selectedPosition) {
+                        $availableSeats = $vacancies->isNotEmpty()
+                            ? $vacancies->sum(fn ($vacancy) => max(0, (int) $vacancy->needed_count - (int) $vacancy->filled_count))
+                            : max(0, (int) $selectedPosition->max_emp - (int) $selectedPosition->exist_emp);
+                    }
                 @endphp
-                @include('livewire.recruitment.requests.partials.select', ['field' => 'recruitment_reason', 'label' => 'recruitment_reason', 'options' => $options('recruitment_reasons', 'reason_'), 'required' => true])
-                <p class="-mt-3 text-sm text-secondary-medium">{{ __('recruitment.recruitment_reason_help') }}</p>
+                <div class="grid gap-5 sm:grid-cols-2">
+                    <div>
+                        @include('livewire.recruitment.requests.partials.select', ['field' => 'recruitment_reason', 'label' => 'recruitment_reason', 'options' => $options('recruitment_reasons', 'reason_'), 'required' => true])
+                    </div>
+                    @if (in_array($type, [\App\Enums\RecruitmentRequestType::FillVacancy, \App\Enums\RecruitmentRequestType::CreatePosition], true))
+                        <div>
+                            @include('livewire.recruitment.requests.partials.input', ['field' => 'volunteers_required', 'inputType' => 'number'])
+                            @if ($type === \App\Enums\RecruitmentRequestType::FillVacancy && $availableSeats !== null)
+                                <p class="mt-2 text-sm text-secondary-medium">{{ __('recruitment.volunteers_required_help', ['count' => $availableSeats]) }}</p>
+                            @endif
+                        </div>
+                    @else
+                        @include('livewire.recruitment.requests.partials.input', ['field' => 'needed_by_date', 'inputType' => 'date'])
+                    @endif
+                </div>
                 @if (($data['recruitment_reason'] ?? null) === 'other')
                     @include('livewire.recruitment.requests.partials.textarea', ['field' => 'other_reason'])
                 @endif
                 <div class="grid gap-5 sm:grid-cols-2">
+                    @if (in_array($type, [\App\Enums\RecruitmentRequestType::FillVacancy, \App\Enums\RecruitmentRequestType::CreatePosition], true))
+                        @include('livewire.recruitment.requests.partials.input', ['field' => 'needed_by_date', 'inputType' => 'date'])
+                    @endif
                     @include('livewire.recruitment.requests.partials.select', ['field' => 'priority', 'label' => 'priority', 'options' => $options('priorities', 'priority_'), 'required' => true])
                     @include('livewire.recruitment.requests.partials.select', ['field' => 'volunteer_type', 'label' => 'volunteer_type', 'options' => $options('volunteer_types', 'volunteer_type_'), 'required' => true])
                     @include('livewire.recruitment.requests.partials.input', ['field' => 'weekly_hours', 'inputType' => 'number'])
-                    @include('livewire.recruitment.requests.partials.input', ['field' => 'needed_by_date', 'inputType' => 'date'])
                     @include('livewire.recruitment.requests.partials.input', ['field' => 'volunteer_period_start_date', 'inputType' => 'date'])
                     @include('livewire.recruitment.requests.partials.input', ['field' => 'volunteer_period_end_date', 'inputType' => 'date'])
+                    @if ($type === 2)
+                        @include('livewire.recruitment.requests.partials.input', ['field' => 'additional_count', 'inputType' => 'number'])
+                    @endif
                 </div>
             @endif
-            @if ($type === 2)
-                @include('livewire.recruitment.requests.partials.input', ['field' => 'additional_count', 'inputType' => 'number'])
-            @elseif ($type === 3)
+            @if ($type === 3)
                 @include('livewire.recruitment.requests.partials.input', ['field' => 'reduce_by', 'inputType' => 'number'])
             @endif
             @if (in_array($type, [3, 5, 6], true))
