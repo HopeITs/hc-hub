@@ -24,15 +24,19 @@ trait ResolvesPositionFormOptions
     protected function positionFormCenters(?int $cityId = null): Collection
     {
         $cityId = $this->validPositionFormCityId($cityId ?? $this->form->city_id);
-        $activeCityId = auth()->user()?->activeCityId();
+        $activeCityIds = auth()->user()?->activeCityIds();
 
         $query = Center::query()
             ->where('is_active', true)
             ->with('city');
 
-        if ($activeCityId) {
+        if ($activeCityIds !== null) {
+            // A role covering several cities narrows to the one picked in the
+            // form, as long as it is one of its own.
+            $centerCityIds = $cityId && in_array($cityId, $activeCityIds, true) ? [$cityId] : $activeCityIds;
+
             $query->where(fn ($query) => $query
-                ->where('city_id', $activeCityId)
+                ->whereIn('city_id', $centerCityIds)
                 ->orWhereNull('city_id'));
         } elseif ($cityId && ! City::isNational($cityId)) {
             $query->where(fn ($query) => $query

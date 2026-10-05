@@ -36,6 +36,15 @@ return [
         'recruitment-indicators.manage',
     ],
 
+    /*
+     * Regional HR roles that cover more than their own city, by city slug.
+     * A regional role not listed here covers exactly the city whose slug
+     * follows "HR-" in its name.
+     */
+    'hr_role_cities' => [
+        'HR-HMS' => ['HMS', 'RHO'],
+    ],
+
     'system_roles' => [
         'super-admin',
         'general-manager',

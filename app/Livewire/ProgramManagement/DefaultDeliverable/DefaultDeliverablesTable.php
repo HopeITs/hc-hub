@@ -119,10 +119,10 @@ class DefaultDeliverablesTable extends LivewireTable
 
     protected function employeeOptions(): array
     {
-        $cityId = $this->authorizedCityId();
+        $cityIds = $this->authorizedCityIds();
 
         return Employee::query()
-            ->when($cityId !== null, fn ($q) => $q->where('city_id', $cityId))
+            ->when($cityIds !== null, fn ($q) => $q->whereIn('city_id', $cityIds))
             ->whereHas('contracts', function ($query) {
                 $query->whereHas('position', function ($subQuery) {
                     $subQuery->whereHas('department', function ($q) {
@@ -141,10 +141,10 @@ class DefaultDeliverablesTable extends LivewireTable
         $loc = app()->getLocale();
         $name = $loc === 'ar' ? 'name_ar' : 'name_en';
 
-        $cityId = $this->authorizedCityId();
+        $cityIds = $this->authorizedCityIds();
 
         return City::query()
-            ->when($cityId !== null, fn ($q) => $q->whereKey($cityId))
+            ->when($cityIds !== null, fn ($q) => $q->whereKey($cityIds))
             ->whereHas('centers')
             ->pluck($name, $name)
             ->toArray();

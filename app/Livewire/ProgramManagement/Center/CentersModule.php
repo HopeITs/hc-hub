@@ -146,8 +146,8 @@ class CentersModule extends Component
 
     private function authorizedCityQuery()
     {
-        $cityId = $this->authorizedCityId();
+        $cityIds = $this->authorizedCityIds();
 
-        return $cityId === null ? City::query() : City::query()->whereKey($cityId);
+        return $cityIds === null ? City::query() : City::query()->whereKey($cityIds);
     }
 }

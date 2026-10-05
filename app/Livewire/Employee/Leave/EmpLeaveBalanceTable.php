@@ -92,10 +92,7 @@ class EmpLeaveBalanceTable extends LivewireTable
                 $qq->whereIn('direct_manager_id', $managerPos)->orWhere('tech_manager_id', $managerPos);
             });
         } else {
-            $cityCode = substr($role, 3);
-            $query->whereHas('city', function ($qq) use ($cityCode) {
-                $qq->where('slug', $cityCode);
-            });
+            $query->whereIn('city_id', $user->activeCityIds() ?? []);
         }
 
         return $query;

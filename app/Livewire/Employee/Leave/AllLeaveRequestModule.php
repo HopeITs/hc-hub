@@ -289,16 +289,16 @@ class AllLeaveRequestModule extends Component
      */
     protected function scopedEmployees(): Collection
     {
-        $role = auth()->user()->myRole();
+        $user = auth()->user();
 
-        if (! str_contains($role, 'HR-')) {
+        if (! str_contains($user->myRole(), 'HR-')) {
             return collect();
         }
 
-        $cityCode = explode('-', $role)[1];
+        $cityIds = $user->activeCityIds();
 
         return Employee::query()
-            ->when($cityCode !== 'SYR', fn ($q) => $q->whereHas('city', fn ($c) => $c->where('slug', $cityCode)))
+            ->when($cityIds !== null, fn ($q) => $q->whereIn('city_id', $cityIds))
             ->orderBy(transColumn('first_name'))
             ->get();
     }

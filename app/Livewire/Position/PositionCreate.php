@@ -21,15 +21,15 @@ class PositionCreate extends Component
 
     public function render()
     {
-        $activeCityId = auth()->user()->activeCityId();
+        $activeCityIds = auth()->user()->activeCityIds();
         $cities = City::where('is_active', true)
-            ->when($activeCityId, fn ($query) => $query->whereKey($activeCityId))
+            ->when($activeCityIds !== null, fn ($query) => $query->whereKey($activeCityIds))
             ->get();
         $programs = Program::where('is_active', true)->orderBy('name')->get();
         $centers = $this->positionFormCenters();
         $jobLevels = JobLevel::orderBy('grade')->get();
         $positions = Position::where('is_active', true)
-            ->when($activeCityId, fn ($query) => $query->inCity($activeCityId))
+            ->when($activeCityIds !== null, fn ($query) => $query->inCity($activeCityIds))
             ->with(['center', 'program'])->orderBy(transColumn('title'))->get();
 
         $departments = Department::orderby('name')->get();

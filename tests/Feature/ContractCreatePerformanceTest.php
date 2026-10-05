@@ -223,7 +223,7 @@ class ContractCreatePerformanceTest extends TestCase
     /**
      * A nationwide role is not pinned to its own profile city.
      *
-     * Which cities a user may touch is decided once, from activeCityId(). This
+     * Which cities a user may touch is decided once, from activeCityIds(). This
      * method used to narrow it a second time for any non-HR role, so a
      * general-manager was offered every position in a city and no employees at
      * all — the screen read "Nothing matches" rather than refusing outright.

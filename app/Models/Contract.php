@@ -261,6 +261,15 @@ class Contract extends Model
         return static::isRenewalOfPosition($this->renewalSourceId, $this->position_id);
     }
 
+    /**
+     * A termination is recorded by either half of it: the date, or the reason.
+     * Same rule ContractForm and ContractEdit use to deactivate on save.
+     */
+    public function isTerminated(): bool
+    {
+        return filled($this->terminated_at) || filled($this->termination_reason_id);
+    }
+
     public function getDurationAttribute()
     {
         $start_date = Carbon::parse($this->start_date);

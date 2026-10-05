@@ -40,12 +40,12 @@ trait ResolvesContractLocationOptions
 
         abort_unless($user->hasActivePermission($this->locationOptionsPermission()), 403);
 
-        $activeCityId = $user->activeCityId();
+        $activeCityIds = $user->activeCityIds();
 
         $city = City::query()
             ->whereKey($cityId)
             ->where('is_active', true)
-            ->when($activeCityId, fn ($query, int $allowedCityId) => $query->whereKey($allowedCityId))
+            ->when($activeCityIds !== null, fn ($query) => $query->whereKey($activeCityIds))
             ->first(['id', 'slug']);
 
         abort_unless($city !== null, 403);
@@ -139,7 +139,7 @@ trait ResolvesContractLocationOptions
      * someone derives their city (see contract-composer.js::onEmployeeChange()),
      * instead of requiring a city choice before anyone even appears.
      *
-     * Scoped by the same rule as locationOptions() itself (activeCityId()), so
+     * Scoped by the same rule as locationOptions() itself (activeCityIds()), so
      * this opens no wider a door than a nationwide user already has by picking
      * the "Syria" headquarters scope in the city dropdown — a city-scoped role
      * still sees only its own employees here.
@@ -155,13 +155,13 @@ trait ResolvesContractLocationOptions
         abort_unless($user->hasActivePermission($this->locationOptionsPermission()), 403);
 
         $locale = app()->getLocale();
-        $activeCityId = $user->activeCityId();
+        $activeCityIds = $user->activeCityIds();
 
         $employees = Employee::query()
             ->select('id', 'city_id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar')
             ->with(['media' => fn ($query) => $query->where('collection_name', 'avatar')])
             ->where('is_active', true)
-            ->when($activeCityId, fn ($query, int $cityId) => $query->where('city_id', $cityId))
+            ->when($activeCityIds !== null, fn ($query) => $query->whereIn('city_id', $activeCityIds))
             ->orderBy("first_name_{$locale}")
             ->orderBy("last_name_{$locale}")
             ->get();
@@ -243,8 +243,8 @@ trait ResolvesContractLocationOptions
         return City::select('id', $col)
             ->where('is_active', true)
             ->when(
-                auth()->user()?->activeCityId(),
-                fn ($query, int $cityId) => $query->whereKey($cityId),
+                auth()->user()?->activeCityIds(),
+                fn ($query, array $cityIds) => $query->whereKey($cityIds),
             )
             ->get()
             ->each(fn (City $city) => $city->name = $city->{$col});
@@ -265,13 +265,13 @@ trait ResolvesContractLocationOptions
     {
         /*
          * No role check here. Which cities this user may touch was already
-         * decided by locationOptions() above, from activeCityId(): a city-scoped
+         * decided by locationOptions() above, from activeCityIds(): a city-scoped
          * role never reaches this method with anything but its own city, and a
          * nationwide one (super-admin, general-manager, HR-SYR) is meant to
          * reach all of them.
          *
          * This method used to pin every non-HR role to its own profile city on
-         * top of that, which predates activeCityId() being the single scoping
+         * top of that, which predates activeCityIds() being the single scoping
          * rule. The two disagreed, and the narrower one won silently: a
          * general-manager was offered every position in a city and no employees
          * at all, which read as "there are none" rather than "you may not".
@@ -351,8 +351,7 @@ trait ResolvesContractLocationOptions
 
     private function validateCityConsistency(): bool
     {
-        $activeCityId = auth()->user()?->activeCityId();
-        if ($activeCityId !== null && $activeCityId !== (int) $this->city_id) {
+        if (! auth()->user()?->canAccessCity((int) $this->city_id)) {
             $this->addError('city_id', __('You may only manage contracts in your active city.'));
 
             return false;

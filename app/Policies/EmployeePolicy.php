@@ -28,7 +28,7 @@ class EmployeePolicy
     public function create(User $user, int $cityId): bool
     {
         return $user->hasActivePermission('employees.create')
-            && ($user->activeCityId() === null || $user->activeCityId() === $cityId);
+            && $user->canAccessCity($cityId);
     }
 
     public function update(User $user, Employee $employee): bool
@@ -56,8 +56,6 @@ class EmployeePolicy
 
     private function isInActiveCity(User $user, Employee $employee): bool
     {
-        $activeCityId = $user->activeCityId();
-
-        return $activeCityId === null || (int) $employee->city_id === $activeCityId;
+        return $user->canAccessCity($employee->city_id);
     }
 }

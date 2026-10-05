@@ -13,6 +13,23 @@ use Illuminate\Validation\ValidationException;
 
 class ContractObserver
 {
+    /**
+     * A terminated contract has ended for good, so it can never roll over.
+     *
+     * Enforced here rather than in the form because a termination can be
+     * saved by a role that may not touch auto_renew (ContractForm only writes
+     * the flag for HR), and because ContractAutoRenewalService picks up every
+     * inactive auto_renew contract — terminated ones included — once its
+     * end_date passes. Runs before creating(), so the default there never
+     * sees an unset flag on a terminated contract.
+     */
+    public function saving(Contract $contract): void
+    {
+        if ($contract->isTerminated()) {
+            $contract->auto_renew = false;
+        }
+    }
+
     public function creating(Contract $contract): void
     {
         // Auto-renew defaults true (right for volunteer and service

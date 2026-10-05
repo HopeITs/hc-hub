@@ -61,13 +61,13 @@ class Badge extends Model
             return $query->whereRaw('1 = 0');
         }
 
-        $cityId = $user->activeCityId();
+        $cityIds = $user->activeCityIds();
 
         return $query->when(
-            $cityId !== null,
+            $cityIds !== null,
             fn (Builder $query) => $query->whereHas(
                 'employee',
-                fn (Builder $query) => $query->where('city_id', $cityId),
+                fn (Builder $query) => $query->whereIn('city_id', $cityIds),
             ),
         );
     }

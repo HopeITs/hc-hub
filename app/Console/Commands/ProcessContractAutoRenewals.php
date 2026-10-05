@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\City;
 use App\Models\Contract;
 use App\Models\User;
 use App\Notifications\ContractsAutoRenewedSummary;
@@ -66,7 +67,7 @@ class ProcessContractAutoRenewals extends Command
             return collect();
         }
 
-        $users = $this->hrUsersForRoles(['HR-'.strtoupper($slug)]);
+        $users = $this->hrUsersForRoles(City::hrRolesForSlug($slug));
 
         return $users->isNotEmpty() ? $users : $this->hrUsersForRoles(['HR-SYR']);
     }

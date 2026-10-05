@@ -61,9 +61,7 @@ class DraftContractForm extends Form
     private function belongsToCityAndProgramRule(?int $cityId, ?int $programId): Closure
     {
         return function (string $attribute, mixed $value, Closure $fail) use ($cityId, $programId): void {
-            $activeCityId = auth()->user()?->activeCityId();
-
-            if ($activeCityId !== null && $activeCityId !== $cityId) {
+            if (! auth()->user()?->canAccessCity($cityId)) {
                 $fail(__('You may only manage employees in your active city.'));
 
                 return;

@@ -64,9 +64,9 @@ class CenterCreate extends Component
 
     public function render()
     {
-        $cityId = $this->authorizedCityId();
+        $cityIds = $this->authorizedCityIds();
 
-        $cities = ($cityId === null ? City::query() : City::query()->whereKey($cityId))
+        $cities = ($cityIds === null ? City::query() : City::query()->whereKey($cityIds))
             ->get(['id', transColumn('name')]);
 
         return view('livewire.program-management.center.center-create', compact('cities'));

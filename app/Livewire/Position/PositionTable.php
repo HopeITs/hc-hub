@@ -126,8 +126,8 @@ class PositionTable extends LivewireTable
         $query = $this->model()::query()->with(['city', 'program', 'center', 'jobLevel', 'department', 'directManager']);
 
         $query->when(
-            auth()->user()?->activeCityId(),
-            fn (Builder $query, int $cityId) => $query->inCity($cityId),
+            auth()->user()?->activeCityIds(),
+            fn (Builder $query, array $cityIds) => $query->inCity($cityIds),
         );
 
         if ($this->centerId) {
