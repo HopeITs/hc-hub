@@ -582,6 +582,56 @@ class RecruitmentJobOfferTest extends TestCase
         Livewire::test(Show::class, ['offerId' => $offer->id])->assertNotFound();
     }
 
+    /**
+     * Option A: the requester sees the salary only when granted
+     * view-offer-salary (to his role or to him), only for his own positions,
+     * and only for versions that were sent — never a draft HR is still on.
+     * He still writes nothing.
+     */
+    public function test_the_requester_with_view_offer_salary_sees_the_pay_of_sent_versions_only(): void
+    {
+        $application = $this->selected();
+        $requester = User::query()->findOrFail($application->vacancy->createdFromRequest->requester_user_id);
+        $draft = $this->create($application);
+        $this->actingAs($requester);
+
+        // Without the permission: hidden, as for any manager.
+        $this->send($draft);
+        Livewire::test(Show::class, ['offerId' => $draft->id])->assertDontSee('1,500.00')->assertSee(__('recruitment-applicant.offers.salary_hidden'));
+
+        $requester->givePermissionTo('recruitment-applicants.view-offer-salary');
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
+        $requester = $requester->fresh();
+        $this->actingAs($requester);
+
+        // Sent: the figure shows.
+        $offer = $draft->fresh();
+        $this->assertTrue($requester->can('viewSalary', $offer));
+        Livewire::test(Show::class, ['offerId' => $offer->id])->assertSee('1,500.00');
+
+        // Refused, then revised with a new figure still in draft: the draft stays hidden, the sent version stays visible.
+        $offer = $this->revise($this->respond($offer, Status::Rejected), ['salary' => '1650']);
+        $this->assertFalse($requester->can('viewSalary', $offer));
+        Livewire::test(Show::class, ['offerId' => $offer->id])
+            ->assertSee('1,500.00')
+            ->assertDontSee('1,650.00')
+            ->assertSee(__('recruitment-applicant.offers.salary_hidden'));
+
+        // Once that revision is sent, its figure shows too.
+        $offer = $this->send($offer);
+        Livewire::test(Show::class, ['offerId' => $offer->id])->assertSee('1,650.00');
+
+        // Seeing pay never means writing an offer.
+        $this->assertFalse($requester->can('manage', $offer));
+        Livewire::test(Show::class, ['offerId' => $offer->id])->call('beginCancel')->assertForbidden();
+
+        // The permission alone is not enough: another manager holding it sees nothing of this position.
+        $manager = $this->makeUser($this->homs, 'manager', ['recruitment-applicants.view-offer-salary']);
+        $this->assertFalse($manager->can('viewSalary', $offer));
+        $this->actingAs($manager);
+        Livewire::test(Show::class, ['offerId' => $offer->id])->assertNotFound();
+    }
+
     /** security: there is no public offer endpoint; if one comes later it needs its own token, not an id. */
     public function test_no_offer_is_reachable_without_signing_in(): void
     {

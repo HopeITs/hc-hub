@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentJobOffer;
+use App\Models\RecruitmentJobOfferVersion;
 use App\Models\User;
 use App\Services\RecruitmentScopeResolver;
 use Illuminate\Support\Facades\Gate;
@@ -16,7 +17,10 @@ use Illuminate\Support\Facades\Gate;
  *   Status, dates and contract terms.
  * - viewSalary: the pay figure on top of that, only for users who may see
  *   salaries at all (User::canViewSalary() — active HR role, and never
- *   super-admin, which is salary-blind by design).
+ *   super-admin, which is salary-blind by design). One exception, granted
+ *   on purpose: the position's requester holding view-offer-salary sees the
+ *   figure of each version once it was sent to the candidate — never a
+ *   draft HR is still working on.
  * - create / manage: manage-offers, in scope, and canViewSalary(): writing an
  *   offer means entering the salary, so a user who may not see figures
  *   cannot write one either.
@@ -51,9 +55,19 @@ class RecruitmentJobOfferPolicy
             || $offer->isRequestedBy($user);
     }
 
-    public function viewSalary(User $user, RecruitmentJobOffer $offer): bool
+    /** Of $version when given, otherwise of the offer's current version. */
+    public function viewSalary(User $user, RecruitmentJobOffer $offer, ?RecruitmentJobOfferVersion $version = null): bool
     {
-        return $user->canViewSalary() && $this->view($user, $offer);
+        if ($user->canViewSalary() && $this->view($user, $offer)) {
+            return true;
+        }
+
+        $version ??= $offer->currentVersion;
+
+        return $version?->sent_at !== null
+            && $user->hasActivePermission('recruitment-applicants.view-offer-salary')
+            && ! $user->activeRoleIs(...config('salary.blind_roles', []))
+            && $offer->isRequestedBy($user);
     }
 
     /** Creating the offer for this application. */
