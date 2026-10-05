@@ -216,27 +216,21 @@ class RequestTable extends LivewireTable
 
     private function requesterCell(Model $request): string
     {
-        $mine = (int) $request->requester_user_id === (int) auth()->id();
-
         return Blade::render(
             <<<'BLADE'
                 <div class="space-y-1.5">
                     <div>{{ $name }}</div>
-                    <div class="flex flex-wrap items-center gap-1.5">
-                        <span class="inline-flex h-5 items-center rounded-full px-2 text-xs leading-none font-semibold {{ $mine ? 'border border-primary text-primary' : 'bg-neutral-100 text-secondary-medium' }}">
-                            {{ __($mine ? 'recruitment.my_request' : 'recruitment.team_request') }}
-                        </span>
-                        @if ($needsReview)
+                    @if ($needsReview)
+                        <div class="flex flex-wrap items-center gap-1.5">
                             <span class="inline-flex h-5 items-center rounded-full bg-primary px-2 text-xs leading-none font-semibold text-white">
                                 {{ __('recruitment.needs_my_review') }}
                             </span>
-                        @endif
-                    </div>
+                        </div>
+                    @endif
                 </div>
                 BLADE,
             [
                 'name' => $request->requester?->profile?->name ?? $request->requester?->name ?? '—',
-                'mine' => $mine,
                 'needsReview' => isset($this->pendingReviewLookup()[(int) $request->getKey()]),
             ],
         );
@@ -365,7 +359,7 @@ class RequestTable extends LivewireTable
     {
         return Blade::render(
             '<a href="{{ $url }}" wire:navigate @class(['
-            .'"inline-flex min-h-9 w-40 items-center justify-center rounded-control px-3 py-1.5 text-center text-sm font-semibold transition", '
+            .'"inline-flex h-7 min-h-7 w-40 items-center justify-center rounded-control px-3 py-0 text-center text-sm font-semibold transition", '
             .'"border border-primary text-primary hover:bg-neutral-50" => $outlined, '
             .'"bg-primary text-white hover:bg-primary-600" => ! $outlined, '
             .'])>{{ $label }}</a>',

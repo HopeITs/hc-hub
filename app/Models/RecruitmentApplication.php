@@ -116,6 +116,11 @@ class RecruitmentApplication extends Model
         return $this->hasOne(RecruitmentRejectionNotice::class, 'application_id');
     }
 
+    public function endorsements(): HasMany
+    {
+        return $this->hasMany(RecruitmentApplicationEndorsement::class, 'application_id');
+    }
+
     public function interviews(): HasMany
     {
         return $this->hasMany(RecruitmentInterview::class, 'application_id');

@@ -10,6 +10,12 @@ use App\Livewire\Recruitment\Applicants\Index;
 use App\Livewire\Recruitment\Applicants\Notes;
 use App\Livewire\Recruitment\Applicants\Show;
 use App\Models\City;
+use App\Models\Contract;
+use App\Models\ContractType;
+use App\Models\Department;
+use App\Models\JobLevel;
+use App\Models\Position;
+use App\Models\Program;
 use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplicantNote;
@@ -129,8 +135,7 @@ class RecruitmentApplicantProfileTest extends TestCase
 
     public function test_list_is_refused_without_the_applicant_permission(): void
     {
-        // Managers follow campaigns, but applicant records are HR's.
-        $this->actingAs($this->makeUser($this->homs, 'manager', ['recruitment-campaigns.view']));
+        $this->actingAs($this->makeUser($this->homs, 'employee', ['recruitment-campaigns.view']));
 
         Livewire::test(ApplicationTable::class)->assertForbidden();
         $this->get(route('recruitment.applicants.index'))->assertForbidden();
@@ -193,6 +198,131 @@ class RecruitmentApplicantProfileTest extends TestCase
         Livewire::test(Show::class, ['applicantId' => $applicant->id])
             ->assertSee('Cityless Clara')
             ->assertSee($this->homs->name);
+    }
+
+    public function test_profile_shows_the_visible_application_form_answers(): void
+    {
+        $applicant = $this->makeApplicant('Answer Aida');
+        $homsApplication = $this->applyTo($this->makeCampaignIn($this->homs, title: 'Homs Role'), $applicant);
+        $damascusApplication = $this->applyTo($this->makeCampaignIn($this->damascus, title: 'Damascus Role'), $applicant);
+
+        foreach ([$homsApplication, $damascusApplication] as $application) {
+            $application->formVersion->forceFill([
+                'fields_json' => [
+                    ['key' => 'motivation'],
+                    ['key' => 'english_level'],
+                ],
+            ])->save();
+        }
+
+        $homsApplication->answers()->create([
+            'form_version_id' => $homsApplication->form_version_id,
+            'field_key' => 'motivation',
+            'answer_json' => ['value' => 'Built case management workflows'],
+        ]);
+        $homsApplication->answers()->create([
+            'form_version_id' => $homsApplication->form_version_id,
+            'field_key' => 'english_level',
+            'answer_json' => ['value' => 'c1_c2'],
+        ]);
+        $damascusApplication->answers()->create([
+            'form_version_id' => $damascusApplication->form_version_id,
+            'field_key' => 'motivation',
+            'answer_json' => ['value' => 'Hidden Damascus answer'],
+        ]);
+
+        app()->setLocale('en');
+        $this->actingAs($this->hr($this->homs));
+
+        Livewire::test(Show::class, ['applicantId' => $applicant->id])
+            ->assertSee(__('recruitment-applicant.application_answers.title'))
+            ->assertSee('Why are you interested in this role?')
+            ->assertSee('Built case management workflows')
+            ->assertSee('C1 - C2')
+            ->assertDontSee('Hidden Damascus answer');
+    }
+
+    public function test_managers_see_and_endorse_applicants_for_their_own_campaign_requests(): void
+    {
+        $manager = $this->managerWithPosition($this->homs);
+        $ownCampaign = $this->makeCampaignForRequester($manager, $this->homs, 'Manager Campaign');
+        $foreignCampaign = $this->makeCampaignIn($this->homs, title: 'Foreign Campaign');
+        $ownApplication = $this->applyTo($ownCampaign, $this->makeApplicant('Own Candidate'));
+        $this->applyTo($foreignCampaign, $this->makeApplicant('Hidden Candidate'));
+
+        $this->actingAs($manager);
+
+        Livewire::test(ApplicationTable::class)
+            ->assertSee('Own Candidate')
+            ->assertDontSee('Hidden Candidate')
+            ->assertSee(__('recruitment-applicant.endorsement.group_unvoted'));
+
+        Livewire::test(Show::class, ['applicantId' => $ownApplication->applicant_id])
+            ->call('endorse', $ownApplication->id)
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('recruitment_application_endorsements', [
+            'application_id' => $ownApplication->id,
+            'user_id' => $manager->id,
+            'voter_role' => 'manager',
+        ]);
+    }
+
+    public function test_campaign_applicants_are_filtered_by_distinct_hr_and_manager_shortlist_votes(): void
+    {
+        $manager = $this->managerWithPosition($this->homs);
+        $hr = $this->hr($this->homs);
+        $secondHr = $this->hr($this->homs);
+        $campaign = $this->makeCampaignForRequester($manager, $this->homs, 'Vote Campaign');
+
+        $preferred = $this->applyTo($campaign, $this->makeApplicant('Preferred Paula'), ['status' => Status::Shortlisted]);
+        $alternative = $this->applyTo($campaign, $this->makeApplicant('Alternative Amir'), ['status' => Status::Shortlisted]);
+        $hrOnlyDuplicate = $this->applyTo($campaign, $this->makeApplicant('HR Only Hana'), ['status' => Status::Shortlisted]);
+        $unvoted = $this->applyTo($campaign, $this->makeApplicant('No Vote Noor'), ['status' => Status::Shortlisted]);
+
+        Livewire::actingAs($manager)->test(Show::class, ['applicantId' => $preferred->applicant_id])->call('endorse', $preferred->id);
+        Livewire::actingAs($hr)->test(Show::class, ['applicantId' => $preferred->applicant_id])->call('endorse', $preferred->id);
+        Livewire::actingAs($manager)->test(Show::class, ['applicantId' => $alternative->applicant_id])->call('endorse', $alternative->id);
+        Livewire::actingAs($hr)->test(Show::class, ['applicantId' => $hrOnlyDuplicate->applicant_id])->call('endorse', $hrOnlyDuplicate->id);
+        Livewire::actingAs($secondHr)->test(Show::class, ['applicantId' => $hrOnlyDuplicate->applicant_id])->call('endorse', $hrOnlyDuplicate->id);
+
+        $this->actingAs($hr);
+
+        Livewire::test(Index::class)
+            ->set('activeCampaignId', $campaign->id)
+            ->assertSee(__('recruitment-applicant.endorsement.group_preferred'))
+            ->assertSee(__('recruitment-applicant.endorsement.group_alternative'))
+            ->assertSee(__('recruitment-applicant.endorsement.group_unvoted'));
+
+        Livewire::test(ApplicationTable::class, [
+            'campaignFilter' => $campaign->id,
+            'endorsementGroup' => 'preferred',
+        ])
+            ->assertSee('Preferred Paula')
+            ->assertSee(__('recruitment-applicant.interviews.schedule'))
+            ->assertDontSee('Alternative Amir')
+            ->assertDontSee('HR Only Hana')
+            ->assertDontSee('No Vote Noor');
+
+        Livewire::test(ApplicationTable::class, [
+            'campaignFilter' => $campaign->id,
+            'endorsementGroup' => 'alternative',
+        ])
+            ->assertSee('Alternative Amir')
+            ->assertSee('HR Only Hana')
+            ->assertDontSee('Preferred Paula')
+            ->assertDontSee('No Vote Noor');
+
+        Livewire::test(ApplicationTable::class, [
+            'campaignFilter' => $campaign->id,
+            'endorsementGroup' => 'unvoted',
+        ])
+            ->assertSee('No Vote Noor')
+            ->assertDontSee('Preferred Paula')
+            ->assertDontSee('Alternative Amir')
+            ->assertDontSee('HR Only Hana');
+
+        $this->assertSame(0, $unvoted->endorsements()->count());
     }
 
     // ------------------------------------------------------------------
@@ -455,6 +585,59 @@ class RecruitmentApplicantProfileTest extends TestCase
                 config('access-control.groups.recruitment-applicants'),
             ),
         ]);
+    }
+
+    private function managerWithPosition(City $city): User
+    {
+        $manager = $this->makeUser($city, 'manager', [
+            'recruitment-applicants.view',
+            'recruitment-applicants.endorse',
+            'recruitment-campaigns.view',
+        ]);
+        $program = Program::query()->forceCreate([
+            'name' => 'Manager Program '.uniqid(),
+            'code' => strtoupper(uniqid('MP')),
+            'slug' => 'manager-program-'.uniqid(),
+            'start_date' => now()->subYear(),
+            'is_active' => true,
+        ]);
+        $department = Department::query()->forceCreate(['name' => 'Department '.uniqid(), 'code' => strtoupper(uniqid('D'))]);
+        $jobLevel = JobLevel::query()->forceCreate(['name_en' => 'Manager', 'name_ar' => 'مدير', 'grade' => 2]);
+        $contractType = ContractType::query()->forceCreate(['name_en' => 'Annual', 'name_ar' => 'سنوي']);
+        $position = Position::query()->forceCreate([
+            'program_id' => $program->id,
+            'city_id' => $city->id,
+            'job_level_id' => $jobLevel->id,
+            'department_id' => $department->id,
+            'title_en' => 'Recruitment manager',
+            'title_ar' => 'Recruitment manager',
+            'max_emp' => 1,
+            'exist_emp' => 0,
+            'is_active' => true,
+        ]);
+
+        Contract::query()->forceCreate([
+            'employee_id' => $manager->employee_id,
+            'position_id' => $position->id,
+            'contract_type_id' => $contractType->id,
+            'start_date' => now()->subMonth(),
+            'end_date' => now()->addYear(),
+            'currency' => 2,
+            'salary_per' => 1,
+            'weekly_hours' => 40,
+            'is_active' => true,
+        ]);
+
+        return $manager->fresh();
+    }
+
+    private function makeCampaignForRequester(User $requester, City $city, string $title): \App\Models\HiringCampaign
+    {
+        $campaign = $this->makeCampaignIn($city, title: $title);
+        $campaign->forceFill(['created_by_user_id' => $requester->id])->save();
+        $campaign->vacancy->createdFromRequest->forceFill(['requester_user_id' => $requester->id])->save();
+
+        return $campaign->fresh(['vacancy.createdFromRequest']);
     }
 
     private function without(User $user, array $permissions): User

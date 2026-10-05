@@ -140,8 +140,8 @@
                 $availability = RecruitmentCvAvailability::of($cvFiles);
             @endphp
 
-            <article id="application-{{ $application->id }}" wire:key="application-{{ $application->id }}" class="mt-4 scroll-mt-24 rounded-surface border border-neutral-200 bg-neutral-50/40 p-4 sm:p-5">
-                <div class="flex flex-wrap items-start justify-between gap-3">
+            <details id="application-{{ $application->id }}" wire:key="application-{{ $application->id }}" class="group mt-4 scroll-mt-24 rounded-surface border border-neutral-200 bg-neutral-50/40 p-4 sm:p-5" @if ($statusApplicationId === $application->id) open @endif>
+                <summary class="flex cursor-pointer list-none flex-wrap items-start justify-between gap-3 rounded-control outline-none focus-visible:ring-2 focus-visible:ring-primary [&::-webkit-details-marker]:hidden">
                     <div class="min-w-0">
                         {{-- Focus lands here after a decision: the buttons that led to it are gone. --}}
                         <h3 id="application-{{ $application->id }}-title" tabindex="-1" class="scroll-mt-24 font-semibold wrap-break-word">
@@ -163,10 +163,13 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <x-recruitment.pill :tone="RecruitmentCvAvailability::classes($availability)" class="recruitment-badge">{{ __('recruitment-applicant.cv_availability.'.$availability) }}</x-recruitment.pill>
                         <span class="recruitment-badge rounded-control px-3 py-1 text-sm font-semibold {{ ApplicationStatus::classes($application->status) }}">{{ __('recruitment-applicant.statuses.'.$application->status) }}</span>
+                        <span class="rounded-control border border-neutral-300 bg-white px-3 py-1 text-sm font-semibold text-secondary-dark group-open:hidden">{{ __('recruitment-applicant.profile.expand_application') }}</span>
+                        <span class="hidden rounded-control border border-neutral-300 bg-white px-3 py-1 text-sm font-semibold text-secondary-dark group-open:inline-flex">{{ __('recruitment-applicant.profile.collapse_application') }}</span>
                     </div>
-                </div>
+                </summary>
 
-                <div class="mt-5 grid gap-4 xl:grid-cols-2">
+                <div class="mt-5 border-t border-neutral-200 pt-5">
+                <div class="grid gap-4 xl:grid-cols-2">
                     <section class="rounded-control border border-neutral-200 bg-white p-4">
                         <h4 class="font-semibold">{{ __('recruitment-applicant.profile.documents') }}</h4>
                         {{-- Files. The link appears only for users who may download,
@@ -200,9 +203,82 @@
                     </section>
                 </div>
 
+                @php $answerSections = $applicationAnswers[$application->id] ?? []; @endphp
+                <section class="mt-4 rounded-control border border-neutral-200 bg-white p-4">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                            <h4 class="font-semibold">{{ __('recruitment-applicant.application_answers.title') }}</h4>
+                            <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.application_answers.hint') }}</p>
+                        </div>
+                        @if ($application->formVersion)
+                            <span class="rounded-control bg-neutral-100 px-3 py-1 text-xs font-semibold text-secondary-dark">
+                                {{ __('recruitment-applicant.application_answers.form_version', ['version' => $application->formVersion->version_no]) }}
+                            </span>
+                        @endif
+                    </div>
+
+                    @if ($answerSections !== [])
+                        <div class="mt-4 grid items-start gap-3">
+                            @foreach ($answerSections as $section)
+                                <section class="h-fit self-start rounded-control border border-neutral-200 bg-neutral-50/50 p-3">
+                                    <h5 class="font-semibold">{{ $section['label'] }}</h5>
+                                    <dl class="mt-2 space-y-2">
+                                        @foreach ($section['answers'] as $answer)
+                                            <div class="rounded-control bg-white p-3 ring-1 ring-neutral-100">
+                                                <dt class="text-xs font-medium uppercase tracking-wide text-secondary-medium">{{ $answer['label'] }}</dt>
+                                                <dd class="mt-1 whitespace-pre-line text-sm font-medium text-secondary-dark wrap-break-word">{{ $answer['value'] }}</dd>
+                                            </div>
+                                        @endforeach
+                                    </dl>
+                                </section>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="mt-4 rounded-control bg-neutral-50 p-3 text-sm text-secondary-medium">{{ __('recruitment-applicant.application_answers.none') }}</p>
+                    @endif
+                </section>
+
                 <div class="mt-4 rounded-control border border-neutral-200 bg-white p-4">
                     <livewire:recruitment.applicants.application-tags :application-id="$application->id" :key="'tags-'.$application->id" />
                 </div>
+
+                {{-- Endorsement: HR and managers each cast one shortlist vote. --}}
+                @if ($canEndorse)
+                @php
+                    $myEndorsement = $endorsementService->hasEndorsed(auth()->user(), $application);
+                    $endorsementCount = $application->endorsements_count ?? $application->endorsements()->count();
+                    $hrVoted    = $application->endorsements->contains('voter_role', 'hr');
+                    $mgVoted    = $application->endorsements->contains('voter_role', 'manager');
+                @endphp
+                <section class="mt-4 rounded-control border border-neutral-200 bg-white p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h4 class="font-semibold">{{ __('recruitment-applicant.endorsement.title') }}</h4>
+                            <div class="mt-1 flex flex-wrap gap-2 text-xs">
+                                <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 {{ $hrVoted ? 'bg-primary/10 text-primary' : 'bg-neutral-100 text-secondary-medium' }}">
+                                    <span>{{ __('recruitment-applicant.endorsement.role_hr') }}</span>
+                                    @if ($hrVoted) <svg class="size-3" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg> @endif
+                                </span>
+                                <span class="inline-flex items-center gap-1 rounded-full px-2 py-0.5 {{ $mgVoted ? 'bg-primary/10 text-primary' : 'bg-neutral-100 text-secondary-medium' }}">
+                                    <span>{{ __('recruitment-applicant.endorsement.role_manager') }}</span>
+                                    @if ($mgVoted) <svg class="size-3" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0z"/></svg> @endif
+                                </span>
+                            </div>
+                        </div>
+                        @if ($myEndorsement)
+                            <button type="button" wire:click="retractEndorsement({{ $application->id }})"
+                                class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
+                                {{ __('recruitment-applicant.endorsement.retract') }}
+                            </button>
+                        @else
+                            <button type="button" wire:click="endorse({{ $application->id }})"
+                                class="cursor-pointer rounded-control border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                                {{ __('recruitment-applicant.endorsement.endorse') }}
+                            </button>
+                        @endif
+                    </div>
+                </section>
+                @endif
 
                 {{-- Decisions: one button per move this user may make. The button
                      only picks the target; the service checks it all again. --}}
@@ -335,7 +411,8 @@
                     {{-- Task 9 (Team 2): this application's job offer (view-offers only). --}}
                     <livewire:recruitment.applicants.application-offer :application-id="$application->id" :key="'offer-'.$application->id.'-'.$application->status" />
                 </section>
-            </article>
+                </div>
+            </details>
         @empty
             <p class="mt-4 text-sm text-secondary-medium">{{ __('recruitment-applicant.no_applications') }}</p>
         @endforelse
