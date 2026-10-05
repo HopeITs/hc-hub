@@ -13,8 +13,11 @@
     $fieldsBySection = collect($form['fields'])->groupBy('section');
     $stepCount = $fieldsBySection->count();
     $internal ??= null;
-    $showForm = $internal === null || $internal['state'] === 'ready';
-    $prefill = $internal['prefill'] ?? [];
+    $invitation ??= null;
+    $invitedEmail = ($invitation['state'] ?? null) === 'ready' ? $invitation['email'] : null;
+    $showForm = ($internal === null || $internal['state'] === 'ready')
+        && ($invitation === null || $invitation['state'] === 'ready');
+    $prefill = $internal['prefill'] ?? ($invitedEmail !== null ? ['email' => $invitedEmail] : []);
     $careerUrl = fn (string $language): string => route('careers.show', [
         'token' => request()->route('token'),
         'lang' => $language,
@@ -75,6 +78,10 @@
 
     @if ($internal)
         <x-recruitment.internal-applicant-card :internal="$internal" />
+    @endif
+
+    @if ($invitation)
+        <x-recruitment.invitation-card :invitation="$invitation" :token="request()->route('token')" :locale="$locale" />
     @endif
 
     @if ($submissionError)
@@ -209,6 +216,7 @@
                                 @default
                                     @php
                                         $workEmail = $internal && $key === 'email';
+                                        $invitedEmailField = $invitedEmail !== null && $field['type'] === 'email';
                                         $isPhone = $key === 'phone';
                                         $isBirthDate = $key === 'date_of_birth';
                                         $hasAgeRange = $age_range['minimum'] !== null && $age_range['maximum'] !== null;
@@ -219,7 +227,7 @@
                                         name="answers[{{ $key }}]"
                                         value="{{ $prefill[$key] ?? '' }}"
                                         placeholder="{{ $field['type'] === 'date' ? '' : __('careers.your_answer') }}"
-                                        class="mt-4 block w-full max-w-sm rounded-none border-0 border-b border-neutral-300 bg-transparent px-0 py-2 text-body shadow-none outline-none placeholder:text-neutral-500 focus:border-primary focus:ring-0 {{ in_array($field['type'], ['email', 'tel'], true) ? 'rtl:text-right' : '' }} {{ $workEmail ? 'cursor-not-allowed text-neutral-600' : '' }}"
+                                        class="mt-4 block w-full max-w-sm rounded-none border-0 border-b border-neutral-300 bg-transparent px-0 py-2 text-body shadow-none outline-none placeholder:text-neutral-500 focus:border-primary focus:ring-0 {{ in_array($field['type'], ['email', 'tel'], true) ? 'rtl:text-right' : '' }} {{ $workEmail || $invitedEmailField ? 'cursor-not-allowed text-neutral-600' : '' }}"
                                         @if ($field['type'] === 'email' || $field['type'] === 'tel') dir="ltr" @endif
                                         @if ($isPhone)
                                             inputmode="numeric"
@@ -239,7 +247,7 @@
                                                 data-age-error-message="{{ __('careers.age_ineligible', ['minimum' => $age_range['minimum'], 'maximum' => $age_range['maximum']]) }}"
                                             @endif
                                         @endif
-                                        @if ($workEmail) readonly aria-describedby="field-{{ $key }}-note" @endif
+                                        @if ($workEmail || $invitedEmailField) readonly aria-describedby="field-{{ $key }}-note" @endif
                                         @if ($field['required']) required @endif
                                     >
                                     @if ($isPhone)
@@ -255,6 +263,8 @@
                                         @endif
                                     @elseif ($workEmail)
                                         <p id="field-{{ $key }}-note" class="mt-2 text-small text-neutral-500">{{ __('careers.internal.work_email_note') }}</p>
+                                    @elseif ($invitedEmailField)
+                                        <p id="field-{{ $key }}-note" class="mt-2 text-small text-neutral-500">{{ __('careers.invitation.email_note') }}</p>
                                     @elseif (isset($prefill[$key]))
                                         <p class="mt-2 text-small text-neutral-500">{{ __('careers.internal.from_record') }}</p>
                                     @endif

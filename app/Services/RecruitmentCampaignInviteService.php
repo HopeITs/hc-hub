@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\RecruitmentCampaignLinkMode;
+use App\Jobs\SendRecruitmentCampaignInvite;
 use App\Models\HiringCampaign;
 use App\Models\RecruitmentCampaignInvite;
 use App\Models\User;
@@ -72,6 +73,8 @@ class RecruitmentCampaignInviteService
                     'full_name' => $fullName,
                     'status' => RecruitmentCampaignInvite::STATUS_PENDING,
                     'sent_at' => null,
+                    'failed_at' => null,
+                    'failure_reason' => null,
                 ])->save();
             } else {
                 // Pending or sent: an edit. A corrected name does not un-send
@@ -87,6 +90,83 @@ class RecruitmentCampaignInviteService
 
             return $invite->fresh();
         });
+    }
+
+    /**
+     * Email the application link to one invitee, or send it again.
+     *
+     * Run now rather than queued, so HR is told straight away when there is no
+     * link to send; the automatic send on adding an invite is the queued one.
+     */
+    public function send(User $actor, RecruitmentCampaignInvite $invite): void
+    {
+        Gate::forUser($actor)->authorize('manageForCampaign', [RecruitmentCampaignInvite::class, $invite->campaign]);
+
+        if ($invite->used_at !== null || ! in_array($invite->status, [
+            RecruitmentCampaignInvite::STATUS_PENDING,
+            RecruitmentCampaignInvite::STATUS_SENT,
+        ], true)) {
+            throw ValidationException::withMessages(['invite' => __('recruitment-applicants.invite_send_unavailable')]);
+        }
+
+        if (SendRecruitmentCampaignInvite::activeUrl($invite) === null) {
+            throw ValidationException::withMessages(['invite' => __('recruitment-applicants.invite_send_no_link')]);
+        }
+
+        SendRecruitmentCampaignInvite::dispatchSync($invite->getKey());
+
+        // Run now, so a refusal is known now: say why instead of reporting a send.
+        $fresh = $invite->fresh();
+        if ($fresh->hasDeliveryFailed()) {
+            throw ValidationException::withMessages([
+                'invite' => __('recruitment-applicants.invite_failure.'.$fresh->failure_reason),
+            ]);
+        }
+    }
+
+    /**
+     * Send every invitation still waiting.
+     *
+     * @return array{sent: int, failed: int}
+     */
+    public function sendPending(User $actor, HiringCampaign $campaign): array
+    {
+        Gate::forUser($actor)->authorize('manageForCampaign', [RecruitmentCampaignInvite::class, $campaign]);
+
+        $pending = $campaign->invites()->where('status', RecruitmentCampaignInvite::STATUS_PENDING)->get();
+
+        if ($pending->isNotEmpty() && SendRecruitmentCampaignInvite::activeUrl($pending->first()) === null) {
+            throw ValidationException::withMessages(['invite' => __('recruitment-applicants.invite_send_no_link')]);
+        }
+
+        $failed = 0;
+
+        foreach ($pending as $invite) {
+            SendRecruitmentCampaignInvite::dispatchSync($invite->getKey());
+
+            if ($invite->fresh()->hasDeliveryFailed()) {
+                $failed++;
+            }
+        }
+
+        return ['sent' => $pending->count() - $failed, 'failed' => $failed];
+    }
+
+    /**
+     * Is this email on the campaign's list, and still able to apply?
+     *
+     * The same test the submission makes, asked early so a person is told
+     * before filling in a form that cannot be sent.
+     */
+    public function hasActiveInvite(HiringCampaign $campaign, string $email): bool
+    {
+        $normalized = $this->identity->normalizeEmail($email);
+
+        return filter_var($normalized, FILTER_VALIDATE_EMAIL) !== false
+            && $campaign->invites()
+                ->where('email_normalized', $normalized)
+                ->whereIn('status', [RecruitmentCampaignInvite::STATUS_PENDING, RecruitmentCampaignInvite::STATUS_SENT])
+                ->exists();
     }
 
     public function cancel(User $actor, RecruitmentCampaignInvite $invite): RecruitmentCampaignInvite

@@ -16,10 +16,12 @@
     $conflicts = $matches->where('kind', Conversions::MATCH_ID_CONFLICT);
 @endphp
 
-<div class="space-y-6 p-6">
+<x-slot:title>{{ __('recruitment-applicant.conversions.title') }}</x-slot:title>
+
+<div class="space-y-6">
+    <livewire:layout.breadcrumbs :title="__('recruitment-applicant.conversions.title')" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __('recruitment-applicant.offers.title'), 'route' => 'recruitment.offers.index'], ['label' => __('recruitment-applicant.conversions.title')]]" />
     <div>
         <a href="{{ route('recruitment.offers.show', ['offerId' => $offer->id]) }}" wire:navigate class="text-sm text-primary hover:underline">&larr; {{ __('recruitment-applicant.interviews.back') }}</a>
-        <h1 class="mt-2 text-h3 font-semibold">{{ __('recruitment-applicant.conversions.title') }}</h1>
         <p class="mt-1 text-sm text-secondary-medium">
             {{ $applicant?->full_name }} &middot; {{ $position?->title }} &middot; {{ __('recruitment-applicant.offers.document_title') }} v{{ $version?->version_no }}
         </p>

@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Jobs\SendRecruitmentCampaignInvite;
 use App\Models\RecruitmentCampaignInvite;
 use Illuminate\Validation\ValidationException;
 
@@ -22,6 +23,29 @@ use Illuminate\Validation\ValidationException;
  */
 class RecruitmentCampaignInviteObserver
 {
+    /**
+     * A new invitation is emailed its link when the campaign already has one.
+     *
+     * Here rather than in either service so that both screens that add invites
+     * (and Team 1's publishing page, which we do not touch) behave the same.
+     * Without an active link the invitation stays pending, and HR sends it once
+     * the link exists.
+     */
+    public function created(RecruitmentCampaignInvite $invite): void
+    {
+        $this->send($invite);
+    }
+
+    /** Re-adding a cancelled invitation is inviting that person again. */
+    public function updated(RecruitmentCampaignInvite $invite): void
+    {
+        if ($invite->wasChanged('status')
+            && $invite->status === RecruitmentCampaignInvite::STATUS_PENDING
+            && $invite->getOriginal('status') === RecruitmentCampaignInvite::STATUS_CANCELLED) {
+            $this->send($invite);
+        }
+    }
+
     public function updating(RecruitmentCampaignInvite $invite): void
     {
         $wasUsed = $invite->getOriginal('used_at') !== null
@@ -31,6 +55,14 @@ class RecruitmentCampaignInviteObserver
             throw ValidationException::withMessages([
                 'inviteEmail' => __('recruitment-applicants.invite_already_used'),
             ]);
+        }
+    }
+
+    private function send(RecruitmentCampaignInvite $invite): void
+    {
+        if ($invite->status === RecruitmentCampaignInvite::STATUS_PENDING
+            && SendRecruitmentCampaignInvite::activeUrl($invite) !== null) {
+            SendRecruitmentCampaignInvite::dispatch($invite->getKey())->afterCommit();
         }
     }
 }

@@ -8,6 +8,7 @@ use App\Services\InternalRecruitmentApplicantService;
 use App\Services\Monitoring\SecurityMonitor;
 use App\Services\PublicRecruitmentApplicationService;
 use App\Services\PublicRecruitmentLinkService;
+use App\Services\RecruitmentCampaignInviteService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -32,6 +33,7 @@ class PublicCareerController extends Controller
             ...$page,
             'locale' => $locale,
             'internal' => $this->internalState($request, $token, $service, $locale),
+            'invitation' => $this->invitationState($request, $token, $service),
             'submissionError' => null,
             'submissionErrors' => [],
             'submissionKey' => bin2hex(random_bytes(32)),
@@ -62,6 +64,59 @@ class PublicCareerController extends Controller
 
         return redirect()->setIntendedUrl($back)
             ->to(LaravelLocalization::getLocalizedURL($locale, route('login')));
+    }
+
+    /**
+     * "Is this address invited?", asked before the form instead of after it.
+     *
+     * An invitation-only vacancy shows its form only to an address on the list.
+     * The verified address is kept in the visitor's session, and read back
+     * through the list again on every page view, so cancelling an invitation
+     * closes the form even for somebody who already passed this step.
+     */
+    public function checkInvitation(
+        Request $request,
+        string $token,
+        PublicRecruitmentLinkService $links,
+        RecruitmentCampaignInviteService $invites,
+        SecurityMonitor $monitor,
+    ): RedirectResponse|Response {
+        $locale = $this->setLocale($request);
+
+        try {
+            $page = $links->publicPage($token);
+            $campaign = $links->campaignForPage($token);
+        } catch (PublicRecruitmentUnavailableException) {
+            $monitor->tokenProbe($request, $token);
+
+            return $this->unavailable();
+        }
+
+        if (! $campaign->isInvitationOnly()) {
+            return redirect()->route('careers.show', ['token' => $token, 'lang' => $locale], 303);
+        }
+
+        $email = Str::lower(trim((string) $request->input('invitee_email')));
+
+        if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
+            $error = __('careers.invitation.invalid_email');
+        } elseif (! $invites->hasActiveInvite($campaign, $email)) {
+            $error = __('careers.invitation.not_listed');
+        } else {
+            $request->session()->put($this->invitationSessionKey($token), $email);
+
+            return redirect()->route('careers.show', ['token' => $token, 'lang' => $locale], 303);
+        }
+
+        return response()->view('recruitment.careers.show', [
+            ...$page,
+            'locale' => $locale,
+            'internal' => null,
+            'invitation' => ['state' => 'check', 'error' => $error],
+            'submissionError' => null,
+            'submissionErrors' => [],
+            'submissionKey' => bin2hex(random_bytes(32)),
+        ], 422);
     }
 
     public function submitted(Request $request, string $token): Response
@@ -109,6 +164,7 @@ class PublicCareerController extends Controller
                 ...$page,
                 'locale' => $locale,
                 'internal' => $this->internalState($request, $token, $links, $locale),
+                'invitation' => $this->invitationState($request, $token, $links),
                 'submissionError' => $message,
                 'submissionErrors' => $exception instanceof PublicRecruitmentSubmissionException
                     ? collect($exception->errors)->flatten()->unique()->values()->all()
@@ -158,6 +214,37 @@ class PublicCareerController extends Controller
             'profile' => $staff->profile($user, $employee, $locale),
             'prefill' => $staff->prefill($user, $employee, $locale),
         ];
+    }
+
+    /**
+     * Where an invitation-only vacancy's visitor stands: still to say which
+     * address they were invited with, or let through with it. Null for any
+     * other campaign.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function invitationState(Request $request, string $token, PublicRecruitmentLinkService $links): ?array
+    {
+        $campaign = $links->campaignForPage($token);
+        if (! $campaign->isInvitationOnly()) {
+            return null;
+        }
+
+        $email = $request->session()->get($this->invitationSessionKey($token));
+
+        if (is_string($email) && app(RecruitmentCampaignInviteService::class)->hasActiveInvite($campaign, $email)) {
+            return ['state' => 'ready', 'email' => $email];
+        }
+
+        $request->session()->forget($this->invitationSessionKey($token));
+
+        return ['state' => 'check', 'error' => null];
+    }
+
+    /** Hashed, so the token never sits in the session store as it is in the URL. */
+    private function invitationSessionKey(string $token): string
+    {
+        return 'careers.invitee.'.hash('sha256', $token);
     }
 
     private function setLocale(Request $request): string

@@ -1,13 +1,8 @@
 <x-slot:title>{{ __('recruitment.details') }} · {{ $request->request_number }}</x-slot:title>
 
 <div class="space-y-6">
-    <a class="text-primary hover:underline" href="{{ route('recruitment.requests.index') }}">{{ __('recruitment.back') }}</a>
-
     <header class="flex flex-wrap items-start justify-between gap-4">
-        <div>
-            <p class="text-secondary-medium">{{ __('recruitment.details') }}</p>
-            <h1 class="text-h2 font-semibold text-secondary-dark" dir="auto">{{ $request->request_number }}</h1>
-        </div>
+        <livewire:layout.breadcrumbs :title="$request->request_number" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __('recruitment.navigation_requests'), 'route' => 'recruitment.requests.index'], ['label' => $request->request_number]]" />
         <div class="flex flex-wrap items-center gap-3">
             <span class="rounded-full bg-secondary-soft/60 px-4 py-2 text-sm font-semibold">{{ \App\Enums\RecruitmentRequestStatus::getLocalizedName($request->status)['value'] }}</span>
             @can('update', $request)

@@ -22,11 +22,13 @@
             ->values();
     }
 @endphp
-<div class="space-y-6 p-6">
-    <div class="flex flex-wrap items-end justify-between gap-4">
+<x-slot:title>{{ __($t.'title') }}</x-slot:title>
+
+<div class="space-y-6">
+    <div class="flex flex-wrap items-start justify-between gap-4">
         <div>
-            <h1 class="text-h3 font-semibold">{{ __($t.'title') }}</h1>
-            <p class="mt-1 text-body text-secondary-medium">{{ __($t.'index_hint') }}</p>
+            <livewire:layout.breadcrumbs :title="__($t.'title')" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __($t.'title')]]" />
+            <p class="text-body text-secondary-medium">{{ __($t.'index_hint') }}</p>
         </div>
 
         {{-- A view switch, not tabs: two pressed-state buttons, so assistive tech is not promised arrow-key tab behaviour. --}}

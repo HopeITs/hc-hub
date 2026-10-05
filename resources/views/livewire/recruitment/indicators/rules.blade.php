@@ -66,8 +66,8 @@
     {{-- Heading ---------------------------------------------------------- --}}
     <header class="flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
         <div class="max-w-3xl">
-            <h1 class="text-h2 font-semibold text-neutral-900">{{ $t('title') }}</h1>
-            <p class="mt-2 text-body text-secondary-medium">{{ $t('hint') }} {{ $t('sources_statement') }}</p>
+            <livewire:layout.breadcrumbs :title="$t('title')" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => $t('title')]]" />
+            <p class="text-body text-secondary-medium">{{ $t('hint') }} {{ $t('sources_statement') }}</p>
         </div>
         <dl class="flex flex-wrap items-center gap-2 text-small">
             <dt class="sr-only">{{ $t('version_short') }}</dt>

@@ -35,6 +35,35 @@ class Invites extends Component
         Gate::authorize('manageForCampaign', [RecruitmentCampaignInvite::class, $this->campaign]);
     }
 
+    public function sendPending(RecruitmentCampaignInviteService $invites): void
+    {
+        try {
+            ['sent' => $count, 'failed' => $failed] = $invites->sendPending(auth()->user(), $this->campaign);
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $this->addError('send', collect($exception->errors())->collapse()->first());
+
+            return;
+        }
+
+        $this->resetErrorBag('send');
+
+        if ($count === 0 && $failed === 0) {
+            $this->addError('send', __('recruitment-applicants.invites_none_pending'));
+
+            return;
+        }
+
+        if ($count > 0) {
+            $this->successToast(__('recruitment-applicants.invites_sent_toast', ['count' => $count]));
+        }
+
+        if ($failed > 0) {
+            $this->addError('send', __('recruitment-applicants.invites_failed_notice', ['count' => $failed]));
+        }
+
+        $this->dispatch('refreshLivewireTable');
+    }
+
     public function add(RecruitmentCampaignInviteService $invites): void
     {
         $this->validate([

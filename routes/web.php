@@ -40,6 +40,9 @@ Route::get('/careers/{token}/submitted', [PublicCareerController::class, 'submit
 Route::get('/careers/{token}/sign-in', [PublicCareerController::class, 'signIn'])
     ->middleware('throttle:careers-view')
     ->name('careers.sign-in');
+Route::post('/careers/{token}/invitation', [PublicCareerController::class, 'checkInvitation'])
+    ->middleware('throttle:careers-invitation')
+    ->name('careers.invitation');
 Route::post('/careers/{token}/applications', [PublicCareerController::class, 'store'])
     ->middleware('throttle:careers-submit')
     ->name('careers.submit');
