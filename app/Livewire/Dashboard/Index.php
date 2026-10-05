@@ -41,6 +41,7 @@ class Index extends Component
         $programId = $this->contract->position->program_id ?? null;
 
         $birthdays = Employee::query()
+            ->where('is_active', true)
             ->whereNotNull('dob')
             ->whereDay('dob', $today->day)
             ->whereMonth('dob', $today->month)
@@ -164,6 +165,7 @@ class Index extends Component
         $deptCol = $locale === 'ar' ? 'name_ar' : 'name_en';
 
         return Employee::query()
+            ->where('is_active', true)
             ->whereNotNull('dob')
             ->get()
             ->filter(function ($emp) use ($start, $end) {
