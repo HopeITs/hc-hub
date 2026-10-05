@@ -330,6 +330,21 @@ class ContractAutoRenewalWorkflowTest extends TestCase
         $this->assertFalse($contract->auto_renew);
     }
 
+    public function test_contract_card_has_a_termination_row_shown_only_when_terminated(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $contract = $this->makeContract(
+            $fixtures,
+            $this->makeEmployee($fixtures['city'], 'terminated-card'),
+            $this->makePosition($fixtures, 'Terminated Card Position'),
+        );
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractEdit::class, ['contract' => $contract])
+            ->assertSeeHtml('x-show="isTerminated"')
+            ->assertSeeHtml('x-text="cardTerminated"');
+    }
+
     public function test_a_termination_saved_on_the_model_switches_auto_renew_off(): void
     {
         $fixtures = $this->makeFixtures();

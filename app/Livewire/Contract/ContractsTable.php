@@ -227,6 +227,20 @@ class ContractsTable extends LivewireTable
                     'start' => $m->start_date,
                     'end' => $m->end_date,
                 ]))->asHtml(),
+            // The reason rides along as a tooltip rather than its own column:
+            // it only means something next to the date it explains.
+            Column::make(__('general.terminated-at'), 'terminated_at')
+                ->displayUsing(fn ($v, Model $m) => $m->isTerminated()
+                    ? Blade::render(
+                        '<span title="{{ $reason }}" class="px-2 py-1 font-medium text-red-800 bg-red-100 whitespace-nowrap rounded-inset text-small">{{ $date }}</span>',
+                        [
+                            'date' => $m->terminated_at?->format('Y-m-d') ?? __('general.terminated-at'),
+                            'reason' => $m->terminationReason?->title ?? $m->reason_of_termination ?? '',
+                        ],
+                    )
+                    : '—')
+                ->sortable()
+                ->asHtml(),
 
             Column::make(__('general.yearly-leave-days'), 'leaveBalances')
                 ->displayUsing(fn ($m) => $m[0]->deserved_formatted ?? 0)
@@ -259,21 +273,6 @@ class ContractsTable extends LivewireTable
             BooleanColumn::make(__('general.status'), 'is_active')->searchable(),
 
             BooleanColumn::make(__('general.auto-renew'), 'auto_renew')->searchable(),
-
-            // The reason rides along as a tooltip rather than its own column:
-            // it only means something next to the date it explains.
-            Column::make(__('general.terminated-at'), 'terminated_at')
-                ->displayUsing(fn ($v, Model $m) => $m->isTerminated()
-                    ? Blade::render(
-                        '<span title="{{ $reason }}" class="whitespace-nowrap rounded-inset bg-red-100 px-2 py-1 text-small font-medium text-red-800">{{ $date }}</span>',
-                        [
-                            'date' => $m->terminated_at?->format('Y-m-d') ?? __('general.terminated-at'),
-                            'reason' => $m->terminationReason?->title ?? $m->reason_of_termination ?? '',
-                        ],
-                    )
-                    : '—')
-                ->sortable()
-                ->asHtml(),
 
             Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete, $canCreate, $canExport, $canManageAutoRenew): string {
                 $view = Blade::render('<x-table.show-btn :href="route(\'contracts.show\', $id)" />', ['id' => $m->getKey()]);

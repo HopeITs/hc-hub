@@ -56,16 +56,22 @@
             ['key' => trans_choice('general.contract-type', 1), 'value' => 'cardType'],
             ['key' => __('general.start-date'),             'value' => 'cardStart'],
             ['key' => __('general.end-date'),               'value' => 'cardEnd'],
-            ['key' => __('general.period'),                 'value' => 'cardPeriod'],
+            // Only once a termination is entered — never on create, where the
+            // termination section does not exist.
+            ['key' => __('general.terminated-at'),          'value' => 'cardTerminated', 'when' => 'isTerminated', 'danger' => true],
+            ['key' => __('general.period'),               'value' => 'cardPeriod'],
             ['key' => __('general.work-days'),              'value' => 'cardWorkDays'],
             ['key' => __('general.weekly-hours'),           'value' => 'cardHours'],
             ['key' => __('general.salary'),                 'value' => 'cardSalary'],
         ] as $row)
-            <div class="flex max-h-14 min-h-[1.75rem] flex-1 items-center justify-between gap-3 border-b border-neutral-100 py-1 last:border-b-0">
+            <div class="flex max-h-14 min-h-[1.75rem] flex-1 items-center justify-between gap-3 border-b border-neutral-100 py-1 last:border-b-0"
+                 @isset($row['when']) x-show="{{ $row['when'] }}" x-cloak @endisset>
                 <dt class="shrink-0 text-caption text-secondary-medium">{{ $row['key'] }}</dt>
                 <dd
                     class="min-w-0 truncate text-end text-small font-medium tabular-nums"
-                    @if($row['accent'] ?? false)
+                    @if($row['danger'] ?? false)
+                        x-bind:class="'font-semibold text-primary'"
+                    @elseif($row['accent'] ?? false)
                         x-bind:class="capacity && capacity.left === 0
                             ? 'font-semibold text-primary'
                             : ({{ $row['value'] }} === '—' ? 'text-neutral-300' : 'text-neutral-900')"
