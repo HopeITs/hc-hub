@@ -4,13 +4,13 @@
     use App\Models\RecruitmentInterviewParticipant;
     use App\Services\RecruitmentInterviewSchedulingService;
 @endphp
-<div class="space-y-6 p-6">
+<x-slot:title>{{ $interview ? __('recruitment-applicant.interviews.edit_title') : __('recruitment-applicant.interviews.schedule_title') }}</x-slot:title>
+
+<div class="space-y-6">
+    <livewire:layout.breadcrumbs :title="($interview ? __('recruitment-applicant.interviews.edit_title') : __('recruitment-applicant.interviews.schedule_title'))" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __('recruitment-applicant.interviews.title'), 'route' => 'recruitment.interviews.index'], ['label' => $interview ? __('recruitment-applicant.interviews.edit_title') : __('recruitment-applicant.interviews.schedule_title')]]" />
     <div>
         <a href="{{ $interview ? route('recruitment.interviews.show', ['interviewId' => $interview->id]) : route('recruitment.applicants.show', ['applicantId' => $application->applicant_id]) }}"
            wire:navigate class="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-secondary-dark transition hover:text-secondary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-0"><svg class="size-4 rtl:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12.5 15 7.5 10l5-5"/></svg> {{ __('recruitment-applicant.interviews.back') }}</a>
-        <h1 class="mt-2 text-h3 font-semibold">
-            {{ $interview ? __('recruitment-applicant.interviews.edit_title') : __('recruitment-applicant.interviews.schedule_title') }}
-        </h1>
         <p class="mt-1 text-sm text-secondary-medium">
             {{ $application->applicant?->full_name }}
             &middot; {{ $application->campaign?->vacancy?->position?->title ?? __('recruitment-applicant.no_vacancy') }}

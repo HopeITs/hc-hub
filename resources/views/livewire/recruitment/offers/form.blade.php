@@ -1,9 +1,11 @@
 @php use App\Support\Recruitment\OfferTerms; @endphp
-<div class="space-y-6 p-6">
+<x-slot:title>{{ __('recruitment-applicant.offers.form_title.'.$mode) }}</x-slot:title>
+
+<div class="space-y-6">
+    <livewire:layout.breadcrumbs :title="__('recruitment-applicant.offers.form_title.'.$mode)" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __('recruitment-applicant.offers.title'), 'route' => 'recruitment.offers.index'], ['label' => __('recruitment-applicant.offers.form_title.'.$mode)]]" />
     <div>
         <a href="{{ $offerId ? route('recruitment.offers.show', ['offerId' => $offerId]) : route('recruitment.applicants.show', ['applicantId' => $application->applicant_id]) }}"
            wire:navigate class="text-sm text-primary hover:underline">&larr; {{ __('recruitment-applicant.interviews.back') }}</a>
-        <h1 class="mt-2 text-h3 font-semibold">{{ __('recruitment-applicant.offers.form_title.'.$mode) }}</h1>
         <p class="mt-1 text-sm text-secondary-medium">
             {{ $application->applicant?->full_name }}
             &middot; {{ $application->campaign?->vacancy?->position?->title ?? __('recruitment-applicant.no_vacancy') }}

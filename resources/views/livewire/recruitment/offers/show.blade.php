@@ -9,11 +9,10 @@
     $personName = fn ($user) => $user?->profile?->name ?? $user?->email ?? '—';
 @endphp
 
-<div class="space-y-6 p-6">
+<x-slot:title>{{ __('recruitment-applicant.offers.document_title') }}</x-slot:title>
 
-    <div class="flex flex-wrap items-center justify-between gap-3">
-        <a href="{{ route('recruitment.offers.index') }}" wire:navigate class="text-sm font-medium text-primary hover:underline">&larr; {{ __('recruitment-applicant.offers.all') }}</a>
-    </div>
+<div class="space-y-6">
+    <livewire:layout.breadcrumbs :title="__('recruitment-applicant.offers.document_title')" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __('recruitment-applicant.offers.title'), 'route' => 'recruitment.offers.index'], ['label' => __('recruitment-applicant.offers.document_title')]]" />
 
     @error('offer')
         <p role="alert" class="rounded-control border border-primary bg-primary/5 p-3 text-sm text-primary">{{ $message }}</p>

@@ -12,11 +12,16 @@
 
     `current` is 'requests' or 'team'.
 --}}
+@php
+    $crumbs = $current === 'team'
+        ? [['label' => __('recruitment.navigation_section')], ['label' => __('recruitment.navigation_requests'), 'route' => 'recruitment.requests.index'], ['label' => $title]]
+        : [['label' => __('recruitment.navigation_section')], ['label' => $title]];
+@endphp
 <div class="space-y-6">
     <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
         <div class="min-w-0">
-            <h1 class="text-h2 font-semibold text-secondary-dark">{{ $title }}</h1>
-            <p class="mt-2 max-w-2xl text-secondary-medium">{{ $description }}</p>
+            <livewire:layout.breadcrumbs :title="$title" :crumbs="$crumbs" />
+            <p class="max-w-2xl text-secondary-medium">{{ $description }}</p>
         </div>
 
         {{-- The primary action stays here on both tabs, so it never moves as

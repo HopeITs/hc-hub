@@ -1,8 +1,10 @@
-<div class="space-y-6 p-4 sm:p-6">
-    <div>
-        <h1 id="applicants-title" tabindex="-1" class="scroll-mt-24 text-h3 font-semibold">{{ __('recruitment-applicant.applicants') }}</h1>
-        <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.applicants_hint') }}</p>
-    </div>
+<x-slot:title>{{ __('recruitment-applicant.applicants') }}</x-slot:title>
+
+<div class="space-y-6">
+    <livewire:layout.breadcrumbs :title="__('recruitment-applicant.applicants')" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __('recruitment-applicant.applicants')]]" />
+    {{-- Where focus returns after a bulk action; the visible title is the breadcrumb above. --}}
+    <span id="applicants-title" tabindex="-1" class="sr-only scroll-mt-24">{{ __('recruitment-applicant.applicants') }}</span>
+    <p class="-mt-4 text-body text-secondary-medium">{{ __('recruitment-applicant.applicants_hint') }}</p>
 
     @php
         $reviewStatuses = [
