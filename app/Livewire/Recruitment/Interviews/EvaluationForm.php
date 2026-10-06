@@ -17,7 +17,7 @@ use Livewire\Component;
  *
  * Only ever loads the current user's own evaluation — never another
  * reviewer's. The version it was opened on is locked here and checked by the
- * service, so a save from a stale tab (or over an HR correction) is refused
+ * service, so a save from a stale tab is refused
  * rather than overwriting what is stored.
  */
 class EvaluationForm extends Component

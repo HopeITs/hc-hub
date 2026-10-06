@@ -1080,9 +1080,10 @@ class RecruitmentInterviewTest extends TestCase
         $evaluation = RecruitmentInterviewEvaluation::query()->sole();
         Livewire::test(EvaluationSummary::class, ['interviewId' => $one->id])
             ->assertSee(self::SECRET_EVALUATION)
-            ->assertDontSeeHtml('id="evaluation-'.$evaluation->id.'-correct"')
-            ->call('beginCorrect', $evaluation->id)->assertForbidden();
+            ->assertDontSeeHtml('id="evaluation-'.$evaluation->id.'-note"')
+            ->call('beginNote', $evaluation->id)->assertForbidden();
         $this->assertFalse($requester->can('correct', $evaluation));
+        $this->assertFalse($requester->can('addNote', $evaluation));
         $this->assertThrows(fn () => $this->evaluations()->submit($requester, $one->fresh(), ['recommendation' => Recommendation::Yes], null), AuthorizationException::class);
 
         // Another position's interview stays out of reach.

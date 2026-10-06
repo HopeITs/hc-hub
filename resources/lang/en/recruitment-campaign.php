@@ -47,6 +47,11 @@ return [
         'public_open' => 'Open to the public through a shared link.',
         'invitation_only' => 'Only people whose name and email are added in advance.',
     ],
+    'notify' => [
+        'restricted_launched_subject' => 'A restricted hiring campaign was launched',
+        'restricted_launched_line' => 'Campaign #:campaign was launched for :audience applicants. Open it in HC-HR to review the details.',
+        'open_campaign' => 'Open campaign',
+    ],
     'starts_at' => 'Starts',
     'ends_at' => 'Ends',
     'window' => 'Window',

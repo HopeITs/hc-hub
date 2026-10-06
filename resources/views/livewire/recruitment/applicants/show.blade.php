@@ -109,7 +109,9 @@
     <nav aria-label="{{ __('recruitment-applicant.profile.quick_navigation') }}" class="flex flex-wrap gap-2 rounded-surface border border-neutral-200 bg-white p-3 shadow-e1">
         <a href="#profile-overview" class="rounded-control px-3 py-2 text-sm font-semibold text-secondary-dark hover:bg-neutral-100 hover:text-primary">{{ __('recruitment-applicant.profile.overview') }}</a>
         <a href="#applications" class="rounded-control px-3 py-2 text-sm font-semibold text-secondary-dark hover:bg-neutral-100 hover:text-primary">{{ __('recruitment-applicant.profile.applications') }}</a>
-        <a href="#internal-notes" class="rounded-control px-3 py-2 text-sm font-semibold text-secondary-dark hover:bg-neutral-100 hover:text-primary">{{ __('recruitment-applicant.profile.internal_notes') }}</a>
+        @if ($canViewInternalNotes)
+            <a href="#internal-notes" class="rounded-control px-3 py-2 text-sm font-semibold text-secondary-dark hover:bg-neutral-100 hover:text-primary">{{ __('recruitment-applicant.profile.internal_notes') }}</a>
+        @endif
     </nav>
 
     @if ($applications->count() > 1)
@@ -138,6 +140,7 @@
                 $campaignOpen = in_array($effective, [HiringCampaignStatus::Published, HiringCampaignStatus::Open], true);
                 $cvFiles = $application->files->where('file_type', \App\Models\RecruitmentApplicantFile::TYPE_CV);
                 $availability = RecruitmentCvAvailability::of($cvFiles);
+                $isDelegated = ! $normalScopeApplicationIds->contains($application->id);
             @endphp
 
             <details id="application-{{ $application->id }}" wire:key="application-{{ $application->id }}" class="group mt-4 scroll-mt-24 rounded-surface border border-neutral-200 bg-neutral-50/40 p-4 sm:p-5" @if ($statusApplicationId === $application->id) open @endif>
@@ -238,12 +241,16 @@
                     @endif
                 </section>
 
+                <livewire:recruitment.applicants.application-review-panel :application-id="$application->id" :key="'application-reviews-'.$application->id" />
+
+                @unless ($isDelegated)
                 <div class="mt-4 rounded-control border border-neutral-200 bg-white p-4">
                     <livewire:recruitment.applicants.application-tags :application-id="$application->id" :key="'tags-'.$application->id" />
                 </div>
+                @endunless
 
                 {{-- Endorsement: HR and managers each cast one shortlist vote. --}}
-                @if ($canEndorse)
+                @if (! $isDelegated && $canEndorse)
                 @php
                     $myEndorsement = $endorsementService->hasEndorsed(auth()->user(), $application);
                     $endorsementCount = $application->endorsements_count ?? $application->endorsements()->count();
@@ -282,6 +289,7 @@
 
                 {{-- Decisions: one button per move this user may make. The button
                      only picks the target; the service checks it all again. --}}
+                @unless ($isDelegated)
                 @php $targets = $statusTargets[$application->id] ?? []; @endphp
                 <section class="mt-4 rounded-control border border-neutral-200 bg-white p-4">
                     <h4 class="font-semibold">{{ __('recruitment-applicant.profile.workflow') }}</h4>
@@ -402,8 +410,10 @@
                     </details>
                 @endif
                 </section>
+                @endunless
 
                 {{-- Task 7 (Team 2): this application's interviews. Keyed on the status so a decision re-renders it. --}}
+                @unless ($isDelegated)
                 <section id="application-{{ $application->id }}-interviews" class="mt-4 scroll-mt-24 rounded-control border border-neutral-200 bg-white p-4">
                     <h4 class="mb-4 font-semibold">{{ __('recruitment-applicant.profile.interviews_and_offer') }}</h4>
                     <livewire:recruitment.applicants.application-interviews :application-id="$application->id" :key="'interviews-'.$application->id.'-'.$application->status" />
@@ -411,6 +421,7 @@
                     {{-- Task 9 (Team 2): this application's job offer (view-offers only). --}}
                     <livewire:recruitment.applicants.application-offer :application-id="$application->id" :key="'offer-'.$application->id.'-'.$application->status" />
                 </section>
+                @endunless
                 </div>
             </details>
         @empty
@@ -431,9 +442,11 @@
         </section>
     @endif
 
-    <div id="internal-notes" class="scroll-mt-24">
-        <livewire:recruitment.applicants.notes :applicant-id="$applicant->id" />
-    </div>
+    @if ($canViewInternalNotes)
+        <div id="internal-notes" class="scroll-mt-24">
+            <livewire:recruitment.applicants.notes :applicant-id="$applicant->id" />
+        </div>
+    @endif
 
     <x-recruitment.confirmation-modal scope="applicant-profile" />
 </div>

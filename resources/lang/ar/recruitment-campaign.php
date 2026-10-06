@@ -47,6 +47,11 @@ return [
         'public_open' => 'مفتوحة للعامة عبر رابط يُشارَك.',
         'invitation_only' => 'لمن تُدخَل أسماؤهم وإيميلاتهم مسبقاً لا غير.',
     ],
+    'notify' => [
+        'restricted_launched_subject' => 'تم إطلاق حملة توظيف محدودة',
+        'restricted_launched_line' => 'تم إطلاق الحملة رقم :campaign للمتقدمين من فئة «:audience». افتحها في نظام HC-HR لمراجعة التفاصيل.',
+        'open_campaign' => 'فتح الحملة',
+    ],
     'starts_at' => 'تبدأ',
     'ends_at' => 'تنتهي',
     'window' => 'المدة',

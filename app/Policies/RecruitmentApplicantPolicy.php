@@ -18,7 +18,13 @@ class RecruitmentApplicantPolicy
 
     public function view(User $user, RecruitmentApplicant $applicant): bool
     {
-        return $this->viewAny($user) && $this->scopes->canAccessApplicant($user, $applicant);
+        if ($this->viewAny($user) && $this->scopes->canAccessApplicant($user, $applicant)) {
+            return true;
+        }
+
+        return $applicant->applications()
+            ->whereHas('currentReviewParticipants', fn ($participants) => $participants->where('user_id', $user->getKey()))
+            ->exists();
     }
 
     /**

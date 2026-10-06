@@ -10,11 +10,14 @@ use App\Models\HiringCampaign;
 use App\Models\RecruitmentRequestEvent;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Notifications\RecruitmentRestrictedCampaignLaunched;
 use App\Services\HiringCampaignService;
 use App\Services\HiringCampaignStateMachine;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\BuildsPublishedCampaignAssets;
 use Tests\Concerns\BuildsWorkflowFixtures;
 use Tests\Concerns\CreatesHrFixtures;
@@ -163,6 +166,49 @@ class HiringCampaignTest extends TestCase
         // The advert stays readable; only applications stop (D3 · D48).
         $this->assertTrue($this->campaigns->isPubliclyVisible($closed));
         $this->assertFalse($this->campaigns->acceptsSubmissions($closed));
+    }
+
+    #[DataProvider('restrictedCampaignModes')]
+    public function test_launching_a_restricted_campaign_notifies_the_direct_manager_and_hr_syria(string $linkMode): void
+    {
+        Notification::fake();
+        [$hr, $vacancy] = $this->seat();
+        $manager = $vacancy->position->directManager->employee()->account;
+        $hrSyria = $this->makeUser($vacancy->position->city, 'HR-SYR');
+        $campaign = $this->campaigns->create($hr, $vacancy, [
+            'link_mode' => $linkMode,
+            'starts_at' => now()->addDay(),
+            'ends_at' => now()->addMonth(),
+        ]);
+        $campaign = $this->prepareCampaignForOpening($campaign, $hr);
+
+        $this->campaigns->launch($hr, $campaign->fresh());
+
+        Notification::assertSentTo(
+            [$manager, $hrSyria],
+            RecruitmentRestrictedCampaignLaunched::class,
+            fn (RecruitmentRestrictedCampaignLaunched $notification): bool => $notification->campaign->is($campaign),
+        );
+
+        // Launch is idempotent while waiting for the scheduled start.
+        $this->campaigns->launch($hr, $campaign->fresh());
+        Notification::assertCount(2);
+    }
+
+    public function test_launching_a_public_campaign_does_not_send_the_restricted_notice(): void
+    {
+        Notification::fake();
+        [$hr, $vacancy] = $this->seat();
+        $campaign = $this->campaigns->create($hr, $vacancy, [
+            'link_mode' => HiringCampaign::PUBLIC_OPEN,
+            'starts_at' => now()->addDay(),
+            'ends_at' => now()->addMonth(),
+        ]);
+        $campaign = $this->prepareCampaignForOpening($campaign, $hr);
+
+        $this->campaigns->launch($hr, $campaign->fresh());
+
+        Notification::assertNothingSent();
     }
 
     /**
@@ -315,10 +361,19 @@ class HiringCampaignTest extends TestCase
         $this->assertSame('Done.', $closing->meta['reason']);
     }
 
-    /** An HR user and an open seat to recruit for. @return array{0: User, 1: Vacancy} */
-    private function seat(): array
+    /** @return array<string, array{string}> */
+    public static function restrictedCampaignModes(): array
     {
-        ['hr' => $hr, 'request' => $request, 'position' => $position] = $this->workflow();
+        return [
+            'staff only' => [HiringCampaign::INTERNAL],
+            'named list' => [HiringCampaign::INVITE_ONLY],
+        ];
+    }
+
+    /** An HR user and an open seat to recruit for. @return array{0: User, 1: Vacancy} */
+    private function seat(string $citySlug = 'HMS'): array
+    {
+        ['hr' => $hr, 'request' => $request, 'position' => $position] = $this->workflow($citySlug, 'HR-'.$citySlug);
 
         $request->forceFill([
             'request_type' => RecruitmentRequestType::FillVacancy,

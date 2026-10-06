@@ -60,9 +60,8 @@ Route::prefix('recruitment/campaigns')->name('recruitment.campaigns.')
 // The permission is the outer wall; each applicant is re-resolved through the
 // recruitment scope inside the component, so a guessed id is a 404.
 Route::prefix('recruitment/applicants')->name('recruitment.applicants.')
-    ->middleware('active_permission:recruitment-applicants.view')
     ->group(function () {
-        Route::get('/', ApplicantIndex::class)->name('index');
+        Route::get('/', ApplicantIndex::class)->middleware('active_permission:recruitment-applicants.view')->name('index');
         Route::get('/{applicantId}', ApplicantShow::class)->whereNumber('applicantId')->name('show');
     });
 

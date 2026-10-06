@@ -157,10 +157,10 @@ return [
             // and record their outcome. Participants need no permission.
             'schedule-interviews',
             // Phase 2 Task 8: the aggregated view of every reviewer's
-            // evaluation, and correcting / withdrawing someone else's.
+            // evaluation. HR opinions are stored as separate evaluation notes.
             // Writing one's own evaluation needs none: it comes from being on
             // the interview.
-            'view-evaluations', 'correct-evaluations',
+            'view-evaluations',
             // Phase 2 Task 9: follow job offers / write them. Writing also
             // needs User::canViewSalary(), checked by the policy.
             'view-offers', 'manage-offers',
@@ -422,6 +422,10 @@ return [
             'confirmDelete' => 'recruitment-applicants.delete-notes',
             'deleteNote' => 'recruitment-applicants.delete-notes',
         ],
+        'recruitment.applicants.application-review-panel' => [
+            'addParticipant' => 'recruitment-applicants.manage',
+            'removeParticipant' => 'recruitment-applicants.manage',
+        ],
         // Phase 2 Task 7. Each method re-resolves the interview through
         // RecruitmentInterview::visibleTo() and asks the policy (manage /
         // schedule, scope included) again; the service authorizes a third time.
@@ -436,10 +440,8 @@ return [
         // evaluation through the scoped query and asks the policy again; the
         // service authorizes a third time.
         'recruitment.interviews.evaluation-summary' => [
-            'beginCorrect' => 'recruitment-applicants.correct-evaluations',
-            'saveCorrection' => 'recruitment-applicants.correct-evaluations',
-            'beginWithdraw' => 'recruitment-applicants.correct-evaluations',
-            'withdraw' => 'recruitment-applicants.correct-evaluations',
+            'beginNote' => 'recruitment-applicants.add-notes',
+            'addNote' => 'recruitment-applicants.add-notes',
             'closeEvaluations' => 'recruitment-applicants.schedule-interviews',
         ],
         // Phase 2 Task 9. Each method re-resolves the offer through the scoped
@@ -494,6 +496,10 @@ return [
         'recruitment.applicants.show' => ['cancelStatusChange', 'cancelArchive'],
         // refreshNotes only re-renders, through the same scoped query as the first render.
         'recruitment.applicants.notes' => ['cancelDelete', 'refreshNotes'],
+        // A reviewer writes only their own assessment. The current reviewer
+        // assignment is checked by policy in the component and again under a
+        // row lock in RecruitmentApplicationReviewService. Reload is read-only.
+        'recruitment.applicants.application-review-panel' => ['saveReview', 'reloadReview'],
         // Re-render through the same scoped query; they write nothing.
         // selectTable() reads ids through the same scoped, filtered query.
         // executeAction/executeItemAction authorize their action code by policy.

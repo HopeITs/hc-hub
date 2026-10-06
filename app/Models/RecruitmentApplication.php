@@ -121,6 +121,21 @@ class RecruitmentApplication extends Model
         return $this->hasMany(RecruitmentApplicationEndorsement::class, 'application_id');
     }
 
+    public function reviewParticipants(): HasMany
+    {
+        return $this->hasMany(RecruitmentApplicationParticipant::class, 'application_id');
+    }
+
+    public function currentReviewParticipants(): HasMany
+    {
+        return $this->reviewParticipants()->current();
+    }
+
+    public function profileReviews(): HasMany
+    {
+        return $this->hasMany(RecruitmentApplicationReview::class, 'application_id');
+    }
+
     public function interviews(): HasMany
     {
         return $this->hasMany(RecruitmentInterview::class, 'application_id');
@@ -134,6 +149,16 @@ class RecruitmentApplication extends Model
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         return app(RecruitmentScopeResolver::class)->scopeApplications($query, $user);
+    }
+
+    /** Applicant-profile access: normal recruitment scope or a named assignment. */
+    public function scopeProfileVisibleTo(Builder $query, User $user): Builder
+    {
+        return $query->where(function (Builder $visible) use ($user): void {
+            $visible->where(fn (Builder $scoped): Builder => app(RecruitmentScopeResolver::class)->scopeApplications($scoped, $user))
+                ->orWhereHas('currentReviewParticipants', fn (Builder $participants): Builder => $participants
+                    ->where('user_id', $user->getKey()));
+        });
     }
 
     /**

@@ -75,7 +75,20 @@ class RecruitmentApplicant extends Model
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        return app(RecruitmentScopeResolver::class)->scopeApplicants($query, $user);
+        $scopes = app(RecruitmentScopeResolver::class);
+
+        // An organization-wide scope adds no SQL constraint. Returning here
+        // prevents the empty nested group below from narrowing the result to
+        // explicitly assigned participants only.
+        if ($scopes->isOrganizationWide($user)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $visible) use ($user): void {
+            app(RecruitmentScopeResolver::class)->scopeApplicants($visible, $user);
+            $visible->orWhereHas('applications.currentReviewParticipants', fn (Builder $participants): Builder => $participants
+                ->where('user_id', $user->getKey()));
+        });
     }
 
     protected function casts(): array
