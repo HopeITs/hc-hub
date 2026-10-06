@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use LogicException;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * One interview of one application (Phase 2 Task 7). An application can have
@@ -22,8 +24,12 @@ use LogicException;
  * meeting_url is hidden from serialization: it reaches a page only through
  * the viewMeetingLink ability, never by riding along in a Livewire payload.
  */
-class RecruitmentInterview extends Model
+class RecruitmentInterview extends Model implements HasMedia
 {
+    use InteractsWithMedia;
+
+    public const ATTACHMENTS = 'attachments';
+
     protected $guarded = ['id'];
 
     protected $hidden = ['meeting_url'];
@@ -63,6 +69,12 @@ class RecruitmentInterview extends Model
     public function evaluations(): HasMany
     {
         return $this->hasMany(RecruitmentInterviewEvaluation::class, 'interview_id');
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(self::ATTACHMENTS)
+            ->useDisk('local');
     }
 
     public function reschedules(): HasMany

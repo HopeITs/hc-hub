@@ -3,6 +3,7 @@
 use App\Http\Controllers\RecruitmentApplicantErasureController;
 use App\Http\Controllers\RecruitmentApplicantExportController;
 use App\Http\Controllers\RecruitmentApplicantFileController;
+use App\Http\Controllers\RecruitmentInterviewAttachmentController;
 use App\Livewire\Recruitment\Applicants\Index as ApplicantIndex;
 use App\Livewire\Recruitment\Applicants\Show as ApplicantShow;
 use App\Livewire\Recruitment\Approvals\Pending;
@@ -82,6 +83,11 @@ Route::get('recruitment/applications/{applicationId}/interviews/create', Intervi
     ->whereNumber('applicationId')
     ->middleware('active_permission:recruitment-applicants.schedule-interviews')
     ->name('recruitment.interviews.create');
+
+Route::get('recruitment/interview-attachments/{media}/download', RecruitmentInterviewAttachmentController::class)
+    ->whereNumber('media')
+    ->middleware('throttle:60,1')
+    ->name('recruitment.interview-attachments.download');
 
 // Phase 2 Task 9 (Team 2): job offers. The list and a single offer have no
 // permission middleware on purpose: the manager who requested the position

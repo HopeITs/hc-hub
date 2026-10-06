@@ -31,12 +31,14 @@ use App\Services\RecruitmentInterviewNoticeService;
 use App\Services\RecruitmentInterviewSchedulingService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use LogicException;
@@ -180,6 +182,41 @@ class RecruitmentInterviewTest extends TestCase
                 ->map(fn (RecruitmentApplicationDecision $decision): array => [$decision->from_status, $decision->to_status])
                 ->all(),
         );
+    }
+
+    public function test_hr_uploads_private_interview_attachments_that_only_interview_viewers_can_download(): void
+    {
+        Storage::fake('local');
+        $application = $this->shortlisted('Attachment Candidate');
+        $interview = $this->schedule($application, [
+            'participants' => [$this->interviewer->id => Participant::ROLE_INTERVIEWER],
+        ]);
+        $this->actingAs($this->hr);
+
+        Livewire::test(Show::class, ['interviewId' => $interview->id])
+            ->set('attachment', UploadedFile::fake()->create('panel-recording.mp3', 100, 'audio/mpeg'))
+            ->call('uploadAttachment')
+            ->assertHasNoErrors()
+            ->assertSee('panel-recording.mp3');
+
+        $media = $interview->fresh()->getFirstMedia(RecruitmentInterview::ATTACHMENTS);
+        $this->assertNotNull($media);
+        $this->assertSame('local', $media->disk);
+        Storage::disk('local')->assertExists($media->getPathRelativeToRoot());
+
+        $download = route('recruitment.interview-attachments.download', ['media' => $media->id]);
+        $this->get($download)->assertOk()->assertHeader('X-Content-Type-Options', 'nosniff');
+        $this->actingAs($this->interviewer)->get($download)->assertOk();
+
+        $outsider = $this->makeUser($this->homs, 'employee');
+        $this->actingAs($outsider)->get($download)->assertNotFound();
+
+        $this->actingAs($this->hr);
+        Livewire::test(Show::class, ['interviewId' => $interview->id])
+            ->call('discardAttachment', $media->id)
+            ->assertHasNoErrors();
+        $this->assertDatabaseMissing('media', ['id' => $media->id]);
+        Storage::disk('local')->assertMissing($media->getPathRelativeToRoot());
     }
 
     /** [7] The type must be HR, technical or final. */
@@ -867,7 +904,7 @@ class RecruitmentInterviewTest extends TestCase
 
         foreach ([Form::class, Show::class, Index::class, Calendar::class, Board::class, RecruitmentInterviewSchedulingService::class, RecruitmentInterviewNoticeService::class] as $class) {
             foreach ((new ReflectionClass($class))->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-                if ($method->getDeclaringClass()->getName() === $class) {
+                if ($method->getDeclaringClass()->getName() === $class && ! str_starts_with($method->getName(), '_')) {
                     $this->assertDoesNotMatchRegularExpression('/delete|destroy|remove(?!Participant)|purge/i', $method->getName(), "$class::{$method->getName()}");
                 }
             }

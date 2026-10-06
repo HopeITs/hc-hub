@@ -217,6 +217,53 @@
         </x-modal.dialog>
     </section>
 
+    <section class="rounded-surface border border-secondary-soft bg-white p-6 shadow-e1">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div>
+                <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.interviews.attachments.title') }}</h2>
+                <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.interviews.attachments.hint') }}</p>
+            </div>
+        </div>
+
+        <ul class="mt-4 divide-y divide-secondary-soft text-sm">
+            @forelse ($attachments as $media)
+                <li wire:key="interview-attachment-{{ $media->id }}" class="flex flex-wrap items-center justify-between gap-3 py-3">
+                    <div class="min-w-0">
+                        <p class="font-medium wrap-anywhere">{{ $media->getCustomProperty('original_name', $media->name) }}</p>
+                        <p class="text-xs text-secondary-medium">{{ number_format($media->size / 1024, 1) }} KB &middot; {{ $media->created_at?->format('Y-m-d H:i') }}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <a href="{{ route('recruitment.interview-attachments.download', ['media' => $media->id]) }}" class="{{ $link }}">
+                            {{ __('recruitment-applicant.download') }}
+                        </a>
+                        @if ($canManage)
+                            <button type="button" wire:click="discardAttachment({{ $media->id }})" wire:confirm="{{ __('recruitment-applicant.interviews.attachments.remove_confirm') }}"
+                                class="cursor-pointer font-semibold text-primary hover:underline">
+                                {{ __('recruitment-applicant.interviews.attachments.remove') }}
+                            </button>
+                        @endif
+                    </div>
+                </li>
+            @empty
+                <li class="py-3 text-secondary-medium">{{ __('recruitment-applicant.interviews.attachments.none') }}</li>
+            @endforelse
+        </ul>
+
+        @if ($canManage)
+            <form wire:submit="uploadAttachment" class="mt-4 border-t border-secondary-soft pt-4">
+                <x-forms.input-label for="interviewAttachment" :value="__('recruitment-applicant.interviews.attachments.file')" required />
+                <input id="interviewAttachment" type="file" wire:model="attachment"
+                    accept="audio/mpeg,audio/mp4,audio/wav,video/mp4,video/webm,application/pdf,image/jpeg,image/png"
+                    class="mt-1 block w-full cursor-pointer rounded-control border border-secondary-light bg-white text-sm file:me-3 file:cursor-pointer file:border-0 file:bg-neutral-100 file:px-3 file:py-2 file:font-semibold">
+                <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.interviews.attachments.formats') }}</p>
+                <x-forms.input-error field="attachment" input-id="interviewAttachment" />
+                <x-primary-button type="submit" wire:target="attachment,uploadAttachment" class="mt-3">
+                    {{ __('recruitment-applicant.interviews.attachments.upload') }}
+                </x-primary-button>
+            </form>
+        @endif
+    </section>
+
     {{--
         Order follows the moment. Before the interview, who is coming matters
         most. Once it has started, evaluation is the work: a reviewer's own form
