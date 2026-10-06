@@ -71,7 +71,12 @@ class RecruitmentInterviewSchedulingService
     public const MIN_REASON = 10;
 
     /** Application statuses that can have an interview scheduled. */
-    public const SCHEDULABLE = [ApplicationStatus::Shortlisted, ApplicationStatus::InterviewScheduled, ApplicationStatus::Interviewed];
+    public const SCHEDULABLE = [
+        ApplicationStatus::Shortlisted,
+        ApplicationStatus::InterviewScheduled,
+        ApplicationStatus::Interviewed,
+        ApplicationStatus::Finalist,
+    ];
 
     /** Application statuses that close every open interview. */
     public const CLOSING = [ApplicationStatus::Rejected, ApplicationStatus::Withdrawn, ApplicationStatus::Archived];
@@ -692,8 +697,8 @@ class RecruitmentInterviewSchedulingService
 
     /**
      * Once no open interview is left, the application leaves
-     * InterviewScheduled: to Interviewed if one was held, otherwise back to
-     * Shortlisted, where HR decides what comes next.
+     * InterviewScheduled: comparison interviews return to Finalist; earlier
+     * rounds move to Interviewed if held, or Shortlisted if none was held.
      */
     private function syncApplication(User $actor, RecruitmentApplication $locked): void
     {
@@ -707,13 +712,18 @@ class RecruitmentInterviewSchedulingService
             return;
         }
 
-        $this->statuses->applyInterviewTransition(
-            $actor,
-            $locked,
-            (clone $interviews)->where('status', Status::Completed)->exists()
+        $scheduledFrom = $locked->decisions()
+            ->where('to_status', ApplicationStatus::InterviewScheduled)
+            ->latest('id')
+            ->value('from_status');
+
+        $target = $scheduledFrom === ApplicationStatus::Finalist
+            ? ApplicationStatus::Finalist
+            : ((clone $interviews)->where('status', Status::Completed)->exists()
                 ? ApplicationStatus::Interviewed
-                : ApplicationStatus::Shortlisted,
-        );
+                : ApplicationStatus::Shortlisted);
+
+        $this->statuses->applyInterviewTransition($actor, $locked, $target);
     }
 
     /**

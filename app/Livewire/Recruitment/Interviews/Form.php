@@ -96,6 +96,10 @@ class Form extends Component
 
         $this->applicationId = $application->getKey();
         $this->duration = (int) config('recruitment.interviews.default_duration_minutes', 60);
+
+        if ($application->status === RecruitmentApplicationStatus::Finalist) {
+            $this->type = RecruitmentInterviewType::Final;
+        }
     }
 
     /** Form state only; the list is validated again, user by user, on save. */

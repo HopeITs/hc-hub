@@ -497,6 +497,7 @@ return [
         'times_in' => 'الأوقات بتوقيت :timezone',
         'minutes' => ':count دقيقة',
         'schedule' => 'جدولة مقابلة',
+        'schedule_final' => 'جدولة مقابلة نهائية',
         'schedule_title' => 'جدولة مقابلة',
         'edit_title' => 'تعديل المقابلة أو تغيير موعدها',
         'details' => 'تفاصيل المقابلة',

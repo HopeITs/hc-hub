@@ -335,9 +335,13 @@ class ApplicationTable extends LivewireTable
             Column::make(__('recruitment-applicant.next_action'), function (RecruitmentApplication $application): string {
                 if (Gate::allows('schedule', [RecruitmentInterview::class, $application])
                     && in_array($application->status, RecruitmentInterviewSchedulingService::SCHEDULABLE, true)) {
+                    $label = $application->status === RecruitmentApplicationStatus::Finalist
+                        ? __('recruitment-applicant.interviews.schedule_final')
+                        : __('recruitment-applicant.interviews.schedule');
+
                     return '<a href="'.e(route('recruitment.interviews.create', ['applicationId' => $application->id])).'" wire:navigate x-on:click.stop'
                         .' class="recruitment-action rounded-control border border-primary px-3 py-1.5 text-sm font-semibold text-primary hover:bg-selection">'
-                        .e(__('recruitment-applicant.interviews.schedule')).'</a>';
+                        .e($label).'</a>';
                 }
 
                 return '<a href="'.e(route('recruitment.applicants.show', ['applicantId' => $application->applicant_id])).'" wire:navigate x-on:click.stop'

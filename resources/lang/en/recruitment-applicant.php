@@ -497,6 +497,7 @@ return [
         'times_in' => 'Times are in :timezone',
         'minutes' => ':count minutes',
         'schedule' => 'Schedule interview',
+        'schedule_final' => 'Schedule final interview',
         'schedule_title' => 'Schedule an interview',
         'edit_title' => 'Edit or reschedule interview',
         'details' => 'Interview details',

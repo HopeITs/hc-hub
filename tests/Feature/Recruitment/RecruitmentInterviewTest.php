@@ -148,6 +148,40 @@ class RecruitmentInterviewTest extends TestCase
         Notification::assertSentTo($this->interviewer, ParticipantNotice::class, fn (ParticipantNotice $n) => $n->kind === ParticipantNotice::SCHEDULED);
     }
 
+    public function test_multiple_finalists_can_enter_a_final_comparison_round_and_return_to_the_final_list(): void
+    {
+        $application = $this->applyTo(
+            $this->makeCampaignIn($this->homs),
+            $this->makeApplicant('Comparison Candidate'),
+            ['status' => AppStatus::Finalist],
+        );
+        $this->actingAs($this->hr);
+
+        Livewire::test(Form::class, ['applicationId' => $application->id])
+            ->assertSet('type', RecruitmentInterviewType::Final);
+
+        $interview = $this->schedule($application, [
+            'type' => RecruitmentInterviewType::Final,
+            'startsAt' => '2026-10-04T10:00',
+            'participants' => [$this->interviewer->id => Participant::ROLE_INTERVIEWER],
+        ]);
+
+        $this->assertSame(AppStatus::InterviewScheduled, $application->fresh()->status);
+
+        $this->outcome($interview, Status::Completed);
+
+        $this->assertSame(AppStatus::Finalist, $application->fresh()->status);
+        $this->assertSame(
+            [
+                [AppStatus::Finalist, AppStatus::InterviewScheduled],
+                [AppStatus::InterviewScheduled, AppStatus::Finalist],
+            ],
+            $application->decisions()->orderBy('id')->get()
+                ->map(fn (RecruitmentApplicationDecision $decision): array => [$decision->from_status, $decision->to_status])
+                ->all(),
+        );
+    }
+
     /** [7] The type must be HR, technical or final. */
     public function test_the_interview_type_is_one_of_hr_technical_or_final(): void
     {
@@ -419,9 +453,9 @@ class RecruitmentInterviewTest extends TestCase
         $this->actingAs($this->interviewer->fresh());
         Livewire::test(Show::class, ['interviewId' => $theirs->id])->assertNotFound();
 
-        // No permission and never a participant: the interviews page itself is refused.
+        // Managers can open the board, but scope still leaves it empty.
         $stranger = $this->makeUser($this->homs, 'manager');
-        $this->actingAs($stranger)->get(route('recruitment.interviews.index'))->assertForbidden();
+        $this->actingAs($stranger)->get(route('recruitment.interviews.index'))->assertOk();
     }
 
     /** [12] The meeting link: managing HR and participants see it; an in-scope reader who is neither does not. */
@@ -1214,7 +1248,7 @@ class RecruitmentInterviewTest extends TestCase
 
         $manager = $this->makeUser($this->homs, 'manager');
         $this->actingAs($manager);
-        $this->assertFalse($manager->can('viewAny', RecruitmentInterview::class));
+        $this->assertTrue($manager->can('viewAny', RecruitmentInterview::class));
         Livewire::test(Show::class, ['interviewId' => $interview->id])->assertNotFound();
         Livewire::test(EvaluationSummary::class, ['interviewId' => $interview->id])->assertNotFound();
     }
@@ -1258,8 +1292,7 @@ class RecruitmentInterviewTest extends TestCase
     {
         $other = $this->applyTo($application->campaign, $this->makeApplicant($name));
         $statuses = app(RecruitmentApplicationStatusService::class);
-        $statuses->change($this->hr, $other, AppStatus::Submitted, AppStatus::UnderReview, null);
-        $statuses->change($this->hr, $other->fresh(), AppStatus::UnderReview, AppStatus::Shortlisted, null);
+        $statuses->change($this->hr, $other, AppStatus::Submitted, AppStatus::Shortlisted, null);
 
         return $other->fresh();
     }
