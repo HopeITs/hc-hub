@@ -126,8 +126,7 @@ class PositionForm extends Form
             Gate::authorize('create', [Position::class, (int) $this->city_id]);
         }
 
-        $activeCityId = auth()->user()?->activeCityId();
-        if ($activeCityId !== null && $activeCityId !== (int) $this->city_id) {
+        if (! auth()->user()?->canAccessCity((int) $this->city_id)) {
             throw ValidationException::withMessages([
                 'city_id' => __('You may only manage positions in your active city.'),
             ]);

@@ -110,6 +110,7 @@ return [
         'correct-evaluations' => 'Correct or withdraw interview evaluations',
         'view-offers' => 'View job offers',
         'manage-offers' => 'Create and manage job offers',
+        'view-offer-salary' => 'See the salary of sent job offers for positions they requested',
         'convert-hires' => 'Hire accepted candidates (create the employee and contract)',
         'request-erasure' => 'Anonymize an applicant\'s data on their request',
     ],

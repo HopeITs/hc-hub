@@ -14,11 +14,10 @@
     $nextTarget = $currentTargets[0] ?? null;
 @endphp
 
-<div class="mx-auto max-w-[1440px] space-y-6 p-4 sm:p-6">
-    <a href="{{ route('recruitment.applicants.index') }}" wire:navigate class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
-        <svg class="size-4 rtl:-scale-x-100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m15 19-7-7 7-7"/></svg>
-        {{ __('recruitment-applicant.back_to_list') }}
-    </a>
+<x-slot:title>{{ $applicant->full_name }}</x-slot:title>
+
+<div class="mx-auto max-w-[1440px] space-y-6">
+    <livewire:layout.breadcrumbs :title="__('recruitment-applicant.profile.title')" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __('recruitment-applicant.applicants'), 'route' => 'recruitment.applicants.index'], ['label' => __('recruitment-applicant.profile.title')]]" />
 
     <section id="profile-overview" class="scroll-mt-24 overflow-hidden rounded-surface border border-neutral-200 bg-white shadow-e1">
         <div class="h-1.5 bg-primary" aria-hidden="true"></div>

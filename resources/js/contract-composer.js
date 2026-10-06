@@ -1485,6 +1485,12 @@ document.addEventListener('alpine:init', () => {
             return this.formatDate(this.endDate) || this.labels.empty;
         },
 
+        // A reason recorded without a date still terminates the contract, so
+        // the row falls back to the reason rather than reading as empty.
+        get cardTerminated() {
+            return this.formatDate(this.terminatedAt) || this.terminationReasonLabel || this.labels.empty;
+        },
+
         get cardPeriod() {
             return this.durationLabel || this.labels.empty;
         },

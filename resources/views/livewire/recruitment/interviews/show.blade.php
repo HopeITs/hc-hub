@@ -17,9 +17,8 @@
     $link = 'font-medium text-secondary-dark underline decoration-secondary-light underline-offset-4 transition hover:decoration-secondary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
 @endphp
 
-<div class="space-y-6 p-6">
-
-    <a href="{{ route('recruitment.interviews.index') }}" wire:navigate class="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-secondary-dark transition hover:text-secondary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-0"><svg class="size-4 rtl:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12.5 15 7.5 10l5-5"/></svg> {{ __('recruitment-applicant.interviews.all') }}</a>
+<div class="space-y-6">
+    <livewire:layout.breadcrumbs :title="__('recruitment-applicant.interviews.types.'.$interview->interview_type)" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __('recruitment-applicant.interviews.title'), 'route' => 'recruitment.interviews.index'], ['label' => __('recruitment-applicant.interviews.types.'.$interview->interview_type)]]" />
 
     {{-- With a panel open, its own error shows inside it, next to the action that caused it. --}}
     @if ($panel === null)
@@ -64,13 +63,17 @@
                         <span class="block font-normal wrap-break-word">{{ $interview->location_value }}</span>
                     @endif
                     @if ($interview->location_type === RecruitmentInterviewLocationType::Online)
-                        @if ($meetingUrl)
+                        @if ($meetingUrl && $canJoin)
                             <a href="{{ $meetingUrl }}" target="_blank" rel="noopener noreferrer" class="{{ $quiet }} mt-2 gap-1.5">
                                 {{ __('recruitment-applicant.interviews.join_meeting') }}
                                 <svg class="size-4 rtl:-scale-x-100" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4h5v5M16 4l-7 7M14 11.5V15a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h3.5"/></svg>
                                 <span class="sr-only">{{ __('recruitment-applicant.interviews.new_tab') }}</span>
                             </a>
                             <span class="mt-1 block text-xs font-normal break-all text-secondary-medium" dir="ltr">{{ $meetingUrl }}</span>
+                        @elseif ($meetingUrl)
+                            {{-- Over: the link as plain text for the record, nothing to click. --}}
+                            <span class="mt-1 block text-xs font-normal break-all text-secondary-medium" dir="ltr">{{ $meetingUrl }}</span>
+                            <span class="block text-xs font-normal text-secondary-medium">{{ __('recruitment-applicant.interviews.meeting_over') }}</span>
                         @else
                             <span class="block text-xs font-normal text-secondary-medium">{{ __('recruitment-applicant.interviews.meeting_url_hidden') }}</span>
                         @endif

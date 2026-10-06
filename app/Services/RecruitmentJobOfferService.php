@@ -119,8 +119,6 @@ class RecruitmentJobOfferService
                     throw $this->error('offer', 'no_vacancy');
                 }
 
-                $this->assertStartNotPast($terms);
-
                 $offer = Offer::query()->forceCreate([
                     'application_id' => $locked->getKey(),
                     'vacancy_id' => $vacancy->getKey(),
@@ -167,7 +165,6 @@ class RecruitmentJobOfferService
                 throw $this->error('offer', 'not_editable');
             }
 
-            $this->assertStartNotPast($terms);
             $changed = $this->changedTerms($version, $terms);
 
             if ($changed === []) {
@@ -203,7 +200,6 @@ class RecruitmentJobOfferService
                 throw $this->error('offer', 'not_selected');
             }
 
-            $this->assertStartNotPast(['start_date' => $version->start_date]);
             $this->assertSeatAvailable($locked);
 
             // The version the candidate had until now is replaced, not rewritten.
@@ -256,8 +252,6 @@ class RecruitmentJobOfferService
             if (! in_array($application->status, self::SENDABLE_FROM, true)) {
                 throw $this->error('offer', 'not_selected');
             }
-
-            $this->assertStartNotPast($terms);
 
             $revision = $locked->versions()->forceCreate([
                 'version_no' => (int) $locked->versions()->max('version_no') + 1,
@@ -454,13 +448,12 @@ class RecruitmentJobOfferService
     }
 
     /**
-     * Every term the contract will need is required — the notes and the
-     * probation alone are optional — so an accepted offer can become a
-     * contract as it stands. The contract type is a trial or a service
-     * contract only, as on the recruitment request
-     * (ContractType::recruitmentOptions()). The probation is HR's to type as
-     * they see fit and is not checked: a whole number of days is kept,
-     * anything else is left empty.
+     * Every field is required, so an accepted offer can become a contract
+     * as it stands. The dates are HR's to choose, a past start included; the
+     * end only has to follow the start, within the year a contract may run.
+     * The contract type is a trial or a service contract only, as on the
+     * recruitment request (ContractType::recruitmentOptions()). The
+     * probation is any whole number of days HR types, 0 included.
      *
      * @param  array<string, mixed>  $input
      * @return array<string, mixed> version attributes
@@ -505,9 +498,11 @@ class RecruitmentJobOfferService
             $errors['endDate'] = __('recruitment-applicant.offers.errors.end_date_too_far');
         }
 
-        // Free: not required and not checked. Only what the column can hold is kept.
+        // Required; any whole number of days the column can hold.
         $probation = filter_var($input['probationDays'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 4294967295]]);
-        $probation = $probation === false ? null : $probation;
+        if ($probation === false) {
+            $errors['probationDays'] = __('recruitment-applicant.offers.errors.probation_required');
+        }
 
         // Only a service contract may say 0 hours, as ContractForm allows.
         $minHours = $contractType?->category === 'service' ? 0 : 1;
@@ -531,7 +526,9 @@ class RecruitmentJobOfferService
         }
 
         $notes = is_string($input['notes'] ?? null) ? (trim($input['notes']) ?: null) : null;
-        if ($notes !== null && mb_strlen($notes) > 2000) {
+        if ($notes === null) {
+            $errors['notes'] = __('recruitment-applicant.offers.errors.notes_required');
+        } elseif (mb_strlen($notes) > 2000) {
             $errors['notes'] = __('recruitment-applicant.offers.errors.too_long', ['max' => 2000]);
         }
 
@@ -651,16 +648,6 @@ class RecruitmentJobOfferService
 
         if ($this->seatsLeft($vacancy, $locked) < 1) {
             throw $this->error('offer', 'vacancy_full');
-        }
-    }
-
-    /** @param  array<string, mixed>  $terms */
-    private function assertStartNotPast(array $terms): void
-    {
-        $start = $terms['start_date'] ?? null;
-
-        if ($start !== null && Carbon::parse($start)->startOfDay()->lt(today())) {
-            throw $this->error('startDate', 'start_in_past');
         }
     }
 

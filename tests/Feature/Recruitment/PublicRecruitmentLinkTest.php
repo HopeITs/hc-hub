@@ -8,8 +8,11 @@ use App\Enums\RecruitmentEventType;
 use App\Enums\RecruitmentRequestMode;
 use App\Enums\RecruitmentRequestStatus;
 use App\Enums\RecruitmentRequestType;
+use App\Jobs\SendRecruitmentCampaignInvite;
 use App\Jobs\SendRecruitmentResponseReceipt;
+use App\Livewire\Recruitment\Campaigns\InviteTable;
 use App\Livewire\Recruitment\PublicLinks\Manager;
+use App\Mail\RecruitmentCampaignInviteMail;
 use App\Mail\RecruitmentResponseReceiptMail;
 use App\Models\ApplicationForm;
 use App\Models\Department;
@@ -21,18 +24,22 @@ use App\Models\Program;
 use App\Models\PublicRecruitmentLink;
 use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplication;
+use App\Models\RecruitmentCampaignInvite;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentRequestVersion;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Services\HiringCampaignService;
 use App\Services\PublicRecruitmentLinkService;
+use App\Services\RecruitmentCampaignInviteService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Mockery;
+use RuntimeException;
 use Spatie\Permission\Models\Permission;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
@@ -631,7 +638,8 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->assertDatabaseHas('recruitment_campaign_invites', [
             'campaign_id' => $campaign->id,
             'email_normalized' => 'candidate@example.com',
-            'status' => 'pending',
+            // The link already exists, so the invitation was emailed on adding.
+            'status' => 'sent',
         ]);
     }
 
@@ -882,6 +890,369 @@ class PublicRecruitmentLinkTest extends TestCase
         $this->assertSame('public_link', $applicant->source);
     }
 
+    /** The person named on an invitation-only campaign is sent the link, not left to be told it. */
+    public function test_an_invitee_is_emailed_the_application_link_when_added(): void
+    {
+        Mail::fake();
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $links = app(PublicRecruitmentLinkService::class);
+        $result = $links->generate($campaign, $hr, now()->addDays(10), RecruitmentCampaignLinkMode::InvitationOnly);
+
+        $invite = $links->addInvite($campaign->fresh(), $hr, 'Invited Person', 'Invited@Example.COM');
+
+        Mail::assertSent(RecruitmentCampaignInviteMail::class, fn ($mail): bool => $mail->hasTo('invited@example.com')
+            && $mail->url === $result['url']
+            && $mail->invite->is($invite));
+        $this->assertSame(RecruitmentCampaignInvite::STATUS_SENT, $invite->fresh()->status);
+        $this->assertNotNull($invite->fresh()->sent_at);
+    }
+
+    public function test_an_invitation_added_before_the_link_exists_waits_and_hr_sends_it_afterwards(): void
+    {
+        Mail::fake();
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $hr->roles()->wherePivot('is_active', true)->firstOrFail()
+            ->givePermissionTo(Permission::findOrCreate('recruitment-applicants.manage', 'web'));
+        $campaign->forceFill(['link_mode' => RecruitmentCampaignLinkMode::InvitationOnly])->save();
+        $invites = app(RecruitmentCampaignInviteService::class);
+
+        $invite = $invites->add($hr, $campaign->fresh(), 'Early Invitee', 'early@example.com');
+
+        Mail::assertNothingSent();
+        $this->assertSame(RecruitmentCampaignInvite::STATUS_PENDING, $invite->fresh()->status);
+
+        // Nothing to send yet, and HR is told why.
+        try {
+            $invites->sendPending($hr, $campaign->fresh());
+            $this->fail('Sending without a link should be refused.');
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $this->assertArrayHasKey('invite', $exception->errors());
+        }
+
+        app(PublicRecruitmentLinkService::class)
+            ->generate($campaign->fresh(), $hr, now()->addDays(10), RecruitmentCampaignLinkMode::InvitationOnly);
+
+        $this->assertSame(['sent' => 1, 'failed' => 0], $invites->sendPending($hr, $campaign->fresh()));
+        Mail::assertSent(RecruitmentCampaignInviteMail::class, 1);
+        $this->assertSame(RecruitmentCampaignInvite::STATUS_SENT, $invite->fresh()->status);
+
+        // Sending again is a resend, not a duplicate of the pending batch.
+        $this->assertSame(['sent' => 0, 'failed' => 0], $invites->sendPending($hr, $campaign->fresh()));
+        $invites->send($hr, $invite->fresh());
+        Mail::assertSent(RecruitmentCampaignInviteMail::class, 2);
+    }
+
+    public function test_the_invitation_email_is_written_in_both_languages_and_names_the_address(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $links = app(PublicRecruitmentLinkService::class);
+        $result = $links->generate($campaign, $hr, now()->addDays(10), RecruitmentCampaignLinkMode::InvitationOnly);
+        $invite = $links->addInvite($campaign->fresh(), $hr, 'Invited Person', 'invited@example.com');
+
+        $mail = new RecruitmentCampaignInviteMail($invite->fresh(), $result['url']);
+
+        $mail->assertSeeInHtml($result['url'], false);
+        $mail->assertSeeInHtml('invited@example.com');
+        $mail->assertSeeInHtml('dir="rtl"', false);
+        $mail->assertSeeInHtml('dir="ltr"', false);
+        $mail->assertSeeInHtml('IT Specialist');
+        $mail->assertSeeInHtml('اختصاصي تقنية معلومات');
+        $this->assertStringContainsString('IT Specialist', $mail->envelope()->subject);
+        $this->assertStringContainsString('اختصاصي تقنية معلومات', $mail->envelope()->subject);
+    }
+
+    /** An address that does not exist is told to HR with its reason, once, and is not retried. */
+    public function test_a_refused_address_is_recorded_with_its_reason_and_not_retried(): void
+    {
+        [$campaign, $hr, $invite] = $this->pendingInviteWithLink('typo@example.org');
+
+        Mail::shouldReceive('to')->once()->andReturnSelf();
+        Mail::shouldReceive('send')->once()->andThrow(new \Symfony\Component\Mailer\Exception\UnexpectedResponseException(
+            'Expected response code "250/251/252" but got code "511", with message "511 sorry, no mailbox here by that name (#5.1.1 - chkuser)".',
+            511,
+        ));
+
+        // Ends quietly: a refusal that cannot change is not a job to retry.
+        SendRecruitmentCampaignInvite::dispatchSync($invite->id);
+
+        $invite = $invite->fresh();
+        $this->assertSame(RecruitmentCampaignInvite::STATUS_PENDING, $invite->status);
+        $this->assertSame(RecruitmentCampaignInvite::FAILURE_MAILBOX_MISSING, $invite->failure_reason);
+        $this->assertNotNull($invite->failed_at);
+        $this->assertNull($invite->sent_at);
+        $this->assertTrue($invite->hasDeliveryFailed());
+    }
+
+    public function test_hr_is_told_why_when_a_resend_is_refused(): void
+    {
+        [$campaign, $hr, $invite] = $this->pendingInviteWithLink('nobody@example.org');
+        $hr->roles()->wherePivot('is_active', true)->firstOrFail()
+            ->givePermissionTo(Permission::findOrCreate('recruitment-applicants.manage', 'web'));
+
+        Mail::shouldReceive('to')->andReturnSelf();
+        Mail::shouldReceive('send')->andThrow(new \Symfony\Component\Mailer\Exception\UnexpectedResponseException(
+            'Expected response code "250" but got code "550", with message "550 5.1.1 User unknown".',
+            550,
+        ));
+
+        try {
+            app(RecruitmentCampaignInviteService::class)->send($hr, $invite);
+            $this->fail('A refused address should be reported, not shown as sent.');
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            $this->assertSame(
+                __('recruitment-applicants.invite_failure.mailbox_missing'),
+                $exception->errors()['invite'][0],
+            );
+        }
+    }
+
+    /** A server that could not be reached is worth retrying; once the retries are spent it is recorded. */
+    public function test_an_unreachable_server_is_retried_then_recorded(): void
+    {
+        [$campaign, $hr, $invite] = $this->pendingInviteWithLink('late@example.org');
+
+        Mail::shouldReceive('to')->andReturnSelf();
+        Mail::shouldReceive('send')->andThrow(new \Symfony\Component\Mailer\Exception\TransportException('Connection timed out'));
+
+        $job = new SendRecruitmentCampaignInvite($invite->id);
+
+        try {
+            $job->handle();
+            $this->fail('A dropped connection should be left to the queue to retry.');
+        } catch (\Symfony\Component\Mailer\Exception\TransportException) {
+            $this->assertNull($invite->fresh()->failure_reason);
+        }
+
+        $job->failed(new RuntimeException('retries spent'));
+
+        $this->assertSame(RecruitmentCampaignInvite::FAILURE_NOT_SENT, $invite->fresh()->failure_reason);
+    }
+
+    public function test_a_later_successful_send_clears_the_failure(): void
+    {
+        Mail::fake();
+        [$campaign, $hr, $invite] = $this->pendingInviteWithLink('fixed@example.org');
+        $invite->forceFill([
+            'failed_at' => now()->subHour(),
+            'failure_reason' => RecruitmentCampaignInvite::FAILURE_NOT_SENT,
+        ])->save();
+
+        SendRecruitmentCampaignInvite::dispatchSync($invite->id);
+
+        $invite = $invite->fresh();
+        $this->assertSame(RecruitmentCampaignInvite::STATUS_SENT, $invite->status);
+        $this->assertNull($invite->failure_reason);
+        $this->assertNull($invite->failed_at);
+        $this->assertFalse($invite->hasDeliveryFailed());
+    }
+
+    public function test_the_invite_list_shows_a_failed_delivery_with_its_reason(): void
+    {
+        [$campaign, $hr, $invite] = $this->pendingInviteWithLink('typo@example.org');
+        $hr->roles()->wherePivot('is_active', true)->firstOrFail()
+            ->givePermissionTo(Permission::findOrCreate('recruitment-applicants.manage', 'web'));
+        $invite->forceFill([
+            'failed_at' => now(),
+            'failure_reason' => RecruitmentCampaignInvite::FAILURE_MAILBOX_MISSING,
+        ])->save();
+
+        Livewire::actingAs($hr)
+            ->test(InviteTable::class, ['campaignId' => $campaign->id])
+            ->assertSee(__('recruitment-applicants.invite_status_failed'))
+            ->assertSee(__('recruitment-applicants.invite_failure.mailbox_missing'))
+            ->assertSee(__('recruitment-applicants.invite_resend'));
+
+        // Cancelled, there is nothing left to deliver, so the failure is not shown.
+        $invite->forceFill(['status' => RecruitmentCampaignInvite::STATUS_CANCELLED])->save();
+        $this->assertFalse($invite->fresh()->hasDeliveryFailed());
+    }
+
+    public function test_adding_a_cancelled_invitation_again_sends_the_link_again(): void
+    {
+        Mail::fake();
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $hr->roles()->wherePivot('is_active', true)->firstOrFail()
+            ->givePermissionTo(Permission::findOrCreate('recruitment-applicants.manage', 'web'));
+        $links = app(PublicRecruitmentLinkService::class);
+        $links->generate($campaign, $hr, now()->addDays(10), RecruitmentCampaignLinkMode::InvitationOnly);
+        $invite = $links->addInvite($campaign->fresh(), $hr, 'Second Chance', 'again@example.org');
+        $links->cancelInvite($invite, $hr);
+        Mail::assertSentCount(1);
+
+        app(RecruitmentCampaignInviteService::class)->add($hr, $campaign->fresh(), 'Second Chance', 'again@example.org');
+
+        Mail::assertSentCount(2);
+        $this->assertSame(RecruitmentCampaignInvite::STATUS_SENT, $invite->fresh()->status);
+    }
+
+    public function test_sending_every_pending_invitation_counts_the_refused_ones_apart(): void
+    {
+        [$campaign, $hr, $first] = $this->pendingInviteWithLink('good@example.org');
+        $hr->roles()->wherePivot('is_active', true)->firstOrFail()
+            ->givePermissionTo(Permission::findOrCreate('recruitment-applicants.manage', 'web'));
+        // Quietly: with the link already live, creating it would send it at once.
+        $second = RecruitmentCampaignInvite::withoutEvents(fn () => RecruitmentCampaignInvite::query()->create([
+            'campaign_id' => $campaign->id,
+            'full_name' => 'Wrong Address',
+            'email_normalized' => 'wrong@example.org',
+            'status' => RecruitmentCampaignInvite::STATUS_PENDING,
+            'created_by_user_id' => $hr->id,
+        ]));
+
+        Mail::shouldReceive('to')->andReturnUsing(function (string $to) {
+            $pending = Mockery::mock();
+            $pending->shouldReceive('send')->andReturnUsing(function () use ($to): void {
+                if ($to === 'wrong@example.org') {
+                    throw new \Symfony\Component\Mailer\Exception\UnexpectedResponseException('550 5.1.1 User unknown', 550);
+                }
+            });
+
+            return $pending;
+        });
+
+        $result = app(RecruitmentCampaignInviteService::class)->sendPending($hr, $campaign);
+
+        $this->assertSame(['sent' => 1, 'failed' => 1], $result);
+        $this->assertSame(RecruitmentCampaignInvite::STATUS_SENT, $first->fresh()->status);
+        $this->assertSame(RecruitmentCampaignInvite::FAILURE_MAILBOX_MISSING, $second->fresh()->failure_reason);
+    }
+
+    public function test_an_invitation_that_has_been_used_cannot_be_sent_again(): void
+    {
+        Mail::fake();
+        [$campaign, $hr, $invite] = $this->pendingInviteWithLink('done@example.org');
+        $hr->roles()->wherePivot('is_active', true)->firstOrFail()
+            ->givePermissionTo(Permission::findOrCreate('recruitment-applicants.manage', 'web'));
+        $invite->forceFill(['status' => RecruitmentCampaignInvite::STATUS_USED, 'used_at' => now()])->save();
+
+        $this->expectException(\Illuminate\Validation\ValidationException::class);
+
+        try {
+            app(RecruitmentCampaignInviteService::class)->send($hr, $invite->fresh());
+        } finally {
+            Mail::assertNothingSent();
+        }
+    }
+
+    /** A bounced email does not revoke the invitation: HR can still pass the link on by hand. */
+    public function test_an_invitation_whose_email_bounced_can_still_apply(): void
+    {
+        [$campaign, $hr, $invite] = $this->pendingInviteWithLink('bounced@example.org');
+        $invite->forceFill([
+            'failed_at' => now(),
+            'failure_reason' => RecruitmentCampaignInvite::FAILURE_NOT_SENT,
+        ])->save();
+        $token = $campaign->publicLinks()->where('status', PublicRecruitmentLink::STATUS_ACTIVE)->firstOrFail();
+        $url = \Illuminate\Support\Facades\Crypt::decryptString($token->url_encrypted);
+        $tokenValue = basename((string) parse_url($url, PHP_URL_PATH));
+
+        $this->post(route('careers.invitation', $tokenValue), ['invitee_email' => 'bounced@example.org'])
+            ->assertRedirect();
+    }
+
+    public function test_the_email_check_is_rate_limited(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)
+            ->generate($campaign, $hr, now()->addDays(10), RecruitmentCampaignLinkMode::InvitationOnly);
+
+        foreach (range(1, 6) as $attempt) {
+            $this->post(route('careers.invitation', $result['token']), ['invitee_email' => "guess{$attempt}@example.org"])
+                ->assertStatus(422);
+        }
+
+        $this->post(route('careers.invitation', $result['token']), ['invitee_email' => 'guess7@example.org'])
+            ->assertTooManyRequests();
+    }
+
+    public function test_a_cancelled_invitation_is_not_sent_the_link(): void
+    {
+        Mail::fake();
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $links = app(PublicRecruitmentLinkService::class);
+        $links->generate($campaign, $hr, now()->addDays(10), RecruitmentCampaignLinkMode::InvitationOnly);
+        $invite = $links->addInvite($campaign->fresh(), $hr, 'Changed Mind', 'changed@example.com');
+        $links->cancelInvite($invite, $hr);
+        Mail::assertSentCount(1);
+
+        SendRecruitmentCampaignInvite::dispatchSync($invite->id);
+
+        Mail::assertSentCount(1);
+        $this->assertSame(RecruitmentCampaignInvite::STATUS_CANCELLED, $invite->fresh()->status);
+    }
+
+    public function test_an_invitation_only_page_asks_for_the_email_before_it_shows_the_form(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $links = app(PublicRecruitmentLinkService::class);
+        $result = $links->generate($campaign, $hr, now()->addDays(10), RecruitmentCampaignLinkMode::InvitationOnly);
+        $links->addInvite($campaign->fresh(), $hr, 'Invited Person', 'invited@example.com');
+        $key = 'careers.invitee.'.hash('sha256', $result['token']);
+
+        // Before: the question, and no form.
+        $this->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee(__('careers.invitation.title'))
+            ->assertDontSee('data-recruitment-wizard', false);
+
+        // An address that is not on the list is told so, and gets no form.
+        $this->post(route('careers.invitation', $result['token']), ['invitee_email' => 'stranger@example.com'])
+            ->assertStatus(422)
+            ->assertSee(__('careers.invitation.not_listed'))
+            ->assertDontSee('data-recruitment-wizard', false)
+            ->assertSessionMissing($key);
+
+        $this->post(route('careers.invitation', $result['token']), ['invitee_email' => 'not an email'])
+            ->assertStatus(422)
+            ->assertSee(__('careers.invitation.invalid_email'));
+
+        // The invited address, however it is typed, is let through.
+        $this->post(route('careers.invitation', $result['token']), ['invitee_email' => '  INVITED@example.com '])
+            ->assertRedirect()
+            ->assertSessionHas($key, 'invited@example.com');
+
+        // After: the form, with the address filled in and fixed.
+        $page = $this->withSession([$key => 'invited@example.com'])
+            ->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee('data-recruitment-wizard', false)
+            ->assertSee('value="invited@example.com"', false)
+            ->assertSee(__('careers.invitation.email_note'));
+        $this->assertStringContainsString('readonly', $page->getContent());
+    }
+
+    public function test_a_cancelled_invitation_closes_the_form_again(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $links = app(PublicRecruitmentLinkService::class);
+        $result = $links->generate($campaign, $hr, now()->addDays(10), RecruitmentCampaignLinkMode::InvitationOnly);
+        $invite = $links->addInvite($campaign->fresh(), $hr, 'Invited Person', 'invited@example.com');
+        $key = 'careers.invitee.'.hash('sha256', $result['token']);
+
+        $links->cancelInvite($invite, $hr);
+
+        $this->withSession([$key => 'invited@example.com'])
+            ->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertSee(__('careers.invitation.title'))
+            ->assertDontSee('data-recruitment-wizard', false);
+    }
+
+    public function test_the_email_check_changes_nothing_for_a_campaign_open_to_everyone(): void
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $result = app(PublicRecruitmentLinkService::class)
+            ->generate($campaign, $hr, now()->addDays(10), RecruitmentCampaignLinkMode::PublicOpen);
+
+        $this->get(route('careers.show', $result['token']))
+            ->assertOk()
+            ->assertDontSee('data-invitation-state', false)
+            ->assertSee('data-recruitment-wizard', false);
+
+        $this->post(route('careers.invitation', $result['token']), ['invitee_email' => 'anyone@example.com'])
+            ->assertRedirect();
+    }
+
     private function staffMember(): User
     {
         $city = $this->makeCity('ALP', '001');
@@ -896,6 +1267,27 @@ class PublicRecruitmentLinkTest extends TestCase
         $user->forceFill(['email' => 'rami.haddad@hopecenter.test'])->save();
 
         return $user->fresh();
+    }
+
+    /** @return array{0: HiringCampaign, 1: User, 2: RecruitmentCampaignInvite} */
+    private function pendingInviteWithLink(string $email): array
+    {
+        [$campaign, $hr] = $this->makePublishedCampaign();
+        $campaign->forceFill(['link_mode' => RecruitmentCampaignLinkMode::InvitationOnly])->save();
+
+        // Added before the link exists, so nothing is sent yet and it stays pending.
+        $invite = RecruitmentCampaignInvite::query()->create([
+            'campaign_id' => $campaign->id,
+            'full_name' => 'Invited Person',
+            'email_normalized' => $email,
+            'status' => RecruitmentCampaignInvite::STATUS_PENDING,
+            'created_by_user_id' => $hr->id,
+        ]);
+
+        app(PublicRecruitmentLinkService::class)
+            ->generate($campaign->fresh(), $hr, now()->addDays(10), RecruitmentCampaignLinkMode::InvitationOnly);
+
+        return [$campaign->fresh(), $hr, $invite];
     }
 
     private function makePublishedCampaign(): array

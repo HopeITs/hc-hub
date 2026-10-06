@@ -48,14 +48,16 @@ class RecruitmentInterviewEvaluationService
 
     /**
      * Why this interview cannot be evaluated right now, or null if it can:
-     * not_started, cancelled, no_show, closed.
+     * cancelled, no_show, not_held, closed. Evaluation opens when HR records
+     * the interview as held — not at its start time — so nobody evaluates an
+     * interview that may not have taken place.
      */
     public function closedReason(RecruitmentInterview $interview): ?string
     {
         return match (true) {
             $interview->status === Status::Cancelled => 'cancelled',
             $interview->status === Status::NoShow => 'no_show',
-            $interview->scheduled_at->isFuture() => 'not_started',
+            $interview->status !== Status::Completed => 'not_held',
             $interview->evaluationsClosed() => 'closed',
             default => null,
         };

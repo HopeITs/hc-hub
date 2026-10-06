@@ -13,6 +13,7 @@ use App\Models\Department;
 use App\Models\JobLevel;
 use App\Models\Position;
 use App\Models\Program;
+use App\Models\TerminationReason;
 use App\Notifications\ContractsAutoRenewedSummary;
 use App\Notifications\ContractsExpiringAutoRenewWarning;
 use App\Services\LeaveBalanceService;
@@ -298,6 +299,109 @@ class ContractAutoRenewalWorkflowTest extends TestCase
             ->assertStatus(403);
 
         $this->assertTrue($contract->fresh()->auto_renew);
+    }
+
+    public function test_terminating_a_contract_switches_auto_renew_off(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $employee = $this->makeEmployee($fixtures['city'], 'terminated-edit');
+        $position = $this->makePosition($fixtures, 'Terminated Edit Position');
+        $contract = $this->makeContract($fixtures, $employee, $position, ['auto_renew' => true]);
+        $reason = TerminationReason::query()->create(['title_en' => 'Resigned', 'title_ar' => 'استقالة']);
+
+        // HR leaves the auto-renew switch on in the same submit: the
+        // termination still wins.
+        $payload = $this->composerPayload($fixtures, $contract, [
+            'autoRenew' => true,
+            'terminatedAt' => '2026-06-30',
+            'terminationReasonId' => $reason->id,
+        ]);
+
+        $this->mock(LeaveBalanceService::class)->shouldReceive('create');
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractEdit::class, ['contract' => $contract])
+            ->call('submit', $payload)
+            ->assertHasNoErrors();
+
+        $contract->refresh();
+        $this->assertSame('2026-06-30', $contract->terminated_at->toDateString());
+        $this->assertFalse($contract->is_active);
+        $this->assertFalse($contract->auto_renew);
+    }
+
+    public function test_contract_card_has_a_termination_row_shown_only_when_terminated(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $contract = $this->makeContract(
+            $fixtures,
+            $this->makeEmployee($fixtures['city'], 'terminated-card'),
+            $this->makePosition($fixtures, 'Terminated Card Position'),
+        );
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractEdit::class, ['contract' => $contract])
+            ->assertSeeHtml('x-show="isTerminated"')
+            ->assertSeeHtml('x-text="cardTerminated"');
+    }
+
+    public function test_a_termination_saved_on_the_model_switches_auto_renew_off(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $contract = $this->makeContract(
+            $fixtures,
+            $this->makeEmployee($fixtures['city'], 'terminated-model'),
+            $this->makePosition($fixtures, 'Terminated Model Position'),
+            ['auto_renew' => true],
+        );
+
+        $contract->update(['terminated_at' => '2026-06-30', 'is_active' => false]);
+
+        $this->assertFalse($contract->fresh()->auto_renew);
+    }
+
+    public function test_process_auto_renewals_skips_terminated_contracts(): void
+    {
+        $this->travelTo('2026-09-16 09:00:00');
+        Notification::fake();
+
+        $fixtures = $this->makeFixtures();
+        $employee = $this->makeEmployee($fixtures['city'], 'terminated-expired');
+        $contract = $this->makeContract($fixtures, $employee, $this->makePosition($fixtures, 'Terminated Expired Position'), [
+            'start_date' => '2026-01-01',
+            'end_date' => '2026-09-15',
+            'is_active' => false,
+        ]);
+
+        // Legacy row: terminated before the observer forced the flag off.
+        Contract::query()->whereKey($contract)->update([
+            'terminated_at' => '2026-05-01',
+            'auto_renew' => true,
+        ]);
+
+        Artisan::call(ProcessContractAutoRenewals::class);
+
+        $this->assertSame(1, Contract::query()->where('employee_id', $employee->id)->count());
+    }
+
+    public function test_contracts_table_shows_termination_date_and_hides_auto_renew_toggle(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $contract = $this->makeContract(
+            $fixtures,
+            $this->makeEmployee($fixtures['city'], 'terminated-table'),
+            $this->makePosition($fixtures, 'Terminated Table Position'),
+            ['terminated_at' => '2026-06-30', 'is_active' => false],
+        );
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractsTable::class)
+            ->assertSee('2026-06-30')
+            ->assertDontSee('confirmToggleAutoRenew')
+            ->call('toggleAutoRenewConfirmed', ['id' => $contract->id])
+            ->assertStatus(403);
+
+        $this->assertFalse($contract->fresh()->auto_renew);
     }
 
     private function makeFixtures(): array

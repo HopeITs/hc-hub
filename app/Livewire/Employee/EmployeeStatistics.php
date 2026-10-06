@@ -34,11 +34,11 @@ class EmployeeStatistics extends Component
      */
     private function contracts(): Builder
     {
-        $cityId = $this->authorizedCityId();
+        $cityIds = $this->authorizedCityIds();
 
         return Contract::query()->when(
-            $cityId !== null,
-            fn (Builder $query) => $query->whereHas('position', fn ($p) => $p->inCity($cityId)),
+            $cityIds !== null,
+            fn (Builder $query) => $query->whereHas('position', fn ($p) => $p->inCity($cityIds)),
         );
     }
 

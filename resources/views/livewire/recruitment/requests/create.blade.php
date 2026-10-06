@@ -1,11 +1,8 @@
 <x-slot:title>{{ __('recruitment.create') }}</x-slot:title>
 
 <div class="mx-auto max-w-5xl space-y-6">
-    <a class="text-primary hover:underline" href="{{ route('recruitment.requests.index') }}">{{ __('recruitment.back') }}</a>
-    <header>
-        <h1 class="text-h2 font-semibold text-secondary-dark">{{ __('recruitment.create') }}</h1>
-        <p class="mt-2 text-secondary-medium">{{ __('recruitment.create_description') }}</p>
-    </header>
+    <livewire:layout.breadcrumbs :title="__('recruitment.create')" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __('recruitment.navigation_requests'), 'route' => 'recruitment.requests.index'], ['label' => __('recruitment.create')]]" />
+    <p class="-mt-4 text-secondary-medium">{{ __('recruitment.create_description') }}</p>
     <form wire:submit="save" class="space-y-6">
         @if (($editing ?? false) && filled($changeRequest ?? null))
             <section class="rounded-surface border border-neutral-200 bg-white p-5">

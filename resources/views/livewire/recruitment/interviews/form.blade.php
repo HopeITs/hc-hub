@@ -4,13 +4,13 @@
     use App\Models\RecruitmentInterviewParticipant;
     use App\Services\RecruitmentInterviewSchedulingService;
 @endphp
-<div class="space-y-6 p-6">
+<x-slot:title>{{ $interview ? __('recruitment-applicant.interviews.edit_title') : __('recruitment-applicant.interviews.schedule_title') }}</x-slot:title>
+
+<div class="space-y-6">
+    <livewire:layout.breadcrumbs :title="($interview ? __('recruitment-applicant.interviews.edit_title') : __('recruitment-applicant.interviews.schedule_title'))" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __('recruitment-applicant.interviews.title'), 'route' => 'recruitment.interviews.index'], ['label' => $interview ? __('recruitment-applicant.interviews.edit_title') : __('recruitment-applicant.interviews.schedule_title')]]" />
     <div>
         <a href="{{ $interview ? route('recruitment.interviews.show', ['interviewId' => $interview->id]) : route('recruitment.applicants.show', ['applicantId' => $application->applicant_id]) }}"
            wire:navigate class="inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-secondary-dark transition hover:text-secondary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:min-h-0"><svg class="size-4 rtl:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12.5 15 7.5 10l5-5"/></svg> {{ __('recruitment-applicant.interviews.back') }}</a>
-        <h1 class="mt-2 text-h3 font-semibold">
-            {{ $interview ? __('recruitment-applicant.interviews.edit_title') : __('recruitment-applicant.interviews.schedule_title') }}
-        </h1>
         <p class="mt-1 text-sm text-secondary-medium">
             {{ $application->applicant?->full_name }}
             &middot; {{ $application->campaign?->vacancy?->position?->title ?? __('recruitment-applicant.no_vacancy') }}
@@ -29,11 +29,11 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                     <x-forms.input-label for="type" required :value="__('recruitment-applicant.interviews.type')" />
-                    <select id="type" wire:model="type" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body shadow-e1 transition focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary">
+                    <x-forms.select2-input id="type" wire:model="type">
                         @foreach (RecruitmentInterviewType::values() as $value)
                             <option value="{{ $value }}">{{ __('recruitment-applicant.interviews.types.'.$value) }}</option>
                         @endforeach
-                    </select>
+                    </x-forms.select2-input>
                     <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.interviews.type_hint') }}</p>
                     <x-forms.input-error field="type" input-id="type" />
                 </div>
@@ -47,11 +47,11 @@
 
                 <div>
                     <x-forms.input-label for="duration" required :value="__('recruitment-applicant.interviews.duration')" />
-                    <select id="duration" wire:model="duration" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body shadow-e1 transition focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary">
+                    <x-forms.select2-input id="duration" wire:model="duration">
                         @foreach ([15, 30, 45, 60, 90, 120, 180, 240] as $minutes)
                             <option value="{{ $minutes }}">{{ __('recruitment-applicant.interviews.minutes', ['count' => $minutes]) }}</option>
                         @endforeach
-                    </select>
+                    </x-forms.select2-input>
                     <x-forms.input-error field="duration" input-id="duration" />
                 </div>
             </div>
@@ -59,11 +59,11 @@
             <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                     <x-forms.input-label for="locationType" required :value="__('recruitment-applicant.interviews.location')" />
-                    <select id="locationType" wire:model.live="locationType" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body shadow-e1 transition focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary">
+                    <x-forms.select2-input id="locationType" wire:model.live="locationType">
                         @foreach (RecruitmentInterviewLocationType::values() as $value)
                             <option value="{{ $value }}">{{ __('recruitment-applicant.interviews.location_types.'.$value) }}</option>
                         @endforeach
-                    </select>
+                    </x-forms.select2-input>
                     <x-forms.input-error field="locationType" input-id="locationType" />
                 </div>
 
@@ -103,11 +103,11 @@
                 </div>
                 <div>
                     <x-forms.input-label for="newParticipantRole" :value="__('recruitment-applicant.interviews.participant_role')" />
-                    <select id="newParticipantRole" wire:model="newParticipantRole" class="w-full rounded-control border border-secondary-light bg-white px-3 py-2 text-body shadow-e1 transition focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary">
+                    <x-forms.select2-input id="newParticipantRole" wire:model="newParticipantRole">
                         @foreach (RecruitmentInterviewParticipant::roles() as $role)
                             <option value="{{ $role }}">{{ __('recruitment-applicant.interviews.roles.'.$role) }}</option>
                         @endforeach
-                    </select>
+                    </x-forms.select2-input>
                 </div>
                 <button type="button" wire:click="addParticipant" class="rounded-control border border-primary px-4 py-2 text-sm font-semibold text-primary transition hover:bg-selection focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
                     {{ __('recruitment-applicant.interviews.add') }}

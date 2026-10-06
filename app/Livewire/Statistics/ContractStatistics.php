@@ -33,10 +33,10 @@ class ContractStatistics extends Component
 
     public function mount(): void
     {
-        $cityId = $this->authorizedCityId();
+        $cityIds = $this->authorizedCityIds();
 
         $this->cities = City::where('is_active', true)
-            ->when($cityId !== null, fn ($q) => $q->whereKey($cityId))
+            ->when($cityIds !== null, fn ($q) => $q->whereKey($cityIds))
             ->get();
 
         $this->programs = Program::where('is_active', true)
@@ -175,10 +175,12 @@ class ContractStatistics extends Component
      */
     private function enforceCityScope(): void
     {
-        $cityId = $this->authorizedCityId();
+        $cityIds = $this->authorizedCityIds();
 
-        if ($cityId !== null) {
-            $this->selectedCity = $cityId;
+        // A role covering several cities may switch between them, one at a
+        // time; anything else falls back to the first of its own.
+        if ($cityIds !== null && ! in_array($this->selectedCity, $cityIds, true)) {
+            $this->selectedCity = $cityIds[0] ?? 0;
         }
     }
 

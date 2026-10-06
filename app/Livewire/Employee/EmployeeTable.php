@@ -113,8 +113,8 @@ class EmployeeTable extends LivewireTable
                 'media',
             ])
             ->when(
-                auth()->user()->activeCityId(),
-                fn (Builder $q, int $cityId) => $q->where('city_id', $cityId),
+                auth()->user()->activeCityIds(),
+                fn (Builder $q, array $cityIds) => $q->whereIn('city_id', $cityIds),
             )
             ->orderByDesc('is_active');
     }
@@ -129,8 +129,8 @@ class EmployeeTable extends LivewireTable
         return Employee::query()
             ->select(['id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar'])
             ->when(
-                auth()->user()->activeCityId(),
-                fn (Builder $q, int $cityId) => $q->where('city_id', $cityId),
+                auth()->user()->activeCityIds(),
+                fn (Builder $q, array $cityIds) => $q->whereIn('city_id', $cityIds),
             )
             ->where('is_active', true)
             ->orderBy(transColumn('first_name'), 'asc')

@@ -40,9 +40,7 @@ class EmployeeProfile extends Component
         $this->isSelf = $user->employee_id === $this->employee->id;
         $isHr = $user->activeRoleIs('HR', 'super-admin');
         $isManagement = $user->activeRoleIs('general-manager');
-        $activeCityId = $user->activeCityId();
-        $isHrInScope = $isHr
-            && ($activeCityId === null || $this->employee->city_id === $activeCityId);
+        $isHrInScope = $isHr && $user->canAccessCity($this->employee->city_id);
 
         $this->canViewPrivate = $this->isSelf || $isHrInScope;
 

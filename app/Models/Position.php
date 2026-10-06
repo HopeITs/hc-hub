@@ -184,29 +184,32 @@ class Position extends Model
      * Positions reachable from the given city: either assigned directly to the
      * city, or assigned to a center that belongs to it. Single source of truth
      * for city scoping; keep contract create/edit filters aligned with it.
+     *
+     * @param  int|array<int, int>  $cityIds  one city, or every city a role covers
      */
-    public function scopeInCity($query, int $cityId)
+    public function scopeInCity($query, int|array $cityIds)
     {
-        return $this->scopeInCities($query, [$cityId]);
+        $cityIds = (array) $cityIds;
+
+        // Qualify the columns: callers such as PositionTable join tables
+        // (centers, departments, ...) that also carry a city_id, which MySQL
+        // rejects as ambiguous.
+        return $query->where(function ($q) use ($cityIds) {
+            $q->whereIn($q->qualifyColumn('city_id'), $cityIds)
+                ->orWhereHas('center', fn ($c) => $c->whereIn($c->qualifyColumn('city_id'), $cityIds));
+        });
     }
 
     /**
-     * The same rule for several governorates at once.
-     *
-     * Some governorates are administered together — Homs Rural is the
-     * countryside of Homs, not a governorate of its own — so a caller sometimes
-     * has a set rather than one id. It delegates to the same predicate rather
-     * than restating it: a second copy of "city_id or the centre's city_id" is
-     * how the two drift apart.
+     * The same rule for several governorates at once. Delegates to inCity()
+     * rather than restating it: a second copy of "city_id or the centre's
+     * city_id" is how the two drift apart.
      *
      * @param  array<int, int>  $cityIds
      */
     public function scopeInCities($query, array $cityIds)
     {
-        return $query->where(function ($q) use ($cityIds) {
-            $q->whereIn($q->qualifyColumn('city_id'), $cityIds)
-                ->orWhereHas('center', fn ($c) => $c->whereIn($c->qualifyColumn('city_id'), $cityIds));
-        });
+        return $this->scopeInCity($query, $cityIds);
     }
 
     // --------------------------------------------

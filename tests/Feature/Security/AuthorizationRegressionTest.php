@@ -279,7 +279,7 @@ class AuthorizationRegressionTest extends TestCase
         // Historically assigned, not currently active.
         $this->assertTrue($user->hasRole('super-admin'));
         $this->assertFalse($user->isActiveAdministrator());
-        $this->assertSame($aleppo->id, $user->activeCityId());
+        $this->assertSame([$aleppo->id], $user->activeCityIds());
     }
 
     public function test_an_active_super_admin_role_is_recognised(): void
@@ -288,7 +288,7 @@ class AuthorizationRegressionTest extends TestCase
         $user = $this->makeUser($city, 'super-admin');
 
         $this->assertTrue($user->isActiveAdministrator());
-        $this->assertNull($user->activeCityId());
+        $this->assertNull($user->activeCityIds());
     }
 
     // --- Sensitive values stay out of the activity log (item 14) ---------

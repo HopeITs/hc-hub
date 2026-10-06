@@ -56,6 +56,8 @@ class ContractExport implements FromCollection, ShouldAutoSize, WithHeadings, Wi
                 'salary_per' => __('general.salary-per', [], 'en'),
                 'weekly_hours' => __('general.weekly-hours', [], 'en'),
                 'is_active' => __('general.status', [], 'en'),
+                'auto_renew' => __('general.auto-renew', [], 'en'),
+                'terminated_at' => __('general.terminated-at', [], 'en'),
                 default => $code,
             };
         }
@@ -85,6 +87,8 @@ class ContractExport implements FromCollection, ShouldAutoSize, WithHeadings, Wi
                 'salary_per' => SalaryPer::getLocalizedName($row->salary_per instanceof SalaryPer ? $row->salary_per->value : (int) $row->salary_per)['value'] ?? '',
                 'weekly_hours' => $row->weekly_hours ?? '0',
                 'is_active' => $row->is_active ? 'Yes' : 'No',
+                'auto_renew' => $row->auto_renew ? 'Yes' : 'No',
+                'terminated_at' => $row->terminated_at?->format('Y-m-d') ?? '',
                 default => '',
             };
         }

@@ -137,11 +137,9 @@ class LeaveRequest extends Model
         }
 
         if ($role && str_starts_with($role, 'HR-')) {
-            $cityCode = substr($role, 3);
-
             return $query->whereHas(
-                'leaveBalance.contract.employee.city',
-                fn (Builder $cityQuery) => $cityQuery->where('slug', $cityCode),
+                'leaveBalance.contract.employee',
+                fn (Builder $employeeQuery) => $employeeQuery->whereIn('city_id', $user->activeCityIds() ?? []),
             );
         }
 
@@ -188,11 +186,9 @@ class LeaveRequest extends Model
         }
 
         if (str_starts_with($role, 'HR-')) {
-            $cityCode = substr($role, 3);
-
             return $query->whereHas(
-                'leaveBalance.contract.employee.city',
-                fn ($q) => $q->where('slug', $cityCode),
+                'leaveBalance.contract.employee',
+                fn ($q) => $q->whereIn('city_id', $user->activeCityIds() ?? []),
             );
         }
 

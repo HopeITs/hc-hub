@@ -61,14 +61,14 @@ class ContractPolicy
 
     private function isInActiveCity(User $user, Contract $contract): bool
     {
-        $activeCityId = $user->activeCityId();
+        $activeCityIds = $user->activeCityIds();
 
-        if ($activeCityId === null) {
+        if ($activeCityIds === null) {
             return true;
         }
 
         return $contract->employee()
-            ->where('city_id', $activeCityId)
+            ->whereIn('city_id', $activeCityIds)
             ->exists();
     }
 }

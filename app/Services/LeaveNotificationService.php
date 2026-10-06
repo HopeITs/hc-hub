@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\City;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use App\Notifications\ActionLeaveRequest;
@@ -123,7 +124,7 @@ class LeaveNotificationService
         }
 
         return User::query()
-            ->whereHas('roles', fn ($query) => $query->where('name', 'HR-'.$citySlug))
+            ->whereHas('roles', fn ($query) => $query->whereIn('name', City::hrRolesForSlug($citySlug)))
             ->whereHas('profile', fn ($query) => $query->where('is_active', true))
             ->get();
     }

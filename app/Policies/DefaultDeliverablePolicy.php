@@ -42,8 +42,6 @@ class DefaultDeliverablePolicy
 
     private function cityAllowed(User $user, int $cityId): bool
     {
-        $activeCityId = $user->activeCityId();
-
-        return $activeCityId === null || $activeCityId === $cityId;
+        return $user->canAccessCity($cityId);
     }
 }

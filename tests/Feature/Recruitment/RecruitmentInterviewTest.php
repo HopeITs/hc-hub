@@ -492,18 +492,67 @@ class RecruitmentInterviewTest extends TestCase
     // Exceptional cases
     // ------------------------------------------------------------------
 
-    /** [14] A slot in the past is refused on create and on reschedule. */
-    public function test_a_slot_in_the_past_is_refused(): void
+    /**
+     * [14] HR picks any date and time, a past one included (an interview
+     * already held is recorded after the fact) — on create and on
+     * reschedule. The candidate is emailed only about a slot still ahead.
+     */
+    public function test_any_slot_may_be_chosen_and_only_a_future_one_is_emailed(): void
     {
         $application = $this->shortlisted();
 
-        $this->assertValidationError(fn () => $this->schedule($application, ['startsAt' => '2026-10-05T08:59']), 'startsAt');
-        $this->assertValidationError(fn () => $this->schedule($application, ['startsAt' => '2026-10-05T09:00']), 'startsAt');
-        $this->assertSame(0, RecruitmentInterview::query()->count());
+        $past = $this->schedule($application, ['startsAt' => '2026-10-01T10:00']);
+        $this->assertSame('2026-10-01 10:00', $past->fresh()->scheduled_at->format('Y-m-d H:i'));
+        $this->assertSame(0, $past->notices()->count(), 'No invitation to a slot already over.');
 
-        $interview = $this->schedule($application);
-        $this->assertValidationError(fn () => $this->reschedule($interview, ['startsAt' => '2026-10-01T10:00']), 'startsAt');
-        $this->assertSame('2026-10-08 10:00', $interview->fresh()->scheduled_at->format('Y-m-d H:i'));
+        $interview = $this->schedule($application->fresh());
+        $this->assertSame(1, $interview->notices()->where('kind', Notice::KIND_SCHEDULED)->count());
+        $this->reschedule($interview, ['startsAt' => '2026-10-02T10:00']);
+        $this->assertSame('2026-10-02 10:00', $interview->fresh()->scheduled_at->format('Y-m-d H:i'));
+        $this->assertSame(0, $interview->notices()->where('kind', Notice::KIND_RESCHEDULED)->count());
+
+        // A date that cannot exist is still refused, not rolled over.
+        $this->assertValidationError(fn () => $this->schedule($application->fresh(), ['startsAt' => '2026-02-30T10:00']), 'startsAt');
+    }
+
+    /**
+     * The join button is for an interview still to come. Once held,
+     * cancelled or a no-show the link stays as plain text, for the record.
+     */
+    public function test_the_join_button_goes_once_the_interview_is_over(): void
+    {
+        $interview = $this->schedule($this->shortlisted(), ['startsAt' => '2026-10-06T10:00']);
+        $this->actingAs($this->hr);
+        Livewire::test(Show::class, ['interviewId' => $interview->id])
+            ->assertSeeHtml('href="'.self::MEETING_URL.'"')
+            ->assertSee(__('recruitment-applicant.interviews.join_meeting'));
+
+        $this->travelTo(Carbon::parse('2026-10-06 11:00:00'));
+        $this->service()->recordOutcome($this->hr, $interview->fresh(), $interview->fresh()->status, $interview->scheduled_at->toIso8601String(), Status::Completed, null);
+        Livewire::test(Show::class, ['interviewId' => $interview->id])
+            ->assertSee(self::MEETING_URL)
+            ->assertSee(__('recruitment-applicant.interviews.meeting_over'))
+            ->assertDontSeeHtml('href="'.self::MEETING_URL.'"')
+            ->assertDontSee(__('recruitment-applicant.interviews.join_meeting'));
+    }
+
+    /** The interview form's dropdowns are the project's Select2, searchable as on the Leaves page — on create and on edit. */
+    public function test_the_interview_form_uses_searchable_select2_for_every_dropdown(): void
+    {
+        $application = $this->shortlisted();
+        $this->actingAs($this->hr);
+
+        foreach ([
+            Livewire::test(Form::class, ['applicationId' => $application->id])->html(),
+            Livewire::test(Form::class, ['interviewId' => $this->schedule($application)->id])->html(),
+        ] as $html) {
+            foreach (['type', 'duration', 'locationType', 'newParticipantId', 'newParticipantRole'] as $id) {
+                $this->assertMatchesRegularExpression('/<select x-ref="select"[^>]*id="'.$id.'"/', $html, $id.' is a Select2 dropdown');
+            }
+            $this->assertSame(substr_count($html, '<select'), substr_count($html, '<select x-ref="select"'), 'No plain select is left.');
+            $this->assertSame(5, substr_count($html, 'minimumResultsForSearch: 0'));
+            $this->assertStringNotContainsString('minimumResultsForSearch: Infinity', $html);
+        }
     }
 
     /** [15] An inactive employee cannot be added; one who becomes inactive stays on but is no longer notified. */
@@ -1076,6 +1125,7 @@ class RecruitmentInterviewTest extends TestCase
 
         // Every evaluation, read-only; no form of his own to fill in.
         $this->travelTo(Carbon::parse('2026-10-08 11:00:00'));
+        $this->service()->recordOutcome($this->hr, $one->fresh(), $one->fresh()->status, $one->scheduled_at->toIso8601String(), Status::Completed, null);
         $this->evaluations()->submit($this->interviewer, $one->fresh(), ['recommendation' => Recommendation::No, 'notes' => self::SECRET_EVALUATION], null);
         $evaluation = RecruitmentInterviewEvaluation::query()->sole();
         Livewire::test(EvaluationSummary::class, ['interviewId' => $one->id])
@@ -1119,6 +1169,7 @@ class RecruitmentInterviewTest extends TestCase
         $this->assertEqualsCanonicalizing([$interview->id, $other->id], RecruitmentInterview::query()->visibleTo($requester)->pluck('id')->all());
 
         $this->travelTo(Carbon::parse('2026-10-08 11:00:00'));
+        $this->service()->recordOutcome($this->hr, $interview->fresh(), $interview->fresh()->status, $interview->scheduled_at->toIso8601String(), Status::Completed, null);
         $theirs = $this->evaluations()->submit($this->interviewer, $interview->fresh(), ['recommendation' => Recommendation::Maybe], null);
 
         $this->actingAs($requester);
@@ -1137,8 +1188,7 @@ class RecruitmentInterviewTest extends TestCase
         $this->assertFalse($requester->can('correct', $theirs));
 
         // Closed: no more saving through the form, for him as for everyone.
-        $held = $this->service()->recordOutcome($this->hr, $interview->fresh(), $interview->fresh()->status, $interview->scheduled_at->toIso8601String(), Status::Completed, null);
-        $this->evaluations()->close($this->hr, $held->fresh(), Status::Completed);
+        $this->evaluations()->close($this->hr, $interview->fresh(), Status::Completed);
         $this->assertThrows(fn () => $this->evaluations()->submit($requester, $interview->fresh(), ['recommendation' => Recommendation::No], $own->version), ValidationException::class);
     }
 

@@ -15,7 +15,7 @@ class PositionPolicy
     public function create(User $user, ?int $cityId): bool
     {
         return $user->hasActivePermission('positions.create')
-            && ($user->activeCityId() === null || $user->activeCityId() === $cityId);
+            && $user->canAccessCity($cityId);
     }
 
     public function update(User $user, Position $position): bool
@@ -30,9 +30,9 @@ class PositionPolicy
 
     private function isInActiveCity(User $user, Position $position): bool
     {
-        $activeCityId = $user->activeCityId();
+        $activeCityIds = $user->activeCityIds();
 
-        return $activeCityId === null
-            || Position::query()->inCity($activeCityId)->whereKey($position)->exists();
+        return $activeCityIds === null
+            || Position::query()->inCity($activeCityIds)->whereKey($position)->exists();
     }
 }

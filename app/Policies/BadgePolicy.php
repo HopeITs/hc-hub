@@ -34,8 +34,6 @@ class BadgePolicy
             return false;
         }
 
-        $cityId = $user->activeCityId();
-
-        return $cityId === null || $employee->city_id === $cityId;
+        return $user->canAccessCity($employee->city_id);
     }
 }

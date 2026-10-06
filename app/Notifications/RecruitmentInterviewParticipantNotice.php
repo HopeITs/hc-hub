@@ -29,6 +29,9 @@ class RecruitmentInterviewParticipantNotice extends Notification implements Shou
 
     public const REMOVED = 'removed';
 
+    /** Held: evaluation is open and the reviewer's own is needed. */
+    public const EVALUATION_OPEN = 'evaluation_open';
+
     public function __construct(
         public RecruitmentInterview $interview,
         public string $kind,
@@ -72,6 +75,9 @@ class RecruitmentInterviewParticipantNotice extends Notification implements Shou
 
     private function url(): string
     {
-        return route('recruitment.interviews.show', ['interviewId' => $this->interview->getKey()]);
+        $url = route('recruitment.interviews.show', ['interviewId' => $this->interview->getKey()]);
+
+        // Straight to the reviewer's own form.
+        return $this->kind === self::EVALUATION_OPEN ? $url.'#my-evaluation' : $url;
     }
 }

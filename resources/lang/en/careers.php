@@ -35,6 +35,17 @@ return [
     'submitted_message' => 'Thank you. Your application was received securely. The recruitment team will contact you if your profile is selected for the next step.',
     'unavailable_title' => 'This opportunity is unavailable',
     'unavailable_message' => 'The link may be invalid, disabled or expired. Please contact the recruitment team if you believe this is a mistake.',
+    'invitation' => [
+        'title' => 'Enter the email address you were invited with',
+        'message' => 'This vacancy is open to invited people only. Enter the email address the invitation was sent to and the application form will open.',
+        'email' => 'Email address',
+        'check' => 'Continue',
+        'not_listed' => 'This email address is not on the invitation list for this vacancy. Use the address the invitation was sent to.',
+        'invalid_email' => 'Enter a valid email address.',
+        'invited_as' => 'Invited as',
+        'ready_help' => 'You can fill in the application below. It must be submitted with this same email address.',
+        'email_note' => 'This is the address you were invited with, so it cannot be changed.',
+    ],
     'internal' => [
         'badge' => 'Staff only',
         'sign_in_title' => 'This vacancy is for Christian Hope Center staff',

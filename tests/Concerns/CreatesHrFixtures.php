@@ -13,7 +13,7 @@ use Spatie\Permission\Models\Role;
  *
  * The scoping rules depend on the exact shape of a role name (HR-ALP resolves
  * to a city, HR-SYR and super-admin deliberately do not), so these helpers
- * build users the same way the seeder does rather than stubbing activeCityId().
+ * build users the same way the seeder does rather than stubbing activeCityIds().
  */
 trait CreatesHrFixtures
 {

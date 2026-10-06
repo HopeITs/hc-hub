@@ -51,8 +51,6 @@ class CenterPolicy
     /** A null active city means the role legitimately spans every city. */
     private function cityAllowed(User $user, int $cityId): bool
     {
-        $activeCityId = $user->activeCityId();
-
-        return $activeCityId === null || $activeCityId === $cityId;
+        return $user->canAccessCity($cityId);
     }
 }
