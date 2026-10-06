@@ -4,6 +4,7 @@ use App\Http\Controllers\RecruitmentApplicantErasureController;
 use App\Http\Controllers\RecruitmentApplicantExportController;
 use App\Http\Controllers\RecruitmentApplicantFileController;
 use App\Http\Controllers\RecruitmentInterviewAttachmentController;
+use App\Http\Controllers\RecruitmentJobOfferResponseEvidenceController;
 use App\Livewire\Recruitment\Applicants\Index as ApplicantIndex;
 use App\Livewire\Recruitment\Applicants\Show as ApplicantShow;
 use App\Livewire\Recruitment\Approvals\Pending;
@@ -114,6 +115,11 @@ Route::get('recruitment/applications/{applicationId}/offer/create', OfferForm::c
     ->whereNumber('applicationId')
     ->middleware('active_permission:recruitment-applicants.manage-offers')
     ->name('recruitment.offers.create');
+
+Route::get('recruitment/offer-response-evidence/{media}/download', RecruitmentJobOfferResponseEvidenceController::class)
+    ->whereNumber('media')
+    ->middleware('throttle:60,1')
+    ->name('recruitment.offer-response-evidence.download');
 
 // Phase 2 Task 11. Outside the group above, with no permission middleware, for
 // the same reason as the file download below: the policy enforces the explicit

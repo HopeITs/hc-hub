@@ -30,9 +30,11 @@ use App\Services\RecruitmentJobOfferService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use LogicException;
@@ -794,6 +796,56 @@ class RecruitmentJobOfferTest extends TestCase
             ->call('save')
             ->assertHasNoErrors();
         $this->assertSame([Status::Revised, '1650.00'], [$other->fresh()->status, $other->fresh()->currentVersion->salary_amount]);
+    }
+
+    public function test_hr_privately_documents_the_candidate_response_email(): void
+    {
+        Storage::fake('local');
+
+        $application = $this->selected();
+        $offer = $this->send($this->create($application));
+        $this->actingAs($this->hr);
+
+        Livewire::test(Show::class, ['offerId' => $offer->id])
+            ->call('beginResponse', Status::Accepted)
+            ->set('responseNote', 'Accepted by email.')
+            ->set('responseEvidence', UploadedFile::fake()->createWithContent(
+                'candidate-response.eml',
+                "From: candidate@example.test\nSubject: Offer acceptance\n\nI accept the offer.",
+            ))
+            ->call('recordResponse')
+            ->assertHasNoErrors();
+
+        $offer = $offer->fresh();
+        $evidence = $offer->getFirstMedia(Offer::RESPONSE_EVIDENCE);
+        $this->assertNotNull($evidence);
+        $this->assertSame('candidate-response.eml', $evidence->getCustomProperty('original_name'));
+        $this->assertSame($this->hr->id, $evidence->getCustomProperty('uploaded_by_user_id'));
+        Storage::disk('local')->assertExists($evidence->getPathRelativeToRoot());
+
+        $download = route('recruitment.offer-response-evidence.download', ['media' => $evidence->id]);
+        $this->get($download)
+            ->assertOk()
+            ->assertHeader('content-type', 'application/octet-stream')
+            ->assertHeader('x-content-type-options', 'nosniff');
+
+        $requester = User::query()->findOrFail($application->vacancy->createdFromRequest->requester_user_id);
+        $this->actingAs($requester)->get($download)->assertForbidden();
+
+        $outsider = $this->makeUser($this->homs, 'manager');
+        $this->actingAs($outsider)->get($download)->assertNotFound();
+
+        $this->actingAs($this->hr);
+        Livewire::test(Show::class, ['offerId' => $offer->id])
+            ->set('responseEvidence', UploadedFile::fake()->create('reply.pdf', 20, 'application/pdf'))
+            ->call('uploadResponseEvidence')
+            ->assertHasNoErrors()
+            ->call('discardResponseEvidence', $evidence->id)
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseMissing('media', ['id' => $evidence->id]);
+        Storage::disk('local')->assertMissing($evidence->getPathRelativeToRoot());
+        $this->assertCount(1, $offer->fresh()->getMedia(Offer::RESPONSE_EVIDENCE));
     }
 
     /**
