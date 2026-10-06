@@ -12,6 +12,16 @@
                         class="mt-1 rounded-control border-neutral-300">
                 </div>
                 <div>
+                    <x-forms.input-label for="tagKind">{{ __('recruitment-applicant.tags.kind') }}</x-forms.input-label>
+                    <select id="tagKind" wire:model="tagKind"
+                        @error('tagKind') aria-invalid="true" aria-describedby="tagKind-error" @enderror
+                        class="mt-1 rounded-control border-neutral-300">
+                        @foreach ($kinds as $kind)
+                            <option value="{{ $kind }}">{{ __('recruitment-applicant.tags.kinds.'.$kind) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
                     <x-forms.input-label for="tagColor">{{ __('recruitment-applicant.tags.color') }}</x-forms.input-label>
                     <select id="tagColor" wire:model="tagColor"
                         @error('tagColor') aria-invalid="true" aria-describedby="tagColor-error" @enderror
@@ -24,6 +34,7 @@
                 <x-primary-button type="submit" wire:loading.attr="disabled" wire:target="create">{{ __('recruitment-applicant.tags.create') }}</x-primary-button>
             </form>
             <x-forms.input-error field="tagName" input-id="tagName" />
+            <x-forms.input-error field="tagKind" input-id="tagKind" />
             <x-forms.input-error field="tagColor" input-id="tagColor" />
 
             <ul class="mt-6 divide-y divide-neutral-100 text-sm">
@@ -35,6 +46,14 @@
                                 <input id="renameName" type="text" wire:model="renameName" maxlength="{{ config('recruitment.tags.max_length') }}" aria-required="true"
                                     @error('renameName') aria-invalid="true" aria-describedby="renameName-error" @enderror
                                     class="rounded-control border-neutral-300 text-sm">
+                                <label for="renameKind" class="sr-only">{{ __('recruitment-applicant.tags.kind') }}</label>
+                                <select id="renameKind" wire:model="renameKind"
+                                    @error('renameKind') aria-invalid="true" aria-describedby="renameKind-error" @enderror
+                                    class="rounded-control border-neutral-300 text-sm">
+                                    @foreach ($kinds as $kind)
+                                        <option value="{{ $kind }}">{{ __('recruitment-applicant.tags.kinds.'.$kind) }}</option>
+                                    @endforeach
+                                </select>
                                 <label for="renameColor" class="sr-only">{{ __('recruitment-applicant.tags.color') }}</label>
                                 <select id="renameColor" wire:model="renameColor"
                                     @error('renameColor') aria-invalid="true" aria-describedby="renameColor-error" @enderror
@@ -46,11 +65,19 @@
                                 <x-primary-button type="submit">{{ __('recruitment-applicant.tags.save') }}</x-primary-button>
                                 <x-secondary-button wire:click="cancelRename">{{ __('recruitment-applicant.cancel') }}</x-secondary-button>
                                 <x-forms.input-error field="renameName" input-id="renameName" class="w-full" />
+                                <x-forms.input-error field="renameKind" input-id="renameKind" class="w-full" />
                                 <x-forms.input-error field="renameColor" input-id="renameColor" class="w-full" />
                             </form>
                         @else
                             <div class="flex min-w-0 flex-wrap items-center gap-2">
-                                <x-recruitment.pill :tone="$tag->classes()" :class="'max-w-full wrap-anywhere '.($tag->trashed() ? 'line-through opacity-60' : '')">{{ $tag->name }}</x-recruitment.pill>
+                                <x-recruitment.pill :tone="$tag->classes()" :class="'max-w-full wrap-anywhere '.($tag->trashed() ? 'line-through opacity-60' : '')">
+                                    @if ($tag->kind === \App\Models\RecruitmentTag::KIND_GREEN_FLAG)
+                                        <svg class="me-1 inline size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m5 12 4 4L19 6"/></svg>
+                                    @elseif ($tag->kind === \App\Models\RecruitmentTag::KIND_RED_FLAG)
+                                        <svg class="me-1 inline size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.3 3.7 2.4 17.4A2 2 0 0 0 4.1 20h15.8a2 2 0 0 0 1.7-2.6L13.7 3.7a2 2 0 0 0-3.4 0Z"/></svg>
+                                    @endif
+                                    {{ $tag->kindLabel() }} — {{ $tag->name }}
+                                </x-recruitment.pill>
                                 <span class="text-secondary-medium">{{ trans_choice('recruitment-applicant.tags.usage', $tag->visible_count, ['count' => $tag->visible_count]) }}</span>
                                 @if ($tag->trashed())
                                     <span class="text-xs text-secondary-medium">&middot; {{ __('recruitment-applicant.tags.deleted') }}</span>

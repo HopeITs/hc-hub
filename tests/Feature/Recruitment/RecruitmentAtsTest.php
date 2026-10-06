@@ -6,6 +6,7 @@ use App\Enums\RecruitmentApplicationStatus as Status;
 use App\Enums\RecruitmentFileScanStatus;
 use App\Enums\RecruitmentIndicatorOutcome as Outcome;
 use App\Livewire\Recruitment\Applicants\ApplicationTable;
+use App\Livewire\Recruitment\Applicants\ApplicationTags;
 use App\Livewire\Recruitment\Applicants\Show;
 use App\Models\City;
 use App\Models\HiringCampaign;
@@ -26,6 +27,7 @@ use App\Services\RecruitmentMatchingIndicators;
 use App\Services\RecruitmentTagService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter;
@@ -159,6 +161,37 @@ class RecruitmentAtsTest extends TestCase
         $this->assertSame($first->id, (int) $removal->properties['applied_by_user_id']);
     }
 
+    public function test_hr_defines_flags_and_a_general_manager_can_apply_them_inside_their_scope(): void
+    {
+        $campaign = $this->makeCampaignIn($this->homs);
+        $manager = $this->makeUser($this->homs, 'general-manager');
+        $application = $this->applyTo($campaign, $this->makeApplicant('Flagged Farah'));
+        $hr = $this->hr($this->homs);
+        $tag = app(RecruitmentTagService::class)->create(
+            $hr,
+            'Excellent communication',
+            'neutral',
+            RecruitmentTag::KIND_GREEN_FLAG,
+        );
+
+        $this->assertSame(RecruitmentTag::KIND_GREEN_FLAG, $tag->kind);
+        $this->assertSame(__('recruitment-applicant.tags.kinds.green_flag'), $tag->kindLabel());
+
+        $this->assertTrue(Gate::forUser($manager)->allows('tag', $application));
+        app(RecruitmentTagService::class)->attach($manager, $application, $tag->id);
+
+        $this->actingAs($manager);
+        Livewire::test(ApplicationTags::class, ['applicationId' => $application->id])
+            ->assertSee(__('recruitment-applicant.tags.kinds.green_flag'))
+            ->assertSee('Excellent communication');
+
+        $this->assertDatabaseHas('recruitment_application_tags', [
+            'application_id' => $application->id,
+            'tag_id' => $tag->id,
+            'created_by_user_id' => $manager->id,
+        ]);
+    }
+
     public function test_bulk_tagging_refuses_an_oversized_or_empty_selection(): void
     {
         config(['recruitment.tags.bulk_limit' => 2]);
@@ -238,6 +271,7 @@ class RecruitmentAtsTest extends TestCase
         }
 
         $this->assertValidationError(fn () => $tags->create($hr, 'Fine', 'chartreuse'), 'tagColor');
+        $this->assertValidationError(fn () => $tags->create($hr, 'Fine', 'neutral', 'blue_flag'), 'tagKind');
 
         foreach (['abc', '-1', 0, null, ['1'], '99999'] as $tagId) {
             $this->assertValidationError(fn () => $tags->attach($hr, $application, $tagId), 'tagId');

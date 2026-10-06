@@ -79,7 +79,7 @@ return [
             'recruitment-job-posts.view', 'recruitment-forms.view',
             'recruitment-links.view',
             // General managers endorse applicants for their campaigns.
-            'recruitment-applicants.view', 'recruitment-applicants.endorse',
+            'recruitment-applicants.view', 'recruitment-applicants.endorse', 'recruitment-applicants.tag',
         ],
         'manager' => [
             'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
@@ -99,7 +99,7 @@ return [
             'recruitment-requests.request-changes', 'recruitment-requests.export',
             // Managers see and endorse applicants for their campaigns.
             'recruitment-vacancies.view', 'recruitment-campaigns.view',
-            'recruitment-applicants.view', 'recruitment-applicants.endorse',
+            'recruitment-applicants.view', 'recruitment-applicants.endorse', 'recruitment-applicants.tag',
         ],
         'employee' => [
             'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
