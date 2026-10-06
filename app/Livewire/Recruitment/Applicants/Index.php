@@ -2,10 +2,14 @@
 
 namespace App\Livewire\Recruitment\Applicants;
 
+use App\Models\HiringCampaign;
 use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplication;
 use App\Services\RecruitmentApplicationFilters;
+use App\Services\RecruitmentFinalistService;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
+use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Component;
 
 class Index extends Component
@@ -35,6 +39,26 @@ class Index extends Component
         $this->activeEvaluationRecommendation = $recommendation;
     }
 
+    public function finalizeSingleCandidate(RecruitmentFinalistService $finalists): void
+    {
+        $campaign = HiringCampaign::query()
+            ->visibleTo(auth()->user())
+            ->findOrFail($this->activeCampaignId);
+
+        try {
+            $finalists->selectSingle(auth()->user(), $campaign);
+        } catch (ValidationException $exception) {
+            LivewireAlert::title($exception->validator->errors()->first())
+                ->error()->toast()->position('top-start')->show();
+
+            return;
+        }
+
+        $this->dispatch('recruitment-decisions-changed');
+        LivewireAlert::title(__('recruitment-applicant.finalists.single_selected'))
+            ->success()->toast()->position('top-start')->show();
+    }
+
     public function render(RecruitmentApplicationFilters $filters)
     {
         Gate::authorize('viewAny', RecruitmentApplicant::class);
@@ -52,6 +76,7 @@ class Index extends Component
         // Endorsement group counts — only when a campaign is selected.
         $endorsementCounts = null;
         $evaluationCounts = null;
+        $finalistCount = null;
         if ($this->activeCampaignId) {
             $rows = RecruitmentApplication::query()
                 ->visibleTo($user)
@@ -64,6 +89,12 @@ class Index extends Component
                 'alternative' => $rows->filter(fn (RecruitmentApplication $application): bool => $application->endorsements->pluck('voter_role')->unique()->count() === 1)->count(),
                 'unvoted' => $rows->filter(fn (RecruitmentApplication $application): bool => $application->endorsements->pluck('voter_role')->unique()->count() === 0)->count(),
             ];
+
+            $finalistCount = RecruitmentApplication::query()
+                ->visibleTo($user)
+                ->where('campaign_id', $this->activeCampaignId)
+                ->where('status', \App\Enums\RecruitmentApplicationStatus::Finalist)
+                ->count();
 
             if ($user->hasActivePermission('recruitment-applicants.view-evaluations')) {
                 $evaluationCounts = collect($filters->evaluationRecommendationOptions())
@@ -83,6 +114,8 @@ class Index extends Component
             'endorsementCounts' => $endorsementCounts,
             'evaluationCounts' => $evaluationCounts,
             'mayViewEvaluationDashboard' => $user->hasActivePermission('recruitment-applicants.view-evaluations'),
+            'finalistCount' => $finalistCount,
+            'mayFinalize' => $user->hasActivePermission('recruitment-applicants.accept'),
         ]);
     }
 }

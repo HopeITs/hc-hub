@@ -120,6 +120,25 @@
         </section>
     @endif
 
+    @if ($finalistCount !== null && $finalistCount > 0)
+        <section aria-label="{{ __('recruitment-applicant.finalists.title') }}" class="rounded-surface border border-primary bg-white p-4">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                    <h2 class="font-semibold text-secondary-dark">{{ __('recruitment-applicant.finalists.title') }}</h2>
+                    <p class="mt-1 text-sm text-secondary-medium">
+                        {{ trans_choice('recruitment-applicant.finalists.count', $finalistCount, ['count' => $finalistCount]) }}
+                        {{ $finalistCount === 1 ? __('recruitment-applicant.finalists.single_hint') : __('recruitment-applicant.finalists.comparison_hint') }}
+                    </p>
+                </div>
+                @if ($finalistCount === 1 && $mayFinalize)
+                    <x-primary-button type="button" wire:click="finalizeSingleCandidate" wire:loading.attr="disabled" wire:target="finalizeSingleCandidate">
+                        {{ __('recruitment-applicant.finalists.proceed_offer') }}
+                    </x-primary-button>
+                @endif
+            </div>
+        </section>
+    @endif
+
     <livewire:recruitment.applicants.bulk-tags />
 
     <livewire:recruitment.applicants.bulk-reject />

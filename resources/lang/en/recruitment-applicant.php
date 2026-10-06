@@ -325,6 +325,17 @@ return [
         'clear' => 'Clear evaluation filter',
     ],
 
+    'finalists' => [
+        'title' => 'Final candidate list',
+        'count' => '{1} :count finalist|[2,*] :count finalists',
+        'single_hint' => 'Finalize the list to move this candidate to the Job Offer stage.',
+        'comparison_hint' => 'These candidates need a final comparison interview round.',
+        'proceed_offer' => 'Finalize and proceed to offer',
+        'single_selected' => 'The only finalist is now selected. The Job Offer action is available.',
+        'none' => 'Add one candidate to the final list before finalizing it.',
+        'multiple' => ':count candidates are on the final list. Start a comparison round instead.',
+    ],
+
     'tags' => [
         'title' => 'Tags',
         'tag' => 'Tag',
