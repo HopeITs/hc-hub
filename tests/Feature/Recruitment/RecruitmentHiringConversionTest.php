@@ -954,7 +954,8 @@ class RecruitmentHiringConversionTest extends TestCase
         // owns the earlier recruitment stages.
         $application = $this->applyTo($campaign ?? $this->campaign, $this->makeApplicant($name), ['status' => AppStatus::Interviewed]);
         $statuses = app(RecruitmentApplicationStatusService::class);
-        $statuses->change($this->hr, $application, AppStatus::Interviewed, AppStatus::Selected, null);
+        $statuses->change($this->hr, $application, AppStatus::Interviewed, AppStatus::Finalist, null);
+        $statuses->change($this->hr, $application->fresh(), AppStatus::Finalist, AppStatus::Selected, null);
 
         return $application->fresh();
     }

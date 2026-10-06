@@ -266,8 +266,9 @@ class RecruitmentInterviewEvaluationTest extends TestCase
 
         // Unanimous "no" still leaves the decision entirely to HR.
         $statuses = app(RecruitmentApplicationStatusService::class);
-        $this->assertContains(AppStatus::Selected, $statuses->targets($this->application->fresh()));
-        $statuses->change($this->hr, $this->application->fresh(), AppStatus::Interviewed, AppStatus::Selected, null);
+        $this->assertContains(AppStatus::Finalist, $statuses->targets($this->application->fresh()));
+        $statuses->change($this->hr, $this->application->fresh(), AppStatus::Interviewed, AppStatus::Finalist, null);
+        $statuses->change($this->hr, $this->application->fresh(), AppStatus::Finalist, AppStatus::Selected, null);
         $this->assertSame(AppStatus::Selected, $this->application->fresh()->status);
         $this->assertSame(Recommendation::No, Evaluation::query()->where('reviewer_user_id', $this->reviewerB->id)->value('recommendation'));
     }

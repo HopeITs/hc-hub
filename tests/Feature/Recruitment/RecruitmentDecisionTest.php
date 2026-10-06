@@ -86,7 +86,7 @@ class RecruitmentDecisionTest extends TestCase
     public function test_accepting_needs_its_own_permission_on_top_of_change_status(): void
     {
         $applicant = $this->makeApplicant();
-        $application = $this->applyTo($this->makeCampaignIn($this->homs), $applicant, ['status' => Status::Interviewed]);
+        $application = $this->applyTo($this->makeCampaignIn($this->homs), $applicant, ['status' => Status::Finalist]);
         $hr = $this->without($this->hr($this->homs), ['recruitment-applicants.accept']);
         $this->actingAs($hr);
 
@@ -99,7 +99,7 @@ class RecruitmentDecisionTest extends TestCase
 
         // The service refuses too, whoever calls it.
         $this->expectException(AuthorizationException::class);
-        app(RecruitmentApplicationStatusService::class)->change($hr, $application, Status::Interviewed, Status::Selected, null);
+        app(RecruitmentApplicationStatusService::class)->change($hr, $application, Status::Finalist, Status::Selected, null);
     }
 
     public function test_selected_applications_move_forward_to_offer_not_back_to_screening(): void
@@ -110,7 +110,8 @@ class RecruitmentDecisionTest extends TestCase
         $statuses = app(RecruitmentApplicationStatusService::class);
         $this->actingAs($hr);
 
-        $statuses->change($hr, $application, Status::Interviewed, Status::Selected, null);
+        $statuses->change($hr, $application, Status::Interviewed, Status::Finalist, null);
+        $statuses->change($hr, $application->fresh(), Status::Finalist, Status::Selected, null);
         $application->refresh();
 
         $this->assertSame(Status::Selected, $application->status);

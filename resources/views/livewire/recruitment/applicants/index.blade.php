@@ -13,6 +13,7 @@
             ['status' => \App\Enums\RecruitmentApplicationStatus::Shortlisted, 'label' => __('recruitment-applicant.statuses.shortlisted')],
             ['status' => \App\Enums\RecruitmentApplicationStatus::InterviewScheduled, 'label' => __('recruitment-applicant.statuses.interview_scheduled')],
             ['status' => \App\Enums\RecruitmentApplicationStatus::Interviewed, 'label' => __('recruitment-applicant.statuses.interviewed')],
+            ['status' => \App\Enums\RecruitmentApplicationStatus::Finalist, 'label' => __('recruitment-applicant.statuses.finalist')],
             ['status' => \App\Enums\RecruitmentApplicationStatus::Selected, 'label' => __('recruitment-applicant.statuses.selected')],
         ];
     @endphp

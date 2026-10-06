@@ -271,7 +271,8 @@ class RecruitmentJobOfferTest extends TestCase
 
         $this->assertSame(
             [
-                [AppStatus::Interviewed, AppStatus::Selected],
+                [AppStatus::Interviewed, AppStatus::Finalist],
+                [AppStatus::Finalist, AppStatus::Selected],
                 [AppStatus::Selected, AppStatus::OfferSent], [AppStatus::OfferSent, AppStatus::OfferRejected],
                 [AppStatus::OfferRejected, AppStatus::OfferSent], [AppStatus::OfferSent, AppStatus::OfferAccepted],
             ],
@@ -562,9 +563,10 @@ class RecruitmentJobOfferTest extends TestCase
         $this->assertThrows(fn () => $this->service()->cancel($requester, $offer->fresh(), $offer->current_version_id, 'another_candidate_chosen', null), AuthorizationException::class);
         Livewire::test(Show::class, ['offerId' => $elsewhere->id])->assertNotFound();
 
-        // The link is shown; the applicant page itself keeps its own permission (Team 1's), untouched here.
+        // The link is shown; the applicant page itself keeps its own permission
+        // and scope-hides records the requester cannot open.
         $this->assertTrue($requester->can('viewApplicant', $offer));
-        $this->get($applicantLink)->assertForbidden();
+        $this->get($applicantLink)->assertNotFound();
 
         // HR in scope still gets the link, as before.
         $this->assertTrue($this->hr->can('viewApplicant', $offer));
@@ -853,7 +855,8 @@ class RecruitmentJobOfferTest extends TestCase
         // owns the earlier recruitment stages.
         $application = $this->applyTo($campaign ?? $this->campaign, $this->makeApplicant($name), ['status' => AppStatus::Interviewed]);
         $statuses = app(RecruitmentApplicationStatusService::class);
-        $statuses->change($this->hr, $application, AppStatus::Interviewed, AppStatus::Selected, null);
+        $statuses->change($this->hr, $application, AppStatus::Interviewed, AppStatus::Finalist, null);
+        $statuses->change($this->hr, $application->fresh(), AppStatus::Finalist, AppStatus::Selected, null);
 
         return $application->fresh();
     }
