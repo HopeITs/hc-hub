@@ -36,7 +36,7 @@
                     @php
                         $status = $stage['status'];
                         $label = $stage['label'];
-                        $isActive = $activeStatus === $status && $activeEndorsementGroup === null;
+                        $isActive = $activeStatus === $status;
                         $count = $status === null ? $counts->sum() : (int) ($counts[$status] ?? 0);
                     @endphp
                     <button type="button" wire:click="filterByStatus(@js($status))"
@@ -87,6 +87,38 @@
     </section>
     @endif
 
+    @if ($mayViewEvaluationDashboard && $evaluationCounts !== null)
+        <section aria-label="{{ __('recruitment-applicant.dashboard.evaluation_filter') }}" class="rounded-surface border border-neutral-200 bg-white p-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 class="font-semibold">{{ __('recruitment-applicant.dashboard.title') }}</h2>
+                    <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.dashboard.hint') }}</p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    @foreach ($evaluationCounts as $recommendation => $count)
+                        @php
+                            $isActive = $activeEvaluationRecommendation === $recommendation;
+                            $label = $recommendation === 'none'
+                                ? __('recruitment-applicant.dashboard.not_evaluated')
+                                : __('recruitment-applicant.evaluations.recommendations.'.$recommendation);
+                        @endphp
+                        <button type="button" wire:click="filterByEvaluationRecommendation(@js($recommendation))"
+                            class="inline-flex h-7 min-h-7 cursor-pointer items-center gap-1.5 rounded-control border px-3 py-0 text-sm font-semibold {{ $isActive ? 'border-primary bg-primary text-white' : 'border-neutral-300 bg-white text-secondary-dark hover:bg-neutral-50' }}">
+                            <span>{{ $label }}</span>
+                            <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs {{ $isActive ? 'bg-white/20 text-white' : 'bg-neutral-100 text-secondary-dark' }}">{{ $count }}</span>
+                        </button>
+                    @endforeach
+                    @if ($activeEvaluationRecommendation !== null)
+                        <button type="button" wire:click="filterByEvaluationRecommendation(null)"
+                            class="inline-flex h-7 min-h-7 cursor-pointer items-center rounded-control border border-neutral-300 bg-white px-3 py-0 text-sm text-secondary-dark hover:bg-neutral-50">
+                            {{ __('recruitment-applicant.dashboard.clear') }}
+                        </button>
+                    @endif
+                </div>
+            </div>
+        </section>
+    @endif
+
     <livewire:recruitment.applicants.bulk-tags />
 
     <livewire:recruitment.applicants.bulk-reject />
@@ -95,6 +127,7 @@
         :stage-status="$activeStatus"
         :campaign-filter="$activeCampaignId"
         :endorsement-group="$activeEndorsementGroup"
+        :evaluation-recommendation="$activeEvaluationRecommendation"
     />
 
     <livewire:recruitment.applicants.tag-manager />

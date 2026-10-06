@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\RecruitmentApplicationStatus;
+use App\Enums\RecruitmentEvaluationRecommendation;
 use App\Enums\RecruitmentFileScanStatus;
 use App\Models\City;
 use App\Models\HiringCampaign;
@@ -44,7 +45,8 @@ class RecruitmentApplicationFilters
 
     /**
      * @param  array<string, mixed>  $filters  campaign, status, city, tag, source, cv,
-     *                                         previous, submitted_from, submitted_to, search
+     *                                         previous, endorsement_group, evaluation,
+     *                                         submitted_from, submitted_to, search
      */
     public function query(User $user, array $filters = []): Builder
     {
@@ -57,6 +59,8 @@ class RecruitmentApplicationFilters
         $this->source($query, $filters['source'] ?? null);
         $this->cv($query, $filters['cv'] ?? null);
         $this->previousApplicant($query, $filters['previous'] ?? null);
+        $this->endorsementGroup($query, $filters['endorsement_group'] ?? null);
+        $this->evaluationRecommendation($query, $filters['evaluation'] ?? null);
         $this->submittedBetween($query, $filters['submitted_from'] ?? null, $filters['submitted_to'] ?? null);
         $this->search($query, $filters['search'] ?? null);
 
@@ -161,6 +165,28 @@ class RecruitmentApplicationFilters
             false => $query->whereNotExists($this->earlierApplication($query)),
             default => $query,
         };
+    }
+
+    /**
+     * Applications with at least one active reviewer recommendation of the
+     * selected value, or with no active evaluation at all. Conflicting
+     * reviewers remain visible under each recommendation they submitted.
+     */
+    public function evaluationRecommendation(Builder $query, mixed $value): Builder
+    {
+        $allowed = [...RecruitmentEvaluationRecommendation::values(), 'none'];
+
+        if (! is_string($value) || ! in_array($value, $allowed, true)) {
+            return $query;
+        }
+
+        $evaluations = $this->activeEvaluations($query);
+
+        if ($value === 'none') {
+            return $query->whereNotExists($evaluations);
+        }
+
+        return $query->whereExists($evaluations->where('evaluations.recommendation', $value));
     }
 
     public function submittedBetween(Builder $query, mixed $from, mixed $to): Builder
@@ -274,6 +300,27 @@ class RecruitmentApplicationFilters
         ];
     }
 
+    /** @return array<string, string> */
+    public function endorsementGroupOptions(): array
+    {
+        return [
+            'preferred' => __('recruitment-applicant.endorsement.group_preferred'),
+            'alternative' => __('recruitment-applicant.endorsement.group_alternative'),
+            'unvoted' => __('recruitment-applicant.endorsement.group_unvoted'),
+        ];
+    }
+
+    /** @return array<string, string> */
+    public function evaluationRecommendationOptions(): array
+    {
+        return collect(RecruitmentEvaluationRecommendation::values())
+            ->mapWithKeys(fn (string $recommendation): array => [
+                $recommendation => __('recruitment-applicant.evaluations.recommendations.'.$recommendation),
+            ])
+            ->put('none', __('recruitment-applicant.dashboard.not_evaluated'))
+            ->all();
+    }
+
     // --------------------------------------------
     // Internals
     // --------------------------------------------
@@ -327,6 +374,15 @@ class RecruitmentApplicationFilters
             ->selectRaw('1')
             ->whereColumn('recruitment_applicant_files.application_id', $query->qualifyColumn('id'))
             ->where('recruitment_applicant_files.file_type', RecruitmentApplicantFile::TYPE_CV);
+    }
+
+    private function activeEvaluations(Builder $query): QueryBuilder
+    {
+        return DB::table('recruitment_interview_evaluations as evaluations')
+            ->join('recruitment_interviews as evaluation_interviews', 'evaluation_interviews.id', '=', 'evaluations.interview_id')
+            ->selectRaw('1')
+            ->whereColumn('evaluation_interviews.application_id', $query->qualifyColumn('id'))
+            ->whereNull('evaluations.withdrawn_at');
     }
 
     /** @return array<int, int> positive integer ids, de-duplicated and capped */

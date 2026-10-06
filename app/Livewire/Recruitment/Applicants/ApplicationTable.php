@@ -5,6 +5,7 @@ namespace App\Livewire\Recruitment\Applicants;
 use App\Enums\HiringCampaignStatus;
 use App\Enums\RecruitmentApplicationStatus;
 use App\Enums\RecruitmentCvAvailability;
+use App\Enums\RecruitmentEvaluationRecommendation;
 use App\Enums\RecruitmentIndicatorOutcome;
 use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplication;
@@ -19,6 +20,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Reactive;
@@ -60,6 +62,10 @@ class ApplicationTable extends LivewireTable
     /** 'preferred' | 'alternative' | 'unvoted' | null */
     #[Reactive]
     public ?string $endorsementGroup = null;
+
+    /** 'yes' | 'maybe' | 'no' | 'none' | null */
+    #[Reactive]
+    public ?string $evaluationRecommendation = null;
 
     protected string $model = RecruitmentApplication::class;
 
@@ -156,6 +162,12 @@ class ApplicationTable extends LivewireTable
         $this->resetPage();
     }
 
+    public function updatedEvaluationRecommendation(): void
+    {
+        $this->clearSelection();
+        $this->resetPage();
+    }
+
     protected function query(): Builder
     {
         Gate::authorize('viewAny', RecruitmentApplicant::class);
@@ -165,11 +177,20 @@ class ApplicationTable extends LivewireTable
         $query = RecruitmentApplication::query()
             ->visibleTo(auth()->user())
             ->addSelect(['has_previous_application' => $filters->earlierApplication(RecruitmentApplication::query())])
-            ->with(['applicant', 'campaign.vacancy.position', 'cvFiles', 'endorsements', 'tags']);
+            ->with(['applicant', 'campaign.vacancy.position', 'cvFiles', 'endorsements', 'tags'])
+            ->when(
+                $this->canViewEvaluationDashboard(),
+                fn (Builder $applications): Builder => $applications->with([
+                    'interviews.evaluations' => function (HasMany $evaluations): void {
+                        $evaluations->active();
+                    },
+                ]),
+            );
 
         $filters->status($query, $this->stageStatus);
         $filters->campaign($query, $this->campaignFilter);
         $filters->endorsementGroup($query, $this->endorsementGroup);
+        $filters->evaluationRecommendation($query, $this->evaluationRecommendation);
 
         return $query;
     }
@@ -262,6 +283,26 @@ class ApplicationTable extends LivewireTable
                     .e(__('recruitment-applicant.endorsement.group_'.$group)).'</span>';
             })->asHtml(),
 
+            ...($this->canViewEvaluationDashboard() ? [
+                Column::make(__('recruitment-applicant.dashboard.evaluation_column'), function (RecruitmentApplication $application): string {
+                    $counts = $application->interviews
+                        ->flatMap->evaluations
+                        ->countBy('recommendation');
+
+                    if ($counts->isEmpty()) {
+                        return '<span class="recruitment-badge rounded-control bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-secondary-dark">'
+                            .e(__('recruitment-applicant.dashboard.not_evaluated')).'</span>';
+                    }
+
+                    return collect(RecruitmentEvaluationRecommendation::values())
+                        ->filter(fn (string $recommendation): bool => (int) $counts->get($recommendation, 0) > 0)
+                        ->map(fn (string $recommendation): string => '<span class="recruitment-badge me-1 inline-flex rounded-control px-2 py-0.5 text-xs font-semibold '
+                            .RecruitmentEvaluationRecommendation::classes($recommendation).'">'
+                            .e(__('recruitment-applicant.evaluations.recommendations.'.$recommendation)).' '.(int) $counts->get($recommendation).'</span>')
+                        ->implode('');
+                })->asHtml(),
+            ] : []),
+
             Column::make(__('recruitment-applicant.source'), 'applicant.source')
                 ->displayUsing(fn ($value): string => RecruitmentApplicant::sourceLabel($value)),
 
@@ -335,7 +376,20 @@ class ApplicationTable extends LivewireTable
 
             SelectFilter::make(__('recruitment-applicant.previous_applicant'), fn (Builder $query, $value) => $filters->previousApplicant($query, $value), 'previous')
                 ->options($filters->previousOptions()),
+
+            SelectFilter::make(__('recruitment-applicant.endorsement.groups_label'), fn (Builder $query, $value) => $filters->endorsementGroup($query, $value), 'endorsement_group')
+                ->options($filters->endorsementGroupOptions()),
+
+            ...($this->canViewEvaluationDashboard() ? [
+                SelectFilter::make(__('recruitment-applicant.dashboard.evaluation_filter'), fn (Builder $query, $value) => $filters->evaluationRecommendation($query, $value), 'evaluation')
+                    ->options($filters->evaluationRecommendationOptions()),
+            ] : []),
         ];
+    }
+
+    private function canViewEvaluationDashboard(): bool
+    {
+        return auth()->user()->hasActivePermission('recruitment-applicants.view-evaluations');
     }
 
     /**

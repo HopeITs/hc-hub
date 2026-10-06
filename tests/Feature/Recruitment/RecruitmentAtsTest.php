@@ -3,8 +3,10 @@
 namespace Tests\Feature\Recruitment;
 
 use App\Enums\RecruitmentApplicationStatus as Status;
+use App\Enums\RecruitmentEvaluationRecommendation as Recommendation;
 use App\Enums\RecruitmentFileScanStatus;
 use App\Enums\RecruitmentIndicatorOutcome as Outcome;
+use App\Enums\RecruitmentInterviewStatus;
 use App\Livewire\Recruitment\Applicants\ApplicationTable;
 use App\Livewire\Recruitment\Applicants\ApplicationTags;
 use App\Livewire\Recruitment\Applicants\Show;
@@ -16,6 +18,8 @@ use App\Models\RecruitmentApplicationDecision;
 use App\Models\RecruitmentApplicationIndicatorSnapshot;
 use App\Models\RecruitmentApplicationTag;
 use App\Models\RecruitmentIndicatorCriteriaVersion;
+use App\Models\RecruitmentInterview;
+use App\Models\RecruitmentInterviewEvaluation;
 use App\Models\RecruitmentRequestPositionDetail;
 use App\Models\RecruitmentRequestVersion;
 use App\Models\RecruitmentTag;
@@ -129,6 +133,48 @@ class RecruitmentAtsTest extends TestCase
         $this->assertSame([$withCv->id], $filters->query($hr, ['cv' => 'available'])->pluck('id')->all());
         $this->assertContains($withoutCv->id, $filters->query($hr, ['cv' => 'none'])->pluck('id')->all());
         $this->assertSame([$withCv->id], $filters->query($hr, ['previous' => '1'])->pluck('id')->all());
+    }
+
+    public function test_candidate_dashboard_filters_by_interview_recommendation(): void
+    {
+        $campaign = $this->makeCampaignIn($this->homs);
+        $yes = $this->applyTo($campaign, $this->makeApplicant('Recommended Rima'));
+        $no = $this->applyTo($campaign, $this->makeApplicant('Declined Dalia'));
+        $notEvaluated = $this->applyTo($campaign, $this->makeApplicant('Pending Petra'));
+        $hr = $this->hr($this->homs);
+        $reviewer = $this->makeUser($this->homs, 'employee');
+
+        foreach ([[$yes, Recommendation::Yes], [$no, Recommendation::No]] as [$application, $recommendation]) {
+            $interview = RecruitmentInterview::query()->forceCreate([
+                'application_id' => $application->id,
+                'interview_type' => 'technical',
+                'status' => RecruitmentInterviewStatus::Completed,
+                'scheduled_at' => now()->subDay(),
+                'location_type' => 'in_person',
+                'created_by_user_id' => $hr->id,
+            ]);
+
+            RecruitmentInterviewEvaluation::query()->forceCreate([
+                'interview_id' => $interview->id,
+                'reviewer_user_id' => $reviewer->id,
+                'recommendation' => $recommendation,
+                'submitted_at' => now(),
+                'updated_by_user_id' => $reviewer->id,
+            ]);
+        }
+
+        $filters = app(RecruitmentApplicationFilters::class);
+
+        $this->assertSame([$yes->id], $filters->query($hr, ['evaluation' => Recommendation::Yes])->pluck('id')->all());
+        $this->assertSame([$no->id], $filters->query($hr, ['evaluation' => Recommendation::No])->pluck('id')->all());
+        $this->assertSame([$notEvaluated->id], $filters->query($hr, ['evaluation' => 'none'])->pluck('id')->all());
+        $this->assertCount(3, $filters->query($hr, ['evaluation' => 'invalid'])->get());
+
+        $this->actingAs($hr);
+        Livewire::test(ApplicationTable::class, ['campaignFilter' => $campaign->id, 'evaluationRecommendation' => Recommendation::Yes])
+            ->assertSee('Recommended Rima')
+            ->assertDontSee('Declined Dalia')
+            ->assertSee(__('recruitment-applicant.dashboard.evaluation_column'));
     }
 
     // ------------------------------------------------------------------

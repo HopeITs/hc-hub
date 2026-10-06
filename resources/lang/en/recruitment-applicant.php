@@ -312,6 +312,15 @@ return [
         'previous_no' => 'First-time applicants',
     ],
 
+    'dashboard' => [
+        'title' => 'Interview evaluation',
+        'hint' => 'Filter this campaign by reviewer recommendations. A candidate can appear under more than one recommendation when reviewers disagree.',
+        'evaluation_filter' => 'Interview recommendation',
+        'evaluation_column' => 'Evaluation',
+        'not_evaluated' => 'Not evaluated',
+        'clear' => 'Clear evaluation filter',
+    ],
+
     'tags' => [
         'title' => 'Tags',
         'tag' => 'Tag',
