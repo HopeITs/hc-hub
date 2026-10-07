@@ -22,7 +22,7 @@
             </div>
             <div>
                 <x-forms.input-label for="applicant-profile-role-{{ $applicant->id }}" :value="__('recruitment-applicant.profile_reviews.access')" />
-                <select id="applicant-profile-role-{{ $applicant->id }}" wire:model="newParticipantRole" class="w-full cursor-pointer rounded-control border border-secondary-light bg-white px-3 py-2">
+                <select id="applicant-profile-role-{{ $applicant->id }}" wire:model="newParticipantRole" class="h-[34px] w-full cursor-pointer rounded-control border border-secondary-light bg-white px-3 py-0 text-body">
                     @foreach (Participant::roles() as $role)
                         <option value="{{ $role }}">{{ __('recruitment-applicant.profile_reviews.roles.'.$role) }}</option>
                     @endforeach

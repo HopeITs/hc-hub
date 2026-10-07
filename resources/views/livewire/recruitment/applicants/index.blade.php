@@ -38,7 +38,7 @@
                         $status = $stage['status'];
                         $label = $stage['label'];
                         $isActive = $activeStatus === $status;
-                        $count = $status === null ? $counts->sum() : (int) ($counts[$status] ?? 0);
+                        $count = $status === null ? $allCount : (int) ($counts[$status] ?? 0);
                     @endphp
                     <button type="button" wire:click="filterByStatus(@js($status))"
                         class="inline-flex h-7 min-h-7 cursor-pointer items-center gap-1.5 rounded-control border px-3 py-0 text-sm font-semibold {{ $isActive ? 'border-primary bg-primary text-white' : 'border-neutral-300 bg-white text-secondary-dark hover:bg-neutral-50' }}">

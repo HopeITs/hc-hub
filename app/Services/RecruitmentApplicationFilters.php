@@ -257,7 +257,9 @@ class RecruitmentApplicationFilters
     public function campaignOptions(User $user): array
     {
         return HiringCampaign::query()
-            ->visibleTo($user)
+            ->whereIn('id', RecruitmentApplication::query()
+                ->profileVisibleTo($user)
+                ->select('campaign_id'))
             ->with('vacancy.position')
             ->latest('id')
             ->get()

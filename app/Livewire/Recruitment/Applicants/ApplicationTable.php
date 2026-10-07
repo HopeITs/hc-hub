@@ -32,10 +32,11 @@ use RamonRietdijk\LivewireTables\Filters\SelectFilter;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
 /**
- * One row per application, so the campaign, status and date filters each
- * match a single submission rather than any of an applicant's several.
+ * One row per applicant. Filters first narrow the matching applications,
+ * then the newest matching application represents each applicant in the
+ * table. The profile remains the complete application history.
  *
- * Every row comes through RecruitmentApplication::visibleTo(), and so does
+ * Every row comes through RecruitmentApplication::profileVisibleTo(), and so does
  * every filter option; each filter goes through RecruitmentApplicationFilters,
  * which only narrows. A campaign or city id typed into the query string can
  * shrink an already scoped result, never widen it.
@@ -191,7 +192,7 @@ class ApplicationTable extends LivewireTable
         $filters = app(RecruitmentApplicationFilters::class);
 
         $query = RecruitmentApplication::query()
-            ->visibleTo(auth()->user())
+            ->profileVisibleTo(auth()->user())
             ->addSelect(['has_previous_application' => $filters->earlierApplication(RecruitmentApplication::query())])
             ->with(['applicant', 'campaign.vacancy.position', 'cvFiles', 'endorsements', 'tags', 'flags'])
             ->when(
@@ -207,6 +208,41 @@ class ApplicationTable extends LivewireTable
         $filters->campaign($query, $this->campaignFilter);
         $filters->endorsementGroup($query, $this->endorsementGroup);
         $filters->evaluationRecommendation($query, $this->evaluationRecommendation);
+
+        return $query;
+    }
+
+    /**
+     * Apply every table concern before collapsing matching applications so
+     * campaign, stage, search, and assessment filters still find applicants
+     * through the application that matched the user's selection.
+     */
+    protected function appliedQuery(): Builder
+    {
+        $query = $this->query();
+
+        $this
+            ->applySelect($query)
+            ->applySoftDeletes($query)
+            ->applyRelations($query)
+            ->applyGlobalSearch($query)
+            ->applyColumnSearch($query)
+            ->applyFilters($query);
+
+        $qualifiedApplicationId = $query->getQuery()->getGrammar()->wrap(
+            $query->qualifyColumn('id'),
+        );
+
+        $representativeApplicationIds = (clone $query)
+            ->setEagerLoads([])
+            ->reorder()
+            ->select([])
+            ->selectRaw("MAX($qualifiedApplicationId)")
+            ->groupBy($query->qualifyColumn('applicant_id'));
+
+        $query->whereIn($query->qualifyColumn('id'), $representativeApplicationIds);
+
+        $this->applySorting($query);
 
         return $query;
     }

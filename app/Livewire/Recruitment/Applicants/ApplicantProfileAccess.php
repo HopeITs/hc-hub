@@ -66,19 +66,22 @@ class ApplicantProfileAccess extends Component
         $application = $this->visibleApplication();
         $participants = $applicant->currentReviewParticipants()->with('user.profile')->oldest('id')->get();
         $employeeId = $applicant->employee_id;
+        $canManage = Gate::allows('manageReviewParticipants', $application);
 
         return view('livewire.recruitment.applicants.applicant-profile-access', [
             'applicant' => $applicant,
             'participants' => $participants,
-            'canManage' => Gate::allows('manageReviewParticipants', $application),
-            'candidates' => User::query()
-                ->whereHas('profile', fn ($profile) => $profile->where('is_active', true))
-                ->when($employeeId !== null, fn ($query) => $query->where('employee_id', '!=', $employeeId))
-                ->whereKeyNot($participants->pluck('user_id'))
-                ->with('profile')
-                ->get()
-                ->sortBy(fn (User $candidate) => $candidate->profile?->name)
-                ->values(),
+            'canManage' => $canManage,
+            'candidates' => $canManage
+                ? User::query()
+                    ->whereHas('profile', fn ($profile) => $profile->where('is_active', true))
+                    ->when($employeeId !== null, fn ($query) => $query->where('employee_id', '!=', $employeeId))
+                    ->whereKeyNot($participants->pluck('user_id'))
+                    ->with('profile')
+                    ->get()
+                    ->sortBy(fn (User $candidate) => $candidate->profile?->name)
+                    ->values()
+                : collect(),
         ]);
     }
 
@@ -88,7 +91,7 @@ class ApplicantProfileAccess extends Component
             ->visibleTo(auth()->user())
             ->findOrFail($this->applicantId)
             ->applications()
-            ->visibleTo(auth()->user())
+            ->profileVisibleTo(auth()->user())
             ->latest('id')
             ->firstOrFail();
     }

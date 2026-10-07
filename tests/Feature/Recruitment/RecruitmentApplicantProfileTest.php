@@ -87,6 +87,37 @@ class RecruitmentApplicantProfileTest extends TestCase
             ->assertDontSee(__('recruitment-applicant.previous_applicant_flag'));
     }
 
+    public function test_list_shows_each_applicant_once_and_counts_unique_people(): void
+    {
+        $applicant = $this->makeApplicant('Single Samer');
+        $olderCampaign = $this->makeCampaignIn($this->homs, title: 'Older Role');
+        $newerCampaign = $this->makeCampaignIn($this->homs, title: 'Newer Role');
+        $this->applyTo($olderCampaign, $applicant, [
+            'status' => Status::Submitted,
+            'submitted_at' => now()->subDay(),
+        ]);
+        $this->applyTo($newerCampaign, $applicant, [
+            'status' => Status::Submitted,
+            'submitted_at' => now(),
+        ]);
+        $this->actingAs($this->hr($this->homs));
+
+        $table = Livewire::test(ApplicationTable::class);
+        $index = Livewire::test(Index::class);
+
+        $this->assertSame(1, substr_count($table->html(), 'Single Samer'));
+        $table
+            ->assertSee(__('recruitment-applicant.campaign_number', ['number' => $newerCampaign->id]))
+            ->assertDontSee(__('recruitment-applicant.campaign_number', ['number' => $olderCampaign->id]));
+        $this->assertSame(1, $index->viewData('allCount'));
+        $this->assertSame(1, (int) $index->viewData('counts')[Status::Submitted]);
+
+        Livewire::test(ApplicationTable::class)
+            ->set('filters.campaign_id', $olderCampaign->id)
+            ->assertSee('Single Samer')
+            ->assertSee(__('recruitment-applicant.campaign_number', ['number' => $olderCampaign->id]));
+    }
+
     public function test_filters_narrow_by_status_campaign_and_source(): void
     {
         $first = $this->makeCampaignIn($this->homs, title: 'Teacher');
@@ -186,6 +217,8 @@ class RecruitmentApplicantProfileTest extends TestCase
     {
         $applicant = $this->makeApplicant('Shared Shireen');
         $application = $this->applyTo($this->makeCampaignIn($this->homs, title: 'Shared Role'), $applicant);
+        $unsharedApplicant = $this->makeApplicant('Hidden Hala');
+        $this->applyTo($this->makeCampaignIn($this->homs, title: 'Hidden Role'), $unsharedApplicant);
         $hr = $this->hr($this->homs);
         $viewer = $this->makeUser($this->damascus, 'employee');
 
@@ -199,7 +232,21 @@ class RecruitmentApplicantProfileTest extends TestCase
         $participant = RecruitmentApplicationParticipant::query()->sole();
         $this->assertSame(RecruitmentApplicationParticipant::ROLE_VIEWER, $participant->role);
 
-        $this->actingAs($viewer)
+        $this->actingAs($viewer);
+        $this->assertTrue(Gate::allows('viewAny', RecruitmentApplicant::class));
+
+        $this->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee(__('recruitment.navigation_applicants'));
+
+        $this->get(route('recruitment.applicants.index'))
+            ->assertOk();
+
+        Livewire::test(ApplicationTable::class)
+            ->assertSee('Shared Shireen')
+            ->assertDontSee('Hidden Hala');
+
+        $this
             ->get(route('recruitment.applicants.show', ['applicantId' => $applicant->id]))
             ->assertOk()
             ->assertSee('Shared Shireen')

@@ -83,8 +83,9 @@
                     @php
                         // Task 7 (Team 2): participants see their interviews without any recruitment permission.
                         $seesInterviews = (bool) auth()->user()?->can('viewAny', \App\Models\RecruitmentInterview::class);
+                        $seesApplicants = (bool) auth()->user()?->can('viewAny', \App\Models\RecruitmentApplicant::class);
                     @endphp
-                    @if(auth()->user()?->hasActivePermission('recruitment-requests.view') || $canSeeRecruitmentApprovals || auth()->user()?->hasActivePermission('recruitment-campaigns.view') || auth()->user()?->hasActivePermission('recruitment-applicants.view') || auth()->user()?->hasActivePermission('recruitment-indicators.manage') || $seesInterviews)
+                    @if(auth()->user()?->hasActivePermission('recruitment-requests.view') || $canSeeRecruitmentApprovals || auth()->user()?->hasActivePermission('recruitment-campaigns.view') || $seesApplicants || auth()->user()?->hasActivePermission('recruitment-indicators.manage') || $seesInterviews)
                         {{-- Group: Recruitment --}}
                         <li x-show="!sidebarCollapsed || open" aria-hidden="true" class="px-3 py-[3px]">
                             <span class="text-caption font-semibold uppercase tracking-wider text-secondary-light">{{ __('recruitment.navigation_section') }}</span>
@@ -111,12 +112,12 @@
                             </x-layouts.app.sidebar.single-item>
                         @endactivepermission
 
-                        @activepermission('recruitment-applicants.view')
+                        @if ($seesApplicants)
                             <x-layouts.app.sidebar.single-item :href="route('recruitment.applicants.index')" :active="request()->routeIs('recruitment.applicants.*')">
                                 <x-slot name="icon"><x-icons.users class="size-5" /></x-slot>
                                 {{ __('recruitment.navigation_applicants') }}
                             </x-layouts.app.sidebar.single-item>
-                        @endactivepermission
+                        @endif
 
                         @activepermission('recruitment-indicators.manage')
                             <x-layouts.app.sidebar.single-item :href="route('recruitment.indicator-rules')" :active="request()->routeIs('recruitment.indicator-rules')">

@@ -59,11 +59,12 @@ Route::prefix('recruitment/campaigns')->name('recruitment.campaigns.')
         Route::get('/{campaignId}', CampaignShow::class)->whereNumber('campaignId')->name('show');
     });
 
-// The permission is the outer wall; each applicant is re-resolved through the
-// recruitment scope inside the component, so a guessed id is a 404.
+// The policy admits normal recruitment viewers and named profile participants.
+// Components still re-resolve every row through profileVisibleTo(), so a
+// guessed applicant id outside either scope remains a 404.
 Route::prefix('recruitment/applicants')->name('recruitment.applicants.')
     ->group(function () {
-        Route::get('/', ApplicantIndex::class)->middleware('active_permission:recruitment-applicants.view')->name('index');
+        Route::get('/', ApplicantIndex::class)->name('index');
         Route::get('/{applicantId}', ApplicantShow::class)->whereNumber('applicantId')->name('show');
     });
 

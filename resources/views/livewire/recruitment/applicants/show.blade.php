@@ -175,7 +175,7 @@
                 <div class="mt-5 border-t border-neutral-200 pt-5">
                 <livewire:recruitment.applicants.application-review-panel :application-id="$application->id" :show-access="false" :key="'application-reviews-'.$application->id" />
 
-                <div class="grid gap-4 xl:grid-cols-2">
+                <div class="mt-4 grid gap-4 xl:grid-cols-2">
                     <section class="rounded-control border border-neutral-200 bg-white p-4">
                         <h4 class="font-semibold">{{ __('recruitment-applicant.profile.documents') }}</h4>
                         {{-- Files. The link appears only for users who may download,

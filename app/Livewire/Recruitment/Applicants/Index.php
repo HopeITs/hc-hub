@@ -65,11 +65,15 @@ class Index extends Component
 
         $user = auth()->user();
 
-        $countQuery = RecruitmentApplication::query()->visibleTo($user);
+        $countQuery = RecruitmentApplication::query()->profileVisibleTo($user);
         $filters->campaign($countQuery, $this->activeCampaignId);
 
+        $allCount = (clone $countQuery)
+            ->distinct()
+            ->count('applicant_id');
+
         $counts = $countQuery
-            ->selectRaw('status, count(*) as total')
+            ->selectRaw('status, count(distinct applicant_id) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
 
@@ -79,7 +83,7 @@ class Index extends Component
         $finalistCount = null;
         if ($this->activeCampaignId) {
             $rows = RecruitmentApplication::query()
-                ->visibleTo($user)
+                ->profileVisibleTo($user)
                 ->where('campaign_id', $this->activeCampaignId)
                 ->with('endorsements:id,application_id,voter_role')
                 ->get(['id']);
@@ -91,7 +95,7 @@ class Index extends Component
             ];
 
             $finalistCount = RecruitmentApplication::query()
-                ->visibleTo($user)
+                ->profileVisibleTo($user)
                 ->where('campaign_id', $this->activeCampaignId)
                 ->where('status', \App\Enums\RecruitmentApplicationStatus::Finalist)
                 ->count();
@@ -99,7 +103,7 @@ class Index extends Component
             if ($user->hasActivePermission('recruitment-applicants.view-evaluations')) {
                 $evaluationCounts = collect($filters->evaluationRecommendationOptions())
                     ->mapWithKeys(function (string $label, string $recommendation) use ($filters, $user): array {
-                        $query = RecruitmentApplication::query()->visibleTo($user);
+                        $query = RecruitmentApplication::query()->profileVisibleTo($user);
                         $filters->campaign($query, $this->activeCampaignId);
                         $filters->evaluationRecommendation($query, $recommendation);
 
@@ -110,6 +114,7 @@ class Index extends Component
 
         return view('livewire.recruitment.applicants.index', [
             'counts' => $counts,
+            'allCount' => $allCount,
             'campaignOptions' => $filters->campaignOptions($user),
             'endorsementCounts' => $endorsementCounts,
             'evaluationCounts' => $evaluationCounts,
