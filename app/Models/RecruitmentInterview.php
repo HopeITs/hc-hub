@@ -66,6 +66,11 @@ class RecruitmentInterview extends Model implements HasMedia
         return $this->participants()->whereNull('removed_at');
     }
 
+    public function requiredParticipants(): HasMany
+    {
+        return $this->hasMany(RecruitmentInterviewRequiredParticipant::class, 'interview_id');
+    }
+
     public function evaluations(): HasMany
     {
         return $this->hasMany(RecruitmentInterviewEvaluation::class, 'interview_id');

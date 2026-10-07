@@ -2,6 +2,7 @@
     use App\Enums\RecruitmentInterviewLocationType;
     use App\Enums\RecruitmentInterviewType;
     use App\Models\RecruitmentInterviewParticipant;
+    use App\Models\RecruitmentInterviewRequiredParticipant;
     use App\Services\RecruitmentInterviewSchedulingService;
 @endphp
 <x-slot:title>{{ $interview ? __('recruitment-applicant.interviews.edit_title') : __('recruitment-applicant.interviews.schedule_title') }}</x-slot:title>
@@ -89,6 +90,47 @@
             <div>
                 <h2 class="text-h4 font-semibold">{{ __('recruitment-applicant.interviews.participants') }}</h2>
                 <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.interviews.participants_hint') }}</p>
+            </div>
+
+            <div class="rounded-control border border-neutral-200 bg-neutral-50 p-4">
+                <h3 class="text-sm font-semibold text-neutral-900">{{ __('recruitment-applicant.interviews.required_panel') }}</h3>
+                <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.interviews.required_panel_hint') }}</p>
+
+                @if (! isset($requiredParticipantOwners[RecruitmentInterviewRequiredParticipant::SEAT_MANAGER]))
+                    <p role="alert" class="mt-3 rounded-control border border-primary bg-white p-3 text-sm text-primary">
+                        {{ __('recruitment-applicant.interviews.errors.required_manager_missing') }}
+                    </p>
+                @endif
+
+                <div class="mt-3 grid gap-4 md:grid-cols-2">
+                    @foreach (RecruitmentInterviewRequiredParticipant::seats() as $seat)
+                        @continue(! isset($requiredParticipantOwners[$seat]))
+                        @php
+                            $owner = $requiredOwners->get((int) $requiredParticipantOwners[$seat]);
+                            $attendee = $requiredAttendees->get((int) ($requiredParticipants[$seat] ?? 0));
+                        @endphp
+                        <div wire:key="required-seat-{{ $seat }}">
+                            <x-forms.input-label for="requiredParticipant-{{ $seat }}" required :value="__('recruitment-applicant.interviews.required_seats.'.$seat)" />
+                            <p class="mb-2 text-xs text-secondary-medium">
+                                {{ __('recruitment-applicant.interviews.seat_owner', ['name' => $owner?->profile?->name ?? $owner?->email ?? '—']) }}
+                                @if ($attendee && $owner && ! $attendee->is($owner))
+                                    · {{ __('recruitment-applicant.interviews.attending_on_behalf', ['name' => $attendee->profile?->name ?? $attendee->email]) }}
+                                @endif
+                            </p>
+                            <x-forms.select2-input id="requiredParticipant-{{ $seat }}" wire:model="requiredParticipants.{{ $seat }}">
+                                @foreach ($substituteCandidates as $user)
+                                    <option value="{{ $user->id }}">
+                                        {{ $user->profile?->name }} — {{ $user->email }}
+                                        @if ($user->id === (int) $requiredParticipantOwners[$seat])
+                                            ({{ __('recruitment-applicant.interviews.attends_self') }})
+                                        @endif
+                                    </option>
+                                @endforeach
+                            </x-forms.select2-input>
+                        </div>
+                    @endforeach
+                </div>
+                <x-forms.input-error field="requiredParticipants" input-id="requiredParticipant-hr" />
             </div>
 
             <div class="grid grid-cols-1 items-end gap-3 md:grid-cols-[1fr_12rem_auto]" wire:key="participant-picker">

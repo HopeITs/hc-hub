@@ -23,6 +23,7 @@ use App\Models\RecruitmentInterview;
 use App\Models\RecruitmentInterviewEvaluation;
 use App\Models\RecruitmentInterviewNotice as Notice;
 use App\Models\RecruitmentInterviewParticipant as Participant;
+use App\Models\RecruitmentInterviewRequiredParticipant as RequiredParticipant;
 use App\Models\User;
 use App\Notifications\RecruitmentInterviewParticipantNotice as ParticipantNotice;
 use App\Services\RecruitmentApplicationStatusService;
@@ -115,6 +116,7 @@ class RecruitmentInterviewTest extends TestCase
     {
         Notification::fake();
         $application = $this->shortlisted();
+        $manager = $application->vacancy->createdFromRequest->requester;
         $this->actingAs($this->hr);
 
         Livewire::test(Form::class, ['applicationId' => $application->id])
@@ -136,7 +138,22 @@ class RecruitmentInterviewTest extends TestCase
         $this->assertSame(RecruitmentInterviewType::Technical, $interview->interview_type);
         $this->assertSame('2026-10-08 10:30:00', $interview->scheduled_at->format('Y-m-d H:i:s'));
         $this->assertSame('2026-10-08 11:15:00', $interview->ends_at->format('Y-m-d H:i:s'));
-        $this->assertSame([$this->interviewer->id => Participant::ROLE_INTERVIEWER], $interview->currentParticipants()->pluck('role', 'user_id')->all());
+        $this->assertEqualsCanonicalizing(
+            [$this->hr->id, $manager->id, $this->interviewer->id],
+            $interview->currentParticipants()->pluck('user_id')->all(),
+        );
+        $this->assertDatabaseHas('recruitment_interview_required_participants', [
+            'interview_id' => $interview->id,
+            'seat' => RequiredParticipant::SEAT_HR,
+            'owner_user_id' => $this->hr->id,
+            'attendee_user_id' => $this->hr->id,
+        ]);
+        $this->assertDatabaseHas('recruitment_interview_required_participants', [
+            'interview_id' => $interview->id,
+            'seat' => RequiredParticipant::SEAT_MANAGER,
+            'owner_user_id' => $manager->id,
+            'attendee_user_id' => $manager->id,
+        ]);
 
         // [28] shortlisted -> interview_scheduled, recorded as a decision.
         $this->assertSame(AppStatus::InterviewScheduled, $application->fresh()->status);
@@ -148,6 +165,42 @@ class RecruitmentInterviewTest extends TestCase
             ->exists());
 
         Notification::assertSentTo($this->interviewer, ParticipantNotice::class, fn (ParticipantNotice $n) => $n->kind === ParticipantNotice::SCHEDULED);
+    }
+
+    public function test_hr_can_assign_a_substitute_for_a_required_interview_seat(): void
+    {
+        $application = $this->shortlisted('Substitute Candidate');
+        $manager = $application->vacancy->createdFromRequest->requester;
+        $substitute = $this->makeUser($this->homs, 'employee');
+        $this->actingAs($this->hr);
+
+        Livewire::test(Form::class, ['applicationId' => $application->id])
+            ->assertSet('requiredParticipantOwners.'.RequiredParticipant::SEAT_MANAGER, $manager->id)
+            ->set('requiredParticipants.'.RequiredParticipant::SEAT_MANAGER, $substitute->id)
+            ->set('startsAt', '2026-10-08T14:00')
+            ->set('locationType', 'online')
+            ->set('meetingUrl', self::MEETING_URL)
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertRedirect();
+
+        $interview = RecruitmentInterview::query()->sole();
+        $this->assertDatabaseHas('recruitment_interview_required_participants', [
+            'interview_id' => $interview->id,
+            'seat' => RequiredParticipant::SEAT_MANAGER,
+            'owner_user_id' => $manager->id,
+            'attendee_user_id' => $substitute->id,
+        ]);
+        $this->assertDatabaseHas('recruitment_interview_participants', [
+            'interview_id' => $interview->id,
+            'user_id' => $substitute->id,
+            'removed_at' => null,
+        ]);
+        $this->assertDatabaseMissing('recruitment_interview_participants', [
+            'interview_id' => $interview->id,
+            'user_id' => $manager->id,
+            'removed_at' => null,
+        ]);
     }
 
     public function test_multiple_finalists_can_enter_a_final_comparison_round_and_return_to_the_final_list(): void

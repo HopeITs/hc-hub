@@ -10,6 +10,7 @@ use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentInterview;
 use App\Models\RecruitmentInterviewNotice as Notice;
 use App\Models\RecruitmentInterviewParticipant as Participant;
+use App\Models\RecruitmentInterviewRequiredParticipant as RequiredParticipant;
 use App\Models\RecruitmentInterviewReschedule;
 use App\Models\User;
 use App\Notifications\RecruitmentInterviewParticipantNotice as ParticipantNotice;
@@ -118,9 +119,13 @@ class RecruitmentInterviewSchedulingService
 
         $details = $this->validateDetails($input);
         $participants = $this->validateParticipants($input['participants'] ?? [], []);
+        $required = array_key_exists('requiredParticipants', $input)
+            ? $this->validateRequiredParticipants($actor, $application, $input['requiredParticipants'])
+            : [];
+        $participants = $this->withRequiredParticipants($participants, $required);
         $notices = [];
 
-        $interview = DB::transaction(function () use ($actor, $application, $details, $participants, $notifyCandidate, &$notices): RecruitmentInterview {
+        $interview = DB::transaction(function () use ($actor, $application, $details, $participants, $required, $notifyCandidate, &$notices): RecruitmentInterview {
             $locked = $this->lockApplication($application);
             $this->assertSchedulable($locked);
             $this->assertSlotAvailable($locked, $details, array_keys($participants));
@@ -148,6 +153,8 @@ class RecruitmentInterviewSchedulingService
                     'added_by_user_id' => $actor->getKey(),
                 ]);
             }
+
+            $this->syncRequiredParticipants($interview, $required);
 
             if ($locked->status !== ApplicationStatus::InterviewScheduled) {
                 $this->statuses->applyInterviewTransition($actor, $locked, ApplicationStatus::InterviewScheduled);
@@ -233,6 +240,10 @@ class RecruitmentInterviewSchedulingService
             $existing = $locked->participants()->get()->keyBy('user_id');
             $currentIds = $existing->whereNull('removed_at')->keys()->map(fn ($id) => (int) $id)->all();
             $participants = $this->validateParticipants($input['participants'] ?? [], $currentIds);
+            $required = array_key_exists('requiredParticipants', $input)
+                ? $this->validateRequiredParticipants($actor, $application, $input['requiredParticipants'], $locked)
+                : [];
+            $participants = $this->withRequiredParticipants($participants, $required);
             $this->assertSlotAvailable($application, $details, array_keys($participants), $locked->getKey());
 
             $changes = [];
@@ -301,6 +312,7 @@ class RecruitmentInterviewSchedulingService
             }
 
             [$added, $removed, $roleChanged] = $this->syncParticipants($actor, $locked, $existing, $participants);
+            $this->syncRequiredParticipants($locked, $required);
 
             if ($added !== [] || $removed !== [] || $roleChanged !== []) {
                 $changes['participants'] = ['added' => $added, 'removed' => $removed, 'role_changed' => $roleChanged];
@@ -625,6 +637,37 @@ class RecruitmentInterviewSchedulingService
         return $participants;
     }
 
+    /**
+     * The protected HR and manager seats shown by the form. A different active
+     * employee may attend either seat on the owner's behalf.
+     *
+     * @return array<string, array{owner_id: int, attendee_id: int}>
+     */
+    public function requiredParticipantAssignments(
+        User $actor,
+        RecruitmentApplication $application,
+        ?RecruitmentInterview $interview = null,
+    ): array {
+        $owners = $this->requiredParticipantOwners($actor, $application);
+
+        $assignments = collect($owners)->mapWithKeys(fn (User $owner, string $seat): array => [
+            $seat => ['owner_id' => $owner->getKey(), 'attendee_id' => $owner->getKey()],
+        ])->all();
+
+        if ($interview === null) {
+            return $assignments;
+        }
+
+        foreach ($interview->requiredParticipants()->get() as $stored) {
+            $assignments[$stored->seat] = [
+                'owner_id' => (int) $stored->owner_user_id,
+                'attendee_id' => (int) $stored->attendee_user_id,
+            ];
+        }
+
+        return $assignments;
+    }
+
     /** A local wall-clock time in the application timezone, strictly formatted. */
     public function parseLocal(mixed $value): ?Carbon
     {
@@ -647,6 +690,103 @@ class RecruitmentInterviewSchedulingService
         }
 
         return null;
+    }
+
+    /**
+     * @return array<string, array{owner_id: int, attendee_id: int}>
+     */
+    private function validateRequiredParticipants(
+        User $actor,
+        RecruitmentApplication $application,
+        mixed $input,
+        ?RecruitmentInterview $interview = null,
+    ): array {
+        $assignments = $this->requiredParticipantAssignments($actor, $application, $interview);
+
+        if (! isset($assignments[RequiredParticipant::SEAT_HR], $assignments[RequiredParticipant::SEAT_MANAGER])) {
+            throw ValidationException::withMessages([
+                'requiredParticipants' => __('recruitment-applicant.interviews.errors.required_manager_missing'),
+            ]);
+        }
+
+        $input = is_array($input) ? $input : [];
+        $currentAttendees = $interview?->requiredParticipants()->pluck('attendee_user_id')->map(fn ($id) => (int) $id)->all() ?? [];
+
+        foreach ($assignments as $seat => &$assignment) {
+            $attendeeId = filter_var($input[$seat] ?? $assignment['attendee_id'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+            $attendee = $attendeeId === false ? null : User::query()->with('profile')->find($attendeeId);
+
+            if ($attendee === null) {
+                throw ValidationException::withMessages([
+                    'requiredParticipants' => __('recruitment-applicant.interviews.errors.participant_invalid'),
+                ]);
+            }
+
+            if (! self::isActiveUser($attendee) && ! in_array($attendee->getKey(), $currentAttendees, true)) {
+                throw ValidationException::withMessages([
+                    'requiredParticipants' => __('recruitment-applicant.interviews.errors.participant_inactive', [
+                        'name' => $attendee->profile?->name ?? $attendee->email,
+                    ]),
+                ]);
+            }
+
+            $assignment['attendee_id'] = $attendee->getKey();
+        }
+        unset($assignment);
+
+        return $assignments;
+    }
+
+    /** @return array<string, User> */
+    private function requiredParticipantOwners(User $actor, RecruitmentApplication $application): array
+    {
+        $application->loadMissing([
+            'vacancy.position.directManager.activeContracts.employee.account',
+            'vacancy.createdFromRequest.actualRequester.profile',
+            'vacancy.createdFromRequest.requester.profile',
+        ]);
+
+        $managerEmployee = $application->vacancy?->position?->directManager?->employee();
+        $manager = $managerEmployee?->account
+            ?? $application->vacancy?->createdFromRequest?->actualRequester
+            ?? $application->vacancy?->createdFromRequest?->requester;
+
+        return array_filter([
+            RequiredParticipant::SEAT_HR => $actor,
+            RequiredParticipant::SEAT_MANAGER => $manager,
+        ], fn (?User $user): bool => $user !== null && self::isActiveUser($user));
+    }
+
+    /**
+     * @param  array<int, string>  $participants
+     * @param  array<string, array{owner_id: int, attendee_id: int}>  $required
+     * @return array<int, string>
+     */
+    private function withRequiredParticipants(array $participants, array $required): array
+    {
+        foreach ($required as $assignment) {
+            $participants[$assignment['attendee_id']] = Participant::ROLE_INTERVIEWER;
+        }
+
+        $max = (int) config('recruitment.interviews.max_participants', 15);
+        if (count($participants) > $max) {
+            throw ValidationException::withMessages([
+                'participants' => __('recruitment-applicant.interviews.errors.too_many_participants', ['max' => $max]),
+            ]);
+        }
+
+        return $participants;
+    }
+
+    /** @param  array<string, array{owner_id: int, attendee_id: int}>  $required */
+    private function syncRequiredParticipants(RecruitmentInterview $interview, array $required): void
+    {
+        foreach ($required as $seat => $assignment) {
+            $interview->requiredParticipants()->updateOrCreate(
+                ['seat' => $seat],
+                ['owner_user_id' => $assignment['owner_id'], 'attendee_user_id' => $assignment['attendee_id']],
+            );
+        }
     }
 
     /**

@@ -58,6 +58,13 @@ class Form extends Component
     /** @var array<int|string, string> [user_id => role] */
     public array $participants = [];
 
+    /** @var array<string, int> [required seat => attendee user id] */
+    public array $requiredParticipants = [];
+
+    /** @var array<string, int> [required seat => role owner user id] */
+    #[Locked]
+    public array $requiredParticipantOwners = [];
+
     public ?string $newParticipantId = null;
 
     public string $newParticipantRole = RecruitmentInterviewParticipant::ROLE_INTERVIEWER;
@@ -69,6 +76,8 @@ class Form extends Component
 
     public function mount(?int $applicationId = null, ?int $interviewId = null): void
     {
+        $scheduling = app(RecruitmentInterviewSchedulingService::class);
+
         if ($interviewId !== null) {
             $interview = $this->resolveInterview($interviewId);
             Gate::authorize('manage', $interview);
@@ -85,7 +94,12 @@ class Form extends Component
             $this->locationType = $interview->location_type;
             $this->locationValue = (string) $interview->location_value;
             $this->meetingUrl = Gate::allows('viewMeetingLink', $interview) ? (string) $interview->meeting_url : '';
-            $this->participants = $interview->currentParticipants()->pluck('role', 'user_id')->all();
+            $assignments = $scheduling->requiredParticipantAssignments(auth()->user(), $interview->application, $interview);
+            $this->requiredParticipantOwners = collect($assignments)->mapWithKeys(fn (array $assignment, string $seat): array => [$seat => $assignment['owner_id']])->all();
+            $this->requiredParticipants = collect($assignments)->mapWithKeys(fn (array $assignment, string $seat): array => [$seat => $assignment['attendee_id']])->all();
+            $this->participants = $interview->currentParticipants()
+                ->whereNotIn('user_id', array_values($this->requiredParticipants))
+                ->pluck('role', 'user_id')->all();
 
             return;
         }
@@ -96,6 +110,9 @@ class Form extends Component
 
         $this->applicationId = $application->getKey();
         $this->duration = (int) config('recruitment.interviews.default_duration_minutes', 60);
+        $assignments = $scheduling->requiredParticipantAssignments(auth()->user(), $application);
+        $this->requiredParticipantOwners = collect($assignments)->mapWithKeys(fn (array $assignment, string $seat): array => [$seat => $assignment['owner_id']])->all();
+        $this->requiredParticipants = collect($assignments)->mapWithKeys(fn (array $assignment, string $seat): array => [$seat => $assignment['attendee_id']])->all();
 
         if ($application->status === RecruitmentApplicationStatus::Finalist) {
             $this->type = RecruitmentInterviewType::Final;
@@ -108,6 +125,10 @@ class Form extends Component
         $userId = filter_var($this->newParticipantId, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
         if ($userId === false || ! in_array($this->newParticipantRole, RecruitmentInterviewParticipant::roles(), true)) {
+            return;
+        }
+
+        if (in_array($userId, array_values($this->requiredParticipants), true)) {
             return;
         }
 
@@ -134,6 +155,7 @@ class Form extends Component
             'locationValue' => $this->locationValue,
             'meetingUrl' => $this->meetingUrl,
             'participants' => $this->participants,
+            'requiredParticipants' => $this->requiredParticipants,
         ];
 
         try {
@@ -174,19 +196,24 @@ class Form extends Component
         $application = $this->resolveApplication((int) $this->applicationId);
         $interview = $this->interviewId ? $this->resolveInterview($this->interviewId) : null;
         $chosen = User::query()->whereKey(array_keys($this->participants))->with('profile')->get()->keyBy('id');
+        $activeUsers = User::query()
+            ->whereHas('profile', fn ($query) => $query->where('is_active', true))
+            ->with('profile')
+            ->get()
+            ->sortBy(fn (User $user) => $user->profile?->name)
+            ->values();
 
         return view('livewire.recruitment.interviews.form', [
             'application' => $application->loadMissing('applicant', 'campaign.vacancy.position'),
             'interview' => $interview,
             'chosen' => $chosen,
+            'requiredOwners' => User::query()->whereKey(array_values($this->requiredParticipantOwners))->with('profile')->get()->keyBy('id'),
+            'requiredAttendees' => User::query()->whereKey(array_values($this->requiredParticipants))->with('profile')->get()->keyBy('id'),
+            'substituteCandidates' => $activeUsers,
             // Only active staff can be added; someone already on the interview
             // who became inactive stays listed (and flagged) until removed.
-            'candidates' => User::query()
-                ->whereHas('profile', fn ($query) => $query->where('is_active', true))
-                ->whereKeyNot(array_keys($this->participants))
-                ->with('profile')
-                ->get()
-                ->sortBy(fn (User $user) => $user->profile?->name)
+            'candidates' => $activeUsers
+                ->whereNotIn('id', array_merge(array_map('intval', array_keys($this->participants)), array_values($this->requiredParticipants)))
                 ->values(),
             'timezone' => $scheduling->timezone(),
             'isReopenable' => $application->status === RecruitmentApplicationStatus::Rejected,

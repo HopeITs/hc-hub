@@ -252,9 +252,34 @@
         @if ($canManage)
             <form wire:submit="uploadAttachment" class="mt-4 border-t border-secondary-soft pt-4">
                 <x-forms.input-label for="interviewAttachment" :value="__('recruitment-applicant.interviews.attachments.file')" required />
-                <input id="interviewAttachment" type="file" wire:model="attachment"
-                    accept="audio/mpeg,audio/mp4,audio/wav,video/mp4,video/webm,application/pdf,image/jpeg,image/png"
-                    class="mt-1 block w-full cursor-pointer rounded-control border border-secondary-light bg-white text-sm file:me-3 file:cursor-pointer file:border-0 file:bg-neutral-100 file:px-3 file:py-2 file:font-semibold">
+                <div
+                    x-data="{ dragging: false, selectedName: '' }"
+                    x-on:dragover.prevent="dragging = true"
+                    x-on:dragleave.prevent="dragging = false"
+                    x-on:drop.prevent="
+                        dragging = false;
+                        const input = $refs.fileInput;
+                        const files = $event.dataTransfer.files;
+                        if (input && files.length) {
+                            input.files = files;
+                            selectedName = files[0].name;
+                            input.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                    "
+                    :class="dragging ? 'border-primary bg-primary/5' : 'border-secondary-light bg-white'"
+                    class="mt-1 rounded-surface border-2 border-dashed p-6 text-center transition duration-150 motion-reduce:transition-none sm:p-8"
+                >
+                    <x-icons.upload class="mx-auto size-12 text-primary" />
+                    <p class="mt-3 text-body text-secondary-dark">{{ __('recruitment-applicant.interviews.attachments.drop_hint') }}</p>
+                    <label for="interviewAttachment" class="mt-4 inline-flex min-h-11 cursor-pointer items-center justify-center rounded-control bg-primary px-5 py-2 text-body font-semibold text-white shadow-e1 transition hover:bg-primary-hover focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-primary">
+                        {{ __('recruitment-applicant.interviews.attachments.browse') }}
+                    </label>
+                    <input x-ref="fileInput" id="interviewAttachment" type="file" wire:model="attachment"
+                        x-on:change="selectedName = $event.target.files[0]?.name ?? ''"
+                        accept="audio/mpeg,audio/mp4,audio/wav,video/mp4,video/webm,application/pdf,image/jpeg,image/png"
+                        class="sr-only">
+                    <p x-show="selectedName" x-text="selectedName" class="mt-3 break-all text-small font-medium text-secondary-dark" x-cloak></p>
+                </div>
                 <p class="mt-1 text-xs text-secondary-medium">{{ __('recruitment-applicant.interviews.attachments.formats') }}</p>
                 <x-forms.input-error field="attachment" input-id="interviewAttachment" />
                 <x-primary-button type="submit" wire:target="attachment,uploadAttachment" class="mt-3">

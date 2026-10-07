@@ -189,6 +189,8 @@ class Show extends Component
             'application.campaign.vacancy.position',
             'participants' => fn ($participants) => $participants->orderByRaw('removed_at is not null')->orderBy('id'),
             'participants.user.profile',
+            'requiredParticipants.owner.profile',
+            'requiredParticipants.attendee.profile',
             'creator.profile',
             'cancelledBy.profile',
             'outcomeRecordedBy.profile',

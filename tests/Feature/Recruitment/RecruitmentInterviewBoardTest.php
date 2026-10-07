@@ -358,8 +358,7 @@ class RecruitmentInterviewBoardTest extends TestCase
         $application = $this->applyTo($this->makeCampaignIn($this->homs, title: $title), $this->makeApplicant($name));
 
         $statuses = app(RecruitmentApplicationStatusService::class);
-        $statuses->change($this->hr, $application, AppStatus::Submitted, AppStatus::UnderReview, null);
-        $statuses->change($this->hr, $application->fresh(), AppStatus::UnderReview, AppStatus::Shortlisted, null);
+        $statuses->change($this->hr, $application, AppStatus::Submitted, AppStatus::Shortlisted, null);
 
         return $application->fresh();
     }
