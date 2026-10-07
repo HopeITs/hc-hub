@@ -123,6 +123,7 @@ class RecruitmentInterviewSchedulingService
         $interview = DB::transaction(function () use ($actor, $application, $details, $participants, $notifyCandidate, &$notices): RecruitmentInterview {
             $locked = $this->lockApplication($application);
             $this->assertSchedulable($locked);
+            $this->assertSlotAvailable($locked, $details, array_keys($participants));
 
             $interview = RecruitmentInterview::query()->forceCreate([
                 'application_id' => $locked->getKey(),
@@ -232,6 +233,7 @@ class RecruitmentInterviewSchedulingService
             $existing = $locked->participants()->get()->keyBy('user_id');
             $currentIds = $existing->whereNull('removed_at')->keys()->map(fn ($id) => (int) $id)->all();
             $participants = $this->validateParticipants($input['participants'] ?? [], $currentIds);
+            $this->assertSlotAvailable($application, $details, array_keys($participants), $locked->getKey());
 
             $changes = [];
 
@@ -645,6 +647,53 @@ class RecruitmentInterviewSchedulingService
         }
 
         return null;
+    }
+
+    /**
+     * Refuse slots that overlap another open interview for the candidate or
+     * for anyone on the proposed panel. Adjacent slots are allowed.
+     *
+     * @param  array{starts: Carbon, ends: Carbon}  $details
+     * @param  array<int, int>  $participantIds
+     */
+    private function assertSlotAvailable(
+        RecruitmentApplication $application,
+        array $details,
+        array $participantIds,
+        ?int $exceptInterviewId = null,
+    ): void {
+        $conflict = RecruitmentInterview::query()
+            ->open()
+            ->when($exceptInterviewId !== null, fn ($query) => $query->whereKeyNot($exceptInterviewId))
+            ->where('scheduled_at', '<', $details['ends'])
+            ->where('ends_at', '>', $details['starts'])
+            ->where(function ($query) use ($application, $participantIds): void {
+                $query->whereHas(
+                    'application',
+                    fn ($applications) => $applications->where('applicant_id', $application->applicant_id),
+                );
+
+                if ($participantIds !== []) {
+                    $query->orWhereHas(
+                        'currentParticipants',
+                        fn ($participants) => $participants->whereIn('user_id', $participantIds),
+                    );
+                }
+            })
+            ->orderBy('scheduled_at')
+            ->lockForUpdate()
+            ->first();
+
+        if ($conflict === null) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'startsAt' => __('recruitment-applicant.interviews.errors.slot_conflict', [
+                'start' => $conflict->scheduled_at->format('Y-m-d H:i'),
+                'end' => $conflict->ends_at->format('H:i'),
+            ]),
+        ]);
     }
 
     /** Same order everywhere: the application first, then the interview. */

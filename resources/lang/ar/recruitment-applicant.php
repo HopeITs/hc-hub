@@ -730,6 +730,7 @@ return [
             'participant_invalid' => 'أحد المشاركين غير صالح.',
             'too_many_participants' => 'لا يمكن أن يزيد عدد المشاركين في المقابلة على :max.',
             'participant_inactive' => ':name ليس موظفًا فعّالًا ولا يمكن إضافته.',
+            'slot_conflict' => 'يتداخل هذا الموعد مع مقابلة أخرى مجدولة من :start إلى :end لهذا المرشح أو لأحد المشاركين المحددين.',
             'reason_required' => 'وضّح سبب التغيير (:min أحرف على الأقل).',
             'cancel_reason_required' => 'اختر سبب الإلغاء.',
             'not_allowed' => 'هذا الإجراء غير مسموح لهذه المقابلة.',

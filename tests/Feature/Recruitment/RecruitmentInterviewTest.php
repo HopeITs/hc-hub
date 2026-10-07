@@ -233,6 +233,64 @@ class RecruitmentInterviewTest extends TestCase
         $this->assertSame(RecruitmentInterviewType::values(), RecruitmentInterview::query()->orderBy('id')->pluck('interview_type')->all());
     }
 
+    public function test_an_interview_cannot_overlap_for_the_same_candidate_or_participant(): void
+    {
+        $firstApplication = $this->shortlisted('First Candidate');
+        $this->schedule($firstApplication, [
+            'startsAt' => '2026-10-08T10:00',
+            'duration' => 60,
+            'participants' => [$this->interviewer->id => Participant::ROLE_INTERVIEWER],
+        ]);
+
+        $candidateErrors = $this->assertValidationError(
+            fn () => $this->schedule($firstApplication->fresh(), [
+                'startsAt' => '2026-10-08T10:30',
+                'duration' => 30,
+            ]),
+            'startsAt',
+        );
+        $this->assertStringContainsString('2026-10-08 10:00', $candidateErrors['startsAt'][0]);
+
+        $secondApplication = $this->shortlisted('Second Candidate');
+        $this->assertValidationError(
+            fn () => $this->schedule($secondApplication, [
+                'startsAt' => '2026-10-08T10:45',
+                'duration' => 30,
+                'participants' => [$this->interviewer->id => Participant::ROLE_INTERVIEWER],
+            ]),
+            'startsAt',
+        );
+
+        $adjacent = $this->schedule($secondApplication->fresh(), [
+            'startsAt' => '2026-10-08T11:00',
+            'duration' => 30,
+            'participants' => [$this->interviewer->id => Participant::ROLE_INTERVIEWER],
+        ]);
+
+        $this->assertSame('2026-10-08 11:00', $adjacent->scheduled_at->format('Y-m-d H:i'));
+    }
+
+    public function test_rescheduling_checks_conflicts_but_does_not_conflict_with_itself(): void
+    {
+        $first = $this->schedule($this->shortlisted('First Candidate'), [
+            'startsAt' => '2026-10-08T10:00',
+            'duration' => 60,
+            'participants' => [$this->interviewer->id => Participant::ROLE_INTERVIEWER],
+        ]);
+        $second = $this->schedule($this->shortlisted('Second Candidate'), [
+            'startsAt' => '2026-10-08T12:00',
+            'duration' => 60,
+            'participants' => [$this->interviewer->id => Participant::ROLE_INTERVIEWER],
+        ]);
+
+        $this->reschedule($first, ['locationValue' => 'Updated platform'], reason: self::SECRET_RESCHEDULE_REASON);
+
+        $this->assertValidationError(
+            fn () => $this->reschedule($second, ['startsAt' => '2026-10-08T10:30']),
+            'startsAt',
+        );
+    }
+
     /** [3] The candidate email is queued as a job carrying only the notice id, then sent with the details. */
     public function test_the_candidate_notification_is_dispatched_and_sent_with_the_interview_details(): void
     {

@@ -730,6 +730,7 @@ return [
             'participant_invalid' => 'One of the participants is not valid.',
             'too_many_participants' => 'An interview can have at most :max participants.',
             'participant_inactive' => ':name is not an active employee and cannot be added.',
+            'slot_conflict' => 'This time overlaps another interview scheduled from :start to :end for this candidate or one of the selected participants.',
             'reason_required' => 'Explain the change (at least :min characters).',
             'cancel_reason_required' => 'Choose a cancellation reason.',
             'not_allowed' => 'This action is not allowed for this interview.',
