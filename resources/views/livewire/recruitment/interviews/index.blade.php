@@ -5,6 +5,8 @@
     $t = 'recruitment-applicant.interviews.';
     $focus = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
     $panel = 'rounded-surface border border-neutral-200 bg-white p-5 shadow-e1';
+    $eyebrow = 'text-caption font-semibold uppercase tracking-wider text-secondary-medium';
+    $countPill = 'inline-flex min-w-6 items-center justify-center rounded-full border border-neutral-200 bg-white px-2 py-0.5 text-caption font-semibold tabular-nums text-secondary-dark';
     $showUrl = fn ($id) => route('recruitment.interviews.show', ['interviewId' => $id]);
     $zoned = fn ($interview, $date) => $date?->copy()->setTimezone($interview->timezone ?: $timezone);
     $personName = fn ($participant) => $participant->user?->profile?->name ?? $participant->user?->email;
@@ -25,7 +27,7 @@
 <x-slot:title>{{ __($t.'title') }}</x-slot:title>
 
 <div class="space-y-6">
-    <div class="flex flex-wrap items-start justify-between gap-4">
+    <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
             <livewire:layout.breadcrumbs :title="__($t.'title')" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __($t.'title')]]" />
             <p class="text-body text-secondary-medium">{{ __($t.'index_hint') }}</p>
@@ -46,11 +48,11 @@
     </div>
 
     {{-- The briefing: what is next, what is waiting on me, and the week at a glance. --}}
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-12">
+    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {{-- 1. Next interview --}}
-        <section aria-labelledby="briefing-next" class="{{ $panel }} flex flex-col md:col-span-2 xl:col-span-5">
+        <section aria-labelledby="briefing-next" class="{{ $panel }} flex flex-col md:col-span-2 xl:col-span-1">
             <div class="flex flex-wrap items-center justify-between gap-2">
-                <h2 id="briefing-next" class="text-small font-semibold text-secondary-dark">
+                <h2 id="briefing-next" class="{{ $eyebrow }}">
                     {{ __($t.'board.'.($nextIsMine || ! $next ? 'next_mine' : 'next_scope')) }}
                 </h2>
                 @if ($next)
@@ -63,7 +65,7 @@
                             {{ __($t.'board.now') }}
                         </span>
                     @else
-                        <time datetime="{{ $start->toIso8601String() }}" class="text-small tabular-nums text-secondary-medium">
+                        <time datetime="{{ $start->toIso8601String() }}" class="rounded-full bg-selection px-2.5 py-0.5 text-caption font-semibold tabular-nums text-secondary-dark">
                             {{ $start->copy()->locale(app()->getLocale())->diffForHumans(['parts' => 2, 'join' => true]) }}
                         </time>
                     @endif
@@ -71,7 +73,7 @@
             </div>
 
             @if ($next)
-                <div class="mt-4 flex flex-1 gap-4">
+                <div class="my-4 flex gap-4">
                     {{-- A tear-off date tile. --}}
                     <time datetime="{{ $start->toDateString() }}" aria-hidden="true"
                           class="w-16 shrink-0 self-start overflow-hidden rounded-control border border-neutral-200 text-center shadow-e1">
@@ -94,7 +96,7 @@
                             {{ __($t.'types.'.$next->interview_type) }}
                         </p>
 
-                        <dl class="mt-3 space-y-1.5 text-small text-secondary-dark">
+                        <dl class="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-small text-secondary-dark">
                             <div class="flex items-start gap-2">
                                 <dt class="mt-0.5 shrink-0">
                                     <flux:icon.clock variant="micro" class="size-3.5 text-secondary-medium" aria-hidden="true" />
@@ -136,7 +138,7 @@
                     </div>
                 </div>
 
-                <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-neutral-100 pt-3">
+                <div class="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-neutral-100 pt-3">
                     <div class="flex min-w-0 items-center gap-2">
                         @if ($members->isNotEmpty())
                             <span class="flex shrink-0 -space-x-1.5" aria-hidden="true">
@@ -171,12 +173,10 @@
         </section>
 
         {{-- 2. Waiting on you --}}
-        <section aria-labelledby="briefing-waiting" class="{{ $panel }} flex flex-col xl:col-span-4">
-            <div class="flex items-center gap-2">
-                <h2 id="briefing-waiting" class="text-small font-semibold text-secondary-dark">{{ __($t.'board.waiting_title') }}</h2>
-                @if ($waitingCount > 0)
-                    <span class="rounded-inset bg-neutral-900 px-1.5 py-0.5 text-caption font-semibold tabular-nums text-white">{{ $waitingCount }}</span>
-                @endif
+        <section aria-labelledby="briefing-waiting" class="{{ $panel }} flex flex-col">
+            <div class="flex items-center justify-between gap-2">
+                <h2 id="briefing-waiting" class="{{ $eyebrow }}">{{ __($t.'board.waiting_title') }}</h2>
+                <span @class([$countPill, 'border-neutral-900 bg-neutral-900 text-white' => $waitingCount > 0])>{{ $waitingCount }}</span>
             </div>
             <p class="mt-1 text-small text-secondary-medium">{{ __($t.'board.waiting_hint') }}</p>
 
@@ -217,23 +217,25 @@
                 @endif
             @else
                 <div class="flex flex-1 flex-col items-center justify-center py-6 text-center">
-                    <flux:icon.check-circle class="size-7 text-secondary-medium" aria-hidden="true" />
-                    <p class="mt-2 font-semibold text-secondary-dark">{{ __($t.'board.caught_up') }}</p>
+                    <span class="flex size-11 items-center justify-center rounded-full border border-neutral-200 bg-neutral-50 text-secondary-dark" aria-hidden="true">
+                        <flux:icon.check variant="mini" class="size-5" />
+                    </span>
+                    <p class="mt-3 text-h4 font-semibold text-secondary-dark">{{ __($t.'board.caught_up') }}</p>
                     <p class="mt-1 max-w-xs text-small text-secondary-medium">{{ __($t.'board.caught_up_hint') }}</p>
                 </div>
             @endif
         </section>
 
         {{-- 3. This week: a small data list, not a headline number. --}}
-        <section aria-labelledby="briefing-week" class="{{ $panel }} xl:col-span-3">
+        <section aria-labelledby="briefing-week" class="{{ $panel }} flex flex-col">
             <div class="flex flex-wrap items-baseline justify-between gap-2">
-                <h2 id="briefing-week" class="text-small font-semibold text-secondary-dark">{{ __($t.'board.week_title') }}</h2>
+                <h2 id="briefing-week" class="{{ $eyebrow }}">{{ __($t.'board.week_title') }}</h2>
                 <span class="text-small tabular-nums text-secondary-medium">
                     {{ $weekStart->translatedFormat('j M') }} &ndash; {{ $weekStart->copy()->addDays(6)->translatedFormat('j M') }}
                 </span>
             </div>
 
-            <ol class="mt-3 grid grid-cols-7 gap-1">
+            <ol class="my-4 grid grid-cols-7 gap-1">
                 @foreach (range(0, 6) as $offset)
                     @php
                         $day = $weekStart->copy()->addDays($offset);
@@ -242,9 +244,9 @@
                     @endphp
                     <li wire:key="briefing-day-{{ $day->toDateString() }}"
                         aria-label="{{ trans_choice($t.'board.day_count', $dayInterviews->count(), ['date' => $day->translatedFormat('l j F')]) }}"
-                        class="flex flex-col items-center gap-1 py-1.5 {{ $isToday ? 'rounded-control bg-neutral-100' : '' }}">
+                        class="flex flex-col items-center gap-1.5 rounded-control py-2 {{ $isToday ? 'bg-selection' : '' }}">
                         <span aria-hidden="true" class="text-caption {{ $day->isFriday() ? 'text-secondary-light' : 'text-secondary-medium' }}">{{ $day->minDayName }}</span>
-                        <span aria-hidden="true" class="flex size-6 items-center justify-center text-small font-semibold tabular-nums
+                        <span aria-hidden="true" class="flex size-7 items-center justify-center text-small font-semibold tabular-nums
                             {{ $isToday ? 'rounded-full bg-neutral-900 text-white' : ($day->isFriday() ? 'text-secondary-light' : 'text-secondary-dark') }}">{{ $day->day }}</span>
                         <span aria-hidden="true" class="flex flex-col items-center gap-0.5">
                             @foreach ($dayInterviews->take(5) as $interview)
@@ -258,7 +260,7 @@
                 @endforeach
             </ol>
 
-            <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-1.5 text-small">
+            <dl class="mt-auto grid grid-cols-2 gap-x-6 gap-y-2 border-t border-neutral-100 pt-3 text-small">
                 @foreach (['all' => null, 'ahead' => RecruitmentInterviewStatus::Scheduled, 'held' => RecruitmentInterviewStatus::Completed, 'off' => RecruitmentInterviewStatus::Cancelled] as $total => $dotStatus)
                     <div class="flex items-center justify-between gap-2">
                         <dt class="flex min-w-0 items-center gap-1.5 text-secondary-medium">

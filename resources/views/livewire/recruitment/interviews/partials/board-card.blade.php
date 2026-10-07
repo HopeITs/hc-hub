@@ -44,7 +44,7 @@
     $reasonKey = 'recruitment-applicant.interviews.cancellation_reasons.'.$interview->cancellation_reason;
 @endphp
 <li wire:key="board-card-{{ $interview->id }}"
-    class="relative rounded-control border border-neutral-200 bg-white p-3 shadow-e1 transition duration-200 hover:border-neutral-300 hover:shadow-e2 motion-reduce:transition-none has-[.card-link:focus-visible]:outline-2 has-[.card-link:focus-visible]:outline-offset-2 has-[.card-link:focus-visible]:outline-primary"
+    class="relative rounded-surface border border-neutral-200 bg-white p-4 shadow-e1 transition duration-200 hover:border-neutral-300 hover:shadow-e2 motion-reduce:transition-none has-[.card-link:focus-visible]:outline-2 has-[.card-link:focus-visible]:outline-offset-2 has-[.card-link:focus-visible]:outline-primary"
     x-bind:class="thread === null ? '' : (thread === {{ $appId }} ? 'ring-2 ring-neutral-900 shadow-e2' : 'opacity-40')"
     @if ($threaded)
         x-on:mouseenter="thread = {{ $appId }}" x-on:mouseleave="thread = null"
@@ -69,12 +69,12 @@
         @endif
     </div>
 
-    <div class="mt-2 flex items-center gap-2.5">
+    <div class="mt-3 flex items-center gap-3">
         <x-recruitment.monogram :name="$interview->application?->applicant?->full_name" tone="candidate" />
         <div class="min-w-0">
             <h3 class="truncate text-body font-semibold text-neutral-900">
                 <a href="{{ $showUrl }}" wire:navigate
-                   @class(['card-link after:absolute after:inset-0 after:rounded-control focus-visible:outline-none', 'line-through' => $lane === 'closed'])>{{ $interview->application?->applicant?->full_name }}</a>
+                   @class(['card-link after:absolute after:inset-0 after:rounded-surface focus-visible:outline-none', 'line-through' => $lane === 'closed'])>{{ $interview->application?->applicant?->full_name }}</a>
             </h3>
             <p class="truncate text-small text-secondary-medium">
                 @if ($position)
@@ -93,7 +93,7 @@
     @endif
 
     {{-- Round track: which of the candidate's rounds this is, and where the others stand. Logical start/end, so it mirrors in RTL. --}}
-    <ol class="pointer-events-none isolate mt-3 grid grid-cols-3" aria-label="{{ __('recruitment-applicant.interviews.board.rounds') }}">
+    <ol class="pointer-events-none isolate mt-4 grid grid-cols-3" aria-label="{{ __('recruitment-applicant.interviews.board.rounds') }}">
         @foreach ($rounds as $round)
             <li @class([
                 'relative flex flex-col items-center gap-1',
@@ -128,7 +128,7 @@
         @endforeach
     </ol>
 
-    <div class="mt-3 flex items-center justify-between gap-2 border-t border-neutral-100 pt-2.5">
+    <div class="mt-4 flex items-center justify-between gap-2 border-t border-neutral-100 pt-3">
         {{-- Where it is held. Never the meeting link: that is only on the interview page, behind its own permission. --}}
         <p class="flex min-w-0 items-center gap-1 text-small text-secondary-medium">
             @if ($interview->location_type === RecruitmentInterviewLocationType::Online)

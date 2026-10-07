@@ -618,6 +618,7 @@ return [
             'search' => 'Search candidate or vacancy',
             'round' => 'Round',
             'all_rounds' => 'All rounds',
+            'more_filters' => 'More filters',
             'vacancy' => 'Vacancy',
             'all_vacancies' => 'All vacancies',
             'date_from' => 'From date',

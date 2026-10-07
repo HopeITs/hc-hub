@@ -618,6 +618,7 @@ return [
             'search' => 'ابحث باسم المرشح أو الوظيفة',
             'round' => 'الجولة',
             'all_rounds' => 'كل الجولات',
+            'more_filters' => 'فلاتر إضافية',
             'vacancy' => 'الشاغر',
             'all_vacancies' => 'كل الشواغر',
             'date_from' => 'من تاريخ',
