@@ -9,30 +9,28 @@
     $allEmpty = collect($lanes)->every(fn (array $lane) => $lane['count'] === 0);
 
     $advanced = collect([$dateFrom ?? '', $dateTo ?? '', $campaign ?? '', $applicant ?? '', $participant ?? ''])->contains(fn ($value) => $value !== '');
-    $laneRule = ['upcoming' => 'border-neutral-900', 'awaiting' => 'border-neutral-600', 'held' => 'border-neutral-300', 'closed' => 'border-neutral-200'];
+    $laneRule = ['upcoming' => 'border-primary', 'awaiting' => 'border-secondary-dark', 'held' => 'border-neutral-300', 'closed' => 'border-neutral-200'];
 
-    $today = now($timezone)->toDateString();
-    $tomorrow = now($timezone)->addDay()->toDateString();
 @endphp
 <div x-data="{ lane: $wire.entangle('lane'), thread: null, more: @js($advanced) }" class="space-y-5">
     {{-- Filters. Each one narrows every lane at once; none of them widens what the user may see. --}}
     <div class="space-y-3">
-      <div class="flex flex-wrap items-center gap-3">
+      <div class="grid items-stretch gap-3 xl:grid-cols-[minmax(18rem,1fr)_auto_auto_auto]">
         <div class="relative min-w-48 flex-1">
             <label for="board-search" class="sr-only">{{ __('recruitment-applicant.interviews.board.search') }}</label>
             <flux:icon.magnifying-glass variant="micro" class="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-secondary-medium" />
             <input id="board-search" type="search" wire:model.live.debounce.400ms="search"
                    placeholder="{{ __('recruitment-applicant.interviews.board.search') }}"
-                   class="min-h-11 w-full rounded-control border border-neutral-200 bg-white ps-9 pe-3 text-body text-neutral-900 shadow-e1 placeholder:text-secondary-medium {{ $focusRing }}">
+                   class="min-h-11 w-full rounded-control border border-neutral-300 bg-white ps-9 pe-3 text-body text-neutral-900 placeholder:text-secondary-medium {{ $focusRing }}">
         </div>
 
-        <div role="group" aria-label="{{ __('recruitment-applicant.interviews.board.round') }}" class="inline-flex flex-wrap items-center gap-1 rounded-control border border-neutral-200 bg-white p-1 shadow-e1">
+        <div role="group" aria-label="{{ __('recruitment-applicant.interviews.board.round') }}" class="inline-flex items-center gap-1 rounded-control border border-neutral-200 bg-white p-1">
             @foreach (array_merge([''], RecruitmentInterviewType::values()) as $round)
                 <button type="button" wire:click="$set('type', '{{ $round }}')" aria-pressed="{{ $type === $round ? 'true' : 'false' }}"
                         @class([
                             'inline-flex min-h-11 cursor-pointer items-center rounded-control px-3 text-small transition duration-150 motion-reduce:transition-none sm:min-h-9',
                             $focusRing,
-                            'bg-selection font-semibold text-secondary-dark' => $type === $round,
+                            'bg-secondary-dark font-semibold text-white' => $type === $round,
                             'text-secondary-medium hover:text-secondary-dark' => $type !== $round,
                         ])>
                     {{ $round === '' ? __('recruitment-applicant.interviews.board.all_rounds') : __('recruitment-applicant.interviews.board.rounds_short.'.$round) }}
@@ -40,21 +38,8 @@
             @endforeach
         </div>
 
-        @if ($vacancies->count() > 1)
-            <div>
-                <label for="board-vacancy" class="sr-only">{{ __('recruitment-applicant.interviews.board.vacancy') }}</label>
-                <select id="board-vacancy" wire:model.live="vacancy"
-                        class="min-h-11 max-w-64 rounded-control border border-neutral-200 bg-white ps-3 pe-8 text-small text-neutral-900 shadow-e1 {{ $focusRing }}">
-                    <option value="">{{ __('recruitment-applicant.interviews.board.all_vacancies') }}</option>
-                    @foreach ($vacancies as $vacancyId => $vacancyTitle)
-                        <option value="{{ $vacancyId }}">{{ $vacancyTitle }}</option>
-                    @endforeach
-                </select>
-            </div>
-        @endif
-
         @if ($canFilterMine)
-            <label class="inline-flex min-h-11 cursor-pointer items-center gap-2.5 rounded-control border border-neutral-200 bg-white px-3 text-small text-secondary-dark shadow-e1 transition duration-150 hover:border-neutral-300 motion-reduce:transition-none has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary">
+            <label class="inline-flex min-h-11 cursor-pointer items-center gap-2.5 rounded-control border border-neutral-200 bg-white px-3 text-small text-secondary-dark transition duration-150 hover:border-neutral-300 motion-reduce:transition-none has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary">
                 <input type="checkbox" role="switch" wire:model.live="mine" class="peer sr-only">
                 <span aria-hidden="true" class="relative h-4.5 w-8 shrink-0 rounded-full bg-neutral-300 transition-colors duration-150 peer-checked:bg-neutral-900 motion-reduce:transition-none
                              after:absolute after:top-0.5 after:start-0.5 after:size-3.5 after:rounded-full after:bg-white after:shadow-e1 after:transition-all after:duration-150 peer-checked:after:start-4 motion-reduce:after:transition-none"></span>
@@ -63,9 +48,9 @@
         @endif
 
         <button type="button" x-on:click="more = ! more" x-bind:aria-expanded="more" aria-expanded="{{ $advanced ? 'true' : 'false' }}" aria-controls="board-more-filters"
-                class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-control border border-neutral-200 bg-white px-3 text-small font-semibold text-secondary-dark shadow-e1 transition duration-150 hover:border-neutral-300 motion-reduce:transition-none {{ $focusRing }}"
-                x-bind:class="more ? 'bg-selection' : 'bg-white'">
-            <flux:icon.adjustments-horizontal variant="micro" class="size-4" aria-hidden="true" />
+                class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-control border border-neutral-200 bg-white px-3 text-small font-semibold text-secondary-dark transition duration-150 hover:border-neutral-300 motion-reduce:transition-none {{ $focusRing }}"
+                x-bind:class="more ? 'border-primary text-primary' : 'bg-white'">
+            <flux:icon.funnel variant="micro" class="size-4" aria-hidden="true" />
             {{ __('recruitment-applicant.interviews.board.more_filters') }}
             @if ($advanced)
                 <span class="size-1.5 rounded-full bg-neutral-900" aria-hidden="true"></span>
@@ -81,21 +66,20 @@
       </div>
 
       <div id="board-more-filters" x-show="more" x-cloak x-transition.opacity.duration.150ms
-           @class(['grid gap-3 rounded-surface border border-neutral-200 bg-white p-4 shadow-e1 sm:grid-cols-2 lg:grid-cols-5', 'hidden' => ! $advanced])
-           x-bind:class="more ? '' : 'hidden'">
+           class="grid gap-3 rounded-surface border border-neutral-200 bg-white p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <div>
-            <label for="board-date-from" class="mb-1 block text-caption font-medium text-secondary-dark">{{ __('recruitment-applicant.interviews.board.date_from') }}</label>
+            <label for="board-date-from" class="mb-1.5 block text-small font-semibold text-secondary-dark">{{ __('recruitment-applicant.interviews.board.date_from') }}</label>
             <input id="board-date-from" type="date" wire:model.live="dateFrom"
-                   class="min-h-11 w-full rounded-control border border-neutral-200 bg-white px-3 text-small text-neutral-900 sm:min-h-9 {{ $focusRing }}">
+                   class="h-10 w-full rounded-control border border-neutral-300 bg-white px-3 text-small text-neutral-900 {{ $focusRing }}">
         </div>
         <div>
-            <label for="board-date-to" class="mb-1 block text-caption font-medium text-secondary-dark">{{ __('recruitment-applicant.interviews.board.date_to') }}</label>
+            <label for="board-date-to" class="mb-1.5 block text-small font-semibold text-secondary-dark">{{ __('recruitment-applicant.interviews.board.date_to') }}</label>
             <input id="board-date-to" type="date" wire:model.live="dateTo"
-                   class="min-h-11 w-full rounded-control border border-neutral-200 bg-white px-3 text-small text-neutral-900 sm:min-h-9 {{ $focusRing }}">
+                   class="h-10 w-full rounded-control border border-neutral-300 bg-white px-3 text-small text-neutral-900 {{ $focusRing }}">
         </div>
         <div>
-            <label for="board-campaign" class="mb-1 block text-caption font-medium text-secondary-dark">{{ __('recruitment-applicant.interviews.board.campaign') }}</label>
-            <select id="board-campaign" wire:model.live="campaign" class="min-h-11 w-full rounded-control border border-neutral-200 bg-white ps-3 pe-8 text-small text-neutral-900 sm:min-h-9 {{ $focusRing }}">
+            <label for="board-campaign" class="mb-1.5 block text-small font-semibold text-secondary-dark">{{ __('recruitment-applicant.interviews.board.campaign') }}</label>
+            <select id="board-campaign" wire:model.live="campaign" class="h-10 w-full rounded-control border border-neutral-300 bg-white ps-3 pe-8 text-small font-medium text-neutral-900 {{ $focusRing }}">
                 <option value="">{{ __('recruitment-applicant.interviews.board.all_campaigns') }}</option>
                 @foreach ($campaigns as $campaignId => $campaignTitle)
                     <option value="{{ $campaignId }}">{{ $campaignTitle }}</option>
@@ -103,8 +87,8 @@
             </select>
         </div>
         <div>
-            <label for="board-applicant" class="mb-1 block text-caption font-medium text-secondary-dark">{{ __('recruitment-applicant.interviews.board.applicant') }}</label>
-            <select id="board-applicant" wire:model.live="applicant" class="min-h-11 w-full rounded-control border border-neutral-200 bg-white ps-3 pe-8 text-small text-neutral-900 sm:min-h-9 {{ $focusRing }}">
+            <label for="board-applicant" class="mb-1.5 block text-small font-semibold text-secondary-dark">{{ __('recruitment-applicant.interviews.board.applicant') }}</label>
+            <select id="board-applicant" wire:model.live="applicant" class="h-10 w-full rounded-control border border-neutral-300 bg-white ps-3 pe-8 text-small font-medium text-neutral-900 {{ $focusRing }}">
                 <option value="">{{ __('recruitment-applicant.interviews.board.all_applicants') }}</option>
                 @foreach ($applicants as $applicantId => $applicantName)
                     <option value="{{ $applicantId }}">{{ $applicantName }}</option>
@@ -112,8 +96,8 @@
             </select>
         </div>
         <div>
-            <label for="board-participant" class="mb-1 block text-caption font-medium text-secondary-dark">{{ __('recruitment-applicant.interviews.board.participant') }}</label>
-            <select id="board-participant" wire:model.live="participant" class="min-h-11 w-full rounded-control border border-neutral-200 bg-white ps-3 pe-8 text-small text-neutral-900 sm:min-h-9 {{ $focusRing }}">
+            <label for="board-participant" class="mb-1.5 block text-small font-semibold text-secondary-dark">{{ __('recruitment-applicant.interviews.board.participant') }}</label>
+            <select id="board-participant" wire:model.live="participant" class="h-10 w-full rounded-control border border-neutral-300 bg-white ps-3 pe-8 text-small font-medium text-neutral-900 {{ $focusRing }}">
                 <option value="">{{ __('recruitment-applicant.interviews.board.all_participants') }}</option>
                 @foreach ($participants as $participantId => $participantName)
                     <option value="{{ $participantId }}">{{ $participantName }}</option>
@@ -173,26 +157,7 @@
                         </p>
                     @else
                         <ol class="space-y-3">
-                            @php $previousDay = null; @endphp
                             @foreach ($data['items'] as $interview)
-                                {{-- Coming up reads as an agenda: one heading per day, so the cards carry only their times. --}}
-                                @if ($key === 'upcoming')
-                                    @php $day = $interview->scheduled_at->copy()->setTimezone($timezone); @endphp
-                                    @if ($day->toDateString() !== $previousDay)
-                                        @php $previousDay = $day->toDateString(); @endphp
-                                        <li wire:key="board-day-{{ $previousDay }}" class="pt-1 text-caption font-semibold uppercase tracking-wider text-secondary-medium">
-                                            @if ($previousDay === $today)
-                                                <span class="me-1 rounded-inset bg-neutral-900 px-1.5 py-0.5 text-caption font-semibold text-white">{{ __('recruitment-applicant.interviews.today') }}</span>
-                                                {{ $day->translatedFormat('l j F') }}
-                                            @elseif ($previousDay === $tomorrow)
-                                                {{ __('recruitment-applicant.interviews.board.tomorrow') }}
-                                            @else
-                                                {{ $day->translatedFormat('l j F') }}
-                                            @endif
-                                        </li>
-                                    @endif
-                                @endif
-
                                 @include('livewire.recruitment.interviews.partials.board-card', [
                                     'interview' => $interview,
                                     'lane' => $key,

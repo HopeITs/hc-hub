@@ -4,7 +4,7 @@
 
     $t = 'recruitment-applicant.interviews.';
     $focus = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
-    $panel = 'rounded-surface border border-neutral-200 bg-white p-5 shadow-e1';
+    $panel = 'rounded-surface border border-neutral-200 bg-white p-5';
     $eyebrow = 'text-caption font-semibold uppercase tracking-wider text-secondary-medium';
     $countPill = 'inline-flex min-w-6 items-center justify-center rounded-full border border-neutral-200 bg-white px-2 py-0.5 text-caption font-semibold tabular-nums text-secondary-dark';
     $showUrl = fn ($id) => route('recruitment.interviews.show', ['interviewId' => $id]);
@@ -30,16 +30,16 @@
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
             <livewire:layout.breadcrumbs :title="__($t.'title')" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __($t.'title')]]" />
-            <p class="text-body text-secondary-medium">{{ __($t.'index_hint') }}</p>
+            <p class="mt-1 text-body text-secondary-medium">{{ __($t.'index_hint') }}</p>
         </div>
 
         {{-- A view switch, not tabs: two pressed-state buttons, so assistive tech is not promised arrow-key tab behaviour. --}}
-        <div class="inline-flex rounded-control border border-neutral-200 bg-white p-1 text-body shadow-e1" role="group"
+        <div class="inline-flex rounded-control border border-neutral-200 bg-white p-1 text-body" role="group"
              aria-label="{{ __($t.'title') }}">
             @foreach (['board' => ['board_view', 'squares-2x2'], 'calendar' => ['calendar_view', 'calendar-days']] as $option => [$label, $icon])
                 <button type="button" wire:click="$set('view', '{{ $option }}')" aria-pressed="{{ $view === $option ? 'true' : 'false' }}"
                         class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-control px-4 transition duration-150 motion-reduce:transition-none sm:min-h-10 {{ $focus }}
-                               {{ $view === $option ? 'bg-selection font-semibold text-secondary-dark' : 'text-secondary-medium hover:text-secondary-dark' }}">
+                               {{ $view === $option ? 'bg-secondary-dark font-semibold text-white' : 'text-secondary-dark hover:bg-neutral-50' }}">
                     <flux:icon :name="$icon" variant="micro" class="size-4" aria-hidden="true" />
                     {{ __($t.$label) }}
                 </button>
@@ -65,7 +65,7 @@
                             {{ __($t.'board.now') }}
                         </span>
                     @else
-                        <time datetime="{{ $start->toIso8601String() }}" class="rounded-full bg-selection px-2.5 py-0.5 text-caption font-semibold tabular-nums text-secondary-dark">
+                        <time datetime="{{ $start->toIso8601String() }}" class="rounded-full border border-primary bg-white px-2.5 py-0.5 text-caption font-semibold tabular-nums text-primary">
                             {{ $start->copy()->locale(app()->getLocale())->diffForHumans(['parts' => 2, 'join' => true]) }}
                         </time>
                     @endif
@@ -76,8 +76,8 @@
                 <div class="my-4 flex gap-4">
                     {{-- A tear-off date tile. --}}
                     <time datetime="{{ $start->toDateString() }}" aria-hidden="true"
-                          class="w-16 shrink-0 self-start overflow-hidden rounded-control border border-neutral-200 text-center shadow-e1">
-                        <span class="block bg-neutral-900 px-1 py-0.5 text-caption font-semibold text-white">
+                          class="w-16 shrink-0 self-start overflow-hidden rounded-control border border-neutral-200 text-center">
+                        <span class="block bg-primary px-1 py-0.5 text-caption font-semibold text-white">
                             {{ $start->isToday() ? __($t.'today') : $start->translatedFormat('D') }}
                         </span>
                         <span class="block pt-1 text-h3 font-bold tabular-nums text-neutral-900">{{ $start->day }}</span>
@@ -105,7 +105,7 @@
                                 <dd>
                                     <span class="sr-only">{{ $start->translatedFormat('l j F Y') }}</span>
                                     <time datetime="{{ $start->toIso8601String() }}" class="font-semibold tabular-nums">{{ $start->format('H:i') }}</time>@if ($end)&ndash;<time datetime="{{ $end->toIso8601String() }}" class="font-semibold tabular-nums">{{ $end->format('H:i') }}</time>@endif
-                                    <span class="ms-1 text-caption text-secondary-medium">{{ __($t.'times_in', ['timezone' => $next->timezone ?: $timezone]) }}</span>
+                                    <span class="mt-1 block text-caption text-secondary-medium">{{ __($t.'times_in', ['timezone' => $next->timezone ?: $timezone]) }}</span>
                                 </dd>
                             </div>
                             <div class="flex items-start gap-2">
@@ -129,7 +129,7 @@
 
                         @if ($nextMeetingUrl)
                             <a href="{{ $nextMeetingUrl }}" target="_blank" rel="noopener noreferrer"
-                               class="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-control bg-neutral-900 px-3 text-small font-semibold text-white shadow-e1 transition duration-150 hover:bg-neutral-800 active:scale-[0.98] motion-reduce:transition-none sm:min-h-9 {{ $focus }}">
+                               class="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-control bg-primary px-3 text-small font-semibold text-white transition duration-150 hover:bg-primary-hover active:scale-[0.98] motion-reduce:transition-none sm:min-h-9 {{ $focus }}">
                                 <flux:icon.video-camera variant="micro" class="size-3.5" aria-hidden="true" />
                                 {{ __($t.'join_meeting') }}
                                 <span class="sr-only">{{ __($t.'new_tab') }}</span>
@@ -156,7 +156,7 @@
                         @endif
                     </div>
                     <a href="{{ $showUrl($next->id) }}" wire:navigate
-                       class="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-control text-small font-semibold text-secondary-dark hover:text-neutral-900 sm:min-h-9 {{ $focus }}">
+                       class="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-control text-small font-semibold text-primary hover:underline sm:min-h-9 {{ $focus }}">
                         {{ __($t.'board.open') }}
                         <flux:icon.arrow-right variant="micro" class="size-3.5 rtl:rotate-180" aria-hidden="true" />
                     </a>
