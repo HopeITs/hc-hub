@@ -13,7 +13,8 @@
 @endphp
 <div x-data="{ lane: $wire.entangle('lane'), thread: null }" class="space-y-4">
     {{-- Filters. Each one narrows every lane at once; none of them widens what the user may see. --}}
-    <div class="flex flex-wrap items-center gap-2 rounded-surface border border-neutral-200 bg-white p-2 shadow-e1">
+    <div class="space-y-2 rounded-surface border border-neutral-200 bg-white p-2 shadow-e1">
+      <div class="flex flex-wrap items-center gap-2">
         <div class="relative min-w-48 flex-1">
             <label for="board-search" class="sr-only">{{ __('recruitment-applicant.interviews.board.search') }}</label>
             <flux:icon.magnifying-glass variant="micro" class="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-secondary-medium" />
@@ -62,6 +63,47 @@
                 {{ __('recruitment-applicant.interviews.board.clear') }}
             </button>
         @endif
+      </div>
+
+      <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+        <div>
+            <label for="board-date-from" class="mb-1 block text-caption font-medium text-secondary-dark">{{ __('recruitment-applicant.interviews.board.date_from') }}</label>
+            <input id="board-date-from" type="date" wire:model.live="dateFrom"
+                   class="min-h-11 w-full rounded-control border border-neutral-200 bg-white px-3 text-small text-neutral-900 sm:min-h-9 {{ $focusRing }}">
+        </div>
+        <div>
+            <label for="board-date-to" class="mb-1 block text-caption font-medium text-secondary-dark">{{ __('recruitment-applicant.interviews.board.date_to') }}</label>
+            <input id="board-date-to" type="date" wire:model.live="dateTo"
+                   class="min-h-11 w-full rounded-control border border-neutral-200 bg-white px-3 text-small text-neutral-900 sm:min-h-9 {{ $focusRing }}">
+        </div>
+        <div>
+            <label for="board-campaign" class="mb-1 block text-caption font-medium text-secondary-dark">{{ __('recruitment-applicant.interviews.board.campaign') }}</label>
+            <select id="board-campaign" wire:model.live="campaign" class="min-h-11 w-full rounded-control border border-neutral-200 bg-white ps-3 pe-8 text-small text-neutral-900 sm:min-h-9 {{ $focusRing }}">
+                <option value="">{{ __('recruitment-applicant.interviews.board.all_campaigns') }}</option>
+                @foreach ($campaigns as $campaignId => $campaignTitle)
+                    <option value="{{ $campaignId }}">{{ $campaignTitle }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label for="board-applicant" class="mb-1 block text-caption font-medium text-secondary-dark">{{ __('recruitment-applicant.interviews.board.applicant') }}</label>
+            <select id="board-applicant" wire:model.live="applicant" class="min-h-11 w-full rounded-control border border-neutral-200 bg-white ps-3 pe-8 text-small text-neutral-900 sm:min-h-9 {{ $focusRing }}">
+                <option value="">{{ __('recruitment-applicant.interviews.board.all_applicants') }}</option>
+                @foreach ($applicants as $applicantId => $applicantName)
+                    <option value="{{ $applicantId }}">{{ $applicantName }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label for="board-participant" class="mb-1 block text-caption font-medium text-secondary-dark">{{ __('recruitment-applicant.interviews.board.participant') }}</label>
+            <select id="board-participant" wire:model.live="participant" class="min-h-11 w-full rounded-control border border-neutral-200 bg-white ps-3 pe-8 text-small text-neutral-900 sm:min-h-9 {{ $focusRing }}">
+                <option value="">{{ __('recruitment-applicant.interviews.board.all_participants') }}</option>
+                @foreach ($participants as $participantId => $participantName)
+                    <option value="{{ $participantId }}">{{ $participantName }}</option>
+                @endforeach
+            </select>
+        </div>
+      </div>
     </div>
 
     @if ($filtering && $allEmpty)
@@ -94,7 +136,7 @@
         </div>
 
         <div class="grid items-start gap-4 transition-opacity duration-150 motion-reduce:transition-none md:grid-cols-2 xl:grid-cols-4"
-             wire:loading.class="opacity-60" wire:target="search,type,vacancy,mine,clearFilters">
+             wire:loading.class="opacity-60" wire:target="search,type,vacancy,campaign,applicant,participant,dateFrom,dateTo,mine,clearFilters">
             @foreach ($lanes as $key => $data)
                 @php $remaining = $data['count'] - $data['items']->count(); @endphp
                 <section aria-labelledby="lane-{{ $key }}-title" wire:key="board-lane-{{ $key }}"

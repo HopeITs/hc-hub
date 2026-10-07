@@ -200,9 +200,23 @@ class RecruitmentInterviewBoardTest extends TestCase
         $board->set('mine', false)->set('vacancy', (string) $accountant->vacancy_id);
         $this->assertSame([$finance->id], $this->allKeys($board->viewData('lanes')));
 
+        $board->set('vacancy', '')->set('campaign', (string) $technical->application->campaign_id);
+        $this->assertSame([$technical->id], $this->allKeys($board->viewData('lanes')));
+
+        $board->set('campaign', '')->set('applicant', (string) $accountant->applicant_id);
+        $this->assertSame([$finance->id], $this->allKeys($board->viewData('lanes')));
+
+        $board->set('applicant', '')->set('participant', (string) $this->hr->id);
+        $this->assertSame([$hrOne->id], $this->allKeys($board->viewData('lanes')));
+
+        $board->set('participant', '')->set('dateFrom', '2026-10-09')->set('dateTo', '2026-10-09');
+        $this->assertSame([$technical->id], $this->allKeys($board->viewData('lanes')));
+
         $board->set('type', RecruitmentInterviewType::Technical)->set('search', 'Beta')->set('mine', true)
             ->call('clearFilters')
-            ->assertSet('type', '')->assertSet('search', '')->assertSet('vacancy', '')->assertSet('mine', false);
+            ->assertSet('type', '')->assertSet('search', '')->assertSet('vacancy', '')
+            ->assertSet('campaign', '')->assertSet('applicant', '')->assertSet('participant', '')
+            ->assertSet('dateFrom', '')->assertSet('dateTo', '')->assertSet('mine', false);
         $this->assertSame([$hrOne->id, $technical->id, $finance->id], $this->allKeys($board->viewData('lanes')));
 
         // Unknown values are ignored rather than trusted.
