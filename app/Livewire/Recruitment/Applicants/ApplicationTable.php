@@ -9,6 +9,7 @@ use App\Enums\RecruitmentEvaluationRecommendation;
 use App\Enums\RecruitmentIndicatorOutcome;
 use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplication;
+use App\Models\RecruitmentApplicationFlag;
 use App\Models\RecruitmentInterview;
 use App\Models\RecruitmentTag;
 use App\Services\HiringCampaignStateMachine;
@@ -49,6 +50,8 @@ class ApplicationTable extends LivewireTable
 
     public const BULK_REJECT = 'bulk_reject';
 
+    public const BULK_REVIEW_ACCESS = 'bulk_review_access';
+
     public string $sortColumn = 'submitted_at';
 
     public string $sortDirection = 'desc';
@@ -88,6 +91,7 @@ class ApplicationTable extends LivewireTable
         [$ability, $event, $panel] = match ($code) {
             self::BULK_TAG => ['bulkTag', 'recruitment-bulk-tag', BulkTags::class],
             self::BULK_REJECT => ['bulkReject', 'recruitment-bulk-reject', BulkReject::class],
+            self::BULK_REVIEW_ACCESS => ['bulkManageReviewParticipants', 'recruitment-bulk-review-access', BulkReviewParticipants::class],
             default => abort(403),
         };
 
@@ -137,6 +141,18 @@ class ApplicationTable extends LivewireTable
         $this->clearSelection();
     }
 
+    #[On('recruitment-flags-changed')]
+    public function refreshFlags(): void
+    {
+        $this->clearSelection();
+    }
+
+    #[On('recruitment-review-access-changed')]
+    public function refreshReviewAccess(): void
+    {
+        $this->clearSelection();
+    }
+
     #[On('recruitment-decisions-changed')]
     public function refreshDecisions(): void
     {
@@ -177,7 +193,7 @@ class ApplicationTable extends LivewireTable
         $query = RecruitmentApplication::query()
             ->visibleTo(auth()->user())
             ->addSelect(['has_previous_application' => $filters->earlierApplication(RecruitmentApplication::query())])
-            ->with(['applicant', 'campaign.vacancy.position', 'cvFiles', 'endorsements', 'tags'])
+            ->with(['applicant', 'campaign.vacancy.position', 'cvFiles', 'endorsements', 'tags', 'flags'])
             ->when(
                 $this->canViewEvaluationDashboard(),
                 fn (Builder $applications): Builder => $applications->with([
@@ -220,6 +236,9 @@ class ApplicationTable extends LivewireTable
                 ->keepSelection(),
             Action::make(__('recruitment-applicant.decisions.bulk_action'), fn () => null, self::BULK_REJECT)
                 ->canSee(Gate::allows('bulkReject', RecruitmentApplication::class))
+                ->keepSelection(),
+            Action::make(__('recruitment-applicant.profile_reviews.bulk_action'), fn () => null, self::BULK_REVIEW_ACCESS)
+                ->canSee(Gate::allows('bulkManageReviewParticipants', RecruitmentApplication::class))
                 ->keepSelection(),
         ];
     }
@@ -328,6 +347,12 @@ class ApplicationTable extends LivewireTable
                     ->implode('');
             })->asHtml(),
 
+            Column::make(__('recruitment-applicant.flags.title'), function (RecruitmentApplication $application): string {
+                return $application->flags
+                    ->map(fn (RecruitmentApplicationFlag $flag): string => '<span class="me-1 inline-block rounded-control px-2 py-0.5 text-xs font-semibold '.($flag->type === RecruitmentApplicationFlag::TYPE_RED ? 'border border-primary text-primary' : 'bg-neutral-100 text-secondary-dark').'">'.e($flag->typeLabel()).': '.e($flag->reasonLabel()).'</span>')
+                    ->implode('');
+            })->asHtml(),
+
             Column::make(__('recruitment-applicant.indicators.column'), function (RecruitmentApplication $application): string {
                 return $this->indicatorSummary($application);
             })->asHtml(),
@@ -374,6 +399,12 @@ class ApplicationTable extends LivewireTable
 
             SelectFilter::make(__('recruitment-applicant.tags.title'), fn (Builder $query, $value) => $filters->tag($query, $value), 'tag')
                 ->options($filters->tagOptions()),
+
+            SelectFilter::make(__('recruitment-applicant.flags.type'), fn (Builder $query, $value) => $filters->flagType($query, $value), 'flag_type')
+                ->options($filters->flagTypeOptions()),
+
+            SelectFilter::make(__('recruitment-applicant.flags.category'), fn (Builder $query, $value) => $filters->flagCategory($query, $value), 'flag_category')
+                ->options($filters->flagCategoryOptions()),
 
             SelectFilter::make(__('recruitment-applicant.cv'), fn (Builder $query, $value) => $filters->cv($query, $value), 'cv')
                 ->options($filters->cvOptions()),

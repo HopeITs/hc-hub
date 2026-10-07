@@ -96,6 +96,11 @@ class RecruitmentApplication extends Model
             ->withTimestamps();
     }
 
+    public function flags(): HasMany
+    {
+        return $this->hasMany(RecruitmentApplicationFlag::class, 'application_id');
+    }
+
     public function indicatorSnapshot(): HasOne
     {
         return $this->hasOne(RecruitmentApplicationIndicatorSnapshot::class, 'application_id');
@@ -156,7 +161,7 @@ class RecruitmentApplication extends Model
     {
         return $query->where(function (Builder $visible) use ($user): void {
             $visible->where(fn (Builder $scoped): Builder => app(RecruitmentScopeResolver::class)->scopeApplications($scoped, $user))
-                ->orWhereHas('currentReviewParticipants', fn (Builder $participants): Builder => $participants
+                ->orWhereHas('applicant.currentReviewParticipants', fn (Builder $participants): Builder => $participants
                     ->where('user_id', $user->getKey()));
         });
     }

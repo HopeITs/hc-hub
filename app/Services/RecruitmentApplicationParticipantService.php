@@ -39,9 +39,11 @@ class RecruitmentApplicationParticipantService
             ]);
         }
 
-        $participant = DB::transaction(function () use ($actor, $application, $user, $role): RecruitmentApplicationParticipant {
+        $applicant = $application->applicant()->firstOrFail();
+
+        $participant = DB::transaction(function () use ($actor, $application, $applicant, $user, $role): RecruitmentApplicationParticipant {
             $participant = RecruitmentApplicationParticipant::query()
-                ->where('application_id', $application->getKey())
+                ->where('applicant_id', $applicant->getKey())
                 ->where('user_id', $user->getKey())
                 ->lockForUpdate()
                 ->first();
@@ -49,6 +51,7 @@ class RecruitmentApplicationParticipantService
             if ($participant === null) {
                 return RecruitmentApplicationParticipant::query()->create([
                     'application_id' => $application->getKey(),
+                    'applicant_id' => $applicant->getKey(),
                     'user_id' => $user->getKey(),
                     'role' => $role,
                     'added_by_user_id' => $actor->getKey(),
@@ -80,9 +83,10 @@ class RecruitmentApplicationParticipantService
     {
         Gate::forUser($actor)->authorize('manageReviewParticipants', $application);
 
+        $applicant = $application->applicant()->firstOrFail();
         $participant = RecruitmentApplicationParticipant::query()
             ->current()
-            ->where('application_id', $application->getKey())
+            ->where('applicant_id', $applicant->getKey())
             ->findOrFail($participantId);
 
         $participant->forceFill([
@@ -97,5 +101,42 @@ class RecruitmentApplicationParticipantService
             properties: ['user_id' => (int) $participant->user_id, 'role' => $participant->role],
             logName: self::AUDIT_LOG,
         );
+    }
+
+    /** @param iterable<mixed> $applicationIds @return array{changed: int, skipped: int} */
+    public function bulkAssign(User $actor, iterable $applicationIds, mixed $userId, mixed $role): array
+    {
+        Gate::forUser($actor)->authorize('bulkManageReviewParticipants', RecruitmentApplication::class);
+
+        $ids = collect($applicationIds)
+            ->filter(fn ($id): bool => is_scalar($id) && filter_var($id, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) !== false)
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->take((int) config('recruitment.tags.bulk_limit', 500))
+            ->values();
+
+        if ($ids->isEmpty()) {
+            throw ValidationException::withMessages(['applicationIds' => __('recruitment-applicant.profile_reviews.bulk_empty')]);
+        }
+
+        $userId = filter_var($userId, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        if ($userId === false) {
+            throw ValidationException::withMessages(['bulkParticipantId' => __('recruitment-applicant.profile_reviews.errors.user_required')]);
+        }
+
+        if (! in_array($role, RecruitmentApplicationParticipant::roles(), true)) {
+            throw ValidationException::withMessages(['bulkParticipantRole' => __('recruitment-applicant.profile_reviews.errors.role_required')]);
+        }
+
+        $visible = RecruitmentApplication::query()
+            ->visibleTo($actor)
+            ->whereKey($ids)
+            ->get();
+
+        foreach ($visible as $application) {
+            $this->assign($actor, $application, (int) $userId, $role);
+        }
+
+        return ['changed' => $visible->count(), 'skipped' => $ids->count() - $visible->count()];
     }
 }

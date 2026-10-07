@@ -22,9 +22,7 @@ class RecruitmentApplicantPolicy
             return true;
         }
 
-        return $applicant->applications()
-            ->whereHas('currentReviewParticipants', fn ($participants) => $participants->where('user_id', $user->getKey()))
-            ->exists();
+        return $applicant->currentReviewParticipants()->where('user_id', $user->getKey())->exists();
     }
 
     /**

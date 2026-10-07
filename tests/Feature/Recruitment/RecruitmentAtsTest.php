@@ -7,6 +7,7 @@ use App\Enums\RecruitmentEvaluationRecommendation as Recommendation;
 use App\Enums\RecruitmentFileScanStatus;
 use App\Enums\RecruitmentIndicatorOutcome as Outcome;
 use App\Enums\RecruitmentInterviewStatus;
+use App\Livewire\Recruitment\Applicants\ApplicationFlags;
 use App\Livewire\Recruitment\Applicants\ApplicationTable;
 use App\Livewire\Recruitment\Applicants\ApplicationTags;
 use App\Livewire\Recruitment\Applicants\Show;
@@ -15,6 +16,7 @@ use App\Models\HiringCampaign;
 use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
 use App\Models\RecruitmentApplicationDecision;
+use App\Models\RecruitmentApplicationFlag;
 use App\Models\RecruitmentApplicationIndicatorSnapshot;
 use App\Models\RecruitmentApplicationTag;
 use App\Models\RecruitmentIndicatorCriteriaVersion;
@@ -26,6 +28,7 @@ use App\Models\RecruitmentTag;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\RecruitmentApplicationFilters;
+use App\Services\RecruitmentApplicationFlagService;
 use App\Services\RecruitmentApplicationFormService;
 use App\Services\RecruitmentMatchingIndicators;
 use App\Services\RecruitmentTagService;
@@ -236,6 +239,34 @@ class RecruitmentAtsTest extends TestCase
             'tag_id' => $tag->id,
             'created_by_user_id' => $manager->id,
         ]);
+    }
+
+    public function test_structured_flags_capture_category_reason_note_and_can_be_filtered(): void
+    {
+        $campaign = $this->makeCampaignIn($this->homs);
+        $application = $this->applyTo($campaign, $this->makeApplicant('Structured Farah'));
+        $hr = $this->hr($this->homs);
+        $flags = app(RecruitmentApplicationFlagService::class);
+
+        $red = $flags->create($hr, $application, RecruitmentApplicationFlag::TYPE_RED, 'ethics', 'concern', 'Needs an HR follow-up before progressing.');
+        $green = $flags->create($hr, $application, RecruitmentApplicationFlag::TYPE_GREEN, 'experience', 'relevant', null);
+
+        $this->assertSame(['ethics', 'concern', 'Needs an HR follow-up before progressing.'], [$red->category, $red->reason, $red->note]);
+        $this->assertSame(__('recruitment-applicant.flags.types.red'), $red->typeLabel());
+        $this->assertSame(__('recruitment-applicant.flags.types.green'), $green->typeLabel());
+        $this->assertSame([$application->id], app(RecruitmentApplicationFilters::class)->query($hr, ['flag_type' => 'red'])->pluck('id')->all());
+        $this->assertSame([$application->id], app(RecruitmentApplicationFilters::class)->query($hr, ['flag_category' => 'ethics'])->pluck('id')->all());
+
+        $this->actingAs($hr);
+        Livewire::test(ApplicationFlags::class, ['applicationId' => $application->id])
+            ->assertSee(__('recruitment-applicant.flags.types.red'))
+            ->assertSee(__('recruitment-applicant.flags.categories.ethics'))
+            ->assertSee('Needs an HR follow-up before progressing.')
+            ->call('discardFlag', $red->id)
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseMissing('recruitment_application_flags', ['id' => $red->id]);
+        $this->assertDatabaseHas('recruitment_application_flags', ['id' => $green->id, 'type' => RecruitmentApplicationFlag::TYPE_GREEN]);
     }
 
     public function test_bulk_tagging_refuses_an_oversized_or_empty_selection(): void

@@ -10,6 +10,7 @@ use App\Models\HiringCampaign;
 use App\Models\RecruitmentApplicant;
 use App\Models\RecruitmentApplicantFile;
 use App\Models\RecruitmentApplication;
+use App\Models\RecruitmentApplicationFlag;
 use App\Models\RecruitmentRequest;
 use App\Models\RecruitmentTag;
 use App\Models\User;
@@ -56,6 +57,8 @@ class RecruitmentApplicationFilters
         $this->status($query, $filters['status'] ?? null);
         $this->city($query, $filters['city'] ?? null);
         $this->tag($query, $filters['tag'] ?? null);
+        $this->flagType($query, $filters['flag_type'] ?? null);
+        $this->flagCategory($query, $filters['flag_category'] ?? null);
         $this->source($query, $filters['source'] ?? null);
         $this->cv($query, $filters['cv'] ?? null);
         $this->previousApplicant($query, $filters['previous'] ?? null);
@@ -118,6 +121,30 @@ class RecruitmentApplicationFilters
             ->whereNull('recruitment_tags.deleted_at')
             ->whereIn('recruitment_application_tags.tag_id', $ids)
             ->select('recruitment_application_tags.application_id'));
+    }
+
+    public function flagType(Builder $query, mixed $value): Builder
+    {
+        if (! is_string($value) || ! in_array($value, RecruitmentApplicationFlag::types(), true)) {
+            return $query;
+        }
+
+        return $query->whereExists(RecruitmentApplicationFlag::query()
+            ->select('id')
+            ->whereColumn('application_id', $query->qualifyColumn('id'))
+            ->where('type', $value));
+    }
+
+    public function flagCategory(Builder $query, mixed $value): Builder
+    {
+        if (! is_string($value) || ! array_key_exists($value, RecruitmentApplicationFlag::reasons())) {
+            return $query;
+        }
+
+        return $query->whereExists(RecruitmentApplicationFlag::query()
+            ->select('id')
+            ->whereColumn('application_id', $query->qualifyColumn('id'))
+            ->where('category', $value));
     }
 
     public function source(Builder $query, mixed $value): Builder
@@ -280,6 +307,22 @@ class RecruitmentApplicationFilters
     public function tagOptions(): array
     {
         return RecruitmentTag::query()->orderBy('name')->pluck('name', 'id')->all();
+    }
+
+    /** @return array<string, string> */
+    public function flagTypeOptions(): array
+    {
+        return collect(RecruitmentApplicationFlag::types())
+            ->mapWithKeys(fn (string $type): array => [$type => __('recruitment-applicant.flags.types.'.$type)])
+            ->all();
+    }
+
+    /** @return array<string, string> */
+    public function flagCategoryOptions(): array
+    {
+        return collect(array_keys(RecruitmentApplicationFlag::reasons()))
+            ->mapWithKeys(fn (string $category): array => [$category => __('recruitment-applicant.flags.categories.'.$category)])
+            ->all();
     }
 
     /** @return array<string, string> */

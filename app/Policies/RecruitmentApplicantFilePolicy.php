@@ -22,8 +22,8 @@ class RecruitmentApplicantFilePolicy
      */
     public function download(User $user, RecruitmentApplicantFile $file): Response
     {
-        $isAssigned = $file->application_id !== null
-            && $file->application?->currentReviewParticipants()->where('user_id', $user->getKey())->exists();
+        $isAssigned = $file->application?->applicant?->currentReviewParticipants()
+            ->where('user_id', $user->getKey())->exists() ?? false;
 
         if (! $user->hasActivePermission('recruitment-applicants.download-cv') && ! $isAssigned) {
             return Response::deny(code: 'missing_permission');

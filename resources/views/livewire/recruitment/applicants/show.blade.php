@@ -113,6 +113,8 @@
         @endif
     </nav>
 
+    <livewire:recruitment.applicants.applicant-profile-access :applicant-id="$applicant->id" />
+
     @if ($applications->count() > 1)
         <nav aria-label="{{ __('recruitment-applicant.profile.applications_navigation') }}" class="flex flex-wrap gap-2">
             @foreach ($applications as $application)
@@ -171,6 +173,8 @@
                 </summary>
 
                 <div class="mt-5 border-t border-neutral-200 pt-5">
+                <livewire:recruitment.applicants.application-review-panel :application-id="$application->id" :show-access="false" :key="'application-reviews-'.$application->id" />
+
                 <div class="grid gap-4 xl:grid-cols-2">
                     <section class="rounded-control border border-neutral-200 bg-white p-4">
                         <h4 class="font-semibold">{{ __('recruitment-applicant.profile.documents') }}</h4>
@@ -240,11 +244,10 @@
                     @endif
                 </section>
 
-                <livewire:recruitment.applicants.application-review-panel :application-id="$application->id" :key="'application-reviews-'.$application->id" />
-
                 @unless ($isDelegated)
                 <div class="mt-4 rounded-control border border-neutral-200 bg-white p-4">
                     <livewire:recruitment.applicants.application-tags :application-id="$application->id" :key="'tags-'.$application->id" />
+                    <livewire:recruitment.applicants.application-flags :application-id="$application->id" :key="'flags-'.$application->id" />
                 </div>
                 @endunless
 

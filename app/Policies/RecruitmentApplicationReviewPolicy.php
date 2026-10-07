@@ -11,10 +11,10 @@ class RecruitmentApplicationReviewPolicy
 {
     public function submit(User $user, RecruitmentApplication $application): bool
     {
-        return $application->currentReviewParticipants()
+        return $application->applicant?->currentReviewParticipants()
             ->where('user_id', $user->getKey())
             ->where('role', RecruitmentApplicationParticipant::ROLE_REVIEWER)
-            ->exists();
+            ->exists() ?? false;
     }
 
     public function view(User $user, RecruitmentApplicationReview $review): bool

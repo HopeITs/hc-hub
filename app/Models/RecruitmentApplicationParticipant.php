@@ -25,6 +25,11 @@ class RecruitmentApplicationParticipant extends Model
         return $this->belongsTo(RecruitmentApplication::class, 'application_id');
     }
 
+    public function applicant(): BelongsTo
+    {
+        return $this->belongsTo(RecruitmentApplicant::class, 'applicant_id');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

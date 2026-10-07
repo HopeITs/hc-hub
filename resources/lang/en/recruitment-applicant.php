@@ -393,6 +393,31 @@ return [
         'not_deleted' => 'That tag is not deleted.',
     ],
 
+    'flags' => [
+        'title' => 'Applicant assessment flags',
+        'hint' => 'Use structured observations for hiring discussions. Flags do not change the application status.',
+        'type' => 'Flag type',
+        'category' => 'Category',
+        'reason' => 'Reason',
+        'note' => 'Internal note (optional)',
+        'add' => 'Add flag',
+        'none' => 'No assessment flags yet.',
+        'discard' => 'Remove',
+        'discard_confirm' => 'Remove this assessment flag?',
+        'invalid' => 'Choose a valid flag option.',
+        'note_length' => 'The internal note must not exceed 1,000 characters.',
+        'types' => ['green' => 'Green flag', 'red' => 'Red flag'],
+        'categories' => [
+            'technical' => 'Technical skills', 'ethics' => 'Ethics / integrity', 'communication' => 'Communication',
+            'reliability' => 'Reliability', 'experience' => 'Experience', 'eligibility' => 'Eligibility',
+        ],
+        'reasons' => [
+            'strong' => 'Strong', 'below_requirement' => 'Below requirement', 'integrity' => 'Positive integrity signal',
+            'concern' => 'Concern identified', 'weak' => 'Needs improvement', 'dependable' => 'Dependable',
+            'relevant' => 'Relevant experience', 'insufficient' => 'Insufficient experience', 'verified' => 'Verified', 'issue' => 'Eligibility issue',
+        ],
+    ],
+
     'indicators' => [
         'title' => 'Matching indicators',
         'column' => 'Indicators',
@@ -1095,7 +1120,7 @@ return [
 
     'profile_reviews' => [
         'title' => 'Profile access and reviews',
-        'hint' => 'Give named staff access to this application as a viewer or reviewer.',
+        'hint' => 'Give named staff access to this applicant profile and all of its applications as a viewer or reviewer.',
         'person' => 'Person',
         'access' => 'Access level',
         'roles' => [
@@ -1103,6 +1128,11 @@ return [
             'viewer' => 'View only',
         ],
         'add' => 'Add person',
+        'bulk_action' => 'Grant profile access',
+        'bulk_title' => 'Grant access to selected applicants',
+        'bulk_selected' => '{1} 1 applicant selected|[2,*] :count applicants selected',
+        'bulk_apply' => 'Grant access',
+        'bulk_done' => 'Access granted to :changed applicant(s); :skipped outside your scope.',
         'remove' => 'Remove access',
         'remove_confirm' => 'Remove this person’s access to the application?',
         'no_participants' => 'No additional people have access.',

@@ -25,6 +25,8 @@ class ApplicationReviewPanel extends Component
 
     public string $newParticipantRole = RecruitmentApplicationParticipant::ROLE_REVIEWER;
 
+    public bool $showAccess = true;
+
     #[Locked]
     public ?int $expectedVersion = null;
 
@@ -36,9 +38,10 @@ class ApplicationReviewPanel extends Component
 
     public string $notes = '';
 
-    public function mount(int $applicationId): void
+    public function mount(int $applicationId, bool $showAccess = true): void
     {
         $this->applicationId = $applicationId;
+        $this->showAccess = $showAccess;
         $this->resolveApplication();
         $this->loadOwnReview();
     }
@@ -110,11 +113,11 @@ class ApplicationReviewPanel extends Component
         $application = $this->resolveApplication();
         $user = auth()->user();
         $canManage = Gate::allows('manageReviewParticipants', $application);
-        $ownParticipant = $application->currentReviewParticipants()
+        $ownParticipant = $application->applicant?->currentReviewParticipants()
             ->where('user_id', $user->getKey())
             ->first();
 
-        $participants = $application->currentReviewParticipants()
+        $participants = $application->applicant?->currentReviewParticipants()
             ->with('user.profile')
             ->oldest('id')
             ->get();
@@ -125,14 +128,14 @@ class ApplicationReviewPanel extends Component
             'canManage' => $canManage,
             'canReview' => $ownParticipant?->role === RecruitmentApplicationParticipant::ROLE_REVIEWER,
             'ownParticipant' => $ownParticipant,
-            'participants' => $participants,
+            'participants' => $participants ?? collect(),
             'reviews' => $canManage
                 ? $application->profileReviews()->with('reviewer.profile')->latest('updated_at')->get()
                 : $application->profileReviews()->where('reviewer_user_id', $user->getKey())->with('reviewer.profile')->get(),
             'candidates' => $canManage ? User::query()
                 ->whereHas('profile', fn ($profile) => $profile->where('is_active', true))
                 ->when($applicantEmployeeId !== null, fn ($candidates) => $candidates->where('employee_id', '!=', $applicantEmployeeId))
-                ->whereKeyNot($participants->pluck('user_id'))
+                ->whereKeyNot(($participants ?? collect())->pluck('user_id'))
                 ->with('profile')
                 ->get()
                 ->sortBy(fn (User $candidate) => $candidate->profile?->name)

@@ -141,6 +141,8 @@
 
     <livewire:recruitment.applicants.bulk-tags />
 
+    <livewire:recruitment.applicants.bulk-review-participants />
+
     <livewire:recruitment.applicants.bulk-reject />
 
     <livewire:recruitment.applicants.application-table

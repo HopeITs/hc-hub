@@ -16,7 +16,7 @@ class RecruitmentApplicationPolicy
     {
         return ($user->hasActivePermission('recruitment-applicants.view')
                 && $this->scopes->canAccessApplication($user, $application))
-            || $application->currentReviewParticipants()->where('user_id', $user->getKey())->exists();
+            || $application->applicant?->currentReviewParticipants()->where('user_id', $user->getKey())->exists();
     }
 
     /** Assigning access remains an HR action inside the application's normal scope. */
@@ -24,6 +24,12 @@ class RecruitmentApplicationPolicy
     {
         return $user->hasActivePermission('recruitment-applicants.manage')
             && $this->scopes->canAccessApplication($user, $application);
+    }
+
+    public function bulkManageReviewParticipants(User $user): bool
+    {
+        return $user->hasActivePermission('recruitment-applicants.manage')
+            && $user->hasActivePermission('recruitment-applicants.view');
     }
 
     /** Its own permission: reading an application never implies deciding it. */

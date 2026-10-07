@@ -6,15 +6,15 @@
 <section class="mt-4 rounded-control border border-neutral-200 bg-white p-4">
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div>
-            <h4 class="font-semibold">{{ __('recruitment-applicant.profile_reviews.title') }}</h4>
-            <p class="mt-1 text-sm text-secondary-medium">{{ __('recruitment-applicant.profile_reviews.hint') }}</p>
+            <h4 class="font-semibold">{{ __($showAccess ? 'recruitment-applicant.profile_reviews.title' : 'recruitment-applicant.profile_reviews.my_review') }}</h4>
+            <p class="mt-1 text-sm text-secondary-medium">{{ __($showAccess ? 'recruitment-applicant.profile_reviews.hint' : 'recruitment-applicant.profile_reviews.advisory') }}</p>
         </div>
         @if ($ownParticipant)
             <x-recruitment.pill>{{ __('recruitment-applicant.profile_reviews.roles.'.$ownParticipant->role) }}</x-recruitment.pill>
         @endif
     </div>
 
-    @if ($canManage)
+    @if ($showAccess && $canManage)
         <div class="mt-4 grid items-end gap-3 md:grid-cols-[1fr_12rem_auto]">
             <div>
                 <x-forms.input-label for="application-review-participant-{{ $application->id }}" :value="__('recruitment-applicant.profile_reviews.person')" />
