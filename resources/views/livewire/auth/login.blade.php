@@ -62,7 +62,7 @@
                     {{ __('auth.remember-me') }}
                     </x-forms.checkbox-input>
 
-                    @if (request()->has('password.request'))
+                    @if (Route::has('password.request'))
                         <a href="{{ route('password.request') }}" class="text-primary hover:underline">
                             {{ __('auth.forgot-password') }}
                         </a>
