@@ -23,7 +23,7 @@
                 </div>
                 <div>
                     <x-forms.input-label for="bulkParticipantRole" required>{{ __('recruitment-applicant.profile_reviews.access') }}</x-forms.input-label>
-                    <select id="bulkParticipantRole" wire:model="role" class="mt-1 w-full rounded-control border-neutral-300">
+                    <select id="bulkParticipantRole" wire:model="role" class="h-[37.6px] w-full rounded-control border-neutral-300 py-0 text-sm shadow-e1">
                         @foreach (\App\Models\RecruitmentApplicationParticipant::roles() as $option)
                             <option value="{{ $option }}">{{ __('recruitment-applicant.profile_reviews.roles.'.$option) }}</option>
                         @endforeach

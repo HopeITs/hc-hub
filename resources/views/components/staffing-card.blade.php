@@ -166,13 +166,14 @@
          cut in half. Nothing is rendered at all when there is nothing to start —
          a disabled control that will not say why is worse than no control. --}}
     @if ($available->isNotEmpty())
+        <div class="mx-auto {{ $isStaff ? ($compact ? 'w-24' : 'w-32') : 'w-full' }}">
         <button type="button" x-on:click="menu = ! menu" :aria-expanded="menu" data-no-pan
-                class="mt-2 flex w-full items-center justify-between gap-1 rounded-control bg-primary px-2 py-1.5 text-caption font-bold text-white transition hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
-            <span class="flex min-w-0 items-center gap-1">
+                class="mt-3 flex min-h-11 w-full items-center justify-between gap-2 rounded-control bg-primary px-2 py-2 text-caption font-semibold text-white shadow-e1 transition duration-150 motion-reduce:transition-none hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
+            <span class="flex min-w-0 flex-1 items-center justify-center gap-1.5">
                 <svg class="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
                 </svg>
-                <span class="truncate">{{ __('recruitment.team_staffing.open_request') }}</span>
+                <span class="whitespace-normal text-center leading-snug">{{ __('recruitment.team_staffing.open_request') }}</span>
             </span>
             <svg class="size-3 shrink-0 transition-transform duration-200" :class="menu ? 'rotate-180' : ''"
                  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
@@ -192,6 +193,7 @@
                 </li>
             @endforeach
         </ul>
+        </div>
     @endif
 
   </div>
