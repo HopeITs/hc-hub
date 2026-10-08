@@ -147,7 +147,10 @@ class TeamStaffing extends Component
         $positionIds = $positions->keys()->map(fn ($id): int => (int) $id)->values();
         $activeRequests = RecruitmentRequest::query()
             ->whereIn('target_position_id', $positionIds)
-            ->whereIn('status', RecruitmentPositionActionService::ACTIVE_REQUEST_STATUSES)
+            ->where(fn (\Illuminate\Database\Eloquent\Builder $query) => $query
+                ->whereIn('status', RecruitmentPositionActionService::ACTIVE_REQUEST_STATUSES)
+                ->orWhere(fn (\Illuminate\Database\Eloquent\Builder $fill) => $fill->blockingFill()))
+            ->with('vacancy')
             ->get()
             ->groupBy('target_position_id');
         $visibleRequests = RecruitmentRequest::query()

@@ -263,6 +263,15 @@ class TeamStaffingScreenTest extends TestCase
             ->assertSet('data.vacancy_id', $vacancy->id);
     }
 
+    public function test_an_applied_fill_request_with_an_unfilled_vacancy_hides_the_duplicate_action(): void
+    {
+        $position = $this->openPost('Hiring already underway', filled: 0, capacity: 1);
+        $vacancy = $this->opening($position, RecruitmentRequestType::FillVacancy);
+
+        Livewire::actingAs($this->manager)->test(TeamStaffing::class)
+            ->assertDontSee('vacancy_id='.$vacancy->id, escape: false);
+    }
+
     /** Two openings are a real choice, so the link stays silent about them. */
     public function test_two_open_vacancies_are_left_for_the_form_to_ask_about(): void
     {
@@ -290,12 +299,12 @@ class TeamStaffingScreenTest extends TestCase
      * unique, so two openings on one post need two requests behind them — which
      * is what really happens: each opening was asked for separately.
      */
-    private function opening(Position $position): Vacancy
+    private function opening(Position $position, int $type = RecruitmentRequestType::IncreaseHeadcount): Vacancy
     {
         $request = RecruitmentRequest::query()->create([
             'request_number' => 'HS-'.str_pad((string) (RecruitmentRequest::query()->count() + 1), 3, '0', STR_PAD_LEFT),
             'requester_user_id' => $this->manager->getKey(),
-            'request_type' => RecruitmentRequestType::FillVacancy,
+            'request_type' => $type,
             'mode' => \App\Enums\RecruitmentRequestMode::Normal,
             'status' => \App\Enums\RecruitmentRequestStatus::Applied,
             'scope_city_id' => $this->root->city_id,
