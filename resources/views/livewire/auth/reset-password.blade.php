@@ -52,7 +52,6 @@
                         {{ __('auth.password-text') }}
                     </p>
 
-                    <x-forms.input-error field="password" />
                 </div>
 
                 {{-- Confirm Password --}}
@@ -64,7 +63,6 @@
                         placeholder="••••••••"
                         autocomplete="new-password"
                     />
-                    <x-forms.input-error field="password_confirmation" />
                 </div>
 
                 {{-- Submit --}}

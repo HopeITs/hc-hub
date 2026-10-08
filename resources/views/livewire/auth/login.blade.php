@@ -54,7 +54,6 @@
                         autocomplete="current-password"
                     />
 
-                    <x-forms.input-error field="password" input-id="password" />
                 </div>
 
                 <div class="flex items-center justify-between text-body text-secondary-medium">
