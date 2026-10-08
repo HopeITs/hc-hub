@@ -11,6 +11,7 @@ use App\Models\RecruitmentInterviewParticipant;
 use App\Models\User;
 use App\Services\RecruitmentInterviewSchedulingService;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
@@ -74,6 +75,9 @@ class Form extends Component
 
     public bool $notifyCandidate = true;
 
+    #[Locked]
+    public bool $fromCalendar = false;
+
     public function mount(?int $applicationId = null, ?int $interviewId = null): void
     {
         $scheduling = app(RecruitmentInterviewSchedulingService::class);
@@ -109,6 +113,11 @@ class Form extends Component
         Gate::authorize('schedule', [RecruitmentInterview::class, $application]);
 
         $this->applicationId = $application->getKey();
+        $date = request()->query('date');
+        if (is_string($date) && Validator::make(['date' => $date], ['date' => ['date_format:Y-m-d', 'after_or_equal:today']])->passes()) {
+            $this->startsAt = $date.'T09:00';
+        }
+        $this->fromCalendar = request()->boolean('from_calendar');
         $this->duration = (int) config('recruitment.interviews.default_duration_minutes', 60);
         $assignments = $scheduling->requiredParticipantAssignments(auth()->user(), $application);
         $this->requiredParticipantOwners = collect($assignments)->mapWithKeys(fn (array $assignment, string $seat): array => [$seat => $assignment['owner_id']])->all();
@@ -184,6 +193,12 @@ class Form extends Component
             foreach ($exception->errors() as $field => $messages) {
                 $this->addError($field, $messages[0]);
             }
+
+            return;
+        }
+
+        if ($this->fromCalendar) {
+            $this->redirectRoute('recruitment.interviews.index', ['view' => 'calendar', 'month' => substr($this->startsAt, 0, 7)], navigate: true);
 
             return;
         }

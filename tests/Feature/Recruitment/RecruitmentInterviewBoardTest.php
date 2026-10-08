@@ -6,6 +6,8 @@ use App\Enums\RecruitmentApplicationStatus as AppStatus;
 use App\Enums\RecruitmentInterviewStatus as Status;
 use App\Enums\RecruitmentInterviewType;
 use App\Livewire\Recruitment\Interviews\Board;
+use App\Livewire\Recruitment\Interviews\Calendar;
+use App\Livewire\Recruitment\Interviews\Form;
 use App\Livewire\Recruitment\Interviews\Index;
 use App\Models\City;
 use App\Models\RecruitmentApplication;
@@ -303,6 +305,77 @@ class RecruitmentInterviewBoardTest extends TestCase
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
+
+    public function test_calendar_dates_open_a_scoped_campaign_and_application_chooser(): void
+    {
+        $application = $this->shortlisted('Calendar Candidate');
+        $submitted = $this->applyTo($application->campaign, $this->makeApplicant('Not shortlisted'));
+        $otherCity = $this->makeCity('DMS', '003');
+        $foreign = $this->applyTo($this->makeCampaignIn($otherCity), $this->makeApplicant('Outside scope'));
+        app(RecruitmentApplicationStatusService::class)->change($this->hr($otherCity), $foreign, AppStatus::Submitted, AppStatus::Shortlisted, null);
+
+        $calendar = Livewire::actingAs($this->hr)->test(Calendar::class)
+            ->call('startScheduling', '2026-10-08')
+            ->assertSet('selectedDate', '2026-10-08');
+
+        $this->assertSame([$application->id], $calendar->viewData('schedulingOptions')->modelKeys());
+        $calendar->set('campaignId', (string) $application->campaign_id)
+            ->set('applicationId', (string) $application->id)
+            ->assertSee('Calendar Candidate')
+            ->call('continueScheduling')
+            ->assertRedirect(route('recruitment.interviews.create', [
+                'applicationId' => $application->id, 'date' => '2026-10-08', 'from_calendar' => 1,
+            ]));
+        $this->assertDatabaseCount('recruitment_interviews', 0);
+    }
+
+    public function test_calendar_scheduling_rejects_past_dates_and_users_without_permission(): void
+    {
+        Livewire::actingAs($this->hr)->test(Calendar::class)
+            ->call('startScheduling', '2026-10-04')
+            ->assertHasErrors('date')
+            ->assertSet('selectedDate', null);
+
+        $reader = $this->without($this->hr, ['recruitment-applicants.schedule-interviews']);
+        Livewire::actingAs($reader)->test(Calendar::class)
+            ->assertDontSee(__('recruitment-applicant.interviews.schedule'))
+            ->call('startScheduling', '2026-10-08')
+            ->assertForbidden();
+    }
+
+    public function test_calendar_cannot_schedule_a_forged_application_or_mismatched_campaign(): void
+    {
+        $application = $this->shortlisted();
+        $another = $this->shortlisted('Another candidate');
+
+        Livewire::actingAs($this->hr)->test(Calendar::class)
+            ->call('startScheduling', '2026-10-08')
+            ->set('campaignId', (string) $another->campaign_id)
+            ->set('applicationId', (string) $application->id)
+            ->call('continueScheduling')
+            ->assertNotFound();
+        $this->assertDatabaseCount('recruitment_interviews', 0);
+    }
+
+    public function test_calendar_date_prefills_the_existing_form_and_saves_back_to_the_calendar(): void
+    {
+        $application = $this->shortlisted();
+
+        Livewire::actingAs($this->hr)->withQueryParams(['date' => '2026-10-08', 'from_calendar' => 1])
+            ->test(Form::class, ['applicationId' => $application->id])
+            ->assertSet('startsAt', '2026-10-08T09:00')
+            ->assertSet('fromCalendar', true)
+            ->set('startsAt', '2026-10-08T10:00')
+            ->set('locationValue', 'Meeting room')
+            ->set('notifyCandidate', false)
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertRedirect(route('recruitment.interviews.index', ['view' => 'calendar', 'month' => '2026-10']));
+
+        $this->assertDatabaseCount('recruitment_interviews', 1);
+        $calendar = Livewire::actingAs($this->hr)->test(Calendar::class, ['month' => '2026-10']);
+        $this->assertSame(1, collect($calendar->viewData('weeks'))->flatten(1)->sum(fn (array $day): int => $day['interviews']->count()));
+    }
 
     /** @param  array<string, array<int, int>>  $expected  lanes not named must be empty */
     private function assertLanes(array $expected): void
