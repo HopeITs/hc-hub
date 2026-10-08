@@ -13,7 +13,6 @@
             </a>
         @endif
     </div>
-    <p class="-mt-4 text-body text-secondary-medium">{{ __('recruitment-campaign.campaigns_hint') }}</p>
 
     <livewire:recruitment.campaigns.campaign-table />
 </div>

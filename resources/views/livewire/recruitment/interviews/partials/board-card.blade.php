@@ -172,7 +172,7 @@
         @if ($pending)
             <div class="mt-2.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                 <a href="{{ $showUrl }}#my-evaluation" wire:navigate
-                   class="relative z-10 inline-flex min-h-11 items-center gap-1.5 rounded-control bg-primary px-3 text-small font-semibold text-white transition duration-150 hover:bg-primary-hover motion-reduce:transition-none sm:min-h-8 {{ $focusRing }}">
+                   class="relative z-10 inline-flex py-2 items-center gap-1.5 rounded-control bg-primary px-3 text-body font-semibold text-white transition duration-150 hover:bg-primary-hover motion-reduce:transition-none {{ $focusRing }}">
                     {{ __('recruitment-applicant.interviews.board.evaluate') }}
                     <flux:icon.arrow-right variant="micro" class="size-3.5 rtl:rotate-180" />
                 </a>

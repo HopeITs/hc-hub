@@ -276,12 +276,12 @@
                         </div>
                         @if ($myEndorsement)
                             <button type="button" wire:click="retractEndorsement({{ $application->id }})"
-                                class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-sm font-semibold hover:bg-neutral-50">
+                                class="cursor-pointer rounded-control border border-neutral-300 px-4 py-2 text-body font-semibold hover:bg-neutral-50">
                                 {{ __('recruitment-applicant.endorsement.retract') }}
                             </button>
                         @else
                             <button type="button" wire:click="endorse({{ $application->id }})"
-                                class="cursor-pointer rounded-control border border-primary bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90">
+                                class="cursor-pointer rounded-control border border-primary bg-primary px-4 py-2 text-body font-semibold text-white hover:bg-primary/90">
                                 {{ __('recruitment-applicant.endorsement.endorse') }}
                             </button>
                         @endif
@@ -370,7 +370,7 @@
                                         : __('recruitment-applicant.decisions.actions.'.$target);
                                 @endphp
                                 <button type="button" id="decide-{{ $application->id }}-{{ $target }}" wire:key="decide-{{ $application->id }}-{{ $target }}" wire:click="beginStatusChange({{ $application->id }}, '{{ $target }}')"
-                                    class="cursor-pointer rounded-control border px-4 py-2 text-sm font-semibold {{ $style }}">
+                                    class="cursor-pointer rounded-control border px-4 py-2 text-body font-semibold {{ $style }}">
                                     {{ $label }}
                                 </button>
                             @endforeach

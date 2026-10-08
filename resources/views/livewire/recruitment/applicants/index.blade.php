@@ -7,7 +7,7 @@
     $panel = 'rounded-surface border border-neutral-200 bg-white shadow-e1';
     $eyebrow = 'text-caption font-semibold uppercase tracking-wider text-secondary-medium';
     // One chip recipe for every quick filter on the page: grey selection, never a red fill.
-    $chip = fn (bool $on) => 'inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-control border px-3 text-small transition duration-150 motion-reduce:transition-none sm:min-h-9 '.$focus.' '
+    $chip = fn (bool $on) => 'inline-flex py-2 cursor-pointer items-center gap-2 rounded-control border px-3 text-body transition duration-150 motion-reduce:transition-none '.$focus.' '
         .($on ? 'border-neutral-300 bg-selection font-semibold text-secondary-dark' : 'border-neutral-200 bg-white text-secondary-dark hover:border-neutral-300');
     $chipCount = fn (bool $on) => 'inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-caption font-semibold tabular-nums '
         .($on ? 'bg-white text-secondary-dark' : 'bg-neutral-100 text-secondary-medium');
@@ -32,7 +32,6 @@
             <livewire:layout.breadcrumbs :title="__('recruitment-applicant.applicants')" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __('recruitment-applicant.applicants')]]" />
             {{-- Where focus returns after a bulk action; the visible title is the breadcrumb above. --}}
             <span id="applicants-title" tabindex="-1" class="sr-only scroll-mt-24">{{ __('recruitment-applicant.applicants') }}</span>
-            <p class="text-body text-secondary-medium">{{ __('recruitment-applicant.applicants_hint') }}</p>
         </div>
 
         {{-- The campaign is the widest lens on the page, so it sits with the title rather than inside a filter card. --}}
@@ -107,7 +106,7 @@
                         </div>
                         @if ($activeEndorsementGroup !== null)
                             <button type="button" wire:click="filterByEndorsementGroup(null)"
-                                    class="inline-flex min-h-11 shrink-0 cursor-pointer items-center rounded-control px-2 text-small font-semibold text-secondary-dark hover:bg-selection sm:min-h-8 {{ $focus }}">
+                                    class="inline-flex py-2 shrink-0 cursor-pointer items-center rounded-control px-2 text-body font-semibold text-secondary-dark hover:bg-selection {{ $focus }}">
                                 {{ __('recruitment-applicant.endorsement.clear_group') }}
                             </button>
                         @endif
@@ -139,7 +138,7 @@
                         </div>
                         @if ($activeEvaluationRecommendation !== null)
                             <button type="button" wire:click="filterByEvaluationRecommendation(null)"
-                                    class="inline-flex min-h-11 shrink-0 cursor-pointer items-center rounded-control px-2 text-small font-semibold text-secondary-dark hover:bg-selection sm:min-h-8 {{ $focus }}">
+                                    class="inline-flex py-2 shrink-0 cursor-pointer items-center rounded-control px-2 text-body font-semibold text-secondary-dark hover:bg-selection {{ $focus }}">
                                 {{ __('recruitment-applicant.dashboard.clear') }}
                             </button>
                         @endif

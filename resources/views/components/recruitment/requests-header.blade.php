@@ -1,4 +1,4 @@
-@props(['title', 'description', 'current'])
+@props(['title', 'current'])
 
 {{--
     The head of both recruitment request tabs.
@@ -21,14 +21,13 @@
     <div class="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
         <div class="min-w-0">
             <livewire:layout.breadcrumbs :title="$title" :crumbs="$crumbs" />
-            <p class="max-w-2xl text-secondary-medium">{{ $description }}</p>
         </div>
 
         {{-- The primary action stays here on both tabs, so it never moves as
             the manager switches between the list and the chart. --}}
         <div class="flex flex-wrap items-center gap-3">
             @can('create', \App\Models\RecruitmentRequest::class)
-                <x-primary-button :href="route('recruitment.requests.create')" class="!h-7 !py-0 !text-sm !shadow-none">
+                <x-primary-button :href="route('recruitment.requests.create')">
                     {{ __('recruitment.create') }}
                 </x-primary-button>
             @endcan
@@ -38,7 +37,7 @@
                  for the HR who holds this permission the direct opening is not
                  the lesser errand. --}}
             @can('directOpen', \App\Models\RecruitmentRequest::class)
-                <x-primary-button :href="route('recruitment.requests.direct-open')" class="!h-7 !py-0 !text-sm !shadow-none">
+                <x-primary-button :href="route('recruitment.requests.direct-open')">
                     {{ __('recruitment.direct_open.title') }}
                 </x-primary-button>
             @endcan

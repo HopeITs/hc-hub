@@ -5,8 +5,7 @@
 <div class="space-y-6 pb-8">
     <x-recruitment.requests-header
         current="team"
-        :title="__('recruitment.team_staffing.title')"
-        :description="__('recruitment.team_staffing.description')" />
+        :title="__('recruitment.team_staffing.title')" />
 
     <section class="isolate overflow-hidden rounded-surface border border-neutral-200 bg-white shadow-e1">
         @if ($root)
@@ -27,7 +26,7 @@
                         @foreach (['staff', 'positions'] as $mode)
                             <button type="button" wire:click="setView('{{ $mode }}')"
                                     aria-pressed="{{ $view === $mode ? 'true' : 'false' }}"
-                                    class="rounded-inset px-3 py-1.5 text-small font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1
+                                    class="rounded-inset px-4 py-2 text-body font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1
                                            {{ $view === $mode
                                                ? 'bg-white text-secondary-dark shadow-e1'
                                                : 'text-secondary-medium hover:text-secondary-dark' }}">
@@ -41,7 +40,7 @@
                              omits cards without saying it is doing so. --}}
                         <button type="button" wire:click="toggleVacantOnly"
                                 aria-pressed="{{ $vacantOnly ? 'true' : 'false' }}"
-                                class="flex items-center gap-2 rounded-control border px-3 py-1.5 text-small font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1
+                                class="flex items-center gap-2 rounded-control border px-4 py-2 text-body font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1
                                        {{ $vacantOnly
                                            ? 'border-primary bg-primary text-white hover:bg-primary-hover'
                                            : 'border-neutral-200 bg-white text-secondary-medium hover:border-secondary-light hover:bg-secondary-soft hover:text-primary' }}">
@@ -55,7 +54,7 @@
                         </button>
 
                         <button type="button" wire:click="toggleDensity"
-                                class="rounded-control border border-neutral-200 bg-white px-3 py-1.5 text-small font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
+                                class="rounded-control border border-neutral-200 bg-white px-4 py-2 text-body font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
                             {{ $compact ? __('general.comfortable-view') : __('general.compact-view') }}
                         </button>
                     </div>
@@ -95,7 +94,7 @@
                         ] as $control)
                             <button type="button" wire:click="{{ $control['action'] }}"
                                     @if ($control['dispatch']) x-on:click="$dispatch('{{ $control['dispatch'] }}')" @endif
-                                    class="rounded-control border border-neutral-200 bg-white px-2.5 py-1.5 text-caption font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
+                                    class="rounded-control border border-neutral-200 bg-white px-4 py-2 text-body font-semibold text-secondary-medium transition hover:border-secondary-light hover:bg-secondary-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1">
                                 {{ $control['label'] }}
                             </button>
                         @endforeach

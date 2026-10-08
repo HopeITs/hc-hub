@@ -28,7 +28,7 @@
             @foreach (array_merge([''], RecruitmentInterviewType::values()) as $round)
                 <button type="button" wire:click="$set('type', '{{ $round }}')" aria-pressed="{{ $type === $round ? 'true' : 'false' }}"
                         @class([
-                            'inline-flex min-h-11 cursor-pointer items-center rounded-control px-3 text-small transition duration-150 motion-reduce:transition-none sm:min-h-9',
+                            'inline-flex py-2 cursor-pointer items-center rounded-control px-3 text-body transition duration-150 motion-reduce:transition-none',
                             $focusRing,
                             'bg-secondary-dark font-semibold text-white' => $type === $round,
                             'text-secondary-medium hover:text-secondary-dark' => $type !== $round,
@@ -39,7 +39,7 @@
         </div>
 
         @if ($canFilterMine)
-            <label class="inline-flex min-h-11 cursor-pointer items-center gap-2.5 rounded-control border border-neutral-200 bg-white px-3 text-small text-secondary-dark transition duration-150 hover:border-neutral-300 motion-reduce:transition-none has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary">
+            <label class="inline-flex py-2 cursor-pointer items-center gap-2.5 rounded-control border border-neutral-200 bg-white px-3 text-body text-secondary-dark transition duration-150 hover:border-neutral-300 motion-reduce:transition-none has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-primary">
                 <input type="checkbox" role="switch" wire:model.live="mine" class="peer sr-only">
                 <span aria-hidden="true" class="relative h-4.5 w-8 shrink-0 rounded-full bg-neutral-300 transition-colors duration-150 peer-checked:bg-neutral-900 motion-reduce:transition-none
                              after:absolute after:top-0.5 after:start-0.5 after:size-3.5 after:rounded-full after:bg-white after:shadow-e1 after:transition-all after:duration-150 peer-checked:after:start-4 motion-reduce:after:transition-none"></span>
@@ -48,7 +48,7 @@
         @endif
 
         <button type="button" x-on:click="more = ! more" x-bind:aria-expanded="more" aria-expanded="{{ $advanced ? 'true' : 'false' }}" aria-controls="board-more-filters"
-                class="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-control border border-neutral-200 bg-white px-3 text-small font-semibold text-secondary-dark transition duration-150 hover:border-neutral-300 motion-reduce:transition-none {{ $focusRing }}"
+                class="inline-flex py-2 cursor-pointer items-center justify-center gap-2 rounded-control border border-neutral-200 bg-white px-3 text-body font-semibold text-secondary-dark transition duration-150 hover:border-neutral-300 motion-reduce:transition-none {{ $focusRing }}"
                 x-bind:class="more ? 'border-primary text-primary' : 'bg-white'">
             <flux:icon.funnel variant="micro" class="size-4" aria-hidden="true" />
             {{ __('recruitment-applicant.interviews.board.more_filters') }}
@@ -59,7 +59,7 @@
 
         @if ($filtering)
             <button type="button" wire:click="clearFilters"
-                    class="inline-flex min-h-11 cursor-pointer items-center rounded-control px-3 text-small font-medium text-secondary-dark transition duration-150 hover:bg-selection motion-reduce:transition-none sm:min-h-9 {{ $focusRing }}">
+                    class="inline-flex py-2 cursor-pointer items-center rounded-control px-3 text-body font-medium text-secondary-dark transition duration-150 hover:bg-selection motion-reduce:transition-none {{ $focusRing }}">
                 {{ __('recruitment-applicant.interviews.board.clear') }}
             </button>
         @endif
@@ -112,7 +112,7 @@
         <div class="rounded-surface border border-neutral-200 bg-white p-6 text-center shadow-e1">
             <p class="text-body text-secondary-dark">{{ __('recruitment-applicant.interviews.board.no_match') }}</p>
             <button type="button" wire:click="clearFilters"
-                    class="mt-3 inline-flex min-h-11 cursor-pointer items-center rounded-control bg-neutral-100 px-3 text-small font-semibold text-neutral-900 transition duration-150 hover:bg-selection motion-reduce:transition-none sm:min-h-9 {{ $focusRing }}">
+                    class="mt-3 inline-flex py-2 cursor-pointer items-center rounded-control bg-neutral-100 px-3 text-body font-semibold text-neutral-900 transition duration-150 hover:bg-selection motion-reduce:transition-none {{ $focusRing }}">
                 {{ __('recruitment-applicant.interviews.board.clear') }}
             </button>
         </div>
@@ -173,7 +173,7 @@
 
                         @if ($remaining > 0)
                             <button type="button" wire:click="showMore('{{ $key }}')"
-                                    class="mt-2 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-1.5 rounded-control px-3 text-small font-medium text-secondary-dark transition duration-150 hover:bg-selection motion-reduce:transition-none sm:min-h-9 {{ $focusRing }}">
+                                    class="mt-2 inline-flex py-2 w-full cursor-pointer items-center justify-center gap-1.5 rounded-control px-3 text-body font-medium text-secondary-dark transition duration-150 hover:bg-selection motion-reduce:transition-none {{ $focusRing }}">
                                 {{ __('recruitment-applicant.interviews.board.show_more') }}
                                 <span class="tabular-nums text-secondary-medium">({{ $remaining }})</span>
                             </button>

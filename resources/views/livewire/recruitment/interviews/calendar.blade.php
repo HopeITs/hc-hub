@@ -17,7 +17,7 @@
                 <svg class="size-4 rtl:rotate-180" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m7.5 5 5 5-5 5"/></svg>
             </button>
             <button type="button" wire:click="thisMonth"
-                    class="ms-1 inline-flex min-h-11 cursor-pointer items-center rounded-control px-3 text-sm font-medium text-secondary-dark transition hover:bg-selection sm:min-h-9 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                    class="ms-1 inline-flex py-2 cursor-pointer items-center rounded-control px-3 text-body font-medium text-secondary-dark transition hover:bg-selection focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
                 {{ __('recruitment-applicant.interviews.today') }}
             </button>
         </div>

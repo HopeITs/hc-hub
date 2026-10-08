@@ -9,8 +9,7 @@
 <div class="space-y-6">
     <x-recruitment.requests-header
         current="requests"
-        :title="__('recruitment.requests')"
-        :description="__('recruitment.list_description')" />
+        :title="__('recruitment.requests')" />
 
     @if (count($views) > 1)
         {{-- Who the request belongs to, as count tiles. "Needs my review" is the only one that asks something of the viewer, so it alone gets a red dot when it is not empty. --}}

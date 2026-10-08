@@ -4,12 +4,12 @@
     <header class="flex flex-wrap items-start justify-between gap-4">
         <livewire:layout.breadcrumbs :title="$request->request_number" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __('recruitment.navigation_requests'), 'route' => 'recruitment.requests.index'], ['label' => $request->request_number]]" />
         <div class="flex flex-wrap items-center gap-3">
-            <span class="rounded-full bg-secondary-soft/60 px-4 py-2 text-sm font-semibold">{{ \App\Enums\RecruitmentRequestStatus::getLocalizedName($request->status)['value'] }}</span>
+            <span class="rounded-full bg-secondary-soft/60 px-4 py-2 text-body font-semibold">{{ \App\Enums\RecruitmentRequestStatus::getLocalizedName($request->status)['value'] }}</span>
             @can('update', $request)
-                <a class="rounded-control border border-secondary-light px-4 py-2 text-sm font-semibold hover:bg-secondary-soft/30" href="{{ route('recruitment.requests.edit', ['requestId' => $request->id]) }}">{{ __('recruitment.edit') }}</a>
+                <a class="rounded-control border border-secondary-light px-4 py-2 text-body font-semibold hover:bg-secondary-soft/30" href="{{ route('recruitment.requests.edit', ['requestId' => $request->id]) }}">{{ __('recruitment.edit') }}</a>
             @endcan
             @can('cancel', $request)
-                <button type="button" class="cursor-pointer rounded-control border border-secondary-light px-4 py-2 text-sm font-semibold hover:bg-secondary-soft/30" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'cancelRequest', message: @js(__('recruitment.confirm_cancel')), confirmLabel: @js(__('recruitment.cancel_request')), tone: 'danger' })">{{ __('recruitment.cancel_request') }}</button>
+                <button type="button" class="cursor-pointer rounded-control border border-secondary-light px-4 py-2 text-body font-semibold hover:bg-secondary-soft/30" x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'cancelRequest', message: @js(__('recruitment.confirm_cancel')), confirmLabel: @js(__('recruitment.cancel_request')), tone: 'danger' })">{{ __('recruitment.cancel_request') }}</button>
             @endcan
             @can('submit', $request)
                 {{-- Disabled while in flight so a double click cannot fire twice; the
@@ -18,7 +18,7 @@
             @endcan
             @if ($canCreateCampaign)
                 <a href="{{ route('recruitment.campaigns.create', ['vacancyId' => $request->vacancy->id]) }}" wire:navigate
-                    class="cursor-pointer rounded-control bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover">
+                    class="cursor-pointer rounded-control bg-primary px-4 py-2 text-body font-semibold text-white hover:bg-primary-hover">
                     {{ __('recruitment.campaign.create') }}
                 </a>
             @endif
@@ -44,13 +44,13 @@
                     </x-primary-button>
 
                     <button type="button"
-                        class="cursor-pointer rounded-control border border-secondary-light px-4 py-2 text-sm font-semibold hover:bg-secondary-soft/30"
+                        class="cursor-pointer rounded-control border border-secondary-light px-4 py-2 text-body font-semibold hover:bg-secondary-soft/30"
                         wire:click="askForChanges">
                         {{ __('recruitment.request_changes') }}
                     </button>
 
                     <button type="button"
-                        class="cursor-pointer rounded-control border border-primary/30 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5"
+                        class="cursor-pointer rounded-control border border-primary/30 px-4 py-2 text-body font-semibold text-primary hover:bg-primary/5"
                         wire:click="askToReject">
                         {{ __('recruitment.reject_action') }}
                     </button>
@@ -69,14 +69,14 @@
 
                 <div class="mt-4 flex flex-wrap gap-3">
                     <button type="button"
-                        class="cursor-pointer rounded-control bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
+                        class="cursor-pointer rounded-control bg-primary px-4 py-2 text-body font-semibold text-white hover:bg-primary-hover"
                         wire:loading.attr="disabled" wire:target="decide"
                         x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'decide', args: ['reject'], message: @js(__('recruitment.confirm_reject')), confirmLabel: @js(__('recruitment.reject_action')), tone: 'danger' })">
                         {{ __('recruitment.reject_action') }}
                     </button>
 
                     <button type="button"
-                        class="cursor-pointer rounded-control border border-secondary-light px-4 py-2 text-sm font-semibold hover:bg-secondary-soft/30"
+                        class="cursor-pointer rounded-control border border-secondary-light px-4 py-2 text-body font-semibold hover:bg-secondary-soft/30"
                         wire:click="cancelChangeRequest">
                         {{ __('recruitment.back_to_decisions') }}
                     </button>
@@ -112,7 +112,7 @@
                     </x-primary-button>
 
                     <button type="button"
-                        class="cursor-pointer rounded-control border border-secondary-light px-4 py-2 text-sm font-semibold hover:bg-secondary-soft/30"
+                        class="cursor-pointer rounded-control border border-secondary-light px-4 py-2 text-body font-semibold hover:bg-secondary-soft/30"
                         wire:click="cancelChangeRequest">
                         {{ __('recruitment.back_to_decisions') }}
                     </button>
@@ -148,7 +148,7 @@
             @if ($mayExecuteNow)
                 <div class="mt-4">
                     <button type="button"
-                        class="rounded-control border border-secondary-light bg-white px-4 py-2 text-sm font-semibold text-secondary-dark hover:bg-secondary-soft/60"
+                        class="rounded-control border border-secondary-light bg-white px-4 py-2 text-body font-semibold text-secondary-dark hover:bg-secondary-soft/60"
                         x-on:click="$dispatch('open-recruitment-confirmation', { scope: 'request-details', action: 'executeNow', message: @js(__('recruitment.confirm_execute_now')), confirmLabel: @js(__('recruitment.execute_now')) })">{{ __('recruitment.execute_now') }}</button>
                 </div>
             @endif

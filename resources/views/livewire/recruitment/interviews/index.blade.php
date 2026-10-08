@@ -30,7 +30,6 @@
     <div class="flex flex-wrap items-end justify-between gap-4">
         <div>
             <livewire:layout.breadcrumbs :title="__($t.'title')" :crumbs="[['label' => __('recruitment.navigation_section')], ['label' => __($t.'title')]]" />
-            <p class="mt-1 text-body text-secondary-medium">{{ __($t.'index_hint') }}</p>
         </div>
 
         {{-- A view switch, not tabs: two pressed-state buttons, so assistive tech is not promised arrow-key tab behaviour. --}}
@@ -38,7 +37,7 @@
              aria-label="{{ __($t.'title') }}">
             @foreach (['board' => ['board_view', 'squares-2x2'], 'calendar' => ['calendar_view', 'calendar-days']] as $option => [$label, $icon])
                 <button type="button" wire:click="$set('view', '{{ $option }}')" aria-pressed="{{ $view === $option ? 'true' : 'false' }}"
-                        class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-control px-4 transition duration-150 motion-reduce:transition-none sm:min-h-10 {{ $focus }}
+                        class="inline-flex py-2 text-body cursor-pointer items-center gap-2 rounded-control px-4 transition duration-150 motion-reduce:transition-none {{ $focus }}
                                {{ $view === $option ? 'bg-secondary-dark font-semibold text-white' : 'text-secondary-dark hover:bg-neutral-50' }}">
                     <flux:icon :name="$icon" variant="micro" class="size-4" aria-hidden="true" />
                     {{ __($t.$label) }}
@@ -129,7 +128,7 @@
 
                         @if ($nextMeetingUrl)
                             <a href="{{ $nextMeetingUrl }}" target="_blank" rel="noopener noreferrer"
-                               class="mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-control bg-primary px-3 text-small font-semibold text-white transition duration-150 hover:bg-primary-hover active:scale-[0.98] motion-reduce:transition-none sm:min-h-9 {{ $focus }}">
+                               class="mt-3 inline-flex py-2 items-center gap-1.5 rounded-control bg-primary px-3 text-body font-semibold text-white transition duration-150 hover:bg-primary-hover active:scale-[0.98] motion-reduce:transition-none {{ $focus }}">
                                 <flux:icon.video-camera variant="micro" class="size-3.5" aria-hidden="true" />
                                 {{ __($t.'join_meeting') }}
                                 <span class="sr-only">{{ __($t.'new_tab') }}</span>
@@ -156,7 +155,7 @@
                         @endif
                     </div>
                     <a href="{{ $showUrl($next->id) }}" wire:navigate
-                       class="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-control text-small font-semibold text-primary hover:underline sm:min-h-9 {{ $focus }}">
+                       class="inline-flex py-2 shrink-0 items-center gap-1 rounded-control text-body font-semibold text-primary hover:underline {{ $focus }}">
                         {{ __($t.'board.open') }}
                         <flux:icon.arrow-right variant="micro" class="size-3.5 rtl:rotate-180" aria-hidden="true" />
                     </a>
@@ -199,12 +198,12 @@
                             </div>
                             @if ($loop->first)
                                 <a href="{{ $evaluateUrl }}" wire:navigate
-                                   class="inline-flex min-h-11 shrink-0 items-center rounded-control bg-primary px-3 text-small font-semibold text-white shadow-e1 transition duration-150 hover:bg-primary-hover active:scale-[0.98] motion-reduce:transition-none sm:min-h-9 {{ $focus }}">
+                                   class="inline-flex py-2 shrink-0 items-center rounded-control bg-primary px-3 text-body font-semibold text-white shadow-e1 transition duration-150 hover:bg-primary-hover active:scale-[0.98] motion-reduce:transition-none {{ $focus }}">
                                     {{ __($t.'board.evaluate') }}<span class="sr-only">: {{ $name }}</span>
                                 </a>
                             @else
                                 <a href="{{ $evaluateUrl }}" wire:navigate
-                                   class="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-control px-1 text-small font-semibold text-secondary-dark hover:text-neutral-900 sm:min-h-9 {{ $focus }}">
+                                   class="inline-flex py-2 shrink-0 items-center gap-1 rounded-control px-1 text-body font-semibold text-secondary-dark hover:text-neutral-900 {{ $focus }}">
                                     {{ __($t.'board.evaluate') }}<span class="sr-only">: {{ $name }}</span>
                                     <flux:icon.arrow-right variant="micro" class="size-3.5 rtl:rotate-180" aria-hidden="true" />
                                 </a>

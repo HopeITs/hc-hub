@@ -2,7 +2,7 @@
     @if ($mayManage)
         @php
             $field = 'mt-1 block min-h-11 w-full rounded-control border border-neutral-300 bg-white px-3 text-body text-neutral-900 shadow-e1 focus:border-primary focus:ring-primary sm:min-h-10';
-            $quiet = 'inline-flex min-h-11 cursor-pointer items-center rounded-control px-3 text-small font-semibold transition duration-150 motion-reduce:transition-none sm:min-h-8 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
+            $quiet = 'inline-flex py-2 cursor-pointer items-center rounded-control px-3 text-body font-semibold transition duration-150 motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary';
         @endphp
         <details class="group rounded-surface border border-neutral-200 bg-white shadow-e1">
             <summary class="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-surface p-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
@@ -49,7 +49,7 @@
                         @endforeach
                     </select>
                 </div>
-                <x-primary-button type="submit" class="min-h-11 justify-center sm:min-h-10" wire:loading.attr="disabled" wire:target="create">{{ __('recruitment-applicant.tags.create') }}</x-primary-button>
+                <x-primary-button type="submit" wire:loading.attr="disabled" wire:target="create">{{ __('recruitment-applicant.tags.create') }}</x-primary-button>
             </form>
             <x-forms.input-error field="tagName" input-id="tagName" />
             <x-forms.input-error field="tagKind" input-id="tagKind" />
