@@ -93,42 +93,42 @@
 
                         @activepermission('recruitment-requests.view')
                             <x-layouts.app.sidebar.single-item :href="route('recruitment.requests.index')" :active="request()->routeIs('recruitment.requests.*')">
-                                <x-slot name="icon"><x-icons.clipboard-list class="size-5" /></x-slot>
+                                <x-slot name="icon"><x-icons.recruitment-request class="size-5" /></x-slot>
                                 {{ __('recruitment.navigation_requests') }}
                             </x-layouts.app.sidebar.single-item>
                         @endactivepermission
 
                         @if ($canSeeRecruitmentApprovals)
                             <x-layouts.app.sidebar.single-item :href="route('recruitment.approvals.pending')" :active="request()->routeIs('recruitment.approvals.*')">
-                                <x-slot name="icon"><x-icons.check class="size-5" /></x-slot>
+                                <x-slot name="icon"><x-icons.recruitment-approval class="size-5" /></x-slot>
                                 {{ __('recruitment.navigation_pending_approvals') }}
                             </x-layouts.app.sidebar.single-item>
                         @endif
 
                         @activepermission('recruitment-campaigns.view')
                             <x-layouts.app.sidebar.single-item :href="route('recruitment.campaigns.index')" :active="request()->routeIs('recruitment.campaigns.*')">
-                                <x-slot name="icon"><x-icons.newspaper class="size-5" /></x-slot>
+                                <x-slot name="icon"><x-icons.recruitment-campaign class="size-5" /></x-slot>
                                 {{ __('recruitment.navigation_campaigns') }}
                             </x-layouts.app.sidebar.single-item>
                         @endactivepermission
 
                         @if ($seesApplicants)
                             <x-layouts.app.sidebar.single-item :href="route('recruitment.applicants.index')" :active="request()->routeIs('recruitment.applicants.*')">
-                                <x-slot name="icon"><x-icons.users class="size-5" /></x-slot>
+                                <x-slot name="icon"><x-icons.recruitment-applicant class="size-5" /></x-slot>
                                 {{ __('recruitment.navigation_applicants') }}
                             </x-layouts.app.sidebar.single-item>
                         @endif
 
                         @activepermission('recruitment-indicators.manage')
                             <x-layouts.app.sidebar.single-item :href="route('recruitment.indicator-rules')" :active="request()->routeIs('recruitment.indicator-rules')">
-                                <x-slot name="icon"><x-icons.check class="size-5" /></x-slot>
+                                <x-slot name="icon"><x-icons.recruitment-rules class="size-5" /></x-slot>
                                 {{ __('recruitment-indicator-rules.navigation') }}
                             </x-layouts.app.sidebar.single-item>
                         @endactivepermission
 
                         @if ($seesInterviews)
                             <x-layouts.app.sidebar.single-item :href="route('recruitment.interviews.index')" :active="request()->routeIs('recruitment.interviews.*')">
-                                <x-slot name="icon"><x-icons.calendar class="size-5" /></x-slot>
+                                <x-slot name="icon"><x-icons.recruitment-interview class="size-5" /></x-slot>
                                 {{ __('recruitment-applicant.interviews.title') }}
                             </x-layouts.app.sidebar.single-item>
                         @endif
@@ -136,7 +136,7 @@
                         {{-- Task 9 (Team 2) --}}
                         @can('viewAny', \App\Models\RecruitmentJobOffer::class)
                             <x-layouts.app.sidebar.single-item :href="route('recruitment.offers.index')" :active="request()->routeIs('recruitment.offers.*')">
-                                <x-slot name="icon"><x-icons.clipboard-list class="size-5" /></x-slot>
+                                <x-slot name="icon"><x-icons.recruitment-offer class="size-5" /></x-slot>
                                 {{ __('recruitment-applicant.offers.title') }}
                             </x-layouts.app.sidebar.single-item>
                         @endcan
