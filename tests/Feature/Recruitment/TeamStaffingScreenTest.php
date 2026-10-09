@@ -143,13 +143,12 @@ class TeamStaffingScreenTest extends TestCase
     }
 
     /**
-     * Sibling posts flow: one wrapping row, never a fixed column count.
+     * Sibling posts stay on one reporting level, never a fixed column count.
      *
-     * Four posts sit side by side while the canvas is wide enough and fold onto
-     * the next line when it is not, so the count of columns is never in the
-     * markup. Managers come before the reports who manage nobody.
+     * A wide reporting level scrolls horizontally instead of wrapping into what
+     * looks like a different level. Managers come before individual contributors.
      */
-    public function test_sibling_posts_wrap_by_available_width_in_both_views(): void
+    public function test_sibling_posts_stay_on_one_reporting_level_in_both_views(): void
     {
         $branch = $this->openPost('Branch report', filled: 0, capacity: 1);
         $this->openPost('Leaf report', filled: 0, capacity: 1);
@@ -160,7 +159,7 @@ class TeamStaffingScreenTest extends TestCase
         foreach (['positions', 'staff'] as $view) {
             $html = $this->chart($view);
 
-            $this->assertStringContainsString('flex flex-wrap items-start justify-center', $html);
+            $this->assertStringContainsString('min-w-max flex-nowrap items-start justify-center', $html);
             $this->assertStringNotContainsString('grid-template-columns', $html);
             $this->assertLessThan(strpos($html, 'Leaf report'), strpos($html, 'Branch report'));
         }
@@ -200,10 +199,10 @@ class TeamStaffingScreenTest extends TestCase
 
         // The fixed width is on a content column, never on a box that wraps
         // children: every occurrence of it carries mx-auto with it.
-        $this->assertStringContainsString('w-52 mx-auto', $html);
+        $this->assertStringContainsString('w-44 mx-auto', $html);
         $this->assertSame(
-            substr_count($html, 'w-52'),
-            substr_count($html, 'w-52 mx-auto'),
+            substr_count($html, 'w-44 mx-auto'),
+            substr_count($html, 'w-44 mx-auto flex flex-1 flex-col'),
             'a fixed width escaped onto a box that contains a subtree',
         );
     }

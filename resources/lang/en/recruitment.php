@@ -324,6 +324,8 @@ return [
         'open_request' => 'Open a request',
         'more_holders' => '+:count more in this position',
         'vacant_only' => 'Unfilled only',
+        'show_unfilled' => 'Show only these',
+        'show_all' => 'Show everyone',
         'view_label' => 'What the cards show',
         'views' => [
             'staff' => 'Staff',

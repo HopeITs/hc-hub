@@ -55,7 +55,7 @@ class TeamStaffing extends Component
     #[Url(as: 'view', except: 'staff')]
     public string $view = 'staff';
 
-    public string $density = 'comfortable';
+    public string $density = 'compact';
 
     public function boot(): void
     {
@@ -95,11 +95,6 @@ class TeamStaffing extends Component
         }
 
         $this->view = $view;
-    }
-
-    public function toggleDensity(): void
-    {
-        $this->density = $this->density === 'compact' ? 'comfortable' : 'compact';
     }
 
     public function render(): View

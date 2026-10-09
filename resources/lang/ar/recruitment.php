@@ -324,6 +324,8 @@ return [
         'open_request' => 'فتح طلب',
         'more_holders' => '+:count آخرون في هذا المنصب',
         'vacant_only' => 'غير المشغولة فقط',
+        'show_unfilled' => 'اعرض هذه فقط',
+        'show_all' => 'اعرض الكل',
         'view_label' => 'ما تعرضه البطاقات',
         'views' => [
             'staff' => 'فريق',
