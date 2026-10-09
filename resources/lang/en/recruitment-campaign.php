@@ -20,6 +20,8 @@ return [
 
     // Screens.
     'campaigns' => 'Hiring campaigns',
+    'closing_soon' => '{1} 1 campaign closes within a week.|[2,*] :count campaigns close within a week.',
+    'no_end_date' => 'No end date',
     'campaigns_hint' => 'One seat is usually advertised more than once: inside the organisation first, then more widely.',
     'new_campaign' => 'New campaign',
     'campaign' => 'Campaign',
