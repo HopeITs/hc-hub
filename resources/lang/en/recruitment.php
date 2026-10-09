@@ -446,6 +446,8 @@ return [
     // The horizontal road a request travels, drawn from the workflow that is
     // actually running rather than from a fixed list of three.
     'track' => [
+        'latest' => 'Current',
+        'changes' => 'Changed in this version',
         'title' => 'Progress',
         'submitted' => 'Submitted',
         'approved' => 'Approved',
@@ -463,6 +465,12 @@ return [
         ],
     ],
     'decision_comment' => 'Reason, or what needs changing',
+    'sections' => [
+        'role' => 'Role',
+        'terms' => 'Terms',
+        'reason' => 'Reason',
+        'description' => 'Job description',
+    ],
     'decided' => 'Your decision was recorded.',
     'your_decision' => 'Your decision is needed',
     'confirm_reject' => 'Reject this request? Rejection is final.',
