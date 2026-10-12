@@ -11,16 +11,23 @@
 
     <!-- Scrollable Content -->
     <div
-            class="flex-1 overflow-y-auto px-6 pb-4 space-y-4 scrollbar-thin scrollbar-thumb-[var(--color-secondary-medium)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-secondary-medium)]">
+            class="flex-1 min-h-0 overflow-y-auto px-6 pb-6 space-y-3 text-start scrollbar-thin scrollbar-thumb-[var(--color-secondary-medium)] scrollbar-track-[var(--color-neutral-100)] hover:scrollbar-thumb-[var(--color-secondary-medium)]">
         <!-- Leave Item -->
 
         @forelse($upcomingLeaves as $upcomingLeave)
-            <div class="pb-3  border-b border-b-secondary-soft">
-                <div class="flex justify-between items-center">
-                    <p class="text-body font-bold text-[#58595B]">{{$upcomingLeave->leaveBalance->contract->employee->name}}</p>
+            <div class="flex items-start gap-3 rounded-control border border-neutral-200 bg-neutral-50 p-4">
+                <span class="flex size-10 shrink-0 items-center justify-center rounded-control border border-neutral-200 bg-white text-secondary-medium" aria-hidden="true">
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="5" width="18" height="16" rx="2" />
+                        <path d="M16 3v4M8 3v4M3 11h18M8 15h2M14 15h2M8 18h2" />
+                    </svg>
+                </span>
+                <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap justify-between items-center gap-x-3 gap-y-2">
+                    <p class="min-w-0 break-words text-body font-semibold leading-relaxed text-secondary-dark">{{$upcomingLeave->leaveBalance->contract->employee->name}}</p>
                     @activerole('HR','super-admin','general-manager','manager')
                     <span
-                            class="text-caption h-5.5 w-16 font-normal tracking-wide mt-4 text-center text-white bg-{{LeaveRequestStatus::getLocalizedName($upcomingLeave->status)['color']}} px-1 py-1  rounded-full">{{LeaveRequestStatus::getLocalizedName($upcomingLeave->status)['value']}}</span>
+                            class="text-small shrink-0 font-medium leading-5 text-center text-white bg-{{LeaveRequestStatus::getLocalizedName($upcomingLeave->status)['color']}} px-2 py-0.5 rounded-control">{{LeaveRequestStatus::getLocalizedName($upcomingLeave->status)['value']}}</span>
                     @endactiverole
                 </div>
 
@@ -37,7 +44,7 @@
                             $leave_date ='<span>' . $upcomingLeave->start_at->format('d M') .  '</span><span class="me-1"> - '.$upcomingLeave->end_at->format('d M') .'</span>';
                         }
                     @endphp
-                    <p class="text-caption font-light mt-1 text-secondary-medium gap-1 flex">{!! $leave_date . ' ('.$upcomingLeave->leaveBalance->leaveType->name .') ' !!}</p>
+                    <p class="text-small font-normal mt-1 text-secondary-medium leading-relaxed gap-1 flex flex-wrap">{!! $leave_date . ' ('.$upcomingLeave->leaveBalance->leaveType->name .') ' !!}</p>
 
                 @else
                     @php
@@ -50,13 +57,14 @@
                         }
 
                     @endphp
-                    <p class="text-caption font-light mt-1 text-secondary-medium space-x-1">{!!   $leave_date . ' ('.$upcomingLeave->leaveBalance->leaveType->name .') '  !!}
+                    <p class="text-small font-normal mt-1 text-secondary-medium leading-relaxed break-words">{!!   $leave_date . ' ('.$upcomingLeave->leaveBalance->leaveType->name .') '  !!}
                     </p>
                 @endif
+                </div>
             </div>
         @empty
-            <div class="flex flex-col items-center justify-center  text-body font-light text-secondary-light h-full">
-                <span class="text-[10.5px]">@lang('general.no-available-data')</span>
+            <div class="flex flex-col items-center justify-center text-body font-normal text-secondary-medium h-full">
+                <span class="text-small">@lang('general.no-available-data')</span>
             </div>
         @endforelse
 
