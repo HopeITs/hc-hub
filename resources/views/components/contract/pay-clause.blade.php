@@ -87,7 +87,9 @@
             $stipendAr = $glyphs('خصص الفريق الأول للفريق الثاني مكافأة وقدرها').' <strong>'.$glyphs('/ ').$amountAr.$glyphs(' /').'</strong>'.$glyphs(' عن كل جلسة، مدة الجلسة الواحدة ').$durationAr.$glyphs('.');
         } else {
             $stipendEn = 'Christian Hope Center is to give a monthly stipend of <strong>/ '.$amount.' /</strong>';
-            $stipendAr = $glyphs('خصص الفريق الأول للفريق الثاني شهرياً مكافأة وقدرها').' <strong>'.$glyphs('/ ').$amountAr.$glyphs(' /').'</strong>';
+            // The English sentence wraps to two lines on its own, so the Arabic
+            // figure goes on its own line to keep both columns the same height.
+            $stipendAr = $glyphs('خصص الفريق الأول للفريق الثاني شهرياً مكافأة وقدرها').'<br><strong>'.$glyphs('/ ').$amountAr.$glyphs(' /').'</strong>';
         }
 
         $rows[] = ['en' => $stipendEn, 'ar' => $stipendAr];
