@@ -380,6 +380,8 @@ return [
     'marital_status' => 'الحالة الاجتماعية',
     'address_info' => 'معلومات الهوية',
     'national_number' => 'الرقم الوطني',
+    'national_number_placeholder' => '11 رقماً',
+    'phone_placeholder' => '09XXXXXXXX (10 أرقام)',
     'civil_registry_office' => 'أمانة السجل المدني',
     'place_of_registration' => 'مكان القيد',
     'place_and_birth_date' => 'مكان الولادة',

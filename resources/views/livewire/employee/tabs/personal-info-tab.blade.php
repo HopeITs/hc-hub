@@ -213,10 +213,12 @@
             <x-forms.input-label for="national_number" required>@lang('general.national_number')</x-forms.input-label>
             @if ((int) data_get($infoForm, 'nationality') === Nationality::Syrian)
                 <x-forms.input type="text" wire:model="infoForm.national_number" id="national_number"
-                    inputmode="numeric" maxlength="11" />
+                    inputmode="numeric" maxlength="11"
+                    placeholder="{{ __('general.national_number_placeholder') }}" />
             @else
                 <x-forms.input type="text" wire:model="infoForm.national_number" id="national_number"
-                    inputmode="text" maxlength="255" />
+                    inputmode="text" maxlength="255"
+                    placeholder="{{ __('general.national_number_placeholder') }}" />
             @endif
             <x-error-span>{{ $errors->first('infoForm.national_number') }}</x-error-span>
         </div>

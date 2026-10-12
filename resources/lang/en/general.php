@@ -384,6 +384,8 @@ return [
     'father_name' => 'Father Name',
     'mother_name' => 'Mother Name',
     'national_number' => 'National Number',
+    'national_number_placeholder' => '11 digits',
+    'phone_placeholder' => '09XXXXXXXX (10 digits)',
     'birth-place' => 'Birth Place',
     'board-since' => 'Board Since',
     'civil_registry_office' => 'Civil Registry Office',
