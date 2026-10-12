@@ -61,6 +61,37 @@ class UpcomingLeavesCardTest extends TestCase
         $component->assertSet('upcomingLeaves', fn ($leaves) => $leaves->modelKeys() === [$ongoing->id, $future->id]);
     }
 
+    #[DataProvider('viewAllCases')]
+    public function test_view_all_requires_permission_and_more_than_three_leaves(string $role, bool $permitted, int $count, bool $shown): void
+    {
+        $this->travelTo(now()->setDate(2026, 10, 12)->setTime(12, 0));
+        $city = $this->makeCity('DMS', '003');
+        $user = $this->makeUser($city, $role, $permitted ? ['leaves.view-all'] : []);
+        $this->makeContractFor($user->profile);
+        for ($index = 0; $index < $count; $index++) {
+            $leave = $this->makeLeave($city, 'day', '2026-10-12', '2026-10-12');
+            $leave->update(['status' => LeaveRequestStatus::Accepted]);
+        }
+
+        $component = Livewire::actingAs($user)->test(UpcomingLeavesCard::class);
+
+        $component->assertCount('upcomingLeaves', $count);
+        if ($shown) {
+            $component->assertSeeHtml('href="'.route('leaves.all').'"');
+        } else {
+            $component->assertDontSeeHtml('href="'.route('leaves.all').'"');
+        }
+    }
+
+    public static function viewAllCases(): array
+    {
+        return [
+            'authorized with many leaves' => ['HR-DMS', true, 4, true],
+            'employee with many leaves' => ['employee', false, 4, false],
+            'authorized with three leaves' => ['HR-DMS', true, 3, false],
+        ];
+    }
+
     private function makeLeave(\App\Models\City $city, string $type, string $start, string $end): LeaveRequest
     {
         $employee = $this->makeEmployee($city, 'leave-'.uniqid());
