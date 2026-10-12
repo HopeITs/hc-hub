@@ -265,7 +265,7 @@ class ContractsTable extends LivewireTable
                     $per = SalaryPer::getLocalizedName($value);
 
                     return Blade::render('<x-badge :color="$color">{{$text}}</x-badge>', [
-                        'color' => $per['color'] ?? 'gray',
+                        'color' => $per['color'] ?? 'secondary-light',
                         'text' => $per['value'] ?? $value,
                     ]);
                 })
