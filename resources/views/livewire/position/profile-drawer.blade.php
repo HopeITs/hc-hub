@@ -165,7 +165,7 @@
 
             {{-- Footer action stays visible while the details scroll. --}}
             @if(filled($employee->username))
-                <div class="shrink-0 border-t border-neutral-100 bg-white/95 px-4 py-4 shadow-[0_-12px_24px_-18px_rgba(88,89,91,0.45)] backdrop-blur sm:px-6">
+                <div class="shrink-0 border-t border-neutral-100 bg-white/95 px-4 py-4 shadow-[0_-12px_24px_-18px_rgba(15,23,42,0.45)] backdrop-blur sm:px-6">
                     <a href="{{ route('employees.show', ['employee' => $employee->username]) }}" wire:navigate
                        class="flex items-center justify-center gap-2 rounded-surface bg-primary px-4 py-2 text-body font-semibold text-white transition hover:bg-primary focus:outline-none focus:ring-2 focus:ring-secondary-light focus:ring-offset-2">
                         @lang('general.view-full-profile')

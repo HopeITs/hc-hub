@@ -166,9 +166,7 @@ class LeaveRequest extends Model
 
     public function scopeUpcoming($query)
     {
-        return $query->where(fn ($query) => $query
-            ->whereDate('start_at', '>=', today())
-            ->orWhereDate('end_at', '>=', today()));
+        return $query->whereDate('start_at', '>=', now());
     }
 
     /**
