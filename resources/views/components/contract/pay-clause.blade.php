@@ -46,7 +46,20 @@
 
     $rows = [];
 
-    if ((int) $contract->pay_mode === PayMode::Flexible) {
+    // The on-screen contract is read by roles that may not see pay figures
+    // (super-admin, general-manager, manager); the composer withholds them from
+    // those roles and so does this. The PDF never gets here for them -
+    // ContractPolicy::export refuses it - and a render with nobody signed in
+    // (console, export doctor) keeps the full clause.
+    // @see \App\Models\User::canViewSalary()
+    $payHidden = auth()->check() && ! auth()->user()->canViewSalary();
+
+    if ($payHidden) {
+        $rows[] = [
+            'en' => '<em>'.e(__('general.salary-hidden-title', [], 'en')).'</em>',
+            'ar' => '<em>'.e($glyphs(__('general.salary-hidden-title', [], 'ar'))).'</em>',
+        ];
+    } elseif ((int) $contract->pay_mode === PayMode::Flexible) {
         $tiers = $contract->payTiers;
 
         if ($tiers->isEmpty()) {
