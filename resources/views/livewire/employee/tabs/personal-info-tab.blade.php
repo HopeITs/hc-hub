@@ -146,15 +146,24 @@
             <x-error-span>{{ $errors->first('infoForm.children') }}</x-error-span>
         </div>
 
-        @foreach (config('app.supported_locales') as $locale)
-            <div wire:key="emp-address-{{ $locale }}">
-                <x-forms.input-label for="address_{{ $locale }}">@lang('general.address') ({{ strtoupper($locale) }})
-                </x-forms.input-label>
-                <x-forms.input type="text" wire:model="infoForm.address_{{ $locale }}"
-                    id="address_{{ $locale }}" />
-                <x-error-span>{{ $errors->first('infoForm.address_' . $locale) }}</x-error-span>
-            </div>
-        @endforeach
+        <div wire:key="emp-joined-at">
+            <x-forms.input-label for="joined_at">@lang('general.join-at')</x-forms.input-label>
+            <x-forms.date-input wire:model="infoForm.joined_at" id="joined_at" />
+            <x-error-span>{{ $errors->first('infoForm.joined_at') }}</x-error-span>
+        </div>
+
+        {{-- Own row so the EN/AR address pair stays side by side. --}}
+        <div class="grid md:grid-cols-2 col-span-full gap-x-6 gap-y-3">
+            @foreach (config('app.supported_locales') as $locale)
+                <div wire:key="emp-address-{{ $locale }}">
+                    <x-forms.input-label for="address_{{ $locale }}">@lang('general.address') ({{ strtoupper($locale) }})
+                    </x-forms.input-label>
+                    <x-forms.input type="text" wire:model="infoForm.address_{{ $locale }}"
+                        id="address_{{ $locale }}" />
+                    <x-error-span>{{ $errors->first('infoForm.address_' . $locale) }}</x-error-span>
+                </div>
+            @endforeach
+        </div>
     </div>
 
     <div class="grid pb-8 mb-8 border-b md:grid-cols-2 gap-x-6 gap-y-3">
@@ -204,10 +213,12 @@
             <x-forms.input-label for="national_number" required>@lang('general.national_number')</x-forms.input-label>
             @if ((int) data_get($infoForm, 'nationality') === Nationality::Syrian)
                 <x-forms.input type="text" wire:model="infoForm.national_number" id="national_number"
-                    inputmode="numeric" maxlength="11" />
+                    inputmode="numeric" maxlength="11"
+                    placeholder="{{ __('general.national_number_placeholder') }}" />
             @else
                 <x-forms.input type="text" wire:model="infoForm.national_number" id="national_number"
-                    inputmode="text" maxlength="255" />
+                    inputmode="text" maxlength="255"
+                    placeholder="{{ __('general.national_number_placeholder') }}" />
             @endif
             <x-error-span>{{ $errors->first('infoForm.national_number') }}</x-error-span>
         </div>

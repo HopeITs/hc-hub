@@ -8,6 +8,7 @@ use App\Models\City;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Department;
+use App\Models\Employee;
 use App\Models\JobLevel;
 use App\Models\Position;
 use App\Models\Program;
@@ -21,11 +22,18 @@ use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
+use RamonRietdijk\LivewireTables\Enums\Direction;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ContractsTable extends LivewireTable
 {
+    // Open alphabetically by employee name; clicking the header still toggles
+    // desc and then clears back to the package's id order.
+    public string $sortColumn = 'employee';
+
+    public string $sortDirection = 'asc';
+
     protected string $model = Contract::class;
 
     protected $listeners = [
@@ -180,6 +188,18 @@ class ContractsTable extends LivewireTable
         return [
             Column::make(trans_choice('general.employee', 1), 'employee')
                 ->displayUsing(fn ($v, Model $m) => $m->employee?->name ?? '—')
+                // Same order as the displayed name: first name, then last name,
+                // in the active locale. Subqueries rather than a join so the
+                // select stays contracts.* for the table and the Excel export.
+                ->sortable(function (Builder $query, Direction $direction) {
+                    foreach (['first_name', 'last_name'] as $base) {
+                        $query->orderBy(
+                            Employee::select(transColumn($base))->whereColumn('employees.id', 'contracts.employee_id'),
+                            $direction->value,
+                        );
+                    }
+                    $query->orderBy('contracts.id');
+                })
                 ->searchable(function (Builder $query, $value) {
                     $parts = array_filter(explode(' ', trim($value)));
 

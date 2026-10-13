@@ -114,88 +114,92 @@
                     </dl>
                 </x-profile-section>
 
-                <x-profile-section data-tour="profile.career" :title="__('general.career-history')" :subtitle="__('general.contract-details')" icon="icons.contracts">
-                    <div class="space-y-4">
-                        @forelse($contracts as $contract)
-                            <article class="relative rounded-surface border border-neutral-200 p-4 ps-6">
-                                <span
-                                    class="absolute inset-y-4 start-0 w-1 rounded-e-full {{ $contract->is_active && !$contract->terminated_at ? 'bg-primary' : 'bg-neutral-300' }}"></span>
-                                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                    <div>
-                                        <h3 class="font-bold text-secondary-dark">
-                                            {{ $contract->position?->title ?? $notSpecified }}</h3>
-                                        <p class="mt-1 text-body text-secondary-medium">
-                                            {{ $contract->position?->department?->name ?? $notSpecified }}
-                                            @if ($contract->contractType)
-                                                · {{ $contract->contractType->name }}
-                                            @endif
-                                        </p>
-                                    </div>
+                @if ($canViewRecords)
+                    <x-profile-section data-tour="profile.career" :title="__('general.career-history')" :subtitle="__('general.contract-details')" icon="icons.contracts">
+                        <div class="space-y-4">
+                            @forelse($contracts as $contract)
+                                <article class="relative rounded-surface border border-neutral-200 p-4 ps-6">
                                     <span
-                                        class="shrink-0 rounded-full px-3 py-1 text-small font-bold {{ $contract->is_active && !$contract->terminated_at ? 'bg-emerald-50 text-emerald-700' : 'bg-neutral-100 text-secondary-medium' }}">
-                                        {{ $contract->is_active && !$contract->terminated_at ? __('general.active') : __('general.inactive') }}
-                                    </span>
-                                </div>
-                                <div class="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-small text-secondary-light">
-                                    <span>{{ $formatDate($contract->start_date) }} -
-                                        {{ $formatDate($contract->terminated_at ?? $contract->end_date) }}</span>
-                                    @if ($contract->weekly_hours)
-                                        <span>@lang('general.weekly-hours'): {{ $contract->weekly_hours }}</span>
-                                    @endif
-                                    @if ($canViewFinancial && $contract->salary)
-                                        <span class="font-bold text-primary">@lang('general.salary'):
-                                            {{ number_format($contract->salary) }}
-                                            {{ $currency[$contract->currency] ?? '' }}</span>
-                                    @endif
-                                </div>
-                            </article>
-                        @empty
-                            <p class="rounded-surface bg-neutral-50 p-4 text-center text-body text-secondary-light">
-                                @lang('general.no-available-data')</p>
-                        @endforelse
-                    </div>
-                </x-profile-section>
+                                        class="absolute inset-y-4 start-0 w-1 rounded-e-full {{ $contract->is_active && !$contract->terminated_at ? 'bg-primary' : 'bg-neutral-300' }}"></span>
+                                    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                        <div>
+                                            <h3 class="font-bold text-secondary-dark">
+                                                {{ $contract->position?->title ?? $notSpecified }}</h3>
+                                            <p class="mt-1 text-body text-secondary-medium">
+                                                {{ $contract->position?->department?->name ?? $notSpecified }}
+                                                @if ($contract->contractType)
+                                                    · {{ $contract->contractType->name }}
+                                                @endif
+                                            </p>
+                                        </div>
+                                        <span
+                                            class="shrink-0 rounded-full px-3 py-1 text-small font-bold {{ $contract->is_active && !$contract->terminated_at ? 'bg-emerald-50 text-emerald-700' : 'bg-neutral-100 text-secondary-medium' }}">
+                                            {{ $contract->is_active && !$contract->terminated_at ? __('general.active') : __('general.inactive') }}
+                                        </span>
+                                    </div>
+                                    <div class="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-small text-secondary-light">
+                                        <span>{{ $formatDate($contract->start_date) }} -
+                                            {{ $formatDate($contract->terminated_at ?? $contract->end_date) }}</span>
+                                        @if ($contract->weekly_hours)
+                                            <span>@lang('general.weekly-hours'): {{ $contract->weekly_hours }}</span>
+                                        @endif
+                                        @if ($canViewFinancial && $contract->salary)
+                                            <span class="font-bold text-primary">@lang('general.salary'):
+                                                {{ number_format($contract->salary) }}
+                                                {{ $currency[$contract->currency] ?? '' }}</span>
+                                        @endif
+                                    </div>
+                                </article>
+                            @empty
+                                <p class="rounded-surface bg-neutral-50 p-4 text-center text-body text-secondary-light">
+                                    @lang('general.no-available-data')</p>
+                            @endforelse
+                        </div>
+                    </x-profile-section>
+                @endif
 
-                <div class="grid gap-4 lg:grid-cols-2">
-                    <x-profile-section :title="__('general.education')" icon="icons.education">
-                        <div class="space-y-4">
-                            @forelse($employee->educations as $education)
-                                <div class="border-s-2 border-primary ps-4">
-                                    <h3 class="text-body font-bold text-secondary-dark">
-                                        {{ $education->name ?? ($education->specialization ?? $notSpecified) }}</h3>
-                                    <p class="mt-1 text-small text-secondary-medium">
-                                        {{ \App\Enums\EducationType::getLocalizedName((int) $education->degree) }} ·
-                                        {{ \App\Enums\EducationStatus::getLocalizedName((int) $education->status) }}
-                                    </p>
-                                    @if ($education->specialization)
-                                        <p class="mt-1 text-small text-secondary-light">{{ $education->specialization }}
+                @if ($canViewRecords)
+                    <div class="grid gap-4 lg:grid-cols-2">
+                        <x-profile-section :title="__('general.education')" icon="icons.education">
+                            <div class="space-y-4">
+                                @forelse($employee->educations as $education)
+                                    <div class="border-s-2 border-primary ps-4">
+                                        <h3 class="text-body font-bold text-secondary-dark">
+                                            {{ $education->name ?? ($education->specialization ?? $notSpecified) }}</h3>
+                                        <p class="mt-1 text-small text-secondary-medium">
+                                            {{ \App\Enums\EducationType::getLocalizedName((int) $education->degree) }} ·
+                                            {{ \App\Enums\EducationStatus::getLocalizedName((int) $education->status) }}
                                         </p>
-                                    @endif
-                                </div>
-                            @empty
-                                <p class="text-body text-secondary-light">@lang('general.no-available-data')</p>
-                            @endforelse
-                        </div>
-                    </x-profile-section>
+                                        @if ($education->specialization)
+                                            <p class="mt-1 text-small text-secondary-light">{{ $education->specialization }}
+                                            </p>
+                                        @endif
+                                    </div>
+                                @empty
+                                    <p class="text-body text-secondary-light">@lang('general.no-available-data')</p>
+                                @endforelse
+                            </div>
+                        </x-profile-section>
 
-                    <x-profile-section :title="__('general.experience')" icon="icons.experience">
-                        <div class="space-y-4">
-                            @forelse($employee->experiences as $experience)
-                                <div class="border-s-2 border-primary ps-4">
-                                    <h3 class="text-body font-bold text-secondary-dark">
-                                        {{ $experience->job_title ?? $notSpecified }}</h3>
-                                    <p class="mt-1 text-small text-secondary-medium">
-                                        {{ $experience->company ?? $notSpecified }}</p>
-                                    <p class="mt-1 text-small text-secondary-light">
-                                        {{ $formatDate($experience->start_date) }} -
-                                        {{ $formatDate($experience->end_date) }}</p>
-                                </div>
-                            @empty
-                                <p class="text-body text-secondary-light">@lang('general.no-available-data')</p>
-                            @endforelse
-                        </div>
-                    </x-profile-section>
-                </div>
+                        <x-profile-section :title="__('general.experience')" icon="icons.experience">
+                            <div class="space-y-4">
+                                @forelse($employee->experiences as $experience)
+                                    <div class="border-s-2 border-primary ps-4">
+                                        <h3 class="text-body font-bold text-secondary-dark">
+                                            {{ $experience->job_title ?? $notSpecified }}</h3>
+                                        <p class="mt-1 text-small text-secondary-medium">
+                                            {{ $experience->company ?? $notSpecified }}</p>
+                                        <p class="mt-1 text-small text-secondary-light">
+                                            {{ $formatDate($experience->start_date) }} -
+                                            {{ $formatDate($experience->end_date) }}</p>
+                                    </div>
+                                @empty
+                                    <p class="text-body text-secondary-light">@lang('general.no-available-data')</p>
+                                @endforelse
+                            </div>
+                        </x-profile-section>
+                    </div>
+                @endif
 
                 @if ($canViewPrivate)
                     <x-profile-section data-tour="profile.private" :title="__('general.personal-information')" :subtitle="__('general.private-information')" icon="icons.contact" private>
@@ -250,42 +254,46 @@
                     </x-profile-section>
                 @endif
 
-                <x-profile-section :title="__('general.skills-and-interests')" icon="icons.statistics">
-                    <div class="mb-4 flex flex-wrap gap-2">
-                        @forelse($skills as $skill)
-                            <span
-                                class="rounded-full bg-primary px-3 py-2 text-small font-bold text-white">{{ $skill }}</span>
-                        @empty
-                            <span class="text-body text-secondary-light">@lang('general.no-available-data')</span>
-                        @endforelse
-                    </div>
-                    @if ($interests)
-                        <div class="border-t border-neutral-100 pt-4">
-                            <p class="mb-3 text-small font-semibold text-secondary-light">@lang('general.interests')</p>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach ($interests as $interest)
-                                    <span
-                                        class="rounded-full bg-neutral-100 px-3 py-2 text-small font-semibold text-secondary-medium">{{ $interest }}</span>
-                                @endforeach
-                            </div>
+                @if ($canViewRecords)
+                    <x-profile-section :title="__('general.skills-and-interests')" icon="icons.statistics">
+                        <div class="mb-4 flex flex-wrap gap-2">
+                            @forelse($skills as $skill)
+                                <span
+                                    class="rounded-full bg-primary px-3 py-2 text-small font-bold text-white">{{ $skill }}</span>
+                            @empty
+                                <span class="text-body text-secondary-light">@lang('general.no-available-data')</span>
+                            @endforelse
                         </div>
-                    @endif
-                </x-profile-section>
-
-                <x-profile-section :title="__('general.courses')" icon="icons.courses">
-                    <div class="space-y-4">
-                        @forelse($employee->courses->take(5) as $course)
-                            <div class="border-s-2 border-primary ps-3">
-                                <p class="text-body font-bold text-secondary-dark">{{ $course->title ?? $notSpecified }}
-                                </p>
-                                <p class="mt-1 text-small text-secondary-light">
-                                    {{ $course->organization ?? ($course->granted_by ?? $notSpecified) }}</p>
+                        @if ($interests)
+                            <div class="border-t border-neutral-100 pt-4">
+                                <p class="mb-3 text-small font-semibold text-secondary-light">@lang('general.interests')</p>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach ($interests as $interest)
+                                        <span
+                                            class="rounded-full bg-neutral-100 px-3 py-2 text-small font-semibold text-secondary-medium">{{ $interest }}</span>
+                                    @endforeach
+                                </div>
                             </div>
-                        @empty
-                            <p class="text-body text-secondary-light">@lang('general.no-available-data')</p>
-                        @endforelse
-                    </div>
-                </x-profile-section>
+                        @endif
+                    </x-profile-section>
+                @endif
+
+                @if ($canViewRecords)
+                    <x-profile-section :title="__('general.courses')" icon="icons.courses">
+                        <div class="space-y-4">
+                            @forelse($employee->courses->take(5) as $course)
+                                <div class="border-s-2 border-primary ps-3">
+                                    <p class="text-body font-bold text-secondary-dark">{{ $course->title ?? $notSpecified }}
+                                    </p>
+                                    <p class="mt-1 text-small text-secondary-light">
+                                        {{ $course->organization ?? ($course->granted_by ?? $notSpecified) }}</p>
+                                </div>
+                            @empty
+                                <p class="text-body text-secondary-light">@lang('general.no-available-data')</p>
+                            @endforelse
+                        </div>
+                    </x-profile-section>
+                @endif
 
                 @if($canViewBadges)
                     <x-profile-section :title="__('general.badges')" icon="icons.badges">
