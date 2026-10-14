@@ -6,15 +6,30 @@
     $reports = $this->directReports;
 @endphp
 
-{{-- Visibility is owned by Alpine, not the server: every card dispatches the
-     browser event 'open-profile', which opens the drawer on the spot while the
-     #[On] listener loads the employee. Entangling a server `open` flag made each
-     re-open depend on a client/server sync that could leave the drawer shut. --}}
-<div x-data="{ show: false }"
+{{-- Alpine owns the drawer: every card dispatches the browser event
+     'open-profile', which opens the drawer on the spot and asks the server for
+     that employee. The server's copy only renders once its employeeId matches
+     the one just requested — until then a spinner shows, so the previous
+     employee is never left on screen under a new click. --}}
+<div x-data="{
+        show: false,
+        requestedId: null,
+        get ready() {
+            return this.requestedId !== null && this.$wire.employeeId === this.requestedId;
+        },
+        open(employeeId) {
+            this.requestedId = Number(employeeId);
+            this.show = true;
+
+            if (! this.ready) {
+                this.$wire.openProfile(this.requestedId);
+            }
+        },
+     }"
      x-cloak
      x-show="show"
      x-effect="document.body.classList.toggle('overflow-hidden', show)"
-     x-on:open-profile.window="show = true"
+     x-on:open-profile.window="open($event.detail.employeeId)"
      x-on:livewire:navigating.window="show = false; document.body.classList.remove('overflow-hidden')"
      x-on:keydown.escape.window="show = false"
      class="fixed inset-0 z-50">
@@ -38,6 +53,7 @@
          x-transition:leave-end="translate-y-full sm:translate-y-0 sm:translate-x-full sm:rtl:-translate-x-full">
 
         @if($employee)
+        <div class="flex min-h-0 flex-1 flex-col" x-show="ready">
             {{-- Header --}}
             <div class="relative px-6 pt-6 pb-4 overflow-hidden text-white shrink-0 bg-gradient-to-b from-secondary-dark to-secondary-light">
 
@@ -173,11 +189,12 @@
                     </a>
                 </div>
             @endif
-        @else
-            {{-- The drawer opens before the first employee has loaded. --}}
-            <div class="flex items-center justify-center flex-1 p-8">
-                <x-icons.spinner class="size-6 animate-spin text-primary" />
-            </div>
+        </div>
         @endif
+
+        {{-- Shown while the requested employee is still loading. --}}
+        <div class="flex items-center justify-center flex-1 p-8" x-show="! ready">
+            <x-icons.spinner class="size-6 animate-spin text-primary" />
+        </div>
     </div>
 </div>
