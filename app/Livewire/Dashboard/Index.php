@@ -216,23 +216,13 @@ class Index extends Component
             ->get();
     }
 
-    /**
-     * The badges the active role reaches on the Badges page, through the
-     * same Badge::scopeVisibleTo(): a regional HR role its own city, HR-SYR
-     * and general-manager every city, a manager granted badges.view their
-     * own reports, and nobody else anything.
-     */
     public function getMyBadgesProperty()
     {
-        if (! $this->canViewBadges()) {
+        if (! $this->employee) {
             return collect();
         }
 
-        return Badge::query()
-            ->visibleTo(auth()->user())
-            ->with('employee')
-            ->orderByDesc('date')
-            ->get();
+        return Badge::query()->with('employee')->where('employee_id', $this->employee->id)->orderByDesc('date')->get();
     }
 
     public function getPendingRequestsProperty()
@@ -414,15 +404,9 @@ class Index extends Component
             'todayEvents' => $this->todayEvents,
             'upcomingEvents' => $this->getUpcomingEventsProperty(),
             'deliveredItems' => $this->deliveredItems,
-            'canViewBadges' => $this->canViewBadges(),
             'myBadges' => $this->myBadges,
             'pendingRequests' => $this->pendingRequests,
             'teamMembers' => $this->teamMembers,
         ]);
-    }
-
-    protected function canViewBadges(): bool
-    {
-        return auth()->user()?->hasActivePermission('badges.view') ?? false;
     }
 }
