@@ -336,28 +336,37 @@ class Index extends Component
             ->unique()
             ->all();
 
-        // Every employee in the organization: the viewer's own city first, then
-        // the other cities, each ordered by job grade.
+        // Every employee in the organization: head office (Syria-level
+        // positions) first, then the viewer's own city, then the other cities
+        // one at a time in city-code order (Aleppo, Homs, Damascus, ...). Each
+        // group is ordered by job grade.
         $ownCityId = $this->employee?->city_id;
+        $headOfficeCityId = City::query()->where('slug', City::NATIONAL_SLUG)->value('id');
 
         $allEmployees = Employee::query()
             ->where('is_active', true)
             ->whereHas('contracts')
             ->whereNotIn('id', $excludeIds)
             ->whereNotNull('username')
-            ->with(['media', 'account', 'contracts.position.jobLevel'])
+            ->with(['media', 'account', 'city', 'contracts.position.jobLevel'])
             ->get()
-            ->map(function ($emp) use ($nameCol, $titleCol) {
+            ->map(function ($emp) use ($nameCol, $titleCol, $ownCityId, $headOfficeCityId) {
                 $contract = $emp->contracts->filter(fn ($c) => $c->is_active || (! $c->terminated_at && $c->start_date <= now() && $c->end_date >= now()))->sortByDesc('start_date')->first() ?? $emp->latestActiveContract();
 
                 $emp->displayName = $emp->$nameCol ?? $emp->name_en;
                 $emp->positionTitle = $contract?->position?->$titleCol ?? ($contract?->position?->title_en ?? '—');
                 $emp->jobLevelGrade = $contract?->position?->jobLevel?->grade ?? 999;
+                $emp->groupRank = match (true) {
+                    $headOfficeCityId && $contract?->position?->city_id === $headOfficeCityId => 0,
+                    $emp->city_id === $ownCityId => 1,
+                    default => 2,
+                };
 
                 return $emp;
             })
             ->sortBy([
-                fn ($a, $b) => ($a->city_id !== $ownCityId) <=> ($b->city_id !== $ownCityId),
+                fn ($a, $b) => $a->groupRank <=> $b->groupRank,
+                fn ($a, $b) => $a->groupRank === 2 ? (string) $a->city?->code <=> (string) $b->city?->code : 0,
                 fn ($a, $b) => $a->jobLevelGrade <=> $b->jobLevelGrade,
             ])
             ->values();
