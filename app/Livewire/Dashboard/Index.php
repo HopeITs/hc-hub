@@ -336,13 +336,16 @@ class Index extends Component
             ->unique()
             ->all();
 
-        $sameCityEmployees = Employee::query()
-            ->where('city_id', $this->employee?->city_id)
+        // Every employee in the organization: the viewer's own city first, then
+        // the other cities, each ordered by job grade.
+        $ownCityId = $this->employee?->city_id;
+
+        $allEmployees = Employee::query()
             ->where('is_active', true)
             ->whereHas('contracts')
             ->whereNotIn('id', $excludeIds)
             ->whereNotNull('username')
-            ->with(['contracts.position.jobLevel'])
+            ->with(['media', 'account', 'contracts.position.jobLevel'])
             ->get()
             ->map(function ($emp) use ($nameCol, $titleCol) {
                 $contract = $emp->contracts->filter(fn ($c) => $c->is_active || (! $c->terminated_at && $c->start_date <= now() && $c->end_date >= now()))->sortByDesc('start_date')->first() ?? $emp->latestActiveContract();
@@ -353,10 +356,13 @@ class Index extends Component
 
                 return $emp;
             })
-            ->sortBy('jobLevelGrade')
+            ->sortBy([
+                fn ($a, $b) => ($a->city_id !== $ownCityId) <=> ($b->city_id !== $ownCityId),
+                fn ($a, $b) => $a->jobLevelGrade <=> $b->jobLevelGrade,
+            ])
             ->values();
 
-        return $members->merge($sameCityEmployees)->unique('id')->values();
+        return $members->merge($allEmployees)->unique('id')->values();
     }
 
     public function mount(): void
