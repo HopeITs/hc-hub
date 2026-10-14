@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Employee;
 
+use App\Models\Badge;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
 
@@ -55,7 +57,12 @@ class EmployeeProfile extends Component
         $this->canViewFinancial = $isHrInScope && $user->canViewSalary();
         $this->canEdit = $isHrInScope || $isManagement;
         $this->canViewRecords = ! $user->activeRoleIs('employee');
-        $this->canViewBadges = ($this->isSelf || $isHrInScope) && $this->canViewRecords;
+        // Same rule as the Badges page and the dashboard card, through
+        // Badge::scopeVisibleTo(): regional HR its own city, HR-SYR and
+        // general-manager every city, a manager granted badges.view their
+        // reports. Being the profile's owner grants nothing by itself.
+        $this->canViewBadges = $this->canViewRecords
+            && Gate::forUser($user)->allows('viewForEmployee', [Badge::class, $this->employee]);
     }
 
     public function render()
