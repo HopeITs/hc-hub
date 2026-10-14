@@ -29,8 +29,17 @@
 
         @forelse($this->teamMembers as $member)
             @php
-                // Phone normalization
-                $phone = preg_replace('/\D+/', '', $member->personal_phone ?? '');
+                // Work contact first, personal as the fallback; a missing one hides its icon
+                $phone = preg_replace('/\D+/', '', $member->work_phone ?: ($member->personal_phone ?? ''));
+                $email = $member->account?->email ?: $member->personal_email;
+
+                // Telegram (work) holds a username or a t.me link, as on the digital ID
+                $telegram = trim((string) $member->telegram_work);
+                $telegramHref = match (true) {
+                    $telegram === '' => null,
+                    str_starts_with($telegram, 'http://'), str_starts_with($telegram, 'https://') => $telegram,
+                    default => 'https://t.me/'.ltrim($telegram, '@'),
+                };
 
                 // Localized job title for each member
                 $memberContract = $member->latestActiveContract();
@@ -76,19 +85,25 @@
                         <x-icons.user class="transition text-secondary-light hover:text-primary" />
                     </a>
 
-                    <a href="tel:{{ $phone }}" title="Call">
-                        <x-icons.phone class="text-secondary-light ml-1 hover:text-primary transition" />
-                    </a>
+                    @if ($phone)
+                        <a href="tel:{{ $phone }}" title="Call">
+                            <x-icons.phone class="text-secondary-light ml-1 hover:text-primary transition" />
+                        </a>
+                    @endif
 
-                    <a href="tg://resolve?phone={{ $phone }}"
-                        class="transition text-secondary-light hover:text-primary" title="Chat on Telegram">
-                        <x-icons.telegram class="transition text-secondary-light hover:text-primary" />
-                    </a>
+                    @if ($telegramHref)
+                        <a href="{{ $telegramHref }}" target="_blank" rel="noopener"
+                            class="transition text-secondary-light hover:text-primary" title="Chat on Telegram">
+                            <x-icons.telegram class="transition text-secondary-light hover:text-primary" />
+                        </a>
+                    @endif
 
-                    <a href="mailto:{{ $member->account->email ?? '#' }}"
-                        class="transition text-secondary-light hover:text-primary" title="Send Email">
-                        <x-icons.envelope class="transition text-secondary-light ms-1 hover:text-primary" />
-                    </a>
+                    @if ($email)
+                        <a href="mailto:{{ $email }}"
+                            class="transition text-secondary-light hover:text-primary" title="Send Email">
+                            <x-icons.envelope class="transition text-secondary-light ms-1 hover:text-primary" />
+                        </a>
+                    @endif
 
                 </div>
             </div>
