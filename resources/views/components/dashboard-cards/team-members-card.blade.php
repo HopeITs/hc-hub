@@ -33,11 +33,20 @@
                 $phone = preg_replace('/\D+/', '', $member->work_phone ?: ($member->personal_phone ?? ''));
                 $email = $member->account?->email ?: $member->personal_email;
 
-                // Telegram (work) holds a username or a t.me link, as on the digital ID
+                // Telegram (work) is normally a phone number stored locally (09xxxxxxxx);
+                // Telegram needs it international (+963 9xxxxxxxx). A username or a
+                // t.me link still works.
                 $telegram = trim((string) $member->telegram_work);
+                $telegramDigits = preg_replace('/\D+/', '', $telegram);
+                $telegramDigits = match (true) {
+                    str_starts_with($telegramDigits, '00') => substr($telegramDigits, 2),
+                    str_starts_with($telegramDigits, '0') => '963'.substr($telegramDigits, 1),
+                    default => $telegramDigits,
+                };
                 $telegramHref = match (true) {
                     $telegram === '' => null,
                     str_starts_with($telegram, 'http://'), str_starts_with($telegram, 'https://') => $telegram,
+                    ! preg_match('/[a-z]/i', $telegram) => $telegramDigits !== '' ? 'https://t.me/+'.$telegramDigits : null,
                     default => 'https://t.me/'.ltrim($telegram, '@'),
                 };
 
