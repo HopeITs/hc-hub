@@ -516,6 +516,16 @@ class Employee extends Model implements HasMedia
         );
     }
 
+    /**
+     * The organization email — the linked account's login. Anything shown to
+     * colleagues uses this and work_phone, never personal_email/personal_phone,
+     * which stay on the HR-only private profile section.
+     */
+    protected function workEmail(): Attribute
+    {
+        return Attribute::get(fn (): ?string => $this->account?->email);
+    }
+
     protected function firstName(): Attribute
     {
         return Attribute::make(

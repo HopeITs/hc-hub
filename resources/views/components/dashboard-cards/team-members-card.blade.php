@@ -29,8 +29,9 @@
 
         @forelse($this->teamMembers as $member)
             @php
-                // Phone normalization
-                $phone = preg_replace('/\D+/', '', $member->personal_phone ?? '');
+                // Work contact only — personal numbers are never shown to colleagues.
+                $phone = preg_replace('/\D+/', '', $member->work_phone ?? '');
+                $email = $member->work_email;
 
                 // Localized job title for each member
                 $memberContract = $member->latestActiveContract();
@@ -76,19 +77,23 @@
                         <x-icons.user class="transition text-secondary-light hover:text-primary" />
                     </a>
 
-                    <a href="tel:{{ $phone }}" title="Call">
-                        <x-icons.phone class="text-secondary-light ml-1 hover:text-primary transition" />
-                    </a>
+                    @if ($phone !== '')
+                        <a href="tel:{{ $phone }}" title="Call">
+                            <x-icons.phone class="text-secondary-light ml-1 hover:text-primary transition" />
+                        </a>
 
-                    <a href="tg://resolve?phone={{ $phone }}"
-                        class="transition text-secondary-light hover:text-primary" title="Chat on Telegram">
-                        <x-icons.telegram class="transition text-secondary-light hover:text-primary" />
-                    </a>
+                        <a href="tg://resolve?phone={{ $phone }}"
+                            class="transition text-secondary-light hover:text-primary" title="Chat on Telegram">
+                            <x-icons.telegram class="transition text-secondary-light hover:text-primary" />
+                        </a>
+                    @endif
 
-                    <a href="mailto:{{ $member->account->email ?? '#' }}"
-                        class="transition text-secondary-light hover:text-primary" title="Send Email">
-                        <x-icons.envelope class="transition text-secondary-light ms-1 hover:text-primary" />
-                    </a>
+                    @if ($email)
+                        <a href="mailto:{{ $email }}"
+                            class="transition text-secondary-light hover:text-primary" title="Send Email">
+                            <x-icons.envelope class="transition text-secondary-light ms-1 hover:text-primary" />
+                        </a>
+                    @endif
 
                 </div>
             </div>

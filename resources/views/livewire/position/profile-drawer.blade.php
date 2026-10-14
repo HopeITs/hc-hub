@@ -102,8 +102,7 @@
                 {{-- Contact --}}
                 @php($contacts = collect([
                     ['icon' => 'phone', 'value' => $employee->work_phone, 'href' => 'tel:'],
-                    ['icon' => 'mobile', 'value' => $employee->personal_phone, 'href' => 'tel:'],
-                    ['icon' => 'mail', 'value' => $employee->personal_email, 'href' => 'mailto:'],
+                    ['icon' => 'mail', 'value' => $employee->work_email, 'href' => 'mailto:'],
                 ])->filter(fn ($c) => filled($c['value'])))
                 @if($contacts->isNotEmpty())
                     <div>
@@ -115,8 +114,6 @@
                                     <span class="flex items-center justify-center rounded-surface size-7 shrink-0 bg-secondary-soft/10 text-primary">
                                         @if($contact['icon'] === 'mail')
                                             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-                                        @elseif($contact['icon'] === 'mobile')
-                                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path stroke-linecap="round" d="M11 18h2"/></svg>
                                         @else
                                             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2 5a2 2 0 0 1 2-2h2l2 5-2 1a12 12 0 0 0 5 5l1-2 5 2v2a2 2 0 0 1-2 2A16 16 0 0 1 2 5Z"/></svg>
                                         @endif

@@ -46,14 +46,14 @@ class ProfileDrawer extends Component
         $this->employeeId = $employee->id;
     }
 
-    /** The employee being shown, with avatar + home city loaded. */
+    /** The employee being shown, with avatar, home city and work email loaded. */
     public function getEmployeeProperty(): ?Employee
     {
         if (! $this->employeeId) {
             return null;
         }
 
-        $employee = Employee::with(['media', 'city'])->find($this->employeeId);
+        $employee = Employee::with(['media', 'city', 'account'])->find($this->employeeId);
 
         // Re-checked on render, not only on open: a role switch between the
         // two must not leave a stale authorized drawer on screen.
