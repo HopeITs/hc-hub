@@ -84,7 +84,8 @@ class EmployeeProfileRecordsVisibilityTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $subject = $this->makeSubjectWithRecords($city);
 
-        $component = Livewire::actingAs($this->makeUser($city, 'HR-ALP'))
+        // badges.view: the live HR-ALP role holds it, the fixture role does not.
+        $component = Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['badges.view']))
             ->test(EmployeeProfile::class, ['employee' => $subject])
             ->assertOk()
             ->assertSet('canViewRecords', true)

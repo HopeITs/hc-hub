@@ -81,9 +81,11 @@
             <x-dashboard-cards.checklist-items-card :delivered-items="$deliveredItems"/>
         </div>
 
-        <div class="flex items-center justify-center font-semibold text-white h-70">
-            <x-dashboard-cards.my-badges-card :my-badges="$myBadges"/>
-        </div>
+        @if($canViewBadges)
+            <div class="flex items-center justify-center font-semibold text-white h-70">
+                <x-dashboard-cards.my-badges-card :my-badges="$myBadges"/>
+            </div>
+        @endif
     </div>
 
 

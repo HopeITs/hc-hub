@@ -36,6 +36,8 @@ return [
             'checklists.manage', 'project-basics.view', 'archives.view',
             'archives.create', 'archives.update', 'archives.delete', 'archives.share',
             'archives.download',
+            // Read-only, across every city like HR-SYR: see Badge::scopeVisibleTo().
+            'badges.view',
         ],
         'manager' => [
             // Read-only, and only their direct/technical reports' contracts:
