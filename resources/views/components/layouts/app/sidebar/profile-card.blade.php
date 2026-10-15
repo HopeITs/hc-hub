@@ -201,10 +201,18 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        if (window.Livewire?.on) {
+    // wire:navigate re-runs this script on every page and DOMContentLoaded never
+    // fires again, so register the (global) listener once, whenever Livewire is up.
+    (() => {
+        if (window.__hcRoleSwitchedBound) return;
+
+        const bind = () => {
+            if (window.__hcRoleSwitchedBound) return;
+            window.__hcRoleSwitchedBound = true;
             Livewire.on('role-switched', ({role}) => {document.getElementById('activeRolePill')?.replaceChildren(document.createTextNode(role));
             });
-        }
-    });
+        };
+
+        window.Livewire?.on ? bind() : document.addEventListener('livewire:init', bind, { once: true });
+    })();
 </script>
