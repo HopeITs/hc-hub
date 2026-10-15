@@ -116,6 +116,7 @@ return [
     'email' => 'البريد الإلكتروني',
     'active' => 'فعّال',
     'inactive' => 'غير فعّال',
+    'on-leave' => 'في إجازة',
     'toggle-status' => 'تبديل الحالة',
     'confirm-status-change' => 'هل أنت متأكد أنك تريد تغيير الحالة؟',
     'confirm-delete-item' => 'هل أنت متأكد أنك تريد حذف العنصر بشكل نهائي؟',

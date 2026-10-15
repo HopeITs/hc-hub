@@ -27,12 +27,20 @@
 
                 <div class="min-w-0 w-full flex-1 min-[900px]:basis-[calc(100%-11.5rem)]">
                     <div class="mb-2 flex flex-wrap items-center gap-2 sm:mb-3 sm:gap-2">
-                        <span
-                            class="inline-flex items-center rounded-full px-2 py-1 text-caption font-bold sm:px-3 sm:py-1 sm:text-small {{ $employee->is_active ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-neutral-100 text-secondary-medium ring-1 ring-neutral-200' }}">
+                        @if ($isOnLeave)
                             <span
-                                class="me-1 h-1.5 w-1.5 rounded-full sm:me-2 sm:h-2 sm:w-2 {{ $employee->is_active ? 'bg-emerald-500' : 'bg-neutral-400' }}"></span>
-                            {{ $employee->is_active ? __('general.active') : __('general.inactive') }}
-                        </span>
+                                class="inline-flex items-center rounded-full bg-amber-50 px-2 py-1 text-caption font-bold text-amber-700 ring-1 ring-amber-200 sm:px-3 sm:py-1 sm:text-small">
+                                <span class="me-1 h-1.5 w-1.5 rounded-full bg-amber-500 sm:me-2 sm:h-2 sm:w-2"></span>
+                                @lang('general.on-leave')
+                            </span>
+                        @else
+                            <span
+                                class="inline-flex items-center rounded-full px-2 py-1 text-caption font-bold sm:px-3 sm:py-1 sm:text-small {{ $employee->is_active ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-neutral-100 text-secondary-medium ring-1 ring-neutral-200' }}">
+                                <span
+                                    class="me-1 h-1.5 w-1.5 rounded-full sm:me-2 sm:h-2 sm:w-2 {{ $employee->is_active ? 'bg-emerald-500' : 'bg-neutral-400' }}"></span>
+                                {{ $employee->is_active ? __('general.active') : __('general.inactive') }}
+                            </span>
+                        @endif
                         @if ($employee->is_board_member)
                             <span
                                 class="inline-flex rounded-full bg-primary px-2 py-1 text-caption font-bold text-white sm:px-3 sm:py-1 sm:text-small">
