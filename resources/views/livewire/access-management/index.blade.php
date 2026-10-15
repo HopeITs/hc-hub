@@ -162,7 +162,7 @@
                     <form wire:submit="saveEmployeeAccess">
                         <div class="flex flex-wrap items-center gap-3 border-b border-gray-200 px-[clamp(1rem,2vw,1.5rem)] py-4">
                             @if (filled($selectedUser->profile->username))
-                                <a href="{{ route('employees.show', ['employee' => $selectedUser->profile->username]) }}"
+                                <a href="{{ route('employees.show', ['employee' => $selectedUser->profile->username]) }}" wire:navigate
                                     aria-label="{{ __('general.view-profile-of', ['name' => $selectedUser->profile->name]) }}"
                                     class="shrink-0 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]">
                                     <img src="{{ $selectedUser->profile->avatar_url }}"
@@ -176,7 +176,7 @@
 
                             <div class="min-w-0 flex-1">
                                 @if (filled($selectedUser->profile->username))
-                                    <a href="{{ route('employees.show', ['employee' => $selectedUser->profile->username]) }}"
+                                    <a href="{{ route('employees.show', ['employee' => $selectedUser->profile->username]) }}" wire:navigate
                                         class="block w-fit max-w-full rounded-sm text-[clamp(1rem,1.5vw,1.2rem)] font-bold text-gray-900 transition hover:text-[#be1f24] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]">
                                         <h2 class="truncate">{{ $selectedUser->profile->name }}</h2>
                                     </a>
@@ -489,7 +489,7 @@
                         <article wire:key="assigned-role-user-{{ $roleUser->id }}"
                             class="flex min-w-0 items-center gap-3 border-b border-gray-100 px-1 py-3 first:pt-0 last:border-0 last:pb-0">
                             @if ($roleProfile && filled($roleProfile->username))
-                                <a href="{{ route('employees.show', ['employee' => $roleProfile->username]) }}"
+                                <a href="{{ route('employees.show', ['employee' => $roleProfile->username]) }}" wire:navigate
                                     class="shrink-0 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]"
                                     aria-label="{{ __('access.view-employee', ['name' => $roleProfile->nameForLocale(app()->getLocale())]) }}">
                                     <img src="{{ $roleProfile->avatar_url }}" alt=""
@@ -502,7 +502,7 @@
 
                             <div class="min-w-0 flex-1">
                                 @if ($roleProfile && filled($roleProfile->username))
-                                    <a href="{{ route('employees.show', ['employee' => $roleProfile->username]) }}"
+                                    <a href="{{ route('employees.show', ['employee' => $roleProfile->username]) }}" wire:navigate
                                         class="block truncate text-sm font-bold text-gray-900 transition hover:text-[#be1f24] hover:underline hover:underline-offset-4 focus-visible:rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]">
                                         {{ $roleProfile->nameForLocale(app()->getLocale()) }}
                                     </a>

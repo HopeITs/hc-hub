@@ -72,7 +72,7 @@
         <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
             @forelse($folders as $folder)
             <div class="relative group ">
-                <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]) }}" class="flex flex-col items-center justify-center h-40 p-4 text-center transition bg-white border border-neutral-200 rounded-surface shadow-e1 hover:-translate-y-0.5 hover:border-[#c2151c]/50 hover:shadow-e3">
+                <a href="{{ $isShared ? route('shared-folders.index', ['folderId' => $folder->id]) : route('my-folders.index', ['folderId' => $folder->id]) }}" wire:navigate class="flex flex-col items-center justify-center h-40 p-4 text-center transition bg-white border border-neutral-200 rounded-surface shadow-e1 hover:-translate-y-0.5 hover:border-[#c2151c]/50 hover:shadow-e3">
                     <span class="flex items-center justify-center rounded-surface size-16 bg-transparent ring-1 ring-transparent group-hover:bg-[#c2151c] group-hover:ring-[#c2151c]">
                         <x-icons.folder class="w-10 h-10 text-[#c2151c] group-hover:text-white" />
                     </span>
