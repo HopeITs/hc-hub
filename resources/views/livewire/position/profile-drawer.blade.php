@@ -132,12 +132,11 @@
                     <div>
                         <h3 class="flex items-center gap-2 mb-2 text-small font-bold tracking-wide uppercase text-secondary-light">
                             @lang('general.direct-reports')
-                            <span class="rounded-full bg-neutral-100 px-2 py-1 text-caption font-bold text-secondary-medium">{{ $reports->count() }}</span>
+                            <span class="rounded-full bg-neutral-100 px-2 py-1 text-caption font-bold text-secondary-medium">{{ \App\Models\Position::headcount($reports) }}</span>
                         </h3>
                         <div class="space-y-2">
                             @foreach($reports as $report)
-                                @php($rEmployee = $report->activeContracts->first()?->employee)
-                                @if($rEmployee)
+                                @forelse($report->activeContracts->pluck('employee')->filter()->unique('id') as $rEmployee)
                                     <button type="button" wire:click="$dispatch('open-profile', { employeeId: {{ $rEmployee->id }} })"
                                             class="flex items-center w-full gap-3 px-3 py-2 transition border border-neutral-100 rounded-surface text-start hover:border-secondary-light hover:bg-secondary-soft">
                                         <img src="{{ $rEmployee->avatar_url }}" alt="" class="object-cover rounded-full size-9">
@@ -146,7 +145,7 @@
                                             <div class="text-small truncate text-secondary-light">{{ $report->title }}</div>
                                         </div>
                                     </button>
-                                @else
+                                @empty
                                     <div class="flex items-center gap-3 px-3 py-2 border border-neutral-200 border-dashed rounded-surface text-secondary-light">
                                         <span class="flex items-center justify-center border border-neutral-300 border-dashed rounded-full size-9"><x-icons.user class="size-4"/></span>
                                         <div class="min-w-0">
@@ -154,7 +153,7 @@
                                             <div class="text-small truncate">{{ $report->title }}</div>
                                         </div>
                                     </div>
-                                @endif
+                                @endforelse
                             @endforeach
                         </div>
                     </div>
