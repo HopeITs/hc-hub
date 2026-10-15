@@ -82,47 +82,33 @@
 @include('partials.scripts')
 @stack('scripts')
 <script nonce="{{ Vite::cspNonce() }}">
-    function hidePreloader() {
-        const overlay = document.getElementById('page-gif-overlay');
-        if (!overlay) return;
+    // The overlay shows on every page load and wire:navigate, but only briefly:
+    // long enough to read as a transition, short enough not to slow anyone down.
+    // Wrapped in an IIFE because wire:navigate re-runs body scripts, and a
+    // top-level const would throw on redeclaration.
+    (() => {
+        const MIN_VISIBLE = 300;
+        const FADE = 250;
 
-        overlay.style.transition = "opacity 0.8s ease";
-        overlay.style.opacity = "0";
+        const hide = () => {
+            const overlay = document.getElementById('page-gif-overlay');
+            if (!overlay || overlay.dataset.hiding) return;
+            overlay.dataset.hiding = '1';
 
-        setTimeout(() => {
-            overlay.style.display = "none";
-        }, 100);
-    }
+            setTimeout(() => {
+                overlay.style.transition = `opacity ${FADE}ms ease`;
+                overlay.style.opacity = '0';
+                setTimeout(() => { overlay.style.display = 'none'; }, FADE);
+            }, MIN_VISIBLE);
+        };
 
-    function showPreloader() {
-        const overlay = document.getElementById('page-gif-overlay');
-        if (!overlay) return;
+        hide();
 
-        overlay.style.display = "flex";
-        overlay.style.opacity = "1";
-    }
-
-    const MIN_TIME = 1500;
-    let startTime = performance.now();
-
-    function scheduleHide() {
-        const elapsed = performance.now() - startTime;
-        const remaining = MIN_TIME - elapsed;
-
-        setTimeout(hidePreloader, remaining > 0 ? remaining : 0);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        startTime = performance.now();
-        scheduleHide();
-    });
-
-    document.addEventListener('livewire:navigated', () => {
-        startTime = performance.now();
-        scheduleHide();
-    });
-
-    setTimeout(hidePreloader, 2000);
+        if (!window.__hcPreloaderBound) {
+            window.__hcPreloaderBound = true;
+            document.addEventListener('livewire:navigated', hide);
+        }
+    })();
 </script>
 
 
