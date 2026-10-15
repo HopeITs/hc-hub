@@ -886,4 +886,6 @@ return [
     'assign-position-draft-description' => 'You can reserve a position for this employee now and finish their contract later, or skip this and add a contract whenever you are ready.',
     'create-draft-and-continue' => 'Reserve Position & Continue',
     'skip-for-now' => 'Skip for Now',
+    'contracts-history' => 'Contracts History',
+    'contracts-history-empty' => 'No contracts yet. Contract history will appear here after the employee is saved.',
 ];

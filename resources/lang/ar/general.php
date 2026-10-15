@@ -886,4 +886,6 @@ return [
     'assign-position-draft-description' => 'يمكنك حجز منصب لهذا الموظف الآن وإكمال عقده لاحقًا، أو تخطي هذه الخطوة وإضافة عقد عندما تكون جاهزًا.',
     'create-draft-and-continue' => 'حجز المنصب والمتابعة',
     'skip-for-now' => 'تخطي الآن',
+    'contracts-history' => 'سجل العقود',
+    'contracts-history-empty' => 'لا توجد عقود بعد. سيظهر سجل العقود هنا بعد حفظ الموظف.',
 ];
