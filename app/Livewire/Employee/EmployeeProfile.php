@@ -131,6 +131,7 @@ class EmployeeProfile extends Component
             'contracts' => $contracts,
             'currentContract' => $currentContract,
             'currentPosition' => $currentPosition,
+            'isOnLeave' => $employee->is_active && $employee->isOnLeaveToday(),
             'directManager' => $currentPosition?->directManager?->activeContracts?->first()?->employee,
             'skills' => $this->canViewRecords ? $this->parseTags($employee->skills) : [],
             'interests' => $this->canViewRecords ? $this->parseTags($employee->interests) : [],
