@@ -34,6 +34,11 @@ class ContractsTable extends LivewireTable
 
     public string $sortDirection = 'asc';
 
+    // Restore the list position and searches after visiting a contract.
+    protected bool $useSession = true;
+
+    protected array $sessionProperties = ['globalSearch', 'search', 'paginators', 'perPage'];
+
     protected string $model = Contract::class;
 
     protected $listeners = [
@@ -123,6 +128,36 @@ class ContractsTable extends LivewireTable
             new ContractExport($data, $visibleColumnCodes),
             $filename,
         );
+    }
+
+    public function updatedPaginators(): void
+    {
+        // Pagination actions change state directly rather than through wire:model.
+        $this->updateSession();
+    }
+
+    protected function sessionKey(): string
+    {
+        return parent::sessionKey().':'.auth()->id();
+    }
+
+    protected function restoreSession(): void
+    {
+        // Livewire has already read URL searches before the table initializes.
+        $urlSearch = [];
+        foreach ($this->sessionProperties as $property) {
+            if (request()->query->has($this->getQueryStringName($property))) {
+                $urlSearch[$property] = $this->{$property};
+            }
+        }
+
+        parent::restoreSession();
+
+        $this->fill($urlSearch);
+
+        if (request()->query->has('page')) {
+            $this->paginators['page'] = max(1, request()->integer('page', 1));
+        }
     }
 
     /**
