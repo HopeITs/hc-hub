@@ -355,7 +355,7 @@ return [
         // caller-supplied owner id, so there is no cross-user surface for a
         // permission to protect.
         'dashboard.employee-notes-card' => [
-            'addText', 'createNote', 'toggleDone', 'updateContent', 'delete',
+            'addText', 'createNote', 'toggleDone', 'updateContent', 'delete', 'restoreNote',
         ],
         'notifications.dropdown' => [
             'markAsRead', 'markAllAsRead', 'openNotification', 'refreshList', 'safeNotificationUrl',

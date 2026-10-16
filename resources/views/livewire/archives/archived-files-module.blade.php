@@ -216,31 +216,6 @@
     </div>
     @endif
 
-    @if ($showDeleteConfirmationModal)
-    <div class="fixed inset-0 z-40 bg-neutral-900/60" wire:click="$set('showDeleteConfirmationModal', false)"></div>
-    <div class="fixed z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
-        <div class="mx-4 bg-white rounded-surface shadow-e3">
-            <div class="px-6 pt-6">
-                <div class="flex items-start">
-                    <div class="flex items-center justify-center flex-shrink-0 w-12 h-12 bg-neutral-100 rounded-full">
-                        <x-icons.exclamation-triangle class="w-6 h-6 text-[#c2151c]" />
-                    </div>
-                    <div class="text-left ms-4">
-                        <h3 class="text-h4 font-medium text-neutral-900">{{ __('general.delete_item') }}</h3>
-                        <div class="mt-2">
-                            <p class="text-body text-secondary-medium">{{ __('general.delete_confirmation', ['item' => $itemNameToDelete ?? 'this item']) }}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-3 px-6 py-4 mt-4 rounded-b-lg bg-neutral-50">
-                <button type="button" wire:click="deleteItem" class="inline-flex justify-center w-full px-4 py-2 text-body font-medium text-white bg-[#c2151c] rounded-control hover:bg-[#a51b20] focus:outline-none">{{ __('general.delete') }}</button>
-                <button type="button" wire:click="$set('showDeleteConfirmationModal', false)" class="inline-flex justify-center w-full px-4 py-2 text-body font-medium text-neutral-800 bg-white border border-neutral-300 rounded-control hover:bg-neutral-50">{{ __('general.cancel') }}</button>
-            </div>
-        </div>
-    </div>
-    @endif
-
     @if ($editingFolderId)
     <div class="fixed inset-0 z-40 bg-neutral-900/60" wire:click="$set('editingFolderId', null)"></div>
     <div class="fixed z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">

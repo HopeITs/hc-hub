@@ -58,16 +58,6 @@
           class="{{ View::hasSection('greeting') ? '' : 'pt-[120px] ' }} bg-app-surface flex-grow flex flex-col items-center focus:outline-none">
 
 
-        {{--
-            role="status" makes the flash message announced when it appears.
-            Without it the text is painted silently and a screen reader user
-            never learns the action succeeded.
-        --}}
-        @if (session('status'))
-            <div class="alert alert-success" role="status" aria-live="polite">
-                {{ session('status') }}
-            </div>
-        @endif
         <div class="px-4 pb-18 max-lg:w-full md:w-11/12  min-h-full">
             @yield('greeting')
             {{ $slot }}
@@ -78,6 +68,10 @@
 </div>
 
 <x-tour.overlay/>
+
+{{-- Outcome toasts (session('status') included) and delete confirmations, for every page. --}}
+<x-toasts/>
+<x-confirm-dialog/>
 
 @include('partials.scripts')
 @stack('scripts')

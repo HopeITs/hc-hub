@@ -32,19 +32,6 @@
         </div>
     </header>
 
-    @if (session('access-success'))
-        <div x-data="{ visible: true, dismissTimer: null }"
-            x-init="dismissTimer = setTimeout(() => visible = false, 5000)"
-            x-show="visible"
-            x-transition.opacity.duration.200ms
-            x-on:beforeunload.window="clearTimeout(dismissTimer)"
-            data-testid="access-success"
-            class="flex min-h-11 items-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-800"
-            role="status">
-            {{ session('access-success') }}
-        </div>
-    @endif
-
     @if ($activeTab === 'employees')
         <div class="grid min-w-0 gap-[clamp(1rem,1.5vw,1.5rem)] xl:grid-cols-[21rem_minmax(0,1fr)]">
             <section class="@container/directory flex min-w-0 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
@@ -389,7 +376,7 @@
                                     class="min-h-11 rounded-lg border border-gray-200 px-4 text-sm font-bold text-gray-700 transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]">
                                     {{ __('access.rename-role') }}
                                 </button>
-                                <button type="button" wire:click="deleteRole" wire:confirm="{{ __('access.delete-role') }}?"
+                                <button type="button" x-on:click="if (await $confirm({ title: @js(__('access.delete-role')) })) $wire.deleteRole()"
                                     class="min-h-11 rounded-lg border border-[#be1f24] px-4 text-sm font-bold text-[#be1f24] transition hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]">
                                     {{ __('access.delete-role') }}
                                 </button>
