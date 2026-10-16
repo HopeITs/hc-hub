@@ -2,18 +2,18 @@
 
 namespace App\Livewire\Employee;
 
+use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Forms\Employee\DraftContractForm;
 use App\Livewire\Forms\Employee\PersonalInfoForm;
 use App\Models\City;
 use App\Models\Position;
-use App\Traits\WithAlerts;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class EmployeeCreate extends Component
 {
-    use WithAlerts, WithFileUploads;
+    use WithFeedback, WithFileUploads;
 
     public PersonalInfoForm $infoForm;
 
@@ -78,7 +78,7 @@ class EmployeeCreate extends Component
             throw $e;
         }
 
-        $this->successToast();
+        $this->toast();
         $this->showDraftPrompt = true;
         $this->draftCityId = $this->infoForm->employee->city_id;
 
@@ -88,32 +88,6 @@ class EmployeeCreate extends Component
         // Profile tab's view — force the user back there so it is always
         // reachable regardless of which tab they saved from.
         $this->activeTab = 'information';
-    }
-
-    /**
-     * Which tab to show so a validation failure is visible: stays on the
-     * current tab if it already accounts for at least one of the failing
-     * fields, otherwise jumps to the other one.
-     */
-    private function tabForErrors(array $errors): string
-    {
-        $contactFields = ['username', 'email', 'work_phone', 'personal_phone'];
-
-        $failingFields = collect(array_keys($errors))
-            ->map(fn (string $key): string => str($key)->after('infoForm.')->toString());
-
-        $hasContactError = $failingFields->intersect($contactFields)->isNotEmpty();
-        $hasProfileError = $failingFields->diff($contactFields)->isNotEmpty();
-
-        if ($this->activeTab === 'contact' && $hasContactError) {
-            return 'contact';
-        }
-
-        if ($this->activeTab !== 'contact' && $hasProfileError) {
-            return $this->activeTab;
-        }
-
-        return $hasContactError ? 'contact' : 'information';
     }
 
     /** Whether the acting user may point the draft-position cascade at a city other than the employee's own. */
@@ -211,7 +185,7 @@ class EmployeeCreate extends Component
     public function createDraftAndContinue()
     {
         $this->draftForm->createDraft($this->infoForm->employee, $this->draftCityId, $this->draftProgramId);
-        $this->successToast();
+        $this->toast();
 
         return $this->redirect(route('employees.edit', $this->infoForm->employee->id), navigate: true);
     }
@@ -236,5 +210,31 @@ class EmployeeCreate extends Component
             'canViewContractPay' => false,
             'contractHistory' => collect(),
         ]);
+    }
+
+    /**
+     * Which tab to show so a validation failure is visible: stays on the
+     * current tab if it already accounts for at least one of the failing
+     * fields, otherwise jumps to the other one.
+     */
+    private function tabForErrors(array $errors): string
+    {
+        $contactFields = ['username', 'email', 'work_phone', 'personal_phone'];
+
+        $failingFields = collect(array_keys($errors))
+            ->map(fn (string $key): string => str($key)->after('infoForm.')->toString());
+
+        $hasContactError = $failingFields->intersect($contactFields)->isNotEmpty();
+        $hasProfileError = $failingFields->diff($contactFields)->isNotEmpty();
+
+        if ($this->activeTab === 'contact' && $hasContactError) {
+            return 'contact';
+        }
+
+        if ($this->activeTab !== 'contact' && $hasProfileError) {
+            return $this->activeTab;
+        }
+
+        return $hasContactError ? 'contact' : 'information';
     }
 }

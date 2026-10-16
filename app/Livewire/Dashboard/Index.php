@@ -12,6 +12,7 @@ use App\Models\News;
 use App\Models\Position;
 use App\Models\Program;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Livewire\Component;
 
 class Index extends Component
@@ -371,7 +372,9 @@ class Index extends Component
             ])
             ->values();
 
-        return $members->merge($allEmployees)->unique('id')->values();
+        // The card links each member's work email (account login) — load it in one query.
+        return (new EloquentCollection($members->merge($allEmployees)->unique('id')->values()))
+            ->loadMissing('account');
     }
 
     public function mount(): void

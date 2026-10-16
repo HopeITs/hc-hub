@@ -7,18 +7,17 @@ use App\Models\Position;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
  * Side drawer showing an employee's position, manager, and direct reports.
  *
- * A Livewire #[On] listener is a public HTTP endpoint. The org chart happens to
- * dispatch 'open-profile' only for employees already on the page, but nothing
- * stops a client from dispatching it with any id at all — so the drawer did a
- * global Employee::find() and rendered whatever came back, across cities.
+ * openProfile() is a public HTTP endpoint. The org chart only opens the drawer
+ * for employees already on the page, but nothing stops a client from calling
+ * it with any id at all — so the drawer did a global Employee::find() and
+ * rendered whatever came back, across cities.
  *
- * The event payload is therefore treated as untrusted input: the employee is
+ * The id is therefore treated as untrusted input: the employee is
  * loaded, authorized through EmployeePolicy, and every follow-up lookup
  * (position, manager, reports) is restricted to the viewer's city using the
  * same Position::inCity scope the contract forms use.
@@ -29,10 +28,10 @@ class ProfileDrawer extends Component
     public ?int $employeeId = null;
 
     /**
-     * Load an employee into the drawer (dispatched from any card on the page).
-     * Showing and hiding the drawer happens client-side on the same event.
+     * Load an employee into the drawer. Called by the drawer's own Alpine
+     * handler for the 'open-profile' browser event every card dispatches, so
+     * there is no #[On] listener — that would load each click twice.
      */
-    #[On('open-profile')]
     public function openProfile(int $employeeId): void
     {
         $employee = Employee::query()->find($employeeId);
@@ -47,14 +46,14 @@ class ProfileDrawer extends Component
         $this->employeeId = $employee->id;
     }
 
-    /** The employee being shown, with avatar + home city loaded. */
+    /** The employee being shown, with avatar, home city and work email loaded. */
     public function getEmployeeProperty(): ?Employee
     {
         if (! $this->employeeId) {
             return null;
         }
 
-        $employee = Employee::with(['media', 'city'])->find($this->employeeId);
+        $employee = Employee::with(['media', 'city', 'account'])->find($this->employeeId);
 
         // Re-checked on render, not only on open: a role switch between the
         // two must not leave a stale authorized drawer on screen.

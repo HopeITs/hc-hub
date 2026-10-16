@@ -4,6 +4,7 @@ namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
+use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
@@ -14,13 +15,13 @@ use Blade;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
-use Jantinnerezo\LivewireAlert\Facades\LivewireAlert;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class AllLeaveRequestModule extends Component
 {
     use AuthorizesActivePermissions;
+    use WithFeedback;
 
     public LeaveBalance $leaveBalance;
 
@@ -159,11 +160,7 @@ class AllLeaveRequestModule extends Component
         $this->decisionModal = false;
         $this->clearLinkedLeave();
 
-        LivewireAlert::title(__('general.success-message'))
-            ->success()
-            ->toast()
-            ->position('top-start')
-            ->show();
+        $this->toast();
 
         $this->dispatch('$refresh');
         $this->dispatch('leaveRequestDecisionSaved')->to(AllLeaveRequestTable::class);
@@ -220,13 +217,7 @@ class AllLeaveRequestModule extends Component
     {
         $html = $this->confirmationMessage();
 
-        LivewireAlert::title(__('general.confirmation'))
-            ->timer(null)
-            ->question()
-            ->html($html)
-            ->withConfirmButton(__('general.save'))
-            ->onConfirm('processSave')
-            ->withCancelButton(__('general.cancel'))->show();
+        $this->confirm('processSave', title: __('general.confirmation'), html: $html, confirmLabel: __('general.save'), danger: false);
 
     }
 
@@ -244,11 +235,7 @@ class AllLeaveRequestModule extends Component
         $this->formModal = false;
         $this->form->reset();
 
-        LivewireAlert::title(__('general.success-message'))
-            ->success()
-            ->toast()
-            ->position('top-start')
-            ->show();
+        $this->toast();
 
         $this->refreshCounts();
     }
@@ -256,14 +243,7 @@ class AllLeaveRequestModule extends Component
     public function confirmDelete($id)
     {
 
-        LivewireAlert::title(__('general.delete-item'))
-            ->text(__('general.confirm-delete-item'))
-            ->question()
-            ->confirmButtonColor(config('samples.styles.colors.primary'))
-            ->withConfirmButton(__('general.delete'))
-            ->onConfirm('delete', ['id' => $id])
-            ->withCancelButton(__('general.cancel'))
-            ->show();
+        $this->confirm('delete', ['id' => $id]);
     }
 
     public function delete($id)
@@ -275,11 +255,7 @@ class AllLeaveRequestModule extends Component
         $this->showModal = false;
         $this->clearLinkedLeave();
         $this->refreshCounts();
-        LivewireAlert::title(__('general.success-message'))
-            ->success()
-            ->toast()
-            ->position('top-start')
-            ->show();
+        $this->toast();
 
     }
 

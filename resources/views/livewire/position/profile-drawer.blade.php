@@ -6,15 +6,30 @@
     $reports = $this->directReports;
 @endphp
 
-{{-- Visibility is owned by Alpine, not the server: every card dispatches the
-     browser event 'open-profile', which opens the drawer on the spot while the
-     #[On] listener loads the employee. Entangling a server `open` flag made each
-     re-open depend on a client/server sync that could leave the drawer shut. --}}
-<div x-data="{ show: false }"
+{{-- Alpine owns the drawer: every card dispatches the browser event
+     'open-profile', which opens the drawer on the spot and asks the server for
+     that employee. The server's copy only renders once its employeeId matches
+     the one just requested — until then a spinner shows, so the previous
+     employee is never left on screen under a new click. --}}
+<div x-data="{
+        show: false,
+        requestedId: null,
+        get ready() {
+            return this.requestedId !== null && this.$wire.employeeId === this.requestedId;
+        },
+        open(employeeId) {
+            this.requestedId = Number(employeeId);
+            this.show = true;
+
+            if (! this.ready) {
+                this.$wire.openProfile(this.requestedId);
+            }
+        },
+     }"
      x-cloak
      x-show="show"
      x-effect="document.body.classList.toggle('overflow-hidden', show)"
-     x-on:open-profile.window="show = true"
+     x-on:open-profile.window="open($event.detail.employeeId)"
      x-on:livewire:navigating.window="show = false; document.body.classList.remove('overflow-hidden')"
      x-on:keydown.escape.window="show = false"
      class="fixed inset-0 z-50">
@@ -38,6 +53,7 @@
          x-transition:leave-end="translate-y-full sm:translate-y-0 sm:translate-x-full sm:rtl:-translate-x-full">
 
         @if($employee)
+        <div class="flex min-h-0 flex-1 flex-col" x-show="ready">
             {{-- Header --}}
             <div class="relative px-6 pt-6 pb-4 overflow-hidden text-white shrink-0 bg-gradient-to-b from-secondary-dark to-secondary-light">
 
@@ -86,8 +102,7 @@
                 {{-- Contact --}}
                 @php($contacts = collect([
                     ['icon' => 'phone', 'value' => $employee->work_phone, 'href' => 'tel:'],
-                    ['icon' => 'mobile', 'value' => $employee->personal_phone, 'href' => 'tel:'],
-                    ['icon' => 'mail', 'value' => $employee->personal_email, 'href' => 'mailto:'],
+                    ['icon' => 'mail', 'value' => $employee->work_email, 'href' => 'mailto:'],
                 ])->filter(fn ($c) => filled($c['value'])))
                 @if($contacts->isNotEmpty())
                     <div>
@@ -99,8 +114,6 @@
                                     <span class="flex items-center justify-center rounded-surface size-7 shrink-0 bg-secondary-soft/10 text-primary">
                                         @if($contact['icon'] === 'mail')
                                             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
-                                        @elseif($contact['icon'] === 'mobile')
-                                            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path stroke-linecap="round" d="M11 18h2"/></svg>
                                         @else
                                             <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2 5a2 2 0 0 1 2-2h2l2 5-2 1a12 12 0 0 0 5 5l1-2 5 2v2a2 2 0 0 1-2 2A16 16 0 0 1 2 5Z"/></svg>
                                         @endif
@@ -172,11 +185,12 @@
                     </a>
                 </div>
             @endif
-        @else
-            {{-- The drawer opens before the first employee has loaded. --}}
-            <div class="flex items-center justify-center flex-1 p-8">
-                <x-icons.spinner class="size-6 animate-spin text-primary" />
-            </div>
+        </div>
         @endif
+
+        {{-- Shown while the requested employee is still loading. --}}
+        <div class="flex items-center justify-center flex-1 p-8" x-show="! ready">
+            <x-icons.spinner class="size-6 animate-spin text-primary" />
+        </div>
     </div>
 </div>

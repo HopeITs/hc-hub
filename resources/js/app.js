@@ -70,9 +70,8 @@ Chart.register(
 
 window.Chart = Chart;
 
-import Swal from 'sweetalert2';
-
-window.Swal = Swal;
+// Toasts and the confirmation dialog (<x-toasts/>, <x-confirm-dialog/>).
+import './feedback.js';
 
 import './password-toggle.js';
 import './password-strength.js';
