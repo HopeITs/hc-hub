@@ -4,7 +4,6 @@ namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Forms\LeaveRequestForm;
-use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use Illuminate\Database\Eloquent\Builder;
@@ -55,17 +54,6 @@ class MyLeaveRequestTable extends LivewireTable
         Gate::authorize('update', $model);
 
         $this->form->setLeaveRequest($model);
-        $employee = auth()->user()->profile;
-        $modalTitle = __('general.edit');
-        $form = $this->form;
-        $availableLeaves = auth()->user()->profile->availableLeaves();
-        $allAvailableLeaves = $employee->allAvailableLeaves();
-        $alternativeEmployees = Employee::where('city_id', $employee->city_id)->where('id', '!=', $employee->id)
-            ->whereHas('contracts', function ($query) use ($employee) {
-                $query->whereHas('position.department', function ($query) use ($employee) {
-                    $query->where('id', $employee->department->id ?? null);
-                });
-            })->get();
         $this->showModal = true;
     }
 
