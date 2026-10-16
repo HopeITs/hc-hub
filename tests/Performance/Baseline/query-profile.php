@@ -25,6 +25,10 @@ require $root.'/vendor/autoload.php';
 $app = require $root.'/bootstrap/app.php';
 perf_configure($app);
 $kernel = $app->make(HttpKernel::class);
+// Providers (and the locale-prefixed route group) read the request while
+// booting; give them an English one, as a browser hitting / would.
+$serverVars = ['HTTP_HOST' => '127.0.0.1:'.(getenv('PERF_PORT') ?: '8390'), 'HTTP_ACCEPT_LANGUAGE' => 'en'];
+$app->instance('request', Request::create('/', 'GET', server: $serverVars));
 $kernel->bootstrap();
 perf_assert_isolated();
 
@@ -69,7 +73,7 @@ foreach ($paths as $path) {
         $app['events']->listen(QueryExecuted::class, $listener);
 
         $app['auth']->guard('web')->setUser($user);
-        $request = Request::create($path, 'GET', server: ['HTTP_HOST' => '127.0.0.1:'.(getenv('PERF_PORT') ?: '8390'), 'HTTP_ACCEPT_LANGUAGE' => 'en']);
+        $request = Request::create($path, 'GET', server: $serverVars);
         $started = microtime(true);
         $response = $kernel->handle($request);
         $elapsed = (microtime(true) - $started) * 1000;
