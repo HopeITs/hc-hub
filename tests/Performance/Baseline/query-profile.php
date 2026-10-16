@@ -28,7 +28,9 @@ $kernel = $app->make(HttpKernel::class);
 $kernel->bootstrap();
 perf_assert_isolated();
 
-[$script, $email, ...$paths] = $argv;
+$email = $argv[1] ?? exit("usage: query-profile.php <persona-email> <path> [<path> ...]
+");
+$paths = array_slice($argv, 2);
 $user = User::query()->where('email', $email)->firstOrFail();
 
 $viewSource = function (string $compiled): string {
