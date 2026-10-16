@@ -28,8 +28,7 @@ $kernel = $app->make(HttpKernel::class);
 $kernel->bootstrap();
 perf_assert_isolated();
 
-$email = $argv[1] ?? exit("usage: query-profile.php <persona-email> <path> [<path> ...]
-");
+$email = $argv[1] ?? exit('usage: query-profile.php <persona-email> <path> [<path> ...]'.PHP_EOL);
 $paths = array_slice($argv, 2);
 $user = User::query()->where('email', $email)->firstOrFail();
 
