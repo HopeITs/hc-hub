@@ -1373,7 +1373,10 @@ document.addEventListener('alpine:init', () => {
             }
 
             if (this.flexDaysPerWeekOn && this.flexDaysPerWeek !== '') {
-                fragments.push(isAr ? `${this.flexDaysPerWeek} يوم أسبوعيًا` : `${this.flexDaysPerWeek} days per week`);
+                // Arabic counts 3-10 take the plural (أيام); 1-2 stay singular.
+                fragments.push(isAr
+                    ? `${this.flexDaysPerWeek} ${Number(this.flexDaysPerWeek) >= 3 ? 'أيام' : 'يوم'} أسبوعيًا`
+                    : `${this.flexDaysPerWeek} days per week`);
             }
 
             if (this.flexHoursPerMonthOn && this.flexHoursPerMonth !== '') {

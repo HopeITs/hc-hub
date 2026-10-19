@@ -63,7 +63,9 @@
 
         if ($contract->flex_days_per_week) {
             $fragmentsEn[] = ((string) $contract->flex_days_per_week).' days per week';
-            $fragmentsAr[] = $glyphs($digitsAr($contract->flex_days_per_week).' يوم أسبوعيًا');
+            // Arabic counts 3-10 take the plural (أيام); 1-2 stay singular.
+            $dayWordAr = (int) $contract->flex_days_per_week >= 3 ? 'أيام' : 'يوم';
+            $fragmentsAr[] = $glyphs($digitsAr($contract->flex_days_per_week).' '.$dayWordAr.' أسبوعيًا');
         }
 
         if ($contract->flex_hours_per_month) {
