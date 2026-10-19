@@ -79,9 +79,9 @@ class ContractsTable extends LivewireTable
     {
         $contract = Contract::findOrFail($payload['id']);
         Gate::authorize('manageAutoRenew', $contract);
-        // The toggle is not rendered for a terminated contract, and
+        // The toggle is not rendered for a terminated or trial contract, and
         // ContractObserver::saving() would force the flag straight back off.
-        abort_if($contract->isTerminated(), 403);
+        abort_unless($contract->canAutoRenew(), 403);
 
         $contract->update(['auto_renew' => ! $contract->auto_renew]);
 
@@ -331,7 +331,7 @@ class ContractsTable extends LivewireTable
                 $edit = $canUpdate
                     ? Blade::render('<x-table.edit-btn :href="route(\'contracts.edit\', $id)" />', ['id' => $m->getKey()])
                     : '';
-                $autoRenew = $canManageAutoRenew && ! $m->isTerminated()
+                $autoRenew = $canManageAutoRenew && $m->canAutoRenew()
                     ? Blade::render(
                         '<x-forms.toggle-input class="p-2 text-xl" active="'.($m->auto_renew ? 1 : 0).'" :model-id="'.$m->getKey().'" wire-event="confirmToggleAutoRenew" title="'.e(__('general.auto-renew')).'" />',
                     )

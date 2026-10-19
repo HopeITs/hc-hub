@@ -386,6 +386,47 @@ class ContractAutoRenewalWorkflowTest extends TestCase
         $this->assertSame(1, Contract::query()->where('employee_id', $employee->id)->count());
     }
 
+    public function test_process_auto_renewals_skips_trial_contracts(): void
+    {
+        $this->travelTo('2026-09-16 09:00:00');
+        Notification::fake();
+
+        $fixtures = $this->makeFixtures();
+        $employee = $this->makeEmployee($fixtures['city'], 'trial-expired');
+        $contract = $this->makeContract($fixtures, $employee, $this->makePosition($fixtures, 'Trial Expired Position'), [
+            'contract_type_id' => $fixtures['trialType']->id,
+            'start_date' => '2026-06-01',
+            'end_date' => '2026-09-15',
+            'is_active' => false,
+        ]);
+
+        // Legacy row: a trial switched on before the observer forced it off.
+        Contract::query()->whereKey($contract)->update(['auto_renew' => true]);
+
+        Artisan::call(ProcessContractAutoRenewals::class);
+
+        $this->assertSame(1, Contract::query()->where('employee_id', $employee->id)->count());
+    }
+
+    public function test_contracts_table_refuses_the_auto_renew_toggle_on_a_trial_contract(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $contract = $this->makeContract(
+            $fixtures,
+            $this->makeEmployee($fixtures['city'], 'trial-table'),
+            $this->makePosition($fixtures, 'Trial Table Position'),
+            ['contract_type_id' => $fixtures['trialType']->id],
+        );
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractsTable::class)
+            ->assertDontSee('confirmToggleAutoRenew')
+            ->call('toggleAutoRenewConfirmed', ['id' => $contract->id])
+            ->assertStatus(403);
+
+        $this->assertFalse($contract->fresh()->auto_renew);
+    }
+
     public function test_contracts_table_shows_termination_date_and_hides_auto_renew_toggle(): void
     {
         $fixtures = $this->makeFixtures();
@@ -422,11 +463,12 @@ class ContractAutoRenewalWorkflowTest extends TestCase
         $jobLevel = JobLevel::query()->forceCreate(['name_en' => 'Officer', 'name_ar' => 'مسؤول', 'grade' => 2]);
         $program = Program::query()->forceCreate(['name' => 'Core Program', 'slug' => 'core-program', 'code' => 'CORE', 'is_active' => true]);
         $annualType = ContractType::query()->forceCreate(['id' => 1, 'name_en' => 'Annual', 'name_ar' => 'سنوي']);
+        $trialType = ContractType::query()->forceCreate(['id' => 3, 'name_en' => 'Trial', 'name_ar' => 'تجريبي']);
         ContractType::query()->forceCreate(['id' => 5, 'name_en' => 'Service Agreement', 'name_ar' => 'اتفاقية خدمة']);
         $hr = $this->makeUser($city, 'HR-ALP', ['contracts.update', 'contracts.view'], null);
         $hr->update(['email' => 'hr.alp@example.test']);
 
-        return compact('city', 'center', 'department', 'jobLevel', 'program', 'annualType', 'hr');
+        return compact('city', 'center', 'department', 'jobLevel', 'program', 'annualType', 'trialType', 'hr');
     }
 
     private function makeManagerWithPosition(array $fixtures): array
