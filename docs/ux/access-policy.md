@@ -169,6 +169,8 @@ Implementation of each affected part stays **conditional** until the decision is
 
 ## 7. Effect on the failures A1 routed here
 
+> **Superseded for #2–#4 (2026-10-20):** the §9 decision (readable card link, no token) replaces the token/legacy design of §5.3 and the rows below. What A2 actually implemented and tested: [a2-implementation.md](a2-implementation.md).
+
 A1 found these failures; it did not change them. The **intent** of each stays; the **assertion** must follow the signed policy.
 
 | A1 # | Test | Today | Under this policy | For A2 |

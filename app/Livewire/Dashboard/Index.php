@@ -13,6 +13,7 @@ use App\Models\Position;
 use App\Models\Program;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
 
 class Index extends Component
@@ -271,6 +272,18 @@ class Index extends Component
             ->with(['media', 'contracts.position.jobLevel'])
             ->first();
 
+        // The CEO and the deputies are pinned by id and by position rather
+        // than by the is_active filter below, so they go through the Directory
+        // rule instead: a former holder is not shown to staff and managers
+        // (access-policy.md A2D-Q3).
+        $viewer = auth()->user();
+        $visible = fn (?Employee $employee) => $employee && $viewer
+            && Gate::forUser($viewer)->allows('viewDirectory', $employee);
+
+        if ($ceo && ! $visible($ceo)) {
+            $ceo = null;
+        }
+
         if ($ceo) {
             $contract = $ceo->latestActiveContract();
             $ceo->positionTitle = 'Chief Executive Officer';
@@ -292,7 +305,7 @@ class Index extends Component
             ->get()
             ->unique('employee_id')
             ->sortBy('position_id')
-            ->filter(fn (Contract $contract) => $contract->employee)
+            ->filter(fn (Contract $contract) => $visible($contract->employee))
             ->map(function (Contract $contract) use ($titleCol) {
                 $contract->employee->positionTitle = $contract->position?->$titleCol ?? '—';
 

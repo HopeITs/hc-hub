@@ -90,6 +90,8 @@ return [
             'renameRole' => 'access-management.manage-roles',
             'deleteRole' => 'access-management.manage-roles',
         ],
+        // edit() discloses a city into the modal, like the other basics modules.
+        'basics.city-module' => ['edit' => 'project-basics.update'],
         'basics.city-table' => [
             'toggleItemStatusConfirmed' => 'project-basics.update',
             'exportExcel' => 'project-basics.export',
@@ -184,7 +186,17 @@ return [
             'renewAsIs' => 'contracts.create',
             'renewWithEdit' => 'contracts.create',
         ],
-        'contract.contracts-table' => ['delete' => 'contracts.delete', 'exportExcel' => 'contracts.export'],
+        // Both auto-renew actions also run ContractPolicy::manageAutoRenew on
+        // the specific contract (HR role, contracts.update, visible to the
+        // caller), which is the city/record control; the permission here is
+        // the coarse gate. The confirmed write normally arrives as a dispatched
+        // event, so the in-method Gate is what holds on that path.
+        'contract.contracts-table' => [
+            'delete' => 'contracts.delete',
+            'exportExcel' => 'contracts.export',
+            'confirmToggleAutoRenew' => 'contracts.update',
+            'toggleAutoRenewConfirmed' => 'contracts.update',
+        ],
         'news.news-table' => ['delete' => 'news.delete'],
         'employee.leave.all-leave-request-module' => [
             'create' => 'leaves.create', 'delete' => 'leaves.delete',
@@ -305,7 +317,10 @@ return [
         'basics.job-level-table' => ['confirmDelete'],
         'basics.leave-type-table' => ['confirmDelete'],
         'basics.termination-reason-table' => ['confirmDelete'],
-        'contract.contracts-table' => ['confirmDelete'],
+        // updatedPaginators (not a dialog) stores the caller's own page
+        // position in their own session (the key includes auth()->id()); the
+        // rows still come from query(), which applies Contract::scopeVisibleTo.
+        'contract.contracts-table' => ['confirmDelete', 'updatedPaginators'],
         'news.news-table' => ['confirmDelete'],
         'position.position-table' => ['confirmDelete', 'confirmToggleItemStatus'],
         'program-management.center.centers-table' => ['confirmDelete', 'confirmToggleItemStatus'],
@@ -327,6 +342,15 @@ return [
         'basics.job-level-module' => ['save'],
         'basics.leave-type-module' => ['save'],
         'basics.termination-reason-module' => ['save'],
+        // save() writes only cities.hr_hotline (the ID card's emergency number,
+        // A2D-Q7) after its own project-basics.update check.
+        'basics.city-module' => ['save'],
+        // Each re-reads the employee by its locked id and runs the
+        // digital-id.manage or digital-id.report-lost gate (DigitalIdPolicy)
+        // against the request's active role. A permission name would be wrong:
+        // reportLost belongs to the card's owner, who holds no HR permission,
+        // and manage is city-scoped HR, which a permission cannot express.
+        'employee-cards.manage-digital-id' => ['reissue', 'disable', 'enable', 'reportLost'],
         // updatedFormNewsableType() only clears dependent form selections;
         // it does not read a record or persist data. save() authorizes before writing.
         'news.news-create' => ['save', 'updatedFormNewsableType'],
@@ -349,6 +373,13 @@ return [
             'edit', 'confirmDelete', 'confirmHrReview', 'refreshTable', 'setStatusFilter',
         ],
         'employee.leave.my-leave-request-table' => ['edit', 'confirmDelete', 'setStatusFilter'],
+        // A record read, not a state toggle: it takes a caller-supplied
+        // employee id. It authorizes EmployeePolicy::viewDirectory on that id,
+        // and the drawer re-checks on every render, so a role switch or a
+        // former employee drops back to a uniform not-found (access-policy.md
+        // §4.4). The middleware could only add positions.view, which every
+        // role already holds and which says nothing about the record.
+        'position.profile-drawer' => ['openProfile'],
 
         // --- Scoped to the caller -------------------------------------------
         // These resolve their subject from auth() and never accept a
@@ -404,12 +435,19 @@ return [
             'setActiveTab', 'toggleBoardMember', 'addEducation', 'addCourse',
             'addExperience', 'addRelative', 'addAttachment', 'openInitiateReturnModal',
         ],
+        // toggleVacancies only flips whether empty positions are drawn and
+        // rebuilds the same tree; vacant positions hold no person's data.
         'position.org-chart' => [
             'zoomIn', 'zoomOut', 'resetZoom', 'fitToScreen', 'expandAll',
             'collapseAll', 'toggleCollapse', 'toggleDensity', 'resetFilters',
+            'toggleVacancies',
         ],
         'position.directory' => ['resetFilters'],
-        'position.profile-drawer' => ['openProfile', 'close'],
+        // Reset the dependent center selection and pass the city through
+        // validPositionFormCityId(), which refuses a city outside the
+        // caller's scope. Nothing is written until the mapped save() runs.
+        'position.position-create' => ['updatedFormCityId'],
+        'position.position-edit' => ['updatedFormCityId'],
         'program-management.center.center-details' => ['switchTab'],
         'news.today-events-card' => ['loadEvents'],
 

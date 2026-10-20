@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\LeaveRequestStatus;
+use App\Services\DigitalIdManager;
 use App\Traits\HasTranslation;
 use App\Traits\RedactsSensitiveActivityLog;
 use Carbon\Carbon;
@@ -101,6 +102,8 @@ class Employee extends Model implements HasMedia
         'digital_id_enabled' => 'boolean',
         'digital_id_rotated_at' => 'datetime',
         'digital_id_revoked_at' => 'datetime',
+        // Deliberately not fillable: only DigitalIdManager moves it, forward.
+        'digital_id_card_index' => 'integer',
     ];
 
     /** Memoized result of latestActiveContract() — not a database column. */
@@ -111,9 +114,18 @@ class Employee extends Model implements HasMedia
     /** Memoized result of isOnLeaveToday() — not a database column. */
     protected ?bool $onLeaveTodayMemo = null;
 
-    public function digitalIdUrl(): string
+    /**
+     * The public link of this employee's current card, for printing:
+     * /ID/[city][program][employee id]-[index]. Null when no link can be built
+     * (no city, no current position, or a code that is not 1–3 digits).
+     *
+     * @see DigitalIdManager
+     */
+    public function digitalIdUrl(): ?string
     {
-        return route('digital-id.show', ['token' => $this->digital_id_token]);
+        $card = app(DigitalIdManager::class)->cardCode($this);
+
+        return $card === null ? null : route('digital-id.show', ['card' => $card]);
     }
 
     public function nameForLocale(string $locale): string
@@ -369,8 +381,8 @@ class Employee extends Model implements HasMedia
     /**
      * A short-lived signed photo URL for the unauthenticated digital ID card.
      *
-     * Only ShowDigitalId should call this, and only after the bearer token has
-     * been matched to an active employee.
+     * Only ShowDigitalId should call this, and only after the card link has
+     * resolved to an active employee's current, enabled card.
      */
     public function signedAvatarUrl(): string
     {
@@ -523,6 +535,8 @@ class Employee extends Model implements HasMedia
     protected static function booted(): void
     {
         static::creating(function (Employee $employee): void {
+            // No longer read by the card (its link is DigitalIdManager's), kept
+            // so the previous release still works if it has to be redeployed.
             $employee->digital_id_token ??= Str::random(64);
         });
     }
