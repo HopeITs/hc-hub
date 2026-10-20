@@ -103,13 +103,10 @@ use App\Enums\LeaveRequestStatus;
 
                 @if($form->leave_balance_id !== null)
                     @if($allAvailableLeaves->find($form->leave_balance_id)?->leaveType?->id === LeaveTypeCases::Annual)
-                        <div class="mt-4">
-                            <x-forms.input-label>Leave Type</x-forms.input-label>
-                            <div class="flex gap-4">
-                                <x-forms.radio-input wire:model.live="form.type" value="day">Day</x-forms.radio-input>
-                                <x-forms.radio-input wire:model.live="form.type" value="hour">Hour</x-forms.radio-input>
-                            </div>
-                        </div>
+                        <x-forms.radio-group class="mt-4" :legend="trans_choice('general.leave-type',1)" error="form.type">
+                            <x-forms.radio-input wire:model.live="form.type" value="day">{{trans_choice('general.day',1)}}</x-forms.radio-input>
+                            <x-forms.radio-input wire:model.live="form.type" value="hour">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
+                        </x-forms.radio-group>
                     @endif
                 @endif
                 @if($form->leave_balance_id === null || $allAvailableLeaves->find($form->leave_balance_id)?->leaveType?->id !== LeaveTypeCases::Annual)
@@ -333,32 +330,23 @@ use App\Enums\LeaveRequestStatus;
                 @if($decisionLeave->status === LeaveRequestStatus::Pending)
                     <div class="border-t pt-4 space-y-4">
 
-                        <x-forms.input-label>{{ __('general.action') }}</x-forms.input-label>
-
-                        <div class="flex gap-6">
-                            <label class="flex items-center space-x-2">
-                                <x-forms.radio-input :value="LeaveRequestStatus::Accepted" id="accept"
-                                                     wire:model.live="form.status">
-                                    {{ __('general.accept') }}
-                                </x-forms.radio-input>
-
-                            </label>
-
-                            <label class="flex items-center space-x-2">
-                                <x-forms.radio-input :value="LeaveRequestStatus::Rejected" id="reject"
-                                                     wire:model.live="form.status">
-                                    {{ __('general.reject') }}
-                                </x-forms.radio-input>
-
-                            </label>
-                        </div>
-                        <x-error-span>{{ $errors->first('form.status') }}</x-error-span>
+                        {{-- One <label> per radio (inside radio-input); wrapping it in a second one was invalid nesting. --}}
+                        <x-forms.radio-group :legend="__('general.action')" error="form.status" required>
+                            <x-forms.radio-input :value="LeaveRequestStatus::Accepted"
+                                                 wire:model.live="form.status">
+                                {{ __('general.accept') }}
+                            </x-forms.radio-input>
+                            <x-forms.radio-input :value="LeaveRequestStatus::Rejected"
+                                                 wire:model.live="form.status">
+                                {{ __('general.reject') }}
+                            </x-forms.radio-input>
+                        </x-forms.radio-group>
 
                         @if((int)$form->status === LeaveRequestStatus::Rejected)
                             <div>
-                                <x-forms.input-label required>{{ __('general.reject-reason') }}</x-forms.input-label>
-                                <x-forms.input wire:model="form.reject_reason"/>
-                                <x-error-span>{{ $errors->first('form.reject_reason') }}</x-error-span>
+                                <x-forms.input-label for="reject_reason" required>{{ __('general.reject-reason') }}</x-forms.input-label>
+                                <x-forms.input id="reject_reason" wire:model="form.reject_reason"/>
+                                <x-forms.input-error field="form.reject_reason" input-id="reject_reason"/>
                             </div>
                         @endif
 

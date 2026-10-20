@@ -864,6 +864,8 @@ return [
         'logo-preview' => 'معاينة الشعار المحدد',
         'current-logo' => 'الشعار الحالي',
         'toggle-password' => 'إظهار أو إخفاء كلمة المرور',
+        'close-dialog' => 'إغلاق النافذة',
+        'view-details' => 'عرض التفاصيل',
     ],
 
     // نصوص <meta> الافتراضية، ويمكن تجاوزها لكل صفحة عبر $title / $description

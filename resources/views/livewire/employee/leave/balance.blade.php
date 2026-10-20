@@ -57,28 +57,20 @@ use App\Enums\LeaveRequestStatus;
                 </div>
 
                 <div>
-                    <x-forms.input-label required>@lang('general.operation')</x-forms.input-label>
-                    <div class="flex gap-x-4">
-                        <x-forms.radio-input id="op_sum" name="operation" value="sum"
+                    <x-forms.radio-group :legend="__('general.operation')" error="form.operation" required>
+                        <x-forms.radio-input value="sum"
                                              wire:model="form.operation">{{__('general.sum')}}</x-forms.radio-input>
-                        <x-forms.radio-input id="op_sub" name="operation" value="sub"
+                        <x-forms.radio-input value="sub"
                                              wire:model="form.operation">{{__('general.sub')}}</x-forms.radio-input>
-
-                    </div>
-
-                    <x-error-span>{{ $errors->first('form.operation') }}</x-error-span>
+                    </x-forms.radio-group>
                 </div>
                 <div>
-                    <x-forms.input-label required>@lang('general.unit')</x-forms.input-label>
-                    <div class="flex gap-x-4">
-                        <x-forms.radio-input id="unit_hour" name="unit" value="hour"
+                    <x-forms.radio-group :legend="__('general.unit')" error="form.unit" required>
+                        <x-forms.radio-input value="hour"
                                              wire:model="form.unit">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
-                        <x-forms.radio-input id="unit_day" name="unit" value="day"
+                        <x-forms.radio-input value="day"
                                              wire:model="form.unit">{{trans_choice('general.day',1)}}</x-forms.radio-input>
-
-                    </div>
-
-                    <x-error-span>{{ $errors->first('form.unit') }}</x-error-span>
+                    </x-forms.radio-group>
                 </div>
                 <div>
                     <x-forms.input-label for="amount" required>@lang('general.amount')</x-forms.input-label>

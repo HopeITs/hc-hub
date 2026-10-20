@@ -201,15 +201,12 @@ use App\Enums\LeaveRequestStatus;
 
                     @if($form->leave_balance_id !== null)
                         @if($availableLeaves->find($form->leave_balance_id)?->leaveType?->id === LeaveTypeCases::Annual)
-                            <div class="mt-4">
-                                <x-forms.input-label>{{trans_choice('general.leave-type',1)}}</x-forms.input-label>
-                                <div class="flex gap-4">
-                                    <x-forms.radio-input wire:model.live="form.type"
-                                                         value="day">{{trans_choice('general.day',1)}}</x-forms.radio-input>
-                                    <x-forms.radio-input wire:model.live="form.type"
-                                                         value="hour">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
-                                </div>
-                            </div>
+                            <x-forms.radio-group class="mt-4" :legend="trans_choice('general.leave-type',1)" error="form.type">
+                                <x-forms.radio-input wire:model.live="form.type"
+                                                     value="day">{{trans_choice('general.day',1)}}</x-forms.radio-input>
+                                <x-forms.radio-input wire:model.live="form.type"
+                                                     value="hour">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
+                            </x-forms.radio-group>
                         @endif
                     @endif
                     @if($form->leave_balance_id === null || $availableLeaves->find($form->leave_balance_id)?->leaveType?->id !== LeaveTypeCases::Annual)
