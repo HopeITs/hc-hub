@@ -38,6 +38,11 @@ Source of policy: "سياسة الموارد البشرية - 2026" (Christian H
 | D-9 Part-time | **Weekly hours below 40** = part-time, deducted by hours only. A center that works full time is identified by the **contract's weekly hours** (40). |
 | Service agreements | A **service agreement** contract has **no paid leave and no balance**. If the volunteer apologizes for a session, HR is informed, the hours are simply not worked and not paid (pay is hourly). Nothing is deducted from any leave balance. The **direct manager also approves** the absence (HR is informed). Gap: the request form needs a balance (`leave_balance_id` is required) and service contracts have none, so this absence flow has no home today; it needs a decision on where it lives (a no-balance request type) in the implementation task. This matches the existing exemption in `LeaveBalanceService::isExemptFromLeave`. |
 
+### D-4 refinement — who sets holidays (2026-10-21)
+Official holidays are in the HR policy. They are entered by **national HR (HR-SYR)**, or by the **program manager** for the projects they are responsible for (a project = a program in one governorate). A program manager may grant a **one-off** holiday to a project. A holiday may be shared by several projects or belong to one; projects may have different holidays. A volunteer gets national holidays + their project's.
+**Birthday holiday:** a holiday for everyone, each on their own birthday (`actual_dob`, else `dob`); created for a period and not necessarily repeated (e.g. this year only). On a weekend or holiday the volunteer picks another day in the same week. Shown to colleagues as "Birthday" (no year), an accepted exception to the private tier. The moved day needs the direct manager's approval; service agreements excluded; created by HR-SYR only.
+**Other answers:** CYG holidays are set by HR-SYR; there is no governorate-wide holiday level, only per project; saints' days are commemorations shown in the calendar, not holidays. Design: [team-coverage-contract.md](team-coverage-contract.md) §6.1.
+
 ### Implementation gap found
 - ~~`cities` has no weekend field~~ Resolved by D-1: the weekend is read from a center of the volunteer's program in their governorate. If the program has no center there, fall back to the code default with a visible warning.
 - D-5 needs a schema change on `leave_requests` (computed hours + rule version); D-7 needs an "exceptional" flag. Both belong to the implementation task, not A3-D.
@@ -97,6 +102,18 @@ Implementation notes (not decided here): today `LeaveRequestPolicy::decide` also
 | "My team" | Both views: same project/program **and** same direct manager (user can switch between them). |
 | What colleagues see | The leave **with its type**. |
 | Coverage | Advisory warning to the manager only; never blocks a request. |
+
+### DEC-06 detail (2026-10-21, C5-D)
+Full record: [team-coverage-contract.md](team-coverage-contract.md) §3.1.
+
+| Point | Decision |
+|---|---|
+| Colleague set (replaces "same project/program") | Same **department** in any governorate + same **center** + same **direct manager** (the manager included) + **project managers** (job level grade 3) of the same program see each other. |
+| Service departments | Leave of a volunteer in CT (`Comm`), IT, HR, PR (`Fund`), Logistic (`Logi`), Financial (`Fin`), MEAL or Legal Affair consultant (`LegA`) is also visible to the **project managers of every program in the same governorate** (e.g. Logistic Aleppo → Study Zone Aleppo PM). Visibility only, no warning. |
+| Sensitive types | Sick, maternity, paternity, bereavement show to colleagues as "On leave"; manager and HR see the type. |
+| Pending | Colleagues see accepted only; manager and HR coverage counts pending, marked. |
+| Warning | Manager: on any overlap. Requester: anonymous count before submitting. Never blocks. |
+| HR scope | Regional HR: own city. super-admin: as national HR. |
 
 ## DEC-07 — Installable app (settled 2026-10-16)
 Yes: make it installable (PWA) without offline caching of private data.
