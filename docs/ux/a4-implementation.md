@@ -1,7 +1,7 @@
 # A4: Bilingual and RTL experience in core journeys
 
 Task A4 (R-18) in [ux-prompts-v3.md](ux-prompts-v3.md). Worked on branch `a4` (base `1d53c1f1`, A3-R).
-Status: **implemented, not committed, awaiting review** (QA engineer + technical lead) **and the Arabic content reviewer**. The human content review (step 4) is still **pending**, so A4 is **not** done.
+Status: **implemented and committed (`bb71b430`), awaiting review** (QA engineer + technical lead) **and the Arabic content reviewer**. The human content review (step 4) is still **pending**, so A4 is **not** done.
 
 ## 1. Prerequisites
 
