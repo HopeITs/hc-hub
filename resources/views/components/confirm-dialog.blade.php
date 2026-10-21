@@ -10,21 +10,27 @@
     Cancel, so a stray Enter never confirms a destructive action, and returns
     to the triggering control when the dialog closes (x-trap).
 --}}
+{{--
+    One x-init on purpose: an element keeps only the first of two identically
+    named attributes, so a second x-init (the focus fallback) was silently dropped.
+--}}
 <div x-data
-     x-init="$store.confirm.defaults = @js([
-         'title' => __('general.delete-item'),
-         'message' => __('general.confirm-delete-item'),
-         'confirmLabel' => __('general.delete'),
-         'danger' => true,
-     ])"
+     x-init="
+         $store.confirm.defaults = @js([
+             'title' => __('general.delete-item'),
+             'message' => __('general.confirm-delete-item'),
+             'confirmLabel' => __('general.delete'),
+             'danger' => true,
+         ]);
+         {{-- x-trap places focus 15ms after opening; if the panel was not painted yet, focus would stay behind. --}}
+         $watch('$store.confirm.open', open => open && [60, 200, 500].forEach(ms => setTimeout(() => {
+             if ($store.confirm.open && ! $refs.panel.contains(document.activeElement)) $refs.cancel?.focus();
+         }, ms)))
+     "
      x-show="$store.confirm.open"
      x-on:keydown.escape.window="$store.confirm.open && $store.confirm.settle(false)"
      {{-- Opened over a form modal, this root was hidden by that modal's x-trap.inert; un-hide it or a screen reader never hears the question. --}}
      x-effect="$store.confirm.open && $el.removeAttribute('aria-hidden')"
-     {{-- x-trap places focus 15ms after opening; if the panel was not painted yet, focus would stay behind. --}}
-     x-init="$watch('$store.confirm.open', open => open && [60, 200, 500].forEach(ms => setTimeout(() => {
-         if ($store.confirm.open && ! $refs.panel.contains(document.activeElement)) $refs.cancel?.focus();
-     }, ms)))"
      class="fixed inset-0 z-[9000] flex items-center justify-center p-4"
      style="display: none;">
     <div x-show="$store.confirm.open"
