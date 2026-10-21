@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Contract;
 
+use App\Enums\ContractType as ContractTypeEnum;
 use App\Enums\SalaryPer;
 use App\Exports\ContractExport;
 use App\Livewire\Concerns\WithFeedback;
@@ -19,7 +20,6 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
-use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
 use RamonRietdijk\LivewireTables\Enums\Direction;
@@ -244,7 +244,7 @@ class ContractsTable extends LivewireTable
                 ->options(Program::orderBy('slug')->pluck('slug', 'slug')->toArray())
                 ->sortable()->searchable(),
 
-            SelectColumn::make(trans_choice('general.positions', 1), 'position.'.$title)
+            SelectColumn::make(__('general.position'), 'position.'.$title)
                 ->options(Position::orderBy($title)->pluck($title, $title)->toArray())
                 ->sortable()->searchable(),
 
@@ -271,7 +271,7 @@ class ContractsTable extends LivewireTable
                 ->sortable()->searchable(),
 
             Column::make(__('general.duration'), 'duration')
-                ->displayUsing(fn ($v, Model $m) => $m->duration.' '.__('general.months'))
+                ->displayUsing(fn ($v, Model $m) => self::countLabel('months', $m->duration))
                 ->sortable(),
 
             Column::make(__('general.period'), 'period')
@@ -284,7 +284,7 @@ class ContractsTable extends LivewireTable
             Column::make(__('general.terminated-at'), 'terminated_at')
                 ->displayUsing(fn ($v, Model $m) => $m->isTerminated()
                     ? Blade::render(
-                        '<span title="{{ $reason }}" class="px-2 py-1 font-medium text-red-800 bg-red-100 whitespace-nowrap rounded-inset text-small">{{ $date }}</span>',
+                        '<span title="{{ $reason }}" class="px-2 py-1 font-medium text-red-800 bg-red-100 whitespace-nowrap rounded-inset text-small"><bdi>{{ $date }}</bdi></span>',
                         [
                             'date' => $m->terminated_at?->format('Y-m-d') ?? __('general.terminated-at'),
                             'reason' => $m->terminationReason?->title ?? $m->reason_of_termination ?? '',
@@ -319,12 +319,43 @@ class ContractsTable extends LivewireTable
                 ->asHtml(),
 
             Column::make(__('general.weekly-hours'), 'weekly_hours')
-                ->displayUsing(fn ($v) => $v ? "{$v} ".trans_choice('general.hour', 2) : '—')
+                ->displayUsing(fn ($v) => $v ? self::countLabel('hours', $v) : '—')
                 ->sortable(),
 
-            BooleanColumn::make(__('general.status'), 'is_active')->searchable(),
+            // Text plus colour rather than the boolean column's bare dot, so the
+            // state reads in either language and without relying on colour.
+            // Filtering stays on the stored flag (active / inactive).
+            SelectColumn::make(__('general.status'), 'is_active')
+                ->options([
+                    1 => __('general.active'),
+                    0 => __('general.inactive'),
+                ])
+                ->displayUsing(function ($v, Model $m) {
+                    [$label, $color] = self::statusOf($m);
 
-            BooleanColumn::make(__('general.auto-renew'), 'auto_renew')->searchable(),
+                    return Blade::render('<x-badge :color="$color">{{ $text }}</x-badge>', [
+                        'color' => $color,
+                        'text' => $label,
+                    ]);
+                })
+                ->sortable()
+                ->searchable()
+                ->asHtml(),
+
+            // Same reasoning as the status column: a word, not just a dot, and
+            // a filter whose Yes/No follow the interface language.
+            SelectColumn::make(__('general.auto-renew'), 'auto_renew')
+                ->options([
+                    1 => __('general.yes'),
+                    0 => __('general.no'),
+                ])
+                ->displayUsing(fn ($v) => Blade::render('<x-badge :color="$color">{{ $text }}</x-badge>', [
+                    'color' => $v ? 'green' : 'gray',
+                    'text' => $v ? __('general.yes') : __('general.no'),
+                ]))
+                ->sortable()
+                ->searchable()
+                ->asHtml(),
 
             Column::make(__('general.actions'), function (Model $m) use ($canUpdate, $canDelete, $canCreate, $canExport, $canManageAutoRenew): string {
                 $view = Blade::render('<x-table.show-btn :href="route(\'contracts.show\', $id)" />', ['id' => $m->getKey()]);
@@ -352,5 +383,35 @@ class ContractsTable extends LivewireTable
                 return '<div class="flex items-center justify-center gap-2">'.$autoRenew.$view.$edit.$renew.$export.$delete.'</div>';
             })->asHtml()->clickable(false),
         ];
+    }
+
+    /**
+     * "3 months" / "٣ أشهر" with the right plural form; a fractional figure
+     * (2.5 months) has no plural category of its own, so it gets the plain one.
+     */
+    private static function countLabel(string $unit, int|float|string $value): string
+    {
+        $number = (float) $value;
+
+        return fmod($number, 1.0) === 0.0
+            ? trans_choice("contracts.{$unit}-count", (int) $number)
+            : __("contracts.{$unit}-decimal", ['count' => $value]);
+    }
+
+    /**
+     * The status word and badge colour for one row. A draft and a terminated
+     * contract are both inactive, but they are not the same state.
+     *
+     * @return array{0: string, 1: string}
+     */
+    private static function statusOf(Model $contract): array
+    {
+        return match (true) {
+            (int) $contract->type === ContractTypeEnum::Draft => [ContractTypeEnum::getLocalizedName(ContractTypeEnum::Draft)['value'], 'gray'],
+            $contract->isTerminated() => [__('contracts.status-terminated'), 'red'],
+            (bool) $contract->is_active => [__('general.active'), 'green'],
+            $contract->end_date !== null && $contract->end_date->isPast() => [__('contracts.status-expired'), 'gray'],
+            default => [__('general.inactive'), 'gray'],
+        };
     }
 }

@@ -21,7 +21,7 @@ class EmpLeaveBalanceTable extends LivewireTable
 
     public $showModal = false;
 
-    public $modalTitle = 'Modal title';
+    public $modalTitle = '';
 
     protected string $model = Employee::class;
 

@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Maatwebsite\Excel\Facades\Excel;
-use RamonRietdijk\LivewireTables\Columns\BooleanColumn;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\DateColumn;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
@@ -134,7 +133,7 @@ class EmployeeTable extends LivewireTable
         $canDelete = $user->hasActivePermission('employees.delete');
 
         return [
-            Column::make('ID', 'id')->sortable(),
+            Column::make(__('employees.table.id'), 'id')->sortable(),
 
             Column::make(trans('general.photo'), 'photo')
                 ->displayUsing(function ($v, Model $m): string {
@@ -149,7 +148,10 @@ class EmployeeTable extends LivewireTable
             //     ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
             //     ->sortable()->searchable(),
             Column::make(trans('general.name'), 'employee')
-                ->displayUsing(fn ($v, Model $m) => $m->name)
+                // <bdi>: a Latin name that falls back into the Arabic table
+                // keeps its own word order.
+                ->displayUsing(fn ($v, Model $m) => '<bdi>'.e($m->name).'</bdi>')
+                ->asHtml()
                 ->sortable()
                 ->searchable(function (Builder $query, $value) {
                     $parts = array_filter(explode(' ', trim($value)));
@@ -166,15 +168,16 @@ class EmployeeTable extends LivewireTable
                     });
                 }),
             Column::make(trans_choice('general.role', 1), 'account')
-                ->displayUsing(fn ($v, Model $m) => $m->account?->myRole()),
+                ->displayUsing(fn ($v, Model $m) => role_label($m->account?->myRole())),
 
             Column::make(trans('general.years-of-service'), 'years_of_service_formatted')->computed()->sortable(),
 
-            // dir="ltr": in the Arabic (RTL) layout the bidi algorithm otherwise
-            // reorders "01-Jan-2018" into "Jan-2018-01".
+            // Month name in the page's own language, isolated with <bdi>: an
+            // Arabic date then reads right to left as a whole, an English one
+            // left to right, and neither gets reordered by the text around it.
             DateColumn::make(trans('general.join-at'), 'joined_at')
                 ->displayUsing(fn ($v, Model $m) => $m->joined_at
-                    ? '<span dir="ltr">'.$m->joined_at->format('d-M-Y').'</span>'
+                    ? '<bdi class="whitespace-nowrap">'.e($m->joined_at->copy()->locale(app()->getLocale())->translatedFormat('d M Y')).'</bdi>'
                     : '—')
                 ->asHtml()
                 ->sortable(),
@@ -205,9 +208,20 @@ class EmployeeTable extends LivewireTable
                 ->sortable()->searchable(),
 
             Column::make(trans('general.work_email'), 'work_email')
-                ->displayUsing(fn ($v, Model $m) => $m->account?->email ?? '—'),
+                ->displayUsing(fn ($v, Model $m) => $m->account?->email
+                    ? '<span dir="ltr">'.e($m->account->email).'</span>'
+                    : '—')
+                ->asHtml(),
 
-            BooleanColumn::make(trans('general.is-active'), 'is_active')->searchable(),
+            // Status as text as well as colour, with the filter offering the
+            // same two words instead of a bare Yes / No.
+            SelectColumn::make(trans('general.is-active'), 'is_active')
+                ->options([1 => __('general.active'), 0 => __('general.inactive')])
+                ->displayUsing(fn ($v, Model $m): string => $m->is_active
+                    ? '<span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-emerald-50 px-2 py-0.5 text-small font-semibold text-emerald-700 ring-1 ring-emerald-200"><span class="size-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>'.e(__('general.active')).'</span>'
+                    : '<span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-neutral-100 px-2 py-0.5 text-small font-semibold text-secondary-medium ring-1 ring-neutral-200"><span class="size-1.5 rounded-full bg-neutral-400" aria-hidden="true"></span>'.e(__('general.inactive')).'</span>')
+                ->asHtml()
+                ->searchable(),
 
             Column::make(__('general.actions'), function (Model $model) use ($canUpdate, $canDelete): string {
                 $isActive = $model->is_active ? 1 : 0;
@@ -224,7 +238,7 @@ class EmployeeTable extends LivewireTable
                 // not have one yet, so only link when it exists.
                 $viewBtn = $model->username
                     ? Blade::render(
-                        '<a  href="'.route('employees.show', ['employee' => $model->username]).'" class="p-2 " title="View Profile">
+                        '<a  href="'.route('employees.show', ['employee' => $model->username]).'" class="p-2 " title="'.e(__('general.view-profile')).'" aria-label="'.e(__('general.view-profile')).'">
                                 <x-icons.eye class="transition text-secondary-light hover:text-primary" />
                             </a>',
                     )

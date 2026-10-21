@@ -78,7 +78,7 @@ class ContractsAutoRenewedSummary extends Notification
             ],
             'body' => [
                 'en' => "{$count} contract(s) were renewed successfully today: {$namesEn}.",
-                'ar' => "تم تجديد {$count} عقد بنجاح اليوم: {$namesAr}.",
+                'ar' => "تم اليوم تجديد العقود التالية بنجاح ({$count}): {$namesAr}.",
             ],
             'contract_ids' => $this->contractIds,
             'employee_names' => $this->employeeNames,

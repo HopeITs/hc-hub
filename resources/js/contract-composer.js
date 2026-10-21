@@ -950,10 +950,10 @@ document.addEventListener('alpine:init', () => {
             if (total < 1) {
                 const days = Math.max(0, Math.round((end - start) / 86400000));
 
-                return `${days} ${days === 1 ? this.labels.day : this.labels.days}`;
+                return this.countLabel(this.labels.daysCount, this.labels.daysDecimal, days);
             }
 
-            return `${total} ${total === 1 ? this.labels.month : this.labels.months}`;
+            return this.countLabel(this.labels.monthsCount, this.labels.monthsDecimal, total);
         },
 
         // =============================================================
@@ -1088,17 +1088,17 @@ document.addEventListener('alpine:init', () => {
 
         /** "N days/week" — shown next to its own checkbox, fixed mode only. */
         get fixedDaysPerWeekLabel() {
-            return this.fill(this.labels.daysPerWeek, { count: this.fixedDaysPerWeek });
+            return this.fill(this.choice(this.labels.daysPerWeek, this.fixedDaysPerWeek), { count: this.fixedDaysPerWeek });
         },
 
         /** "M hours/week" — shown next to its own checkbox, fixed mode only. */
         get fixedHoursPerWeekLabel() {
-            return this.fill(this.labels.hoursPerWeek, { count: this.weeklyHours });
+            return this.fill(this.choice(this.labels.hoursPerWeek, this.weeklyHours), { count: this.weeklyHours });
         },
 
         /** "K hours/day" — shown next to its own checkbox, fixed mode only. */
         get fixedHoursPerDayLabel() {
-            return this.fill(this.labels.hoursPerDay, { count: this.fixedHoursPerDay });
+            return this.fill(this.choice(this.labels.hoursPerDay, this.fixedHoursPerDay), { count: this.fixedHoursPerDay });
         },
 
         /** The always-visible read-only summary, e.g. "40 h/week" — both modes. */
@@ -1211,6 +1211,66 @@ document.addEventListener('alpine:init', () => {
             );
         },
 
+        /**
+         * Picks the segment of a Laravel pipe-plural string ("{1} :count day|
+         * [2,*] :count days") that matches `count` — the same {n} / [from,to]
+         * conditions trans_choice() reads, so Arabic's six forms come straight
+         * from the lang file. A string without conditions is returned as is.
+         */
+        choice(template, count) {
+            const segments = str(template).split('|');
+            const number = Number(count);
+            const condition = /^\s*(?:\{\s*([^}]*?)\s*\}|\[\s*([^,\]]*?)\s*,\s*([^\]]*?)\s*\])\s*([\s\S]*)$/;
+
+            for (const segment of segments) {
+                const match = segment.match(condition);
+
+                if (!match) {
+                    continue;
+                }
+
+                const [, exact, from, to, text] = match;
+
+                if (exact !== undefined) {
+                    if (number === Number(exact)) {
+                        return text.trim();
+                    }
+
+                    continue;
+                }
+
+                const low = from === '*' ? -Infinity : Number(from);
+                const high = to === '*' ? Infinity : Number(to);
+
+                if (number >= low && number <= high) {
+                    return text.trim();
+                }
+            }
+
+            return segments[segments.length - 1].replace(condition, '$4').trim();
+        },
+
+        /**
+         * "3 months" / "٣ أشهر": whole numbers take their plural form, a
+         * fraction (2.5) the plain one. `display` is what replaces :count, so
+         * a figure can be locale-formatted without changing which form is picked.
+         */
+        countLabel(template, decimalTemplate, value, display = value) {
+            const number = Number(value);
+            const chosen = Number.isInteger(number) ? this.choice(template, number) : str(decimalTemplate);
+
+            return this.fill(chosen, { count: display });
+        },
+
+        /**
+         * Wraps a value in Unicode first-strong isolates — the plain-text
+         * equivalent of <bdi>, for strings that end up in x-text — so a time
+         * range or a Latin name keeps its own order inside Arabic text.
+         */
+        isolate(value) {
+            return value === '' || value === null || value === undefined ? '' : `⁨${value}⁩`;
+        },
+
         formatDate(value) {
             if (!value) {
                 return '';
@@ -1279,10 +1339,10 @@ document.addEventListener('alpine:init', () => {
 
         get assignmentSummary() {
             const period = this.startDate && this.endDate
-                ? `${this.formatDate(this.startDate)} → ${this.formatDate(this.endDate)}`
+                ? `${this.isolate(this.formatDate(this.startDate))} ${this.labels.periodArrow} ${this.isolate(this.formatDate(this.endDate))}`
                 : '';
 
-            return [this.selectedEmployee?.label, this.selectedPosition?.label, this.selectedType?.name, period]
+            return [this.isolate(this.selectedEmployee?.label), this.isolate(this.selectedPosition?.label), this.selectedType?.name, period]
                 .filter(Boolean).join(' · ');
         },
 
@@ -1419,13 +1479,15 @@ document.addEventListener('alpine:init', () => {
         },
 
         get scheduleSummary() {
-            const hours = this.weeklyHours > 0 ? `${this.weeklyHours} h` : '';
+            const hours = this.weeklyHours > 0 ? this.countLabel(this.labels.hoursShort, this.labels.hoursShort, this.weeklyHours) : '';
 
             if (this.scheduleMode === '1') {
-                let hoursRange = `${this.workHoursFrom}–${this.workHoursTo}`;
+                // Each range is isolated: inside Arabic text "09:00–17:00"
+                // would otherwise be laid out as "17:00–09:00".
+                let hoursRange = this.isolate(`${this.workHoursFrom}–${this.workHoursTo}`);
 
                 if (this.hasSecondShift()) {
-                    hoursRange += `, ${this.workHours2From}–${this.workHours2To}`;
+                    hoursRange += `${this.locale === 'ar' ? '، ' : ', '}${this.isolate(`${this.workHours2From}–${this.workHours2To}`)}`;
                 }
 
                 return [this.fixedDayRangeLabel, hoursRange, hours].filter(Boolean).join(' · ');
@@ -1450,7 +1512,7 @@ document.addEventListener('alpine:init', () => {
 
             if (this.payMode === '2') {
                 return this.payTiers.length > 0
-                    ? this.fill(this.labels.tiersCount, { count: this.payTiers.length })
+                    ? this.countLabel(this.labels.tiersCount, this.labels.tiersCount, this.payTiers.length)
                     : this.labels.flexible;
             }
 
@@ -1503,7 +1565,9 @@ document.addEventListener('alpine:init', () => {
         },
 
         get cardHours() {
-            return Number(this.weeklyHours) >= 1 ? `${this.weeklyHours} h` : this.labels.empty;
+            return Number(this.weeklyHours) >= 1
+                ? this.countLabel(this.labels.hoursShort, this.labels.hoursShort, this.weeklyHours)
+                : this.labels.empty;
         },
 
         get cardSalary() {
@@ -1513,7 +1577,7 @@ document.addEventListener('alpine:init', () => {
 
             if (this.payMode === '2') {
                 return this.payTiers.length > 0
-                    ? this.fill(this.labels.tiersCount, { count: this.payTiers.length })
+                    ? this.countLabel(this.labels.tiersCount, this.labels.tiersCount, this.payTiers.length)
                     : this.labels.empty;
             }
 
@@ -1525,7 +1589,7 @@ document.addEventListener('alpine:init', () => {
         get cardLeave() {
             return this.leaveDays === null
                 ? this.labels.empty
-                : `${this.formatNumber(this.leaveDays)} ${this.labels.daysUnit}`;
+                : this.countLabel(this.labels.daysCount, this.labels.daysDecimal, this.leaveDays, this.formatNumber(this.leaveDays));
         },
 
         // =============================================================

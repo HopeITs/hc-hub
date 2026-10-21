@@ -19,9 +19,9 @@ class SalaryPerEmployeeStatistics extends Component
      * is the brand primary (#c2151c).
      */
     private const SALARY_PER_META = [
-        1 => ['key' => 'per_month', 'label' => 'Per Month', 'color' => '#c2151c'],
-        3 => ['key' => 'per_session', 'label' => 'Per Session', 'color' => '#4b4b4b'],
-        2 => ['key' => 'per_hour', 'label' => 'Per Hour', 'color' => '#cdcdcd'],
+        1 => ['key' => 'per_month', 'label' => 'dashboard.salary-per.month', 'color' => '#c2151c'],
+        3 => ['key' => 'per_session', 'label' => 'dashboard.salary-per.session', 'color' => '#4b4b4b'],
+        2 => ['key' => 'per_hour', 'label' => 'dashboard.salary-per.hour', 'color' => '#cdcdcd'],
     ];
 
     public array $series = [];
@@ -52,7 +52,9 @@ class SalaryPerEmployeeStatistics extends Component
 
         foreach (self::SALARY_PER_META as $salaryPer => $meta) {
             $this->series[] = [
-                'label' => $meta['label'],
+                // Translation key in the map, resolved per request (the
+                // counts are cached, the labels are not).
+                'label' => __($meta['label']),
                 'color' => $meta['color'],
                 'value' => (int) ($counts[$salaryPer] ?? 0),
             ];

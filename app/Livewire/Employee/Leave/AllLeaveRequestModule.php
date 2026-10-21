@@ -5,6 +5,7 @@ namespace App\Livewire\Employee\Leave;
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Concerns\WithFeedback;
+use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
@@ -21,6 +22,7 @@ use Livewire\Component;
 class AllLeaveRequestModule extends Component
 {
     use AuthorizesActivePermissions;
+    use FormatsLeaveDuration;
     use WithFeedback;
 
     public LeaveBalance $leaveBalance;
@@ -31,7 +33,7 @@ class AllLeaveRequestModule extends Component
 
     public $formModal = false;
 
-    public $modalTitle = 'Modal title';
+    public $modalTitle = '';
 
     public string $statusFilter = 'all';
 
@@ -89,7 +91,7 @@ class AllLeaveRequestModule extends Component
         $this->linkedLeaveId = $leaveRequest->id;
         $this->linkedLeaveMode = 'details';
 
-        $this->modalTitle = 'Leave Details';
+        $this->modalTitle = __('general.leave-details');
         $this->showModal = true;
     }
 
@@ -215,6 +217,11 @@ class AllLeaveRequestModule extends Component
 
     public function confirmSave()
     {
+        // Validate first: the confirmation needs a chosen leave balance, and
+        // without this an empty form only reported "leave type is invalid"
+        // instead of each missing field.
+        $this->form->validate();
+
         $html = $this->confirmationMessage();
 
         $this->confirm('processSave', title: __('general.confirmation'), html: $html, confirmLabel: __('general.save'), danger: false);
@@ -284,20 +291,21 @@ class AllLeaveRequestModule extends Component
     {
         $leaveTypeName = $this->form->selectedBalance()
             ->leaveType
-            ->name ?? 'N/A';
+            ->name ?? '—';
 
         $type = $this->form->type;
 
         $start = $this->resolveStart();
         $end = $this->resolveEnd();
-        $duration = $this->resolveDuration();
+        $durationVal = $this->resolveDuration();
+        $duration = $type === 'day' ? $this->formatLeaveDays($durationVal) : $this->formatLeaveHours($durationVal);
         $date = $this->form->leave_date;
         $reason = $this->form->reason;
 
         return Blade::render(
-            '<x-alerts.leave-request-confirmation
+            '<x-leave.request-confirmation
                 :type="$type"
-                :leave_type="$leaveTypeName"
+                :leave-type="$leaveTypeName"
                 :start="$start"
                 :end="$end"
                 :duration="$duration"

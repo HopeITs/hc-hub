@@ -476,23 +476,18 @@ class Employee extends Model implements HasMedia
         $end = $this->serviceEndDate();
 
         if (! $start || $end->lte($start)) {
-            return 0 .' '.trans_choice('general.year', 0);
+            return trans_choice('general.count.years', 0);
         }
 
         $years = $this->yearsOfServiceOn();
         $months = (int) floor($start->copy()->addYears($years)->diffInMonths($end));
 
-        $result = '';
+        $parts = array_filter([
+            $years > 0 ? trans_choice('general.count.years', $years) : null,
+            $months > 0 ? trans_choice('general.count.months', $months) : null,
+        ]);
 
-        if ($years > 0) {
-            $result = $years.' '.trans_choice('general.year', $years).' ';
-        }
-
-        if ($months > 0) {
-            $result .= $months.' '.trans_choice('general.month', $months);
-        }
-
-        return trim($result) ?: 0 .' '.trans_choice('general.year', 0);
+        return join_counts($parts) ?: trans_choice('general.count.years', 0);
     }
 
     public function getYearsOfServiceAttribute(): int

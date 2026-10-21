@@ -84,4 +84,14 @@ return [
         'hotline_help' => 'Shown as the emergency number on this city\'s public ID cards. While it is empty, the work phone of the first active HR employee in the city is shown.',
         'hotline_invalid' => 'Enter a phone number: digits, spaces, +, - and brackets only.',
     ],
+
+    // The public card itself. It always renders in English (ShowDigitalId).
+    'card' => [
+        'label' => 'Employee digital ID',
+        'contact_links' => 'Employee contact links',
+        'call' => 'Call :name',
+        'telegram' => 'Open Telegram for :name',
+        'linkedin' => 'Open LinkedIn for :name',
+        'emergency' => 'EMERGENCY CONTACT:',
+    ],
 ];

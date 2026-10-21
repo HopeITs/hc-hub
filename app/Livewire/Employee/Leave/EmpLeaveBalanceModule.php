@@ -4,6 +4,7 @@ namespace App\Livewire\Employee\Leave;
 
 use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Concerns\WithFeedback;
+use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use App\Livewire\Forms\LeaveBalanceForm;
 use App\Models\LeaveBalance;
 use Blade;
@@ -12,6 +13,7 @@ use Livewire\Component;
 class EmpLeaveBalanceModule extends Component
 {
     use AuthorizesActivePermissions;
+    use FormatsLeaveDuration;
     use WithFeedback;
 
     public LeaveBalance $leaveBalance;
@@ -20,7 +22,7 @@ class EmpLeaveBalanceModule extends Component
 
     public $showModal = false;
 
-    public $modalTitle = 'Modal title';
+    public $modalTitle = '';
 
     protected $listeners = [
         'openEdit' => 'edit',
@@ -68,18 +70,17 @@ class EmpLeaveBalanceModule extends Component
 
         $name = $this->form->balance->contract->employee->name;
         $operation = __('general.'.$this->form->operation);
-        $amount = $this->form->amount.' '.trans_choice('general.'.$this->form->unit, $this->form->amount);
+        $amount = $this->formatLeaveAmount($this->form->amount, $this->form->unit);
         $add_badge = $this->form->add_badge ? __('general.yes') : __('general.no');
-        $notes = $add_badge ? $this->form->notes : '';
+        $notes = $this->form->add_badge ? $this->form->notes : null;
 
         return Blade::render(
-            '<x-alerts.leave-balance-confirmation
+            '<x-leave.balance-confirmation
                 :name="$name"
                 :operation="$operation"
                 :amount="$amount"
-                :add_badge="$add_badge"
+                :add-badge="$add_badge"
                 :notes="$notes"
-
             />', compact('name', 'operation', 'amount', 'add_badge', 'notes'),
         );
     }

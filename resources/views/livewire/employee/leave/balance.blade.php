@@ -37,7 +37,7 @@ use App\Enums\LeaveRequestStatus;
             <div class="grid md:grid-cols-3 gap-4">
                 <div class="md:col-span-1">
                     <x-forms.input-label >{{__('general.name')}}</x-forms.input-label>
-                    <p>{{$form->balance?->contract->employee->name}}</p>
+                    <p><bdi>{{$form->balance?->contract->employee->name}}</bdi></p>
                 </div>
                 <div class="md:col-span-2">
                     <x-forms.input-label >{{__('general.years-of-service')}}</x-forms.input-label>
@@ -67,9 +67,9 @@ use App\Enums\LeaveRequestStatus;
                 <div>
                     <x-forms.radio-group :legend="__('general.unit')" error="form.unit" required>
                         <x-forms.radio-input value="hour"
-                                             wire:model="form.unit">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
+                                             wire:model="form.unit">{{ __('leaves.unit.hour') }}</x-forms.radio-input>
                         <x-forms.radio-input value="day"
-                                             wire:model="form.unit">{{trans_choice('general.day',1)}}</x-forms.radio-input>
+                                             wire:model="form.unit">{{ __('leaves.unit.day') }}</x-forms.radio-input>
                     </x-forms.radio-group>
                 </div>
                 <div>

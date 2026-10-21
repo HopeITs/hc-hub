@@ -68,7 +68,7 @@ class ContractObserver
 
         if (! $pos->canAssign()) {
             throw ValidationException::withMessages([
-                'form.position_id' => __('validation.custom.position_id.max_reached'),
+                'form.position_id' => __('contracts.errors.position-full'),
             ]);
         }
     }
@@ -104,7 +104,7 @@ class ContractObserver
 
             if (! $pos->canAssign()) {
                 throw ValidationException::withMessages([
-                    'form.position_id' => __('validation.custom.position_id.max_reached'),
+                    'form.position_id' => __('contracts.errors.position-full'),
                 ]);
             }
 
@@ -139,7 +139,7 @@ class ContractObserver
         }
         if (! $new->canAssign()) {
             throw ValidationException::withMessages([
-                'form.position_id' => __('validation.custom.position_id.max_reached'),
+                'form.position_id' => __('contracts.errors.position-full'),
             ]);
         }
     }

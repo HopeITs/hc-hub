@@ -55,14 +55,14 @@
                 <!-- RIGHT: End Date (only difference) -->
                 <div class="flex flex-col items-end">
                     <p class="text-body font-semibold text-primary whitespace-nowrap">
-                        {{ \Carbon\Carbon::parse($contract->end_date)->format('d/m/Y') }}
+                        <bdi>{{ \Carbon\Carbon::parse($contract->end_date)->format('d/m/Y') }}</bdi>
                     </p>
                 </div>
 
             </div>
         @empty
             <div class="flex h-full flex-col items-center justify-center text-center text-[10.5px] text-[var(--color-neutral-500)]">
-                @lang('general.no_active_contracts_ending_soon')
+                @lang('dashboard.no-contracts-ending-soon')
             </div>
         @endforelse
     </div>

@@ -3,7 +3,7 @@
 
     $isRtl = app()->getLocale() === 'ar';
     $user = auth()->user();
-    $activeRole = $user->active_role_name ?? __('None');
+    $activeRole = role_label($user->active_role_name) ?: __('None');
     $switchTo = $isRtl ? 'en' : 'ar';
     $localized = LaravelLocalization::getLocalizedURL($switchTo, null, [], true);
     $curr = app()->getLocale();
@@ -28,7 +28,7 @@
         <div class="flex items-center justify-end gap-1.5 sm:gap-3 md:pe-0 sm:pe-4">
             <button wire:click="$dispatch('sidebar.toggle')" type="button"
                 class="p-1.5 sm:p-2 shrink-0 transition bg-transparent border border-transparent cursor-pointer md:hidden me-auto text-heading text-secondary-light hover:text-secondary-dark rounded-base">
-                <span class="sr-only">Open sidebar</span>
+                <span class="sr-only">{{ __('general.a11y.open-sidebar') }}</span>
                 <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                     fill="none" viewBox="0 0 24 24">
                     <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M5 7h14M5 12h14M5 17h10" />
@@ -78,7 +78,7 @@
 
                         <span class="relative inline-flex items-center justify-center rounded-full size-10 shrink-0">
                             <img class="object-cover border rounded-full size-10 border-primary"
-                                src="{{ $user->profile?->avatar_url }}" alt="user" />
+                                src="{{ $user->profile?->avatar_url }}" alt="" />
 
                             <span
                                 class="absolute bottom-0.5 {{ $isRtl ? 'start-0.5' : 'end-0.5' }}
@@ -101,7 +101,7 @@
                             <div class="relative flex items-center gap-3">
                                 <span class="inline-flex items-center justify-center overflow-hidden rounded-full size-14 shrink-0">
                                     <img class="object-cover border rounded-full size-12 border-primary"
-                                        src="{{ $user->profile?->avatar_url }}" alt="user">
+                                        src="{{ $user->profile?->avatar_url }}" alt="">
                                 </span>
 
                                 <div class="min-w-0">
@@ -109,7 +109,7 @@
                                         {{ $user->profile?->name }}
                                     </div>
                                     <div class="text-small text-secondary-medium truncate">{{ $user->email }}</div>
-                                    <div class="text-small text-secondary-medium truncate">{{ $user->myRole() }}</div>
+                                    <div class="text-small text-secondary-medium truncate">{{ role_label($user->myRole()) }}</div>
                                 </div>
                             </div>
                         </div>

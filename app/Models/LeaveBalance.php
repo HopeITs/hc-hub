@@ -127,8 +127,7 @@ class LeaveBalance extends Model
         // -------------------------------------------
         $text = '';
         if ($days > 0) {
-            $text = '<strong class="text-secondary-dark">'.$days.'</strong>'.' '.
-                trans_choice('general.day', $days).' ';
+            $text = trans_choice('general.count.days', $days, ['count' => '<strong class="text-secondary-dark">'.$days.'</strong>']).' ';
         }
 
         $result = $text;
@@ -141,16 +140,14 @@ class LeaveBalance extends Model
             $timeText = [];
 
             if ($hours > 0) {
-                $timeText[] = '<strong class="text-secondary-dark">'.$hours.'</strong>'.' '.
-                    trans_choice('general.hour', $hours);
+                $timeText[] = trans_choice('general.count.hours', $hours, ['count' => '<strong class="text-secondary-dark">'.$hours.'</strong>']);
             }
 
             if ($minutes > 0) {
-                $timeText[] = '<strong class="text-secondary-dark">'.$minutes.'</strong>'.' '.
-                    trans_choice('general.minute', $minutes);
+                $timeText[] = trans_choice('general.count.minutes', $minutes, ['count' => '<strong class="text-secondary-dark">'.$minutes.'</strong>']);
             }
 
-            $finalTime = implode(' ', $timeText);
+            $finalTime = join_counts($timeText);
 
             if ($text !== '') {
                 $result = __('general.and', [
@@ -164,8 +161,7 @@ class LeaveBalance extends Model
 
         // Original fallback behavior
         if ($text === '' && $hours === 0 && $minutes === 0) {
-            $result = '<strong class="text-secondary-dark">0</strong>'.' '.
-                trans_choice('general.day', $days);
+            $result = trans_choice('general.count.days', 0, ['count' => '<strong class="text-secondary-dark">0</strong>']);
         }
 
         return $result;

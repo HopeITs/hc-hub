@@ -17,6 +17,34 @@ import select2 from 'select2';
 
 select2();
 
+// select2's own messages ("No results found", "Searching…") in the page's
+// language. The strings come from resources/lang through a meta tag in the
+// head (partials/head.blade.php); without it select2 keeps its English ones.
+(() => {
+    let messages = {};
+    try {
+        messages = JSON.parse(document.querySelector('meta[name="hc-select2-i18n"]')?.content || '{}');
+    } catch {
+        return;
+    }
+    if (!messages.noResults) return;
+
+    const count = (text, n) => String(text).replace(':count', n);
+
+    $.fn.select2.defaults.set('language', {
+        errorLoading: () => messages.errorLoading,
+        inputTooLong: (args) => count(messages.inputTooLong, args.input.length - args.maximum),
+        inputTooShort: (args) => count(messages.inputTooShort, args.minimum - args.input.length),
+        loadingMore: () => messages.loadingMore,
+        maximumSelected: (args) => count(messages.maximumSelected, args.maximum),
+        noResults: () => messages.noResults,
+        searching: () => messages.searching,
+        removeAllItems: () => messages.removeAllItems,
+        removeItem: () => messages.removeItem,
+        search: () => messages.search,
+    });
+})();
+
 // The single-page composer behind both creating and editing a contract.
 import './contract-composer.js';
 

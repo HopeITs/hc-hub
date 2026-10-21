@@ -4,6 +4,7 @@ namespace App\Livewire\Forms;
 
 use App\Enums\LeaveRequestStatus;
 use App\Enums\LeaveTypeCases;
+use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
@@ -19,6 +20,8 @@ use LogicException;
 
 class LeaveRequestForm extends Form
 {
+    use FormatsLeaveDuration;
+
     public ?LeaveRequest $leaveRequest = null;
 
     public ?LeaveRequest $decisionLeave = null;
@@ -91,7 +94,7 @@ class LeaveRequestForm extends Form
 
                 // Check if start hour is within center's working hours
                 if ($start->lessThan($centerOpenTime)) {
-                    $fail(__('Start hour must be within the center\'s working hours.'));
+                    $fail(__('leaves.validation.start-hour-within-working-hours'));
                 }
             }];
 
@@ -108,14 +111,14 @@ class LeaveRequestForm extends Form
 
                     // Check if end hour is within center's working hours
                     if ($end->greaterThan($centerCloseTime)) {
-                        $fail(__('End hour must be within the center\'s working hours.'));
+                        $fail(__('leaves.validation.end-hour-within-working-hours'));
 
                         return;
                     }
 
                     // Check that end hour is after start hour
                     if ($end->lessThanOrEqualTo($start)) {
-                        $fail(__('End hour must be after start hour.'));
+                        $fail(__('leaves.validation.end-hour-after-start-hour'));
 
                         return;
                     }
@@ -123,7 +126,7 @@ class LeaveRequestForm extends Form
                     $duration = $start->DiffInHours($end);
 
                     if ($duration > $maxHours) {
-                        $fail(__('Duration must not exceed :max hours.', ['max' => $maxHours]));
+                        $fail(__('leaves.validation.max-hours', ['max' => $this->formatLeaveHours($maxHours)]));
                     }
                 },
             ];
@@ -362,6 +365,26 @@ class LeaveRequestForm extends Form
     }
 
     /**
+     * Field names used in validation messages, in the current locale.
+     *
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
+    {
+        return [
+            'type' => __('leaves.unit.legend'),
+            'reason' => __('general.reason'),
+            'leave_balance_id' => trans_choice('general.leave-type', 1),
+            'alternative_employee' => __('general.alternative-employee'),
+            'start_at' => __('general.start-date'),
+            'end_at' => __('general.end-date'),
+            'leave_date' => __('general.leave-date'),
+            'start_hour' => __('general.start-time'),
+            'end_hour' => __('general.end-time'),
+        ];
+    }
+
+    /**
      * The columns an edit is allowed to change. status / approved_* / hr_approved
      * must never come from the form — they are set by submitDecision() and the
      * HR-seen toggle only.
@@ -463,9 +486,9 @@ class LeaveRequestForm extends Form
 
             if ($days > $baseDays) {
                 throw ValidationException::withMessages([
-                    'end_at' => __('validation.leave-max-date', [
-                        'days' => $days,
-                        'max' => $baseDays,
+                    'end_at' => __('leaves.validation.max-days', [
+                        'days' => $this->formatLeaveDays($days),
+                        'max' => $this->formatLeaveDays($baseDays),
                     ]),
                 ]);
             }
@@ -484,9 +507,9 @@ class LeaveRequestForm extends Form
 
         if ($days > $baseDays) {
             throw ValidationException::withMessages([
-                'end_at' => __('validation.leave-max-date', [
-                    'days' => $days,
-                    'max' => $baseDays,
+                'end_at' => __('leaves.validation.max-days', [
+                    'days' => $this->formatLeaveDays($days),
+                    'max' => $this->formatLeaveDays($baseDays),
                 ]),
             ]);
         }

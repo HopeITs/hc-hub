@@ -33,7 +33,7 @@
                                 <input type="text"
                                     wire:model.defer="notes.{{ $item->id }}"
                                     wire:key="note-input-{{ $item->id }}"
-                                    placeholder="{{ __('general.add_note') }}"
+                                    placeholder="{{ __('general.add-note') }}"
                                     class="w-full rounded-control border-red-500 text-body focus:border-red-600 focus:ring-red-600">
                             </td>
                             <td class="px-4 py-3 text-center">

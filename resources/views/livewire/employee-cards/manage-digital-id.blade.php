@@ -38,7 +38,7 @@
                     @if ($issuedAt)
                         <div class="rounded-surface bg-neutral-50 p-3 sm:col-span-2">
                             <dt class="text-small text-secondary-light">@lang('digital_id.panel.last_issued')</dt>
-                            <dd class="mt-1 font-semibold text-secondary-dark">{{ $issuedAt->translatedFormat('d M Y') }}</dd>
+                            <dd class="mt-1 font-semibold text-secondary-dark"><bdi>{{ $issuedAt->locale(app()->getLocale())->translatedFormat('d M Y') }}</bdi></dd>
                         </div>
                     @endif
                 </dl>

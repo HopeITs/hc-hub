@@ -73,15 +73,15 @@ class LeaveRequest extends Model
             $parts = [];
 
             if ($hours > 0) {
-                $parts[] = $hours.' '.trans_choice('general.hour', $hours);
+                $parts[] = trans_choice('general.count.hours', $hours);
             }
 
             if ($minutes > 0) {
-                $parts[] = $minutes.' '.trans_choice('general.minute', $minutes);
+                $parts[] = trans_choice('general.count.minutes', $minutes);
             }
 
             // Fallback if both are zero (unlikely but safe)
-            return implode(' ', $parts) ?: '0 '.trans_choice('general.minute', 2);
+            return join_counts($parts) ?: trans_choice('general.count.minutes', 0);
         }
 
         // Day-based leave (unchanged)
@@ -91,7 +91,7 @@ class LeaveRequest extends Model
         // Include the end date
         $days = $start->diffInWeekDays($end) + 1;
 
-        return $days.' '.trans_choice('general.day', $days);
+        return trans_choice('general.count.days', $days);
     }
 
     public function getDurationInHoursAttribute(): float
