@@ -163,7 +163,7 @@ use App\Enums\LeaveRequestStatus;
                 <x-forms.errors-validation-list/>
                 <div class="grid md:grid-cols-2 gap-4">
 
-                    <div class="md:col-span-1" wire:key="container-leave-type-{{ $form->leave_balance_id ?? 'new' }}">
+                    <div class="md:col-span-1" wire:key="container-leave-type-{{ $form->leaveRequest ? 'edit' : 'new' }}">
                         <x-forms.input-label for="leave_balance_id" required>{{__('general.type')}}</x-forms.input-label>
                         <x-forms.select2-input wire:model.live="form.leave_balance_id" required id="leave_balance_id">
                             @if($allAvailableLeaves?->count() > 0)
@@ -184,7 +184,7 @@ use App\Enums\LeaveRequestStatus;
                         </x-forms.select2-input>
                         <x-error-span>{{ $errors->first('form.leave_balance_id') }}</x-error-span>
                     </div>
-                    <div class="md:col-span-1" wire:key="container-alt-employee-{{ $form->alternative_employee ?? 'none' }}">
+                    <div class="md:col-span-1" wire:key="container-alt-employee-{{ $form->leaveRequest ? 'edit' : 'new' }}">
                         <x-forms.input-label for="alternative_employee">{{__('general.alternative-employee')}}</x-forms.input-label>
                         <x-forms.select2-input wire:model="form.alternative_employee" id="alternative_employee">
                             <option
