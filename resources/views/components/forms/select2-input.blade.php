@@ -3,6 +3,28 @@
 <div class="w-full" 
     x-data="{
         value: @entangle($attributes->wire('model')),
+        // The one place a value is normalized: '' and null both mean 'nothing
+        // chosen', and ids compare as strings (the server may hold 13, the DOM '13').
+        normalize(value) {
+            return value === null || value === undefined || value === '' ? null : String(value);
+        },
+        // A placeholder <option> without value='' reports its own text ('Select',
+        // 'اختيار') as its value, which then reached the server as an id.
+        chosen(select) {
+            let option = select[0].selectedOptions[0];
+            return option && option.getAttribute('value') ? option.value : null;
+        },
+        show(select, value) {
+            value = this.normalize(value);
+            if (value === null) {
+                // Show the placeholder rather than an empty box.
+                let options = [...select[0].options];
+                select[0].selectedIndex = options.findIndex(o => ! o.getAttribute('value'));
+            } else {
+                select.val(value);
+            }
+            select.trigger('change.select2');
+        },
         initSelect2() {
             let select = $(this.$refs.select);
 
@@ -23,7 +45,7 @@
             });
 
 
-            select.val(this.value).trigger('change.select2');
+            this.show(select, this.value);
 
             // select2 names its combobox only by the current value (e.g. Select),
             // so the field's own <label for> never reaches a screen reader.
@@ -40,13 +62,16 @@
             select.prop('disabled', {{ $disabled ? 'true' : 'false' }});
 
 
-            select.on('change', (e) => {
-                this.value = e.target.value;
+            select.on('change', () => {
+                let chosen = this.chosen(select);
+                if (chosen !== this.normalize(this.value)) {
+                    this.value = chosen;
+                }
             });
 
             this.$watch('value', (newValue) => {
-                if (select.val() !== newValue) {
-                    select.val(newValue).trigger('change.select2');
+                if (this.chosen(select) !== this.normalize(newValue)) {
+                    this.show(select, newValue);
                 }
             });
 
