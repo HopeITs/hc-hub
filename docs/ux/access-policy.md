@@ -1,6 +1,6 @@
 # A2-D · Directory visibility and public digital-ID policy (proposed)
 
-Status: **analysis complete, awaiting HR and security decisions** (HR product owner + security reviewer, §9). Not marked done until the decisions are recorded and the document is reviewed.
+Status: **approved 2026-10-20** by the HR product owner and technical lead (§9). Public card contents stay as DEC-02 (unchanged), with the accepted card-link risks in §9 Q6.
 Decision sheet to send (EN/AR, one page): [a2-d-decision-sheet.md](a2-d-decision-sheet.md).
 Date: 2026-10-19. Task: A2-D in [ux-prompts-v3.md](ux-prompts-v3.md) (R-24). Owner role: HR product owner + security reviewer. Reviewer: HR product owner + technical lead.
 Consumers: **A2** (implementation), C3-D, C5-D. Also read by D1-D, C2 and X1-I (§10).
@@ -169,6 +169,8 @@ Implementation of each affected part stays **conditional** until the decision is
 
 ## 7. Effect on the failures A1 routed here
 
+> **Superseded for #2–#4 (2026-10-20):** the §9 decision (readable card link, no token) replaces the token/legacy design of §5.3 and the rows below. What A2 actually implemented and tested: [a2-implementation.md](a2-implementation.md).
+
 A1 found these failures; it did not change them. The **intent** of each stays; the **assertion** must follow the signed policy.
 
 | A1 # | Test | Today | Under this policy | For A2 |
@@ -193,25 +195,25 @@ A1 found these failures; it did not change them. The **intent** of each stays; t
 
 | Item | Decision | Decided by (role) | Date |
 |---|---|---|---|
-| Field/action matrix §4.3 and deny behaviour §4.4 | *(pending)* | HR product owner + security reviewer | |
-| A2D-Q1 Directory fields | *(pending; recommended: yes)* | HR product owner | |
-| A2D-Q2 Colleague records tier | *(pending)* | HR product owner | |
-| A2D-Q3 Former employees | *(pending)* | HR product owner + security reviewer | |
-| A2D-Q4 Regional HR at Directory tier for other cities | *(pending; recommended: yes)* | HR product owner + security reviewer | |
-| A2D-Q5 Card management roles | *(pending)* | HR product owner | |
-| DEC-02 option (A / B / C) | *(pending; recommended: C)* | HR product owner + security reviewer | |
-| A2D-Q6 Legacy sunset date + risk acceptance | *(pending)* | Security reviewer + HR product owner | |
-| A2D-Q7 Emergency number source | *(pending; optional)* | HR product owner | |
+| Field/action matrix §4.3 and deny behaviour §4.4 | **Approved**, with two adjustments from the answers: (1) `employee` sees R on their own profile (Q2); (2) `manager` gets R for **direct reports only**, since the technical-manager role no longer exists (DEC-05 revision). | HR product owner + technical lead | 2026-10-20 (in session) |
+| A2D-Q1 Directory fields | **A: yes** (program, department, center, city, manager/reports visible to all staff) | HR product owner | 2026-10-20 (in session) |
+| A2D-Q2 Colleague records tier | **A:** manager for own team, general manager, city HR, national HR; employee sees own | HR product owner | 2026-10-20 (in session) |
+| A2D-Q3 Former employees | **A:** hidden from staff and managers; visible to general manager and HR | HR product owner + security reviewer | 2026-10-20 (in session) |
+| A2D-Q4 Regional HR at Directory tier for other cities | **A: yes**, directory tier only | HR product owner + security reviewer | 2026-10-20 (in session) |
+| A2D-Q5 Card management roles | **A:** city HR, national HR, super-admin; staff report a loss, HR acts | HR product owner | 2026-10-20 (in session) |
+| DEC-02 option (A / B / C) | **A: all cards switch to secure links at once.** Not the recommended C. Everyone gets a reprinted card first; old username links stop on switch day. No legacy period after that day; the only exposure is today's links until switch day (see Q6). | HR product owner + security reviewer | 2026-10-20 (in session) |
+| A2D-Q6 Card URL (replaces legacy sunset) | No cards printed yet, so no legacy links or switch day. **Decided format:** `ID/[city 3 digits][program 3 digits][employee_id]-[index]`, no secret part. Index `0` = cardboard, temporary: it stops when the plastic card is issued (lost before that: not revoked). Plastic starts at `1`; a lost plastic card is re-issued with the next index (`-2`, `-3`…) and **only the latest plastic index is valid**; older ones show "card is not valid". **Risks accepted by HR, against the recommendation:** (1) the link is enumerable, so anyone on the internet can collect every volunteer's public card (name, photo, position, center, city, phone, Telegram, LinkedIn, emergency number); (2) a cardboard card lost before the plastic one is issued cannot be stopped (a narrow exception to DEC-02). Purpose of the card: show whether the volunteer is active, and the emergency number. A move to another governorate or a new position prints a new card and the old link stops. | HR product owner + technical lead | 2026-10-20 (in session) |
+| A2D-Q7 Emergency number source | **A:** fixed HR hotline per city, set by HR | HR product owner | 2026-10-20 (in session) |
 
 ## 10. Acceptance criteria and handoff
 
 | AC | Status | Evidence |
 |---|---|---|
-| **AC-A2-D-01** HR/security record a chosen field/action matrix and deny behaviour for each role/city. | **Matrix proposed; recording pending** | §4.3 (role × same/other city × former), actions, §4.4 deny behaviour. Built on DEC-01. HR + security record their choice in §9. |
-| **AC-A2-D-02** Existing card compatibility is decided without pretending a guessable redirect preserves secrecy. | **Options analysed; recommendation C; decision pending** | §5.2 (A/B/C, redirect rejected and why), §5.3 (legacy link renders, never redirects; re-issue ends it immediately), A2D-Q6 sunset. |
+| **AC-A2-D-01** HR/security record a chosen field/action matrix and deny behaviour for each role/city. | **Met** (§9, 2026-10-20) | §4.3 (role × same/other city × former), actions, §4.4 deny behaviour. Built on DEC-01. HR + security record their choice in §9. |
+| **AC-A2-D-02** Existing card compatibility is decided without pretending a guessable redirect preserves secrecy. | **Met** (2026-10-20): no legacy cards; URL format and accepted risks recorded in §9 Q6 | §5.2 (A/B/C, redirect rejected and why), §5.3 (legacy link renders, never redirects; re-issue ends it immediately), A2D-Q6 sunset. |
 | **AC-A2-D-03** Open questions are named decisions; implementation stays conditional. | **Met** | §6 A2D-Q1…Q7, each with the part it blocks; §9 record. |
 
-Verification performed: source trace at `43a4d441` (files cited per row), `git log` for the drawer and the card route, and the app's own gates run against synthetic personas on the X2 session copy (§3). No application test is claimed from this review. **Formal review: pending.** A2-D is **not** marked done.
+Verification performed: source trace at `43a4d441` (files cited per row), `git log` for the drawer and the card route, and the app's own gates run against synthetic personas on the X2 session copy (§3). No application test is claimed from this review. **Formal review: done 2026-10-20 (HR + technical lead).** A2-D is marked done.
 
 **Handoff:**
 

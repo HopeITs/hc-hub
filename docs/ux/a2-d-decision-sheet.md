@@ -1,6 +1,6 @@
 # A2-D decision sheet: staff directory and public ID card
 
-**For:** HR product owner and security reviewer · **From:** A2-D analysis (2026-10-19) · **Status:** analysis complete, awaiting HR and security decisions
+**For:** HR product owner and security reviewer · **From:** A2-D analysis (2026-10-19) · **Status:** decided 2026-10-20 (answers in access-policy.md §9; Q6 replaced by the card-link decision)
 Full analysis and evidence: [access-policy.md](access-policy.md). Please mark one option per question and return the sheet; answers are recorded in access-policy.md §9.
 
 Background in one paragraph: in October HR decided that all staff may see colleagues in every city (name, photo, position, work contact), and that a lost or replaced ID card must stop working immediately. Today the org chart's profile panel has its security check switched off, any signed-in user can open any full profile, the directory still lists former staff, and the public ID card's web address is the person's username (the part of the work email before @), so anyone can guess it and a replaced card can never be switched off.

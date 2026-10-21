@@ -864,6 +864,8 @@ return [
         'logo-preview' => 'Selected logo preview',
         'current-logo' => 'Current logo',
         'toggle-password' => 'Show or hide password',
+        'close-dialog' => 'Close dialog',
+        'view-details' => 'View details',
     ],
 
     // Default <meta> copy, overridden per page via $title / $description

@@ -94,8 +94,18 @@
             </div>
         </section>
 
-        <section data-tour="profile.summary" class="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
-            @foreach ([[__('general.years-of-service'), $employee->years_of_service_formatted, 'icons.clock'], [trans_choice('general.department', 1), $currentPosition?->department?->name ?? $notSpecified, 'icons.homepage'], [trans_choice('general.center', 1), $currentPosition?->center?->name ?? $notSpecified, 'icons.map-pin'], [__('general.contract-status'), $currentContract ? __('general.active') : __('general.inactive'), 'icons.contracts']] as [$label, $value, $icon])
+        {{-- Length of service comes from the career history, so it is only
+             there for viewers who get that tier ($yearsOfService is null otherwise). --}}
+        @php
+            $summary = array_values(array_filter([
+                $yearsOfService !== null ? [__('general.years-of-service'), $yearsOfService, 'icons.clock'] : null,
+                [trans_choice('general.department', 1), $currentPosition?->department?->name ?? $notSpecified, 'icons.homepage'],
+                [trans_choice('general.center', 1), $currentPosition?->center?->name ?? $notSpecified, 'icons.map-pin'],
+                [__('general.contract-status'), $currentContract ? __('general.active') : __('general.inactive'), 'icons.contracts'],
+            ]));
+        @endphp
+        <section data-tour="profile.summary" @class(['grid grid-cols-2 gap-2 sm:gap-3', 'lg:grid-cols-4' => count($summary) === 4, 'lg:grid-cols-3' => count($summary) === 3])>
+            @foreach ($summary as [$label, $value, $icon])
                 <div class="rounded-surface border border-neutral-200 bg-white p-3 shadow-e1 sm:rounded-surface sm:p-4">
                     <div
                         class="mb-2 inline-flex h-7 w-7 items-center justify-center rounded-surface bg-primary text-white sm:mb-3 sm:h-9 sm:w-9 sm:rounded-surface">
@@ -248,6 +258,7 @@
                         @endif
                     </div>
                 </x-profile-section>
+                <livewire:employee-cards.manage-digital-id :employee="$employee" :key="'digital-id-'.$employee->id" />
 
                 @if ($canViewPrivate)
                     <x-profile-section :title="__('general.personal-contact')" icon="icons.phone" private>
