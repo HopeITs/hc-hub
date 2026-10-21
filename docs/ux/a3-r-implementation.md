@@ -67,6 +67,18 @@ No schema, route, policy, permission, salary, calculation or server-action chang
 |---|---|
 | AR, HR-ALP, *All Leaves* → *Add New* (`form.employee_id`, `.live`, `<option value="">`) | Employee → `إلياس عطالله` / `"31"`, 1 request. The leave-type list reloads for that employee, and Annual → `سنوية` / `"200"` with the Day/Hour group. Clearing the employee → `wire null` for the employee **and** the leave type (the component's own `updatedFormEmployeeId`), 1 request. |
 
+### Slow connection (requests still in flight)
+
+Same fixture. Every Livewire response was held for 2.5 s by wrapping `window.fetch` in the page, for inspection only. The next action started about 0.6 s after the first request had been sent.
+
+| Run | Result |
+|---|---|
+| AR: pick Annual, and change the start date in the same instant | Sent as one request (`leave_balance_id "13"` + `start_at`). After the response: `سنوية`, the date kept, the Day/Hour group shown. |
+| AR: pick Sick, then Annual while Sick's request is in flight | Two requests in order (`"14"`, then `"13"`). It ends on **`سنوية` / `"13"`** with the group shown. No flash back to Sick or the placeholder. |
+| AR: Sick in flight, then the alternative employee, then Annual | The second request carries `alternative_employee "199"` + `leave_balance_id "13"`. It ends on `سنوية` and `آدم حنا`, and the date is kept. |
+| AR: Sick in flight, then close the dialog with Escape, then *Add New* | It reopens on `اختيار`, `wire null`, empty date and alternative employee. No stale state. |
+| EN: Full Sick, then Annual while Full Sick's request is in flight | Ends on **`Annual` / `"13"`** with the group shown. |
+
 Automated: `php artisan test --filter=LeaveSelectorStateTest` passed **5/5** (35 assertions). These tests cover the server side only. The UI fix is proved by the browser runs above.
 
 ## 5. Found, not fixed (outside A3-R)
@@ -88,8 +100,8 @@ Automated: `php artisan test --filter=LeaveSelectorStateTest` passed **5/5** (35
 ## 7. Still required before "done"
 
 1. QA + technical lead review of the diff and of the evidence above.
-2. A pass on a slow connection, which was not done: picking a type and then another field while the first request is still in flight.
-3. Commit, merge.
+2. ~~A pass on a slow connection~~. Done (§4, "Slow connection"). The delay was simulated in the page, not on a real slow network.
+3. Push, PR, merge.
 
 ## 8. Handoff to A3
 
