@@ -43,10 +43,12 @@ class ContractsExpiringAutoRenewWarning extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $data = $this->toArray($notifiable);
+        // See ContractsAutoRenewedSummary::toMail(): one language per email.
+        $locale = app()->getLocale() === 'en' ? 'en' : 'ar';
 
         return (new MailMessage)
-            ->subject($data['title']['ar'])
-            ->line($data['body']['ar']);
+            ->subject($data['title'][$locale])
+            ->line($data['body'][$locale]);
     }
 
     /**

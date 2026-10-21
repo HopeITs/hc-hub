@@ -8,10 +8,10 @@ Status: **implemented and committed (`bb71b430`), awaiting review** (QA engineer
 | Input | State | Effect on A4 |
 |---|---|---|
 | X1 | Baseline measured ([evidence/x1](evidence/x1/summary.md)). | None. A4 changes wording and markup only. No query is added except the dashboard contract-type chart, which now also reads `name_ar` (same query, one more column). |
-| X2 | Instrument ready, **0 participant sessions** ([usability-baseline.md §10](usability-baseline.md)). | Same open choice as A5: the technical lead picks (a) wait for sessions or (b) merge and disclose "no pre-change baseline" **before A4 merges**. Labels changed here (see §2) need a version note in the X2 scripts. |
+| X2 | Instrument ready, **0 participant sessions** ([usability-baseline.md §10](usability-baseline.md)). | **Decided 2026-10-21 (§4.1): option (b)**, merge and disclose. There is **no pre-change usability baseline for the A4 delta**; X2-R must say so (AC-X2-R-01). Labels changed here (see §2) need a version note in the X2 scripts. |
 | A5 | Implemented and merged, screen-reader pass pending ([a5-implementation.md](a5-implementation.md)). | A5 deliberately left "Showing …" and the pagination sentence to A4 (done, §2.5). Dialog focus and naming are A5's and were not changed. |
 
-No upstream decision (DEC-01…10) is needed for A4. No schema, route, policy, permission, salary or data change. Stored values (names, leave-type names, notification payloads, enum ids) are shown as stored, never translated.
+No upstream decision (DEC-01…10) is needed for A4. No route, policy, permission or salary change. One schema change after the 2026-10-21 decisions: nullable `users.locale` for the mail language (§4.2, plan in §5). Stored values (names, leave-type names, notification payloads, enum ids) are shown as stored, never translated.
 
 ## 2. What changed
 
@@ -117,7 +117,7 @@ Tests (`tests/Feature/A4BilingualTest.php`, 9 tests, 82 assertions), meaningful 
 
 `Auth\AuthenticationTest::test_users_can_logout` now expects the localized home URL (behaviour change in §2.5, intended).
 
-Full suite, PHP 8.5, SQLite `:memory:`, 2026-10-21: **618 tests, 614 passed, 4 failed, 0 errors.** The 4 failures are baseline defects listed in [test-baseline.md](test-baseline.md): `ContractAutoRenewalWorkflowTest` (duplicate warning, B6), `ContractCreatePerformanceTest`, `ContractPayClauseTest` (PDF), `ContractRenewalTest` (`<script>` assertion). None is caused by A4.
+Full suite, PHP 8.5, SQLite `:memory:`, 2026-10-21: **622 tests, 618 passed, 4 failed, 0 errors** (after the §4.1 decisions; 618/614 before them). The 4 failures are baseline defects listed in [test-baseline.md](test-baseline.md): `ContractAutoRenewalWorkflowTest` (duplicate warning, B6), `ContractCreatePerformanceTest`, `ContractPayClauseTest` (PDF), `ContractRenewalTest` (`<script>` assertion). None is caused by A4.
 
 Rendered validation in the browser (AR, `staff`/`manager` persona, empty *إضافة جديد* leave form): «حقل نوع الإجازة مطلوب.»، «حقل تاريخ البداية مطلوب.»، «حقل تاريخ النهاية مطلوب.»، «حقل السبب مطلوب.», each under its field.
 
@@ -144,21 +144,48 @@ Confirmed in Arabic: Select2 no-match «لا توجد نتائج» and search bo
 
 Not checked: 200 % text zoom, phone widths, and a screen reader on the Arabic pages (A5's screen-reader pass is still pending). Native date inputs show the browser's own `dd/mm/yyyy` placeholder, which follows the browser language, not the page.
 
-## 4. Left open / decisions for the reviewer
+## 4. Decisions and open items
+
+### 4.1 Decisions taken (product owner, 2026-10-21)
+
+| Question | Decision | Implemented |
+|---|---|---|
+| Arabic office hours in the contract wording (composer preview and PDF) printed «9:00 AM». | Use «9:00 ص» / «5:00 م» in the Arabic column. The English column keeps "9:00 AM". | `schedule-clause.blade.php` (`$to12HourAr`) and `contract-composer.js` (`to12Hour(value, true)`), so preview and PDF stay identical. Applies to every contract rendered from now on, including re-prints of existing contracts (the clause is rendered from stored hours, not stored text). Test: `ContractScheduleClauseTest` checks «9:00 ص», «5:00 م», «6:00 م», «8:00 م». |
+| X2 baseline before merging A4. | Merge and disclose: no pre-change baseline for this delta. | Recorded in §1. |
+| Language of the contract renewal / expiry emails (were always Arabic). | Each recipient's own language. | §4.2 and §5. |
+| Numeric dates in tables (`20-10-2026`). | Keep numeric, day first. | No change. |
+
+### 4.2 Recipient language for mail
+
+- `users.locale` (new, nullable `string(5)`), migration `2026_10_21_000000_add_locale_to_users_table`.
+- `RememberUserLocale` (web group, after `EnsureAccountIsActive`) stores the current interface language when it differs from the stored one. One query-builder update per language switch: no model events, no activity-log row, no `updated_at` change. Unsupported locales are ignored.
+- `User` implements `HasLocalePreference`; Laravel renders every mail to that user in `preferredLocale()`. Null (a user not seen since deploy) falls back to the current locale: the request's locale for mail sent during a request, `APP_LOCALE` (`ar` in production) for scheduled commands. That is today's behaviour for these emails.
+- `ContractsAutoRenewedSummary` and `ContractsExpiringAutoRenewWarning` pick subject, line and employee names in that language, so greeting and body match.
+- Tests: `tests/Feature/A4UserLocaleTest.php` (stores and follows a switch; writes nothing else; ignores an unsupported locale; one EN and one AR recipient each get the subject in their own language).
+
+### 4.3 Left open
 
 | Item | Why it is not changed here | Owner |
 |---|---|---|
-| The Arabic printed-wording preview and the PDF schedule clause print office hours as «9:00 AM» (`contract-composer.js` `to12Hour`, `schedule-clause.blade.php` `g:i A`). | This is the contract **document** text, the same in preview and PDF. Changing it (e.g. «9:00 ص») changes what is signed. | Arabic content reviewer + contract owner; then A6. |
 | `general.text*`, `general.team1`: Arabic-only contract body strings, identical in `en/general.php` or missing there. | The contract body is bilingual by design and rendered from `contracts/details/*`; these are legacy keys. | A6 cleanup. |
-| The two contract emails (`ContractsAutoRenewedSummary`, `ContractsExpiringAutoRenewWarning`) always mail the Arabic subject and line. | A recipient-language rule is a product decision (users have no stored language). | Product owner. |
 | Latin names inside stored notification text are not isolated with Unicode marks. | Would change stored and emailed text. The dropdown can use `dir="auto"` per line if the reviewer sees reordering. | D3 / B6. |
 | Role switcher with several roles was not walked (the personas hold one role each); the labels go through the same `role_label()`. | Needs a multi-role persona. | QA |
 | Auth register / verify-email screens: translated in `ar.json` but not walked (registration is not a core journey). | Out of A4's core-journey scope. | — |
-| Human review of natural Arabic, long names and date ambiguity (task step 4). | Needs the Arabic content reviewer. Dates in tables are `d-m-Y` with `dir="ltr"`; the reviewer should confirm that day-first numeric dates are unambiguous for staff. | Arabic content reviewer. |
+| Human review of natural Arabic, long names and date ambiguity (task step 4). | Needs the Arabic content reviewer. Dates in tables stay `d-m-Y` with `dir="ltr"` (decided, §4.1). | Arabic content reviewer. |
 
 ## 5. Rollout and recovery
 
-UI wording, markup and lang files only. Revert the A4 commit to roll back. No data written, no migration. Stored notifications keep the same shape; old rows render as before.
+Mostly UI wording, markup and lang files: revert the A4 commits to roll back. Stored notifications keep the same shape; old rows render as before.
+
+One schema change (§4.2), with its compatibility and recovery plan:
+
+| Step | What happens |
+|---|---|
+| Deploy | Run the migration with the code. The column is nullable with no backfill; every existing user starts at null, which behaves exactly as before (mail in the app default language). |
+| Data written | Only `users.locale`, only for signed-in users, only on a language change. No other column or table is touched. |
+| Rollback | Revert the code **and** run `php artisan migrate:rollback --step=1` (drops the column). Code without the column fails on every authenticated request (the middleware writes it), so never roll back the migration alone; reverting only the code is safe and leaves an unused column. |
+| Loss on rollback | Only the remembered languages; users re-acquire them on their next visit after a redeploy. |
+| Not done | No live migration was run. Production deploy needs separate authorization. |
 
 ## 6. Handoff
 

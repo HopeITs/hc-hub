@@ -50,13 +50,17 @@ class ContractsAutoRenewedSummary extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $data = $this->toArray($notifiable);
+        // The sender renders mail in the recipient's preferredLocale(), or the
+        // app default when they have none, so the whole email (greeting
+        // included) is in one language.
+        $locale = app()->getLocale() === 'en' ? 'en' : 'ar';
 
         $message = (new MailMessage)
-            ->subject($data['title']['ar'])
-            ->line($data['body']['ar']);
+            ->subject($data['title'][$locale])
+            ->line($data['body'][$locale]);
 
         foreach ($data['employee_names'] as $name) {
-            $message->line('- '.($name['ar'] ?: $name['en']));
+            $message->line('- '.($name[$locale] ?: $name['en']));
         }
 
         return $message;

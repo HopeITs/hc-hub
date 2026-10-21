@@ -978,19 +978,20 @@ document.addEventListener('alpine:init', () => {
         },
 
         /**
-         * 'HH:MM' (24h, straight from the time input) -> '9:00 AM' — matches
+         * 'HH:MM' (24h, straight from the time input) -> '9:00 AM', or
+         * '9:00 ص' / '5:00 م' for the Arabic wording (A4) — matches
          * the format the actual print templates already use for office
          * hours (see page2.blade.php's `g:i A`), so the preview reads the
          * same way the printed contract will.
          */
-        to12Hour(value) {
+        to12Hour(value, arabic = false) {
             if (!value) {
                 return '';
             }
 
             const [hoursStr, minutes] = value.split(':');
             let hours = Number(hoursStr);
-            const suffix = hours >= 12 ? 'PM' : 'AM';
+            const suffix = arabic ? (hours >= 12 ? 'م' : 'ص') : (hours >= 12 ? 'PM' : 'AM');
 
             hours %= 12;
 
@@ -1396,12 +1397,12 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 let timePart = isAr
-                    ? `من الساعة ${this.to12Hour(this.workHoursFrom)} حتى الساعة ${this.to12Hour(this.workHoursTo)}`
+                    ? `من الساعة ${this.to12Hour(this.workHoursFrom, true)} حتى الساعة ${this.to12Hour(this.workHoursTo, true)}`
                     : `from ${this.to12Hour(this.workHoursFrom)} to ${this.to12Hour(this.workHoursTo)}`;
 
                 if (this.hasSecondShift()) {
                     timePart += isAr
-                        ? ` ومن الساعة ${this.to12Hour(this.workHours2From)} حتى الساعة ${this.to12Hour(this.workHours2To)}`
+                        ? ` ومن الساعة ${this.to12Hour(this.workHours2From, true)} حتى الساعة ${this.to12Hour(this.workHours2To, true)}`
                         : ` and from ${this.to12Hour(this.workHours2From)} to ${this.to12Hour(this.workHours2To)}`;
                 }
 
