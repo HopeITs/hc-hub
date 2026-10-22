@@ -10,12 +10,12 @@
     @if(method_exists($this, 'savedViews'))
         {{-- HasSavedViews: personal views (table state only), owner + active role only. --}}
         @php($savedViews = $this->savedViews())
-        <div x-data="{ open: false }" x-on:keydown.escape="open = false" class="flex flex-col items-start gap-2">
+        <div x-data="{ open: false }" x-on:keydown.escape="open = false" x-on:click.outside="open = false" class="relative self-start">
             <button type="button" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" aria-controls="saved-views-panel-{{ $this->getId() }}"
                 class="inline-flex min-h-11 items-center rounded-control border border-neutral-300 bg-white px-4 text-sm font-semibold text-neutral-800 hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
                 {{ __('general.views-menu') }} ({{ $savedViews->count() }})
             </button>
-            <div id="saved-views-panel-{{ $this->getId() }}" x-show="open" x-cloak class="w-full max-w-md rounded-surface border border-[var(--line-hairline)] bg-white p-3 shadow-e1">
+            <div id="saved-views-panel-{{ $this->getId() }}" x-show="open" x-cloak class="absolute start-0 top-full z-30 mt-2 w-[min(24rem,calc(100vw-2rem))] rounded-surface border border-[var(--line-hairline)] bg-white p-3 shadow-e1">
                 <p class="mb-2 text-small text-neutral-600">{{ __('general.views-help') }}</p>
                 @error('savedViewName')
                     <p role="alert" class="mb-2 text-sm font-medium text-red-800">{{ $message }}</p>
