@@ -110,11 +110,11 @@ class AccessibilityTest extends TestCase
         $this->assertStringContainsString('href="#main-content"', $layout);
         $this->assertStringContainsString('id="main-content"', $layout);
 
-        // The decorative preloader must stay out of the accessibility tree.
-        $this->assertMatchesRegularExpression(
-            '/id="page-gif-overlay"\s+aria-hidden="true"/',
-            $layout,
-        );
+        // A7: no full-screen preloader covers ready content (it used to hold
+        // every page for at least 550 ms, hidden from assistive technology
+        // but not from anyone else).
+        $this->assertStringNotContainsString('page-gif-overlay', $layout);
+        $this->assertStringNotContainsString('<video', $layout);
     }
 
     public function test_accessibility_strings_are_translated_in_every_locale(): void

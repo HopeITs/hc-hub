@@ -117,7 +117,7 @@ No new automated test was added: the defect fixed in §6 is a browser focus beha
 - **Toast reachability:** the toast region is last in the tab order, so a keyboard user reaches Undo only after the rest of the page. With 8 s (paused once focused) that is tight on long pages. **For A5-M/B2:** do not rely on Undo as the only recovery path for keyboard users.
 - **After dismissing a toast** with the keyboard, focus falls to the page body. Acceptable for now; a later task may return it to the previously focused control.
 - **Touch targets:** Undo (≈53×26 px) and Dismiss (32×32 px) are below the product's 44 px target (not the WCAG AA minimum). **For M1/D2.**
-- **Navigation into an `/en/…` or `/ar/…` URL with `wire:navigate`** is redirected by the locale middleware; the app's own links use the un-prefixed form, which works.
+- **Locale prefixes and `wire:navigate`:** the app's own links carry the current locale's prefix (`/ar/contracts` in Arabic) and navigate normally. A scripted `wire:navigate` to the **other** locale's prefix is redirected by the locale middleware; the language switch itself is a full page load. *(Corrected 2026-10-21 during A7: an earlier version said the app's links are un-prefixed, which is true only of the English default.)*
 
 ## 8. Acceptance criteria
 
