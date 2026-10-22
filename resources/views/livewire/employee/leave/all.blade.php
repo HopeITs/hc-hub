@@ -60,7 +60,7 @@ use App\Enums\LeaveRequestStatus;
 
     <x-modal.dialog max-width="6xl" id="formModal" :title="$modalTitle" wire:model.defer="formModal" close-action="requestClose" wire:ignore.self>
 
-        <form wire:submit.prevent="save" class="space-y-4">
+        <form wire:submit.prevent="save" class="space-y-4 sheet:flex-1 sheet:flex sheet:flex-col">
             <x-forms.errors-validation-list/>
             <div class="grid md:grid-cols-2 gap-4">
                 <div class="md:col-span-1">
@@ -167,13 +167,13 @@ use App\Enums\LeaveRequestStatus;
                 </div>
             </div>
 
-            <div class="flex justify-end gap-2">
+            <x-modal.actions>
                 <x-primary-button type="button" wire:click="confirmSave"
                                   class="!w-auto">@lang('general.save')</x-primary-button>
                 {{-- Closes through the guard, like Escape and the header close: no link, no submit. --}}
                 <x-primary-button type="button" :show-spinner="false" x-on:click="close()"
                                   class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
-            </div>
+            </x-modal.actions>
         </form>
     </x-modal.dialog>
 
@@ -248,7 +248,7 @@ use App\Enums\LeaveRequestStatus;
 
                 </div>
 
-                <div class="flex space-x-2 justify-end mt-4">
+                <div class="flex justify-end gap-2 mt-4">
                     <x-primary-button wire:click="confirmDelete({{$selectedLeave->id}})"
                                       class=" !w-auto">
                         {{ __('general.delete') }}
@@ -265,7 +265,7 @@ use App\Enums\LeaveRequestStatus;
 
     <x-modal.dialog id="decisionModal" :title="$modalTitle" wire:model.defer="decisionModal" close-action="requestClose" wire:ignore.self>
         @if($decisionLeave)
-            <div class="space-y-6">
+            <div class="space-y-6 sheet:flex-1 sheet:flex sheet:flex-col">
 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
@@ -354,7 +354,7 @@ use App\Enums\LeaveRequestStatus;
                     </div>
                 @endif
 
-                <div class="flex space-x-2 justify-end mt-4">
+                <x-modal.actions class="mt-4">
 
                     <x-primary-button
                         wire:click="submitDecision"
@@ -368,7 +368,7 @@ use App\Enums\LeaveRequestStatus;
                                       class="!bg-secondary-light !w-auto">
                         {{ __('general.cancel') }}
                     </x-primary-button>
-                </div>
+                </x-modal.actions>
 
             </div>
         @endif

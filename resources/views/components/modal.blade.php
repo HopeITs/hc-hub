@@ -5,35 +5,35 @@
 
     switch ($maxWidth ?? '2xl') {
         case 'sm':
-            $maxWidth = 'sm:max-w-sm';
+            $maxWidth = 'dialog:max-w-sm';
             break;
         case 'md':
-            $maxWidth = 'sm:max-w-md';
+            $maxWidth = 'dialog:max-w-md';
             break;
         case 'lg':
-            $maxWidth = 'sm:max-w-lg';
+            $maxWidth = 'dialog:max-w-lg';
             break;
         case 'xl':
-            $maxWidth = 'sm:max-w-xl';
+            $maxWidth = 'dialog:max-w-xl';
             break;
         case '3xl':
-            $maxWidth = 'sm:max-w-3xl';
+            $maxWidth = 'dialog:max-w-3xl';
             break;
         case '4xl':
-            $maxWidth = 'sm:max-w-4xl';
+            $maxWidth = 'dialog:max-w-4xl';
             break;
         case '5xl':
-            $maxWidth = 'sm:max-w-5xl';
+            $maxWidth = 'dialog:max-w-5xl';
             break;
         case '6xl':
-            $maxWidth = 'sm:max-w-6xl';
+            $maxWidth = 'dialog:max-w-6xl';
             break;
         case '7xl':
-            $maxWidth = 'sm:max-w-7xl';
+            $maxWidth = 'dialog:max-w-7xl';
             break;
         case '2xl':
         default:
-            $maxWidth = 'sm:max-w-2xl';
+            $maxWidth = 'dialog:max-w-2xl';
             break;
     }
 @endphp
@@ -166,7 +166,7 @@
     x-show="show"
     id="{{ $id }}"
     data-modal-root
-    class="fixed inset-0 z-50 overflow-y-auto overscroll-contain"
+    class="fixed inset-0 z-50 overflow-y-auto overscroll-contain sheet:scroll-pb-28"
     style="display: none;"
 >
     <div x-show="show" class="fixed inset-0 z-0 transform bg-gray-500/75 transition-all motion-reduce:transition-none"
@@ -184,7 +184,9 @@
          a Livewire morph of this dialog never removes a dropdown it does not know about. --}}
     <div wire:ignore data-modal-dropdowns class="relative z-20"></div>
 
-    <div class="pointer-events-none relative z-10 flex min-h-full items-center justify-center p-4 sm:p-6">
+    {{-- Below `sm` the panel is a full-screen sheet (M1): no gutter, dvh height so browser chrome
+         and the virtual keyboard do not hide the bottom edge. sm and up is the centred dialog. --}}
+    <div class="pointer-events-none relative z-10 flex min-h-full items-stretch justify-center p-0 dialog:items-center dialog:p-6">
         <div x-show="show"
              x-ref="panel"
              role="dialog"
@@ -192,13 +194,13 @@
              tabindex="-1"
              @if($labelledby) aria-labelledby="{{ $labelledby }}" @elseif($label) aria-label="{{ $label }}" @endif
              @if($describedby) aria-describedby="{{ $describedby }}" @endif
-             class="pointer-events-auto w-full overflow-hidden rounded-surface bg-white shadow-e3 transform transition-all focus:outline-none motion-reduce:transition-none motion-reduce:transform-none {{ $maxWidth }}"
+             class="pointer-events-auto w-full bg-white shadow-e3 transform sheet:min-h-dvh sheet:rounded-none dialog:overflow-hidden dialog:rounded-surface transition-all focus:outline-none motion-reduce:transition-none motion-reduce:transform-none {{ $maxWidth }}"
              x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:enter-start="opacity-0 translate-y-4 dialog:translate-y-0 dialog:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 dialog:scale-100"
              x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+             x-transition:leave-start="opacity-100 translate-y-0 dialog:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 dialog:translate-y-0 dialog:scale-95">
             {{ $slot }}
         </div>
     </div>

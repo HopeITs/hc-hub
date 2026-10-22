@@ -8,7 +8,7 @@
 @endphp
 
 <div>
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
         <livewire:layout.breadcrumbs :title="trans_choice('general.employee', 2)" :crumbs="[
             ['label' => trans_choice('general.employee-management', 2)],
             ['label' => trans_choice('general.employee', 2)],

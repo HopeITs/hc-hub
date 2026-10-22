@@ -56,7 +56,7 @@
             <x-error-span>{{ $errors->first('draftForm.position_id') }}</x-error-span>
         </div>
 
-        <div class="flex justify-end space-x-2">
+        <div class="flex justify-end space-x-2 m1-action-bar">
             <x-primary-button type="button" wire:click="createDraftAndContinue" class="!w-auto">
                 @lang('general.create-draft-and-continue')
             </x-primary-button>

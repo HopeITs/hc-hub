@@ -19,7 +19,7 @@
     {{-- The export state wraps the header row and the error below it, so a
          failure can be explained (and retried) full width, under the buttons. --}}
     <div class="space-y-3" @if($canExport) x-data="@include('livewire.contract._export-pdf-state', ['contract' => $contract])" @endif>
-    <div class="flex items-center justify-between gap-3">
+    <div class="flex flex-wrap items-center justify-between gap-3">
         <livewire:layout.breadcrumbs
             :title="trans_choice('general.contracts', 1)"
             :crumbs="$crumbs ?? [
@@ -29,7 +29,7 @@
             ]"
         />
 
-        <div class="shrink-0 flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2 max-md:w-full max-md:[&>*]:flex-1 max-md:[&>*]:justify-center max-md:[&>*]:min-h-11">
             @if($canExport)
             <button type="button" data-tour="contract-details.export"
                     x-on:click="exportPdf()"
@@ -97,7 +97,7 @@
         </x-badge>
     </div>
 
-    <div data-tour="contract-details.document">
+    <div data-tour="contract-details.document" class="contract-review">
         @includeIf($partialPath)
     </div>
 

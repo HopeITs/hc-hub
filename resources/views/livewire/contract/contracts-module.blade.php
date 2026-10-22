@@ -6,7 +6,7 @@
 <div>
     @php($locale = app()->getLocale())
 
-    <div class="flex justify-between mb-6">
+    <div class="flex flex-wrap justify-between items-center gap-3 mb-6">
         <livewire:layout.breadcrumbs
             :title="trans_choice('general.contracts', 2)"
             :crumbs="[

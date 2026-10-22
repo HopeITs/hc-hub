@@ -214,9 +214,10 @@ use App\Enums\LeaveRequestStatus;
         close-action="requestClose"
         wire:ignore.self
         class="flex items-center justify-center px-2">
-        <div class="w-full max-h-[60vh] overflow-y-auto bg-white rounded-surface px-6 py-4 md:px-12 md:py-6">
+        {{-- Phones (M1): the sheet itself scrolls, so there is no nested scroll area; sm and up keeps the capped panel. --}}
+        <div class="w-full sheet:flex-1 sheet:flex sheet:flex-col bg-white rounded-surface px-0 py-0 dialog:max-h-[60dvh] dialog:overflow-y-auto dialog:px-6 dialog:py-4 dialog:md:px-12 dialog:md:py-6">
             {{-- Enter in a field takes the same path as Save (there is no save()). --}}
-            <form wire:submit.prevent="confirmSave" class="space-y-4">
+            <form wire:submit.prevent="confirmSave" class="space-y-4 sheet:flex-1 sheet:flex sheet:flex-col">
                 <x-forms.errors-validation-list/>
                 <div class="grid md:grid-cols-2 gap-4">
 
@@ -351,7 +352,9 @@ use App\Enums\LeaveRequestStatus;
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-2 pt-4">
+                {{-- Phones (M1): Submit/Cancel stay pinned to the bottom of the sheet, above the safe area, while
+                     the form scrolls; the modal root's scroll padding keeps a focused field clear of this bar. --}}
+                <x-modal.actions data-testid="leave-form-actions">
                     {{-- Disabled while saving is feedback only; duplicates are
                          stopped on the server (LeaveRequestForm::store). --}}
                     <x-primary-button
@@ -371,7 +374,7 @@ use App\Enums\LeaveRequestStatus;
                         class="!bg-secondary-light !w-auto">
                         @lang('general.cancel')
                     </x-primary-button>
-                </div>
+                </x-modal.actions>
             </form>
         </div>
     </x-modal.dialog>

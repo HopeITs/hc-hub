@@ -74,7 +74,7 @@
                     </dl>
                 </div>
 
-                <footer class="mt-auto flex flex-wrap gap-2 border-t border-neutral-200 p-4">
+                <footer class="sticky bottom-0 mt-auto flex flex-wrap gap-2 border-t border-neutral-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] max-sm:[&>a]:flex-1 max-sm:[&>a]:justify-center">
                     <a href="{{ route('contracts.show', $contract->getKey()) }}" wire:navigate
                         class="inline-flex min-h-11 items-center rounded-control bg-primary px-4 text-sm font-semibold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">{{ __('contracts.drawer-open-full') }}</a>
                     @if($canEdit)

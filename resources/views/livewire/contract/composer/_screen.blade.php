@@ -130,7 +130,7 @@
 <div
     x-data="contractComposer(@js($composerConfig))"
     x-init="initialize()"
-    class="pb-2 max-lg:pb-28"
+    class="pb-2 max-lg:pb-40"
 >
     {{--
         items-stretch is what actually guarantees the two columns share a

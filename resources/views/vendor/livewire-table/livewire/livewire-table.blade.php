@@ -49,13 +49,21 @@
         {{-- The per-column search lives in the table header, which phones do not show: offer the select filters here. --}}
         @php($phoneFilters = $this->resolveColumns()->filter(fn ($c) => $c instanceof \RamonRietdijk\LivewireTables\Columns\SelectColumn && $c->isSearchable() && in_array($c->code(), $this->columns)))
         @if($phoneFilters->isNotEmpty())
-            <div class="flex flex-col gap-2 md:hidden">
-                @foreach($phoneFilters as $column)
-                    <div wire:key="phone-filter-{{ $column->code() }}" class="rounded-surface border border-[var(--line-hairline)] bg-white">
-                        <span class="block px-3 pt-2 text-small font-semibold text-secondary-medium">{{ $column->label() }}</span>
-                        {{ $column->renderSearch() }}
-                    </div>
-                @endforeach
+            {{-- M1: collapsed by default, so the first result is on the first screen; the state lives in Alpine and survives Livewire morphs. --}}
+            <div class="md:hidden" x-data="{ filtersOpen: false }">
+                <button type="button" x-on:click="filtersOpen = ! filtersOpen" x-bind:aria-expanded="filtersOpen.toString()" aria-controls="phone-filters-{{ $this->getId() }}"
+                    class="inline-flex min-h-11 w-full items-center justify-between rounded-control border border-neutral-300 bg-white px-4 text-sm font-semibold text-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                    <span>{{ __('Filters') }}</span>
+                    <svg class="size-5 transition-transform motion-reduce:transition-none" x-bind:class="filtersOpen && 'rotate-180'" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                </button>
+                <div id="phone-filters-{{ $this->getId() }}" x-show="filtersOpen" x-cloak class="mt-2 flex flex-col gap-2">
+                    @foreach($phoneFilters as $column)
+                        <div wire:key="phone-filter-{{ $column->code() }}" class="rounded-surface border border-[var(--line-hairline)] bg-white">
+                            <span class="block px-3 pt-2 text-small font-semibold text-secondary-medium">{{ $column->label() }}</span>
+                            {{ $column->renderSearch() }}
+                        </div>
+                    @endforeach
+                </div>
             </div>
         @endif
         <div class="md:hidden"
