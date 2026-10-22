@@ -1,7 +1,7 @@
 # A3: Accurate leave-impact summary and request status path
 
 Task A3 (R-04) in [ux-prompts-v3.md](ux-prompts-v3.md). Built on branch `a3` (base `7fb086db`), 2026-10-21.
-Status: **implemented, browser evidence recorded (§9, 2026-10-22), not committed, awaiting review** (QA engineer + technical lead).
+Status: **implemented, browser evidence recorded (§9, 2026-10-22), committed as `5ad4cb90` on branch `a3`, awaiting review** (QA engineer + technical lead).
 
 Inputs: [leave-calculation-contract.md](leave-calculation-contract.md) (A3-D, approved 2026-10-20, decisions D-1 to D-9), [a3-r-implementation.md](a3-r-implementation.md) (A3-R selector), B0 feedback foundation (`WithFeedback`, toasts, confirm dialog).
 
