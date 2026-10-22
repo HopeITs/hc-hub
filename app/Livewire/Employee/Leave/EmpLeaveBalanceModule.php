@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee\Leave;
 
 use App\Livewire\Concerns\AuthorizesActivePermissions;
+use App\Livewire\Concerns\GuardsModalClose;
 use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use App\Livewire\Forms\LeaveBalanceForm;
@@ -14,6 +15,7 @@ class EmpLeaveBalanceModule extends Component
 {
     use AuthorizesActivePermissions;
     use FormatsLeaveDuration;
+    use GuardsModalClose;
     use WithFeedback;
 
     public LeaveBalance $leaveBalance;
@@ -32,9 +34,13 @@ class EmpLeaveBalanceModule extends Component
 
     public function edit(LeaveBalance $id)
     {
+        // A reopened form starts from the defaults, not from an abandoned edit.
+        $this->form->reset();
+        $this->form->resetValidation();
         $this->form->setLeaveBalance($id);
 
         $this->modalTitle = __('general.edit');
+        $this->markClean();
         $this->showModal = true;
     }
 
@@ -63,6 +69,18 @@ class EmpLeaveBalanceModule extends Component
 
         $this->toast();
 
+    }
+
+    protected function guardedEntries(string $dialog): array
+    {
+        return $this->form->only(['operation', 'unit', 'amount', 'add_badge', 'notes']);
+    }
+
+    protected function closeGuardedDialog(string $dialog): void
+    {
+        $this->showModal = false;
+        $this->form->reset();
+        $this->form->resetValidation();
     }
 
     protected function confirmationMessage(): string

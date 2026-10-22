@@ -3,6 +3,7 @@
 namespace App\Livewire\Basics;
 
 use App\Livewire\Concerns\AuthorizesActivePermissions;
+use App\Livewire\Concerns\GuardsModalClose;
 use App\Livewire\Concerns\WithFeedback;
 use App\Models\City;
 use Livewire\Component;
@@ -16,6 +17,7 @@ use Livewire\Component;
 class CityModule extends Component
 {
     use AuthorizesActivePermissions;
+    use GuardsModalClose;
     use WithFeedback;
 
     public bool $showModal = false;
@@ -51,6 +53,7 @@ class CityModule extends Component
         $this->modalTitle = __('digital_id.city.edit');
 
         $this->resetValidation();
+        $this->markClean();
         $this->showModal = true;
     }
 

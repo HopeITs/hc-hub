@@ -19,7 +19,7 @@ use App\Enums\LeaveRequestStatus;
 
         <div>
             <x-primary-button wire:click="create" data-tour="leaves.request">
-                @lang('general.add-new')
+                @lang('leaves.modal.new-title')
             </x-primary-button>
         </div>
 
@@ -206,6 +206,7 @@ use App\Enums\LeaveRequestStatus;
         id="showModal"
         :title="$modalTitle"
         wire:model.defer="showModal"
+        close-action="requestClose"
         wire:ignore.self
         class="flex items-center justify-center px-2">
         <div class="w-full max-h-[60vh] overflow-y-auto bg-white rounded-surface px-6 py-4 md:px-12 md:py-6">
@@ -353,7 +354,7 @@ use App\Enums\LeaveRequestStatus;
                         wire:click="confirmSave"
                         wire:target="confirmSave,processSave"
                         class="!w-auto">
-                        @lang('general.save')
+                        {{ $form->id ? __('leaves.modal.save-changes') : __('leaves.modal.submit') }}
                     </x-primary-button>
 
                     {{-- Closes locally, like Escape and the header close: no
@@ -361,7 +362,7 @@ use App\Enums\LeaveRequestStatus;
                     <x-primary-button
                         type="button"
                         :show-spinner="false"
-                        x-on:click="show = false"
+                        x-on:click="close()"
                         class="!bg-secondary-light !w-auto">
                         @lang('general.cancel')
                     </x-primary-button>

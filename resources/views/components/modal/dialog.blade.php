@@ -1,8 +1,8 @@
-@props(['id'=> 'modal', 'maxWidth' => null ,'title' => 'modal'])
+@props(['id'=> 'modal', 'maxWidth' => null ,'title' => 'modal', 'closeAction' => null])
 
 @php($titleId = $id.'-title')
 
-<x-modal :id="$id" :maxWidth="$maxWidth" :labelledby="$titleId" {{$attributes}}>
+<x-modal :id="$id" :maxWidth="$maxWidth" :labelledby="$titleId" :close-action="$closeAction" {{$attributes}}>
         <!-- Modal content -->
         <div class="relative bg-white rounded-surface shadow-e1 dark:bg-neutral-700">
             <!-- Modal header -->
@@ -13,7 +13,7 @@
 
                 {{-- Same path as Escape and Cancel: closes locally, never submits. --}}
                 <button type="button"
-                        x-on:click="show = false"
+                        x-on:click="close()"
                         aria-label="{{ __('general.a11y.close-dialog') }}"
                         data-modal-close
                         class="-me-2 grid size-11 shrink-0 place-items-center rounded-control text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none">

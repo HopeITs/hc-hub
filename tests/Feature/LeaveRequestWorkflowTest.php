@@ -717,6 +717,71 @@ class LeaveRequestWorkflowTest extends TestCase
     }
 
     /**
+     * @return array{0: User, 1: LeaveRequest}
+     */
+    /** A5-M: a chosen decision is guarded; closing it writes nothing and clears the deep link. */
+    public function test_closing_a_decision_with_a_choice_asks_and_discarding_writes_nothing(): void
+    {
+        [$decisionMaker, $leaveRequest] = $this->createPendingDecisionFixture();
+        Notification::fake();
+
+        Livewire::actingAs($decisionMaker)
+            ->test(AllLeaveRequestModule::class)
+            ->call('openDecision', $leaveRequest->id)
+            ->call('requestClose', 'decisionModal')
+            ->assertSet('decisionModal', false)
+            ->assertNotDispatched('confirm-dialog')
+            ->call('openDecision', $leaveRequest->id)
+            ->set('form.status', LeaveRequestStatus::Rejected)
+            ->set('form.reject_reason', 'Coverage is unavailable.')
+            ->call('requestClose', 'decisionModal')
+            ->assertSet('decisionModal', true)
+            ->assertSet('form.reject_reason', 'Coverage is unavailable.')
+            ->assertDispatched('confirm-dialog', method: 'discardChanges', payload: 'decisionModal')
+            ->call('discardChanges', 'decisionModal')
+            ->assertSet('decisionModal', false)
+            ->assertSet('linkedLeaveId', null)
+            ->call('openDecision', $leaveRequest->id)
+            ->assertSet('form.status', null)
+            ->assertSet('form.reject_reason', null);
+
+        $this->assertSame(LeaveRequestStatus::Pending, (int) $leaveRequest->fresh()->status);
+        Notification::assertNothingSent();
+    }
+
+    public function test_the_hr_request_form_is_guarded_and_the_details_dialog_is_not(): void
+    {
+        [$decisionMaker] = $this->createPendingDecisionFixture();
+        $before = LeaveRequest::query()->count();
+
+        Livewire::actingAs($decisionMaker)
+            ->test(AllLeaveRequestModule::class)
+            ->call('create')
+            ->call('requestClose', 'formModal')
+            ->assertSet('formModal', false)
+            ->assertNotDispatched('confirm-dialog')
+            ->call('create')
+            ->set('form.reason', 'Typed by HR')
+            ->call('requestClose', 'formModal')
+            ->assertSet('formModal', true)
+            ->assertDispatched('confirm-dialog', method: 'discardChanges', payload: 'formModal')
+            ->call('discardChanges', 'formModal')
+            ->assertSet('formModal', false)
+            ->assertSet('form.reason', '')
+            ->assertSeeHtml("\$wire.call(this.guard, 'formModal')")
+            ->assertSeeHtml("\$wire.call(this.guard, 'decisionModal')")
+            ->assertDontSeeHtml(route('leaves.all').'"');
+
+        // Read-only details keep their ordinary close; the guard refuses them.
+        Livewire::actingAs($decisionMaker)
+            ->test(AllLeaveRequestModule::class)
+            ->call('requestClose', 'showModal')
+            ->assertNotFound();
+
+        $this->assertSame($before, LeaveRequest::query()->count());
+    }
+
+    /**
      * The all-leaves table lists other people's requests, so the employee
      * column has to be there for every role that can reach the page.
      */
@@ -887,9 +952,6 @@ class LeaveRequestWorkflowTest extends TestCase
         return [$user, LeaveRequest::query()->findOrFail($leaveRequestId)];
     }
 
-    /**
-     * @return array{0: User, 1: LeaveRequest}
-     */
     private function createPendingDecisionFixture(): array
     {
         [, $leaveRequest] = $this->createRejectedLeaveFixture(null);

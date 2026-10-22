@@ -4,6 +4,7 @@ namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
+use App\Livewire\Concerns\GuardsModalClose;
 use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use App\Livewire\Forms\LeaveRequestForm;
@@ -27,6 +28,7 @@ class MyLeaveRequestModule extends Component
 {
     use AuthorizesActivePermissions;
     use FormatsLeaveDuration;
+    use GuardsModalClose;
     use WithFeedback;
 
     public LeaveBalance $leaveBalance;
@@ -108,7 +110,8 @@ class MyLeaveRequestModule extends Component
         // One token per opened form: a retried or double-sent save of this
         // form returns the request it already created (LeaveRequestForm::store).
         $this->form->submission_token = (string) Str::uuid();
-        $this->modalTitle = __('general.add-new');
+        $this->markClean();
+        $this->modalTitle = __('leaves.modal.new-title');
         $this->showModal = true;
     }
 
@@ -120,7 +123,8 @@ class MyLeaveRequestModule extends Component
         $this->form->resetValidation();
         $this->form->setLeaveRequest($id);
 
-        $this->modalTitle = __('general.edit');
+        $this->markClean();
+        $this->modalTitle = __('leaves.modal.edit-title');
         $this->showModal = true;
     }
 
@@ -292,6 +296,19 @@ class MyLeaveRequestModule extends Component
 
         $this->finishSave($leaveRequest, 'sent');
         $this->keepConsumedToken($token);
+    }
+
+    /** The request dialog's entries, for the close guard. */
+    protected function guardedEntries(string $dialog): array
+    {
+        return $this->form->entries();
+    }
+
+    protected function closeGuardedDialog(string $dialog): void
+    {
+        $this->showModal = false;
+        $this->form->reset();
+        $this->form->resetValidation();
     }
 
     protected function confirmationMessage(?LeaveQuote $quote): string

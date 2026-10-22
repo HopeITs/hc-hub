@@ -81,4 +81,12 @@ return [
         'hr-seen' => 'HR has seen the decision. There are no further steps.',
     ],
 
+    // A5-M: the leave request dialog (new and edit). The close guard's wording is general.unsaved.*.
+    'modal' => [
+        'new-title' => 'Request leave',
+        'submit' => 'Submit request',
+        'edit-title' => 'Edit leave request',
+        'save-changes' => 'Save changes',
+    ],
+
 ];

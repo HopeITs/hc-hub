@@ -155,6 +155,16 @@ class LeaveRequestForm extends Form
     }
 
     /**
+     * What the user can change, for the dialog's close guard (A5-M).
+     *
+     * @return array<string, mixed>
+     */
+    public function entries(): array
+    {
+        return $this->only(self::INPUT_FIELDS);
+    }
+
+    /**
      * Set form state from an existing leave request
      */
     public function setLeaveRequest(LeaveRequest $leaveRequest): void

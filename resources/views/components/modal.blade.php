@@ -1,4 +1,4 @@
-@props(['id', 'maxWidth', 'labelledby' => null, 'label' => null, 'describedby' => null])
+@props(['id', 'maxWidth', 'labelledby' => null, 'label' => null, 'describedby' => null, 'closeAction' => null])
 
 @php
     $id = $id ?? md5($attributes->wire('model'));
@@ -54,6 +54,12 @@
         starts, and a read-only dialog is announced from its heading.
       - Escape is handled on the root, not the window, so it closes only the
         dialog that has focus and never one sitting under the confirm dialog.
+      - An editable dialog passes `close-action`: the name of a Livewire method
+        that decides whether it may close (A5-M), called with this dialog's id
+        (see App\Livewire\Concerns\GuardsModalClose). Then the backdrop is
+        ignored, and Escape, the header close and Cancel all call close(),
+        which asks that method instead of hiding the dialog. Without it
+        (read-only dialogs) every route closes locally, as before.
 --}}
 <div
     x-data="{
@@ -62,6 +68,12 @@
         remember: null,
         lastInside: null,
         observer: null,
+        guard: @js($closeAction),
+        {{-- The single close route for Escape, the header close and Cancel. --}}
+        close() {
+            if (this.guard) { $wire.call(this.guard, @js($id)); return; }
+            this.show = false;
+        },
         init() {
             {{-- The opener is usually a wire:click button that Livewire disables while the request
                  runs, which drops focus to <body> before the dialog opens. Remember the last
@@ -82,6 +94,22 @@
                     {{-- After the leave transition. x-trap returns focus only to what was focused when it activated. --}}
                     setTimeout(() => this.returnFocus(), 250);
                 }
+            });
+
+            {{-- Answered "Keep editing" to the close guard's question: return to the control that
+                 asked. Cancel is disabled while its request runs, so the confirmation's trap had
+                 nothing inside this dialog to give focus back to, and Escape stopped reaching it. --}}
+            this.$watch('$store.confirm.open', open => {
+                if (open || ! this.show) return;
+
+                setTimeout(() => {
+                    if (! this.show || this.$el.contains(document.activeElement)) return;
+
+                    let last = this.lastInside;
+                    last?.isConnected && ! last.disabled && last.getClientRects().length
+                        ? last.focus()
+                        : this.recoverFocus(last);
+                }, 60);
             });
         },
         destroy() {
@@ -134,7 +162,7 @@
     x-trap.inert.noscroll.noautofocus="show"
     x-on:focusin="lastInside = $event.target"
     x-on:close.stop="show = false"
-    x-on:keydown.escape="if ($event.defaultPrevented || $store.confirm?.open) return; $event.stopPropagation(); show = false"
+    x-on:keydown.escape="if ($event.defaultPrevented || $store.confirm?.open) return; $event.stopPropagation(); close()"
     x-show="show"
     id="{{ $id }}"
     data-modal-root
@@ -143,7 +171,7 @@
 >
     <div x-show="show" class="fixed inset-0 z-0 transform bg-gray-500/75 transition-all motion-reduce:transition-none"
          aria-hidden="true"
-         x-on:click="show = false"
+         x-on:click="guard || close()"
          x-transition:enter="ease-out duration-300"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"

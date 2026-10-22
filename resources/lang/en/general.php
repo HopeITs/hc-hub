@@ -961,4 +961,12 @@ return [
         'files-and-tasks' => 'Files & Tasks',
         'more' => 'More',
     ],
+
+    // A5-M: closing an editable dialog with unsaved entries (GuardsModalClose).
+    'unsaved' => [
+        'title' => 'Discard your changes?',
+        'message' => 'Your changes have not been saved.',
+        'keep-editing' => 'Keep editing',
+        'discard' => 'Discard changes',
+    ],
 ];

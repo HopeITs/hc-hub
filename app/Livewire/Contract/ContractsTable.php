@@ -376,7 +376,9 @@ class ContractsTable extends LivewireTable
                     ? Blade::render('<x-table.renew-btn :modelId="$id" />', ['id' => $m->getKey()])
                     : '';
                 $export = $canExport
-                    ? Blade::render('<x-table.export-btn :href="route(\'contracts.export\', $id)" />', ['id' => $m->getKey()])
+                    // Fetched in place (loading, error toast, retry) rather
+                    // than a link that dumps a failed render on a blank tab.
+                    ? view('livewire.contract._export-pdf-icon-button', ['contract' => $m])->render()
                     : '';
                 $delete = $canDelete
                     ? Blade::render('<x-table.delete-btn :modelId="$id" />', ['id' => $m->getKey()])

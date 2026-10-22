@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * The close guard of an editable dialog (GuardsModalClose, A5-M). requestClose()
+ * only compares the entries with what the dialog opened with and either hides
+ * it or raises the "Discard your changes?" question; discardChanges() hides it
+ * and clears that dialog's own form. Neither reads a record or writes one, and
+ * the dialog name they take is checked against the component's own list.
+ */
+$closeGuard = ['requestClose', 'discardChanges'];
+
 return [
     'administrator_roles' => ['super-admin', 'HR-SYR'],
 
@@ -334,17 +343,17 @@ return [
         // middleware map would be wrong in one direction or the other. Each of
         // these calls authorizeActivePermission() with the correct permission
         // for the branch it is taking, which the middleware cannot do.
-        'basics.annual-leave-rule-module' => ['save'],
-        'basics.checklist-item-module' => ['save'],
-        'basics.contract-type-module' => ['save'],
-        'basics.course-category-module' => ['save'],
-        'basics.department-module' => ['save'],
-        'basics.job-level-module' => ['save'],
-        'basics.leave-type-module' => ['save'],
-        'basics.termination-reason-module' => ['save'],
+        'basics.annual-leave-rule-module' => ['save', ...$closeGuard],
+        'basics.checklist-item-module' => ['save', ...$closeGuard],
+        'basics.contract-type-module' => ['save', ...$closeGuard],
+        'basics.course-category-module' => ['save', ...$closeGuard],
+        'basics.department-module' => ['save', ...$closeGuard],
+        'basics.job-level-module' => ['save', ...$closeGuard],
+        'basics.leave-type-module' => ['save', ...$closeGuard],
+        'basics.termination-reason-module' => ['save', ...$closeGuard],
         // save() writes only cities.hr_hotline (the ID card's emergency number,
         // A2D-Q7) after its own project-basics.update check.
-        'basics.city-module' => ['save'],
+        'basics.city-module' => ['save', ...$closeGuard],
         // Each re-reads the employee by its locked id and runs the
         // digital-id.manage or digital-id.report-lost gate (DigitalIdPolicy)
         // against the request's active role. A permission name would be wrong:
@@ -355,8 +364,8 @@ return [
         // it does not read a record or persist data. save() authorizes before writing.
         'news.news-create' => ['save', 'updatedFormNewsableType'],
         // Also runs assertCityIsAuthorized() and a Gate check on the city.
-        'program-management.center.centers-module' => ['save'],
-        'program-management.default-deliverable.default-deliverables-module' => ['save'],
+        'program-management.center.centers-module' => ['save', ...$closeGuard],
+        'program-management.default-deliverable.default-deliverables-module' => ['save', ...$closeGuard],
         // Each calls authorizeActivePermission() plus a LeaveRequestPolicy
         // check on the specific record, which is the stronger control.
         'employee.leave.my-leave-request-module' => [
@@ -367,13 +376,15 @@ return [
             // Read-only, self-scoped: prices the typed window against a balance
             // of the signed-in employee's own active contract; writes nothing.
             'leaveImpact',
+            ...$closeGuard,
         ],
         'employee.leave.all-leave-request-module' => [
             'edit', 'show', 'processSave', 'confirmSave', 'confirmDelete',
             'closeDecision', 'closeDetails', 'refreshCounts', 'setActiveTab',
             'updatedFormEmployeeId',
+            ...$closeGuard,
         ],
-        'employee.leave.emp-leave-balance-module' => ['confirmSave'],
+        'employee.leave.emp-leave-balance-module' => ['confirmSave', ...$closeGuard],
         'employee.leave.all-leave-request-table' => [
             'edit', 'confirmDelete', 'confirmHrReview', 'refreshTable', 'setStatusFilter',
         ],
@@ -424,7 +435,7 @@ return [
         'contract.contract-details' => ['nextPage', 'prevPage', 'setPage'],
         // Dismisses the modal and clears its state. Writes nothing; the two
         // actions that do write are mapped to contracts.create above.
-        'contract.contract-renew-modal' => ['close'],
+        'contract.contract-renew-modal' => ['close', ...$closeGuard],
         'dashboard.calendar-card' => ['next', 'prev'],
         // skipDraft is pure navigation (a redirect, no data read or write) and
         // updatedDraftCityId/updatedDraftProgramId only reset the draft

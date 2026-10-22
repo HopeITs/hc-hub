@@ -58,7 +58,7 @@ use App\Enums\LeaveRequestStatus;
     </div>
 
 
-    <x-modal.dialog max-width="6xl" id="formModal" :title="$modalTitle" wire:model.defer="formModal" wire:ignore.self>
+    <x-modal.dialog max-width="6xl" id="formModal" :title="$modalTitle" wire:model.defer="formModal" close-action="requestClose" wire:ignore.self>
 
         <form wire:submit.prevent="save" class="space-y-4">
             <x-forms.errors-validation-list/>
@@ -170,7 +170,8 @@ use App\Enums\LeaveRequestStatus;
             <div class="flex justify-end gap-2">
                 <x-primary-button type="button" wire:click="confirmSave"
                                   class="!w-auto">@lang('general.save')</x-primary-button>
-                <x-primary-button :href="route('leaves.all')"
+                {{-- Closes through the guard, like Escape and the header close: no link, no submit. --}}
+                <x-primary-button type="button" :show-spinner="false" x-on:click="close()"
                                   class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
             </div>
         </form>
@@ -262,7 +263,7 @@ use App\Enums\LeaveRequestStatus;
         @endif
     </x-modal.dialog>
 
-    <x-modal.dialog id="decisionModal" :title="$modalTitle" wire:model.defer="decisionModal" wire:ignore.self>
+    <x-modal.dialog id="decisionModal" :title="$modalTitle" wire:model.defer="decisionModal" close-action="requestClose" wire:ignore.self>
         @if($decisionLeave)
             <div class="space-y-6">
 
@@ -363,7 +364,7 @@ use App\Enums\LeaveRequestStatus;
                         {{ __('general.save') }}
                     </x-primary-button>
 
-                    <x-primary-button wire:click="closeDecision"
+                    <x-primary-button type="button" :show-spinner="false" x-on:click="close()"
                                       class="!bg-secondary-light !w-auto">
                         {{ __('general.cancel') }}
                     </x-primary-button>

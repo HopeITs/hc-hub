@@ -101,7 +101,7 @@
         <div class="flex justify-end gap-2">
             <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
             {{-- Closes locally, like Escape and the header close. --}}
-            <x-primary-button type="button" x-on:click="show = false"
+            <x-primary-button type="button" x-on:click="close()"
                               class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
         </div>
     </form>
