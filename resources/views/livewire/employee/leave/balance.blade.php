@@ -30,7 +30,7 @@ use App\Enums\LeaveRequestStatus;
     </div>
 
 
-    <x-modal.dialog max-width="6xl" id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
+    <x-modal.dialog max-width="6xl" id="showModal" :title="$modalTitle" wire:model.defer="showModal" close-action="requestClose" wire:ignore.self>
 
         <form wire:submit.prevent="save" class="space-y-4">
             <x-forms.errors-validation-list/>
@@ -95,7 +95,8 @@ use App\Enums\LeaveRequestStatus;
             <div class="flex justify-end gap-2">
                 <x-primary-button type="button" wire:click="confirmSave"
                                   class="!w-auto">@lang('general.save')</x-primary-button>
-                <x-primary-button :href="route('leaves.balance')"
+                {{-- Closes through the guard, like Escape and the header close: no link, no submit. --}}
+                <x-primary-button type="button" :show-spinner="false" x-on:click="close()"
                                   class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
             </div>
         </form>

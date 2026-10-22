@@ -4,6 +4,7 @@ namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
+use App\Livewire\Concerns\GuardsModalClose;
 use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use App\Livewire\Forms\LeaveRequestForm;
@@ -24,6 +25,7 @@ class AllLeaveRequestModule extends Component
 {
     use AuthorizesActivePermissions;
     use FormatsLeaveDuration;
+    use GuardsModalClose;
     use WithFeedback;
 
     public LeaveBalance $leaveBalance;
@@ -113,6 +115,7 @@ class AllLeaveRequestModule extends Component
         $this->form->leave_balance_id = (int) $id->leave_balance_id;
 
         $this->modalTitle = __('general.edit');
+        $this->markClean('formModal');
         $this->formModal = true;
     }
 
@@ -146,6 +149,7 @@ class AllLeaveRequestModule extends Component
         $this->linkedLeaveMode = 'decision';
 
         $this->modalTitle = __('general.leave-decision');
+        $this->markClean('decisionModal');
         $this->decisionModal = true;
     }
 
@@ -203,6 +207,7 @@ class AllLeaveRequestModule extends Component
     public function create()
     {
         $this->form->reset();
+        $this->markClean('formModal');
         $this->formModal = true;
         $this->modalTitle = __('general.add-new');
     }
@@ -268,6 +273,31 @@ class AllLeaveRequestModule extends Component
         $this->refreshCounts();
         $this->toast();
 
+    }
+
+    /** The details dialog is read-only and keeps its ordinary close. */
+    protected function guardedDialogs(): array
+    {
+        return ['formModal', 'decisionModal'];
+    }
+
+    protected function guardedEntries(string $dialog): array
+    {
+        return $dialog === 'decisionModal'
+            ? $this->form->only(['status', 'reject_reason'])
+            : $this->form->entries() + ['employee_id' => $this->form->employee_id];
+    }
+
+    protected function closeGuardedDialog(string $dialog): void
+    {
+        if ($dialog === 'decisionModal') {
+            $this->closeDecision();
+        } else {
+            $this->formModal = false;
+            $this->form->reset();
+        }
+
+        $this->form->resetValidation();
     }
 
     /**

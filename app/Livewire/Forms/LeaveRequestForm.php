@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Livewire\Attributes\Locked;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 use LogicException;
@@ -92,15 +91,6 @@ class LeaveRequestForm extends Form
      */
     public ?string $submission_token = null;
 
-    /**
-     * What the form held when it was opened (new) or loaded (edit), for the
-     * close guard (A5-M). Locked: the browser can neither fake nor clear it.
-     *
-     * @var array<string, string>
-     */
-    #[Locked]
-    public array $baseline = [];
-
     /** Set by store() for the current request only; never sent to the browser. */
     protected bool $replayed = false;
 
@@ -165,51 +155,18 @@ class LeaveRequestForm extends Form
     }
 
     /**
+     * What the user can change, for the dialog's close guard (A5-M).
+     *
+     * @return array<string, mixed>
+     */
+    public function entries(): array
+    {
+        return $this->only(self::INPUT_FIELDS);
+    }
+
+    /**
      * Set form state from an existing leave request
      */
-    /**
-     * Remember the current values as "unchanged". Called once the form is
-     * opened or loaded, and after a save.
-     */
-    public function markClean(): void
-    {
-        $this->baseline = $this->typedValues();
-    }
-
-    /**
-     * Whether the entries differ from the baseline. A value changed and then
-     * restored is clean; so is a field that only gained an input event.
-     */
-    public function isDirty(): bool
-    {
-        return $this->typedValues() !== $this->baseline;
-    }
-
-    /** @return array<string, string> */
-    private function typedValues(): array
-    {
-        $values = [];
-
-        foreach (self::INPUT_FIELDS as $field) {
-            $value = $this->{$field};
-
-            if (is_bool($value)) {
-                $value = $value ? '1' : '0';
-            }
-
-            $value = trim((string) ($value ?? ''));
-
-            // "09:00:00" and "09:00" are the same entry.
-            if (preg_match('/^(\d{2}:\d{2}):\d{2}$/', $value, $time)) {
-                $value = $time[1];
-            }
-
-            $values[$field] = $value;
-        }
-
-        return $values;
-    }
-
     public function setLeaveRequest(LeaveRequest $leaveRequest): void
     {
 

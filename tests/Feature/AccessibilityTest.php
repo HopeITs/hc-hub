@@ -165,7 +165,7 @@ class AccessibilityTest extends TestCase
             $html = $this->renderModal('<x-modal.dialog id="m" title="T" wire:model="show">Body</x-modal.dialog>');
 
             $this->assertMatchesRegularExpression(
-                '/<button type="button"\s+x-on:click="show = false"\s+aria-label="'.preg_quote($name, '/').'"/u',
+                '/<button type="button"\s+x-on:click="close\(\)"\s+aria-label="'.preg_quote($name, '/').'"/u',
                 $html,
                 "Close button is unnamed in [{$locale}].",
             );

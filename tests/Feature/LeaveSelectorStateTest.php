@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\LeaveRequestStatus;
 use App\Enums\LeaveTypeCases;
+use App\Livewire\Employee\Leave\EmpLeaveBalanceModule;
 use App\Livewire\Employee\Leave\MyLeaveRequestModule;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
@@ -132,10 +133,11 @@ class LeaveSelectorStateTest extends TestCase
             ->assertSet('form.leave_balance_id', (string) $this->annual->id)
             ->assertDispatched('confirm-dialog',
                 method: 'discardChanges',
-                title: __('leaves.modal.discard-title'),
-                message: __('leaves.modal.discard-message'),
-                confirmLabel: __('leaves.modal.discard'),
-                cancelLabel: __('leaves.modal.keep-editing'),
+                payload: 'showModal',
+                title: __('general.unsaved.title'),
+                message: __('general.unsaved.message'),
+                confirmLabel: __('general.unsaved.discard'),
+                cancelLabel: __('general.unsaved.keep-editing'),
                 danger: false,
             );
     }
@@ -202,6 +204,7 @@ class LeaveSelectorStateTest extends TestCase
             ->test(MyLeaveRequestModule::class)
             ->call('create')
             ->assertSeeHtml("guard: 'requestClose'")
+            ->assertSeeHtml("\$wire.call(this.guard, 'showModal')")
             ->assertSeeHtml('guard || close()')
             ->assertDontSeeHtml('x-on:click="show = false"');
     }
@@ -225,7 +228,35 @@ class LeaveSelectorStateTest extends TestCase
 
         $this->assertSame('Request leave', trans('leaves.modal.new-title', [], 'en'));
         $this->assertSame('طلب إجازة', trans('leaves.modal.new-title', [], 'ar'));
-        $this->assertSame('تجاهل التغييرات؟', trans('leaves.modal.discard-title', [], 'ar'));
+        $this->assertSame('تجاهل التغييرات؟', trans('general.unsaved.title', [], 'ar'));
+    }
+
+    /** A5-M: the HR balance adjustment uses the same guard, and reopens clean. */
+    public function test_the_balance_adjustment_is_guarded_and_reopens_clean(): void
+    {
+        $deserved = $this->annual->deserved;
+
+        Livewire::actingAs($this->user)
+            ->test(EmpLeaveBalanceModule::class)
+            ->call('edit', $this->annual->id)
+            ->call('requestClose', 'showModal')
+            ->assertSet('showModal', false)
+            ->assertNotDispatched('confirm-dialog')
+            ->call('edit', $this->annual->id)
+            ->set('form.amount', '3')
+            ->set('form.operation', 'sub')
+            ->call('requestClose', 'showModal')
+            ->assertSet('showModal', true)
+            ->assertSet('form.amount', '3')
+            ->assertDispatched('confirm-dialog', method: 'discardChanges', payload: 'showModal')
+            ->call('discardChanges', 'showModal')
+            ->assertSet('showModal', false)
+            ->call('edit', $this->annual->id)
+            ->assertSet('form.amount', 0)
+            ->assertSet('form.operation', 'sum')
+            ->assertDontSeeHtml(route('leaves.balance').'"');
+
+        $this->assertEquals($deserved, $this->annual->fresh()->deserved);
     }
 
     private function assertSelectThenClear(string $annualLabel): void

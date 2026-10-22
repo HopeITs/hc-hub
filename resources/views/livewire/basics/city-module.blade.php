@@ -22,7 +22,7 @@
     <livewire:basics.city-table />
 
     {{-- Edit: the HR hotline only (see CityModule). --}}
-    <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" wire:ignore.self>
+    <x-modal.dialog id="showModal" :title="$modalTitle" wire:model.defer="showModal" close-action="requestClose" wire:ignore.self>
         <form wire:submit.prevent="save" class="space-y-4">
             <p class="text-body font-semibold text-secondary-dark">{{ $item['name'] }}</p>
 

@@ -69,6 +69,33 @@ class ContractRenewalTest extends TestCase
     // Renew as is
     // ────────────────────────────────────────────────
 
+    /** A5-M: a changed period is guarded; closing never creates a contract. */
+    public function test_closing_the_renew_dialog_after_changing_the_period_asks_first(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $source = $this->makeContract($fixtures);
+
+        Livewire::actingAs($fixtures['hr'])
+            ->test(ContractRenewModal::class)
+            ->call('open', $source->id)
+            ->call('requestClose', 'contractRenewModal')
+            ->assertSet('show', false)
+            ->assertNotDispatched('confirm-dialog')
+            ->call('open', $source->id)
+            ->set('form.end_date', '2027-06-30')
+            ->call('requestClose', 'contractRenewModal')
+            ->assertSet('show', true)
+            ->assertSet('form.end_date', '2027-06-30')
+            ->assertDispatched('confirm-dialog', method: 'discardChanges', payload: 'contractRenewModal')
+            ->call('discardChanges', 'contractRenewModal')
+            ->assertSet('show', false)
+            ->assertSet('contractId', null)
+            ->call('open', $source->id)
+            ->assertSet('form.end_date', '2027-12-31');
+
+        $this->assertSame(1, Contract::query()->count());
+    }
+
     public function test_renew_as_is_clones_every_field_except_the_dates(): void
     {
         $fixtures = $this->makeFixtures();

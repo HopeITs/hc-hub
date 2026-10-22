@@ -1,8 +1,8 @@
-@props(['id'=> 'modal', 'maxWidth' => null ,'title' => 'modal'])
+@props(['id'=> 'modal', 'maxWidth' => null ,'title' => 'modal', 'closeAction' => null])
 
 @php($titleId = $id.'-title')
 
-<x-modal :id="$id" :maxWidth="$maxWidth" :labelledby="$titleId" {{$attributes}}>
+<x-modal :id="$id" :maxWidth="$maxWidth" :labelledby="$titleId" :close-action="$closeAction" {{$attributes}}>
         <!-- Modal content -->
         <div class="relative bg-white rounded-surface shadow-e1 dark:bg-neutral-700">
             <!-- Modal header -->

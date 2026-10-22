@@ -55,10 +55,11 @@
       - Escape is handled on the root, not the window, so it closes only the
         dialog that has focus and never one sitting under the confirm dialog.
       - An editable dialog passes `close-action`: the name of a Livewire method
-        that decides whether it may close (A5-M). Then the backdrop is ignored,
-        and Escape, the header close and Cancel all call close(), which asks
-        that method instead of hiding the dialog. Without it (read-only
-        dialogs) every route closes locally, as before.
+        that decides whether it may close (A5-M), called with this dialog's id
+        (see App\Livewire\Concerns\GuardsModalClose). Then the backdrop is
+        ignored, and Escape, the header close and Cancel all call close(),
+        which asks that method instead of hiding the dialog. Without it
+        (read-only dialogs) every route closes locally, as before.
 --}}
 <div
     x-data="{
@@ -70,7 +71,7 @@
         guard: @js($closeAction),
         {{-- The single close route for Escape, the header close and Cancel. --}}
         close() {
-            if (this.guard) { $wire.call(this.guard); return; }
+            if (this.guard) { $wire.call(this.guard, @js($id)); return; }
             this.show = false;
         },
         init() {

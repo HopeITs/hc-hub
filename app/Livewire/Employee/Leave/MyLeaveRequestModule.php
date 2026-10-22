@@ -4,6 +4,7 @@ namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
+use App\Livewire\Concerns\GuardsModalClose;
 use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use App\Livewire\Forms\LeaveRequestForm;
@@ -27,6 +28,7 @@ class MyLeaveRequestModule extends Component
 {
     use AuthorizesActivePermissions;
     use FormatsLeaveDuration;
+    use GuardsModalClose;
     use WithFeedback;
 
     public LeaveBalance $leaveBalance;
@@ -108,7 +110,7 @@ class MyLeaveRequestModule extends Component
         // One token per opened form: a retried or double-sent save of this
         // form returns the request it already created (LeaveRequestForm::store).
         $this->form->submission_token = (string) Str::uuid();
-        $this->form->markClean();
+        $this->markClean();
         $this->modalTitle = __('leaves.modal.new-title');
         $this->showModal = true;
     }
@@ -121,50 +123,9 @@ class MyLeaveRequestModule extends Component
         $this->form->resetValidation();
         $this->form->setLeaveRequest($id);
 
-        $this->form->markClean();
+        $this->markClean();
         $this->modalTitle = __('leaves.modal.edit-title');
         $this->showModal = true;
-    }
-
-    /**
-     * The one close path of the request dialog: Cancel, the header close and
-     * Escape all land here (the backdrop does nothing). A form with nothing
-     * entered closes at once; one with unsaved entries asks first. Nothing
-     * here writes an HR record or leaves the page.
-     */
-    public function requestClose(): void
-    {
-        if (! $this->showModal) {
-            return;
-        }
-
-        if (! $this->form->isDirty()) {
-            $this->closeForm();
-
-            return;
-        }
-
-        $this->confirm(
-            'discardChanges',
-            title: __('leaves.modal.discard-title'),
-            message: __('leaves.modal.discard-message'),
-            confirmLabel: __('leaves.modal.discard'),
-            cancelLabel: __('leaves.modal.keep-editing'),
-            danger: false,
-        );
-    }
-
-    /** Only after the explicit "Discard changes" answer. */
-    public function discardChanges(): void
-    {
-        $this->closeForm();
-    }
-
-    private function closeForm(): void
-    {
-        $this->showModal = false;
-        $this->form->reset();
-        $this->form->resetValidation();
     }
 
     #[Computed]
@@ -335,6 +296,19 @@ class MyLeaveRequestModule extends Component
 
         $this->finishSave($leaveRequest, 'sent');
         $this->keepConsumedToken($token);
+    }
+
+    /** The request dialog's entries, for the close guard. */
+    protected function guardedEntries(string $dialog): array
+    {
+        return $this->form->entries();
+    }
+
+    protected function closeGuardedDialog(string $dialog): void
+    {
+        $this->showModal = false;
+        $this->form->reset();
+        $this->form->resetValidation();
     }
 
     protected function confirmationMessage(?LeaveQuote $quote): string
