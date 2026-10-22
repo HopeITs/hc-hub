@@ -59,8 +59,27 @@
 
                 <p class="mt-1 line-clamp-2 text-small transition-colors duration-300
                           {{ $isUnread ? 'text-secondary-medium' : 'text-secondary-medium' }}">
-                    {{ $note->data['body'][app()->getLocale()] ?? '' }}
+                    {{ ($states[$note->id]['state'] ?? null) === 'unavailable' ? __('general.notification-target-unavailable') : ($note->data['body'][app()->getLocale()] ?? '') }}
                 </p>
+
+                    @php($state = $states[$note->id] ?? null)
+                    @if($state && $state['state'] !== 'info')
+                        <p class="mt-1 flex flex-wrap items-center gap-x-2 text-caption">
+                            @if($state['state'] === 'awaiting')
+                                <span class="rounded-full bg-neutral-100 px-2 py-0.5 font-semibold text-primary">@lang('general.notification-state.awaiting')</span>
+                            @elseif($state['state'] === 'handled')
+                                <span class="rounded-full bg-neutral-100 px-2 py-0.5 font-semibold text-secondary-medium">@lang('general.notification-state.handled')</span>
+                            @else
+                                <span class="rounded-full bg-neutral-100 px-2 py-0.5 font-semibold text-secondary-medium">@lang('general.notification-state.unavailable')</span>
+                            @endif
+                            @if($state['status'])
+                                <span class="text-secondary-medium">@lang('general.notification-state.status', ['status' => $state['status']])</span>
+                            @endif
+                        </p>
+                        @if($state['next_step'] && $state['state'] !== 'handled')
+                            <p class="mt-1 text-caption text-secondary-medium">{{ $state['next_step'] }}</p>
+                        @endif
+                    @endif
 
                 <p class="mt-1 text-caption text-secondary-light">
                     {{ $note->created_at?->diffForHumans() }}
