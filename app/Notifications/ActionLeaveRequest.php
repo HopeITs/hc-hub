@@ -57,6 +57,7 @@ class ActionLeaveRequest extends Notification
                         : "تم رفض طلب إجازتك من نوع: {$leaveType->name_ar} — سبب الرفض: {$rejectReason}",
                 ],
                 'url' => route('leaves.index', ['leave' => $leaveRequest->id]),
+                'subject' => ['type' => 'leave_request', 'id' => $leaveRequest->id, 'action' => null],
             ];
         }
 
@@ -90,6 +91,7 @@ class ActionLeaveRequest extends Notification
                     'leave' => $leaveRequest->id,
                     'mode' => 'details',
                 ]),
+                'subject' => ['type' => 'leave_request', 'id' => $leaveRequest->id, 'action' => 'review'],
             ];
         }
 

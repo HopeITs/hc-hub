@@ -16,8 +16,11 @@ class Index extends Component
 
     public function render(): View
     {
+        $notifications = auth()->user()->notifications()->latest()->paginate(10);
+
         return view('livewire.notifications.index', [
-            'notifications' => auth()->user()->notifications()->latest()->paginate(10),
+            'notifications' => $notifications,
+            'states' => $this->requestStates($notifications->getCollection()),
         ]);
     }
 }
