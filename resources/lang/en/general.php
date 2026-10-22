@@ -969,4 +969,15 @@ return [
         'keep-editing' => 'Keep editing',
         'discard' => 'Discard changes',
     ],
+
+    // Notification progress: separate from unread. Unread means "not opened yet";
+    // these say whether the record still needs this person, from its current state.
+    'notification-state' => [
+        'awaiting' => 'Awaiting your action',
+        'handled' => 'Already handled',
+        'unavailable' => 'No longer available',
+        'status' => 'Request status: :status',
+    ],
+    'notification-target-unavailable' => 'This request is no longer available to you. It may have been removed, or your access may have changed.',
+
 ];

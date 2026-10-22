@@ -101,7 +101,7 @@ class ContractEdit extends Component
 
         $this->toast();
 
-        return redirect()->route('contracts.show', $this->contract->id);
+        return $this->redirectRoute('contracts.show', $this->contract->id, navigate: true);
     }
 
     // ────────────────────────────────────────────────

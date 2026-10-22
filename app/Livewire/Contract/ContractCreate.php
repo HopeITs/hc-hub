@@ -143,7 +143,7 @@ class ContractCreate extends Component
         $this->finishTaskAttempt();
         $this->toast();
 
-        return redirect()->route('contracts.show', $contract->id);
+        return $this->redirectRoute('contracts.show', $contract->id, navigate: true);
     }
 
     /**

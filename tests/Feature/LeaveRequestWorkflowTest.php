@@ -7,6 +7,8 @@ use App\Livewire\Employee\Leave\AllLeaveRequestModule;
 use App\Livewire\Employee\Leave\AllLeaveRequestTable;
 use App\Livewire\Employee\Leave\MyLeaveRequestModule;
 use App\Livewire\Employee\Leave\MyLeaveRequestTable;
+use App\Livewire\Notifications\Dropdown as NotificationsDropdown;
+use App\Livewire\Notifications\Index as NotificationsIndex;
 use App\Models\LeaveRequest;
 use App\Models\TaskAttempt;
 use App\Models\User;
@@ -14,6 +16,7 @@ use App\Notifications\ActionLeaveRequest;
 use App\Notifications\HRSawLeaveRequest;
 use App\Notifications\NewLeaveRequest;
 use App\Services\LeaveNotificationService;
+use App\Services\NotificationRequestState;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -809,6 +812,92 @@ class LeaveRequestWorkflowTest extends TestCase
     }
 
     /**
+     * Build only the domain records required by the leave details flow.
+     *
+     * The repository's EmployeeFactory still targets removed `name_*` columns,
+     * so these fixtures intentionally use the current migration schema.
+     *
+     * @return array{0: User, 1: LeaveRequest}
+     */
+    public function test_new_request_notification_is_awaiting_action_until_the_request_is_decided(): void
+    {
+        [$hr, $leaveRequest] = $this->createPendingDecisionFixture();
+        $leaveRequest->update(['reason' => 'Confidential: surgery follow-up']);
+        $hr->notify(new NewLeaveRequest($leaveRequest->fresh()));
+        $notification = $hr->notifications()->first();
+
+        $this->assertStringNotContainsString('surgery', json_encode($notification->data, JSON_UNESCAPED_UNICODE));
+
+        $states = app(NotificationRequestState::class);
+        $pending = $states->forMany($hr, [$notification])[$notification->id];
+        $this->assertSame('awaiting', $pending['state']);
+        $this->assertNotNull($pending['next_step']);
+
+        Livewire::actingAs($hr)->test(NotificationsIndex::class)->assertSee(__('general.notification-state.awaiting'));
+
+        $leaveRequest->update(['status' => LeaveRequestStatus::Accepted, 'approved_at' => now()]);
+
+        $decided = $states->forMany($hr, [$notification->fresh()])[$notification->id];
+        $this->assertSame('handled', $decided['state']);
+        $this->assertNull($decided['next_step']);
+        $this->assertNull($notification->fresh()->read_at, 'Handled is separate from unread');
+
+        Livewire::actingAs($hr)->test(NotificationsIndex::class)
+            ->assertSee(__('general.notification-state.handled'))
+            ->assertDontSee(__('general.notification-state.awaiting'));
+    }
+
+    public function test_opening_a_notification_for_a_deleted_request_is_a_safe_outcome(): void
+    {
+        [$hr, $leaveRequest] = $this->createPendingDecisionFixture();
+        $hr->notify(new NewLeaveRequest($leaveRequest->fresh()));
+        $notification = $hr->notifications()->first();
+        $leaveRequest->delete();
+
+        Livewire::actingAs($hr)
+            ->test(NotificationsDropdown::class)
+            ->call('openNotification', $notification->id)
+            ->assertNoRedirect()
+            ->assertDispatched('toast');
+
+        $this->assertNotNull($notification->fresh()->read_at);
+        $this->assertSame('unavailable', app(NotificationRequestState::class)
+            ->forMany($hr, [$notification->fresh()])[$notification->id]['state']);
+    }
+
+    public function test_opening_a_notification_after_losing_access_does_not_navigate(): void
+    {
+        [$hr, $leaveRequest] = $this->createPendingDecisionFixture();
+        $hr->notify(new NewLeaveRequest($leaveRequest->fresh()));
+        $notification = $hr->notifications()->first();
+
+        // Role change since the message was written: no role, no city.
+        $hr->syncRoles([]);
+
+        Livewire::actingAs($hr->fresh())
+            ->test(NotificationsDropdown::class)
+            ->call('openNotification', $notification->id)
+            ->assertNoRedirect()
+            ->assertDispatched('toast');
+
+        Livewire::actingAs($hr->fresh())->test(NotificationsIndex::class)
+            ->assertSee(__('general.notification-state.unavailable'))
+            ->assertDontSee($leaveRequest->leaveBalance->leaveType->name_en.' leave request from');
+    }
+
+    public function test_an_authorized_open_still_navigates_to_the_record(): void
+    {
+        [$hr, $leaveRequest] = $this->createPendingDecisionFixture();
+        $hr->notify(new NewLeaveRequest($leaveRequest->fresh()));
+        $notification = $hr->notifications()->first();
+
+        Livewire::actingAs($hr)
+            ->test(NotificationsDropdown::class)
+            ->call('openNotification', $notification->id)
+            ->assertRedirect();
+    }
+
+    /**
      * The all-leaves table lists other people's requests, so the employee
      * column has to be there for every role that can reach the page.
      */
@@ -841,14 +930,6 @@ class LeaveRequestWorkflowTest extends TestCase
             ->assertSee($teamMember->name);
     }
 
-    /**
-     * Build only the domain records required by the leave details flow.
-     *
-     * The repository's EmployeeFactory still targets removed `name_*` columns,
-     * so these fixtures intentionally use the current migration schema.
-     *
-     * @return array{0: User, 1: LeaveRequest}
-     */
     private function createRejectedLeaveFixture(
         ?string $rejectReason,
         string $email = 'employee@example.test',

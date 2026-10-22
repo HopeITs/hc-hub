@@ -31,8 +31,11 @@ class Dropdown extends Component
             ? $user->readNotifications()->latest()->take(4 - $unread->count())->get()
             : collect();
 
+        $notifications = $unread->merge($read);
+
         return view('livewire.notifications.dropdown', [
-            'notifications' => $unread->merge($read),
+            'notifications' => $notifications,
+            'states' => $this->requestStates($notifications),
             'hasUnread' => $user->unreadNotifications()->exists(),
         ]);
     }

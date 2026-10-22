@@ -24,8 +24,6 @@
 
 </div>
 
-<script nonce="{{ Vite::cspNonce() }}" src="{{ asset('js/chart.umd.js') }}"></script>
-
 <script nonce="{{ Vite::cspNonce() }}">
     // Runs on a normal load and again when wire:navigate swaps this page in,
     // where DOMContentLoaded has already fired and would never call back.

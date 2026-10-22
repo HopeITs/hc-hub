@@ -69,6 +69,7 @@ class NewLeaveRequest extends Notification
                 'leave' => $leaveRequest->id,
                 'mode' => 'decision',
             ]),
+            'subject' => ['type' => 'leave_request', 'id' => $leaveRequest->id, 'action' => 'decide'],
         ];
     }
 }

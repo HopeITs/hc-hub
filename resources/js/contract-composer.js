@@ -375,7 +375,10 @@ document.addEventListener('alpine:init', () => {
             // nothing to react to. Ask once, up front.
             this.scheduleLeavePreview();
 
-            window.addEventListener('composer-invalid', (event) => {
+            // Kept so destroy() can remove it: this is a window listener, so
+            // without cleanup every visit to the composer under wire:navigate
+            // would stack another one that outlives its component.
+            this.onComposerInvalid = (event) => {
                 const sections = event.detail?.sections ?? [];
 
                 if (sections.length > 0) {
@@ -383,7 +386,13 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 this.submitting = false;
-            });
+            };
+            window.addEventListener('composer-invalid', this.onComposerInvalid);
+        },
+
+        destroy() {
+            window.removeEventListener('composer-invalid', this.onComposerInvalid);
+            clearTimeout(this.leaveTimer);
         },
 
         // =============================================================
