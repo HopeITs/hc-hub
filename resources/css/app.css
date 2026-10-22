@@ -809,6 +809,11 @@ select option:checked {
     .animate-notif-pop {
         animation: none;
     }
+
+    /* Livewire's navigate progress bar (A7): keep the progress, drop the sliding. */
+    #nprogress .bar {
+        transition: none !important;
+    }
 }
 
 /* ------------------------------------------------------------------ */
