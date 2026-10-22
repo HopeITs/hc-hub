@@ -9,7 +9,10 @@ use App\Models\City;
 use App\Models\Department;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ViewErrorBag;
 use Livewire\Livewire;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
@@ -225,5 +228,41 @@ class ModalCloseGuardTest extends TestCase
 
         $this->assertSame([], $unguarded, 'Editable dialogs without close-action (or add read-only ones to READ_ONLY_DIALOGS).');
         $this->assertSame([], $navigating, 'Cancel buttons that navigate instead of closing the dialog.');
+    }
+
+    /**
+     * Blade does not compile @js() inside a component tag's attribute, which
+     * once left the dismiss button reading "Cancel" instead of "Keep editing".
+     */
+    public function test_the_confirmation_renames_its_dismiss_button_from_the_store(): void
+    {
+        foreach (['en' => 'Cancel', 'ar' => 'إلغاء'] as $locale => $cancel) {
+            app()->setLocale($locale);
+
+            $html = Blade::render('<x-confirm-dialog/>');
+
+            $this->assertStringNotContainsString('@js(', $html);
+            $this->assertStringContainsString('x-text="$store.confirm.cancelLabel"', $html);
+            // @js() writes the defaults as JSON with quotes escaped as \u0022.
+            $this->assertStringContainsString('\\u0022cancelLabel\\u0022:\\u0022'.$cancel.'\\u0022', $html);
+        }
+    }
+
+    /** Answering "Keep editing" hands focus back to the dialog, so Escape still reaches it. */
+    public function test_the_dialog_takes_focus_back_when_the_confirmation_closes(): void
+    {
+        View::share('errors', new ViewErrorBag);
+        View::share('__livewire', new class
+        {
+            public function getId(): string
+            {
+                return 'test-component';
+            }
+        });
+
+        $html = Blade::render('<x-modal.dialog id="m" title="T" wire:model="show" close-action="requestClose">Body</x-modal.dialog>');
+
+        $this->assertStringContainsString("\$watch('\$store.confirm.open'", $html);
+        $this->assertStringContainsString("\$wire.call(this.guard, 'm')", $html);
     }
 }
