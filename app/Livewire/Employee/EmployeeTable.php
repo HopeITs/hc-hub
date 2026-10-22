@@ -4,6 +4,7 @@ namespace App\Livewire\Employee;
 
 use App\Exports\EmployeeExport;
 use App\Livewire\Concerns\HasListStates;
+use App\Livewire\Concerns\RemembersTableState;
 use App\Livewire\Concerns\WithFeedback;
 use App\Models\City;
 use App\Models\Employee;
@@ -11,8 +12,9 @@ use App\Models\Position;
 use App\Services\TaskTelemetry;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Maatwebsite\Excel\Facades\Excel;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\DateColumn;
@@ -24,7 +26,14 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class EmployeeTable extends LivewireTable
 {
     use HasListStates;
+    use RemembersTableState;
     use WithFeedback;
+
+    public const VIEWS = ['active', 'inactive'];
+
+    /** B4 named preset (`?view=`): only ever narrows the authorized query. See effectiveView(). */
+    #[Url(as: 'view')]
+    public string $preset = 'active';
 
     protected string $model = Employee::class;
 
@@ -51,12 +60,13 @@ class EmployeeTable extends LivewireTable
 
     public function confirmDelete($id): void
     {
+        Gate::authorize('delete', $this->scopedEmployee($id));
         $this->confirm('delete', ['id' => $id]);
     }
 
     public function delete($payload): void
     {
-        $employee = Employee::findOrFail($payload['id']);
+        $employee = $this->scopedEmployee($payload['id']);
         Gate::authorize('delete', $employee);
         $employee->delete();
 
@@ -65,12 +75,13 @@ class EmployeeTable extends LivewireTable
 
     public function confirmToggleItemStatus($id): void
     {
+        Gate::authorize('update', $this->scopedEmployee($id));
         $this->confirm('toggleItemStatusConfirmed', ['id' => $id], title: __('general.toggle-status'), message: __('general.confirm-status-change'), confirmLabel: __('general.save'), danger: false);
     }
 
     public function toggleItemStatusConfirmed($payload): void
     {
-        $item = Employee::findOrFail($payload['id']);
+        $item = $this->scopedEmployee($payload['id']);
         Gate::authorize('update', $item);
         $item->is_active = ! $item->is_active;
         $item->save();
@@ -106,6 +117,39 @@ class EmployeeTable extends LivewireTable
         );
     }
 
+    /** Alpine expression the table view runs on a row click when link() is null. */
+    public function rowClickAction(Model $model): string
+    {
+        return "\$dispatch('employee-drawer', { id: ".(int) $model->getKey().' })';
+    }
+
+    /** Below md each row becomes a card (B4-D §6). */
+    public function cardView(): ?string
+    {
+        return 'livewire.employee.partials.card';
+    }
+
+    /** Inactive (former) staff are HR / general manager only (A2-D Q3). */
+    public function canUseInactiveView(): bool
+    {
+        return (bool) auth()->user()?->activeRoleIs('HR', 'general-manager', 'super-admin');
+    }
+
+    /** The preset actually applied: an unknown or unauthorized value falls back to Active. */
+    public function effectiveView(): string
+    {
+        return $this->preset === 'inactive' && $this->canUseInactiveView() ? 'inactive' : 'active';
+    }
+
+    #[On('employee-set-view')]
+    public function setView(string $view): void
+    {
+        $this->preset = in_array($view, self::VIEWS, true) ? $view : 'active';
+        $this->preset = $this->effectiveView();
+        $this->resetPage();
+        $this->dispatch('employee-view-changed', view: $this->preset);
+    }
+
     /** Add action only for roles that may open the create route (employees.create). */
     protected function emptyStateCreate(): ?array
     {
@@ -114,11 +158,25 @@ class EmployeeTable extends LivewireTable
             : null;
     }
 
+    /** Row click opens the read-only drawer, never the editor (B4D-Q2). */
     protected function link(Model $model): ?string
     {
-        return auth()->user()->hasActivePermission('employees.update')
-            ? route('employees.edit', $model->getKey())
-            : null;
+        return null;
+    }
+
+    /** "Clear all" goes back to the default preset. */
+    protected function clearPreset(): void
+    {
+        $this->preset = 'active';
+        $this->dispatch('employee-view-changed', view: 'active');
+    }
+
+    /** The record, only if it lies inside the active role's city scope (404 otherwise). */
+    protected function scopedEmployee(mixed $id): Employee
+    {
+        return Employee::query()
+            ->when(auth()->user()->activeCityIds(), fn (Builder $q, array $cityIds) => $q->whereIn('city_id', $cityIds))
+            ->findOrFail($id);
     }
 
     protected function query(): Builder
@@ -133,7 +191,7 @@ class EmployeeTable extends LivewireTable
                 auth()->user()->activeCityIds(),
                 fn (Builder $q, array $cityIds) => $q->whereIn('city_id', $cityIds),
             )
-            ->orderByDesc('is_active');
+            ->where('employees.is_active', $this->effectiveView() === 'active');
     }
 
     protected function globalSearchColumns(): array
@@ -161,26 +219,15 @@ class EmployeeTable extends LivewireTable
         $user = auth()->user();
         $canUpdate = $user->hasActivePermission('employees.update');
         $canDelete = $user->hasActivePermission('employees.delete');
+        $nationwide = $user->activeCityIds() === null;
 
         return [
-            Column::make(__('employees.table.id'), 'id')->sortable(),
+            // Detail columns live in the picker only (hidden by default): B4-D §3.
+            Column::make(__('employees.table.id'), 'id')->sortable()->hide(),
 
-            Column::make(trans('general.photo'), 'photo')
-                ->displayUsing(function ($v, Model $m): string {
-                    $src = $m->avatar_url;
-
-                    return $src
-                        ? '<img src="'.e($src).'" alt="'.e($m->name).'" class="size-[38px] max-w-none shrink-0 rounded-full border border-primary bg-white object-cover" />'
-                        : '<div class="bg-gray-200 rounded-full size-[38px]"></div>';
-                })->asHtml(),
-
-            // Column::make(trans('general.name'), transColumn('name'))
-            //     ->displayUsing(fn($v, Model $m) => $m->name) // uses accessor
-            //     ->sortable()->searchable(),
+            // Identity: photo + name (opens the read-only drawer) + position.
             Column::make(trans('general.name'), 'employee')
-                // <bdi>: a Latin name that falls back into the Arabic table
-                // keeps its own word order.
-                ->displayUsing(fn ($v, Model $m) => '<bdi>'.e($m->name).'</bdi>')
+                ->displayUsing(fn ($v, Model $m): string => view('livewire.employee.partials.identity', ['employee' => $m])->render())
                 ->asHtml()
                 ->sortable()
                 ->searchable(function (Builder $query, $value) {
@@ -197,23 +244,6 @@ class EmployeeTable extends LivewireTable
                         }
                     });
                 }),
-            Column::make(trans_choice('general.role', 1), 'account')
-                ->displayUsing(fn ($v, Model $m) => role_label($m->account?->myRole())),
-
-            Column::make(trans('general.years-of-service'), 'years_of_service_formatted')->computed()->sortable(),
-
-            // Month name in the page's own language, isolated with <bdi>: an
-            // Arabic date then reads right to left as a whole, an English one
-            // left to right, and neither gets reordered by the text around it.
-            DateColumn::make(trans('general.join-at'), 'joined_at')
-                ->displayUsing(fn ($v, Model $m) => $m->joined_at
-                    ? '<bdi class="whitespace-nowrap">'.e($m->joined_at->copy()->locale(app()->getLocale())->translatedFormat('d M Y')).'</bdi>'
-                    : '—')
-                ->asHtml()
-                ->sortable(),
-            SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
-                ->options(City::query()->whereNot('code', '000')->where('is_active', true)->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
-                ->sortable()->searchable(),
 
             SelectColumn::make(trans('general.direct_manager'), 'direct_manager')
                 ->displayUsing(function ($v, Model $model) {
@@ -233,60 +263,54 @@ class EmployeeTable extends LivewireTable
                     });
                 }),
 
-            SelectColumn::make(trans('general.position'), 'contracts.position.'.transColumn('title'))
-                ->options(Position::query()->orderby(transColumn('title'), 'asc')->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
-                ->sortable()->searchable(),
-
             Column::make(trans('general.work_email'), 'work_email')
                 ->displayUsing(fn ($v, Model $m) => $m->account?->email
-                    ? '<span dir="ltr">'.e($m->account->email).'</span>'
+                    ? '<span dir="ltr" class="break-all">'.e($m->account->email).'</span>'
                     : '—')
                 ->asHtml(),
 
-            // Status as text as well as colour, with the filter offering the
-            // same two words instead of a bare Yes / No.
+            // Status as text as well as colour. The Active / Inactive choice is the
+            // ?view= preset, so the column carries no filter of its own.
             SelectColumn::make(trans('general.is-active'), 'is_active')
                 ->options([1 => __('general.active'), 0 => __('general.inactive')])
-                ->displayUsing(fn ($v, Model $m): string => $m->is_active
-                    ? '<span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-emerald-50 px-2 py-0.5 text-small font-semibold text-emerald-700 ring-1 ring-emerald-200"><span class="size-1.5 rounded-full bg-emerald-500" aria-hidden="true"></span>'.e(__('general.active')).'</span>'
-                    : '<span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-neutral-100 px-2 py-0.5 text-small font-semibold text-secondary-medium ring-1 ring-neutral-200"><span class="size-1.5 rounded-full bg-neutral-400" aria-hidden="true"></span>'.e(__('general.inactive')).'</span>')
+                ->displayUsing(fn ($v, Model $m): string => view('livewire.employee.partials.status', ['employee' => $m])->render())
+                ->asHtml(),
+
+            // A city column only helps roles that see more than one city.
+            SelectColumn::make(trans_choice('general.city', 1), 'city.'.transColumn('name'))
+                ->options(City::query()->whereNot('code', '000')->where('is_active', true)->get()->pluck(transColumn('name'), transColumn('name'))->toArray())
+                ->sortable()->searchable()
+                ->visible($nationwide),
+
+            Column::make(trans_choice('general.role', 1), 'account')
+                ->displayUsing(fn ($v, Model $m) => role_label($m->account?->myRole()))
+                ->hide(),
+
+            Column::make(trans('general.years-of-service'), 'years_of_service_formatted')->computed()->sortable()->hide(),
+
+            // Month name in the page's own language, isolated with <bdi>: an
+            // Arabic date then reads right to left as a whole, an English one
+            // left to right, and neither gets reordered by the text around it.
+            DateColumn::make(trans('general.join-at'), 'joined_at')
+                ->displayUsing(fn ($v, Model $m) => $m->joined_at
+                    ? '<bdi class="whitespace-nowrap">'.e($m->joined_at->copy()->locale(app()->getLocale())->translatedFormat('d M Y')).'</bdi>'
+                    : '—')
                 ->asHtml()
-                ->searchable(),
+                ->sortable()
+                ->hide(),
 
-            Column::make(__('general.actions'), function (Model $model) use ($canUpdate, $canDelete): string {
-                $isActive = $model->is_active ? 1 : 0;
+            SelectColumn::make(trans('general.position'), 'contracts.position.'.transColumn('title'))
+                ->options(Position::query()->orderby(transColumn('title'), 'asc')->get()->pluck(transColumn('title'), transColumn('title'))->toArray())
+                ->sortable()->searchable()
+                ->hide(),
 
-                $toggleBtn = $canUpdate
-                    ? Blade::render(
-                        '<x-forms.toggle-input class="p-2 m-2 text-xl" active="'.$isActive.
-                            '" :model-id="'.$model->getKey().
-                            '" wire-event="confirmToggleItemStatus" />',
-                    )
-                    : '';
-
-                // Profile route is keyed by username; imported employees may
-                // not have one yet, so only link when it exists.
-                $viewBtn = $model->username
-                    ? Blade::render(
-                        '<a  href="'.route('employees.show', ['employee' => $model->username]).'" wire:navigate class="p-2 " title="'.e(__('general.view-profile')).'" aria-label="'.e(__('general.view-profile')).'">
-                                <x-icons.eye class="transition text-secondary-light hover:text-primary" />
-                            </a>',
-                    )
-                    : '';
-
-                $editBtn = $canUpdate
-                    ? Blade::render('<x-table.edit-btn href="'.route('employees.edit', $model->getKey()).'" />')
-                    : '';
-
-                $deleteBtn = $canDelete
-                    ? Blade::render('<x-table.delete-btn :modelId="'.$model->getKey().'" />')
-                    : '';
-
-                return '<div class="flex items-center gap-1">'.
-                    $toggleBtn.$viewBtn.$editBtn.$deleteBtn.
-                    '</div>';
-            })->asHtml()->clickable(false),
-
+            // Main action (View profile) + a named "More" menu. Each menu item
+            // calls an action that authorizes again on the server.
+            Column::make(__('general.actions'), fn (Model $model): string => view('livewire.employee.partials.row-actions', [
+                'employee' => $model,
+                'canUpdate' => $canUpdate,
+                'canDelete' => $canDelete,
+            ])->render())->asHtml()->clickable(false),
         ];
     }
 }

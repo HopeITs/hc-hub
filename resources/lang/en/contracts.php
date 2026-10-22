@@ -103,4 +103,20 @@ return [
         'pay_tiers.*.condition_ar' => 'condition (AR)',
         'pay_tiers.*.amount' => 'amount',
     ],
+
+    // B4 contracts list: named views, row actions, details drawer.
+    'views-label' => 'View',
+    'view-active' => 'Active',
+    'view-ending-soon' => 'Ending soon (:days days)',
+    'view-ended' => 'Terminated / ended',
+    'view-draft' => 'Draft reservations',
+    'ends-in-days' => '{0} Ends today|{1} Ends tomorrow|[2,*] Ends in :count days',
+    'view-named' => 'View contract of :name',
+    'more-actions-for' => 'More actions for :name',
+    'auto-renew-turn-on' => 'Turn auto-renew on',
+    'auto-renew-turn-off' => 'Turn auto-renew off',
+    'drawer-title' => 'Contract details',
+    'drawer-close' => 'Close contract details',
+    'drawer-open-full' => 'Open full contract',
+    'export-columns-shown' => 'Exports the columns shown',
 ];

@@ -992,5 +992,18 @@ return [
     'state-results-count' => '{1} :count result|[2,*] :count results',
     'state-add-employee' => 'Add employee',
     'state-add-contract' => 'Add contract',
+    'state-notice-filter-cleared' => 'A filter was cleared because it no longer applies',
+    'state-clear-all' => 'Clear all',
+    'state-active-filters' => 'Active filters',
+    'state-remove-filter' => 'Remove filter :filter',
+    'state-dismiss' => 'Dismiss',
+    'emp-open-details' => 'Open details of :name',
+    'emp-more-actions' => 'More actions for :name',
+    'emp-view-profile-of' => 'View profile of :name',
+    'emp-activate' => 'Activate',
+    'emp-deactivate' => 'Deactivate',
+    'emp-drawer-close' => 'Close details',
+    'emp-views' => 'Employee views',
+    'emp-export-note' => 'Exports the columns shown',
 
 ];

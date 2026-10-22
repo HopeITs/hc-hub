@@ -164,6 +164,9 @@ return [
             'initiateReturn' => 'employees.update',
             'finalizeReturnCycle' => 'employees.update',
         ],
+        // B4: opens the read-only drawer; the method re-runs EmployeePolicy::view and
+        // ::viewDirectory on the record inside the active city scope.
+        'employee.employee-drawer' => ['open' => 'employees.view'],
         'employee.employee-table' => [
             'delete' => 'employees.delete',
             'toggleItemStatusConfirmed' => 'employees.update',
@@ -200,6 +203,8 @@ return [
         // caller), which is the city/record control; the permission here is
         // the coarse gate. The confirmed write normally arrives as a dispatched
         // event, so the in-method Gate is what holds on that path.
+        // Opens the read-only drawer; the method re-runs ContractPolicy::view on the record.
+        'contract.contract-drawer' => ['open' => 'contracts.view'],
         'contract.contracts-table' => [
             'delete' => 'contracts.delete',
             'exportExcel' => 'contracts.export',
@@ -330,7 +335,16 @@ return [
         // position in their own session (the key includes auth()->id()); the
         // rows still come from query(), which applies Contract::scopeVisibleTo.
         // B3 list states: view state / text only, no writes.
-        'contract.contracts-table' => ['confirmDelete', 'updatedPaginators', 'clearAllFilters', 'renderEmptyState', 'retryLoad', 'stateAnnouncement'],
+        // B4: setPreset / clearAll / removeChip / dismissStateNotice change only the caller's
+        // own view state (setPreset also 403s a preset the active role may not use); every
+        // row still comes from query() -> Contract::scopeVisibleTo. The rest is display text.
+        'contract.contracts-table' => [
+            'confirmDelete', 'updatedPaginators', 'updatedPerPage', 'updatedRemembersTableState', 'clearAllFilters',
+            'renderEmptyState', 'retryLoad', 'stateAnnouncement', 'setPreset', 'clearAll', 'removeChip',
+            'dismissStateNotice', 'canClearAll', 'activeFilterChips', 'cardView',
+        ],
+        // Closing the read-only drawer only clears its own locked id.
+        'contract.contract-drawer' => ['close'],
         'news.news-table' => ['confirmDelete'],
         'position.position-table' => ['confirmDelete', 'confirmToggleItemStatus'],
         'program-management.center.centers-table' => ['confirmDelete', 'confirmToggleItemStatus'],
@@ -343,7 +357,15 @@ return [
             // They only start an anonymous lookup attempt (TaskTelemetry).
             'updatedGlobalSearch', 'updatedSearch',
             'clearAllFilters', 'renderEmptyState', 'retryLoad', 'stateAnnouncement', // B3: view state / text only
+            // B4: setView / clearAll / removeChip / dismissStateNotice change only the caller's own
+            // view state (setView falls back to Active for a view the role may not use); rows still
+            // come from query(). The rest is display text or an Alpine expression.
+            'setView', 'clearAll', 'removeChip', 'dismissStateNotice', 'canClearAll', 'activeFilterChips',
+            'cardView', 'rowClickAction', 'canUseInactiveView', 'effectiveView',
+            'updatedPaginators', 'updatedPerPage', 'updatedRemembersTableState',
         ],
+        // Closing the read-only drawer only clears its own id.
+        'employee.employee-drawer' => ['close'],
 
         // --- X2-I task telemetry --------------------------------------------
         // dehydrateTracksTaskAttempt is a Livewire lifecycle hook: dehydrate*

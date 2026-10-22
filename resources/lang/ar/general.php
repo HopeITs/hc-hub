@@ -994,5 +994,18 @@ return [
     'state-results-count' => '{1} نتيجة واحدة|{2} نتيجتان|[3,10] :count نتائج|[11,*] :count نتيجة',
     'state-add-employee' => 'إضافة موظف',
     'state-add-contract' => 'إضافة عقد',
+    'state-notice-filter-cleared' => 'تم مسح أحد المرشحات لأنه لم يعد ينطبق',
+    'state-clear-all' => 'مسح الكل',
+    'state-active-filters' => 'المرشحات المفعّلة',
+    'state-remove-filter' => 'إزالة المرشح :filter',
+    'state-dismiss' => 'إغلاق',
+    'emp-open-details' => 'فتح تفاصيل :name',
+    'emp-more-actions' => 'المزيد من الإجراءات لـ :name',
+    'emp-view-profile-of' => 'عرض الملف الشخصي لـ :name',
+    'emp-activate' => 'تفعيل',
+    'emp-deactivate' => 'إلغاء التفعيل',
+    'emp-drawer-close' => 'إغلاق التفاصيل',
+    'emp-views' => 'عروض الموظفين',
+    'emp-export-note' => 'يصدّر الأعمدة المعروضة',
 
 ];

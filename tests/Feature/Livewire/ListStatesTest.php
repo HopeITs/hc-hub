@@ -119,10 +119,13 @@ class ListStatesTest extends TestCase
         $user = $this->makeUser($this->makeCity('DMS', '003'), 'HR-DMS', ['contracts.view']);
         $this->makeContractFor($user->profile, ['salary' => 7391]);
 
+        // The typed search is echoed in its own filter chip, so the proof that
+        // pay is not searchable is that the contract does not match it.
         Livewire::actingAs($user)->test(ContractsTable::class)
+            ->assertSee('Test Person')
             ->assertDontSee('7391')
             ->set('globalSearch', '7391')
-            ->assertDontSee('7391');
+            ->assertDontSee('Test Person');
     }
 
     public function test_load_failure_shows_retry_and_recovers(): void
