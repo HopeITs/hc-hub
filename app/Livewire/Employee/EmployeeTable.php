@@ -258,7 +258,7 @@ class EmployeeTable extends LivewireTable
                 // not have one yet, so only link when it exists.
                 $viewBtn = $model->username
                     ? Blade::render(
-                        '<a  href="'.route('employees.show', ['employee' => $model->username]).'" class="p-2 " title="'.e(__('general.view-profile')).'" aria-label="'.e(__('general.view-profile')).'">
+                        '<a  href="'.route('employees.show', ['employee' => $model->username]).'" wire:navigate class="p-2 " title="'.e(__('general.view-profile')).'" aria-label="'.e(__('general.view-profile')).'">
                                 <x-icons.eye class="transition text-secondary-light hover:text-primary" />
                             </a>',
                     )

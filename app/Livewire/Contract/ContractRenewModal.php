@@ -84,7 +84,7 @@ class ContractRenewModal extends Component
 
         $this->toast();
 
-        return redirect()->route('contracts.show', $renewal->id);
+        return $this->redirectRoute('contracts.show', $renewal->id, navigate: true);
     }
 
     /**
@@ -100,11 +100,11 @@ class ContractRenewModal extends Component
             'form.end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:form.start_date'],
         ]);
 
-        return redirect()->route('contracts.renew', [
+        return $this->redirectRoute('contracts.renew', [
             'contract' => $source->id,
             'start' => $this->form->start_date,
             'end' => $this->form->end_date,
-        ]);
+        ], navigate: true);
     }
 
     public function render(): View

@@ -125,6 +125,13 @@ Livewire.hook('commit', ({ succeed }) => {
     });
 });
 
+// Chart.js instances created by the inline dashboard scripts are bound to
+// canvases that wire:navigate is about to remove; destroy them so their
+// resize observers and animation frames do not outlive the page.
+document.addEventListener('livewire:navigating', () => {
+    Object.values(Chart.instances).forEach((chart) => chart.destroy());
+});
+
 document.addEventListener('livewire:navigated', () => {
     initFlowbite();
     initClockTimepickers();

@@ -178,11 +178,11 @@
 
 @guest
     <div class="p-4 space-y-2 w-full">
-        <a href="{{ route('login') }}"
+        <a href="{{ route('login') }}" wire:navigate
            class="block w-full text-center py-2 px-4 text-body font-semibold text-white bg-primary rounded-surface">
             @lang('auth.login')
         </a>
-        <a href="{{ route('register') }}"
+        <a href="{{ route('register') }}" wire:navigate
            class="block w-full text-center py-2 px-4 text-body font-semibold text-neutral-800 bg-neutral-200 hover:bg-neutral-300 rounded-surface">
             @lang('auth.register')
         </a>

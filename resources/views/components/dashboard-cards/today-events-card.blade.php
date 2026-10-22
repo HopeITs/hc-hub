@@ -74,7 +74,7 @@
     </div>
     {{-- Swiper Assets --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
-    <script nonce="{{ Vite::cspNonce() }}" src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script nonce="{{ Vite::cspNonce() }}" src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" data-navigate-once></script>
     <script nonce="{{ Vite::cspNonce() }}">
         // Runs on a normal load and again when wire:navigate swaps this page in,
         // where DOMContentLoaded has already fired and would never call back.
@@ -86,7 +86,13 @@
                 return;
             }
 
-            new Swiper(".js-today-events .swiper", {
+            const el = document.querySelector(".js-today-events .swiper");
+            if (!el || el.swiper) return;
+
+            // wire:navigate drops this element without stopping the autoplay timer.
+            document.addEventListener('livewire:navigating', () => el.swiper?.destroy(true, true), { once: true });
+
+            new Swiper(el, {
                 slidesPerView: 1,
                 loop: true,
                 autoplay: {
