@@ -6,6 +6,7 @@ use App\Enums\ContractType as ContractTypeEnum;
 use App\Enums\SalaryPer;
 use App\Exports\ContractExport;
 use App\Livewire\Concerns\HasListStates;
+use App\Livewire\Concerns\HasSavedViews;
 use App\Livewire\Concerns\RemembersTableState;
 use App\Livewire\Concerns\WithFeedback;
 use App\Models\City;
@@ -32,6 +33,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class ContractsTable extends LivewireTable
 {
     use HasListStates;
+    use HasSavedViews;
 
     // Remembers search/filters/sort/page/columns per user + ACTIVE role + city
     // scope (B4-D). Aliased so the preset can join the chips and "Clear all".

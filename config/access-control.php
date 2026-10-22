@@ -338,7 +338,13 @@ return [
         // B4: setPreset / clearAll / removeChip / dismissStateNotice change only the caller's
         // own view state (setPreset also 403s a preset the active role may not use); every
         // row still comes from query() -> Contract::scopeVisibleTo. The rest is display text.
+        // B4-D saved views: saveView / applyView / renameView / deleteView / savedViews touch only
+        // the caller's OWN saved_table_views rows (every query is scoped by auth id, this table and
+        // the active role context; another user's id is a 404). They store table state only (search,
+        // filters, sort, per-page, columns), never rows or pay, and applyView re-runs the table's
+        // sanitizing, so rows still come from query().
         'contract.contracts-table' => [
+            'saveView', 'applyView', 'renameView', 'deleteView', 'savedViews',
             'confirmDelete', 'updatedPaginators', 'updatedPerPage', 'updatedRemembersTableState', 'clearAllFilters',
             'renderEmptyState', 'retryLoad', 'stateAnnouncement', 'setPreset', 'clearAll', 'removeChip',
             'dismissStateNotice', 'canClearAll', 'activeFilterChips', 'cardView',
@@ -353,6 +359,7 @@ return [
         'program-management.program.index' => ['confirmDelete', 'confirmToggleItemStatus', 'loadMore'],
         'employee.employee-table' => [
             'confirmDelete', 'confirmToggleItemStatus',
+            'saveView', 'applyView', 'renameView', 'deleteView', 'savedViews', // B4-D saved views: own rows only, see contract.contracts-table
             // X2-I lifecycle hooks: Livewire refuses direct calls to updated*.
             // They only start an anonymous lookup attempt (TaskTelemetry).
             'updatedGlobalSearch', 'updatedSearch',

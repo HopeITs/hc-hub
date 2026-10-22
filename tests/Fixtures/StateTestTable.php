@@ -3,6 +3,7 @@
 namespace Tests\Fixtures;
 
 use App\Livewire\Concerns\HasListStates;
+use App\Livewire\Concerns\HasSavedViews;
 use App\Livewire\Concerns\RemembersTableState;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,7 +16,7 @@ use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 /** Minimal consumer of RemembersTableState, used only by the B4 state tests. */
 class StateTestTable extends LivewireTable
 {
-    use HasListStates, RemembersTableState;
+    use HasListStates, HasSavedViews, RemembersTableState;
 
     protected string $model = Employee::class;
 

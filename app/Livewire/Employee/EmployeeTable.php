@@ -4,6 +4,7 @@ namespace App\Livewire\Employee;
 
 use App\Exports\EmployeeExport;
 use App\Livewire\Concerns\HasListStates;
+use App\Livewire\Concerns\HasSavedViews;
 use App\Livewire\Concerns\RemembersTableState;
 use App\Livewire\Concerns\WithFeedback;
 use App\Models\City;
@@ -26,6 +27,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class EmployeeTable extends LivewireTable
 {
     use HasListStates;
+    use HasSavedViews;
     use RemembersTableState;
     use WithFeedback;
 

@@ -1005,5 +1005,17 @@ return [
     'emp-drawer-close' => 'Close details',
     'emp-views' => 'Employee views',
     'emp-export-note' => 'Exports the columns shown',
+    'views-menu' => 'My views',
+    'views-saved-list' => 'Saved views',
+    'views-none' => 'No saved views yet.',
+    'views-name' => 'View name',
+    'views-save-current' => 'Save current view',
+    'views-apply' => 'Apply view :name',
+    'views-rename' => 'Rename view :name',
+    'views-delete' => 'Delete view :name',
+    'views-delete-confirm' => 'Delete this saved view?',
+    'views-limit' => 'You can keep up to :max saved views for this table. Delete one first.',
+    'views-name-taken' => 'You already have a view with this name.',
+    'views-help' => 'A view keeps search, filters, sort, rows per page and columns. It never keeps results.',
 
 ];
