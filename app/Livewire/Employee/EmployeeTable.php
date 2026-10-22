@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee;
 
 use App\Exports\EmployeeExport;
+use App\Livewire\Concerns\HasListStates;
 use App\Livewire\Concerns\WithFeedback;
 use App\Models\City;
 use App\Models\Employee;
@@ -22,6 +23,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class EmployeeTable extends LivewireTable
 {
+    use HasListStates;
     use WithFeedback;
 
     protected string $model = Employee::class;
@@ -102,6 +104,14 @@ class EmployeeTable extends LivewireTable
             new EmployeeExport($data, $visibleColumnCodes),
             $filename,
         );
+    }
+
+    /** Add action only for roles that may open the create route (employees.create). */
+    protected function emptyStateCreate(): ?array
+    {
+        return auth()->user()?->hasActivePermission('employees.create')
+            ? [__('general.state-add-employee'), route('employees.create')]
+            : null;
     }
 
     protected function link(Model $model): ?string

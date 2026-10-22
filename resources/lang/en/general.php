@@ -980,4 +980,17 @@ return [
     ],
     'notification-target-unavailable' => 'This request is no longer available to you. It may have been removed, or your access may have changed.',
 
+    // Shared list states (x-center-empty-state, x-ui.load-error, x-ui.skeleton)
+    'state-empty-title' => 'No records yet',
+    'state-empty-help' => 'Nothing has been added here yet.',
+    'state-filtered-title' => 'No results match your filters',
+    'state-filtered-help' => 'Try changing or removing some filters.',
+    'clear-filters' => 'Clear filters',
+    'state-error-title' => 'Could not load this content',
+    'state-error-help' => 'Something went wrong while loading. Your data has not changed.',
+    'retry' => 'Retry',
+    'state-results-count' => '{1} :count result|[2,*] :count results',
+    'state-add-employee' => 'Add employee',
+    'state-add-contract' => 'Add contract',
+
 ];

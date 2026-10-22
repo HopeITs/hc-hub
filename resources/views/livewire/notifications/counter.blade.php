@@ -1,5 +1,5 @@
 <div
-    wire:poll.10s="updateCount"
+    @if($poll) wire:poll.10s="updateCount" @endif
     {{-- The scope lives on the stable wrapper: the badge below appears and
          disappears with the count, and a morph that re-created it without its
          own x-data left :class evaluating "pop" with no scope. --}}

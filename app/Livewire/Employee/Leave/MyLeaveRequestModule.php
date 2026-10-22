@@ -5,6 +5,7 @@ namespace App\Livewire\Employee\Leave;
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Concerns\GuardsModalClose;
+use App\Livewire\Concerns\HandlesLoadFailure;
 use App\Livewire\Concerns\TracksTaskAttempt;
 use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
@@ -24,12 +25,14 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Throwable;
 
 class MyLeaveRequestModule extends Component
 {
     use AuthorizesActivePermissions;
     use FormatsLeaveDuration;
     use GuardsModalClose;
+    use HandlesLoadFailure;
     use TracksTaskAttempt;
     use WithFeedback;
 
@@ -68,6 +71,8 @@ class MyLeaveRequestModule extends Component
     protected $listeners = [
         'openRequestLeaveEdit' => 'edit',
         'openMyLeaveDetails' => 'openDetails',
+        'openRequestLeaveCreate' => 'create',
+        'leaveStatusFilterCleared' => 'resetStatusFilter',
         'processSave' => 'processSave',
     ];
 
@@ -86,6 +91,12 @@ class MyLeaveRequestModule extends Component
         $this->dispatch('$refresh');
     }
 
+    /** The table's "clear filters" when only the status tab was narrowing the list. */
+    public function resetStatusFilter(): void
+    {
+        $this->setActiveTab('all');
+    }
+
     public function refreshCounts(): void
     {
         $user = auth()->user();
@@ -95,12 +106,19 @@ class MyLeaveRequestModule extends Component
             $query->where('employee_id', $employee->id);
         });
 
-        $this->counts = [
-            'all' => (clone $leaveRequests)?->count(),
-            'pending' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Pending)?->count(),
-            'accepted' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Accepted)?->count(),
-            'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)?->count(),
-        ];
+        // A failed count must not take the page down: the table below shows the
+        // load error with its retry, and the tabs fall back to zero until it recovers.
+        try {
+            $this->counts = [
+                'all' => (clone $leaveRequests)?->count(),
+                'pending' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Pending)?->count(),
+                'accepted' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Accepted)?->count(),
+                'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)?->count(),
+            ];
+        } catch (Throwable $e) {
+            report($e);
+            $this->counts = ['all' => 0, 'pending' => 0, 'accepted' => 0, 'rejected' => 0];
+        }
     }
 
     public function create()
@@ -232,9 +250,14 @@ class MyLeaveRequestModule extends Component
     public function render()
     {
         $employee = auth()->user()->profile;
-        $availableLeaves = $employee->availableLeaves();
-        $allAvailableLeaves = $employee->allAvailableLeaves();
-        $alternativeEmployees = app(LeaveAlternativeEmployees::class)->for($employee);
+
+        // A failed balance lookup shows a retry panel in place of the cards
+        // instead of a 500; the request list below has its own failure state.
+        [$availableLeaves, $allAvailableLeaves, $alternativeEmployees] = $this->guardedLoad(fn () => [
+            $employee->availableLeaves(),
+            $employee->allAvailableLeaves(),
+            app(LeaveAlternativeEmployees::class)->for($employee),
+        ], fallback: [null, collect(), collect()]);
 
         return view('livewire.employee.leave.index', compact(
             'availableLeaves', 'allAvailableLeaves', 'alternativeEmployees',

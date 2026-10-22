@@ -4,7 +4,7 @@
         x-init="init(@js($this->notes->pluck('id')))"
         class="relative h-full w-full">
         <div class="flex h-full w-full flex-col overflow-hidden rounded-surface border border-gray-200 bg-white shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)]">
-            <x-dashboard-cards.card-header :title="__('general.notes')" :count="$this->notes->count()">
+            <x-dashboard-cards.card-header :title="__('general.notes')" :count="$loadFailed ? null : $this->notes->count()">
                 <x-slot:icon>
                     <img class="block size-full object-contain" src="{{ asset('assets/icons/notes.svg') }}" alt="">
                 </x-slot:icon>
@@ -23,6 +23,9 @@
             <div data-csb-exclude class="mx-6 mt-[11px] mb-4 pe-2 flex-1 min-h-0 overflow-y-auto custom-scrollbar">
                 <div class="pt-1">
 
+                    @if ($loadFailed)
+                        <x-ui.load-error class="min-h-40" />
+                    @else
                     <table class="w-full text-body text-neutral-800 ">
                         <thead>
                         <tr class="border-b border-b-secondary-light text-secondary-medium">
@@ -103,6 +106,7 @@
                         @endforelse
                         </tbody>
                     </table>
+                    @endif
                 </div>
             </div>
         </div>

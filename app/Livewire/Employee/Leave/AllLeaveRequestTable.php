@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
+use App\Livewire\Concerns\HasScreenListStates;
 use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Contract;
@@ -23,6 +24,7 @@ use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
 class AllLeaveRequestTable extends LivewireTable
 {
+    use HasScreenListStates;
     use WithFeedback;
 
     public LeaveRequestForm $form;
@@ -115,6 +117,31 @@ class AllLeaveRequestTable extends LivewireTable
         $this->dispatch('$refresh');
 
         $this->toast(__('general.item-updated'));
+    }
+
+    protected function emptyScreenState(): array
+    {
+        $user = auth()->user();
+        // Mirrors the header button (HR / super-admin) and the permission create() enforces.
+        $canCreate = $user && $user->activeRoleIs('HR', 'super-admin') && $user->hasActivePermission('leaves.create');
+
+        return [
+            'title' => __('states.leave-all-empty-title'),
+            'description' => __('states.leave-all-empty-help'),
+            'action' => $canCreate
+                ? ['label' => __('general.add-new'), 'alpine' => "\$dispatch('openAllLeaveCreate')"]
+                : null,
+        ];
+    }
+
+    protected function narrowedByTab(): bool
+    {
+        return $this->statusFilter !== 'all';
+    }
+
+    protected function clearTab(): void
+    {
+        $this->dispatch('leaveStatusFilterCleared');
     }
 
     protected function rowClickAction(Model $model): ?string

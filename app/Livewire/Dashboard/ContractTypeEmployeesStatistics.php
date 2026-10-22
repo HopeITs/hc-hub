@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Livewire\Concerns\HandlesLoadFailure;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Support\StatisticsCache;
@@ -9,6 +10,8 @@ use Livewire\Component;
 
 class ContractTypeEmployeesStatistics extends Component
 {
+    use HandlesLoadFailure;
+
     /**
      * Donut sections → the contract_type_id values that roll up into them.
      *
@@ -24,7 +27,32 @@ class ContractTypeEmployeesStatistics extends Component
 
     public $chartData;
 
-    public function mount()
+    public function mount(): void
+    {
+        $this->loadData();
+    }
+
+    /**
+     * B3: re-runs the load. The amCharts init re-runs after every Livewire commit, so a re-render is enough.
+     */
+    public function retryLoad(): void
+    {
+        $this->loadData();
+    }
+
+    public function render()
+    {
+        return view('livewire.dashboard.contract-type-employees-statistics', [
+            'chartData' => $this->chartData,
+        ]);
+    }
+
+    private function loadData(): void
+    {
+        $this->guardedLoad(fn () => $this->compute());
+    }
+
+    private function compute(): void
     {
         /**
          * Contract counts per type, rolled up into the three donut sections.
@@ -67,13 +95,6 @@ class ContractTypeEmployeesStatistics extends Component
                     ->values(),
             ])
             ->values();
-    }
-
-    public function render()
-    {
-        return view('livewire.dashboard.contract-type-employees-statistics', [
-            'chartData' => $this->chartData,
-        ]);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveTypeCases;
 use App\Exports\EmployeeLeaveBalanceExport;
+use App\Livewire\Concerns\HasScreenListStates;
 use App\Livewire\Forms\LeaveBalanceForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
@@ -17,6 +18,8 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class EmpLeaveBalanceTable extends LivewireTable
 {
+    use HasScreenListStates;
+
     public LeaveBalanceForm $form;
 
     public $showModal = false;
@@ -64,6 +67,14 @@ class EmpLeaveBalanceTable extends LivewireTable
             new EmployeeLeaveBalanceExport($data, $visibleColumnCodes),
             $filename,
         );
+    }
+
+    protected function emptyScreenState(): array
+    {
+        return [
+            'title' => __('states.leave-balance-empty-title'),
+            'description' => __('states.leave-balance-empty-help'),
+        ];
     }
 
     protected function rowClickAction(Model $model): ?string

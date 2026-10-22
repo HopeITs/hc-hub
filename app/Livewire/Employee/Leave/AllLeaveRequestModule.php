@@ -21,6 +21,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Throwable;
 
 class AllLeaveRequestModule extends Component
 {
@@ -65,6 +66,8 @@ class AllLeaveRequestModule extends Component
     protected $listeners = [
         'openRequestLeaveEdit' => 'edit',
         'openShowRequestLeave' => 'show',
+        'openAllLeaveCreate' => 'create',
+        'leaveStatusFilterCleared' => 'resetStatusFilter',
         'openDecisionRequestLeave' => 'openDecision',
         'processSave' => 'processSave',
     ];
@@ -204,14 +207,31 @@ class AllLeaveRequestModule extends Component
         $user = auth()->user();
         $leaveRequests = LeaveRequest::query()->manageableBy($user);
 
-        $this->counts = ['all' => (clone $leaveRequests)->count(),
-            'pending' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Pending)->count(),
-            'accepted' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Accepted)->count(),
-            'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)->count(), ];
+        // A failed count must not take the page down: the table below shows the
+        // load error with its retry, and the tabs fall back to zero until it recovers.
+        try {
+            $this->counts = ['all' => (clone $leaveRequests)->count(),
+                'pending' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Pending)->count(),
+                'accepted' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Accepted)->count(),
+                'rejected' => (clone $leaveRequests)->where('status', LeaveRequestStatus::Rejected)->count(), ];
+        } catch (Throwable $e) {
+            report($e);
+            $this->counts = ['all' => 0, 'pending' => 0, 'accepted' => 0, 'rejected' => 0];
+        }
+    }
+
+    /** The table's "clear filters" when only the status tab was narrowing the list. */
+    public function resetStatusFilter(): void
+    {
+        $this->setActiveTab('all');
     }
 
     public function create()
     {
+        // Also reached by the empty-state button's event, so check here, not in the view.
+        $this->authorizeActivePermission('leaves.create');
+        abort_unless(auth()->user()->activeRoleIs('HR', 'super-admin'), 403);
+
         $this->form->reset();
         $this->markClean('formModal');
         $this->formModal = true;

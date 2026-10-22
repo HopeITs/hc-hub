@@ -7,7 +7,7 @@
     <!-- Bell Button -->
     <button
         type="button"
-        @click="open = !open"
+        @click="open = !open; if (open) $dispatch('notification-panel-opened')"
         :aria-expanded="open"
         aria-haspopup="menu"
         class="relative inline-flex items-center justify-center transition rounded-[14px] cursor-pointer size-9 text-secondary-light hover:bg-white hover:text-secondary-dark hover:shadow-e1 focus:outline-none focus:ring-2 focus:ring-neutral-200 dark:text-secondary-light dark:hover:text-white">
@@ -49,7 +49,7 @@
 
         <!-- Livewire component renders its own header + list -->
         <div class="max-h-[22rem] overflow-y-auto">
-            <livewire:notifications.dropdown wire:poll.10s />
+            <livewire:notifications.dropdown />
         </div>
 
         <!-- Footer -->

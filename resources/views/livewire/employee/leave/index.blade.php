@@ -17,15 +17,20 @@ use App\Enums\LeaveRequestStatus;
             :showButton="true"
         />
 
-        <div>
-            <x-primary-button wire:click="create" data-tour="leaves.request">
-                @lang('leaves.modal.new-title')
-            </x-primary-button>
-        </div>
+        {{-- Offered only to roles that may create; create() authorizes again on the server. --}}
+        @if(auth()->user()->hasActivePermission('leaves.create'))
+            <div>
+                <x-primary-button wire:click="create" data-tour="leaves.request">
+                    @lang('leaves.modal.new-title')
+                </x-primary-button>
+            </div>
+        @endif
 
     </div>
 
-    @isset($availableLeaves)
+    @if($loadFailed)
+        <x-ui.load-error class="mb-6" :message="__('states.balances-unavailable')" />
+    @elseif($availableLeaves !== null && $availableLeaves->isNotEmpty())
         <div data-tour="leaves.balances" class="grid
             grid-cols-1
             sm:grid-cols-2
@@ -48,11 +53,11 @@ use App\Enums\LeaveRequestStatus;
             @endforeach
         </div>
     @else
-        <div class="rounded-surface shadow-e2 mb-6 text-center font-semibold text-secondary-medium p-4">
+        <div class="rounded-surface shadow-e2 mb-6 text-center font-semibold text-secondary-medium p-4" role="status">
             @lang('general.no-available-data')
         </div>
 
-    @endisset
+    @endif
 
     {{-- Result of the last send/update (A3): the real status and who acts next.
          Stays until hidden, unlike the toast, so it can be read at any pace. --}}

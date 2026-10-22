@@ -2,12 +2,15 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Livewire\Concerns\HandlesLoadFailure;
 use App\Models\Contract;
 use App\Support\StatisticsCache;
 use Livewire\Component;
 
 class SalaryPerEmployeeStatistics extends Component
 {
+    use HandlesLoadFailure;
+
     /**
      * salary_per is stored as a tinyint (see the contracts migration:
      * 0=Unknown, 1=Month, 2=Hour, 3=Session). Presentation metadata is keyed by
@@ -30,7 +33,30 @@ class SalaryPerEmployeeStatistics extends Component
 
     public int $highlightPercentage = 0;
 
-    public function mount()
+    public function mount(): void
+    {
+        $this->loadData();
+    }
+
+    /**
+     * B3: re-runs the load. The amCharts init re-runs after every Livewire commit, so a re-render is enough.
+     */
+    public function retryLoad(): void
+    {
+        $this->loadData();
+    }
+
+    public function render()
+    {
+        return view('livewire.dashboard.salary-per-employee-statistics');
+    }
+
+    private function loadData(): void
+    {
+        $this->guardedLoad(fn () => $this->compute());
+    }
+
+    private function compute(): void
     {
         /**
          * Distribution of salary periods across each employee's current contract.
@@ -67,10 +93,5 @@ class SalaryPerEmployeeStatistics extends Component
         $this->highlightPercentage = $this->totalEmployees > 0
             ? (int) round($perMonth / $this->totalEmployees * 100)
             : 0;
-    }
-
-    public function render()
-    {
-        return view('livewire.dashboard.salary-per-employee-statistics');
     }
 }

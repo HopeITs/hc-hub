@@ -982,4 +982,17 @@ return [
     ],
     'notification-target-unavailable' => 'لم يعد هذا الطلب متاحًا لك. ربما حُذف، أو تغيّرت صلاحياتك.',
 
+    // حالات القوائم المشتركة (x-center-empty-state, x-ui.load-error, x-ui.skeleton)
+    'state-empty-title' => 'لا توجد سجلات بعد',
+    'state-empty-help' => 'لم تتم إضافة أي شيء هنا حتى الآن.',
+    'state-filtered-title' => 'لا توجد نتائج مطابقة للمرشحات',
+    'state-filtered-help' => 'جرّب تغيير بعض المرشحات أو إزالتها.',
+    'clear-filters' => 'مسح المرشحات',
+    'state-error-title' => 'تعذّر تحميل هذا المحتوى',
+    'state-error-help' => 'حدث خطأ أثناء التحميل. لم تتغيّر بياناتك.',
+    'retry' => 'إعادة المحاولة',
+    'state-results-count' => '{1} نتيجة واحدة|{2} نتيجتان|[3,10] :count نتائج|[11,*] :count نتيجة',
+    'state-add-employee' => 'إضافة موظف',
+    'state-add-contract' => 'إضافة عقد',
+
 ];

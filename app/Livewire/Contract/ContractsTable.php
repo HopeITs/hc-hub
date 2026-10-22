@@ -5,6 +5,7 @@ namespace App\Livewire\Contract;
 use App\Enums\ContractType as ContractTypeEnum;
 use App\Enums\SalaryPer;
 use App\Exports\ContractExport;
+use App\Livewire\Concerns\HasListStates;
 use App\Livewire\Concerns\WithFeedback;
 use App\Models\City;
 use App\Models\Contract;
@@ -28,6 +29,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ContractsTable extends LivewireTable
 {
+    use HasListStates;
     use WithFeedback;
 
     // Open alphabetically by employee name; clicking the header still toggles
@@ -122,6 +124,14 @@ class ContractsTable extends LivewireTable
     {
         // Pagination actions change state directly rather than through wire:model.
         $this->updateSession();
+    }
+
+    /** Add action only for roles that may open the create route (contracts.create). */
+    protected function emptyStateCreate(): ?array
+    {
+        return auth()->user()?->hasActivePermission('contracts.create')
+            ? [__('general.state-add-contract'), route('contracts.create')]
+            : null;
     }
 
     protected function sessionKey(): string

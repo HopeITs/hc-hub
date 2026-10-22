@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Dashboard;
 
+use App\Livewire\Concerns\HandlesLoadFailure;
 use App\Models\Badge;
 use App\Models\Center;
 use App\Models\Checklist;
@@ -18,6 +19,8 @@ use Livewire\Component;
 
 class Index extends Component
 {
+    use HandlesLoadFailure;
+
     public $employee;
 
     public $contract;
@@ -29,6 +32,17 @@ class Index extends Component
     public $joinedOn;
 
     public $workEmail;
+
+    /**
+     * Sections whose load failed during THIS request (card key => true). Not a
+     * public property: it is recomputed on every render, and a retry simply re-renders.
+     *
+     * @var array<string, bool>
+     */
+    protected array $failedSections = [];
+
+    /** @var array<string, mixed> Per-request memo so a card that reads $this->x after render() does not query twice. */
+    protected array $memo = [];
 
     public function getTodayEventsProperty()
     {
@@ -109,49 +123,7 @@ class Index extends Component
 
     public function getUpcomingEventsProperty()
     {
-        $start = now()->timezone(config('app.timezone'))->addDay()->startOfDay();
-        $end = $start->copy()->addDays(6)->endOfDay();
-
-        $employeeId = $this->employee->id ?? null;
-        $cityId = $this->employee->city_id ?? null;
-        $centerId = $this->contract->position->center_id ?? null;
-        $programId = $this->contract->position->program_id ?? null;
-
-        return News::query()
-            ->whereBetween('event_date', [$start->toDateString(), $end->toDateString()])
-            ->where(function ($q) use ($cityId, $centerId, $programId, $employeeId) {
-                $q->whereNull('newsable_type')
-                    ->orWhere(function ($q2) use ($employeeId) {
-                        $q2->where('newsable_type', Employee::class)->where('newsable_id', $employeeId);
-                    })
-                    ->orWhere(function ($q2) use ($cityId) {
-                        $q2->where('newsable_type', City::class)->where('newsable_id', $cityId);
-                    })
-                    ->orWhere(function ($q2) use ($centerId) {
-                        $q2->where('newsable_type', Center::class)->where('newsable_id', $centerId);
-                    })
-                    ->orWhere(function ($q2) use ($programId) {
-                        $q2->where('newsable_type', Program::class)->where('newsable_id', $programId);
-                    });
-            })
-            ->where(function ($q) {
-                $q->whereNull('display_until')->orWhere('display_until', '>=', now()->startOfDay());
-            })
-            ->get()
-            ->map(function ($news) {
-                $timestamp = $news->event_date;
-                $daysLeft = now()->diffInDays($timestamp, false);
-
-                $news->event_title = $news->title;
-                $news->event_description = $news->description;
-                $news->event_timestamp = $timestamp;
-                $news->image_url = $news->getFirstMediaUrl('news-image') ?: '/images/news-default.png';
-                $news->daysLeftText = trans_choice('dashboard.in-days', (int) $daysLeft);
-
-                return $news;
-            })
-            ->sortBy('event_timestamp')
-            ->values();
+        return $this->section('upcoming-events', fn () => $this->loadUpcomingEvents(), collect());
     }
 
     public function getUpcomingBirthdaysProperty()
@@ -199,6 +171,129 @@ class Index extends Component
 
     public function getDeliveredItemsProperty()
     {
+        return $this->section('delivered', fn () => $this->loadDeliveredItems(), collect());
+    }
+
+    public function getMyBadgesProperty()
+    {
+        return $this->section('badges', fn () => $this->loadMyBadges(), collect());
+    }
+
+    public function getPendingRequestsProperty()
+    {
+        return $this->section('pending', fn () => $this->loadPendingRequests(), collect());
+    }
+
+    public function getTeamMembersProperty()
+    {
+        return $this->section('team', fn () => $this->loadTeamMembers(), collect());
+    }
+
+    public function mount(): void
+    {
+        $locale = app()->getLocale();
+        $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
+        $deptCol = $locale === 'ar' ? 'name_ar' : 'name_en';
+
+        $user = auth()->user();
+        if (! $user) {
+            abort(403, 'Unauthorized');
+        }
+
+        $this->employee = $user
+            ->profile()
+            ->with(['media', 'city'])
+            ->first();
+
+        if ($this->employee) {
+            $this->contract = Contract::with(['position.department', 'position.center', 'position.program'])
+                ->where('employee_id', $this->employee->id)
+                ->orderByDesc('start_date')
+                ->first();
+
+            $this->positionTitle = $this->contract?->position?->$titleCol ?? '—';
+            $this->departmentName = $this->contract?->position?->department?->$deptCol ?? '—';
+            $this->joinedOn = $this->contract?->start_date
+                ? Carbon::parse($this->contract->start_date)->locale(app()->getLocale())->translatedFormat('d M Y')
+                : '—';
+            $this->workEmail = $user->email ?? '—';
+        } else {
+            $this->positionTitle = $this->departmentName = $this->joinedOn = $this->workEmail = '—';
+        }
+    }
+
+    public function render()
+    {
+        // The unused todayEvents list (36 queries for 100 employees: N+1 per
+        // birthday) used to be computed here and never rendered; the
+        // news.today-events-card component loads its own data.
+        $viewData = [
+            'employee' => $this->employee,
+            'hasLeaves' => $this->section('leaves', fn () => $this->employee?->availableLeaves()?->count() > 0, false),
+            'contract' => $this->contract,
+            'positionTitle' => $this->positionTitle,
+            'departmentName' => $this->departmentName,
+            'joinedOn' => $this->joinedOn,
+            'workEmail' => $this->workEmail,
+            'upcomingEvents' => $this->upcomingEvents,
+            'deliveredItems' => $this->deliveredItems,
+            'myBadges' => $this->myBadges,
+            'pendingRequests' => $this->pendingRequests,
+            'teamMembers' => $this->teamMembers,
+        ];
+
+        return view('livewire.dashboard.index', $viewData + ['failedSections' => $this->failedSections]);
+    }
+
+    protected function loadUpcomingEvents()
+    {
+        $start = now()->timezone(config('app.timezone'))->addDay()->startOfDay();
+        $end = $start->copy()->addDays(6)->endOfDay();
+
+        $employeeId = $this->employee->id ?? null;
+        $cityId = $this->employee->city_id ?? null;
+        $centerId = $this->contract->position->center_id ?? null;
+        $programId = $this->contract->position->program_id ?? null;
+
+        return News::query()
+            ->whereBetween('event_date', [$start->toDateString(), $end->toDateString()])
+            ->where(function ($q) use ($cityId, $centerId, $programId, $employeeId) {
+                $q->whereNull('newsable_type')
+                    ->orWhere(function ($q2) use ($employeeId) {
+                        $q2->where('newsable_type', Employee::class)->where('newsable_id', $employeeId);
+                    })
+                    ->orWhere(function ($q2) use ($cityId) {
+                        $q2->where('newsable_type', City::class)->where('newsable_id', $cityId);
+                    })
+                    ->orWhere(function ($q2) use ($centerId) {
+                        $q2->where('newsable_type', Center::class)->where('newsable_id', $centerId);
+                    })
+                    ->orWhere(function ($q2) use ($programId) {
+                        $q2->where('newsable_type', Program::class)->where('newsable_id', $programId);
+                    });
+            })
+            ->where(function ($q) {
+                $q->whereNull('display_until')->orWhere('display_until', '>=', now()->startOfDay());
+            })
+            ->get()
+            ->map(function ($news) {
+                $timestamp = $news->event_date;
+                $daysLeft = now()->diffInDays($timestamp, false);
+
+                $news->event_title = $news->title;
+                $news->event_description = $news->description;
+                $news->event_timestamp = $timestamp;
+                $news->image_url = $news->getFirstMediaUrl('news-image') ?: '/images/news-default.png';
+                $news->daysLeftText = trans_choice('dashboard.in-days', (int) $daysLeft);
+
+                return $news;
+            })
+            ->sortBy('event_timestamp')
+            ->values();
+    }
+
+    protected function loadDeliveredItems()
+    {
         if (! $this->employee) {
             return collect();
         }
@@ -211,7 +306,7 @@ class Index extends Component
             ->get();
     }
 
-    public function getMyBadgesProperty()
+    protected function loadMyBadges()
     {
         if (! $this->employee) {
             return collect();
@@ -220,7 +315,7 @@ class Index extends Component
         return Badge::query()->with('employee')->where('employee_id', $this->employee->id)->orderByDesc('date')->get();
     }
 
-    public function getPendingRequestsProperty()
+    protected function loadPendingRequests()
     {
         if (! $this->employee) {
             return collect();
@@ -242,7 +337,7 @@ class Index extends Component
             );
     }
 
-    public function getTeamMembersProperty()
+    protected function loadTeamMembers()
     {
         if (! $this->contract?->position) {
             return collect();
@@ -383,56 +478,26 @@ class Index extends Component
             ->loadMissing('account');
     }
 
-    public function mount(): void
+    /**
+     * Run one card's loader once per request. A failure is reported, marked on
+     * $failedSections (the view swaps that card for x-ui.load-error) and returns
+     * the fallback, so a broken card never blanks or 500s the whole dashboard.
+     */
+    protected function section(string $key, callable $loader, mixed $fallback): mixed
     {
-        $locale = app()->getLocale();
-        $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
-        $deptCol = $locale === 'ar' ? 'name_ar' : 'name_en';
-
-        $user = auth()->user();
-        if (! $user) {
-            abort(403, 'Unauthorized');
+        if (array_key_exists($key, $this->memo)) {
+            return $this->memo[$key];
         }
 
-        $this->employee = $user
-            ->profile()
-            ->with(['media', 'city'])
-            ->first();
+        $result = $this->guardedLoad($loader, $fallback);
 
-        if ($this->employee) {
-            $this->contract = Contract::with(['position.department', 'position.center', 'position.program'])
-                ->where('employee_id', $this->employee->id)
-                ->orderByDesc('start_date')
-                ->first();
-
-            $this->positionTitle = $this->contract?->position?->$titleCol ?? '—';
-            $this->departmentName = $this->contract?->position?->department?->$deptCol ?? '—';
-            $this->joinedOn = $this->contract?->start_date
-                ? Carbon::parse($this->contract->start_date)->locale(app()->getLocale())->translatedFormat('d M Y')
-                : '—';
-            $this->workEmail = $user->email ?? '—';
-        } else {
-            $this->positionTitle = $this->departmentName = $this->joinedOn = $this->workEmail = '—';
+        if ($this->loadFailed) {
+            $this->failedSections[$key] = true;
         }
-    }
 
-    public function render()
-    {
+        // guardedLoad() resets the flag on success; keep it true if any section failed.
+        $this->loadFailed = $this->failedSections !== [];
 
-        return view('livewire.dashboard.index', [
-            'employee' => $this->employee,
-            'hasLeaves' => $this->employee?->availableLeaves()?->count() > 0,
-            'contract' => $this->contract,
-            'positionTitle' => $this->positionTitle,
-            'departmentName' => $this->departmentName,
-            'joinedOn' => $this->joinedOn,
-            'workEmail' => $this->workEmail,
-            'todayEvents' => $this->todayEvents,
-            'upcomingEvents' => $this->getUpcomingEventsProperty(),
-            'deliveredItems' => $this->deliveredItems,
-            'myBadges' => $this->myBadges,
-            'pendingRequests' => $this->pendingRequests,
-            'teamMembers' => $this->teamMembers,
-        ]);
+        return $this->memo[$key] = $result;
     }
 }
