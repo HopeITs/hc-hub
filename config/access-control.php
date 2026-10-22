@@ -327,7 +327,18 @@ return [
         'program-management.default-deliverable.default-deliverables-table' => ['confirmDelete'],
         'program-management.program.detail' => ['confirmDelete', 'confirmToggleItemStatus'],
         'program-management.program.index' => ['confirmDelete', 'confirmToggleItemStatus', 'loadMore'],
-        'employee.employee-table' => ['confirmDelete', 'confirmToggleItemStatus'],
+        'employee.employee-table' => [
+            'confirmDelete', 'confirmToggleItemStatus',
+            // X2-I lifecycle hooks: Livewire refuses direct calls to updated*.
+            // They only start an anonymous lookup attempt (TaskTelemetry).
+            'updatedGlobalSearch', 'updatedSearch',
+        ],
+
+        // --- X2-I task telemetry --------------------------------------------
+        // dehydrateTracksTaskAttempt is a Livewire lifecycle hook: dehydrate*
+        // cannot be called from the browser. It only flags an anonymous
+        // attempt as having met a validation error (TracksTaskAttempt).
+        'contract.contract-create' => ['dehydrateTracksTaskAttempt'],
 
         // --- Authorized inside the method -----------------------------------
         // save() is create-or-update, so a single permission name in the
@@ -367,11 +378,13 @@ return [
             // Read-only, self-scoped: prices the typed window against a balance
             // of the signed-in employee's own active contract; writes nothing.
             'leaveImpact',
+            'dehydrateTracksTaskAttempt', // X2-I lifecycle hook, see contract.contract-create
         ],
         'employee.leave.all-leave-request-module' => [
             'edit', 'show', 'processSave', 'confirmSave', 'confirmDelete',
             'closeDecision', 'closeDetails', 'refreshCounts', 'setActiveTab',
             'updatedFormEmployeeId',
+            'dehydrateTracksTaskAttempt', // X2-I lifecycle hook, see contract.contract-create
         ],
         'employee.leave.emp-leave-balance-module' => ['confirmSave'],
         'employee.leave.all-leave-request-table' => [

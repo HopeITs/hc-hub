@@ -7,6 +7,7 @@ use App\Enums\LeaveTypeCases;
 use App\Livewire\Employee\Leave\MyLeaveRequestModule;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
+use App\Models\TaskAttempt;
 use App\Models\User;
 use App\Notifications\NewLeaveRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -344,6 +345,41 @@ class LeaveRequestSubmitFlowTest extends TestCase
             ->set('form.leave_balance_id', (string) $this->sick->id)
             ->assertSet('form.type', 'day')
             ->assertSet('form.reason', 'Keep me.');
+    }
+
+    public function test_x2i_a_sent_request_is_one_completed_attempt_flagged_by_its_earlier_error(): void
+    {
+        config(['telemetry.enabled' => true]);
+        Notification::fake();
+
+        $component = $this->openNewRequest()
+            ->set('form.leave_balance_id', (string) $this->sick->id)
+            ->set('form.start_at', '2026-11-24')
+            ->set('form.end_at', '2026-11-23')
+            ->set('form.reason', 'Reversed first, then fixed.')
+            ->call('confirmSave')
+            ->assertHasErrors(['form.end_at']);
+
+        $component->set('form.start_at', '2026-11-23')
+            ->call('processSave')
+            ->assertHasNoErrors()
+            ->call('processSave'); // double click after the form closed
+
+        $attempt = TaskAttempt::query()->sole();
+        $this->assertSame('leave_request', $attempt->task);
+        $this->assertSame('completed', $attempt->outcome);
+        $this->assertTrue($attempt->had_validation_error);
+        // This fixture user holds permissions but no role.
+        $this->assertSame('none', $attempt->role_context);
+    }
+
+    public function test_x2i_reopening_the_form_closes_the_earlier_attempt_as_cancelled(): void
+    {
+        config(['telemetry.enabled' => true]);
+
+        $this->openNewRequest()->call('create');
+
+        $this->assertSame(['cancelled', null], TaskAttempt::query()->orderBy('id')->pluck('outcome')->all());
     }
 
     private function openNewRequest()
