@@ -45,6 +45,10 @@ class SendContractExpirationWarnings extends Command
 
                 $daysUntilExpiration = (int) today()->diffInDays($group->first()->end_date);
 
+                if ($this->alreadyWarnedToday($manager, $group, $daysUntilExpiration)) {
+                    return;
+                }
+
                 $manager->notify(new ContractsExpiringAutoRenewWarning(
                     $group,
                     $daysUntilExpiration,
@@ -87,6 +91,24 @@ class SendContractExpirationWarnings extends Command
             ->orderBy('end_date')
             ->orderBy('id')
             ->get();
+    }
+
+    /**
+     * A second run on the same day must not repeat the reminder: the manager
+     * already holds one today for exactly these contracts and day count.
+     *
+     * @param  Collection<int, Contract>  $group
+     */
+    private function alreadyWarnedToday(User $manager, Collection $group, int $days): bool
+    {
+        $ids = $group->pluck('id')->sort()->values()->all();
+
+        return $manager->notifications()
+            ->where('type', ContractsExpiringAutoRenewWarning::class)
+            ->where('created_at', '>=', today())
+            ->get()
+            ->contains(fn ($notification): bool => ($notification->data['days_until_expiration'] ?? null) === $days
+                && collect($notification->data['contracts'] ?? [])->pluck('id')->sort()->values()->all() === $ids);
     }
 
     private function directManagerUser(Contract $contract): ?User

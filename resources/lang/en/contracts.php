@@ -38,6 +38,24 @@ return [
 
     'amount' => 'Amount',
 
+    // Composer: short explanations next to the controls they describe.
+    'composer-help' => [
+        'location' => 'Choose the city first. Programs list only those with active positions in that city, and positions list only those in the chosen program. The center comes from the position.',
+        'capacity' => 'A position marked “Full” already has a contract in every seat, so it cannot be chosen. Pick another position, or ask for its number of seats to be raised.',
+        'draft' => 'A draft only reserves the position: it has no dates or pay, does not take one of the position’s seats, and is not an active contract. Saving here turns it into an active contract and takes the seat.',
+        'status' => 'A saved contract is active. It stops being active when its end date passes or when a termination date is recorded. New contracts renew automatically by default, except trial contracts.',
+        'auto-renew' => 'When this is on and the contract ends without a termination, a new contract with the same terms, pay included, is created automatically. It starts the day after the end date and runs to the end of that year. Trial contracts never renew.',
+    ],
+
+    // Contract PDF export (details page and list): loading, failure and retry.
+    // export-failed is also the plain-text body the server sends with a 503.
+    'export-loading' => 'Preparing PDF…',
+    'export-failed' => 'The contract PDF could not be generated. Your contract is unchanged — try again.',
+    'export-forbidden' => 'You are not allowed to export this contract.',
+    'export-error' => 'The PDF could not be downloaded. Check your connection and try again.',
+    'export-retry' => 'Try again',
+    'export-retry-label' => 'Try the PDF export again',
+
     // Server-side checks raised by the composer.
     'errors' => [
         'city-not-allowed' => 'You may only manage contracts in your active city.',

@@ -40,6 +40,11 @@
                         <p class="mt-0.5 text-caption text-secondary-medium">
                             @lang('general.auto-renew-hint')
                         </p>
+                        {{-- What switching it on actually does
+                             (ContractAutoRenewalService). --}}
+                        <p class="mt-1 text-caption text-secondary-medium">
+                            @lang('contracts.composer-help.auto-renew')
+                        </p>
                     </div>
 
                     <x-forms.toggle-input

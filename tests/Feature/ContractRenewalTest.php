@@ -711,11 +711,54 @@ class ContractRenewalTest extends TestCase
         $fixtures = $this->makeFixtures();
         $source = $this->makeContract($fixtures);
 
+        // The page has <script> tags of its own (Livewire, the layout), so the
+        // probe is a payload that cannot occur there: it must never come back
+        // unescaped, and the default window must be used instead.
+        $payload = '<script>window.__a6Probe=1</script>';
+
         $this->actingAs($fixtures['hr'])
-            ->get(route('contracts.renew', ['contract' => $source, 'start' => 'not-a-date', 'end' => '<script>']))
+            ->get(route('contracts.renew', ['contract' => $source, 'start' => 'not-a-date', 'end' => $payload]))
             ->assertOk()
             ->assertSee('2027-01-01')
-            ->assertDontSee('<script>', false);
+            ->assertDontSee($payload, false)
+            ->assertDontSee('window.__a6Probe', false);
+    }
+
+    public function test_the_renew_page_survives_array_and_out_of_range_query_values(): void
+    {
+        $fixtures = $this->makeFixtures();
+        $source = $this->makeContract($fixtures);
+
+        $malformed = [
+            // Array-shaped values (?start[]=...) must not reach a string cast.
+            ['start' => ['2027-03-01'], 'end' => ['x' => '2027-08-31']],
+            // Impossible calendar dates.
+            ['start' => '2027-02-30', 'end' => '2027-13-01'],
+            // End before start.
+            ['start' => '2027-08-31', 'end' => '2027-03-01'],
+            // Only one side present.
+            ['start' => '2027-03-01'],
+        ];
+
+        foreach ($malformed as $query) {
+            $this->actingAs($fixtures['hr'])
+                ->get(route('contracts.renew', ['contract' => $source] + $query))
+                ->assertOk()
+                ->assertSee('2027-01-01');
+        }
+
+        // Nothing was created by merely opening the page.
+        $this->assertSame(1, Contract::query()->count());
+    }
+
+    public function test_the_create_page_ignores_stray_renewal_query_values(): void
+    {
+        $fixtures = $this->makeFixtures();
+
+        $this->actingAs($fixtures['hr'])
+            ->get(route('contracts.create', ['start' => ['x'], 'end' => '<script>window.__a6Probe=1</script>']))
+            ->assertOk()
+            ->assertDontSee('window.__a6Probe', false);
     }
 
     public function test_the_plain_create_page_still_loads_over_http(): void
