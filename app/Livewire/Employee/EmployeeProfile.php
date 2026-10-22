@@ -5,6 +5,7 @@ namespace App\Livewire\Employee;
 use App\Models\Badge;
 use App\Models\Employee;
 use App\Models\User;
+use App\Services\TaskTelemetry;
 use App\Support\DirectoryAccess;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -58,6 +59,11 @@ class EmployeeProfile extends Component
             : Auth::user()?->profile ?? abort(404);
 
         $this->resolveAccess();
+
+        // X2-I task B: opening someone's profile completes an open lookup.
+        if ($employee?->exists) {
+            app(TaskTelemetry::class)->completeLookup();
+        }
     }
 
     /** The active role may have changed since the page was opened. */

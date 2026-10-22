@@ -5,6 +5,7 @@ namespace App\Livewire\Employee\Leave;
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Concerns\GuardsModalClose;
+use App\Livewire\Concerns\TracksTaskAttempt;
 use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use App\Livewire\Forms\LeaveRequestForm;
@@ -26,6 +27,7 @@ class AllLeaveRequestModule extends Component
     use AuthorizesActivePermissions;
     use FormatsLeaveDuration;
     use GuardsModalClose;
+    use TracksTaskAttempt;
     use WithFeedback;
 
     public LeaveBalance $leaveBalance;
@@ -151,11 +153,14 @@ class AllLeaveRequestModule extends Component
         $this->modalTitle = __('general.leave-decision');
         $this->markClean('decisionModal');
         $this->decisionModal = true;
+        // X2-I task C: one attempt per opened decision.
+        $this->startTaskAttempt('leave_review');
     }
 
     public function submitDecision()
     {
         $leaveRequest = $this->form->submitDecision();
+        $this->finishTaskAttempt();
 
         app(LeaveNotificationService::class)->sendDecision(
             $leaveRequest,
@@ -188,6 +193,7 @@ class AllLeaveRequestModule extends Component
 
     public function closeDecision(): void
     {
+        $this->finishTaskAttempt('cancelled');
         $this->decisionModal = false;
         $this->decisionLeave = null;
         $this->clearLinkedLeave();

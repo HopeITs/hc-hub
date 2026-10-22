@@ -8,6 +8,7 @@ use App\Livewire\Employee\Leave\AllLeaveRequestTable;
 use App\Livewire\Employee\Leave\MyLeaveRequestModule;
 use App\Livewire\Employee\Leave\MyLeaveRequestTable;
 use App\Models\LeaveRequest;
+use App\Models\TaskAttempt;
 use App\Models\User;
 use App\Notifications\ActionLeaveRequest;
 use App\Notifications\HRSawLeaveRequest;
@@ -779,6 +780,32 @@ class LeaveRequestWorkflowTest extends TestCase
             ->assertNotFound();
 
         $this->assertSame($before, LeaveRequest::query()->count());
+    }
+
+    public function test_x2i_closing_a_decision_cancels_and_a_submitted_one_completes_its_attempt(): void
+    {
+        config(['telemetry.enabled' => true]);
+        [$decisionMaker, $leaveRequest] = $this->createPendingDecisionFixture();
+        Notification::fake();
+
+        Livewire::actingAs($decisionMaker)
+            ->test(AllLeaveRequestModule::class)
+            ->call('openDecision', $leaveRequest->id)
+            ->call('closeDecision')
+            ->call('openDecision', $leaveRequest->id)
+            ->set('form.status', LeaveRequestStatus::Rejected)
+            ->call('submitDecision')
+            ->assertHasErrors(['form.reject_reason'])
+            ->set('form.reject_reason', 'Required operational coverage is unavailable.')
+            ->call('submitDecision')
+            ->assertHasNoErrors();
+
+        $this->assertSame(
+            [['leave_review', 'cancelled', false], ['leave_review', 'completed', true]],
+            TaskAttempt::query()->orderBy('id')->get()
+                ->map(fn (TaskAttempt $a) => [$a->task, $a->outcome, $a->had_validation_error])
+                ->all(),
+        );
     }
 
     /**

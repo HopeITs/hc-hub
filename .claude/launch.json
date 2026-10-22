@@ -153,6 +153,28 @@
       },
       "port": 8396,
       "autoPort": false
+    },
+    {
+      "name": "hc-hr X2-I (synthetic SQLite, telemetry on)",
+      "runtimeExecutable": "php",
+      "runtimeArgs": [
+        "-d",
+        "extension=pdo_sqlite",
+        "-d",
+        "extension=sqlite3",
+        "-S",
+        "127.0.0.1:8397",
+        "-t",
+        "public",
+        "tests/Usability/Baseline/router.php"
+      ],
+      "env": {
+        "X2_HOME": "C:/laragon/tmp/hc-hr-x2i",
+        "X2_PORT": "8397",
+        "TASK_TELEMETRY_ENABLED": "true"
+      },
+      "port": 8397,
+      "autoPort": false
     }
   ]
 }

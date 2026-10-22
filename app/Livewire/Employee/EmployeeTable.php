@@ -7,6 +7,7 @@ use App\Livewire\Concerns\WithFeedback;
 use App\Models\City;
 use App\Models\Employee;
 use App\Models\Position;
+use App\Services\TaskTelemetry;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
@@ -26,6 +27,25 @@ class EmployeeTable extends LivewireTable
     protected string $model = Employee::class;
 
     protected $listeners = ['delete', 'toggleItemStatusConfirmed', 'exportExcel' => 'exportExcel'];
+
+    /** X2-I task B: the first search on the employee list starts a lookup attempt. */
+    public function updatedGlobalSearch(): void
+    {
+        parent::updatedGlobalSearch();
+
+        if (filled($this->globalSearch)) {
+            app(TaskTelemetry::class)->startLookup();
+        }
+    }
+
+    public function updatedSearch(mixed $value, ?string $key): void
+    {
+        parent::updatedSearch($value, $key);
+
+        if (filled($value)) {
+            app(TaskTelemetry::class)->startLookup();
+        }
+    }
 
     public function confirmDelete($id): void
     {

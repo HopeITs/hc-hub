@@ -5,6 +5,7 @@ namespace App\Livewire\Employee\Leave;
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Concerns\GuardsModalClose;
+use App\Livewire\Concerns\TracksTaskAttempt;
 use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use App\Livewire\Forms\LeaveRequestForm;
@@ -29,6 +30,7 @@ class MyLeaveRequestModule extends Component
     use AuthorizesActivePermissions;
     use FormatsLeaveDuration;
     use GuardsModalClose;
+    use TracksTaskAttempt;
     use WithFeedback;
 
     public LeaveBalance $leaveBalance;
@@ -113,6 +115,8 @@ class MyLeaveRequestModule extends Component
         $this->markClean();
         $this->modalTitle = __('leaves.modal.new-title');
         $this->showModal = true;
+        // X2-I task A: one attempt per opened new-request form.
+        $this->startTaskAttempt('leave_request');
     }
 
     public function edit(LeaveRequest $id)
@@ -275,6 +279,7 @@ class MyLeaveRequestModule extends Component
 
         $this->form->store();
         $leaveRequest = $this->form->leaveRequest;
+        $this->finishTaskAttempt();
 
         if ($this->form->wasReplayed()) {
             if (! $wasOpen) {

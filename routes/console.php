@@ -3,6 +3,7 @@
 use App\Console\Commands\DeactivateContract;
 use App\Console\Commands\DeactivateEmployee;
 use App\Console\Commands\ProcessContractAutoRenewals;
+use App\Console\Commands\PruneTaskAttempts;
 use App\Console\Commands\SendContractExpirationWarnings;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -17,6 +18,8 @@ Schedule::command(DeactivateContract::class)->dailyAt('21:30');
 Schedule::command(SendContractExpirationWarnings::class)->dailyAt('08:00');
 Schedule::command(ProcessContractAutoRenewals::class)->dailyAt('21:35');
 Schedule::command(DeactivateEmployee::class)->weekly();
+// X2-I / DEC-10: task-attempt telemetry is deleted after 90 days.
+Schedule::command(PruneTaskAttempts::class)->dailyAt('03:10');
 Schedule::call(function () {
     Log::info('الكرون جوب يعمل بنجاح!');
 })->daily();
