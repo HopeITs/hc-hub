@@ -116,7 +116,8 @@ document.addEventListener('alpine:init', () => {
             this.message = settings.html ? '' : settings.message ?? '';
             this.html = settings.html ?? null;
             this.confirmLabel = settings.confirmLabel ?? '';
-            this.cancelLabel = settings.cancelLabel ?? '';
+            // WithFeedback sends null when the caller did not rename it.
+            this.cancelLabel = settings.cancelLabel || this.defaults.cancelLabel || '';
             this.danger = settings.danger ?? true;
 
             return new Promise((resolve) => {

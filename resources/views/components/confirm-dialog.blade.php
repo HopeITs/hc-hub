@@ -20,6 +20,7 @@
              'title' => __('general.delete-item'),
              'message' => __('general.confirm-delete-item'),
              'confirmLabel' => __('general.delete'),
+             'cancelLabel' => __('general.cancel'),
              'danger' => true,
          ]);
          {{-- x-trap places focus 15ms after opening; if the panel was not painted yet, focus would stay behind. --}}
@@ -77,8 +78,10 @@
         </div>
 
         <div class="mt-6 flex flex-wrap justify-end gap-3">
+            {{-- The label comes from the store: Blade does not compile @js() inside a
+                 component tag's attribute, which once left this reading "Cancel". --}}
             <x-secondary-button x-ref="cancel" x-on:click="$store.confirm.settle(false)" class="!w-auto"
-                                x-text="$store.confirm.cancelLabel || @js(__('general.cancel'))">
+                                x-text="$store.confirm.cancelLabel">
                 {{ __('general.cancel') }}
             </x-secondary-button>
 

@@ -95,6 +95,22 @@
                     setTimeout(() => this.returnFocus(), 250);
                 }
             });
+
+            {{-- Answered "Keep editing" to the close guard's question: return to the control that
+                 asked. Cancel is disabled while its request runs, so the confirmation's trap had
+                 nothing inside this dialog to give focus back to, and Escape stopped reaching it. --}}
+            this.$watch('$store.confirm.open', open => {
+                if (open || ! this.show) return;
+
+                setTimeout(() => {
+                    if (! this.show || this.$el.contains(document.activeElement)) return;
+
+                    let last = this.lastInside;
+                    last?.isConnected && ! last.disabled && last.getClientRects().length
+                        ? last.focus()
+                        : this.recoverFocus(last);
+                }, 60);
+            });
         },
         destroy() {
             document.removeEventListener('focusin', this.remember);
