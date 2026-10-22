@@ -58,7 +58,7 @@ class Index extends Component
                 $emp->positionTitle = $contract?->position?->$titleCol ?? null;
                 $emp->departmentName = $contract?->position?->department?->$deptCol ?? null;
                 $emp->event_type = 'birthday';
-                $emp->event_title = 'Happy Birthday!';
+                $emp->event_title = __('dashboard.happy-birthday');
                 $emp->event_description = trim(($emp->positionTitle ? $emp->positionTitle.' · ' : '').($emp->departmentName ?? ''));
                 $emp->event_timestamp = $today;
 
@@ -146,10 +146,7 @@ class Index extends Component
                 $news->event_description = $news->description;
                 $news->event_timestamp = $timestamp;
                 $news->image_url = $news->getFirstMediaUrl('news-image') ?: '/images/news-default.png';
-                $news->daysLeftText = match ($daysLeft) {
-                    1 => 'Tomorrow',
-                    default => "In {$daysLeft} days",
-                };
+                $news->daysLeftText = trans_choice('dashboard.in-days', (int) $daysLeft);
 
                 return $news;
             })
@@ -191,12 +188,8 @@ class Index extends Component
                     $dob->addYear();
                 }
                 $daysLeft = now()->diffInDays($dob, false);
-                $emp->upcomingDob = $dob->format('d M');
-                $emp->daysLeftText = match ($daysLeft) {
-                    0 => 'Today 🎂',
-                    1 => 'Tomorrow',
-                    default => "In {$daysLeft} days",
-                };
+                $emp->upcomingDob = $dob->copy()->locale(app()->getLocale())->translatedFormat('d M');
+                $emp->daysLeftText = trans_choice('dashboard.in-days', (int) $daysLeft).((int) $daysLeft === 0 ? ' 🎂' : '');
 
                 return $emp;
             })
@@ -286,7 +279,7 @@ class Index extends Component
 
         if ($ceo) {
             $contract = $ceo->latestActiveContract();
-            $ceo->positionTitle = 'Chief Executive Officer';
+            $ceo->positionTitle = __('dashboard.ceo-title');
             $members->push($ceo);
         }
 
@@ -414,7 +407,9 @@ class Index extends Component
 
             $this->positionTitle = $this->contract?->position?->$titleCol ?? '—';
             $this->departmentName = $this->contract?->position?->department?->$deptCol ?? '—';
-            $this->joinedOn = $this->contract?->start_date ? date('d M Y', strtotime($this->contract->start_date)) : '—';
+            $this->joinedOn = $this->contract?->start_date
+                ? Carbon::parse($this->contract->start_date)->locale(app()->getLocale())->translatedFormat('d M Y')
+                : '—';
             $this->workEmail = $user->email ?? '—';
         } else {
             $this->positionTitle = $this->departmentName = $this->joinedOn = $this->workEmail = '—';

@@ -856,6 +856,8 @@ return [
     // screen readers but never painted, so they must stay translated like any
     // other user-facing copy.
     'a11y' => [
+        'open-sidebar' => 'Open sidebar',
+        'breadcrumb' => 'Breadcrumb',
         'skip-to-content' => 'Skip to main content',
         'main-content' => 'Main content',
         'required-field' => 'required',
@@ -905,4 +907,58 @@ return [
 
     'contracts-history' => 'Contracts History',
     'contracts-history-empty' => 'No contracts yet. Contract history will appear here after the employee is saved.',
+
+    // A4: a number with its unit, for durations shown after a figure.
+    // :count may carry markup (the figure in bold).
+    'count' => [
+        'days' => ':count Day|:count Days',
+        'hours' => ':count Hour|:count Hours',
+        'minutes' => ':count Minute|:count Minutes',
+        'months' => ':count Month|:count Months',
+        'years' => ':count Year|:count Years',
+        // Joins two counts ("1 Year 3 Months").
+        'and' => ':first :second',
+    ],
+
+    // A4: display names for stored role names (see role_label()).
+    'role-labels' => [
+        'employee' => 'Employee',
+        'manager' => 'Manager',
+        'general-manager' => 'General Manager',
+        'super-admin' => 'System Administrator',
+        'hr-city' => 'HR · :city',
+    ],
+
+    // A4: keys that were used but missing in one or both languages.
+    'na' => 'N/A',
+    'view' => 'View',
+    'update' => 'Update',
+    'general-info' => 'General Information',
+    'employee-dashboard' => 'Employee Dashboard',
+    'hours' => 'Hours',
+    'updating-statistics' => 'Updating statistics…',
+    'badges-management' => 'Badges Management',
+
+    // A4: select2's own messages (search box, empty list). :count is filled in the browser.
+    'select2' => [
+        'noResults' => 'No results found',
+        'searching' => 'Searching…',
+        'loadingMore' => 'Loading more results…',
+        'errorLoading' => 'The results could not be loaded.',
+        'inputTooShort' => 'Please enter :count more characters',
+        'inputTooLong' => 'Please delete :count characters',
+        'maximumSelected' => 'You can only select :count items',
+        'removeAllItems' => 'Remove all items',
+        'removeItem' => 'Remove item',
+        'search' => 'Search',
+    ],
+
+    // A4: sidebar group headings.
+    'nav-group' => [
+        'main' => 'Main',
+        'management' => 'Management',
+        'time-and-leave' => 'Time & Leave',
+        'files-and-tasks' => 'Files & Tasks',
+        'more' => 'More',
+    ],
 ];

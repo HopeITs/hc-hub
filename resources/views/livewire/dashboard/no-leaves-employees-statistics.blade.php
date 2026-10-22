@@ -49,7 +49,7 @@
             </div>
         @empty
             <div class="text-center p-4 text-body text-[var(--color-neutral-500)]">
-                No active contracts are set to end in the next 30 days.
+                @lang('dashboard.no-leaves-employees-empty')
             </div>
         @endforelse
     </div>

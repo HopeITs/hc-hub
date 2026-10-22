@@ -35,7 +35,7 @@ use App\Enums\LeaveRequestStatus;
             mb-6">
             @foreach($availableLeaves as $availableLeave)
                 <x-leave-card
-                    class="{{ $loop->first ? 'col-span-1 xl:col-span-2' : 'col-span-1' }}"
+                    class="{{ $availableLeave->isAnnual() ? 'col-span-1 sm:col-span-2' : 'col-span-1' }}"
                     :title="$availableLeave->leaveType->name"
                     :total="$availableLeave->deserved_formatted"
                     :remaining="$availableLeave->remaining"
@@ -53,6 +53,50 @@ use App\Enums\LeaveRequestStatus;
         </div>
 
     @endisset
+
+    {{-- Result of the last send/update (A3): the real status and who acts next.
+         Stays until hidden, unlike the toast, so it can be read at any pace. --}}
+    @php
+        $submittedLeave = $this->submittedLeave;
+    @endphp
+    @if($submittedLeave)
+        <section wire:key="submitted-leave-{{ $submittedLeave->id }}-{{ $submittedKind }}"
+                 x-data="{ open: true }" x-show="open"
+                 aria-labelledby="submitted-leave-title"
+                 data-testid="leave-submitted-result"
+                 class="mb-6 rounded-surface border border-s-4 border-neutral-200 border-s-green-600 bg-white p-4 shadow-e2">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div class="min-w-0 flex-1 space-y-2">
+                    <h2 id="submitted-leave-title" class="flex flex-wrap items-center gap-2 font-semibold text-neutral-900">
+                        <span>{{ __('leaves.submit.'.($submittedKind === 'updated' ? 'updated' : 'sent').'-title') }}</span>
+                        <span class="inline-flex rounded-full bg-amber-100 px-3 py-0.5 text-sm font-semibold text-amber-800 ring-1 ring-inset ring-amber-200">
+                            <span class="sr-only">@lang('general.status'): </span>{{ LeaveRequestStatus::getLocalizedName((int) $submittedLeave->status)['value'] }}
+                        </span>
+                    </h2>
+                    <p class="text-body text-neutral-700">
+                        <span class="font-medium">@lang('leaves.next-step.title'):</span>
+                        {{ app(\App\Services\LeaveRequestNextStep::class)->describe($submittedLeave) }}
+                    </p>
+                </div>
+                <div class="flex shrink-0 items-center gap-2">
+                    <button type="button"
+                            wire:click="openDetails({{ $submittedLeave->id }})"
+                            class="min-h-11 rounded-control px-3 text-sm font-semibold text-primary hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                        @lang('leaves.submit.view-details')
+                    </button>
+                    <button type="button"
+                            x-on:click="open = false"
+                            aria-label="{{ __('leaves.submit.dismiss') }}"
+                            class="grid size-11 place-items-center rounded-control text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+                        <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                            <path d="M6 6l12 12M18 6L6 18"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+    @endif
 
     <x-tabs-list data-tour="leaves.filters">
         <x-tabs-list-item
@@ -99,6 +143,12 @@ use App\Enums\LeaveRequestStatus;
             <div class="space-y-6">
                 <x-leave.decision-summary :leave-request="$selectedLeave" />
 
+                {{-- Who acts next, for every status (A3). --}}
+                <div class="rounded-xl border border-neutral-200 bg-neutral-50 p-4" data-testid="leave-next-step">
+                    <h3 class="text-sm text-neutral-500">@lang('leaves.next-step.title')</h3>
+                    <p class="mt-1 font-semibold text-neutral-800">{{ app(\App\Services\LeaveRequestNextStep::class)->describe($selectedLeave) }}</p>
+                </div>
+
                 <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div class="rounded-xl border border-neutral-200 p-4">
                         <dt class="text-sm text-neutral-500">{{ trans_choice('general.leave-type', 1) }}</dt>
@@ -107,20 +157,20 @@ use App\Enums\LeaveRequestStatus;
 
                     <div class="rounded-xl border border-neutral-200 p-4">
                         <dt class="text-sm text-neutral-500">@lang('general.type')</dt>
-                        <dd class="mt-1 font-semibold text-neutral-800">{{ trans_choice('general.'.$selectedLeave->type, 1) }}</dd>
+                        <dd class="mt-1 font-semibold text-neutral-800">{{ __('leaves.unit.'.($selectedLeave->type === 'hour' ? 'hour' : 'day')) }}</dd>
                     </div>
 
                     <div class="rounded-xl border border-neutral-200 p-4">
                         <dt class="text-sm text-neutral-500">@lang('general.during-period')</dt>
                         <dd class="mt-1 font-semibold text-neutral-800">
                             @if($selectedLeave->type === 'hour')
-                                {{ $selectedLeave->start_at->format('d-m-Y, H:i') }}
-                                <span aria-hidden="true">→</span>
-                                {{ $selectedLeave->end_at->format('H:i') }}
+                                <bdi dir="ltr">{{ $selectedLeave->start_at->format('d-m-Y, H:i') }}</bdi>
+                                <span aria-hidden="true">{{ __('leaves.range-separator') }}</span>
+                                <bdi dir="ltr">{{ $selectedLeave->end_at->format('H:i') }}</bdi>
                             @else
-                                {{ $selectedLeave->start_at->format('d-m-Y') }}
-                                <span aria-hidden="true">→</span>
-                                {{ $selectedLeave->end_at->format('d-m-Y') }}
+                                <bdi dir="ltr">{{ $selectedLeave->start_at->format('d-m-Y') }}</bdi>
+                                <span aria-hidden="true">{{ __('leaves.range-separator') }}</span>
+                                <bdi dir="ltr">{{ $selectedLeave->end_at->format('d-m-Y') }}</bdi>
                             @endif
                         </dd>
                     </div>
@@ -132,7 +182,7 @@ use App\Enums\LeaveRequestStatus;
 
                     <div class="rounded-xl border border-neutral-200 p-4 sm:col-span-2">
                         <dt class="text-sm text-neutral-500">@lang('general.alternative-employee')</dt>
-                        <dd class="mt-1 font-semibold text-neutral-800">{{ $selectedLeave->alternativeEmployee?->name ?? '—' }}</dd>
+                        <dd class="mt-1 font-semibold text-neutral-800"><bdi>{{ $selectedLeave->alternativeEmployee?->name ?? '—' }}</bdi></dd>
                     </div>
 
                     <div class="rounded-xl border border-neutral-200 p-4 sm:col-span-2">
@@ -159,12 +209,13 @@ use App\Enums\LeaveRequestStatus;
         wire:ignore.self
         class="flex items-center justify-center px-2">
         <div class="w-full max-h-[60vh] overflow-y-auto bg-white rounded-surface px-6 py-4 md:px-12 md:py-6">
-            <form wire:submit.prevent="save" class="space-y-4">
+            {{-- Enter in a field takes the same path as Save (there is no save()). --}}
+            <form wire:submit.prevent="confirmSave" class="space-y-4">
                 <x-forms.errors-validation-list/>
                 <div class="grid md:grid-cols-2 gap-4">
 
                     <div class="md:col-span-1" wire:key="container-leave-type-{{ $form->leaveRequest ? 'edit' : 'new' }}">
-                        <x-forms.input-label for="leave_balance_id" required>{{__('general.type')}}</x-forms.input-label>
+                        <x-forms.input-label for="leave_balance_id" required>{{ trans_choice('general.leave-type', 1) }}</x-forms.input-label>
                         <x-forms.select2-input wire:model.live="form.leave_balance_id" required id="leave_balance_id">
                             @if($allAvailableLeaves?->count() > 0)
                                 <option
@@ -201,11 +252,11 @@ use App\Enums\LeaveRequestStatus;
 
                     @if($form->leave_balance_id !== null)
                         @if($availableLeaves->find($form->leave_balance_id)?->leaveType?->id === LeaveTypeCases::Annual)
-                            <x-forms.radio-group class="mt-4" :legend="trans_choice('general.leave-type',1)" error="form.type">
+                            <x-forms.radio-group class="mt-4" :legend="__('leaves.unit.legend')" error="form.type">
                                 <x-forms.radio-input wire:model.live="form.type"
-                                                     value="day">{{trans_choice('general.day',1)}}</x-forms.radio-input>
+                                                     value="day">{{ __('leaves.unit.day') }}</x-forms.radio-input>
                                 <x-forms.radio-input wire:model.live="form.type"
-                                                     value="hour">{{trans_choice('general.hour',1)}}</x-forms.radio-input>
+                                                     value="hour">{{ __('leaves.unit.hour') }}</x-forms.radio-input>
                             </x-forms.radio-group>
                         @endif
                     @endif
@@ -213,12 +264,12 @@ use App\Enums\LeaveRequestStatus;
 
                         <div>
                             <x-forms.input-label for="start_at" required>{{__('general.start-date')}}</x-forms.input-label>
-                            <x-forms.date-input id="start_at" wire:model="form.start_at" label="Start Date"/>
+                            <x-forms.date-input id="start_at" wire:model.live="form.start_at" :label="__('general.start-date')"/>
                             <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
                         </div>
                         <div>
                             <x-forms.input-label for="end_at" required>{{__('general.end-date')}}</x-forms.input-label>
-                            <x-forms.date-input id="end_at" wire:model="form.end_at" label="End Date"/>
+                            <x-forms.date-input id="end_at" wire:model.live="form.end_at" :label="__('general.end-date')"/>
                             <x-error-span>{{ $errors->first('form.end_at') }}</x-error-span>
                         </div>
 
@@ -229,12 +280,12 @@ use App\Enums\LeaveRequestStatus;
                                 <div>
                                     <x-forms.input-label
                                         for="start_at" required>{{__('general.start-date')}}</x-forms.input-label>
-                                    <x-forms.date-input id="start_at" wire:model="form.start_at" label="Start Date"/>
+                                    <x-forms.date-input id="start_at" wire:model.live="form.start_at" :label="__('general.start-date')"/>
                                     <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
                                 </div>
                                 <div>
                                     <x-forms.input-label for="end_at" required>{{__('general.end-date')}}</x-forms.input-label>
-                                    <x-forms.date-input id="end_at" wire:model="form.end_at" label="End Date"/>
+                                    <x-forms.date-input id="end_at" wire:model.live="form.end_at" :label="__('general.end-date')"/>
                                     <x-error-span>{{ $errors->first('form.end_at') }}</x-error-span>
                                 </div>
                             </div>
@@ -242,25 +293,51 @@ use App\Enums\LeaveRequestStatus;
 
                             <div>
                                 <x-forms.input-label for="leave_date" required>{{__('general.leave-date')}}</x-forms.input-label>
-                                <x-forms.date-input id="leave_date" wire:model.live="form.leave_date" label="Leave Date"/>
+                                <x-forms.date-input id="leave_date" wire:model.live="form.leave_date" :label="__('general.leave-date')"/>
                                 <x-error-span>{{ $errors->first('form.leave_date') }}</x-error-span>
                             </div>
 
                             <div>
                                 <x-forms.input-label for="start_time" required>{{__('general.start-time')}}(24)
                                 </x-forms.input-label>
-                                <x-forms.time-picker id="start_time" wire-model="form.start_hour" format="HH:mm" min="09:00" max="21:00" />
+                                <x-forms.time-picker id="start_time" wire-model="form.start_hour" format="HH:mm" min="09:00" max="21:00" :live="true" />
                                 <x-error-span>{{ $errors->first('form.start_hour') }}</x-error-span>
                             </div>
                             <div>
                                 <x-forms.input-label for="end_time" required>{{__('general.end-time')}}(24)</x-forms.input-label>
-                                <x-forms.time-picker id="end_time" wire-model="form.end_hour" format="HH:mm" min="09:00" max="21:00" />
+                                <x-forms.time-picker id="end_time" wire-model="form.end_hour" format="HH:mm" min="09:00" max="21:00" :live="true" />
                                 <x-error-span>{{ $errors->first('form.end_hour') }}</x-error-span>
                             </div>
 
                         @endif
 
                     @endif
+
+                    {{-- D-7: December leave only as an exception. Offered only
+                         when the typed period touches December. --}}
+                    @if($form->periodTouchesDecember())
+                        <div class="col-span-full rounded-control border border-amber-200 bg-amber-50 px-3 py-2" wire:key="leave-exceptional">
+                            <label for="is_exceptional" class="flex min-h-11 cursor-pointer items-start gap-3">
+                                <input type="checkbox" id="is_exceptional" wire:model.live="form.is_exceptional"
+                                       aria-describedby="is_exceptional-hint"
+                                       class="mt-1 size-5 shrink-0 rounded-inset border-neutral-300 text-primary focus-visible:ring-2 focus-visible:ring-primary">
+                                <span>
+                                    <span class="block font-medium text-neutral-900">@lang('leave_quote.exceptional.label')</span>
+                                    <span id="is_exceptional-hint" class="block text-sm text-neutral-700">@lang('leave_quote.exceptional.hint')</span>
+                                </span>
+                            </label>
+                            <x-error-span>{{ $errors->first('form.is_exceptional') }}</x-error-span>
+                        </div>
+                    @endif
+
+                    {{-- Live impact summary (A3): priced on the server on each change. --}}
+                    @php($impact = $this->leaveImpact)
+                    @if($impact !== null)
+                        <div class="col-span-full" wire:key="leave-impact">
+                            @include('livewire.employee.leave.partials.impact-summary', ['impact' => $impact])
+                        </div>
+                    @endif
+
                     <div class="col-span-full">
                         <x-forms.input-label for="reason" required>{{__('general.reason')}}</x-forms.input-label>
                         <x-forms.input id="reason" wire:model="form.reason" required/>
@@ -269,15 +346,22 @@ use App\Enums\LeaveRequestStatus;
                 </div>
 
                 <div class="flex justify-end gap-2 pt-4">
+                    {{-- Disabled while saving is feedback only; duplicates are
+                         stopped on the server (LeaveRequestForm::store). --}}
                     <x-primary-button
                         type="button"
                         wire:click="confirmSave"
+                        wire:target="confirmSave,processSave"
                         class="!w-auto">
                         @lang('general.save')
                     </x-primary-button>
 
+                    {{-- Closes locally, like Escape and the header close: no
+                         navigation, no reload, nothing submitted. --}}
                     <x-primary-button
-                        :href="route('leaves.index')"
+                        type="button"
+                        :show-spinner="false"
+                        x-on:click="show = false"
                         class="!bg-secondary-light !w-auto">
                         @lang('general.cancel')
                     </x-primary-button>

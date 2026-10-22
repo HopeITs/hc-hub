@@ -25,6 +25,10 @@
 
             const departments = @json($departmentLabels);
             const employees   = @json($employeeCounts);
+            // Tooltip text per count, pluralised on the server so Arabic gets
+            // its full set of plural forms.
+            const countLabels = @json(collect($employeeCounts)->unique()->mapWithKeys(fn ($count) => [$count => trans_choice('dashboard.employees-count', $count)]));
+            const isRtl = document.documentElement.dir === 'rtl';
 
             const primaryColor = "#c2151c";
             const gridColor    = "#dcddde";
@@ -73,14 +77,17 @@
                             padding: 10,
                             cornerRadius: 8,
                             displayColors: false,
+                            rtl: isRtl,
+                            textDirection: isRtl ? 'rtl' : 'ltr',
                             callbacks: {
-                                label: (ctx) => `${ctx.parsed.y} Employees`
+                                label: (ctx) => countLabels[ctx.parsed.y] ?? String(ctx.parsed.y)
                             }
                         }
                     },
 
                     scales: {
                         x: {
+                            reverse: isRtl,
                             grid: { display: false },
                             ticks: {
                                 color: "#6b7280",
@@ -90,6 +97,7 @@
                         },
 
                         y: {
+                            position: isRtl ? 'right' : 'left',
                             beginAtZero: true,
 
                             grid: {

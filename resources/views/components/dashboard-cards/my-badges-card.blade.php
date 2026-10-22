@@ -44,7 +44,7 @@
                 </p>
 
                 <span class="text-[11px] text-[#888]">
-                    {{ optional($badge->date)->format('d/m/Y') }}
+                    <bdi>{{ optional($badge->date)->format('d/m/Y') }}</bdi>
                 </span>
             </div>
         @empty

@@ -52,7 +52,8 @@
         const neutral   = styles.getPropertyValue("--color-neutral-300").trim();
 
         async function fetchData(mode = "monthly") {
-            const res = await fetch(`/employee-statistics/${mode}`);
+            // Locale-prefixed, so the endpoint answers in the page's language.
+            const res = await fetch(`${@js(LaravelLocalization::localizeUrl('/employee-statistics'))}/${mode}`);
             if (!res.ok) return { labels: [], new: [], ended: [], terminated: [] };
             return res.json();
         }
@@ -65,7 +66,7 @@
                 labels: data.labels,
                 datasets: [
                     {
-                        label: "New Employees",
+                        label: @js(__('dashboard.employee-chart.new')),
                         data: data.new,
                         borderColor: primary,
                         fill: false,
@@ -76,7 +77,7 @@
                         pointHoverRadius: 4.2
                     },
                     {
-                        label: "Ended",
+                        label: @js(__('dashboard.employee-chart.ended')),
                         data: data.ended,
                         borderColor: secondary,
                         fill: false,
@@ -87,7 +88,7 @@
                         pointHoverRadius: 4.2
                     },
                     {
-                        label: "Terminated",
+                        label: @js(__('dashboard.employee-chart.terminated')),
                         data: data.terminated,
                         borderColor: neutral,
                         fill: false,

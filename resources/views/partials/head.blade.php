@@ -15,6 +15,9 @@
 {{-- Internal HR system: nothing here belongs in a search index. A layout may pass $robots to override. --}}
 <meta name="robots" content="{{ $robots ?? 'noindex, nofollow' }}" />
 
+{{-- select2's built-in messages in the page language; read by resources/js/app.js. --}}
+<meta name="hc-select2-i18n" content="{{ json_encode(__('general.select2'), JSON_UNESCAPED_UNICODE) }}" />
+
 <link rel="canonical" href="{{ url()->current() }}" />
 
 {{-- Link previews for staff sharing a URL in chat. Inert for search while noindex is set. --}}

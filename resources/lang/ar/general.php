@@ -132,7 +132,7 @@ return [
     'allowed-gender' => 'الجنس المسموح به',
     'marital-status' => 'الحالة الاجتماعية',
     'any' => 'أي',
-    'and' => ':attr1 و :attr2',
+    'and' => ':attr1 و:attr2',
     'and2' => 'و',
     'attachment' => 'المرفق',
     'upload-failed-for' => 'فشل رفع الملفات التالية:',
@@ -635,7 +635,7 @@ return [
     'end-at' => 'تاريخ الانتهاء',
     'start-time' => 'وقت البدء',
     'end-time' => 'وقت الانتهاء',
-    'seen-by-hr' => 'مراجَع من الـ HR',
+    'seen-by-hr' => 'راجعته الموارد البشرية',
     'reviewed' => 'تمت المراجعة',
     'mark-reviewed' => 'تحديد كمراجَع',
     'review-leave-request' => 'مراجعة طلب الإجازة',
@@ -848,7 +848,7 @@ return [
         'create' => 'إنشاء العقد',
         'continue' => 'متابعة',
 
-        'no-results' => 'لا نتائج مطابقة',
+        'no-results' => 'لا توجد نتائج',
         'clear' => 'مسح',
     ],
 
@@ -856,6 +856,8 @@ return [
     // screen readers but never painted, so they must stay translated like any
     // other user-facing copy.
     'a11y' => [
+        'open-sidebar' => 'فتح القائمة الجانبية',
+        'breadcrumb' => 'مسار التنقل',
         'skip-to-content' => 'تخطَّ إلى المحتوى الرئيسي',
         'main-content' => 'المحتوى الرئيسي',
         'required-field' => 'مطلوب',
@@ -905,4 +907,60 @@ return [
 
     'contracts-history' => 'سجل العقود',
     'contracts-history-empty' => 'لا توجد عقود بعد. سيظهر سجل العقود هنا بعد حفظ الموظف.',
+
+    // A4: العدد مع وحدته بصيغ الجمع العربية الست
+    // (صفر | واحد | اثنان | 3–10 | 11–99 | 100 فأكثر). قد يحمل :count تنسيقًا (الرقم بخط عريض).
+    'count' => [
+        'days' => ':count يوم|يوم واحد|يومان|:count أيام|:count يومًا|:count يوم',
+        'hours' => ':count ساعة|ساعة واحدة|ساعتان|:count ساعات|:count ساعة|:count ساعة',
+        'minutes' => ':count دقيقة|دقيقة واحدة|دقيقتان|:count دقائق|:count دقيقة|:count دقيقة',
+        'months' => ':count شهر|شهر واحد|شهران|:count أشهر|:count شهرًا|:count شهر',
+        'years' => ':count سنة|سنة واحدة|سنتان|:count سنوات|:count سنة|:count سنة',
+        // يربط عددين بواو العطف («سنة واحدة و3 أشهر»).
+        'and' => ':first و:second',
+    ],
+
+    // A4: أسماء العرض لأسماء الأدوار المخزنة (انظر role_label()).
+    'role-labels' => [
+        'employee' => 'موظف',
+        'manager' => 'مدير',
+        'general-manager' => 'المدير العام',
+        'super-admin' => 'مسؤول النظام',
+        'hr-city' => 'الموارد البشرية · :city',
+    ],
+
+    // A4: مفاتيح كانت مستخدمة وناقصة في إحدى اللغتين أو كلتيهما.
+    'na' => 'غير متوفر',
+    'view' => 'عرض',
+    'update' => 'تعديل',
+    'name_en' => 'الاسم بالإنجليزية',
+    'name_ar' => 'الاسم بالعربية',
+    'items_from_checklist' => 'جميع العناصر',
+    'back_to_list' => 'إلغاء',
+    'delivered' => 'تم التسليم',
+    'received' => 'تم الاستلام',
+    'no_notifications' => 'لا توجد إشعارات',
+
+    // A4: رسائل select2 (مربع البحث والقائمة الفارغة). يُملأ :count في المتصفح.
+    'select2' => [
+        'noResults' => 'لا توجد نتائج',
+        'searching' => 'جارٍ البحث…',
+        'loadingMore' => 'جارٍ تحميل المزيد من النتائج…',
+        'errorLoading' => 'تعذّر تحميل النتائج.',
+        'inputTooShort' => 'يرجى إدخال أحرف إضافية (:count على الأقل)',
+        'inputTooLong' => 'يرجى حذف أحرف (:count)',
+        'maximumSelected' => 'الحد الأقصى للاختيار: :count',
+        'removeAllItems' => 'إزالة كل العناصر',
+        'removeItem' => 'إزالة العنصر',
+        'search' => 'بحث',
+    ],
+
+    // A4: عناوين مجموعات القائمة الجانبية.
+    'nav-group' => [
+        'main' => 'الرئيسية',
+        'management' => 'الإدارة',
+        'time-and-leave' => 'الإجازات',
+        'files-and-tasks' => 'الملفات والمهام',
+        'more' => 'أخرى',
+    ],
 ];

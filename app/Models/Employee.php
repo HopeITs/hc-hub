@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\LeaveRequestStatus;
 use App\Services\DigitalIdManager;
+use App\Services\LeaveRequestPricing;
 use App\Traits\HasTranslation;
 use App\Traits\RedactsSensitiveActivityLog;
 use Carbon\Carbon;
@@ -293,39 +294,24 @@ class Employee extends Model implements HasMedia
 
     public function availableLeaves()
     {
-
         $leaves = $this->latestActiveContract()?->leaveBalances()
-//            ->whereHas('leaveType', fn ($q) => $q->where('base_days', '>', 10))
-            ->with(['leaveRequests' => fn ($q) => $q->pending()
-                ->select('id', 'leave_balance_id', 'type', 'start_at', 'end_at'),
-            ])
+            ->with(['leaveType', 'contract.position.center'])
             ->get();
 
-        // Now compute pending durations using the real accessor logic
-
+        // Pending = hours reserved by pending requests, from the same pricing
+        // service as the request preview (A3-D §2.3: one unit, hours). Split
+        // into days + hours with the contract's own day length for the card.
         if ($leaves?->count() > 0) {
+            $pricing = app(LeaveRequestPricing::class);
+
             foreach ($leaves as $leave) {
+                $pending = $pricing->pendingHoursFor($leave);
+                $perDay = $leave->contract ? $pricing->hoursPerDayFor($leave->contract) : null;
+                [$days, $rest] = LeaveRequestPricing::splitDays($pending, $perDay);
 
-                $pendingDays = 0;
-                $pendingHours = 0;
-
-                foreach ($leave->leaveRequests as $req) {
-
-                    if ($req->type === 'day') {
-                        $weekends = array_map('intval', explode(',', $req->leaveBalance->contract->position->center->weekends ?? '0,6'));
-
-                        Carbon::setWeekendDays($weekends);
-
-                        $pendingDays += $req->start_at->diffInWeekDays($req->end_at) + 1;
-                    }
-
-                    if ($req->type === 'hour') {
-                        $pendingHours += $req->start_at->floatDiffInRealHours($req->end_at);
-                    }
-                }
-
-                $leave->pending_days = $pendingDays;
-                $leave->pending_hours = $pendingHours;
+                $leave->pending_total_hours = $pending;
+                $leave->pending_days = $days;
+                $leave->pending_hours = $rest;
             }
         }
 
@@ -476,23 +462,18 @@ class Employee extends Model implements HasMedia
         $end = $this->serviceEndDate();
 
         if (! $start || $end->lte($start)) {
-            return 0 .' '.trans_choice('general.year', 0);
+            return trans_choice('general.count.years', 0);
         }
 
         $years = $this->yearsOfServiceOn();
         $months = (int) floor($start->copy()->addYears($years)->diffInMonths($end));
 
-        $result = '';
+        $parts = array_filter([
+            $years > 0 ? trans_choice('general.count.years', $years) : null,
+            $months > 0 ? trans_choice('general.count.months', $months) : null,
+        ]);
 
-        if ($years > 0) {
-            $result = $years.' '.trans_choice('general.year', $years).' ';
-        }
-
-        if ($months > 0) {
-            $result .= $months.' '.trans_choice('general.month', $months);
-        }
-
-        return trim($result) ?: 0 .' '.trans_choice('general.year', 0);
+        return join_counts($parts) ?: trans_choice('general.count.years', 0);
     }
 
     public function getYearsOfServiceAttribute(): int

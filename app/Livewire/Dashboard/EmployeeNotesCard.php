@@ -46,7 +46,7 @@ class EmployeeNotesCard extends Component
 
     public function addText(): void
     {
-        $this->createNote($this->newText === '' ? 'New Note' : $this->newText, 'note');
+        $this->createNote($this->newText === '' ? __('dashboard.new-note') : $this->newText, 'note');
 
         $this->newText = '';
     }

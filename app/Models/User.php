@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,13 +18,24 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable
+class User extends Authenticatable implements HasLocalePreference
 {
     use HasFactory, HasRoles, LogsActivity, Notifiable;
 
     protected $fillable = ['email', 'password', 'employee_id'];
 
     protected $hidden = ['password', 'remember_token'];
+
+    /**
+     * The language mail to this user is rendered in: the interface language
+     * they last worked in (RememberUserLocale). Null (not seen since the
+     * column was added) falls back to the current locale, which outside a
+     * request is the app default.
+     */
+    public function preferredLocale(): ?string
+    {
+        return $this->locale ?: null;
+    }
 
     public function profile(): BelongsTo
     {

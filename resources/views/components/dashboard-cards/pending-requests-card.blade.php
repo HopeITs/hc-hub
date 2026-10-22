@@ -21,7 +21,7 @@
                 </p>
 
                 <span class="text-[11px] text-[#888]">
-                    {{ $req['request_date'] }}
+                    <bdi>{{ $req['request_date'] }}</bdi>
                 </span>
             </div>
         @empty

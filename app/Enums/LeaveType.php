@@ -20,12 +20,12 @@ class LeaveType
     {
 
         $val = match ($status) {
-            self::GENDER_MALE => ['text' => ['en' => 'Male', 'ar' => 'ذكر'], 'color' => 'blue'],
-            self::GENDER_FEMALE => ['text' => ['en' => 'Female', 'ar' => 'انثى'], 'color' => 'yellow'],
-            default => ['text' => ['en' => 'All', 'ar' => 'الكل '], 'color' => 'green'],
+            self::GENDER_MALE => ['key' => 'leaves.gender.male', 'color' => 'blue'],
+            self::GENDER_FEMALE => ['key' => 'leaves.gender.female', 'color' => 'yellow'],
+            default => ['key' => 'leaves.gender.any', 'color' => 'green'],
         };
         $result = [
-            'value' => $val['text'][app()->getLocale()],
+            'value' => __($val['key']),
             'color' => $val['color'],
         ];
 
@@ -37,12 +37,12 @@ class LeaveType
     {
 
         $val = match ($status) {
-            self::MARITAL_STATUS_SINGLE => ['text' => ['en' => 'Single', 'ar' => 'أعزب'], 'color' => 'yellow'],
-            self::MARITAL_STATUS_MARRIED => ['text' => ['en' => 'Married', 'ar' => 'متزوج'], 'color' => 'gray'],
-            default => ['text' => ['en' => 'All', 'ar' => 'الكل '], 'color' => 'green'],
+            self::MARITAL_STATUS_SINGLE => ['key' => 'leaves.marital.single', 'color' => 'yellow'],
+            self::MARITAL_STATUS_MARRIED => ['key' => 'leaves.marital.married', 'color' => 'gray'],
+            default => ['key' => 'leaves.marital.any', 'color' => 'green'],
         };
         $result = [
-            'value' => $val['text'][app()->getLocale()],
+            'value' => __($val['key']),
             'color' => $val['color'],
         ];
 

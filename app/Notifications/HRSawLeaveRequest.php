@@ -72,7 +72,7 @@ class HRSawLeaveRequest extends Notification
             return [
                 'title' => [
                     'en' => 'HR Reviewed Leave Request',
-                    'ar' => 'مراجعة طلب الإجازة من قبل الموارد البشرية',
+                    'ar' => 'راجع قسم الموارد البشرية طلب إجازة',
                 ],
                 'body' => [
                     'en' => "HR reviewed {$leaveType->name_en} leave request for employee: {$employeeNameEn}",

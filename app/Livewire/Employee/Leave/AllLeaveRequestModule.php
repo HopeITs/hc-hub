@@ -5,12 +5,14 @@ namespace App\Livewire\Employee\Leave;
 use App\Enums\LeaveRequestStatus;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Concerns\WithFeedback;
+use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use App\Services\LeaveAlternativeEmployees;
 use App\Services\LeaveNotificationService;
+use App\Support\Leave\LeaveQuote;
 use Blade;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -21,6 +23,7 @@ use Livewire\Component;
 class AllLeaveRequestModule extends Component
 {
     use AuthorizesActivePermissions;
+    use FormatsLeaveDuration;
     use WithFeedback;
 
     public LeaveBalance $leaveBalance;
@@ -31,7 +34,7 @@ class AllLeaveRequestModule extends Component
 
     public $formModal = false;
 
-    public $modalTitle = 'Modal title';
+    public $modalTitle = '';
 
     public string $statusFilter = 'all';
 
@@ -89,7 +92,7 @@ class AllLeaveRequestModule extends Component
         $this->linkedLeaveId = $leaveRequest->id;
         $this->linkedLeaveMode = 'details';
 
-        $this->modalTitle = 'Leave Details';
+        $this->modalTitle = __('general.leave-details');
         $this->showModal = true;
     }
 
@@ -215,7 +218,15 @@ class AllLeaveRequestModule extends Component
 
     public function confirmSave()
     {
-        $html = $this->confirmationMessage();
+        // Validate first: the confirmation needs a chosen leave balance, and
+        // without this an empty form only reported "leave type is invalid"
+        // instead of each missing field.
+        $this->form->validate();
+        // Pricing errors (balance, December, working hours ...) on their own
+        // fields, from the same service store()/update() use under a lock.
+        $quote = $this->form->checkedQuote();
+
+        $html = $this->confirmationMessage($quote);
 
         $this->confirm('processSave', title: __('general.confirmation'), html: $html, confirmLabel: __('general.save'), danger: false);
 
@@ -280,24 +291,33 @@ class AllLeaveRequestModule extends Component
             ->get();
     }
 
-    protected function confirmationMessage(): string
+    /**
+     * The duration comes from the pricing service. No balance figure is shown
+     * here: this page is also used by managers, who see the leave type but
+     * not balances (A3-D §9).
+     */
+    protected function confirmationMessage(?LeaveQuote $quote): string
     {
         $leaveTypeName = $this->form->selectedBalance()
             ->leaveType
-            ->name ?? 'N/A';
+            ->name ?? '—';
 
         $type = $this->form->type;
 
         $start = $this->resolveStart();
         $end = $this->resolveEnd();
-        $duration = $this->resolveDuration();
+        // No quote: a content-only edit of an accepted request, which keeps
+        // its stored amount.
+        $duration = $quote
+            ? $this->formatLeaveSplit($quote->requestedHours, $quote->hoursPerDay)
+            : ($this->form->leaveRequest?->duration ?? '—');
         $date = $this->form->leave_date;
         $reason = $this->form->reason;
 
         return Blade::render(
-            '<x-alerts.leave-request-confirmation
+            '<x-leave.request-confirmation
                 :type="$type"
-                :leave_type="$leaveTypeName"
+                :leave-type="$leaveTypeName"
                 :start="$start"
                 :end="$end"
                 :duration="$duration"
@@ -338,17 +358,6 @@ class AllLeaveRequestModule extends Component
         return $this->form->type === 'day'
             ? Carbon::parse($this->form->end_at)->format('d-m-Y')
             : $this->form->end_hour;
-    }
-
-    protected function resolveDuration()
-    {
-        if ($this->form->type === 'day') {
-            return Carbon::parse($this->form->start_at)
-                ->diffInDays(Carbon::parse($this->form->end_at)) + 1;
-        }
-
-        return Carbon::parse($this->form->start_hour)
-            ->floatDiffInHours(Carbon::parse($this->form->end_hour));
     }
 
     private function clearLinkedLeave(): void

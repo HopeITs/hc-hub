@@ -6,6 +6,8 @@
     'disabled' => false,
     'min' => null,
     'max' => null,
+    // Send each change to the server (debounced), e.g. for a live preview.
+    'live' => false,
 ])
 
 @php($pickerId = $id . '_picker')
@@ -13,7 +15,7 @@
 <input
     id="{{ $id }}"
     type="hidden"
-    @if($wireModel) wire:model.defer="{{ $wireModel }}" @endif
+    @if($wireModel && $live) wire:model.live.debounce.400ms="{{ $wireModel }}" @elseif($wireModel) wire:model.defer="{{ $wireModel }}" @endif
     @if($alpineModel) x-model="{{ $alpineModel }}" @endif
 />
 

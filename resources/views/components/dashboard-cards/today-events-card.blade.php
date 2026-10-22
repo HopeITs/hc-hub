@@ -54,8 +54,9 @@
                                 {{-- Watermark --}}
                                 <img
                                     src="{{ $event['type'] === 'birthday' ? '/assets/icons/birthday-cake.svg' : '/assets/icons/event.svg' }}"
-                                    class="pointer-events-none absolute {{ $event['type'] === 'birthday' ? 'right-0 bottom-0' : 'right-1 -bottom-3' }} w-20 h-20 opacity-10 select-none"
-                                    alt="{{ ucfirst($event['type']) }} watermark">
+                                    class="pointer-events-none absolute {{ $event['type'] === 'birthday' ? 'end-0 bottom-0' : 'end-1 -bottom-3' }} w-20 h-20 opacity-10 select-none"
+                                    alt=""
+                                    aria-hidden="true">
                             </div>
                         </div>
                     @endforeach

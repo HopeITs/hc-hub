@@ -53,8 +53,8 @@ class ActionLeaveRequest extends Notification
                         ? "Your leave request has been approved: {$leaveType->name_en}"
                         : "Your leave request has been rejected: {$leaveType->name_en} — Reason: {$rejectReason}",
                     'ar' => $isAccepted
-                        ? "تم قبول إجازتك من نوع: {$leaveType->name_ar}"
-                        : "تم رفض طلب الإجازة من نوع: {$leaveType->name_ar} — سبب الرفض: {$rejectReason}",
+                        ? "تم قبول طلب إجازتك من نوع: {$leaveType->name_ar}"
+                        : "تم رفض طلب إجازتك من نوع: {$leaveType->name_ar} — سبب الرفض: {$rejectReason}",
                 ],
                 'url' => route('leaves.index', ['leave' => $leaveRequest->id]),
             ];
