@@ -295,7 +295,9 @@ class ContractsTable extends LivewireTable
                 ->asHtml(),
 
             Column::make(__('general.yearly-leave-days'), 'leaveBalances')
-                ->displayUsing(fn ($m) => $m[0]->deserved_formatted ?? 0)
+                // The balance reads its day length through the contract, already
+                // loaded here with position.center: no query per row.
+                ->displayUsing(fn ($m, $contract) => $m?->first()?->setRelation('contract', $contract)->deserved_formatted ?? 0)
                 ->sortable()->asHtml(),
 
             SelectColumn::make(__('general.salary-per'), 'salary_per')

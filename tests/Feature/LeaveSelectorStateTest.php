@@ -9,6 +9,7 @@ use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -89,8 +90,8 @@ class LeaveSelectorStateTest extends TestCase
             ->call('create')
             ->set('form.leave_balance_id', (string) $this->annual->id)
             ->set('form.type', 'day')
-            ->set('form.start_at', now()->addMonth()->toDateString())
-            ->set('form.end_at', now()->addMonth()->addDay()->toDateString())
+            ->set('form.start_at', self::workingMonday()->toDateString())
+            ->set('form.end_at', self::workingMonday()->addDay()->toDateString())
             ->set('form.reason', 'Cleared selector must not save.')
             ->set('form.leave_balance_id', null)
             ->call('processSave')
@@ -272,5 +273,21 @@ class LeaveSelectorStateTest extends TestCase
         $this->annual = LeaveBalance::query()->findOrFail($annualId);
         $this->sick = LeaveBalance::query()->findOrFail($sickId);
         $this->pending = LeaveRequest::query()->findOrFail($pendingId);
+    }
+
+    /**
+     * A Monday at least a month ahead whose Monday and Tuesday are working
+     * days outside December, so the weekend (0,6) and the December rule
+     * (A3-D D-7) never depend on the day the suite runs.
+     */
+    private static function workingMonday(): Carbon
+    {
+        $monday = now()->addMonth()->next(Carbon::MONDAY)->startOfDay();
+
+        while ($monday->month === 12 || $monday->copy()->addDay()->month === 12) {
+            $monday->addWeek();
+        }
+
+        return $monday;
     }
 }

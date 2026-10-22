@@ -12,6 +12,7 @@ use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use App\Services\LeaveAlternativeEmployees;
 use App\Services\LeaveNotificationService;
+use App\Support\Leave\LeaveQuote;
 use Blade;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -221,8 +222,11 @@ class AllLeaveRequestModule extends Component
         // without this an empty form only reported "leave type is invalid"
         // instead of each missing field.
         $this->form->validate();
+        // Pricing errors (balance, December, working hours ...) on their own
+        // fields, from the same service store()/update() use under a lock.
+        $quote = $this->form->checkedQuote();
 
-        $html = $this->confirmationMessage();
+        $html = $this->confirmationMessage($quote);
 
         $this->confirm('processSave', title: __('general.confirmation'), html: $html, confirmLabel: __('general.save'), danger: false);
 
@@ -287,7 +291,12 @@ class AllLeaveRequestModule extends Component
             ->get();
     }
 
-    protected function confirmationMessage(): string
+    /**
+     * The duration comes from the pricing service. No balance figure is shown
+     * here: this page is also used by managers, who see the leave type but
+     * not balances (A3-D §9).
+     */
+    protected function confirmationMessage(?LeaveQuote $quote): string
     {
         $leaveTypeName = $this->form->selectedBalance()
             ->leaveType
@@ -297,8 +306,11 @@ class AllLeaveRequestModule extends Component
 
         $start = $this->resolveStart();
         $end = $this->resolveEnd();
-        $durationVal = $this->resolveDuration();
-        $duration = $type === 'day' ? $this->formatLeaveDays($durationVal) : $this->formatLeaveHours($durationVal);
+        // No quote: a content-only edit of an accepted request, which keeps
+        // its stored amount.
+        $duration = $quote
+            ? $this->formatLeaveSplit($quote->requestedHours, $quote->hoursPerDay)
+            : ($this->form->leaveRequest?->duration ?? '—');
         $date = $this->form->leave_date;
         $reason = $this->form->reason;
 
@@ -346,17 +358,6 @@ class AllLeaveRequestModule extends Component
         return $this->form->type === 'day'
             ? Carbon::parse($this->form->end_at)->format('d-m-Y')
             : $this->form->end_hour;
-    }
-
-    protected function resolveDuration()
-    {
-        if ($this->form->type === 'day') {
-            return Carbon::parse($this->form->start_at)
-                ->diffInDays(Carbon::parse($this->form->end_at)) + 1;
-        }
-
-        return Carbon::parse($this->form->start_hour)
-            ->floatDiffInHours(Carbon::parse($this->form->end_hour));
     }
 
     private function clearLinkedLeave(): void

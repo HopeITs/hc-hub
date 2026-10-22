@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Employee\Leave\Concerns;
 
+use App\Services\LeaveRequestPricing;
+
 /**
  * Locale-aware wording for leave durations ("3 days", "يومان", "ساعة واحدة و30 دقيقة").
  *
@@ -54,6 +56,28 @@ trait FormatsLeaveDuration
         }
 
         return __('leaves.duration.and', ['first' => $hoursText, 'second' => $minutesText]);
+    }
+
+    /**
+     * An amount of hours as whole days plus the remaining hours and minutes
+     * ("2 days and 3 hours"), with $hoursPerDay as the day length. Without a
+     * day length (irregular or unknown schedule) it stays in hours.
+     */
+    protected function formatLeaveSplit(int|float|string|null $hours, ?float $hoursPerDay): string
+    {
+        [$days, $rest] = LeaveRequestPricing::splitDays((float) $hours, $hoursPerDay);
+
+        if ($days === 0) {
+            return $this->formatLeaveHours($rest);
+        }
+
+        $daysText = $this->formatLeaveDays($days);
+
+        if ($rest === 0.0) {
+            return $daysText;
+        }
+
+        return __('leaves.duration.and', ['first' => $daysText, 'second' => $this->formatLeaveHours($rest)]);
     }
 
     protected function formatLeaveAmount(int|float|string|null $amount, string $unit): string

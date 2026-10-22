@@ -45,12 +45,12 @@
 
                 <div>
                     <x-forms.input-label for="start_at" required>{{__('general.start-date')}}</x-forms.input-label>
-                    <x-forms.date-input id="start_at" wire:model.live="form.start_at" label="Start Date"/>
+                    <x-forms.date-input id="start_at" wire:model.live="form.start_at" :label="__('general.start-date')"/>
                     <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
                 </div>
                 <div>
                     <x-forms.input-label for="end_at" required>{{__('general.end-date')}}</x-forms.input-label>
-                    <x-forms.date-input id="end_at" wire:model.live="form.end_at" label="End Date"/>
+                    <x-forms.date-input id="end_at" wire:model.live="form.end_at" :label="__('general.end-date')"/>
                     <x-error-span>{{ $errors->first('form.end_at') }}</x-error-span>
                 </div>
 
@@ -60,12 +60,12 @@
                     <div class="col-span-full grid md:grid-cols-2 gap-4">
                         <div>
                             <x-forms.input-label for="start_at" required>{{__('general.start-date')}}</x-forms.input-label>
-                            <x-forms.date-input id="start_at" wire:model.live="form.start_at" label="Start Date"/>
+                            <x-forms.date-input id="start_at" wire:model.live="form.start_at" :label="__('general.start-date')"/>
                             <x-error-span>{{ $errors->first('form.start_at') }}</x-error-span>
                         </div>
                         <div>
                             <x-forms.input-label for="end_at" required>{{__('general.end-date')}}</x-forms.input-label>
-                            <x-forms.date-input id="end_at" wire:model.live="form.end_at" label="End Date"/>
+                            <x-forms.date-input id="end_at" wire:model.live="form.end_at" :label="__('general.end-date')"/>
                             <x-error-span>{{ $errors->first('form.end_at') }}</x-error-span>
                         </div>
                     </div>
@@ -73,7 +73,7 @@
 
                     <div>
                         <x-forms.input-label for="leave_date" required>{{__('general.leave-date')}}</x-forms.input-label>
-                        <x-forms.date-input wire:model.live="form.leave_date" label="Leave Date"/>
+                        <x-forms.date-input id="leave_date" wire:model.live="form.leave_date" :label="__('general.leave-date')"/>
                         <x-error-span>{{ $errors->first('form.leave_date') }}</x-error-span>
                     </div>
 
@@ -100,7 +100,8 @@
 
         <div class="flex justify-end gap-2">
             <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
-            <x-primary-button :href="route('leaves.index')"
+            {{-- Closes locally, like Escape and the header close. --}}
+            <x-primary-button type="button" x-on:click="show = false"
                               class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
         </div>
     </form>

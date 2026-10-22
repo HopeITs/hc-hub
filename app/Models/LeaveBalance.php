@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\LeaveTypeCases;
+use App\Services\LeaveRequestPricing;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,9 @@ class LeaveBalance extends Model
     use HasFactory, LogsActivity;
 
     protected $fillable = ['contract_id', 'type_id', 'deserved', 'used'];
+
+    /** @var array{0: float|null}|null */
+    private ?array $workHoursPerDay = null;
 
     public function contract(): BelongsTo
     {
@@ -192,15 +196,22 @@ class LeaveBalance extends Model
     }
 
     /**
-     * Daily work hours of the contract, guarded against zero so the
-     * day/hour breakdown never divides by zero (e.g. imported contracts
-     * with weekly_hours = 0). Falls back to null when unknown.
+     * Length of one working day of the contract, from the same pricing
+     * service as the leave request preview (weekly hours ÷ working days of
+     * the center's weekend), so the balance card and the preview word the
+     * same hours as the same days. Null when unknown (no hours, irregular
+     * schedule); the figures then stay in hours. Memoized: a card reads it
+     * three times.
      */
     private function workHoursPerDay(): ?float
     {
-        $perDay = ($this->contract->weekly_hours ?? 0) / 5;
+        if (! $this->contract) {
+            return null;
+        }
 
-        return $perDay > 0 ? $perDay : null;
+        $this->workHoursPerDay ??= [app(LeaveRequestPricing::class)->hoursPerDayFor($this->contract)];
+
+        return $this->workHoursPerDay[0];
     }
 
     /**
@@ -209,14 +220,6 @@ class LeaveBalance extends Model
      */
     private function splitIntoDays(float $hours): array
     {
-        $perDay = $this->workHoursPerDay();
-
-        if ($perDay === null) {
-            return [0, $hours];
-        }
-
-        $days = floor($hours / $perDay);
-
-        return [$days, $hours - ($days * $perDay)];
+        return LeaveRequestPricing::splitDays($hours, $this->workHoursPerDay());
     }
 }

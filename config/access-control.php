@@ -361,7 +361,12 @@ return [
         // check on the specific record, which is the stronger control.
         'employee.leave.my-leave-request-module' => [
             'create', 'edit', 'processSave', 'confirmSave', 'openDetails',
-            'closeDetails', 'selectedLeave', 'refreshCounts', 'setActiveTab',
+            'closeDetails', 'selectedLeave', 'submittedLeave', 'refreshCounts', 'setActiveTab',
+            // Only resets form.type to "day" when an own non-annual balance is picked.
+            'updatedFormLeaveBalanceId',
+            // Read-only, self-scoped: prices the typed window against a balance
+            // of the signed-in employee's own active contract; writes nothing.
+            'leaveImpact',
         ],
         'employee.leave.all-leave-request-module' => [
             'edit', 'show', 'processSave', 'confirmSave', 'confirmDelete',

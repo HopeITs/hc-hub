@@ -14,6 +14,7 @@ use App\Notifications\HRSawLeaveRequest;
 use App\Notifications\NewLeaveRequest;
 use App\Services\LeaveNotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
@@ -105,8 +106,8 @@ class LeaveRequestWorkflowTest extends TestCase
             ->test(MyLeaveRequestModule::class)
             ->set('form.leave_balance_id', $existingLeave->leave_balance_id)
             ->set('form.type', 'day')
-            ->set('form.start_at', now()->addMonth()->toDateString())
-            ->set('form.end_at', now()->addMonth()->addDay()->toDateString())
+            ->set('form.start_at', self::workingMonday()->toDateString())
+            ->set('form.end_at', self::workingMonday()->addDay()->toDateString())
             ->set('form.reason', 'Final end-to-end confirmation scenario.')
             ->call('confirmSave')
             ->assertHasNoErrors();
@@ -121,8 +122,8 @@ class LeaveRequestWorkflowTest extends TestCase
             ->test(MyLeaveRequestModule::class)
             ->set('form.leave_balance_id', $existingLeave->leave_balance_id)
             ->set('form.type', 'day')
-            ->set('form.start_at', now()->addMonth()->toDateString())
-            ->set('form.end_at', now()->addMonth()->addDay()->toDateString())
+            ->set('form.start_at', self::workingMonday()->toDateString())
+            ->set('form.end_at', self::workingMonday()->addDay()->toDateString())
             ->set('form.reason', 'Alternative without an active contract.')
             ->set('form.alternative_employee', $outsiderId)
             ->call('processSave')
@@ -141,8 +142,8 @@ class LeaveRequestWorkflowTest extends TestCase
             ->test(MyLeaveRequestModule::class)
             ->set('form.leave_balance_id', $existingLeave->leave_balance_id)
             ->set('form.type', 'day')
-            ->set('form.start_at', now()->addMonth()->toDateString())
-            ->set('form.end_at', now()->addMonth()->addDay()->toDateString())
+            ->set('form.start_at', self::workingMonday()->toDateString())
+            ->set('form.end_at', self::workingMonday()->addDay()->toDateString())
             ->set('form.reason', 'Verify the stored alternative employee.')
             ->set('form.alternative_employee', $alternativeEmployeeId)
             ->set('form.status', LeaveRequestStatus::Accepted)
@@ -177,8 +178,8 @@ class LeaveRequestWorkflowTest extends TestCase
             ->test(MyLeaveRequestModule::class)
             ->set('form.leave_balance_id', $otherLeave->leave_balance_id)
             ->set('form.type', 'day')
-            ->set('form.start_at', now()->addMonth()->toDateString())
-            ->set('form.end_at', now()->addMonth()->addDay()->toDateString())
+            ->set('form.start_at', self::workingMonday()->toDateString())
+            ->set('form.end_at', self::workingMonday()->addDay()->toDateString())
             ->set('form.reason', 'Forged balance request.')
             ->call('processSave')
             ->assertHasErrors(['form.leave_balance_id']);
@@ -1066,5 +1067,21 @@ class LeaveRequestWorkflowTest extends TestCase
         } else {
             $this->assertSame($mode, $query['mode'] ?? null);
         }
+    }
+
+    /**
+     * A Monday at least a month ahead whose Monday and Tuesday are working
+     * days outside December, so the weekend (0,6) and the December rule
+     * (A3-D D-7) never depend on the day the suite runs.
+     */
+    private static function workingMonday(): Carbon
+    {
+        $monday = now()->addMonth()->next(Carbon::MONDAY)->startOfDay();
+
+        while ($monday->month === 12 || $monday->copy()->addDay()->month === 12) {
+            $monday->addWeek();
+        }
+
+        return $monday;
     }
 }
