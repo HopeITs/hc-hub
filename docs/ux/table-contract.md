@@ -1,6 +1,6 @@
 # B4-D · Task-focused tables and view persistence (proposed)
 
-Status: **groundwork; product-owner answers recorded 2026-10-22 (§8); awaiting the G-A gate and formal review.** Not marked done until G-A has passed and the document is reviewed.
+Status: **complete; product-owner answers recorded 2026-10-22 (§8); G-A passed; awaiting formal review** (QA engineer + technical lead). Not marked done until reviewed.
 Date: 2026-10-22. Task: B4-D in [ux-prompts-v3.md](ux-prompts-v3.md) (R-16). Owner role: UX designer + HR product owner. Reviewer: QA engineer + technical lead.
 Consumer: **B4** (implementation).
 
@@ -13,7 +13,7 @@ This is a design document. **No application code was changed.** Every column set
 | Item | Value |
 |---|---|
 | Revision | `hr-ux-by-rafi` = `main` @ `ed464e73` (A2, A3, A3-R, A4, A5, A5-M, A6, A7, B0, X2-I merged) |
-| Dependency | **G-A** (Rita): not yet reported. B4-D started early as groundwork, on the developer's instruction, because it changes no code. If G-A changes a table, §3–§6 are updated before sign-off. |
+| Dependency | **G-A: PASS WITH CONDITIONS** ([g-a-gate.md](g-a-gate.md), `2375ac49`, §7 "B1, B4-D and B6 may start"). B4-D was drafted before the gate as groundwork; rechecked after it: `git diff ed464e73..33c7ba24` touches no table component, model scope or table view, so §2–§6 stand unchanged. |
 | Table package | `ramonrietdijk/livewire-tables` v6.5.4, with the app's view override `resources/views/vendor/livewire-table/livewire/livewire-table.blade.php` |
 
 ## 2. Inventory (task step 1)
@@ -215,4 +215,6 @@ Follow-ups created by Q5 (defaults in §5.1, B4 may proceed with them unless HR 
 | **AC-B4-D-02** State persistence and stale-page reset rules are documented. | **Met** | §4.1 URL vs session vs database; §4.2 reset rules incl. role/city change |
 | **AC-B4-D-03** Saved view meanings and authorized scopes are explicit. | **Met** | §5 presets with meaning and who sees them; §5.1 personal views (owner-only, role-bound); both only narrow authorized rows |
 
-Verification performed: source trace at `ed464e73` (components, package concerns, view override); no application test is claimed. **Formal review: pending. G-A: pending.** B4-D is **not** marked done.
+Verification performed: source trace at `ed464e73` (components, package concerns, view override); no application test is claimed. **G-A: passed** (rechecked at `33c7ba24`). **Formal review: pending.** B4-D is **not** marked done.
+
+G-A conditions relevant to B4: open item 1 (Arabic Escape after reopen) means B4 must not reuse `GuardsModalClose` in a detail drawer until it is checked; open item 4 (13 reference-table actions with only the coarse permission) is not a table-list concern but should not be copied into B4 actions.
