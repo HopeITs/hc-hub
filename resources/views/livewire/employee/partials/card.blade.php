@@ -4,7 +4,7 @@
     $canUpdate = $user->hasActivePermission('employees.update');
     $canDelete = $user->hasActivePermission('employees.delete');
     $showCity = $user->activeCityIds() === null;
-    $position = $item->latestActiveContract()?->position?->title;
+    $position = $item->primaryContract()?->position?->title;
     $city = $showCity ? $item->city?->name : null;
     $email = $item->account?->email;
 @endphp

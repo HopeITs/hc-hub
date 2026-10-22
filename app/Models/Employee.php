@@ -180,6 +180,26 @@ class Employee extends Model implements HasMedia
     }
 
     /**
+     * The contract shown as the employee's main position: the active one whose
+     * position has the highest job level (lowest grade; no level ranks last),
+     * newest first on a tie. Display only: leave balances keep following
+     * latestActiveContract().
+     */
+    public function primaryContract(): ?Contract
+    {
+        $contracts = $this->relationLoaded('contracts')
+            ? $this->contracts
+            : $this->contracts()->with('position.jobLevel')->get();
+
+        return $contracts
+            ->sortBy([
+                fn ($a, $b) => ($a->position?->jobLevel?->grade ?? PHP_INT_MAX) <=> ($b->position?->jobLevel?->grade ?? PHP_INT_MAX),
+                fn ($a, $b) => $b->created_at <=> $a->created_at,
+            ])
+            ->first();
+    }
+
+    /**
      * Whether an accepted leave covers today: a day leave for the whole of
      * its dates, an hour leave only between its start and end times.
      */

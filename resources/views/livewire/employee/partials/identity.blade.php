@@ -1,5 +1,5 @@
 {{-- Employee list identity cell: photo, name (opens the read-only drawer) and position on a second line. --}}
-@php($position = $employee->latestActiveContract()?->position?->title)
+@php($position = $employee->primaryContract()?->position?->title)
 <div class="flex min-w-0 items-center gap-3">
     <img src="{{ $employee->avatar_url }}" alt="" loading="lazy" class="size-[38px] max-w-none shrink-0 rounded-full border border-primary bg-white object-cover" />
     <div class="min-w-0">

@@ -2,7 +2,10 @@
 
 namespace App\Livewire\Employee;
 
+use App\Enums\LeaveRequestStatus;
 use App\Models\Employee;
+use App\Models\LeaveRequest;
+use App\Models\Position;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
@@ -60,7 +63,61 @@ class EmployeeDrawer extends Component
             }
         }
 
-        return view('livewire.employee.drawer', ['employee' => $employee]);
+        return view('livewire.employee.drawer', [
+            'employee' => $employee,
+            'assignments' => $employee ? $this->assignments($employee) : collect(),
+            'pendingRequests' => $employee ? $this->pendingRequests($employee) : null,
+        ]);
+    }
+
+    /**
+     * Every active position the employee holds: its center, the direct manager
+     * and the people reporting to it. Same directory-tier data the org chart
+     * profile shows.
+     */
+    private function assignments(Employee $employee)
+    {
+        $positions = $employee->contracts()
+            ->with(['position.center', 'position.department', 'position.directManager.activeContracts.employee', 'position.jobLevel'])
+            ->get()
+            ->sortBy(fn ($c) => $c->position?->jobLevel?->grade ?? PHP_INT_MAX)
+            ->pluck('position')
+            ->filter()
+            ->unique('id')
+            ->values();
+
+        $reports = Position::query()
+            ->visible()
+            ->whereIn('direct_manager_id', $positions->pluck('id'))
+            ->with('activeContracts.employee')
+            ->get()
+            ->groupBy('direct_manager_id');
+
+        return $positions->map(fn (Position $position) => [
+            'position' => $position,
+            'manager' => $position->directManager?->employee(),
+            'reports' => ($reports[$position->id] ?? collect())
+                ->flatMap(fn (Position $p) => $p->activeContracts->pluck('employee'))
+                ->filter()
+                ->unique('id')
+                ->values(),
+        ]);
+    }
+
+    /** Pending leave requests; only for roles that review leave, otherwise null (section hidden). */
+    private function pendingRequests(Employee $employee)
+    {
+        $user = auth()->user();
+
+        if (! $user?->hasActivePermission('leaves.view-all')) {
+            return null;
+        }
+
+        return LeaveRequest::query()
+            ->where('status', LeaveRequestStatus::Pending)
+            ->whereHas('leaveBalance.contract', fn ($q) => $q->where('employee_id', $employee->id))
+            ->latest('start_at')
+            ->get();
     }
 
     private function stillAllowed(Employee $employee): bool

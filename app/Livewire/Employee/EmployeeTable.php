@@ -185,6 +185,7 @@ class EmployeeTable extends LivewireTable
     {
         return $this->model()::query()
             ->with([
+                'contracts.position.jobLevel',
                 'contracts.position.directManager.activeContracts',
                 'account',
                 'media',
@@ -249,7 +250,7 @@ class EmployeeTable extends LivewireTable
 
             SelectColumn::make(trans('general.direct_manager'), 'direct_manager')
                 ->displayUsing(function ($v, Model $model) {
-                    return $model->latestActiveContract()?->position->directManager?->employee()?->name ?? '—';
+                    return $model->primaryContract()?->position?->directManager?->employee()?->name ?? '—';
                 })
                 ->options($this->managerOptions())
                 ->sortable()
