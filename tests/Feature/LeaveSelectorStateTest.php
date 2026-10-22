@@ -100,6 +100,134 @@ class LeaveSelectorStateTest extends TestCase
         $this->assertSame($before, LeaveRequest::query()->count());
     }
 
+    /**
+     * A5-M: the request dialog closes only through requestClose(), which
+     * compares the entries with what the form opened with.
+     */
+    public function test_a_pristine_new_request_closes_at_once_without_asking(): void
+    {
+        $before = LeaveRequest::query()->count();
+
+        Livewire::actingAs($this->user)
+            ->test(MyLeaveRequestModule::class)
+            ->call('create')
+            ->assertSet('showModal', true)
+            ->call('requestClose')
+            ->assertSet('showModal', false)
+            ->assertNotDispatched('confirm-dialog');
+
+        $this->assertSame($before, LeaveRequest::query()->count());
+    }
+
+    public function test_a_dirty_new_request_asks_and_keeps_every_entry_and_the_dialog(): void
+    {
+        Livewire::actingAs($this->user)
+            ->test(MyLeaveRequestModule::class)
+            ->call('create')
+            ->set('form.leave_balance_id', (string) $this->annual->id)
+            ->set('form.reason', 'Family visit')
+            ->call('requestClose')
+            ->assertSet('showModal', true)
+            ->assertSet('form.reason', 'Family visit')
+            ->assertSet('form.leave_balance_id', (string) $this->annual->id)
+            ->assertDispatched('confirm-dialog',
+                method: 'discardChanges',
+                title: __('leaves.modal.discard-title'),
+                message: __('leaves.modal.discard-message'),
+                confirmLabel: __('leaves.modal.discard'),
+                cancelLabel: __('leaves.modal.keep-editing'),
+                danger: false,
+            );
+    }
+
+    public function test_a_value_changed_and_restored_is_not_dirty(): void
+    {
+        Livewire::actingAs($this->user)
+            ->test(MyLeaveRequestModule::class)
+            ->call('create')
+            ->set('form.reason', 'Temporary')
+            ->set('form.reason', '')
+            ->call('requestClose')
+            ->assertSet('showModal', false)
+            ->assertNotDispatched('confirm-dialog');
+    }
+
+    public function test_discarding_clears_only_this_form_and_writes_nothing(): void
+    {
+        $before = LeaveRequest::query()->count();
+
+        Livewire::actingAs($this->user)
+            ->test(MyLeaveRequestModule::class)
+            ->call('create')
+            ->set('form.reason', 'Family visit')
+            ->call('requestClose')
+            ->call('discardChanges')
+            ->assertSet('showModal', false)
+            ->assertSet('form.reason', '')
+            ->call('create')
+            ->assertSet('form.reason', '')
+            ->call('requestClose')
+            ->assertSet('showModal', false)
+            ->assertNotDispatched('confirm-dialog');
+
+        $this->assertSame($before, LeaveRequest::query()->count());
+    }
+
+    public function test_an_edited_request_is_guarded_and_reopens_with_its_saved_values(): void
+    {
+        $saved = $this->pending->reason;
+
+        Livewire::actingAs($this->user)
+            ->test(MyLeaveRequestModule::class)
+            ->call('edit', $this->pending->id)
+            ->call('requestClose')
+            ->assertSet('showModal', false)
+            ->assertNotDispatched('confirm-dialog')
+            ->call('edit', $this->pending->id)
+            ->set('form.reason', 'Something else entirely')
+            ->call('requestClose')
+            ->assertSet('showModal', true)
+            ->assertDispatched('confirm-dialog', method: 'discardChanges')
+            ->call('discardChanges')
+            ->assertSet('showModal', false)
+            ->call('edit', $this->pending->id)
+            ->assertSet('form.reason', $saved);
+
+        $this->assertSame($saved, $this->pending->fresh()->reason);
+    }
+
+    public function test_the_dialog_is_wired_to_the_guard_and_the_backdrop_is_inert(): void
+    {
+        Livewire::actingAs($this->user)
+            ->test(MyLeaveRequestModule::class)
+            ->call('create')
+            ->assertSeeHtml("guard: 'requestClose'")
+            ->assertSeeHtml('guard || close()')
+            ->assertDontSeeHtml('x-on:click="show = false"');
+    }
+
+    public function test_new_and_edit_labels_match_their_action_in_both_languages(): void
+    {
+        foreach (['en', 'ar'] as $locale) {
+            app()->setLocale($locale);
+
+            Livewire::actingAs($this->user)
+                ->test(MyLeaveRequestModule::class)
+                ->call('create')
+                ->assertSet('modalTitle', __('leaves.modal.new-title'))
+                ->assertSee(__('leaves.modal.submit'))
+                ->assertDontSee(__('leaves.modal.save-changes'))
+                ->call('discardChanges')
+                ->call('edit', $this->pending->id)
+                ->assertSet('modalTitle', __('leaves.modal.edit-title'))
+                ->assertSee(__('leaves.modal.save-changes'));
+        }
+
+        $this->assertSame('Request leave', trans('leaves.modal.new-title', [], 'en'));
+        $this->assertSame('طلب إجازة', trans('leaves.modal.new-title', [], 'ar'));
+        $this->assertSame('تجاهل التغييرات؟', trans('leaves.modal.discard-title', [], 'ar'));
+    }
+
     private function assertSelectThenClear(string $annualLabel): void
     {
         $component = Livewire::actingAs($this->user)

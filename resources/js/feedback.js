@@ -100,6 +100,7 @@ document.addEventListener('alpine:init', () => {
         message: '',
         html: null,
         confirmLabel: '',
+        cancelLabel: '',
         danger: true,
         // Translated delete wording, set by <x-confirm-dialog/> from the server.
         defaults: {},
@@ -115,6 +116,7 @@ document.addEventListener('alpine:init', () => {
             this.message = settings.html ? '' : settings.message ?? '';
             this.html = settings.html ?? null;
             this.confirmLabel = settings.confirmLabel ?? '';
+            this.cancelLabel = settings.cancelLabel ?? '';
             this.danger = settings.danger ?? true;
 
             return new Promise((resolve) => {

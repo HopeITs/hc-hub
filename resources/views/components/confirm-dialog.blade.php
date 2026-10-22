@@ -77,7 +77,8 @@
         </div>
 
         <div class="mt-6 flex flex-wrap justify-end gap-3">
-            <x-secondary-button x-ref="cancel" x-on:click="$store.confirm.settle(false)" class="!w-auto">
+            <x-secondary-button x-ref="cancel" x-on:click="$store.confirm.settle(false)" class="!w-auto"
+                                x-text="$store.confirm.cancelLabel || @js(__('general.cancel'))">
                 {{ __('general.cancel') }}
             </x-secondary-button>
 
