@@ -964,6 +964,7 @@ return [
     ],
 
     // A5-M: closing an editable dialog with unsaved entries (GuardsModalClose).
+    'network-error' => 'Could not reach the server. Nothing was saved, and your entries are still here. Check your connection, then try again.',
     'unsaved' => [
         'title' => 'Discard your changes?',
         'message' => 'Your changes have not been saved.',

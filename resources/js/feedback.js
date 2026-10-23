@@ -90,6 +90,39 @@ async function revealField(key, { section = null, reveal = null, wire = null, me
 
 window.hcRevealField = revealField;
 
+/*
+ * When did the user last press, click or tap? Lets the code below react only
+ * to requests the user caused (a Save), never to background polling.
+ */
+let lastInteraction = 0;
+['pointerdown', 'keydown'].forEach((type) =>
+    document.addEventListener(type, () => (lastInteraction = Date.now()), true),
+);
+const userJustActed = () => Date.now() - lastInteraction < 10000;
+
+/*
+ * G-B-2: a request that never reached the server (connection lost, server
+ * down) used to fail silently: no message, the button simply came back.
+ * Livewire reports it through the request hook with no response body; a
+ * server error still has a body and keeps Livewire's own error dialog.
+ * Entries stay on the page and a retry is safe (B2 submission tokens).
+ */
+document.addEventListener('livewire:init', () => {
+    window.Livewire.hook('request', ({ fail }) => {
+        fail(({ content }) => {
+            if (content !== null || !userJustActed()) return;
+
+            const store = window.Alpine?.store('toasts');
+            const message = window.hcFeedbackText?.networkError;
+
+            // One at a time: a second failed click does not stack another.
+            if (!store || !message || store.items.some((toast) => toast.message === message)) return;
+
+            store.push({ type: 'error', message });
+        });
+    });
+});
+
 // Calls a method on the Livewire component that raised the toast or the
 // confirmation. A null payload means "call with no argument".
 function callBack({ component, method, payload }) {
@@ -248,10 +281,21 @@ document.addEventListener('alpine:init', () => {
             this.sync();
             requestAnimationFrame(() => this.sync());
 
+            // G-B-3: this summary appears with the first failed save. Take the
+            // user to the first error, which may be off screen on a phone.
+            if (userJustActed()) this.afterPaint(() => this.focusFirstError());
+
             // Switching tab re-renders the form without clearing the errors, so
             // which messages are on screen changes after every round trip.
-            this.stopListening = window.Livewire?.hook('commit', ({ succeed }) => {
-                succeed(() => queueMicrotask(() => this.sync()));
+            this.stopListening = window.Livewire?.hook('commit', ({ component, commit, succeed }) => {
+                // A save (a method call on this summary's component), not a field update.
+                const isSave = component?.id === this.$wire?.$id && (commit?.calls?.length ?? 0) > 0;
+
+                succeed(() => queueMicrotask(() => {
+                    this.sync();
+
+                    if (isSave && this.keys.length) this.afterPaint(() => this.focusFirstError());
+                }));
             });
 
             // Collapsing a section or switching an Alpine-only tab hides
@@ -289,6 +333,38 @@ document.addEventListener('alpine:init', () => {
 
         isCovered(key) {
             return this.covered.includes(key);
+        },
+
+        afterPaint(callback) {
+            requestAnimationFrame(() => requestAnimationFrame(callback));
+        },
+
+        /**
+         * The first error's field, scrolled to the middle and focused; if that
+         * field is on another tab or in a closed section, the summary itself,
+         * whose entries lead there. Nothing moves when there is no error.
+         */
+        focusFirstError() {
+            const summary = this.$root;
+            const first = summary.querySelector('[data-error-key]');
+
+            if (!first) return;
+
+            const field = locateField(first.dataset.errorKey, first.textContent.trim(), summary);
+
+            if (field) {
+                field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                field.focus({ preventScroll: true });
+
+                return;
+            }
+
+            const entry = [...summary.querySelectorAll('[data-error-key] button')].find(isVisible);
+
+            if (entry) {
+                summary.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                entry.focus({ preventScroll: true });
+            }
         },
 
         go(key, section = null) {
