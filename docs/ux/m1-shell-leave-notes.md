@@ -2,7 +2,7 @@
 
 Task M1 in [ux-prompts-v3.md](ux-prompts-v3.md), slice: header, shared modal, leave request flow, notifications UI.
 Employee create/resume/list/details and contract views belong to another slice.
-Status: **implemented, not reviewed, nothing committed.**
+Status: **implemented and committed (19cbdb51); QA + technical-lead review still pending.**
 Prerequisite B2 has **no delivered notes file** in `docs/ux/` (only b1, b3, b4, b5-d, b6 exist), so I read the source it left (A5-M guarded modals, `GuardsModalClose`, `WithFeedback`) and kept their contract unchanged.
 
 ## What changed

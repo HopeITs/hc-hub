@@ -32,6 +32,6 @@ Environment: built-in browser, synthetic SQLite copy (X2 harness, port 8398, HR-
 
 ## Limits / not done
 - Real virtual-keyboard behaviour, 200% text zoom and screen-reader runs were not performed (emulated viewport only). `interactive-widget=resizes-content` in the viewport meta (partials/head.blade.php, shared) would make fixed/sticky bars ride above the on-screen keyboard on Android Chrome; not changed here, recommended to the shell owner.
-- Login page is wider than 375px (outside this slice). `min-h-screen` in the shared layout is not `dvh` (shell owner).
+- Login card was a fixed `w-96` (384px); now `w-full max-w-96`. Viewport meta now carries `interactive-widget=resizes-content` (Android Chrome keyboard avoidance); real-device verification still pending. `min-h-screen` in the shared layout is not `dvh` (shell owner).
 - The 768-1023px band now uses the phone selector/action bar for the employee form.
 - Contract review is still a paginated A4 document; on phones it reflows rather than being a separate summary view.
