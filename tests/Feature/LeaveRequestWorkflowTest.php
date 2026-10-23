@@ -465,10 +465,15 @@ class LeaveRequestWorkflowTest extends TestCase
             ->where('id', $leaveRequest->leave_balance_id)
             ->value('used');
 
+        // A repeat (double click, retry after a lost response) is told its
+        // decision is already saved (G-B-1), never shown a Forbidden page.
         $component
             ->set('form.status', LeaveRequestStatus::Accepted)
             ->call('submitDecision')
-            ->assertForbidden();
+            ->assertOk()
+            ->assertHasNoErrors()
+            ->assertDispatched('toast', fn ($event, $params) => ($params['type'] ?? null) === 'info'
+                && str_contains($params['message'] ?? '', 'Your decision to accept this request was already saved'));
 
         $this->assertSame(
             $usedAfterFirstDecision,
@@ -481,6 +486,124 @@ class LeaveRequestWorkflowTest extends TestCase
             ActionLeaveRequest::class,
             1,
         );
+    }
+
+    /**
+     * G-B-1: two people had the same request open; the second to save is told
+     * who decided it and when, and nothing of theirs is written or sent.
+     */
+    public function test_a_decision_saved_after_someone_else_decided_reports_who_decided(): void
+    {
+        [$hr, $leaveRequest] = $this->createPendingDecisionFixture();
+        $colleague = $this->createHrUserForLeave($leaveRequest, 'colleague.hr@example.test');
+        Notification::fake();
+
+        $staleDialog = Livewire::actingAs($hr)
+            ->test(AllLeaveRequestModule::class)
+            ->call('openDecision', $leaveRequest->id)
+            ->assertSet('decisionModal', true);
+
+        Livewire::actingAs($colleague)
+            ->test(AllLeaveRequestModule::class)
+            ->call('openDecision', $leaveRequest->id)
+            ->set('form.status', LeaveRequestStatus::Rejected)
+            ->set('form.reject_reason', 'No cover for these dates.')
+            ->call('submitDecision')
+            ->assertHasNoErrors();
+
+        $decidedAt = $leaveRequest->fresh()->approved_at->format('d-m-Y, H:i');
+
+        // Back in the first person's session (actingAs is global to the test).
+        $this->actingAs($hr);
+
+        $staleDialog
+            ->set('form.status', LeaveRequestStatus::Accepted)
+            ->call('submitDecision')
+            ->assertOk()
+            ->assertHasNoErrors()
+            ->assertSet('decisionModal', false)
+            ->assertSet('showModal', true)
+            ->assertSet('linkedLeaveMode', 'details')
+            ->assertDispatched('leaveRequestDecisionSaved')
+            ->assertDispatched('toast', fn ($event, $params) => ($params['type'] ?? null) === 'info'
+                && str_contains($params['message'], 'already rejected by')
+                && str_contains($params['message'], $colleague->profile->name)
+                && str_contains($params['message'], $decidedAt)
+                && str_contains($params['message'], 'Your decision was not saved'));
+
+        $this->assertDatabaseHas('leave_requests', [
+            'id' => $leaveRequest->id,
+            'status' => LeaveRequestStatus::Rejected,
+            'reject_reason' => 'No cover for these dates.',
+            'approved_by' => $colleague->employee_id,
+        ]);
+        $this->assertSame(0.0, (float) DB::table('leave_balances')->where('id', $leaveRequest->leave_balance_id)->value('used'));
+        Notification::assertSentToTimes(
+            $leaveRequest->leaveBalance->contract->employee->account,
+            ActionLeaveRequest::class,
+            1,
+        );
+    }
+
+    /** A stale "reject without a reason" is not asked for a reason first. */
+    public function test_a_stale_decision_is_reported_before_validation(): void
+    {
+        [$hr, $leaveRequest] = $this->createPendingDecisionFixture();
+        Notification::fake();
+
+        $staleDialog = Livewire::actingAs($hr)
+            ->test(AllLeaveRequestModule::class)
+            ->call('openDecision', $leaveRequest->id);
+
+        $leaveRequest->update(['status' => LeaveRequestStatus::Accepted, 'approved_at' => now()]);
+
+        $staleDialog
+            ->set('form.status', LeaveRequestStatus::Rejected)
+            ->call('submitDecision')
+            ->assertHasNoErrors()
+            ->assertSet('showModal', true)
+            ->assertDispatched('toast', fn ($event, $params) => str_contains($params['message'], 'already accepted on'));
+
+        $this->assertSame(LeaveRequestStatus::Accepted, $leaveRequest->fresh()->status);
+    }
+
+    public function test_opening_the_decision_of_an_already_decided_request_shows_its_details(): void
+    {
+        [$hr, $leaveRequest] = $this->createPendingDecisionFixture();
+        $colleague = $this->createHrUserForLeave($leaveRequest, 'colleague.hr@example.test');
+        $leaveRequest->update([
+            'status' => LeaveRequestStatus::Accepted,
+            'approved_at' => now(),
+            'approved_by' => $colleague->employee_id,
+        ]);
+
+        Livewire::actingAs($hr)
+            ->test(AllLeaveRequestModule::class)
+            ->call('openDecision', $leaveRequest->id)
+            ->assertOk()
+            ->assertSet('decisionModal', false)
+            ->assertSet('showModal', true)
+            ->assertDispatched('toast', fn ($event, $params) => str_contains($params['message'], 'already accepted by')
+                && str_contains($params['message'], $colleague->profile->name));
+    }
+
+    /** Who decided is only told to someone who may still see the request. */
+    public function test_an_already_decided_request_out_of_scope_is_still_forbidden(): void
+    {
+        [, $targetLeave] = $this->createPendingDecisionFixture();
+        $targetLeave->update(['status' => LeaveRequestStatus::Rejected, 'approved_at' => now()]);
+        [$outOfScopeHr] = $this->createRejectedLeaveFixture(
+            null,
+            'stale.out-of-scope.hr@example.test',
+            'stale-out-of-scope-hr',
+        );
+        $outOfScopeHr->assignRole(Role::findOrCreate('HR-XXX', 'web'));
+
+        Livewire::actingAs($outOfScopeHr->fresh())
+            ->test(AllLeaveRequestModule::class)
+            ->call('openDecision', $targetLeave->id)
+            ->assertForbidden()
+            ->assertNotDispatched('toast');
     }
 
     public function test_pending_request_cannot_generate_a_decision_notification_payload(): void

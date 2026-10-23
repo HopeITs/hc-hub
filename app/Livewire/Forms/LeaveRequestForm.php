@@ -3,6 +3,7 @@
 namespace App\Livewire\Forms;
 
 use App\Enums\LeaveRequestStatus;
+use App\Exceptions\LeaveDecisionAlreadyMade;
 use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use App\Models\Employee;
 use App\Models\LeaveBalance;
@@ -216,6 +217,12 @@ class LeaveRequestForm extends Form
             throw new LogicException('A leave request must be selected before submitting a decision.');
         }
 
+        // Before validation, so nobody is asked for a reason on a decision
+        // that can no longer be made. Repeated under the lock below.
+        if ($current = LeaveRequest::query()->find($this->decisionLeave->id)) {
+            $this->assertStillPending($current);
+        }
+
         $this->validate([
             'status' => [
                 'required',
@@ -243,6 +250,7 @@ class LeaveRequestForm extends Form
 
             // Authorization is intentionally checked after the row lock. A
             // concurrent decision must observe the latest persisted status.
+            $this->assertStillPending($leaveRequest);
             Gate::authorize('decide', $leaveRequest);
 
             if ((int) $this->status === LeaveRequestStatus::Accepted) {
@@ -603,6 +611,19 @@ class LeaveRequestForm extends Form
         return [
             'end_at.after_or_equal' => __('leaves.validation.end-before-start'),
         ];
+    }
+
+    /**
+     * A request decided since the dialog opened (by someone else, or by this
+     * same decision sent twice) is reported as already decided, not as a 403
+     * (G-B-1). Only to someone who may still see it: anyone else gets the
+     * policy's refusal, which says nothing about the request.
+     */
+    private function assertStillPending(LeaveRequest $leaveRequest): void
+    {
+        if ((int) $leaveRequest->status !== LeaveRequestStatus::Pending && Gate::allows('view', $leaveRequest)) {
+            throw new LeaveDecisionAlreadyMade($leaveRequest);
+        }
     }
 
     private function storeOnce(?string $key): void

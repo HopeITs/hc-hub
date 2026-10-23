@@ -17,7 +17,7 @@ The rule this document enforces: **the inbox lists and launches; each domain dec
 | Revision inspected | `hr-ux-by-rafi` @ `ccb3575b` (B5 on top of `main` with B1–B4, B6, M1, B2) |
 | A2-D | [access-policy.md](access-policy.md): roles, city scope, deny behaviour |
 | A3-D / A3 | [leave-calculation-contract.md](leave-calculation-contract.md), [a3-implementation.md](a3-implementation.md): pricing snapshot, balance effect, next-step text |
-| **G-B** | **PASS WITH CONDITIONS** at `ccb3575b` ([g-b-gate.md](g-b-gate.md)). It changed no source below. Four of its items land in C3 (§10a). |
+| **G-B** | **PASS WITH CONDITIONS** at `ccb3575b` ([g-b-gate.md](g-b-gate.md)). It changed no source below. Four of its items land in C3 (§10a); G-B-1 has since been fixed on the existing page. |
 | DEC-05 (2026-10-16) + revision for leave (2026-10-20) | [decisions.md](decisions.md), quoted in §2.3 |
 | Related | C5-D [team-coverage-contract.md](team-coverage-contract.md) (shares the "my reports" rule); B6 [b6-implementation.md](b6-implementation.md) (notification `subject` and request state) |
 
@@ -219,7 +219,7 @@ Answered by the developer acting for the HR product owner (Rafi), question by qu
 
 | G-B item | What C3 must do |
 |---|---|
-| G-B-1 | A stale decision currently shows the full-page "Forbidden" error. Return `already_handled` with who and when (§4.1). Observed: two sessions, request decided by the manager, HR's open dialog then saved. |
+| G-B-1 | **Fixed on the existing page** ([g-b-gate.md](g-b-gate.md) §9): `LeaveRequestForm::submitDecision()` raises `LeaveDecisionAlreadyMade` (no write, no notification) and the page shows the details with "already rejected by … on …" (`LeaveRequestNextStep::alreadyDecided()`). C3: reuse both for the inbox's `already_handled`, do not rebuild them. |
 | G-B-7 | Enter in the decision's reason field does nothing (no `<form>`). The inbox decision UI must submit on Enter like other forms. |
 | G-B-9 | HR can still decide (G1 above). Confirmed in the browser on the synthetic copy. |
 | G-B-6 | The leave **edit** dialog opened by a manager showed an empty Employee field. Reproduce before the inbox reuses that dialog for "View/Edit". |

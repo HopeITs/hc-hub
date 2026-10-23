@@ -81,6 +81,18 @@ return [
         'hr-seen' => 'HR has seen the decision. There are no further steps.',
     ],
 
+    // G-B-1: a decision opened or saved after the request was already decided.
+    'decision' => [
+        'already' => [
+            'accepted-by' => 'This request was already accepted by :name on :date. Your decision was not saved.',
+            'rejected-by' => 'This request was already rejected by :name on :date. Your decision was not saved.',
+            'accepted' => 'This request was already accepted on :date. Your decision was not saved.',
+            'rejected' => 'This request was already rejected on :date. Your decision was not saved.',
+            'accepted-by-you' => 'Your decision to accept this request was already saved on :date. Nothing more is needed.',
+            'rejected-by-you' => 'Your decision to reject this request was already saved on :date. Nothing more is needed.',
+        ],
+    ],
+
     // A5-M: the leave request dialog (new and edit). The close guard's wording is general.unsaved.*.
     'modal' => [
         'new-title' => 'Request leave',

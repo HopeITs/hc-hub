@@ -103,23 +103,84 @@ const userJustActed = () => Date.now() - lastInteraction < 10000;
 /*
  * G-B-2: a request that never reached the server (connection lost, server
  * down) used to fail silently: no message, the button simply came back.
- * Livewire reports it through the request hook with no response body; a
- * server error still has a body and keeps Livewire's own error dialog.
- * Entries stay on the page and a retry is safe (B2 submission tokens).
+ *
+ * Livewire reports it as an action failure: fetch itself threw. A server
+ * error is reported as an error instead and keeps Livewire's own dialog, and
+ * an aborted request reports neither. One toast says so and offers Try again,
+ * which sends the same actions again (the B3 retry: repeat the same request).
+ * Entries stay on the page and Livewire sends them again with the call; a
+ * repeat is safe (A3/B2 submission tokens; a leave decision already made is
+ * reported as such, G-B-1).
  */
+let unreachable = { toastId: null, actions: [] };
+let failedTogether = [];
+
+function reportUnreachable(action) {
+    // Polling is not the user's doing, and pauses itself while offline.
+    if (action.metadata?.type === 'poll' || !userJustActed()) return;
+
+    // Every action in the failed request lands here in the same tick.
+    if (failedTogether.push(action) > 1) return;
+
+    queueMicrotask(() => {
+        const actions = failedTogether;
+
+        failedTogether = [];
+        showUnreachable(actions);
+    });
+}
+
+function showUnreachable(actions) {
+    const store = window.Alpine?.store('toasts');
+    const text = window.hcFeedbackText;
+
+    if (!store || !text?.networkError) return;
+
+    // Still on screen: one toast, whose Try again covers these as well.
+    if (store.find(unreachable.toastId)) {
+        unreachable.actions = withoutRepeats([...unreachable.actions, ...actions]);
+
+        return;
+    }
+
+    unreachable.actions = withoutRepeats(actions);
+    unreachable.toastId = store.push({
+        type: 'error',
+        message: text.networkError,
+        action: { label: text.tryAgain, run: tryAgain },
+    });
+}
+
+// Two failed clicks on the same Save are one thing to try again.
+function withoutRepeats(actions) {
+    return [...new Map(actions.map((action) => [action.fingerprint, action])).values()];
+}
+
+function tryAgain() {
+    const actions = unreachable.actions;
+
+    unreachable = { toastId: null, actions: [] };
+
+    // The toast that held focus is gone: give it back to the control used.
+    const origin = actions[0]?.origin;
+    const control = origin?.targetEl ?? origin?.el;
+
+    if (control?.isConnected && control.matches(FOCUSABLE) && isVisible(control)) {
+        control.focus({ preventScroll: true });
+    }
+
+    actions.forEach((action) => {
+        // A component that has left the page (dialog closed, page changed)
+        // has nothing to repeat.
+        if (!window.Livewire.find(action.component.id)) return;
+
+        window.Livewire.fireAction(action.component, action.name, action.params, action.metadata);
+    });
+}
+
 document.addEventListener('livewire:init', () => {
-    window.Livewire.hook('request', ({ fail }) => {
-        fail(({ content }) => {
-            if (content !== null || !userJustActed()) return;
-
-            const store = window.Alpine?.store('toasts');
-            const message = window.hcFeedbackText?.networkError;
-
-            // One at a time: a second failed click does not stack another.
-            if (!store || !message || store.items.some((toast) => toast.message === message)) return;
-
-            store.push({ type: 'error', message });
-        });
+    window.Livewire.interceptAction(({ action, onFailure }) => {
+        onFailure(() => reportUnreachable(action));
     });
 });
 
@@ -140,15 +201,21 @@ document.addEventListener('alpine:init', () => {
         items: [],
         nextId: 1,
 
-        push({ type = 'info', message = '', undo = null, duration = null } = {}) {
-            if (!message) return;
+        /**
+         * `undo` comes from the server (WithFeedback::toast) and calls a
+         * component back; `action` ({label, run}) is for toasts raised in the
+         * browser, such as Try again (G-B-2). Returns the toast's id.
+         */
+        push({ type = 'info', message = '', undo = null, action = null, duration = null } = {}) {
+            if (!message) return null;
 
             const toast = {
                 id: this.nextId++,
                 type,
                 message,
                 undo,
-                remaining: duration ?? (undo ? UNDO_DURATION : DURATION[type] ?? DURATION.info),
+                action,
+                remaining: duration ?? (undo || action ? UNDO_DURATION : DURATION[type] ?? DURATION.info),
                 timer: null,
                 startedAt: 0,
             };
@@ -156,6 +223,8 @@ document.addEventListener('alpine:init', () => {
             this.items.push(toast);
             this.items.splice(0, Math.max(0, this.items.length - MAX_VISIBLE)).forEach((old) => clearTimeout(old.timer));
             this.resume(toast.id);
+
+            return toast.id;
         },
 
         find(id) {
@@ -198,6 +267,15 @@ document.addEventListener('alpine:init', () => {
 
             this.dismiss(id);
             callBack(toast.undo);
+        },
+
+        act(id) {
+            const toast = this.find(id);
+
+            if (!toast?.action) return;
+
+            this.dismiss(id);
+            toast.action.run();
         },
     });
 
@@ -247,7 +325,12 @@ document.addEventListener('alpine:init', () => {
     // Called with no options it asks the standard delete question.
     Alpine.magic('confirm', () => (options) => Alpine.store('confirm').ask(options));
 
-    window.addEventListener('toast', (event) => Alpine.store('toasts').push(event.detail ?? {}));
+    // An event cannot carry a function, so `action` is browser-only.
+    window.addEventListener('toast', (event) => {
+        const { action, ...toast } = event.detail ?? {};
+
+        Alpine.store('toasts').push(toast);
+    });
 
     window.addEventListener('confirm-dialog', async (event) => {
         const { componentId, method, payload, ...options } = event.detail ?? {};

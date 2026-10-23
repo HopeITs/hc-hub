@@ -898,6 +898,7 @@ return [
         'error' => 'Error:',
         'info' => 'Note:',
         'undo' => 'Undo',
+        'try-again' => 'Try again',
         'dismiss' => 'Dismiss notification',
     ],
     'return-process-initiated' => 'Return process initiated.',
@@ -963,8 +964,10 @@ return [
         'more' => 'More',
     ],
 
-    // A5-M: closing an editable dialog with unsaved entries (GuardsModalClose).
+    // G-B-2: an action that never reached the server (resources/js/feedback.js).
     'network-error' => 'Could not reach the server. Nothing was saved, and your entries are still here. Check your connection, then try again.',
+
+    // A5-M: closing an editable dialog with unsaved entries (GuardsModalClose).
     'unsaved' => [
         'title' => 'Discard your changes?',
         'message' => 'Your changes have not been saved.',

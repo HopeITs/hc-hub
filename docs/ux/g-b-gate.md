@@ -78,9 +78,9 @@ Data integrity summary: no duplicate request, contract, account or decision; bal
 
 | # | Item | Severity | Disposition | Owner |
 |---|---|---|---|---|
-| G-B-1 | A stale leave decision (another person already decided) shows the full-page "Forbidden — you don't have permission" error instead of "already rejected by …". Data is safe. | Medium | **Accepted for now; fixed in C3** (contract in [approval-source-contract.md](approval-source-contract.md) §4.1 `already_handled`). Not release-blocking. | C3 |
-| G-B-2 | When the server cannot be reached, *Create contract* (and Livewire actions generally) give **no feedback**: no toast, no error, the button returns to normal. Entries are kept and a retry is safe (B2 token). | Medium | **Fix before G-C**: a network-failure toast with *Try again* (B3 retry pattern). Not release-blocking (no data harm). | Frontend (B3 owner) |
-| G-B-3 | Phone: after a failed save in a long dialog, the inline error can be below the visible area; focus is not moved and the summary stays hidden (it counts an off-screen message as "shown"). | Medium | **Fix with B2 follow-up**: scroll/focus the first error after a failed save; count only messages inside the viewport. | B2 owner (Rafi) |
+| G-B-1 | A stale leave decision (another person already decided) shows the full-page "Forbidden — you don't have permission" error instead of "already rejected by …". Data is safe. | Medium | **Fixed** (§9). Opening or saving a decision on a request that is no longer pending shows its details and "already rejected by … on …", the `already_handled` outcome of [approval-source-contract.md](approval-source-contract.md) §4.1. C3's inbox still maps its own refusals the same way. | Rafi |
+| G-B-2 | When the server cannot be reached, *Create contract* (and Livewire actions generally) give **no feedback**: no toast, no error, the button returns to normal. Entries are kept and a retry is safe (B2 token). | Medium | **Fixed** (§9): one error toast with *Try again*, which repeats the failed actions ([feedback-contract.md](feedback-contract.md) §2.3). | Rafi |
+| G-B-3 | Phone: after a failed save in a long dialog, the inline error can be below the visible area; focus is not moved and the summary stays hidden (it counts an off-screen message as "shown"). | Medium | **Fix with B2 follow-up**: scroll/focus the first error after a failed save; count only messages inside the viewport. **Partly done** in `8872f852` (focus); viewport counting still open (§9). | B2 owner (Rafi) |
 | G-B-4 | Leave tables (All leaves, My leaves, Balances) are sideways tables on phones; the status column is off-screen. Already listed as not done in B4 and M1. | Medium | **Carried**: convert to cards (B4-D §6) in a follow-up before G-C. | B4/M1 owners |
 | G-B-5 | Tapping a decided leave row opens the **editor**, not a read-only view (B4D-Q2 was applied to employees and contracts only). | Low | Carried with G-B-4. | B4 owner |
 | G-B-6 | The leave **edit** dialog opened by the manager showed the *Employee* field empty (red border). Seen once, on request of Nour Halabi (2 Oct). Not investigated further here. | Low, to confirm | **Reproduce and decide** before C3 reuses the dialog. | Leave owner |
@@ -111,4 +111,30 @@ Data integrity summary: no duplicate request, contract, account or decision; bal
 
 ## 8. Handoff
 
-C0 and C3-D may proceed. C3 takes G-B-1, G-B-7, G-B-9 and must not reuse the leave edit dialog before G-B-6 is checked. G-B-2, G-B-3 and G-B-4/5 should be closed before G-C. **Formal review (QA engineer + technical lead): pending.**
+C0 and C3-D may proceed. C3 takes G-B-7, G-B-9 and must not reuse the leave edit dialog before G-B-6 is checked. G-B-1 and G-B-2 are fixed (§9). G-B-3 and G-B-4/5 should be closed before G-C. **Formal review (QA engineer + technical lead): pending.**
+
+## 9. Follow-up: G-B-1 and G-B-2 fixed
+
+Date: 2026-10-23. On `hr-ux-by-rafi` after `8872f852`. Checked on a separate synthetic copy (`C:/laragon/tmp/hc-hr-gb12`, launch entry "hc-hr G-B-1/2 fixes", port 8401), so the gate's own database above is unchanged.
+
+**G-B-1: already decided.**
+- **Change:** `LeaveRequestForm::submitDecision()` checks before validation, and again under the row lock, whether the request is still pending. If it is not, and the actor may still see it, it raises `LeaveDecisionAlreadyMade`, so nothing is written and no notification is sent. `AllLeaveRequestModule` then closes the decision, opens the request's details and shows an info toast from `LeaveRequestNextStep::alreadyDecided()`. `openDecision()` does the same for a row or link that is out of date. Anyone who may no longer see the request still gets the policy's 403, which says nothing about it.
+- **The same rule covers a repeat of your own decision** (double click, or *Try again* after a lost response). It says "Your decision to accept this request was already saved on …" instead of Forbidden.
+- **Browser, AR, two sessions:**
+  1. HR ALP (`localhost`) opened the decision for request 66.
+  2. The manager ALP (`127.0.0.1`) rejected it with a reason.
+  3. HR then chose Accept and saved.
+  4. HR saw the details dialog (status «مرفوض», the manager's reason) and the toast «سبق أن رُفض هذا الطلب من قِبل جورج خوري بتاريخ 23-10-2026, 16:49. لم يُحفظ قرارك.»
+  5. The database still showed rejected by employee 34, balance `used` 0, and no new notification.
+- **Tests** (`LeaveRequestWorkflowTest`): someone else decided first; a stale decision is reported before validation; opening an already-decided decision shows its details; out-of-scope access is still forbidden with no toast; a repeat of your own decision. The last one replaces the old test that expected 403.
+
+**G-B-2: lost connection.**
+- **Change:** `feedback.js` listens for Livewire action failures (fetch threw) instead of the request hook. A failure the user caused shows one error toast with *Try again* («إعادة المحاولة»), which sends the same actions again. The toast store gained a browser-only `action` button next to *Undo*. Details: [feedback-contract.md](feedback-contract.md) §2.3.
+- **Browser, AR, HR ALP, request 65.** The connection was cut inside the page (Livewire's `fetch` rejected, as when the network drops), because stopping the server would also have ended the browser session.
+  1. Accept, then Save twice while offline: **one** toast with *Try again*. The choice was kept. Both `submitDecision` calls and a background `updateCount` poll failed; the poll was not reported.
+  2. Back online, *Try again*: exactly **one** `submitDecision` was sent, followed by the success toast and the dialog closing.
+  3. Database: request 65 accepted once by employee 1, balance 62 `used` 0 → 24 h (3 days × 8 h), one new notification.
+- **Phone 375 px:** the toast is 343 px wide, with no sideways page scroll.
+- **Not covered:** *Try again* is not covered by an automated test (the suite has no JS runner). A real network drop on a phone has not been tried.
+
+**G-B-3: started in `8872f852`, not closed.** After a failed save, that commit moves focus to the first error (or the summary). "Count only messages inside the viewport" is not done, so G-B-3 stays open.

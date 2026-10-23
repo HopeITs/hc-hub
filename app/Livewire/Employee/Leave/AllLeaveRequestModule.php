@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
+use App\Exceptions\LeaveDecisionAlreadyMade;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Concerns\GuardsModalClose;
 use App\Livewire\Concerns\TracksTaskAttempt;
@@ -14,6 +15,7 @@ use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use App\Services\LeaveAlternativeEmployees;
 use App\Services\LeaveNotificationService;
+use App\Services\LeaveRequestNextStep;
 use App\Support\Leave\LeaveQuote;
 use Blade;
 use Carbon\Carbon;
@@ -146,6 +148,13 @@ class AllLeaveRequestModule extends Component
 
     public function openDecision(LeaveRequest $id)
     {
+        // A row or link from before someone decided it (G-B-1).
+        if ($id->status !== LeaveRequestStatus::Pending && Gate::allows('view', $id)) {
+            $this->showAlreadyDecided($id);
+
+            return;
+        }
+
         Gate::authorize('decide', $id);
 
         $this->form->setDecisionLeave($id);
@@ -162,7 +171,18 @@ class AllLeaveRequestModule extends Component
 
     public function submitDecision()
     {
-        $leaveRequest = $this->form->submitDecision();
+        try {
+            $leaveRequest = $this->form->submitDecision();
+        } catch (LeaveDecisionAlreadyMade $e) {
+            // Nothing was written, and no notification goes out.
+            $this->finishTaskAttempt('cancelled');
+            $this->decisionModal = false;
+            $this->decisionLeave = null;
+            $this->showAlreadyDecided($e->leaveRequest);
+
+            return;
+        }
+
         $this->finishTaskAttempt();
 
         app(LeaveNotificationService::class)->sendDecision(
@@ -414,6 +434,20 @@ class AllLeaveRequestModule extends Component
         return $this->form->type === 'day'
             ? Carbon::parse($this->form->end_at)->format('d-m-Y')
             : $this->form->end_hour;
+    }
+
+    /**
+     * The approval contract's `already_handled` (§4.1): not an error. The
+     * request opens read-only with its decision, a toast says who made it, and
+     * the list and tab counts catch up with it.
+     */
+    private function showAlreadyDecided(LeaveRequest $leaveRequest): void
+    {
+        $this->show($leaveRequest->id);
+        $this->toast(app(LeaveRequestNextStep::class)->alreadyDecided($leaveRequest, auth()->user()), 'info');
+
+        $this->refreshCounts();
+        $this->dispatch('leaveRequestDecisionSaved')->to(AllLeaveRequestTable::class);
     }
 
     private function clearLinkedLeave(): void
