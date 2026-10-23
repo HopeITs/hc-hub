@@ -1,6 +1,6 @@
 # C3-D · Approval-source and decision contract (proposed)
 
-Status: **groundwork; product-owner answers recorded 2026-10-23 (§9); awaiting G-B (Rita) and formal review.** Not marked done until G-B has passed and the document is reviewed.
+Status: **complete; product-owner answers recorded 2026-10-23 (§9); G-B passed with conditions ([g-b-gate.md](g-b-gate.md)); awaiting formal review.** Not marked done until reviewed.
 Date: 2026-10-23. Task: C3-D in [ux-prompts-v3.md](ux-prompts-v3.md) (R-09). Owner role: backend lead + HR product owner. Reviewer: HR product owner + technical lead.
 Consumers: **C3** (unified approvals inbox), **D4** (onboarding/renewal/leaving journeys).
 
@@ -17,7 +17,7 @@ The rule this document enforces: **the inbox lists and launches; each domain dec
 | Revision inspected | `hr-ux-by-rafi` @ `ccb3575b` (B5 on top of `main` with B1–B4, B6, M1, B2) |
 | A2-D | [access-policy.md](access-policy.md): roles, city scope, deny behaviour |
 | A3-D / A3 | [leave-calculation-contract.md](leave-calculation-contract.md), [a3-implementation.md](a3-implementation.md): pricing snapshot, balance effect, next-step text |
-| **G-B** | **Not reported yet (Rita).** This document was prepared as groundwork. If G-B changes any source below, §3–§7 are updated before sign-off. |
+| **G-B** | **PASS WITH CONDITIONS** at `ccb3575b` ([g-b-gate.md](g-b-gate.md)). It changed no source below. Four of its items land in C3 (§10a). |
 | DEC-05 (2026-10-16) + revision for leave (2026-10-20) | [decisions.md](decisions.md), quoted in §2.3 |
 | Related | C5-D [team-coverage-contract.md](team-coverage-contract.md) (shares the "my reports" rule); B6 [b6-implementation.md](b6-implementation.md) (notification `subject` and request state) |
 
@@ -213,4 +213,13 @@ Answered by the developer acting for the HR product owner (Rafi), question by qu
 | **AC-C3-D-02** Authorization, conflict/idempotency and batch semantics are agreed for each source. | **Met (decided 2026-10-23)** | §4 outcomes and per-owner guarantees; §4.3 objection (Q5, Q6); §5 authorization; §6.2 batch semantics; §9 answers |
 | **AC-C3-D-03** Bulk capability is explicit; no fake recruitment provider is added. | **Met (decided)** | §6.1 per-source bulk table (only checklist confirmations); §2.2 non-existent sources excluded |
 
-**G-B: pending. HR decisions: recorded (§9). Formal review: pending.** C3-D is **not** marked done.
+**G-B: passed with conditions. HR decisions: recorded (§9). Formal review: pending.** C3-D is **not** marked done.
+
+## 10a. Items from G-B for C3
+
+| G-B item | What C3 must do |
+|---|---|
+| G-B-1 | A stale decision currently shows the full-page "Forbidden" error. Return `already_handled` with who and when (§4.1). Observed: two sessions, request decided by the manager, HR's open dialog then saved. |
+| G-B-7 | Enter in the decision's reason field does nothing (no `<form>`). The inbox decision UI must submit on Enter like other forms. |
+| G-B-9 | HR can still decide (G1 above). Confirmed in the browser on the synthetic copy. |
+| G-B-6 | The leave **edit** dialog opened by a manager showed an empty Employee field. Reproduce before the inbox reuses that dialog for "View/Edit". |
