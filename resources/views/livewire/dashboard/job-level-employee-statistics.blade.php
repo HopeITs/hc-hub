@@ -8,9 +8,15 @@
 
     </div>
 
+    @if ($loadFailed)
+        <x-ui.load-error class="flex-1" />
+    @elseif (empty($jobLevelLabels))
+        <x-center-empty-state variant="empty" class="flex-1 min-h-40! border-0 shadow-none" />
+    @else
     <div class="relative flex-1 min-h-[200px]">
         <canvas id="jobLevelEmployeesChart" class="w-full h-full"></canvas>
     </div>
+    @endif
 
 </div>
 

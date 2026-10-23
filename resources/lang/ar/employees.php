@@ -50,4 +50,9 @@ return [
         'personal-phone-format' => 'يجب أن يتكون الهاتف الشخصي من 10 أرقام تماماً وأن يبدأ بـ 09.',
         'national-number-syrian' => 'يجب أن يتكون الرقم الوطني للسوريين من 11 رقماً تماماً.',
     ],
+    'drawer' => [
+        'pending-requests' => 'طلبات معلّقة',
+        'leave-request' => 'طلب إجازة',
+        'position-n' => 'المنصب :n',
+    ],
 ];

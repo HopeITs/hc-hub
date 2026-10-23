@@ -50,4 +50,9 @@ return [
         'personal-phone-format' => 'The personal phone must be exactly 10 digits and start with 09.',
         'national-number-syrian' => 'The national number must be exactly 11 digits for Syrian employees.',
     ],
+    'drawer' => [
+        'pending-requests' => 'Pending requests',
+        'leave-request' => 'Leave request',
+        'position-n' => 'Position :n',
+    ],
 ];

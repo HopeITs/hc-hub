@@ -3,6 +3,7 @@
 namespace App\Livewire\Employee\Leave;
 
 use App\Enums\LeaveRequestStatus;
+use App\Livewire\Concerns\HasScreenListStates;
 use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Forms\LeaveRequestForm;
 use App\Models\LeaveRequest;
@@ -19,6 +20,7 @@ use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 
 class MyLeaveRequestTable extends LivewireTable
 {
+    use HasScreenListStates;
     use WithFeedback;
 
     public LeaveRequestForm $form;
@@ -61,6 +63,30 @@ class MyLeaveRequestTable extends LivewireTable
         $leaveRequest->delete();
 
         $this->toast();
+    }
+
+    protected function emptyScreenState(): array
+    {
+        // Same permission the create handler enforces; a role without it gets text only.
+        $canCreate = auth()->user()?->hasActivePermission('leaves.create') ?? false;
+
+        return [
+            'title' => __('states.leave-empty-title'),
+            'description' => __($canCreate ? 'states.leave-empty-help' : 'states.leave-empty-help-readonly'),
+            'action' => $canCreate
+                ? ['label' => __('leaves.modal.new-title'), 'alpine' => "\$dispatch('openRequestLeaveCreate')"]
+                : null,
+        ];
+    }
+
+    protected function narrowedByTab(): bool
+    {
+        return $this->statusFilter !== 'all';
+    }
+
+    protected function clearTab(): void
+    {
+        $this->dispatch('leaveStatusFilterCleared');
     }
 
     protected function rowClickAction(Model $model): ?string

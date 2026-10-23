@@ -130,7 +130,7 @@
 <div
     x-data="contractComposer(@js($composerConfig))"
     x-init="initialize()"
-    class="pb-2 max-lg:pb-28"
+    class="pb-2 max-lg:pb-40"
 >
     {{-- Errors in a collapsed section; each entry opens it (reveal-field). --}}
     <x-forms.errors-validation-list :sections="$errorSections ?? []" />

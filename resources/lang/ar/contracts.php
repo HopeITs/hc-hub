@@ -102,4 +102,20 @@ return [
         'pay_tiers.*.condition_ar' => 'الشرط (بالعربية)',
         'pay_tiers.*.amount' => 'المبلغ',
     ],
+
+    // B4 contracts list: named views, row actions, details drawer.
+    'views-label' => 'العرض',
+    'view-active' => 'السارية',
+    'view-ending-soon' => 'تنتهي قريبًا (:days يومًا)',
+    'view-ended' => 'المنتهية / المُنهاة',
+    'view-draft' => 'حجوزات المسودة',
+    'ends-in-days' => '{0} تنتهي اليوم|{1} تنتهي غدًا|{2} تنتهي بعد يومين|[3,10] تنتهي بعد :count أيام|[11,*] تنتهي بعد :count يومًا',
+    'view-named' => 'عرض عقد :name',
+    'more-actions-for' => 'مزيد من الإجراءات لـ :name',
+    'auto-renew-turn-on' => 'تفعيل التجديد التلقائي',
+    'auto-renew-turn-off' => 'إيقاف التجديد التلقائي',
+    'drawer-title' => 'تفاصيل العقد',
+    'drawer-close' => 'إغلاق تفاصيل العقد',
+    'drawer-open-full' => 'فتح العقد كاملًا',
+    'export-columns-shown' => 'يصدّر الأعمدة المعروضة',
 ];

@@ -53,7 +53,7 @@
                     </svg>
                     <span>Notifications</span>
                 </div>
-                <livewire:notifications.counter wire:poll.10s/>
+                <livewire:notifications.counter :poll="false" />
             </a>
         </div>
 

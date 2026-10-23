@@ -445,8 +445,12 @@ class ContractAutoRenewalWorkflowTest extends TestCase
             ['terminated_at' => '2026-06-30', 'is_active' => false],
         );
 
+        // Terminated contracts live in the "ended" view, and the termination date
+        // is one of the optional columns (compact defaults, B4).
         Livewire::actingAs($fixtures['hr'])
             ->test(ContractsTable::class)
+            ->call('setPreset', 'ended')
+            ->call('selectAllColumns', true)
             ->assertSee('2026-06-30')
             ->assertDontSee('confirmToggleAutoRenew')
             ->call('toggleAutoRenewConfirmed', ['id' => $contract->id])

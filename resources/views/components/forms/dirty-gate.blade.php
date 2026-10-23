@@ -24,7 +24,7 @@
     back to a tab with unsaved entries keeps them counted as unsaved. Only the
     component's `form-saved` event (after a save that succeeded) moves it.
 --}}
-<div {{ $attributes }}
+<div {{ $attributes->class(['m1-action-bar']) }}
     x-data="{
         gated: @js((bool) $active),
         entry: null,

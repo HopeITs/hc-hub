@@ -7,7 +7,7 @@
     <div class="flex items-center justify-between">
         <h2 class="text-h4 font-semibold text-neutral-800">@lang('general.notifications')</h2>
 
-        @if($notifications->getCollection()->contains(fn ($n) => is_null($n->read_at)))
+        @if(! $loadFailed && $unreadCount > 0)
             <button
                 type="button"
                 wire:click="markAllAsRead"
@@ -17,6 +17,15 @@
         @endif
     </div>
 
+    {{-- Polite announcement after load, retry and mark-all-read. --}}
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        <span wire:loading wire:target="markAllAsRead,retryLoad,gotoPage,nextPage,previousPage">{{ __('states.notifications-loading') }}</span>
+        <span wire:loading.remove wire:target="markAllAsRead,retryLoad,gotoPage,nextPage,previousPage">{{ $loadFailed ? __('general.state-error-title') : trans_choice('states.notifications-summary', $unreadCount) }}</span>
+    </p>
+
+    @if($loadFailed)
+        <x-ui.load-error />
+    @else
     {{-- Card list --}}
     <div class="overflow-hidden rounded-surface border border-neutral-100 bg-white shadow-[0_25px_80px_-40px_rgba(2,6,23,0.35)] ring-1 ring-black/5">
         @forelse ($notifications as $notification)
@@ -98,14 +107,16 @@
                       x-bind:style="clicked ? 'opacity: 0; transform: scale(0)' : ''"></span>
             </a>
         @empty
-            <div class="flex flex-col items-center justify-center gap-2 px-4 py-16 text-center">
-                <span class="inline-flex size-12 items-center justify-center rounded-full bg-neutral-100 text-secondary-light">
+            <div class="flex min-h-72 flex-col items-center justify-center gap-2 px-4 py-16 text-center" data-state="empty">
+                <span class="inline-flex size-12 items-center justify-center rounded-full bg-neutral-100 text-secondary-light" aria-hidden="true">
                     <x-icons.notification class="size-5" />
                 </span>
-                <span class="text-body text-secondary-light">@lang('general.no-notifications')</span>
+                <h3 class="text-body font-semibold text-neutral-800">@lang('general.no-notifications')</h3>
+                <p class="text-small text-secondary-light">@lang('states.notifications-empty-help')</p>
             </div>
         @endforelse
     </div>
 
     {{ $notifications->links() }}
+    @endif
 </div>
