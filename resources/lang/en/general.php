@@ -759,6 +759,7 @@ return [
     // Contract create — the single-page "Composer" screen.
     'composer' => [
 
+        'submit-in-progress' => 'This contract is still being saved. Wait a moment, then check the contracts list before sending it again.',
         'assignment' => 'Assignment & Contract',
         'schedule' => 'Schedule',
         'pay' => 'Pay',
