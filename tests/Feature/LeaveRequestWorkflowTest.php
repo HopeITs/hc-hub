@@ -1107,6 +1107,23 @@ class LeaveRequestWorkflowTest extends TestCase
      *
      * @return array{0: User, 1: LeaveRequest}
      */
+    /** C1: the sidebar's work inbox counts the team's pending request, and drops it once decided. */
+    public function test_c1_work_inbox_counts_pending_requests_of_the_managers_team(): void
+    {
+        [$manager, $leave] = $this->createManagerEditFixture();
+        $manager->setActiveRole($manager->roles()->where('name', 'manager')->value('roles.id'));
+
+        Livewire::actingAs($manager->fresh())
+            ->test(\App\Livewire\Layout\Sidebar::class)
+            ->assertSeeHtml('data-testid="nav-badge">1<');
+
+        $leave->update(['status' => LeaveRequestStatus::Rejected]);
+
+        Livewire::actingAs($manager->fresh())
+            ->test(\App\Livewire\Layout\Sidebar::class)
+            ->assertSeeHtml('data-testid="nav-badge">0<');
+    }
+
     private function createManagerEditFixture(): array
     {
         [, $leave] = $this->createPendingDecisionFixture();

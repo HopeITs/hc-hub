@@ -11,7 +11,6 @@ use App\Enums\LeaveRequestStatus;
         <livewire:layout.breadcrumbs
             :title="__('general.all-leaves')"
             :crumbs="[
-                ['label' => __('general.holidays-and-leaves')],
 
             ]"
             :showButton="true"

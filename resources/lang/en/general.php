@@ -956,6 +956,22 @@ return [
     ],
 
     // A4: sidebar group headings.
+    // C1: the sidebar areas of C0 (docs/ux/interaction-contract.md §4, §8).
+    'nav' => [
+        'area' => [
+            'my-space' => 'My space',
+            'my-team' => 'My team',
+            'hr' => 'HR operations',
+            'settings' => 'Settings',
+        ],
+        'organisation' => 'Organization',
+        'work-inbox' => 'Work inbox',
+        'work-inbox-count' => ':count items waiting for you',
+        'team-leaves' => 'Team leaves',
+        'team-contracts' => 'Team contracts',
+        'acting-as' => 'Working as',
+    ],
+
     'nav-group' => [
         'main' => 'Main',
         'management' => 'Management',

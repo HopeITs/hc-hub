@@ -958,6 +958,22 @@ return [
     ],
 
     // A4: عناوين مجموعات القائمة الجانبية.
+    // C1: أقسام القائمة الجانبية من C0 (docs/ux/interaction-contract.md §4، §8).
+    'nav' => [
+        'area' => [
+            'my-space' => 'مساحتي',
+            'my-team' => 'فريقي',
+            'hr' => 'عمليات الموارد البشرية',
+            'settings' => 'الإعدادات',
+        ],
+        'organisation' => 'المنظمة',
+        'work-inbox' => 'صندوق المهام',
+        'work-inbox-count' => ':count بانتظارك',
+        'team-leaves' => 'إجازات فريقي',
+        'team-contracts' => 'عقود فريقي',
+        'acting-as' => 'تعمل بصفة',
+    ],
+
     'nav-group' => [
         'main' => 'الرئيسية',
         'management' => 'الإدارة',
