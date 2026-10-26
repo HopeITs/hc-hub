@@ -1024,6 +1024,68 @@ class LeaveRequestWorkflowTest extends TestCase
      * The all-leaves table lists other people's requests, so the employee
      * column has to be there for every role that can reach the page.
      */
+    public function test_gb6_a_manager_editing_a_team_members_request_sees_the_employee_and_can_save(): void
+    {
+        [$manager, $leave] = $this->createManagerEditFixture();
+        $employee = $leave->leaveBalance->contract->employee;
+
+        $component = Livewire::actingAs($manager)
+            ->test(AllLeaveRequestModule::class)
+            ->call('edit', $leave->id)
+            ->assertSet('formModal', true)
+            ->assertSet('form.employee_id', $employee->id)
+            ->assertSeeHtml('data-testid="leave-form-employee"')
+            ->assertSee($employee->name)
+            ->assertDontSeeHtml('id="employee_id"');
+
+        $component->set('form.reason', 'Changed by the direct manager')
+            ->call('confirmSave')
+            ->assertHasNoErrors()
+            ->call('processSave')
+            ->assertHasNoErrors();
+
+        $leave->refresh();
+        $this->assertSame('Changed by the direct manager', $leave->reason);
+        $this->assertSame($employee->id, $leave->leaveBalance->contract->employee_id);
+    }
+
+    public function test_gb6_a_manager_cannot_move_a_team_members_request_onto_their_own_balance(): void
+    {
+        [$manager, $leave] = $this->createManagerEditFixture();
+        $managerBalanceId = DB::table('leave_balances')
+            ->whereIn('contract_id', DB::table('contracts')->where('employee_id', $manager->employee_id)->pluck('id'))
+            ->value('id');
+        $this->assertNotNull($managerBalanceId);
+
+        Livewire::actingAs($manager)
+            ->test(AllLeaveRequestModule::class)
+            ->call('edit', $leave->id)
+            ->set('form.leave_balance_id', $managerBalanceId)
+            ->call('confirmSave')
+            ->assertHasErrors('form.leave_balance_id');
+
+        $this->assertSame($leave->leave_balance_id, $leave->fresh()->leave_balance_id);
+    }
+
+    /**
+     * A pending request whose employee reports to a manager (direct-manager
+     * position), the way test_direct_manager_can_open_a_pending_team_members_leave_decision builds it.
+     *
+     * @return array{0: User, 1: LeaveRequest}
+     */
+    private function createManagerEditFixture(): array
+    {
+        [, $leave] = $this->createPendingDecisionFixture();
+        [$manager] = $this->createRejectedLeaveFixture(null, 'direct.manager@example.test', 'direct-manager');
+        $manager->assignRole(Role::findOrCreate('manager', 'web'));
+
+        $managerPositionId = DB::table('contracts')->where('employee_id', $manager->employee_id)->value('position_id');
+        $teamMemberPositionId = DB::table('contracts')->where('id', $leave->leaveBalance->contract_id)->value('position_id');
+        DB::table('positions')->where('id', $teamMemberPositionId)->update(['direct_manager_id' => $managerPositionId]);
+
+        return [$manager->fresh(), $leave->fresh()];
+    }
+
     private function assertAllLeavesTableNamesRequestingEmployee(string $roleName): void
     {
         [, $teamMemberLeave] = $this->createPendingDecisionFixture();

@@ -64,13 +64,21 @@ use App\Enums\LeaveRequestStatus;
             <x-forms.errors-validation-list/>
             <div class="grid md:grid-cols-2 gap-4">
                 <div class="md:col-span-1">
-                    <x-forms.input-label for="employee_id" required>{{trans_choice('general.employee',1)}}</x-forms.input-label>
-                    <x-forms.select2-input wire:model.live="form.employee_id" id="employee_id">
-                        <option value="">{{ __('leaves.select-employee') }}</option>
-                        @foreach($employees as $emp)
-                            <option value="{{ $emp->id }}">{{ $emp->name }}</option>
-                        @endforeach
-                    </x-forms.select2-input>
+                    {{-- Only HR has an employee list. A manager editing a team member's
+                         request sees whose it is; an empty dropdown there showed no
+                         one and could clear the leave type (G-B-6). --}}
+                    @if ($employees->isEmpty() && $form->leaveRequest)
+                        <x-forms.input-label>{{trans_choice('general.employee',1)}}</x-forms.input-label>
+                        <p class="py-2 text-neutral-800" data-testid="leave-form-employee"><bdi>{{ $form->leaveRequest->leaveBalance?->contract?->employee?->name }}</bdi></p>
+                    @else
+                        <x-forms.input-label for="employee_id" required>{{trans_choice('general.employee',1)}}</x-forms.input-label>
+                        <x-forms.select2-input wire:model.live="form.employee_id" id="employee_id">
+                            <option value="">{{ __('leaves.select-employee') }}</option>
+                            @foreach($employees as $emp)
+                                <option value="{{ $emp->id }}">{{ $emp->name }}</option>
+                            @endforeach
+                        </x-forms.select2-input>
+                    @endif
                     <x-error-span>{{ $errors->first('form.employee_id') }}</x-error-span>
                 </div>
             

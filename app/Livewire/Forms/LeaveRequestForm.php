@@ -1165,6 +1165,14 @@ class LeaveRequestForm extends Form
                 ->find($this->employee_id);
         }
 
+        // An edit by anyone else (the owner, or a manager the policy let in)
+        // is about the request's own employee, never the editor's profile:
+        // a manager's edit was validated against the manager's own contract
+        // and always refused (G-B-6).
+        if ($this->leaveRequest) {
+            return $this->leaveRequest->leaveBalance?->contract?->employee;
+        }
+
         return $user?->profile;
     }
 

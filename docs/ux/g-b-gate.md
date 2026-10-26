@@ -83,9 +83,9 @@ Data integrity summary: no duplicate request, contract, account or decision; bal
 | G-B-3 | Phone: after a failed save in a long dialog, the inline error can be below the visible area; focus is not moved and the summary stays hidden (it counts an off-screen message as "shown"). | Medium | **Fixed** (§9): after a failed save the first error is scrolled into view and focused; an inline message counts as "shown" only when it is inside the visible area. | Rafi |
 | G-B-4 | Leave tables (All leaves, My leaves, Balances) are sideways tables on phones; the status column is off-screen. Already listed as not done in B4 and M1. | Medium | **Carried**: convert to cards (B4-D §6) in a follow-up before G-C. | B4/M1 owners |
 | G-B-5 | Tapping a decided leave row opens the **editor**, not a read-only view (B4D-Q2 was applied to employees and contracts only). | Low | Carried with G-B-4. | B4 owner |
-| G-B-6 | The leave **edit** dialog opened by the manager showed the *Employee* field empty (red border). Seen once, on request of Nour Halabi (2 Oct). Not investigated further here. | Low, to confirm | **Reproduce and decide** before C3 reuses the dialog. | Leave owner |
+| G-B-6 | The leave **edit** dialog opened by the manager showed the *Employee* field empty (red border). Seen once, on request of Nour Halabi (2 Oct). Not investigated further here. | **Medium** (was Low, to confirm) | **Fixed** (§9). Reproduced, and worse than it looked: a manager's edit was validated against the manager's own contract, so every save was refused, and a leave type from the manager's own balance was accepted. | Rafi |
 | G-B-7 | Keyboard: pressing Enter in the decision dialog's reason field does nothing (no `<form>`); Tab to *Save* works. | Low | Fix in C3 (decision UI) or A5 follow-up. | Frontend |
-| G-B-8 | Composer: choosing the contract type after entering the start date resets the start date to the type's default. | Low | Composer follow-up: keep a user-entered date. | Contracts owner |
+| G-B-8 | Composer: choosing the contract type after entering the start date resets the start date to the type's default. | Low | **Fixed** (§9): a date the user typed is kept when the type changes. | Rafi |
 | G-B-9 | HR (city) can still decide leave requests; DEC-05 revision says only the direct manager decides (A3 §4, C3-D G1). | Policy gap, known | **C3** implements DEC-05 rev. | C3 |
 | G-B-10 | Auto-renew is on by default and the composer does not ask (X2 note). | Info | HR question for D4. | HR product owner |
 | G-B-11 | Not covered here: screen reader, real phone and on-screen keyboard, 200 % zoom; 7 of 16 task × language × device combinations; participant timings. | Limitation | Carried to X2-R / G-C; G-A item 2 still open. | QA lead |
@@ -111,7 +111,7 @@ Data integrity summary: no duplicate request, contract, account or decision; bal
 
 ## 8. Handoff
 
-C0 and C3-D may proceed. C3 takes G-B-7, G-B-9 and must not reuse the leave edit dialog before G-B-6 is checked. G-B-1, G-B-2 and G-B-3 are fixed (§9). G-B-4/5 should be closed before G-C. **Formal review (QA engineer + technical lead): pending.**
+C0 and C3-D may proceed. C3 takes G-B-7, G-B-9; G-B-6 is fixed, so C3 may reuse the leave edit dialog. G-B-1, G-B-2, G-B-3, G-B-6 and G-B-8 are fixed (§9). G-B-4/5 should be closed before G-C. **Formal review (QA engineer + technical lead): pending.**
 
 ## 9. Follow-up: G-B-1 and G-B-2 fixed
 
@@ -152,3 +152,39 @@ Date: 2026-10-23. On `hr-ux-by-rafi` after `8872f852`. Checked on a separate syn
 
   An earlier phone run, before the instant scroll, showed the summary correctly listing the off-screen error but left the field below the screen.
 - **Tests:** none added; the suite has no JS runner. Full suite: 934 tests, 1 failure in `ContractsTableB4Test::test_no_amount_in_the_rendered_html_or_payload_under_any_column_choice`, which passes 3 of 3 on its own. It is a flaky check (it looks for the digits `8731` in HTML that also holds random component ids and checksums), not related to this change; to be raised with the B4 owner.
+
+**G-B-6: fixed (2026-10-26).**
+- **Cause:** the leave form chose "whose leave is this" from the signed-in user. Only HR may pick an employee, so for anyone else it used the editor's own profile, even when a manager was editing a team member's request (`LeaveRequestPolicy::update()` allows it).
+  - The *Employee* dropdown is filled only for HR, so a manager saw it empty.
+  - The leave type was validated against the **manager's** contract. Every save of a team member's real leave type was refused ("The selected Leave Type is invalid").
+  - A leave type from the manager's **own** balance was accepted, so an edit could move the request onto the manager's balance.
+- **Change:**
+  - `LeaveRequestForm::targetEmployee()`: an edit by someone who cannot pick employees is about the request's own employee. HR keeps its city-scoped choice; a new request by staff still uses their own profile.
+  - The leave dialog (`all.blade.php`): when there is no employee list and the dialog is an edit, it shows the employee's name read-only instead of an empty dropdown.
+- **Tests** (`LeaveRequestWorkflowTest`), both failing without the change:
+  - `test_gb6_a_manager_editing_a_team_members_request_sees_the_employee_and_can_save`;
+  - `test_gb6_a_manager_cannot_move_a_team_members_request_onto_their_own_balance`.
+- **Browser** (copy `hc-hr-gb12`, `manager.alp`, Arabic, phone width):
+  - Edit on request 64 shows «نور حلبي», the employee of the original report, and no empty field. The red border seen earlier is the leave type dropdown's focus style, not an error.
+  - Changing the reason and saving went through the confirmation. Request 64 kept employee 7, balance 44 and its rejected status; only the reason changed.
+- **Still open (G-B-5):** a manager reaches this editor only from a decided row; a pending row offers *Decision* and *Details*. Whether a decided request should be editable at all is G-B-5.
+
+**G-B-8: fixed (2026-10-26).**
+- **Change** (`resources/js/contract-composer.js`, `_assignment.blade.php`):
+  - The composer remembers whether the user typed each date. Only the user's own input in a date field sets this; a type change or a seed does not.
+  - Choosing a type keeps a typed date and fills only the dates that are still defaults.
+  - With a typed start, the end follows the rules of `ContractForm::updatedContractTypeId()`:
+    - trial: three months, without overflow, the same as Carbon's `addMonthsNoOverflow` (30 Nov → 28 Feb);
+    - other types: the type's end if it is still after the start, otherwise one year less a day.
+- **Server:** unchanged. The composer's dates already override the type defaults on save (`applyComposerPayload`).
+- **Browser** (copy `hc-hr-gb12`, `hr.alp`, Arabic, contract create; dates entered by key presses):
+
+  | Steps | Start | End |
+  |---|---|---|
+  | No date typed → *Volunteer Contract* | 1 Nov (default) | 31 Dec (default) |
+  | Start 6 Nov typed → *Volunteer Contract* (before: reset to 1 Nov) | **6 Nov** | 31 Dec |
+  | → *Trial Volunteer Contract* | **6 Nov** | 6 Feb 2027 (3 months) |
+  | End 15 Dec typed → *Volunteer Contract* | **6 Nov** | **15 Dec** |
+- **Tests:** none added (no JS runner).
+
+**Suite after G-B-6 and G-B-8:** 936 tests, 5163 assertions, 0 failures (the `ContractsTableB4Test` check that failed once above passed this time).
