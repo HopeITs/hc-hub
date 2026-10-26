@@ -439,12 +439,13 @@ return [
         'employee.leave.emp-leave-balance-module' => ['confirmSave', ...$closeGuard],
         // B3 HasScreenListStates: clearAllFilters resets search/filters/tab (view state only),
         // renderEmptyState and stateAnnouncement render text, retryLoad re-renders. No writes.
+        // G-B-4: cardView only names the phone card's Blade view; rows still come from query().
         'employee.leave.all-leave-request-table' => [
             'edit', 'confirmDelete', 'confirmHrReview', 'refreshTable', 'setStatusFilter',
-            'clearAllFilters', 'renderEmptyState', 'retryLoad', 'stateAnnouncement',
+            'clearAllFilters', 'renderEmptyState', 'retryLoad', 'stateAnnouncement', 'cardView',
         ],
-        'employee.leave.my-leave-request-table' => ['edit', 'confirmDelete', 'setStatusFilter', 'clearAllFilters', 'renderEmptyState', 'retryLoad', 'stateAnnouncement'],
-        'employee.leave.emp-leave-balance-table' => ['clearAllFilters', 'renderEmptyState', 'retryLoad', 'stateAnnouncement'],
+        'employee.leave.my-leave-request-table' => ['edit', 'confirmDelete', 'setStatusFilter', 'clearAllFilters', 'renderEmptyState', 'retryLoad', 'stateAnnouncement', 'cardView'],
+        'employee.leave.emp-leave-balance-table' => ['clearAllFilters', 'renderEmptyState', 'retryLoad', 'stateAnnouncement', 'cardView'],
         // B3: read-only lists of the caller's own checklist rows; retryLoad re-renders only.
         'checklist-items.all-items' => ['retryLoad'],
         'checklist-items.pending-items' => ['retryLoad'],

@@ -822,6 +822,40 @@ class LeaveRequestWorkflowTest extends TestCase
         Notification::assertCount(3);
     }
 
+    /** G-B-4/5: All leaves has phone cards; a decided request opens read-only, never the editor. */
+    public function test_gb45_all_leaves_cards_and_a_decided_request_opens_the_read_only_details(): void
+    {
+        [$hr, $pending] = $this->createPendingDecisionFixture();
+        [, $decided] = $this->createRejectedLeaveFixture('Busy week', 'colleague@example.test', 'colleague');
+        $sameCity = $pending->leaveBalance->contract->employee->city_id;
+        DB::table('employees')->where('id', $decided->leaveBalance->contract->employee_id)->update(['city_id' => $sameCity]);
+
+        $html = Livewire::actingAs($hr)->test(AllLeaveRequestTable::class)->html();
+
+        foreach ([$pending, $decided] as $leave) {
+            $this->assertStringContainsString('data-card="'.$leave->id.'"', $html);
+            $this->assertStringContainsString(e($leave->leaveBalance->contract->employee->name), $html);
+        }
+
+        // Pending opens the decision; decided opens the details (row and card alike).
+        $this->assertStringContainsString(e("\$dispatch('openDecisionRequestLeave', { id: {$pending->id} })"), $html);
+        $this->assertStringContainsString(e("\$dispatch('openShowRequestLeave', { id: {$decided->id} })"), $html);
+        $this->assertStringNotContainsString('x-on:click.prevent="'.e("\$dispatch('openRequestLeaveEdit', { id: {$decided->id} })").'"', $html);
+        $this->assertStringNotContainsString('x-on:click="'.e("\$dispatch('openRequestLeaveEdit', { id: {$decided->id} })").'"', $html);
+    }
+
+    /** G-B-4: My leaves has phone cards with the leave type first and the same actions. */
+    public function test_gb4_my_leaves_cards_show_the_request_and_its_actions(): void
+    {
+        [$employee, $leave] = $this->createRejectedLeaveFixture('Busy week');
+
+        $html = Livewire::actingAs($employee)->test(MyLeaveRequestTable::class)->html();
+
+        $this->assertStringContainsString('data-card="'.$leave->id.'"', $html);
+        $this->assertStringContainsString(e($leave->leaveBalance->leaveType->name_en), $html);
+        $this->assertStringContainsString(e("\$dispatch('openMyLeaveDetails', { id: {$leave->id} })"), $html);
+    }
+
     public function test_all_leaves_table_names_the_requesting_employee_for_a_super_admin(): void
     {
         [$decisionMaker, $leave] = $this->createPendingDecisionFixture();

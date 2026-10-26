@@ -81,8 +81,8 @@ Data integrity summary: no duplicate request, contract, account or decision; bal
 | G-B-1 | A stale leave decision (another person already decided) shows the full-page "Forbidden — you don't have permission" error instead of "already rejected by …". Data is safe. | Medium | **Fixed** (§9). Opening or saving a decision on a request that is no longer pending shows its details and "already rejected by … on …", the `already_handled` outcome of [approval-source-contract.md](approval-source-contract.md) §4.1. C3's inbox still maps its own refusals the same way. | Rafi |
 | G-B-2 | When the server cannot be reached, *Create contract* (and Livewire actions generally) give **no feedback**: no toast, no error, the button returns to normal. Entries are kept and a retry is safe (B2 token). | Medium | **Fixed** (§9): one error toast with *Try again*, which repeats the failed actions ([feedback-contract.md](feedback-contract.md) §2.3). | Rafi |
 | G-B-3 | Phone: after a failed save in a long dialog, the inline error can be below the visible area; focus is not moved and the summary stays hidden (it counts an off-screen message as "shown"). | Medium | **Fixed** (§9): after a failed save the first error is scrolled into view and focused; an inline message counts as "shown" only when it is inside the visible area. | Rafi |
-| G-B-4 | Leave tables (All leaves, My leaves, Balances) are sideways tables on phones; the status column is off-screen. Already listed as not done in B4 and M1. | Medium | **Carried**: convert to cards (B4-D §6) in a follow-up before G-C. | B4/M1 owners |
-| G-B-5 | Tapping a decided leave row opens the **editor**, not a read-only view (B4D-Q2 was applied to employees and contracts only). | Low | Carried with G-B-4. | B4 owner |
+| G-B-4 | Leave tables (All leaves, My leaves, Balances) are sideways tables on phones; the status column is off-screen. Already listed as not done in B4 and M1. | Medium | **Fixed** (§9): the three leave tables are cards on phones (B4-D §6). | Rafi (for B4/M1) |
+| G-B-5 | Tapping a decided leave row opens the **editor**, not a read-only view (B4D-Q2 was applied to employees and contracts only). | Low | **Fixed** (§9): a decided row or card opens the read-only details (B4D-Q2); Edit is its own button. | Rafi (for B4) |
 | G-B-6 | The leave **edit** dialog opened by the manager showed the *Employee* field empty (red border). Seen once, on request of Nour Halabi (2 Oct). Not investigated further here. | **Medium** (was Low, to confirm) | **Fixed** (§9). Reproduced, and worse than it looked: a manager's edit was validated against the manager's own contract, so every save was refused, and a leave type from the manager's own balance was accepted. | Rafi |
 | G-B-7 | Keyboard: pressing Enter in the decision dialog's reason field does nothing (no `<form>`); Tab to *Save* works. | Low | Fix in C3 (decision UI) or A5 follow-up. | Frontend |
 | G-B-8 | Composer: choosing the contract type after entering the start date resets the start date to the type's default. | Low | **Fixed** (§9): a date the user typed is kept when the type changes. | Rafi |
@@ -111,7 +111,7 @@ Data integrity summary: no duplicate request, contract, account or decision; bal
 
 ## 8. Handoff
 
-C0 and C3-D may proceed. C3 takes G-B-7, G-B-9; G-B-6 is fixed, so C3 may reuse the leave edit dialog. G-B-1, G-B-2, G-B-3, G-B-6 and G-B-8 are fixed (§9). G-B-4/5 should be closed before G-C. **Formal review (QA engineer + technical lead): pending.**
+C0 and C3-D may proceed. C3 takes G-B-7, G-B-9; G-B-6 is fixed, so C3 may reuse the leave edit dialog. G-B-1 to G-B-6 and G-B-8 are fixed (§9); nothing from G-B is left for G-C except the C3 items and the HR/QA notes. **Formal review (QA engineer + technical lead): pending.**
 
 ## 9. Follow-up: G-B-1 and G-B-2 fixed
 
@@ -188,3 +188,35 @@ Date: 2026-10-23. On `hr-ux-by-rafi` after `8872f852`. Checked on a separate syn
 - **Tests:** none added (no JS runner).
 
 **Suite after G-B-6 and G-B-8:** 936 tests, 5163 assertions, 0 failures (the `ContractsTableB4Test` check that failed once above passed this time).
+
+**G-B-4 and G-B-5: fixed (2026-10-26).** Built from the B4-D decisions already recorded (B4D-Q2, B4D-Q7, [table-contract.md](table-contract.md) §3 and §6); no new question.
+- **Phone cards** through the shared `cardView()` hook that the employee and contract lists already use. Below `md` the table is replaced by cards, so nothing scrolls sideways.
+
+  | Table | Card |
+  |---|---|
+  | All leaves | **Employee name** · leave type · dates · duration · status · *Seen by HR* (HR only, decided requests) · the row's actions |
+  | My leaves | **Leave type** · dates · duration · status, with *Seen by HR* on the same line · View, plus Edit and Delete while pending |
+  | Leave balances | **Name** · years of service · one row each for deserved, used and remaining · Edit |
+
+- **G-B-5:** in All leaves a decided row, or a tap on its card, opens the **read-only details**, not the editor. Pending still opens the decision.
+  - Edit is a separate button after View, shown only with `leaves.update`.
+  - Each table builds its action buttons once (`leaveActions()`), for the table column and the card alike.
+- **Status colour (found on the way):** the status pill's classes were built at runtime (`bg-{color}-100`), so Tailwind never generated them and the pill had no colour, in the table too.
+  - Both tables and the cards now use one partial with literal classes (`leave/partials/card-status`): pending amber, accepted green, rejected red text on grey.
+  - The look matches the employee status.
+- **Tests** (`LeaveRequestWorkflowTest`), both failing on the old tables:
+  - `test_gb45_all_leaves_cards_and_a_decided_request_opens_the_read_only_details`;
+  - `test_gb4_my_leaves_cards_show_the_request_and_its_actions`.
+- **Browser** (copy `hc-hr-gb12`, Arabic):
+
+  | Check | Size | Result |
+  |---|---|---|
+  | `manager.alp` · All leaves | 375×667 | 11 cards; no page scroll sideways; the date range reads start → end (checked by position); tapping accepted request 65 opened *Leave details*, not the editor |
+  | `hr.alp` · Balances | 375×667 | 15 cards; figures readable on their own rows |
+  | `staff.alp` · My leaves | 375×667 | 6 cards; pending with View/Edit/Delete; accepted with "Seen by HR" |
+  | `staff.alp` · My leaves | 1200×700 | the table shows (coloured pills) and the cards are hidden |
+
+- **Security:** the card helpers (`leaveActions`, `rowOpenAction`, `showsHrReview`, `cardBalance`) are `protected`, so the browser cannot call them. Only `cardView`, which just names a Blade view, is public; it is listed in `livewire_exempt`, as on the employee and contract tables. `LivewireMutationCoverageTest` caught the first, public version.
+- **Not done here (B4D-Q4):** the default tab per role (managers on "Needs my decision", HR on "Not yet seen by HR") and the tab kept in the URL. These belong with C3's inbox.
+
+**Suite after G-B-4/5:** 938 tests, 5174 assertions, 0 failures. In one earlier run the flaky `8731` check in `ContractsTableB4Test` failed again, this time in `test_phone_cards_render_with_the_named_actions_and_no_pay`; it passed on the rerun.
