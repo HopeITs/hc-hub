@@ -382,7 +382,8 @@ return [
         // dehydrateTracksTaskAttempt is a Livewire lifecycle hook: dehydrate*
         // cannot be called from the browser. It only flags an anonymous
         // attempt as having met a validation error (TracksTaskAttempt).
-        'contract.contract-create' => ['dehydrateTracksTaskAttempt'],
+        'contract.contract-create' => ['dehydrateTracksTaskAttempt', 'mountRemembersReturnTo', // C2 lifecycle hook (Livewire refuses direct calls to mount*): reads ?from through SafeReturn, writes nothing
+        ],
 
         // --- Authorized inside the method -----------------------------------
         // save() is create-or-update, so a single permission name in the
@@ -408,7 +409,9 @@ return [
         'employee-cards.manage-digital-id' => ['reissue', 'disable', 'enable', 'reportLost'],
         // updatedFormNewsableType() only clears dependent form selections;
         // it does not read a record or persist data. save() authorizes before writing.
-        'news.news-create' => ['save', 'updatedFormNewsableType'],
+        'news.news-create' => ['save', 'updatedFormNewsableType',
+            'mountRemembersReturnTo', // C2 lifecycle hook (Livewire refuses direct calls to mount*): reads ?from through SafeReturn, writes nothing
+        ],
         // Also runs assertCityIsAuthorized() and a Gate check on the city.
         'program-management.center.centers-module' => ['save', ...$closeGuard],
         'program-management.default-deliverable.default-deliverables-module' => ['save', ...$closeGuard],
@@ -427,6 +430,7 @@ return [
             'leaveImpact',
             ...$closeGuard,
             'dehydrateTracksTaskAttempt', // X2-I lifecycle hook, see contract.contract-create
+            'mountRemembersReturnTo', // C2 lifecycle hook (Livewire refuses direct calls to mount*): reads ?from through SafeReturn, writes nothing
         ],
         'employee.leave.all-leave-request-module' => [
             'edit', 'show', 'processSave', 'confirmSave', 'confirmDelete',
@@ -435,6 +439,7 @@ return [
             'updatedFormEmployeeId',
             ...$closeGuard,
             'dehydrateTracksTaskAttempt', // X2-I lifecycle hook, see contract.contract-create
+            'mountRemembersReturnTo', // C2 lifecycle hook (Livewire refuses direct calls to mount*): reads ?from through SafeReturn, writes nothing
         ],
         'employee.leave.emp-leave-balance-module' => ['confirmSave', ...$closeGuard],
         // B3 HasScreenListStates: clearAllFilters resets search/filters/tab (view state only),
@@ -516,7 +521,13 @@ return [
         // setActiveTab, not the mapped createDraftAndContinue/
         // positionOptionsForDraft/programOptionsForDraft/citiesForDraft/
         // canPickAnyDraftCity above.
-        'employee.employee-create' => ['setActiveTab', 'toggleBoardMember', 'skipDraft', 'updatedDraftCityId', 'updatedDraftProgramId'],
+        'employee.employee-create' => ['setActiveTab', 'toggleBoardMember', 'skipDraft', 'updatedDraftCityId', 'updatedDraftProgramId',
+            'mountRemembersReturnTo', // C2 lifecycle hook (Livewire refuses direct calls to mount*): reads ?from through SafeReturn, writes nothing
+        ],
+        // C2 header search: a lifecycle hook (Livewire refuses direct calls to updated*) that only
+        // trims the term and counts it against the per-user search limit. Results come from
+        // DirectoryAccess::constrain() and the active role's menu on every render.
+        'layout.global-search' => ['updatedQ'],
         // The add*/openInitiateReturnModal methods stage rows in the in-memory
         // form object; nothing is written until the mapped save* action runs,
         // and mount() has already authorized 'update' on this employee.

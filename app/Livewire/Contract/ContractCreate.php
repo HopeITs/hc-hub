@@ -3,6 +3,7 @@
 namespace App\Livewire\Contract;
 
 use App\Enums\ContractType as ContractTypeEnum;
+use App\Livewire\Concerns\RemembersReturnTo;
 use App\Livewire\Concerns\TracksTaskAttempt;
 use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Contract\Concerns\DrivesContractComposer;
@@ -44,6 +45,7 @@ use Livewire\Component;
 class ContractCreate extends Component
 {
     use DrivesContractComposer, ResolvesContractLocationOptions;
+    use RemembersReturnTo;
     use TracksTaskAttempt;
     use WithFeedback;
 

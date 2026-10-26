@@ -37,5 +37,6 @@
         </div>
     @endif
 
-    @include('livewire.contract.composer._screen', ['mode' => 'create'])
+    {{-- C2: Cancel returns to the page New was pressed on, when SafeReturn allows it. --}}
+    @include('livewire.contract.composer._screen', ['mode' => 'create', 'cancelUrl' => $returnTo ?? route('contracts.index')])
 </div>

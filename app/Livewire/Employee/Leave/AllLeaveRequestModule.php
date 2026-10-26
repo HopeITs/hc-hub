@@ -6,6 +6,7 @@ use App\Enums\LeaveRequestStatus;
 use App\Exceptions\LeaveDecisionAlreadyMade;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Concerns\GuardsModalClose;
+use App\Livewire\Concerns\RemembersReturnTo;
 use App\Livewire\Concerns\TracksTaskAttempt;
 use App\Livewire\Concerns\WithFeedback;
 use App\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
@@ -30,6 +31,7 @@ class AllLeaveRequestModule extends Component
     use AuthorizesActivePermissions;
     use FormatsLeaveDuration;
     use GuardsModalClose;
+    use RemembersReturnTo;
     use TracksTaskAttempt;
     use WithFeedback;
 
@@ -58,6 +60,10 @@ class AllLeaveRequestModule extends Component
 
     #[Url(as: 'mode')]
     public ?string $linkedLeaveMode = null;
+
+    /** C2: ?new=1 (the header's New button) opens the new-request dialog once. */
+    #[Url(as: 'new', except: false)]
+    public bool $startNew = false;
 
     public array $counts = [];
 
@@ -89,6 +95,11 @@ class AllLeaveRequestModule extends Component
             } else {
                 $this->show($leaveRequest->id);
             }
+        }
+
+        if ($this->startNew) {
+            $this->startNew = false;
+            $this->create();
         }
     }
 
@@ -344,6 +355,11 @@ class AllLeaveRequestModule extends Component
         }
 
         $this->form->resetValidation();
+
+        // C2: a request started from New and closed unsent goes back to where New was pressed.
+        if ($dialog !== 'decisionModal' && $this->returnTo !== null) {
+            $this->redirect($this->returnTo, navigate: true);
+        }
     }
 
     /**

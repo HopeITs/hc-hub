@@ -956,6 +956,29 @@ return [
     ],
 
     // A4: sidebar group headings.
+    // C2: header search and the New button (docs/ux/interaction-contract.md §6).
+    'global-search' => [
+        'label' => 'Search people and pages',
+        'placeholder' => 'Search people and pages',
+        'loading' => 'Searching…',
+        'too-short' => 'Type at least :count letters.',
+        'throttled' => 'Too many searches in a short time. Wait a minute, then try again.',
+        'failed' => 'Search is not available right now. Try again.',
+        'empty' => 'No people or pages found for “:term”.',
+        'count' => ':count result|:count results',
+        'pages' => 'Pages',
+        'people' => 'People',
+        'former' => 'former',
+    ],
+    'new-menu' => [
+        'label' => 'New',
+        'leave' => 'Leave request',
+        'leave-for-employee' => 'Leave request for an employee',
+        'employee' => 'Employee',
+        'contract' => 'Contract',
+        'news' => 'News item',
+    ],
+
     // C1: the sidebar areas of C0 (docs/ux/interaction-contract.md §4, §8).
     'nav' => [
         'area' => [

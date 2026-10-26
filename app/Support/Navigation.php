@@ -26,7 +26,7 @@ final class Navigation
     /**
      * @return array{inbox: array{count: int, route: string}|null, areas: list<array{id: string, label: string, items: list<array<string, mixed>>}>}
      */
-    public static function for(User $user, bool $isDeliverResponsible = false): array
+    public static function for(User $user, bool $isDeliverResponsible = false, bool $countInbox = true): array
     {
         $can = fn (string ...$permissions): bool => collect($permissions)->contains(fn ($p) => $user->hasActivePermission($p));
         $isManager = $user->activeRoleIs('manager');
@@ -120,7 +120,7 @@ final class Navigation
             $organisation !== [] ? ['id' => 'organisation', 'label' => __('general.nav.organisation'), 'items' => $organisation] : null,
         ]));
 
-        return ['inbox' => self::inbox($user, $can), 'areas' => $areas];
+        return ['inbox' => self::inbox($user, $can, $countInbox), 'areas' => $areas];
     }
 
     /**
@@ -155,6 +155,81 @@ final class Navigation
     }
 
     /**
+     * Every page of the active role's menu, flattened, with its name in both
+     * languages: what the header search offers as pages (C2, C0-Q6). A page
+     * that is not in the role's menu is not offered.
+     *
+     * @return list<array{route: string, area: string, label: string, label_en: string, label_ar: string}>
+     */
+    public static function pages(User $user, bool $isDeliverResponsible = false): array
+    {
+        $byLocale = [];
+        $current = app()->getLocale();
+
+        foreach (['en', 'ar'] as $locale) {
+            app()->setLocale($locale);
+            $byLocale[$locale] = self::flatten(self::for($user, $isDeliverResponsible, countInbox: false));
+        }
+
+        app()->setLocale($current);
+
+        $pages = [];
+        foreach ($byLocale[$current] as $key => $page) {
+            $pages[] = $page + [
+                'label_en' => $byLocale['en'][$key]['label'] ?? $page['label'],
+                'label_ar' => $byLocale['ar'][$key]['label'] ?? $page['label'],
+            ];
+        }
+
+        return $pages;
+    }
+
+    /**
+     * What the header's New button may start for the active role (C2, C0-Q3):
+     * the same permission each create screen checks on the server, which
+     * checks it again when used. Contract also needs pay visibility: a contract
+     * is its pay clause, and the salary-blind super-admin cannot fill it in.
+     *
+     * @return list<array{id: string, label: string, route: string, params: array<string, mixed>}>
+     */
+    public static function newActions(User $user): array
+    {
+        $can = fn (string $permission): bool => $user->hasActivePermission($permission);
+
+        return array_values(array_filter([
+            $can('leaves.create') && $can('leaves.view-own')
+                ? ['id' => 'new.leave', 'label' => __('general.new-menu.leave'), 'route' => 'leaves.index', 'params' => ['new' => 1]] : null,
+            // HR files a request for an employee from All leaves (the same rule as its Add button).
+            $can('leaves.create') && $can('leaves.view-all') && $user->activeRoleIs('HR', 'super-admin')
+                ? ['id' => 'new.leave-for-employee', 'label' => __('general.new-menu.leave-for-employee'), 'route' => 'leaves.all', 'params' => ['new' => 1]] : null,
+            $can('employees.create')
+                ? ['id' => 'new.employee', 'label' => __('general.new-menu.employee'), 'route' => 'employees.create', 'params' => []] : null,
+            $can('contracts.create') && $user->canViewSalary()
+                ? ['id' => 'new.contract', 'label' => __('general.new-menu.contract'), 'route' => 'contracts.create', 'params' => []] : null,
+            $can('news.create')
+                ? ['id' => 'new.news', 'label' => __('general.new-menu.news'), 'route' => 'news.create', 'params' => []] : null,
+        ]));
+    }
+
+    /**
+     * Route names a return link may point to (SafeReturn): the pages of the
+     * active role's menu, plus the record pages people start work from. Each
+     * of those pages still authorizes the visit itself.
+     *
+     * @return list<string>
+     */
+    public static function returnRoutes(User $user, bool $isDeliverResponsible = false): array
+    {
+        $menu = array_column(self::flatten(self::for($user, $isDeliverResponsible, countInbox: false)), 'route');
+
+        return array_values(array_unique([
+            ...$menu,
+            'dashboard', 'my-profile', 'notifications.index',
+            'employees.show', 'contracts.show', 'programs.show', 'centers.show',
+        ]));
+    }
+
+    /**
      * Staff of IT, CT and HR hand out and take back checklist items (the rule
      * the sidebar has always used).
      */
@@ -165,6 +240,26 @@ final class Navigation
         return in_array($department, ['IT', 'CT', 'HR'], true);
     }
 
+    /** @return array<string, array{route: string, area: string, label: string}> keyed by item id */
+    private static function flatten(array $nav): array
+    {
+        $pages = [];
+
+        if ($nav['inbox']) {
+            $pages['nav.inbox'] = ['route' => $nav['inbox']['route'], 'area' => '', 'label' => __('general.nav.work-inbox')];
+        }
+
+        foreach ($nav['areas'] as $area) {
+            foreach ($area['items'] as $item) {
+                foreach ($item['children'] ?? [$item] as $page) {
+                    $pages[$page['id']] = ['route' => $page['route'], 'area' => $area['label'], 'label' => $page['label']];
+                }
+            }
+        }
+
+        return $pages;
+    }
+
     /**
      * Interim work inbox (C0-Q2) until C3 ships its page: leave requests
      * waiting on this role, from the same scope the leave list uses. Pending
@@ -173,13 +268,17 @@ final class Navigation
      *
      * @return array{count: int, route: string}|null
      */
-    private static function inbox(User $user, callable $can): ?array
+    private static function inbox(User $user, callable $can, bool $count = true): ?array
     {
         $decides = $can('leaves.decide');
         $reviews = $can('leaves.review');
 
         if (! $decides && ! $reviews) {
             return null;
+        }
+
+        if (! $count) {
+            return ['count' => 0, 'route' => 'leaves.all'];
         }
 
         try {
