@@ -20,6 +20,26 @@ const FOCUSABLE = 'input:not([type=hidden]):not([disabled]), select:not([disable
 
 const isVisible = (el) => el.getClientRects().length > 0;
 
+/**
+ * Rendered *and* inside the visible area: within the window and within every
+ * scrolling container around it (a dialog's body on a phone). An element far
+ * down a long form is rendered but not seen (G-B-3).
+ */
+function isInView(el) {
+    if (!isVisible(el)) return false;
+
+    const rect = el.getBoundingClientRect();
+    const overlaps = (box) => rect.bottom > box.top && rect.top < box.bottom && rect.right > box.left && rect.left < box.right;
+
+    if (!overlaps({ top: 0, left: 0, bottom: window.innerHeight, right: window.innerWidth })) return false;
+
+    for (let box = el.parentElement; box && box !== document.body; box = box.parentElement) {
+        if (getComputedStyle(box).overflowY !== 'visible' && !overlaps(box.getBoundingClientRect())) return false;
+    }
+
+    return true;
+}
+
 // select2 hides the real <select> and takes focus on its own box.
 function focusTarget(el) {
     if (el?.classList?.contains('select2-hidden-accessible')) {
@@ -84,7 +104,7 @@ async function revealField(key, { section = null, reveal = null, wire = null, me
 
     if (!field) return;
 
-    field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    field.scrollIntoView({ block: 'center' });
     field.focus({ preventScroll: true });
 }
 
@@ -395,9 +415,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         sync() {
-            const visible = (el) => el.getClientRects().length > 0;
+            // Only a message the user can see now counts as shown. Re-checked
+            // after a save, a click or a key, not on scroll, so the list does
+            // not jump while the user scrolls to a field.
             const inline = [...document.querySelectorAll('[data-inline-error]')].filter(
-                (el) => visible(el) && !this.$el.contains(el),
+                (el) => isInView(el) && !this.$el.contains(el),
             );
             const items = [...this.$el.querySelectorAll('[data-error-key]')];
 
@@ -436,7 +458,7 @@ document.addEventListener('alpine:init', () => {
             const field = locateField(first.dataset.errorKey, first.textContent.trim(), summary);
 
             if (field) {
-                field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                field.scrollIntoView({ block: 'center' });
                 field.focus({ preventScroll: true });
 
                 return;
@@ -445,7 +467,7 @@ document.addEventListener('alpine:init', () => {
             const entry = [...summary.querySelectorAll('[data-error-key] button')].find(isVisible);
 
             if (entry) {
-                summary.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                summary.scrollIntoView({ block: 'center' });
                 entry.focus({ preventScroll: true });
             }
         },

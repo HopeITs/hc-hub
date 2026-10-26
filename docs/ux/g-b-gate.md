@@ -80,7 +80,7 @@ Data integrity summary: no duplicate request, contract, account or decision; bal
 |---|---|---|---|---|
 | G-B-1 | A stale leave decision (another person already decided) shows the full-page "Forbidden — you don't have permission" error instead of "already rejected by …". Data is safe. | Medium | **Fixed** (§9). Opening or saving a decision on a request that is no longer pending shows its details and "already rejected by … on …", the `already_handled` outcome of [approval-source-contract.md](approval-source-contract.md) §4.1. C3's inbox still maps its own refusals the same way. | Rafi |
 | G-B-2 | When the server cannot be reached, *Create contract* (and Livewire actions generally) give **no feedback**: no toast, no error, the button returns to normal. Entries are kept and a retry is safe (B2 token). | Medium | **Fixed** (§9): one error toast with *Try again*, which repeats the failed actions ([feedback-contract.md](feedback-contract.md) §2.3). | Rafi |
-| G-B-3 | Phone: after a failed save in a long dialog, the inline error can be below the visible area; focus is not moved and the summary stays hidden (it counts an off-screen message as "shown"). | Medium | **Fix with B2 follow-up**: scroll/focus the first error after a failed save; count only messages inside the viewport. **Partly done** in `8872f852` (focus); viewport counting still open (§9). | B2 owner (Rafi) |
+| G-B-3 | Phone: after a failed save in a long dialog, the inline error can be below the visible area; focus is not moved and the summary stays hidden (it counts an off-screen message as "shown"). | Medium | **Fixed** (§9): after a failed save the first error is scrolled into view and focused; an inline message counts as "shown" only when it is inside the visible area. | Rafi |
 | G-B-4 | Leave tables (All leaves, My leaves, Balances) are sideways tables on phones; the status column is off-screen. Already listed as not done in B4 and M1. | Medium | **Carried**: convert to cards (B4-D §6) in a follow-up before G-C. | B4/M1 owners |
 | G-B-5 | Tapping a decided leave row opens the **editor**, not a read-only view (B4D-Q2 was applied to employees and contracts only). | Low | Carried with G-B-4. | B4 owner |
 | G-B-6 | The leave **edit** dialog opened by the manager showed the *Employee* field empty (red border). Seen once, on request of Nour Halabi (2 Oct). Not investigated further here. | Low, to confirm | **Reproduce and decide** before C3 reuses the dialog. | Leave owner |
@@ -111,7 +111,7 @@ Data integrity summary: no duplicate request, contract, account or decision; bal
 
 ## 8. Handoff
 
-C0 and C3-D may proceed. C3 takes G-B-7, G-B-9 and must not reuse the leave edit dialog before G-B-6 is checked. G-B-1 and G-B-2 are fixed (§9). G-B-3 and G-B-4/5 should be closed before G-C. **Formal review (QA engineer + technical lead): pending.**
+C0 and C3-D may proceed. C3 takes G-B-7, G-B-9 and must not reuse the leave edit dialog before G-B-6 is checked. G-B-1, G-B-2 and G-B-3 are fixed (§9). G-B-4/5 should be closed before G-C. **Formal review (QA engineer + technical lead): pending.**
 
 ## 9. Follow-up: G-B-1 and G-B-2 fixed
 
@@ -137,4 +137,18 @@ Date: 2026-10-23. On `hr-ux-by-rafi` after `8872f852`. Checked on a separate syn
 - **Phone 375 px:** the toast is 343 px wide, with no sideways page scroll.
 - **Not covered:** *Try again* is not covered by an automated test (the suite has no JS runner). A real network drop on a phone has not been tried.
 
-**G-B-3: started in `8872f852`, not closed.** After a failed save, that commit moves focus to the first error (or the summary). "Count only messages inside the viewport" is not done, so G-B-3 stays open.
+**G-B-3: fixed (2026-10-26).**
+- **Change** (`resources/js/feedback.js`):
+  - The error summary counts an inline message as already shown only if it is **inside the visible area**: the window and every scrolling container around it, such as a dialog's body on a phone (`isInView`). This is re-checked after a save, a click or a key press, not on scroll, so the list does not jump while the user scrolls.
+  - After a failed save the user caused, the first error's field is scrolled to the middle and focused; if the field is on another tab or in a closed section, the summary is focused instead. This was started in `8872f852`.
+  - The scroll is now **instant**: the smooth scroll did not move the dialog's scrolling container at all, so the field stayed below the screen.
+- **Browser** (copy `hc-hr-gb12`, staff ALP, Arabic, leave request, reason left empty and scrolled out of view, Submit pressed with Enter):
+
+  | Size | Reason field before | After the failed save |
+  |---|---|---|
+  | Phone 375×667, first failure | top 682 px (off screen) | focus on the reason, top 516 px (on screen), error visible |
+  | Phone 375×667, second failure | top 682 px | same; one focus move |
+  | Desktop 1200×700 | top 823 px (off screen) | focus on the reason, error visible, summary hidden (nothing duplicated) |
+
+  An earlier phone run, before the instant scroll, showed the summary correctly listing the off-screen error but left the field below the screen.
+- **Tests:** none added; the suite has no JS runner. Full suite: 934 tests, 1 failure in `ContractsTableB4Test::test_no_amount_in_the_rendered_html_or_payload_under_any_column_choice`, which passes 3 of 3 on its own. It is a flaky check (it looks for the digits `8731` in HTML that also holds random component ids and checksums), not related to this change; to be raised with the B4 owner.
