@@ -3,7 +3,7 @@
 Version: **interaction/1.4** · Date: 2026-10-26, HR answers 2026-10-26 (final, see §10) · Task: C0 in [ux-prompts-v3.md](ux-prompts-v3.md) (R-06 to R-10)
 Owner role: UX designer + HR product owner · Reviewer: QA engineer + technical lead
 Consumers: **C1** (menu), **C2** (search and *New*), **C3** (work inbox), **C4** (home page), **D1-D** (profile)
-Status: **HR decisions recorded (§10). Prototype delivered (§9). Scenario checks with users pending (§11). Review pending.**
+Status: **Done with a recorded limitation (2026-10-26):** HR decisions recorded (§10), prototype delivered (§9), pilot run recorded; the check with real users is moved to X2-R (§11). Formal review pending.
 
 This document changes no code, route, permission or data. It fixes the names, the place of every screen, and how people enter and leave each task, so that C1–C4 build one structure instead of four.
 
@@ -148,7 +148,7 @@ Answer history, same day: Q5 was first "keep the home page as it is" and changed
 
 ## 11. Scenario checks (AC-C0-03)
 
-**Status: PENDING USER RESEARCH. Ready to run.** No participant has used the prototype yet. Recruiting and contacting staff are for the UX researcher with HR's approval (as in X2); nobody was contacted for C0.
+**Status: LIMITATION ACCEPTED (product owner, 2026-10-26). Only a pilot by the project team exists; the check with real users is moved to X2-R.** The guide and test mode below are ready for it. No participant has used the prototype yet. Recruiting and contacting staff are for the UX researcher with HR's approval (as in X2); nobody was contacted for C0.
 
 **How to run it:**
 - **Moderator guide (Arabic):** [c0/scenario-check.md](c0/scenario-check.md). It covers consent wording, steps, the tasks with their correct answers, the results sheet and what to do with the results.
@@ -204,7 +204,7 @@ Pilot signals (to watch in the real sessions, no label changed yet):
 |---|---|---|
 | **AC-C0-01** Each role has an agreed task/permission map and first-screen priorities. | **Met (decided)** | §3–§5; HR decisions C0-Q1, Q2, Q4, Q5 (§10) |
 | **AC-C0-02** Search/New and inbox/dashboard use consistent terminology and entry/return behaviour. | **Met (decided)** | §6–§8; C0-Q2, Q3, Q6 |
-| **AC-C0-03** Evidence records what users could find and any revised labels. | **Open: pending user research** | §11: guide, test mode and results sheet ready ([c0/scenario-check.md](c0/scenario-check.md)); 0 participants |
+| **AC-C0-03** Evidence records what users could find and any revised labels. | **Limitation, accepted by the product owner** | §11: pilot by the project team (9/9 found, T1 slow), no real participants. Real check moved to **X2-R** with [c0/scenario-check.md](c0/scenario-check.md); no label revised yet. |
 
 **Handoff:**
 - **C1** builds §4 and §7 (menu areas, inbox entry, `nav.*` IDs, tour mapping). No permission change.
@@ -212,3 +212,4 @@ Pilot signals (to watch in the real sessions, no label changed yet):
 - **C3** names its page *Work inbox / صندوق المهام* and supplies the count used by the menu and the home section.
 - **C4** builds the *For you now* section of §5 on top of the existing cards (C0-Q5), after C3 (inbox) and C5 (who is off).
 - **D1-D**: the profile opened from search, directory and inbox is the same page with the same tiers.
+- **X2-R** runs the C0 scenario check with real participants (P1, P2 …, 1–2 per persona) using [c0/scenario-check.md](c0/scenario-check.md) and the prototype's test mode, on the built menu or the prototype. It watches T1 (*New → Leave request*) first. Any label change it causes is recorded in §11 here.
