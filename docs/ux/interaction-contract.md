@@ -174,7 +174,27 @@ Script (first click on the prototype, about 10 minutes per person; 1–2 people 
 
 Labels are revised only from these results; any change is recorded here with the task that caused it.
 
-| Task | Participants | First-click success | Notes / revised label |
+**Pilot run (2026-10-26, project team, codes `T0` and `P?`; one person ran all four personas).** It checks the tasks and the tool and gives early signals. **It is not user evidence**: the person knew the design, so it does not count towards AC-C0-03.
+
+| Task | Persona | First click | Found | Seconds | Clicks | Path |
+|---|---|---|---|---|---|---|
+| T1 | Employee | `open:new` | Y | 36.9 | 6 | open:new > open:new > other > open:search > other > focus:leave |
+| T2 | Employee | `open:search` | Y | 20.2 | 2 | open:search > page:directory |
+| T3 | Employee | `focus:requests` | Y | 6.9 | 1 | focus:requests |
+| T4 | Manager | `focus:inbox` | Y | 9.9 | 1 | focus:inbox |
+| T5 | Manager | `focus:teamOff` | Y | 8.0 | 1 | focus:teamOff |
+| T6 | Regional HR | `focus:inbox` | Y | 20.3 | 1 | focus:inbox |
+| T7 | Regional HR | `focus:contractsEnding` | Y | 4.2 | 1 | focus:contractsEnding |
+| T8 | Regional HR | `open:new` | Y | 4.2 | 2 | open:new > new:new.contract |
+| T9 | Administrator | `page:access` | Y | 10.8 | 1 | page:access |
+
+Pilot signals (to watch in the real sessions, no label changed yet):
+- **9/9 found; 7 of 9 on the first click.** *For you now* was the first click in 5 tasks (T3–T7): the home section is where this person looked first.
+- **T1 (request leave) was the slowest, 37 s and 6 clicks.** *New* was opened and closed without choosing *Leave request*, then search, then *For you now → Request leave*. The *New → Leave request* item was checked and responds to a click, so this is a finding, not a tool fault. Question for the real sessions: is *New* read as the place to ask for leave, or does *Request leave* need to be more visible?
+- **T2:** search was tried first, then the directory: both paths work.
+- **T8:** *New → Contract* was found at once.
+
+| Real sessions | Participants | First-click success | Notes / revised label |
 |---|---|---|---|
 | T1–T9 | 0 | — | Pending |
 
