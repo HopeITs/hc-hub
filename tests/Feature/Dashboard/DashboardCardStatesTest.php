@@ -284,7 +284,8 @@ class DashboardCardStatesTest extends TestCase
             'type' => 'day',
             'start_at' => '2026-10-13',
             'end_at' => '2026-10-14',
-            'status' => LeaveRequestStatus::Pending,
+            // C4: the upcoming card lists accepted leave only (team-coverage-contract.md §3.1 Q2).
+            'status' => LeaveRequestStatus::Accepted,
         ]);
     }
 }

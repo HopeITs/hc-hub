@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\EncryptedSalary;
+use App\Enums\ContractType as ContractTypeEnum;
 use App\Traits\RedactsSensitiveActivityLog;
 use Carbon\Carbon;
 use Closure;
@@ -151,6 +152,46 @@ class Contract extends Model
      * - regional HR: contracts of employees in the role's cities.
      * - everyone else (HR-SYR, general-manager, super-admin): every contract.
      */
+    /**
+     * A named contracts view (B4 presets): `active` (default), `ending-soon`,
+     * `ended`, `draft`. Shared by the contracts table and the home page's
+     * "ending soon" figure (C4), so the count and the list it opens agree.
+     * It only narrows; combine it with visibleTo() for the role's scope.
+     */
+    public function scopeInView(Builder $query, string $view, int $endingSoonDays = 30): Builder
+    {
+        $today = today();
+        $notDraft = fn (Builder $q) => $q->where(fn (Builder $w) => $w
+            ->whereNull('contracts.type')->orWhere('contracts.type', '!=', ContractTypeEnum::Draft));
+        $running = function (Builder $q) use ($notDraft, $today) {
+            $notDraft($q);
+            $q->where('contracts.is_active', true)
+                ->whereNull('contracts.terminated_at')
+                ->whereNull('contracts.termination_reason_id')
+                ->where(fn (Builder $w) => $w->whereNull('contracts.end_date')->orWhereDate('contracts.end_date', '>=', $today));
+        };
+
+        match ($view) {
+            'ending-soon' => $query->where(function (Builder $q) use ($running, $today, $endingSoonDays) {
+                $running($q);
+                $q->whereNotNull('contracts.end_date')
+                    ->whereDate('contracts.end_date', '<=', $today->copy()->addDays($endingSoonDays));
+            }),
+            'ended' => $query->where(function (Builder $q) use ($notDraft, $today) {
+                $notDraft($q);
+                $q->where(fn (Builder $w) => $w
+                    ->whereNotNull('contracts.terminated_at')
+                    ->orWhereNotNull('contracts.termination_reason_id')
+                    ->orWhere('contracts.is_active', false)
+                    ->orWhereDate('contracts.end_date', '<', $today));
+            }),
+            'draft' => $query->where('contracts.type', ContractTypeEnum::Draft),
+            default => $query->where($running),
+        };
+
+        return $query;
+    }
+
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         if ($user->activeRoleIs('manager')) {
