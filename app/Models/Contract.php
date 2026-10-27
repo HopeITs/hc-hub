@@ -141,18 +141,6 @@ class Contract extends Model
     }
 
     /**
-     * The contracts $user's active role may see. The single source of truth for
-     * contract visibility: ContractsTable lists through it and ContractPolicy
-     * checks single records through it, so a direct URL can never reach a
-     * contract the list would not show.
-     *
-     * - manager: contracts on positions they manage, directly or technically.
-     *   "Their" positions are the ones on their own currently active contracts,
-     *   so someone who has left a managerial post stops seeing that team.
-     * - regional HR: contracts of employees in the role's cities.
-     * - everyone else (HR-SYR, general-manager, super-admin): every contract.
-     */
-    /**
      * A named contracts view (B4 presets): `active` (default), `ending-soon`,
      * `ended`, `draft`. Shared by the contracts table and the home page's
      * "ending soon" figure (C4), so the count and the list it opens agree.
@@ -192,6 +180,20 @@ class Contract extends Model
         return $query;
     }
 
+    /**
+     * The contracts $user's active role may see. The single source of truth for
+     * contract visibility: ContractsTable lists through it and ContractPolicy
+     * checks single records through it, so a direct URL can never reach a
+     * contract the list would not show.
+     *
+     * - manager: contracts of their direct reports (the direct_manager_id
+     *   line), the same team as Team leaves, the calendar and the inbox
+     *   (DEC-05 rev. 2, G-C-8: the technical-manager line no longer counts).
+     *   "Their" positions are the ones on their own currently active contracts,
+     *   so someone who has left a managerial post stops seeing that team.
+     * - regional HR: contracts of employees in the role's cities.
+     * - everyone else (HR-SYR, general-manager, super-admin): every contract.
+     */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
         if ($user->activeRoleIs('manager')) {
@@ -203,11 +205,7 @@ class Contract extends Model
                 return $query->whereRaw('1 = 0');
             }
 
-            return $query->whereHas('position', fn (Builder $position): Builder => $position->where(
-                fn (Builder $line): Builder => $line
-                    ->whereIn('direct_manager_id', $managedPositionIds)
-                    ->orWhereIn('tech_manager_id', $managedPositionIds),
-            ));
+            return $query->whereHas('position', fn (Builder $position): Builder => $position->whereIn('direct_manager_id', $managedPositionIds));
         }
 
         $cityIds = $user->activeCityIds();

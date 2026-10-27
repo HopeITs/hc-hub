@@ -119,7 +119,8 @@ class EmployeeProfileBadgesVisibilityTest extends TestCase
 
     private function reportingTo(Position $managerPosition, City $city): Position
     {
-        return $this->makePosition($city, ['tech_manager_id' => $managerPosition->id]);
+        // Direct reports only, like Team contracts (G-C-8).
+        return $this->makePosition($city, ['direct_manager_id' => $managerPosition->id]);
     }
 
     private function withBadge(Employee $employee, string $reason): Employee

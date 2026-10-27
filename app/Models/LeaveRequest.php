@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\LeaveRequestStatus;
 use App\Services\LeaveRequestPricing;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,9 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class LeaveRequest extends Model
 {
     use HasFactory, LogsActivity;
+
+    /** How many days ahead an undecided request counts as starting soon (C3/C4). */
+    public const STARTS_SOON_DAYS = 2;
 
     protected $fillable = [
         'leave_balance_id', 'type', 'start_at', 'end_at', 'reason',
@@ -37,6 +41,27 @@ class LeaveRequest extends Model
         'computed_hours' => 'float',
         'is_exceptional' => 'boolean',
     ];
+
+    /**
+     * Where an undecided request's first day stands (G-C-5): 'started' when it
+     * is already behind today, 'soon' from today to today + STARTS_SOON_DAYS,
+     * null otherwise. The inbox row and the home figure both read this, so the
+     * "starts soon" label and the "N start within two days" count agree.
+     */
+    public static function startFlag(?DateTimeInterface $startAt): ?string
+    {
+        if ($startAt === null) {
+            return null;
+        }
+
+        $day = Carbon::instance($startAt)->startOfDay();
+
+        return match (true) {
+            $day->lt(today()) => 'started',
+            $day->lte(today()->addDays(self::STARTS_SOON_DAYS)) => 'soon',
+            default => null,
+        };
+    }
 
     public function leaveBalance(): BelongsTo
     {

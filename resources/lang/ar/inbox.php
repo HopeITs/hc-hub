@@ -24,6 +24,7 @@ return [
     ],
     'waiting-since' => 'بانتظارك منذ :when',
     'urgent' => 'يبدأ قريبًا',
+    'started' => 'بدأ دون قرار',
     'details' => 'التفاصيل',
     'basis' => [
         'on_behalf' => 'تقرر بالنيابة عن :manager (في إجازة).',

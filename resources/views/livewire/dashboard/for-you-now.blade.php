@@ -38,8 +38,13 @@
                                 {{ collect($part['kinds'])->map(fn ($n, $kind) => __("inbox.filter.{$kind}").' '.$n)->implode(' · ') }}
                             </p>
                         @endif
+                        @if ($part['started'] > 0)
+                            <p class="mt-0.5 text-caption font-semibold text-amber-800" data-testid="for-you-{{ $key }}-started">
+                                <span aria-hidden="true">⚠</span> {{ trans_choice('dashboard.for-you.already-started', $part['started'], ['count' => $part['started']]) }}
+                            </p>
+                        @endif
                         @if ($part['soon'] > 0)
-                            <p class="mt-0.5 text-caption font-semibold text-amber-800">
+                            <p class="mt-0.5 text-caption font-semibold text-amber-800" data-testid="for-you-{{ $key }}-soon">
                                 <span aria-hidden="true">⚠</span> {{ trans_choice('dashboard.for-you.starts-soon', $part['soon'], ['count' => $part['soon']]) }}
                             </p>
                         @endif
@@ -53,8 +58,8 @@
                                                 {{ $row['what'] }}@if ($row['from']) · {{ $range($row['from'], $row['to']) }}@endif
                                             </span>
                                         </span>
-                                        @if ($row['urgent'])
-                                            <span class="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-caption font-semibold text-amber-800 ring-1 ring-amber-200">{{ __('inbox.urgent') }}</span>
+                                        @if ($row['start_flag'])
+                                            <span class="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-caption font-semibold text-amber-800 ring-1 ring-amber-200">{{ __($row['start_flag'] === 'started' ? 'inbox.started' : 'inbox.urgent') }}</span>
                                         @endif
                                     </a>
                                 </li>

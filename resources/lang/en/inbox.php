@@ -24,6 +24,7 @@ return [
     ],
     'waiting-since' => 'Waiting for :when',
     'urgent' => 'Starts soon',
+    'started' => 'Already started',
     'details' => 'Details',
     'basis' => [
         'on_behalf' => 'You decide on behalf of :manager (on leave).',

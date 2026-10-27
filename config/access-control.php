@@ -64,7 +64,7 @@ return [
             'badges.view',
         ],
         'manager' => [
-            // Read-only, and only their direct/technical reports' contracts:
+            // Read-only, and only their direct reports' contracts (G-C-8):
             // see Contract::scopeVisibleTo().
             'contracts.view',
             'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',

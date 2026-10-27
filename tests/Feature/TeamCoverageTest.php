@@ -402,6 +402,34 @@ class TeamCoverageTest extends TestCase
             ->assertSeeHtml('wire:submit.prevent="submitDecision"');
     }
 
+    /**
+     * G-C-13 (F12): HR deciding on behalf of a manager whose team spans cities
+     * is warned only about the members it may see (§4.1). Zaid reports to Sami
+     * from Aleppo: Sami sees his pending leave, HR-HMS never learns of it.
+     */
+    public function test_the_overlap_warning_is_limited_to_what_the_decider_may_see(): void
+    {
+        $this->person('zaid', 'Zaid', 'Halabi', 'ALP', 'B', 'Tchr', 6, $this->p['sami']['position']->id, 'employee');
+        $this->leave('zaid', LeaveTypeCases::Annual, '2026-11-03', '2026-11-03', LeaveRequestStatus::Pending);
+        $this->leave('lina', LeaveTypeCases::Annual, '2026-11-03', '2026-11-03', LeaveRequestStatus::Pending);
+        $omar = $this->leave('omar', LeaveTypeCases::Annual, '2026-11-03', '2026-11-03', LeaveRequestStatus::Pending);
+        // Sami is away today, so HR-HMS decides on his behalf.
+        $this->leave('sami', LeaveTypeCases::Annual, '2026-10-27', '2026-10-27');
+
+        $names = fn (User $viewer) => collect($this->fresh()->teamOverlap($omar, $viewer)['members'])->pluck('name')->sort()->values()->all();
+
+        $this->assertSame(['Lina Haddad', 'Zaid Halabi'], $names($this->user('sami')));
+        $this->assertSame(['Lina Haddad'], $names($this->user('huda')));
+
+        // On screen the decider is the signed-in user.
+        $this->fresh();
+        Livewire::actingAs($this->user('huda'))->test(AllLeaveRequestModule::class)
+            ->call('openDecision', $omar->id)
+            ->assertSeeHtml('data-testid="team-overlap"')
+            ->assertSee('Lina Haddad')
+            ->assertDontSee('Zaid Halabi');
+    }
+
     // ── Fixtures ─────────────────────────────────────────────────────────
 
     private function coverage(): TeamCoverage

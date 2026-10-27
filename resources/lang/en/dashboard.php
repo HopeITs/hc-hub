@@ -69,6 +69,7 @@ return [
         'open' => 'Open',
         'see-all' => 'See all',
         'starts-soon' => '{1} 1 starts within two days|[2,*] :count start within two days',
+        'already-started' => '{1} 1 has already started|[2,*] :count have already started',
         'decisions' => [
             'title' => 'Needs my decision',
             'count' => '{1} 1 leave request is waiting for you|[2,*] :count leave requests are waiting for you',

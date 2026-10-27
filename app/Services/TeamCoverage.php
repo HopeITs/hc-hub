@@ -240,11 +240,18 @@ final class TeamCoverage
      * pending, on the requester's working days of $leave. Empty when none.
      * Advisory only: it is never an error and never blocks the decision.
      *
+     * Each member is shown only as far as the decider ($viewer, by default the
+     * signed-in user) may see them on the calendar (§4.1, G-C-13 / F12): out
+     * of reach, left out; at colleague level, accepted leave only. HR deciding
+     * on behalf of a manager whose team spans cities therefore never learns
+     * of a pending request in another city.
+     *
      * @return array{dates: array<int, string>, members: array<int, array{name: string, status: string, dates: array<int, string>}>}
      */
-    public function teamOverlap(LeaveRequest $leave): array
+    public function teamOverlap(LeaveRequest $leave, ?User $viewer = null): array
     {
         $none = ['dates' => [], 'members' => []];
+        $viewer ??= auth()->user();
         $leave->loadMissing('leaveBalance.contract.position.center');
         $contract = $leave->leaveBalance?->contract;
         $managerPositionId = $contract?->position?->direct_manager_id;
@@ -281,6 +288,16 @@ final class TeamCoverage
             }
 
             $member = $team[$other->leaveBalance->contract->employee_id];
+            $pending = (int) $other->status === LeaveRequestStatus::Pending;
+
+            if ($viewer !== null) {
+                $level = $this->levelFor($viewer, $this->context($viewer), $member);
+
+                if ($level === null || ($pending && $level < self::LEVEL_MANAGER)) {
+                    continue;
+                }
+            }
+
             $occupied = $this->occupiedDates($other, $from, $to);
             $counted = $other->type === 'hour' ? $occupied : array_values(array_intersect($occupied, $this->workingDates($member, $from, $to)));
             $overlap = array_values(array_intersect($counted, $own));
@@ -292,7 +309,7 @@ final class TeamCoverage
             $dates = [...$dates, ...$overlap];
             $members[] = [
                 'name' => (string) $member->employee?->name,
-                'status' => (int) $other->status === LeaveRequestStatus::Pending ? 'pending' : 'accepted',
+                'status' => $pending ? 'pending' : 'accepted',
                 'dates' => $overlap,
             ];
         }

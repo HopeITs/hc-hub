@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Enums\LeaveRequestStatus;
 use App\Enums\LeaveTypeCases;
 use App\Livewire\Dashboard\ForYouNow;
+use App\Livewire\Employee\EmployeeTable;
 use App\Livewire\Inbox\Index as Inbox;
 use App\Models\Center;
 use App\Models\Contract;
@@ -161,6 +162,64 @@ class ForYouNowTest extends TestCase
         foreach (['huda', 'sami', 'lina'] as $who) {
             Livewire::actingAs($this->user($who))->test(ForYouNow::class)->assertDontSee('987654');
         }
+    }
+
+    /**
+     * G-C-5 (D-03): "starts soon" is today to today + 2. A request whose first
+     * day is already behind is labelled "already started" and counted apart,
+     * on the home block and on the inbox page alike.
+     */
+    public function test_an_already_started_request_is_not_counted_as_starting_soon(): void
+    {
+        $this->leave('omar', '2026-10-20', '2026-10-28', LeaveRequestStatus::Pending);
+        $this->leave('lina', '2026-10-29', '2026-10-29', LeaveRequestStatus::Pending);
+        $this->leave('lina', '2026-11-10', '2026-11-10', LeaveRequestStatus::Pending);
+        $sami = $this->user('sami');
+
+        Livewire::actingAs($sami)->test(ForYouNow::class)
+            ->assertSee('3 leave requests are waiting for you')
+            ->assertSeeHtml('data-testid="for-you-decisions-soon"')
+            ->assertSee('1 starts within two days')
+            ->assertSee('1 has already started');
+
+        $html = Livewire::actingAs($sami)->test(Inbox::class)->html();
+        $this->assertSame(1, substr_count($html, 'Starts soon'));
+        $this->assertSame(1, substr_count($html, 'Already started'));
+    }
+
+    /**
+     * G-C-10 (F7): "this week" is the rest of the calendar's Sunday–Saturday
+     * week, the one its link opens. Today is Tuesday 27 October: Saturday the
+     * 31st is in it, Sunday 1 November is next week.
+     */
+    public function test_team_off_this_week_is_the_week_its_link_opens(): void
+    {
+        $this->leave('lina', '2026-10-31', '2026-10-31');
+        $this->leave('omar', '2026-11-01', '2026-11-01');
+
+        Livewire::actingAs($this->user('sami'))->test(ForYouNow::class)
+            ->assertSeeHtml('data-part="team-off"')
+            ->assertSee('Lina Haddad')
+            ->assertDontSee('Omar Hamdan')
+            ->assertSeeHtml('href="'.e(route('team.calendar', ['scope' => 'reports', 'view' => 'week'])).'"');
+    }
+
+    /**
+     * G-C-13 (F13): a regional HR role whose city does not exist sees nothing,
+     * never every city, on the home figures and on the employees table.
+     */
+    public function test_an_hr_role_without_a_city_counts_and_lists_nobody(): void
+    {
+        $ghost = $this->makeUser($this->cities['ALP'], 'HR-XYZ', ['contracts.view', 'employees.view']);
+
+        $this->assertSame([], $ghost->activeCityIds());
+        $this->assertNotContains('employees-waiting', $this->partsFor($ghost));
+        $this->assertNotContains('contracts-ending', $this->partsFor($ghost));
+
+        // Aleppo HR lists its staff; the city-less role lists no one at all.
+        Livewire::actingAs($this->user('huda'))->test(EmployeeTable::class)->assertSee('Lina Haddad');
+        Livewire::actingAs($ghost)->test(EmployeeTable::class)
+            ->assertDontSee(['Lina Haddad', 'Dana Damascus', 'Sami Khoury']);
     }
 
     // ── Fixtures ─────────────────────────────────────────────────────────
