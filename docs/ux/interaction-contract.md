@@ -55,13 +55,13 @@ A person with several roles sees the structure of the **active** role; switching
 
 ## 4. The menu: inbox + four areas (decided, C0-Q1, Q2, Q4)
 
-Grouped by **whose work it is**. An area, sub-heading or item appears only if the active role holds the permission it already needs today; **the menu change shows nothing the role cannot already open, and hides nothing it can (C0-Q4)**. Menu visibility is never the permission: every page and action keeps its own server check.
+Grouped by **whose work it is**. An area, sub-heading or item appears only if the active role holds the permission it already needs today; the menu never shows a page the role cannot open. **One deliberate exception (C0-Q4, answer 2): some read-only reference pages are left out of the `employee` and `manager` menus** (see the *Organisation* row). Menu visibility is never the permission: every page and action keeps its own server check, and a page left out of the menu still opens by URL.
 
 | Place (EN / AR) | Purpose | Items → route name (permission, unchanged) |
 |---|---|---|
 | **Work inbox / صندوق المهام** (top item, with a count; C0-Q2) | Everything waiting on *me* | C3 inbox (new route `inbox`, C3). Shown only when the active role has at least one inbox source (C3-D §3). Until C3 ships, C1 links it to *All leaves* on the pending tab. |
 | **My space / مساحتي** (C0-Q1) | My own work | Home `dashboard` · My leaves `leaves.index` · My items `checklist-items.index` · My files `my-folders.index` · Shared files `shared-folders.index` |
-| ↳ **Organisation / المنظمة** (C0-Q4; **built by C1 as the last area of the menu**, see [c1-implementation.md](c1-implementation.md) §2) | Reference pages, read as today | Directory and org chart `org.chart` · Centers `centers.index` · Programs `programs.index` · Positions `positions.index` · Project basics (read): the nine `project-basics` pages |
+| ↳ **Organisation / المنظمة** (C0-Q4; **built by C1 as the last area of the menu**, see [c1-implementation.md](c1-implementation.md) §2) | Finding colleagues; reference pages for roles that read them | **Everyone:** Directory and org chart `org.chart`. **Manager:** also Centers `centers.index` and Programs `programs.index` (for the team). **General manager and other read-only roles:** also Positions and Project basics. **Left out of the `employee` menu:** centers, programs, positions, project basics; **of the `manager` menu:** positions, project basics. Read permission unchanged; they open by URL. |
 | **My team / فريقي** | People I manage | Team leaves `leaves.all` (manager scope) · Team calendar (C5) · Team contracts `contracts.index` (own reports, read-only) · Items to hand out / take back `checklist-items.pending-delivers`, `checklist-items.pending-returns` |
 | **HR operations / عمليات الموارد البشرية** | Daily HR work in my cities | Employees `employees.index` · Contracts `contracts.index` · Leave requests `leaves.all` · Leave balances `leaves.balance` · Default deliverables `default-deliverables.index` · Completed checklist requests `checklist-items.done-requests` · Badges `badges.index` · News `news.index` · Statistics `statistics.general`, `statistics.contract` |
 | **Settings / الإعدادات** | Setup and administration | Access management `access-management.index` · Activity log `activity-log.index` · and, for roles that **edit** them, the project basics, positions, programs and centers |
@@ -111,7 +111,7 @@ Rules for C4:
 
 - **Route names and URLs do not change.** Bookmarks, notification links, the guided tour and the user guide keep working. C1 changes only where links sit and what they are called.
 - **Menu item IDs**: `nav.<area>.<item>`, e.g. `nav.inbox`, `nav.my-space.leaves`, `nav.my-team.leaves`, `nav.hr.contracts`, `nav.settings.access`. The existing `data-tour="nav.*"` hooks are mapped in C1 so the tour keeps its steps.
-- **Protected legacy access**: every page stays protected by its own route middleware and policies exactly as today. The menu grants and removes nothing (C0-Q4).
+- **Protected legacy access**: every page stays protected by its own route middleware and policies exactly as today. The menu grants and removes no permission; the pages C0-Q4 leaves out of a menu still open by URL (tested in C1).
 
 ## 8. Glossary (EN / AR)
 
@@ -140,11 +140,11 @@ Checked in the browser (2026-10-26), Arabic and English at phone width: manager 
 | **C0-Q1** | Names of the menu areas | Groups by kind of data (Main, Management, Time & Leave, Files & Tasks, More) | **My space / My team / HR operations / Settings** (مساحتي / فريقي / عمليات الموارد البشرية / الإعدادات) |
 | **C0-Q2** | One place for what waits on me | Notifications only | **"Work inbox" (صندوق المهام) as the top menu item, with a count**, for roles that have inbox sources |
 | **C0-Q3** | A *New* button | None | **Yes**: Leave request · Employee · Contract · News item, each only for roles allowed to create it |
-| **C0-Q4** | Reference pages (project basics, centers, programs, positions, org chart) for employee and manager | Visible, read-only | **Keep them all visible as today.** Placed under *My space → Organisation* (§4). |
+| **C0-Q4** | Reference pages (project basics, centers, programs, positions, org chart) for employee and manager | Visible, read-only | **Answer 2: the directory and org chart for everyone; centers and programs stay for the manager (needed for the team); everything else leaves the employee and manager menus.** Menu only: the read permission is not withdrawn (§4). |
 | **C0-Q5** | Role-specific first screen | Same 11 cards for all | **What matters to each role first (§5), then the existing cards below, unchanged.** |
 | **C0-Q6** | Header search | None | **Pages and people for every role**, people limited to the directory tier the viewer may see |
 
-Answer history, same day: Q5 was first "keep the home page as it is" and changed to the above; Q1 and Q3 were briefly changed to "keep the current menu" and "no *New* button", then restored; Q4 was briefly changed to "leave the reference pages out of the employee and manager menu", then restored to "keep everything visible". The table holds the final answers.
+Answer history, same day: Q5 was first "keep the home page as it is" and changed to the above; Q1 and Q3 were briefly changed to "keep the current menu" and "no *New* button", then restored; Q4 went from "keep everything visible" to answer 1, back to 4, and on 2026-10-27 (after C1–C3 were built) to answer 2; C1 and C2 were updated for it (c1-implementation.md §2). The table holds the final answers.
 
 ## 11. Scenario checks (AC-C0-03)
 

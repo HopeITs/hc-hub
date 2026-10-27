@@ -86,12 +86,19 @@ final class Navigation
             $hrOps[] = $news;
         }
 
+        // C0-Q4 (answer 2): the directory and org chart for everyone; the other
+        // reference pages leave the menu of `employee`, and of `manager` except
+        // centers and programs (a manager needs them for the team). Menu only:
+        // the read permission is unchanged and the pages still open by URL.
+        $isEmployee = $user->activeRoleIs('employee');
+        $readsAll = ! $isEmployee && ! $isManager;
+
         $organisation = array_values(array_filter([
             $can('positions.view') ? self::item('nav.org.chart', __('general.orgn-chart'), 'org.chart', ['org.chart'], 'code-fork', 'nav.org-chart') : null,
-            ! $editsCenters && $can('centers.view') ? $centers : null,
-            ! $editsPrograms && $can('programs.view') ? $programs : null,
-            ! $editsPositions && $can('positions.view') ? $positions : null,
-            ! $editsBasics && $can('project-basics.view') ? $basics : null,
+            ! $isEmployee && ! $editsCenters && $can('centers.view') ? $centers : null,
+            ! $isEmployee && ! $editsPrograms && $can('programs.view') ? $programs : null,
+            $readsAll && ! $editsPositions && $can('positions.view') ? $positions : null,
+            $readsAll && ! $editsBasics && $can('project-basics.view') ? $basics : null,
             ! $newsInHr && $can('news.view') ? $news : null,
         ]));
 

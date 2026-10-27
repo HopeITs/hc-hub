@@ -153,6 +153,11 @@ class GlobalSearchTest extends TestCase
         app()->setLocale('en');
         $this->search($employee, 'Roles')->assertDontSeeHtml('data-testid="search-page"');
         $this->search($this->userWithRole('HR-SYR'), 'Roles')->assertSeeHtml('data-testid="search-page"');
+
+        // C0-Q4 (answer 2): pages left out of a role's menu are not offered either.
+        $this->search($employee, 'Positions')->assertDontSeeHtml('data-testid="search-page"');
+        $this->search($this->userWithRole('manager'), 'Centers')->assertSeeHtml('data-testid="search-page"');
+        $this->search($this->userWithRole('manager'), 'Positions')->assertDontSeeHtml('data-testid="search-page"');
     }
 
     /** Safe outcomes: too short, nothing found, wildcards, and the per-user limit. */

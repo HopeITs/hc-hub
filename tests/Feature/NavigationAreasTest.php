@@ -45,8 +45,9 @@ class NavigationAreasTest extends TestCase
         $hrWork = ['employees.index', 'contracts.index', 'leaves.all', 'default-deliverables.index', 'badges.index', 'news.index', 'statistics.general', 'statistics.contract'];
 
         $expected = [
-            'employee' => [...self::MY_SPACE, ...$reference, ...self::BASICS],
-            'manager' => [...self::MY_SPACE, ...$reference, ...self::BASICS, 'leaves.all', 'contracts.index', 'news.index', 'inbox'],
+            // C0-Q4 (answer 2): an employee keeps only the org chart; a manager also centers and programs.
+            'employee' => [...self::MY_SPACE, 'org.chart'],
+            'manager' => [...self::MY_SPACE, 'org.chart', 'centers.index', 'programs.index', 'leaves.all', 'contracts.index', 'news.index', 'inbox'],
             'general-manager' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'inbox'],
             'HR-ALP' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'inbox'],
             'HR-SYR' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
@@ -84,14 +85,21 @@ class NavigationAreasTest extends TestCase
         $this->assertStringNotContainsString('data-nav-area="my-team"', $employee);
         $this->assertStringNotContainsString('data-nav-area="hr"', $employee);
         $this->assertStringNotContainsString('data-nav="nav.inbox"', $employee);
-        // Reference pages stay visible to an employee, under Organisation (C0-Q4).
-        $this->assertStringContainsString('data-nav="nav.basics.cities"', $employee);
+        // C0-Q4 (answer 2): an employee keeps the org chart only.
+        $this->assertStringContainsString('data-nav="nav.org.chart"', $employee);
+        $this->assertStringNotContainsString('data-nav="nav.basics.cities"', $employee);
+        $this->assertStringNotContainsString('data-nav="nav.centers"', $employee);
 
         $manager = $this->sidebarHtml($this->userWithRole('manager'));
         $this->assertStringContainsString('data-nav="nav.my-team.leaves"', $manager);
         $this->assertStringContainsString('data-nav="nav.my-team.contracts"', $manager);
         $this->assertStringNotContainsString('data-nav-area="hr"', $manager);
         $this->assertStringContainsString('data-nav="nav.inbox"', $manager);
+        // A manager keeps centers and programs for the team; positions and basics leave the menu.
+        $this->assertStringContainsString('data-nav="nav.centers"', $manager);
+        $this->assertStringContainsString('data-nav="nav.programs"', $manager);
+        $this->assertStringNotContainsString('data-nav="nav.positions"', $manager);
+        $this->assertStringNotContainsString('data-nav="nav.basics.cities"', $manager);
 
         $hr = $this->sidebarHtml($this->userWithRole('HR-ALP'));
         $this->assertStringContainsString('data-nav="nav.hr.contracts"', $hr);
@@ -104,6 +112,19 @@ class NavigationAreasTest extends TestCase
         $admin = $this->sidebarHtml($this->userWithRole('super-admin'));
         $this->assertStringContainsString('data-nav="nav.settings.access"', $admin);
         $this->assertStringContainsString('data-nav="nav.settings.activity"', $admin);
+    }
+
+    /** C0-Q4: pages left out of a role's menu are not revoked; they still open by URL. */
+    public function test_reference_pages_left_out_of_the_menu_still_open_by_url(): void
+    {
+        foreach (['employee' => [...self::BASICS, 'centers.index', 'programs.index', 'positions.index'],
+            'manager' => [...self::BASICS, 'positions.index']] as $role => $routes) {
+            $user = $this->userWithRole($role);
+
+            foreach ($routes as $route) {
+                $this->actingAs($user)->get(route($route))->assertOk();
+            }
+        }
     }
 
     /** Switching the active role changes the menu on the next render. */

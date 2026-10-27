@@ -25,6 +25,7 @@ Status: **built and tested; review pending.**
 - **LIKE input:** `%`, `_` and `\` typed by the user are removed before matching, so "%%" lists nobody.
 - **Livewire surface:** `GlobalSearch::updatedQ` and the `mountRemembersReturnTo` hooks are listed in `livewire_exempt` with the reason (Livewire refuses direct calls to `updated*`/`mount*`). `$returnTo` is `#[Locked]`.
 - **Menu ≠ permission:** New and the page results only list what the role may open; every target checks again.
+- **C0-Q4 answer 2 (2026-10-27):** page search follows the menu, so the reference pages left out of the employee and manager menus are not offered in their search either (`test_pages_come_from_the_active_roles_menu_in_both_languages`).
 
 ## 3. Tests
 
