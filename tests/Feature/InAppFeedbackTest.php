@@ -4,8 +4,15 @@ namespace Tests\Feature;
 
 use App\Livewire\Feedback\FeedbackForm;
 use App\Livewire\Feedback\FeedbackIndex;
+use App\Models\Center;
 use App\Models\City;
+use App\Models\Contract;
+use App\Models\ContractType;
+use App\Models\Department;
 use App\Models\InAppFeedback;
+use App\Models\JobLevel;
+use App\Models\Position;
+use App\Models\Program;
 use App\Models\User;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,7 +21,6 @@ use Illuminate\Support\Facades\Schema;
 use Livewire\Features\SupportFileUploads\WithFileUploads;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesHrFixtures;
@@ -258,15 +264,16 @@ class InAppFeedbackTest extends TestCase
         $this->assertSame(0, InAppFeedback::query()->count());
     }
 
-    public function test_hr_staff_and_managers_cannot_read_feedback(): void
+    public function test_nobody_without_an_it_contract_can_read_feedback(): void
     {
         InAppFeedback::query()->insert([
             'user_id' => null, 'message' => 'secret note', 'locale' => 'en', 'created_at' => now(),
         ]);
 
-        // HR-SYR is an administrator role and passes every hasActivePermission()
-        // check; even an explicit role grant of feedback.view must not open it.
+        // Roles and permissions do not count: not super-admin, not HR-SYR
+        // (an administrator role), not even a feedback.view grant...
         $cases = [
+            ['super-admin', []],
             ['HR-SYR', ['feedback.view']],
             ['HR-ALP', ['feedback.view', 'activity-log.view']],
             ['general-manager', []],
@@ -276,28 +283,29 @@ class InAppFeedbackTest extends TestCase
 
         foreach ($cases as [$role, $permissions]) {
             $user = $this->makeUser($this->city, $role, $permissions);
-
-            $this->assertFalse($user->canReadFeedback(), $role);
-
-            $this->actingAs($user)->get(route('feedback.index'))->assertForbidden();
-
-            Livewire::actingAs($user)->test(FeedbackIndex::class)->assertForbidden();
+            $this->assertRefused($user, $role);
         }
+
+        // ...nor a contract in another department, nor an IT contract that is
+        // not in force today (ended, not started yet, or deactivated).
+        $this->assertRefused($this->contractHolder('HR'), 'HR department contract');
+        $this->assertRefused($this->contractHolder('IT', ['start_date' => now()->subYears(2), 'end_date' => now()->subDay()]), 'ended IT contract');
+        $this->assertRefused($this->contractHolder('IT', ['start_date' => now()->addDay()]), 'future IT contract');
+        $this->assertRefused($this->contractHolder('IT', ['is_active' => false]), 'inactive IT contract');
     }
 
-    public function test_a_reader_whose_role_is_switched_is_refused_on_the_next_update(): void
+    public function test_a_reader_whose_it_contract_ends_is_refused_on_the_next_update(): void
     {
-        $user = $this->makeUser($this->city, 'super-admin');
-        $user = $this->assignInactiveRole($user, 'employee');
+        $user = $this->contractHolder('IT');
 
         $component = Livewire::actingAs($user)->test(FeedbackIndex::class)->assertOk();
 
-        $user->setActiveRole(Role::findByName('employee', 'web')->id);
+        Contract::query()->where('employee_id', $user->employee_id)->update(['end_date' => now()->subDay()]);
 
         $component->set('category', 'idea')->assertForbidden();
     }
 
-    public function test_super_admin_and_a_directly_granted_account_read_newest_first(): void
+    public function test_an_it_contract_holder_reads_newest_first_whatever_the_active_role(): void
     {
         $author = $this->makeUser($this->city, 'employee');
         InAppFeedback::query()->insert([
@@ -305,16 +313,15 @@ class InAppFeedbackTest extends TestCase
             ['user_id' => $author->id, 'category' => 'idea', 'message' => 'Newer note', 'route_name' => 'dashboard', 'locale' => 'ar', 'role_name' => 'HR-ALP', 'created_at' => now()->subDay()],
         ]);
 
-        $admin = $this->makeUser($this->city, 'super-admin');
-        $this->actingAs($admin)->get(route('feedback.index'))
-            ->assertOk()
-            ->assertSeeInOrder(['Newer note', 'Older note']);
+        foreach (['employee', 'HR-ALP'] as $role) {
+            $developer = $this->contractHolder('IT', [], $role);
 
-        $developer = $this->makeUser($this->city, 'employee');
-        $developer->givePermissionTo(Permission::findOrCreate('feedback.view', 'web'));
-        $developer = $developer->fresh();
+            $this->assertTrue($developer->canReadFeedback(), $role);
+            $this->actingAs($developer)->get(route('feedback.index'))
+                ->assertOk()
+                ->assertSeeInOrder(['Newer note', 'Older note']);
+        }
 
-        $this->assertTrue($developer->canReadFeedback());
         Livewire::actingAs($developer)->test(FeedbackIndex::class)
             ->assertSeeInOrder(['Newer note', 'Older note'])
             ->set('category', 'problem')
@@ -347,6 +354,48 @@ class InAppFeedbackTest extends TestCase
         $user->delete();
 
         $this->assertNull(InAppFeedback::query()->sole()->user_id);
+    }
+
+    private function assertRefused(User $user, string $case): void
+    {
+        $this->assertFalse($user->canReadFeedback(), $case);
+        $this->actingAs($user)->get(route('feedback.index'))->assertForbidden();
+        Livewire::actingAs($user)->test(FeedbackIndex::class)->assertForbidden();
+    }
+
+    /** A user whose employee holds a contract on a position of the given department. */
+    private function contractHolder(string $departmentCode, array $contract = [], string $role = 'employee'): User
+    {
+        $user = $this->makeUser($this->city, $role);
+
+        $department = Department::query()->firstOrCreate(['code' => $departmentCode], ['name' => $departmentCode]);
+        $center = Center::query()->create([
+            'name_en' => 'Center '.uniqid(), 'name_ar' => 'مركز', 'city_id' => $this->city->id,
+            'is_active' => true, 'weekends' => 'friday', 'open_at' => '08:00:00', 'close_at' => '16:00:00',
+        ]);
+        $position = Position::query()->forceCreate([
+            'center_id' => $center->id,
+            'city_id' => $this->city->id,
+            'department_id' => $department->id,
+            'job_level_id' => JobLevel::query()->forceCreate(['name_en' => 'Officer', 'name_ar' => 'مسؤول', 'grade' => 2])->id,
+            'program_id' => Program::query()->forceCreate(['name' => 'Core', 'slug' => 'core-'.uniqid(), 'code' => 'C'.uniqid(), 'is_active' => true])->id,
+            'title_en' => $departmentCode.' officer',
+            'title_ar' => $departmentCode,
+            'is_active' => true,
+        ]);
+
+        Contract::query()->forceCreate(array_merge([
+            'employee_id' => $user->employee_id,
+            'position_id' => $position->id,
+            'contract_type_id' => ContractType::query()->forceCreate(['name_en' => 'Annual', 'name_ar' => 'سنوي'])->id,
+            'start_date' => now()->subMonth(),
+            'end_date' => now()->addYear(),
+            'currency' => 2,
+            'weekly_hours' => 40,
+            'is_active' => true,
+        ], $contract));
+
+        return $user->fresh();
     }
 
     private function send(User $user, string $message = 'The leave form froze after I picked a date.', string $category = 'problem', ?string $route = 'dashboard')

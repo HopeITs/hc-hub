@@ -19,16 +19,9 @@ return [
     ],
 
     /*
-     * Who may read feedback (User::canReadFeedback()). There is no IT role, so
-     * DEC-08's "IT team" is: the active role is listed here (super-admin is the
-     * developers' system account), or the user holds `permission` as a DIRECT
-     * grant. A permission held through a role does not count: saving an
-     * administrator role in access management hands it every permission in the
-     * table, HR-SYR included, and User::hasActivePermission() answers yes for
-     * every administrator role anyway. The permission is deliberately not in
-     * access-control.groups, so no role is ever auto-granted it.
+     * Who may read feedback (User::canReadFeedback()): DEC-08's "IT team" is
+     * anyone with a contract in force on a position of this department
+     * (departments.code). Not a role or permission.
      */
-    'reader_roles' => ['super-admin'],
-
-    'permission' => 'feedback.view',
+    'reader_department_code' => 'IT',
 ];

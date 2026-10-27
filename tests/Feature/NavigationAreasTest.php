@@ -52,8 +52,8 @@ class NavigationAreasTest extends TestCase
             'general-manager' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'inbox'],
             'HR-ALP' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'inbox'],
             'HR-SYR' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
-            // D3 / DEC-08 added the IT team's feedback list; HR-SYR must not get it.
-            'super-admin' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox', 'feedback.index'],
+            // The D3 feedback list follows an IT contract, not a role (InAppFeedbackTest).
+            'super-admin' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
         ];
 
         foreach ($expected as $role => $routes) {

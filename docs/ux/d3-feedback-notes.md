@@ -24,8 +24,8 @@ Status: **built and tested; review pending. One new table (migration file only; 
 
 | # | Decision | Why |
 |---|---|---|
-| D-1 | **Who counts as "the IT team".** There is no IT role. `User::canReadFeedback()` is true when **the active role is `super-admin`**, the developers' system account (`config('feedback.reader_roles')`). It is also true for an account holding a **direct** `feedback.view` permission. | DEC-08 says IT only. super-admin is already the developers' role (see `canViewSalary()`). **Assumption, needs product sign-off.** |
-| D-2 | **A role's `feedback.view` never counts.** It is checked by name, not through `hasActivePermission()`. The permission is deliberately left out of `access-control.groups`. | `hasActivePermission()` says yes to every `administrator_roles` entry, **HR-SYR included**. Also, saving an administrator role in Access management syncs *every* permission in the table to it. Through either path HR-SYR would have read IT-only data. Outside the catalog, `Role::created` never auto-grants it to HR-* roles. The access-management screen does not list it either, so a grant is a deliberate act (tinker / SQL on a named account). |
+| D-1 | **Who counts as "the IT team"** (product owner, 2026-10-27): **anyone with a contract in the IT team.** `User::canReadFeedback()` is true when the user's employee has a contract in force today (`Contract::activeNow`: active, started, not ended) on a position whose department code is `IT` (`config('feedback.reader_department_code')`). The active role does not matter. | Settled by the product owner. `IT` is the same department code `config/team-coverage.php` already uses. |
+| D-2 | **Roles and permissions never count**, super-admin included. There is no `feedback.view` permission. | `hasActivePermission()` says yes to every `administrator_roles` entry (HR-SYR included), so any role-based rule would have leaked IT-only data to HR. When an IT contract ends, access ends on the next request. |
 | D-3 | **Author deleted → `user_id` set null** (`nullOnDelete`). The note stays until its one-year expiry and shows «Removed account». | The text is product feedback, not the user's record. Keeping it anonymous loses nothing IT needs, and DEC-08's one-year limit still applies. |
 | D-4 | **Page capture.** The layout passes `request()->route()?->getName()` to the component on the server at render. It is stored in a `#[Locked]` property and re-checked by `InAppFeedbackRecorder::safeRouteName()`: it must match `[A-Za-z0-9._-]`, be at most 150 characters, satisfy `Route::has()`, and not be a Livewire endpoint. Anything else is stored as null. | A route name says which screen without the URL. A URL can carry record ids and search terms (`?search=…`). `wire:navigate` replaces the body, so the component remounts on each page and the name stays current. |
 | D-5 | **Language and role are derived at submit**, on the server. Language comes from `app()->getLocale()` of the request, limited to the supported locales. Role comes from `User::myRole()`, stored trimmed as the Spatie name, e.g. `HR-ALP`, at most 64 characters. Nothing role-like is read from the browser. | The update route is locale-prefixed, so the language is the page's own. The role is the one acting now, not another assigned role. |
@@ -41,13 +41,13 @@ Status: **built and tested; review pending. One new table (migration file only; 
 
 | Area | Files |
 |---|---|
-| Schema | `database/migrations/2026_10_27_120000_create_in_app_feedback_table.php` (table + `feedback.view` permission row) |
+| Schema | `database/migrations/2026_10_27_120000_create_in_app_feedback_table.php` (table only) |
 | Model / write | `app/Models/InAppFeedback.php`, `app/Services/InAppFeedbackRecorder.php`, `config/feedback.php` |
 | Access | `User::canReadFeedback()`, Gate `feedback.read` (`AppServiceProvider`). Route `feedback.index` uses `can:feedback.read` (`routes/web.php`). `config/access-control.php` `livewire_exempt` entries are commented: form = every signed-in role, self-scoped write; list = in-method Gate. Settings menu item in `app/Support/Navigation.php`. |
 | UI | `app/Livewire/Feedback/FeedbackForm.php` + `resources/views/livewire/feedback/feedback-form.blade.php` (mounted in `components/layouts/app.blade.php`); `FeedbackIndex.php` + `feedback-index.blade.php`. The menu item is in `resources/views/livewire/layout/header.blade.php`. |
 | Text | `resources/lang/{en,ar}/feedback.php` (Arabic plurals for counts and minutes) |
 | Retention | `routes/console.php` |
-| Tests | `tests/Feature/InAppFeedbackTest.php` (17). `NavigationAreasTest` expects `feedback.index` in super-admin's menu, and HR-SYR's list is unchanged. |
+| Tests | `tests/Feature/InAppFeedbackTest.php`. `NavigationAreasTest`: no role gets `feedback.index` in its menu by role alone. |
 
 ## 4. AC-D3-03 evidence: "stores only disclosed approved context; unsupported attachment types are not accepted"
 
@@ -65,9 +65,9 @@ Status: **built and tested; review pending. One new table (migration file only; 
 | Guest `open` / `submit` → 403 | `test_guests_cannot_open_or_submit` |
 | No `WithFileUploads`; `_startUpload` refused | `test_no_attachment_can_be_sent` |
 | A5-M: clean close; dirty → confirm; keep; discard clears; no redirect | `test_dirty_close_asks_and_keeps_text_until_discard` |
-| HR-SYR (even with a role grant of `feedback.view`), HR-ALP, general-manager, manager and employee → 403 on the page and the component | `test_hr_staff_and_managers_cannot_read_feedback` |
-| Reader switched to a non-reader role → next Livewire update 403 | `test_a_reader_whose_role_is_switched_is_refused_on_the_next_update` |
-| super-admin and a direct-grant account read newest first; filter works | `test_super_admin_and_a_directly_granted_account_read_newest_first` |
+| super-admin, HR-SYR (even with `feedback.view`), HR-ALP, general-manager, manager, employee; an HR-department contract; an ended, future or inactive IT contract → 403 on the page and the component | `test_nobody_without_an_it_contract_can_read_feedback` |
+| A reader's IT contract ends → next Livewire update 403 | `test_a_reader_whose_it_contract_ends_is_refused_on_the_next_update` |
+| IT contract holder reads newest first whatever the active role (employee, HR-ALP); filter works | `test_an_it_contract_holder_reads_newest_first_whatever_the_active_role` |
 | Older than 365 days pruned, newer kept; `model:prune` scheduled | `test_feedback_older_than_one_year_is_pruned_and_the_prune_is_scheduled` |
 | Author deleted → note kept, `user_id` null | `test_deleting_the_author_keeps_the_note_without_the_link` |
 
@@ -78,7 +78,7 @@ Status: **built and tested; review pending. One new table (migration file only; 
 
 ### Browser (synthetic SQLite copy `C:/laragon/tmp/hc-hr-d3`, launch entry «hc-hr D3 feedback», port 8403)
 
-The copy was cloned from the G-C synthetic database. Only this migration was run on it, and `feedback.view` was granted directly to the synthetic `hr.alp@example.test` to show the reader path. The operational MySQL (`.env`) was **not** migrated or touched.
+The copy was cloned from the G-C synthetic database. Only this migration was run on it, and (under the earlier super-admin / `feedback.view` rule, since replaced by D-1) `feedback.view` was granted directly to the synthetic `hr.alp@example.test` to show the reader path. The operational MySQL (`.env`) was **not** migrated or touched.
 
 | Screenshot (`docs/ux/evidence/d3/`) | Shows |
 |---|---|
@@ -97,13 +97,12 @@ The copy was cloned from the G-C synthetic database. Only this migration was run
 
 ## 5. Limits and follow-ups
 
-- **IT mapping (D-1/D-2) is an assumption.** If the product owner wants a named IT account rather than super-admin, remove `super-admin` from `feedback.reader_roles` and grant `feedback.view` directly to that account.
-- **No in-app grant UI** for `feedback.view`, on purpose (D-2). Grant it with tinker: `User::find($id)->givePermissionTo('feedback.view')`.
+- **Readers follow HR data.** Whoever HR places on an IT-department position reads feedback while the contract is in force; nobody else does. If the IT department's code is ever changed, update `feedback.reader_department_code`.
 - **Free text can still contain personal data** that the user typed despite the warning. There is no automatic scrubbing. Readers are IT only, and rows expire after a year.
 - No reply/close workflow and no manual delete, as the task allows.
 
 ## 6. Migration and recovery
 
-- **Deploy:** `php artisan migrate` creates `in_app_feedback` and the `feedback.view` permission row. Make sure the scheduler runs so `model:prune` enforces retention.
-- **Rollback:** `php artisan migrate:rollback --step=1` (or drop the table and delete the permission row). The data is disposable by policy, so there is nothing to recover. Remove the layout mount and menu item, or the dialog will fail on a missing table.
+- **Deploy:** `php artisan migrate` creates `in_app_feedback`. Make sure the scheduler runs so `model:prune` enforces retention. Check that the IT department's `code` in production is `IT`.
+- **Rollback:** `php artisan migrate:rollback --step=1` (or drop the table). The data is disposable by policy, so there is nothing to recover. Remove the layout mount and menu item, or the dialog will fail on a missing table.
 - No existing table or record is changed.

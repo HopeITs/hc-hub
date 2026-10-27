@@ -1,17 +1,16 @@
 <?php
 
-use App\Models\Permission;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Spatie\Permission\PermissionRegistrar;
 
 /*
  * D3 / DEC-08: in-app feedback. Holds the typed text and exactly the context
  * the form discloses (page route name, language, active role). Nothing else:
  * no URL or query string, no IP, no user agent, no record ids, no files.
  *
- * Rollback drops the table and the permission; the rows are disposable by
+ * Readers are the IT department's contract holders (config/feedback.php),
+ * not a role or permission. Rollback drops the table; the rows are disposable by
  * policy (one-year retention), so there is nothing to recover.
  */
 return new class extends Migration
@@ -30,18 +29,10 @@ return new class extends Migration
             $table->string('role_name', 64)->nullable();
             $table->timestamp('created_at')->useCurrent()->index();
         });
-
-        // Not in access-control.groups on purpose: no role is auto-granted it.
-        // Only a direct grant to a named account counts (config/feedback.php).
-        Permission::findOrCreate('feedback.view', 'web');
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 
     public function down(): void
     {
         Schema::dropIfExists('in_app_feedback');
-
-        Permission::query()->where('name', 'feedback.view')->where('guard_name', 'web')->delete();
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 };
