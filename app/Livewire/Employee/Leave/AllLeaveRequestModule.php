@@ -17,6 +17,7 @@ use App\Models\LeaveRequest;
 use App\Services\LeaveAlternativeEmployees;
 use App\Services\LeaveNotificationService;
 use App\Services\LeaveRequestNextStep;
+use App\Services\TeamCoverage;
 use App\Support\Leave\LeaveQuote;
 use Blade;
 use Carbon\Carbon;
@@ -278,7 +279,10 @@ class AllLeaveRequestModule extends Component
         $allAvailableLeaves = $this->allAvailableLeaves;
         $alternativeEmployees = $this->alternativeEmployees;
 
-        return view('livewire.employee.leave.all', compact('employees', 'allAvailableLeaves', 'alternativeEmployees'));
+        return view('livewire.employee.leave.all', [
+            ...compact('employees', 'allAvailableLeaves', 'alternativeEmployees'),
+            'decisionOverlap' => $this->decisionOverlap(),
+        ]);
     }
 
     public function confirmSave()
@@ -453,6 +457,22 @@ class AllLeaveRequestModule extends Component
         return $this->form->type === 'day'
             ? Carbon::parse($this->form->end_at)->format('d-m-Y')
             : $this->form->end_hour;
+    }
+
+    /** C5: who else in the requester's team is away, for the open decision (advisory). */
+    private function decisionOverlap(): ?array
+    {
+        if (! $this->decisionModal || ! $this->decisionLeave || (int) $this->decisionLeave->status !== LeaveRequestStatus::Pending) {
+            return null;
+        }
+
+        try {
+            return app(TeamCoverage::class)->teamOverlap($this->decisionLeave);
+        } catch (Throwable $e) {
+            report($e);
+
+            return null;
+        }
     }
 
     /**

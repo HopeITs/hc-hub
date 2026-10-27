@@ -13,6 +13,7 @@ use App\Services\LeaveDecisionAuthority;
 use App\Services\LeaveNotificationService;
 use App\Services\LeaveRequestNextStep;
 use App\Services\LeaveRequestReview;
+use App\Services\TeamCoverage;
 use App\Services\WorkInbox;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Gate;
@@ -242,6 +243,8 @@ class Index extends Component
                 $row['managers'] = $leave && $row['basis'] === LeaveDecisionAuthority::ON_BEHALF
                     ? $authority->directManagers($leave)->map->name->implode('، ')
                     : null;
+                // C5: others in the requester's team away on these days (advisory).
+                $row['overlap'] = $leave ? $this->overlapFor($leave) : null;
             }
             $row['slug'] = $this->slug($row['key']);
 
@@ -254,6 +257,17 @@ class Index extends Component
             'failed' => $failed,
             'showCity' => auth()->user()->activeCityIds() === null || count(auth()->user()->activeCityIds() ?? []) > 1,
         ]);
+    }
+
+    private function overlapFor(LeaveRequest $leave): ?array
+    {
+        try {
+            return app(TeamCoverage::class)->teamOverlap($leave);
+        } catch (Throwable $e) {
+            report($e);
+
+            return null;
+        }
     }
 
     private function review(string $key, callable $write, string $doneMessage): void

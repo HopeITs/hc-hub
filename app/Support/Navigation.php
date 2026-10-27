@@ -40,6 +40,7 @@ final class Navigation
         $mySpace = array_values(array_filter([
             self::item('nav.my-space.home', __('general.dashboard'), 'dashboard', ['dashboard', 'employee.dashboard'], 'dashboard', 'nav.dashboard'),
             $can('leaves.view-own') ? self::item('nav.my-space.leaves', __('general.my-leaves'), 'leaves.index', ['leaves.index'], 'my-leaves', 'nav.my-leaves') : null,
+            $can('leaves.view-own') ? self::item('nav.my-space.team-calendar', __('team_calendar.nav'), 'team.calendar', ['team.calendar'], 'calendar') : null,
             $can('checklists.view-own') ? self::item('nav.my-space.items', __('general.my-items'), 'checklist-items.index', ['checklist-items.index'], 'clipboard-list', 'nav.my-items') : null,
             $can('archives.view') ? self::item('nav.my-space.files', __('general.my-folders'), 'my-folders.index', ['my-folders.*'], 'archived', 'nav.archives') : null,
             $can('archives.view') ? self::item('nav.my-space.shared-files', __('general.shared-folders'), 'shared-folders.index', ['shared-folders.*'], 'folder') : null,

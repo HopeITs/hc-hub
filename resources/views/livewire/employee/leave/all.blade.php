@@ -336,6 +336,10 @@ use App\Enums\LeaveRequestStatus;
                     </div>
                 </div>
 
+                @if($decisionOverlap)
+                    @include('livewire.team.partials.overlap-warning', ['overlap' => $decisionOverlap])
+                @endif
+
                 {{-- Decision Section --}}
                 @if($decisionLeave->status === LeaveRequestStatus::Pending)
                     <div class="border-t pt-4 space-y-4">

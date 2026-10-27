@@ -546,6 +546,10 @@ return [
         // ChecklistWorkflow (row scoped to the actor, plus checklists.deliver/receive),
         // finalizeItem -> Gate update on the employee + ChecklistWorkflow::finalizeReturn.
         // previewBatch writes nothing; setFilter changes the view only.
+        // C5 team calendar: move/goToday/openDay only change the period shown.
+        // What is shown comes from TeamCoverage on every render, scoped to the
+        // active role; the URL values are re-checked there.
+        'team.calendar' => ['move', 'goToday', 'openDay'],
         'inbox.index' => ['setFilter', 'decide', 'markSeen', 'object', 'confirmItem', 'finalizeItem', 'previewBatch', 'applyBatch'],
         // C2 header search: a lifecycle hook (Livewire refuses direct calls to updated*) that only
         // trims the term and counts it against the per-user search limit. Results come from

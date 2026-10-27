@@ -26,6 +26,7 @@ use App\Livewire\Notifications\Index;
 use App\Livewire\Settings\Password;
 use App\Livewire\Statistics\ContractStatistics;
 use App\Livewire\Statistics\GeneralStatistics;
+use App\Livewire\Team\Calendar as TeamCalendar;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
@@ -81,6 +82,9 @@ Route::group(
             require __DIR__.'/projects-management.php';
 
             require __DIR__.'/employees-management.php';
+
+            // C5: who is away, for everyone; TeamCoverage limits what each role sees.
+            Route::get('/team-calendar', TeamCalendar::class)->name('team.calendar')->middleware('active_permission:leaves.view-own');
 
             Route::prefix('leaves')
                 ->name('leaves.')

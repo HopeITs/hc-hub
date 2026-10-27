@@ -103,6 +103,9 @@
                             @elseif (($row['basis'] ?? null) === 'no_manager')
                                 <p class="mt-1 text-small text-primary">{{ __('inbox.basis.no_manager') }}</p>
                             @endif
+                            @if (! empty($row['overlap']['members']))
+                                <div class="mt-2">@include('livewire.team.partials.overlap-warning', ['overlap' => $row['overlap']])</div>
+                            @endif
                         </div>
                         @if ($row['source'] === 'leave')
                             <a href="{{ route('leaves.all', ['leave' => $row['id'], 'mode' => 'details']) }}" wire:navigate
