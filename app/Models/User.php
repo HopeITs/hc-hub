@@ -197,6 +197,27 @@ class User extends Authenticatable implements HasLocalePreference
     }
 
     /**
+     * May this user read in-app feedback (D3, DEC-08: the IT team only)?
+     *
+     * There is no IT role. The answer is yes for an active role named in
+     * config('feedback.reader_roles') (super-admin, the developers' account),
+     * or for a DIRECT grant of config('feedback.permission') to this account.
+     *
+     * Deliberately not hasActivePermission(): that says yes to every
+     * administrator role (HR-SYR included), and saving an administrator role
+     * in access management gives it every permission in the table. A role's
+     * grant therefore never counts here.
+     */
+    public function canReadFeedback(): bool
+    {
+        if ($this->activeRoleIs(...config('feedback.reader_roles', []))) {
+            return true;
+        }
+
+        return $this->permissions()->where('name', config('feedback.permission'))->exists();
+    }
+
+    /**
      * Whether the active role may open a reference page group (`centers`,
      * `programs`, `positions`, `project-basics`): its read permission, unless
      * config('access-control.reference_pages_hidden_from') refuses the role

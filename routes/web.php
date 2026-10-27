@@ -20,6 +20,7 @@ use App\Livewire\Employee\Leave\AllLeaveRequestModule;
 use App\Livewire\Employee\Leave\EmpLeaveBalanceModule;
 use App\Livewire\Employee\Leave\MyLeaveRequestModule;
 use App\Livewire\EmployeeCards\ShowDigitalId;
+use App\Livewire\Feedback\FeedbackIndex;
 use App\Livewire\News\NewsCreate;
 use App\Livewire\News\NewsModule;
 use App\Livewire\Notifications\Index;
@@ -138,6 +139,13 @@ Route::group(
             Route::get('/activity-log', ActivityLogModule::class)
                 ->name('activity-log.index')
                 ->middleware('active_permission:activity-log.view');
+
+            // D3 / DEC-08: in-app feedback is read by the IT team only. Not an
+            // active_permission check: that one says yes to every administrator
+            // role, HR-SYR included (see User::canReadFeedback()).
+            Route::get('/feedback', FeedbackIndex::class)
+                ->middleware('can:feedback.read')
+                ->name('feedback.index');
 
             Route::get('/access-management', AccessManagementIndex::class)
                 ->middleware('active_permission:access-management.view')
