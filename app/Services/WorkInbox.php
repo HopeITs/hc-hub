@@ -53,7 +53,9 @@ final class WorkInbox
     {
         return collect(['leaves.decide', 'leaves.review', 'checklists.deliver', 'checklists.receive'])
             ->contains(fn (string $permission) => $user->hasActivePermission($permission))
-            || ($this->isHr($user) && $user->hasActivePermission('employees.update'));
+            || ($this->isHr($user) && $user->hasActivePermission('employees.update'))
+            // A direct manager decides whatever their role (DEC-05 revision 2).
+            || app(LeaveDecisionAuthority::class)->holdsManagerPosition($user);
     }
 
     /** What the decider saw: changes when the requester edits the request or someone decides it (§4.1 `changed`). */
@@ -65,10 +67,8 @@ final class WorkInbox
     /** @return Collection<int, array<string, mixed>> */
     private function leaveDecisions(User $user): Collection
     {
-        if (! $user->hasActivePermission('leaves.decide')) {
-            return collect();
-        }
-
+        // No permission check here: the direct manager decides whatever their
+        // role (DEC-05 revision 2); the decide policy below is the gate.
         return $this->leaveQuery($user)
             ->where('status', LeaveRequestStatus::Pending)
             ->limit(self::PER_SOURCE)

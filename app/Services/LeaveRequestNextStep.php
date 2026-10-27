@@ -13,10 +13,9 @@ use Illuminate\Support\Collection;
  * code that actually runs, not from an assumed approval chain:
  *
  *  - Pending: LeaveNotificationService::newRequestAudience() lists the people
- *    told about the request. A manager among them can decide only while
- *    holding the manager or general-manager role (LeaveRequest::scopeManageableBy
- *    via LeaveRequestPolicy::decide), so only those are named. City HR can
- *    always decide. Any one of them decides; there is no second approval.
+ *    told about the request. Every direct manager among them decides,
+ *    whatever their role (DEC-05 revision 2); HR only stands in (C3-Q1).
+ *    Any one of them decides; there is no second approval.
  *  - Accepted / rejected: the decision is final; the only remaining step is
  *    HR marking it as seen (hr_approved, LeaveRequestPolicy::review).
  *
@@ -25,8 +24,6 @@ use Illuminate\Support\Collection;
  */
 class LeaveRequestNextStep
 {
-    private const DECIDING_MANAGER_ROLES = ['manager', 'general-manager'];
-
     public function __construct(private readonly LeaveNotificationService $notifications) {}
 
     public function describe(LeaveRequest $leaveRequest): string
@@ -128,7 +125,6 @@ class LeaveRequestNextStep
     private function decidingManagerNames(Collection $managers): Collection
     {
         return $managers
-            ->filter(fn (User $user) => $user->hasAnyRole(self::DECIDING_MANAGER_ROLES))
             ->map(fn (User $user) => $user->profile?->name)
             ->filter()
             ->unique()

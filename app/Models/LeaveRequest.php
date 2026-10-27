@@ -175,32 +175,32 @@ class LeaveRequest extends Model
             return $query;
         }
 
+        // The direct-manager position is the authority (DEC-05 revision 2,
+        // G-C-1): whoever holds it sees their direct reports' requests,
+        // whatever their system role. The technical manager no longer
+        // exists (DEC-05 revision, C3 G2); the column stays and grants nothing.
+        $managerPositionIds = $user->employee_id
+            ? Contract::query()->activeNow()->where('employee_id', $user->employee_id)->pluck('position_id')
+            : collect();
+        $directReports = fn (Builder $q) => $q->whereHas(
+            'leaveBalance.contract.position',
+            fn (Builder $positionQuery) => $positionQuery->whereIn('direct_manager_id', $managerPositionIds),
+        );
+
         if ($role && str_starts_with($role, 'HR-')) {
-            return $query->whereHas(
-                'leaveBalance.contract.employee',
-                fn (Builder $employeeQuery) => $employeeQuery->whereIn('city_id', $user->activeCityIds() ?? []),
-            );
+            return $query->where(fn (Builder $scoped) => $scoped
+                ->whereHas(
+                    'leaveBalance.contract.employee',
+                    fn (Builder $employeeQuery) => $employeeQuery->whereIn('city_id', $user->activeCityIds() ?? []),
+                )
+                ->when($managerPositionIds->isNotEmpty(), fn (Builder $q) => $q->orWhere($directReports)));
         }
 
-        if (in_array($role, ['manager', 'general-manager'], true)) {
-            $managerPositionIds = Contract::query()
-                ->activeNow()
-                ->where('employee_id', $user->employee_id)
-                ->pluck('position_id');
-
-            if ($managerPositionIds->isEmpty()) {
-                return $query->whereRaw('1 = 0');
-            }
-
-            // Direct reports only: the technical manager no longer exists
-            // (DEC-05 revision, C3 G2). The column stays; it grants nothing.
-            return $query->whereHas(
-                'leaveBalance.contract.position',
-                fn (Builder $positionQuery) => $positionQuery->whereIn('direct_manager_id', $managerPositionIds),
-            );
+        if ($managerPositionIds->isEmpty()) {
+            return $query->whereRaw('1 = 0');
         }
 
-        return $query->whereRaw('1 = 0');
+        return $directReports($query);
     }
 
     public function scopeUpcoming($query)

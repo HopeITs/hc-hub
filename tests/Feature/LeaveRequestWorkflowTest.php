@@ -696,7 +696,11 @@ class LeaveRequestWorkflowTest extends TestCase
 
         $this->assertNotificationUrl($employeeAction['url'], $leaveRequest->id);
         $this->assertNotificationUrl($hrAction['url'], $leaveRequest->id, 'details');
-        $this->assertNotificationUrl($newRequest['url'], $leaveRequest->id, 'decision');
+        // Someone without the All leaves page (a direct manager with only the
+        // employee role, DEC-05 revision 2) is sent to the work inbox instead.
+        $this->assertSame(route('inbox', ['open' => "leave:{$leaveRequest->id}:decide"]), $newRequest['url']);
+        $user->givePermissionTo('leaves.view-all');
+        $this->assertNotificationUrl((new NewLeaveRequest($leaveRequest))->toArray($user->fresh())['url'], $leaveRequest->id, 'decision');
         $this->assertNotificationUrl($employeeReview['url'], $leaveRequest->id);
         $this->assertNotificationUrl($managerReview['url'], $leaveRequest->id, 'details');
         $this->assertStringContainsString('Test Employee', $newRequest['body']['en']);
@@ -1236,6 +1240,97 @@ class LeaveRequestWorkflowTest extends TestCase
         $this->assertSame('on_behalf', app(\App\Services\LeaveDecisionAuthority::class)->basisFor($other, $own));
     }
 
+    // --- G-C-1: the direct-manager position is the authority (DEC-05 revision 2) ---
+
+    public function test_gc1_a_direct_manager_with_only_the_employee_role_decides_from_the_inbox(): void
+    {
+        [$hr, $leave] = $this->createPendingDecisionFixture();
+        $manager = $this->makeDirectManagerOf($leave, asEmployeeOnly: true);
+        $this->assertFalse($manager->hasActivePermission('leaves.decide'));
+        Notification::fake();
+        $inbox = app(\App\Services\WorkInbox::class);
+
+        $this->assertSame('manager', app(\App\Services\LeaveDecisionAuthority::class)->basisFor($manager, $leave));
+        $this->assertTrue($inbox->hasSources($manager));
+        $this->assertSame(["leave:{$leave->id}:decide"], $inbox->rows($manager)->pluck('key')->all());
+        // No escalation: HR does not stand in while that manager is at work.
+        $this->assertNull(app(\App\Services\LeaveDecisionAuthority::class)->basisFor($hr, $leave));
+
+        Livewire::actingAs($manager)
+            ->test(\App\Livewire\Inbox\Index::class)
+            ->call('decide', "leave:{$leave->id}:decide", $inbox->leaveVersion($leave->fresh()), LeaveRequestStatus::Accepted)
+            ->assertHasNoErrors();
+
+        $this->assertSame(LeaveRequestStatus::Accepted, $leave->fresh()->status);
+        $this->assertSame('manager', $leave->fresh()->decision_basis);
+    }
+
+    public function test_gc1_the_next_step_names_a_direct_manager_whatever_their_role(): void
+    {
+        [, $leave] = $this->createPendingDecisionFixture();
+        $manager = $this->makeDirectManagerOf($leave, asEmployeeOnly: true);
+
+        app()->setLocale('en');
+        $this->assertStringContainsString(
+            $manager->profile->name,
+            app(\App\Services\LeaveRequestNextStep::class)->describe($leave->fresh()),
+        );
+    }
+
+    public function test_gc1_the_new_request_notice_opens_the_inbox_for_a_manager_without_all_leaves(): void
+    {
+        [, $leave] = $this->createPendingDecisionFixture();
+        $manager = $this->makeDirectManagerOf($leave, asEmployeeOnly: true);
+
+        $data = (new NewLeaveRequest($leave->fresh()->load('leaveBalance.leaveType', 'leaveBalance.contract.employee')))->toArray($manager);
+
+        $this->assertSame(route('inbox', ['open' => "leave:{$leave->id}:decide"]), $data['url']);
+    }
+
+    public function test_gc1_one_reminder_goes_to_the_manager_and_city_hr_after_three_days(): void
+    {
+        [$hr, $leave] = $this->createPendingDecisionFixture();
+        $manager = $this->makeDirectManagerOf($leave, asEmployeeOnly: true);
+        $leave->forceFill(['created_at' => now()->subDays(3)->subMinute(), 'start_at' => today()->addDays(10), 'end_at' => today()->addDays(11)])->save();
+        Notification::fake();
+
+        $this->artisan('leaves:send-decision-reminders')->assertSuccessful();
+        $this->artisan('leaves:send-decision-reminders')->assertSuccessful();
+
+        Notification::assertSentToTimes($manager, \App\Notifications\LeaveDecisionReminder::class, 1);
+        Notification::assertSentTo($manager, \App\Notifications\LeaveDecisionReminder::class, fn ($n) => $n->recipientType === 'manager');
+        Notification::assertSentToTimes($hr, \App\Notifications\LeaveDecisionReminder::class, 1);
+        Notification::assertSentTo($hr, \App\Notifications\LeaveDecisionReminder::class, fn ($n) => $n->recipientType === 'hr');
+        Notification::assertNotSentTo($leave->leaveBalance->contract->employee->account, \App\Notifications\LeaveDecisionReminder::class);
+    }
+
+    public function test_gc1_a_reminder_goes_one_day_before_the_start_even_if_sent_today(): void
+    {
+        [, $leave] = $this->createPendingDecisionFixture();
+        $manager = $this->makeDirectManagerOf($leave);
+        $leave->forceFill(['created_at' => now(), 'start_at' => today()->addDay(), 'end_at' => today()->addDays(2)])->save();
+        Notification::fake();
+
+        $this->artisan('leaves:send-decision-reminders')->assertSuccessful();
+
+        Notification::assertSentToTimes($manager, \App\Notifications\LeaveDecisionReminder::class, 1);
+    }
+
+    public function test_gc1_no_reminder_before_it_is_due_or_once_decided(): void
+    {
+        [, $leave] = $this->createPendingDecisionFixture();
+        $manager = $this->makeDirectManagerOf($leave);
+        $leave->forceFill(['created_at' => now()->subDays(2), 'start_at' => today()->addDays(5), 'end_at' => today()->addDays(6)])->save();
+        Notification::fake();
+
+        $this->artisan('leaves:send-decision-reminders')->assertSuccessful();
+        Notification::assertNothingSent();
+
+        $leave->forceFill(['created_at' => now()->subDays(5), 'status' => LeaveRequestStatus::Rejected, 'reject_reason' => 'x'])->save();
+        $this->artisan('leaves:send-decision-reminders')->assertSuccessful();
+        Notification::assertNothingSent();
+    }
+
     public function test_c3_the_technical_manager_neither_sees_nor_decides(): void
     {
         [, $leave] = $this->createPendingDecisionFixture();
@@ -1432,13 +1527,16 @@ class LeaveRequestWorkflowTest extends TestCase
     }
 
     /** A manager who holds the position the requester's position reports to, with the real manager permissions. */
-    private function makeDirectManagerOf(LeaveRequest $leave): User
+    private function makeDirectManagerOf(LeaveRequest $leave, bool $asEmployeeOnly = false): User
     {
         [$manager] = $this->createRejectedLeaveFixture(null, uniqid('manager.').'@example.test', uniqid('manager-'));
-        $role = \App\Models\Role::findOrCreate('manager', 'web');
-        $manager->assignRole($role);
-        $manager->setActiveRole($role->id);
-        $manager->givePermissionTo(['leaves.decide', 'leaves.view-all']);
+
+        if (! $asEmployeeOnly) {
+            $role = \App\Models\Role::findOrCreate('manager', 'web');
+            $manager->assignRole($role);
+            $manager->setActiveRole($role->id);
+            $manager->givePermissionTo(['leaves.decide', 'leaves.view-all']);
+        }
 
         $managerPositionId = DB::table('contracts')->where('employee_id', $manager->employee_id)->value('position_id');
         DB::table('positions')

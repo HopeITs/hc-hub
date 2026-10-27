@@ -60,7 +60,7 @@ Ids: `F` = source audit, `D` = browser walkthrough.
 
 | # | Finding | Severity | Disposition |
 |---|---|---|---|
-| G-C-1 (F1, D-01) | **A pending request can have no possible decider.** If the direct-manager position is held by someone who cannot decide (only `employee` role, no account, switched role, HR role of another city) and is not on leave, HR may not stand in (`LeaveDecisionAuthority::basisFor`, lines 44–58). Every inbox shows 0 while All leaves → Pending shows it; the employee is told "waiting for the HR team". Seen in the browser on request 71; the synthetic copy has ≥ 10 such requests across cities. | **High** | **Decided 2026-10-27** ([decisions.md](decisions.md) DEC-05 revision 2): the direct-manager position holder decides whatever their role, no escalation; one in-app reminder to the manager (copy to city HR) after 3 days without an answer or 1 day before the leave starts. **Needs correction** (C3 owner). |
+| G-C-1 (F1, D-01) | **A pending request can have no possible decider.** If the direct-manager position is held by someone who cannot decide (only `employee` role, no account, switched role, HR role of another city) and is not on leave, HR may not stand in (`LeaveDecisionAuthority::basisFor`, lines 44–58). Every inbox shows 0 while All leaves → Pending shows it; the employee is told "waiting for the HR team". Seen in the browser on request 71; the synthetic copy has ≥ 10 such requests across cities. | **High** | **Decided and built (2026-10-27)**, [decisions.md](decisions.md) DEC-05 revision 2. The direct-manager position holder sees and decides their reports' requests in the work inbox whatever their role (`LeaveRequest::scopeManageableBy`, `LeaveDecisionAuthority::basisFor`, `WorkInbox`); no escalation, HR on behalf only while the manager is on leave. The new-request notice opens the inbox for someone without *All leaves*, and the next-step text names that manager. `leaves:send-decision-reminders` (daily 08:05) sends one in-app reminder to the manager and city HR 3 days after submission or 1 day before the start. Tests `test_gc1_*` (`LeaveRequestWorkflowTest`); a manager position holder with **no login account** still cannot act (HR creates the account). |
 | G-C-2 (F2) | **HR can decide its own leave** "on behalf" of its own manager on leave, or as "no manager" at the top of the tree; nothing compares requester and decider. | **High** | **Fixed (2026-10-27).** `LeaveDecisionAuthority::basisFor()` returns no basis when the requester is the user, on every basis; the policy, the decision form and the inbox all go through it. Tests `test_gc2_hr_cannot_decide_its_own_request_as_no_manager` and `…_on_behalf_of_its_absent_manager` fail without the change; another HR person in scope still stands in. |
 | G-C-3 (F3) | Inbox "Seen by HR" / "Object" skip the `leaves.review` permission that the old table action requires; an objection returns days to the balance. | Medium | **Needs correction**: same permission check as the table action. |
 | G-C-4 (D-02, D-04) | After HR decides on behalf (or any older HR decision), HR's review row says "The manager accepted/rejected". The employee's view is correct. | Medium | **Needs correction** (wording from the stored basis). |
@@ -78,7 +78,7 @@ Ids: `F` = source audit, `D` = browser walkthrough.
 | G-C-16 | Built assets were older than `resources/` (re-ran `npm run build`); older launch entries point at a removed `php-8.5.11` path. | Info | Environment only. |
 
 **Accepted as delivered:** C1 navigation, C2 bilingual search and quick actions, C5 calendar privacy, the shared count source across badge / inbox / dashboard, and concurrency/stale-role handling.
-**Release-blocking for Phase C:** G-C-1 (decided, not yet built). G-C-2 is fixed.
+**Release-blocking for Phase C:** none left from G-C once the §3 matrix is re-run on the corrected SHA; G-C-1 and G-C-2 are fixed.
 
 ## 5. Acceptance criteria
 
@@ -90,7 +90,7 @@ Ids: `F` = source audit, `D` = browser walkthrough.
 
 ## 6. Handoff
 
-- **C3 owner:** G-C-3, G-C-4, G-C-7; G-C-1 after the decision. **C4/C5 owner:** G-C-5, G-C-6, G-C-10, G-C-11, G-C-13. Then re-run the §3 matrix on the corrected SHA.
+- **C3 owner:** G-C-3, G-C-4, G-C-7 (G-C-1 and G-C-2 are built). **C4/C5 owner:** G-C-5, G-C-6, G-C-10, G-C-11, G-C-13. Then re-run the §3 matrix on the corrected SHA.
 - **HR product owner:** G-C-1, G-C-6 and G-C-8 decided on 2026-10-27 (DEC-05 revision 2); nothing left open.
 - **D4** may start its design work; it must not build on the current on-behalf rule until G-C-1 is decided. **X1-I** may note the inbox being computed 2–3 times per page (audit F16). **X2-R** inherits §2's uncovered combinations and the need for real participants. **G-R** must cite the corrected SHA, not `aa983edc`.
 - **Formal review (QA engineer + technical lead): pending.**
