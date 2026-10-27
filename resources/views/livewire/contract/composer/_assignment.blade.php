@@ -309,5 +309,13 @@
          renews on its own unless it is a trial (ContractObserver). --}}
     <p class="mt-3 text-caption text-secondary-medium">@lang('contracts.composer-help.status')</p>
 
+    {{-- G-B-10 (answer 2): on create the switch is shown here, already on.
+         Editing keeps it in the termination section. --}}
+    @if(! $isEdit && $canManageAutoRenew)
+        <div class="mt-4">
+            @include('livewire.contract.composer._auto-renew')
+        </div>
+    @endif
+
     <x-contract.continue section="assignment" />
 </x-contract.section>

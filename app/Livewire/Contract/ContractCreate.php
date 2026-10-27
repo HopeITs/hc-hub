@@ -44,7 +44,9 @@ use Livewire\Component;
  */
 class ContractCreate extends Component
 {
-    use DrivesContractComposer, ResolvesContractLocationOptions;
+    use DrivesContractComposer, ResolvesContractLocationOptions {
+        DrivesContractComposer::applyComposerTermination as private baseComposerTermination;
+    }
     use RemembersReturnTo;
     use TracksTaskAttempt;
     use WithFeedback;
@@ -195,7 +197,23 @@ class ContractCreate extends Component
             // A plain create opens blank; a renewal opens on its predecessor.
             'seed' => $this->isRenewal() ? $this->composerSeed() : null,
             'errorSections' => $this->errorSections(),
+            'canManageAutoRenew' => $this->canSetAutoRenew(),
         ]);
+    }
+
+    /**
+     * G-B-10 (answer 2): HR sees the auto-renew switch while creating, already
+     * on, and may turn it off. Other roles do not see it, and the contract
+     * gets ContractObserver's default; a trial is always off.
+     */
+    protected function applyComposerTermination(array $payload): void
+    {
+        $this->baseComposerTermination($payload);
+
+        if ($this->canSetAutoRenew() && array_key_exists('autoRenew', $payload)) {
+            $this->form->auto_renew = (bool) $payload['autoRenew']
+                && ! Contract::isTrialType($this->form->contract_type_id);
+        }
     }
 
     protected function locationOptionsPermission(): string
@@ -294,6 +312,18 @@ class ContractCreate extends Component
     // ────────────────────────────────────────────────
     // Private helpers
     // ────────────────────────────────────────────────
+
+    /** The same rule ContractForm applies when it saves (canPersistAutoRenew). */
+    private function canSetAutoRenew(): bool
+    {
+        $user = auth()->user();
+
+        if ($this->isRenewal()) {
+            return $user->can('manageAutoRenew', $this->renewalSource);
+        }
+
+        return $user->activeRoleIs('HR') && $user->hasActivePermission('contracts.create');
+    }
 
     private function isRenewal(): bool
     {

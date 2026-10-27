@@ -241,6 +241,21 @@ class LeaveRequestWorkflowTest extends TestCase
         Notification::assertNothingSent();
     }
 
+    public function test_the_decision_dialog_is_a_form_so_enter_submits_it(): void
+    {
+        [$decisionMaker, $leaveRequest] = $this->createPendingDecisionFixture();
+
+        // G-B-7: Save is the form's submit button, not a separate click handler
+        // (both together would send the decision twice).
+        Livewire::actingAs($decisionMaker)
+            ->test(AllLeaveRequestModule::class)
+            ->call('openDecision', $leaveRequest->id)
+            ->set('form.status', LeaveRequestStatus::Rejected)
+            ->assertSeeHtml('wire:submit.prevent="submitDecision"')
+            ->assertDontSeeHtml('wire:click="submitDecision"')
+            ->assertSeeHtml('id="reject_reason"');
+    }
+
     public function test_decision_rejects_an_unknown_action_value(): void
     {
         [$decisionMaker, $leaveRequest] = $this->createPendingDecisionFixture();

@@ -22,7 +22,7 @@ Status: **built and tested; review pending.**
 
 1. **Organization comes last**, not under My space as C0 §4 drew it. Under My space its long list (up to 15 reference links for a manager) pushed *My team*, the manager's daily work, below the fold. C1's objective is that frequent work comes first. Recorded here and in C0 §4.
 2. **English spelling "Organization"** (the app's existing spelling, e.g. "Organization Chart"); C0's glossary said "Organisation".
-4. **C0-Q4 changed to answer 2 (2026-10-27):** in *Organization*, an `employee` now sees only the org chart, and a `manager` the org chart, centers and programs; positions and project basics left their menus. Permissions unchanged: `test_reference_pages_left_out_of_the_menu_still_open_by_url` opens each one by URL for both roles, and `test_each_role_keeps_exactly_the_pages_it_had` holds the new lists.
+4. **C0-Q4 changed to answer 2 (2026-10-27):** in *Organization*, an `employee` now sees only the org chart, and a `manager` the org chart, centers and programs; positions and project basics left their menus. Since G-B-13 (answer 2) these pages are also refused by URL for those roles (`test_reference_pages_left_out_of_the_menu_are_refused_by_url`; the read permission stays, see g-b-gate.md §9), and `test_each_role_keeps_exactly_the_pages_it_had` holds the new lists.
 3. **The current item stays highlighted after the phone drawer opens** (bug fixed on the way). The sidebar re-renders through Livewire's update route, where `routeIs()` no longer knows the page; it now keeps the page's route from the first request (`Sidebar::$currentRoute`). The old sidebar had the same bug.
 
 ## 3. Security

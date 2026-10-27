@@ -274,7 +274,8 @@ use App\Enums\LeaveRequestStatus;
 
     <x-modal.dialog id="decisionModal" :title="$modalTitle" wire:model.defer="decisionModal" close-action="requestClose" wire:ignore.self>
         @if($decisionLeave)
-            <div class="space-y-6 sheet:flex-1 sheet:flex sheet:flex-col">
+            {{-- A real form, so Enter in the reason field submits (G-B-7). --}}
+            <form wire:submit.prevent="submitDecision" class="space-y-6 sheet:flex-1 sheet:flex sheet:flex-col">
 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
@@ -366,7 +367,7 @@ use App\Enums\LeaveRequestStatus;
                 <x-modal.actions class="mt-4">
 
                     <x-primary-button
-                        wire:click="submitDecision"
+                        type="submit"
                         wire:loading.attr="disabled"
                         wire:target="submitDecision"
                         class="!w-auto">
@@ -379,7 +380,7 @@ use App\Enums\LeaveRequestStatus;
                     </x-primary-button>
                 </x-modal.actions>
 
-            </div>
+            </form>
         @endif
     </x-modal.dialog>
 

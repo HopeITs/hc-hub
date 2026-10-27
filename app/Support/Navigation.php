@@ -86,19 +86,19 @@ final class Navigation
             $hrOps[] = $news;
         }
 
-        // C0-Q4 (answer 2): the directory and org chart for everyone; the other
-        // reference pages leave the menu of `employee`, and of `manager` except
-        // centers and programs (a manager needs them for the team). Menu only:
-        // the read permission is unchanged and the pages still open by URL.
-        $isEmployee = $user->activeRoleIs('employee');
-        $readsAll = ! $isEmployee && ! $isManager;
+        // C0-Q4 and G-B-13 (answer 2 both): the directory and org chart for
+        // everyone; the other reference pages are closed to `employee`, and to
+        // `manager` except centers and programs (a manager needs them for the
+        // team). One list (access-control.reference_pages_hidden_from) drives
+        // both this menu and the pages' own route check.
+        $opens = fn (string $page): bool => $user->canOpenReferencePage($page);
 
         $organisation = array_values(array_filter([
             $can('positions.view') ? self::item('nav.org.chart', __('general.orgn-chart'), 'org.chart', ['org.chart'], 'code-fork', 'nav.org-chart') : null,
-            ! $isEmployee && ! $editsCenters && $can('centers.view') ? $centers : null,
-            ! $isEmployee && ! $editsPrograms && $can('programs.view') ? $programs : null,
-            $readsAll && ! $editsPositions && $can('positions.view') ? $positions : null,
-            $readsAll && ! $editsBasics && $can('project-basics.view') ? $basics : null,
+            ! $editsCenters && $opens('centers') ? $centers : null,
+            ! $editsPrograms && $opens('programs') ? $programs : null,
+            ! $editsPositions && $opens('positions') ? $positions : null,
+            ! $editsBasics && $opens('project-basics') ? $basics : null,
             ! $newsInHr && $can('news.view') ? $news : null,
         ]));
 

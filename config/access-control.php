@@ -34,6 +34,21 @@ return [
         'employee',
     ],
 
+    /*
+     * Reference pages a role may not open, though its baseline still holds
+     * the read permission (C0-Q4 answer 2, G-B-13 answer 2). The same list
+     * takes them out of the menu and refuses their URL with 403, so the two
+     * cannot drift. The permission stays: positions.view also opens the org
+     * chart and the colleague drawer, which every role keeps.
+     * Read through User::canOpenReferencePage().
+     */
+    'reference_pages_hidden_from' => [
+        'centers' => ['employee'],
+        'programs' => ['employee'],
+        'positions' => ['employee', 'manager'],
+        'project-basics' => ['employee', 'manager'],
+    ],
+
     'role_baselines' => [
         'general-manager' => [
             'statistics.view', 'employees.view', 'employees.create', 'employees.update', 'employees.export',

@@ -327,7 +327,9 @@ document.addEventListener('alpine:init', () => {
         terminatedAt: config.seed?.terminatedAt ?? '',
         terminationReasonId: str(config.seed?.terminationReasonId ?? ''),
         reasonOfTermination: config.seed?.reasonOfTermination ?? '',
-        autoRenew: Boolean(config.seed?.autoRenew),
+        // A new contract starts with auto-renew on (G-B-10; ContractObserver
+        // applies the same default); an edit or renewal shows what is saved.
+        autoRenew: config.seed ? Boolean(config.seed.autoRenew) : true,
 
         // ---- ui
         // An edit opens with every section collapsed and summarised: there is

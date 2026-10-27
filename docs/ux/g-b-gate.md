@@ -84,14 +84,14 @@ Data integrity summary: no duplicate request, contract, account or decision; bal
 | G-B-4 | Leave tables (All leaves, My leaves, Balances) are sideways tables on phones; the status column is off-screen. Already listed as not done in B4 and M1. | Medium | **Fixed** (§9): the three leave tables are cards on phones (B4-D §6). | Rafi (for B4/M1) |
 | G-B-5 | Tapping a decided leave row opens the **editor**, not a read-only view (B4D-Q2 was applied to employees and contracts only). | Low | **Fixed** (§9): a decided row or card opens the read-only details (B4D-Q2); Edit is its own button. | Rafi (for B4) |
 | G-B-6 | The leave **edit** dialog opened by the manager showed the *Employee* field empty (red border). Seen once, on request of Nour Halabi (2 Oct). Not investigated further here. | **Medium** (was Low, to confirm) | **Fixed** (§9). Reproduced, and worse than it looked: a manager's edit was validated against the manager's own contract, so every save was refused, and a leave type from the manager's own balance was accepted. | Rafi |
-| G-B-7 | Keyboard: pressing Enter in the decision dialog's reason field does nothing (no `<form>`); Tab to *Save* works. | Low | Fix in C3 (decision UI) or A5 follow-up. | Frontend |
+| G-B-7 | Keyboard: pressing Enter in the decision dialog's reason field does nothing (no `<form>`); Tab to *Save* works. | Low | **Fixed** (§9): the C3 inbox uses real forms, and the *All leaves* decision dialog is now a form too; Enter submits in both. | Rafi |
 | G-B-8 | Composer: choosing the contract type after entering the start date resets the start date to the type's default. | Low | **Fixed** (§9): a date the user typed is kept when the type changes. | Rafi |
-| G-B-9 | HR (city) can still decide leave requests; DEC-05 revision says only the direct manager decides (A3 §4, C3-D G1). | Policy gap, known | **C3** implements DEC-05 rev. | C3 |
-| G-B-10 | Auto-renew is on by default and the composer does not ask (X2 note). | Info | HR question for D4. | HR product owner |
+| G-B-9 | HR (city) can still decide leave requests; DEC-05 revision says only the direct manager decides (A3 §4, C3-D G1). | Policy gap, known | **Done in C3** ([c3-implementation.md](c3-implementation.md)): only the direct manager decides; HR decides on their behalf when they are on leave today, or when there is no direct manager (C3-Q1). | C3 |
+| G-B-10 | Auto-renew is on by default and the composer does not ask (X2 note). | Info | **Answered (2026-10-27, G-B10-Q1 = 2):** keep it on by default, but show it as a ticked box on the create screen so HR sees it and can untick it before saving (trials stay excluded). Still editable afterwards from the edit screen and the contracts list. **Built** (§9). | HR product owner |
 | G-B-11 | Not covered here: screen reader, real phone and on-screen keyboard, 200 % zoom; 7 of 16 task × language × device combinations; participant timings. | Limitation | Carried to X2-R / G-C; G-A item 2 still open. | QA lead |
 | G-B-12 | Test environment only: `/en/...` redirects to https on the `php -S` copy; viewport emulation taller than the pane misplaces clicks; one-step typing does not fill date inputs. | Info | No product action. | — |
 
-| G-B-13 | A *Termination Reasons* link (`/termination-reasons`) appeared in a staff persona's page. **Checked: by design.** The route requires `project-basics.view`, and `config/access-control.php` grants that read permission to the `employee` and `manager` baselines. Writes on those reference tables are a separate matter (G-A item 4). | Info | None for G-B. HR may want to confirm that staff should see reference data. | HR product owner |
+| G-B-13 | A *Termination Reasons* link (`/termination-reasons`) appeared in a staff persona's page. **Checked: by design.** The route requires `project-basics.view`, and `config/access-control.php` grants that read permission to the `employee` and `manager` baselines. Writes on those reference tables are a separate matter (G-A item 4). | Info | **Answered (2026-10-27, G-B13-Q1 = 2) and fixed** (§9): the reference pages left out of a role's menu by C0-Q4 are refused by URL too. | HR product owner |
 
 **Release-blocking items:** none. No item loses data, duplicates a write, or exposes data across roles or cities.
 
@@ -220,3 +220,42 @@ Date: 2026-10-23. On `hr-ux-by-rafi` after `8872f852`. Checked on a separate syn
 - **Not done here (B4D-Q4):** the default tab per role (managers on "Needs my decision", HR on "Not yet seen by HR") and the tab kept in the URL. These belong with C3's inbox.
 
 **Suite after G-B-4/5:** 938 tests, 5174 assertions, 0 failures. In one earlier run the flaky `8731` check in `ContractsTableB4Test` failed again, this time in `test_phone_cards_render_with_the_named_actions_and_no_pay`; it passed on the rerun.
+
+**G-B-7 and G-B-9: closed (2026-10-27).**
+
+- **G-B-9** was built in C3 (DEC-05 revision): see [c3-implementation.md](c3-implementation.md) §1–§2 and its `test_c3_*` tests.
+- **G-B-7:** C3's inbox already submitted on Enter. The decision dialog on *All leaves* still had no `<form>`, so Enter in the reject-reason field did nothing there. The dialog body is now `<form wire:submit.prevent="submitDecision">` and *Save* is its submit button. The old `wire:click` was removed, because with both a click on *Save* would send the decision twice.
+- **Test:** `LeaveRequestWorkflowTest::test_the_decision_dialog_is_a_form_so_enter_submits_it`.
+- **Browser** (copy `hc-hr-gb12`, `hr.alp`, Arabic, request 30 with no direct manager):
+  - «رفض» chosen, empty reason, Enter: one error «حقل سبب الرفض مطلوب.», nothing saved.
+  - Reason typed, Enter: dialog closed with «تم إتمام العملية بنجاح». The request was rejected once with basis `no_manager`.
+
+**G-B-10: answered (2026-10-27).**
+
+- **Today:** a new contract gets auto-renew switched on (`ContractObserver::creating`) without HR seeing it. The create screen does not show the toggle. Trials are always off.
+- **Changing it now:** only HR in the contract's city (`manageAutoRenew`) can change it, from the edit screen (termination section) or the contracts list.
+- **Decision (G-B10-Q1 = answer 2):** default stays **on**, but the create screen shows it as a ticked box that HR can untick before saving. Trials never show it. Editing afterwards is unchanged.
+- **Built (2026-10-27):**
+  - **Where it shows:** on the create screen, under the dates, already on. The same partial `composer/_auto-renew.blade.php` is used in the edit screen's termination section.
+  - **Hidden:** when the trial type is chosen.
+  - **Who sees and saves it:** HR with `contracts.create` (`ContractCreate::canSetAutoRenew`, the same rule as `ContractForm::canPersistAutoRenew`). The contract's city is already held to the role's by the identity validation. For a renewal, `manageAutoRenew` on the predecessor applies.
+  - **Other roles:** they never see it, and the contract gets `ContractObserver`'s default.
+  - **Safety:** an unset value is never written as off (`auto_renew !== null`), so a draft upgrade or another caller keeps the default.
+- **Tests:** in `ContractAutoRenewalWorkflowTest`:
+  - `test_hr_sets_auto_renew_while_creating_a_contract`: off and on are saved as chosen; a trial with the switch on still saves off.
+  - `test_a_role_other_than_hr_does_not_see_auto_renew_while_creating`.
+- **Suite:** 978 tests, 5504 assertions, 0 failures.
+- **Browser** (`hr.alp`, Arabic): box shown ticked under the dates; hidden after choosing «عقد تطوّع تجريبي»; shown again for «عقد تطوّع».
+
+**G-B-13: answered and fixed (2026-10-27).**
+
+- **Decision (G-B13-Q1 = answer 2):** an employee and a manager may no longer open the reference pages their menu leaves out (C0-Q4 answer 2). They get 403 instead.
+  - **`employee`:** centers, programs, positions, and the nine project-basics pages (including Termination Reasons).
+  - **`manager`:** positions and project basics. A manager keeps centers and programs for the team.
+  - **Everyone:** the org chart and the colleague drawer stay open.
+- **How:**
+  - One list, `config('access-control.reference_pages_hidden_from')`, is read through `User::canOpenReferencePage()`.
+  - It feeds both the *Organisation* menu (`Navigation`) and a new `reference_page:{group}` route middleware, which replaces `active_permission:{group}.view` on those routes.
+  - The "View positions" links on the centers table and the center page follow the same check.
+- **Why the permissions were not revoked:** `positions.view` also opens the org chart and the colleague drawer, which every role keeps. No migration and no change to role data. To undo, empty the list.
+- **Test:** `NavigationAreasTest::test_reference_pages_left_out_of_the_menu_are_refused_by_url` (403 for each hidden page; the org chart, and centers and programs for a manager, still 200; `positions.view` still held).

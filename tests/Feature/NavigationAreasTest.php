@@ -114,14 +114,34 @@ class NavigationAreasTest extends TestCase
         $this->assertStringContainsString('data-nav="nav.settings.activity"', $admin);
     }
 
-    /** C0-Q4: pages left out of a role's menu are not revoked; they still open by URL. */
-    public function test_reference_pages_left_out_of_the_menu_still_open_by_url(): void
+    /**
+     * G-B-13 (answer 2): a reference page left out of a role's menu is closed
+     * by URL too, from the same list; the org chart stays open to everyone,
+     * and a manager keeps centers and programs.
+     */
+    public function test_reference_pages_left_out_of_the_menu_are_refused_by_url(): void
     {
-        foreach (['employee' => [...self::BASICS, 'centers.index', 'programs.index', 'positions.index'],
-            'manager' => [...self::BASICS, 'positions.index']] as $role => $routes) {
-            $user = $this->userWithRole($role);
+        $cases = [
+            'employee' => [
+                'refused' => [...self::BASICS, 'centers.index', 'programs.index', 'positions.index'],
+                'open' => ['org.chart'],
+            ],
+            'manager' => [
+                'refused' => [...self::BASICS, 'positions.index'],
+                'open' => ['org.chart', 'centers.index', 'programs.index'],
+            ],
+        ];
 
-            foreach ($routes as $route) {
+        foreach ($cases as $role => $routes) {
+            $user = $this->userWithRole($role);
+            // The read permission is kept: the list refuses the page, not the permission.
+            $this->assertTrue($user->hasActivePermission('positions.view'));
+
+            foreach ($routes['refused'] as $route) {
+                $this->actingAs($user)->get(route($route))->assertForbidden();
+            }
+
+            foreach ($routes['open'] as $route) {
                 $this->actingAs($user)->get(route($route))->assertOk();
             }
         }

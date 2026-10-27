@@ -130,7 +130,7 @@ Route::group(
             Route::get('/news/create', NewsCreate::class)->name('news.create')->middleware('active_permission:news.create');
             Route::get('/news/{news}/edit', NewsCreate::class)->name('news.edit')->middleware('active_permission:news.update');
 
-            Route::get('/course-categories', CourseCategoryModule::class)->middleware('active_permission:project-basics.view')->name('course-categories.index');
+            Route::get('/course-categories', CourseCategoryModule::class)->middleware('reference_page:project-basics')->name('course-categories.index');
             Route::get('/activity-log', ActivityLogModule::class)
                 ->name('activity-log.index')
                 ->middleware('active_permission:activity-log.view');
