@@ -195,6 +195,10 @@ use App\Enums\LeaveRequestStatus;
                     </div>
                 </dl>
 
+                <div class="grid">
+                    @include('livewire.employee.leave.partials.hr-notes', ['leaveRequest' => $selectedLeave])
+                </div>
+
                 <div class="flex justify-end">
                     <x-primary-button type="button" wire:click="closeDetails" class="!w-auto !bg-secondary-light">
                         @lang('general.cancel')

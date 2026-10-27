@@ -11,11 +11,10 @@ use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
-use App\Services\LeaveNotificationService;
+use App\Services\LeaveRequestReview;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\DateColumn;
@@ -95,24 +94,10 @@ class AllLeaveRequestTable extends LivewireTable
 
     public function markAsReviewed(array $payload): void
     {
-        $item = DB::transaction(function () use ($payload): LeaveRequest {
-            $leaveRequest = LeaveRequest::query()
-                ->lockForUpdate()
-                ->findOrFail($payload['id']);
+        // One writer for "Seen by HR", shared with the work inbox (C3): it locks,
+        // authorizes after the lock, writes and notifies after commit.
+        app(LeaveRequestReview::class)->markSeen((int) $payload['id'], auth()->user());
 
-            // Authorization runs after acquiring the lock so a concurrent
-            // request cannot pass with a stale, unreviewed model.
-            Gate::authorize('review', $leaveRequest);
-
-            $leaveRequest->update(['hr_approved' => true]);
-
-            return $leaveRequest;
-        });
-
-        app(LeaveNotificationService::class)->sendHrReview(
-            $item,
-            auth()->user(),
-        );
         $this->dispatch('notification-created');
         $this->dispatch('$refresh');
 

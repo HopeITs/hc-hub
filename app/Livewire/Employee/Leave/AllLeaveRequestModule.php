@@ -87,9 +87,12 @@ class AllLeaveRequestModule extends Component
         if ($this->linkedLeaveId !== null) {
             $leaveRequest = LeaveRequest::findOrFail($this->linkedLeaveId);
 
+            // C3: HR is notified of every new request but decides only on a
+            // manager's behalf, so a decision link it may not use opens the details.
             if (
                 $this->linkedLeaveMode === 'decision'
                 && $leaveRequest->status === LeaveRequestStatus::Pending
+                && Gate::allows('decide', $leaveRequest)
             ) {
                 $this->openDecision($leaveRequest);
             } else {

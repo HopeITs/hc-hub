@@ -46,11 +46,11 @@ class NavigationAreasTest extends TestCase
 
         $expected = [
             'employee' => [...self::MY_SPACE, ...$reference, ...self::BASICS],
-            'manager' => [...self::MY_SPACE, ...$reference, ...self::BASICS, 'leaves.all', 'contracts.index', 'news.index'],
-            'general-manager' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork],
-            'HR-ALP' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance'],
-            'HR-SYR' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index'],
-            'super-admin' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index'],
+            'manager' => [...self::MY_SPACE, ...$reference, ...self::BASICS, 'leaves.all', 'contracts.index', 'news.index', 'inbox'],
+            'general-manager' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'inbox'],
+            'HR-ALP' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'inbox'],
+            'HR-SYR' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
+            'super-admin' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
         ];
 
         foreach ($expected as $role => $routes) {
@@ -182,7 +182,7 @@ class NavigationAreasTest extends TestCase
             $names[] = app('router')->getRoutes()->match(Request::create($href))->getName() ?? $href;
         }
 
-        // The inbox links to a page that is also in the menu (C3 replaces it).
+        // C3: the work inbox is its own page (route `inbox`) for roles with a source.
         $names = array_values(array_unique($names));
         sort($names);
 

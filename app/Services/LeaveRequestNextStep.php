@@ -91,9 +91,21 @@ class LeaveRequestNextStep
         $decidedBy = $this->decidedByName($leaveRequest);
         $date = $leaveRequest->approved_at?->format('d-m-Y');
 
-        $decision = $decidedBy
-            ? __('leaves.next-step.decided-by', ['name' => $this->isolate($decidedBy), 'date' => $this->isolate((string) $date)])
-            : __('leaves.next-step.decided', ['date' => $this->isolate((string) ($date ?? '—'))]);
+        // C3: a decision HR made in the manager's place says so.
+        $onBehalfOf = $leaveRequest->decided_on_behalf_of
+            ? Employee::query()->find($leaveRequest->decided_on_behalf_of)?->name
+            : null;
+
+        $decision = match (true) {
+            $decidedBy && $leaveRequest->decision_basis === LeaveDecisionAuthority::ON_BEHALF && $onBehalfOf => __('leaves.next-step.decided-on-behalf', [
+                'name' => $this->isolate($decidedBy), 'manager' => $this->isolate($onBehalfOf), 'date' => $this->isolate((string) $date),
+            ]),
+            $decidedBy && $leaveRequest->decision_basis === LeaveDecisionAuthority::NO_MANAGER => __('leaves.next-step.decided-no-manager', [
+                'name' => $this->isolate($decidedBy), 'date' => $this->isolate((string) $date),
+            ]),
+            (bool) $decidedBy => __('leaves.next-step.decided-by', ['name' => $this->isolate($decidedBy), 'date' => $this->isolate((string) $date)]),
+            default => __('leaves.next-step.decided', ['date' => $this->isolate((string) ($date ?? '—'))]),
+        };
 
         $after = $leaveRequest->hr_approved
             ? __('leaves.next-step.hr-seen')

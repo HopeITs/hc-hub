@@ -2,9 +2,8 @@
 
 namespace App\Support;
 
-use App\Enums\LeaveRequestStatus;
-use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Services\WorkInbox;
 use Throwable;
 
 /**
@@ -261,45 +260,33 @@ final class Navigation
     }
 
     /**
-     * Interim work inbox (C0-Q2) until C3 ships its page: leave requests
-     * waiting on this role, from the same scope the leave list uses. Pending
-     * requests for roles that decide; decided ones not yet seen by HR for
-     * roles that review. Null when the role has neither source.
+     * The work inbox (C0-Q2, C3): shown to roles that have an inbox source,
+     * with the count of the very rows the inbox page lists (WorkInbox), never
+     * an unscoped count (approval-source-contract.md §5).
      *
      * @return array{count: int, route: string}|null
      */
     private static function inbox(User $user, callable $can, bool $count = true): ?array
     {
-        $decides = $can('leaves.decide');
-        $reviews = $can('leaves.review');
+        $inbox = app(WorkInbox::class);
 
-        if (! $decides && ! $reviews) {
+        if (! $inbox->hasSources($user)) {
             return null;
         }
 
         if (! $count) {
-            return ['count' => 0, 'route' => 'leaves.all'];
+            return ['count' => 0, 'route' => 'inbox'];
         }
 
         try {
-            $count = LeaveRequest::query()
-                ->manageableBy($user)
-                ->where(function ($query) use ($decides, $reviews) {
-                    if ($decides) {
-                        $query->orWhere('status', LeaveRequestStatus::Pending);
-                    }
-                    if ($reviews) {
-                        $query->orWhere(fn ($q) => $q->where('status', '!=', LeaveRequestStatus::Pending)->where('hr_approved', false));
-                    }
-                })
-                ->count();
+            $count = $inbox->count($user);
         } catch (Throwable $e) {
             // A badge must not take every page down with it.
             report($e);
             $count = 0;
         }
 
-        return ['count' => $count, 'route' => 'leaves.all'];
+        return ['count' => $count, 'route' => 'inbox'];
     }
 
     /** @return array<string, mixed> */

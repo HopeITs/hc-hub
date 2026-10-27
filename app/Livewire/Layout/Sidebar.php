@@ -38,6 +38,8 @@ class Sidebar extends Component
         $this->open = false;
     }
 
+    // C3: the work inbox changed (an item was handled), so its badge is recounted.
+    #[On('inbox-changed')]
     #[On('pendingDeliversCount')]
     #[On('pendingReturnsCount')]
     public function refreshCounts(): void

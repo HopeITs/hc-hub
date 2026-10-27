@@ -253,6 +253,8 @@ use App\Enums\LeaveRequestStatus;
                         <p class="text-neutral-800">{{ $selectedLeave->reason }}</p>
                     </div>
 
+                    @include('livewire.employee.leave.partials.hr-notes', ['leaveRequest' => $selectedLeave])
+
                 </div>
 
                 <div class="flex justify-end gap-2 mt-4">

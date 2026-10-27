@@ -71,6 +71,9 @@ Route::group(
             Route::redirect('settings', 'settings/password');
             Route::get('settings/password', Password::class)->name('settings.password');
             Route::get('my-profile', EmployeeProfile::class)->name('my-profile');
+            // C3: the work inbox. No permission of its own: every row comes from a
+            // source's scoped query and every action re-checks its domain policy.
+            Route::get('inbox', App\Livewire\Inbox\Index::class)->name('inbox');
 
             // Basic project routes
             require __DIR__.'/basic-project.php';

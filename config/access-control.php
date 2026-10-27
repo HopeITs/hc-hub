@@ -524,6 +524,14 @@ return [
         'employee.employee-create' => ['setActiveTab', 'toggleBoardMember', 'skipDraft', 'updatedDraftCityId', 'updatedDraftProgramId',
             'mountRemembersReturnTo', // C2 lifecycle hook (Livewire refuses direct calls to mount*): reads ?from through SafeReturn, writes nothing
         ],
+        // C3 work inbox: no permission of its own, by design (approval-source-contract.md §5).
+        // Each action re-reads the record and runs its domain owner, which authorizes inside
+        // its lock: decide -> LeaveRequestForm::submitDecision (Gate decide, LeaveDecisionAuthority),
+        // markSeen/object -> LeaveRequestReview (Gate review/object), confirmItem/applyBatch ->
+        // ChecklistWorkflow (row scoped to the actor, plus checklists.deliver/receive),
+        // finalizeItem -> Gate update on the employee + ChecklistWorkflow::finalizeReturn.
+        // previewBatch writes nothing; setFilter changes the view only.
+        'inbox.index' => ['setFilter', 'decide', 'markSeen', 'object', 'confirmItem', 'finalizeItem', 'previewBatch', 'applyBatch'],
         // C2 header search: a lifecycle hook (Livewire refuses direct calls to updated*) that only
         // trims the term and counts it against the per-user search limit. Results come from
         // DirectoryAccess::constrain() and the active role's menu on every render.

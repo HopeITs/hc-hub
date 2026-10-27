@@ -9,6 +9,7 @@ use App\Models\Employee;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
 use App\Services\LeaveAlternativeEmployees;
+use App\Services\LeaveDecisionAuthority;
 use App\Services\LeaveRequestPricing;
 use App\Support\Leave\LeaveQuote;
 use App\Support\Leave\LeaveWindow;
@@ -253,6 +254,14 @@ class LeaveRequestForm extends Form
             $this->assertStillPending($leaveRequest);
             Gate::authorize('decide', $leaveRequest);
 
+            // How the decider was entitled (C3): the direct manager, or HR on
+            // their behalf / with no direct manager. Stored with the decision.
+            $authority = app(LeaveDecisionAuthority::class);
+            $basis = $authority->basisFor(auth()->user(), $leaveRequest);
+            $onBehalfOf = $basis === LeaveDecisionAuthority::ON_BEHALF
+                ? $authority->directManagers($leaveRequest)->first()?->id
+                : null;
+
             if ((int) $this->status === LeaveRequestStatus::Accepted) {
                 // Lock order: request, then balance (store/update: employee,
                 // then balance; update locks its request first as well).
@@ -277,6 +286,8 @@ class LeaveRequestForm extends Form
                     'reject_reason' => null,
                     'approved_at' => now(),
                     'approved_by' => auth()->user()->profile->id,
+                    'decision_basis' => $basis,
+                    'decided_on_behalf_of' => $onBehalfOf,
                 ]);
 
                 if ($hours > 0) {
@@ -288,6 +299,8 @@ class LeaveRequestForm extends Form
                     'reject_reason' => $this->reject_reason,
                     'approved_at' => now(),
                     'approved_by' => auth()->user()->profile->id,
+                    'decision_basis' => $basis,
+                    'decided_on_behalf_of' => $onBehalfOf,
                 ]);
             }
 
@@ -1052,9 +1065,7 @@ class LeaveRequestForm extends Form
      */
     private function deductionHours(LeaveRequest $leaveRequest): float
     {
-        return $leaveRequest->computed_hours !== null
-            ? round((float) $leaveRequest->computed_hours, 2)
-            : round(app(LeaveRequestPricing::class)->quoteLegacy($leaveRequest), 2);
+        return $leaveRequest->deductionHours();
     }
 
     /**

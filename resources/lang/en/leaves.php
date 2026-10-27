@@ -66,9 +66,20 @@ return [
     ],
 
     // Who acts next on a request, read from the real approval rules.
+    // C3: HR's note on a reviewed or objected request (field label in errors).
+    'review' => [
+        'notes-title' => 'Notes from HR',
+        'kind' => [
+            'note' => 'Note',
+            'objection' => 'Objection',
+        ],
+        'note' => 'note',
+    ],
+
     'next-step' => [
         'title' => 'Next step',
-        'pending-managers-and-hr' => 'Waiting for a decision from :managers or the HR team in :city. Either can accept or reject it, and both have been notified.',
+        // C3 (DEC-05 revision): only the direct manager decides; HR is informed.
+        'pending-managers-and-hr' => 'Waiting for a decision from :managers, who has been sent a notification. The HR team in :city has been informed.',
         'pending-managers' => 'Waiting for a decision from :managers, who has been sent a notification.',
         'pending-hr' => 'Waiting for a decision from the HR team in :city, which has been sent a notification.',
         'pending-unassigned' => 'Waiting for a decision from HR. No manager or HR account was found to notify, so please let your HR team know.',
@@ -76,6 +87,8 @@ return [
         'or' => ':first or :last',
         'list-separator' => ', ',
         'decided-by' => 'Decided by :name on :date.',
+        'decided-on-behalf' => 'Decided by :name (HR) on behalf of :manager on :date.',
+        'decided-no-manager' => 'Decided by :name (HR, no direct manager) on :date.',
         'decided' => 'Decided on :date.',
         'awaiting-hr' => 'Next: HR marks the decision as seen. Nothing is needed from you.',
         'hr-seen' => 'HR has seen the decision. There are no further steps.',
