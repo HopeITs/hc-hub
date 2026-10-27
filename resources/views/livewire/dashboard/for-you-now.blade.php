@@ -30,6 +30,7 @@
                 @switch($key)
                     @case('decisions')
                     @case('inbox')
+                    @case('inbox-items')
                         <p class="mt-1 text-small text-neutral-800" data-testid="for-you-{{ $key }}-count">
                             {{ trans_choice("dashboard.for-you.{$key}.count", $part['count'], ['count' => $part['count']]) }}
                         </p>

@@ -45,20 +45,24 @@ class LeaveRequestPolicy
 
     /**
      * HR sends a decided request back to the manager as pending, with a note
-     * (C3 G3, C3D-Q5). Same audience as review: HR roles and super-admin in scope.
+     * (C3 G3, C3D-Q5). Same audience as review: HR roles and super-admin in
+     * scope, holding leaves.review like the leave list's row action (G-C-3).
      */
     public function object(User $user, LeaveRequest $leaveRequest): bool
     {
         return $leaveRequest->status !== LeaveRequestStatus::Pending
             && $this->isHr($user)
+            && $user->hasActivePermission('leaves.review')
             && $this->canManage($user, $leaveRequest);
     }
 
+    /** "Seen by HR": the permission is checked here, not only by the menu or the route (G-C-3). */
     public function review(User $user, LeaveRequest $leaveRequest): bool
     {
         return $leaveRequest->status !== LeaveRequestStatus::Pending
             && ! $leaveRequest->hr_approved
             && $this->isHr($user)
+            && $user->hasActivePermission('leaves.review')
             && $this->canManage($user, $leaveRequest);
     }
 

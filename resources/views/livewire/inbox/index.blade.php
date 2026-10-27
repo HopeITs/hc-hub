@@ -55,6 +55,10 @@
             </div>
         @endif
 
+        @if ($capped)
+            <p class="mb-3 text-small text-secondary-medium" data-testid="inbox-capped">{{ __('inbox.capped', $capped) }}</p>
+        @endif
+
         <ul class="flex flex-col gap-3" wire:loading.class="opacity-70" wire:target="decide,markSeen,object,confirmItem,finalizeItem,applyBatch,setFilter">
             @foreach ($rows as $row)
                 @php
@@ -77,6 +81,9 @@
                         <div class="min-w-0 flex-1">
                             <p class="font-semibold text-neutral-900">
                                 <bdi>{{ $subject?->name ?? __('general.na') }}</bdi>
+                                @if ($row['former'] ?? false)
+                                    <span class="ms-1 rounded-full bg-neutral-100 px-2 py-0.5 text-caption font-semibold text-secondary-medium" data-testid="inbox-former">{{ __('inbox.former') }}</span>
+                                @endif
                                 @if ($showCity && $row['city'])
                                     <span class="text-small font-normal text-secondary-medium">· <bdi>{{ $row['city'] }}</bdi></span>
                                 @endif
@@ -145,7 +152,7 @@
                             </form>
                         @elseif ($row['action'] === 'review')
                             <p class="mb-2 text-small text-secondary-medium">
-                                {{ __($row['status'] === \App\Enums\LeaveRequestStatus::Accepted ? 'inbox.review.accepted' : 'inbox.review.rejected') }}
+                                {{ $row['decision'] }}
                             </p>
                             {{-- Seen by HR with an optional note; objection needs one (C3D-Q5). --}}
                             <form x-data="{ objecting: false }"
