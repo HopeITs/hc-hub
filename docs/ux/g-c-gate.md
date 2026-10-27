@@ -61,7 +61,7 @@ Ids: `F` = source audit, `D` = browser walkthrough.
 | # | Finding | Severity | Disposition |
 |---|---|---|---|
 | G-C-1 (F1, D-01) | **A pending request can have no possible decider.** If the direct-manager position is held by someone who cannot decide (only `employee` role, no account, switched role, HR role of another city) and is not on leave, HR may not stand in (`LeaveDecisionAuthority::basisFor`, lines 44–58). Every inbox shows 0 while All leaves → Pending shows it; the employee is told "waiting for the HR team". Seen in the browser on request 71; the synthetic copy has ≥ 10 such requests across cities. | **High** | **Held for policy decision (DEC-05 / C3-Q1)**, then correction: should HR stand in when the holder cannot decide, or should the manager role be granted? Until then the requests stay visible in All leaves (no data loss). Owner: HR product owner, then C3 owner. |
-| G-C-2 (F2) | **HR can decide its own leave** "on behalf" of its own manager on leave, or as "no manager" at the top of the tree; nothing compares requester and decider. | **High** | **Needs correction** (self-approval is not a policy choice): refuse a decision on one's own request in `basisFor` and test it. Owner: C3 owner. |
+| G-C-2 (F2) | **HR can decide its own leave** "on behalf" of its own manager on leave, or as "no manager" at the top of the tree; nothing compares requester and decider. | **High** | **Fixed (2026-10-27).** `LeaveDecisionAuthority::basisFor()` returns no basis when the requester is the user, on every basis; the policy, the decision form and the inbox all go through it. Tests `test_gc2_hr_cannot_decide_its_own_request_as_no_manager` and `…_on_behalf_of_its_absent_manager` fail without the change; another HR person in scope still stands in. |
 | G-C-3 (F3) | Inbox "Seen by HR" / "Object" skip the `leaves.review` permission that the old table action requires; an objection returns days to the balance. | Medium | **Needs correction**: same permission check as the table action. |
 | G-C-4 (D-02, D-04) | After HR decides on behalf (or any older HR decision), HR's review row says "The manager accepted/rejected". The employee's view is correct. | Medium | **Needs correction** (wording from the stored basis). |
 | G-C-5 (D-03) | Pending requests that already started are labelled "Starts soon" and counted in "⚠ N start within two days". | Medium | **Needs correction**. |
@@ -78,7 +78,7 @@ Ids: `F` = source audit, `D` = browser walkthrough.
 | G-C-16 | Built assets were older than `resources/` (re-ran `npm run build`); older launch entries point at a removed `php-8.5.11` path. | Info | Environment only. |
 
 **Accepted as delivered:** C1 navigation, C2 bilingual search and quick actions, C5 calendar privacy, the shared count source across badge / inbox / dashboard, and concurrency/stale-role handling.
-**Release-blocking for Phase C:** G-C-1 (after its decision) and G-C-2.
+**Release-blocking for Phase C:** G-C-1 (after its decision). G-C-2 is fixed.
 
 ## 5. Acceptance criteria
 
@@ -90,7 +90,7 @@ Ids: `F` = source audit, `D` = browser walkthrough.
 
 ## 6. Handoff
 
-- **C3 owner:** G-C-2, G-C-3, G-C-4, G-C-7; G-C-1 after the decision. **C4/C5 owner:** G-C-5, G-C-6, G-C-10, G-C-11, G-C-13. Then re-run the §3 matrix on the corrected SHA.
+- **C3 owner:** G-C-3, G-C-4, G-C-7; G-C-1 after the decision. **C4/C5 owner:** G-C-5, G-C-6, G-C-10, G-C-11, G-C-13. Then re-run the §3 matrix on the corrected SHA.
 - **HR product owner:** G-C-1 (who decides when the manager-position holder cannot), G-C-8 (team definition for contracts), G-C-6 if leavers' returns should stay out of the inbox.
 - **D4** may start its design work; it must not build on the current on-behalf rule until G-C-1 is decided. **X1-I** may note the inbox being computed 2–3 times per page (audit F16). **X2-R** inherits §2's uncovered combinations and the need for real participants. **G-R** must cite the corrected SHA, not `aa983edc`.
 - **Formal review (QA engineer + technical lead): pending.**

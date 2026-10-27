@@ -1205,6 +1205,37 @@ class LeaveRequestWorkflowTest extends TestCase
         $this->assertSame('no_manager', $leave->fresh()->decision_basis);
     }
 
+    public function test_gc2_hr_cannot_decide_its_own_request_as_no_manager(): void
+    {
+        [$hr] = $this->createPendingDecisionFixture();
+        $own = $this->pendingOwnRequestOf($hr);
+        $authority = app(\App\Services\LeaveDecisionAuthority::class);
+
+        $this->assertSame([], $authority->directManagers($own)->all());
+        $this->assertNull($authority->basisFor($hr, $own));
+        $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($hr)->allows('decide', $own));
+
+        Livewire::actingAs($hr)
+            ->test(AllLeaveRequestModule::class)
+            ->call('openDecision', $own->id)
+            ->assertForbidden();
+
+        $this->assertSame(LeaveRequestStatus::Pending, $own->fresh()->status);
+    }
+
+    public function test_gc2_hr_cannot_decide_its_own_request_on_behalf_of_its_absent_manager(): void
+    {
+        [$hr] = $this->createPendingDecisionFixture();
+        $own = $this->pendingOwnRequestOf($hr);
+        $this->putOnAcceptedLeaveToday($this->makeDirectManagerOf($own));
+        $other = $this->createHrUserForLeave($own, 'other.hr@example.test');
+        $other->givePermissionTo(['leaves.decide', 'leaves.view-all']);
+
+        $this->assertNull(app(\App\Services\LeaveDecisionAuthority::class)->basisFor($hr, $own));
+        // Another HR person in scope still stands in for the absent manager.
+        $this->assertSame('on_behalf', app(\App\Services\LeaveDecisionAuthority::class)->basisFor($other, $own));
+    }
+
     public function test_c3_the_technical_manager_neither_sees_nor_decides(): void
     {
         [, $leave] = $this->createPendingDecisionFixture();
@@ -1415,6 +1446,18 @@ class LeaveRequestWorkflowTest extends TestCase
             ->update(['direct_manager_id' => $managerPositionId]);
 
         return $manager->fresh();
+    }
+
+    /** $user's own leave request, made pending and placed in their HR role's city. */
+    private function pendingOwnRequestOf(User $user): LeaveRequest
+    {
+        DB::table('employees')->where('id', $user->employee_id)->update(['city_id' => $user->activeCityIds()[0]]);
+        $own = LeaveRequest::query()
+            ->whereHas('leaveBalance.contract', fn ($contract) => $contract->where('employee_id', $user->employee_id))
+            ->firstOrFail();
+        $own->update(['status' => LeaveRequestStatus::Pending, 'reject_reason' => null, 'approved_at' => null, 'approved_by' => null]);
+
+        return $own->fresh();
     }
 
     private function putOnAcceptedLeaveToday(User $manager): void

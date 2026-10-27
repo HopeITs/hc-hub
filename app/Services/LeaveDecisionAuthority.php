@@ -22,9 +22,10 @@ use Illuminate\Support\Collection;
  *  - no_manager: HR in scope, when the requester has no direct manager (no
  *                manager position, or nobody holds it) (C3-Q1).
  *
- * The technical manager no longer exists. The role must also hold
- * leaves.decide. Seeing a request (LeaveRequest::manageableBy) is wider than
- * deciding it: HR still sees and reviews its city's requests.
+ * Nobody decides their own request, on any basis (G-C-2). The technical
+ * manager no longer exists. The role must also hold leaves.decide. Seeing a
+ * request (LeaveRequest::manageableBy) is wider than deciding it: HR still
+ * sees and reviews its city's requests.
  */
 final class LeaveDecisionAuthority
 {
@@ -38,6 +39,10 @@ final class LeaveDecisionAuthority
     public function basisFor(User $user, LeaveRequest $leaveRequest): ?string
     {
         if (! $user->hasActivePermission('leaves.decide')) {
+            return null;
+        }
+
+        if ($user->employee_id !== null && (int) $leaveRequest->leaveBalance?->contract?->employee_id === (int) $user->employee_id) {
             return null;
         }
 
