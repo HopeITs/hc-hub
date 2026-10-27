@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\LeaveRequestStatus;
 use App\Models\Checklist;
 use App\Models\LeaveRequest;
+use App\Models\ProfileChangeRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Gate;
  *   checklist:{id}:deliver  S3  item the user is to hand over
  *   checklist:{id}:receive  S4  item the user is to take back
  *   checklist:{id}:finalize S5  returned item HR is to close
+ *   profile:{id}:approve    D1  a change an employee proposed to their own profile (profile-contract.md §5.1)
  *
  * The inbox lists and launches; each domain decides. Every row comes from
  * the source's own scoped query and, where a policy owns the decision, is
@@ -39,6 +41,7 @@ final class WorkInbox
             ->merge($this->leaveReviews($user))
             ->merge($this->checklistConfirmations($user))
             ->merge($this->checklistFinalizations($user))
+            ->merge($this->profileChanges($user))
             ->sortBy('waiting_since')
             ->values();
     }
@@ -141,6 +144,48 @@ final class WorkInbox
             ->get()
             ->filter(fn (Checklist $item) => $item->employee && Gate::forUser($user)->allows('update', $item->employee))
             ->map(fn (Checklist $item) => $this->checklistRow($item, 'finalize', $item->returned_at ?? $item->updated_at));
+    }
+
+    /**
+     * D1: HR of the employee's city approves what an employee proposed to
+     * their own profile; the same rule as editing the record.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function profileChanges(User $user): Collection
+    {
+        if (! $this->isHr($user) || ! $user->hasActivePermission('employees.update')) {
+            return collect();
+        }
+
+        $cityIds = $user->activeCityIds();
+
+        return ProfileChangeRequest::query()->pending()
+            ->whereHas('employee', fn (Builder $employee) => $employee->where('is_active', true)
+                ->when($cityIds !== null, fn (Builder $q) => $q->whereIn('city_id', $cityIds)))
+            ->with(['employee.city', 'media'])
+            ->orderBy('created_at')
+            ->limit(self::PER_SOURCE)
+            ->get()
+            ->filter(fn (ProfileChangeRequest $change) => Gate::forUser($user)->allows('update', $change->employee))
+            ->map(fn (ProfileChangeRequest $change) => [
+                'key' => "profile:{$change->id}:approve",
+                'source' => 'profile',
+                'action' => 'approve',
+                'id' => $change->id,
+                'subject' => $change->employee,
+                'item' => __('employees.profile.change.sections.'.$change->section),
+                'section' => $change->section,
+                'proposed' => $change->proposed,
+                'file_url' => ($media = $change->getFirstMedia('file') ?? $change->getFirstMedia('photo'))
+                    ? route('employee-files.download', $media)
+                    : null,
+                'city' => $change->employee?->city?->name,
+                'waiting_since' => $change->created_at,
+                'urgent' => false,
+                'version' => null,
+                'bulk' => false,
+            ]);
     }
 
     private function leaveQuery(User $user): Builder

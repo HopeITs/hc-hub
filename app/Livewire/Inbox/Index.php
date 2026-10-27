@@ -13,6 +13,7 @@ use App\Services\LeaveDecisionAuthority;
 use App\Services\LeaveNotificationService;
 use App\Services\LeaveRequestNextStep;
 use App\Services\LeaveRequestReview;
+use App\Services\ProfileChangeRequests;
 use App\Services\TeamCoverage;
 use App\Services\WorkInbox;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -61,7 +62,7 @@ class Index extends Component
 
     public function setFilter(string $filter): void
     {
-        $this->filter = in_array($filter, ['all', 'decide', 'review', 'checklist'], true) ? $filter : 'all';
+        $this->filter = in_array($filter, ['all', 'decide', 'review', 'checklist', 'profile'], true) ? $filter : 'all';
     }
 
     // --- S1 leave decision ------------------------------------------------
@@ -130,6 +131,46 @@ class Index extends Component
     {
         $outcome = $this->applyChecklist($key, trim((string) ($this->notes[$this->slug($key)] ?? '')) ?: null);
         $this->reportChecklist($key, $outcome);
+    }
+
+    /** D1: approve an employee's proposed profile change (HR of their city). */
+    public function approveProfile(string $key): void
+    {
+        $this->resetErrorBag();
+        [$id] = $this->parse($key, 'profile', ['approve']);
+
+        try {
+            $result = app(ProfileChangeRequests::class)->approve(auth()->user(), $id);
+        } catch (AuthorizationException) {
+            $this->report($key, 'not_allowed', __('inbox.outcome.not_allowed'));
+
+            return;
+        }
+
+        $result === ProfileChangeRequests::ALREADY_HANDLED
+            ? $this->report($key, 'already_handled', __('inbox.profile.already'))
+            : $this->done($key, __('inbox.profile.approved'));
+    }
+
+    /** D1: reject it, with a reason the employee reads (required). */
+    public function rejectProfile(string $key): void
+    {
+        $this->resetErrorBag();
+        [$id] = $this->parse($key, 'profile', ['approve']);
+
+        try {
+            $result = app(ProfileChangeRequests::class)->reject(auth()->user(), $id, (string) ($this->notes[$this->slug($key)] ?? ''));
+        } catch (AuthorizationException) {
+            $this->report($key, 'not_allowed', __('inbox.outcome.not_allowed'));
+
+            return;
+        } catch (ValidationException $e) {
+            throw $this->onRow($e, $key, ['reason' => 'notes']);
+        }
+
+        $result === ProfileChangeRequests::ALREADY_HANDLED
+            ? $this->report($key, 'already_handled', __('inbox.profile.already'))
+            : $this->done($key, __('inbox.profile.rejected'));
     }
 
     /** Close a returned item's cycle (HR). One by one (approval-source-contract.md §6.1). */
@@ -225,12 +266,14 @@ class Index extends Component
             'decide' => $rows->where('action', 'decide')->count(),
             'review' => $rows->where('action', 'review')->count(),
             'checklist' => $rows->where('source', 'checklist')->count(),
+            'profile' => $rows->where('source', 'profile')->count(),
         ];
 
         $visible = match ($this->filter) {
             'decide' => $rows->where('action', 'decide'),
             'review' => $rows->where('action', 'review'),
             'checklist' => $rows->where('source', 'checklist'),
+            'profile' => $rows->where('source', 'profile'),
             default => $rows,
         };
 
@@ -373,7 +416,7 @@ class Index extends Component
     /** @return array{0: int, 1: string} */
     private function parse(string $key, string $source, array $actions): array
     {
-        if (! preg_match('/^(leave|checklist):(\d+):([a-z]+)$/', $key, $m) || $m[1] !== $source || ! in_array($m[3], $actions, true)) {
+        if (! preg_match('/^(leave|checklist|profile):(\d+):([a-z]+)$/', $key, $m) || $m[1] !== $source || ! in_array($m[3], $actions, true)) {
             abort(404);
         }
 

@@ -607,6 +607,10 @@ class Employee extends Model implements HasMedia
                 'board_member_end_at',
                 'is_active',
                 'is_board_member',
+                // D1: the owner edits these themself (profile-contract.md §5.1), so who
+                // changed them is kept. Not sensitive; contact fields are logged by name only.
+                'skills',
+                'interests',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();

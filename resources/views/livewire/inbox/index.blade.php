@@ -16,7 +16,7 @@
 
     {{-- Filters with the same counts as the menu badge. --}}
     <div role="group" aria-label="{{ __('inbox.filter.label') }}" class="mb-4 flex flex-wrap gap-2">
-        @foreach (['all', 'decide', 'review', 'checklist'] as $key)
+        @foreach (['all', 'decide', 'review', 'checklist', 'profile'] as $key)
             @if ($key === 'all' || $counts[$key] > 0 || $filter === $key)
                 <button type="button" wire:click="setFilter('{{ $key }}')" aria-pressed="{{ $filter === $key ? 'true' : 'false' }}"
                         data-testid="inbox-filter-{{ $key }}"
@@ -55,7 +55,7 @@
             </div>
         @endif
 
-        <ul class="flex flex-col gap-3" wire:loading.class="opacity-70" wire:target="decide,markSeen,object,confirmItem,finalizeItem,applyBatch,setFilter">
+        <ul class="flex flex-col gap-3" wire:loading.class="opacity-70" wire:target="decide,markSeen,object,confirmItem,finalizeItem,approveProfile,rejectProfile,applyBatch,setFilter">
             @foreach ($rows as $row)
                 @php
                     $slug = $row['slug'];
@@ -166,6 +166,9 @@
                                 </div>
                                 <p class="text-caption text-secondary-medium">{{ __('inbox.review.object-help') }}</p>
                             </form>
+                        @elseif ($row['source'] === 'profile')
+                            {{-- D1: what the employee proposed, so HR approves what it has seen. --}}
+                            @include('livewire.inbox.partials.profile-change', ['row' => $row, 'slug' => $slug])
                         @elseif ($row['action'] === 'finalize')
                             <button type="button" wire:click="finalizeItem(@js($row['key']))"
                                     class="min-h-11 rounded-control bg-primary px-5 font-semibold text-white">{{ __('inbox.checklist.finalize') }}</button>

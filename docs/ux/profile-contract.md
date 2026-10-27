@@ -2,7 +2,7 @@
 
 Version: **profile/1.0** · Date: 2026-10-27 · Task: D1-D in [ux-prompts-v3.md](ux-prompts-v3.md) (R-11)
 Owner role: UX designer + HR product owner · Reviewer: QA engineer + technical lead · Consumer: **D1** (also read by D2)
-Status: **HR decisions recorded (Q1–Q5, 2026-10-27); technical-lead review of §5, §5.1 and §7 pending.** This is a design document. **No application code, route, schema or data was changed.** Every component, field and route introduced below is **PROPOSED** until D1 implements it.
+Status: **HR decisions recorded (Q1–Q5) and technical lead approval of §5, §5.1, §7 (2026-10-27).** This is a design document. **No application code, route, schema or data was changed.** Every component, field and route introduced below is **PROPOSED** until D1 implements it.
 
 ---
 
@@ -171,4 +171,4 @@ Verification: source trace of the files in §2 at `aa983edc`. No application tes
 | Q3 | **A**: termination reason as today (R tier) | HR product owner | 2026-10-27 (in session) |
 | Q4 | **A**: certificate files as today (self and HR only) | HR product owner | 2026-10-27 (in session) |
 | Q5 | **4**: self-editing, direct for contact/skills, HR approval for education, courses, experience, photo, family | HR product owner | 2026-10-27 (in session) |
-| §5, §5.1 (incl. the new `profile_change_requests` table), §7 | pending | Technical lead | |
+| §5, §5.1 (incl. the new `profile_change_requests` table), §7 | **Approved** | Technical lead (in session) | 2026-10-27 |

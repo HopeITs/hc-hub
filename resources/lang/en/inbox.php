@@ -14,6 +14,7 @@ return [
         'decide' => 'Leave decisions',
         'review' => 'To mark as seen',
         'checklist' => 'Items',
+        'profile' => 'Profile changes',
     ],
     'action' => [
         'decide' => 'Leave request to decide',
@@ -21,6 +22,17 @@ return [
         'deliver' => 'Item to hand over',
         'receive' => 'Item to take back',
         'finalize' => 'Returned item to close',
+        'approve' => 'Profile change waiting for your approval',
+    ],
+    // D1: changes an employee proposes to their own profile.
+    'profile' => [
+        'approve' => 'Approve',
+        'reject' => 'Reject',
+        'reason' => 'Reason for rejecting (required to reject; the employee reads it)',
+        'file' => 'Open the attached file',
+        'approved' => "Approved. The change is now on the employee's profile.",
+        'rejected' => 'Rejected. The employee was told why.',
+        'already' => 'This change was already handled.',
     ],
     'waiting-since' => 'Waiting for :when',
     'urgent' => 'Starts soon',
