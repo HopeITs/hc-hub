@@ -78,6 +78,16 @@ Replaces the "Leave approval chain" row above **for leave requests only**. Other
 
 Implementation notes (not decided here): today `LeaveRequestPolicy::decide` also allows HR at any time and the technical manager (`tech_manager_id` in `manageableBy` and in notifications); both must change. An objection on an accepted request must release its hours from `used` when it returns to pending (A3-D §3.4).
 
+### DEC-05 revision 2 — G-C decisions (settled 2026-10-27, HR product owner, from [g-c-gate.md](g-c-gate.md))
+
+| Point | Decision |
+|---|---|
+| Manager who cannot decide (G-C-1) | When every holder of the direct-manager position is at work but **cannot decide** (no account, `employee` role only, active role without `leaves.decide`, HR role of another city), the request goes **one level up**: the holders of that position's own direct-manager position decide. If they cannot decide either, or there is no such position, **HR in the requester's city** decides. |
+| Manager on leave | **Unchanged** (C3-Q1): HR decides on behalf while every direct manager is on accepted leave today. Escalation one level up applies only to a manager who cannot decide at all. |
+| Own request (G-C-2) | Nobody decides their own request, on any basis. Built in `99529cf3`. |
+| Team contracts (G-C-8) | "Team contracts" follows **direct reports only**, like team leaves, the calendar and the inbox. |
+| Leavers' checklist items (G-C-6) | Hand-out / take-back items of former employees **appear in the inbox**, so the inbox and the counters agree. |
+
 ## DEC-01 / DEC-02 — Directory and public card (settled 2026-10-16)
 | Point | Decision |
 |---|---|
