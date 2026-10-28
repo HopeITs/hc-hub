@@ -39,8 +39,18 @@ Also updated: `BottomNavTest` (D2) had asserted that no worker was registered; i
 | **Open a page offline** | `/ar/inbox` showed the bilingual offline page; the inbox was never stored. |
 | **Logout** | On `/ar/login` the cache was reset to the 4 static entries (build files removed too), and the fingerprint reads `signed-out`. |
 
+### Chrome's own installability check (2026-10-28)
+
+- **How:** the Chrome 156 installed on this PC, headless with throwaway profiles, driven through its DevTools protocol (`Page.getInstallabilityErrors`, `Page.getAppManifest`). No package was downloaded.
+- **Target:** `http://127.0.0.1:8401/ar/login` on the test copy.
+
+| Manifest | Installability errors | Notes |
+|---|---|---|
+| **New** (commit ade75db6) | **none** | Manifest parsed with no errors; name «HopeHR»; worker `activated`; cache holds only the offline page, icons and fingerprinted fonts. |
+| **Old** (86c70911, restored temporarily, then put back) | `start-url-not-valid`, `manifest-missing-name-or-short-name`, `no-acceptable-icon` | Before this task the app could not be installed at all. |
+
 ## 4. Limits
 
-- **Install prompt and home-screen icon:** not tried on a real phone. The browser preview cannot install apps.
+- **Install prompt and home-screen icon:** not tried on a real phone. Chrome's own check says the app is installable (above), but tapping *Install* on a phone remains for QA.
 - **What works without a connection:** only the offline page. Nothing of HR data is available offline, by decision.
 - **Found, not changed here:** the app layout's inline `window.CustomScrollbarConfig` script, and two other inline scripts, are blocked by the same CSP (no nonce), so the custom scrollbar runs on its defaults. This predates D2-PWA.
