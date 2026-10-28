@@ -51,9 +51,9 @@ class NavigationAreasTest extends TestCase
             'manager' => [...self::MY_SPACE, 'org.chart', 'centers.index', 'programs.index', 'leaves.all', 'contracts.index', 'news.index', 'inbox'],
             'general-manager' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'inbox'],
             'HR-ALP' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'inbox'],
-            'HR-SYR' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
+            'HR-SYR' => [...self::MY_SPACE, ...$reference, ...self::BASICS, 'holidays.index', ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
             // The D3 feedback list follows an IT contract, not a role (InAppFeedbackTest).
-            'super-admin' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
+            'super-admin' => [...self::MY_SPACE, ...$reference, ...self::BASICS, 'holidays.index', ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
         ];
 
         foreach ($expected as $role => $routes) {

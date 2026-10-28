@@ -7,12 +7,10 @@ use App\Enums\LeaveRequestStatus;
 use App\Enums\LeaveTypeCases;
 use App\Enums\ScheduleMode;
 use App\Models\Center;
-use App\Models\City;
 use App\Models\Contract;
 use App\Models\Holiday;
 use App\Models\LeaveBalance;
 use App\Models\LeaveRequest;
-use App\Models\Program;
 use App\Support\Leave\LeaveQuote;
 use App\Support\Leave\LeaveWindow;
 use Carbon\CarbonImmutable;
@@ -361,56 +359,48 @@ class LeaveRequestPricing
      * Holiday dates that apply to $contract between $from and $to (inclusive),
      * keyed by Y-m-d.
      *
-     * D-4 says "national + the center's city + the program". The holidays
-     * table has no national flag and its morph (holidayable) points at City or
-     * Program, so — without a schema change — this reads:
-     *  - national  = a holiday attached to the City whose slug is
-     *                City::NATIONAL_SLUG ('SYR', the nationwide scope that
-     *                HR-SYR owns);
-     *  - city      = a holiday attached to the center's City (the position's
-     *                city when there is no center);
-     *  - program   = a holiday attached to the position's Program, in every
-     *                governorate (a "project" = program × governorate cannot
-     *                be expressed by the morph alone; see the D-4 refinement).
-     * Holidays attached to anything else (e.g. a Center) are not read.
+     * D-4 as refined in team-coverage-contract §6.1: national holidays reach
+     * everyone; a project holiday reaches the volunteers of that program in
+     * that governorate (the center's city, else the position's city — the
+     * Position::scopeInCity rule). There is no city- or program-wide level.
      * A recurring holiday repeats on the same month/day every year; a Feb 29
-     * recurring date falls on Mar 1 in other years.
+     * recurring date falls on Mar 1 in other years. The holder's birthday
+     * holiday, when one is in force, is added by BirthdayHoliday.
      *
      * @return array<string, true>
      */
     public function holidayDates(Contract $contract, CarbonImmutable $from, CarbonImmutable $to): array
     {
+        $dates = $this->officialHolidayDates($contract, $from, $to);
+
+        foreach (app(BirthdayHoliday::class)->datesFor($contract, $from->startOfDay(), $to->startOfDay()) as $date) {
+            $dates[$date] = true;
+        }
+
+        ksort($dates);
+
+        return $dates;
+    }
+
+    /**
+     * National and project holidays only, without the birthday — what the
+     * birthday itself is checked against.
+     *
+     * @return array<string, true>
+     */
+    public function officialHolidayDates(Contract $contract, CarbonImmutable $from, CarbonImmutable $to): array
+    {
         $from = $from->startOfDay();
         $to = $to->startOfDay();
         $position = $contract->position;
 
-        $cityIds = array_values(array_unique(array_filter([
-            $this->nationalCityId(),
-            $position?->center?->city_id ?? $position?->city_id,
-        ])));
-        $programId = $position?->program_id;
-
-        if ($cityIds === [] && ! $programId) {
-            return [];
-        }
+        $programId = $position?->program_id ? (int) $position->program_id : null;
+        $cityId = $position?->center?->city_id ?? $position?->city_id;
 
         $holidays = Holiday::query()
-            ->where(function ($scope) use ($cityIds, $programId) {
-                $scope->where(fn ($q) => $q
-                    ->where('holidayable_type', (new City)->getMorphClass())
-                    ->whereIn('holidayable_id', $cityIds ?: [0]));
-
-                if ($programId) {
-                    $scope->orWhere(fn ($q) => $q
-                        ->where('holidayable_type', (new Program)->getMorphClass())
-                        ->where('holidayable_id', $programId));
-                }
-            })
-            ->where(fn ($q) => $q
-                ->where('is_recurring', true)
-                ->orWhere(fn ($q) => $q
-                    ->whereDate('start_date', '<=', $to->toDateString())
-                    ->whereDate('end_date', '>=', $from->toDateString())))
+            ->where('kind', '!=', Holiday::KIND_BIRTHDAY)
+            ->applicableTo($programId, $cityId !== null ? (int) $cityId : null)
+            ->occurringBetween($from, $to)
             ->get(['start_date', 'end_date', 'is_recurring']);
 
         $dates = [];
@@ -439,6 +429,12 @@ class LeaveRequestPricing
         }
 
         return $dates;
+    }
+
+    /** H-5: a service-agreement contract gets no birthday holiday. */
+    public function isServiceAgreement(Contract $contract): bool
+    {
+        return (config('contracts.map_by_id')[$contract->contract_type_id] ?? 'annual') === 'service';
     }
 
     // ---------------------------------------------------------------------------
@@ -674,13 +670,6 @@ class LeaveRequestPricing
         sort($days);
 
         return $days === [] ? null : $days;
-    }
-
-    private function nationalCityId(): ?int
-    {
-        $id = City::query()->where('slug', City::NATIONAL_SLUG)->value('id');
-
-        return $id !== null ? (int) $id : null;
     }
 
     /**
