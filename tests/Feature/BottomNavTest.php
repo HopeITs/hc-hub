@@ -75,8 +75,7 @@ class BottomNavTest extends TestCase
         $this->assertStringContainsString('data-testid="bottom-nav"', $html);
         $this->assertStringContainsString('viewport-fit=cover', $html);
         $this->assertStringContainsString('data-testid="offline-notice"', $html);
-        // Nothing is registered for offline caching (D2 step 4).
-        $this->assertStringNotContainsString('serviceWorker.register', $html);
+        // D2-PWA registers a worker that stores no private response (PwaInstallTest checks it).
     }
 
     /** AC-D2-02: the stylesheet makes the bar step aside for focused fields and sticky save rows. */
