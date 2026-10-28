@@ -520,6 +520,8 @@ return [
         // lifecycle hook that only changes the filter.
         'feedback.feedback-index' => ['updatedCategory'],
         'layout.sidebar' => ['toggle', 'close', 'refreshCounts'],
+        // D2 phone bar: re-renders its own links and the inbox count (WorkInbox, scoped to the caller).
+        'layout.bottom-nav' => ['refreshInbox'],
 
         // --- Component-state only -------------------------------------------
         // Tab switches, wizard steps, modal open/close, filter changes, zoom

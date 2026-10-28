@@ -989,6 +989,7 @@ return [
         ],
         'organisation' => 'Organization',
         'work-inbox' => 'Work inbox',
+        'bottom' => 'Quick navigation',
         'work-inbox-count' => ':count items waiting for you',
         'team-leaves' => 'Team leaves',
         'team-contracts' => 'Team contracts',
@@ -1072,5 +1073,7 @@ return [
     'views-limit' => 'You can keep up to :max saved views for this table. Delete one first.',
     'views-name-taken' => 'You already have a view with this name.',
     'views-help' => 'A view keeps search, filters, sort, rows per page and columns. It never keeps results.',
-
+    'connection' => [
+        'offline' => 'No internet connection. What you type stays on the page, but nothing is saved until the connection is back.',
+    ],
 ];
