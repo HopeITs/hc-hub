@@ -33,11 +33,15 @@ class HolidayModule extends Component
 
     public ?int $governorate = null;
 
-    protected $listeners = ['openHolidayEdit' => 'edit'];
+    /** The team calendar embeds the dialog alone (no title, table or breadcrumbs). */
+    public bool $embedded = false;
 
-    public function mount(): void
+    protected $listeners = ['openHolidayEdit' => 'edit', 'openHolidayCreate' => 'createOn'];
+
+    public function mount(bool $embedded = false): void
     {
         $this->authorizeManager();
+        $this->embedded = $embedded;
         $this->item = $this->blank();
     }
 
@@ -45,7 +49,7 @@ class HolidayModule extends Component
     {
         $mine = $projects->managedBy(auth()->user());
 
-        return view('livewire.basics.holiday-module', [
+        return view($this->embedded ? 'livewire.basics.holiday-dialog' : 'livewire.basics.holiday-module', [
             'isNationalHr' => $projects->isNationalHr(auth()->user()),
             'projectOptions' => $mine->map(fn ($p) => $p['label'])->all(),
             'governorates' => City::query()
@@ -65,6 +69,18 @@ class HolidayModule extends Component
         $this->modalTitle = __('general.add-new');
         $this->markClean();
         $this->showModal = true;
+    }
+
+    /** From a day of the team calendar: a new holiday starting and ending that day. */
+    public function createOn(string $date): void
+    {
+        $this->create();
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) === 1) {
+            $this->item['start_date'] = $date;
+            $this->item['end_date'] = $date;
+            $this->markClean();
+        }
     }
 
     public function edit(int $id): void
@@ -156,6 +172,7 @@ class HolidayModule extends Component
         $this->showModal = false;
 
         $this->dispatch('refreshHolidayTable');
+        $this->dispatch('holidaysChanged');
 
         $this->toast();
     }

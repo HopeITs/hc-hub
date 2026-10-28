@@ -390,20 +390,48 @@ class LeaveRequestPricing
      */
     public function officialHolidayDates(Contract $contract, CarbonImmutable $from, CarbonImmutable $to): array
     {
+        $position = $contract->position;
+        $cityId = $position?->center?->city_id ?? $position?->city_id;
+
+        return array_map(
+            fn () => true,
+            $this->holidaysOn($position?->program_id ? (int) $position->program_id : null, $cityId !== null ? (int) $cityId : null, $from, $to),
+        );
+    }
+
+    /**
+     * National and project holidays for a program × governorate (null, null:
+     * national only), with the rows behind each date — what a calendar needs
+     * to name the day. Birthday rows are windows, not days, and stay out.
+     *
+     * @return array<string, list<Holiday>> keyed by Y-m-d, sorted
+     */
+    public function holidaysOn(?int $programId, ?int $cityId, CarbonImmutable $from, CarbonImmutable $to): array
+    {
         $from = $from->startOfDay();
         $to = $to->startOfDay();
-        $position = $contract->position;
-
-        $programId = $position?->program_id ? (int) $position->program_id : null;
-        $cityId = $position?->center?->city_id ?? $position?->city_id;
 
         $holidays = Holiday::query()
             ->where('kind', '!=', Holiday::KIND_BIRTHDAY)
-            ->applicableTo($programId, $cityId !== null ? (int) $cityId : null)
+            ->applicableTo($programId, $cityId)
             ->occurringBetween($from, $to)
-            ->get(['start_date', 'end_date', 'is_recurring']);
+            ->get(['id', 'name_en', 'name_ar', 'scope', 'kind', 'start_date', 'end_date', 'is_recurring']);
 
-        $dates = [];
+        return $this->spread($holidays, $from, $to);
+    }
+
+    /**
+     * Each holiday's dates between $from and $to (recurring rows on the same
+     * month/day every year), grouped by date.
+     *
+     * @param  iterable<Holiday>  $holidays
+     * @return array<string, list<Holiday>> keyed by Y-m-d, sorted
+     */
+    public function spread(iterable $holidays, CarbonImmutable $from, CarbonImmutable $to): array
+    {
+        $from = $from->startOfDay();
+        $to = $to->startOfDay();
+        $byDate = [];
 
         foreach ($holidays as $holiday) {
             $start = CarbonImmutable::parse($holiday->start_date)->startOfDay();
@@ -413,22 +441,28 @@ class LeaveRequestPricing
                 continue;
             }
 
+            $dates = [];
+
             if (! $holiday->is_recurring) {
                 $this->addRange($dates, $start, $end, $from, $to);
+            } else {
+                $length = (int) $start->diffInDays($end);
 
-                continue;
+                // year - 1 catches a recurring range that crosses New Year.
+                for ($year = $from->year - 1; $year <= $to->year; $year++) {
+                    $yearStart = $start->setYear($year);
+                    $this->addRange($dates, $yearStart, $yearStart->addDays($length), $from, $to);
+                }
             }
 
-            $length = (int) $start->diffInDays($end);
-
-            // year - 1 catches a recurring range that crosses New Year.
-            for ($year = $from->year - 1; $year <= $to->year; $year++) {
-                $yearStart = $start->setYear($year);
-                $this->addRange($dates, $yearStart, $yearStart->addDays($length), $from, $to);
+            foreach (array_keys($dates) as $date) {
+                $byDate[$date][] = $holiday;
             }
         }
 
-        return $dates;
+        ksort($byDate);
+
+        return $byDate;
     }
 
     /** H-5: a service-agreement contract gets no birthday holiday. */

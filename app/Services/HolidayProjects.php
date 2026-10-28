@@ -107,6 +107,33 @@ class HolidayProjects
             && $links->every(fn ($l) => $mine->has($l->program_id.':'.$l->city_id));
     }
 
+    /**
+     * The non-birthday holidays $user looks after: every one for national
+     * HR, those on any of their projects for a program manager.
+     *
+     * @return Builder<Holiday>
+     */
+    public function holidaysOf(?User $user): Builder
+    {
+        $query = Holiday::query()->with('projects')->where('kind', '!=', Holiday::KIND_BIRTHDAY);
+
+        if ($this->isNationalHr($user)) {
+            return $query;
+        }
+
+        $mine = $this->managedBy($user);
+
+        if ($mine->isEmpty()) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereHas('projects', fn (Builder $link) => $link->where(function (Builder $any) use ($mine) {
+            foreach ($mine as $p) {
+                $any->orWhere(fn (Builder $pair) => $pair->where('program_id', $p['program_id'])->where('city_id', $p['city_id']));
+            }
+        }));
+    }
+
     /** @return Builder<Position> */
     private function projectManagerPositions(): Builder
     {

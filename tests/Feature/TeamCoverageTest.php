@@ -325,7 +325,9 @@ class TeamCoverageTest extends TestCase
             ->set('date', '2026-11-03')
             ->set('scope', 'org')
             ->assertDontSee('Rana Saad')
-            ->assertSeeHtml('data-testid="calendar-empty"');
+            // Nobody visible is away; the month list keeps only Lina's own project holiday.
+            ->assertDontSeeHtml('data-testid="calendar-empty"')
+            ->assertSee('Homs holiday');
     }
 
     /** The manager's view: pending marked by text, status filter, week and day views and navigation. */

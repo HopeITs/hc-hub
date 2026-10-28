@@ -420,7 +420,7 @@ return [
         'basics.job-level-module' => ['save', ...$closeGuard],
         'basics.leave-type-module' => ['save', ...$closeGuard],
         'basics.termination-reason-module' => ['save', ...$closeGuard],
-        'basics.holiday-module' => ['create', 'edit', 'save', 'selectGovernorate', ...$closeGuard],
+        'basics.holiday-module' => ['create', 'createOn', 'edit', 'save', 'selectGovernorate', ...$closeGuard],
         // choose() records the caller's own request for their own birthday;
         // decide() is refused unless the caller holds the volunteer's
         // direct-manager position (BirthdayHoliday::canDecide).
