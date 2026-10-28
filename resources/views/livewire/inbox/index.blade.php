@@ -55,7 +55,12 @@
             </div>
         @endif
 
+        @if ($capped)
+            <p class="mb-3 text-small text-secondary-medium" data-testid="inbox-capped">{{ __('inbox.capped', $capped) }}</p>
+        @endif
+
         <ul class="flex flex-col gap-3" wire:loading.class="opacity-70" wire:target="decide,markSeen,object,confirmItem,finalizeItem,approveProfile,rejectProfile,applyBatch,setFilter">
+
             @foreach ($rows as $row)
                 @php
                     $slug = $row['slug'];
@@ -77,6 +82,9 @@
                         <div class="min-w-0 flex-1">
                             <p class="font-semibold text-neutral-900">
                                 <bdi>{{ $subject?->name ?? __('general.na') }}</bdi>
+                                @if ($row['former'] ?? false)
+                                    <span class="ms-1 rounded-full bg-neutral-100 px-2 py-0.5 text-caption font-semibold text-secondary-medium" data-testid="inbox-former">{{ __('inbox.former') }}</span>
+                                @endif
                                 @if ($showCity && $row['city'])
                                     <span class="text-small font-normal text-secondary-medium">· <bdi>{{ $row['city'] }}</bdi></span>
                                 @endif
@@ -94,8 +102,9 @@
                             <p class="text-caption text-secondary-light">
                                 {{-- A length ("3 days"), not "3 days ago": the sentence around it says since when. --}}
                                 {{ __('inbox.waiting-since', ['when' => $row['waiting_since']?->diffForHumans(null, \Carbon\CarbonInterface::DIFF_ABSOLUTE)]) }}
-                                @if ($row['urgent'])
-                                    <span class="ms-1 rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-800 ring-1 ring-amber-200">{{ __('inbox.urgent') }}</span>
+                                {{-- G-C-5: an undecided leave already under way is not "starts soon"; the home block uses the same rule. --}}
+                                @if ($startFlag = \App\Livewire\Dashboard\ForYouNow::startFlag($row))
+                                    <span class="ms-1 rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-800 ring-1 ring-amber-200">{{ __($startFlag === 'started' ? 'inbox.started' : 'inbox.urgent') }}</span>
                                 @endif
                             </p>
                             @if (($row['basis'] ?? null) === 'on_behalf')
@@ -145,7 +154,7 @@
                             </form>
                         @elseif ($row['action'] === 'review')
                             <p class="mb-2 text-small text-secondary-medium">
-                                {{ __($row['status'] === \App\Enums\LeaveRequestStatus::Accepted ? 'inbox.review.accepted' : 'inbox.review.rejected') }}
+                                {{ $row['decision'] }}
                             </p>
                             {{-- Seen by HR with an optional note; objection needs one (C3D-Q5). --}}
                             <form x-data="{ objecting: false }"

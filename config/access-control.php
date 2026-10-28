@@ -64,7 +64,7 @@ return [
             'badges.view',
         ],
         'manager' => [
-            // Read-only, and only their direct/technical reports' contracts:
+            // Read-only, and only their direct reports' contracts (G-C-8):
             // see Contract::scopeVisibleTo().
             'contracts.view',
             'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
@@ -495,6 +495,17 @@ return [
             'retryLoad', // B3: re-renders the read-only list; marks nothing read
         ],
         'notifications.counter' => ['updateCount', 'syncCount'],
+        // D3 / DEC-08 feedback form: every signed-in role may send feedback, so
+        // there is no permission to check. open() only shows the dialog;
+        // submit() aborts for a guest, validates, is rate limited per user, and
+        // writes one row owned by the caller whose role, language and page are
+        // derived on the server (InAppFeedbackRecorder). Reading is separate.
+        'feedback.feedback-form' => ['open', 'submit', ...$closeGuard],
+        // D3 reading list: boot() runs Gate feedback.read (User::canReadFeedback)
+        // on every request; a permission name here would be wrong, since
+        // hasActivePermission() says yes to HR-SYR. updatedCategory is a
+        // lifecycle hook that only changes the filter.
+        'feedback.feedback-index' => ['updatedCategory'],
         'layout.sidebar' => ['toggle', 'close', 'refreshCounts'],
 
         // --- Component-state only -------------------------------------------

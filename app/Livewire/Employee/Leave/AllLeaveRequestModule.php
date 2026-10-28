@@ -240,7 +240,8 @@ class AllLeaveRequestModule extends Component
     public function refreshCounts(): void
     {
         $user = auth()->user();
-        $leaveRequests = LeaveRequest::query()->manageableBy($user);
+        // The same rows as the table below (AllLeaveRequestTable::query()).
+        $leaveRequests = LeaveRequest::query()->manageableBy($user)->exceptFormerStaffPending();
 
         // A failed count must not take the page down: the table below shows the
         // load error with its retry, and the tabs fall back to zero until it recovers.
