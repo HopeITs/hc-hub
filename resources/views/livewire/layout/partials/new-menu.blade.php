@@ -37,7 +37,7 @@
             @foreach ($actions as $action)
                 <a role="menuitem" href="{{ route($action['route'], $action['params']) }}" data-new="{{ $action['id'] }}"
                    x-on:click.prevent="go($event)"
-                   class="flex min-h-11 items-center rounded-control px-3 text-body font-medium text-neutral-800 hover:bg-secondary-soft focus:bg-secondary-soft focus:outline-none">
+                   class="flex min-h-11 items-center rounded-control px-3 text-body font-medium text-neutral-800 hover:bg-secondary-soft focus:outline-none focus-visible:bg-secondary-soft">
                     {{ $action['label'] }}
                 </a>
             @endforeach
