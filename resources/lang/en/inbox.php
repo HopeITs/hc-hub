@@ -26,6 +26,7 @@ return [
     'urgent' => 'Starts soon',
     'former' => 'Former employee',
     'capped' => 'Showing the oldest :shown of :total. The rest appear as these are handled.',
+    'started' => 'Already started',
     'details' => 'Details',
     'basis' => [
         'on_behalf' => 'You decide on behalf of :manager (on leave).',

@@ -3,6 +3,7 @@
 namespace App\Livewire\Dashboard;
 
 use App\Enums\LeaveRequestStatus;
+use App\Livewire\Team\Calendar;
 use App\Models\Checklist;
 use App\Models\Contract;
 use App\Models\Employee;
@@ -66,6 +67,17 @@ class ForYouNow extends Component
     }
 
     /**
+     * 'soon' or 'started' for a leave still waiting for a decision (G-C-5),
+     * null for any other row. The inbox page labels its rows the same way.
+     */
+    public static function startFlag(array $row): ?string
+    {
+        return $row['source'] === 'leave' && $row['action'] === 'decide'
+            ? LeaveRequest::startFlag($row['start_at'] ?? null)
+            : null;
+    }
+
+    /**
      * The parts for the active role, in the order C0 §5 fixes.
      *
      * @return array<int, string>
@@ -99,7 +111,8 @@ class ForYouNow extends Component
         return [
             // The exact count, as on the badge (G-C-7).
             'count' => $counts['decide'],
-            'soon' => $rows->where('urgent', true)->count(),
+            'soon' => $this->countStarting($rows, 'soon'),
+            'started' => $this->countStarting($rows, 'started'),
             'rows' => $rows->take(self::PREVIEW_ROWS)->map(fn (array $row) => $this->inboxRow($row))->all(),
             'url' => route('inbox', ['show' => 'decide']),
         ];
@@ -122,7 +135,8 @@ class ForYouNow extends Component
                 'review' => $counts['review'],
                 'checklist' => $counts['checklist'],
             ]),
-            'soon' => $rows->where('urgent', true)->count(),
+            'soon' => $this->countStarting($rows, 'soon'),
+            'started' => $this->countStarting($rows, 'started'),
             'rows' => $rows->take(self::PREVIEW_ROWS)->map(fn (array $row) => $this->inboxRow($row))->all(),
             'url' => route('inbox'),
         ];
@@ -141,12 +155,18 @@ class ForYouNow extends Component
         return [
             'count' => $counts['checklist'],
             'soon' => 0,
+            'started' => 0,
             'rows' => $rows->take(self::PREVIEW_ROWS)->map(fn (array $row) => $this->inboxRow($row))->all(),
             'url' => route('inbox', ['show' => 'checklist']),
         ];
     }
 
-    /** Manager: who in my team is off today and this week (C5, accepted + pending, manager level). */
+    /**
+     * Manager: who in my team is off today and this week (C5, accepted +
+     * pending, manager level). "This week" is the rest of the calendar's own
+     * Sunday–Saturday week, so every name here is on the week view the link
+     * opens (G-C-10 / F7).
+     */
     private function partTeamOff(User $user): ?array
     {
         $coverage = app(TeamCoverage::class);
@@ -156,7 +176,7 @@ class ForYouNow extends Component
         }
 
         $today = CarbonImmutable::today();
-        $week = $coverage->absences($user, 'reports', $today, $today->addDays(6));
+        $week = $coverage->absences($user, 'reports', $today, Calendar::weekOf($today)[1]);
 
         if ($week->isEmpty()) {
             return null;
@@ -268,8 +288,7 @@ class ForYouNow extends Component
             return null;
         }
 
-        $scoped = fn () => Employee::query()
-            ->when($user->activeCityIds(), fn (Builder $q, array $cityIds) => $q->whereIn('city_id', $cityIds));
+        $scoped = fn () => Employee::query()->inActiveCities($user);
 
         $awaiting = $scoped()->awaitingContract()->count();
         $incomplete = $scoped()->drafts()->count();
@@ -313,6 +332,11 @@ class ForYouNow extends Component
 
     // ── Helpers ─────────────────────────────────────────────────────────
 
+    private function countStarting($rows, string $flag): int
+    {
+        return $rows->filter(fn (array $row) => self::startFlag($row) === $flag)->count();
+    }
+
     /** An inbox row reduced to what the preview shows: no reason, no pay. */
     private function inboxRow(array $row): array
     {
@@ -322,7 +346,7 @@ class ForYouNow extends Component
             'what' => $row['source'] === 'leave' ? $row['leave_type'] : $row['item'],
             'from' => isset($row['start_at']) ? $row['start_at']->toDateString() : null,
             'to' => isset($row['end_at']) ? $row['end_at']->toDateString() : null,
-            'urgent' => (bool) $row['urgent'],
+            'start_flag' => self::startFlag($row),
             'url' => route('inbox', ['open' => $row['key']]),
         ];
     }

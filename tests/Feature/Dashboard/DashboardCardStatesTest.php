@@ -94,6 +94,24 @@ class DashboardCardStatesTest extends TestCase
         $this->assertStringNotContainsString('987,654', $html);
     }
 
+    /** G-C-9 (F14): the Statistics card lists what the home figure counts, inside the HR role's city. */
+    public function test_soon_ending_card_is_scoped_to_the_hr_roles_city(): void
+    {
+        $hr = $this->hr();
+        $damascus = $this->makeCity('DMS', '003');
+
+        foreach ([[$hr->profile->city, 'Aleppoending'], [$damascus, 'Damascusending']] as [$city, $name]) {
+            $this->makeContractFor($this->makeEmployee($city, strtolower($name), ['first_name_en' => $name]), [
+                'start_date' => now()->subMonth()->toDateString(),
+                'end_date' => now()->addDays(5)->toDateString(),
+            ]);
+        }
+
+        $this->live($hr)->test(SoonEndingContractsCard::class)
+            ->assertSee('Aleppoending')
+            ->assertDontSee('Damascusending');
+    }
+
     public function test_cards_render_a_placeholder_instead_of_blocking_the_page(): void
     {
         $this->actingAs($this->hr());

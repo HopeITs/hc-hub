@@ -101,8 +101,9 @@
                             <p class="text-caption text-secondary-light">
                                 {{-- A length ("3 days"), not "3 days ago": the sentence around it says since when. --}}
                                 {{ __('inbox.waiting-since', ['when' => $row['waiting_since']?->diffForHumans(null, \Carbon\CarbonInterface::DIFF_ABSOLUTE)]) }}
-                                @if ($row['urgent'])
-                                    <span class="ms-1 rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-800 ring-1 ring-amber-200">{{ __('inbox.urgent') }}</span>
+                                {{-- G-C-5: an undecided leave already under way is not "starts soon"; the home block uses the same rule. --}}
+                                @if ($startFlag = \App\Livewire\Dashboard\ForYouNow::startFlag($row))
+                                    <span class="ms-1 rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-800 ring-1 ring-amber-200">{{ __($startFlag === 'started' ? 'inbox.started' : 'inbox.urgent') }}</span>
                                 @endif
                             </p>
                             @if (($row['basis'] ?? null) === 'on_behalf')

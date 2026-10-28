@@ -1762,8 +1762,8 @@ class LeaveRequestWorkflowTest extends TestCase
         $cityId = DB::table('cities')->insertGetId([
             'name_en' => 'Aleppo',
             'name_ar' => 'حلب',
-            'slug' => 'A'.substr(md5($suffix), 0, 2),
-            'code' => substr(md5('code_'.$suffix), 0, 3),
+            'slug' => 'A'.substr(md5($suffix), 0, 6),
+            'code' => substr(md5('code_'.$suffix), 0, 6),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
