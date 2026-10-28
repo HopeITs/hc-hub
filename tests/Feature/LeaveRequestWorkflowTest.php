@@ -1362,6 +1362,34 @@ class LeaveRequestWorkflowTest extends TestCase
         $this->assertStringNotContainsString('HR team', $text);
     }
 
+    public function test_n07_hr_does_not_mark_its_own_decision_as_seen(): void
+    {
+        [$hr, $leave] = $this->createPendingDecisionFixture();
+        $leave->update(['status' => LeaveRequestStatus::Rejected, 'reject_reason' => 'x', 'approved_at' => now(), 'approved_by' => $hr->employee_id, 'hr_approved' => false]);
+        $other = $this->createHrUserForLeave($leave, 'second.hr@example.test');
+        $other->givePermissionTo(['leaves.review', 'leaves.view-all']);
+        $inbox = app(\App\Services\WorkInbox::class);
+
+        $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($hr)->allows('review', $leave->fresh()));
+        $this->assertSame(0, $inbox->snapshot($hr)['counts']['review']);
+        // Another HR person still sees it.
+        $this->assertSame(["leave:{$leave->id}:review"], $inbox->rows($other)->pluck('key')->all());
+    }
+
+    public function test_n09_arabic_agrees_with_one_female_manager(): void
+    {
+        [, $leave] = $this->createPendingDecisionFixture();
+        $manager = $this->makeDirectManagerOf($leave);
+        DB::table('employees')->where('id', $manager->employee_id)->update(['gender' => \App\Enums\Gender::Female]);
+        app()->setLocale('ar');
+
+        $text = app(\App\Services\LeaveRequestNextStep::class)->describe($leave->fresh());
+
+        $this->assertStringContainsString('مديرتك', $text);
+        $this->assertStringContainsString('إليها', $text);
+        $this->assertStringNotContainsString('إليه ', $text);
+    }
+
     public function test_gc1_no_reminder_before_it_is_due_or_once_decided(): void
     {
         [, $leave] = $this->createPendingDecisionFixture();

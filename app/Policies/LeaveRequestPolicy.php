@@ -61,6 +61,8 @@ class LeaveRequestPolicy
     {
         return $leaveRequest->status !== LeaveRequestStatus::Pending
             && ! $leaveRequest->hr_approved
+            // Nobody marks their own decision as seen (N-07).
+            && ! ($user->employee_id !== null && (int) $leaveRequest->approved_by === (int) $user->employee_id)
             && $this->isHr($user)
             && $user->hasActivePermission('leaves.review')
             && $this->canManage($user, $leaveRequest);

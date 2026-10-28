@@ -87,6 +87,11 @@ return [
         'managers' => '{1} your manager :names|[2,*] your managers :names',
         // G-C-12: the same request read by someone other than the requester.
         'managers-other' => '{1} the direct manager :names|[2,*] the direct managers :names',
+        'managers-female' => '{1} your manager :names|[2,*] your managers :names',
+        'managers-other-female' => '{1} the direct manager :names|[2,*] the direct managers :names',
+        'notified-male' => '',
+        'notified-female' => '',
+        'notified-many' => '',
         'pending-you' => 'Waiting for your decision.',
         'or' => ':first or :last',
         'list-separator' => ', ',

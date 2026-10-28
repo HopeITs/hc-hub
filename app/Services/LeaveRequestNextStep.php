@@ -105,27 +105,33 @@ class LeaveRequestNextStep
             $managers = $this->decidingManagerNames($audience['managers']);
 
             if ($managers->isNotEmpty()) {
+                $female = $this->isOneFemale($audience['managers']);
+
                 return __('leaves.next-step.pending-managers-hr-reader', [
-                    'managers' => $this->managerPhrase($managers, false),
+                    'managers' => $this->managerPhrase($managers, false, $female),
+                    'to' => $this->notifiedPronoun($managers, $female),
                 ]);
             }
         }
 
         $forRequester = $viewer === null || ($requester !== null && (int) $viewer->employee_id === (int) $requester->id);
         $managers = $this->decidingManagerNames($audience['managers']);
+        $female = $this->isOneFemale($audience['managers']);
         $city = $requester?->city?->name;
         $hrNotified = $audience['hr']->isNotEmpty();
 
         if ($managers->isNotEmpty() && $hrNotified) {
             return __('leaves.next-step.pending-managers-and-hr', [
-                'managers' => $this->managerPhrase($managers, $forRequester),
+                'managers' => $this->managerPhrase($managers, $forRequester, $female),
                 'city' => $city ?? '—',
+                'to' => $this->notifiedPronoun($managers, $female),
             ]);
         }
 
         if ($managers->isNotEmpty()) {
             return __('leaves.next-step.pending-managers', [
-                'managers' => $this->managerPhrase($managers, $forRequester),
+                'managers' => $this->managerPhrase($managers, $forRequester, $female),
+                'to' => $this->notifiedPronoun($managers, $female),
             ]);
         }
 
@@ -190,8 +196,10 @@ class LeaveRequestNextStep
      *
      * @param  Collection<int, string>  $names
      */
-    private function managerPhrase(Collection $names, bool $forRequester = true): string
+    private function managerPhrase(Collection $names, bool $forRequester = true, bool $female = false): string
     {
+        $key = ($forRequester ? 'leaves.next-step.managers' : 'leaves.next-step.managers-other').($female ? '-female' : '');
+
         $names = $names->map(fn (string $name) => $this->isolate($name));
 
         $joined = $names->count() === 1
@@ -201,7 +209,24 @@ class LeaveRequestNextStep
                 'last' => $names->last(),
             ]);
 
-        return trans_choice($forRequester ? 'leaves.next-step.managers' : 'leaves.next-step.managers-other', $names->count(), ['names' => $joined]);
+        return trans_choice($key, $names->count(), ['names' => $joined]);
+    }
+
+    /** One deciding manager, recorded as female: Arabic agrees with her (N-09). */
+    private function isOneFemale(Collection $managers): bool
+    {
+        return $managers->count() === 1
+            && (int) $managers->first()->profile?->gender === \App\Enums\Gender::Female;
+    }
+
+    /** "him / her / them" after "a notification was sent to" (Arabic only; English needs none). */
+    private function notifiedPronoun(Collection $names, bool $female): string
+    {
+        return __('leaves.next-step.notified-'.match (true) {
+            $names->count() > 1 => 'many',
+            $female => 'female',
+            default => 'male',
+        });
     }
 
     /**

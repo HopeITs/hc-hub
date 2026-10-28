@@ -131,7 +131,11 @@ final class WorkInbox
         // not yet seen), so its count is exact; the policy re-checks what is listed.
         $query = $this->leaveQuery($user)
             ->where('status', '!=', LeaveRequestStatus::Pending)
-            ->where('hr_approved', false);
+            ->where('hr_approved', false)
+            // Not the reviewer's own decision (N-07), as the policy says.
+            ->when($user->employee_id !== null, fn (Builder $q) => $q->where(fn (Builder $by) => $by
+                ->whereNull('approved_by')
+                ->orWhere('approved_by', '!=', $user->employee_id)));
 
         return [
             (clone $query)->limit(self::PER_SOURCE)->get()

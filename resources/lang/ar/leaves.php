@@ -77,14 +77,19 @@ return [
     'next-step' => [
         'title' => 'الخطوة التالية',
         // C3 (قرار DEC-05 المعدَّل): المدير المباشر وحده يقرر، والموارد البشرية تُبلَّغ.
-        'pending-managers-and-hr' => 'بانتظار قرار :managers، وقد أُرسل إليه إشعار بالطلب. وأُبلغ فريق الموارد البشرية في :city.',
-        'pending-managers' => 'بانتظار قرار :managers، وقد أُرسل إليه إشعار بالطلب.',
-        'pending-managers-hr-reader' => 'بانتظار قرار :managers، وقد أُرسل إليه إشعار بالطلب. وصلك إشعار للعلم.',
+        'pending-managers-and-hr' => 'بانتظار قرار :managers، وقد أُرسل :to إشعار بالطلب. وأُبلغ فريق الموارد البشرية في :city.',
+        'pending-managers' => 'بانتظار قرار :managers، وقد أُرسل :to إشعار بالطلب.',
+        'pending-managers-hr-reader' => 'بانتظار قرار :managers، وقد أُرسل :to إشعار بالطلب. وصلك إشعار للعلم.',
         'pending-hr' => 'بانتظار قرار فريق الموارد البشرية في :city، وقد وصله إشعار بالطلب.',
         'pending-unassigned' => 'بانتظار قرار الموارد البشرية. لم نجد مديرًا أو حسابًا في الموارد البشرية لإرسال إشعار إليه، لذا يُرجى إبلاغ فريق الموارد البشرية.',
         'managers' => 'مديرك :names',
         // G-C-12: الطلب نفسه حين يقرؤه غير صاحبه.
         'managers-other' => 'المدير المباشر :names',
+        'managers-female' => 'مديرتك :names',
+        'managers-other-female' => 'المديرة المباشرة :names',
+        'notified-male' => 'إليه',
+        'notified-female' => 'إليها',
+        'notified-many' => 'إليهم',
         'pending-you' => 'بانتظار قرارك.',
         'or' => ':first أو :last',
         'list-separator' => '، ',
