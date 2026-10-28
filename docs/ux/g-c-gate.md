@@ -94,3 +94,26 @@ Ids: `F` = source audit, `D` = browser walkthrough.
 - **HR product owner:** G-C-1, G-C-6 and G-C-8 decided on 2026-10-27 (DEC-05 revision 2); nothing left open.
 - **D4** may start its design work; it must not build on the current on-behalf rule until G-C-1 is decided. **X1-I** may note the inbox being computed 2–3 times per page (audit F16). **X2-R** inherits §2's uncovered combinations and the need for real participants. **G-R** must cite the corrected SHA, not `aa983edc`.
 - **Formal review (QA engineer + technical lead): pending.**
+
+## 7. Re-run on the corrected code (2026-10-28)
+
+Branch `G-C` at **`4b07f3e6`**; full suite **1058/1058**. Fresh synthetic copy `C:/laragon/tmp/hc-hr-gc2`, launch entry "hc-hr G-C re-run (synthetic SQLite copy)", port 8403. Evidence: [evidence/g-c/browser-rerun.md](evidence/g-c/browser-rerun.md). Moderator run, no participants.
+
+**First-run defects:** D-01 to D-08 **fixed** in the browser (D-01: the request of an employee-role manager's report is in that manager's inbox and was decided there; HR-HMS's pending total 10 = 2 HR decisions + 8 the position holder decides). D-09 (leave-type list reopens) and D-10 (`/centers` 500 on SQLite) still present (G-C-14).
+
+**Matrix (AC-G-C-02):** badge = inbox tabs = dashboard = All/Team leaves pending = calendar today = upcoming card for staff, both managers and both HR roles, including the on-behalf and already-started states. Privacy probes (other city, non-reports, employee-role manager, technical-line contracts) all refused with no DB change. Two sessions on one request: one write, "already accepted by …", badge refreshed. Reminder: exactly one per manager and city HR; a second run sends none; the link opens the inbox row.
+
+**New cells covered:** A EN phone, B EN phone, C AR phone, D AR desktop (contract created with the auto-renew box; one seat).
+
+| # | Finding | Severity | Disposition |
+|---|---|---|---|
+| G-C-17 (N-01) | Employee-role manager-position holders see their decisions in the badge and inbox, but "For you now" on the home shows nothing (`ForYouNow::plan()` picks parts by role name). | Medium | **Needs correction.** |
+| G-C-18 (N-02) | For a request with no direct manager, HR is the decider, but its reminder says "still awaiting the manager … the manager was reminded", has no decide action and links to All leaves. | Medium | **Needs correction.** |
+| G-C-19 (N-03, N-06, N-07, N-09) | HR deciders get the new-request notice in the requester's wording; the on-behalf summary names one of two absent managers; HR is asked to mark its own decisions as seen; masculine Arabic pronoun for a female manager. | Low | Needs correction. |
+| G-C-20 (N-04) | The bell still counts unread "no longer available" notices. | Low | Needs correction. |
+| G-C-21 (N-05) | Composer radios announced as "1/5/3"; comboboxes as «اختيار». | Low (a11y) | Needs correction. |
+| G-C-22 (N-08) | TAR request 34 has no decider and no reminder audience (synthetic data: no manager account, no HR in the city). | Info (data) | HR data task. |
+
+**Not covered:** A AR desktop, B AR desktop, C EN phone, D EN, D phone, D′; G-C-3 with an HR role lacking `leaves.review`, G-C-6 leavers' items, G-C-7 past 100 rows, G-C-9, G-C-10 in the browser (all covered by tests); HR objection flow; general manager, super-admin; MySQL; screen reader; real phone.
+
+**Result:** AC-G-C-02 is **met** in the defined matrix (no contradictory actionable count or private exposure observed). Phase C acceptance waits on G-C-17 and G-C-18 (Medium) and the formal review.
