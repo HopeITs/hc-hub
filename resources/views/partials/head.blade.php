@@ -1,5 +1,5 @@
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
 <meta name="description" content="{{ $description ?? __('Secure human resources management for Christian Hope Center teams across Syria.') }}" />
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
 

@@ -496,6 +496,8 @@ return [
         ],
         'notifications.counter' => ['updateCount', 'syncCount'],
         'layout.sidebar' => ['toggle', 'close', 'refreshCounts'],
+        // D2 phone bar: re-renders its own links and the inbox count (WorkInbox, scoped to the caller).
+        'layout.bottom-nav' => ['refreshInbox'],
 
         // --- Component-state only -------------------------------------------
         // Tab switches, wizard steps, modal open/close, filter changes, zoom
