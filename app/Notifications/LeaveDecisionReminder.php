@@ -9,7 +9,9 @@ use Illuminate\Notifications\Notification;
 /**
  * The one reminder a pending leave request gets (DEC-05 revision 2, G-C-1):
  * to the direct manager, who decides, and a copy to HR in the requester's
- * city, who follows up. In-app only.
+ * city, who follows up. When HR is the one who decides (no direct manager,
+ * or every one on leave), HR gets the decide wording instead (G-C-18).
+ * In-app only.
  */
 class LeaveDecisionReminder extends Notification
 {
@@ -17,7 +19,7 @@ class LeaveDecisionReminder extends Notification
 
     public function __construct(
         public LeaveRequest $leaveRequest,
-        public string $recipientType = 'manager', // manager | hr
+        public string $recipientType = 'manager', // manager | hr | hr_decider
     ) {}
 
     /** @return array<int, string> */
@@ -48,6 +50,21 @@ class LeaveDecisionReminder extends Notification
                 ],
                 'url' => route('leaves.all', ['leave' => $leaveRequest->id, 'mode' => 'details']),
                 'subject' => ['type' => 'leave_request', 'id' => $leaveRequest->id, 'action' => null],
+            ];
+        }
+
+        if ($this->recipientType === 'hr_decider') {
+            return [
+                'title' => [
+                    'en' => 'Reminder: Leave Request Awaiting Your Decision',
+                    'ar' => 'تذكير: طلب إجازة بانتظار قرارك',
+                ],
+                'body' => [
+                    'en' => "{$leaveType->name_en} leave request from {$nameEn}, starting {$start}, is still waiting for a decision. No direct manager can decide it now, so HR decides.",
+                    'ar' => "طلب إجازة ({$leaveType->name_ar}) من {$nameAr} يبدأ في {$start} وما زال بانتظار القرار. لا يوجد مدير مباشر يستطيع القرار الآن، لذلك تقرّر الموارد البشرية.",
+                ],
+                'url' => route('inbox', ['open' => "leave:{$leaveRequest->id}:decide"]),
+                'subject' => ['type' => 'leave_request', 'id' => $leaveRequest->id, 'action' => 'decide'],
             ];
         }
 

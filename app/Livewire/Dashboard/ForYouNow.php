@@ -9,6 +9,7 @@ use App\Models\Contract;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Services\LeaveDecisionAuthority;
 use App\Services\LeaveRequestNextStep;
 use App\Services\LeaveRequestPricing;
 use App\Services\TeamCoverage;
@@ -92,7 +93,11 @@ class ForYouNow extends Component
             // G-C-11 F9: items to hand over / take back, which the menu badge counts.
             $role === 'general-manager' => ['decisions', 'inbox-items', 'key-figures', 'contracts-ending'],
             $role === 'manager' => ['decisions', 'inbox-items', 'team-off', 'balance'],
-            default => ['inbox-items', 'balance', 'my-requests', 'my-items'],
+            // A direct manager decides whatever their role (DEC-05 revision 2,
+            // G-C-17), so their decisions lead the home as they lead the badge.
+            default => app(LeaveDecisionAuthority::class)->holdsManagerPosition($user)
+                ? ['decisions', 'inbox-items', 'balance', 'my-requests', 'my-items']
+                : ['inbox-items', 'balance', 'my-requests', 'my-items'],
         };
     }
 

@@ -1316,6 +1316,35 @@ class LeaveRequestWorkflowTest extends TestCase
         Notification::assertSentToTimes($manager, \App\Notifications\LeaveDecisionReminder::class, 1);
     }
 
+    public function test_gc18_hr_that_decides_is_reminded_to_decide(): void
+    {
+        // No direct manager: HR is the decider (C3-Q1).
+        [$hr, $leave] = $this->createPendingDecisionFixture();
+        $leave->forceFill(['created_at' => now()->subDays(4), 'start_at' => today()->addDays(10), 'end_at' => today()->addDays(11)])->save();
+        Notification::fake();
+
+        $this->artisan('leaves:send-decision-reminders')->assertSuccessful();
+
+        Notification::assertSentToTimes($hr, \App\Notifications\LeaveDecisionReminder::class, 1);
+        Notification::assertSentTo($hr, \App\Notifications\LeaveDecisionReminder::class, function ($n) use ($hr, $leave) {
+            $data = $n->toArray($hr);
+
+            return $n->recipientType === 'hr_decider'
+                && $data['subject']['action'] === 'decide'
+                && $data['url'] === route('inbox', ['open' => "leave:{$leave->id}:decide"]);
+        });
+    }
+
+    public function test_gc17_the_home_shows_decisions_to_a_manager_with_only_the_employee_role(): void
+    {
+        [, $leave] = $this->createPendingDecisionFixture();
+        $manager = $this->makeDirectManagerOf($leave, asEmployeeOnly: true);
+
+        Livewire::actingAs($manager)
+            ->test(\App\Livewire\Dashboard\ForYouNow::class)
+            ->assertSeeHtml('data-testid="for-you-decisions-count"');
+    }
+
     public function test_gc1_no_reminder_before_it_is_due_or_once_decided(): void
     {
         [, $leave] = $this->createPendingDecisionFixture();

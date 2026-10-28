@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\LeaveRequestStatus;
 use App\Models\LeaveRequest;
 use App\Notifications\LeaveDecisionReminder;
+use App\Services\LeaveDecisionAuthority;
 use App\Services\LeaveNotificationService;
 use App\Services\NotificationDeliveryLedger;
 use Illuminate\Console\Command;
@@ -34,13 +35,19 @@ class SendLeaveDecisionReminders extends Command
         $today = $ledger->today();
         $sent = 0;
 
-        $this->dueRequests($today)->each(function (LeaveRequest $leave) use ($ledger, $notifications, &$sent): void {
+        $authority = app(LeaveDecisionAuthority::class);
+
+        $this->dueRequests($today)->each(function (LeaveRequest $leave) use ($ledger, $notifications, $authority, &$sent): void {
             // Once per request: the claim day is the day it was sent.
             $day = $leave->created_at->copy()->timezone(config('app.timezone'))->startOfDay();
             $audience = $notifications->newRequestAudience($leave, $leave->leaveBalance->contract->employee->account);
 
-            foreach (['manager' => $audience['managers'], 'hr' => $audience['hr']] as $type => $users) {
+            foreach (['manager' => $audience['managers'], 'hr' => $audience['hr']] as $group => $users) {
                 foreach ($users as $user) {
+                    // HR that decides itself (no direct manager, or every one on
+                    // leave) is reminded to decide, not told the manager was (G-C-18).
+                    $type = $group === 'hr' && $authority->basisFor($user, $leave) !== null ? 'hr_decider' : $group;
+
                     if (! $ledger->claim(self::LEDGER_KIND, $user->id, [$leave->id], $day)) {
                         continue;
                     }

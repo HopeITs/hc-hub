@@ -107,8 +107,8 @@ Branch `G-C` at **`4b07f3e6`**; full suite **1058/1058**. Fresh synthetic copy `
 
 | # | Finding | Severity | Disposition |
 |---|---|---|---|
-| G-C-17 (N-01) | Employee-role manager-position holders see their decisions in the badge and inbox, but "For you now" on the home shows nothing (`ForYouNow::plan()` picks parts by role name). | Medium | **Needs correction.** |
-| G-C-18 (N-02) | For a request with no direct manager, HR is the decider, but its reminder says "still awaiting the manager … the manager was reminded", has no decide action and links to All leaves. | Medium | **Needs correction.** |
+| G-C-17 (N-01) | Employee-role manager-position holders see their decisions in the badge and inbox, but "For you now" on the home shows nothing (`ForYouNow::plan()` picks parts by role name). | Medium | **Fixed (2026-10-28).** The home adds the decisions part for anyone holding a manager position (`ForYouNow::plan`). Test `test_gc17_*`. |
+| G-C-18 (N-02) | For a request with no direct manager, HR is the decider, but its reminder says "still awaiting the manager … the manager was reminded", has no decide action and links to All leaves. | Medium | **Fixed (2026-10-28).** HR that may decide now (no direct manager, or all on leave) gets a decide reminder linking to the inbox row (`hr_decider`). Test `test_gc18_*`. |
 | G-C-19 (N-03, N-06, N-07, N-09) | HR deciders get the new-request notice in the requester's wording; the on-behalf summary names one of two absent managers; HR is asked to mark its own decisions as seen; masculine Arabic pronoun for a female manager. | Low | Needs correction. |
 | G-C-20 (N-04) | The bell still counts unread "no longer available" notices. | Low | Needs correction. |
 | G-C-21 (N-05) | Composer radios announced as "1/5/3"; comboboxes as «اختيار». | Low (a11y) | Needs correction. |
@@ -116,4 +116,4 @@ Branch `G-C` at **`4b07f3e6`**; full suite **1058/1058**. Fresh synthetic copy `
 
 **Not covered:** A AR desktop, B AR desktop, C EN phone, D EN, D phone, D′; G-C-3 with an HR role lacking `leaves.review`, G-C-6 leavers' items, G-C-7 past 100 rows, G-C-9, G-C-10 in the browser (all covered by tests); HR objection flow; general manager, super-admin; MySQL; screen reader; real phone.
 
-**Result:** AC-G-C-02 is **met** in the defined matrix (no contradictory actionable count or private exposure observed). Phase C acceptance waits on G-C-17 and G-C-18 (Medium) and the formal review.
+**Result:** AC-G-C-02 is **met** in the defined matrix (no contradictory actionable count or private exposure observed). G-C-17 and G-C-18 are fixed (suite 1060/1060); Phase C acceptance now waits on the formal review. Low items G-C-14 and G-C-19 to G-C-21 stay open.
