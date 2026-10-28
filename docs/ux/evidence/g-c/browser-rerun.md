@@ -135,3 +135,28 @@ Observations: (a) the leave confirmation shows "left after this request" from th
 - G-C-3 with an HR role **lacking** `leaves.review` (only a manager without it was probed); G-C-6 leavers' items (*Former employee* mark, batch confirm); G-C-7 with more than 100 rows (HR-SYR / super-admin); G-C-9 Statistics card; G-C-10 "off this week" link; G-C-13 F12/F13/F15.
 - HR objection flow; Ctrl+K; screen reader (only the accessibility tree was read); real phone, on-screen keyboard, 200 % zoom; general manager and super-admin personas; DMS/LAT/TAR HR personas in the browser.
 - MySQL (D-10 and data shape seen on SQLite only); one browser engine; emulated viewports.
+
+## 10. Follow-up: G-C-17 and G-C-18 (code at `350fee96`)
+
+Same copy `C:/laragon/tmp/hc-hr-gc2`, same launch entry (port 8403), restarted on the new code and stopped afterwards. No app code changed, nothing committed.
+
+Synthetic state added (copy only): pending request **74** for staff.hms (26-11-2026, balance 941) so that Maya has a decision. Requests 62, 66 and 67 were aged to 4 days; the earlier ledger row for 62 was deleted (66 and 67 had none). `leaves:send-decision-reminders` was run through `db.php` with `X2_HOME`/`X2_PORT=8403` (copy env only).
+
+| Check | Persona | Locale / device | Result | Ids |
+|---|---|---|---|---|
+| G-C-17 home decisions | Dana Saliba (employee role) | EN desktop | *Needs my decision · 5*, "⚠ 1 has already started"; badge 5 = inbox All 5 / decisions 5. Clicking the row "Fares Antoun" opened `inbox?open=leave:67:decide` with the row highlighted. | 10, 42, 67, 68, 69 |
+| G-C-17 | Maya Halabi (employee role) | **AR phone** | «بانتظار قراري · طلب إجازة واحد بانتظارك»; badge 1 = inbox 1 = decisions 1. Tapping «نبيل فرح» opened `/ar/inbox?open=leave:74:decide`. | 74 |
+| G-C-17 | Hadi Shami (employee role, on leave) | EN desktop | *Needs my decision · 3*; badge 3 = inbox 3. Clicking the row "Rana Daher" opened `inbox?open=leave:66:decide`. | 36, 64, 66 |
+| G-C-17 unchanged | staff.alp (no manager position) | EN desktop | No decisions part and no inbox menu item; balance and *My open requests* only. | — |
+| G-C-18 send | — | CLI | 7 sent, then **0** on the second run. 62 → user 1 `hr_decider` (action `decide`, link `/inbox?open=leave:62:decide`). 66 → users 34 and 136 (manager) and 1 (`hr_decider`, every manager on leave). 67 → users 23 and 124 (manager) and 90 (HR copy: "Leave Request Still Awaiting the Manager … The manager was reminded.", link to *All leaves*, unchanged). | 62, 66, 67 |
+| G-C-18 bell | hr.alp | EN + AR desktop | EN: "Reminder: Leave Request Awaiting Your Decision … is still waiting for a decision. No direct manager can decide it now, so HR decides." · *Awaiting your action* · Pending. AR: «تذكير: طلب إجازة بانتظار قرارك … لذلك تقرّر الموارد البشرية» · «بانتظار إجراء منك». | 62 |
+| G-C-18 link + decide | hr.alp | AR desktop | Click → `/ar/inbox?open=leave:62:decide`, row highlighted («لا يوجد مدير مباشر لهذا الموظف، لذا تقرر الموارد البشرية»). Rejected with a reason: toast «رُفض طلب الإجازة»; decisions 8→7, review 3→4. The notice now reads «تمت معالجته · مرفوض». DB: 62 status 2, `approved_by` 1, basis `no_manager`. | 62 |
+| With-manager HR copy | hr.hms | EN desktop | Bell: "Leave Request Still Awaiting the Manager … The manager was reminded." (unchanged). | 67 |
+
+**Result: G-C-17 and G-C-18 verified fixed** for the cases above.
+
+Remaining notes (low):
+- (a) For 66, the HR text "No direct manager can decide it now" is inaccurate. Both managers are on leave, but they still decide and got their own reminders; the inbox row's "on behalf of … (on leave)" is accurate.
+- (b) The notice's state line still reads "Waiting for a decision from the HR team in Aleppo" to HR itself (N-03 open).
+- (c) The title is in Title Case ("Leave Request Awaiting Your Decision"), not the sentence case in the brief.
+- (d) The first-run reminder for 62 (old wording) stays in the bell list.

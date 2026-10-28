@@ -60,8 +60,8 @@ class LeaveDecisionReminder extends Notification
                     'ar' => 'تذكير: طلب إجازة بانتظار قرارك',
                 ],
                 'body' => [
-                    'en' => "{$leaveType->name_en} leave request from {$nameEn}, starting {$start}, is still waiting for a decision. No direct manager can decide it now, so HR decides.",
-                    'ar' => "طلب إجازة ({$leaveType->name_ar}) من {$nameAr} يبدأ في {$start} وما زال بانتظار القرار. لا يوجد مدير مباشر يستطيع القرار الآن، لذلك تقرّر الموارد البشرية.",
+                    'en' => "{$leaveType->name_en} leave request from {$nameEn}, starting {$start}, is still waiting for a decision. HR may decide it (no direct manager, or the manager is on leave).",
+                    'ar' => "طلب إجازة ({$leaveType->name_ar}) من {$nameAr} يبدأ في {$start} وما زال بانتظار القرار. يمكن للموارد البشرية أن تقرّره (لا يوجد مدير مباشر، أو المدير في إجازة).",
                 ],
                 'url' => route('inbox', ['open' => "leave:{$leaveRequest->id}:decide"]),
                 'subject' => ['type' => 'leave_request', 'id' => $leaveRequest->id, 'action' => 'decide'],
