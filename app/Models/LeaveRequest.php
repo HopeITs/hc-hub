@@ -203,6 +203,18 @@ class LeaveRequest extends Model
         return $directReports($query);
     }
 
+    /**
+     * Leaves out a former employee's pending request: it is nobody's work to
+     * decide (approval-source-contract.md §5, G-C-11). Their decided requests
+     * stay, as history. The inbox, Team leaves and its counts all use this.
+     */
+    public function scopeExceptFormerStaffPending(Builder $query): Builder
+    {
+        return $query->where(fn (Builder $q) => $q
+            ->where('status', '!=', LeaveRequestStatus::Pending)
+            ->orWhereHas('leaveBalance.contract.employee', fn (Builder $employee) => $employee->where('is_active', true)));
+    }
+
     public function scopeUpcoming($query)
     {
         return $query->where(fn ($query) => $query

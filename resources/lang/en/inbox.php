@@ -24,6 +24,8 @@ return [
     ],
     'waiting-since' => 'Waiting for :when',
     'urgent' => 'Starts soon',
+    'former' => 'Former employee',
+    'capped' => 'Showing the oldest :shown of :total. The rest appear as these are handled.',
     'details' => 'Details',
     'basis' => [
         'on_behalf' => 'You decide on behalf of :manager (on leave).',
@@ -36,8 +38,6 @@ return [
         'save' => 'Save decision',
     ],
     'review' => [
-        'accepted' => 'The manager accepted this request.',
-        'rejected' => 'The manager rejected this request.',
         'note-optional' => 'Note (optional)',
         'note-required' => 'Why are you objecting?',
         'seen' => 'Seen by HR',

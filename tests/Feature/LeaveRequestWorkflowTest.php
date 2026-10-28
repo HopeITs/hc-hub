@@ -1509,6 +1509,145 @@ class LeaveRequestWorkflowTest extends TestCase
         $this->assertSame('objection', $leave->fresh()->notes->first()->kind);
     }
 
+    // --- G-C-3, 4, 7, 11, 12 ---
+
+    /** G-C-3 (F3): without leaves.review the inbox may neither mark seen nor object, whatever is called. */
+    public function test_gc3_inbox_review_and_objection_need_the_review_permission(): void
+    {
+        [$hr, $leave] = $this->createPendingDecisionFixture();
+        $leave->update(['status' => LeaveRequestStatus::Accepted, 'approved_at' => now(), 'computed_hours' => 8]);
+        $leave->leaveBalance->update(['used' => 40]);
+        $hr->revokePermissionTo('leaves.review');
+        $hr = $hr->fresh();
+        Notification::fake();
+
+        $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($hr)->allows('review', $leave->fresh()));
+        $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($hr)->allows('object', $leave->fresh()));
+
+        $key = "leave:{$leave->id}:review";
+        $inbox = Livewire::actingAs($hr)->test(\App\Livewire\Inbox\Index::class);
+        $inbox->call('markSeen', $key)->assertSet("outcomes.leave-{$leave->id}-review.outcome", 'not_allowed');
+        $inbox->set("notes.leave-{$leave->id}-review", 'Direct call.')->call('object', $key)
+            ->assertSet("outcomes.leave-{$leave->id}-review.outcome", 'not_allowed');
+
+        $leave->refresh();
+        $this->assertSame(LeaveRequestStatus::Accepted, $leave->status);
+        $this->assertFalse($leave->hr_approved);
+        $this->assertEquals(40, $leave->leaveBalance->fresh()->used);
+    }
+
+    /** G-C-4 (D-02, D-04): HR's review row says who decided, from the stored basis. */
+    public function test_gc4_the_review_row_names_the_decider_and_basis(): void
+    {
+        [$hr, $leave] = $this->createPendingDecisionFixture();
+        $manager = $this->makeDirectManagerOf($leave);
+        $other = $this->createHrUserForLeave($leave, 'other.hr@example.test');
+        app()->setLocale('en');
+        $next = app(\App\Services\LeaveRequestNextStep::class);
+
+        $leave->update([
+            'status' => LeaveRequestStatus::Accepted, 'approved_at' => now(), 'approved_by' => $other->employee_id,
+            'decision_basis' => 'on_behalf', 'decided_on_behalf_of' => $manager->employee_id,
+        ]);
+        $summary = $next->decisionSummary($leave->fresh());
+        $this->assertStringContainsString('on behalf of', $summary);
+        $this->assertStringContainsString($other->profile->name, $summary);
+        $this->assertStringContainsString($manager->profile->name, $summary);
+        $this->assertStringNotContainsString('The manager', $summary);
+
+        Livewire::actingAs($hr)->test(\App\Livewire\Inbox\Index::class)
+            ->assertSee('accepted this request on behalf of')
+            ->assertDontSee('The manager accepted');
+
+        // No direct manager, and a decision from before C3 (no basis): never "the manager".
+        $leave->update(['decision_basis' => 'no_manager', 'decided_on_behalf_of' => null]);
+        $this->assertStringContainsString('(no direct manager)', $next->decisionSummary($leave->fresh()));
+
+        $leave->update(['status' => LeaveRequestStatus::Rejected, 'reject_reason' => 'x', 'decision_basis' => null]);
+        $this->assertSame("\u{2068}{$other->profile->name}\u{2069} rejected this request.", $next->decisionSummary($leave->fresh()));
+
+        app()->setLocale('ar');
+        $this->assertStringNotContainsString('رفض المدير', $next->decisionSummary($leave->fresh()));
+    }
+
+    /** G-C-7 (F5): the decide filter runs before the cap, so a decidable request behind 100 others still appears. */
+    public function test_gc7_a_decidable_request_behind_the_cap_is_listed_and_counted(): void
+    {
+        [$hr, $leave] = $this->createPendingDecisionFixture();
+        // HR may see, but not decide, its own requests (G-C-2): older than $leave, more than the cap.
+        $own = $this->pendingOwnRequestOf($hr);
+        $own->forceFill(['created_at' => now()->subDays(30)])->save();
+
+        for ($i = 0; $i < \App\Services\WorkInbox::PER_SOURCE; $i++) {
+            $own->replicate()->forceFill(['created_at' => now()->subDays(20)])->save();
+        }
+        $leave->forceFill(['created_at' => now()])->save();
+
+        $inbox = app(\App\Services\WorkInbox::class);
+        $this->assertSame(["leave:{$leave->id}:decide"], $inbox->rows($hr)->where('action', 'decide')->pluck('key')->values()->all());
+        $this->assertSame(1, $inbox->snapshot($hr)['counts']['decide']);
+    }
+
+    /** G-C-11 (F10): a former employee's pending request is not decidable and is pending work nowhere. */
+    public function test_gc11_a_former_employees_pending_request_is_nobodys_work(): void
+    {
+        [$hr, $leave] = $this->createPendingDecisionFixture();
+        $this->assertTrue(\Illuminate\Support\Facades\Gate::forUser($hr)->allows('decide', $leave));
+
+        DB::table('employees')->where('id', $leave->leaveBalance->contract->employee_id)->update(['is_active' => false]);
+        $leave = $leave->fresh();
+
+        $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($hr)->allows('decide', $leave));
+        $this->assertSame(0, app(\App\Services\WorkInbox::class)->snapshot($hr)['counts']['decide']);
+
+        Livewire::actingAs($hr)->test(AllLeaveRequestModule::class)
+            ->call('refreshCounts')
+            ->assertSet('counts.pending', 0);
+        $this->assertFalse(LeaveRequest::query()->manageableBy($hr)->exceptFormerStaffPending()->whereKey($leave->id)->exists());
+
+        // Their decided requests stay, as history.
+        $leave->update(['status' => LeaveRequestStatus::Accepted, 'approved_at' => now()]);
+        $this->assertTrue(LeaveRequest::query()->manageableBy($hr)->exceptFormerStaffPending()->whereKey($leave->id)->exists());
+    }
+
+    /** G-C-12 (D-06): the next-step text fits who reads it. */
+    public function test_gc12_the_next_step_is_worded_for_its_reader(): void
+    {
+        [$hr, $leave] = $this->createPendingDecisionFixture();
+        $manager = $this->makeDirectManagerOf($leave);
+        $leave = $leave->fresh();
+        $next = app(\App\Services\LeaveRequestNextStep::class);
+        app()->setLocale('en');
+
+        $this->assertStringContainsString('your manager', $next->describe($leave));
+        $this->assertSame('Waiting for your decision.', $next->describe($leave, $manager));
+
+        $forHr = $next->describe($leave, $hr);
+        $this->assertStringContainsString('the direct manager', $forHr);
+        $this->assertStringNotContainsString('your manager', $forHr);
+    }
+
+    /** G-C-12 (D-07): the bell stops counting a notice once its request is handled; HR's informational notice still counts. */
+    public function test_gc12_the_bell_does_not_count_handled_requests(): void
+    {
+        [$hr, $leave] = $this->createPendingDecisionFixture();
+        $manager = $this->makeDirectManagerOf($leave);
+        $manager->notify(new NewLeaveRequest($leave->fresh()));
+        $hr->notify(new NewLeaveRequest($leave->fresh()));
+        $states = app(NotificationRequestState::class);
+
+        $this->assertSame(1, $states->unreadCount($manager));
+        // HR may not decide while the manager is at work: informed, not "already handled".
+        $this->assertSame(1, $states->unreadCount($hr));
+        $this->assertNotSame('handled', $states->forMany($hr, $hr->notifications)[$hr->notifications->first()->id]['state']);
+
+        $leave->update(['status' => LeaveRequestStatus::Accepted, 'approved_at' => now()]);
+
+        $this->assertSame(0, $states->unreadCount($manager));
+        $this->assertSame(1, $manager->unreadNotifications()->count(), 'Handled is separate from unread');
+        Livewire::actingAs($manager)->test(\App\Livewire\Notifications\Counter::class)->assertSet('count', 0);
+    }
+
     /** C1: the sidebar's work inbox counts the team's pending request, and drops it once decided. */
     public function test_c1_work_inbox_counts_pending_requests_of_the_managers_team(): void
     {

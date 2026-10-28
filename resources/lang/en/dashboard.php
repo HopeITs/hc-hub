@@ -77,6 +77,10 @@ return [
             'title' => 'Work inbox',
             'count' => '{1} 1 item is waiting for you|[2,*] :count items are waiting for you',
         ],
+        'inbox-items' => [
+            'title' => 'Items to confirm',
+            'count' => '{1} 1 item to hand over or take back|[2,*] :count items to hand over or take back',
+        ],
         'team-off' => [
             'title' => 'Who in my team is off',
             'today' => 'Today',

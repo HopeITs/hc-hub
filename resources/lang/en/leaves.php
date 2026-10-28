@@ -84,6 +84,9 @@ return [
         'pending-hr' => 'Waiting for a decision from the HR team in :city, which has been sent a notification.',
         'pending-unassigned' => 'Waiting for a decision from HR. No manager or HR account was found to notify, so please let your HR team know.',
         'managers' => '{1} your manager :names|[2,*] your managers :names',
+        // G-C-12: the same request read by someone other than the requester.
+        'managers-other' => '{1} the direct manager :names|[2,*] the direct managers :names',
+        'pending-you' => 'Waiting for your decision.',
         'or' => ':first or :last',
         'list-separator' => ', ',
         'decided-by' => 'Decided by :name on :date.',
@@ -103,6 +106,19 @@ return [
             'rejected' => 'This request was already rejected on :date. Your decision was not saved.',
             'accepted-by-you' => 'Your decision to accept this request was already saved on :date. Nothing more is needed.',
             'rejected-by-you' => 'Your decision to reject this request was already saved on :date. Nothing more is needed.',
+        ],
+        // G-C-4: who decided, from the stored basis (HR's review row).
+        'summary' => [
+            'accepted-manager' => 'The manager :name accepted this request.',
+            'rejected-manager' => 'The manager :name rejected this request.',
+            'accepted-on-behalf' => 'HR (:name) accepted this request on behalf of :manager.',
+            'rejected-on-behalf' => 'HR (:name) rejected this request on behalf of :manager.',
+            'accepted-no-manager' => 'HR (:name) accepted this request (no direct manager).',
+            'rejected-no-manager' => 'HR (:name) rejected this request (no direct manager).',
+            'accepted-by' => ':name accepted this request.',
+            'rejected-by' => ':name rejected this request.',
+            'accepted' => 'This request was accepted.',
+            'rejected' => 'This request was rejected.',
         ],
     ],
 

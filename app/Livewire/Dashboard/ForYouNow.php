@@ -77,9 +77,10 @@ class ForYouNow extends Component
         return match (true) {
             str_starts_with($role, 'HR-') => ['inbox', 'contracts-ending', 'employees-waiting'],
             $role === 'super-admin' => ['inbox', 'admin-shortcuts'],
-            $role === 'general-manager' => ['decisions', 'key-figures', 'contracts-ending'],
-            $role === 'manager' => ['decisions', 'team-off', 'balance'],
-            default => ['balance', 'my-requests', 'my-items'],
+            // G-C-11 F9: items to hand over / take back, which the menu badge counts.
+            $role === 'general-manager' => ['decisions', 'inbox-items', 'key-figures', 'contracts-ending'],
+            $role === 'manager' => ['decisions', 'inbox-items', 'team-off', 'balance'],
+            default => ['inbox-items', 'balance', 'my-requests', 'my-items'],
         };
     }
 
@@ -88,14 +89,16 @@ class ForYouNow extends Component
     /** Manager / general manager: what waits for my decision (C3 inbox, decide rows only). */
     private function partDecisions(User $user): ?array
     {
-        $rows = app(WorkInbox::class)->rows($user)->where('action', 'decide')->values();
+        ['rows' => $rows, 'counts' => $counts] = app(WorkInbox::class)->snapshot($user);
+        $rows = $rows->where('action', 'decide')->values();
 
         if ($rows->isEmpty()) {
             return null;
         }
 
         return [
-            'count' => $rows->count(),
+            // The exact count, as on the badge (G-C-7).
+            'count' => $counts['decide'],
             'soon' => $rows->where('urgent', true)->count(),
             'rows' => $rows->take(self::PREVIEW_ROWS)->map(fn (array $row) => $this->inboxRow($row))->all(),
             'url' => route('inbox', ['show' => 'decide']),
@@ -105,22 +108,41 @@ class ForYouNow extends Component
     /** HR and super-admin: the whole work inbox by kind (C3). */
     private function partInbox(User $user): ?array
     {
-        $rows = app(WorkInbox::class)->rows($user);
+        ['rows' => $rows, 'counts' => $counts] = app(WorkInbox::class)->snapshot($user);
 
         if ($rows->isEmpty()) {
             return null;
         }
 
         return [
-            'count' => $rows->count(),
+            // The exact counts, as on the badge (G-C-7).
+            'count' => $counts['all'],
             'kinds' => array_filter([
-                'decide' => $rows->where('action', 'decide')->count(),
-                'review' => $rows->where('action', 'review')->count(),
-                'checklist' => $rows->where('source', 'checklist')->count(),
+                'decide' => $counts['decide'],
+                'review' => $counts['review'],
+                'checklist' => $counts['checklist'],
             ]),
             'soon' => $rows->where('urgent', true)->count(),
             'rows' => $rows->take(self::PREVIEW_ROWS)->map(fn (array $row) => $this->inboxRow($row))->all(),
             'url' => route('inbox'),
+        ];
+    }
+
+    /** Roles without the whole inbox part: the checklist rows of the inbox (G-C-11 F9). */
+    private function partInboxItems(User $user): ?array
+    {
+        ['rows' => $rows, 'counts' => $counts] = app(WorkInbox::class)->snapshot($user);
+        $rows = $rows->where('source', 'checklist')->values();
+
+        if ($rows->isEmpty()) {
+            return null;
+        }
+
+        return [
+            'count' => $counts['checklist'],
+            'soon' => 0,
+            'rows' => $rows->take(self::PREVIEW_ROWS)->map(fn (array $row) => $this->inboxRow($row))->all(),
+            'url' => route('inbox', ['show' => 'checklist']),
         ];
     }
 

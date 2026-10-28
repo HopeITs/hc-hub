@@ -26,11 +26,44 @@ class LeaveRequestNextStep
 {
     public function __construct(private readonly LeaveNotificationService $notifications) {}
 
-    public function describe(LeaveRequest $leaveRequest): string
+    /**
+     * Worded for the requester ("your manager …") unless $viewer is someone
+     * else: a deciding manager reads "Waiting for your decision", anyone else
+     * "the direct manager …" (G-C-12).
+     */
+    public function describe(LeaveRequest $leaveRequest, ?User $viewer = null): string
     {
         return (int) $leaveRequest->status === LeaveRequestStatus::Pending
-            ? $this->pending($leaveRequest)
+            ? $this->pending($leaveRequest, $viewer)
             : $this->decided($leaveRequest);
+    }
+
+    /**
+     * Who decided, on the basis stored with the decision (G-C-4): "The manager
+     * A accepted", "HR (B) accepted on behalf of A", "HR (B) accepted (no
+     * direct manager)". A decision from before C3 has no basis and names only
+     * the person who made it.
+     */
+    public function decisionSummary(LeaveRequest $leaveRequest): string
+    {
+        $outcome = (int) $leaveRequest->status === LeaveRequestStatus::Accepted ? 'accepted' : 'rejected';
+        $decidedBy = $this->decidedByName($leaveRequest);
+        $onBehalfOf = $leaveRequest->decided_on_behalf_of
+            ? Employee::query()->find($leaveRequest->decided_on_behalf_of)?->name
+            : null;
+
+        if ($decidedBy === null) {
+            return __("leaves.decision.summary.{$outcome}");
+        }
+
+        $name = $this->isolate($decidedBy);
+
+        return match (true) {
+            $leaveRequest->decision_basis === LeaveDecisionAuthority::ON_BEHALF && $onBehalfOf !== null => __("leaves.decision.summary.{$outcome}-on-behalf", ['name' => $name, 'manager' => $this->isolate($onBehalfOf)]),
+            $leaveRequest->decision_basis === LeaveDecisionAuthority::NO_MANAGER => __("leaves.decision.summary.{$outcome}-no-manager", ['name' => $name]),
+            $leaveRequest->decision_basis === LeaveDecisionAuthority::MANAGER => __("leaves.decision.summary.{$outcome}-manager", ['name' => $name]),
+            default => __("leaves.decision.summary.{$outcome}-by", ['name' => $name]),
+        };
     }
 
     /**
@@ -54,25 +87,30 @@ class LeaveRequestNextStep
             : __("leaves.decision.already.{$outcome}", ['date' => $date]);
     }
 
-    private function pending(LeaveRequest $leaveRequest): string
+    private function pending(LeaveRequest $leaveRequest, ?User $viewer): string
     {
         $requester = $leaveRequest->leaveBalance?->contract?->employee;
         $audience = $this->notifications->newRequestAudience($leaveRequest, $requester?->account);
 
+        if ($viewer !== null && $audience['managers']->contains('id', $viewer->id)) {
+            return __('leaves.next-step.pending-you');
+        }
+
+        $forRequester = $viewer === null || ($requester !== null && (int) $viewer->employee_id === (int) $requester->id);
         $managers = $this->decidingManagerNames($audience['managers']);
         $city = $requester?->city?->name;
         $hrNotified = $audience['hr']->isNotEmpty();
 
         if ($managers->isNotEmpty() && $hrNotified) {
             return __('leaves.next-step.pending-managers-and-hr', [
-                'managers' => $this->managerPhrase($managers),
+                'managers' => $this->managerPhrase($managers, $forRequester),
                 'city' => $city ?? '—',
             ]);
         }
 
         if ($managers->isNotEmpty()) {
             return __('leaves.next-step.pending-managers', [
-                'managers' => $this->managerPhrase($managers),
+                'managers' => $this->managerPhrase($managers, $forRequester),
             ]);
         }
 
@@ -132,11 +170,12 @@ class LeaveRequestNextStep
     }
 
     /**
-     * "your manager A" / "your managers A or B" / "… A, B or C".
+     * "your manager A" / "your managers A or B" / "… A, B or C"; "the direct
+     * manager A" when the reader is not the requester.
      *
      * @param  Collection<int, string>  $names
      */
-    private function managerPhrase(Collection $names): string
+    private function managerPhrase(Collection $names, bool $forRequester = true): string
     {
         $names = $names->map(fn (string $name) => $this->isolate($name));
 
@@ -147,7 +186,7 @@ class LeaveRequestNextStep
                 'last' => $names->last(),
             ]);
 
-        return trans_choice('leaves.next-step.managers', $names->count(), ['names' => $joined]);
+        return trans_choice($forRequester ? 'leaves.next-step.managers' : 'leaves.next-step.managers-other', $names->count(), ['names' => $joined]);
     }
 
     /**
