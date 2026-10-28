@@ -145,10 +145,13 @@ return new class extends Migration
             ->leftJoin('centers', 'centers.id', '=', 'positions.center_id')
             ->where('job_levels.grade', $grade)
             ->whereNotNull('positions.program_id')
-            ->selectRaw('positions.program_id as program_id, COALESCE(centers.city_id, positions.city_id) as city_id')
+            // Plain selects, not selectRaw: the builder adds the table prefix
+            // (hchr_ on MySQL) only to identifiers it parses itself.
+            ->select('positions.program_id', 'positions.city_id as position_city_id', 'centers.city_id as center_city_id')
             ->get()
-            ->filter(fn ($p) => $p->city_id !== null)
-            ->map(fn ($p) => ['program_id' => (int) $p->program_id, 'city_id' => (int) $p->city_id])
+            ->map(fn ($p) => ['program_id' => (int) $p->program_id, 'city_id' => $p->center_city_id ?? $p->position_city_id])
+            ->filter(fn ($p) => $p['city_id'] !== null)
+            ->map(fn ($p) => ['program_id' => $p['program_id'], 'city_id' => (int) $p['city_id']])
             ->unique(fn ($p) => $p['program_id'].':'.$p['city_id'])
             ->values()
             ->all();
