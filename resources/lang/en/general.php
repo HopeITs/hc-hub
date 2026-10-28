@@ -1006,6 +1006,17 @@ return [
     // G-B-2: an action that never reached the server (resources/js/feedback.js).
     'network-error' => 'Could not reach the server. Nothing was saved, and your entries are still here. Check your connection, then try again.',
 
+    // X1-I: a write whose answer never came back (resources/js/feedback.js).
+    // The outcome is looked up by the operation key, never guessed or re-run.
+    'unknown-result' => [
+        'message' => 'We could not confirm whether this was saved. Your entries are still here. Check the result before saving again.',
+        'check' => 'Check result',
+        'applied' => 'It was saved. Nothing was added twice.',
+        'not-applied' => 'It was not saved. Your entries are still here, and you can save again.',
+        'decided' => 'It was already decided. Nothing was changed twice.',
+        'undecided' => 'The decision was not saved. It is still waiting, and you can decide again.',
+    ],
+
     // A5-M: closing an editable dialog with unsaved entries (GuardsModalClose).
     'unsaved' => [
         'title' => 'Discard your changes?',
