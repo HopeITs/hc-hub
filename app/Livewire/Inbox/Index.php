@@ -254,20 +254,14 @@ class Index extends Component
         $failed = false;
 
         try {
-            $rows = app(WorkInbox::class)->rows(auth()->user());
+            // Exact counts, the badge's (G-C-7); each source lists at most WorkInbox::PER_SOURCE.
+            ['rows' => $rows, 'counts' => $counts] = app(WorkInbox::class)->snapshot(auth()->user());
         } catch (Throwable $e) {
             report($e);
             $rows = collect();
+            $counts = ['all' => 0, 'decide' => 0, 'review' => 0, 'checklist' => 0, 'profile' => 0];
             $failed = true;
         }
-
-        $counts = [
-            'all' => $rows->count(),
-            'decide' => $rows->where('action', 'decide')->count(),
-            'review' => $rows->where('action', 'review')->count(),
-            'checklist' => $rows->where('source', 'checklist')->count(),
-            'profile' => $rows->where('source', 'profile')->count(),
-        ];
 
         $visible = match ($this->filter) {
             'decide' => $rows->where('action', 'decide'),
@@ -277,17 +271,25 @@ class Index extends Component
             default => $rows,
         };
 
+        $shown = $visible->count();
+
         // Who the user decides for, on rows where HR stands in for the manager.
         $authority = app(LeaveDecisionAuthority::class);
-        $visible = $visible->map(function (array $row) use ($authority) {
+        $nextStep = app(LeaveRequestNextStep::class);
+        $visible = $visible->map(function (array $row) use ($authority, $nextStep) {
             if ($row['action'] === 'decide') {
                 $leave = LeaveRequest::query()->with('leaveBalance.contract.position')->find($row['id']);
                 $row['basis'] = $leave ? $authority->basisFor(auth()->user(), $leave) : null;
                 $row['managers'] = $leave && $row['basis'] === LeaveDecisionAuthority::ON_BEHALF
-                    ? $authority->directManagers($leave)->map->name->implode('، ')
+                    ? $authority->directManagers($leave)->map->name->implode(__('leaves.next-step.list-separator'))
                     : null;
                 // C5: others in the requester's team away on these days (advisory).
                 $row['overlap'] = $leave ? $this->overlapFor($leave) : null;
+            }
+            if ($row['action'] === 'review') {
+                // Who decided, from the stored basis, never assumed to be the manager (G-C-4).
+                $leave = LeaveRequest::query()->find($row['id']);
+                $row['decision'] = $leave ? $nextStep->decisionSummary($leave) : null;
             }
             $row['slug'] = $this->slug($row['key']);
 
@@ -297,6 +299,8 @@ class Index extends Component
         return view('livewire.inbox.index', [
             'rows' => $visible->values(),
             'counts' => $counts,
+            // Fewer listed than counted: some source reached its cap.
+            'capped' => $counts[$this->filter] > $shown ? ['shown' => $shown, 'total' => $counts[$this->filter]] : null,
             'failed' => $failed,
             'showCity' => auth()->user()->activeCityIds() === null || count(auth()->user()->activeCityIds() ?? []) > 1,
         ]);
@@ -439,6 +443,8 @@ class Index extends Component
     private function report(string $key, string $outcome, string $message): void
     {
         $this->outcomes[$this->slug($key)] = ['outcome' => $outcome, 'message' => $message];
+        // The row may have left the list (someone else handled it): the menu badge recounts (G-C-11 D-05).
+        $this->dispatch('inbox-changed');
         $this->toast($message, $outcome === 'not_allowed' ? 'error' : 'info');
     }
 

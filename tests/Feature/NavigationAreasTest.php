@@ -52,6 +52,7 @@ class NavigationAreasTest extends TestCase
             'general-manager' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'inbox'],
             'HR-ALP' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'inbox'],
             'HR-SYR' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
+            // The D3 feedback list follows an IT contract, not a role (InAppFeedbackTest).
             'super-admin' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
         ];
 

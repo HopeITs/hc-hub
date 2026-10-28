@@ -11,6 +11,7 @@ use App\Models\DefaultDeliverable;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\Position;
+use App\Models\User;
 use App\Observers\ContractObserver;
 use App\Observers\EmployeeObserver;
 use App\Policies\BadgePolicy;
@@ -80,6 +81,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('digital-id.view', [DigitalIdPolicy::class, 'view']);
         Gate::define('digital-id.manage', [DigitalIdPolicy::class, 'manage']);
         Gate::define('digital-id.report-lost', [DigitalIdPolicy::class, 'reportLost']);
+
+        // D3 / DEC-08: in-app feedback is read by the IT team only.
+        Gate::define('feedback.read', fn (User $user): bool => $user->canReadFeedback());
 
         Livewire::setUpdateRoute(function ($handle) {
             return Route::post('/livewire/update', $handle)

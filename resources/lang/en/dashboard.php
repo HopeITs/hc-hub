@@ -69,6 +69,7 @@ return [
         'open' => 'Open',
         'see-all' => 'See all',
         'starts-soon' => '{1} 1 starts within two days|[2,*] :count start within two days',
+        'already-started' => '{1} 1 has already started|[2,*] :count have already started',
         'decisions' => [
             'title' => 'Needs my decision',
             'count' => '{1} 1 leave request is waiting for you|[2,*] :count leave requests are waiting for you',
@@ -76,6 +77,10 @@ return [
         'inbox' => [
             'title' => 'Work inbox',
             'count' => '{1} 1 item is waiting for you|[2,*] :count items are waiting for you',
+        ],
+        'inbox-items' => [
+            'title' => 'Items to confirm',
+            'count' => '{1} 1 item to hand over or take back|[2,*] :count items to hand over or take back',
         ],
         'team-off' => [
             'title' => 'Who in my team is off',

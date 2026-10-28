@@ -3,11 +3,13 @@
 namespace App\Livewire\Dashboard;
 
 use App\Enums\LeaveRequestStatus;
+use App\Livewire\Team\Calendar;
 use App\Models\Checklist;
 use App\Models\Contract;
 use App\Models\Employee;
 use App\Models\LeaveRequest;
 use App\Models\User;
+use App\Services\LeaveDecisionAuthority;
 use App\Services\LeaveRequestNextStep;
 use App\Services\LeaveRequestPricing;
 use App\Services\TeamCoverage;
@@ -66,6 +68,17 @@ class ForYouNow extends Component
     }
 
     /**
+     * 'soon' or 'started' for a leave still waiting for a decision (G-C-5),
+     * null for any other row. The inbox page labels its rows the same way.
+     */
+    public static function startFlag(array $row): ?string
+    {
+        return $row['source'] === 'leave' && $row['action'] === 'decide'
+            ? LeaveRequest::startFlag($row['start_at'] ?? null)
+            : null;
+    }
+
+    /**
      * The parts for the active role, in the order C0 §5 fixes.
      *
      * @return array<int, string>
@@ -77,9 +90,14 @@ class ForYouNow extends Component
         return match (true) {
             str_starts_with($role, 'HR-') => ['inbox', 'contracts-ending', 'employees-waiting'],
             $role === 'super-admin' => ['inbox', 'admin-shortcuts'],
-            $role === 'general-manager' => ['decisions', 'key-figures', 'contracts-ending'],
-            $role === 'manager' => ['decisions', 'team-off', 'balance'],
-            default => ['balance', 'my-requests', 'my-items'],
+            // G-C-11 F9: items to hand over / take back, which the menu badge counts.
+            $role === 'general-manager' => ['decisions', 'inbox-items', 'key-figures', 'contracts-ending'],
+            $role === 'manager' => ['decisions', 'inbox-items', 'team-off', 'balance'],
+            // A direct manager decides whatever their role (DEC-05 revision 2,
+            // G-C-17), so their decisions lead the home as they lead the badge.
+            default => app(LeaveDecisionAuthority::class)->holdsManagerPosition($user)
+                ? ['decisions', 'inbox-items', 'balance', 'my-requests', 'my-items']
+                : ['inbox-items', 'balance', 'my-requests', 'my-items'],
         };
     }
 
@@ -88,15 +106,18 @@ class ForYouNow extends Component
     /** Manager / general manager: what waits for my decision (C3 inbox, decide rows only). */
     private function partDecisions(User $user): ?array
     {
-        $rows = app(WorkInbox::class)->rows($user)->where('action', 'decide')->values();
+        ['rows' => $rows, 'counts' => $counts] = app(WorkInbox::class)->snapshot($user);
+        $rows = $rows->where('action', 'decide')->values();
 
         if ($rows->isEmpty()) {
             return null;
         }
 
         return [
-            'count' => $rows->count(),
-            'soon' => $rows->where('urgent', true)->count(),
+            // The exact count, as on the badge (G-C-7).
+            'count' => $counts['decide'],
+            'soon' => $this->countStarting($rows, 'soon'),
+            'started' => $this->countStarting($rows, 'started'),
             'rows' => $rows->take(self::PREVIEW_ROWS)->map(fn (array $row) => $this->inboxRow($row))->all(),
             'url' => route('inbox', ['show' => 'decide']),
         ];
@@ -105,26 +126,52 @@ class ForYouNow extends Component
     /** HR and super-admin: the whole work inbox by kind (C3). */
     private function partInbox(User $user): ?array
     {
-        $rows = app(WorkInbox::class)->rows($user);
+        ['rows' => $rows, 'counts' => $counts] = app(WorkInbox::class)->snapshot($user);
 
         if ($rows->isEmpty()) {
             return null;
         }
 
         return [
-            'count' => $rows->count(),
+            // The exact counts, as on the badge (G-C-7).
+            'count' => $counts['all'],
             'kinds' => array_filter([
-                'decide' => $rows->where('action', 'decide')->count(),
-                'review' => $rows->where('action', 'review')->count(),
-                'checklist' => $rows->where('source', 'checklist')->count(),
+                'decide' => $counts['decide'],
+                'review' => $counts['review'],
+                'checklist' => $counts['checklist'],
             ]),
-            'soon' => $rows->where('urgent', true)->count(),
+            'soon' => $this->countStarting($rows, 'soon'),
+            'started' => $this->countStarting($rows, 'started'),
             'rows' => $rows->take(self::PREVIEW_ROWS)->map(fn (array $row) => $this->inboxRow($row))->all(),
             'url' => route('inbox'),
         ];
     }
 
-    /** Manager: who in my team is off today and this week (C5, accepted + pending, manager level). */
+    /** Roles without the whole inbox part: the checklist rows of the inbox (G-C-11 F9). */
+    private function partInboxItems(User $user): ?array
+    {
+        ['rows' => $rows, 'counts' => $counts] = app(WorkInbox::class)->snapshot($user);
+        $rows = $rows->where('source', 'checklist')->values();
+
+        if ($rows->isEmpty()) {
+            return null;
+        }
+
+        return [
+            'count' => $counts['checklist'],
+            'soon' => 0,
+            'started' => 0,
+            'rows' => $rows->take(self::PREVIEW_ROWS)->map(fn (array $row) => $this->inboxRow($row))->all(),
+            'url' => route('inbox', ['show' => 'checklist']),
+        ];
+    }
+
+    /**
+     * Manager: who in my team is off today and this week (C5, accepted +
+     * pending, manager level). "This week" is the rest of the calendar's own
+     * Sunday–Saturday week, so every name here is on the week view the link
+     * opens (G-C-10 / F7).
+     */
     private function partTeamOff(User $user): ?array
     {
         $coverage = app(TeamCoverage::class);
@@ -134,7 +181,7 @@ class ForYouNow extends Component
         }
 
         $today = CarbonImmutable::today();
-        $week = $coverage->absences($user, 'reports', $today, $today->addDays(6));
+        $week = $coverage->absences($user, 'reports', $today, Calendar::weekOf($today)[1]);
 
         if ($week->isEmpty()) {
             return null;
@@ -246,8 +293,7 @@ class ForYouNow extends Component
             return null;
         }
 
-        $scoped = fn () => Employee::query()
-            ->when($user->activeCityIds(), fn (Builder $q, array $cityIds) => $q->whereIn('city_id', $cityIds));
+        $scoped = fn () => Employee::query()->inActiveCities($user);
 
         $awaiting = $scoped()->awaitingContract()->count();
         $incomplete = $scoped()->drafts()->count();
@@ -291,6 +337,11 @@ class ForYouNow extends Component
 
     // ── Helpers ─────────────────────────────────────────────────────────
 
+    private function countStarting($rows, string $flag): int
+    {
+        return $rows->filter(fn (array $row) => self::startFlag($row) === $flag)->count();
+    }
+
     /** An inbox row reduced to what the preview shows: no reason, no pay. */
     private function inboxRow(array $row): array
     {
@@ -300,7 +351,7 @@ class ForYouNow extends Component
             'what' => $row['source'] === 'leave' ? $row['leave_type'] : $row['item'],
             'from' => isset($row['start_at']) ? $row['start_at']->toDateString() : null,
             'to' => isset($row['end_at']) ? $row['end_at']->toDateString() : null,
-            'urgent' => (bool) $row['urgent'],
+            'start_flag' => self::startFlag($row),
             'url' => route('inbox', ['open' => $row['key']]),
         ];
     }

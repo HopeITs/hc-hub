@@ -114,6 +114,8 @@ final class Navigation
             $editsBasics && $can('project-basics.view') ? $basics : null,
             $can('access-management.view') ? self::item('nav.settings.access', __('access.title'), 'access-management.index', ['access-management.*'], 'cog', 'nav.access') : null,
             $can('activity-log.view') ? self::item('nav.settings.activity', __('general.activity-log'), 'activity-log.index', ['activity-log.*'], 'activity-log', 'nav.activity-log') : null,
+            // D3 / DEC-08: the IT team only; not a role permission (User::canReadFeedback()).
+            $user->canReadFeedback() ? self::item('nav.settings.feedback', __('feedback.inbox.title'), 'feedback.index', ['feedback.*'], 'activity-log') : null,
         ]));
 
         // Organisation (reference pages, C0-Q4) comes last: C0 put it under My

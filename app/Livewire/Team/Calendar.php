@@ -111,6 +111,19 @@ class Calendar extends Component
         ]);
     }
 
+    /**
+     * The Sunday–Saturday week holding $day: what the week view shows, and
+     * what the home page's "this week" reads up to (G-C-10).
+     *
+     * @return array{0: CarbonImmutable, 1: CarbonImmutable}
+     */
+    public static function weekOf(CarbonImmutable $day): array
+    {
+        $start = $day->startOfDay()->subDays($day->dayOfWeek);
+
+        return [$start, $start->addDays(6)];
+    }
+
     private function normalisedView(): string
     {
         return in_array($this->view, self::VIEWS, true) ? $this->view : 'month';
@@ -137,10 +150,10 @@ class Calendar extends Component
     private function range(string $view): array
     {
         $anchor = $this->anchor();
-        $weekStart = fn (CarbonImmutable $day) => $day->subDays($day->dayOfWeek);
+        $weekStart = fn (CarbonImmutable $day) => self::weekOf($day)[0];
 
         return match ($view) {
-            'week' => [$weekStart($anchor), $weekStart($anchor)->addDays(6)],
+            'week' => self::weekOf($anchor),
             'day' => [$anchor, $anchor],
             'agenda' => [$anchor->startOfMonth(), $anchor->endOfMonth()->startOfDay()],
             default => [$weekStart($anchor->startOfMonth()), $weekStart($anchor->startOfMonth())->addDays(41)],
