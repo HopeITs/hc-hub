@@ -96,6 +96,21 @@ class LeaveRequestNextStep
             return __('leaves.next-step.pending-you');
         }
 
+        // HR reading its own notice (N-03): "you", never "the HR team".
+        if ($viewer !== null && $audience['hr']->contains('id', $viewer->id)) {
+            if (app(LeaveDecisionAuthority::class)->basisFor($viewer, $leaveRequest) !== null) {
+                return __('leaves.next-step.pending-you');
+            }
+
+            $managers = $this->decidingManagerNames($audience['managers']);
+
+            if ($managers->isNotEmpty()) {
+                return __('leaves.next-step.pending-managers-hr-reader', [
+                    'managers' => $this->managerPhrase($managers, false),
+                ]);
+            }
+        }
+
         $forRequester = $viewer === null || ($requester !== null && (int) $viewer->employee_id === (int) $requester->id);
         $managers = $this->decidingManagerNames($audience['managers']);
         $city = $requester?->city?->name;

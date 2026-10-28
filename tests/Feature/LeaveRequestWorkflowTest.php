@@ -1345,6 +1345,23 @@ class LeaveRequestWorkflowTest extends TestCase
             ->assertSeeHtml('data-testid="for-you-decisions-count"');
     }
 
+    public function test_n03_hr_reads_you_not_the_hr_team_in_the_next_step(): void
+    {
+        [$hr, $leave] = $this->createPendingDecisionFixture();
+        $nextStep = app(\App\Services\LeaveRequestNextStep::class);
+        app()->setLocale('en');
+
+        // No direct manager: HR decides, so HR reads "your decision".
+        $this->assertSame(__('leaves.next-step.pending-you'), $nextStep->describe($leave->fresh(), $hr));
+
+        // With a manager at work: HR reads that it was informed, not "the HR team".
+        $manager = $this->makeDirectManagerOf($leave);
+        $text = $nextStep->describe($leave->fresh(), $hr);
+        $this->assertStringContainsString('You have been informed', $text);
+        $this->assertStringContainsString($manager->profile->name, $text);
+        $this->assertStringNotContainsString('HR team', $text);
+    }
+
     public function test_gc1_no_reminder_before_it_is_due_or_once_decided(): void
     {
         [, $leave] = $this->createPendingDecisionFixture();

@@ -81,6 +81,7 @@ return [
         // C3 (DEC-05 revision): only the direct manager decides; HR is informed.
         'pending-managers-and-hr' => 'Waiting for a decision from :managers, who has been sent a notification. The HR team in :city has been informed.',
         'pending-managers' => 'Waiting for a decision from :managers, who has been sent a notification.',
+        'pending-managers-hr-reader' => 'Waiting for a decision from :managers, who has been sent a notification. You have been informed.',
         'pending-hr' => 'Waiting for a decision from the HR team in :city, which has been sent a notification.',
         'pending-unassigned' => 'Waiting for a decision from HR. No manager or HR account was found to notify, so please let your HR team know.',
         'managers' => '{1} your manager :names|[2,*] your managers :names',
