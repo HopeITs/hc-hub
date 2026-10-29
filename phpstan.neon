@@ -1,0 +1,16 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    paths:
+        - app/
+
+    level: 7
+
+    # Existing HR code is grandfathered in phpstan-baseline.neon. New code
+    # (Tracking, Media and anything added to HR) must pass level 7 outright:
+    # fix errors rather than regenerating the baseline. A baseline entry
+    # that no longer matches fails the run, so fixed errors drop out.
+    reportUnmatchedIgnoredErrors: true
