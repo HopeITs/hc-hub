@@ -86,16 +86,16 @@ class Index extends Component
             ->where(function ($q) use ($cityId, $centerId, $programId, $employeeId) {
                 $q->whereNull('newsable_type')
                     ->orWhere(function ($q2) use ($employeeId) {
-                        $q2->where('newsable_type', Employee::class)->where('newsable_id', $employeeId);
+                        $q2->where('newsable_type', (new Employee)->getMorphClass())->where('newsable_id', $employeeId);
                     })
                     ->orWhere(function ($q2) use ($cityId) {
-                        $q2->where('newsable_type', City::class)->where('newsable_id', $cityId);
+                        $q2->where('newsable_type', (new City)->getMorphClass())->where('newsable_id', $cityId);
                     })
                     ->orWhere(function ($q2) use ($centerId) {
-                        $q2->where('newsable_type', Center::class)->where('newsable_id', $centerId);
+                        $q2->where('newsable_type', (new Center)->getMorphClass())->where('newsable_id', $centerId);
                     })
                     ->orWhere(function ($q2) use ($programId) {
-                        $q2->where('newsable_type', Program::class)->where('newsable_id', $programId);
+                        $q2->where('newsable_type', (new Program)->getMorphClass())->where('newsable_id', $programId);
                     });
             })
             ->where(function ($q) {
@@ -260,16 +260,16 @@ class Index extends Component
             ->where(function ($q) use ($cityId, $centerId, $programId, $employeeId) {
                 $q->whereNull('newsable_type')
                     ->orWhere(function ($q2) use ($employeeId) {
-                        $q2->where('newsable_type', Employee::class)->where('newsable_id', $employeeId);
+                        $q2->where('newsable_type', (new Employee)->getMorphClass())->where('newsable_id', $employeeId);
                     })
                     ->orWhere(function ($q2) use ($cityId) {
-                        $q2->where('newsable_type', City::class)->where('newsable_id', $cityId);
+                        $q2->where('newsable_type', (new City)->getMorphClass())->where('newsable_id', $cityId);
                     })
                     ->orWhere(function ($q2) use ($centerId) {
-                        $q2->where('newsable_type', Center::class)->where('newsable_id', $centerId);
+                        $q2->where('newsable_type', (new Center)->getMorphClass())->where('newsable_id', $centerId);
                     })
                     ->orWhere(function ($q2) use ($programId) {
-                        $q2->where('newsable_type', Program::class)->where('newsable_id', $programId);
+                        $q2->where('newsable_type', (new Program)->getMorphClass())->where('newsable_id', $programId);
                     });
             })
             ->where(function ($q) {

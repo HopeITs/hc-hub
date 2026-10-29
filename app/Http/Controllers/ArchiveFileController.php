@@ -59,7 +59,7 @@ class ArchiveFileController extends Controller
 
     private function authorizeMediaAccess(Media $media): void
     {
-        abort_if($media->model_type !== Folder::class, 404);
+        abort_if($media->model_type !== (new Folder)->getMorphClass(), 404);
 
         $folder = Folder::findOrFail($media->model_id);
         $user = auth()->user();

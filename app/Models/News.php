@@ -100,7 +100,8 @@ class News extends Model implements HasMedia
         }
 
         $relation = $this->newsable;
-        $type = class_basename($this->newsable_type);
+        // newsable_type holds a morph alias; name the target by its class.
+        $type = class_basename($relation);
 
         $name = match ($type) {
             'City' => trans_choice('general.city', 1),

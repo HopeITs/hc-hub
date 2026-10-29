@@ -8,6 +8,7 @@ use App\Models\Employee;
 use App\Models\News;
 use App\Models\Program;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -33,14 +34,19 @@ class NewsForm extends Form
 
     public string|int|null $newsable_id = '';
 
-    /** @return list<class-string> */
+    /**
+     * The morph aliases a news item can target (see App\Support\MorphMap).
+     * newsable_type stores the alias, never the class name.
+     *
+     * @return list<string>
+     */
     public static function allowedNewsableTypes(): array
     {
         return [
-            City::class,
-            Center::class,
-            Program::class,
-            Employee::class,
+            (new City)->getMorphClass(),
+            (new Center)->getMorphClass(),
+            (new Program)->getMorphClass(),
+            (new Employee)->getMorphClass(),
         ];
     }
 
@@ -86,7 +92,7 @@ class NewsForm extends Form
 
     public function entities(): Collection
     {
-        return match ($this->newsable_type) {
+        return match (Relation::getMorphedModel($this->newsable_type)) {
             City::class => City::select('id', 'name_en', 'name_ar')->where('is_active', true)->orderBy('name_en')->get(),
             Center::class => Center::select('id', transColumn('name'))->where('is_active', true)->orderBy(transColumn('name'))->get(),
             Program::class => Program::select('id', 'name')->orderBy('name')->get(),

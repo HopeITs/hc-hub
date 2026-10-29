@@ -3,6 +3,7 @@
 namespace App\Livewire\ActivityLog;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Filters\SelectFilter;
@@ -44,7 +45,7 @@ class ActivityLogTable extends LivewireTable
             Column::make(__('Model'), 'subject_type')
                 ->sortable()
                 ->searchable()
-                ->displayUsing(fn ($value) => class_basename($value)),
+                ->displayUsing(fn ($value) => class_basename(Relation::getMorphedModel((string) $value) ?? $value)),
 
             Column::make(__('Event'), 'event')
                 ->sortable()
@@ -109,7 +110,7 @@ class ActivityLogTable extends LivewireTable
                         ->select('subject_type')
                         ->distinct()
                         ->pluck('subject_type')
-                        ->mapWithKeys(fn ($type) => [$type => class_basename($type)])
+                        ->mapWithKeys(fn ($type) => [$type => class_basename(Relation::getMorphedModel((string) $type) ?? $type)])
                         ->toArray(),
                 ),
 

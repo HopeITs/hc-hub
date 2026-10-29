@@ -24,6 +24,8 @@ use App\Policies\LeaveRequestPolicy;
 use App\Policies\PositionPolicy;
 use App\Services\ActivityLogger;
 use App\Services\SalaryCipher;
+use App\Support\MorphMap;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
@@ -56,6 +58,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Every *_type column stores a short alias, never a class name. See
+        // App\Support\MorphMap: a new polymorphic model must be added there.
+        Relation::enforceMorphMap(MorphMap::MAP);
+
         // Applies wherever Rules\Password::defaults() is used (registration,
         // reset, and the settings screen).
         //

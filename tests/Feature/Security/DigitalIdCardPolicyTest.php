@@ -594,7 +594,7 @@ class DigitalIdCardPolicyTest extends TestCase
                 ->sole();
 
             $this->assertSame($holder->id, (int) $entry->subject_id);
-            $this->assertSame(Employee::class, $entry->subject_type);
+            $this->assertSame((new Employee)->getMorphClass(), $entry->subject_type);
             $this->assertSame($hr->id, (int) $entry->causer_id);
             $this->assertSame($holder->id, (int) $entry->properties['employee_id']);
         }

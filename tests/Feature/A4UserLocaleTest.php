@@ -44,7 +44,7 @@ class A4UserLocaleTest extends TestCase
         $this->runMiddleware($user, 'ar');
 
         $this->assertEquals($updatedAt, $user->fresh()->updated_at);
-        $this->assertDatabaseMissing('activity_log', ['subject_type' => User::class, 'event' => 'updated']);
+        $this->assertDatabaseMissing('activity_log', ['subject_type' => (new User)->getMorphClass(), 'event' => 'updated']);
     }
 
     public function test_an_unsupported_locale_is_not_stored(): void

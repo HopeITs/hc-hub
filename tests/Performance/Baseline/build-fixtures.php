@@ -279,7 +279,7 @@ $accounts = $withAccount->mapWithKeys(function (Employee $employee) use ($passwo
 });
 
 DB::table('model_has_roles')->insert($accounts->map(fn (User $u) => [
-    'role_id' => $employeeRole->id, 'model_type' => User::class, 'model_id' => $u->id, 'is_active' => true,
+    'role_id' => $employeeRole->id, 'model_type' => (new User)->getMorphClass(), 'model_id' => $u->id, 'is_active' => true,
 ])->values()->all());
 
 // Measurement personas: an Aleppo HR officer, and an Aleppo staff member who
@@ -293,7 +293,7 @@ $hrUser->forceFill(['email' => 'hr.alp@example.test'])->save();
 $hrRole = Role::findByName('HR-ALP', 'web');
 // Login activates the lowest role id, so an HR officer holds only the HR role.
 DB::table('model_has_roles')->where('model_id', $hrUser->id)->delete();
-DB::table('model_has_roles')->insert(['role_id' => $hrRole->id, 'model_type' => User::class, 'model_id' => $hrUser->id, 'is_active' => true]);
+DB::table('model_has_roles')->insert(['role_id' => $hrRole->id, 'model_type' => (new User)->getMorphClass(), 'model_id' => $hrUser->id, 'is_active' => true]);
 
 $staffUser = $accounts[$personaEmployee(1)->id];
 $staffUser->forceFill(['email' => 'staff.alp@example.test'])->save();
@@ -305,7 +305,7 @@ foreach (['HMS', 'DMS', 'LAT'] as $slug) {
     if ($candidate && isset($accounts[$candidate->id])) {
         $role = Role::findByName("HR-{$slug}", 'web');
         DB::table('model_has_roles')->where('model_id', $accounts[$candidate->id]->id)->delete();
-        DB::table('model_has_roles')->insert(['role_id' => $role->id, 'model_type' => User::class, 'model_id' => $accounts[$candidate->id]->id, 'is_active' => true]);
+        DB::table('model_has_roles')->insert(['role_id' => $role->id, 'model_type' => (new User)->getMorphClass(), 'model_id' => $accounts[$candidate->id]->id, 'is_active' => true]);
     }
 }
 app(Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
@@ -367,7 +367,7 @@ for ($n = 0; $n < TARGET['notifications']; $n++) {
     $rows[] = [
         'id' => (string) Str::uuid(),
         'type' => NewLeaveRequest::class,
-        'notifiable_type' => User::class,
+        'notifiable_type' => (new User)->getMorphClass(),
         'notifiable_id' => $notifiable,
         'data' => json_encode($payload),
         'read_at' => ($n < 60 ? $n >= 12 : mt_rand(0, 3) > 0) ? $created->copy()->addHour() : null,

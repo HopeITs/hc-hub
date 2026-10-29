@@ -349,7 +349,7 @@ class LeaveChecklistNotificationStatesTest extends TestCase
         DB::table('notifications')->insert([
             'id' => $id,
             'type' => 'test',
-            'notifiable_type' => User::class,
+            'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id' => $user->id,
             'data' => json_encode(['title' => ['en' => 'Test notification', 'ar' => 'إشعار'], 'body' => ['en' => 'Body', 'ar' => 'نص']]),
             'read_at' => null,

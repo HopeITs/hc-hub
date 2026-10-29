@@ -333,7 +333,7 @@ class AuthorizationRegressionTest extends TestCase
         ]);
 
         $properties = DB::table('activity_log')
-            ->where('subject_type', Employee::class)
+            ->where('subject_type', (new Employee)->getMorphClass())
             ->pluck('properties')
             ->implode(' ');
 

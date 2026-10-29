@@ -115,7 +115,7 @@ class NotificationNavigationTest extends TestCase
         DB::table('notifications')->insert([
             'id' => $id,
             'type' => 'test',
-            'notifiable_type' => User::class,
+            'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id' => $user->id,
             'data' => json_encode($data, JSON_THROW_ON_ERROR),
             'read_at' => null,

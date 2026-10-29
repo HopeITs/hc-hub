@@ -662,7 +662,7 @@ class ArchivedFilesModule extends Component
     {
         $media = Media::findOrFail($mediaId);
 
-        abort_if($media->model_type !== Folder::class, 404);
+        abort_if($media->model_type !== (new Folder)->getMorphClass(), 404);
 
         $folder = Folder::with('users')->findOrFail($media->model_id);
 

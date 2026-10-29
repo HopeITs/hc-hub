@@ -62,8 +62,8 @@ $log = fn (string $line) => fwrite(STDOUT, $line."\n");
 /** Replace a user's roles with exactly one active role. */
 $setRole = function (User $user, string $roleName): void {
     $role = Role::findByName($roleName, 'web');
-    DB::table('model_has_roles')->where('model_type', User::class)->where('model_id', $user->id)->delete();
-    DB::table('model_has_roles')->insert(['role_id' => $role->id, 'model_type' => User::class, 'model_id' => $user->id, 'is_active' => true]);
+    DB::table('model_has_roles')->where('model_type', (new User)->getMorphClass())->where('model_id', $user->id)->delete();
+    DB::table('model_has_roles')->insert(['role_id' => $role->id, 'model_type' => (new User)->getMorphClass(), 'model_id' => $user->id, 'is_active' => true]);
 };
 
 $accountFor = function (Employee $employee, string $email) use ($password): User {
@@ -191,11 +191,11 @@ foreach (['ALP', 'HMS'] as $slug) {
     // X1 spreads leave notifications at random, so the personas' bells point
     // at requests they cannot open. Give the manager only real notices for
     // the three requests above; the staff persona's bell is cleared further down.
-    DB::table('notifications')->where('notifiable_type', User::class)->where('notifiable_id', $managerUser->id)->delete();
+    DB::table('notifications')->where('notifiable_type', (new User)->getMorphClass())->where('notifiable_id', $managerUser->id)->delete();
     foreach ($pending as $n => $row) {
         $created = now()->subHours(3 - $n);
         DB::table('notifications')->insert([
-            'id' => (string) Str::uuid(), 'type' => NewLeaveRequest::class, 'notifiable_type' => User::class,
+            'id' => (string) Str::uuid(), 'type' => NewLeaveRequest::class, 'notifiable_type' => (new User)->getMorphClass(),
             'notifiable_id' => $managerUser->id, 'read_at' => null, 'created_at' => $created, 'updated_at' => $created,
             'data' => json_encode((new NewLeaveRequest(LeaveRequest::query()->with('leaveBalance.contract.employee', 'leaveBalance.leaveType')->find($row['request_id'])))->toArray($managerUser)),
         ]);
@@ -220,7 +220,7 @@ foreach (['ALP', 'HMS'] as $slug) {
     $perDay = max(1, (int) round(($staffContract->weekly_hours ?: 40) / 5));
     $staffBalance->forceFill(['deserved' => max((float) $staffBalance->deserved, 10 * $perDay), 'used' => 0])->save();
     $used->push($staffUser->employee_id);
-    DB::table('notifications')->where('notifiable_type', User::class)->where('notifiable_id', $staffUser->id)->delete();
+    DB::table('notifications')->where('notifiable_type', (new User)->getMorphClass())->where('notifiable_id', $staffUser->id)->delete();
     $entry['task_a'] = ['email' => $staffUser->email, 'role' => 'employee', 'employee_id' => $staffUser->employee_id,
         'target_date' => $workingDay($staffContract, 8)->toDateString(), 'center_weekends' => $staffContract->position?->center?->weekends];
 

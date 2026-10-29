@@ -97,13 +97,14 @@ class PurgeSensitiveActivityLog extends Command
     }
 
     /**
-     * Subject type => attributes whose values must not persist in the log.
+     * Subject type (morph alias) => attributes whose values must not persist
+     * in the log.
      * Mirrors the $sensitiveLogAttributes lists on the models themselves.
      */
     private function map(): array
     {
         return [
-            Employee::class => [
+            (new Employee)->getMorphClass() => [
                 'national_number', 'civil_registry_number', 'civil_registry_office',
                 'address', 'address_en', 'address_ar', 'dob', 'actual_dob',
                 'personal_phone', 'work_phone', 'personal_email', 'whatsapp_work',
@@ -111,10 +112,10 @@ class PurgeSensitiveActivityLog extends Command
                 'mother_name_en', 'mother_name_ar', 'children', 'marital_status',
                 'digital_id_token',
             ],
-            Contract::class => ['salary'],
-            Badge::class => ['current_salary', 'new_salary', 'reason', 'notes'],
-            Relative::class => ['name', 'phone'],
-            EmployeeNote::class => ['content'],
+            (new Contract)->getMorphClass() => ['salary'],
+            (new Badge)->getMorphClass() => ['current_salary', 'new_salary', 'reason', 'notes'],
+            (new Relative)->getMorphClass() => ['name', 'phone'],
+            (new EmployeeNote)->getMorphClass() => ['content'],
         ];
     }
 }

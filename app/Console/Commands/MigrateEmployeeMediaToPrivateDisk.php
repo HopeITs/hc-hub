@@ -25,10 +25,14 @@ class MigrateEmployeeMediaToPrivateDisk extends Command
                     // Avatars are included: employee photographs are
                     // protection-sensitive and were previously world-readable
                     // under a guessable public path.
-                    $query->where('model_type', Employee::class)
+                    $query->where('model_type', (new Employee)->getMorphClass())
                         ->whereIn('collection_name', ['attachments', 'avatar']);
                 })->orWhere(function ($query): void {
-                    $query->whereIn('model_type', [Education::class, Course::class, Experience::class])
+                    $query->whereIn('model_type', [
+                        (new Education)->getMorphClass(),
+                        (new Course)->getMorphClass(),
+                        (new Experience)->getMorphClass(),
+                    ])
                         ->where('collection_name', 'file');
                 });
             });

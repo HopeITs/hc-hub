@@ -27,10 +27,10 @@
         <x-forms.input-label>@lang('general.target_type')</x-forms.input-label>
         <x-forms.select2-input wire:model.live="form.newsable_type">
             <option value="">@lang('general.all_org')</option>
-            <option value="{{ \App\Models\City::class }}">{{ trans_choice('general.city', 1) }}</option>
-            <option value="{{ \App\Models\Center::class }}">{{ trans_choice('general.center', 1) }}</option>
-            <option value="{{ \App\Models\Program::class }}">{{ trans_choice('general.program', 1) }}</option>
-            <option value="{{ \App\Models\Employee::class }}">{{ trans_choice('general.employee', 1) }}</option>
+            <option value="{{ (new \App\Models\City)->getMorphClass() }}">{{ trans_choice('general.city', 1) }}</option>
+            <option value="{{ (new \App\Models\Center)->getMorphClass() }}">{{ trans_choice('general.center', 1) }}</option>
+            <option value="{{ (new \App\Models\Program)->getMorphClass() }}">{{ trans_choice('general.program', 1) }}</option>
+            <option value="{{ (new \App\Models\Employee)->getMorphClass() }}">{{ trans_choice('general.employee', 1) }}</option>
         </x-forms.select2-input>
         <x-error-span>{{ $errors->first('form.newsable_type') }}</x-error-span>
     </div>
