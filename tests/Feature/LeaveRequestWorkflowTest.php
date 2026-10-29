@@ -31,6 +31,9 @@ class LeaveRequestWorkflowTest extends TestCase
 {
     use RefreshDatabase;
 
+    /** Makes createRejectedLeaveFixture()'s unique keys collision-free. */
+    private static int $fixtureSequence = 0;
+
     public function test_employee_can_view_the_rejection_reason_for_their_own_leave(): void
     {
         [$user, $leaveRequest] = $this->createRejectedLeaveFixture('Operational coverage is unavailable.');
@@ -1921,18 +1924,22 @@ class LeaveRequestWorkflowTest extends TestCase
     ): array {
         $suffix = str_replace(['@', '.', '-'], '_', $email);
 
+        // The sequence makes every key unique: two hex characters alone gave
+        // a 1-in-256 chance per test that two fixtures shared a city slug.
+        $sequence = ++self::$fixtureSequence;
+
         $cityId = DB::table('cities')->insertGetId([
             'name_en' => 'Aleppo',
             'name_ar' => 'حلب',
-            'slug' => 'A'.substr(md5($suffix), 0, 2),
-            'code' => substr(md5('code_'.$suffix), 0, 3),
+            'slug' => 'A'.substr(md5($suffix), 0, 2).$sequence,
+            'code' => substr(md5('code_'.$suffix), 0, 3).$sequence,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
         $programId = DB::table('programs')->insertGetId([
             'name' => 'Program '.$suffix,
-            'code' => substr(md5('program_code_'.$suffix), 0, 6),
+            'code' => substr(md5('program_code_'.$suffix), 0, 6).$sequence,
             'slug' => 'program-'.$suffix,
             'created_at' => now(),
             'updated_at' => now(),
@@ -1949,7 +1956,7 @@ class LeaveRequestWorkflowTest extends TestCase
 
         $departmentId = DB::table('departments')->insertGetId([
             'name' => 'Department '.$suffix,
-            'code' => substr(md5('department_'.$suffix), 0, 8),
+            'code' => substr(md5('department_'.$suffix), 0, 8).$sequence,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

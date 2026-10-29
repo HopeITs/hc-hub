@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Employee;
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
@@ -17,7 +18,7 @@ function morphAliasMigration(): Migration
 /**
  * Rows as HR wrote them before the morph map existed: full class names.
  */
-function seedLegacyMorphRows(Employee $employee, User $user, Role $role): void
+function seedLegacyMorphRows(Employee $employee, User $user, Role $role, Permission $permission): void
 {
     // Creating the fixtures logged activity of its own; keep only legacy rows.
     DB::table('activity_log')->delete();
@@ -27,6 +28,12 @@ function seedLegacyMorphRows(Employee $employee, User $user, Role $role): void
         'model_type' => 'App\\Models\\User',
         'model_id' => $user->id,
         'is_active' => true,
+    ]);
+
+    DB::table('model_has_permissions')->insert([
+        'permission_id' => $permission->id,
+        'model_type' => 'App\\Models\\User',
+        'model_id' => $user->id,
     ]);
 
     DB::table('activity_log')->insert([
@@ -83,8 +90,9 @@ test('the migration rewrites legacy class names to aliases and back', function (
     $employee = Employee::factory()->create();
     $user = User::factory()->create(['employee_id' => $employee->id]);
     $role = Role::findOrCreate('legacy-role', 'web');
+    $permission = Permission::findOrCreate('legacy.permission', 'web');
 
-    seedLegacyMorphRows($employee, $user, $role);
+    seedLegacyMorphRows($employee, $user, $role, $permission);
 
     morphAliasMigration()->up();
 
@@ -93,17 +101,20 @@ test('the migration rewrites legacy class names to aliases and back', function (
         ->and(DB::table('news')->value('newsable_type'))->toBe('employee')
         ->and(DB::table('media')->value('model_type'))->toBe('employee')
         ->and(DB::table('notifications')->value('notifiable_type'))->toBe('user')
-        ->and(DB::table('model_has_roles')->value('model_type'))->toBe('user');
+        ->and(DB::table('model_has_roles')->value('model_type'))->toBe('user')
+        ->and(DB::table('model_has_permissions')->value('model_type'))->toBe('user');
 
     // The rewritten rows resolve through the enforced map.
     app(PermissionRegistrar::class)->forgetCachedPermissions();
     $activity = Activity::query()->with(['subject', 'causer'])->firstOrFail();
-    $freshUser = User::query()->with(['roles', 'notifications'])->findOrFail($user->id);
+    $freshUser = User::query()->with(['roles', 'permissions', 'notifications'])->findOrFail($user->id);
 
     expect($activity->subject)->toBeInstanceOf(Employee::class)
         ->and($activity->subject->is($employee))->toBeTrue()
         ->and($activity->causer->is($user))->toBeTrue()
         ->and($freshUser->roles->pluck('name')->all())->toBe(['legacy-role'])
+        ->and($freshUser->permissions->pluck('name')->all())->toBe(['legacy.permission'])
+        ->and($freshUser->hasActivePermission('legacy.permission'))->toBeTrue()
         ->and($freshUser->notifications)->toHaveCount(1)
         ->and($employee->fresh()->getMedia('attachments'))->toHaveCount(1);
 
@@ -114,7 +125,8 @@ test('the migration rewrites legacy class names to aliases and back', function (
         ->and(DB::table('news')->value('newsable_type'))->toBe('App\\Models\\Employee')
         ->and(DB::table('media')->value('model_type'))->toBe('App\\Models\\Employee')
         ->and(DB::table('notifications')->value('notifiable_type'))->toBe('App\\Models\\User')
-        ->and(DB::table('model_has_roles')->value('model_type'))->toBe('App\\Models\\User');
+        ->and(DB::table('model_has_roles')->value('model_type'))->toBe('App\\Models\\User')
+        ->and(DB::table('model_has_permissions')->value('model_type'))->toBe('App\\Models\\User');
 });
 
 test('the migration leaves rows that already use aliases untouched', function () {

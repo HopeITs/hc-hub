@@ -3,6 +3,8 @@
 namespace App\Livewire\ActivityLog;
 
 use App\Models\User;
+use App\Support\MorphMap;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 use RamonRietdijk\LivewireTables\Columns\Column;
@@ -14,7 +16,39 @@ class ActivityLogTable extends LivewireTable
 {
     protected string $model = ActivityLog::class;
 
-    protected function query(): \Illuminate\Database\Eloquent\Builder
+    /**
+     * Morph aliases whose alias or class name contains $term, so a search for
+     * "LeaveRequest" (or "App\Models\LeaveRequest") finds `leave_request` rows.
+     *
+     * @return list<string>
+     */
+    public static function subjectAliasesMatching(string $term): array
+    {
+        $needle = Str::lower(trim($term));
+
+        if ($needle === '') {
+            return [];
+        }
+
+        return array_values(array_filter(
+            array_keys(MorphMap::MAP),
+            fn (string $alias) => Str::contains($alias, $needle)
+                || Str::contains(Str::lower(MorphMap::MAP[$alias]), $needle),
+        ));
+    }
+
+    /**
+     * The stored form of a subject type: a mapped class name becomes its
+     * alias; anything else (an alias, an unmapped type) is returned as is.
+     */
+    public static function subjectTypeAlias(string $type): string
+    {
+        $alias = array_search($type, MorphMap::MAP, true);
+
+        return is_string($alias) ? $alias : $type;
+    }
+
+    protected function query(): Builder
     {
         return ActivityLog::query()
             ->with(['causer.profile'])
@@ -42,9 +76,22 @@ class ActivityLogTable extends LivewireTable
                 ->sortable()
                 ->searchable(),
 
+            // subject_type holds a morph alias (`leave_request`), while the
+            // column shows, and people search for, the class (`LeaveRequest`).
             Column::make(__('Model'), 'subject_type')
                 ->sortable()
-                ->searchable()
+                ->searchable(function (Builder $builder, mixed $search): void {
+                    if (! is_string($search) || trim($search) === '') {
+                        return;
+                    }
+
+                    $column = $builder->qualifyColumn('subject_type');
+                    $aliases = self::subjectAliasesMatching($search);
+
+                    $builder->where(fn (Builder $query) => $query
+                        ->whereLike($column, '%'.$search.'%')
+                        ->when($aliases !== [], fn (Builder $query) => $query->orWhereIn($column, $aliases)));
+                })
                 ->displayUsing(fn ($value) => class_basename(Relation::getMorphedModel((string) $value) ?? $value)),
 
             Column::make(__('Event'), 'event')
@@ -105,6 +152,20 @@ class ActivityLogTable extends LivewireTable
                 ),
 
             SelectFilter::make(__('Model'), 'subject_type')
+                // A filter value remembered from before the morph map holds a
+                // class name (`App\Models\Employee`); read it as its alias.
+                ->filterUsing(function (Builder $builder, mixed $value): void {
+                    $types = collect(is_array($value) ? $value : [$value])
+                        ->filter(fn ($type) => is_string($type) && $type !== '')
+                        ->map(fn (string $type) => self::subjectTypeAlias($type))
+                        ->unique()
+                        ->values()
+                        ->all();
+
+                    if ($types !== []) {
+                        $builder->whereIn($builder->qualifyColumn('subject_type'), $types);
+                    }
+                })
                 ->options(
                     ActivityLog::query()
                         ->select('subject_type')
