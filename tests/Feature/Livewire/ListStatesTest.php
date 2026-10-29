@@ -21,8 +21,8 @@ class ListStatesTest extends TestCase
 
     public function test_employee_list_empty_dataset_offers_add_only_with_create_permission(): void
     {
-        $creator = $this->makeUser($this->makeCity('DMS', '003'), 'HR-DMS', ['employees.view', 'employees.create']);
-        $viewer = $this->makeUser($this->makeCity('LAT', '002'), 'HR-LAT', ['employees.view']);
+        $creator = $this->makeUser($this->makeCity('DMS', '003'), 'HR-DMS', ['hr.employees.view', 'hr.employees.create']);
+        $viewer = $this->makeUser($this->makeCity('LAT', '002'), 'HR-LAT', ['hr.employees.view']);
 
         // The fixture users are themselves employees; remove them for a truly empty dataset.
         Employee::query()->delete();
@@ -41,7 +41,7 @@ class ListStatesTest extends TestCase
     public function test_employee_list_filtered_empty_clears_back_to_records(): void
     {
         $city = $this->makeCity('DMS', '003');
-        $user = $this->makeUser($city, 'HR-DMS', ['employees.view', 'employees.create']);
+        $user = $this->makeUser($city, 'HR-DMS', ['hr.employees.view', 'hr.employees.create']);
         $row = 'wire:key="row-'.$this->makeEmployee($city, 'visible-one', ['first_name_en' => 'Zebulon', 'last_name_en' => 'Quill'])->id.'"';
 
         Livewire::actingAs($user)->test(EmployeeTable::class)
@@ -61,7 +61,7 @@ class ListStatesTest extends TestCase
     public function test_column_search_counts_as_filtered_and_is_cleared(): void
     {
         $city = $this->makeCity('DMS', '003');
-        $user = $this->makeUser($city, 'HR-DMS', ['employees.view']);
+        $user = $this->makeUser($city, 'HR-DMS', ['hr.employees.view']);
         $row = 'wire:key="row-'.$this->makeEmployee($city, 'visible-two', ['first_name_en' => 'Zebulon'])->id.'"';
 
         Livewire::actingAs($user)->test(EmployeeTable::class)
@@ -76,7 +76,7 @@ class ListStatesTest extends TestCase
     {
         $dms = $this->makeCity('DMS', '003');
         $lat = $this->makeCity('LAT', '002');
-        $user = $this->makeUser($dms, 'HR-DMS', ['employees.view']);
+        $user = $this->makeUser($dms, 'HR-DMS', ['hr.employees.view']);
         $in = 'wire:key="row-'.$this->makeEmployee($dms, 'in-city', ['first_name_en' => 'Zebulon'])->id.'"';
         $out = 'wire:key="row-'.$this->makeEmployee($lat, 'out-city', ['first_name_en' => 'Zebedee'])->id.'"';
 
@@ -91,8 +91,8 @@ class ListStatesTest extends TestCase
     public function test_contract_list_states_and_create_action_per_role(): void
     {
         $city = $this->makeCity('DMS', '003');
-        $hr = $this->makeUser($city, 'HR-DMS', ['contracts.view', 'contracts.create']);
-        $viewer = $this->makeUser($city, 'manager', ['contracts.view']);
+        $hr = $this->makeUser($city, 'HR-DMS', ['hr.contracts.view', 'hr.contracts.create']);
+        $viewer = $this->makeUser($city, 'manager', ['hr.contracts.view']);
 
         Livewire::actingAs($hr)->test(ContractsTable::class)
             ->assertSeeHtml('data-state="empty"')
@@ -116,7 +116,7 @@ class ListStatesTest extends TestCase
 
     public function test_contract_list_never_leaks_pay_figures(): void
     {
-        $user = $this->makeUser($this->makeCity('DMS', '003'), 'HR-DMS', ['contracts.view']);
+        $user = $this->makeUser($this->makeCity('DMS', '003'), 'HR-DMS', ['hr.contracts.view']);
         $this->makeContractFor($user->profile, ['salary' => 7391]);
 
         // The typed search is echoed in its own filter chip, so the proof that
@@ -131,7 +131,7 @@ class ListStatesTest extends TestCase
     public function test_load_failure_shows_retry_and_recovers(): void
     {
         Exceptions::fake();
-        $user = $this->makeUser($this->makeCity('DMS', '003'), 'HR-DMS', ['employees.view']);
+        $user = $this->makeUser($this->makeCity('DMS', '003'), 'HR-DMS', ['hr.employees.view']);
         FailingEmployeeTable::$broken = true;
 
         $component = Livewire::actingAs($user)->test(FailingEmployeeTable::class)
@@ -151,7 +151,7 @@ class ListStatesTest extends TestCase
 
     public function test_state_changes_are_announced(): void
     {
-        $user = $this->makeUser($this->makeCity('DMS', '003'), 'HR-DMS', ['employees.view']);
+        $user = $this->makeUser($this->makeCity('DMS', '003'), 'HR-DMS', ['hr.employees.view']);
 
         Livewire::actingAs($user)->test(EmployeeTable::class)
             ->assertSeeHtml('role="status"')
@@ -163,7 +163,7 @@ class ListStatesTest extends TestCase
     {
         Exceptions::fake();
         $city = $this->makeCity('DMS', '003');
-        $user = $this->makeUser($city, 'staff-leave', ['leaves.view-own', 'leaves.create']);
+        $user = $this->makeUser($city, 'staff-leave', ['hr.leaves.view-own', 'hr.leaves.create']);
 
         \Illuminate\Support\Facades\Schema::drop('leave_requests');
 

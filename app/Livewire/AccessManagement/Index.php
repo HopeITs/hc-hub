@@ -166,7 +166,7 @@ class Index extends Component
 
     public function saveEmployeeAccess(ActivityLogger $activityLogger): void
     {
-        $this->authorizePermission('access-management.manage-employees');
+        $this->authorizePermission('hub.access-management.manage-employees');
 
         if (! $this->employeeAccessIsDirty) {
             return;
@@ -267,7 +267,7 @@ class Index extends Component
 
     public function saveRolePermissions(ActivityLogger $activityLogger): void
     {
-        $this->authorizePermission('access-management.manage-permissions');
+        $this->authorizePermission('hub.access-management.manage-permissions');
         $role = Role::query()->with('permissions')->findOrFail($this->selectedRoleId);
 
         $this->validate([
@@ -322,7 +322,7 @@ class Index extends Component
 
     public function selectAllRolePermissions(): void
     {
-        $this->authorizePermission('access-management.manage-permissions');
+        $this->authorizePermission('hub.access-management.manage-permissions');
         $this->rolePermissionIds = Permission::query()
             ->whereIn('name', AccessPermissionCatalog::names())
             ->pluck('id')
@@ -332,7 +332,7 @@ class Index extends Component
 
     public function clearRolePermissions(): void
     {
-        $this->authorizePermission('access-management.manage-permissions');
+        $this->authorizePermission('hub.access-management.manage-permissions');
         $role = Role::query()->findOrFail($this->selectedRoleId);
 
         if (! $this->isAdministratorRole($role)) {
@@ -342,7 +342,7 @@ class Index extends Component
 
     public function createRole(ActivityLogger $activityLogger): void
     {
-        $this->authorizePermission('access-management.manage-roles');
+        $this->authorizePermission('hub.access-management.manage-roles');
         $this->newRoleName = Str::slug($this->newRoleName);
 
         $validated = $this->validate([
@@ -363,7 +363,7 @@ class Index extends Component
 
     public function renameRole(ActivityLogger $activityLogger): void
     {
-        $this->authorizePermission('access-management.manage-roles');
+        $this->authorizePermission('hub.access-management.manage-roles');
         $role = Role::query()->findOrFail($this->selectedRoleId);
         $this->ensureCustomRole($role);
         $this->selectedRoleName = Str::slug($this->selectedRoleName);
@@ -391,7 +391,7 @@ class Index extends Component
 
     public function deleteRole(ActivityLogger $activityLogger): void
     {
-        $this->authorizePermission('access-management.manage-roles');
+        $this->authorizePermission('hub.access-management.manage-roles');
         $role = Role::query()->withCount('users')->findOrFail($this->selectedRoleId);
         $this->ensureCustomRole($role);
 
@@ -449,9 +449,9 @@ class Index extends Component
             'selectedRoleUsers' => $selectedRoleUsers,
             'selectedRoleIsSystem' => $selectedRole ? $this->isSystemRole($selectedRole) : false,
             'selectedRoleIsAdministrator' => $selectedRole ? $this->isAdministratorRole($selectedRole) : false,
-            'canManageEmployees' => auth()->user()->hasActivePermission('access-management.manage-employees'),
-            'canManageRoles' => auth()->user()->hasActivePermission('access-management.manage-roles'),
-            'canManagePermissions' => auth()->user()->hasActivePermission('access-management.manage-permissions'),
+            'canManageEmployees' => auth()->user()->hasActivePermission('hub.access-management.manage-employees'),
+            'canManageRoles' => auth()->user()->hasActivePermission('hub.access-management.manage-roles'),
+            'canManagePermissions' => auth()->user()->hasActivePermission('hub.access-management.manage-permissions'),
         ]);
     }
 
@@ -496,7 +496,7 @@ class Index extends Component
      * Restrict account administration to the actor's own city.
      *
      * Latent rather than live today, because only administrator roles hold
-     * access-management.manage-employees and those roles are nationwide by
+     * hub.access-management.manage-employees and those roles are nationwide by
      * design. It stops being latent the moment that permission is granted to a
      * regional role through this very screen — at which point the role would
      * otherwise administer accounts across the whole country.
@@ -527,7 +527,7 @@ class Index extends Component
 
     private function authorizeView(): void
     {
-        $this->authorizePermission('access-management.view');
+        $this->authorizePermission('hub.access-management.view');
     }
 
     private function authorizePermission(string $permission): void
@@ -543,7 +543,7 @@ class Index extends Component
     /**
      * Only an active super-admin may hand out administrator roles.
      *
-     * Without this, holding access-management.manage-employees was enough to
+     * Without this, holding hub.access-management.manage-employees was enough to
      * create a super-admin. That permission is granted automatically to every
      * role in access-control.administrator_roles — which includes HR-SYR — so
      * headquarters HR could promote any account in the system to full

@@ -27,7 +27,7 @@ use Illuminate\Support\Collection;
  *
  * Nobody decides their own request, on any basis (G-C-2), and nobody decides
  * a former employee's (G-C-11). The technical
- * manager no longer exists. HR's role must also hold leaves.decide. Seeing a
+ * manager no longer exists. HR's role must also hold hr.leaves.decide. Seeing a
  * request (LeaveRequest::manageableBy) is wider than deciding it: HR still
  * sees and reviews its city's requests.
  */
@@ -57,7 +57,7 @@ final class LeaveDecisionAuthority
             return self::MANAGER;
         }
 
-        if (! $user->hasActivePermission('leaves.decide')) {
+        if (! $user->hasActivePermission('hr.leaves.decide')) {
             return null;
         }
 

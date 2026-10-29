@@ -27,4 +27,4 @@ Route::middleware('reference_page:project-basics')->group(function () {
 // component checks who may set which holidays, so no reference-page gate here.
 Route::get('holidays', HolidayModule::class)->name('holidays.index');
 
-Route::get('/org-chart', OrgChart::class)->middleware('active_permission:positions.view')->name('org.chart');
+Route::get('/org-chart', OrgChart::class)->middleware('active_permission:hr.positions.view')->name('org.chart');

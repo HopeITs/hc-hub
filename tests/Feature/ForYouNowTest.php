@@ -92,7 +92,7 @@ class ForYouNowTest extends TestCase
         $this->assertSame(['admin-shortcuts'], $this->partsFor($admin));
 
         // An employee with no contract and nothing open: one quiet line.
-        $newcomer = $this->makeUser($this->cities['ALP'], 'employee', ['leaves.view-own']);
+        $newcomer = $this->makeUser($this->cities['ALP'], 'employee', ['hr.leaves.view-own']);
         Livewire::actingAs($newcomer)->test(ForYouNow::class)->assertSeeHtml('data-testid="for-you-empty"');
     }
 
@@ -210,7 +210,7 @@ class ForYouNowTest extends TestCase
      */
     public function test_an_hr_role_without_a_city_counts_and_lists_nobody(): void
     {
-        $ghost = $this->makeUser($this->cities['ALP'], 'HR-XYZ', ['contracts.view', 'employees.view']);
+        $ghost = $this->makeUser($this->cities['ALP'], 'HR-XYZ', ['hr.contracts.view', 'hr.employees.view']);
 
         $this->assertSame([], $ghost->activeCityIds());
         $this->assertNotContains('employees-waiting', $this->partsFor($ghost));
@@ -269,7 +269,7 @@ class ForYouNowTest extends TestCase
                 'weekly_hours' => 40, 'is_active' => true, 'auto_renew' => false,
             ]);
             $balance = LeaveBalance::query()->create(['contract_id' => $contract->id, 'type_id' => LeaveTypeCases::Annual, 'deserved' => 112, 'used' => 0]);
-            $permissions = ['leaves.view-own', 'leaves.create', 'leaves.view-all', 'leaves.decide', 'checklists.view-own'];
+            $permissions = ['hr.leaves.view-own', 'hr.leaves.create', 'hr.leaves.view-all', 'hr.leaves.decide', 'hr.checklists.view-own'];
             $user = $role ? $this->makeUser($this->cities[$city], $role, $permissions, $employee) : null;
             $this->p[$key] = compact('employee', 'position', 'contract', 'balance', 'user');
         };
@@ -281,7 +281,7 @@ class ForYouNowTest extends TestCase
         $person('ending', 'Rami', 'Ending', 'ALP', null, null, '2026-11-15');
         $person('dms', 'Dana', 'Damascus', 'DMS', null, null, '2026-11-15');
 
-        $huda = $this->makeUser($this->cities['ALP'], 'HR-ALP', ['contracts.view', 'employees.view', 'leaves.view-all', 'leaves.review', 'leaves.decide', 'employees.update']);
+        $huda = $this->makeUser($this->cities['ALP'], 'HR-ALP', ['hr.contracts.view', 'hr.employees.view', 'hr.leaves.view-all', 'hr.leaves.review', 'hr.leaves.decide', 'hr.employees.update']);
         $this->p['huda'] = ['user' => $huda];
 
         // Awaiting a first contract (B5): one in Aleppo, one in Damascus.

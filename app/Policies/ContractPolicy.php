@@ -9,30 +9,30 @@ class ContractPolicy
 {
     public function view(User $user, Contract $contract): bool
     {
-        return $user->hasActivePermission('contracts.view') && $this->isVisibleTo($user, $contract);
+        return $user->hasActivePermission('hr.contracts.view') && $this->isVisibleTo($user, $contract);
     }
 
     public function update(User $user, Contract $contract): bool
     {
-        return $user->hasActivePermission('contracts.update') && $this->isVisibleTo($user, $contract);
+        return $user->hasActivePermission('hr.contracts.update') && $this->isVisibleTo($user, $contract);
     }
 
     public function manageAutoRenew(User $user, Contract $contract): bool
     {
         return $user->activeRoleIs('HR')
-            && $user->hasActivePermission('contracts.update')
+            && $user->hasActivePermission('hr.contracts.update')
             && $this->isVisibleTo($user, $contract);
     }
 
     /**
-     * A renewal creates a contract, so it is gated on `contracts.create` rather
+     * A renewal creates a contract, so it is gated on `hr.contracts.create` rather
      * than on update. A terminated or already-deactivated contract has no term
      * left to carry forward and is never renewable — the successor would have
      * to be created from scratch.
      */
     public function renew(User $user, Contract $contract): bool
     {
-        return $user->hasActivePermission('contracts.create')
+        return $user->hasActivePermission('hr.contracts.create')
             && $contract->is_active
             && $contract->terminated_at === null
             && $this->isVisibleTo($user, $contract);
@@ -40,7 +40,7 @@ class ContractPolicy
 
     public function delete(User $user, Contract $contract): bool
     {
-        return $user->hasActivePermission('contracts.delete') && $this->isVisibleTo($user, $contract);
+        return $user->hasActivePermission('hr.contracts.delete') && $this->isVisibleTo($user, $contract);
     }
 
     /**
@@ -54,7 +54,7 @@ class ContractPolicy
      */
     public function export(User $user, Contract $contract): bool
     {
-        return $user->hasActivePermission('contracts.export')
+        return $user->hasActivePermission('hr.contracts.export')
             && $user->canViewSalary()
             && $this->isVisibleTo($user, $contract);
     }

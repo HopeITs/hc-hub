@@ -555,7 +555,7 @@ class LeaveRequestSubmitFlowTest extends TestCase
         $this->user = User::query()->create([
             'employee_id' => $staffEmployeeId, 'email' => 'submit.flow@example.test', 'password' => 'password',
         ]);
-        $this->user->givePermissionTo(['leaves.create', 'leaves.update']);
+        $this->user->givePermissionTo(['hr.leaves.create', 'hr.leaves.update']);
 
         $this->manager = User::query()->create([
             'employee_id' => $managerEmployeeId, 'email' => 'rami.manager@example.test', 'password' => 'password',

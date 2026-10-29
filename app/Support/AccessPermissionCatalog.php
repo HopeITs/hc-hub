@@ -3,10 +3,14 @@
 namespace App\Support;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 final class AccessPermissionCatalog
 {
     /**
+     * Permission groups keyed by their module-prefixed name (`hr.contracts`,
+     * `hub.access-management`); a permission is "{group}.{action}".
+     *
      * @return array<string, array<int, string>>
      */
     public static function groups(): array
@@ -36,7 +40,7 @@ final class AccessPermissionCatalog
         return collect(self::groups())->map(function (array $actions, string $group) use ($permissions): array {
             return [
                 'name' => $group,
-                'label' => __("access.groups.{$group}"),
+                'label' => __('access.groups.'.Str::after($group, '.')),
                 'permissions' => collect($actions)->map(function (string $action) use ($group, $permissions): array {
                     $name = "{$group}.{$action}";
 

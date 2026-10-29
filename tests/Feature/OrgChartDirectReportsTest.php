@@ -44,7 +44,7 @@ class OrgChartDirectReportsTest extends TestCase
 
         // Id 1 is the main city the chart always keeps in scope.
         $this->city = $this->makeCity('SYR', '000');
-        $this->hr = $this->makeUser($this->city, 'HR-SYR', ['positions.view', 'employees.view']);
+        $this->hr = $this->makeUser($this->city, 'HR-SYR', ['hr.positions.view', 'hr.employees.view']);
 
         $ceo = $this->position('Chief Executive Officer', grade: 1, manager: null);
         $this->seat($ceo, 'ceo');

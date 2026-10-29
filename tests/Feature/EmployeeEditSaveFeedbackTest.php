@@ -78,7 +78,7 @@ class EmployeeEditSaveFeedbackTest extends TestCase
         $city = $this->makeCity('ALP', '001');
 
         return [
-            $this->makeUser($city, 'HR-ALP', ['employees.update']),
+            $this->makeUser($city, 'HR-ALP', ['hr.employees.update']),
             $this->makeEmployee($city, 'subject-'.uniqid()),
         ];
     }

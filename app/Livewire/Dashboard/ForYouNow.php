@@ -201,7 +201,7 @@ class ForYouNow extends Component
     {
         $employee = $user->profile;
 
-        if (! $employee || ! $user->hasActivePermission('leaves.view-own')) {
+        if (! $employee || ! $user->hasActivePermission('hr.leaves.view-own')) {
             return null;
         }
 
@@ -218,7 +218,7 @@ class ForYouNow extends Component
             'remaining' => $leave ? trim(strip_tags($leave->remaining)) : null,
             'pending' => $leave && ($leave->pending_total_hours ?? 0) > 0 ? trim(strip_tags(formatDuration($leave->pending_days, $leave->pending_hours))) : null,
             'holiday' => $contract ? $this->nextHoliday($contract) : null,
-            'can_request' => $user->hasActivePermission('leaves.create'),
+            'can_request' => $user->hasActivePermission('hr.leaves.create'),
             'request_url' => route('leaves.index', ['new' => 1]),
             'url' => route('leaves.index'),
         ];
@@ -227,7 +227,7 @@ class ForYouNow extends Component
     /** Employee: my open requests and their next step (the same wording as My leaves). */
     private function partMyRequests(User $user): ?array
     {
-        if (! $user->employee_id || ! $user->hasActivePermission('leaves.view-own')) {
+        if (! $user->employee_id || ! $user->hasActivePermission('hr.leaves.view-own')) {
             return null;
         }
 
@@ -259,7 +259,7 @@ class ForYouNow extends Component
     /** Employee: items I am to receive or hand back (the My items page's own rows). */
     private function partMyItems(User $user): ?array
     {
-        if (! $user->employee_id || ! $user->hasActivePermission('checklists.view-own')) {
+        if (! $user->employee_id || ! $user->hasActivePermission('hr.checklists.view-own')) {
             return null;
         }
 
@@ -277,7 +277,7 @@ class ForYouNow extends Component
     /** HR and general manager: running contracts ending within 30 days, as the contracts table's view counts them. */
     private function partContractsEnding(User $user): ?array
     {
-        if (! $user->hasActivePermission('contracts.view')) {
+        if (! $user->hasActivePermission('hr.contracts.view')) {
             return null;
         }
 
@@ -289,7 +289,7 @@ class ForYouNow extends Component
     /** HR: volunteers awaiting their first contract, and incomplete records (B5 views). */
     private function partEmployeesWaiting(User $user): ?array
     {
-        if (! $user->hasActivePermission('employees.view')) {
+        if (! $user->hasActivePermission('hr.employees.view')) {
             return null;
         }
 
@@ -313,7 +313,7 @@ class ForYouNow extends Component
     /** General manager: a few organisation figures, then the statistics page. No pay. */
     private function partKeyFigures(User $user): ?array
     {
-        if (! $user->hasActivePermission('statistics.view')) {
+        if (! $user->hasActivePermission('hr.statistics.view')) {
             return null;
         }
 
@@ -328,8 +328,8 @@ class ForYouNow extends Component
     private function partAdminShortcuts(User $user): ?array
     {
         $links = array_filter([
-            $user->hasActivePermission('access-management.view') ? ['label' => __('access.title'), 'url' => route('access-management.index')] : null,
-            $user->hasActivePermission('activity-log.view') ? ['label' => __('general.activity-log'), 'url' => route('activity-log.index')] : null,
+            $user->hasActivePermission('hub.access-management.view') ? ['label' => __('access.title'), 'url' => route('access-management.index')] : null,
+            $user->hasActivePermission('hub.activity-log.view') ? ['label' => __('general.activity-log'), 'url' => route('activity-log.index')] : null,
         ]);
 
         return $links === [] ? null : ['links' => array_values($links)];

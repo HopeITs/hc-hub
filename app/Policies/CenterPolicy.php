@@ -14,33 +14,33 @@ class CenterPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasActivePermission('centers.view');
+        return $user->hasActivePermission('hr.centers.view');
     }
 
     public function view(User $user, Center $center): bool
     {
-        return $user->hasActivePermission('centers.view') && $this->inActiveCity($user, $center);
+        return $user->hasActivePermission('hr.centers.view') && $this->inActiveCity($user, $center);
     }
 
     public function create(User $user, ?int $cityId = null): bool
     {
-        return $user->hasActivePermission('centers.create')
+        return $user->hasActivePermission('hr.centers.create')
             && ($cityId === null || $this->cityAllowed($user, $cityId));
     }
 
     public function update(User $user, Center $center): bool
     {
-        return $user->hasActivePermission('centers.update') && $this->inActiveCity($user, $center);
+        return $user->hasActivePermission('hr.centers.update') && $this->inActiveCity($user, $center);
     }
 
     public function delete(User $user, Center $center): bool
     {
-        return $user->hasActivePermission('centers.delete') && $this->inActiveCity($user, $center);
+        return $user->hasActivePermission('hr.centers.delete') && $this->inActiveCity($user, $center);
     }
 
     public function export(User $user): bool
     {
-        return $user->hasActivePermission('centers.view');
+        return $user->hasActivePermission('hr.centers.view');
     }
 
     private function inActiveCity(User $user, Center $center): bool

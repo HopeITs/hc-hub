@@ -69,7 +69,7 @@ class ContractComposerGuidanceTest extends TestCase
         app()->setLocale($locale);
         $contract = $this->makeContractFor($this->makeEmployee($this->city, 'renew-subject'));
 
-        Livewire::actingAs($this->hr(['contracts.view', 'contracts.update']))
+        Livewire::actingAs($this->hr(['hr.contracts.view', 'hr.contracts.update']))
             ->test(ContractEdit::class, ['contract' => $contract])
             ->assertOk()
             ->assertSee(__('general.composer.termination'))
@@ -123,7 +123,7 @@ class ContractComposerGuidanceTest extends TestCase
         // the figures when the role is allowed them.
         $contract = $this->contractWithFigures();
 
-        $html = Livewire::actingAs($this->hr(['contracts.view', 'contracts.update']))
+        $html = Livewire::actingAs($this->hr(['hr.contracts.view', 'hr.contracts.update']))
             ->test(ContractEdit::class, ['contract' => $contract])
             ->html();
 
@@ -136,7 +136,7 @@ class ContractComposerGuidanceTest extends TestCase
         return ['English' => ['en'], 'Arabic' => ['ar']];
     }
 
-    private function hr(array $permissions = ['contracts.view', 'contracts.create']): User
+    private function hr(array $permissions = ['hr.contracts.view', 'hr.contracts.create']): User
     {
         return $this->makeUser($this->city, 'HR-ALP', $permissions);
     }

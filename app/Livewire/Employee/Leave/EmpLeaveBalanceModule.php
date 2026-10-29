@@ -60,7 +60,7 @@ class EmpLeaveBalanceModule extends Component
 
     public function processSave()
     {
-        $this->authorizeActivePermission('leaves.manage-balances');
+        $this->authorizeActivePermission('hr.leaves.manage-balances');
 
         $this->form->updateAnnualLeaves();
 

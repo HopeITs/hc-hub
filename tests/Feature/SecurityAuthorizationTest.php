@@ -24,7 +24,7 @@ class SecurityAuthorizationTest extends TestCase
         $aleppo = $this->city('ALP', '001');
         $homs = $this->city('HMS', '002');
         $user = $this->userInCity($aleppo);
-        $permission = Permission::findOrCreate('employees.update', 'web');
+        $permission = Permission::findOrCreate('hr.employees.update', 'web');
         $role = Role::findOrCreate('HR-ALP', 'web');
         $role->givePermissionTo($permission);
         $user->assignRole($role);

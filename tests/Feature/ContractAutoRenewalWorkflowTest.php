@@ -260,7 +260,7 @@ class ContractAutoRenewalWorkflowTest extends TestCase
         $employee = $this->makeEmployee($fixtures['city'], 'table-toggle');
         $position = $this->makePosition($fixtures, 'Table Toggle Position');
         $contract = $this->makeContract($fixtures, $employee, $position, ['auto_renew' => true]);
-        $manager = $this->makeUser($fixtures['city'], 'manager', ['contracts.update', 'contracts.view']);
+        $manager = $this->makeUser($fixtures['city'], 'manager', ['hr.contracts.update', 'hr.contracts.view']);
 
         Livewire::actingAs($fixtures['hr'])
             ->test(ContractsTable::class)
@@ -302,7 +302,7 @@ class ContractAutoRenewalWorkflowTest extends TestCase
         $payload = $this->composerPayload($fixtures, $contract, ['autoRenew' => false]);
         // Sees and edits every contract, but is not HR. (A manager no longer
         // fits here: they only reach their own reports' contracts at all.)
-        $generalManager = $this->makeUser($fixtures['city'], 'general-manager', ['contracts.update', 'contracts.view']);
+        $generalManager = $this->makeUser($fixtures['city'], 'general-manager', ['hr.contracts.update', 'hr.contracts.view']);
 
         Livewire::actingAs($generalManager)
             ->test(ContractEdit::class, ['contract' => $contract])
@@ -316,7 +316,7 @@ class ContractAutoRenewalWorkflowTest extends TestCase
     public function test_hr_sets_auto_renew_while_creating_a_contract(): void
     {
         $fixtures = $this->makeFixtures();
-        $fixtures['hr']->roles->first()->givePermissionTo(\App\Models\Permission::findOrCreate('contracts.create', 'web'));
+        $fixtures['hr']->roles->first()->givePermissionTo(\App\Models\Permission::findOrCreate('hr.contracts.create', 'web'));
         $hr = $fixtures['hr']->fresh();
         $this->mock(LeaveBalanceService::class)->shouldReceive('create');
 
@@ -344,14 +344,14 @@ class ContractAutoRenewalWorkflowTest extends TestCase
     }
 
     /**
-     * Another role holding contracts.create does not see the switch. (It cannot
+     * Another role holding hr.contracts.create does not see the switch. (It cannot
      * create from scratch anyway, being blind to pay; a renewal keeps the
      * predecessor's value unless manageAutoRenew allows a change.)
      */
     public function test_a_role_other_than_hr_does_not_see_auto_renew_while_creating(): void
     {
         $fixtures = $this->makeFixtures();
-        $generalManager = $this->makeUser($fixtures['city'], 'general-manager', ['contracts.create', 'contracts.view']);
+        $generalManager = $this->makeUser($fixtures['city'], 'general-manager', ['hr.contracts.create', 'hr.contracts.view']);
 
         Livewire::actingAs($generalManager)
             ->test(ContractCreate::class)
@@ -669,7 +669,7 @@ class ContractAutoRenewalWorkflowTest extends TestCase
         $annualType = ContractType::query()->forceCreate(['id' => 1, 'name_en' => 'Annual', 'name_ar' => 'سنوي']);
         $trialType = ContractType::query()->forceCreate(['id' => 3, 'name_en' => 'Trial', 'name_ar' => 'تجريبي']);
         ContractType::query()->forceCreate(['id' => 5, 'name_en' => 'Service Agreement', 'name_ar' => 'اتفاقية خدمة']);
-        $hr = $this->makeUser($city, 'HR-ALP', ['contracts.update', 'contracts.view'], null);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.contracts.update', 'hr.contracts.view'], null);
         $hr->update(['email' => 'hr.alp@example.test']);
 
         return compact('city', 'center', 'department', 'jobLevel', 'program', 'annualType', 'trialType', 'hr');

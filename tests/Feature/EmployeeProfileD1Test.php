@@ -123,7 +123,7 @@ class EmployeeProfileD1Test extends TestCase
 
     public function test_hr_with_pay_sees_the_salary_increase_and_a_salary_blind_role_does_not(): void
     {
-        $huda = $this->makeUser($this->aleppo, 'HR-ALP', ['employees.view', 'employees.update', 'badges.view']);
+        $huda = $this->makeUser($this->aleppo, 'HR-ALP', ['hr.employees.view', 'hr.employees.update', 'hr.badges.view']);
         $component = $this->profileAs($huda, $this->lina);
         $this->assertContains('badge.salary', $this->kinds($component));
 
@@ -168,8 +168,8 @@ class EmployeeProfileD1Test extends TestCase
     {
         $self = $this->makeUser($this->aleppo, 'employee', [], $this->lina);
         $rana = $this->makeUser($this->aleppo, 'employee', [], $this->makeEmployee($this->aleppo, 'rana'));
-        $huda = $this->makeUser($this->aleppo, 'HR-ALP', ['employees.view', 'employees.update']);
-        $karim = $this->makeUser($this->homs, 'HR-HMS', ['employees.view', 'employees.update']);
+        $huda = $this->makeUser($this->aleppo, 'HR-ALP', ['hr.employees.view', 'hr.employees.update']);
+        $karim = $this->makeUser($this->homs, 'HR-HMS', ['hr.employees.view', 'hr.employees.update']);
 
         // The owner: contact and skills, not work contact.
         $this->assertSame(['personal-contact', 'skills'], $this->profileAs($self, $this->lina)->viewData('editable'));
@@ -243,7 +243,7 @@ class EmployeeProfileD1Test extends TestCase
             ->assertSet('sectionModal', false)
             ->assertSet('editing', '');
 
-        $huda = $this->makeUser($this->aleppo, 'HR-ALP', ['employees.view', 'employees.update']);
+        $huda = $this->makeUser($this->aleppo, 'HR-ALP', ['hr.employees.view', 'hr.employees.update']);
         $this->actingAs($huda)->get(route('employees.edit', $this->lina))->assertOk();
     }
 

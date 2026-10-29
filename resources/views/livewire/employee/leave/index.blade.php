@@ -17,7 +17,7 @@ use App\Enums\LeaveRequestStatus;
         />
 
         {{-- Offered only to roles that may create; create() authorizes again on the server. --}}
-        @if(auth()->user()->hasActivePermission('leaves.create'))
+        @if(auth()->user()->hasActivePermission('hr.leaves.create'))
             <div>
                 <x-primary-button wire:click="create" data-tour="leaves.request">
                     @lang('leaves.modal.new-title')

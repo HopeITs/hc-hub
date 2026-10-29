@@ -41,7 +41,7 @@
             </div>
         @empty
             <x-center-empty-state variant="empty" :title="__('general.no-available-data')" :description="''" class="min-h-40! border-0 shadow-none">
-                @if (auth()->user()->hasActivePermission('leaves.view-own'))
+                @if (auth()->user()->hasActivePermission('hr.leaves.view-own'))
                     <x-slot:action>
                         <a href="{{ route('leaves.index') }}" wire:navigate class="inline-flex min-h-11 items-center justify-center rounded-control px-3 text-small font-bold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">{{ __('general.my-leaves') }}</a>
                     </x-slot:action>

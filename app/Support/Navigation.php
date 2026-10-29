@@ -33,18 +33,18 @@ final class Navigation
 
         // A role that may change reference data finds it with its work
         // (HR operations / Settings); one that only reads it, under Organisation.
-        $editsPrograms = $can('programs.create', 'programs.update');
-        $editsPositions = $can('positions.create', 'positions.update');
-        $editsCenters = $can('centers.create', 'centers.update');
-        $editsBasics = $can('project-basics.create', 'project-basics.update', 'project-basics.delete');
+        $editsPrograms = $can('hr.programs.create', 'hr.programs.update');
+        $editsPositions = $can('hr.positions.create', 'hr.positions.update');
+        $editsCenters = $can('hr.centers.create', 'hr.centers.update');
+        $editsBasics = $can('hr.project-basics.create', 'hr.project-basics.update', 'hr.project-basics.delete');
 
         $mySpace = array_values(array_filter([
             self::item('nav.my-space.home', __('general.dashboard'), 'dashboard', ['dashboard', 'employee.dashboard'], 'dashboard', 'nav.dashboard'),
-            $can('leaves.view-own') ? self::item('nav.my-space.leaves', __('general.my-leaves'), 'leaves.index', ['leaves.index'], 'my-leaves', 'nav.my-leaves') : null,
-            $can('leaves.view-own') ? self::item('nav.my-space.team-calendar', __('team_calendar.nav'), 'team.calendar', ['team.calendar'], 'calendar') : null,
-            $can('checklists.view-own') ? self::item('nav.my-space.items', __('general.my-items'), 'checklist-items.index', ['checklist-items.index'], 'clipboard-list', 'nav.my-items') : null,
-            $can('archives.view') ? self::item('nav.my-space.files', __('general.my-folders'), 'my-folders.index', ['my-folders.*'], 'archived', 'nav.archives') : null,
-            $can('archives.view') ? self::item('nav.my-space.shared-files', __('general.shared-folders'), 'shared-folders.index', ['shared-folders.*'], 'folder') : null,
+            $can('hr.leaves.view-own') ? self::item('nav.my-space.leaves', __('general.my-leaves'), 'leaves.index', ['leaves.index'], 'my-leaves', 'nav.my-leaves') : null,
+            $can('hr.leaves.view-own') ? self::item('nav.my-space.team-calendar', __('team_calendar.nav'), 'team.calendar', ['team.calendar'], 'calendar') : null,
+            $can('hr.checklists.view-own') ? self::item('nav.my-space.items', __('general.my-items'), 'checklist-items.index', ['checklist-items.index'], 'clipboard-list', 'nav.my-items') : null,
+            $can('hr.archives.view') ? self::item('nav.my-space.files', __('general.my-folders'), 'my-folders.index', ['my-folders.*'], 'archived', 'nav.archives') : null,
+            $can('hr.archives.view') ? self::item('nav.my-space.shared-files', __('general.shared-folders'), 'shared-folders.index', ['shared-folders.*'], 'folder') : null,
         ]));
 
         $basics = self::group('nav.basics', __('general.project-basics'), 'home', array_values(array_filter([
@@ -69,17 +69,17 @@ final class Navigation
         $news = self::item('nav.news', __('general.news-management'), 'news.index', ['news.*'], 'newspaper', 'nav.news');
 
         $hrOps = array_values(array_filter([
-            $can('employees.view') ? self::item('nav.hr.employees', trans_choice('general.employee', 2), 'employees.index', ['employees.*'], 'users', 'nav.employees') : null,
-            ! $isManager && $can('contracts.view') ? self::item('nav.hr.contracts', trans_choice('general.contracts', 2), 'contracts.index', ['contracts.*'], 'contracts') : null,
-            ! $isManager && $can('leaves.view-all') ? self::item('nav.hr.leaves', __('general.all-leaves'), 'leaves.all', ['leaves.all'], 'calendar', 'nav.leaves-management') : null,
-            $can('leaves.manage-balances') ? self::item('nav.hr.balances', __('general.balance'), 'leaves.balance', ['leaves.balance'], 'calendar') : null,
-            $can('checklists.manage') ? self::item('nav.hr.deliverables', trans_choice('general.default-deliverables', 2), 'default-deliverables.index', ['default-deliverables.*'], 'checklist') : null,
-            $isDeliverResponsible && $can('checklists.manage') ? self::item('nav.hr.done-requests', __('general.done_requests'), 'checklist-items.done-requests', ['checklist-items.done-requests'], 'check') : null,
-            $editsPrograms && $can('programs.view') ? $programs : null,
-            $editsPositions && $can('positions.view') ? $positions : null,
-            $editsCenters && $can('centers.view') ? $centers : null,
-            $can('badges.view') ? self::item('nav.hr.badges', __('general.all-badges'), 'badges.index', ['badges.*'], 'badges', 'nav.badges') : null,
-            $can('statistics.view') ? self::group('nav.hr.statistics', __('general.statistics'), 'statistics', [
+            $can('hr.employees.view') ? self::item('nav.hr.employees', trans_choice('general.employee', 2), 'employees.index', ['employees.*'], 'users', 'nav.employees') : null,
+            ! $isManager && $can('hr.contracts.view') ? self::item('nav.hr.contracts', trans_choice('general.contracts', 2), 'contracts.index', ['contracts.*'], 'contracts') : null,
+            ! $isManager && $can('hr.leaves.view-all') ? self::item('nav.hr.leaves', __('general.all-leaves'), 'leaves.all', ['leaves.all'], 'calendar', 'nav.leaves-management') : null,
+            $can('hr.leaves.manage-balances') ? self::item('nav.hr.balances', __('general.balance'), 'leaves.balance', ['leaves.balance'], 'calendar') : null,
+            $can('hr.checklists.manage') ? self::item('nav.hr.deliverables', trans_choice('general.default-deliverables', 2), 'default-deliverables.index', ['default-deliverables.*'], 'checklist') : null,
+            $isDeliverResponsible && $can('hr.checklists.manage') ? self::item('nav.hr.done-requests', __('general.done_requests'), 'checklist-items.done-requests', ['checklist-items.done-requests'], 'check') : null,
+            $editsPrograms && $can('hr.programs.view') ? $programs : null,
+            $editsPositions && $can('hr.positions.view') ? $positions : null,
+            $editsCenters && $can('hr.centers.view') ? $centers : null,
+            $can('hr.badges.view') ? self::item('nav.hr.badges', __('general.all-badges'), 'badges.index', ['badges.*'], 'badges', 'nav.badges') : null,
+            $can('hr.statistics.view') ? self::group('nav.hr.statistics', __('general.statistics'), 'statistics', [
                 self::item('nav.hr.statistics.general', __('general.general-statistics'), 'statistics.general', ['statistics.general']),
                 self::item('nav.hr.statistics.contracts', __('general.contract-statistics'), 'statistics.contract', ['statistics.contract']),
             ], 'nav.statistics') : null,
@@ -87,7 +87,7 @@ final class Navigation
 
         // News sits with HR's work when there is any; a manager, who has no
         // HR operations, finds it under Organisation instead.
-        $newsInHr = $can('news.view') && $hrOps !== [];
+        $newsInHr = $can('hr.news.view') && $hrOps !== [];
         if ($newsInHr) {
             $hrOps[] = $news;
         }
@@ -100,12 +100,12 @@ final class Navigation
         $opens = fn (string $page): bool => $user->canOpenReferencePage($page);
 
         $organisation = array_values(array_filter([
-            $can('positions.view') ? self::item('nav.org.chart', __('general.orgn-chart'), 'org.chart', ['org.chart'], 'code-fork', 'nav.org-chart') : null,
+            $can('hr.positions.view') ? self::item('nav.org.chart', __('general.orgn-chart'), 'org.chart', ['org.chart'], 'code-fork', 'nav.org-chart') : null,
             ! $editsCenters && $opens('centers') ? $centers : null,
             ! $editsPrograms && $opens('programs') ? $programs : null,
             ! $editsPositions && $opens('positions') ? $positions : null,
             ! $editsBasics && $opens('project-basics') ? $basics : null,
-            ! $newsInHr && $can('news.view') ? $news : null,
+            ! $newsInHr && $can('hr.news.view') ? $news : null,
         ]));
 
         // A program manager sets holidays for their projects (§6.1); national HR finds the page under Settings.
@@ -114,16 +114,16 @@ final class Navigation
 
         $myTeam = array_values(array_filter([
             $holidaysForProjects ? self::item('nav.my-team.holidays', __('holidays.title'), 'holidays.index', ['holidays.*'], 'calendar') : null,
-            $isManager && $can('leaves.view-all') ? self::item('nav.my-team.leaves', __('general.nav.team-leaves'), 'leaves.all', ['leaves.all'], 'calendar', 'nav.leaves-management') : null,
-            $isManager && $can('contracts.view') ? self::item('nav.my-team.contracts', __('general.nav.team-contracts'), 'contracts.index', ['contracts.*'], 'contracts') : null,
-            $isDeliverResponsible && $can('checklists.deliver') ? self::item('nav.my-team.hand-out', __('general.pending-delivers'), 'checklist-items.pending-delivers', ['checklist-items.pending-delivers'], 'items', 'nav.checklists', 'checklist-items.pending-delivers-counter') : null,
-            $isDeliverResponsible && $can('checklists.receive') ? self::item('nav.my-team.take-back', __('general.pending_returns'), 'checklist-items.pending-returns', ['checklist-items.pending-returns'], 'items', null, 'checklist-items.pending-returns-counter') : null,
+            $isManager && $can('hr.leaves.view-all') ? self::item('nav.my-team.leaves', __('general.nav.team-leaves'), 'leaves.all', ['leaves.all'], 'calendar', 'nav.leaves-management') : null,
+            $isManager && $can('hr.contracts.view') ? self::item('nav.my-team.contracts', __('general.nav.team-contracts'), 'contracts.index', ['contracts.*'], 'contracts') : null,
+            $isDeliverResponsible && $can('hr.checklists.deliver') ? self::item('nav.my-team.hand-out', __('general.pending-delivers'), 'checklist-items.pending-delivers', ['checklist-items.pending-delivers'], 'items', 'nav.checklists', 'checklist-items.pending-delivers-counter') : null,
+            $isDeliverResponsible && $can('hr.checklists.receive') ? self::item('nav.my-team.take-back', __('general.pending_returns'), 'checklist-items.pending-returns', ['checklist-items.pending-returns'], 'items', null, 'checklist-items.pending-returns-counter') : null,
         ]));
 
         $settings = array_values(array_filter([
-            $editsBasics && $can('project-basics.view') ? $basics : null,
-            $can('access-management.view') ? self::item('nav.settings.access', __('access.title'), 'access-management.index', ['access-management.*'], 'cog', 'nav.access') : null,
-            $can('activity-log.view') ? self::item('nav.settings.activity', __('general.activity-log'), 'activity-log.index', ['activity-log.*'], 'activity-log', 'nav.activity-log') : null,
+            $editsBasics && $can('hr.project-basics.view') ? $basics : null,
+            $can('hub.access-management.view') ? self::item('nav.settings.access', __('access.title'), 'access-management.index', ['access-management.*'], 'cog', 'nav.access') : null,
+            $can('hub.activity-log.view') ? self::item('nav.settings.activity', __('general.activity-log'), 'activity-log.index', ['activity-log.*'], 'activity-log', 'nav.activity-log') : null,
             // D3 / DEC-08: the IT team only; not a role permission (User::canReadFeedback()).
             $user->canReadFeedback() ? self::item('nav.settings.feedback', __('feedback.inbox.title'), 'feedback.index', ['feedback.*'], 'activity-log') : null,
         ]));
@@ -218,16 +218,16 @@ final class Navigation
         $can = fn (string $permission): bool => $user->hasActivePermission($permission);
 
         return array_values(array_filter([
-            $can('leaves.create') && $can('leaves.view-own')
+            $can('hr.leaves.create') && $can('hr.leaves.view-own')
                 ? ['id' => 'new.leave', 'label' => __('general.new-menu.leave'), 'route' => 'leaves.index', 'params' => ['new' => 1], 'returns' => false] : null,
             // HR files a request for an employee from All leaves (the same rule as its Add button).
-            $can('leaves.create') && $can('leaves.view-all') && $user->activeRoleIs('HR', 'super-admin')
+            $can('hr.leaves.create') && $can('hr.leaves.view-all') && $user->activeRoleIs('HR', 'super-admin')
                 ? ['id' => 'new.leave-for-employee', 'label' => __('general.new-menu.leave-for-employee'), 'route' => 'leaves.all', 'params' => ['new' => 1], 'returns' => false] : null,
-            $can('employees.create')
+            $can('hr.employees.create')
                 ? ['id' => 'new.employee', 'label' => __('general.new-menu.employee'), 'route' => 'employees.create', 'params' => [], 'returns' => true] : null,
-            $can('contracts.create') && $user->canViewSalary()
+            $can('hr.contracts.create') && $user->canViewSalary()
                 ? ['id' => 'new.contract', 'label' => __('general.new-menu.contract'), 'route' => 'contracts.create', 'params' => [], 'returns' => true] : null,
-            $can('news.create')
+            $can('hr.news.create')
                 ? ['id' => 'new.news', 'label' => __('general.new-menu.news'), 'route' => 'news.create', 'params' => [], 'returns' => true] : null,
         ]));
     }

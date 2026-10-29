@@ -81,7 +81,7 @@ class DefaultDeliverablesModule extends Component
 
     public function create(): void
     {
-        $this->authorizeActivePermission('checklists.manage');
+        $this->authorizeActivePermission('hr.checklists.manage');
 
         $this->item = ['id' => null, 'employee_id' => '', 'city_id' => '', 'item_id' => ''];
         $this->resetValidation();
@@ -92,7 +92,7 @@ class DefaultDeliverablesModule extends Component
 
     public function edit(int $id): void
     {
-        $this->authorizeActivePermission('checklists.manage');
+        $this->authorizeActivePermission('hr.checklists.manage');
 
         $model = DefaultDeliverableModel::findOrFail($id);
 
@@ -113,7 +113,7 @@ class DefaultDeliverablesModule extends Component
 
     public function save(): void
     {
-        $this->authorizeActivePermission('checklists.manage');
+        $this->authorizeActivePermission('hr.checklists.manage');
 
         // Same check as before, but via the shared scope rather than a role-name
         // split that assumed every role name contains a hyphen.

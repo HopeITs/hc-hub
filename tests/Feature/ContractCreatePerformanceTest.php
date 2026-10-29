@@ -203,8 +203,8 @@ class ContractCreatePerformanceTest extends TestCase
         // roles above it. Nobody lives in Syria itself, so an unexempted query
         // returns nothing at all — which is exactly how this used to fail.
         $nationwide = [
-            $this->makeUser($syria, 'HR-SYR', ['contracts.create']),
-            $this->makeUser($fixtures['city'], 'general-manager', ['contracts.create']),
+            $this->makeUser($syria, 'HR-SYR', ['hr.contracts.create']),
+            $this->makeUser($fixtures['city'], 'general-manager', ['hr.contracts.create']),
         ];
 
         foreach ($nationwide as $user) {
@@ -235,7 +235,7 @@ class ContractCreatePerformanceTest extends TestCase
 
         // Profile sits in the remote city; the contract is being written in the
         // other one, which a nationwide role is entitled to do.
-        $manager = $this->makeUser($fixtures['remoteCity'], 'general-manager', ['contracts.create']);
+        $manager = $this->makeUser($fixtures['remoteCity'], 'general-manager', ['hr.contracts.create']);
 
         Livewire::actingAs($manager)
             ->test(ContractCreate::class)
@@ -496,7 +496,7 @@ class ContractCreatePerformanceTest extends TestCase
 
         $employee = $this->makeEmployee($city, 'local-contract-employee');
         $remoteEmployee = $this->makeEmployee($remoteCity, 'remote-contract-employee');
-        $hr = $this->makeUser($city, 'HR-ALP', ['contracts.create', 'contracts.update']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.contracts.create', 'hr.contracts.update']);
 
         return compact(
             'city',

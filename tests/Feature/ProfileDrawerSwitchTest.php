@@ -19,7 +19,7 @@ class ProfileDrawerSwitchTest extends TestCase
     public function test_opening_a_second_employee_replaces_the_first(): void
     {
         $aleppo = $this->makeCity('ALP', '001');
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['employees.view']);
+        $hr = $this->makeUser($aleppo, 'HR-ALP', ['hr.employees.view']);
         $fredy = $this->makeEmployee($aleppo, 'fredy', ['first_name_en' => 'Fredy']);
         $other = $this->makeEmployee($aleppo, 'other', ['first_name_en' => 'Nadia']);
 
@@ -37,7 +37,7 @@ class ProfileDrawerSwitchTest extends TestCase
     public function test_the_drawer_loads_the_employee_itself_and_hides_stale_content(): void
     {
         $aleppo = $this->makeCity('ALP', '001');
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['employees.view']);
+        $hr = $this->makeUser($aleppo, 'HR-ALP', ['hr.employees.view']);
 
         // The drawer must request the clicked employee from its own Alpine
         // handler and gate the rendered profile on the server catching up.

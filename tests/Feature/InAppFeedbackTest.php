@@ -271,11 +271,11 @@ class InAppFeedbackTest extends TestCase
         ]);
 
         // Roles and permissions do not count: not super-admin, not HR-SYR
-        // (an administrator role), not even a feedback.view grant...
+        // (an administrator role), not even a hub.feedback.view grant...
         $cases = [
             ['super-admin', []],
-            ['HR-SYR', ['feedback.view']],
-            ['HR-ALP', ['feedback.view', 'activity-log.view']],
+            ['HR-SYR', ['hub.feedback.view']],
+            ['HR-ALP', ['hub.feedback.view', 'hub.activity-log.view']],
             ['general-manager', []],
             ['manager', []],
             ['employee', []],

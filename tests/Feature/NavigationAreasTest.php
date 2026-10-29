@@ -137,7 +137,7 @@ class NavigationAreasTest extends TestCase
         foreach ($cases as $role => $routes) {
             $user = $this->userWithRole($role);
             // The read permission is kept: the list refuses the page, not the permission.
-            $this->assertTrue($user->hasActivePermission('positions.view'));
+            $this->assertTrue($user->hasActivePermission('hr.positions.view'));
 
             foreach ($routes['refused'] as $route) {
                 $this->actingAs($user)->get(route($route))->assertForbidden();

@@ -496,7 +496,7 @@ class TeamCoverageTest extends TestCase
         $this->person('maya', 'Maya', 'Saleh', 'ALP', null, 'PMA', 3, null, 'manager');
         $this->person('logi', 'Logi', 'Volunteer', 'ALP', null, 'Logi', 6, null, 'employee');
 
-        $this->p['huda'] = ['user' => $this->makeUser($this->cities['HMS'], 'HR-HMS', ['leaves.view-own', 'leaves.view-all', 'leaves.decide'])];
+        $this->p['huda'] = ['user' => $this->makeUser($this->cities['HMS'], 'HR-HMS', ['hr.leaves.view-own', 'hr.leaves.view-all', 'hr.leaves.decide'])];
     }
 
     /** One volunteer: employee, position, running contract, balances, and a user with $role. */
@@ -531,7 +531,7 @@ class TeamCoverageTest extends TestCase
             $balances[$typeId] = LeaveBalance::query()->create(['contract_id' => $contract->id, 'type_id' => $typeId, 'deserved' => 112, 'used' => 0]);
         }
 
-        $user = $role ? $this->makeUser($this->cities[$city], $role, ['leaves.view-own', 'leaves.view-all', 'leaves.decide', 'leaves.create'], $employee) : null;
+        $user = $role ? $this->makeUser($this->cities[$city], $role, ['hr.leaves.view-own', 'hr.leaves.view-all', 'hr.leaves.decide', 'hr.leaves.create'], $employee) : null;
         $this->p[$key] = compact('employee', 'position', 'contract', 'balances', 'user');
 
         return $key;

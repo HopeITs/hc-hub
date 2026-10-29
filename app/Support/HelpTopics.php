@@ -32,9 +32,9 @@ class HelpTopics
     public const TOPICS = [
         'leave-units' => ['points' => 6],
         'leave-balance' => ['points' => 5],
-        'contract-types' => ['points' => 5, 'permission' => 'contracts.view'],
-        'auto-renew' => ['points' => 5, 'permission' => 'contracts.view'],
-        'position-dependencies' => ['points' => 5, 'permission' => 'contracts.view'],
+        'contract-types' => ['points' => 5, 'permission' => 'hr.contracts.view'],
+        'auto-renew' => ['points' => 5, 'permission' => 'hr.contracts.view'],
+        'position-dependencies' => ['points' => 5, 'permission' => 'hr.contracts.view'],
     ];
 
     /**

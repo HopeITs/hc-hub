@@ -1,8 +1,8 @@
 {{-- Phone card (B4-D §6): name, position, city, email, status as text + colour, actions reachable. --}}
 @php
     $user = auth()->user();
-    $canUpdate = $user->hasActivePermission('employees.update');
-    $canDelete = $user->hasActivePermission('employees.delete');
+    $canUpdate = $user->hasActivePermission('hr.employees.update');
+    $canDelete = $user->hasActivePermission('hr.employees.delete');
     $showCity = $user->activeCityIds() === null;
     $position = $item->primaryContract()?->position?->title;
     $city = $showCity ? $item->city?->name : null;

@@ -56,7 +56,7 @@ class PrivateAvatarAccessTest extends TestCase
 
         $active = $this->withPhoto($this->makeEmployee($homs, 'homs-subject'));
         $former = $this->withPhoto($this->makeEmployee($homs, 'homs-former', ['is_active' => false]));
-        $aleppoHr = $this->makeUser($aleppo, 'HR-ALP', ['employees.view']);
+        $aleppoHr = $this->makeUser($aleppo, 'HR-ALP', ['hr.employees.view']);
 
         $this->actingAs($aleppoHr)
             ->get(route('employees.avatar', $active))
@@ -75,7 +75,7 @@ class PrivateAvatarAccessTest extends TestCase
     {
         $aleppo = $this->makeCity('ALP', '001');
         $subject = $this->withPhoto($this->makeEmployee($aleppo, 'aleppo-subject'));
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['employees.view']);
+        $hr = $this->makeUser($aleppo, 'HR-ALP', ['hr.employees.view']);
 
         $response = $this->actingAs($hr)->get(route('employees.avatar', $subject));
 

@@ -197,7 +197,7 @@ class HolidayManagementTest extends TestCase
 
     public function test_regional_hr_and_plain_employees_cannot_open_the_screen(): void
     {
-        Livewire::actingAs($this->makeUser($this->alp, 'HR-ALP', ['project-basics.view', 'project-basics.create']))
+        Livewire::actingAs($this->makeUser($this->alp, 'HR-ALP', ['hr.project-basics.view', 'hr.project-basics.create']))
             ->test(HolidayModule::class)->assertForbidden();
 
         Livewire::actingAs($this->makeUser($this->alp, 'employee'))

@@ -83,7 +83,7 @@ class TeamCalendarHolidaysTest extends TestCase
 
     public function test_national_hr_can_add_from_the_calendar(): void
     {
-        $hr = $this->makeUser($this->syr, 'HR-SYR', ['leaves.view-own']);
+        $hr = $this->makeUser($this->syr, 'HR-SYR', ['hr.leaves.view-own']);
 
         Livewire::actingAs($hr)->test(Calendar::class)
             ->assertSee('Independence Day')
@@ -139,6 +139,6 @@ class TeamCalendarHolidaysTest extends TestCase
             'currency' => 2, 'salary_per' => 1, 'weekly_hours' => 40, 'is_active' => true, 'auto_renew' => false,
         ]);
 
-        return $this->makeUser($this->syr, $role, ['leaves.view-own', 'leaves.view-all'], $employee);
+        return $this->makeUser($this->syr, $role, ['hr.leaves.view-own', 'hr.leaves.view-all'], $employee);
     }
 }

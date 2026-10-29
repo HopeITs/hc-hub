@@ -27,7 +27,7 @@ class ContractsTableB4Test extends TestCase
 
     private const SALARY = 8731;
 
-    private const HR = ['contracts.view', 'contracts.create', 'contracts.update', 'contracts.delete', 'contracts.export'];
+    private const HR = ['hr.contracts.view', 'hr.contracts.create', 'hr.contracts.update', 'hr.contracts.delete', 'hr.contracts.export'];
 
     private City $dms;
 
@@ -240,7 +240,7 @@ class ContractsTableB4Test extends TestCase
         $this->assertStringContainsString(route('contracts.edit', $contract), $html);
         // HR may see pay, so the PDF is offered; a role barred from pay figures never gets it.
         $this->assertStringContainsString(__('general.export-pdf'), $html);
-        $gm = $this->makeUser($this->dms, 'general-manager', ['contracts.view', 'contracts.export']);
+        $gm = $this->makeUser($this->dms, 'general-manager', ['hr.contracts.view', 'hr.contracts.export']);
         $this->assertStringNotContainsString(__('general.export-pdf'), Livewire::actingAs($gm)->test(ContractsTable::class)->html());
 
         // View-only role: View yes, no menu at all.
@@ -342,6 +342,6 @@ class ContractsTableB4Test extends TestCase
             'end_date' => now()->addMonths(6)->toDateString(),
         ]);
 
-        return [$this->makeUser($this->dms, 'manager', ['contracts.view'], $employee), $managed];
+        return [$this->makeUser($this->dms, 'manager', ['hr.contracts.view'], $employee), $managed];
     }
 }

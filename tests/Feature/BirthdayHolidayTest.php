@@ -229,6 +229,6 @@ class BirthdayHolidayTest extends TestCase
             'currency' => 2, 'salary_per' => 1, 'weekly_hours' => 40, 'is_active' => true, 'auto_renew' => false,
         ]);
 
-        return [$contract, $this->makeUser($this->city, $role, ['leaves.view-own'], $employee)];
+        return [$contract, $this->makeUser($this->city, $role, ['hr.leaves.view-own'], $employee)];
     }
 }

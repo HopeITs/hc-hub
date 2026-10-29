@@ -33,7 +33,7 @@ class PhoneEmployeeContractFlowTest extends TestCase
     {
         $city = $this->makeCity('ALP', '001');
 
-        $component = Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['employees.create']))
+        $component = Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['hr.employees.create']))
             ->test(EmployeeCreate::class);
 
         $options = $this->sectionOptions($component->html());
@@ -52,7 +52,7 @@ class PhoneEmployeeContractFlowTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $employee = $this->makeEmployee($city, 'phone.nav');
 
-        $component = Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['employees.update']))
+        $component = Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['hr.employees.update']))
             ->test(EmployeeEdit::class, ['employee' => $employee]);
 
         $options = $this->sectionOptions($component->html());
@@ -72,7 +72,7 @@ class PhoneEmployeeContractFlowTest extends TestCase
         $employee = $this->makeEmployee($city, 'phone.nav.employee');
 
         $options = $this->sectionOptions(
-            Livewire::actingAs($this->makeUser($city, 'employee', ['employees.update']))
+            Livewire::actingAs($this->makeUser($city, 'employee', ['hr.employees.update']))
                 ->test(EmployeeEdit::class, ['employee' => $employee])
                 ->html(),
         );
@@ -85,7 +85,7 @@ class PhoneEmployeeContractFlowTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $employee = $this->makeEmployee($city, 'phone.actions');
 
-        $html = Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['employees.update']))
+        $html = Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['hr.employees.update']))
             ->test(EmployeeEdit::class, ['employee' => $employee])
             ->html();
 
@@ -97,7 +97,7 @@ class PhoneEmployeeContractFlowTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $this->makeContractFor($this->makeEmployee($city, 'phone.filters'));
 
-        $html = Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['contracts.view']))
+        $html = Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['hr.contracts.view']))
             ->test(ContractsTable::class)
             ->html();
 

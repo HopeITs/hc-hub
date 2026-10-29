@@ -45,7 +45,7 @@ class ProfileChangeRequestsTest extends TestCase
         $this->lina = $this->makeEmployee($this->aleppo, 'lina', ['first_name_en' => 'Lina']);
         $this->makeContractFor($this->lina);
         $this->linaUser = $this->makeUser($this->aleppo, 'employee', [], $this->lina);
-        $this->huda = $this->makeUser($this->aleppo, 'HR-ALP', ['employees.view', 'employees.update']);
+        $this->huda = $this->makeUser($this->aleppo, 'HR-ALP', ['hr.employees.view', 'hr.employees.update']);
     }
 
     public function test_a_proposal_waits_for_hr_and_is_not_on_the_profile_until_approved(): void
@@ -69,7 +69,7 @@ class ProfileChangeRequestsTest extends TestCase
             ->assertSeeHtml('data-testid="inbox-profile-change"')
             ->assertSee('Physics')
             ->assertSeeHtml(route('employee-files.download', $change->getFirstMedia('file')));
-        $karim = $this->makeUser($this->makeCity('HMS', '002'), 'HR-HMS', ['employees.view', 'employees.update']);
+        $karim = $this->makeUser($this->makeCity('HMS', '002'), 'HR-HMS', ['hr.employees.view', 'hr.employees.update']);
         Livewire::actingAs($karim)->test(Inbox::class)->assertDontSee('Physics');
     }
 
@@ -154,7 +154,7 @@ class ProfileChangeRequestsTest extends TestCase
         // HR of another city is refused like a missing row.
         $this->propose('education', $this->education());
         $change = ProfileChangeRequest::query()->sole();
-        $karim = $this->makeUser($this->makeCity('HMS', '002'), 'HR-HMS', ['employees.view', 'employees.update']);
+        $karim = $this->makeUser($this->makeCity('HMS', '002'), 'HR-HMS', ['hr.employees.view', 'hr.employees.update']);
         Livewire::actingAs($karim)->test(Inbox::class)->call('approveProfile', "profile:{$change->id}:approve");
         $this->assertSame(ProfileChangeRequest::PENDING, $change->fresh()->status);
         $this->assertSame(0, $this->lina->educations()->count());

@@ -358,7 +358,7 @@ class Index extends Component
     {
         [$id, $action] = $this->parse($key, 'checklist', ['deliver', 'receive']);
         $user = auth()->user();
-        $permission = $action === 'deliver' ? 'checklists.deliver' : 'checklists.receive';
+        $permission = $action === 'deliver' ? 'hr.checklists.deliver' : 'hr.checklists.receive';
 
         if (! $user->employee_id || ! $user->hasActivePermission($permission)) {
             return 'not_allowed';

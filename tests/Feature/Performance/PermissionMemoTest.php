@@ -23,12 +23,12 @@ class PermissionMemoTest extends TestCase
     public function test_repeated_permission_checks_hit_the_database_once(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $user = $this->makeUser($city, 'HR-ALP', ['employees.view']);
+        $user = $this->makeUser($city, 'HR-ALP', ['hr.employees.view']);
 
         $count = $this->queries(function () use ($user) {
             for ($i = 0; $i < 100; $i++) {
-                $this->assertTrue($user->hasActivePermission('employees.view'));
-                $this->assertFalse($user->hasActivePermission('employees.delete'));
+                $this->assertTrue($user->hasActivePermission('hr.employees.view'));
+                $this->assertFalse($user->hasActivePermission('hr.employees.delete'));
                 $user->activeRoleIs('HR');
                 $user->myRole();
                 $user->canViewSalary();
@@ -41,15 +41,15 @@ class PermissionMemoTest extends TestCase
     public function test_switching_the_active_role_never_serves_a_stale_answer(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $user = $this->makeUser($city, 'HR-ALP', ['employees.update']);
+        $user = $this->makeUser($city, 'HR-ALP', ['hr.employees.update']);
         $other = Role::findOrCreate('staff', 'web');
-        $other->givePermissionTo(Permission::findOrCreate('leaves.create', 'web'));
+        $other->givePermissionTo(Permission::findOrCreate('hr.leaves.create', 'web'));
         $user->assignRole($other);
         $user->roles()->updateExistingPivot($other->id, ['is_active' => false]);
 
         // Warm the memo on this very instance.
-        $this->assertTrue($user->hasActivePermission('employees.update'));
-        $this->assertFalse($user->hasActivePermission('leaves.create'));
+        $this->assertTrue($user->hasActivePermission('hr.employees.update'));
+        $this->assertFalse($user->hasActivePermission('hr.leaves.create'));
         $this->assertSame('HR-ALP', $user->myRole());
         $this->assertTrue($user->canViewSalary());
 
@@ -59,8 +59,8 @@ class PermissionMemoTest extends TestCase
         $user->roles()->updateExistingPivot($other->id, ['is_active' => true]);
 
         $this->assertSame('staff', $user->myRole());
-        $this->assertFalse($user->hasActivePermission('employees.update'));
-        $this->assertTrue($user->hasActivePermission('leaves.create'));
+        $this->assertFalse($user->hasActivePermission('hr.employees.update'));
+        $this->assertTrue($user->hasActivePermission('hr.leaves.create'));
         $this->assertFalse($user->canViewSalary());
         $this->assertFalse($user->activeRoleIs('HR'));
     }
@@ -69,7 +69,7 @@ class PermissionMemoTest extends TestCase
     {
         $aleppo = $this->makeCity('ALP', '001');
         $homs = $this->makeCity('HMS', '002');
-        $user = $this->makeUser($aleppo, 'HR-ALP', ['employees.view']);
+        $user = $this->makeUser($aleppo, 'HR-ALP', ['hr.employees.view']);
         $other = Role::findOrCreate('HR-HMS', 'web');
         $user->assignRole($other);
         $user->roles()->updateExistingPivot($other->id, ['is_active' => false]);
@@ -93,31 +93,31 @@ class PermissionMemoTest extends TestCase
     public function test_deactivating_every_role_revokes_at_once(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $user = $this->makeUser($city, 'HR-ALP', ['employees.update']);
-        $this->assertTrue($user->hasActivePermission('employees.update'));
+        $user = $this->makeUser($city, 'HR-ALP', ['hr.employees.update']);
+        $this->assertTrue($user->hasActivePermission('hr.employees.update'));
 
         // AccessRevoker::deactivateRoles
         $user->roles()->updateExistingPivot($user->roles()->pluck('roles.id')->all(), ['is_active' => false]);
 
-        $this->assertFalse($user->hasActivePermission('employees.update'));
+        $this->assertFalse($user->hasActivePermission('hr.employees.update'));
     }
 
     public function test_changing_a_roles_permissions_or_direct_grants_is_seen_immediately(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $user = $this->makeUser($city, 'HR-ALP', ['employees.update']);
-        $this->assertFalse($user->hasActivePermission('employees.delete'));
+        $user = $this->makeUser($city, 'HR-ALP', ['hr.employees.update']);
+        $this->assertFalse($user->hasActivePermission('hr.employees.delete'));
 
-        Role::findByName('HR-ALP', 'web')->givePermissionTo(Permission::findOrCreate('employees.delete', 'web'));
-        $this->assertTrue($user->hasActivePermission('employees.delete'));
+        Role::findByName('HR-ALP', 'web')->givePermissionTo(Permission::findOrCreate('hr.employees.delete', 'web'));
+        $this->assertTrue($user->hasActivePermission('hr.employees.delete'));
 
-        Role::findByName('HR-ALP', 'web')->revokePermissionTo('employees.delete');
-        $this->assertFalse($user->hasActivePermission('employees.delete'));
+        Role::findByName('HR-ALP', 'web')->revokePermissionTo('hr.employees.delete');
+        $this->assertFalse($user->hasActivePermission('hr.employees.delete'));
 
-        $user->givePermissionTo(Permission::findOrCreate('contracts.create', 'web'));
-        $this->assertTrue($user->hasActivePermission('contracts.create'));
-        $user->revokePermissionTo('contracts.create');
-        $this->assertFalse($user->hasActivePermission('contracts.create'));
+        $user->givePermissionTo(Permission::findOrCreate('hr.contracts.create', 'web'));
+        $this->assertTrue($user->hasActivePermission('hr.contracts.create'));
+        $user->revokePermissionTo('hr.contracts.create');
+        $this->assertFalse($user->hasActivePermission('hr.contracts.create'));
     }
 
     public function test_salary_blind_rules_are_unchanged(): void
@@ -139,7 +139,7 @@ class PermissionMemoTest extends TestCase
     {
         $aleppo = $this->makeCity('ALP', '001');
         $homs = City::query()->forceCreate(['name_en' => 'HMS', 'name_ar' => 'HMS', 'slug' => 'HMS', 'code' => '002', 'is_active' => true]);
-        $user = $this->makeUser($aleppo, 'HR-ALP', ['employees.view', 'employees.update', 'employees.delete']);
+        $user = $this->makeUser($aleppo, 'HR-ALP', ['hr.employees.view', 'hr.employees.update', 'hr.employees.delete']);
 
         foreach (range(1, 15) as $i) {
             $this->makeEmployee($aleppo, "alp{$i}", ['first_name_en' => "Alep{$i}"]);
@@ -158,7 +158,7 @@ class PermissionMemoTest extends TestCase
     public function test_non_deferred_tables_render_once_without_wire_init(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $user = $this->makeUser($city, 'HR-ALP', ['employees.view']);
+        $user = $this->makeUser($city, 'HR-ALP', ['hr.employees.view']);
         $this->makeEmployee($city, 'alp1', ['first_name_en' => 'Alep1']);
 
         Livewire::actingAs($user)->test(EmployeeTable::class)

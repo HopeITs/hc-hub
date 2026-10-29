@@ -83,9 +83,9 @@ final class WorkInbox
     /** Whether the user's active role has any inbox source at all (the menu item shows then). */
     public function hasSources(User $user): bool
     {
-        return collect(['leaves.decide', 'leaves.review', 'checklists.deliver', 'checklists.receive'])
+        return collect(['hr.leaves.decide', 'hr.leaves.review', 'hr.checklists.deliver', 'hr.checklists.receive'])
             ->contains(fn (string $permission) => $user->hasActivePermission($permission))
-            || ($this->isHr($user) && $user->hasActivePermission('employees.update'))
+            || ($this->isHr($user) && $user->hasActivePermission('hr.employees.update'))
             // A direct manager decides whatever their role (DEC-05 revision 2).
             || app(LeaveDecisionAuthority::class)->holdsManagerPosition($user);
     }
@@ -128,7 +128,7 @@ final class WorkInbox
     /** @return array{0: Collection<int, array<string, mixed>>, 1: int} */
     private function leaveReviews(User $user): array
     {
-        if (! $this->isHr($user) || ! $user->hasActivePermission('leaves.review')) {
+        if (! $this->isHr($user) || ! $user->hasActivePermission('hr.leaves.review')) {
             return [collect(), 0];
         }
 
@@ -161,7 +161,7 @@ final class WorkInbox
         $total = 0;
 
         // The same permissions that open the pending-deliveries and pending-returns pages.
-        if ($user->hasActivePermission('checklists.deliver')) {
+        if ($user->hasActivePermission('hr.checklists.deliver')) {
             $query = $this->checklistQuery()
                 ->where('delivered_id', $user->employee_id)
                 ->where('delivered_status', 'pending');
@@ -171,7 +171,7 @@ final class WorkInbox
             $total += $query->count();
         }
 
-        if ($user->hasActivePermission('checklists.receive')) {
+        if ($user->hasActivePermission('hr.checklists.receive')) {
             $query = $this->checklistQuery()
                 ->where('receiver_id', $user->employee_id)
                 ->where('returned_status', 'pending');
@@ -187,7 +187,7 @@ final class WorkInbox
     /** @return array{0: Collection<int, array<string, mixed>>, 1: int} */
     private function checklistFinalizations(User $user): array
     {
-        if (! $this->isHr($user) || ! $user->hasActivePermission('employees.update')) {
+        if (! $this->isHr($user) || ! $user->hasActivePermission('hr.employees.update')) {
             return [collect(), 0];
         }
 
@@ -216,7 +216,7 @@ final class WorkInbox
      */
     private function profileChanges(User $user): array
     {
-        if (! $this->isHr($user) || ! $user->hasActivePermission('employees.update')) {
+        if (! $this->isHr($user) || ! $user->hasActivePermission('hr.employees.update')) {
             return [collect(), 0];
         }
 

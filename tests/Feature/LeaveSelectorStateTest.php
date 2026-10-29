@@ -427,7 +427,7 @@ class LeaveSelectorStateTest extends TestCase
             'email' => 'selector.employee@example.test',
             'password' => 'password',
         ]);
-        $this->user->givePermissionTo(['leaves.create', 'leaves.update']);
+        $this->user->givePermissionTo(['hr.leaves.create', 'hr.leaves.update']);
 
         $this->annual = LeaveBalance::query()->findOrFail($annualId);
         $this->sick = LeaveBalance::query()->findOrFail($sickId);

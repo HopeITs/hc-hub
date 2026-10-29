@@ -102,7 +102,7 @@ class CentersTable extends LivewireTable
 
     protected function rowClickAction(Model $model): ?string
     {
-        return auth()->user()?->hasActivePermission('centers.update')
+        return auth()->user()?->hasActivePermission('hr.centers.update')
             ? "\$dispatch('openCenterEdit', { id: {$model->getKey()} })"
             : null;
     }
@@ -156,8 +156,8 @@ class CentersTable extends LivewireTable
         $locale = app()->getLocale();
         $user = auth()->user();
         $canViewPositions = $user?->canOpenReferencePage('positions') ?? false;
-        $canUpdate = $user?->hasActivePermission('centers.update') ?? false;
-        $canDelete = $user?->hasActivePermission('centers.delete') ?? false;
+        $canUpdate = $user?->hasActivePermission('hr.centers.update') ?? false;
+        $canDelete = $user?->hasActivePermission('hr.centers.delete') ?? false;
 
         return [
             Column::make('ID', 'id')->sortable(),

@@ -172,10 +172,10 @@ class EmployeeTable extends LivewireTable
         $this->dispatch('employee-view-changed', view: $this->preset);
     }
 
-    /** Add action only for roles that may open the create route (employees.create). */
+    /** Add action only for roles that may open the create route (hr.employees.create). */
     protected function emptyStateCreate(): ?array
     {
-        return auth()->user()?->hasActivePermission('employees.create')
+        return auth()->user()?->hasActivePermission('hr.employees.create')
             ? [__('general.state-add-employee'), route('employees.create')]
             : null;
     }
@@ -241,8 +241,8 @@ class EmployeeTable extends LivewireTable
     protected function columns(): array
     {
         $user = auth()->user();
-        $canUpdate = $user->hasActivePermission('employees.update');
-        $canDelete = $user->hasActivePermission('employees.delete');
+        $canUpdate = $user->hasActivePermission('hr.employees.update');
+        $canDelete = $user->hasActivePermission('hr.employees.delete');
         $nationwide = $user->activeCityIds() === null;
 
         return [

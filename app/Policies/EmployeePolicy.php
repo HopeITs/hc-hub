@@ -10,13 +10,13 @@ use Illuminate\Auth\Access\Response;
 class EmployeePolicy
 {
     /**
-     * The HR record ability (employees.view within the active city scope).
+     * The HR record ability (hr.employees.view within the active city scope).
      * Not the directory: colleagues look each other up through viewDirectory.
      */
     public function view(User $user, Employee $employee): bool
     {
         return $this->isSelf($user, $employee)
-            || ($user->hasActivePermission('employees.view') && $this->isInActiveCity($user, $employee));
+            || ($user->hasActivePermission('hr.employees.view') && $this->isInActiveCity($user, $employee));
     }
 
     /**
@@ -59,26 +59,26 @@ class EmployeePolicy
 
     public function create(User $user, int $cityId): bool
     {
-        return $user->hasActivePermission('employees.create')
+        return $user->hasActivePermission('hr.employees.create')
             && $user->canAccessCity($cityId);
     }
 
     public function update(User $user, Employee $employee): bool
     {
-        return $user->hasActivePermission('employees.update')
+        return $user->hasActivePermission('hr.employees.update')
             && $this->isInActiveCity($user, $employee);
     }
 
     public function delete(User $user, Employee $employee): bool
     {
-        return $user->hasActivePermission('employees.delete')
+        return $user->hasActivePermission('hr.employees.delete')
             && $this->isInActiveCity($user, $employee);
     }
 
     public function viewPrivateDocuments(User $user, Employee $employee): bool
     {
         return $this->isSelf($user, $employee)
-            || ($user->hasActivePermission('employees.update') && $this->isInActiveCity($user, $employee));
+            || ($user->hasActivePermission('hr.employees.update') && $this->isInActiveCity($user, $employee));
     }
 
     private function isSelf(User $user, Employee $employee): bool

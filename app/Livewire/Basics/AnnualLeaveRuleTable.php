@@ -69,7 +69,7 @@ class AnnualLeaveRuleTable extends LivewireTable
 
     protected function rowClickAction(Model $model): ?string
     {
-        return auth()->user()?->hasActivePermission('project-basics.update')
+        return auth()->user()?->hasActivePermission('hr.project-basics.update')
             ? "\$dispatch('openAnnualLeaveRuleEdit', { id: {$model->getKey()} })"
             : null;
     }
@@ -86,8 +86,8 @@ class AnnualLeaveRuleTable extends LivewireTable
 
     protected function columns(): array
     {
-        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
-        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
+        $canUpdate = auth()->user()?->hasActivePermission('hr.project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('hr.project-basics.delete') ?? false;
 
         return [
             Column::make(__('general.days_per_year'), 'days')

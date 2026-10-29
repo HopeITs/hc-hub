@@ -136,7 +136,7 @@ class AllLeaveRequestTable extends LivewireTable
         $showBtn = Blade::render('<x-table.show-btn wire:click="$dispatch(\'openShowRequestLeave\', { id: '.$key.' })" />');
 
         // Editing a decided request is deliberate: its own button, after View.
-        $editBtn = ! $pending && auth()->user()?->hasActivePermission('leaves.update')
+        $editBtn = ! $pending && auth()->user()?->hasActivePermission('hr.leaves.update')
             ? Blade::render('<x-table.edit-btn wire:click="$dispatch(\'openRequestLeaveEdit\', { id: '.$key.' })" />')
             : '';
 
@@ -147,7 +147,7 @@ class AllLeaveRequestTable extends LivewireTable
     {
         $user = auth()->user();
         // Mirrors the header button (HR / super-admin) and the permission create() enforces.
-        $canCreate = $user && $user->activeRoleIs('HR', 'super-admin') && $user->hasActivePermission('leaves.create');
+        $canCreate = $user && $user->activeRoleIs('HR', 'super-admin') && $user->hasActivePermission('hr.leaves.create');
 
         return [
             'title' => __('states.leave-all-empty-title'),

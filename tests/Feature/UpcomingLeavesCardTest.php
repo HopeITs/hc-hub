@@ -76,7 +76,7 @@ class UpcomingLeavesCardTest extends TestCase
     {
         $this->travelTo(now()->setDate(2026, 10, 12)->setTime(12, 0));
         $city = $this->makeCity('DMS', '003');
-        $user = $this->makeUser($city, $role, $permitted ? ['leaves.view-all'] : []);
+        $user = $this->makeUser($city, $role, $permitted ? ['hr.leaves.view-all'] : []);
         $this->makeContractFor($user->profile);
         for ($index = 0; $index < $count; $index++) {
             $leave = $this->makeLeave($city, 'day', '2026-10-12', '2026-10-12');

@@ -240,7 +240,7 @@ class ContractCreate extends Component
 
     protected function locationOptionsPermission(): string
     {
-        return 'contracts.create';
+        return 'hr.contracts.create';
     }
 
     protected function locationOptionsEmployeeId(): ?int
@@ -349,7 +349,7 @@ class ContractCreate extends Component
             return $user->can('manageAutoRenew', $this->renewalSource);
         }
 
-        return $user->activeRoleIs('HR') && $user->hasActivePermission('contracts.create');
+        return $user->activeRoleIs('HR') && $user->hasActivePermission('hr.contracts.create');
     }
 
     private function isRenewal(): bool

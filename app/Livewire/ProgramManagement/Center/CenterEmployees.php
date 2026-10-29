@@ -61,7 +61,7 @@ class CenterEmployees extends Component
         $center = Center::query()->findOrFail($this->centerId);
 
         Gate::authorize('view', $center);
-        abort_unless(auth()->user()?->hasActivePermission('employees.view'), 403);
+        abort_unless(auth()->user()?->hasActivePermission('hr.employees.view'), 403);
 
         return $center;
     }

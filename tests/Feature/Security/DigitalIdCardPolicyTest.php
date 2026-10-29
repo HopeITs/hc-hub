@@ -354,7 +354,7 @@ class DigitalIdCardPolicyTest extends TestCase
     public function test_hr_with_basics_update_sets_the_city_hotline(): void
     {
         $city = $this->city('ALP', '001');
-        $hr = $this->makeUser($city, 'HR-ALP', ['project-basics.view', 'project-basics.update']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.project-basics.view', 'hr.project-basics.update']);
 
         Livewire::actingAs($hr)
             ->test(CityModule::class)
@@ -381,7 +381,7 @@ class DigitalIdCardPolicyTest extends TestCase
     public function test_the_city_hotline_cannot_be_set_without_basics_update(): void
     {
         $city = $this->city('ALP', '001');
-        $viewer = $this->makeUser($city, 'employee', ['project-basics.view']);
+        $viewer = $this->makeUser($city, 'employee', ['hr.project-basics.view']);
 
         Livewire::actingAs($viewer)
             ->test(CityModule::class)
@@ -429,7 +429,7 @@ class DigitalIdCardPolicyTest extends TestCase
         $holder = $this->makeCardHolder($aleppo, 'profiled');
         $link = url("/ID/001007{$holder->id}-0");
 
-        $this->actingAs($this->makeUser($aleppo, 'HR-ALP', ['employees.view']))
+        $this->actingAs($this->makeUser($aleppo, 'HR-ALP', ['hr.employees.view']))
             ->get(route('employees.show', $holder->username))
             ->assertOk()
             ->assertSee($link)
@@ -479,9 +479,9 @@ class DigitalIdCardPolicyTest extends TestCase
         $holder = $this->makeCardHolder($aleppo, 'out-of-scope');
 
         $outsiders = [
-            'HR-HMS' => $this->makeUser($homs, 'HR-HMS', ['employees.update']),
-            'manager' => $this->makeUser($aleppo, 'manager', ['employees.update']),
-            'general-manager' => $this->makeUser($aleppo, 'general-manager', ['employees.update']),
+            'HR-HMS' => $this->makeUser($homs, 'HR-HMS', ['hr.employees.update']),
+            'manager' => $this->makeUser($aleppo, 'manager', ['hr.employees.update']),
+            'general-manager' => $this->makeUser($aleppo, 'general-manager', ['hr.employees.update']),
             'employee' => $this->makeUser($aleppo, 'employee'),
         ];
 

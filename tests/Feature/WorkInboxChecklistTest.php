@@ -33,7 +33,7 @@ class WorkInboxChecklistTest extends TestCase
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $this->city = $this->makeCity('DMS', '003');
-        $this->deliverer = $this->makeUser($this->city, 'employee', ['checklists.deliver', 'checklists.receive']);
+        $this->deliverer = $this->makeUser($this->city, 'employee', ['hr.checklists.deliver', 'hr.checklists.receive']);
     }
 
     /** AC-C3-01: rows and count are exactly the items waiting on this user. */

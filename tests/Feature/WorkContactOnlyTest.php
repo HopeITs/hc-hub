@@ -33,7 +33,7 @@ class WorkContactOnlyTest extends TestCase
     public function test_the_profile_drawer_shows_only_work_contact(): void
     {
         $aleppo = $this->makeCity('ALP', '001');
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['employees.view']);
+        $hr = $this->makeUser($aleppo, 'HR-ALP', ['hr.employees.view']);
         $employee = $this->makeEmployee($aleppo, 'rami', [
             'work_phone' => '0911111111',
             'personal_phone' => '0922222222',

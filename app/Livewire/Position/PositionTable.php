@@ -104,7 +104,7 @@ class PositionTable extends LivewireTable
 
     protected function link(Model $model): ?string
     {
-        return auth()->user()?->hasActivePermission('positions.update')
+        return auth()->user()?->hasActivePermission('hr.positions.update')
             ? route('positions.edit', $model->getKey())
             : null;
     }
@@ -130,8 +130,8 @@ class PositionTable extends LivewireTable
 
     protected function columns(): array
     {
-        $canUpdate = auth()->user()?->hasActivePermission('positions.update') ?? false;
-        $canDelete = auth()->user()?->hasActivePermission('positions.delete') ?? false;
+        $canUpdate = auth()->user()?->hasActivePermission('hr.positions.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('hr.positions.delete') ?? false;
 
         return [
             Column::make(__('general.title').' (EN)', 'title_en')->sortable()->searchable(),

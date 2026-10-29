@@ -141,7 +141,7 @@ class A4BilingualTest extends TestCase
     public function test_an_empty_leave_request_is_rejected_with_arabic_sentences(): void
     {
         $balance = $this->makeAnnualBalance();
-        $user = $this->makeUser($balance->contract->employee->city, 'employee', ['leaves.create'], $balance->contract->employee);
+        $user = $this->makeUser($balance->contract->employee->city, 'employee', ['hr.leaves.create'], $balance->contract->employee);
         app()->setLocale('ar');
 
         $component = Livewire::actingAs($user)

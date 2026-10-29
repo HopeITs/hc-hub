@@ -131,7 +131,7 @@ class ContractEdit extends Component
 
     protected function locationOptionsPermission(): string
     {
-        return 'contracts.update';
+        return 'hr.contracts.update';
     }
 
     protected function locationOptionsEmployeeId(): ?int

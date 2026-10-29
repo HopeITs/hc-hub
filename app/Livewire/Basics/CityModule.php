@@ -12,7 +12,7 @@ use Livewire\Component;
  * The cities page. Cities themselves are seeded; the one field HR edits here
  * is the city's HR hotline, the emergency number on its public ID cards
  * (access-policy.md §9 A2D-Q7). Same permission as the existing status toggle
- * on this page: project-basics.update.
+ * on this page: hr.project-basics.update.
  */
 class CityModule extends Component
 {
@@ -41,7 +41,7 @@ class CityModule extends Component
 
     public function edit(int $id): void
     {
-        $this->authorizeActivePermission('project-basics.update');
+        $this->authorizeActivePermission('hr.project-basics.update');
         $city = City::findOrFail($id);
 
         $this->item = [
@@ -59,7 +59,7 @@ class CityModule extends Component
 
     public function save(): void
     {
-        $this->authorizeActivePermission('project-basics.update');
+        $this->authorizeActivePermission('hr.project-basics.update');
         $this->item['hr_hotline'] = trim((string) ($this->item['hr_hotline'] ?? ''));
         $this->validate();
 

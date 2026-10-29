@@ -174,7 +174,7 @@ class TaskTelemetryTest extends TestCase
     public function test_a_search_then_opening_a_profile_is_one_completed_lookup(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $hr = $this->makeUser($city, 'HR-ALP', ['employees.view']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.employees.view']);
         $colleague = $this->makeEmployee($city, 'lookup-target');
 
         Livewire::actingAs($hr)->test(EmployeeTable::class)
@@ -194,7 +194,7 @@ class TaskTelemetryTest extends TestCase
     public function test_a_lookup_left_open_too_long_is_not_continued(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $hr = $this->makeUser($city, 'HR-ALP', ['employees.view']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.employees.view']);
 
         Livewire::actingAs($hr)->test(EmployeeTable::class)->set('globalSearch', 'Test');
         $this->travel(31)->minutes();
@@ -206,7 +206,7 @@ class TaskTelemetryTest extends TestCase
     public function test_opening_the_contract_composer_starts_a_contract_attempt(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $hr = $this->makeUser($city, 'HR-ALP', ['contracts.create']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.contracts.create']);
 
         $component = Livewire::actingAs($hr)->test(ContractCreate::class);
 
@@ -217,7 +217,7 @@ class TaskTelemetryTest extends TestCase
     public function test_the_browser_cannot_call_the_telemetry_hooks(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $hr = $this->makeUser($city, 'HR-ALP', ['contracts.create']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.contracts.create']);
 
         $this->expectException(DirectlyCallingLifecycleHooksNotAllowedException::class);
 

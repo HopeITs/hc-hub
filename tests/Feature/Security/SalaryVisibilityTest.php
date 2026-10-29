@@ -71,7 +71,7 @@ class SalaryVisibilityTest extends TestCase
         $contract = $this->makeContractFor($this->makeEmployee($city, 'export-subject'));
 
         $this->assertTrue(
-            Gate::forUser($this->makeUser($city, 'HR-ALP', ['contracts.export']))->allows('export', $contract),
+            Gate::forUser($this->makeUser($city, 'HR-ALP', ['hr.contracts.export']))->allows('export', $contract),
         );
 
         // Holds every permission there is, and is still refused: the PDF is the

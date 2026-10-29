@@ -266,10 +266,10 @@ class ContractsTable extends LivewireTable
         $query->inView($this->preset, self::ENDING_SOON_DAYS);
     }
 
-    /** Add action only for roles that may open the create route (contracts.create). */
+    /** Add action only for roles that may open the create route (hr.contracts.create). */
     protected function emptyStateCreate(): ?array
     {
-        return auth()->user()?->hasActivePermission('contracts.create')
+        return auth()->user()?->hasActivePermission('hr.contracts.create')
             ? [__('general.state-add-contract'), route('contracts.create')]
             : null;
     }
@@ -341,16 +341,16 @@ class ContractsTable extends LivewireTable
     {
         return once(function (): array {
             $user = auth()->user();
-            $canUpdate = $user?->hasActivePermission('contracts.update') ?? false;
+            $canUpdate = $user?->hasActivePermission('hr.contracts.update') ?? false;
 
             return [
                 'update' => $canUpdate,
-                'delete' => $user?->hasActivePermission('contracts.delete') ?? false,
-                'create' => $user?->hasActivePermission('contracts.create') ?? false,
+                'delete' => $user?->hasActivePermission('hr.contracts.delete') ?? false,
+                'create' => $user?->hasActivePermission('hr.contracts.create') ?? false,
                 // Mirrors ContractPolicy::export, which also refuses a role that
                 // may not see pay figures - the PDF carries the stipend clause.
                 // Hoisted so the item is absent rather than present and 403-ing.
-                'export' => ($user?->hasActivePermission('contracts.export') ?? false) && ($user?->canViewSalary() ?? false),
+                'export' => ($user?->hasActivePermission('hr.contracts.export') ?? false) && ($user?->canViewSalary() ?? false),
                 'autoRenew' => ($user?->activeRoleIs('HR') ?? false) && $canUpdate,
             ];
         });

@@ -29,7 +29,7 @@ class EmployeeAttachmentPreviewTest extends TestCase
     public function test_choosing_a_file_previews_it_instead_of_the_stored_one(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $user = $this->makeUser($city, 'HR-ALP', ['employees.update']);
+        $user = $this->makeUser($city, 'HR-ALP', ['hr.employees.update']);
         $employee = $this->makeEmployee($city, 'attach-'.uniqid());
 
         // Held in a variable: the fake's temp file is unlinked as soon as the
@@ -68,7 +68,7 @@ class EmployeeAttachmentPreviewTest extends TestCase
     public function test_the_shared_pdf_preview_still_renders_every_state(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $user = $this->makeUser($city, 'HR-ALP', ['employees.update']);
+        $user = $this->makeUser($city, 'HR-ALP', ['hr.employees.update']);
         $employee = $this->makeEmployee($city, 'edu-'.uniqid());
 
         $education = $employee->educations()->create([
@@ -117,7 +117,7 @@ class EmployeeAttachmentPreviewTest extends TestCase
     public function test_a_field_error_is_not_echoed_a_third_time_under_the_file_input(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $user = $this->makeUser($city, 'HR-ALP', ['employees.update']);
+        $user = $this->makeUser($city, 'HR-ALP', ['hr.employees.update']);
         $employee = $this->makeEmployee($city, 'errors-'.uniqid());
 
         $html = Livewire::actingAs($user)

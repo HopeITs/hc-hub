@@ -96,7 +96,7 @@ class MyLeaveRequestTable extends LivewireTable
     protected function emptyScreenState(): array
     {
         // Same permission the create handler enforces; a role without it gets text only.
-        $canCreate = auth()->user()?->hasActivePermission('leaves.create') ?? false;
+        $canCreate = auth()->user()?->hasActivePermission('hr.leaves.create') ?? false;
 
         return [
             'title' => __('states.leave-empty-title'),

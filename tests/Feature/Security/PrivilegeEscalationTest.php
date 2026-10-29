@@ -16,7 +16,7 @@ use Tests\TestCase;
  * widen it.
  *
  * HR-SYR appears in access-control.administrator_roles, so hasActivePermission()
- * grants it access-management.manage-employees automatically. Before these
+ * grants it hub.access-management.manage-employees automatically. Before these
  * checks that was enough to promote any account in the system to super-admin:
  * editing your own roles was blocked, but promoting a second account you
  * control reaches the same place one step removed.
@@ -93,12 +93,12 @@ class PrivilegeEscalationTest extends TestCase
         // authority it already has, not escalation. A regional role given
         // manage-permissions is the case this rule exists for.
         $regional = $this->makeUser($this->makeCity('ALP', '001'), 'HR-ALP', [
-            'access-management.view',
-            'access-management.manage-permissions',
+            'hub.access-management.view',
+            'hub.access-management.manage-permissions',
         ]);
 
         $customRole = Role::findOrCreate('regional-helper', 'web');
-        $sensitive = Permission::findOrCreate('access-management.manage-roles', 'web');
+        $sensitive = Permission::findOrCreate('hub.access-management.manage-roles', 'web');
 
         Livewire::actingAs($regional)
             ->test(Index::class)
@@ -115,8 +115,8 @@ class PrivilegeEscalationTest extends TestCase
         $aleppo = $this->makeCity('ALP', '001');
         // A regional role explicitly granted the ability to manage accounts.
         $regional = $this->makeUser($aleppo, 'HR-ALP', [
-            'access-management.view',
-            'access-management.manage-employees',
+            'hub.access-management.view',
+            'hub.access-management.manage-employees',
         ]);
 
         $employee = $this->makeEmployee($aleppo, 'colleague');
@@ -125,7 +125,7 @@ class PrivilegeEscalationTest extends TestCase
         $victim->assignRole($role);
         $victim->roles()->updateExistingPivot($role->id, ['is_active' => true]);
 
-        $sensitive = Permission::findOrCreate('employees.delete', 'web');
+        $sensitive = Permission::findOrCreate('hr.employees.delete', 'web');
 
         Livewire::actingAs($regional)
             ->test(Index::class)
@@ -136,15 +136,15 @@ class PrivilegeEscalationTest extends TestCase
             ->call('saveEmployeeAccess')
             ->assertHasErrors('employeePermissionIds');
 
-        $this->assertFalse($victim->fresh()->hasDirectPermission('employees.delete'));
+        $this->assertFalse($victim->fresh()->hasDirectPermission('hr.employees.delete'));
     }
 
     public function test_a_regional_administrator_cannot_reach_accounts_in_another_city(): void
     {
         $aleppo = $this->makeCity('ALP', '001');
         $regional = $this->makeUser($aleppo, 'HR-ALP', [
-            'access-management.view',
-            'access-management.manage-employees',
+            'hub.access-management.view',
+            'hub.access-management.manage-employees',
         ]);
 
         $outsider = $this->victim();

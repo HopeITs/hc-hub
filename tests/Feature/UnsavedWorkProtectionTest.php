@@ -73,7 +73,7 @@ class UnsavedWorkProtectionTest extends TestCase
     public function test_every_contact_field_counts_as_contact_when_create_picks_a_tab(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $hr = $this->makeUser($city, 'HR-ALP', ['employees.create']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.employees.create']);
 
         // Before B2 only four contact fields were known, so an error on any
         // other one (here a malformed personal phone) sent the user to Profile.
@@ -117,7 +117,7 @@ class UnsavedWorkProtectionTest extends TestCase
     public function test_a_successful_create_resets_the_unsaved_guard(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $hr = $this->makeUser($city, 'HR-ALP', ['employees.create']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.employees.create']);
 
         Livewire::actingAs($hr)
             ->test(EmployeeCreate::class)
@@ -166,7 +166,7 @@ class UnsavedWorkProtectionTest extends TestCase
             ->assertSeeHtml($registers);
 
         $city = $this->makeCity('HMS', '002');
-        Livewire::actingAs($this->makeUser($city, 'HR-HMS', ['employees.create']))
+        Livewire::actingAs($this->makeUser($city, 'HR-HMS', ['hr.employees.create']))
             ->test(EmployeeCreate::class)
             ->assertSeeHtml($registers);
     }
@@ -321,7 +321,7 @@ class UnsavedWorkProtectionTest extends TestCase
         $city = $this->makeCity('ALP', '001');
 
         return [
-            $this->makeUser($city, 'HR-ALP', ['employees.update']),
+            $this->makeUser($city, 'HR-ALP', ['hr.employees.update']),
             $this->makeEmployee($city, 'b2-subject-'.uniqid()),
         ];
     }
@@ -388,7 +388,7 @@ class UnsavedWorkProtectionTest extends TestCase
 
         $employee = $this->makeEmployee($city, 'b2-contract-employee');
         $annualType = ContractType::query()->forceCreate(['id' => 1, 'name_en' => 'Volunteer Contract', 'name_ar' => 'عقد تطوّع']);
-        $hr = $this->makeUser($city, 'HR-ALP', ['contracts.create', 'contracts.view']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.contracts.create', 'hr.contracts.view']);
 
         return compact('city', 'center', 'position', 'program', 'employee', 'annualType', 'hr');
     }

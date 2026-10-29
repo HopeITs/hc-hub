@@ -14,8 +14,8 @@ use Throwable;
  * checks, so the bar never offers a page that would refuse the user. It is a
  * shortcut, never the permission: every page keeps its own server check.
  *
- *   Home · My leaves (leaves.view-own) · Work inbox (an inbox source, with the
- *   same count as the menu) · Team calendar (leaves.view-own) · My profile
+ *   Home · My leaves (hr.leaves.view-own) · Work inbox (an inbox source, with the
+ *   same count as the menu) · Team calendar (hr.leaves.view-own) · My profile
  *
  * Shown below md only (the sidebar becomes a drawer there). It steps aside
  * while a field has focus and on pages that have their own sticky save bar,
@@ -55,13 +55,13 @@ class BottomNav extends Component
 
         $items = array_values(array_filter([
             ['key' => 'home', 'route' => 'dashboard', 'active' => ['dashboard', 'employee.dashboard'], 'icon' => 'home', 'label' => __('general.dashboard')],
-            $user->hasActivePermission('leaves.view-own')
+            $user->hasActivePermission('hr.leaves.view-own')
                 ? ['key' => 'leaves', 'route' => 'leaves.index', 'active' => ['leaves.index'], 'icon' => 'my-leaves', 'label' => __('general.my-leaves')]
                 : null,
             $count !== null
                 ? ['key' => 'inbox', 'route' => 'inbox', 'active' => ['inbox'], 'icon' => 'check', 'label' => __('general.nav.work-inbox'), 'count' => $count]
                 : null,
-            $user->hasActivePermission('leaves.view-own')
+            $user->hasActivePermission('hr.leaves.view-own')
                 ? ['key' => 'calendar', 'route' => 'team.calendar', 'active' => ['team.calendar'], 'icon' => 'calendar', 'label' => __('team_calendar.nav')]
                 : null,
             $user->profile

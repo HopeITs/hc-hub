@@ -43,7 +43,7 @@ class BadgeAuthorizationTest extends TestCase
     {
         $city = $this->createCity('ALP', '001');
         $user = $this->createUserWithActiveRole('employee', $city);
-        $user->givePermissionTo('badges.view');
+        $user->givePermissionTo('hr.badges.view');
 
         $this->actingAs($user)
             ->get(route('badges.index'))
@@ -146,7 +146,7 @@ class BadgeAuthorizationTest extends TestCase
         $aleppoBadge = $this->createBadge($this->createEmployee($aleppo, 'gm.aleppo'));
         $homsBadge = $this->createBadge($this->createEmployee($homs, 'gm.homs'));
 
-        $this->assertTrue($user->hasActivePermission('badges.view'));
+        $this->assertTrue($user->hasActivePermission('hr.badges.view'));
 
         $visibleIds = Badge::query()
             ->visibleTo($user)
@@ -195,7 +195,7 @@ class BadgeAuthorizationTest extends TestCase
         $user = $this->createUserWithActiveRole('manager', $city);
         $this->createBadge($this->createEmployee($city, 'manager.badge'));
 
-        $this->assertFalse($user->hasActivePermission('badges.view'));
+        $this->assertFalse($user->hasActivePermission('hr.badges.view'));
         $this->assertSame(0, Badge::query()->visibleTo($user)->count());
     }
 
@@ -203,7 +203,7 @@ class BadgeAuthorizationTest extends TestCase
     {
         $aleppo = $this->createCity('ALP', '001');
         $homs = $this->createCity('HMS', '002');
-        $this->grantToRole('manager', 'badges.view');
+        $this->grantToRole('manager', 'hr.badges.view');
         $user = $this->createUserWithActiveRole('manager', $aleppo);
 
         // The manager's own position, held through a contract running today.
@@ -248,7 +248,7 @@ class BadgeAuthorizationTest extends TestCase
     public function test_employee_granted_badges_view_reaches_no_badges(): void
     {
         $aleppo = $this->createCity('ALP', '001');
-        $this->grantToRole('employee', 'badges.view');
+        $this->grantToRole('employee', 'hr.badges.view');
         $user = $this->createUserWithActiveRole('employee', $aleppo);
         $badge = $this->createBadge($this->createEmployee($aleppo, 'employee.colleague'));
 

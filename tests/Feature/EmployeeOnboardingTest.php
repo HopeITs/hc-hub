@@ -86,7 +86,7 @@ class EmployeeOnboardingTest extends TestCase
     {
         $city = $this->makeCity('ALP', '001');
         $draft = $this->makeDraft($city);
-        $colleague = $this->hr($city, 'employees.update');
+        $colleague = $this->hr($city, 'hr.employees.update');
 
         Livewire::actingAs($colleague)->test(EmployeeEdit::class, ['employee' => $draft])
             ->assertSee(__('employees.onboarding.state-draft'))
@@ -110,7 +110,7 @@ class EmployeeOnboardingTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $draft = $this->makeDraft($city);
 
-        Livewire::actingAs($this->hr($city, 'employees.update'))->test(EmployeeEdit::class, ['employee' => $draft])
+        Livewire::actingAs($this->hr($city, 'hr.employees.update'))->test(EmployeeEdit::class, ['employee' => $draft])
             ->call('saveInformation')
             ->assertHasErrors(['infoForm.gender', 'infoForm.marital_status']);
 
@@ -122,7 +122,7 @@ class EmployeeOnboardingTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $draft = $this->makeDraft($city);
 
-        Livewire::actingAs($this->hr($city, 'employees.update'))->test(EmployeeEdit::class, ['employee' => $draft])
+        Livewire::actingAs($this->hr($city, 'hr.employees.update'))->test(EmployeeEdit::class, ['employee' => $draft])
             ->set('infoForm.address_en', 'Second visit')
             ->call('saveDraftRecord')
             ->assertHasNoErrors();
@@ -136,7 +136,7 @@ class EmployeeOnboardingTest extends TestCase
         $draft = $this->makeDraft($this->makeCity('ALP', '001'));
         $elsewhere = $this->makeCity('HMS', '002');
 
-        Livewire::actingAs($this->makeUser($elsewhere, 'HR-HMS', ['employees.update']))
+        Livewire::actingAs($this->makeUser($elsewhere, 'HR-HMS', ['hr.employees.update']))
             ->test(EmployeeEdit::class, ['employee' => $draft])
             ->assertForbidden();
     }
@@ -146,7 +146,7 @@ class EmployeeOnboardingTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $employee = $this->makeEmployee($city, 'b5.complete');
 
-        Livewire::actingAs($this->hr($city, 'employees.update'))->test(EmployeeEdit::class, ['employee' => $employee])
+        Livewire::actingAs($this->hr($city, 'hr.employees.update'))->test(EmployeeEdit::class, ['employee' => $employee])
             ->call('saveDraftRecord')
             ->assertForbidden();
 
@@ -237,7 +237,7 @@ class EmployeeOnboardingTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $draft = $this->makeDraft($city);
 
-        Livewire::actingAs($this->hr($city, 'employees.update'))->test(EmployeeTable::class)
+        Livewire::actingAs($this->hr($city, 'hr.employees.update'))->test(EmployeeTable::class)
             ->call('toggleItemStatusConfirmed', ['id' => $draft->id])
             ->assertForbidden();
 
@@ -249,7 +249,7 @@ class EmployeeOnboardingTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $awaiting = $this->makeEmployee($city, 'b5.waiting', ['is_active' => false]);
 
-        Livewire::actingAs($this->hr($city, 'employees.update'))->test(EmployeeTable::class)
+        Livewire::actingAs($this->hr($city, 'hr.employees.update'))->test(EmployeeTable::class)
             ->call('toggleItemStatusConfirmed', ['id' => $awaiting->id])
             ->assertForbidden();
 
@@ -266,7 +266,7 @@ class EmployeeOnboardingTest extends TestCase
             'start_date' => '2024-01-01', 'end_date' => '2024-12-31', 'is_active' => false,
         ]);
 
-        Livewire::actingAs($this->hr($fixtures['city'], 'employees.update'))->test(EmployeeTable::class)
+        Livewire::actingAs($this->hr($fixtures['city'], 'hr.employees.update'))->test(EmployeeTable::class)
             ->call('toggleItemStatusConfirmed', ['id' => $former->id])
             ->assertHasNoErrors();
 
@@ -294,7 +294,7 @@ class EmployeeOnboardingTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $draft = $this->makeDraft($city);
 
-        Livewire::actingAs($this->hr($city, 'employees.update'))->test(EmployeeEdit::class, ['employee' => $draft])
+        Livewire::actingAs($this->hr($city, 'hr.employees.update'))->test(EmployeeEdit::class, ['employee' => $draft])
             ->set('infoForm.is_active', true)
             ->set('infoForm.address_en', 'forged')
             ->call('saveDraftRecord')
@@ -329,7 +329,7 @@ class EmployeeOnboardingTest extends TestCase
         $draft = $this->makeDraft($fixtures['city']);
         $reservation = $this->reserve($draft, $fixtures);
 
-        Livewire::actingAs($this->hr($fixtures['city'], 'employees.update'))->test(EmployeeEdit::class, ['employee' => $draft])
+        Livewire::actingAs($this->hr($fixtures['city'], 'hr.employees.update'))->test(EmployeeEdit::class, ['employee' => $draft])
             ->call('confirmDiscardDraftRecord')
             ->assertDispatched('confirm-dialog')
             ->call('discardDraftRecord')
@@ -344,7 +344,7 @@ class EmployeeOnboardingTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $employee = $this->makeEmployee($city, 'b5.keep', ['is_active' => false]);
 
-        Livewire::actingAs($this->hr($city, 'employees.update'))->test(EmployeeEdit::class, ['employee' => $employee])
+        Livewire::actingAs($this->hr($city, 'hr.employees.update'))->test(EmployeeEdit::class, ['employee' => $employee])
             ->call('discardDraftRecord')
             ->assertForbidden();
 
@@ -433,7 +433,7 @@ class EmployeeOnboardingTest extends TestCase
 
         $this->assertSame(Employee::RECORD_COMPLETE, $active->fresh()->record_status, 'The column default backfills every existing row.');
 
-        Livewire::actingAs($this->hr($city, 'employees.update'))->test(EmployeeEdit::class, ['employee' => $active])
+        Livewire::actingAs($this->hr($city, 'hr.employees.update'))->test(EmployeeEdit::class, ['employee' => $active])
             ->set('infoForm.address_en', 'Edited')
             ->call('saveInformation')
             ->assertHasNoErrors();
@@ -453,7 +453,7 @@ class EmployeeOnboardingTest extends TestCase
             'national_number' => '12345678904', 'gender' => 1, 'marital_status' => 1, 'nationality' => 1, 'is_board_member' => false,
         ]);
 
-        Livewire::actingAs($this->hr($city, 'employees.update'))->test(EmployeeEdit::class, ['employee' => $active])
+        Livewire::actingAs($this->hr($city, 'hr.employees.update'))->test(EmployeeEdit::class, ['employee' => $active])
             ->set('infoForm.create_account', true)
             ->call('saveInformation')
             ->assertHasNoErrors();
@@ -464,7 +464,7 @@ class EmployeeOnboardingTest extends TestCase
     public function test_the_views_keep_drafts_apart_from_active_and_inactive_staff(): void
     {
         $city = $this->makeCity('ALP', '001');
-        $hr = $this->hr($city, 'employees.view');
+        $hr = $this->hr($city, 'hr.employees.view');
         $draft = $this->makeDraft($city);
         $former = $this->makeEmployee($city, 'b5.former', ['is_active' => false]);
         $active = $this->makeEmployee($city, 'b5.active');
@@ -487,7 +487,7 @@ class EmployeeOnboardingTest extends TestCase
     {
         $city = $this->makeCity('ALP', '001');
         $this->makeDraft($city);
-        $gm = $this->makeUser($city, 'general-manager', ['employees.view']);
+        $gm = $this->makeUser($city, 'general-manager', ['hr.employees.view']);
 
         $component = Livewire::actingAs($gm)->test(EmployeeTable::class)->call('setView', 'incomplete');
 
@@ -498,7 +498,7 @@ class EmployeeOnboardingTest extends TestCase
 
     private function hr(City $city, string ...$permissions): User
     {
-        return $this->makeUser($city, 'HR-'.$city->slug, $permissions ?: ['employees.create', 'employees.update']);
+        return $this->makeUser($city, 'HR-'.$city->slug, $permissions ?: ['hr.employees.create', 'hr.employees.update']);
     }
 
     private function draftMinimum($component, City $city)
@@ -588,7 +588,7 @@ class EmployeeOnboardingTest extends TestCase
         ]);
         $employee = $this->makeEmployee($city, 'b5-contract-employee');
         $annualType = ContractType::query()->forceCreate(['id' => 1, 'name_en' => 'Volunteer Contract', 'name_ar' => 'عقد تطوّع']);
-        $hr = $this->makeUser($city, 'HR-ALP', ['contracts.create', 'contracts.view', 'employees.update']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.contracts.create', 'hr.contracts.view', 'hr.employees.update']);
 
         return compact('city', 'center', 'position', 'program', 'employee', 'annualType', 'hr');
     }

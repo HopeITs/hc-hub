@@ -59,7 +59,7 @@ class AccessManagementTest extends TestCase
     public function test_direct_view_permission_shows_navigation_and_opens_access_management_read_only(): void
     {
         $viewer = $this->createUserWithActiveRole('manager');
-        $viewer->givePermissionTo('access-management.view');
+        $viewer->givePermissionTo('hub.access-management.view');
         $target = $this->createUserWithActiveRole('employee');
 
         $this->actingAs($viewer)
@@ -85,10 +85,10 @@ class AccessManagementTest extends TestCase
     public function test_view_only_permission_cannot_invoke_any_access_management_mutation(): void
     {
         $viewer = $this->createUserWithActiveRole('manager');
-        $viewer->givePermissionTo('access-management.view');
+        $viewer->givePermissionTo('hub.access-management.view');
         $target = $this->createUserWithActiveRole('employee');
         $customRole = Role::findOrCreate('view-only-target', 'web');
-        $permission = Permission::findOrCreate('statistics.view', 'web');
+        $permission = Permission::findOrCreate('hr.statistics.view', 'web');
 
         Livewire::actingAs($viewer)
             ->test(Index::class)
@@ -130,13 +130,13 @@ class AccessManagementTest extends TestCase
     public function test_each_access_management_capability_only_allows_its_own_mutations(): void
     {
         $target = $this->createUserWithActiveRole('employee');
-        $directAccessPermission = Permission::findOrCreate('access-management.view', 'web');
-        $rolePermission = Permission::findOrCreate('statistics.view', 'web');
+        $directAccessPermission = Permission::findOrCreate('hub.access-management.view', 'web');
+        $rolePermission = Permission::findOrCreate('hr.statistics.view', 'web');
 
         $employeeManager = $this->createUserWithActiveRole('employee-access-manager');
         $employeeManager->givePermissionTo([
-            'access-management.view',
-            'access-management.manage-employees',
+            'hub.access-management.view',
+            'hub.access-management.manage-employees',
         ]);
 
         Livewire::actingAs($employeeManager)
@@ -156,8 +156,8 @@ class AccessManagementTest extends TestCase
 
         $roleManager = $this->createUserWithActiveRole('role-manager');
         $roleManager->givePermissionTo([
-            'access-management.view',
-            'access-management.manage-roles',
+            'hub.access-management.view',
+            'hub.access-management.manage-roles',
         ]);
 
         Livewire::actingAs($roleManager)
@@ -174,14 +174,14 @@ class AccessManagementTest extends TestCase
 
         $permissionManager = $this->createUserWithActiveRole('permission-manager');
         $permissionManager->givePermissionTo([
-            'access-management.view',
-            'access-management.manage-permissions',
-            // statistics.view is granted to the manager as well, because a
+            'hub.access-management.view',
+            'hub.access-management.manage-permissions',
+            // hr.statistics.view is granted to the manager as well, because a
             // delegated administrator may now only hand out permissions they
             // hold themselves. Without that rule, manage-permissions was a
             // route to assembling a role with every permission in the
             // catalogue and then assigning it — see PrivilegeEscalationTest.
-            'statistics.view',
+            'hr.statistics.view',
         ]);
 
         Livewire::actingAs($permissionManager)
@@ -218,7 +218,7 @@ class AccessManagementTest extends TestCase
         $administrator = $this->createUserWithActiveRole('HR-SYR');
         $employee = $this->createUserWithActiveRole('employee');
         $managerRole = Role::findOrCreate('manager', 'web');
-        $directPermission = Permission::findOrCreate('statistics.view', 'web');
+        $directPermission = Permission::findOrCreate('hr.statistics.view', 'web');
 
         Livewire::actingAs($administrator)
             ->test(Index::class)
@@ -232,7 +232,7 @@ class AccessManagementTest extends TestCase
         $employee->refresh()->unsetRelation('roles')->unsetRelation('permissions');
 
         $this->assertSame('manager', $employee->myRole());
-        $this->assertTrue($employee->hasDirectPermission('statistics.view'));
+        $this->assertTrue($employee->hasDirectPermission('hr.statistics.view'));
         $this->assertCount(2, $employee->roles);
     }
 
@@ -240,7 +240,7 @@ class AccessManagementTest extends TestCase
     {
         $administrator = $this->createUserWithActiveRole('HR-SYR');
         $employee = $this->createUserWithActiveRole('employee');
-        $permission = Permission::findOrCreate('statistics.view', 'web');
+        $permission = Permission::findOrCreate('hr.statistics.view', 'web');
 
         Livewire::actingAs($administrator)
             ->test(Index::class)
@@ -260,7 +260,7 @@ class AccessManagementTest extends TestCase
         $administrator = $this->createUserWithActiveRole('HR-SYR');
         $employee = $this->createUserWithActiveRole('manager');
         $customRole = Role::findOrCreate('test-role', 'web');
-        $permission = Permission::findOrCreate('statistics.view', 'web');
+        $permission = Permission::findOrCreate('hr.statistics.view', 'web');
         $customRole->givePermissionTo($permission);
 
         Livewire::actingAs($administrator)
@@ -279,7 +279,7 @@ class AccessManagementTest extends TestCase
 
         $this->assertSame('test-role', $employee->myRole());
         $this->assertTrue((bool) $activePivot->is_active);
-        $this->assertTrue($employee->hasActivePermission('statistics.view'));
+        $this->assertTrue($employee->hasActivePermission('hr.statistics.view'));
         $this->assertSame([$customRole->id], $employee->roles->pluck('id')->all());
     }
 
@@ -388,8 +388,8 @@ class AccessManagementTest extends TestCase
     {
         $administrator = $this->createUserWithActiveRole('HR-SYR');
         $employee = $this->createUserWithActiveRole('employee');
-        $managedOld = Permission::findOrCreate('employees.view', 'web');
-        $managedNew = Permission::findOrCreate('statistics.view', 'web');
+        $managedOld = Permission::findOrCreate('hr.employees.view', 'web');
+        $managedNew = Permission::findOrCreate('hr.statistics.view', 'web');
         $external = Permission::findOrCreate('legacy.external-access', 'web');
         $employee->givePermissionTo([$managedOld, $external]);
 
@@ -448,8 +448,8 @@ class AccessManagementTest extends TestCase
     {
         $administrator = $this->createUserWithActiveRole('HR-SYR');
         $role = Role::findOrCreate('auditor', 'web');
-        $oldManaged = Permission::findOrCreate('employees.view', 'web');
-        $newManaged = Permission::findOrCreate('statistics.view', 'web');
+        $oldManaged = Permission::findOrCreate('hr.employees.view', 'web');
+        $newManaged = Permission::findOrCreate('hr.statistics.view', 'web');
         $external = Permission::findOrCreate('legacy.audit', 'web');
         $role->givePermissionTo([$oldManaged, $external]);
 
@@ -577,16 +577,16 @@ class AccessManagementTest extends TestCase
     {
         $user = $this->createUserWithActiveRole('employee');
         $manager = Role::findOrCreate('manager', 'web');
-        $permission = Permission::findOrCreate('statistics.view', 'web');
+        $permission = Permission::findOrCreate('hr.statistics.view', 'web');
         $manager->givePermissionTo($permission);
         $user->assignRole($manager);
         $user->roles()->updateExistingPivot($manager->id, ['is_active' => false]);
         $user->unsetRelation('roles')->unsetRelation('permissions');
 
-        $this->assertFalse($user->hasActivePermission('statistics.view'));
+        $this->assertFalse($user->hasActivePermission('hr.statistics.view'));
 
         $user->givePermissionTo($permission);
-        $this->assertTrue($user->hasActivePermission('statistics.view'));
+        $this->assertTrue($user->hasActivePermission('hr.statistics.view'));
     }
 
     public function test_eager_loaded_roles_preserve_the_active_pivot_and_effective_access(): void
@@ -594,7 +594,7 @@ class AccessManagementTest extends TestCase
         $user = $this->createUserWithActiveRole('employee');
         $employeeRole = Role::findByName('employee', 'web');
         $managerRole = Role::findOrCreate('manager', 'web');
-        $permission = Permission::findOrCreate('statistics.view', 'web');
+        $permission = Permission::findOrCreate('hr.statistics.view', 'web');
         $managerRole->givePermissionTo($permission);
         $user->assignRole($managerRole);
         $user->roles()->updateExistingPivot($managerRole->id, ['is_active' => false]);
@@ -623,7 +623,7 @@ class AccessManagementTest extends TestCase
             ->get(route('employees.index'))
             ->assertForbidden();
 
-        $user->givePermissionTo('employees.view');
+        $user->givePermissionTo('hr.employees.view');
 
         $this->actingAs($user)
             ->get(route('employees.index'))
@@ -649,7 +649,7 @@ class AccessManagementTest extends TestCase
             $this->assertSame(403, $exception->getStatusCode());
         }
 
-        $user->givePermissionTo('employees.delete');
+        $user->givePermissionTo('hr.employees.delete');
 
         $response = $middleware->handle($request, fn (): Response => new Response('allowed'));
         $this->assertSame('allowed', $response->getContent());
@@ -695,7 +695,7 @@ class AccessManagementTest extends TestCase
         $guestRequest = Request::create('/protected', 'GET');
 
         try {
-            $middleware->handle($guestRequest, fn (): Response => new Response('allowed'), 'statistics.view');
+            $middleware->handle($guestRequest, fn (): Response => new Response('allowed'), 'hr.statistics.view');
             $this->fail('A guest should not pass active permission middleware.');
         } catch (HttpException $exception) {
             $this->assertSame(403, $exception->getStatusCode());
@@ -706,14 +706,14 @@ class AccessManagementTest extends TestCase
         $request->setUserResolver(fn (): User => $user);
 
         try {
-            $middleware->handle($request, fn (): Response => new Response('allowed'), 'statistics.view');
+            $middleware->handle($request, fn (): Response => new Response('allowed'), 'hr.statistics.view');
             $this->fail('A user without the permission should be rejected.');
         } catch (HttpException $exception) {
             $this->assertSame(403, $exception->getStatusCode());
         }
 
-        $user->givePermissionTo('statistics.view');
-        $response = $middleware->handle($request, fn (): Response => new Response('allowed'), 'statistics.view');
+        $user->givePermissionTo('hr.statistics.view');
+        $response = $middleware->handle($request, fn (): Response => new Response('allowed'), 'hr.statistics.view');
 
         $this->assertSame('allowed', $response->getContent());
     }
@@ -801,7 +801,7 @@ class AccessManagementTest extends TestCase
             ->gatherMiddleware();
 
         $this->assertContains(
-            'active_permission:access-management.view',
+            'active_permission:hub.access-management.view',
             $accessRouteMiddleware,
         );
         $this->assertNotContains(
@@ -814,11 +814,11 @@ class AccessManagementTest extends TestCase
     {
         $role = Role::findOrCreate('HR-ALP', 'web');
 
-        $this->assertFalse($role->hasPermissionTo('access-management.view'));
-        $this->assertFalse($role->hasPermissionTo('access-management.manage-employees'));
-        $this->assertFalse($role->hasPermissionTo('activity-log.view'));
-        $this->assertTrue($role->hasPermissionTo('employees.view'));
-        $this->assertTrue($role->hasPermissionTo('leaves.decide'));
+        $this->assertFalse($role->hasPermissionTo('hub.access-management.view'));
+        $this->assertFalse($role->hasPermissionTo('hub.access-management.manage-employees'));
+        $this->assertFalse($role->hasPermissionTo('hub.activity-log.view'));
+        $this->assertTrue($role->hasPermissionTo('hr.employees.view'));
+        $this->assertTrue($role->hasPermissionTo('hr.leaves.decide'));
     }
 
     public function test_livewire_middleware_allows_guest_authentication_components(): void
@@ -845,7 +845,7 @@ class AccessManagementTest extends TestCase
             ->call('create')
             ->assertForbidden();
 
-        $user->givePermissionTo('project-basics.create');
+        $user->givePermissionTo('hr.project-basics.create');
 
         Livewire::actingAs($user)
             ->test(DepartmentModule::class)

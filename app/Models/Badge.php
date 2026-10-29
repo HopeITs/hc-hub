@@ -57,7 +57,7 @@ class Badge extends Model
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if (! $user->hasActivePermission('badges.view')) {
+        if (! $user->hasActivePermission('hr.badges.view')) {
             return $query->whereRaw('1 = 0');
         }
 
@@ -94,7 +94,7 @@ class Badge extends Model
      *
      * activeCityIds() answers "every city" for any role that is not a regional
      * HR role, so it cannot be the whole rule: a manager or employee granted
-     * badges.view in Access Management would see the entire organisation.
+     * hr.badges.view in Access Management would see the entire organisation.
      * Only the roles below are city-scoped; a manager follows the same line
      * as Contract::scopeVisibleTo() (their direct reports, G-C-8) and any
      * other role reaches nobody.

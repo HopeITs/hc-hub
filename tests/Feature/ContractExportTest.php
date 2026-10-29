@@ -62,7 +62,7 @@ class ContractExportTest extends TestCase
         $contract = $this->contract(1);
         $otherCity = $this->makeCity('HMS', '002');
 
-        $this->actingAs($this->makeUser($otherCity, 'HR-HMS', ['contracts.export']))
+        $this->actingAs($this->makeUser($otherCity, 'HR-HMS', ['hr.contracts.export']))
             ->get(route('contracts.export', $contract))
             ->assertForbidden();
     }
@@ -85,7 +85,7 @@ class ContractExportTest extends TestCase
     {
         $this->rendererMustNotRun();
         $contract = $this->contract(1);
-        $user = $this->makeUser($this->city, $role, ['contracts.export', 'contracts.view']);
+        $user = $this->makeUser($this->city, $role, ['hr.contracts.export', 'hr.contracts.view']);
 
         $this->assertFalse($user->canViewSalary());
 
@@ -96,7 +96,7 @@ class ContractExportTest extends TestCase
     {
         $this->rendererMustNotRun();
 
-        $this->actingAs($this->makeUser($this->city, 'HR-ALP', ['contracts.view']))
+        $this->actingAs($this->makeUser($this->city, 'HR-ALP', ['hr.contracts.view']))
             ->get(route('contracts.export', $this->contract(1)))
             ->assertForbidden();
     }
@@ -242,12 +242,12 @@ class ContractExportTest extends TestCase
             ->assertSee('1,234');
 
         foreach (['super-admin', 'general-manager'] as $role) {
-            $this->actingAs($this->makeUser($this->city, $role, ['contracts.export', 'contracts.view']))
+            $this->actingAs($this->makeUser($this->city, $role, ['hr.contracts.export', 'hr.contracts.view']))
                 ->get(route('contracts.export-preview', $contract))
                 ->assertForbidden();
         }
 
-        $this->actingAs($this->makeUser($this->makeCity('HMS', '002'), 'HR-HMS', ['contracts.export']))
+        $this->actingAs($this->makeUser($this->makeCity('HMS', '002'), 'HR-HMS', ['hr.contracts.export']))
             ->get(route('contracts.export-preview', $contract))
             ->assertForbidden();
     }
@@ -256,7 +256,7 @@ class ContractExportTest extends TestCase
 
     private function hr(): User
     {
-        return $this->makeUser($this->city, 'HR-ALP', ['contracts.export', 'contracts.view']);
+        return $this->makeUser($this->city, 'HR-ALP', ['hr.contracts.export', 'hr.contracts.view']);
     }
 
     private function contract(int $typeId, array $overrides = []): Contract

@@ -779,7 +779,7 @@ class ContractForm extends Form
             // A new contract (G-B-10): HR that may create it. Its city is
             // already held to the role's by the identity validation.
             return auth()->user()->activeRoleIs('HR')
-                && auth()->user()->hasActivePermission('contracts.create');
+                && auth()->user()->hasActivePermission('hr.contracts.create');
         }
 
         $source = Contract::query()->find($this->renewal_source_id);

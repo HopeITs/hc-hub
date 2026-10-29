@@ -33,7 +33,7 @@ class TerminationReasonModule extends Component
 
     public function create(): void
     {
-        $this->authorizeActivePermission('project-basics.create');
+        $this->authorizeActivePermission('hr.project-basics.create');
         $this->item = [
             'id' => null,
             'title_en' => null,
@@ -47,7 +47,7 @@ class TerminationReasonModule extends Component
 
     public function edit(int $id): void
     {
-        $this->authorizeActivePermission('project-basics.update');
+        $this->authorizeActivePermission('hr.project-basics.update');
         $model = TerminationReason::findOrFail($id);
 
         $this->item = [
@@ -65,7 +65,7 @@ class TerminationReasonModule extends Component
     public function save(): void
     {
         $this->authorizeActivePermission(
-            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update',
+            empty($this->item['id']) ? 'hr.project-basics.create' : 'hr.project-basics.update',
         );
         $this->validate();
 

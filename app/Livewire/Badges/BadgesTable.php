@@ -74,7 +74,7 @@ class BadgesTable extends LivewireTable
 
     protected function columns(): array
     {
-        $canDelete = auth()->user()?->hasActivePermission('badges.delete') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('hr.badges.delete') ?? false;
 
         return [
             SelectColumn::make(trans_choice('general.employee', 1), 'employee_id')

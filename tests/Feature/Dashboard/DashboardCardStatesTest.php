@@ -154,7 +154,7 @@ class DashboardCardStatesTest extends TestCase
 
     public function test_upcoming_leaves_empty_action_follows_permission(): void
     {
-        $withAccess = $this->hr('DMS', '003', ['leaves.view-own']);
+        $withAccess = $this->hr('DMS', '003', ['hr.leaves.view-own']);
         $this->live($withAccess)->test(UpcomingLeavesCard::class)
             ->assertSee(__('general.no-available-data'))
             ->assertSee(route('leaves.index'));

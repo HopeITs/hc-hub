@@ -36,7 +36,7 @@ class LeaveChecklistNotificationStatesTest extends TestCase
     public function test_my_leave_empty_state_offers_request_only_with_create_permission(): void
     {
         $city = $this->makeCity('DMS', '003');
-        $may = $this->makeUser($city, 'employee', ['leaves.create']);
+        $may = $this->makeUser($city, 'employee', ['hr.leaves.create']);
         // Roles are shared by name, so the read-only user needs a role of its own.
         $mayNot = $this->makeUser($city, 'staff-readonly', []);
 
@@ -57,7 +57,7 @@ class LeaveChecklistNotificationStatesTest extends TestCase
     {
         $city = $this->makeCity('DMS', '003');
 
-        Livewire::actingAs($this->makeUser($city, 'employee', ['leaves.create']))
+        Livewire::actingAs($this->makeUser($city, 'employee', ['hr.leaves.create']))
             ->test(MyLeaveRequestModule::class)->assertSeeHtml('wire:click="create"');
         Livewire::actingAs($this->makeUser($city, 'staff-readonly', []))
             ->test(MyLeaveRequestModule::class)->assertDontSeeHtml('wire:click="create"');
@@ -115,8 +115,8 @@ class LeaveChecklistNotificationStatesTest extends TestCase
     public function test_hr_all_leaves_empty_state_and_add_action_by_role(): void
     {
         $city = $this->makeCity('DMS', '003');
-        $hr = $this->makeUser($city, 'HR-DMS', ['leaves.view-all', 'leaves.create']);
-        $manager = $this->makeUser($city, 'manager', ['leaves.view-all']);
+        $hr = $this->makeUser($city, 'HR-DMS', ['hr.leaves.view-all', 'hr.leaves.create']);
+        $manager = $this->makeUser($city, 'manager', ['hr.leaves.view-all']);
 
         Livewire::actingAs($hr)->test(AllLeaveRequestTable::class)
             ->assertSeeHtml('data-state="empty"')
@@ -133,11 +133,11 @@ class LeaveChecklistNotificationStatesTest extends TestCase
     {
         $city = $this->makeCity('DMS', '003');
 
-        Livewire::actingAs($this->makeUser($city, 'manager', ['leaves.create']))
+        Livewire::actingAs($this->makeUser($city, 'manager', ['hr.leaves.create']))
             ->test(AllLeaveRequestModule::class)->call('create')->assertForbidden();
         Livewire::actingAs($this->makeUser($city, 'HR-DMS', []))
             ->test(AllLeaveRequestModule::class)->call('create')->assertForbidden();
-        Livewire::actingAs($this->makeUser($city, 'HR-DMS', ['leaves.create']))
+        Livewire::actingAs($this->makeUser($city, 'HR-DMS', ['hr.leaves.create']))
             ->test(AllLeaveRequestModule::class)->call('create')->assertSet('formModal', true);
     }
 
@@ -193,7 +193,7 @@ class LeaveChecklistNotificationStatesTest extends TestCase
     public function test_checklist_screens_show_empty_then_rows_and_fail_with_retry(): void
     {
         Exceptions::fake();
-        $user = $this->makeUser($this->makeCity('DMS', '003'), 'employee', ['checklists.view-own', 'checklists.deliver']);
+        $user = $this->makeUser($this->makeCity('DMS', '003'), 'employee', ['hr.checklists.view-own', 'hr.checklists.deliver']);
 
         Livewire::actingAs($user)->test(AllItems::class)
             ->assertSeeHtml('data-state="empty"')
@@ -226,7 +226,7 @@ class LeaveChecklistNotificationStatesTest extends TestCase
 
     public function test_repeated_retry_on_the_checklist_never_writes(): void
     {
-        $user = $this->makeUser($this->makeCity('DMS', '003'), 'employee', ['checklists.deliver']);
+        $user = $this->makeUser($this->makeCity('DMS', '003'), 'employee', ['hr.checklists.deliver']);
         $item = ChecklistItem::query()->create(['name' => 'Phone', 'order' => 1]);
         $row = Checklist::query()->create([
             'item_id' => $item->id, 'employee_id' => $user->employee_id, 'delivered_id' => $user->employee_id,
@@ -364,7 +364,7 @@ class LeaveChecklistNotificationStatesTest extends TestCase
     private function leaveFixture(): array
     {
         $city = $this->makeCity('DMS', '003');
-        $user = $this->makeUser($city, 'employee', ['leaves.create']);
+        $user = $this->makeUser($city, 'employee', ['hr.leaves.create']);
         $contract = $this->makeContractFor($user->profile);
 
         $typeId = DB::table('leave_types')->insertGetId([

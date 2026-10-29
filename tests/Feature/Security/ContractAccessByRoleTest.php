@@ -28,11 +28,11 @@ class ContractAccessByRoleTest extends TestCase
     use CreatesContractFixtures, RefreshDatabase;
 
     private const HR_PERMISSIONS = [
-        'contracts.view', 'contracts.create', 'contracts.update', 'contracts.delete', 'contracts.export',
+        'hr.contracts.view', 'hr.contracts.create', 'hr.contracts.update', 'hr.contracts.delete', 'hr.contracts.export',
     ];
 
     private const GM_PERMISSIONS = [
-        'contracts.view', 'contracts.create', 'contracts.update', 'contracts.export',
+        'hr.contracts.view', 'hr.contracts.create', 'hr.contracts.update', 'hr.contracts.export',
     ];
 
     private City $alp;
@@ -315,7 +315,7 @@ class ContractAccessByRoleTest extends TestCase
 
     private function manager(): User
     {
-        return $this->makeUser($this->alp, 'manager', ['contracts.view'], $this->managerEmployee);
+        return $this->makeUser($this->alp, 'manager', ['hr.contracts.view'], $this->managerEmployee);
     }
 
     private function makeNamedEmployee(City $city, string $firstName): Employee

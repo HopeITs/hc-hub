@@ -38,7 +38,7 @@ return [
      * Reference pages a role may not open, though its baseline still holds
      * the read permission (C0-Q4 answer 2, G-B-13 answer 2). The same list
      * takes them out of the menu and refuses their URL with 403, so the two
-     * cannot drift. The permission stays: positions.view also opens the org
+     * cannot drift. The permission stays: hr.positions.view also opens the org
      * chart and the colleague drawer, which every role keeps.
      * Read through User::canOpenReferencePage().
      */
@@ -51,52 +51,52 @@ return [
 
     'role_baselines' => [
         'general-manager' => [
-            'statistics.view', 'employees.view', 'employees.create', 'employees.update', 'employees.export',
-            'contracts.view', 'contracts.create', 'contracts.update', 'contracts.export',
-            'programs.view', 'programs.create', 'programs.update', 'centers.view',
-            'positions.view', 'leaves.view-own', 'leaves.view-all', 'leaves.create',
-            'leaves.update', 'leaves.decide', 'news.view', 'news.create', 'news.update',
-            'checklists.view-own',
-            'checklists.manage', 'project-basics.view', 'archives.view',
-            'archives.create', 'archives.update', 'archives.delete', 'archives.share',
-            'archives.download',
+            'hr.statistics.view', 'hr.employees.view', 'hr.employees.create', 'hr.employees.update', 'hr.employees.export',
+            'hr.contracts.view', 'hr.contracts.create', 'hr.contracts.update', 'hr.contracts.export',
+            'hr.programs.view', 'hr.programs.create', 'hr.programs.update', 'hr.centers.view',
+            'hr.positions.view', 'hr.leaves.view-own', 'hr.leaves.view-all', 'hr.leaves.create',
+            'hr.leaves.update', 'hr.leaves.decide', 'hr.news.view', 'hr.news.create', 'hr.news.update',
+            'hr.checklists.view-own',
+            'hr.checklists.manage', 'hr.project-basics.view', 'hr.archives.view',
+            'hr.archives.create', 'hr.archives.update', 'hr.archives.delete', 'hr.archives.share',
+            'hr.archives.download',
             // Read-only, across every city like HR-SYR: see Badge::scopeVisibleTo().
-            'badges.view',
+            'hr.badges.view',
         ],
         'manager' => [
             // Read-only, and only their direct reports' contracts (G-C-8):
             // see Contract::scopeVisibleTo().
-            'contracts.view',
-            'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
-            'leaves.view-all', 'leaves.create', 'leaves.update', 'leaves.decide',
-            'news.view', 'news.create', 'news.update',
-            'checklists.view-own', 'project-basics.view', 'archives.view',
-            'archives.create', 'archives.update', 'archives.delete', 'archives.share',
-            'archives.download',
+            'hr.contracts.view',
+            'hr.programs.view', 'hr.centers.view', 'hr.positions.view', 'hr.leaves.view-own',
+            'hr.leaves.view-all', 'hr.leaves.create', 'hr.leaves.update', 'hr.leaves.decide',
+            'hr.news.view', 'hr.news.create', 'hr.news.update',
+            'hr.checklists.view-own', 'hr.project-basics.view', 'hr.archives.view',
+            'hr.archives.create', 'hr.archives.update', 'hr.archives.delete', 'hr.archives.share',
+            'hr.archives.download',
         ],
         'employee' => [
-            'programs.view', 'centers.view', 'positions.view', 'leaves.view-own',
-            'leaves.create', 'leaves.update', 'archives.view',
-            'archives.create', 'archives.update', 'archives.delete', 'archives.share',
-            'archives.download', 'checklists.view-own', 'project-basics.view',
+            'hr.programs.view', 'hr.centers.view', 'hr.positions.view', 'hr.leaves.view-own',
+            'hr.leaves.create', 'hr.leaves.update', 'hr.archives.view',
+            'hr.archives.create', 'hr.archives.update', 'hr.archives.delete', 'hr.archives.share',
+            'hr.archives.download', 'hr.checklists.view-own', 'hr.project-basics.view',
         ],
     ],
 
     'groups' => [
-        'access-management' => ['view', 'manage-employees', 'manage-roles', 'manage-permissions'],
-        'statistics' => ['view'],
-        'employees' => ['view', 'create', 'update', 'delete', 'export'],
-        'contracts' => ['view', 'create', 'update', 'delete', 'export'],
-        'programs' => ['view', 'create', 'update', 'delete'],
-        'centers' => ['view', 'create', 'update', 'delete', 'export'],
-        'positions' => ['view', 'create', 'update', 'delete', 'export'],
-        'leaves' => ['view-own', 'view-all', 'create', 'update', 'delete', 'decide', 'review', 'manage-balances', 'export'],
-        'project-basics' => ['view', 'create', 'update', 'delete', 'export'],
-        'news' => ['view', 'create', 'update', 'delete'],
-        'badges' => ['view', 'create', 'update', 'delete'],
-        'archives' => ['view', 'create', 'update', 'delete', 'share', 'download'],
-        'checklists' => ['view-own', 'view-all', 'manage', 'deliver', 'receive'],
-        'activity-log' => ['view'],
+        'hub.access-management' => ['view', 'manage-employees', 'manage-roles', 'manage-permissions'],
+        'hr.statistics' => ['view'],
+        'hr.employees' => ['view', 'create', 'update', 'delete', 'export'],
+        'hr.contracts' => ['view', 'create', 'update', 'delete', 'export'],
+        'hr.programs' => ['view', 'create', 'update', 'delete'],
+        'hr.centers' => ['view', 'create', 'update', 'delete', 'export'],
+        'hr.positions' => ['view', 'create', 'update', 'delete', 'export'],
+        'hr.leaves' => ['view-own', 'view-all', 'create', 'update', 'delete', 'decide', 'review', 'manage-balances', 'export'],
+        'hr.project-basics' => ['view', 'create', 'update', 'delete', 'export'],
+        'hr.news' => ['view', 'create', 'update', 'delete'],
+        'hr.badges' => ['view', 'create', 'update', 'delete'],
+        'hr.archives' => ['view', 'create', 'update', 'delete', 'share', 'download'],
+        'hr.checklists' => ['view-own', 'view-all', 'manage', 'deliver', 'receive'],
+        'hub.activity-log' => ['view'],
     ],
 
     /*
@@ -106,198 +106,198 @@ return [
      */
     'livewire' => [
         'access-management.index' => [
-            'saveEmployeeAccess' => 'access-management.manage-employees',
-            'saveRolePermissions' => 'access-management.manage-permissions',
-            'selectAllRolePermissions' => 'access-management.manage-permissions',
-            'clearRolePermissions' => 'access-management.manage-permissions',
-            'createRole' => 'access-management.manage-roles',
-            'renameRole' => 'access-management.manage-roles',
-            'deleteRole' => 'access-management.manage-roles',
+            'saveEmployeeAccess' => 'hub.access-management.manage-employees',
+            'saveRolePermissions' => 'hub.access-management.manage-permissions',
+            'selectAllRolePermissions' => 'hub.access-management.manage-permissions',
+            'clearRolePermissions' => 'hub.access-management.manage-permissions',
+            'createRole' => 'hub.access-management.manage-roles',
+            'renameRole' => 'hub.access-management.manage-roles',
+            'deleteRole' => 'hub.access-management.manage-roles',
         ],
         // edit() discloses a city into the modal, like the other basics modules.
-        'basics.city-module' => ['edit' => 'project-basics.update'],
+        'basics.city-module' => ['edit' => 'hr.project-basics.update'],
         'basics.city-table' => [
-            'toggleItemStatusConfirmed' => 'project-basics.update',
-            'exportExcel' => 'project-basics.export',
+            'toggleItemStatusConfirmed' => 'hr.project-basics.update',
+            'exportExcel' => 'hr.project-basics.export',
         ],
-        'basics.contract-type-table' => ['delete' => 'project-basics.delete', 'exportExcel' => 'project-basics.export'],
-        'basics.checklist-item-table' => ['delete' => 'project-basics.delete', 'exportExcel' => 'project-basics.export'],
-        'basics.leave-type-table' => ['delete' => 'project-basics.delete', 'exportExcel' => 'project-basics.export'],
-        'basics.job-level-table' => ['delete' => 'project-basics.delete', 'exportExcel' => 'project-basics.export'],
-        'basics.department-table' => ['delete' => 'project-basics.delete', 'exportExcel' => 'project-basics.export'],
-        'basics.course-category-table' => ['delete' => 'project-basics.delete', 'exportExcel' => 'project-basics.export'],
-        'basics.annual-leave-rule-table' => ['delete' => 'project-basics.delete', 'exportExcel' => 'project-basics.export'],
-        'basics.termination-reason-table' => ['delete' => 'project-basics.delete'],
-        'program-management.program.create' => ['save' => 'programs.create'],
-        'program-management.program.update' => ['save' => 'programs.update'],
+        'basics.contract-type-table' => ['delete' => 'hr.project-basics.delete', 'exportExcel' => 'hr.project-basics.export'],
+        'basics.checklist-item-table' => ['delete' => 'hr.project-basics.delete', 'exportExcel' => 'hr.project-basics.export'],
+        'basics.leave-type-table' => ['delete' => 'hr.project-basics.delete', 'exportExcel' => 'hr.project-basics.export'],
+        'basics.job-level-table' => ['delete' => 'hr.project-basics.delete', 'exportExcel' => 'hr.project-basics.export'],
+        'basics.department-table' => ['delete' => 'hr.project-basics.delete', 'exportExcel' => 'hr.project-basics.export'],
+        'basics.course-category-table' => ['delete' => 'hr.project-basics.delete', 'exportExcel' => 'hr.project-basics.export'],
+        'basics.annual-leave-rule-table' => ['delete' => 'hr.project-basics.delete', 'exportExcel' => 'hr.project-basics.export'],
+        'basics.termination-reason-table' => ['delete' => 'hr.project-basics.delete'],
+        'program-management.program.create' => ['save' => 'hr.programs.create'],
+        'program-management.program.update' => ['save' => 'hr.programs.update'],
         'program-management.program.index' => [
-            'delete' => 'programs.delete',
-            'toggleItemStatusConfirmed' => 'programs.update',
-            'show' => 'programs.view',
+            'delete' => 'hr.programs.delete',
+            'toggleItemStatusConfirmed' => 'hr.programs.update',
+            'show' => 'hr.programs.view',
         ],
         'program-management.program.detail' => [
-            'delete' => 'programs.delete',
-            'toggleItemStatusConfirmed' => 'programs.update',
+            'delete' => 'hr.programs.delete',
+            'toggleItemStatusConfirmed' => 'hr.programs.update',
         ],
-        'program-management.center.center-create' => ['save' => 'centers.create'],
+        'program-management.center.center-create' => ['save' => 'hr.centers.create'],
         'program-management.center.centers-table' => [
-            'delete' => 'centers.delete',
-            'toggleItemStatusConfirmed' => 'centers.update',
-            'exportExcel' => 'centers.export',
+            'delete' => 'hr.centers.delete',
+            'toggleItemStatusConfirmed' => 'hr.centers.update',
+            'exportExcel' => 'hr.centers.export',
         ],
-        'position.position-create' => ['save' => 'positions.create'],
-        'position.position-edit' => ['save' => 'positions.update'],
+        'position.position-create' => ['save' => 'hr.positions.create'],
+        'position.position-edit' => ['save' => 'hr.positions.update'],
         'position.position-table' => [
-            'delete' => 'positions.delete',
-            'toggleItemStatusConfirmed' => 'positions.update',
-            'exportExcel' => 'positions.export',
+            'delete' => 'hr.positions.delete',
+            'toggleItemStatusConfirmed' => 'hr.positions.update',
+            'exportExcel' => 'hr.positions.export',
         ],
         'employee.employee-create' => [
-            'saveInformation' => 'employees.create',
-            'saveDraftRecord' => 'employees.create',
-            'createDraftAndContinue' => 'employees.create',
-            'positionOptionsForDraft' => 'employees.create',
-            'programOptionsForDraft' => 'employees.create',
-            'citiesForDraft' => 'employees.create',
-            'canPickAnyDraftCity' => 'employees.create',
+            'saveInformation' => 'hr.employees.create',
+            'saveDraftRecord' => 'hr.employees.create',
+            'createDraftAndContinue' => 'hr.employees.create',
+            'positionOptionsForDraft' => 'hr.employees.create',
+            'programOptionsForDraft' => 'hr.employees.create',
+            'citiesForDraft' => 'hr.employees.create',
+            'canPickAnyDraftCity' => 'hr.employees.create',
         ],
         'employee.employee-edit' => [
-            'saveChecklist' => 'employees.update',
-            'saveInformation' => 'employees.update',
-            'saveDraftRecord' => 'employees.update',
-            'confirmDiscardDraftRecord' => 'employees.update',
-            'discardDraftRecord' => 'employees.update',
-            'saveEducation' => 'employees.update',
-            'saveCourses' => 'employees.update',
-            'saveExperience' => 'employees.update',
-            'saveRelatives' => 'employees.update',
-            'saveBadges' => 'badges.create',
-            'saveAttachments' => 'employees.update',
-            'removeAttachment' => 'employees.update',
-            'removeEducation' => 'employees.update',
-            'removeCourse' => 'employees.update',
-            'removeExperience' => 'employees.update',
-            'removeRelative' => 'employees.update',
-            'addBadge' => 'badges.create',
-            'removeBadge' => 'badges.create',
-            'initiateReturn' => 'employees.update',
-            'finalizeReturnCycle' => 'employees.update',
+            'saveChecklist' => 'hr.employees.update',
+            'saveInformation' => 'hr.employees.update',
+            'saveDraftRecord' => 'hr.employees.update',
+            'confirmDiscardDraftRecord' => 'hr.employees.update',
+            'discardDraftRecord' => 'hr.employees.update',
+            'saveEducation' => 'hr.employees.update',
+            'saveCourses' => 'hr.employees.update',
+            'saveExperience' => 'hr.employees.update',
+            'saveRelatives' => 'hr.employees.update',
+            'saveBadges' => 'hr.badges.create',
+            'saveAttachments' => 'hr.employees.update',
+            'removeAttachment' => 'hr.employees.update',
+            'removeEducation' => 'hr.employees.update',
+            'removeCourse' => 'hr.employees.update',
+            'removeExperience' => 'hr.employees.update',
+            'removeRelative' => 'hr.employees.update',
+            'addBadge' => 'hr.badges.create',
+            'removeBadge' => 'hr.badges.create',
+            'initiateReturn' => 'hr.employees.update',
+            'finalizeReturnCycle' => 'hr.employees.update',
         ],
         // B4: opens the read-only drawer; the method re-runs EmployeePolicy::view and
         // ::viewDirectory on the record inside the active city scope.
-        'employee.employee-drawer' => ['open' => 'employees.view'],
+        'employee.employee-drawer' => ['open' => 'hr.employees.view'],
         'employee.employee-table' => [
-            'delete' => 'employees.delete',
-            'toggleItemStatusConfirmed' => 'employees.update',
-            'exportExcel' => 'employees.export',
+            'delete' => 'hr.employees.delete',
+            'toggleItemStatusConfirmed' => 'hr.employees.update',
+            'exportExcel' => 'hr.employees.export',
         ],
         // The composer exposes one option load, one entitlement preview, and
         // the save itself on both screens; create additionally exposes the
         // draft-contract lookup that only makes sense when creating a new
         // contract (see ContractCreate::draftContractFor()).
         'contract.contract-create' => [
-            'submit' => 'contracts.create',
-            'reconcileOperation' => 'contracts.create', // X1-I: lookup by token, never writes
-            'locationOptions' => 'contracts.create',
-            'employeeSearchOptions' => 'contracts.create',
-            'leavePreview' => 'contracts.create',
-            'draftContractFor' => 'contracts.create',
+            'submit' => 'hr.contracts.create',
+            'reconcileOperation' => 'hr.contracts.create', // X1-I: lookup by token, never writes
+            'locationOptions' => 'hr.contracts.create',
+            'employeeSearchOptions' => 'hr.contracts.create',
+            'leavePreview' => 'hr.contracts.create',
+            'draftContractFor' => 'hr.contracts.create',
         ],
         'contract.contract-edit' => [
-            'submit' => 'contracts.update',
-            'locationOptions' => 'contracts.update',
-            'employeeSearchOptions' => 'contracts.update',
-            'leavePreview' => 'contracts.update',
+            'submit' => 'hr.contracts.update',
+            'locationOptions' => 'hr.contracts.update',
+            'employeeSearchOptions' => 'hr.contracts.update',
+            'leavePreview' => 'hr.contracts.update',
         ],
         // A renewal creates a contract. The permission here is the coarse
         // gate; ContractRenewModal re-reads the contract and runs the `renew`
         // policy on every one of these, which is what enforces city scope and
         // rejects a terminated source.
         'contract.contract-renew-modal' => [
-            'open' => 'contracts.create',
-            'renewAsIs' => 'contracts.create',
-            'reconcileOperation' => 'contracts.create', // X1-I: lookup by token, never writes
-            'renewWithEdit' => 'contracts.create',
+            'open' => 'hr.contracts.create',
+            'renewAsIs' => 'hr.contracts.create',
+            'reconcileOperation' => 'hr.contracts.create', // X1-I: lookup by token, never writes
+            'renewWithEdit' => 'hr.contracts.create',
         ],
         // Both auto-renew actions also run ContractPolicy::manageAutoRenew on
-        // the specific contract (HR role, contracts.update, visible to the
+        // the specific contract (HR role, hr.contracts.update, visible to the
         // caller), which is the city/record control; the permission here is
         // the coarse gate. The confirmed write normally arrives as a dispatched
         // event, so the in-method Gate is what holds on that path.
         // Opens the read-only drawer; the method re-runs ContractPolicy::view on the record.
-        'contract.contract-drawer' => ['open' => 'contracts.view'],
+        'contract.contract-drawer' => ['open' => 'hr.contracts.view'],
         'contract.contracts-table' => [
-            'delete' => 'contracts.delete',
-            'exportExcel' => 'contracts.export',
-            'confirmToggleAutoRenew' => 'contracts.update',
-            'toggleAutoRenewConfirmed' => 'contracts.update',
+            'delete' => 'hr.contracts.delete',
+            'exportExcel' => 'hr.contracts.export',
+            'confirmToggleAutoRenew' => 'hr.contracts.update',
+            'toggleAutoRenewConfirmed' => 'hr.contracts.update',
         ],
-        'news.news-table' => ['delete' => 'news.delete'],
+        'news.news-table' => ['delete' => 'hr.news.delete'],
         'employee.leave.all-leave-request-module' => [
-            'create' => 'leaves.create', 'delete' => 'leaves.delete',
-            'openDecision' => 'leaves.decide', 'submitDecision' => 'leaves.decide',
-            'reconcileOperation' => 'leaves.decide', // X1-I: reads the request's state, decides nothing
+            'create' => 'hr.leaves.create', 'delete' => 'hr.leaves.delete',
+            'openDecision' => 'hr.leaves.decide', 'submitDecision' => 'hr.leaves.decide',
+            'reconcileOperation' => 'hr.leaves.decide', // X1-I: reads the request's state, decides nothing
         ],
         'employee.leave.all-leave-request-table' => [
-            'delete' => 'leaves.delete', 'markAsReviewed' => 'leaves.review',
+            'delete' => 'hr.leaves.delete', 'markAsReviewed' => 'hr.leaves.review',
         ],
-        'employee.leave.my-leave-request-table' => ['delete' => 'leaves.delete'],
+        'employee.leave.my-leave-request-table' => ['delete' => 'hr.leaves.delete'],
         // 'edit' loads a balance record into the modal, before processSave().
         'employee.leave.emp-leave-balance-module' => [
-            'processSave' => 'leaves.manage-balances',
-            'edit' => 'leaves.manage-balances',
+            'processSave' => 'hr.leaves.manage-balances',
+            'edit' => 'hr.leaves.manage-balances',
         ],
         'employee.leave.emp-leave-balance-table' => [
-            'exportExcel' => 'leaves.export',
-            'edit' => 'leaves.manage-balances',
+            'exportExcel' => 'hr.leaves.export',
+            'edit' => 'hr.leaves.manage-balances',
         ],
-        'badges.badges-table' => ['delete' => 'badges.delete'],
+        'badges.badges-table' => ['delete' => 'hr.badges.delete'],
         'program-management.default-deliverable.default-deliverables-table' => [
-            'delete' => 'checklists.manage', 'exportExcel' => 'checklists.manage',
+            'delete' => 'hr.checklists.manage', 'exportExcel' => 'hr.checklists.manage',
         ],
         'archives.archived-files-module' => [
-            'createFolder' => 'archives.create',
-            'editPermissions' => 'archives.share',
-            'savePermissions' => 'archives.share',
-            'updatedFilesToUpload' => 'archives.create',
-            'downloadFile' => 'archives.download',
-            'previewFile' => 'archives.view',
-            'confirmFileDeletion' => 'archives.delete',
-            'confirmFolderDeletion' => 'archives.delete',
-            'deleteItem' => 'archives.delete',
-            'startEditingFolder' => 'archives.update',
-            'saveEditedFolder' => 'archives.update',
-            'startEditingFile' => 'archives.update',
-            'saveEditedFile' => 'archives.update',
-            'toggleUser' => 'archives.share',
-            'toggleSelectAllVisible' => 'archives.share',
+            'createFolder' => 'hr.archives.create',
+            'editPermissions' => 'hr.archives.share',
+            'savePermissions' => 'hr.archives.share',
+            'updatedFilesToUpload' => 'hr.archives.create',
+            'downloadFile' => 'hr.archives.download',
+            'previewFile' => 'hr.archives.view',
+            'confirmFileDeletion' => 'hr.archives.delete',
+            'confirmFolderDeletion' => 'hr.archives.delete',
+            'deleteItem' => 'hr.archives.delete',
+            'startEditingFolder' => 'hr.archives.update',
+            'saveEditedFolder' => 'hr.archives.update',
+            'startEditingFile' => 'hr.archives.update',
+            'saveEditedFile' => 'hr.archives.update',
+            'toggleUser' => 'hr.archives.share',
+            'toggleSelectAllVisible' => 'hr.archives.share',
         ],
-        'checklist-items.pending-items' => ['markDelivered' => 'checklists.deliver'],
-        'checklist-items.pending-returns' => ['markReceived' => 'checklists.receive'],
+        'checklist-items.pending-items' => ['markDelivered' => 'hr.checklists.deliver'],
+        'checklist-items.pending-returns' => ['markReceived' => 'hr.checklists.receive'],
 
         // Project-basics lookup tables. create/edit open the modal and disclose
         // the record; save() is create-or-update and decides its own permission
         // in-method, so it appears under livewire_exempt instead.
-        'basics.annual-leave-rule-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
-        'basics.checklist-item-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
+        'basics.annual-leave-rule-module' => ['create' => 'hr.project-basics.create', 'edit' => 'hr.project-basics.update'],
+        'basics.checklist-item-module' => ['create' => 'hr.project-basics.create', 'edit' => 'hr.project-basics.update'],
         'basics.contract-type-module' => [
-            'create' => 'project-basics.create',
-            'edit' => 'project-basics.update',
-            'delete' => 'project-basics.delete',
+            'create' => 'hr.project-basics.create',
+            'edit' => 'hr.project-basics.update',
+            'delete' => 'hr.project-basics.delete',
         ],
-        'basics.course-category-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
-        'basics.department-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
-        'basics.job-level-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
-        'basics.leave-type-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
-        'basics.termination-reason-module' => ['create' => 'project-basics.create', 'edit' => 'project-basics.update'],
+        'basics.course-category-module' => ['create' => 'hr.project-basics.create', 'edit' => 'hr.project-basics.update'],
+        'basics.department-module' => ['create' => 'hr.project-basics.create', 'edit' => 'hr.project-basics.update'],
+        'basics.job-level-module' => ['create' => 'hr.project-basics.create', 'edit' => 'hr.project-basics.update'],
+        'basics.leave-type-module' => ['create' => 'hr.project-basics.create', 'edit' => 'hr.project-basics.update'],
+        'basics.termination-reason-module' => ['create' => 'hr.project-basics.create', 'edit' => 'hr.project-basics.update'],
 
-        'program-management.center.centers-module' => ['create' => 'centers.create', 'edit' => 'centers.update'],
+        'program-management.center.centers-module' => ['create' => 'hr.centers.create', 'edit' => 'hr.centers.update'],
         'program-management.default-deliverable.default-deliverables-module' => [
-            'create' => 'checklists.manage',
-            'edit' => 'checklists.manage',
+            'create' => 'hr.checklists.manage',
+            'edit' => 'hr.checklists.manage',
         ],
         // Streams the whole org directory to CSV; had no check of its own.
-        'position.directory' => ['exportCsv' => 'positions.export'],
+        'position.directory' => ['exportCsv' => 'hr.positions.export'],
     ],
 
     /*
@@ -426,7 +426,7 @@ return [
         // direct-manager position (BirthdayHoliday::canDecide).
         'employee.leave.birthday-holiday-card' => ['choose', 'decide'],
         // save() writes only cities.hr_hotline (the ID card's emergency number,
-        // A2D-Q7) after its own project-basics.update check.
+        // A2D-Q7) after its own hr.project-basics.update check.
         'basics.city-module' => ['save', ...$closeGuard],
         // Each re-reads the employee by its locked id and runs the
         // digital-id.manage or digital-id.report-lost gate (DigitalIdPolicy)
@@ -446,7 +446,7 @@ return [
         // check on the specific record, which is the stronger control.
         'employee.leave.my-leave-request-module' => [
             'create', 'edit', 'processSave', 'confirmSave', 'openDetails',
-            'reconcileOperation', // X1-I: lookup by the form's token; authorizes leaves.create in the method
+            'reconcileOperation', // X1-I: lookup by the form's token; authorizes hr.leaves.create in the method
             'closeDetails', 'selectedLeave', 'submittedLeave', 'refreshCounts', 'setActiveTab',
             // B3: list states. resetStatusFilter only sets the tab to "all" (a filter on the
             // caller's own requests); retryLoad re-renders and writes nothing.
@@ -488,7 +488,7 @@ return [
         // employee id. It authorizes EmployeePolicy::viewDirectory on that id,
         // and the drawer re-checks on every render, so a role switch or a
         // former employee drops back to a uniform not-found (access-policy.md
-        // §4.4). The middleware could only add positions.view, which every
+        // §4.4). The middleware could only add hr.positions.view, which every
         // role already holds and which says nothing about the record.
         'position.profile-drawer' => ['openProfile'],
 
@@ -544,7 +544,7 @@ return [
         // is mapped to a permission above.
         'contract.contract-details' => ['nextPage', 'prevPage', 'setPage'],
         // Dismisses the modal and clears its state. Writes nothing; the two
-        // actions that do write are mapped to contracts.create above.
+        // actions that do write are mapped to hr.contracts.create above.
         'contract.contract-renew-modal' => ['close', ...$closeGuard],
         'dashboard.calendar-card' => ['next', 'prev'],
         // B3: retryLoad re-renders read-only data; placeholder renders the lazy skeleton.
@@ -569,7 +569,7 @@ return [
         // Each action re-reads the record and runs its domain owner, which authorizes inside
         // its lock: decide -> LeaveRequestForm::submitDecision (Gate decide, LeaveDecisionAuthority),
         // markSeen/object -> LeaveRequestReview (Gate review/object), confirmItem/applyBatch ->
-        // ChecklistWorkflow (row scoped to the actor, plus checklists.deliver/receive),
+        // ChecklistWorkflow (row scoped to the actor, plus hr.checklists.deliver/receive),
         // finalizeItem -> Gate update on the employee + ChecklistWorkflow::finalizeReturn.
         // previewBatch writes nothing; setFilter changes the view only.
         // C5 team calendar: move/goToday/openDay only change the period shown.
@@ -607,7 +607,7 @@ return [
         'news.today-events-card' => ['loadEvents'],
 
         // --- Route-gated reads ----------------------------------------------
-        // Reached only through routes carrying active_permission:statistics.view,
+        // Reached only through routes carrying active_permission:hr.statistics.view,
         // and both now apply the caller's city scope to every aggregate.
         'statistics.contract-statistics' => ['loadData', 'resetFilters'],
         'employee.employee-statistics' => ['getStatistics'],

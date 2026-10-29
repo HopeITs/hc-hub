@@ -276,13 +276,13 @@ class User extends Authenticatable implements HasLocalePreference
      * Whether the active role may open a reference page group (`centers`,
      * `programs`, `positions`, `project-basics`): its read permission, unless
      * config('access-control.reference_pages_hidden_from') refuses the role
-     * (G-B-13). The org chart is not one of these; it keeps positions.view.
+     * (G-B-13). The org chart is not one of these; it keeps hr.positions.view.
      */
     public function canOpenReferencePage(string $page): bool
     {
         $hiddenFrom = config("access-control.reference_pages_hidden_from.{$page}", []);
 
-        return $this->hasActivePermission("{$page}.view")
+        return $this->hasActivePermission("hr.{$page}.view")
             && ($hiddenFrom === [] || ! $this->activeRoleIs(...$hiddenFrom));
     }
 

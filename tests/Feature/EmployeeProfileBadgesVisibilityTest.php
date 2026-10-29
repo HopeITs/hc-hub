@@ -45,7 +45,7 @@ class EmployeeProfileBadgesVisibilityTest extends TestCase
 
     public function test_city_hr_sees_badges_in_its_own_city_only(): void
     {
-        $hr = $this->makeUser($this->aleppo, 'HR-ALP', ['badges.view']);
+        $hr = $this->makeUser($this->aleppo, 'HR-ALP', ['hr.badges.view']);
 
         $this->profileAs($hr, $this->aleppoSubject)
             ->assertSet('canViewBadges', true)
@@ -68,7 +68,7 @@ class EmployeeProfileBadgesVisibilityTest extends TestCase
     /**
      * D1 (profile-contract.md Q2 = C, HR 2026-10-27): the owner now sees their
      * own rewards and warnings on their profile; still nobody else's without
-     * badges.view, and never a salary increase or a note.
+     * hr.badges.view, and never a salary increase or a note.
      */
     public function test_manager_without_the_permission_sees_only_their_own_badges(): void
     {
@@ -103,7 +103,7 @@ class EmployeeProfileBadgesVisibilityTest extends TestCase
             'position_id' => $this->reportingTo($managerPosition, $this->homs)->id,
         ]);
 
-        $manager = $this->makeUser($this->aleppo, 'manager', ['badges.view'], $managerEmployee);
+        $manager = $this->makeUser($this->aleppo, 'manager', ['hr.badges.view'], $managerEmployee);
 
         $this->profileAs($manager, $techReport)
             ->assertSet('canViewBadges', true)

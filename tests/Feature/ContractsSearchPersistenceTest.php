@@ -22,7 +22,7 @@ class ContractsSearchPersistenceTest extends TestCase
             \Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter::class,
         ]);
         $city = $this->makeCity('DMS', '003');
-        $user = $this->makeUser($city, 'HR-DMS', ['contracts.view']);
+        $user = $this->makeUser($city, 'HR-DMS', ['hr.contracts.view']);
         $contract = $this->makeContractFor($user->profile);
         $this->seedContracts($city);
 

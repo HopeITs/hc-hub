@@ -486,7 +486,7 @@ class ContractRenewalTest extends TestCase
         $fixtures = $this->makeFixtures();
         $source = $this->makeContract($fixtures);
 
-        $outsider = $this->makeUser($fixtures['remoteCity'], 'HR-HMS', ['contracts.create', 'contracts.view']);
+        $outsider = $this->makeUser($fixtures['remoteCity'], 'HR-HMS', ['hr.contracts.create', 'hr.contracts.view']);
 
         Livewire::actingAs($outsider)
             ->test(ContractRenewModal::class)
@@ -499,7 +499,7 @@ class ContractRenewalTest extends TestCase
         $fixtures = $this->makeFixtures();
         $source = $this->makeContract($fixtures);
 
-        $outsider = $this->makeUser($fixtures['remoteCity'], 'HR-HMS', ['contracts.create', 'contracts.view']);
+        $outsider = $this->makeUser($fixtures['remoteCity'], 'HR-HMS', ['hr.contracts.create', 'hr.contracts.view']);
 
         Livewire::actingAs($outsider)
             ->test(ContractCreate::class, ['contract' => $source])
@@ -511,7 +511,7 @@ class ContractRenewalTest extends TestCase
         $fixtures = $this->makeFixtures();
         $source = $this->makeContract($fixtures);
 
-        $viewer = $this->makeUser($fixtures['city'], 'HR-ALP-viewer', ['contracts.view']);
+        $viewer = $this->makeUser($fixtures['city'], 'HR-ALP-viewer', ['hr.contracts.view']);
 
         Livewire::actingAs($viewer)
             ->test(ContractRenewModal::class)
@@ -901,7 +901,7 @@ class ContractRenewalTest extends TestCase
         $fixtures = $this->makeFixtures();
         $source = $this->makeContract($fixtures);
 
-        $viewer = $this->makeUser($fixtures['city'], 'HR-ALP-reader', ['contracts.view']);
+        $viewer = $this->makeUser($fixtures['city'], 'HR-ALP-reader', ['hr.contracts.view']);
 
         $this->actingAs($viewer)
             ->get(route('contracts.renew', $source))
@@ -913,7 +913,7 @@ class ContractRenewalTest extends TestCase
         $fixtures = $this->makeFixtures();
         $source = $this->makeContract($fixtures);
 
-        $outsider = $this->makeUser($fixtures['remoteCity'], 'HR-HMS', ['contracts.create', 'contracts.view']);
+        $outsider = $this->makeUser($fixtures['remoteCity'], 'HR-HMS', ['hr.contracts.create', 'hr.contracts.view']);
 
         $this->actingAs($outsider)
             ->get(route('contracts.renew', $source))
@@ -1291,7 +1291,7 @@ class ContractRenewalTest extends TestCase
         $otherPosition = $this->makePosition($center, $city->id, $department, $jobLevel, $program, 'Field Officer');
 
         $employee = $this->makeEmployee($city, 'renewal-employee');
-        $hr = $this->makeUser($city, 'HR-ALP', ['contracts.create', 'contracts.update', 'contracts.view']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.contracts.create', 'hr.contracts.update', 'hr.contracts.view']);
 
         return compact(
             'city', 'remoteCity', 'center', 'program', 'annualType', 'trialType',

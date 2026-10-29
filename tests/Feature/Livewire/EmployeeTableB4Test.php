@@ -20,15 +20,15 @@ class EmployeeTableB4Test extends TestCase
 {
     use CreatesHrFixtures, RefreshDatabase;
 
-    private const HR_PERMS = ['employees.view', 'employees.update', 'employees.delete'];
+    private const HR_PERMS = ['hr.employees.view', 'hr.employees.update', 'hr.employees.delete'];
 
     // ------------------------------------------------------------ AC-B4-03 defaults
 
     public function test_default_columns_are_compact_and_city_is_for_nationwide_roles_only(): void
     {
         $city = $this->makeCity('DMS', '003');
-        $nationwide = $this->makeUser($city, 'HR-SYR', ['employees.view']);
-        $regional = $this->makeUser($city, 'HR-DMS', ['employees.view']);
+        $nationwide = $this->makeUser($city, 'HR-SYR', ['hr.employees.view']);
+        $regional = $this->makeUser($city, 'HR-DMS', ['hr.employees.view']);
 
         Livewire::actingAs($nationwide)->test(EmployeeTable::class)
             ->assertSet('columns', fn (array $c) => array_slice($c, 0, 5) === ['employee', 'direct_manager', 'work_email', 'is_active', 'city_name_en']
@@ -41,7 +41,7 @@ class EmployeeTableB4Test extends TestCase
     public function test_identity_cell_shows_name_position_and_the_internal_avatar_url(): void
     {
         $city = $this->makeCity('DMS', '003');
-        $user = $this->makeUser($city, 'HR-DMS', ['employees.view']);
+        $user = $this->makeUser($city, 'HR-DMS', ['hr.employees.view']);
         $employee = $this->makeEmployee($city, 'mira', ['first_name_en' => 'Mira', 'last_name_en' => 'Najjar']);
 
         Livewire::actingAs($user)->test(EmployeeTable::class)
@@ -83,8 +83,8 @@ class EmployeeTableB4Test extends TestCase
     public function test_active_is_the_default_view_and_inactive_is_available_to_hr_and_gm(): void
     {
         $city = $this->makeCity('DMS', '003');
-        $hr = $this->makeUser($city, 'HR-DMS', ['employees.view']);
-        $gm = $this->makeUser($city, 'general-manager', ['employees.view']);
+        $hr = $this->makeUser($city, 'HR-DMS', ['hr.employees.view']);
+        $gm = $this->makeUser($city, 'general-manager', ['hr.employees.view']);
         $this->makeEmployee($city, 'working', ['first_name_en' => 'Zebulon']);
         $this->makeEmployee($city, 'former', ['first_name_en' => 'Quentin', 'is_active' => false]);
 
@@ -100,7 +100,7 @@ class EmployeeTableB4Test extends TestCase
     public function test_inactive_view_is_refused_for_other_roles_even_by_url_or_event(): void
     {
         $city = $this->makeCity('DMS', '003');
-        $manager = $this->makeUser($city, 'manager', ['employees.view']);
+        $manager = $this->makeUser($city, 'manager', ['hr.employees.view']);
         $this->makeEmployee($city, 'working', ['first_name_en' => 'Zebulon']);
         $this->makeEmployee($city, 'former', ['first_name_en' => 'Quentin', 'is_active' => false]);
 
@@ -115,7 +115,7 @@ class EmployeeTableB4Test extends TestCase
     {
         $dms = $this->makeCity('DMS', '003');
         $lat = $this->makeCity('LAT', '002');
-        $hr = $this->makeUser($dms, 'HR-DMS', ['employees.view']);
+        $hr = $this->makeUser($dms, 'HR-DMS', ['hr.employees.view']);
         $this->makeEmployee($dms, 'former-in', ['first_name_en' => 'Quentin', 'is_active' => false]);
         $this->makeEmployee($lat, 'former-out', ['first_name_en' => 'Ottoline', 'is_active' => false]);
 
@@ -132,7 +132,7 @@ class EmployeeTableB4Test extends TestCase
     public function test_unknown_view_value_falls_back_to_active(): void
     {
         $city = $this->makeCity('DMS', '003');
-        $hr = $this->makeUser($city, 'HR-DMS', ['employees.view']);
+        $hr = $this->makeUser($city, 'HR-DMS', ['hr.employees.view']);
         $this->makeEmployee($city, 'former', ['first_name_en' => 'Quentin', 'is_active' => false]);
 
         Livewire::actingAs($hr)->withQueryParams(['view' => 'everything'])->test(EmployeeTable::class)
@@ -168,8 +168,8 @@ class EmployeeTableB4Test extends TestCase
     {
         $dms = $this->makeCity('DMS', '003');
         $this->makeCity('LAT', '002');
-        $user = $this->makeUser($dms, 'HR-DMS', ['employees.view']);
-        $user = $this->assignInactiveRole($user, 'HR-LAT', ['employees.view']);
+        $user = $this->makeUser($dms, 'HR-DMS', ['hr.employees.view']);
+        $user = $this->assignInactiveRole($user, 'HR-LAT', ['hr.employees.view']);
 
         Livewire::actingAs($user)->test(EmployeeTable::class)->set('globalSearch', 'secret-name');
         Livewire::actingAs($user)->test(EmployeeTable::class)->assertSet('globalSearch', 'secret-name');
@@ -187,7 +187,7 @@ class EmployeeTableB4Test extends TestCase
     public function test_drawer_is_a_named_read_only_dialog_without_pay(): void
     {
         $city = $this->makeCity('DMS', '003');
-        $user = $this->makeUser($city, 'HR-DMS', ['employees.view']);
+        $user = $this->makeUser($city, 'HR-DMS', ['hr.employees.view']);
         $employee = $this->makeEmployee($city, 'mira', ['first_name_en' => 'Mira', 'last_name_en' => 'Najjar']);
 
         Livewire::actingAs($user)->test(EmployeeDrawer::class)
@@ -208,8 +208,8 @@ class EmployeeTableB4Test extends TestCase
         $dms = $this->makeCity('DMS', '003');
         $lat = $this->makeCity('LAT', '002');
         $noPermission = $this->makeUser($dms, 'employee');
-        $hr = $this->makeUser($dms, 'HR-DMS', ['employees.view']);
-        $manager = $this->makeUser($dms, 'manager', ['employees.view']);
+        $hr = $this->makeUser($dms, 'HR-DMS', ['hr.employees.view']);
+        $manager = $this->makeUser($dms, 'manager', ['hr.employees.view']);
         $inCity = $this->makeEmployee($dms, 'in');
         $otherCity = $this->makeEmployee($lat, 'out');
         $former = $this->makeEmployee($dms, 'former', ['is_active' => false]);
@@ -234,7 +234,7 @@ class EmployeeTableB4Test extends TestCase
     {
         $dms = $this->makeCity('DMS', '003');
         $lat = $this->makeCity('LAT', '002');
-        $viewer = $this->makeUser($dms, 'manager', ['employees.view']);
+        $viewer = $this->makeUser($dms, 'manager', ['hr.employees.view']);
         $editor = $this->makeUser($dms, 'HR-DMS', self::HR_PERMS);
         $target = $this->makeEmployee($dms, 'target');
         $outside = $this->makeEmployee($lat, 'outside');
@@ -266,8 +266,8 @@ class EmployeeTableB4Test extends TestCase
     public function test_page_says_the_export_follows_the_columns_shown_and_gates_the_inactive_view(): void
     {
         $city = $this->makeCity('DMS', '003');
-        $hr = $this->makeUser($city, 'HR-DMS', ['employees.view']);
-        $manager = $this->makeUser($city, 'manager', ['employees.view']);
+        $hr = $this->makeUser($city, 'HR-DMS', ['hr.employees.view']);
+        $manager = $this->makeUser($city, 'manager', ['hr.employees.view']);
 
         Livewire::actingAs($hr)->test(EmployeeModule::class)
             ->assertSee(__('general.emp-export-note'))

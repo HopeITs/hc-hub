@@ -211,7 +211,7 @@ class ContractComposerDraftUpgradeTest extends TestCase
 
         $annualType = ContractType::query()->forceCreate(['id' => 1, 'name_en' => 'Volunteer Contract', 'name_ar' => 'عقد تطوّع']);
 
-        $hr = $this->makeUser($city, 'HR-ALP', ['contracts.create']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.contracts.create']);
 
         return compact('city', 'center', 'department', 'jobLevel', 'program', 'position', 'employee', 'annualType', 'hr');
     }

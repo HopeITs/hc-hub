@@ -9,9 +9,9 @@ return new class extends Migration
     public function up(): void
     {
         $baselines = [
-            'general-manager' => ['project-basics.view', 'checklists.manage'],
-            'manager' => ['project-basics.view'],
-            'employee' => ['project-basics.view'],
+            'general-manager' => ['hr.project-basics.view', 'hr.checklists.manage'],
+            'manager' => ['hr.project-basics.view'],
+            'employee' => ['hr.project-basics.view'],
         ];
 
         foreach ($baselines as $roleName => $permissions) {

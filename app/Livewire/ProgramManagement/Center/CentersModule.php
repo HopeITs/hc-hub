@@ -59,7 +59,7 @@ class CentersModule extends Component
 
     public function create(): void
     {
-        $this->authorizeActivePermission('centers.create');
+        $this->authorizeActivePermission('hr.centers.create');
 
         $this->item = [
             'id' => null,
@@ -83,7 +83,7 @@ class CentersModule extends Component
     #[On('openCenterEdit')]
     public function edit(int $id): void
     {
-        $this->authorizeActivePermission('centers.update');
+        $this->authorizeActivePermission('hr.centers.update');
 
         $model = Center::findOrFail($id);
 
@@ -113,7 +113,7 @@ class CentersModule extends Component
     public function save(): void
     {
         $this->authorizeActivePermission(
-            empty($this->item['id']) ? 'centers.create' : 'centers.update',
+            empty($this->item['id']) ? 'hr.centers.create' : 'hr.centers.update',
         );
 
         $this->validate();

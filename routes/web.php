@@ -64,7 +64,7 @@ Route::group(
                 ->name('dashboard');
             Route::prefix('statistics')
                 ->name('statistics.')
-                ->middleware('active_permission:statistics.view')
+                ->middleware('active_permission:hr.statistics.view')
                 ->group(function () {
                     Route::get('/general', GeneralStatistics::class)->name('general');
                     Route::get('/contract', ContractStatistics::class)->name('contract');
@@ -85,22 +85,22 @@ Route::group(
             require __DIR__.'/employees-management.php';
 
             // C5: who is away, for everyone; TeamCoverage limits what each role sees.
-            Route::get('/team-calendar', TeamCalendar::class)->name('team.calendar')->middleware('active_permission:leaves.view-own');
+            Route::get('/team-calendar', TeamCalendar::class)->name('team.calendar')->middleware('active_permission:hr.leaves.view-own');
 
             Route::prefix('leaves')
                 ->name('leaves.')
                 ->group(function () {
-                    Route::get('/', MyLeaveRequestModule::class)->middleware('active_permission:leaves.view-own')->name('index');
-                    Route::get('/all', AllLeaveRequestModule::class)->name('all')->middleware('active_permission:leaves.view-all');
-                    Route::get('/balance', EmpLeaveBalanceModule::class)->name('balance')->middleware('active_permission:leaves.manage-balances');
+                    Route::get('/', MyLeaveRequestModule::class)->middleware('active_permission:hr.leaves.view-own')->name('index');
+                    Route::get('/all', AllLeaveRequestModule::class)->name('all')->middleware('active_permission:hr.leaves.view-all');
+                    Route::get('/balance', EmpLeaveBalanceModule::class)->name('balance')->middleware('active_permission:hr.leaves.manage-balances');
                 });
 
-            Route::view('archived-files/{folder?}', 'archives.index')->middleware('active_permission:archives.view')->name('archived-files.index');
-            Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', false)->middleware('active_permission:archives.view')->name('my-folders.index');
-            Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', true)->middleware('active_permission:archives.view')->name('shared-folders.index');
-            Route::get('folder-files/{media}/preview', [ArchiveFileController::class, 'preview'])->middleware('active_permission:archives.view')->name('folder-files.preview');
-            Route::get('folder-files/{media}/download', [ArchiveFileController::class, 'download'])->middleware('active_permission:archives.download')->name('folder-files.download');
-            Route::get('folder-files/{media}/office-preview', [ArchiveFileController::class, 'officePreview'])->middleware('active_permission:archives.view')->name('folder-files.office-preview');
+            Route::view('archived-files/{folder?}', 'archives.index')->middleware('active_permission:hr.archives.view')->name('archived-files.index');
+            Route::get('my-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', false)->middleware('active_permission:hr.archives.view')->name('my-folders.index');
+            Route::get('shared-folders/{folderId?}', ArchivedFilesModule::class)->defaults('isShared', true)->middleware('active_permission:hr.archives.view')->name('shared-folders.index');
+            Route::get('folder-files/{media}/preview', [ArchiveFileController::class, 'preview'])->middleware('active_permission:hr.archives.view')->name('folder-files.preview');
+            Route::get('folder-files/{media}/download', [ArchiveFileController::class, 'download'])->middleware('active_permission:hr.archives.download')->name('folder-files.download');
+            Route::get('folder-files/{media}/office-preview', [ArchiveFileController::class, 'officePreview'])->middleware('active_permission:hr.archives.view')->name('folder-files.office-preview');
             Route::get('employee-files/{media}/download', [EmployeeDocumentController::class, 'download'])
                 ->middleware('throttle:60,1')
                 ->name('employee-files.download');
@@ -115,30 +115,30 @@ Route::group(
             Route::prefix('checklist-items')
                 ->name('checklist-items.')
                 ->group(function () {
-                    Route::get('/pending-delivers', PendingItems::class)->middleware('active_permission:checklists.deliver')->name('pending-delivers');
-                    Route::get('/pending-returns', PendingReturns::class)->middleware('active_permission:checklists.receive')->name('pending-returns');
-                    Route::get('/done-requests', DoneRequests::class)->middleware('active_permission:checklists.manage')->name('done-requests');
-                    Route::get('/all', AllItems::class)->middleware('active_permission:checklists.view-own')->name('index');
+                    Route::get('/pending-delivers', PendingItems::class)->middleware('active_permission:hr.checklists.deliver')->name('pending-delivers');
+                    Route::get('/pending-returns', PendingReturns::class)->middleware('active_permission:hr.checklists.receive')->name('pending-returns');
+                    Route::get('/done-requests', DoneRequests::class)->middleware('active_permission:hr.checklists.manage')->name('done-requests');
+                    Route::get('/all', AllItems::class)->middleware('active_permission:hr.checklists.view-own')->name('index');
                 });
 
             Route::get('/notifications', Index::class)->name('notifications.index');
 
-            Route::get('/news', NewsModule::class)->name('news.index')->middleware('active_permission:news.view');
+            Route::get('/news', NewsModule::class)->name('news.index')->middleware('active_permission:hr.news.view');
 
             Route::get('/employee-statistics/{mode}', [EmployeeStatistics::class, 'getStatistics'])
-                ->middleware('active_permission:statistics.view');
+                ->middleware('active_permission:hr.statistics.view');
 
             Route::get('/badges', BadgesModule::class)
-                ->middleware('active_permission:badges.view')
+                ->middleware('active_permission:hr.badges.view')
                 ->name('badges.index');
 
-            Route::get('/news/create', NewsCreate::class)->name('news.create')->middleware('active_permission:news.create');
-            Route::get('/news/{news}/edit', NewsCreate::class)->name('news.edit')->middleware('active_permission:news.update');
+            Route::get('/news/create', NewsCreate::class)->name('news.create')->middleware('active_permission:hr.news.create');
+            Route::get('/news/{news}/edit', NewsCreate::class)->name('news.edit')->middleware('active_permission:hr.news.update');
 
             Route::get('/course-categories', CourseCategoryModule::class)->middleware('reference_page:project-basics')->name('course-categories.index');
             Route::get('/activity-log', ActivityLogModule::class)
                 ->name('activity-log.index')
-                ->middleware('active_permission:activity-log.view');
+                ->middleware('active_permission:hub.activity-log.view');
 
             // D3 / DEC-08: in-app feedback is read by the IT team only. Not an
             // active_permission check: that one says yes to every administrator
@@ -148,7 +148,7 @@ Route::group(
                 ->name('feedback.index');
 
             Route::get('/access-management', AccessManagementIndex::class)
-                ->middleware('active_permission:access-management.view')
+                ->middleware('active_permission:hub.access-management.view')
                 ->name('access-management.index');
 
         });

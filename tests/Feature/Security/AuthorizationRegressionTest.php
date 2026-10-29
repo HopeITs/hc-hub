@@ -130,7 +130,7 @@ class AuthorizationRegressionTest extends TestCase
         $aleppo = $this->makeCity('ALP', '001');
         $homs = $this->makeCity('HMS', '002');
 
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['employees.view']);
+        $hr = $this->makeUser($aleppo, 'HR-ALP', ['hr.employees.view']);
         $outsider = $this->makeEmployee($homs, 'homs-person', [
             'first_name_en' => 'Outsider',
             'work_phone' => '0933000111',
@@ -162,7 +162,7 @@ class AuthorizationRegressionTest extends TestCase
     public function test_the_profile_drawer_opens_for_an_employee_in_the_same_city(): void
     {
         $aleppo = $this->makeCity('ALP', '001');
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['employees.view']);
+        $hr = $this->makeUser($aleppo, 'HR-ALP', ['hr.employees.view']);
         $colleague = $this->makeEmployee($aleppo, 'aleppo-person');
 
         Livewire::actingAs($hr)
@@ -268,7 +268,7 @@ class AuthorizationRegressionTest extends TestCase
     {
         $city = $this->makeCity('ALP', '001');
         $employee = $this->makeEmployee($city, 'about-to-leave');
-        $user = $this->makeUser($city, 'HR-ALP', ['employees.view'], $employee);
+        $user = $this->makeUser($city, 'HR-ALP', ['hr.employees.view'], $employee);
         $user->forceFill(['remember_token' => 'still-valid'])->save();
 
         $employee->update(['is_active' => false]);
@@ -277,7 +277,7 @@ class AuthorizationRegressionTest extends TestCase
 
         $this->assertNull($user->remember_token);
         $this->assertNull($user->activeRole());
-        $this->assertFalse($user->hasActivePermission('employees.view'));
+        $this->assertFalse($user->hasActivePermission('hr.employees.view'));
     }
 
     public function test_deactivation_is_recorded_in_the_security_log(): void
@@ -300,7 +300,7 @@ class AuthorizationRegressionTest extends TestCase
     {
         $aleppo = $this->makeCity('ALP', '001');
 
-        $user = $this->makeUser($aleppo, 'HR-ALP', ['employees.view']);
+        $user = $this->makeUser($aleppo, 'HR-ALP', ['hr.employees.view']);
         $user = $this->assignInactiveRole($user, 'super-admin');
 
         // Historically assigned, not currently active.

@@ -41,21 +41,21 @@ class ContractExportUiTest extends TestCase
 
     public function test_hr_with_the_export_permission_is_offered_the_export_on_the_details_page(): void
     {
-        $this->detailsAs($this->hr(['contracts.view', 'contracts.export']))
+        $this->detailsAs($this->hr(['hr.contracts.view', 'hr.contracts.export']))
             ->assertSee($this->exportTarget(), false);
     }
 
     public function test_hr_without_the_export_permission_is_not_offered_the_export(): void
     {
-        $this->detailsAs($this->hr(['contracts.view']))
+        $this->detailsAs($this->hr(['hr.contracts.view']))
             ->assertDontSee($this->exportTarget(), false);
     }
 
     public function test_a_role_that_cannot_see_pay_is_not_offered_the_export_nor_shown_the_figure(): void
     {
-        // super-admin holds every permission, contracts.export included, and
+        // super-admin holds every permission, hr.contracts.export included, and
         // is still refused pay figures (config('salary.blind_roles')).
-        $user = $this->makeUser($this->city, 'super-admin', ['contracts.view', 'contracts.export']);
+        $user = $this->makeUser($this->city, 'super-admin', ['hr.contracts.view', 'hr.contracts.export']);
         $this->assertFalse($user->canViewSalary());
 
         // Page 2 is the one carrying the pay clause.
@@ -72,7 +72,7 @@ class ContractExportUiTest extends TestCase
     public function test_hr_does_see_the_figure_on_the_same_page(): void
     {
         // The control for the test above: the figure is on this page when allowed.
-        $this->detailsAs($this->hr(['contracts.view', 'contracts.export']))
+        $this->detailsAs($this->hr(['hr.contracts.view', 'hr.contracts.export']))
             ->call('setPage', 2)
             ->assertSee('98,765');
     }
@@ -81,18 +81,18 @@ class ContractExportUiTest extends TestCase
     {
         $url = $this->exportTarget();
 
-        Livewire::actingAs($this->hr(['contracts.view', 'contracts.export']))
+        Livewire::actingAs($this->hr(['hr.contracts.view', 'hr.contracts.export']))
             ->test(ContractsTable::class)
             ->assertSee($url, false);
 
-        Livewire::actingAs($this->makeUser($this->city, 'super-admin', ['contracts.view', 'contracts.export']))
+        Livewire::actingAs($this->makeUser($this->city, 'super-admin', ['hr.contracts.view', 'hr.contracts.export']))
             ->test(ContractsTable::class)
             ->assertDontSee($url, false);
     }
 
     public function test_the_export_url_refuses_a_role_that_cannot_see_pay(): void
     {
-        $this->actingAs($this->makeUser($this->city, 'super-admin', ['contracts.view', 'contracts.export']))
+        $this->actingAs($this->makeUser($this->city, 'super-admin', ['hr.contracts.view', 'hr.contracts.export']))
             ->get(route('contracts.export', $this->contract), ['Accept' => 'application/pdf'])
             ->assertForbidden();
     }
@@ -104,7 +104,7 @@ class ContractExportUiTest extends TestCase
         $renderer->shouldReceive('render')->once()->andReturn('%PDF-1.7 synthetic');
         $renderer->shouldReceive('fileName')->andReturn('contract.pdf');
 
-        $this->actingAs($this->hr(['contracts.view', 'contracts.export']));
+        $this->actingAs($this->hr(['hr.contracts.view', 'hr.contracts.export']));
 
         $contracts = Contract::query()->count();
         $before = $this->contract->fresh()->updated_at;

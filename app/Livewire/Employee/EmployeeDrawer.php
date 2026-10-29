@@ -27,7 +27,7 @@ class EmployeeDrawer extends Component
     public function open(int $id): void
     {
         $user = auth()->user();
-        abort_unless($user?->hasActivePermission('employees.view'), 403);
+        abort_unless($user?->hasActivePermission('hr.employees.view'), 403);
 
         $employee = Employee::query()
             ->inActiveCities($user)
@@ -108,7 +108,7 @@ class EmployeeDrawer extends Component
     {
         $user = auth()->user();
 
-        if (! $user?->hasActivePermission('leaves.view-all')) {
+        if (! $user?->hasActivePermission('hr.leaves.view-all')) {
             return null;
         }
 
@@ -124,7 +124,7 @@ class EmployeeDrawer extends Component
         $user = auth()->user();
 
         return $user !== null
-            && $user->hasActivePermission('employees.view')
+            && $user->hasActivePermission('hr.employees.view')
             && Gate::forUser($user)->allows('view', $employee)
             && Gate::forUser($user)->allows('viewDirectory', $employee);
     }

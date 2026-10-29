@@ -82,7 +82,7 @@ class CityTable extends LivewireTable
 
     protected function columns(): array
     {
-        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
+        $canUpdate = auth()->user()?->hasActivePermission('hr.project-basics.update') ?? false;
 
         return [
 

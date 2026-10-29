@@ -130,7 +130,7 @@ class DirectoryAccessPolicyTest extends TestCase
 
     public function test_regional_hr_sees_its_city_in_full_and_other_cities_at_directory_tier_only(): void
     {
-        $viewer = $this->makeUser($this->aleppo, 'HR-ALP', ['employees.view']);
+        $viewer = $this->makeUser($this->aleppo, 'HR-ALP', ['hr.employees.view']);
 
         $this->assertCells($viewer, [
             'aleppoActive' => 'DR', 'aleppoFormer' => 'DR', 'homsActive' => 'D', 'homsFormer' => '-',
@@ -164,7 +164,7 @@ class DirectoryAccessPolicyTest extends TestCase
 
     public function test_view_avatar_follows_view_directory(): void
     {
-        $regionalHr = $this->makeUser($this->aleppo, 'HR-ALP', ['employees.view']);
+        $regionalHr = $this->makeUser($this->aleppo, 'HR-ALP', ['hr.employees.view']);
         $staff = $this->makeUser($this->aleppo, 'employee');
 
         $this->assertTrue(Gate::forUser($regionalHr)->allows('viewAvatar', $this->subjects['homsActive']));
@@ -194,7 +194,7 @@ class DirectoryAccessPolicyTest extends TestCase
 
     public function test_a_directory_only_drawer_carries_no_private_record_or_pay_data(): void
     {
-        foreach ([$this->makeUser($this->aleppo, 'employee'), $this->makeUser($this->aleppo, 'HR-ALP', ['employees.view'])] as $viewer) {
+        foreach ([$this->makeUser($this->aleppo, 'employee'), $this->makeUser($this->aleppo, 'HR-ALP', ['hr.employees.view'])] as $viewer) {
             $drawer = Livewire::actingAs($viewer)
                 ->test(ProfileDrawer::class)
                 ->call('openProfile', $this->subjects['homsActive']->id)
@@ -236,7 +236,7 @@ class DirectoryAccessPolicyTest extends TestCase
 
     public function test_a_role_switch_drops_an_open_drawer_on_the_next_request(): void
     {
-        $viewer = $this->assignInactiveRole($this->makeUser($this->aleppo, 'HR-ALP', ['employees.view']), 'employee');
+        $viewer = $this->assignInactiveRole($this->makeUser($this->aleppo, 'HR-ALP', ['hr.employees.view']), 'employee');
 
         $former = Livewire::actingAs($viewer)
             ->test(ProfileDrawer::class)
@@ -281,7 +281,7 @@ class DirectoryAccessPolicyTest extends TestCase
 
     public function test_regional_hr_gets_another_citys_profile_at_directory_tier_only(): void
     {
-        $viewer = $this->makeUser($this->aleppo, 'HR-ALP', ['employees.view', 'employees.update', 'badges.view']);
+        $viewer = $this->makeUser($this->aleppo, 'HR-ALP', ['hr.employees.view', 'hr.employees.update', 'hr.badges.view']);
 
         $profile = Livewire::actingAs($viewer)
             ->test(EmployeeProfile::class, ['employee' => $this->subjects['homsActive']])
@@ -320,7 +320,7 @@ class DirectoryAccessPolicyTest extends TestCase
 
     public function test_the_profile_rechecks_the_active_role_on_every_request(): void
     {
-        $viewer = $this->assignInactiveRole($this->makeUser($this->aleppo, 'HR-ALP', ['employees.view']), 'employee');
+        $viewer = $this->assignInactiveRole($this->makeUser($this->aleppo, 'HR-ALP', ['hr.employees.view']), 'employee');
         $this->subjects['aleppoActive']->update(['national_number' => 'NID-ALEPPO-1']);
 
         $active = Livewire::actingAs($viewer)
@@ -356,7 +356,7 @@ class DirectoryAccessPolicyTest extends TestCase
         ];
 
         foreach ($cases as $role => $expected) {
-            $viewer = $this->makeUser($this->aleppo, $role, ['positions.view', 'positions.export']);
+            $viewer = $this->makeUser($this->aleppo, $role, ['hr.positions.view', 'hr.positions.export']);
             $directory = Livewire::actingAs($viewer)->test(Directory::class);
 
             $this->assertSame($expected, $this->directoryNames($directory), "{$role}, no status filter");
@@ -372,7 +372,7 @@ class DirectoryAccessPolicyTest extends TestCase
 
     public function test_the_csv_export_has_directory_columns_only_and_the_viewers_row_set(): void
     {
-        $viewer = $this->makeUser($this->aleppo, 'HR-ALP', ['positions.view', 'positions.export']);
+        $viewer = $this->makeUser($this->aleppo, 'HR-ALP', ['hr.positions.view', 'hr.positions.export']);
         $directory = Livewire::actingAs($viewer)->test(Directory::class);
         $listed = $this->directoryNames($directory);
 

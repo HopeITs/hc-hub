@@ -289,7 +289,7 @@ class AllLeaveRequestModule extends Component
     public function create()
     {
         // Also reached by the empty-state button's event, so check here, not in the view.
-        $this->authorizeActivePermission('leaves.create');
+        $this->authorizeActivePermission('hr.leaves.create');
         abort_unless(auth()->user()->activeRoleIs('HR', 'super-admin'), 403);
 
         $this->form->reset();
@@ -328,7 +328,7 @@ class AllLeaveRequestModule extends Component
 
     public function processSave()
     {
-        $this->authorizeActivePermission($this->form->id ? 'leaves.update' : 'leaves.create');
+        $this->authorizeActivePermission($this->form->id ? 'hr.leaves.update' : 'hr.leaves.create');
 
         if ($this->form->id) {
             Gate::authorize('update', $this->form->leaveRequest);

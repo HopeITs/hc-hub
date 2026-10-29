@@ -58,7 +58,7 @@
         @if ($isAwaiting)
             <h2 id="onboarding-status-title" class="font-semibold text-secondary-dark">@lang('employees.onboarding.state-awaiting')</h2>
             <p class="mt-1 text-secondary-medium">@lang('employees.onboarding.awaiting-help')</p>
-            @if (auth()->user()?->hasActivePermission('contracts.create'))
+            @if (auth()->user()?->hasActivePermission('hr.contracts.create'))
                 <x-secondary-button :href="route('contracts.create')" class="mt-3 !w-auto">@lang('employees.onboarding.create-contract')</x-secondary-button>
             @endif
         @else

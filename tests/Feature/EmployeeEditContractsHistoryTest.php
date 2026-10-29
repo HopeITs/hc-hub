@@ -32,7 +32,7 @@ class EmployeeEditContractsHistoryTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $subject = $this->makeSubjectWithContracts($city);
 
-        Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['employees.update']))
+        Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['hr.employees.update']))
             ->test(EmployeeEdit::class, ['employee' => $subject])
             ->assertSee(__('general.contracts-history'))
             ->assertDontSee('OLD-CONTRACT-POSITION')
@@ -49,7 +49,7 @@ class EmployeeEditContractsHistoryTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $subject = $this->makeSubjectWithContracts($city);
 
-        Livewire::actingAs($this->makeUser($city, 'super-admin', ['employees.update']))
+        Livewire::actingAs($this->makeUser($city, 'super-admin', ['hr.employees.update']))
             ->test(EmployeeEdit::class, ['employee' => $subject])
             ->call('setActiveTab', 'contracts_history')
             ->assertSee('CURRENT-POSITION')
@@ -64,7 +64,7 @@ class EmployeeEditContractsHistoryTest extends TestCase
         $city = $this->makeCity('ALP', '001');
         $subject = $this->makeSubjectWithContracts($city);
 
-        Livewire::actingAs($this->makeUser($city, 'employee', ['employees.update']))
+        Livewire::actingAs($this->makeUser($city, 'employee', ['hr.employees.update']))
             ->test(EmployeeEdit::class, ['employee' => $subject])
             ->assertDontSee(__('general.contracts-history'))
             ->call('setActiveTab', 'contracts_history')
@@ -77,7 +77,7 @@ class EmployeeEditContractsHistoryTest extends TestCase
     {
         $city = $this->makeCity('ALP', '001');
 
-        $html = Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['employees.create']))
+        $html = Livewire::actingAs($this->makeUser($city, 'HR-ALP', ['hr.employees.create']))
             ->test(EmployeeCreate::class)
             ->html();
 

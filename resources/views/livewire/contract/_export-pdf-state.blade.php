@@ -6,7 +6,7 @@
     Busy controls use aria-disabled rather than disabled, so keyboard focus
     stays on the button during the request; exportPdf() ignores repeats.
 
-    Export is a plain GET of contracts.export: it only reads the contract, so
+    Export is a plain GET of hr.contracts.export: it only reads the contract, so
     Retry simply repeats the same request and can never create anything.
     Server contract: 503 = render failed (body = contracts.export-failed),
     403 = not allowed, anything else = generic. The 503 message is taken

@@ -15,18 +15,18 @@ class DefaultDeliverablePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasActivePermission('checklists.manage');
+        return $user->hasActivePermission('hr.checklists.manage');
     }
 
     public function view(User $user, DefaultDeliverable $deliverable): bool
     {
-        return $user->hasActivePermission('checklists.manage')
+        return $user->hasActivePermission('hr.checklists.manage')
             && $this->cityAllowed($user, (int) $deliverable->city_id);
     }
 
     public function create(User $user, ?int $cityId = null): bool
     {
-        return $user->hasActivePermission('checklists.manage')
+        return $user->hasActivePermission('hr.checklists.manage')
             && ($cityId === null || $this->cityAllowed($user, $cityId));
     }
 

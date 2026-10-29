@@ -21,8 +21,7 @@ return new class extends Migration
 
         foreach (Role::query()->where('name', 'like', 'HR-%')->where('name', '!=', 'HR-SYR')->get() as $role) {
             $role->givePermissionTo($permissions->reject(
-                fn (Permission $permission): bool => str_starts_with($permission->name, 'access-management.')
-                    || $permission->name === 'activity-log.view',
+                fn (Permission $permission): bool => str_starts_with($permission->name, 'hub.'),
             ));
         }
 

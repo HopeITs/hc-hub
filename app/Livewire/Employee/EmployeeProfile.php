@@ -496,7 +496,7 @@ class EmployeeProfile extends Component
         $this->canViewRecords = $gate->allows('viewRecords', $this->employee);
         // Same rule as the Badges page and the dashboard card, through
         // Badge::scopeVisibleTo(): regional HR its own city, HR-SYR and
-        // general-manager every city, a manager granted badges.view their
+        // general-manager every city, a manager granted hr.badges.view their
         // reports. Being the profile's owner grants nothing by itself.
         $this->canViewBadges = $gate->allows('viewForEmployee', [Badge::class, $this->employee]);
     }

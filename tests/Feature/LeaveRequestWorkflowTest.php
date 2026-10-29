@@ -438,7 +438,7 @@ class LeaveRequestWorkflowTest extends TestCase
             'direct-manager',
         );
         $manager->assignRole(Role::findOrCreate('manager', 'web'));
-        $manager->givePermissionTo('leaves.decide');
+        $manager->givePermissionTo('hr.leaves.decide');
 
         $managerPositionId = DB::table('contracts')
             ->where('employee_id', $manager->employee_id)
@@ -515,7 +515,7 @@ class LeaveRequestWorkflowTest extends TestCase
     {
         [$hr, $leaveRequest] = $this->createPendingDecisionFixture();
         $colleague = $this->createHrUserForLeave($leaveRequest, 'colleague.hr@example.test');
-        $colleague->givePermissionTo('leaves.decide');
+        $colleague->givePermissionTo('hr.leaves.decide');
         Notification::fake();
 
         $staleDialog = Livewire::actingAs($hr)
@@ -790,7 +790,7 @@ class LeaveRequestWorkflowTest extends TestCase
         // Someone without the All leaves page (a direct manager with only the
         // employee role, DEC-05 revision 2) is sent to the work inbox instead.
         $this->assertSame(route('inbox', ['open' => "leave:{$leaveRequest->id}:decide"]), $newRequest['url']);
-        $user->givePermissionTo('leaves.view-all');
+        $user->givePermissionTo('hr.leaves.view-all');
         $this->assertNotificationUrl((new NewLeaveRequest($leaveRequest))->toArray($user->fresh())['url'], $leaveRequest->id, 'decision');
         $this->assertNotificationUrl($employeeReview['url'], $leaveRequest->id);
         $this->assertNotificationUrl($managerReview['url'], $leaveRequest->id, 'details');
@@ -1324,7 +1324,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $own = $this->pendingOwnRequestOf($hr);
         $this->putOnAcceptedLeaveToday($this->makeDirectManagerOf($own));
         $other = $this->createHrUserForLeave($own, 'other.hr@example.test');
-        $other->givePermissionTo(['leaves.decide', 'leaves.view-all']);
+        $other->givePermissionTo(['hr.leaves.decide', 'hr.leaves.view-all']);
 
         $this->assertNull(app(\App\Services\LeaveDecisionAuthority::class)->basisFor($hr, $own));
         // Another HR person in scope still stands in for the absent manager.
@@ -1337,7 +1337,7 @@ class LeaveRequestWorkflowTest extends TestCase
     {
         [$hr, $leave] = $this->createPendingDecisionFixture();
         $manager = $this->makeDirectManagerOf($leave, asEmployeeOnly: true);
-        $this->assertFalse($manager->hasActivePermission('leaves.decide'));
+        $this->assertFalse($manager->hasActivePermission('hr.leaves.decide'));
         Notification::fake();
         $inbox = app(\App\Services\WorkInbox::class);
 
@@ -1458,7 +1458,7 @@ class LeaveRequestWorkflowTest extends TestCase
         [$hr, $leave] = $this->createPendingDecisionFixture();
         $leave->update(['status' => LeaveRequestStatus::Rejected, 'reject_reason' => 'x', 'approved_at' => now(), 'approved_by' => $hr->employee_id, 'hr_approved' => false]);
         $other = $this->createHrUserForLeave($leave, 'second.hr@example.test');
-        $other->givePermissionTo(['leaves.review', 'leaves.view-all']);
+        $other->givePermissionTo(['hr.leaves.review', 'hr.leaves.view-all']);
         $inbox = app(\App\Services\WorkInbox::class);
 
         $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($hr)->allows('review', $leave->fresh()));
@@ -1501,7 +1501,7 @@ class LeaveRequestWorkflowTest extends TestCase
         [, $leave] = $this->createPendingDecisionFixture();
         [$tech] = $this->createRejectedLeaveFixture(null, 'tech.manager@example.test', 'tech-manager');
         $tech->assignRole(Role::findOrCreate('manager', 'web'));
-        $tech->givePermissionTo(['leaves.decide', 'leaves.view-all']);
+        $tech->givePermissionTo(['hr.leaves.decide', 'hr.leaves.view-all']);
         $techPositionId = DB::table('contracts')->where('employee_id', $tech->employee_id)->value('position_id');
         DB::table('positions')
             ->where('id', DB::table('contracts')->where('id', $leave->leaveBalance->contract_id)->value('position_id'))
@@ -1676,13 +1676,13 @@ class LeaveRequestWorkflowTest extends TestCase
 
     // --- G-C-3, 4, 7, 11, 12 ---
 
-    /** G-C-3 (F3): without leaves.review the inbox may neither mark seen nor object, whatever is called. */
+    /** G-C-3 (F3): without hr.leaves.review the inbox may neither mark seen nor object, whatever is called. */
     public function test_gc3_inbox_review_and_objection_need_the_review_permission(): void
     {
         [$hr, $leave] = $this->createPendingDecisionFixture();
         $leave->update(['status' => LeaveRequestStatus::Accepted, 'approved_at' => now(), 'computed_hours' => 8]);
         $leave->leaveBalance->update(['used' => 40]);
-        $hr->revokePermissionTo('leaves.review');
+        $hr->revokePermissionTo('hr.leaves.review');
         $hr = $hr->fresh();
         Notification::fake();
 
@@ -1839,7 +1839,7 @@ class LeaveRequestWorkflowTest extends TestCase
             $role = \App\Models\Role::findOrCreate('manager', 'web');
             $manager->assignRole($role);
             $manager->setActiveRole($role->id);
-            $manager->givePermissionTo(['leaves.decide', 'leaves.view-all']);
+            $manager->givePermissionTo(['hr.leaves.decide', 'hr.leaves.view-all']);
         }
 
         $managerPositionId = DB::table('contracts')->where('employee_id', $manager->employee_id)->value('position_id');
@@ -2046,7 +2046,7 @@ class LeaveRequestWorkflowTest extends TestCase
             'email' => $email,
             'password' => 'password',
         ]);
-        $user->givePermissionTo(['leaves.create', 'leaves.update']);
+        $user->givePermissionTo(['hr.leaves.create', 'hr.leaves.update']);
 
         return [$user, LeaveRequest::query()->findOrFail($leaveRequestId)];
     }
@@ -2072,7 +2072,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $decisionMaker->assignRole($role);
         // C3: the requester has no direct manager, so HR in scope decides
         // (C3-Q1); deciding and reviewing need their permissions.
-        $decisionMaker->givePermissionTo(['leaves.decide', 'leaves.review', 'leaves.view-all']);
+        $decisionMaker->givePermissionTo(['hr.leaves.decide', 'hr.leaves.review', 'hr.leaves.view-all']);
 
         return [$decisionMaker->fresh(), $leaveRequest->fresh()];
     }

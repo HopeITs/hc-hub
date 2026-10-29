@@ -27,7 +27,7 @@ class CenterEmployeeDirectoryTest extends TestCase
         $hr = $this->makeUser(
             $fixtures['city'],
             'HR-ALP',
-            ['centers.view', 'employees.view', 'positions.view'],
+            ['hr.centers.view', 'hr.employees.view', 'hr.positions.view'],
         );
 
         $parent = Livewire::actingAs($hr)
@@ -62,7 +62,7 @@ class CenterEmployeeDirectoryTest extends TestCase
     public function test_directory_excludes_expired_inactive_and_other_center_assignments(): void
     {
         $fixtures = $this->makeDirectoryFixtures();
-        $hr = $this->makeUser($fixtures['city'], 'HR-ALP', ['centers.view', 'employees.view']);
+        $hr = $this->makeUser($fixtures['city'], 'HR-ALP', ['hr.centers.view', 'hr.employees.view']);
 
         Livewire::actingAs($hr)
             ->test(CenterEmployees::class, ['centerId' => $fixtures['center']->id])
@@ -78,7 +78,7 @@ class CenterEmployeeDirectoryTest extends TestCase
     public function test_directory_searches_localized_names_positions_and_programs(): void
     {
         $fixtures = $this->makeDirectoryFixtures();
-        $hr = $this->makeUser($fixtures['city'], 'HR-ALP', ['centers.view', 'employees.view']);
+        $hr = $this->makeUser($fixtures['city'], 'HR-ALP', ['hr.centers.view', 'hr.employees.view']);
 
         $component = Livewire::actingAs($hr)
             ->test(CenterEmployees::class, ['centerId' => $fixtures['center']->id]);
@@ -101,13 +101,13 @@ class CenterEmployeeDirectoryTest extends TestCase
     {
         $fixtures = $this->makeDirectoryFixtures();
 
-        $centerOnlyUser = $this->makeUser($fixtures['city'], 'manager', ['centers.view']);
+        $centerOnlyUser = $this->makeUser($fixtures['city'], 'manager', ['hr.centers.view']);
         Livewire::actingAs($centerOnlyUser)
             ->test(CenterEmployees::class, ['centerId' => $fixtures['center']->id])
             ->assertStatus(403);
 
         $otherCity = $this->makeCity('HMS', '002');
-        $remoteUser = $this->makeUser($otherCity, 'HR-HMS', ['centers.view', 'employees.view']);
+        $remoteUser = $this->makeUser($otherCity, 'HR-HMS', ['hr.centers.view', 'hr.employees.view']);
         Livewire::actingAs($remoteUser)
             ->test(CenterEmployees::class, ['centerId' => $fixtures['center']->id])
             ->assertStatus(403);

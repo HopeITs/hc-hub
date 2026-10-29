@@ -130,7 +130,7 @@ test('the activity-log purge redacts rows whose subject type is the employee ali
 
 test('archive file routes serve folder media and 404 any other owner', function () {
     $city = $this->makeCity('ALP', '001');
-    $admin = $this->makeUser($city, 'super-admin', ['archives.view', 'archives.download']);
+    $admin = $this->makeUser($city, 'super-admin', ['hr.archives.view', 'hr.archives.download']);
     $employee = $this->makeEmployee($city, 'archive-'.Str::random(8));
     $folder = Folder::query()->create(['name' => 'Board', 'user_id' => $admin->id, 'is_shared' => false]);
 

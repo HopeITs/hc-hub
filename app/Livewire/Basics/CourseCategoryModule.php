@@ -40,7 +40,7 @@ class CourseCategoryModule extends Component
 
     public function create(): void
     {
-        $this->authorizeActivePermission('project-basics.create');
+        $this->authorizeActivePermission('hr.project-basics.create');
         $this->item = [
             'id' => null,
             'name_en' => '',
@@ -56,7 +56,7 @@ class CourseCategoryModule extends Component
 
     public function edit(int $id): void
     {
-        $this->authorizeActivePermission('project-basics.update');
+        $this->authorizeActivePermission('hr.project-basics.update');
         $cat = CourseCategory::findOrFail($id);
 
         $this->item = [
@@ -75,7 +75,7 @@ class CourseCategoryModule extends Component
     public function save(): void
     {
         $this->authorizeActivePermission(
-            empty($this->item['id']) ? 'project-basics.create' : 'project-basics.update',
+            empty($this->item['id']) ? 'hr.project-basics.create' : 'hr.project-basics.update',
         );
         $this->validate();
 

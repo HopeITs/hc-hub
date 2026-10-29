@@ -133,7 +133,7 @@ class MyLeaveRequestModule extends Component
 
     public function create()
     {
-        $this->authorizeActivePermission('leaves.create');
+        $this->authorizeActivePermission('hr.leaves.create');
 
         $this->form->reset();
         $this->form->resetValidation();
@@ -149,7 +149,7 @@ class MyLeaveRequestModule extends Component
 
     public function edit(LeaveRequest $id)
     {
-        $this->authorizeActivePermission('leaves.update');
+        $this->authorizeActivePermission('hr.leaves.update');
         Gate::authorize('update', $id);
 
         $this->form->resetValidation();
@@ -295,7 +295,7 @@ class MyLeaveRequestModule extends Component
 
     public function processSave()
     {
-        $this->authorizeActivePermission($this->form->id ? 'leaves.update' : 'leaves.create');
+        $this->authorizeActivePermission($this->form->id ? 'hr.leaves.update' : 'hr.leaves.create');
 
         if ($this->form->id) {
             Gate::authorize('update', $this->form->leaveRequest);
@@ -344,7 +344,7 @@ class MyLeaveRequestModule extends Component
      */
     public function reconcileOperation(): void
     {
-        $this->authorizeActivePermission('leaves.create');
+        $this->authorizeActivePermission('hr.leaves.create');
 
         $token = $this->form->submission_token;
         $leaveRequest = $this->form->id ? null : $this->form->consumedRequest();

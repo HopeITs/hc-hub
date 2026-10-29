@@ -24,7 +24,7 @@ class MultiCityHrScopeTest extends TestCase
         $rural = $this->makeCity('RHO', '015');
         $aleppo = $this->makeCity('ALP', '001');
 
-        $hr = $this->makeUser($homs, 'HR-HMS', ['employees.view', 'employees.update', 'employees.create']);
+        $hr = $this->makeUser($homs, 'HR-HMS', ['hr.employees.view', 'hr.employees.update', 'hr.employees.create']);
 
         $this->assertEqualsCanonicalizing([$homs->id, $rural->id], $hr->activeCityIds());
         $this->assertTrue($hr->canAccessCity($rural->id));
@@ -44,7 +44,7 @@ class MultiCityHrScopeTest extends TestCase
         $rural = $this->makeCity('RHO', '015');
         $this->makeCity('ALP', '001');
 
-        $hr = $this->makeUser($homs, 'HR-HMS', ['centers.view']);
+        $hr = $this->makeUser($homs, 'HR-HMS', ['hr.centers.view']);
 
         Livewire::actingAs($hr)
             ->test(CentersModule::class)

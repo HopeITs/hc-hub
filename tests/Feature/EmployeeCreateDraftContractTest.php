@@ -316,7 +316,7 @@ class EmployeeCreateDraftContractTest extends TestCase
         $fixtures = $this->makeFixtures();
         $otherCity = $this->makeCity('HMS', '002');
         $employee = $this->makeSavedEmployee($fixtures, 'draft.city-reset.employee');
-        $nationwideHr = $this->makeUser($fixtures['city'], 'HR-SYR', ['employees.create', 'employees.update']);
+        $nationwideHr = $this->makeUser($fixtures['city'], 'HR-SYR', ['hr.employees.create', 'hr.employees.update']);
 
         Livewire::actingAs($nationwideHr)
             ->test(EmployeeCreate::class)
@@ -372,7 +372,7 @@ class EmployeeCreateDraftContractTest extends TestCase
         ]);
 
         $employee = $this->makeSavedEmployee($fixtures, 'draft.hrsyr.employee'); // lives in $fixtures['city'] (ALP)
-        $nationwideHr = $this->makeUser($fixtures['city'], 'HR-SYR', ['employees.create', 'employees.update']);
+        $nationwideHr = $this->makeUser($fixtures['city'], 'HR-SYR', ['hr.employees.create', 'hr.employees.update']);
 
         $component = Livewire::actingAs($nationwideHr)
             ->test(EmployeeCreate::class)
@@ -480,7 +480,7 @@ class EmployeeCreateDraftContractTest extends TestCase
 
         ContractType::query()->forceCreate(['id' => 1, 'name_en' => 'Volunteer Contract', 'name_ar' => 'عقد تطوّع']);
 
-        $hr = $this->makeUser($city, 'HR-ALP', ['employees.create', 'employees.update']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.employees.create', 'hr.employees.update']);
 
         return compact('city', 'center', 'department', 'jobLevel', 'program', 'otherProgram', 'position', 'otherPosition', 'hr');
     }

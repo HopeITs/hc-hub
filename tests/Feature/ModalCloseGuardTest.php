@@ -53,7 +53,7 @@ class ModalCloseGuardTest extends TestCase
 
         $this->city = $this->makeCity('ALP', '001');
         $this->hr = $this->makeUser($this->city, 'HR-ALP', [
-            'project-basics.create', 'project-basics.update', 'centers.create', 'centers.update',
+            'hr.project-basics.create', 'hr.project-basics.update', 'hr.centers.create', 'hr.centers.update',
         ]);
     }
 

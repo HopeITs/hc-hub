@@ -104,8 +104,8 @@ class HelpPanelTest extends TestCase
 
     public function test_a_page_defaults_to_its_own_topics_and_hides_contract_help_from_other_roles(): void
     {
-        $hr = $this->makeUser($this->city, 'HR-ALP', ['contracts.view', 'contracts.create']);
-        $employee = $this->makeUser($this->city, 'employee', ['leaves.create']);
+        $hr = $this->makeUser($this->city, 'HR-ALP', ['hr.contracts.view', 'hr.contracts.create']);
+        $employee = $this->makeUser($this->city, 'employee', ['hr.leaves.create']);
 
         $forHr = HelpTopics::forRequest($this->requestFor('contracts.create'), $hr);
         $this->assertSame(['contract-types', 'position-dependencies', 'auto-renew'], $forHr['current']);
@@ -136,7 +136,7 @@ class HelpPanelTest extends TestCase
 
     public function test_the_shell_renders_the_panel_and_header_button_for_a_signed_in_user(): void
     {
-        $this->actingAs($this->makeUser($this->city, 'employee', ['leaves.create']));
+        $this->actingAs($this->makeUser($this->city, 'employee', ['hr.leaves.create']));
 
         $html = $this->get(route('dashboard'))->assertOk()->getContent();
         $xpath = $this->xpath($html);
@@ -156,7 +156,7 @@ class HelpPanelTest extends TestCase
 
     public function test_the_panel_sits_outside_every_livewire_component_and_binds_nothing_to_one(): void
     {
-        $this->actingAs($this->makeUser($this->city, 'HR-ALP', ['contracts.view', 'contracts.create']));
+        $this->actingAs($this->makeUser($this->city, 'HR-ALP', ['hr.contracts.view', 'hr.contracts.create']));
 
         $html = $this->get(route('contracts.create'))->assertOk()->getContent();
         $xpath = $this->xpath($html);
@@ -183,7 +183,7 @@ class HelpPanelTest extends TestCase
     public function test_the_composer_help_triggers_cannot_submit_or_call_the_component(): void
     {
         app()->setLocale('en');
-        $hr = $this->makeUser($this->city, 'HR-ALP', ['contracts.view', 'contracts.create']);
+        $hr = $this->makeUser($this->city, 'HR-ALP', ['hr.contracts.view', 'hr.contracts.create']);
         $this->makePosition($this->city);
 
         $component = Livewire::actingAs($hr)
@@ -384,7 +384,7 @@ class HelpPanelTest extends TestCase
             'updated_at' => now(),
         ]);
 
-        $user = $this->makeUser($this->city, 'employee', ['leaves.create', 'leaves.view-own'], $employee);
+        $user = $this->makeUser($this->city, 'employee', ['hr.leaves.create', 'hr.leaves.view-own'], $employee);
 
         return [$user, $annualId];
     }

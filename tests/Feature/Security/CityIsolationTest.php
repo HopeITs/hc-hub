@@ -35,7 +35,7 @@ class CityIsolationTest extends TestCase
         $aleppo = $this->makeCity('ALP', '001');
         $homs = $this->makeCity('HMS', '002');
 
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['centers.view', 'centers.update', 'centers.delete']);
+        $hr = $this->makeUser($aleppo, 'HR-ALP', ['hr.centers.view', 'hr.centers.update', 'hr.centers.delete']);
         $remote = $this->makeCenter($homs->id, 'Homs Centre');
         $local = $this->makeCenter($aleppo->id, 'Aleppo Centre');
 
@@ -52,7 +52,7 @@ class CityIsolationTest extends TestCase
         $aleppo = $this->makeCity('ALP', '001');
         $homs = $this->makeCity('HMS', '002');
 
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['centers.view', 'centers.update']);
+        $hr = $this->makeUser($aleppo, 'HR-ALP', ['hr.centers.view', 'hr.centers.update']);
         $remote = $this->makeCenter($homs->id, 'Homs Centre');
 
         // The edit button is never rendered for this row; the event is
@@ -68,7 +68,7 @@ class CityIsolationTest extends TestCase
         $aleppo = $this->makeCity('ALP', '001');
         $homs = $this->makeCity('HMS', '002');
 
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['centers.create']);
+        $hr = $this->makeUser($aleppo, 'HR-ALP', ['hr.centers.create']);
 
         Livewire::actingAs($hr)
             ->test(CentersModule::class)
@@ -95,7 +95,7 @@ class CityIsolationTest extends TestCase
         $aleppo = $this->makeCity('ALP', '001');
         $this->makeCity('HMS', '002');
 
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['centers.view']);
+        $hr = $this->makeUser($aleppo, 'HR-ALP', ['hr.centers.view']);
 
         Livewire::actingAs($hr)
             ->test(CentersModule::class)
@@ -108,7 +108,7 @@ class CityIsolationTest extends TestCase
         $syria = $this->makeCity('SYR', '000');
         $this->makeCity('HMS', '002');
 
-        $hq = $this->makeUser($syria, 'HR-SYR', ['centers.view']);
+        $hq = $this->makeUser($syria, 'HR-SYR', ['hr.centers.view']);
 
         $this->assertNull($hq->activeCityIds());
 
@@ -137,7 +137,7 @@ class CityIsolationTest extends TestCase
             'item_id' => $item->id,
         ]);
 
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['checklists.manage']);
+        $hr = $this->makeUser($aleppo, 'HR-ALP', ['hr.checklists.manage']);
 
         $this->actingAs($hr);
         $this->assertFalse(Gate::allows('delete', $remote));
@@ -172,7 +172,7 @@ class CityIsolationTest extends TestCase
             }
         }
 
-        $hr = $this->makeUser($aleppo, 'HR-ALP', ['statistics.view']);
+        $hr = $this->makeUser($aleppo, 'HR-ALP', ['hr.statistics.view']);
 
         $payload = Livewire::actingAs($hr)
             ->test(EmployeeStatistics::class)
@@ -197,7 +197,7 @@ class CityIsolationTest extends TestCase
         $employee = $this->makeEmployee($homs, 'hms-emp');
         $this->makeContract($employee->id, $position->id, $type->id);
 
-        $hq = $this->makeUser($syria, 'HR-SYR', ['statistics.view']);
+        $hq = $this->makeUser($syria, 'HR-SYR', ['hr.statistics.view']);
 
         $payload = Livewire::actingAs($hq)
             ->test(EmployeeStatistics::class)

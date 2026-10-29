@@ -71,7 +71,7 @@ class ChecklistItemTable extends LivewireTable
 
     protected function rowClickAction(Model $model): ?string
     {
-        return auth()->user()?->hasActivePermission('project-basics.update')
+        return auth()->user()?->hasActivePermission('hr.project-basics.update')
             ? "\$dispatch('openChecklistItemEdit', { id: {$model->getKey()} })"
             : null;
     }
@@ -88,8 +88,8 @@ class ChecklistItemTable extends LivewireTable
 
     protected function columns(): array
     {
-        $canUpdate = auth()->user()?->hasActivePermission('project-basics.update') ?? false;
-        $canDelete = auth()->user()?->hasActivePermission('project-basics.delete') ?? false;
+        $canUpdate = auth()->user()?->hasActivePermission('hr.project-basics.update') ?? false;
+        $canDelete = auth()->user()?->hasActivePermission('hr.project-basics.delete') ?? false;
 
         return [
             Column::make('ID', 'id')->sortable()->searchable(),

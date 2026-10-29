@@ -11,7 +11,6 @@ use App\Models\Center;
 use App\Models\Contract;
 use App\Models\ContractType;
 use App\Models\Department;
-use App\Models\Employee;
 use App\Models\JobLevel;
 use App\Models\Position;
 use App\Models\Program;
@@ -285,7 +284,7 @@ class ContractComposerPayTest extends TestCase
 
         $annualType = ContractType::query()->forceCreate(['id' => 1, 'name_en' => 'Volunteer Contract', 'name_ar' => 'عقد تطوّع']);
 
-        $hr = $this->makeUser($city, 'HR-ALP', ['contracts.create', 'contracts.update']);
+        $hr = $this->makeUser($city, 'HR-ALP', ['hr.contracts.create', 'hr.contracts.update']);
 
         return compact('city', 'center', 'department', 'jobLevel', 'program', 'position', 'employee', 'annualType', 'hr');
     }

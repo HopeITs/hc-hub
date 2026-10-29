@@ -38,7 +38,7 @@ class CenterDetails extends Component
             'programData' => $this->programData($activeContracts),
             'totalEmployees' => $center->activeEmployeesQuery()->count(),
             'totalAssignments' => $activeContracts->count(),
-            'canViewEmployees' => auth()->user()?->hasActivePermission('employees.view') ?? false,
+            'canViewEmployees' => auth()->user()?->hasActivePermission('hr.employees.view') ?? false,
         ]);
     }
 
