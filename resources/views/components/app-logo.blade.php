@@ -7,5 +7,5 @@
      height="74"
      decoding="async"
      fetchpriority="high"
-     {{$attributes->merge(['class' => ''])}}
+     {{$attributes->merge(['class' => 'app-logo'])}}
 />

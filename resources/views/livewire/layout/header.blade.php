@@ -51,6 +51,10 @@
                     aria-label="العربية" @if($curr === 'ar') aria-current="true" @endif>AR</a>
             </div>
 
+            {{-- Light / dark, beside the language switch. Not on phones (no room at 375px):
+                 there it is a row in the account menu. --}}
+            <x-theme-toggle class="max-sm:hidden" />
+
             {{-- Island 2: utility icons grouped in one capsule --}}
             <div class="flex items-center shrink-0 gap-0.5 rounded-[18px] bg-[#f6f6f6] p-0.5 sm:p-1">
                 {{-- D3. Not on phones: one more 44px button pushed the menu button off the
@@ -161,6 +165,9 @@
                                 </svg>
                                 <span>@lang('help.panel.open')</span>
                             </button>
+
+                            {{-- Phones: the header's light / dark button does not fit there. --}}
+                            <x-theme-toggle menu class="sm:hidden" />
 
                             {{-- D3: opens the feedback dialog over the current page; nothing navigates. --}}
                             <button type="button" role="menuitem" data-feedback-open

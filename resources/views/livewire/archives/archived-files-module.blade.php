@@ -11,7 +11,7 @@
 
         <div class="flex items-center flex-shrink-0 gap-2">
             @if ($canManageCurrentFolder)
-                <button type="button" wire:click="$set('showCreateFolderModal', true)" class="inline-flex items-center justify-center px-4 py-2 text-body font-semibold text-white transition rounded-control shadow-e1 bg-primary hover:bg-[#a51b20] focus:outline-none focus:ring-2 focus:ring-primary/30">
+                <button type="button" wire:click="$set('showCreateFolderModal', true)" class="inline-flex items-center justify-center px-4 py-2 text-body font-semibold text-white transition rounded-control shadow-e1 bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/30">
                     <x-icons.plus class="w-5 h-5 me-1" />
                     {{ __('general.new_folder') }}
                 </button>
@@ -209,7 +209,7 @@
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-3 px-6 py-4 mt-4 rounded-b-lg bg-neutral-50">
-                <button type="button" wire:click="createFolder" class="inline-flex justify-center w-full px-4 py-2 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-[#a51b20] focus:outline-none focus:ring-2 focus:ring-primary/30">{{ __('general.create') }}</button>
+                <button type="button" wire:click="createFolder" class="inline-flex justify-center w-full px-4 py-2 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/30">{{ __('general.create') }}</button>
                 <button type="button" wire:click="$set('showCreateFolderModal', false)" class="inline-flex justify-center w-full px-4 py-2 text-body font-medium text-neutral-800 bg-white border border-neutral-300 rounded-control hover:bg-neutral-50">{{ __('general.cancel') }}</button>
             </div>
         </div>
@@ -231,7 +231,7 @@
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-3 px-6 py-4 mt-4 rounded-b-lg bg-neutral-50">
-                <button type="button" wire:click="saveEditedFolder" class="inline-flex justify-center w-full px-4 py-2 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-[#a51b20] focus:outline-none focus:ring-2 focus:ring-primary/30">{{ __('general.save') }}</button>
+                <button type="button" wire:click="saveEditedFolder" class="inline-flex justify-center w-full px-4 py-2 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/30">{{ __('general.save') }}</button>
                 <button wire:click="$set('editingFolderId', null)" class="inline-flex justify-center w-full px-4 py-2 text-body font-medium text-neutral-800 bg-white border rounded-control hover:bg-neutral-50">{{ __('general.cancel') }}</button>
             </div>
         </div>
@@ -253,7 +253,7 @@
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-3 px-6 py-4 mt-4 rounded-b-lg bg-neutral-50">
-                <button type="button" wire:click="saveEditedFile" class="inline-flex justify-center w-full px-4 py-2 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-[#a51b20] focus:outline-none focus:ring-2 focus:ring-primary/30">{{ __('general.save') }}</button>
+                <button type="button" wire:click="saveEditedFile" class="inline-flex justify-center w-full px-4 py-2 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/30">{{ __('general.save') }}</button>
                 <button wire:click="$set('editingFileId', null)" class="inline-flex justify-center w-full px-4 py-2 text-body font-medium text-neutral-800 bg-white border rounded-control hover:bg-neutral-50">{{ __('general.cancel') }}</button>
             </div>
         </div>
@@ -275,7 +275,7 @@
                     <p class="mt-1 text-small text-secondary-medium">{{ strtoupper($previewFile->extension) }} · {{ $previewFile->size >= 1048576 ? number_format($previewFile->size / 1048576, 1).' MB' : number_format($previewFile->size / 1024, 1).' KB' }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button type="button" wire:click="downloadFile({{ $previewFile->id }})" class="inline-flex items-center justify-center px-3 py-2 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-[#a51b20]">
+                    <button type="button" wire:click="downloadFile({{ $previewFile->id }})" class="inline-flex items-center justify-center px-3 py-2 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-primary-hover">
                         Download
                     </button>
                     <button type="button" wire:click="closePreviewModal" class="inline-flex items-center justify-center text-secondary-medium transition rounded-control size-9 hover:bg-neutral-100 hover:text-neutral-900">
@@ -329,7 +329,7 @@
                                 <p class="mt-2 text-body leading-6 text-secondary-medium">
                                     {{ $officePreviewData['message'] ?? 'A local preview could not be generated for this Office file.' }}
                                 </p>
-                                <button type="button" wire:click="downloadFile({{ $previewFile->id }})" class="inline-flex items-center justify-center px-4 py-2 mt-4 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-[#a51b20]">
+                                <button type="button" wire:click="downloadFile({{ $previewFile->id }})" class="inline-flex items-center justify-center px-4 py-2 mt-4 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-primary-hover">
                                     Download file
                                 </button>
                             </div>
@@ -345,7 +345,7 @@
                             <p class="mt-2 text-body leading-6 text-secondary-medium">
                                 A full local Office preview needs LibreOffice or Microsoft Office available on the server. Until then, this file can be downloaded and opened in its native app.
                             </p>
-                            <button type="button" wire:click="downloadFile({{ $previewFile->id }})" class="inline-flex items-center justify-center px-4 py-2 mt-4 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-[#a51b20]">
+                            <button type="button" wire:click="downloadFile({{ $previewFile->id }})" class="inline-flex items-center justify-center px-4 py-2 mt-4 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-primary-hover">
                                 Download file
                             </button>
                         </div>
@@ -358,7 +358,7 @@
                             </span>
                             <h4 class="mt-4 text-body font-bold text-neutral-950">{{ $previewFile->name }}</h4>
                             <p class="mt-2 text-body text-secondary-medium">Preview is available for images, PDF, Word, Excel and PowerPoint files. Download this file to open it in its native app.</p>
-                            <button type="button" wire:click="downloadFile({{ $previewFile->id }})" class="inline-flex items-center justify-center px-4 py-2 mt-4 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-[#a51b20]">
+                            <button type="button" wire:click="downloadFile({{ $previewFile->id }})" class="inline-flex items-center justify-center px-4 py-2 mt-4 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-primary-hover">
                                 Download file
                             </button>
                         </div>
@@ -526,7 +526,7 @@
                 @endif
             </div>
             <div class="grid grid-cols-2 gap-3 px-6 py-4 mt-4 border-t border-neutral-200 bg-neutral-50">
-                <button type="button" wire:click="savePermissions" class="inline-flex justify-center w-full px-4 py-2 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-[#a51b20] focus:outline-none focus:ring-2 focus:ring-primary/30">{{ __('general.save_permissions') }}</button>
+                <button type="button" wire:click="savePermissions" class="inline-flex justify-center w-full px-4 py-2 text-body font-semibold text-white transition rounded-control bg-primary hover:bg-primary-hover focus:outline-none focus:ring-2 focus:ring-primary/30">{{ __('general.save_permissions') }}</button>
                 <button type="button" wire:click="closePermissionsModal" class="inline-flex justify-center w-full px-4 py-2 text-body font-medium text-neutral-800 bg-white border border-neutral-300 rounded-control hover:bg-neutral-50">{{ __('general.cancel') }}</button>
             </div>
         </div>

@@ -22,7 +22,7 @@
             font-semibold
 
             {{ $active
-                ? 'text-neutral-800 bg-neutral-50'
+                ? 'relative text-neutral-800 bg-neutral-50 before:content-[\'\'] before:absolute before:start-0 before:inset-y-1.5 before:w-[3px] before:rounded-full before:bg-primary'
                 : 'text-secondary-medium hover:text-neutral-800 hover:bg-neutral-50' }}
         "
         :class="sidebarCollapsed && !open ? 'md:justify-center md:size-11 md:px-0 md:mx-auto' : ''"

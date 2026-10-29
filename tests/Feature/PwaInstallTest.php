@@ -80,7 +80,8 @@ class PwaInstallTest extends TestCase
     {
         $login = $this->get(route('login'))->getContent();
         $this->assertStringContainsString('site.webmanifest', $login);
-        $this->assertStringContainsString('<meta name="theme-color" content="#FFFFFF">', $login);
+        $this->assertStringContainsString('<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">', $login);
+        $this->assertStringContainsString('<meta name="theme-color" content="#161617" media="(prefers-color-scheme: dark)">', $login);
         $this->assertStringContainsString("navigator.serviceWorker.register('/sw.js')", $login);
         // With the CSP nonce, or the browser refuses to run it (found in the browser check).
         $this->assertMatchesRegularExpression('/<script nonce="[^"]+">\s*if \(\'serviceWorker\' in navigator/', $login);

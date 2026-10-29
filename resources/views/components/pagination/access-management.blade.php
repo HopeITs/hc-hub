@@ -36,7 +36,7 @@
                     type="button"
                     wire:click="previousPage('{{ $pageName }}')"
                     wire:loading.attr="disabled"
-                    class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:border-gray-300 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24] disabled:pointer-events-none disabled:opacity-50"
+                    class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:border-gray-300 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-50"
                     aria-label="{{ __('access.pagination.previous') }}"
                 >
                     <svg class="size-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -60,7 +60,7 @@
                             $nextTick(() => document.getElementById('access-page-option-{{ $currentPage }}')?.scrollIntoView({ block: 'nearest' }));
                         }
                     "
-                    class="inline-flex min-h-9 w-[4.25rem] items-center justify-between rounded-lg border border-gray-200 bg-white px-2.5 text-sm font-bold tabular-nums text-gray-800 transition hover:border-gray-300 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24]"
+                    class="inline-flex min-h-9 w-[4.25rem] items-center justify-between rounded-lg border border-gray-200 bg-white px-2.5 text-sm font-bold tabular-nums text-gray-800 transition hover:border-gray-300 hover:bg-gray-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     aria-label="{{ __('access.pagination.page') }}"
                     aria-haspopup="listbox"
                     x-bind:aria-expanded="open"
@@ -95,8 +95,8 @@
                             wire:click="gotoPage({{ $page }}, '{{ $pageName }}')"
                             x-on:click="open = false"
                             @class([
-                                'flex h-9 w-full items-center justify-center text-sm font-bold tabular-nums transition focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-[#be1f24]',
-                                'bg-[#be1f24] text-white' => $page === $currentPage,
+                                'flex h-9 w-full items-center justify-center text-sm font-bold tabular-nums transition focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-inset focus-visible:outline-primary',
+                                'bg-primary text-white' => $page === $currentPage,
                                 'bg-white text-gray-700 hover:bg-gray-100 hover:text-gray-900' => $page !== $currentPage,
                             ])
                             role="option"
@@ -117,7 +117,7 @@
                     type="button"
                     wire:click="nextPage('{{ $pageName }}')"
                     wire:loading.attr="disabled"
-                    class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:border-gray-300 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#be1f24] disabled:pointer-events-none disabled:opacity-50"
+                    class="inline-flex size-9 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 transition hover:border-gray-300 hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:pointer-events-none disabled:opacity-50"
                     aria-label="{{ __('access.pagination.next') }}"
                 >
                     <svg class="size-4 rtl:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">

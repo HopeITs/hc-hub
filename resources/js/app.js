@@ -101,6 +101,11 @@ Chart.register(
 
 window.Chart = Chart;
 
+// Dark mode: Chart.js defaults follow the theme (light keeps Chart.js's own).
+import applyChartJsTheme from './charts/chartjs-theme.js';
+
+applyChartJsTheme(Chart);
+
 // Toasts and the confirmation dialog (<x-toasts/>, <x-confirm-dialog/>).
 import './feedback.js';
 

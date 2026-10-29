@@ -205,7 +205,7 @@
                                 @foreach ($dayHolidays as $holiday)
                                     @if ($holiday['editable'])
                                         <button type="button" wire:click="$dispatch('openHolidayEdit', { id: {{ $holiday['id'] }} })"
-                                                class="flex w-full items-center gap-1 truncate rounded-md bg-primary/10 px-1.5 py-0.5 text-start text-[11px] font-semibold text-primary-hover transition hover:bg-primary/15 focus-visible:outline-2 focus-visible:outline-primary"
+                                                class="flex w-full items-center gap-1 truncate rounded-md bg-primary/10 px-1.5 py-0.5 text-start text-[11px] font-semibold text-primary transition hover:bg-primary/15 focus-visible:outline-2 focus-visible:outline-primary"
                                                 title="{{ $holiday['name'] }}">
                                             <svg class="size-3 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M4 2.75a.75.75 0 011.5 0V3h9.25a.75.75 0 01.6 1.2L13.06 7.25l2.29 3.05a.75.75 0 01-.6 1.2H5.5v5.75a.75.75 0 01-1.5 0V2.75z"/></svg>
                                             <span class="truncate">{{ $holiday['name'] }}</span>
