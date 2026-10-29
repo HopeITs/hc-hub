@@ -156,7 +156,7 @@
 
     :root{
         --main:#414042;
-        --red:#c2151c;
+        --red:#BE1F24;
     }
 
     .contract-a4{

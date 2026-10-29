@@ -1,9 +1,9 @@
 <button wire:loading.attr="disabled"
     {{$attributes->merge([
-    'class' => 'text-primary hover:text-white border border-primary hover:bg-primary focus:ring-4 focus:outline-none focus:ring-primary font-medium rounded-control text-body px-4 py-2 text-center me-2 mb-2 shadow-e1 transition duration-150 ease-in-out'
+    'class' => 'min-h-11 bg-white text-neutral-800 border-[1.5px] border-neutral-800 hover:bg-neutral-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-800 font-bold rounded-control text-body px-[18px] py-2 text-center me-2 mb-2 transition duration-150 ease-in-out active:scale-[0.98]'
 ])}}>
     <div role="status" class="me-2" wire:loading>
-        <svg aria-hidden="true" class="inline size-4 text-white-200 animate-spin  fill-white" viewBox="0 0 100 101"
+        <svg aria-hidden="true" class="inline size-4 text-neutral-200 animate-spin fill-neutral-800" viewBox="0 0 100 101"
              fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
                 d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"

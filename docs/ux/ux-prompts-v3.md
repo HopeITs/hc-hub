@@ -57,7 +57,7 @@ Context and evidence
 
 Product and implementation boundaries
 - Planning documents do not authorize implementation, deployment, live migrations, new access grants, sending messages or modifying real HR records. Once a task is assigned for implementation, proceed with its settled scope without asking again for routine reversible choices.
-- Preserve the existing Laravel/Livewire stack, routes, local operational theme (#c2151c primary and current ramp), Somar Sans, privacy boundaries, contract capacity rules and original media. No unsolicited full redesign, recruitment module, paid service, theme replacement or offline HR write queue.
+- Preserve the existing Laravel/Livewire stack, routes, local operational theme (#BE1F24 primary and current ramp), Somar Sans, privacy boundaries, contract capacity rules and original media. No unsolicited full redesign, recruitment module, paid service, theme replacement or offline HR write queue.
 - New component/service/schema names in task outputs are PROPOSED until implemented. Reuse before adding; verify APIs against installed versions/official primary documentation when necessary. Slash-command skills named by another agent are not assumed available.
 
 Authorization and data

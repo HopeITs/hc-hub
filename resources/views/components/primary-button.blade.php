@@ -7,11 +7,12 @@
 ])
 
 @php
-    $base = 'py-2 px-4 text-body font-semibold text-white bg-primary cursor-pointer
-             rounded-control shadow-e1 transition duration-150 ease-in-out flex justify-center items-center
-             hover:bg-primary-hover active:scale-[0.98] active:shadow-none
-             focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary
-             disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100';
+    // media-request .btn .btn-p: 44px target, 18px sides, bold, flat red that dims on hover.
+    $base = 'min-h-11 py-2 px-[18px] text-body font-bold text-white bg-primary cursor-pointer
+             rounded-control border-[1.5px] border-transparent transition duration-150 ease-in-out flex justify-center items-center gap-2
+             hover:opacity-90 active:scale-[0.98]
+             focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-800
+             disabled:opacity-45 disabled:cursor-not-allowed disabled:active:scale-100';
     $classes = ($full ? 'w-full ' : '') . $base;
 @endphp
 

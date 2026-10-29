@@ -15,69 +15,32 @@
 /* select2 is required by 20+ Blade views; its stylesheet must load globally. */
 @import "select2/dist/css/select2.min.css";
 
-@font-face {
-    font-family: 'SomarSans';
-    src: url('../fonts/SomarSans/SomarSans-Thin.woff2') format('woff2');
-    font-weight: 100;
-    font-style: normal;
-    font-display: swap;
-}
+/* ------------------------------------------------------------------
+   Somar Sans — the same files and faces as media-request (the brand's
+   source of truth): its hinted TTFs (v1.002) for 400/500/600/700/800,
+   under its family name 'Somar Sans'. The hub also keeps three weights
+   media-request does not ship (100, 300, 900) as WOFF2.
+   'SomarSans' (no space) is the hub's older name for the same faces,
+   still used by chart scripts and a few inline styles; it points at the
+   same files, so the browser downloads each weight once.
+   ------------------------------------------------------------------ */
+@font-face { font-family: 'Somar Sans'; src: url('../fonts/SomarSans/SomarSans-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Somar Sans'; src: url('../fonts/SomarSans/SomarSans-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Somar Sans'; src: url('../fonts/SomarSans/SomarSans-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Somar Sans'; src: url('../fonts/SomarSans/SomarSans-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Somar Sans'; src: url('../fonts/SomarSans/SomarSans-ExtraBold.ttf') format('truetype'); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Somar Sans'; src: url('../fonts/SomarSans/SomarSans-Thin.woff2') format('woff2'); font-weight: 100; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Somar Sans'; src: url('../fonts/SomarSans/SomarSans-Light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Somar Sans'; src: url('../fonts/SomarSans/SomarSans-Black.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
 
-@font-face {
-    font-family: 'SomarSans';
-    src: url('../fonts/SomarSans/SomarSans-Light.woff2') format('woff2');
-    font-weight: 300;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'SomarSans';
-    src: url('../fonts/SomarSans/SomarSans-Regular.woff2') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'SomarSans';
-    src: url('../fonts/SomarSans/SomarSans-Medium.woff2') format('woff2');
-    font-weight: 500;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'SomarSans';
-    src: url('../fonts/SomarSans/SomarSans-SemiBold.woff2') format('woff2');
-    font-weight: 600;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'SomarSans';
-    src: url('../fonts/SomarSans/SomarSans-Bold.woff2') format('woff2');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'SomarSans';
-    src: url('../fonts/SomarSans/SomarSans-ExtraBold.woff2') format('woff2');
-    font-weight: 800;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'SomarSans';
-    src: url('../fonts/SomarSans/SomarSans-Black.woff2') format('woff2');
-    font-weight: 900;
-    font-style: normal;
-    font-display: swap;
-}
+@font-face { font-family: 'SomarSans'; src: url('../fonts/SomarSans/SomarSans-Regular.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'SomarSans'; src: url('../fonts/SomarSans/SomarSans-Medium.ttf') format('truetype'); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: 'SomarSans'; src: url('../fonts/SomarSans/SomarSans-SemiBold.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'SomarSans'; src: url('../fonts/SomarSans/SomarSans-Bold.ttf') format('truetype'); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: 'SomarSans'; src: url('../fonts/SomarSans/SomarSans-ExtraBold.ttf') format('truetype'); font-weight: 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'SomarSans'; src: url('../fonts/SomarSans/SomarSans-Thin.woff2') format('woff2'); font-weight: 100; font-style: normal; font-display: swap; }
+@font-face { font-family: 'SomarSans'; src: url('../fonts/SomarSans/SomarSans-Light.woff2') format('woff2'); font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: 'SomarSans'; src: url('../fonts/SomarSans/SomarSans-Black.woff2') format('woff2'); font-weight: 900; font-style: normal; font-display: swap; }
 
 
 @font-face {
@@ -148,7 +111,16 @@
 }
 
 body {
-    font-family: 'SomarSans', sans-serif;
+    font-family: var(--font-sans);
+    color: var(--color-neutral-800);
+
+    /* Rendering as media-request: real kerning, no faked bold/italic (Somar
+       Sans ships every weight we use), the smoothest glyph drawing. */
+    text-rendering: optimizeLegibility;
+    font-kerning: normal;
+    font-synthesis: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 
     /* The type scale's base. Without this, any element that carries no
        size utility falls back to the browser's 16px, which is a step
@@ -157,53 +129,64 @@ body {
     line-height: 1.55;
 }
 
+/* Arabic reads more openly (media-request: line-height 1.7 on Arabic pages). */
+html[lang="ar"] body {
+    line-height: 1.7;
+}
+
 @theme {
-    --font-sans: 'SomarSans', 'Lato', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Somar Sans', 'SomarSans', Arial, Tahoma, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
 
     --color-accent: #414042;
     --color-accent-content: #414042;
     --color-accent-foreground: var(--color-white);
 
-    --color-primary: #c2151c; /* HOPE brand primary red */
-    --color-primary-hover: #a51218; /* one step darker, for button hover */
+    /* Hope Center red — the one brand red, flat (media-request --brand). */
+    --color-primary: #BE1F24;
+    /* Hover is not a second, darker red: media-request dims the same red
+       (opacity .9). Mixing with transparent gives that exact result on any
+       surface without dimming the text on top. */
+    --color-primary-hover: color-mix(in srgb, #BE1F24 90%, transparent);
     --color-secondary-dark: #58595b;
     --color-secondary-medium: #6d6e71;
     --color-secondary-light: #939598;
-    --color-secondary-soft: #dcddde;
+    --color-secondary-soft: #E6E7E8;
 
-    --color-neutral-50: #f5f5f6;
-    --color-neutral-100: #eeeff0;
-    --color-neutral-200: #dcddde;
+    --color-neutral-50: #F3F3F4; /* media-request --soft / --hover */
+    --color-neutral-100: #F3F3F4; /* media-request has one light grey here: --soft */
+    --color-neutral-200: #E6E7E8; /* media-request --surface / --line-soft */
     /* soft */
-    --color-neutral-300: #bcbec0;
-    --color-neutral-400: #939598;
+    --color-neutral-300: #BCBEC0; /* --line */
+    --color-neutral-400: #939598; /* --text-3 */
     /* light */
     --color-neutral-500: #808184;
-    --color-neutral-600: #6d6e71;
+    --color-neutral-600: #6D6E71; /* --text-2 */
     /* medium */
     --color-neutral-700: #575759;
-    --color-neutral-800: #414042;
+    --color-neutral-800: #414042; /* --text / --ink */
     /* dark */
-    --color-neutral-900: #2b2a2c;
-    --color-neutral-950: #171718;
+    --color-neutral-900: #414042; /* media-request has no darker text than --text / --ink */
+    --color-neutral-950: #161617; /* dark --bg */
 
 
     --color-black: #414042;
-    --tag-remove-btn-bg--hover: #c2151c;
+    --tag-remove-btn-bg--hover: #BE1F24;
 
     /* Simple-Modern: lighter, cleaner elevation ramp */
-    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
-    --shadow-md: 0 1px 4px 0 rgba(0, 0, 0, 0.07);
-    --shadow-lg: 0 6px 16px -6px rgba(0, 0, 0, 0.12);
+    /* Elevation tinted with the brand dark neutral, as media-request:
+       sm = its --shadow-sm, lg = its --shadow (menus, dialogs). */
+    --shadow-xs: 0 1px 2px 0 rgba(65, 64, 66, 0.06);
+    --shadow-sm: 0 1px 3px rgba(65, 64, 66, 0.08);
+    --shadow-md: 0 2px 8px -2px rgba(65, 64, 66, 0.1);
+    --shadow-lg: 0 6px 24px rgba(65, 64, 66, 0.14);
 
     /* Subtle warm-neutral sidebar surface */
-    --color-sidebar-surface: #f9fafb;
-    --color-app-surface: #f4f5f7;
+    --color-sidebar-surface: #FFFFFF; /* chrome = media-request --bg */
+    --color-app-surface: #F3F3F4; /* page = media-request --soft */
 
     /* Selected-state fill. Never tint the brand red down for this — a
-       low-opacity #c2151c reads as pink, which is not allowed in this UI. */
+       low-opacity #BE1F24 reads as pink, which is not allowed in this UI. */
     --color-selection: #e6e7e8;
 
     /* Critically damped easing — reaches the target quickly, settles without
@@ -241,7 +224,7 @@ body {
 
     /* Custom overlay scrollbar (public/js/custom-scrollbar.js) */
     --csb-color: #bcbec0;
-    --csb-hover: #a7a9ac;
+    --csb-hover: #939598;
 
 }
 [data-flux-field]:not(ui-radio, ui-checkbox) {
@@ -347,9 +330,9 @@ select option:checked {
         padding: 0.5rem 2.5rem 0.5rem 0.75rem;
         font-size: 0.875rem;
         line-height: 1.25rem;
-        color: #111827;
+        color: #414042;
         background-color: #ffffff;
-        border: 1px solid #d1d5db;
+        border: 1px solid #BCBEC0;
         border-radius: 0.375rem;
         box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
@@ -357,7 +340,7 @@ select option:checked {
     }
 
     clock-timepicker > input::placeholder {
-        color: #9ca3af;
+        color: #939598;
     }
 
     clock-timepicker > input:hover:not(:disabled) {
@@ -414,9 +397,9 @@ select option:checked {
         height: 37.6px !important;
         padding: 0.5rem 0.75rem !important;
         font-size: 0.875rem !important;
-        color: #111827 !important;
+        color: #414042 !important;
         background-color: #ffffff !important;
-        border: 1px solid #d1d5db !important;
+        border: 1px solid #BCBEC0 !important;
         border-radius: 0.375rem !important;
 
 
@@ -508,13 +491,13 @@ select option:checked {
         box-shadow: var(--shadow-e1) !important;
         background-color: #ffffff !important;
         font-size: var(--text-small) !important;
-        color: #000000 !important;
+        color: #414042 !important;
     }
 
     .perpage-select-box .select2-container--default .select2-selection--single .select2-selection__rendered {
         padding: 0 !important;
         line-height: 1.5 !important;
-        color: #000000 !important;
+        color: #414042 !important;
     }
 
     /* Filter selects (city/program) — match the Reset Filters button's
@@ -566,7 +549,7 @@ select option:checked {
 
         flex-shrink: 0;
         overflow: hidden;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #E6E7E8;
         border-radius: 0.5cqw;
         background: #ffffff;
         box-shadow: 0 0.1cqw 0.3cqw rgb(65 64 66 / 20%);
@@ -604,8 +587,8 @@ select option:checked {
 
     .org-id-card--vacant {
         border-style: dashed;
-        border-color: #d1d5db;
-        background: #f9fafb;
+        border-color: #BCBEC0;
+        background: #F3F3F4;
         box-shadow: none;
     }
 

@@ -170,7 +170,7 @@ export default function initContractTypeChart() {
                     radius: 4,
                     stroke: am5.color("#ffffff"),
                     strokeWidth: 2,
-                    fill: dataItem.dataContext._dotColor || am5.color("#c2151c")
+                    fill: dataItem.dataContext._dotColor || am5.color("#BE1F24")
                 })
             });
         });

@@ -33,7 +33,7 @@ that preceded this spec found five defects that are structural, not cosmetic:
 - The dependency tree is visible in the layout.
 - Every constraint (capacity, date ceiling, prerequisites) is stated *before* it is violated.
 - The finished form is its own review.
-- Visual language unchanged: white cards on `--surface-base`, brand red `#c2151c` reserved for
+- Visual language unchanged: white cards on `--surface-base`, brand red `#BE1F24` reserved for
   the active state, the required marker, and the single primary action.
 
 ## 3. Non-goals

@@ -14,7 +14,7 @@ const chartPalette = () => {
         rootStyle.getPropertyValue("--color-neutral-600").trim(),
         rootStyle.getPropertyValue("--color-neutral-400").trim(),
         rootStyle.getPropertyValue("--color-neutral-800").trim(),
-    ].map((color) => color || "#c2151c");
+    ].map((color) => color || "#BE1F24");
 };
 
 // Read the Livewire-published globals on every call rather than once at module

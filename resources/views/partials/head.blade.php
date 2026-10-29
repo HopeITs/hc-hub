@@ -43,7 +43,8 @@
      data, a photo or a file. On the sign-in page, and whenever the signed-in
      user or active role differs from the last one seen on this device, it is
      told to start from a clean cache. --}}
-<meta name="theme-color" content="#c2151c">
+{{-- Browser chrome as media-request: white, the colour of the top bar (the hub's screens are light-only). --}}
+<meta name="theme-color" content="#FFFFFF">
 <meta name="apple-mobile-web-app-title" content="HopeHR">
 <meta name="mobile-web-app-capable" content="yes">
 @php($pwaSession = auth()->check() ? hash('sha256', auth()->id().'|'.auth()->user()->myRole().'|'.config('app.key')) : 'signed-out')
@@ -64,8 +65,8 @@
 
 {{-- Preload the critical brand font weights so text paints without a flash.
      Vite::asset() resolves the same fingerprinted URL app.css uses, so the preload is never a wasted second download. --}}
-<link rel="preload" href="{{ Vite::asset('resources/fonts/SomarSans/SomarSans-Regular.woff2') }}" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="{{ Vite::asset('resources/fonts/SomarSans/SomarSans-Medium.woff2') }}" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{ Vite::asset('resources/fonts/SomarSans/SomarSans-Regular.ttf') }}" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="{{ Vite::asset('resources/fonts/SomarSans/SomarSans-SemiBold.ttf') }}" as="font" type="font/ttf" crossorigin>
 
 {{-- Warm the cdnjs connection before the render-blocking Font Awesome stylesheet asks for it --}}
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>

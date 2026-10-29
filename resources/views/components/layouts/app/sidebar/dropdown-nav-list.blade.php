@@ -19,11 +19,11 @@
 
         class="nav-press cursor-pointer
             group flex items-center w-full px-3 py-2 rounded-control
-            font-medium
+            font-semibold
 
             {{ $active
-                ? 'text-white font-semibold bg-primary'
-                : 'text-secondary-light hover:text-secondary-dark hover:bg-black/[0.03]' }}
+                ? 'text-neutral-800 bg-neutral-50'
+                : 'text-secondary-medium hover:text-neutral-800 hover:bg-neutral-50' }}
         "
         :class="sidebarCollapsed && !open ? 'md:justify-center md:size-11 md:px-0 md:mx-auto' : ''"
     >

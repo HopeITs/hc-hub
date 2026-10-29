@@ -1,18 +1,11 @@
 /* ==================================================================
-   HC-HR — Design tokens
+   HC-Hub — Design tokens
    ------------------------------------------------------------------
-   Status: NOT YET ACTIVE. This file is not imported anywhere, so it
-   changes nothing on screen. To activate it later, add this line to
-   app.css directly after the `@import 'tailwindcss';` line:
-
-       @import './tokens.css';
-
-   Built from the audit of the current codebase (2026-07-23):
-   23 spacing steps, 22 font sizes, 9 radii, 9 shadow levels and three
-   parallel grey families are collapsed here into one system.
-
-   No new colours are introduced. Every colour below is a value that
-   already exists in app.css.
+   Imported by app.css right after Tailwind. The brand's source of
+   truth is media-request (C:\laragon\www\media-request,
+   public/css/app.css): one red #BE1F24 (flat), the Hope Center
+   neutrals, Somar Sans. Every colour, radius and shadow below equals
+   a media-request value; see DESIGN.md for the full table.
    ================================================================== */
 
 @theme {
@@ -58,7 +51,7 @@
        a 1.17 ratio instead (12px, 11px). Both already exist in the
        code (text-xs = 150 uses, text-[11px] = 31 uses).
 
-       font-family is untouched — SomarSans / Lato stay as they are.
+       font-family: 'Somar Sans' (app.css), as media-request.
        ============================================================== */
 
     --text-h1: 2.125rem; /* 34px */
@@ -124,9 +117,9 @@
     /* Elevation. Tinted with the brand's own dark neutral (#414042)
        instead of pure black, so shadows sit in the same colour family
        as the rest of the UI. Light source is directly above. */
-    --shadow-e1: 0 1px 2px 0 rgb(65 64 66 / 0.06); /* resting: cards, table container */
-    --shadow-e2: 0 2px 8px -2px rgb(65 64 66 / 0.1); /* raised: dropdowns, popovers, sticky bars */
-    --shadow-e3: 0 8px 24px -8px rgb(65 64 66 / 0.16); /* overlay: modals, drawers, dialogs */
+    --shadow-e1: 0 1px 3px rgb(65 64 66 / 0.08); /* resting: cards, top bar = media-request --shadow-sm */
+    --shadow-e2: 0 2px 8px -2px rgb(65 64 66 / 0.1); /* raised: sticky bars (between the two) */
+    --shadow-e3: 0 6px 24px rgb(65 64 66 / 0.14); /* overlay: menus, modals = media-request --shadow */
 
     /* One border width everywhere. The 2px focus ring is the single
        deliberate exception, because it must survive over any surface. */
@@ -137,7 +130,7 @@
     /* ==============================================================
        4. COLOUR — 60 / 30 / 10 by surface area
        --------------------------------------------------------------
-       Every value below already exists in app.css. Nothing new.
+       Every value below is a media-request value.
 
        The ratio governs SURFACES. Text colour is a separate ink
        scale — ink is not part of the 60/30/10 budget, or every
@@ -145,39 +138,92 @@
        ============================================================== */
 
     /* --- 60% — the canvas ---------------------------------------- */
-    --surface-base: #f4f5f7; /* = --color-app-surface : page background   */
+    --surface-base: #F3F3F4; /* = --color-app-surface : page background (mr --soft) */
 
     /* --- 30% — surfaces sitting on the canvas -------------------- */
-    --surface-raised: #ffffff; /* cards, tables, forms, modals              */
-    --surface-chrome: #f9fafb; /* = --color-sidebar-surface : nav, toolbars */
-    --surface-sunken: #eeeff0; /* = --color-neutral-100 : wells, table head */
-    --surface-selected: #e6e7e8; /* = --color-selection : selected / hover fill */
+    --surface-raised: #FFFFFF; /* cards, tables, forms, modals (mr --card)  */
+    --surface-chrome: #FFFFFF; /* = --color-sidebar-surface : nav, top bar (mr --bg) */
+    --surface-sunken: #F3F3F4; /* wells, table head (mr --soft)             */
+    --surface-selected: #E6E7E8; /* = --color-selection : selected fill (mr --surface) */
 
     /* --- 10% — accent, rationed ---------------------------------- */
     /* Allowed uses ONLY: primary CTA, active navigation item, focus
        ring, destructive confirmation, required-field marker.
        Never as a page background, never as a decorative fill. */
-    --accent: #c2151c; /* = --color-primary      */
-    --accent-hover: #a51218; /* = --color-primary-hover */
+    --accent: #BE1F24; /* = --color-primary (mr --brand) */
+    --accent-hover: color-mix(in srgb, #BE1F24 90%, transparent); /* = --color-primary-hover (mr: opacity .9) */
     --accent-on: #ffffff; /* text/icon on top of accent */
 
     /* --- Ink (outside the ratio) --------------------------------- */
-    --ink-strong: #2b2a2c; /* = --color-neutral-900 : headings          */
+    --ink-strong: #414042; /* headings — media-request uses one text colour */
     --ink-body: #414042; /* = --color-black       : body, table text  */
     --ink-muted: #6d6e71; /* = --color-secondary-medium : labels       */
     --ink-subtle: #939598; /* = --color-secondary-light : placeholders  */
 
     /* --- Lines --------------------------------------------------- */
-    --line-hairline: #e6e7e8; /* dividers, table rows, card edges          */
-    --line-control: #bcbec0; /* = --color-neutral-300 : input borders     */
+    --line-hairline: #E6E7E8; /* dividers, table rows, card edges (mr --line-soft) */
+    --line-control: #BCBEC0; /* = --color-neutral-300 : input borders (mr --line) */
+
+    /* --- The one non-neutral besides red -------------------------- */
+    /* media-request paints green only for "online now" (presence dot).
+       Status itself is icon + words on neutrals, never a colour. */
+    --color-success: #2E9E5B;
+}
+
+/* ==================================================================
+   media-request's own variables, verbatim
+   ------------------------------------------------------------------
+   The media-requests module is ported from media-request, whose CSS
+   reads these names (var(--brand), var(--line-soft) …). They are the
+   same values as the Tailwind tokens above, so a ported view and an
+   HR view look the same. Dark mode follows media-request exactly:
+   the system setting, unless <html data-theme="light|dark"> overrides
+   it. (The HR screens are light-only today: their Tailwind utilities
+   do not read these variables.)
+   ================================================================== */
+:root {
+    --font: 'Somar Sans', Arial, Tahoma, sans-serif;
+    --bg: #FFFFFF; --surface: #E6E7E8; --soft: #F3F3F4; --card: #FFFFFF; --field: #FFFFFF; --hover: #F3F3F4;
+    --line: #BCBEC0; --line-soft: #E6E7E8;
+    --text: #414042; --text-2: #6D6E71; --text-3: #939598;
+    --brand: #BE1F24; --on-brand: #FFFFFF;
+    --focus: #414042;
+    --shadow: 0 6px 24px rgba(65, 64, 66, .14);
+    --shadow-sm: 0 1px 3px rgba(65, 64, 66, .08);
+    --r: 8px; --r-lg: 12px;
+    --ink: #414042; --on-ink: #FFFFFF;
+    --ring: rgba(65, 64, 66, .12); --guide: rgba(255, 255, 255, .45); --backdrop: rgba(20, 19, 21, .45);
+    --logo: none;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #161617; --surface: #2A2A2D; --soft: #1E1E20; --card: #232325; --field: #1B1B1D; --hover: #2C2C2F;
+        --line: #4A4A4E; --line-soft: #333336;
+        --text: #E6E7E8; --text-2: #BCBEC0; --text-3: #939598;
+        --focus: #E6E7E8;
+        --shadow: 0 8px 28px rgba(0, 0, 0, .5); --shadow-sm: 0 1px 3px rgba(0, 0, 0, .45);
+        --ink: #E6E7E8; --on-ink: #161617;
+        --ring: rgba(230, 231, 232, .18); --guide: rgba(255, 255, 255, .04); --backdrop: rgba(0, 0, 0, .6);
+        --logo: brightness(0) invert(1);
+    }
+}
+
+:root[data-theme="dark"] {
+    --bg: #161617; --surface: #2A2A2D; --soft: #1E1E20; --card: #232325; --field: #1B1B1D; --hover: #2C2C2F;
+    --line: #4A4A4E; --line-soft: #333336;
+    --text: #E6E7E8; --text-2: #BCBEC0; --text-3: #939598;
+    --focus: #E6E7E8;
+    --shadow: 0 8px 28px rgba(0, 0, 0, .5); --shadow-sm: 0 1px 3px rgba(0, 0, 0, .45);
+    --ink: #E6E7E8; --on-ink: #161617;
+    --ring: rgba(230, 231, 232, .18); --guide: rgba(255, 255, 255, .04); --backdrop: rgba(0, 0, 0, .6);
+    --logo: brightness(0) invert(1);
 }
 
 /* ==================================================================
    NOT DEFINED HERE — ON PURPOSE
    ------------------------------------------------------------------
-   Status colours (success / warning / info). The current palette has
-   no brand-owned status colours: the code borrows Tailwind defaults
-   (green-600 x15, emerald x8, blue-300 x17, yellow x10) with no
-   system behind them. Naming them would mean inventing colours,
-   which this task explicitly rules out. They need a decision first.
+   Warning / info / error colours. media-request has none: status is
+   an icon plus words on neutrals, and red is kept for the main
+   action, the current stage and what waits on you (errors included).
    ================================================================== */

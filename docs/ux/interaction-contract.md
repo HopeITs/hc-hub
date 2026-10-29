@@ -129,7 +129,7 @@ Rules for C4:
 
 ## 9. Prototype
 
-[c0/prototype.html](c0/prototype.html): a static, clickable page (no app code, synthetic names). Switch **language** (EN/AR, with RTL), **role** (the six personas of §3) and **width** (desktop / phone). It shows the menu of §4 for that role, the header with search and *New* of §6, the inbox entry with a count, and the home page: the *For you now* section of §5 on top, the existing cards below. Brand tokens (`--color-primary` #c2151c, the secondary greys) and Somar Sans (from `resources/fonts/`, by relative path: open the file from the repository folder, or the fonts fall back to Lato).
+[c0/prototype.html](c0/prototype.html): a static, clickable page (no app code, synthetic names). Switch **language** (EN/AR, with RTL), **role** (the six personas of §3) and **width** (desktop / phone). It shows the menu of §4 for that role, the header with search and *New* of §6, the inbox entry with a count, and the home page: the *For you now* section of §5 on top, the existing cards below. Brand tokens (`--color-primary` #BE1F24, the secondary greys) and Somar Sans (from `resources/fonts/`, by relative path: open the file from the repository folder, or the fonts fall back to Lato).
 
 Checked in the browser (2026-10-26), Arabic and English at phone width: manager menu (inbox 3, My space + Organisation, My team); regional HR menu (inbox 5, HR operations); *New* lists *Leave request* and *News item* for a manager; search «عقو» finds *Contracts* under HR operations; the manager's home section opens the inbox; the inbox rows wrap on a phone.
 

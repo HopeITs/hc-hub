@@ -36,7 +36,7 @@
             const countLabels = @json(collect($employeeCounts)->unique()->mapWithKeys(fn ($count) => [$count => trans_choice('dashboard.employees-count', $count)]));
             const isRtl = document.documentElement.dir === 'rtl';
 
-            const primaryColor = "#c2151c";
+            const primaryColor = "#BE1F24";
             const gridColor    = "#dcddde";
 
             new Chart(ctx, {
