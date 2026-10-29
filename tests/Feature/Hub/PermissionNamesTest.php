@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Permission;
+use App\Models\Role;
 use App\Support\AccessPermissionCatalog;
 use App\Support\HelpTopics;
 use Illuminate\Support\Facades\File;
@@ -103,4 +105,16 @@ test('no unprefixed permission name is left in a permission check', function () 
     $oldNames = array_keys($migration::renames());
 
     expect(array_intersect(array_keys(permissionNamesUsedInSource()), $oldNames))->toBe([]);
+});
+
+test('a new HR role receives only hr permissions, even when other modules have catalogue permissions', function () {
+    config(['access-control.groups' => AccessPermissionCatalog::groups() + ['tracking.x' => ['view'], 'media.x' => ['view']]]);
+    Permission::findOrCreate('tracking.x.view', 'web');
+    Permission::findOrCreate('media.x.view', 'web');
+
+    $granted = Role::findOrCreate('HR-QA', 'web')->permissions()->pluck('name');
+    $hrNames = collect(AccessPermissionCatalog::names())->filter(fn (string $name) => str_starts_with($name, 'hr.'));
+
+    expect($granted->reject(fn (string $name) => str_starts_with($name, 'hr.'))->values()->all())->toBe([])
+        ->and($granted->sort()->values()->all())->toBe($hrNames->sort()->values()->all());
 });

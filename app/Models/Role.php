@@ -19,8 +19,8 @@ class Role extends SpatieRole
             if (in_array($role->name, config('access-control.administrator_roles', []), true)) {
                 $role->givePermissionTo($permissions);
             } elseif (Str::startsWith($role->name, 'HR-')) {
-                $role->givePermissionTo($permissions->reject(
-                    fn (Permission $permission): bool => str_starts_with($permission->name, 'hub.'),
+                $role->givePermissionTo($permissions->filter(
+                    fn (Permission $permission): bool => str_starts_with($permission->name, 'hr.'),
                 ));
             } else {
                 $baseline = config("access-control.role_baselines.{$role->name}", []);

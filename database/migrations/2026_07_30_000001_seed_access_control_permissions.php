@@ -20,8 +20,8 @@ return new class extends Migration
         }
 
         foreach (Role::query()->where('name', 'like', 'HR-%')->where('name', '!=', 'HR-SYR')->get() as $role) {
-            $role->givePermissionTo($permissions->reject(
-                fn (Permission $permission): bool => str_starts_with($permission->name, 'hub.'),
+            $role->givePermissionTo($permissions->filter(
+                fn (Permission $permission): bool => str_starts_with($permission->name, 'hr.'),
             ));
         }
 
