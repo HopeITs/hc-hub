@@ -32,7 +32,7 @@
                 <p class="text-[10px] font-light text-gray-400">
                     {{ $news->published_at?->diffForHumans() ?? __('dashboard.just-now') }}
                 </p>
-                <p class="text-sm font-bold text-[#58595B]">
+                <p class="text-sm font-bold text-secondary-dark">
                     {{ $title }}
                 </p>
                 @if(filled($description))

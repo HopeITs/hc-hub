@@ -3,7 +3,7 @@
     $nameCol = "name_{$locale}";
 
     $badgeColors = [
-        'unknown' => 'text-[#58595B]',
+        'unknown' => 'text-secondary-dark',
         'reward' => 'text-green-600',
         'warning' => 'text-primary',
         'bonus' => 'text-blue-600',
@@ -43,7 +43,7 @@
                     {{ $badge->reason ?: \App\Enums\BadgeSubtype::getLocalizedName($badge->subtype) }}
                 </p>
 
-                <span class="text-[11px] text-[#888]">
+                <span class="text-[11px] text-ink-faint">
                     <bdi>{{ optional($badge->date)->format('d/m/Y') }}</bdi>
                 </span>
             </div>

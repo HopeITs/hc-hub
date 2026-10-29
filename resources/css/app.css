@@ -7,6 +7,7 @@
 @plugin "flowbite/plugin";
 @source "../../node_modules/flowbite";
 @source '../views';
+@source '../../modules/*/resources/views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source "../../vendor/ramonrietdijk/livewire-tables/resources/**/*.blade.php";
 @source '../../vendor/livewire/flux-pro/stubs/**/*.blade.php';
@@ -211,6 +212,12 @@ html[lang="ar"] body {
     --color-field: #FFFFFF; /* --field */
     --color-base: #FFFFFF; /* --bg: top bar, sidebar */
     --color-focus: #414042; /* --focus */
+
+    /* Legacy light greys that had only arbitrary-hex classes; tokens keep
+       their exact light value and give them a dark one. */
+    --color-row-alt: #F1F2F2; /* table stripe (livewire-tables even rows) */
+    --color-capsule: #F6F6F6; /* header capsules, search box */
+    --color-ink-faint: #888888; /* faint dashboard metadata */
 }
 
 /* ==================================================================
@@ -288,6 +295,10 @@ html[lang="ar"] body {
         --color-stone-50: #1E1E20; --color-stone-100: #2A2A2D; --color-stone-200: #333336; --color-stone-300: #4A4A4E; --color-stone-400: #939598; --color-stone-500: #939598; --color-stone-600: #BCBEC0; --color-stone-700: #E6E7E8; --color-stone-800: #E6E7E8; --color-stone-900: #E6E7E8; --color-stone-950: #E6E7E8;
 
         --color-black: #E6E7E8;
+        --color-white: #232325; /* = card: every white fill/border/ring turns dark */
+        --color-row-alt: #1E1E20;
+        --color-capsule: #1E1E20;
+        --color-ink-faint: #939598;
         --color-sidebar-surface: #161617;
         --color-app-surface: #1E1E20;
         --color-selection: #2A2A2D;
@@ -341,6 +352,10 @@ html[lang="ar"] body {
     --color-stone-50: #1E1E20; --color-stone-100: #2A2A2D; --color-stone-200: #333336; --color-stone-300: #4A4A4E; --color-stone-400: #939598; --color-stone-500: #939598; --color-stone-600: #BCBEC0; --color-stone-700: #E6E7E8; --color-stone-800: #E6E7E8; --color-stone-900: #E6E7E8; --color-stone-950: #E6E7E8;
 
     --color-black: #E6E7E8;
+    --color-white: #232325; /* = card: every white fill/border/ring turns dark */
+    --color-row-alt: #1E1E20;
+    --color-capsule: #1E1E20;
+    --color-ink-faint: #939598;
     --color-sidebar-surface: #161617;
     --color-app-surface: #1E1E20;
     --color-selection: #2A2A2D;
@@ -351,50 +366,23 @@ html[lang="ar"] body {
     color-scheme: dark;
 }
 
-/* Legacy light utilities the variable flip cannot reach, because one
-   variable serves two jobs (from hc-hr). Declared after Tailwind's own
-   utilities in the same layer, so these win at equal specificity. */
+/* White, in dark mode. `--color-white` itself flips to the card colour
+   (dark blocks above), so every white fill, border and ring follows the
+   theme whatever its variant (odd:, group-hover:, md:, bg-white/80 …).
+   White as a *foreground* (text on the red, icons on a dark fill) must stay
+   white, so text-white / fill-white / stroke-white read their own theme
+   keys (Tailwind looks up --text-color-*, --fill-*, --stroke-* before
+   --color-*), which never flip: #FFFFFF in both themes, so light mode is
+   unchanged. */
+@theme {
+    --text-color-white: #FFFFFF;
+    --fill-white: #FFFFFF;
+    --stroke-white: #FFFFFF;
+}
+/* Legacy light utilities the variable flip cannot reach (from hc-hr).
+   Declared after Tailwind's own utilities in the same layer, so these win
+   at equal specificity. */
 @layer utilities {
-    /* White is both "card" (bg-white) and "text on red" (text-white): the
-       variable stays white for the text; the card fill turns dark. */
-    .bg-white,
-    .hover\:bg-white:hover,
-    .bg-\[\#fff\],
-    .bg-\[\#ffffff\] {
-        @variant theme-dark {
-            background-color: var(--color-card);
-        }
-    }
-
-    /* The header capsules and the few other hard-coded light greys. */
-    .bg-\[\#f6f6f6\],
-    .bg-\[\#f1f2f2\],
-    .bg-\[\#F3F3F4\] {
-        @variant theme-dark {
-            background-color: var(--color-soft);
-        }
-    }
-
-    .ring-\[\#f6f6f6\] {
-        @variant theme-dark {
-            --tw-ring-color: var(--color-line-soft);
-        }
-    }
-
-    .text-\[\#58595B\],
-    .text-\[\#414141\],
-    .text-\[\#414042\] {
-        @variant theme-dark {
-            color: var(--color-ink);
-        }
-    }
-
-    .text-\[\#888\] {
-        @variant theme-dark {
-            color: var(--color-ink-3);
-        }
-    }
-
     /* A solid dark fill (bg-neutral-800, bg-secondary-dark …) inverts with
        the ramp, so the white text on it becomes on-ink. */
     :is(.bg-neutral-700, .bg-neutral-800, .bg-neutral-900, .bg-neutral-950, .bg-gray-700, .bg-gray-800, .bg-gray-900, .bg-zinc-800, .bg-zinc-900, .bg-secondary-dark, .bg-black, .bg-accent) .text-white,

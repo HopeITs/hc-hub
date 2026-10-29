@@ -16,11 +16,11 @@
             <div class="flex justify-between items-center pb-2 border-b border-b-secondary-light"
                  wire:key="pending-request-{{ $req['id'] }}">
 
-                <p class="text-[13px] font-bold text-[#58595B]">
+                <p class="text-[13px] font-bold text-secondary-dark">
                     {{ ucfirst($req['item']) }}
                 </p>
 
-                <span class="text-[11px] text-[#888]">
+                <span class="text-[11px] text-ink-faint">
                     <bdi>{{ $req['request_date'] }}</bdi>
                 </span>
             </div>

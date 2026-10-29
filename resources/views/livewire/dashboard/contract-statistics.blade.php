@@ -94,7 +94,7 @@
 
                         <span class="text-body text-secondary-dark mt-2">
                             {{ trans_choice('general.employee', 2) }}:
-                            <span class="font-bold text-[#414141]">{{ $card['employees'] }}</span>
+                            <span class="font-bold text-ink">{{ $card['employees'] }}</span>
                         </span>
                     </div>
 
@@ -167,7 +167,7 @@
 
                                 <div class="border-t border-neutral-200 pt-1 mt-1 flex justify-between">
                                     <span class="text-neutral-600">@lang('general.total')</span>
-                                    <span class="font-bold text-[#414141]">{{ $total }}</span>
+                                    <span class="font-bold text-ink">{{ $total }}</span>
                                 </div>
 
                             </div>

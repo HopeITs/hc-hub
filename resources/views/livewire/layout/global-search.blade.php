@@ -54,7 +54,7 @@
                    :aria-expanded="open.toString()"
                    :aria-activedescendant="active >= 0 ? 'global-search-option-' + active : null"
                    placeholder="{{ __('general.global-search.placeholder') }}"
-                   class="h-11 w-full rounded-[14px] border border-neutral-300 bg-[#f6f6f6] ps-9 pe-3 xl:pe-14 text-body text-neutral-900 placeholder-neutral-400 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary-light sm:h-10"
+                   class="h-11 w-full rounded-[14px] border border-neutral-300 bg-capsule ps-9 pe-3 xl:pe-14 text-body text-neutral-900 placeholder-neutral-400 focus:border-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary-light sm:h-10"
                    x-on:focus="open = true"
                    x-on:input="open = true; active = -1"
                    x-on:keydown.arrow-down.prevent="move(1)"

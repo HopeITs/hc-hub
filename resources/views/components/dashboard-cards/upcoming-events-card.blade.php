@@ -11,7 +11,7 @@
         @forelse ($upcomingEvents as $event)
             <div class="pb-3 border-b border-b-secondary-soft">
                 <div class="flex justify-between items-center">
-                    <p class="text-body font-bold text-[#58595B]">{{ $event->event_title }}</p>
+                    <p class="text-body font-bold text-secondary-dark">{{ $event->event_title }}</p>
                     <span class="text-caption h-4 w-15 font-medium tracking-wide mt-4 text-center text-secondary-light px-1 rounded-full">
                         <bdi>{{ \Carbon\Carbon::parse($event->event_timestamp)->format('j/n/Y') }}</bdi>
                     </span>

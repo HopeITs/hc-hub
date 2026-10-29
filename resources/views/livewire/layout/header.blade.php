@@ -42,7 +42,7 @@
             {{-- Island 1: language segmented (EN | AR). On phones only the other
                  language is shown (C2): with search and New in the row, two
                  buttons here pushed the menu button off the screen. --}}
-            <div class="flex items-center shrink-0 rounded-[18px] bg-[#f6f6f6] p-0.5 sm:p-1">
+            <div class="flex items-center shrink-0 rounded-[18px] bg-capsule p-0.5 sm:p-1">
                 <a href="{{ $enUrl }}"
                     class="inline-flex items-center justify-center h-11 sm:h-9 min-w-11 px-2.5 sm:px-4 rounded-[14px] text-body font-bold leading-none transition {{ $curr === 'en' ? 'bg-white text-neutral-900 shadow-e1 max-sm:hidden' : 'text-secondary-light font-semibold hover:text-secondary-dark' }}"
                     aria-label="English" @if($curr === 'en') aria-current="true" @endif>EN</a>
@@ -56,7 +56,7 @@
             <x-theme-toggle class="max-sm:hidden" />
 
             {{-- Island 2: utility icons grouped in one capsule --}}
-            <div class="flex items-center shrink-0 gap-0.5 rounded-[18px] bg-[#f6f6f6] p-0.5 sm:p-1">
+            <div class="flex items-center shrink-0 gap-0.5 rounded-[18px] bg-capsule p-0.5 sm:p-1">
                 {{-- D3. Not on phones: one more 44px button pushed the menu button off the
                      screen at 375px (M1). There it is in the account menu, and the "?"
                      beside each difficult field opens the same panel. --}}

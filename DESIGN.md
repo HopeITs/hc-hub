@@ -43,6 +43,10 @@ Hub-only in-between greys (no media-request equivalent; kept so existing hover/c
 Semantic Tailwind colours with media-request's names (new work uses these; they flip in dark mode):
 `ink`, `ink-2`, `ink-3`, `on-ink`, `on-brand`, `line`, `line-soft`, `surface`, `soft`, `hover`, `card`,
 `field`, `base`, `focus` — e.g. `bg-card text-ink border-line-soft`.
+Three legacy light greys that only existed as arbitrary hex classes are tokens now, with a dark value:
+`row-alt #F1F2F2` (table stripe), `capsule #F6F6F6` (header capsules, search), `ink-faint #888888`.
+Never write an arbitrary hex colour class (`bg-[#…]`) — it cannot follow the theme;
+`tests/Feature/Hub/DarkModeTest.php` fails on one.
 
 No warning / info colours exist — media-request has none.
 
@@ -56,8 +60,11 @@ verbatim. It follows the system, overridden by `<html data-theme="light|dark">`:
   `#FFFFFF` (light) / `#161617` (dark), as media-request.
 - `<x-theme-toggle>` is in the header (and, on phones, the account menu).
 - `app.css` flips the Tailwind variables in dark: the semantic colours, the `neutral`, `gray`, `zinc`,
-  `slate`, `stone` and `secondary-*` ramps, `black`, the app/sidebar surfaces. `bg-white` becomes the
-  card colour, white text on a dark fill becomes on-ink, translucent black fills stay backdrops,
+  `slate`, `stone` and `secondary-*` ramps, `black`, the app/sidebar surfaces. `--color-white` itself
+  flips to the card colour, so every white fill, border and ring follows the theme in any variant
+  (`odd:`, `group-odd:`, `hover:`, `md:`, `/80` …); `text-white`, `fill-white` and `stroke-white` read
+  their own theme keys (`--text-color-white` …), which stay `#FFFFFF`, so text on the red stays white.
+  White text on a dark fill becomes on-ink, translucent black fills stay backdrops,
   shadows turn black, the logo turns white. Write `theme-dark:` in CSS; Flux's `dark:` (`.dark`
   class) is never set in the hub and stays dormant.
 - Light mode is unchanged by any of this.

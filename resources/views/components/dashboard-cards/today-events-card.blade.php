@@ -35,7 +35,7 @@
 
                                     {{-- Info --}}
                                     <div class="mt-2 z-20 text-center w-full">
-                                        <p class="font-semibold text-body mt-2 text-[#58595B]">{{ $event['name'] }}</p>
+                                        <p class="font-semibold text-body mt-2 text-secondary-dark">{{ $event['name'] }}</p>
 
                                         @php
                                             $details = trim(
@@ -44,7 +44,7 @@
                                         @endphp
 
                                         @if ($details)
-                                            <p class="text-small tracking-wider font-light text-[#58595B]">{{ $details }}</p>
+                                            <p class="text-small tracking-wider font-light text-secondary-dark">{{ $details }}</p>
                                         @endif
 
                                         <p class="text-small text-secondary-light mt-1">{{ $event['message'] }}</p>
