@@ -62,6 +62,29 @@ return [
             ]) : [],
         ],
 
+        /*
+         * The hc-hr database, read by `php artisan hub:import` only. The
+         * importer switches every session on it to read-only before the first
+         * query (App\Services\HubImport\SourceConnection), so a wrong setting
+         * here can never write to the source.
+         */
+        'hr_source' => [
+            'driver' => 'mysql',
+            'url' => env('HR_SOURCE_DB_URL'),
+            'host' => env('HR_SOURCE_DB_HOST', env('DB_HOST', '127.0.0.1')),
+            'port' => env('HR_SOURCE_DB_PORT', env('DB_PORT', '3306')),
+            'database' => env('HR_SOURCE_DB_DATABASE', 'hcsyriaapps_hr_db'),
+            'username' => env('HR_SOURCE_DB_USERNAME', env('DB_USERNAME', 'root')),
+            'password' => env('HR_SOURCE_DB_PASSWORD', env('DB_PASSWORD', '')),
+            'unix_socket' => env('HR_SOURCE_DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => env('HR_SOURCE_DB_PREFIX', 'hchr_'),
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'mariadb' => [
             'driver' => 'mariadb',
             'url' => env('DB_URL'),
