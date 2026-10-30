@@ -25,7 +25,7 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * It sits on every signed-in route group except the security page itself.
  * Livewire update requests are checked twice (see
- * AppServiceProvider::configureLivewire()): Livewire re-runs this middleware
+ * FortifyServiceProvider::configureLivewire()): Livewire re-runs this middleware
  * for components of guarded pages, and every component outside
  * EnrolmentComponents is refused however it was rendered, so a widget shown
  * on the security page (or an old snapshot of one) cannot be driven either.
@@ -86,14 +86,20 @@ class EnsureTwoFactorIsEnabled
     }
 
     /**
-     * Whether the user's active role must use two-factor authentication, however it
-     * is provided: an emailed code needs no Fortify feature.
+     * Whether the user must use two-factor authentication, however it is
+     * provided (an emailed code needs no Fortify feature): any role they
+     * hold counts, not only the active one, because switching roles needs no
+     * new sign-in.
      */
     public static function roleRequiresTwoFactor(?Authenticatable $user): bool
     {
+        $requiredRoles = config('access-control.two_factor.required_roles', []);
+
         return config('access-control.two_factor.enforced')
             && $user instanceof User
-            && $user->activeRoleIs(...config('access-control.two_factor.required_roles', []));
+            && is_array($requiredRoles)
+            && $requiredRoles !== []
+            && $user->hasAnyRole($requiredRoles);
     }
 
     /**

@@ -11,7 +11,7 @@ use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 
 /**
  * Fortify's "disable two-factor" action, bound in its place by
- * AppServiceProvider, that will not switch off a working authenticator app
+ * FortifyServiceProvider, that will not switch off a working authenticator app
  * when it is the only second factor a required role has (no email to send
  * codes to; see EnsureTwoFactorIsEnabled).
  *

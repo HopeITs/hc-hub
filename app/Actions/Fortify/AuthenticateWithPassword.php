@@ -14,6 +14,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
+use Illuminate\Support\Timebox;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\LoginRateLimiter;
@@ -29,7 +31,8 @@ use SensitiveParameter;
  *
  * On top of Fortify's own limit (a few attempts a minute per identifier and
  * IP), failed logins are limited per IP across all identifiers (password
- * spraying) and per identifier across all IPs (distributed guessing). Only
+ * spraying) and per account (per typed identifier when it names none) across
+ * all IPs (distributed guessing). Only
  * failures count, so a whole office signing in from one IP is never blocked by
  * its own logins. A browser that signed in to the identifier before is held to
  * a limit of its own instead of the per-identifier one (see RecognisedBrowsers),
@@ -90,17 +93,26 @@ class AuthenticateWithPassword
     public const BackoffCapSeconds = 21600;
 
     /**
+     * The shortest time, in microseconds, a failed login takes, so a wrong
+     * password and an unknown account cannot be told apart by timing.
+     */
+    public const MinimumLoginMicroseconds = 200000;
+
+    /**
      * The session key holding which user's password a login just checked,
      * and when, until the login completes.
      */
     private const PasswordCheckedSessionKey = 'auth.password_checked';
 
+    private static ?string $dummyHash = null;
+
     /**
      * Resolve the user for valid credentials.
      *
-     * An unknown identifier (or an inactive account) fails onto the login
-     * field (Fortify's default behaviour); a known one with the wrong password
-     * fails onto the password field instead.
+     * Every failure (unknown identifier, inactive account, wrong password)
+     * gets the same answer on the login field and takes the same time (a
+     * Timebox, with a dummy hash checked when there is no account), so the
+     * form cannot be used to find out which accounts exist.
      *
      * @throws ValidationException
      */
@@ -113,10 +125,8 @@ class AuthenticateWithPassword
             return null;
         }
 
-        // A browser that signed in to this identifier before counts its
-        // failures on its own key, so a lockout strangers caused on it (the
-        // limit across all IPs) does not keep the account's owner out.
-        $backoffKey = RecognisedBrowsers::failedLoginsKey($request, $identifier) ?? self::failedLoginsByEmailKey($identifier);
+        $user = self::findUser($identifier);
+        $backoffKey = self::failedLoginsKey($request, $identifier, $user);
 
         $limits = [
             self::failedLoginsByIpKey($request) => [self::MaxFailedLoginsPerIp, self::FailedLoginDecaySeconds],
@@ -135,25 +145,33 @@ class AuthenticateWithPassword
             ]);
         }
 
-        $user = self::findUser($identifier);
+        $authenticated = app(Timebox::class)->call(function (Timebox $timebox) use ($user, $password): bool {
+            if ($user === null || ! $user->hasActiveEmployee()) {
+                Hash::check($password, self::dummyHash());
 
-        if ($user === null || ! $user->hasActiveEmployee()) {
-            self::recordFailures($limits, $backoffKey, self::MaxFailedLoginsPerEmail);
+                return false;
+            }
 
-            return null;
-        }
+            if (! Hash::check($password, $user->password)) {
+                return false;
+            }
 
-        if (! Hash::check($password, $user->password)) {
+            $timebox->returnEarly();
+
+            return true;
+        }, self::MinimumLoginMicroseconds);
+
+        if (! $authenticated || $user === null) {
             self::recordFailures($limits, $backoffKey, self::MaxFailedLoginsPerEmail);
 
             app(LoginRateLimiter::class)->increment($request);
 
-            // Throwing here skips Fortify's own Failed event, so fire it
-            // without the password.
+            // Fortify's own Failed event would carry the password; fire it
+            // without.
             event(new Failed('web', null, [Fortify::username() => $identifier]));
 
             throw ValidationException::withMessages([
-                'password' => [trans('auth.failed')],
+                Fortify::username() => [trans('auth.failed')],
             ]);
         }
 
@@ -204,7 +222,7 @@ class AuthenticateWithPassword
      *
      * @throws ValidationException
      */
-    public static function confirmsPassword(User $user, #[SensitiveParameter] ?string $password): bool
+    public static function confirmsPassword(User $user, #[SensitiveParameter] ?string $password, string $field = 'password'): bool
     {
         $request = request();
         $limits = [
@@ -214,7 +232,7 @@ class AuthenticateWithPassword
 
         $backoffKey = 'confirm-password-user:'.$user->id;
 
-        self::ensureIsNotThrottled($request, $limits, 'password', 'security.confirm_throttle', $backoffKey);
+        self::ensureIsNotThrottled($request, $limits, $field, 'security.confirm_throttle', $backoffKey);
 
         if ((string) $password === '' || ! Hash::check((string) $password, $user->password)) {
             self::recordFailures($limits, $backoffKey, self::MaxFailedConfirmationsPerUser);
@@ -301,6 +319,29 @@ class AuthenticateWithPassword
         if (RateLimiter::tooManyAttempts($backoffKey, $backoffMaxAttempts)) {
             BackoffThrottle::escalate($backoffKey, self::BackoffBaseSeconds, self::BackoffCapSeconds);
         }
+    }
+
+    /**
+     * The key failed logins count on across all IPs: the account's own key
+     * once the identifier names one (so its email and its username share one
+     * limit), the typed identifier otherwise. A browser recognised for the
+     * account counts on a key of its own instead (see RecognisedBrowsers).
+     */
+    private static function failedLoginsKey(Request $request, string $identifier, ?User $user): string
+    {
+        $email = $user !== null && $user->email !== '' ? $user->email : $identifier;
+
+        return RecognisedBrowsers::failedLoginsKey($request, $email)
+            ?? ($user !== null ? 'login-failures-user:'.$user->id : self::failedLoginsByEmailKey($identifier));
+    }
+
+    /**
+     * A hash to check the typed password against when there is no account,
+     * so an unknown identifier costs as much as a wrong password.
+     */
+    private static function dummyHash(): string
+    {
+        return self::$dummyHash ??= Hash::make(Str::random(40));
     }
 
     private static function failedLoginsByIpKey(Request $request): string

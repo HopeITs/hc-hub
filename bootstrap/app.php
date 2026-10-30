@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\ActivePermissionMiddleware;
 use App\Http\Middleware\EnsureAccountIsActive;
+use App\Http\Middleware\EnsureRequestCameThroughTrustedProxy;
 use App\Http\Middleware\ReferencePageMiddleware;
 use App\Http\Middleware\RememberUserLocale;
 use App\Http\Middleware\RoleMiddleware;
@@ -24,6 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Origin lockdown (TRUSTED_PROXIES_REQUIRED): first in the global
+        // stack, so a request that bypassed the CDN costs nothing else. Which
+        // proxies are trusted (TRUSTED_PROXIES, empty = nobody) is read by
+        // Laravel's own TrustProxies middleware from config/trustedproxy.php.
+        $middleware->prepend(EnsureRequestCameThroughTrustedProxy::class);
+
         $middleware->append(SecurityHeaders::class);
 
         // Re-checks the account's active flag on every authenticated request,

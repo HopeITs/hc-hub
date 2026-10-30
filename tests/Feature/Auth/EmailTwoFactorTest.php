@@ -1,6 +1,7 @@
 <?php
 
 use App\Actions\Fortify\EmailLoginCodes;
+use App\Actions\Fortify\RedirectIfTwoFactorRequired;
 use App\Models\User;
 use App\Notifications\EmailLoginCode;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -278,4 +279,17 @@ test('resending the code is capped per hour, however slowly it is asked for', fu
     $this->withServerVariables(['REMOTE_ADDR' => '10.0.6.99'])
         ->post(route('email-two-factor.resend'))
         ->assertStatus(429);
+});
+
+test('an unfinished emailed-code login does not carry over into an authenticator app login', function () {
+    $emailUser = User::factory()->create(['email_two_factor_enabled' => true]);
+    $appUser = User::factory()->withTwoFactor()->create();
+
+    passwordStepEmailsCode($emailUser);
+    expect(session(RedirectIfTwoFactorRequired::EmailChallengeSessionKey))->toBeTrue();
+
+    $this->post(route('login.store'), ['email' => $appUser->email, 'password' => 'password'])
+        ->assertRedirect(route('two-factor.login'));
+
+    expect(session()->has(RedirectIfTwoFactorRequired::EmailChallengeSessionKey))->toBeFalse();
 });

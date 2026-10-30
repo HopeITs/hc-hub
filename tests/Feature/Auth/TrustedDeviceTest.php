@@ -72,7 +72,7 @@ test('a trusted browser still needs the right password', function () {
 
     $this->withCookie(TrustedDevices::cookieName($user), $token)
         ->post(route('login.store'), ['email' => $user->email, 'password' => 'wrong-password'])
-        ->assertSessionHasErrors('password');
+        ->assertSessionHasErrors('email');
 
     $this->assertGuest();
 });

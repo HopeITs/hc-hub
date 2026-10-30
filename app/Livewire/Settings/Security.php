@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Settings;
 
+use App\Actions\Fortify\SignOutOtherDevices;
 use App\Actions\Fortify\TrustedDevices;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Http\UserAgent;
@@ -9,14 +10,11 @@ use App\Livewire\Concerns\RequiresConfirmedPassword;
 use App\Livewire\Concerns\WithFeedback;
 use App\Models\TrustedDevice;
 use App\Models\User;
-use Illuminate\Auth\Events\OtherDeviceLogout;
-use Illuminate\Auth\SessionGuard;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
@@ -282,13 +280,9 @@ class Security extends Component
             return;
         }
 
-        $this->sessionRows()->where('id', '!=', session()->getId())->delete();
-
-        $this->rotateRememberToken($this->user());
+        SignOutOtherDevices::run(request(), $this->user());
 
         TrustedDevices::forgetOthers(request(), $this->user());
-
-        event(new OtherDeviceLogout('web', $this->user()));
 
         unset($this->signedInDevices, $this->trustedDevices);
 
@@ -353,31 +347,5 @@ class Security extends Component
         return DB::connection(config('session.connection'))
             ->table(config('session.table'))
             ->where('user_id', Auth::id());
-    }
-
-    /**
-     * Give the account a new remember token. When this request came with a
-     * remember-me cookie, this device gets a fresh one for the new token,
-     * built as SessionGuard::queueRecallerCookie() builds it but without
-     * logging in again, which would fire a Login event.
-     */
-    private function rotateRememberToken(User $user): void
-    {
-        /** @var SessionGuard $guard */
-        $guard = Auth::guard('web');
-
-        $guard->getProvider()->updateRememberToken($user, $token = Str::random(60));
-
-        if (! request()->cookies->has($guard->getRecallerName())) {
-            return;
-        }
-
-        $cookies = $guard->getCookieJar();
-
-        $cookies->queue($cookies->make(
-            $guard->getRecallerName(),
-            $user->getAuthIdentifier().'|'.$token.'|'.$guard->hashPasswordForCookie($user->getAuthPassword()),
-            (int) config('auth.guards.web.remember', 576000),
-        ));
     }
 }

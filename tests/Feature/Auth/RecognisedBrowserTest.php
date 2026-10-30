@@ -110,3 +110,35 @@ test('the right password alone does not recognise a browser that still owes the 
         ->assertRedirect(route('email-two-factor.login'))
         ->assertCookieMissing(RecognisedBrowsers::CookieName);
 });
+
+test('the email and the username of one account share one lock', function () {
+    $user = User::factory()->create();
+    $username = $user->profile->username;
+
+    ($this->lockEmail)($username, '10.9.15');
+
+    ($this->attemptLogin)($user->email, 'password', '10.9.16.1')
+        ->assertSessionHasErrors(['email' => __('auth.throttle', ['seconds' => 900])]);
+    $this->assertGuest();
+});
+
+test('a browser recognised after an email sign-in still signs in by username while the account is locked', function () {
+    $user = User::factory()->create();
+    $username = $user->profile->username;
+    $recognition = ($this->recognitionAfterSigningIn)($user, '10.9.17.1');
+
+    ($this->lockEmail)($user->email, '10.9.18');
+    $this->withCookie(RecognisedBrowsers::CookieName, $recognition);
+
+    ($this->attemptLogin)($username, 'password', '10.9.19.1')->assertSessionHasNoErrors();
+    $this->assertAuthenticatedAs($user);
+});
+
+test('failures on an unknown identifier do not lock a real account', function () {
+    $user = User::factory()->create();
+
+    ($this->lockEmail)('nobody-at-all', '10.9.20');
+
+    ($this->attemptLogin)($user->email, 'password', '10.9.21.1')->assertSessionHasNoErrors();
+    $this->assertAuthenticatedAs($user);
+});

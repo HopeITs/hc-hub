@@ -190,7 +190,7 @@ test('a wrong password is still refused when cloudflare gives no usable answer',
         'email' => $user->email,
         'password' => 'not-the-password',
         Turnstile::ResponseField => 'token-from-the-widget',
-    ])->assertSessionHasErrors('password');
+    ])->assertSessionHasErrors('email');
 
     $this->assertGuest();
 });

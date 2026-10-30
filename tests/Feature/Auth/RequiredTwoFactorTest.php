@@ -86,6 +86,26 @@ test('a json request from a super admin without email or app is refused with 403
         ->assertJson(['message' => __('security.two_factor_required_notice')]);
 });
 
+test('a required role counts even while another of the user\'s roles is active', function () {
+    $user = User::factory()->role('Team Member')->role('Super Admin')->create(['email' => '']);
+    $teamMember = $user->roles()->where('name', 'Team Member')->sole();
+    $user->roles()->updateExistingPivot($teamMember->id, ['is_active' => true]);
+
+    expect($user->fresh()->myRole())->toBe('Team Member');
+
+    $this->actingAs($user->fresh())
+        ->get(route('dashboard'))
+        ->assertRedirect(route('settings.security'));
+});
+
+test('a required role held but not active still gets an emailed code at sign-in', function () {
+    $user = User::factory()->role('Team Member')->role('Super Admin')->create();
+    $teamMember = $user->roles()->where('name', 'Team Member')->sole();
+    $user->roles()->updateExistingPivot($teamMember->id, ['is_active' => true]);
+
+    expect(EnsureTwoFactorIsEnabled::emailCodeRequiredFor($user->fresh()))->toBeTrue();
+});
+
 test('a super admin with confirmed two factor goes through', function () {
     $superAdmin = User::factory()->role('Super Admin')->withTwoFactor()->create();
 

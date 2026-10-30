@@ -72,7 +72,7 @@ test('a wrong password reports a failed login without the password', function ()
     Event::fake([Failed::class]);
     $user = User::factory()->create();
 
-    ($this->attemptLogin)($user->email, 'wrong-password', '10.0.4.1')->assertSessionHasErrors('password');
+    ($this->attemptLogin)($user->email, 'wrong-password', '10.0.4.1')->assertSessionHasErrors('email');
 
     Event::assertDispatched(Failed::class, fn (Failed $event): bool => $event->guard === 'web'
         && $event->user === null

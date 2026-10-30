@@ -38,11 +38,17 @@ class RedirectIfTwoFactorRequired extends RedirectIfTwoFactorAuthenticatable
     {
         $user = $this->validateCredentials($request);
 
+        // An emailed-code challenge left over from an earlier, unfinished
+        // login must not carry over into a login that takes another route.
         if ($user instanceof User && TrustedDevices::trusts($request, $user)) {
+            $request->session()->forget(self::EmailChallengeSessionKey);
+
             return $next($request);
         }
 
         if ($user instanceof User && $user->two_factor_secret !== null && $user->two_factor_confirmed_at !== null) {
+            $request->session()->forget(self::EmailChallengeSessionKey);
+
             return $this->twoFactorChallengeResponse($request, $user);
         }
 
