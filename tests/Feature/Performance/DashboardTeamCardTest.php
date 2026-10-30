@@ -4,11 +4,11 @@ namespace Tests\Feature\Performance;
 
 use App\Livewire\Dashboard\Index as DashboardIndex;
 use App\Models\City;
-use App\Models\Employee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
+use Modules\Hr\Models\Employee;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;

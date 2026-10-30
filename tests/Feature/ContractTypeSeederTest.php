@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Models\ContractType;
-use Database\Seeders\ContractTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Hr\Database\Seeders\ContractTypeSeeder;
+use Modules\Hr\Models\ContractType;
 use Tests\TestCase;
 
 class ContractTypeSeederTest extends TestCase

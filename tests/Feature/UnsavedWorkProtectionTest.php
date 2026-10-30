@@ -2,24 +2,24 @@
 
 namespace Tests\Feature;
 
-use App\Enums\ContractType as ContractTypeEnum;
-use App\Livewire\Contract\ContractCreate;
-use App\Livewire\Employee\EmployeeCreate;
-use App\Livewire\Employee\EmployeeEdit;
 use App\Models\Center;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\Department;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
-use App\Services\LeaveBalanceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
+use Modules\Hr\Enums\ContractType as ContractTypeEnum;
+use Modules\Hr\Livewire\Contract\ContractCreate;
+use Modules\Hr\Livewire\Employee\EmployeeCreate;
+use Modules\Hr\Livewire\Employee\EmployeeEdit;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
+use Modules\Hr\Services\LeaveBalanceService;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
@@ -315,7 +315,7 @@ class UnsavedWorkProtectionTest extends TestCase
 
     // ── fixtures ─────────────────────────────────────────────────────
 
-    /** @return array{0: \App\Models\User, 1: \App\Models\Employee} */
+    /** @return array{0: \App\Models\User, 1: \Modules\Hr\Models\Employee} */
     private function hrAndEmployee(): array
     {
         $city = $this->makeCity('ALP', '001');

@@ -1,0 +1,45 @@
+<?php
+
+namespace Modules\Hr\Policies;
+
+use Modules\Hr\Models\Badge;
+use Modules\Hr\Models\Employee;
+use App\Models\User;
+
+class BadgePolicy
+{
+    public function viewAny(User $user): bool
+    {
+        return $user->hasActivePermission('hr.badges.view');
+    }
+
+    public function view(User $user, Badge $badge): bool
+    {
+        return $this->canAccessEmployee($user, $badge->employee, 'hr.badges.view');
+    }
+
+    /** May the user see $employee's badges at all, e.g. the card on their profile? */
+    public function viewForEmployee(User $user, Employee $employee): bool
+    {
+        return $this->canAccessEmployee($user, $employee, 'hr.badges.view');
+    }
+
+    public function create(User $user, Employee $employee): bool
+    {
+        return $this->canAccessEmployee($user, $employee, 'hr.badges.create');
+    }
+
+    public function delete(User $user, Badge $badge): bool
+    {
+        return $this->canAccessEmployee($user, $badge->employee, 'hr.badges.delete');
+    }
+
+    private function canAccessEmployee(User $user, ?Employee $employee, string $permission): bool
+    {
+        if (! $employee || ! $user->hasActivePermission($permission)) {
+            return false;
+        }
+
+        return Badge::coversEmployee($user, $employee);
+    }
+}

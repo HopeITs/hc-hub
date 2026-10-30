@@ -2,10 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Employee\Leave\MyLeaveRequestModule;
 use App\Livewire\Layout\GlobalSearch;
 use App\Models\City;
-use App\Models\Employee;
 use App\Models\Role;
 use App\Models\User;
 use App\Support\Navigation;
@@ -13,6 +11,8 @@ use App\Support\SafeReturn;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestModule;
+use Modules\Hr\Models\Employee;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;
@@ -128,7 +128,7 @@ class GlobalSearchTest extends TestCase
     {
         $this->person($this->aleppo, 'Ziad', 'Former', 'زياد', 'سابق', ['is_active' => false]);
         $waiting = $this->person($this->aleppo, 'Wael', 'Former', 'وائل', 'سابق', ['is_active' => false]);
-        $waiting->contracts()->update(['type' => \App\Enums\ContractType::Draft]);
+        $waiting->contracts()->update(['type' => \Modules\Hr\Enums\ContractType::Draft]);
 
         app()->setLocale('en');
         $html = $this->search($this->makeUser($this->aleppo, 'HR-ALP'), 'Former')

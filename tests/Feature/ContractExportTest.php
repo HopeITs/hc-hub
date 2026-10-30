@@ -3,13 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\User;
-use App\Services\ContractPdfRenderer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Mockery\MockInterface;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Services\ContractPdfRenderer;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
 use Tests\Concerns\CreatesContractFixtures;

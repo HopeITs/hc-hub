@@ -2,15 +2,15 @@
 
 namespace Tests\Feature\Security;
 
-use App\Livewire\Contract\ContractsTable;
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Mcamara\LaravelLocalization\Middleware\LaravelLocalizationRedirectFilter;
 use Mcamara\LaravelLocalization\Middleware\LocaleSessionRedirect;
+use Modules\Hr\Livewire\Contract\ContractsTable;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Employee;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;
 

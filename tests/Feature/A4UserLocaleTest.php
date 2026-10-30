@@ -4,12 +4,12 @@ namespace Tests\Feature;
 
 use App\Http\Middleware\RememberUserLocale;
 use App\Models\User;
-use App\Notifications\ContractsExpiringAutoRenewWarning;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
+use Modules\Hr\Notifications\ContractsExpiringAutoRenewWarning;
 use Tests\TestCase;
 
 /**

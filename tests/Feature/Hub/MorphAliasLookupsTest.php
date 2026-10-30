@@ -8,9 +8,6 @@
 
 use App\Livewire\ActivityLog\ActivityLogTable;
 use App\Livewire\Dashboard\Index as DashboardIndex;
-use App\Livewire\Forms\NewsForm;
-use App\Models\Folder;
-use App\Models\News;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -18,6 +15,9 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Forms\NewsForm;
+use Modules\Hr\Models\Folder;
+use Modules\Hr\Models\News;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesHrFixtures;
 
@@ -196,9 +196,12 @@ test('the activity log Model column searches by class name and tolerates a stale
 
     // Substring match, like the column's own LIKE search.
     expect(ActivityLogTable::subjectAliasesMatching('LeaveRequest'))->toBe(['leave_request', 'leave_request_note'])
-        ->and(ActivityLogTable::subjectAliasesMatching('App\\Models\\Employee'))->toBe(['employee', 'employee_item', 'employee_note'])
+        ->and(ActivityLogTable::subjectAliasesMatching('Modules\\Hr\\Models\\Employee'))->toBe(['employee', 'employee_item', 'employee_note'])
         ->and(ActivityLogTable::subjectAliasesMatching('  '))->toBe([])
+        ->and(ActivityLogTable::subjectTypeAlias('Modules\\Hr\\Models\\LeaveRequest'))->toBe('leave_request')
+        // A filter remembered from before HR moved to modules/Hr.
         ->and(ActivityLogTable::subjectTypeAlias('App\\Models\\LeaveRequest'))->toBe('leave_request')
+        ->and(ActivityLogTable::subjectTypeAlias('App\\Models\\User'))->toBe('user')
         ->and(ActivityLogTable::subjectTypeAlias('leave_request'))->toBe('leave_request');
 
     Livewire::actingAs($admin)
@@ -208,7 +211,7 @@ test('the activity log Model column searches by class name and tolerates a stale
         ->assertSee('LeaveRequest')
         ->assertDontSee('employee row')
         ->set('search.subject_type', '')
-        ->set('filters.subject_type', 'App\\Models\\Employee')
+        ->set('filters.subject_type', 'Modules\\Hr\\Models\\Employee')
         ->assertSee('employee row')
         ->assertDontSee('leave row')
         ->set('filters.subject_type', 'employee')

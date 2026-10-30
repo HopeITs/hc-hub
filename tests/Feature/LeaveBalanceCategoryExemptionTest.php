@@ -2,18 +2,18 @@
 
 namespace Tests\Feature;
 
-use App\Enums\ContractType as ContractTypeEnum;
-use App\Models\AnnualLeaveRule;
 use App\Models\Center;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\Department;
-use App\Models\JobLevel;
-use App\Models\LeaveBalance;
-use App\Models\Position;
 use App\Models\Program;
-use App\Services\LeaveBalanceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Hr\Enums\ContractType as ContractTypeEnum;
+use Modules\Hr\Models\AnnualLeaveRule;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\LeaveBalance;
+use Modules\Hr\Models\Position;
+use Modules\Hr\Services\LeaveBalanceService;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

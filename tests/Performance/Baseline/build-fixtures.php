@@ -14,27 +14,27 @@
  * person from config/samples/sampleData.php enters this database.
  */
 
-use App\Enums\LeaveRequestStatus;
-use App\Models\Checklist;
 use App\Models\CheckListItem;
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\ContractType;
-use App\Models\Employee;
-use App\Models\EmployeeNote;
-use App\Models\LeaveBalance;
-use App\Models\LeaveRequest;
-use App\Models\Position;
 use App\Models\Role;
 use App\Models\User;
-use App\Notifications\NewLeaveRequest;
-use App\Services\LeaveBalanceService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Models\Checklist;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\EmployeeNote;
+use Modules\Hr\Models\LeaveBalance;
+use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Models\Position;
+use Modules\Hr\Notifications\NewLeaveRequest;
+use Modules\Hr\Services\LeaveBalanceService;
 
 require __DIR__.'/env.php';
 

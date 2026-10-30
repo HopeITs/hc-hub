@@ -5,6 +5,7 @@ use App\Models\Role;
 use App\Support\AccessPermissionCatalog;
 use App\Support\HelpTopics;
 use Illuminate\Support\Facades\File;
+use Tests\Support\HubPaths;
 
 /*
  * Hub task 0.3: every permission name carries its module prefix (`hr.*` for
@@ -30,7 +31,7 @@ function permissionNamesUsedInSource(): array
     ];
 
     $used = [];
-    $files = collect([app_path(), resource_path('views'), base_path('routes')])
+    $files = collect([...HubPaths::app(), ...HubPaths::views(), ...HubPaths::routes()])
         ->flatMap(fn (string $dir) => File::allFiles($dir))
         ->filter(fn (SplFileInfo $file) => str_ends_with($file->getFilename(), '.php'));
 

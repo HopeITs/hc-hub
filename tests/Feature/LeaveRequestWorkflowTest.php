@@ -2,20 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Enums\LeaveRequestStatus;
-use App\Livewire\Employee\Leave\AllLeaveRequestModule;
-use App\Livewire\Employee\Leave\AllLeaveRequestTable;
-use App\Livewire\Employee\Leave\MyLeaveRequestModule;
-use App\Livewire\Employee\Leave\MyLeaveRequestTable;
 use App\Livewire\Notifications\Dropdown as NotificationsDropdown;
 use App\Livewire\Notifications\Index as NotificationsIndex;
-use App\Models\LeaveRequest;
 use App\Models\TaskAttempt;
 use App\Models\User;
-use App\Notifications\ActionLeaveRequest;
-use App\Notifications\HRSawLeaveRequest;
-use App\Notifications\NewLeaveRequest;
-use App\Services\LeaveNotificationService;
 use App\Services\NotificationRequestState;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -23,6 +13,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
 use LogicException;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Livewire\Employee\Leave\AllLeaveRequestModule;
+use Modules\Hr\Livewire\Employee\Leave\AllLeaveRequestTable;
+use Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestModule;
+use Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestTable;
+use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Notifications\ActionLeaveRequest;
+use Modules\Hr\Notifications\HRSawLeaveRequest;
+use Modules\Hr\Notifications\NewLeaveRequest;
+use Modules\Hr\Services\LeaveNotificationService;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -1278,8 +1278,8 @@ class LeaveRequestWorkflowTest extends TestCase
         $this->assertSame($manager->employee_id, $leave->decided_on_behalf_of);
 
         app()->setLocale('en');
-        $this->assertStringContainsString('on behalf of', app(\App\Services\LeaveRequestNextStep::class)->describe($leave));
-        $this->assertStringContainsString($manager->profile->name, app(\App\Services\LeaveRequestNextStep::class)->describe($leave));
+        $this->assertStringContainsString('on behalf of', app(\Modules\Hr\Services\LeaveRequestNextStep::class)->describe($leave));
+        $this->assertStringContainsString($manager->profile->name, app(\Modules\Hr\Services\LeaveRequestNextStep::class)->describe($leave));
     }
 
     public function test_c3_hr_decides_when_there_is_no_direct_manager(): void
@@ -1287,7 +1287,7 @@ class LeaveRequestWorkflowTest extends TestCase
         [$hr, $leave] = $this->createPendingDecisionFixture();
         Notification::fake();
 
-        $this->assertSame('no_manager', app(\App\Services\LeaveDecisionAuthority::class)->basisFor($hr, $leave));
+        $this->assertSame('no_manager', app(\Modules\Hr\Services\LeaveDecisionAuthority::class)->basisFor($hr, $leave));
 
         Livewire::actingAs($hr)
             ->test(AllLeaveRequestModule::class)
@@ -1304,7 +1304,7 @@ class LeaveRequestWorkflowTest extends TestCase
     {
         [$hr] = $this->createPendingDecisionFixture();
         $own = $this->pendingOwnRequestOf($hr);
-        $authority = app(\App\Services\LeaveDecisionAuthority::class);
+        $authority = app(\Modules\Hr\Services\LeaveDecisionAuthority::class);
 
         $this->assertSame([], $authority->directManagers($own)->all());
         $this->assertNull($authority->basisFor($hr, $own));
@@ -1326,9 +1326,9 @@ class LeaveRequestWorkflowTest extends TestCase
         $other = $this->createHrUserForLeave($own, 'other.hr@example.test');
         $other->givePermissionTo(['hr.leaves.decide', 'hr.leaves.view-all']);
 
-        $this->assertNull(app(\App\Services\LeaveDecisionAuthority::class)->basisFor($hr, $own));
+        $this->assertNull(app(\Modules\Hr\Services\LeaveDecisionAuthority::class)->basisFor($hr, $own));
         // Another HR person in scope still stands in for the absent manager.
-        $this->assertSame('on_behalf', app(\App\Services\LeaveDecisionAuthority::class)->basisFor($other, $own));
+        $this->assertSame('on_behalf', app(\Modules\Hr\Services\LeaveDecisionAuthority::class)->basisFor($other, $own));
     }
 
     // --- G-C-1: the direct-manager position is the authority (DEC-05 revision 2) ---
@@ -1339,16 +1339,16 @@ class LeaveRequestWorkflowTest extends TestCase
         $manager = $this->makeDirectManagerOf($leave, asEmployeeOnly: true);
         $this->assertFalse($manager->hasActivePermission('hr.leaves.decide'));
         Notification::fake();
-        $inbox = app(\App\Services\WorkInbox::class);
+        $inbox = app(\Modules\Hr\Services\WorkInbox::class);
 
-        $this->assertSame('manager', app(\App\Services\LeaveDecisionAuthority::class)->basisFor($manager, $leave));
+        $this->assertSame('manager', app(\Modules\Hr\Services\LeaveDecisionAuthority::class)->basisFor($manager, $leave));
         $this->assertTrue($inbox->hasSources($manager));
         $this->assertSame(["leave:{$leave->id}:decide"], $inbox->rows($manager)->pluck('key')->all());
         // No escalation: HR does not stand in while that manager is at work.
-        $this->assertNull(app(\App\Services\LeaveDecisionAuthority::class)->basisFor($hr, $leave));
+        $this->assertNull(app(\Modules\Hr\Services\LeaveDecisionAuthority::class)->basisFor($hr, $leave));
 
         Livewire::actingAs($manager)
-            ->test(\App\Livewire\Inbox\Index::class)
+            ->test(\Modules\Hr\Livewire\Inbox\Index::class)
             ->call('decide', "leave:{$leave->id}:decide", $inbox->leaveVersion($leave->fresh()), LeaveRequestStatus::Accepted)
             ->assertHasNoErrors();
 
@@ -1364,7 +1364,7 @@ class LeaveRequestWorkflowTest extends TestCase
         app()->setLocale('en');
         $this->assertStringContainsString(
             $manager->profile->name,
-            app(\App\Services\LeaveRequestNextStep::class)->describe($leave->fresh()),
+            app(\Modules\Hr\Services\LeaveRequestNextStep::class)->describe($leave->fresh()),
         );
     }
 
@@ -1388,11 +1388,11 @@ class LeaveRequestWorkflowTest extends TestCase
         $this->artisan('leaves:send-decision-reminders')->assertSuccessful();
         $this->artisan('leaves:send-decision-reminders')->assertSuccessful();
 
-        Notification::assertSentToTimes($manager, \App\Notifications\LeaveDecisionReminder::class, 1);
-        Notification::assertSentTo($manager, \App\Notifications\LeaveDecisionReminder::class, fn ($n) => $n->recipientType === 'manager');
-        Notification::assertSentToTimes($hr, \App\Notifications\LeaveDecisionReminder::class, 1);
-        Notification::assertSentTo($hr, \App\Notifications\LeaveDecisionReminder::class, fn ($n) => $n->recipientType === 'hr');
-        Notification::assertNotSentTo($leave->leaveBalance->contract->employee->account, \App\Notifications\LeaveDecisionReminder::class);
+        Notification::assertSentToTimes($manager, \Modules\Hr\Notifications\LeaveDecisionReminder::class, 1);
+        Notification::assertSentTo($manager, \Modules\Hr\Notifications\LeaveDecisionReminder::class, fn ($n) => $n->recipientType === 'manager');
+        Notification::assertSentToTimes($hr, \Modules\Hr\Notifications\LeaveDecisionReminder::class, 1);
+        Notification::assertSentTo($hr, \Modules\Hr\Notifications\LeaveDecisionReminder::class, fn ($n) => $n->recipientType === 'hr');
+        Notification::assertNotSentTo($leave->leaveBalance->contract->employee->account, \Modules\Hr\Notifications\LeaveDecisionReminder::class);
     }
 
     public function test_gc1_a_reminder_goes_one_day_before_the_start_even_if_sent_today(): void
@@ -1404,7 +1404,7 @@ class LeaveRequestWorkflowTest extends TestCase
 
         $this->artisan('leaves:send-decision-reminders')->assertSuccessful();
 
-        Notification::assertSentToTimes($manager, \App\Notifications\LeaveDecisionReminder::class, 1);
+        Notification::assertSentToTimes($manager, \Modules\Hr\Notifications\LeaveDecisionReminder::class, 1);
     }
 
     public function test_gc18_hr_that_decides_is_reminded_to_decide(): void
@@ -1416,8 +1416,8 @@ class LeaveRequestWorkflowTest extends TestCase
 
         $this->artisan('leaves:send-decision-reminders')->assertSuccessful();
 
-        Notification::assertSentToTimes($hr, \App\Notifications\LeaveDecisionReminder::class, 1);
-        Notification::assertSentTo($hr, \App\Notifications\LeaveDecisionReminder::class, function ($n) use ($hr, $leave) {
+        Notification::assertSentToTimes($hr, \Modules\Hr\Notifications\LeaveDecisionReminder::class, 1);
+        Notification::assertSentTo($hr, \Modules\Hr\Notifications\LeaveDecisionReminder::class, function ($n) use ($hr, $leave) {
             $data = $n->toArray($hr);
 
             return $n->recipientType === 'hr_decider'
@@ -1432,14 +1432,14 @@ class LeaveRequestWorkflowTest extends TestCase
         $manager = $this->makeDirectManagerOf($leave, asEmployeeOnly: true);
 
         Livewire::actingAs($manager)
-            ->test(\App\Livewire\Dashboard\ForYouNow::class)
+            ->test(\Modules\Hr\Livewire\Dashboard\ForYouNow::class)
             ->assertSeeHtml('data-testid="for-you-decisions-count"');
     }
 
     public function test_n03_hr_reads_you_not_the_hr_team_in_the_next_step(): void
     {
         [$hr, $leave] = $this->createPendingDecisionFixture();
-        $nextStep = app(\App\Services\LeaveRequestNextStep::class);
+        $nextStep = app(\Modules\Hr\Services\LeaveRequestNextStep::class);
         app()->setLocale('en');
 
         // No direct manager: HR decides, so HR reads "your decision".
@@ -1459,7 +1459,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $leave->update(['status' => LeaveRequestStatus::Rejected, 'reject_reason' => 'x', 'approved_at' => now(), 'approved_by' => $hr->employee_id, 'hr_approved' => false]);
         $other = $this->createHrUserForLeave($leave, 'second.hr@example.test');
         $other->givePermissionTo(['hr.leaves.review', 'hr.leaves.view-all']);
-        $inbox = app(\App\Services\WorkInbox::class);
+        $inbox = app(\Modules\Hr\Services\WorkInbox::class);
 
         $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($hr)->allows('review', $leave->fresh()));
         $this->assertSame(0, $inbox->snapshot($hr)['counts']['review']);
@@ -1471,10 +1471,10 @@ class LeaveRequestWorkflowTest extends TestCase
     {
         [, $leave] = $this->createPendingDecisionFixture();
         $manager = $this->makeDirectManagerOf($leave);
-        DB::table('employees')->where('id', $manager->employee_id)->update(['gender' => \App\Enums\Gender::Female]);
+        DB::table('employees')->where('id', $manager->employee_id)->update(['gender' => \Modules\Hr\Enums\Gender::Female]);
         app()->setLocale('ar');
 
-        $text = app(\App\Services\LeaveRequestNextStep::class)->describe($leave->fresh());
+        $text = app(\Modules\Hr\Services\LeaveRequestNextStep::class)->describe($leave->fresh());
 
         $this->assertStringContainsString('مديرتك', $text);
         $this->assertStringContainsString('إليها', $text);
@@ -1520,14 +1520,14 @@ class LeaveRequestWorkflowTest extends TestCase
         $leave->update(['status' => LeaveRequestStatus::Accepted, 'approved_at' => now()]);
         Notification::fake();
 
-        app(\App\Services\LeaveRequestReview::class)->markSeen($leave->id, $hr, '  Cover arranged with the center.  ');
+        app(\Modules\Hr\Services\LeaveRequestReview::class)->markSeen($leave->id, $hr, '  Cover arranged with the center.  ');
 
         $leave->refresh();
         $this->assertTrue($leave->hr_approved);
         $this->assertSame(['note', 'Cover arranged with the center.'], [$leave->notes->first()->kind, $leave->notes->first()->body]);
 
         $this->expectException(\Illuminate\Auth\Access\AuthorizationException::class);
-        app(\App\Services\LeaveRequestReview::class)->markSeen($leave->id, $hr);
+        app(\Modules\Hr\Services\LeaveRequestReview::class)->markSeen($leave->id, $hr);
     }
 
     public function test_c3_an_objection_needs_a_note_returns_the_days_and_goes_back_to_the_manager(): void
@@ -1540,7 +1540,7 @@ class LeaveRequestWorkflowTest extends TestCase
 
         // The note is required (C3D-Q5): nothing changes without it.
         try {
-            app(\App\Services\LeaveRequestReview::class)->object($leave->id, $hr, '   ');
+            app(\Modules\Hr\Services\LeaveRequestReview::class)->object($leave->id, $hr, '   ');
             $this->fail('An objection without a note was accepted.');
         } catch (\Illuminate\Validation\ValidationException $e) {
             $this->assertArrayHasKey('note', $e->errors());
@@ -1548,7 +1548,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $this->assertSame(LeaveRequestStatus::Accepted, $leave->fresh()->status);
         $this->assertEquals(40, $leave->leaveBalance->fresh()->used);
 
-        app(\App\Services\LeaveRequestReview::class)->object($leave->id, $hr, 'Dates overlap the center audit.');
+        app(\Modules\Hr\Services\LeaveRequestReview::class)->object($leave->id, $hr, 'Dates overlap the center audit.');
 
         $leave->refresh();
         $this->assertSame(LeaveRequestStatus::Pending, $leave->status);
@@ -1558,12 +1558,12 @@ class LeaveRequestWorkflowTest extends TestCase
         $this->assertEquals(24, $leave->leaveBalance->fresh()->used);
         $this->assertSame(['objection', 'Dates overlap the center audit.'], [$leave->notes->first()->kind, $leave->notes->first()->body]);
 
-        Notification::assertSentTo($manager, \App\Notifications\LeaveRequestObjected::class);
-        Notification::assertSentTo($leave->leaveBalance->contract->employee->account, \App\Notifications\LeaveRequestObjected::class);
+        Notification::assertSentTo($manager, \Modules\Hr\Notifications\LeaveRequestObjected::class);
+        Notification::assertSentTo($leave->leaveBalance->contract->employee->account, \Modules\Hr\Notifications\LeaveRequestObjected::class);
 
         // Pending again: a second objection is refused and gives nothing back twice.
         try {
-            app(\App\Services\LeaveRequestReview::class)->object($leave->id, $hr, 'Again.');
+            app(\Modules\Hr\Services\LeaveRequestReview::class)->object($leave->id, $hr, 'Again.');
             $this->fail('A pending request was objected to.');
         } catch (\Illuminate\Auth\Access\AuthorizationException) {
         }
@@ -1577,7 +1577,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $leave->update(['status' => LeaveRequestStatus::Accepted, 'approved_at' => now()]);
 
         $this->expectException(\Illuminate\Auth\Access\AuthorizationException::class);
-        app(\App\Services\LeaveRequestReview::class)->object($leave->id, $manager, 'Not mine to object.');
+        app(\Modules\Hr\Services\LeaveRequestReview::class)->object($leave->id, $manager, 'Not mine to object.');
     }
 
     // --- C3: the work inbox, leave rows (approval-source-contract.md §3, §4.1) ---
@@ -1586,7 +1586,7 @@ class LeaveRequestWorkflowTest extends TestCase
     {
         [$hr, $leave] = $this->createPendingDecisionFixture();
         $manager = $this->makeDirectManagerOf($leave);
-        $inbox = app(\App\Services\WorkInbox::class);
+        $inbox = app(\Modules\Hr\Services\WorkInbox::class);
 
         // Pending: the manager decides; HR, with the manager at work, has nothing to do yet.
         $this->assertSame(["leave:{$leave->id}:decide"], $inbox->rows($manager)->pluck('key')->all());
@@ -1609,9 +1609,9 @@ class LeaveRequestWorkflowTest extends TestCase
         $leave->leaveBalance->update(['used' => 0, 'deserved' => 160]);
         Notification::fake();
         $key = "leave:{$leave->id}:decide";
-        $version = app(\App\Services\WorkInbox::class)->leaveVersion($leave->fresh());
+        $version = app(\Modules\Hr\Services\WorkInbox::class)->leaveVersion($leave->fresh());
 
-        $inbox = Livewire::actingAs($manager)->test(\App\Livewire\Inbox\Index::class);
+        $inbox = Livewire::actingAs($manager)->test(\Modules\Hr\Livewire\Inbox\Index::class);
         $inbox->call('decide', $key, $version, LeaveRequestStatus::Accepted)->assertHasNoErrors();
 
         $this->assertSame(LeaveRequestStatus::Accepted, $leave->fresh()->status);
@@ -1629,13 +1629,13 @@ class LeaveRequestWorkflowTest extends TestCase
     {
         [, $leave] = $this->createPendingDecisionFixture();
         $manager = $this->makeDirectManagerOf($leave);
-        $staleVersion = app(\App\Services\WorkInbox::class)->leaveVersion($leave->fresh());
+        $staleVersion = app(\Modules\Hr\Services\WorkInbox::class)->leaveVersion($leave->fresh());
 
         // The requester moved the dates while the manager had the inbox open.
         $this->travel(2)->seconds();
         $leave->update(['start_at' => now()->addWeeks(2)->startOfDay(), 'end_at' => now()->addWeeks(2)->addDay()->startOfDay()]);
 
-        Livewire::actingAs($manager)->test(\App\Livewire\Inbox\Index::class)
+        Livewire::actingAs($manager)->test(\Modules\Hr\Livewire\Inbox\Index::class)
             ->call('decide', "leave:{$leave->id}:decide", $staleVersion, LeaveRequestStatus::Accepted)
             ->assertSet("outcomes.leave-{$leave->id}-decide.outcome", 'changed');
 
@@ -1646,9 +1646,9 @@ class LeaveRequestWorkflowTest extends TestCase
     {
         [, $leave] = $this->createPendingDecisionFixture();
         $manager = $this->makeDirectManagerOf($leave);
-        $version = app(\App\Services\WorkInbox::class)->leaveVersion($leave->fresh());
+        $version = app(\Modules\Hr\Services\WorkInbox::class)->leaveVersion($leave->fresh());
 
-        Livewire::actingAs($manager)->test(\App\Livewire\Inbox\Index::class)
+        Livewire::actingAs($manager)->test(\Modules\Hr\Livewire\Inbox\Index::class)
             ->call('decide', "leave:{$leave->id}:decide", $version, LeaveRequestStatus::Rejected)
             ->assertHasErrors(["reasons.leave-{$leave->id}-decide"]);
 
@@ -1663,7 +1663,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $key = "leave:{$leave->id}:review";
         $slug = "leave-{$leave->id}-review";
 
-        $inbox = Livewire::actingAs($hr)->test(\App\Livewire\Inbox\Index::class);
+        $inbox = Livewire::actingAs($hr)->test(\Modules\Hr\Livewire\Inbox\Index::class);
 
         // An objection needs its note; the error sits on the row's note field.
         $inbox->call('object', $key)->assertHasErrors(["notes.{$slug}"]);
@@ -1690,7 +1690,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($hr)->allows('object', $leave->fresh()));
 
         $key = "leave:{$leave->id}:review";
-        $inbox = Livewire::actingAs($hr)->test(\App\Livewire\Inbox\Index::class);
+        $inbox = Livewire::actingAs($hr)->test(\Modules\Hr\Livewire\Inbox\Index::class);
         $inbox->call('markSeen', $key)->assertSet("outcomes.leave-{$leave->id}-review.outcome", 'not_allowed');
         $inbox->set("notes.leave-{$leave->id}-review", 'Direct call.')->call('object', $key)
             ->assertSet("outcomes.leave-{$leave->id}-review.outcome", 'not_allowed');
@@ -1708,7 +1708,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $manager = $this->makeDirectManagerOf($leave);
         $other = $this->createHrUserForLeave($leave, 'other.hr@example.test');
         app()->setLocale('en');
-        $next = app(\App\Services\LeaveRequestNextStep::class);
+        $next = app(\Modules\Hr\Services\LeaveRequestNextStep::class);
 
         $leave->update([
             'status' => LeaveRequestStatus::Accepted, 'approved_at' => now(), 'approved_by' => $other->employee_id,
@@ -1720,7 +1720,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $this->assertStringContainsString($manager->profile->name, $summary);
         $this->assertStringNotContainsString('The manager', $summary);
 
-        Livewire::actingAs($hr)->test(\App\Livewire\Inbox\Index::class)
+        Livewire::actingAs($hr)->test(\Modules\Hr\Livewire\Inbox\Index::class)
             ->assertSee('accepted this request on behalf of')
             ->assertDontSee('The manager accepted');
 
@@ -1743,12 +1743,12 @@ class LeaveRequestWorkflowTest extends TestCase
         $own = $this->pendingOwnRequestOf($hr);
         $own->forceFill(['created_at' => now()->subDays(30)])->save();
 
-        for ($i = 0; $i < \App\Services\WorkInbox::PER_SOURCE; $i++) {
+        for ($i = 0; $i < \Modules\Hr\Services\WorkInbox::PER_SOURCE; $i++) {
             $own->replicate()->forceFill(['created_at' => now()->subDays(20)])->save();
         }
         $leave->forceFill(['created_at' => now()])->save();
 
-        $inbox = app(\App\Services\WorkInbox::class);
+        $inbox = app(\Modules\Hr\Services\WorkInbox::class);
         $this->assertSame(["leave:{$leave->id}:decide"], $inbox->rows($hr)->where('action', 'decide')->pluck('key')->values()->all());
         $this->assertSame(1, $inbox->snapshot($hr)['counts']['decide']);
     }
@@ -1763,7 +1763,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $leave = $leave->fresh();
 
         $this->assertFalse(\Illuminate\Support\Facades\Gate::forUser($hr)->allows('decide', $leave));
-        $this->assertSame(0, app(\App\Services\WorkInbox::class)->snapshot($hr)['counts']['decide']);
+        $this->assertSame(0, app(\Modules\Hr\Services\WorkInbox::class)->snapshot($hr)['counts']['decide']);
 
         Livewire::actingAs($hr)->test(AllLeaveRequestModule::class)
             ->call('refreshCounts')
@@ -1781,7 +1781,7 @@ class LeaveRequestWorkflowTest extends TestCase
         [$hr, $leave] = $this->createPendingDecisionFixture();
         $manager = $this->makeDirectManagerOf($leave);
         $leave = $leave->fresh();
-        $next = app(\App\Services\LeaveRequestNextStep::class);
+        $next = app(\Modules\Hr\Services\LeaveRequestNextStep::class);
         app()->setLocale('en');
 
         $this->assertStringContainsString('your manager', $next->describe($leave));

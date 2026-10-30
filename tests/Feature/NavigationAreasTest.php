@@ -4,12 +4,12 @@ namespace Tests\Feature;
 
 use App\Livewire\Layout\Sidebar;
 use App\Models\City;
-use App\Models\Employee;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Livewire\Livewire;
+use Modules\Hr\Models\Employee;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 

@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\ViewErrorBag;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Tests\Support\HubPaths;
 use Tests\TestCase;
 
 /**
@@ -264,13 +265,15 @@ class AccessibilityTest extends TestCase
     /** @return iterable<string> */
     private function bladeFiles(): iterable
     {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(resource_path('views')),
-        );
+        foreach (HubPaths::views() as $root) {
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($root),
+            );
 
-        foreach ($iterator as $file) {
-            if (str_ends_with($file->getPathname(), '.blade.php')) {
-                yield $file->getPathname();
+            foreach ($iterator as $file) {
+                if (str_ends_with($file->getPathname(), '.blade.php')) {
+                    yield $file->getPathname();
+                }
             }
         }
     }

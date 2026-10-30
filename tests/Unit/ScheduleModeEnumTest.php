@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Enums\ScheduleMode;
+use Modules\Hr\Enums\ScheduleMode;
 use Tests\TestCase;
 
 class ScheduleModeEnumTest extends TestCase

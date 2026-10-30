@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Security;
 
-use App\Models\Employee;
-use App\Services\DigitalIdManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\URL;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Services\DigitalIdManager;
 use Tests\Concerns\CreatesDigitalIdCards;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;

@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Inbox\Index as Inbox;
-use App\Models\Checklist;
-use App\Models\ChecklistItem;
 use App\Models\City;
 use App\Models\User;
-use App\Services\WorkInbox;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Inbox\Index as Inbox;
+use Modules\Hr\Models\Checklist;
+use Modules\Hr\Models\ChecklistItem;
+use Modules\Hr\Services\WorkInbox;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesHrFixtures;
@@ -107,7 +107,7 @@ class WorkInboxChecklistTest extends TestCase
         $this->assertSame('pending', $a->fresh()->delivered_status);
 
         // Someone confirms one item on the old page between preview and confirm.
-        app(\App\Services\ChecklistWorkflow::class)->markDelivered($c->id, $this->deliverer->employee_id, null);
+        app(\Modules\Hr\Services\ChecklistWorkflow::class)->markDelivered($c->id, $this->deliverer->employee_id, null);
 
         $inbox->call('applyBatch', $keys)
             ->assertDispatched('toast', fn ($event, $params) => str_contains($params['message'], '2'));
@@ -144,7 +144,7 @@ class WorkInboxChecklistTest extends TestCase
         $this->assertNotNull($row);
         $this->assertTrue($row['former']);
 
-        $counter = Livewire::actingAs($this->deliverer)->test(\App\Livewire\ChecklistItems\PendingDeliversCounter::class);
+        $counter = Livewire::actingAs($this->deliverer)->test(\Modules\Hr\Livewire\ChecklistItems\PendingDeliversCounter::class);
         $this->assertSame(app(WorkInbox::class)->count($this->deliverer), $counter->viewData('pendingDeliversCount'));
 
         app()->setLocale('en');
@@ -178,7 +178,7 @@ class WorkInboxChecklistTest extends TestCase
     public function test_gc11_an_already_handled_outcome_refreshes_the_menu_badge(): void
     {
         $item = $this->item('Laptop');
-        app(\App\Services\ChecklistWorkflow::class)->markDelivered($item->id, $this->deliverer->employee_id, null);
+        app(\Modules\Hr\Services\ChecklistWorkflow::class)->markDelivered($item->id, $this->deliverer->employee_id, null);
 
         Livewire::actingAs($this->deliverer)->test(Inbox::class)
             ->call('confirmItem', "checklist:{$item->id}:deliver")
@@ -193,7 +193,7 @@ class WorkInboxChecklistTest extends TestCase
         $this->item('Phone');
         app()->setLocale('en');
 
-        Livewire::actingAs($this->deliverer)->test(\App\Livewire\Dashboard\ForYouNow::class)
+        Livewire::actingAs($this->deliverer)->test(\Modules\Hr\Livewire\Dashboard\ForYouNow::class)
             ->assertViewHas('parts', fn (array $parts) => ($parts['inbox-items']['count'] ?? null) === 2)
             ->assertSee('2 items to hand over or take back')
             ->assertDontSee(__('dashboard.for-you.empty'));

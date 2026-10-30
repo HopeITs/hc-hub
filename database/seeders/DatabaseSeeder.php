@@ -3,8 +3,19 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Modules\Hr\Database\Seeders\AnnualLeaveRuleSeeder;
+use Modules\Hr\Database\Seeders\CheckListItemSeeder;
+use Modules\Hr\Database\Seeders\ContractTypeSeeder;
+use Modules\Hr\Database\Seeders\CourseCategorySeeder;
+use Modules\Hr\Database\Seeders\EducationFieldSeeder;
+use Modules\Hr\Database\Seeders\EmployeeContractSeeder;
+use Modules\Hr\Database\Seeders\EmployeeSeeder;
+use Modules\Hr\Database\Seeders\JobLevelSeeder;
+use Modules\Hr\Database\Seeders\LeaveTypeSeeder;
+use Modules\Hr\Database\Seeders\PositionsSeeder;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Modules\Hr\Database\Seeders\TerminationReasonSeeder;
 
 class DatabaseSeeder extends Seeder
 {

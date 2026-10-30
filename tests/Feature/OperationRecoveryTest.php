@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Contract\ContractCreate;
-use App\Livewire\Contract\ContractRenewModal;
-use App\Livewire\Employee\Leave\AllLeaveRequestModule;
-use App\Livewire\Employee\Leave\MyLeaveRequestModule;
 use App\Support\UnknownOutcome;
+use Modules\Hr\Livewire\Contract\ContractCreate;
+use Modules\Hr\Livewire\Contract\ContractRenewModal;
+use Modules\Hr\Livewire\Employee\Leave\AllLeaveRequestModule;
+use Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestModule;
 use Tests\TestCase;
 
 /**

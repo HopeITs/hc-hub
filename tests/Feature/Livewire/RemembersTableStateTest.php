@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Livewire;
 
-use App\Models\Employee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Models\Employee;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\Fixtures\StateTestTable;
 use Tests\TestCase;

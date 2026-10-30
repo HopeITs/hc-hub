@@ -2,15 +2,9 @@
 
 namespace Tests\Feature\Security;
 
-use App\Livewire\Basics\CityModule;
-use App\Livewire\EmployeeCards\ManageDigitalId;
 use App\Models\City;
 use App\Models\Department;
-use App\Models\Employee;
 use App\Models\User;
-use App\Notifications\DigitalIdReportedLost;
-use App\Services\DigitalIdException;
-use App\Services\DigitalIdManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
@@ -18,6 +12,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Basics\CityModule;
+use Modules\Hr\Livewire\EmployeeCards\ManageDigitalId;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Notifications\DigitalIdReportedLost;
+use Modules\Hr\Services\DigitalIdException;
+use Modules\Hr\Services\DigitalIdManager;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Tests\Concerns\CreatesDigitalIdCards;

@@ -8,6 +8,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use SplFileInfo;
 use Symfony\Component\Finder\Finder;
+use Tests\Support\HubPaths;
 use Tests\TestCase;
 
 /**
@@ -51,7 +52,12 @@ class LivewireMutationCoverageTest extends TestCase
         $exempt = config('access-control.livewire_exempt', []);
         $unclassified = [];
 
-        foreach ($this->livewireComponents() as $class) {
+        $components = $this->livewireComponents();
+
+        // The scan covers the modules too, not only app/Livewire.
+        $this->assertNotEmpty(array_filter($components, fn (string $class) => str_starts_with($class, 'Modules\\')));
+
+        foreach ($components as $class) {
             $name = $this->componentName($class);
             $reflection = new ReflectionClass($class);
 
@@ -100,15 +106,14 @@ class LivewireMutationCoverageTest extends TestCase
         // Reflection reports a trait method as declared by the *using* class,
         // so the class name cannot distinguish "this component defines an
         // action" from "this component uses WithPagination". The defining file
-        // can: only methods written in app/Livewire itself are application
+        // can: only methods written in app/Livewire (or a module's Livewire folder) are application
         // actions. Vendor traits (WithPagination, WithFileUploads) and shared
         // app traits (WithAlerts) are reviewed once at their source instead of
         // once per component that uses them.
         $file = $method->getFileName();
 
-        if ($file === false || ! Str::startsWith(
-            str_replace('\\', '/', $file),
-            str_replace('\\', '/', app_path('Livewire')),
+        if ($file === false || ! collect(array_keys(HubPaths::livewire()))->contains(
+            fn (string $path) => Str::startsWith(str_replace('\\', '/', $file), str_replace('\\', '/', $path)),
         )) {
             return true;
         }
@@ -124,48 +129,47 @@ class LivewireMutationCoverageTest extends TestCase
     /** @return list<class-string<Component>> */
     private function livewireComponents(): array
     {
-        $path = app_path('Livewire');
-
-        if (! is_dir($path)) {
-            return [];
-        }
-
         $classes = [];
 
-        foreach (Finder::create()->files()->in($path)->name('*.php') as $file) {
-            $class = $this->classFor($file);
+        foreach (HubPaths::livewire() as $path => $namespace) {
+            foreach (Finder::create()->files()->in($path)->name('*.php') as $file) {
+                $class = $this->classFor($file, $path, $namespace);
 
-            if (! class_exists($class)) {
-                continue;
+                if (! class_exists($class)) {
+                    continue;
+                }
+
+                $reflection = new ReflectionClass($class);
+
+                if ($reflection->isAbstract() || ! $reflection->isSubclassOf(Component::class)) {
+                    continue;
+                }
+
+                $classes[] = $class;
             }
-
-            $reflection = new ReflectionClass($class);
-
-            if ($reflection->isAbstract() || ! $reflection->isSubclassOf(Component::class)) {
-                continue;
-            }
-
-            $classes[] = $class;
         }
 
         return $classes;
     }
 
-    private function classFor(SplFileInfo $file): string
+    private function classFor(SplFileInfo $file, string $path, string $namespace): string
     {
-        $relative = Str::after($file->getRealPath(), app_path().DIRECTORY_SEPARATOR);
-
-        return 'App\\'.str_replace(
-            [DIRECTORY_SEPARATOR, '.php'],
-            ['\\', ''],
-            $relative,
+        $relative = Str::after(
+            str_replace('\\', '/', $file->getRealPath()),
+            rtrim(str_replace('\\', '/', (string) realpath($path)), '/').'/',
         );
+
+        return $namespace.str_replace(['/', '.php'], ['\\', ''], $relative);
     }
 
-    /** The dotted name Livewire uses in the request payload. */
+    /**
+     * The dotted name Livewire uses in the request payload. A module's
+     * components are registered under the same unprefixed names as the
+     * platform's (Livewire::addLocation), so the namespace prefix is dropped.
+     */
     private function componentName(string $class): string
     {
-        $relative = Str::after($class, 'App\\Livewire\\');
+        $relative = Str::after($class, '\\Livewire\\');
 
         return collect(explode('\\', $relative))
             ->map(fn (string $segment) => Str::kebab($segment))

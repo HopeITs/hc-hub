@@ -51,6 +51,6 @@ class AddAutoRenewToContractsMigrationTest extends TestCase
 
     private function migrationInstance(): Migration
     {
-        return require database_path('migrations/2026_09_15_130000_add_auto_renew_to_contracts.php');
+        return require base_path('modules/Hr/database/migrations/2026_09_15_130000_add_auto_renew_to_contracts.php');
     }
 }

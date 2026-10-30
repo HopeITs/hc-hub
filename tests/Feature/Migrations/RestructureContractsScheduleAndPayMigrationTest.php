@@ -143,7 +143,7 @@ class RestructureContractsScheduleAndPayMigrationTest extends TestCase
 
     private function migrationInstance(): Migration
     {
-        return require database_path('migrations/2026_09_15_000000_restructure_contracts_schedule_pay_and_draft.php');
+        return require base_path('modules/Hr/database/migrations/2026_09_15_000000_restructure_contracts_schedule_pay_and_draft.php');
     }
 
     /**
@@ -155,6 +155,6 @@ class RestructureContractsScheduleAndPayMigrationTest extends TestCase
      */
     private function rollBackFlexHoursRename(): void
     {
-        (require database_path('migrations/2026_09_15_150000_rename_flex_hours_per_day_to_per_month_on_contracts.php'))->down();
+        (require base_path('modules/Hr/database/migrations/2026_09_15_150000_rename_flex_hours_per_day_to_per_month_on_contracts.php'))->down();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Services\ContractPdfRenderer;
+use Modules\Hr\Services\ContractPdfRenderer;
 use RuntimeException;
 use Tests\TestCase;
 
@@ -117,7 +117,7 @@ class ContractPdfRendererTest extends TestCase
 
     public function test_no_renderer_credential_is_committed_to_source(): void
     {
-        $source = (string) file_get_contents(app_path('Services/ContractPdfRenderer.php'));
+        $source = (string) file_get_contents(base_path('modules/Hr/app/Services/ContractPdfRenderer.php'));
 
         $this->assertDoesNotMatchRegularExpression('/token=\w{16,}/', $source);
     }

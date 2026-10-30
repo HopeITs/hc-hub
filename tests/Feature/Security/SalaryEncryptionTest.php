@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Security;
 
-use App\Models\Contract;
-use App\Models\ContractPayTier;
-use App\Services\SalaryCipher;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractPayTier;
+use Modules\Hr\Services\SalaryCipher;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;
 

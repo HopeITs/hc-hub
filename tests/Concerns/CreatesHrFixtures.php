@@ -3,8 +3,8 @@
 namespace Tests\Concerns;
 
 use App\Models\City;
-use App\Models\Employee;
 use App\Models\User;
+use Modules\Hr\Models\Employee;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 

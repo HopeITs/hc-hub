@@ -2,21 +2,21 @@
 
 namespace Tests\Feature;
 
-use App\Enums\LeaveRequestStatus;
-use App\Enums\LeaveTypeCases;
-use App\Livewire\Employee\Leave\AllLeaveRequestModule;
-use App\Livewire\Employee\Leave\MyLeaveRequestModule;
 use App\Models\City;
-use App\Models\LeaveBalance;
-use App\Models\LeaveRequest;
 use App\Models\User;
-use App\Support\Leave\LeaveQuote;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Enums\LeaveTypeCases;
+use Modules\Hr\Livewire\Employee\Leave\AllLeaveRequestModule;
+use Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestModule;
+use Modules\Hr\Models\LeaveBalance;
+use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Support\Leave\LeaveQuote;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;

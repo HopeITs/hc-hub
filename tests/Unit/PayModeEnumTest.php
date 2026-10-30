@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Enums\PayMode;
+use Modules\Hr\Enums\PayMode;
 use Tests\TestCase;
 
 class PayModeEnumTest extends TestCase

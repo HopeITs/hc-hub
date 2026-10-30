@@ -2,18 +2,18 @@
 
 namespace Tests\Feature;
 
-use App\Enums\Currency;
-use App\Enums\PayMode;
-use App\Enums\SalaryPer;
-use App\Enums\SessionDuration;
 use App\Models\Center;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\Department;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Hr\Enums\Currency;
+use Modules\Hr\Enums\PayMode;
+use Modules\Hr\Enums\SalaryPer;
+use Modules\Hr\Enums\SessionDuration;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

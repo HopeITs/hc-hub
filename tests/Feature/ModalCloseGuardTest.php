@@ -2,8 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Basics\DepartmentModule;
-use App\Livewire\ProgramManagement\Center\CentersModule;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\Department;
@@ -14,7 +12,10 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ViewErrorBag;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Basics\DepartmentModule;
+use Modules\Hr\Livewire\ProgramManagement\Center\CentersModule;
 use Tests\Concerns\CreatesHrFixtures;
+use Tests\Support\HubPaths;
 use Tests\TestCase;
 
 /**
@@ -200,11 +201,16 @@ class ModalCloseGuardTest extends TestCase
 
     public function test_every_editable_dialog_is_guarded_and_no_cancel_navigates(): void
     {
-        $views = resource_path('views');
         $unguarded = [];
         $navigating = [];
 
-        foreach (File::allFiles($views.'/livewire') as $file) {
+        // Keys are relative to their views folder, the platform's or a module's.
+        $files = collect(HubPaths::views())
+            ->filter(fn (string $views) => is_dir($views.'/livewire'))
+            ->flatMap(fn (string $views) => collect(File::allFiles($views.'/livewire'))
+                ->map(fn ($file) => [$views, $file]));
+
+        foreach ($files as [$views, $file]) {
             $relative = str_replace('\\', '/', substr($file->getPathname(), strlen($views) + 1));
             $source = $file->getContents();
 

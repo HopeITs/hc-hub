@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Enums\Currency;
+use Modules\Hr\Enums\Currency;
 use PHPUnit\Framework\TestCase;
 
 class CurrencyTest extends TestCase

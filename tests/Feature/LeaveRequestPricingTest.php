@@ -2,21 +2,21 @@
 
 namespace Tests\Feature;
 
-use App\Enums\LeaveRequestStatus;
-use App\Enums\LeaveTypeCases;
-use App\Enums\ScheduleMode;
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\LeaveBalance;
-use App\Models\LeaveRequest;
 use App\Models\Program;
-use App\Services\LeaveRequestPricing;
-use App\Support\Leave\LeaveQuote;
-use App\Support\Leave\LeaveWindow;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Enums\LeaveTypeCases;
+use Modules\Hr\Enums\ScheduleMode;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\LeaveBalance;
+use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Services\LeaveRequestPricing;
+use Modules\Hr\Support\Leave\LeaveQuote;
+use Modules\Hr\Support\Leave\LeaveWindow;
 use ReflectionClass;
 use Tests\TestCase;
 

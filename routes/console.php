@@ -1,16 +1,16 @@
 <?php
 
-use App\Console\Commands\DeactivateContract;
-use App\Console\Commands\DeactivateEmployee;
-use App\Console\Commands\ProcessContractAutoRenewals;
 use App\Console\Commands\PruneTaskAttempts;
-use App\Console\Commands\SendContractExpirationWarnings;
-use App\Console\Commands\SendLeaveDecisionReminders;
 use App\Models\InAppFeedback;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schedule;
+use Modules\Hr\Console\Commands\DeactivateContract;
+use Modules\Hr\Console\Commands\DeactivateEmployee;
+use Modules\Hr\Console\Commands\ProcessContractAutoRenewals;
+use Modules\Hr\Console\Commands\SendContractExpirationWarnings;
+use Modules\Hr\Console\Commands\SendLeaveDecisionReminders;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());

@@ -2,20 +2,20 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Basics\HolidayModule;
-use App\Livewire\Basics\HolidayTable;
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\Department;
-use App\Models\Employee;
-use App\Models\Holiday;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Basics\HolidayModule;
+use Modules\Hr\Livewire\Basics\HolidayTable;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\Holiday;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

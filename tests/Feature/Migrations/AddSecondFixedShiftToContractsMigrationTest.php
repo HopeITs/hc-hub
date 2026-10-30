@@ -18,7 +18,7 @@ class AddSecondFixedShiftToContractsMigrationTest extends TestCase
 
     public function test_down_drops_the_second_shift_columns(): void
     {
-        $migration = require database_path('migrations/2026_09_15_120000_add_second_fixed_shift_to_contracts.php');
+        $migration = require base_path('modules/Hr/database/migrations/2026_09_15_120000_add_second_fixed_shift_to_contracts.php');
 
         $migration->down();
 

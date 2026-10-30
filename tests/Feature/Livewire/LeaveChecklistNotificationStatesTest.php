@@ -2,26 +2,26 @@
 
 namespace Tests\Feature\Livewire;
 
-use App\Enums\LeaveRequestStatus;
-use App\Livewire\ChecklistItems\AllItems;
-use App\Livewire\ChecklistItems\PendingItems;
-use App\Livewire\Employee\Leave\AllLeaveRequestModule;
-use App\Livewire\Employee\Leave\AllLeaveRequestTable;
-use App\Livewire\Employee\Leave\MyLeaveRequestModule;
-use App\Livewire\Employee\Leave\MyLeaveRequestTable;
 use App\Livewire\Notifications\Counter;
 use App\Livewire\Notifications\Dropdown;
 use App\Livewire\Notifications\Index;
-use App\Models\Checklist;
-use App\Models\ChecklistItem;
 use App\Models\User;
-use App\Services\LeaveAlternativeEmployees;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Livewire\ChecklistItems\AllItems;
+use Modules\Hr\Livewire\ChecklistItems\PendingItems;
+use Modules\Hr\Livewire\Employee\Leave\AllLeaveRequestModule;
+use Modules\Hr\Livewire\Employee\Leave\AllLeaveRequestTable;
+use Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestModule;
+use Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestTable;
+use Modules\Hr\Models\Checklist;
+use Modules\Hr\Models\ChecklistItem;
+use Modules\Hr\Services\LeaveAlternativeEmployees;
 use RuntimeException;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;

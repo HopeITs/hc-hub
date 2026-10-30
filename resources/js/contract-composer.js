@@ -262,7 +262,7 @@ document.addEventListener('alpine:init', () => {
         place: str(config.seed?.place ?? '1'),
 
         // ---- schedule
-        // 1 = fixed, 2 = flexible (App\Enums\ScheduleMode). weeklyHours below
+        // 1 = fixed, 2 = flexible (Modules\Hr\Enums\ScheduleMode). weeklyHours below
         // is a computed getter, not a field anyone writes to directly — see it
         // for how each mode arrives at a number.
         scheduleMode: str(config.seed?.scheduleMode ?? '1'),
@@ -308,12 +308,12 @@ document.addEventListener('alpine:init', () => {
         flexCustomOn: Boolean(config.seed?.flexCustomEn || config.seed?.flexCustomAr),
 
         // ---- pay
-        // 1 = fixed, 2 = flexible (App\Enums\PayMode).
+        // 1 = fixed, 2 = flexible (Modules\Hr\Enums\PayMode).
         payMode: str(config.seed?.payMode ?? '1'),
         salary: config.seed?.salary ?? '',
         currency: str(config.seed?.currency ?? '1'),
         salaryPer: str(config.seed?.salaryPer ?? '1'),
-        // Only meaningful when salaryPer is Session (App\Enums\SessionDuration).
+        // Only meaningful when salaryPer is Session (Modules\Hr\Enums\SessionDuration).
         sessionDuration: config.seed?.sessionDuration != null ? str(config.seed.sessionDuration) : '',
         // -- Flexible mode: an unbounded "Add condition" repeater instead of
         // one flat figure, e.g. "if teaching 60h/month" => 200.

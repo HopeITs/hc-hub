@@ -2,18 +2,18 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\ProgramManagement\Center\CenterDetails;
-use App\Livewire\ProgramManagement\Center\CenterEmployees;
 use App\Models\Center;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\Department;
-use App\Models\Employee;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\ProgramManagement\Center\CenterDetails;
+use Modules\Hr\Livewire\ProgramManagement\Center\CenterEmployees;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

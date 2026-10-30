@@ -2,20 +2,20 @@
 
 namespace Tests\Feature;
 
-use App\Enums\EducationStatus;
-use App\Enums\EducationType;
-use App\Enums\KinshipType;
-use App\Livewire\Employee\EmployeeProfile;
-use App\Livewire\Inbox\Index as Inbox;
 use App\Models\City;
-use App\Models\Employee;
-use App\Models\ProfileChangeRequest;
 use App\Models\User;
-use App\Notifications\ProfileChangeDecided;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
+use Modules\Hr\Enums\EducationStatus;
+use Modules\Hr\Enums\EducationType;
+use Modules\Hr\Enums\KinshipType;
+use Modules\Hr\Livewire\Employee\EmployeeProfile;
+use Modules\Hr\Livewire\Inbox\Index as Inbox;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\ProfileChangeRequest;
+use Modules\Hr\Notifications\ProfileChangeDecided;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;
 

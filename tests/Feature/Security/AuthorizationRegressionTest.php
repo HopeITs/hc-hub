@@ -2,18 +2,18 @@
 
 namespace Tests\Feature\Security;
 
-use App\Livewire\Dashboard\EmployeeNotesCard;
-use App\Livewire\Position\ProfileDrawer;
-use App\Models\Checklist;
-use App\Models\ChecklistItem;
-use App\Models\Employee;
-use App\Models\EmployeeNote;
 use App\Models\User;
-use App\Services\ChecklistWorkflow;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Dashboard\EmployeeNotesCard;
+use Modules\Hr\Livewire\Position\ProfileDrawer;
+use Modules\Hr\Models\Checklist;
+use Modules\Hr\Models\ChecklistItem;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\EmployeeNote;
+use Modules\Hr\Services\ChecklistWorkflow;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;

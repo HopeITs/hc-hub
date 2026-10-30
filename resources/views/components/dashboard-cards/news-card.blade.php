@@ -1,5 +1,5 @@
 @php
-    use App\Models\News;
+    use Modules\Hr\Models\News;
     use Carbon\Carbon;
 
     $today = Carbon::today();

@@ -2,18 +2,18 @@
 
 namespace Tests\Feature;
 
-use App\Enums\BadgeSubtype;
-use App\Enums\BadgeType;
-use App\Livewire\Badges\BadgesModule;
-use App\Livewire\Badges\BadgesTable;
-use App\Livewire\Employee\EmployeeEdit;
-use App\Models\Badge;
 use App\Models\City;
-use App\Models\Employee;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Enums\BadgeSubtype;
+use Modules\Hr\Enums\BadgeType;
+use Modules\Hr\Livewire\Badges\BadgesModule;
+use Modules\Hr\Livewire\Badges\BadgesTable;
+use Modules\Hr\Livewire\Employee\EmployeeEdit;
+use Modules\Hr\Models\Badge;
+use Modules\Hr\Models\Employee;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;

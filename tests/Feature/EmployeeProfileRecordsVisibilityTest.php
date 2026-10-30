@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Enums\BadgeType;
-use App\Livewire\Employee\EmployeeProfile;
-use App\Models\Contract;
-use App\Models\Employee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
+use Modules\Hr\Enums\BadgeType;
+use Modules\Hr\Livewire\Employee\EmployeeProfile;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Employee;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;

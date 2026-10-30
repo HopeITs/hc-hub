@@ -2,23 +2,23 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Employee\Leave\BirthdayHolidayCard;
-use App\Models\BirthdayHolidayChoice;
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\Department;
-use App\Models\Holiday;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
 use App\Models\User;
-use App\Services\BirthdayHoliday;
-use App\Services\LeaveRequestPricing;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Employee\Leave\BirthdayHolidayCard;
+use Modules\Hr\Models\BirthdayHolidayChoice;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\Holiday;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
+use Modules\Hr\Services\BirthdayHoliday;
+use Modules\Hr\Services\LeaveRequestPricing;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

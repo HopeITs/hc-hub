@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Employee\EmployeeEdit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Employee\EmployeeEdit;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;

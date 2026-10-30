@@ -2,21 +2,21 @@
 
 namespace Tests\Feature;
 
-use App\Enums\ContractType as ContractTypeEnum;
-use App\Enums\PayMode;
-use App\Enums\SessionDuration;
-use App\Livewire\Contract\ContractCreate;
-use App\Livewire\Contract\ContractEdit;
 use App\Models\Center;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\Department;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
-use App\Services\LeaveBalanceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Enums\ContractType as ContractTypeEnum;
+use Modules\Hr\Enums\PayMode;
+use Modules\Hr\Enums\SessionDuration;
+use Modules\Hr\Livewire\Contract\ContractCreate;
+use Modules\Hr\Livewire\Contract\ContractEdit;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
+use Modules\Hr\Services\LeaveBalanceService;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

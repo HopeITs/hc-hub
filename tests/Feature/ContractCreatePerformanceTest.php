@@ -2,22 +2,22 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Contract\ContractCreate;
-use App\Livewire\Contract\ContractEdit;
 use App\Models\Center;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\Department;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
-use App\Services\LeaveBalanceService;
 use Carbon\Carbon;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Contract\ContractCreate;
+use Modules\Hr\Livewire\Contract\ContractEdit;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
+use Modules\Hr\Services\LeaveBalanceService;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

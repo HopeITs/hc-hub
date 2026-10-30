@@ -4,7 +4,7 @@
 ])
 
 @php
-    use App\Enums\ScheduleMode;
+    use Modules\Hr\Enums\ScheduleMode;
     use App\Support\ArabicText as AR;
     use Carbon\Carbon;
 

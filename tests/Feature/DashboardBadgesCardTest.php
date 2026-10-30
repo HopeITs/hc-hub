@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use App\Enums\BadgeType;
 use App\Livewire\Dashboard\Index;
-use App\Models\Badge;
-use App\Models\Employee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Enums\BadgeType;
+use Modules\Hr\Models\Badge;
+use Modules\Hr\Models\Employee;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;

@@ -3,10 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\City;
-use App\Models\Employee;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Hr\Models\Employee;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 

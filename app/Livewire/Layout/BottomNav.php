@@ -2,10 +2,10 @@
 
 namespace App\Livewire\Layout;
 
-use App\Services\WorkInbox;
 use Illuminate\Support\Facades\Route;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Modules\Hr\Services\WorkInbox;
 use Throwable;
 
 /**

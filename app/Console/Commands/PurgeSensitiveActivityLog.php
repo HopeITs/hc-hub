@@ -2,12 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Badge;
-use App\Models\Contract;
-use App\Models\Employee;
-use App\Models\EmployeeNote;
-use App\Models\Relative;
 use Illuminate\Console\Command;
+use Modules\Hr\Models\Badge;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\EmployeeNote;
+use Modules\Hr\Models\Relative;
 use Spatie\Activitylog\Models\Activity;
 
 /**

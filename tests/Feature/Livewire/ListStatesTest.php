@@ -2,14 +2,14 @@
 
 namespace Tests\Feature\Livewire;
 
-use App\Livewire\Contract\ContractsTable;
-use App\Livewire\Employee\EmployeeTable;
-use App\Models\Employee;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Exceptions;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Contract\ContractsTable;
+use Modules\Hr\Livewire\Employee\EmployeeTable;
+use Modules\Hr\Models\Employee;
 use RuntimeException;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;
@@ -167,7 +167,7 @@ class ListStatesTest extends TestCase
 
         \Illuminate\Support\Facades\Schema::drop('leave_requests');
 
-        Livewire::actingAs($user)->test(\App\Livewire\Employee\Leave\MyLeaveRequestModule::class)
+        Livewire::actingAs($user)->test(\Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestModule::class)
             ->assertOk()
             ->assertSet('counts.all', 0);
 

@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Migrations;
 
-use App\Services\SalaryCipher;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\Hr\Services\SalaryCipher;
 use Tests\TestCase;
 
 class EncryptContractPayFiguresMigrationTest extends TestCase
@@ -150,6 +150,6 @@ class EncryptContractPayFiguresMigrationTest extends TestCase
 
     private function migrationInstance(): Migration
     {
-        return require database_path('migrations/2026_09_22_000000_encrypt_contract_pay_figures.php');
+        return require base_path('modules/Hr/database/migrations/2026_09_22_000000_encrypt_contract_pay_figures.php');
     }
 }

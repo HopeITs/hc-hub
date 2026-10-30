@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Employee\EmployeeEdit;
-use App\Models\Employee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Employee\EmployeeEdit;
+use Modules\Hr\Models\Employee;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;

@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Contract\ContractsTable;
 use DOMDocument;
 use DOMXPath;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Contract\ContractsTable;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;
 

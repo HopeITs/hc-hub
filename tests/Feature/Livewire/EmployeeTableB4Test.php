@@ -2,12 +2,12 @@
 
 namespace Tests\Feature\Livewire;
 
-use App\Livewire\Employee\EmployeeDrawer;
-use App\Livewire\Employee\EmployeeModule;
-use App\Livewire\Employee\EmployeeTable;
-use App\Models\Employee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Employee\EmployeeDrawer;
+use Modules\Hr\Livewire\Employee\EmployeeModule;
+use Modules\Hr\Livewire\Employee\EmployeeTable;
+use Modules\Hr\Models\Employee;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

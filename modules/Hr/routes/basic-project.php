@@ -1,0 +1,30 @@
+<?php
+
+use Modules\Hr\Livewire\Basics\AnnualLeaveRuleModule;
+use Modules\Hr\Livewire\Basics\ChecklistItemModule;
+use Modules\Hr\Livewire\Basics\CityModule;
+use Modules\Hr\Livewire\Basics\ContractTypeModule;
+use Modules\Hr\Livewire\Basics\DepartmentModule;
+use Modules\Hr\Livewire\Basics\HolidayModule;
+use Modules\Hr\Livewire\Basics\JobLevelModule;
+use Modules\Hr\Livewire\Basics\LeaveTypeModule;
+use Modules\Hr\Livewire\Basics\TerminationReasonModule;
+use Modules\Hr\Livewire\Position\OrgChart;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware('reference_page:project-basics')->group(function () {
+    Route::get('cities', CityModule::class)->name('cities.index');
+    Route::get('contract-types', ContractTypeModule::class)->name('contract-types.index');
+    Route::get('checklist-items', ChecklistItemModule::class)->name('basic-checklist-items.index');
+    Route::get('leave-types', LeaveTypeModule::class)->name('leave-types.index');
+    Route::get('job-levels', JobLevelModule::class)->name('job-levels.index');
+    Route::get('departments', DepartmentModule::class)->name('departments.index');
+    Route::get('annual-leave-rules', AnnualLeaveRuleModule::class)->name('annual-leave-rules.index');
+    Route::get('termination-reasons', TerminationReasonModule::class)->name('termination-reasons.index');
+});
+
+// National HR and program managers (team-coverage-contract §6.1); the
+// component checks who may set which holidays, so no reference-page gate here.
+Route::get('holidays', HolidayModule::class)->name('holidays.index');
+
+Route::get('/org-chart', OrgChart::class)->middleware('active_permission:hr.positions.view')->name('org.chart');

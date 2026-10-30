@@ -2,9 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\LeaveTypeCases;
-use App\Livewire\Contract\ContractCreate;
-use App\Livewire\Employee\Leave\MyLeaveRequestModule;
 use App\Models\City;
 use App\Models\User;
 use App\Support\HelpTopics;
@@ -19,6 +16,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
+use Modules\Hr\Enums\LeaveTypeCases;
+use Modules\Hr\Livewire\Contract\ContractCreate;
+use Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestModule;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;

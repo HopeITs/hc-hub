@@ -4,15 +4,15 @@ namespace Tests\Feature;
 
 use App\Models\Center;
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\Department;
-use App\Models\Employee;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
-use App\Services\LeaveAlternativeEmployees;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
+use Modules\Hr\Services\LeaveAlternativeEmployees;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;
 

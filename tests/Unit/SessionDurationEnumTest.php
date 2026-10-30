@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Enums\SessionDuration;
+use Modules\Hr\Enums\SessionDuration;
 use Tests\TestCase;
 
 class SessionDurationEnumTest extends TestCase

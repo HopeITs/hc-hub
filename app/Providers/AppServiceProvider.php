@@ -4,26 +4,8 @@ namespace App\Providers;
 
 use App\Http\Middleware\ActiveLivewirePermissionMiddleware;
 use App\Livewire\Features\SupportToasts;
-use App\Models\Badge;
-use App\Models\Center;
-use App\Models\Contract;
-use App\Models\DefaultDeliverable;
-use App\Models\Employee;
-use App\Models\LeaveRequest;
-use App\Models\Position;
 use App\Models\User;
-use App\Observers\ContractObserver;
-use App\Observers\EmployeeObserver;
-use App\Policies\BadgePolicy;
-use App\Policies\CenterPolicy;
-use App\Policies\ContractPolicy;
-use App\Policies\DefaultDeliverablePolicy;
-use App\Policies\DigitalIdPolicy;
-use App\Policies\EmployeePolicy;
-use App\Policies\LeaveRequestPolicy;
-use App\Policies\PositionPolicy;
 use App\Services\ActivityLogger;
-use App\Services\SalaryCipher;
 use App\Support\MorphMap;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
@@ -43,11 +25,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ActivityLogger::class, function ($app) {
             return new ActivityLogger;
         });
-
-        // Singleton so the Encrypter - and the "this host cannot read the
-        // figures" warning that goes with it - is built once per request
-        // rather than once per contract row rendered.
-        $this->app->singleton(SalaryCipher::class);
 
         // Sends or flashes the toasts raised through WithFeedback::toast().
         // Registered while booting, not in boot(): Livewire attaches the hooks
@@ -74,19 +51,6 @@ class AppServiceProvider extends ServiceProvider
         PasswordRule::defaults(fn () => $this->app->isProduction()
             ? PasswordRule::min(12)->max(255)->uncompromised()
             : PasswordRule::min(12)->max(255));
-
-        Gate::policy(Badge::class, BadgePolicy::class);
-        Gate::policy(Center::class, CenterPolicy::class);
-        Gate::policy(Contract::class, ContractPolicy::class);
-        Gate::policy(DefaultDeliverable::class, DefaultDeliverablePolicy::class);
-        Gate::policy(Employee::class, EmployeePolicy::class);
-        Gate::policy(LeaveRequest::class, LeaveRequestPolicy::class);
-        Gate::policy(Position::class, PositionPolicy::class);
-
-        // Public digital-ID card management (access-policy.md §9 A2D-Q5).
-        Gate::define('digital-id.view', [DigitalIdPolicy::class, 'view']);
-        Gate::define('digital-id.manage', [DigitalIdPolicy::class, 'manage']);
-        Gate::define('digital-id.report-lost', [DigitalIdPolicy::class, 'reportLost']);
 
         // D3 / DEC-08: in-app feedback is read by the IT team only.
         Gate::define('feedback.read', fn (User $user): bool => $user->canReadFeedback());
@@ -158,8 +122,5 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('activepermission', function (string $permission) {
             return auth()->user()?->hasActivePermission($permission) ?? false;
         });
-
-        Contract::observe(ContractObserver::class);
-        Employee::observe(EmployeeObserver::class);
     }
 }

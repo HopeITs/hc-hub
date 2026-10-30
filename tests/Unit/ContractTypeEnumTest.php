@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Enums\ContractType;
+use Modules\Hr\Enums\ContractType;
 use Tests\TestCase;
 
 class ContractTypeEnumTest extends TestCase

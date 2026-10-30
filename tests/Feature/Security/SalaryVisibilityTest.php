@@ -2,16 +2,16 @@
 
 namespace Tests\Feature\Security;
 
-use App\Livewire\Contract\ContractCreate;
-use App\Livewire\Contract\ContractEdit;
-use App\Livewire\Contract\ContractRenewModal;
-use App\Livewire\Employee\EmployeeProfile;
-use App\Models\Contract;
-use App\Models\ContractType;
-use App\Services\LeaveBalanceService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Contract\ContractCreate;
+use Modules\Hr\Livewire\Contract\ContractEdit;
+use Modules\Hr\Livewire\Contract\ContractRenewModal;
+use Modules\Hr\Livewire\Employee\EmployeeProfile;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Services\LeaveBalanceService;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;
 

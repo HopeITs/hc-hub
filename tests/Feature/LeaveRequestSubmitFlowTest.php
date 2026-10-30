@@ -2,21 +2,21 @@
 
 namespace Tests\Feature;
 
-use App\Enums\LeaveRequestStatus;
-use App\Enums\LeaveTypeCases;
-use App\Livewire\Employee\Leave\MyLeaveRequestModule;
-use App\Livewire\Forms\LeaveRequestForm;
-use App\Models\LeaveBalance;
-use App\Models\LeaveRequest;
 use App\Models\TaskAttempt;
 use App\Models\User;
-use App\Notifications\NewLeaveRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Livewire\Livewire;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Enums\LeaveTypeCases;
+use Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestModule;
+use Modules\Hr\Livewire\Forms\LeaveRequestForm;
+use Modules\Hr\Models\LeaveBalance;
+use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Notifications\NewLeaveRequest;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 

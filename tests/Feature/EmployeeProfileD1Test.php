@@ -2,16 +2,16 @@
 
 namespace Tests\Feature;
 
-use App\Enums\BadgeType;
-use App\Livewire\Employee\EmployeeProfile;
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\Employee;
-use App\Models\TerminationReason;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Livewire\Livewire;
+use Modules\Hr\Enums\BadgeType;
+use Modules\Hr\Livewire\Employee\EmployeeProfile;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\TerminationReason;
 use Spatie\Activitylog\Models\Activity;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;

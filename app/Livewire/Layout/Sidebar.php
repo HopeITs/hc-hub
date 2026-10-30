@@ -2,11 +2,11 @@
 
 namespace App\Livewire\Layout;
 
-use App\Models\Checklist;
 use App\Support\Navigation;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Modules\Hr\Models\Checklist;
 use Throwable;
 
 class Sidebar extends Component

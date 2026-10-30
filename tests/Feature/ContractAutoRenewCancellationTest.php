@@ -3,20 +3,19 @@
 namespace Tests\Feature;
 
 use App\Models\Center;
-use App\Models\Checklist;
-use App\Models\ChecklistItem;
-use App\Models\Contract;
-use App\Models\ContractType;
-use App\Models\DefaultDeliverable;
 use App\Models\Department;
-use App\Models\Employee;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
 use App\Models\User;
-use App\Notifications\ChecklistAssigned;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use Modules\Hr\Models\Checklist;
+use Modules\Hr\Models\ChecklistItem;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\DefaultDeliverable;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
+use Modules\Hr\Notifications\ChecklistAssigned;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

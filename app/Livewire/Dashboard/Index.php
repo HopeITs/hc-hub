@@ -3,19 +3,19 @@
 namespace App\Livewire\Dashboard;
 
 use App\Livewire\Concerns\HandlesLoadFailure;
-use App\Models\Badge;
 use App\Models\Center;
-use App\Models\Checklist;
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\Employee;
-use App\Models\News;
-use App\Models\Position;
 use App\Models\Program;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Component;
+use Modules\Hr\Models\Badge;
+use Modules\Hr\Models\Checklist;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\News;
+use Modules\Hr\Models\Position;
 
 class Index extends Component
 {

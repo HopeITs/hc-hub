@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Contract\ContractCreate;
-use App\Livewire\Contract\ContractEdit;
 use App\Models\City;
-use App\Models\Contract;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Contract\ContractCreate;
+use Modules\Hr\Livewire\Contract\ContractEdit;
+use Modules\Hr\Models\Contract;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;

@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Contract\ContractsTable;
-use App\Livewire\Employee\EmployeeCreate;
-use App\Livewire\Employee\EmployeeEdit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Contract\ContractsTable;
+use Modules\Hr\Livewire\Employee\EmployeeCreate;
+use Modules\Hr\Livewire\Employee\EmployeeEdit;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;

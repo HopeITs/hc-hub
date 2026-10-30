@@ -2,14 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Enums\LeaveRequestStatus;
-use App\Livewire\Employee\EmployeeProfile;
 use App\Models\City;
-use App\Models\Employee;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Livewire\Employee\EmployeeProfile;
+use Modules\Hr\Models\Employee;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;

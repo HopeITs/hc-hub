@@ -2,21 +2,21 @@
 
 namespace Tests\Feature\Security;
 
-use App\Livewire\Employee\EmployeeStatistics;
-use App\Livewire\ProgramManagement\Center\CentersModule;
-use App\Livewire\ProgramManagement\DefaultDeliverable\DefaultDeliverablesTable;
 use App\Models\Center;
-use App\Models\ChecklistItem;
-use App\Models\Contract;
-use App\Models\ContractType;
-use App\Models\DefaultDeliverable;
 use App\Models\Department;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Employee\EmployeeStatistics;
+use Modules\Hr\Livewire\ProgramManagement\Center\CentersModule;
+use Modules\Hr\Livewire\ProgramManagement\DefaultDeliverable\DefaultDeliverablesTable;
+use Modules\Hr\Models\ChecklistItem;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\DefaultDeliverable;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

@@ -4,12 +4,12 @@ namespace Tests\Feature;
 
 use App\Models\City;
 use App\Models\Department;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
 use RuntimeException;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
@@ -24,8 +24,8 @@ class HolidayMigrationTest extends TestCase
 
     public function test_old_rows_become_national_or_project_holidays(): void
     {
-        $migration = require database_path('migrations/2026_10_28_100000_reshape_holidays_for_projects.php');
-        $choices = require database_path('migrations/2026_10_28_100100_create_birthday_holiday_choices_table.php');
+        $migration = require base_path('modules/Hr/database/migrations/2026_10_28_100000_reshape_holidays_for_projects.php');
+        $choices = require base_path('modules/Hr/database/migrations/2026_10_28_100100_create_birthday_holiday_choices_table.php');
 
         $syr = $this->makeCity(City::NATIONAL_SLUG, '000');
         $alp = $this->makeCity('ALP', '001');
@@ -77,7 +77,7 @@ class HolidayMigrationTest extends TestCase
 
     public function test_down_refuses_while_project_rows_exist(): void
     {
-        $migration = require database_path('migrations/2026_10_28_100000_reshape_holidays_for_projects.php');
+        $migration = require base_path('modules/Hr/database/migrations/2026_10_28_100000_reshape_holidays_for_projects.php');
 
         DB::table('holidays')->insert(['name_en' => 'P', 'name_ar' => 'P', 'start_date' => '2027-01-01', 'end_date' => '2027-01-01', 'scope' => 'projects']);
 

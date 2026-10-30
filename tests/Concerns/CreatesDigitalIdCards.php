@@ -3,10 +3,10 @@
 namespace Tests\Concerns;
 
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\Employee;
 use App\Models\Program;
-use App\Services\DigitalIdManager;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Services\DigitalIdManager;
 
 /**
  * Employees who hold a public digital-ID card.

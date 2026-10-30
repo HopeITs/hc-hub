@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Enums\LeaveRequestStatus;
-use App\Livewire\Dashboard\UpcomingLeavesCard;
-use App\Models\LeaveBalance;
-use App\Models\LeaveRequest;
-use App\Models\LeaveType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Livewire\Dashboard\UpcomingLeavesCard;
+use Modules\Hr\Models\LeaveBalance;
+use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Models\LeaveType;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;

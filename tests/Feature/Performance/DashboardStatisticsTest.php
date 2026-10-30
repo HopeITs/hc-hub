@@ -2,20 +2,20 @@
 
 namespace Tests\Feature\Performance;
 
-use App\Livewire\Dashboard\DepartmentEmployeeStatistics;
-use App\Livewire\Dashboard\JobLevelEmployeeStatistics;
-use App\Livewire\Dashboard\SalaryPerEmployeeStatistics;
-use App\Models\Contract;
-use App\Models\ContractType;
 use App\Models\Department;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
-use App\Support\StatisticsCache;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Dashboard\DepartmentEmployeeStatistics;
+use Modules\Hr\Livewire\Dashboard\JobLevelEmployeeStatistics;
+use Modules\Hr\Livewire\Dashboard\SalaryPerEmployeeStatistics;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
+use Modules\Hr\Support\StatisticsCache;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

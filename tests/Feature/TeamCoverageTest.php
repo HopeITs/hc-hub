@@ -2,31 +2,31 @@
 
 namespace Tests\Feature;
 
-use App\Enums\LeaveRequestStatus;
-use App\Enums\LeaveTypeCases;
-use App\Livewire\Employee\Leave\AllLeaveRequestModule;
-use App\Livewire\Employee\Leave\MyLeaveRequestModule;
-use App\Livewire\Inbox\Index as Inbox;
-use App\Livewire\Team\Calendar;
 use App\Models\Center;
-use App\Models\Contract;
 use App\Models\Department;
-use App\Models\Employee;
-use App\Models\Holiday;
-use App\Models\JobLevel;
-use App\Models\LeaveBalance;
-use App\Models\LeaveRequest;
-use App\Models\LeaveType;
-use App\Models\Position;
 use App\Models\Program;
 use App\Models\User;
-use App\Services\TeamCoverage;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 use Livewire\Livewire;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Enums\LeaveTypeCases;
+use Modules\Hr\Livewire\Employee\Leave\AllLeaveRequestModule;
+use Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestModule;
+use Modules\Hr\Livewire\Inbox\Index as Inbox;
+use Modules\Hr\Livewire\Team\Calendar;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\Holiday;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\LeaveBalance;
+use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Models\LeaveType;
+use Modules\Hr\Models\Position;
+use Modules\Hr\Services\TeamCoverage;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 
@@ -539,7 +539,7 @@ class TeamCoverageTest extends TestCase
 
     private function contractType(): int
     {
-        return \App\Models\ContractType::query()->firstOrCreate(['id' => 1], ['name_en' => 'Annual', 'name_ar' => 'سنوي'])->id;
+        return \Modules\Hr\Models\ContractType::query()->firstOrCreate(['id' => 1], ['name_en' => 'Annual', 'name_ar' => 'سنوي'])->id;
     }
 
     private function leave(string $who, int $typeId, string $start, string $end, int $status = LeaveRequestStatus::Accepted, string $type = 'day'): LeaveRequest

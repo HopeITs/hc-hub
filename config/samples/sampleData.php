@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\Gender;
-use App\Enums\LeaveType;
-use App\Enums\MaritalStatus;
+use Modules\Hr\Enums\Gender;
+use Modules\Hr\Enums\LeaveType;
+use Modules\Hr\Enums\MaritalStatus;
 
 return [
     'cities' => [

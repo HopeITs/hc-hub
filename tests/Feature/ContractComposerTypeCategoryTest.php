@@ -2,16 +2,16 @@
 
 namespace Tests\Feature;
 
-use App\Enums\ContractType as ContractTypeEnum;
-use App\Livewire\Contract\ContractCreate;
 use App\Models\Center;
-use App\Models\ContractType;
 use App\Models\Department;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Enums\ContractType as ContractTypeEnum;
+use Modules\Hr\Livewire\Contract\ContractCreate;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

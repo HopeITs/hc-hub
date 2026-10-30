@@ -2,10 +2,11 @@
 
 namespace App\Services;
 
-use App\Enums\LeaveRequestStatus;
-use App\Models\LeaveRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Services\LeaveRequestNextStep;
 
 /**
  * Reads the CURRENT state of the record a notification points at, so a

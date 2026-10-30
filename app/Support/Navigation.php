@@ -3,8 +3,8 @@
 namespace App\Support;
 
 use App\Models\User;
-use App\Services\HolidayProjects;
-use App\Services\WorkInbox;
+use Modules\Hr\Services\HolidayProjects;
+use Modules\Hr\Services\WorkInbox;
 use Throwable;
 
 /**

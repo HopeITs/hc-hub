@@ -2,9 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Contract\ContractCreate;
-use App\Livewire\Employee\EmployeeProfile;
-use App\Livewire\Employee\EmployeeTable;
 use App\Models\TaskAttempt;
 use App\Services\TaskTelemetry;
 use App\Support\TaskAttemptSummary;
@@ -13,6 +10,9 @@ use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
 use Livewire\Features\SupportLifecycleHooks\DirectlyCallingLifecycleHooksNotAllowedException;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Contract\ContractCreate;
+use Modules\Hr\Livewire\Employee\EmployeeProfile;
+use Modules\Hr\Livewire\Employee\EmployeeTable;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

@@ -2,12 +2,12 @@
 
 namespace App\Livewire\Layout;
 
-use App\Models\Employee;
-use App\Support\DirectoryAccess;
 use App\Support\Navigation;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Component;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Support\DirectoryAccess;
 use Throwable;
 
 /**

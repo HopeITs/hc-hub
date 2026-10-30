@@ -4,10 +4,10 @@
 ])
 
 @php
-    use App\Enums\Currency;
-    use App\Enums\PayMode;
-    use App\Enums\SalaryPer;
-    use App\Enums\SessionDuration;
+    use Modules\Hr\Enums\Currency;
+    use Modules\Hr\Enums\PayMode;
+    use Modules\Hr\Enums\SalaryPer;
+    use Modules\Hr\Enums\SessionDuration;
     use App\Support\ArabicText as AR;
 
     /*

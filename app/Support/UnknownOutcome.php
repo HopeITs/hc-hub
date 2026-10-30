@@ -2,10 +2,10 @@
 
 namespace App\Support;
 
-use App\Livewire\Contract\ContractCreate;
-use App\Livewire\Contract\ContractRenewModal;
-use App\Livewire\Employee\Leave\AllLeaveRequestModule;
-use App\Livewire\Employee\Leave\MyLeaveRequestModule;
+use Modules\Hr\Livewire\Contract\ContractCreate;
+use Modules\Hr\Livewire\Contract\ContractRenewModal;
+use Modules\Hr\Livewire\Employee\Leave\AllLeaveRequestModule;
+use Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestModule;
 
 /**
  * X1-I: which writes can answer "was operation X applied?".

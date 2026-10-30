@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Security;
 
-use App\Livewire\ProgramManagement\Center\CentersModule;
 use App\Models\City;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\ProgramManagement\Center\CentersModule;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 
@@ -34,8 +34,8 @@ class MultiCityHrScopeTest extends TestCase
 
         $this->assertTrue(Gate::allows('update', $this->makeEmployee($rural, 'rural-emp')));
         $this->assertFalse(Gate::allows('update', $this->makeEmployee($aleppo, 'aleppo-emp')));
-        $this->assertTrue(Gate::allows('create', [\App\Models\Employee::class, $rural->id]));
-        $this->assertFalse(Gate::allows('create', [\App\Models\Employee::class, $aleppo->id]));
+        $this->assertTrue(Gate::allows('create', [\Modules\Hr\Models\Employee::class, $rural->id]));
+        $this->assertFalse(Gate::allows('create', [\Modules\Hr\Models\Employee::class, $aleppo->id]));
     }
 
     public function test_hr_homs_sees_both_cities_in_city_dropdowns(): void

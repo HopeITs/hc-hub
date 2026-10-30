@@ -2,20 +2,21 @@
 
 namespace Tests\Feature;
 
-use App\Enums\LeaveRequestStatus;
-use App\Enums\LeaveTypeCases;
-use App\Livewire\Employee\Leave\MyLeaveRequestModule;
-use App\Models\Contract;
-use App\Models\ContractType;
-use App\Models\LeaveBalance;
-use App\Models\LeaveRequest;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Enums\LeaveTypeCases;
+use Modules\Hr\Livewire\Employee\Leave\MyLeaveRequestModule;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\LeaveBalance;
+use Modules\Hr\Models\LeaveRequest;
 use ReflectionProperty;
 use Tests\Concerns\CreatesContractFixtures;
+use Tests\Support\HubPaths;
 use Tests\TestCase;
 
 /**
@@ -41,9 +42,11 @@ class A4BilingualTest extends TestCase
     {
         $missing = [];
 
-        foreach (glob(lang_path('en/*.php')) as $enFile) {
+        $enFiles = collect(HubPaths::lang())->flatMap(fn (string $lang) => glob($lang.'/en/*.php') ?: []);
+
+        foreach ($enFiles as $enFile) {
             $group = basename($enFile, '.php');
-            $arFile = lang_path("ar/{$group}.php");
+            $arFile = dirname($enFile, 2)."/ar/{$group}.php";
             $this->assertFileExists($arFile, "lang/ar/{$group}.php is missing");
 
             $en = array_keys(Arr::dot(require $enFile));

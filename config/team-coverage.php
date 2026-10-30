@@ -1,10 +1,10 @@
 <?php
 
-use App\Enums\LeaveTypeCases;
+use Modules\Hr\Enums\LeaveTypeCases;
 
 /*
  * Team calendar and coverage (C5; docs/ux/team-coverage-contract.md).
- * Read by App\Services\TeamCoverage only.
+ * Read by Modules\Hr\Services\TeamCoverage only.
  */
 return [
     /*

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Security;
 
-use App\Livewire\Archives\ArchivedFilesModule;
 use Illuminate\Validation\ValidationException;
+use Modules\Hr\Livewire\Archives\ArchivedFilesModule;
 use ReflectionMethod;
 use Tests\TestCase;
 use ZipArchive;

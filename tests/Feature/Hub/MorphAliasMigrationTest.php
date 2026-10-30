@@ -1,12 +1,12 @@
 <?php
 
-use App\Models\Employee;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Modules\Hr\Models\Employee;
 use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\PermissionRegistrar;
 

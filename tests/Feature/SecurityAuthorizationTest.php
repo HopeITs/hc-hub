@@ -3,13 +3,13 @@
 namespace Tests\Feature;
 
 use App\Models\City;
-use App\Models\Employee;
 use App\Models\User;
-use App\Services\DigitalIdManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Services\DigitalIdManager;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\Concerns\CreatesDigitalIdCards;

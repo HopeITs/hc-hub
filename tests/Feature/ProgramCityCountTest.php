@@ -5,11 +5,11 @@ namespace Tests\Feature;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\Department;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\Program;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
 use Tests\TestCase;
 
 class ProgramCityCountTest extends TestCase

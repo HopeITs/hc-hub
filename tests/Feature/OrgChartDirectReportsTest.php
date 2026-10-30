@@ -2,17 +2,17 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Position\OrgChart;
-use App\Livewire\Position\ProfileDrawer;
 use App\Models\City;
-use App\Models\Contract;
-use App\Models\ContractType;
-use App\Models\Employee;
-use App\Models\JobLevel;
-use App\Models\Position;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Position\OrgChart;
+use Modules\Hr\Livewire\Position\ProfileDrawer;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
 use Tests\Concerns\CreatesContractFixtures;
 use Tests\TestCase;
 

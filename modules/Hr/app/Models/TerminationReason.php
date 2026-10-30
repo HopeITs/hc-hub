@@ -1,0 +1,23 @@
+<?php
+
+namespace Modules\Hr\Models;
+
+use App\Traits\HasTranslation;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class TerminationReason extends Model
+{
+    use HasFactory,HasTranslation;
+
+    protected $fillable = ['title_en', 'title_ar'];
+
+    protected function title(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->getTranslatableAttribute('title'),
+            set: fn ($value) => $this->setTranslatableAttribute('title', $value),
+        );
+    }
+}

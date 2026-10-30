@@ -18,7 +18,7 @@ class ActivityLogTable extends LivewireTable
 
     /**
      * Morph aliases whose alias or class name contains $term, so a search for
-     * "LeaveRequest" (or "App\Models\LeaveRequest") finds `leave_request` rows.
+     * "LeaveRequest" (or "Modules\Hr\Models\LeaveRequest") finds `leave_request` rows.
      *
      * @return list<string>
      */
@@ -44,6 +44,11 @@ class ActivityLogTable extends LivewireTable
     public static function subjectTypeAlias(string $type): string
     {
         $alias = array_search($type, MorphMap::MAP, true);
+
+        // HR models were App\Models\X before they moved to Modules\Hr\Models\X.
+        if (! is_string($alias) && Str::startsWith($type, 'App\\Models\\')) {
+            $alias = array_search('Modules\\Hr\\Models\\'.Str::after($type, 'App\\Models\\'), MorphMap::MAP, true);
+        }
 
         return is_string($alias) ? $alias : $type;
     }
@@ -153,7 +158,8 @@ class ActivityLogTable extends LivewireTable
 
             SelectFilter::make(__('Model'), 'subject_type')
                 // A filter value remembered from before the morph map holds a
-                // class name (`App\Models\Employee`); read it as its alias.
+                // class name (`App\Models\Employee`, from before HR moved to
+                // modules/Hr); read it as its alias.
                 ->filterUsing(function (Builder $builder, mixed $value): void {
                     $types = collect(is_array($value) ? $value : [$value])
                         ->filter(fn ($type) => is_string($type) && $type !== '')

@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Performance;
 
-use App\Livewire\Employee\EmployeeTable;
 use App\Models\City;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Employee\EmployeeTable;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\Concerns\CreatesHrFixtures;

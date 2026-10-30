@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Position\ProfileDrawer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Position\ProfileDrawer;
 use Tests\Concerns\CreatesHrFixtures;
 use Tests\TestCase;
 

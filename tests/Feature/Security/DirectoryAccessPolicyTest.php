@@ -3,18 +3,18 @@
 namespace Tests\Feature\Security;
 
 use App\Livewire\Dashboard\Index as DashboardIndex;
-use App\Livewire\Employee\EmployeeProfile;
-use App\Livewire\Position\Directory;
-use App\Livewire\Position\OrgChart;
-use App\Livewire\Position\ProfileDrawer;
 use App\Models\City;
-use App\Models\Employee;
-use App\Models\JobLevel;
 use App\Models\User;
-use App\Support\DirectoryAccess;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Employee\EmployeeProfile;
+use Modules\Hr\Livewire\Position\Directory;
+use Modules\Hr\Livewire\Position\OrgChart;
+use Modules\Hr\Livewire\Position\ProfileDrawer;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Support\DirectoryAccess;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\CreatesContractFixtures;

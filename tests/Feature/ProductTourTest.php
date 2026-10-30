@@ -2,10 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Employee\EmployeeTable;
-use App\Livewire\Position\OrgChart;
-use App\Livewire\Statistics\ContractStatistics;
-use App\Livewire\Statistics\GeneralStatistics;
 use App\Models\User;
 use App\Support\ProductTour;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -14,6 +10,10 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Employee\EmployeeTable;
+use Modules\Hr\Livewire\Position\OrgChart;
+use Modules\Hr\Livewire\Statistics\ContractStatistics;
+use Modules\Hr\Livewire\Statistics\GeneralStatistics;
 use Tests\TestCase;
 
 class ProductTourTest extends TestCase

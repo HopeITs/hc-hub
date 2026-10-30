@@ -1,10 +1,10 @@
 @props(['leaveRequest'])
 
 @php
-    $status = \App\Enums\LeaveRequestStatus::getLocalizedName($leaveRequest->status);
+    $status = \Modules\Hr\Enums\LeaveRequestStatus::getLocalizedName($leaveRequest->status);
     $statusClasses = match ($leaveRequest->status) {
-        \App\Enums\LeaveRequestStatus::Accepted => 'bg-green-100 text-green-800 ring-green-200',
-        \App\Enums\LeaveRequestStatus::Rejected => 'bg-red-100 text-red-800 ring-red-200',
+        \Modules\Hr\Enums\LeaveRequestStatus::Accepted => 'bg-green-100 text-green-800 ring-green-200',
+        \Modules\Hr\Enums\LeaveRequestStatus::Rejected => 'bg-red-100 text-red-800 ring-red-200',
         default => 'bg-amber-100 text-amber-800 ring-amber-200',
     };
 @endphp
@@ -37,7 +37,7 @@
         @endif
     </dl>
 
-    @if ($leaveRequest->status === \App\Enums\LeaveRequestStatus::Rejected)
+    @if ($leaveRequest->status === \Modules\Hr\Enums\LeaveRequestStatus::Rejected)
         <div class="rounded-2xl border border-red-200 bg-red-50 p-5" role="alert">
             <div class="flex items-start gap-3">
                 <span class="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-700">
