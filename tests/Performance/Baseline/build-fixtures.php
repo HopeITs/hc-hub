@@ -85,11 +85,21 @@ Artisan::call('migrate', ['--force' => true]);
 $log('migrated');
 
 foreach ([
-    'ProgramSeeder', 'CitySeeder', 'ContractTypeSeeder', 'DepartmentSeeder', 'CenterSeeder',
-    'CheckListItemSeeder', 'LeaveTypeSeeder', 'AnnualLeaveRuleSeeder',
-    'JobLevelSeeder', 'PositionsSeeder', 'EducationFieldSeeder', 'CourseCategorySeeder', 'TerminationReasonSeeder',
+    \Database\Seeders\ProgramSeeder::class,
+    \Database\Seeders\CitySeeder::class,
+    \Modules\Hr\Database\Seeders\ContractTypeSeeder::class,
+    \Database\Seeders\DepartmentSeeder::class,
+    \Database\Seeders\CenterSeeder::class,
+    \Modules\Hr\Database\Seeders\CheckListItemSeeder::class,
+    \Modules\Hr\Database\Seeders\LeaveTypeSeeder::class,
+    \Modules\Hr\Database\Seeders\AnnualLeaveRuleSeeder::class,
+    \Modules\Hr\Database\Seeders\JobLevelSeeder::class,
+    \Modules\Hr\Database\Seeders\PositionsSeeder::class,
+    \Modules\Hr\Database\Seeders\EducationFieldSeeder::class,
+    \Modules\Hr\Database\Seeders\CourseCategorySeeder::class,
+    \Modules\Hr\Database\Seeders\TerminationReasonSeeder::class,
 ] as $seeder) {
-    Artisan::call('db:seed', ['--class' => "Database\\Seeders\\{$seeder}", '--force' => true]);
+    Artisan::call('db:seed', ['--class' => $seeder, '--force' => true]);
 }
 $log('reference seeders done');
 
