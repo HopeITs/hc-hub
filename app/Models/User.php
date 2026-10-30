@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasPublicUuid;
 use Closure;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,7 +28,7 @@ use WeakReference;
 
 class User extends Authenticatable implements HasLocalePreference
 {
-    use HasFactory, HasRoles, LogsActivity, Notifiable;
+    use HasFactory, HasPublicUuid, HasRoles, LogsActivity, Notifiable;
 
     protected $fillable = ['email', 'password', 'employee_id'];
 

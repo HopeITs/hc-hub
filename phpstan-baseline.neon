@@ -1123,7 +1123,7 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: '#^Method App\\Models\\User\:\:newMorphToMany\(\) should return Illuminate\\Database\\Eloquent\\Relations\\MorphToMany\<TRelatedModel of Illuminate\\Database\\Eloquent\\Model, TDeclaringModel of Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Relations\\MorphPivot, ''pivot''\> but returns Illuminate\\Database\\Eloquent\\Relations\\MorphToMany@anonymous/app/Models/User\.php\:421\.$#'
+			message: '#^Method App\\Models\\User\:\:newMorphToMany\(\) should return Illuminate\\Database\\Eloquent\\Relations\\MorphToMany\<TRelatedModel of Illuminate\\Database\\Eloquent\\Model, TDeclaringModel of Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Relations\\MorphPivot, ''pivot''\> but returns Illuminate\\Database\\Eloquent\\Relations\\MorphToMany@anonymous/app/Models/User\.php\:\d+\.$#'
 			identifier: return.type
 			count: 1
 			path: app/Models/User.php
@@ -1141,7 +1141,7 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: '#^Parameter \#1 \$query of class Illuminate\\Database\\Eloquent\\Relations\\MorphToMany@anonymous/app/Models/User\.php\:421 constructor expects Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>, Illuminate\\Database\\Eloquent\\Builder\<TRelatedModel of Illuminate\\Database\\Eloquent\\Model\> given\.$#'
+			message: '#^Parameter \#1 \$query of class Illuminate\\Database\\Eloquent\\Relations\\MorphToMany@anonymous/app/Models/User\.php\:\d+ constructor expects Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>, Illuminate\\Database\\Eloquent\\Builder\<TRelatedModel of Illuminate\\Database\\Eloquent\\Model\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: app/Models/User.php

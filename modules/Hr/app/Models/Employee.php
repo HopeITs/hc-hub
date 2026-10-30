@@ -2,18 +2,15 @@
 
 namespace Modules\Hr\Models;
 
-use Modules\Hr\Enums\ContractType as ContractTypeEnum;
-use Modules\Hr\Enums\LeaveRequestStatus;
-use Modules\Hr\Services\DigitalIdManager;
-use Modules\Hr\Services\LeaveRequestPricing;
+use App\Models\City;
+use App\Models\User;
+use App\Traits\HasPublicUuid;
 use App\Traits\HasTranslation;
 use App\Traits\RedactsSensitiveActivityLog;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use App\Models\City;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,6 +19,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Modules\Hr\Database\Factories\EmployeeFactory;
+use Modules\Hr\Enums\ContractType as ContractTypeEnum;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Services\DigitalIdManager;
+use Modules\Hr\Services\LeaveRequestPricing;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
@@ -30,7 +31,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 #[UseFactory(EmployeeFactory::class)]
 class Employee extends Model implements HasMedia
 {
-    use HasFactory, HasTranslation, InteractsWithMedia, LogsActivity, RedactsSensitiveActivityLog;
+    use HasFactory, HasPublicUuid, HasTranslation, InteractsWithMedia, LogsActivity, RedactsSensitiveActivityLog;
 
     /*
      * B5 (DEC-04, docs/ux/employee-lifecycle.md): an incomplete record being

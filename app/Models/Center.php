@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasPublicUuid;
 use App\Traits\HasTranslation;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,7 +18,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Center extends Model
 {
-    use HasFactory, HasTranslation, LogsActivity;
+    use HasFactory, HasPublicUuid, HasTranslation, LogsActivity;
 
     protected $fillable = [
         'name_en', 'name_ar', 'weekends', 'open_at', 'close_at', 'city_id',

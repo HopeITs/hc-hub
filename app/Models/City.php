@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasPublicUuid;
 use App\Traits\HasTranslation;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class City extends Model
 {
-    use HasFactory, HasTranslation, LogsActivity;
+    use HasFactory, HasPublicUuid, HasTranslation, LogsActivity;
 
     /**
      * Slug of the nationwide "city".
