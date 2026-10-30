@@ -8,11 +8,11 @@ HC-Hub is the single Laravel app for "Christian Hope Center" (multi-city Syrian 
 
 | Module | Origin | Status |
 |---|---|---|
-| **HR** (core: employees, contracts, leaves, positions, centers, cities, programs, news, archive) | `hc-hr` — this repo started as its clone | live here |
-| **Tracking** (projects, MEAL, annual plans, proposals, donors, tasks, reports) | `hc-tracking` | being ported (phase 2, lane A) |
-| **Media requests** | `media-request` | being ported (phase 2, lane B) |
+| **HR** (core: employees, contracts, leaves, positions, centers, cities, programs, news, archive) | `hc-hr` — this repo started as its clone | live here, in `modules/Hr` |
+| **Tracking** (projects, MEAL, annual plans, proposals, donors, tasks, reports) | `hc-tracking` | being ported (phase 2, lane A) → `modules/Tracking` |
+| **Media requests** | `media-request` | being ported (phase 2, lane B) → `modules/Media` |
 
-HR owns the master data (users, employees, cities, centers, programs, departments, positions, contracts); the other modules use the HR models directly, never copies. The full merge plan is `C:\laragon\www\HC-Hub-Plan.md` (section 2 holds the binding decisions). The original apps in `C:\laragon\www\hc-hr`, `hc-tracking` and `media-request` are read-only references.
+HR owns the master data (employees, positions, contracts, job levels; it also administers the shared organisation models cities, centers, programs, departments, which live in `app/Models` because every module uses them); the other modules use those models directly, never copies. The full merge plan is `C:\laragon\www\HC-Hub-Plan.md` (section 2 holds the binding decisions). The original apps in `C:\laragon\www\hc-hr`, `hc-tracking` and `media-request` are read-only references.
 
 Stack: PHP 8.5, Laravel 13, Livewire 4 (+ Volt + Flux), Tailwind CSS 4, Vite 8, MySQL. Bilingual EN/AR with RTL.
 
@@ -27,7 +27,7 @@ composer dev          # run server + queue:listen + vite concurrently (primary d
 npm run dev           # vite only
 npm run build         # production asset build
 composer test         # config:clear, then php artisan test --parallel
-composer analyse      # Larastan (PHPStan) level 7 over app/
+composer analyse      # Larastan (PHPStan) level 7 over app/ and modules/*/app
 php artisan test --parallel          # same as composer test (Pest + paratest)
 vendor/bin/pest --filter=SomeTest    # single test / file
 vendor/bin/pest tests/Feature/Hub    # one directory
@@ -36,7 +36,7 @@ php artisan migrate:fresh --seed     # rebuild the local hc_hub database
 php artisan storage:link             # REQUIRED — public/storage must be a symlink, not a real dir
 ```
 
-Custom artisan commands (in `app/Console/Commands`):
+Custom artisan commands (HR's in `modules/Hr/app/Console/Commands`, platform ones in `app/Console/Commands`):
 - `php artisan leaves:backfill` — generate deserved leave balances for Excel-imported contracts
 - `php artisan employees:import-images <path> [--force]` — import avatars into the Spatie `avatar` media collection
 - contract / employee deactivation commands
@@ -45,7 +45,8 @@ Custom artisan commands (in `app/Console/Commands`):
 - **Pest 4** runs everything. HR's existing tests are PHPUnit classes and run unchanged; **write new tests in Pest function style** (`test()` / `it()` + `expect()`), which is also what the tracking suite uses. `tests/Pest.php` binds `Tests\TestCase` (plus `RefreshDatabase` under `tests/Feature`) for function-style files.
 - Tests run on SQLite `:memory:` (see `phpunit.xml`); `Tests\TestCase` refuses to run against anything else. Dev/prod use MySQL.
 - Parallel runs (`--parallel`, paratest) are the default; tests must not share state through files, ports or a real database.
-- **Larastan level 7** (`phpstan.neon`, paths `app/`). Existing HR errors are grandfathered in `phpstan-baseline.neon`; **new code must pass level 7 without new baseline entries**. Fix the code instead of regenerating the baseline. Fixed errors drop out automatically (`reportUnmatchedIgnoredErrors`).
+- Tests live in `tests/` (platform and hub-wide) and in each module's `modules/<Name>/tests/{Feature,Unit}` (namespace `Modules\<Name>\Tests\…`); `phpunit.xml` and `tests/Pest.php` pick both up. Shared fixtures stay in `tests/Concerns`. Tests that scan source files ("every view…", "every model…") must go through `Tests\Support\HubPaths` so they cover the modules too.
+- **Larastan level 7** (`phpstan.neon`, paths `app/` plus each `modules/<Name>/app/`, and every module's migrations folder in `databaseMigrationsPath` so Larastan knows its columns). Existing HR errors are grandfathered in `phpstan-baseline.neon`; **new code must pass level 7 without new baseline entries**. Fix the code instead of regenerating the baseline. Fixed errors drop out automatically (`reportUnmatchedIgnoredErrors`).
 
 ### Environment gotchas (Laragon on Windows)
 - The app requires **PHP 8.5** (`C:/laragon/bin/php/php-8.5`), for both the web server (Laragon → PHP menu) and the CLI. Older PHP installs are still in `C:/laragon/bin/php`, and each version has its own `php.ini`, so a change that affects uploads/config must go into 8.5's. `upload_tmp_dir` is `C:/laragon/tmp`.
@@ -54,34 +55,52 @@ Custom artisan commands (in `app/Console/Commands`):
 
 ## Module layout conventions
 
-HR stays exactly where it is (it is the core). Every other module lives side by side in its own namespace:
+**Modular layout (decided 2026-10-30).** Every module, HR included, lives in `modules/<Name>/` with namespace `Modules\<Name>\`; `app/` keeps only hub-wide platform code.
 
-| | HR (core) | Tracking | Media requests |
-|---|---|---|---|
-| Models | `App\Models\*` | `App\Models\Tracking\*` | `App\Models\Media\*` |
-| Livewire | `App\Livewire\<Domain>\*` | `App\Livewire\Tracking\*` | `App\Livewire\Media\*` |
-| Views | `resources/views/livewire/...`, `pages/...` | `resources/views/pages/tracking/*` | `resources/views/pages/media/*` |
-| Routes (URL / name) | existing HR routes | `/tracking/*` / `tracking.*` | `/media-requests/*` / `media-requests.*` |
-| Permissions | `hr.*` | `tracking.*` | `media.*` |
-| Translations | `resources/lang/{en,ar}/*.php` | `resources/lang/{en,ar}/tracking*.php` | `resources/lang/{en,ar}/media*.php` |
+| | Platform (`app/`) | HR (`modules/Hr`) | Tracking (`modules/Tracking`, to port) | Media requests (`modules/Media`, to port) |
+|---|---|---|---|---|
+| Namespace | `App\` | `Modules\Hr\` | `Modules\Tracking\` | `Modules\Media\` |
+| Owns | users/auth, roles/permissions + access management, activity log, notifications (centre, counter, delivery ledger), layout shell (sidebar, header, bottom nav, global search, breadcrumbs), dashboard shell, settings/profile password, feedback, task telemetry, morph map, shared organisation models (`City`, `Center`, `Program`, `Department`), shared traits/concerns/middleware | employees, contracts, positions, job levels, leaves, holidays, badges, checklists, archive folders, news, inbox, team calendar, statistics, digital ID, HR reference data screens (incl. the city/center/program/department admin UIs and `CenterPolicy`), HR dashboard cards, pay-figure encryption, contract PDF | projects, MEAL, annual plans, proposals, donors, tasks, reports | media requests |
+| Models | `app/Models` | `modules/Hr/app/Models` | `modules/Tracking/app/Models` | `modules/Media/app/Models` |
+| Livewire | `app/Livewire/<Domain>` | `modules/Hr/app/Livewire/<Domain>` | same pattern | same pattern |
+| Views | `resources/views` | `modules/Hr/resources/views` | `modules/Tracking/resources/views` | `modules/Media/resources/views` |
+| Translations | `resources/lang/{en,ar}` | `modules/Hr/lang/{en,ar}` | `modules/Tracking/lang/{en,ar}` | `modules/Media/lang/{en,ar}` |
+| Routes (URL / name) | `routes/web.php`, `auth.php`, `console.php` | `modules/Hr/routes/web.php` (+ `basic-project.php`, `projects-management.php`, `employees-management.php`) and `public.php`; existing HR URLs/names | `/tracking/*` / `tracking.*` | `/media-requests/*` / `media-requests.*` |
+| Migrations / factories / seeders | `database/…` (incl. the frozen mixed base schema `basic_tables` and hub data migrations) | `modules/Hr/database/{migrations,factories,seeders}` (`Modules\Hr\Database\…`) | same pattern | same pattern |
+| Tests | `tests/` | `modules/Hr/tests/{Feature,Unit}` (`Modules\Hr\Tests\…`) | same pattern | same pattern |
+| Permissions | `hub.*` | `hr.*` | `tracking.*` | `media.*` |
 
-- **Never copy HR master data into a module.** Tracking and media code use `App\Models\Employee`, `City`, `Center`, `Program`, `Department`, `Position`, `Contract`, `JobLevel`, `User` directly (tracking's old `Hr*` read-only models are not ported).
-- Every module route goes **inside the localized route group** in `routes/web.php` (one `/en` `/ar` prefix for the whole hub), in its own route file `require`d from there.
+A platform file may use a module's classes (the dashboard shell, global search and sidebar read HR models); a module never depends on another module except HR's master data.
+
+**How a module registers** — everything goes through `Modules\<Name>\Providers\<Name>ServiceProvider`, listed in `bootstrap/providers.php` after `AppServiceProvider` (see `HrServiceProvider` for the template):
+- **Autoload**: `composer.json` maps `Modules\<Name>\` → `modules/<Name>/app/`, `Modules\<Name>\Database\Factories\` / `…\Seeders\` → its `database/` folders, and (autoload-dev) `Modules\<Name>\Tests\` → its `tests/`. Run `composer dump-autoload` after adding one.
+- **Views**: `View::addLocation()` on the module's `resources/views`, so its views keep plain names (`view('livewire.contract.index')`, `<x-…>` stays platform), plus `loadViewsFrom(…, '<name>')` for an explicit `hr::…` name. The platform folder is searched first, so a module view must not reuse a platform view name.
+- **Translations**: the module's `lang/` is added to the translation loader's paths (`callAfterResolving('translation.loader', …addPath(…))`), so groups keep plain keys (`__('leaves.status')`). Group names (file names) must be unique across the hub — prefix new module groups (`tracking_*.php`, `media_*.php`).
+- **Livewire**: `Livewire::addLocation(classNamespace: 'Modules\\<Name>\\Livewire')`, so components keep their plain names (`contract.contracts-table`, the keys of `config('access-control.livewire')`). **Every module component must have a `render()`** naming its view: Livewire's implicit view lookup only searches `resources/views/livewire`.
+- **Routes**: the module's `routes/web.php` is `require`d from `routes/web.php` **inside the localized route group and the `auth` group** (one `/en` `/ar` prefix for the whole hub); unauthenticated, unlocalized routes go in its `routes/public.php`, required at the top of `routes/web.php`.
+- **Migrations**: `loadMigrationsFrom()` on its `database/migrations`; Laravel sorts all folders together by file name, so timestamps order across modules. Add the folder to `databaseMigrationsPath` in `phpstan.neon` too.
+- **Factories**: models declare `#[UseFactory(XFactory::class)]` (Laravel's name guess only covers `App\Models`). Seeders are called from `Database\Seeders\DatabaseSeeder`.
+- **Console commands**: the provider registers its `app/Console/Commands` classes (`$this->commands(...)`); Laravel auto-discovers only `app/Console/Commands`. Scheduling stays in `routes/console.php`.
+- **Policies, gates, observers, singletons**: registered explicitly in the provider's `boot()`/`register()`, not in `AppServiceProvider`.
+- **Tests / static analysis**: `phpunit.xml`, `tests/Pest.php` and `Tests\Support\HubPaths` already glob `modules/*/…`; add the module's `app/` to `phpstan.neon` `paths`. `tests/Feature/Hub/ModuleLayoutTest.php` fails on an unregistered provider, a view or lang group shadowed by the platform, or a module component without `render()`.
+
+- **Never copy HR master data into a module.** Tracking and media code use `Modules\Hr\Models\Employee`, `Position`, `Contract`, `JobLevel` and `App\Models\City`, `Center`, `Program`, `Department`, `User` directly (tracking's old `Hr*` read-only models are not ported).
 - A module table name must not collide with an HR table (see the collision map in the plan; e.g. tracking's file store becomes `tracking_files`).
 - **Permission names are prefixed by module**: `{module}.{group}.{action}` — `hr.*`, `tracking.*`, `media.*`, plus `hub.*` for hub-wide platform administration. The rule: **`hub.` only for the platform groups `access-management` (roles/permissions/user access) and `activity-log`; every other existing group is HR's and uses `hr.`** (`hr.employees.view`, `hr.contracts.export`, `hr.leaves.decide`, `hr.statistics.view`, `hr.news.create`, `hr.project-basics.update`, …). Groups in `config/access-control.php` are keyed by their prefixed name (`'hr.contracts' => [...]`); the Access Management label drops the prefix (`access.groups.contracts`). Regional `HR-*` roles get exactly the `hr.*` permissions of the catalogue (never `hub.*`, `tracking.*` or `media.*`). The rename of the old unprefixed rows is the data migration `2026_10_29_000002_prefix_permission_names_by_module` (frozen mapping, idempotent, reversible); `tests/Feature/Hub/PermissionNamesTest.php` fails on a permission name in code that is unprefixed or missing from the catalogue.
 
 ## Polymorphic types: the global morph map (mandatory)
 
 `AppServiceProvider` calls `Relation::enforceMorphMap(App\Support\MorphMap::MAP)`. Every `*_type` column (`model_has_roles`, `model_has_permissions`, `media`, `activity_log.subject_type`/`causer_type`, `notifications.notifiable_type`, `news.newsable_type`, and any new one) stores a **short snake_case alias** (`user`, `employee`, `leave_request`), never a class name.
-- **Every new model must get an alias in `App\Support\MorphMap`** — the rule is "every Eloquent model", not only the ones polymorphic today. An unmapped model throws `ClassMorphViolationException` the moment it is notified, logged, given media, assigned a role or used as a morph target. `tests/Feature/Hub/MorphMapTest.php` fails if an `app/Models` class has no alias (extend it to cover module model folders as they are added).
+- **Every new model must get an alias in `App\Support\MorphMap`** — the rule is "every Eloquent model", not only the ones polymorphic today, **module models included** (the one map lives in `app/` and imports `Modules\<Name>\Models\…`; a module never calls `enforceMorphMap`/`morphMap` itself). An unmapped model throws `ClassMorphViolationException` the moment it is notified, logged, given media, assigned a role or used as a morph target. `tests/Feature/Hub/MorphMapTest.php` fails if a class in `app/Models` or any `modules/*/app/Models` has no alias, and pins the existing aliases.
+- **Moving a model between namespaces never changes its alias** (HR's models moved from `App\Models` to `Modules\Hr\Models` with the same aliases). Only the class side of the map changes.
 - Aliases are the snake_case class basename, the same style tracking already stores (`annual_plan`, `project`, `program`, `department`, `user`, `role`). On a collision with an existing alias, prefix with the module (`media_folder`).
-- **Aliases are stored data.** Never rename or remove one without a data migration (see `2026_10_29_000001_use_morph_aliases_in_polymorphic_columns`, which converted HR's old `App\Models\X` strings).
+- **Aliases are stored data.** Never rename or remove one without a data migration (see `2026_10_29_000001_use_morph_aliases_in_polymorphic_columns`, which converted HR's old `App\Models\X` strings; its class strings are the stored legacy names and must stay `App\Models\X` even though the classes now live in `Modules\Hr\Models`). Likewise `notifications.type` rows written before the move keep `App\Notifications\X`; nothing reads that column back as a class.
 - **Never compare or query a `*_type` column against `X::class` or an `'App\\Models\\...'` string.** Use `(new X)->getMorphClass()` or `Relation::getMorphAlias(X::class)`, and `Relation::getMorphedModel($alias)` to go back. To display a type, map the alias back to a class first (see `ActivityLogTable`).
 
 ## Architecture
 
 ### Laravel 13 layout
-No `app/Http/Kernel.php`. Middleware aliases, routing, and exceptions are configured in `bootstrap/app.php`. Service wiring (morph map, observer registration, Blade directives, query macros) lives in `app/Providers/AppServiceProvider.php`.
+No `app/Http/Kernel.php`. Middleware aliases, routing, and exceptions are configured in `bootstrap/app.php`. Platform wiring (morph map, Blade directives, query macros, toasts) lives in `app/Providers/AppServiceProvider.php`; each module wires its own policies, observers, commands, views, lang and migrations in its `Modules\<Name>\Providers\<Name>ServiceProvider`.
 
 ### Localization & translatable columns
 - URLs are locale-prefixed (`/en/...`, `/ar/...`) via `mcamara/laravel-localization`. All web routes are wrapped in the locale group in `routes/web.php`; `AppServiceProvider` re-registers the Livewire update route under the locale prefix.
@@ -96,11 +115,11 @@ No `app/Http/Kernel.php`. Middleware aliases, routing, and exceptions are config
 - **`Position::scopeInCity($cityId)` is the single source of truth for city scoping** (`city_id` OR `center.city_id`). Any contract create/edit dropdown filter AND its matching validation must both go through this scope — divergence here was the cause of the "invalid position in Syria" bug.
 
 ### Contracts & position capacity
-`ContractObserver` (registered in `AppServiceProvider`) keeps each `Position.exist_emp` counter in sync using `lockForUpdate`, and enforces capacity via `Position::canAssign()`. It **skips the capacity check when `runningInConsole()`** so bulk Excel/CLI imports don't fail.
+`ContractObserver` (registered in `HrServiceProvider`) keeps each `Position.exist_emp` counter in sync using `lockForUpdate`, and enforces capacity via `Position::canAssign()`. It **skips the capacity check when `runningInConsole()`** so bulk Excel/CLI imports don't fail.
 
 ### Pay figures (security-critical)
 `contracts.salary` and `contract_pay_tiers.amount` are **encrypted at rest under their own key**, not under `APP_KEY` — a database copy usually travels with a developer `.env`, and `APP_KEY` with it. The key is `SALARY_ENCRYPTION_KEY` (`php artisan salary:key:generate`), set on production only; `config/salary.php` falls back to `APP_KEY` so local databases and the suite keep working.
-- `App\Services\SalaryCipher` returns **null instead of throwing** for a value it cannot decrypt — a copy without the key must stay usable. `App\Casts\EncryptedSalary` then **refuses to overwrite a figure it could not read**, so working on such a copy cannot destroy the originals. Its `compare()` decrypts before diffing; without it every save would look like a pay change (fresh IV each time).
+- `Modules\Hr\Services\SalaryCipher` returns **null instead of throwing** for a value it cannot decrypt — a copy without the key must stay usable. `Modules\Hr\Casts\EncryptedSalary` then **refuses to overwrite a figure it could not read**, so working on such a copy cannot destroy the originals. Its `compare()` decrypts before diffing; without it every save would look like a pay change (fresh IV each time).
 - Decryption failure is silent by design, so a misconfigured host looks exactly like a working one. `php artisan salary:key:check` is what tells them apart — run it after any deploy or key change.
 - The migration widens the columns to `text` **except on SQLite**, where `change()` rebuilds the table and dropping `contracts` fires `contract_pay_tiers`' `ON DELETE CASCADE`, wiping every flexible contract's pay schedule. SQLite type affinity keeps the envelope verbatim anyway.
 - **`User::canViewSalary()` is the single source of truth for who may see a figure**, and `super-admin` is refused by name in `config('salary.blind_roles')` — it holds every permission automatically, so a `salaries.view` permission would be granted to the one role that must not have it. Callers add their own city scope, the same way they already do for every other HR-only view.
@@ -112,14 +131,14 @@ No `app/Http/Kernel.php`. Middleware aliases, routing, and exceptions are config
 - A custom media path generator (media requests) must be scoped to its own model, never set globally.
 
 ### Contract PDF export
-`ContractPdfRenderer` (in `app/Services/`) renders `resources/views/pdf/contract.blade.php` through Browsershot; the controller only authorizes and sets headers. Host-specific settings: `BROWSERSHOT_CHROME_PATH`, `BROWSERSHOT_NODE_BINARY`, `BROWSERSHOT_TIMEOUT`, and the optional `BROWSERSHOT_WS_ENDPOINT`.
+`ContractPdfRenderer` (in `modules/Hr/app/Services/`) renders `modules/Hr/resources/views/pdf/contract.blade.php` through Browsershot; the controller only authorizes and sets headers. Host-specific settings: `BROWSERSHOT_CHROME_PATH`, `BROWSERSHOT_NODE_BINARY`, `BROWSERSHOT_TIMEOUT`, and the optional `BROWSERSHOT_WS_ENDPOINT`.
 - **Production renders through browserless.io** (`BROWSERSHOT_WS_ENDPOINT`, decided 2026-10-20): the shared host has no usable Chromium, so contracts — pay clause included — are rendered by that service. The token lives only in the server's `.env`; with the endpoint set, `chrome_path` is ignored.
 - **On a Linux server point `BROWSERSHOT_CHROME_PATH` at the distribution's own Chromium** (`/usr/bin/chromium`). A Chrome unpacked by hand into a home directory brings none of the system integration it expects and dies during startup with nothing on stderr but D-Bus and PCI complaints.
 - **Nothing large may travel on node's stdout.** Browsershot parses that stdout as JSON and treats a parse failure as *success* — `$output['result'] ?? ''`, base64-decoded, is an empty string returned with exit code 0. `savePdf()` (not `pdf()`) plus `disableCaptureURLS()` keeps stdout small; with `pdf()` and URL capture it was ~635 KB per contract and whatever truncated it on the server surfaced as a 0-byte "PDF".
 - `php artisan contracts:export-doctor [contract]` runs the same pipeline on a host and reports Chrome, node, puppeteer resolution, directory permissions and the raw stdout/stderr/exit code, printing Chrome's own output in full when a launch fails. Run it on the server before changing anything.
 
 ### Livewire conventions
-- Components in `app/Livewire/<Domain>/` (module components under `app/Livewire/Tracking/`, `app/Livewire/Media/`); reusable form objects in `app/Livewire/Forms/` (Livewire `Form` classes). Extracted domain logic lives in `app/Services/` (e.g. `LeaveBalanceService`).
+- Components in `app/Livewire/<Domain>/` (platform) or `modules/<Name>/app/Livewire/<Domain>/` (module, with a `render()`); reusable form objects in the matching `Livewire/Forms/` (Livewire `Form` classes). Extracted domain logic lives in `Services/` next to them (e.g. `Modules\Hr\Services\LeaveBalanceService`); shared concerns (`app/Livewire/Concerns`) and traits (`app/Traits`) stay in the platform.
 - Data tables extend `ramonrietdijk/livewire-tables` `LivewireTable` — define `query()` and `columns()`. Eager-load relations in `query()` to avoid N+1 (see `EmployeeTable`).
 - `AppServiceProvider` registers query Builder macros (`whereLikeAny`, `search`) and the `@glyph` Blade directive (Arabic glyph shaping).
 
@@ -129,7 +148,7 @@ One brand for every module. **`media-request` is the single source of truth for 
 - `public/fonts/` holds only the `.ttf` files the contract PDF inlines through `public_path()` (`_styles.blade.php`). Those two sets are separate on purpose. Required form fields are marked with a red star via the `required` prop on `<x-forms.input-label>`.
 
 ### Routes
-`routes/web.php` is the locale-wrapped entry point and `require`s the domain route files: `basic-project.php`, `projects-management.php`, `employees-management.php`, and `auth.php`. Module route files (`tracking.php`, `media-requests.php`) are added the same way, inside the locale group.
+`routes/web.php` is the locale-wrapped entry point: it holds the platform routes (dashboard, settings, notifications, activity log, access management, feedback), `require`s `auth.php`, and requires each module's `modules/<Name>/routes/web.php` inside the locale + `auth` group and its `routes/public.php` (HR: the public digital-ID card) outside it. HR's `web.php` in turn requires `basic-project.php`, `projects-management.php` and `employees-management.php`. Route names and URLs did not change when HR moved; compare `php artisan route:list` before and after any such move.
 
 ===
 
