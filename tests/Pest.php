@@ -14,13 +14,14 @@ use Tests\TestCase;
 | module code (Tracking, Media) is written in.
 |
 | Feature tests get a fresh SQLite :memory: database per test, the same as the
-| class-based Feature tests that `use RefreshDatabase`.
+| class-based Feature tests that `use RefreshDatabase`. A module's own tests
+| (modules/<Name>/tests/{Feature,Unit}) get the same bindings.
 |
 */
 
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
-    ->in('Feature');
+    ->in('Feature', '../modules/*/tests/Feature');
 
 pest()->extend(TestCase::class)
-    ->in('Unit');
+    ->in('Unit', '../modules/*/tests/Unit');
