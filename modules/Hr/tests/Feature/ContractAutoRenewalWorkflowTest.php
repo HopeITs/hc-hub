@@ -6,6 +6,7 @@ use App\Models\Center;
 use App\Models\Department;
 use App\Models\Program;
 use App\Models\User;
+use App\Notifications\AppDatabaseChannel;
 use App\Services\NotificationDeliveryLedger;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\Events\NotificationSending;
@@ -61,7 +62,7 @@ class ContractAutoRenewalWorkflowTest extends TestCase
             function (ContractsExpiringAutoRenewWarning $notification, array $channels) use ($contract, $fixtures): bool {
                 $data = $notification->toArray($fixtures['hr']);
 
-                return in_array('database', $channels, true)
+                return in_array(AppDatabaseChannel::class, $channels, true)
                     && in_array('mail', $channels, true)
                     && count($notification->contracts) === 1
                     && $notification->contracts[0]['id'] === $contract->id
@@ -112,7 +113,7 @@ class ContractAutoRenewalWorkflowTest extends TestCase
             function (ContractsExpiringAutoRenewWarning $notification, array $channels): bool {
                 $data = $notification->toArray(new stdClass);
 
-                return in_array('database', $channels, true)
+                return in_array(AppDatabaseChannel::class, $channels, true)
                     && in_array('mail', $channels, true)
                     && count($notification->contracts) === 2
                     && str_contains($data['body']['ar'], 'العقود التالية لديها خاصية التجديد التلقائي مفعّلة')

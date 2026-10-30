@@ -2,20 +2,23 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\Employee;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Modules\Hr\Models\Employee;
 
-class NewEmployeeWelcome extends Notification implements ShouldQueue
+class NewEmployeeWelcome extends Notification implements InboxNotification, ShouldQueue
 {
     use Queueable;
+    use RoutesToInbox;
 
     public function __construct(public Employee $employee) {}
 
-    public function via($notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'employees';
     }
 
     public function toArray($notifiable): array

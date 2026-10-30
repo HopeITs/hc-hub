@@ -2,14 +2,17 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\LeaveRequest;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Modules\Hr\Models\LeaveRequest;
 
-class HRSawLeaveRequest extends Notification
+class HRSawLeaveRequest extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
     /**
      * Create a new notification instance.
@@ -19,14 +22,9 @@ class HRSawLeaveRequest extends Notification
         public string $recipientType = 'employee',// employee | manager
     ) {}
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'leaves';
     }
 
     /**

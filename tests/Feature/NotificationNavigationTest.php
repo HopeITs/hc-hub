@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Livewire\Notifications\Dropdown;
+use App\Livewire\Notifications\Bell;
 use App\Livewire\Notifications\Index;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -23,7 +23,7 @@ class NotificationNavigationTest extends TestCase
         $expectedPath = parse_url($url, PHP_URL_PATH).'?'.parse_url($url, PHP_URL_QUERY);
 
         Livewire::actingAs($user)
-            ->test(Dropdown::class)
+            ->test(Bell::class)
             ->call('openNotification', $id)
             ->assertRedirect($expectedPath);
 
@@ -39,7 +39,7 @@ class NotificationNavigationTest extends TestCase
         $id = $this->createDatabaseNotification($owner, route('notifications.index'));
 
         Livewire::actingAs($otherUser)
-            ->test(Dropdown::class)
+            ->test(Bell::class)
             ->call('openNotification', $id)
             ->assertNotFound();
 
@@ -57,13 +57,15 @@ class NotificationNavigationTest extends TestCase
         $user = $this->createUser('notification.external-link@example.test');
         $externalId = $this->createDatabaseNotification($user, 'https://evil.example/steal');
 
-        $component = new Dropdown;
+        $component = new Bell;
         $this->assertNull($component->safeNotificationUrl('https://evil.example/steal'));
         $this->assertNull($component->safeNotificationUrl('//evil.example/steal'));
         $this->assertNull($component->safeNotificationUrl('javascript:alert(1)'));
 
         Livewire::actingAs($user)
-            ->test(Dropdown::class)
+            ->test(Bell::class)
+            ->call('loadPanel')
+            ->assertSee('Test notification')
             ->assertDontSee('evil.example', false)
             ->call('openNotification', $externalId)
             ->assertNoRedirect();

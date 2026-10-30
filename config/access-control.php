@@ -499,15 +499,18 @@ return [
         'dashboard.employee-notes-card' => [
             'addText', 'createNote', 'toggleDone', 'updateContent', 'delete', 'restoreNote', 'retryLoad',
         ],
-        'notifications.dropdown' => [
-            'markAsRead', 'markAllAsRead', 'openNotification', 'refreshList', 'safeNotificationUrl',
+        // Inbox actions go through App\Notifications\Inbox, scoped to forUser(auth()).
+        'notifications.bell' => [
+            'markAsRead', 'markAllAsRead', 'markUnread', 'openNotification', 'refreshList', 'safeNotificationUrl',
+            'loadPanel', 'showTab', 'showModule', 'refreshCounts', 'snooze', 'unsnooze',
             'retryLoad', // B3: re-renders the read-only list; marks nothing read
         ],
         'notifications.index' => [
-            'markAsRead', 'markAllAsRead', 'openNotification', 'refreshList', 'safeNotificationUrl',
+            'markAsRead', 'markAllAsRead', 'openNotification', 'refreshList', 'safeNotificationUrl', 'unsnooze',
             'retryLoad', // B3: re-renders the read-only list; marks nothing read
         ],
         'notifications.counter' => ['updateCount', 'syncCount'],
+        'notifications.settings' => ['toggleMute'],
         // D3 / DEC-08 feedback form: every signed-in role may send feedback, so
         // there is no permission to check. open() only shows the dialog;
         // submit() aborts for a guest, validates, is rate limited per user, and

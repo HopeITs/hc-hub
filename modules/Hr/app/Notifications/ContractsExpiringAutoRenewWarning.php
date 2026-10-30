@@ -2,15 +2,21 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\Contract;
+use App\Enums\NotificationKind;
+use App\Enums\NotificationPriority;
+use App\Notifications\AppDatabaseChannel;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
+use Modules\Hr\Models\Contract;
 
-class ContractsExpiringAutoRenewWarning extends Notification
+class ContractsExpiringAutoRenewWarning extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
     /**
      * @var array<int, array{id: int, employee_name_en: string, employee_name_ar: string, end_date: string}>
@@ -35,9 +41,27 @@ class ContractsExpiringAutoRenewWarning extends Notification
             ->all();
     }
 
+    public function inboxModule(): string
+    {
+        return 'contracts';
+    }
+
+    public function inboxKind(): NotificationKind
+    {
+        return NotificationKind::Alert;
+    }
+
+    public function inboxPriority(object $notifiable): NotificationPriority
+    {
+        return NotificationPriority::Important;
+    }
+
+    /**
+     * @return list<string>
+     */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return [AppDatabaseChannel::class, 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage

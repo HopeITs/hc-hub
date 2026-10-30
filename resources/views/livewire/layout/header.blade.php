@@ -86,7 +86,7 @@
                 </button>
                 @endauth
 
-                <x-layouts.app.notification />
+                <livewire:notifications.bell />
             </div>
 
             @auth

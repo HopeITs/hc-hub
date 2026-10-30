@@ -2,8 +2,8 @@
 
 namespace Modules\Hr\Tests\Feature\Livewire;
 
+use App\Livewire\Notifications\Bell;
 use App\Livewire\Notifications\Counter;
-use App\Livewire\Notifications\Dropdown;
 use App\Livewire\Notifications\Index;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -251,7 +251,7 @@ class LeaveChecklistNotificationStatesTest extends TestCase
             ->assertSee(__('general.no-notifications'))
             ->assertSee(trans_choice('states.notifications-summary', 0));
 
-        Livewire::actingAs($user)->test(Dropdown::class)
+        Livewire::actingAs($user)->test(Bell::class)->call('loadPanel')
             ->assertSeeHtml('data-state="empty"')
             ->assertSee(__('general.no-notifications'));
     }
@@ -275,14 +275,14 @@ class LeaveChecklistNotificationStatesTest extends TestCase
         $user = $this->makeUser($this->makeCity('DMS', '003'), 'employee');
         $id = $this->notify($user);
         FailingNotificationsIndex::$broken = true;
-        FailingNotificationsDropdown::$broken = true;
+        FailingNotificationsBell::$broken = true;
 
         $page = Livewire::actingAs($user)->test(FailingNotificationsIndex::class)
             ->assertSet('loadFailed', true)
             ->assertSee(__('general.state-error-title'))
             ->assertDontSee('SECRET-SQL-DETAIL')
             ->assertDontSeeHtml('data-state="empty"');
-        $panel = Livewire::actingAs($user)->test(FailingNotificationsDropdown::class)
+        $panel = Livewire::actingAs($user)->test(FailingNotificationsBell::class)->call('loadPanel')
             ->assertSet('loadFailed', true)
             ->assertSee(__('general.retry'))
             ->assertDontSeeHtml('data-state="empty"');
@@ -295,7 +295,7 @@ class LeaveChecklistNotificationStatesTest extends TestCase
         $this->assertNull(DB::table('notifications')->where('id', $id)->value('read_at'));
 
         FailingNotificationsIndex::$broken = false;
-        FailingNotificationsDropdown::$broken = false;
+        FailingNotificationsBell::$broken = false;
         $page->call('retryLoad')->assertSet('loadFailed', false)->assertSee('Test notification');
         $panel->call('retryLoad')->assertSet('loadFailed', false)->assertSee('Test notification');
         $this->assertNull(DB::table('notifications')->where('id', $id)->value('read_at'));
@@ -337,7 +337,9 @@ class LeaveChecklistNotificationStatesTest extends TestCase
     {
         $views = resource_path('views/components/layouts/app');
 
-        $this->assertStringNotContainsString('wire:poll', file_get_contents($views.'/notification.blade.php'));
+        // The bell is the one poller; the header that mounts it and the sidebar copy add none.
+        $this->assertSame(1, substr_count(file_get_contents(resource_path('views/livewire/notifications/bell.blade.php')), 'wire:poll'));
+        $this->assertStringNotContainsString('wire:poll', file_get_contents(resource_path('views/livewire/layout/header.blade.php')));
         $this->assertStringNotContainsString('wire:poll', file_get_contents($views.'/sidebar/profile-card.blade.php'));
     }
 
@@ -428,7 +430,7 @@ class FailingNotificationsIndex extends Index
     }
 }
 
-class FailingNotificationsDropdown extends Dropdown
+class FailingNotificationsBell extends Bell
 {
     public static bool $broken = true;
 

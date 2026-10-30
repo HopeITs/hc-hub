@@ -2,26 +2,28 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\ProfileChangeRequest;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
+use Modules\Hr\Models\ProfileChangeRequest;
 
 /**
  * HR approved or rejected a change the employee proposed to their own profile
  * (D1, profile-contract.md §5.1). Sent to the employee only; the reason of a
  * rejection is theirs to read.
  */
-class ProfileChangeDecided extends Notification
+class ProfileChangeDecided extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
     public function __construct(public ProfileChangeRequest $change) {}
 
-    /** @return array<int, string> */
-    public function via(object $notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'employees';
     }
 
     /** @return array<string, mixed> */

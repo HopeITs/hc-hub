@@ -6,12 +6,14 @@ use App\Models\Center;
 use App\Models\City;
 use App\Models\Department;
 use App\Models\InAppFeedback;
+use App\Models\NotificationMute;
 use App\Models\Permission;
 use App\Models\Program;
 use App\Models\Role;
 use App\Models\SavedTableView;
 use App\Models\TaskAttempt;
 use App\Models\User;
+use App\Models\UserNotification;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Hr\Models\AnnualLeaveRule;
 use Modules\Hr\Models\Attachment;
@@ -120,5 +122,9 @@ final class MorphMap
         'news' => News::class,
         'in_app_feedback' => InAppFeedback::class,
         'saved_table_view' => SavedTableView::class,
+
+        // Hub inbox (notifications)
+        'user_notification' => UserNotification::class,
+        'notification_mute' => NotificationMute::class,
     ];
 }

@@ -2,15 +2,20 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\Contract;
+use App\Enums\NotificationKind;
+use App\Notifications\AppDatabaseChannel;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
+use Modules\Hr\Models\Contract;
 
-class ContractsAutoRenewedSummary extends Notification
+class ContractsAutoRenewedSummary extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
     /**
      * @var array<int, int>
@@ -42,9 +47,28 @@ class ContractsAutoRenewedSummary extends Notification
             ->all();
     }
 
+    public function inboxModule(): string
+    {
+        return 'contracts';
+    }
+
+    public function inboxKind(): NotificationKind
+    {
+        return NotificationKind::Digest;
+    }
+
+    /** Sent to everyone it concerns, not to one person: a mute of the module silences it. */
+    public function isDirect(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @return list<string>
+     */
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return [AppDatabaseChannel::class, 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage

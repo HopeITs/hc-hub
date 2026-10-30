@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Http\Middleware\ActiveLivewirePermissionMiddleware;
 use App\Livewire\Features\SupportToasts;
 use App\Models\User;
+use App\Notifications\AppDatabaseChannel;
 use App\Services\ActivityLogger;
 use App\Support\MorphMap;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -12,6 +13,7 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -38,6 +40,11 @@ class AppServiceProvider extends ServiceProvider
         // Every *_type column stores a short alias, never a class name. See
         // App\Support\MorphMap: a new polymorphic model must be added there.
         Relation::enforceMorphMap(MorphMap::MAP);
+
+        // One inbox for every module: Laravel's `database` channel is the hub's
+        // AppDatabaseChannel too, so a notification queued with the old channel
+        // list is filed with its module like a new one.
+        Notification::extend('database', static fn ($app) => $app->make(AppDatabaseChannel::class));
 
         // Applies wherever Rules\Password::defaults() is used (registration,
         // reset, and the settings screen).

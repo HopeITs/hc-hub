@@ -3,19 +3,28 @@
 namespace Modules\Hr\Notifications;
 
 use App\Models\Center;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-class CenterClosed extends Notification implements ShouldQueue
+class CenterClosed extends Notification implements InboxNotification, ShouldQueue
 {
     use Queueable;
+    use RoutesToInbox;
 
     public function __construct(public Center $center) {}
 
-    public function via($notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'centers';
+    }
+
+    /** Sent to everyone it concerns, not to one person: a mute of the module silences it. */
+    public function isDirect(): bool
+    {
+        return false;
     }
 
     public function toArray($notifiable): array

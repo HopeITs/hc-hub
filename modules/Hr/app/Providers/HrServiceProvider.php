@@ -40,12 +40,37 @@ use ReflectionClass;
  */
 class HrServiceProvider extends ServiceProvider
 {
+    /**
+     * HR notification classes that lived in App\Notifications before the move
+     * to modules/Hr (frozen: these are the names old queued jobs carry).
+     *
+     * @var list<string>
+     */
+    public const LEGACY_NOTIFICATIONS = [
+        'ActionLeaveBalance', 'ActionLeaveRequest', 'CenterClosed', 'ChecklistAssigned',
+        'ContractsAutoRenewedSummary', 'ContractsExpiringAutoRenewWarning', 'DigitalIdReportedLost',
+        'FolderShared', 'HRSawLeaveRequest', 'LeaveDecisionReminder', 'LeaveRequestObjected',
+        'NewCenterCreated', 'NewEmployeeWelcome', 'NewLeaveRequest', 'ProfileChangeDecided',
+    ];
+
     public function register(): void
     {
         // Singleton so the Encrypter - and the "this host cannot read the
         // figures" warning that goes with it - is built once per request
         // rather than once per contract row rendered.
         $this->app->singleton(SalaryCipher::class);
+
+        // Jobs queued by hc-hr before the move serialized its notifications as
+        // App\Notifications\X. Resolve those names to the moved classes, so a
+        // job still in the queue at deploy is sent instead of failing.
+        spl_autoload_register(static function (string $class): void {
+            $legacy = 'App\\Notifications\\';
+            $name = substr($class, strlen($legacy));
+
+            if (str_starts_with($class, $legacy) && in_array($name, self::LEGACY_NOTIFICATIONS, true)) {
+                class_alias('Modules\\Hr\\Notifications\\'.$name, $class);
+            }
+        });
     }
 
     public function boot(): void

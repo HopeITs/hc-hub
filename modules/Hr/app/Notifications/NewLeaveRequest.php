@@ -2,14 +2,18 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\LeaveRequest;
+use App\Enums\NotificationPriority;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Modules\Hr\Models\LeaveRequest;
 
-class NewLeaveRequest extends Notification
+class NewLeaveRequest extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
     /**
      * Create a new notification instance.
@@ -19,14 +23,14 @@ class NewLeaveRequest extends Notification
         //
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'leaves';
+    }
+
+    public function inboxPriority(object $notifiable): NotificationPriority
+    {
+        return NotificationPriority::Important;
     }
 
     /**

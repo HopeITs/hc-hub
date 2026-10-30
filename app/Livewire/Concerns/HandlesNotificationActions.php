@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Concerns;
 
+use App\Notifications\Inbox;
 use App\Services\NotificationRequestState;
 
 trait HandlesNotificationActions
@@ -14,7 +15,7 @@ trait HandlesNotificationActions
             ->notifications()
             ->find($id);
 
-        abort_unless($notification, 404);
+        abort_unless($notification !== null, 404);
 
         if ($notification->unread()) {
             $notification->markAsRead();
@@ -57,13 +58,20 @@ trait HandlesNotificationActions
         }
     }
 
+    /** Every unread row in sight; a snoozed one stays for when it wakes. */
     public function markAllAsRead(): void
     {
-        auth()->user()
-            ->unreadNotifications()
-            ->update(['read_at' => now()]);
+        app(Inbox::class)->markAllRead(auth()->user());
 
         $this->dispatch('notification-read');
+    }
+
+    /** Bring a snoozed notification back now, read state kept. */
+    public function unsnooze(string $id): void
+    {
+        if (app(Inbox::class)->unsnooze(auth()->user(), $id) > 0) {
+            $this->dispatch('notification-read');
+        }
     }
 
     /**

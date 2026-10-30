@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -106,6 +107,17 @@ class User extends Authenticatable implements HasLocalePreference
     public function accessibleFolders(): BelongsToMany
     {
         return $this->belongsToMany(Folder::class);
+    }
+
+    /**
+     * The hub inbox: Notifiable's relation, on the extended inbox model, so
+     * unreadNotifications() and friends see every module's rows.
+     *
+     * @return MorphMany<UserNotification, $this>
+     */
+    public function notifications(): MorphMany
+    {
+        return $this->morphMany(UserNotification::class, 'notifiable')->latest();
     }
 
     /**

@@ -2,9 +2,12 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\Employee;
+use App\Enums\NotificationPriority;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Modules\Hr\Models\Employee;
 
 /**
  * A staff member reported their own digital-ID card lost. Sent to HR of the
@@ -14,16 +17,21 @@ use Illuminate\Notifications\Notification;
  * Carries the name only: no card link, no phone, nothing a forwarded
  * notification could add to what HR already sees on the profile.
  */
-class DigitalIdReportedLost extends Notification
+class DigitalIdReportedLost extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
     public function __construct(public Employee $employee) {}
 
-    /** @return array<int, string> */
-    public function via(object $notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'employees';
+    }
+
+    public function inboxPriority(object $notifiable): NotificationPriority
+    {
+        return NotificationPriority::Important;
     }
 
     /** @return array<string, mixed> */
