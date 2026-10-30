@@ -2,12 +2,15 @@
 
 namespace Modules\Hr\Notifications;
 
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class ActionLeaveBalance extends Notification
+class ActionLeaveBalance extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
     public function __construct(
         public $balance,
@@ -18,9 +21,9 @@ class ActionLeaveBalance extends Notification
         public string $recipientType, // employee | manager
     ) {}
 
-    public function via(object $notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'leaves';
     }
 
     public function toArray(object $notifiable): array

@@ -2,6 +2,10 @@
     {{ __('general.notifications') }}
 </x-slot:title>
 
+@php
+    $presenter = app(\App\Notifications\NotificationPresenter::class);
+@endphp
+
 <div class="w-8/12 mx-auto space-y-4">
     {{-- Page header --}}
     <div class="flex items-center justify-between">
@@ -71,11 +75,11 @@
                 {{-- Text --}}
                 <div class="min-w-0 flex-1">
                     <p class="text-body font-semibold transition-colors duration-300 {{ $isUnread ? 'text-neutral-900' : 'text-neutral-800' }}">
-                        {{ $notification->data['title'][app()->getLocale()] ?? 'Notification' }}
+                        {{ $presenter->title($notification->data) }}
                     </p>
 
                     <p class="mt-1 text-small transition-colors duration-300 {{ $isUnread ? 'text-secondary-medium' : 'text-secondary-medium' }}">
-                        {{ ($states[$notification->id]['state'] ?? null) === 'unavailable' ? __('general.notification-target-unavailable') : ($notification->data['body'][app()->getLocale()] ?? '') }}
+                        {{ ($states[$notification->id]['state'] ?? null) === 'unavailable' ? __('general.notification-target-unavailable') : $presenter->body($notification->data) }}
                     </p>
 
                     @php($state = $states[$notification->id] ?? null)
@@ -97,8 +101,19 @@
                         @endif
                     @endif
 
-                    <p class="mt-1 text-caption text-secondary-light">
-                        {{ $notification->created_at?->diffForHumans() }}
+                    <p class="mt-1 flex flex-wrap items-center gap-x-1.5 text-caption text-secondary-light">
+                        <span>{{ $notification->created_at?->diffForHumans() }}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{{ $presenter->moduleLabel($notification->moduleKey()) }}</span>
+                        @if ($notification->isSnoozed())
+                            <span aria-hidden="true">·</span>
+                            <span class="inline-flex items-center gap-1 font-semibold text-secondary-medium" data-snoozed-until>
+                                {{ __('notifications.snoozed_until', ['time' => $notification->snoozed_until->translatedFormat(__('notifications.formats.datetime'))]) }}
+                            </span>
+                            <button type="button" wire:click.stop.prevent="unsnooze('{{ $notification->id }}')" class="font-semibold text-neutral-900 hover:underline" data-unsnooze>
+                                {{ __('notifications.unsnooze') }}
+                            </button>
+                        @endif
                     </p>
                 </div>
 

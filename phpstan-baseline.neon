@@ -769,18 +769,6 @@ parameters:
 			path: app/Livewire/Notifications/Counter.php
 
 		-
-			message: '#^Parameter \#1 \$boolean of function abort_unless expects bool, Illuminate\\Notifications\\DatabaseNotification\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Livewire/Notifications/Dropdown.php
-
-		-
-			message: '#^Parameter \#1 \$boolean of function abort_unless expects bool, Illuminate\\Notifications\\DatabaseNotification\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Livewire/Notifications/Index.php
-
-		-
 			message: '#^Call to an undefined method Carbon\\Carbon\:\:floatDiffInHours\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -1160,18 +1148,6 @@ parameters:
 
 		-
 			message: '#^Method App\\Notifications\\TestNotification\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: app/Notifications/TestNotification.php
-
-		-
-			message: '#^Method App\\Notifications\\TestNotification\:\:via\(\) has parameter \$notifiable with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Notifications/TestNotification.php
-
-		-
-			message: '#^Method App\\Notifications\\TestNotification\:\:via\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: app/Notifications/TestNotification.php
@@ -11041,12 +11017,6 @@ parameters:
 			path: modules/Hr/app/Notifications/ActionLeaveBalance.php
 
 		-
-			message: '#^Method Modules\\Hr\\Notifications\\ActionLeaveBalance\:\:via\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Notifications/ActionLeaveBalance.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
 			identifier: property.notFound
 			count: 1
@@ -11060,12 +11030,6 @@ parameters:
 
 		-
 			message: '#^Method Modules\\Hr\\Notifications\\ActionLeaveRequest\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Notifications/ActionLeaveRequest.php
-
-		-
-			message: '#^Method Modules\\Hr\\Notifications\\ActionLeaveRequest\:\:via\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/Hr/app/Notifications/ActionLeaveRequest.php
@@ -11095,18 +11059,6 @@ parameters:
 			path: modules/Hr/app/Notifications/CenterClosed.php
 
 		-
-			message: '#^Method Modules\\Hr\\Notifications\\CenterClosed\:\:via\(\) has parameter \$notifiable with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: modules/Hr/app/Notifications/CenterClosed.php
-
-		-
-			message: '#^Method Modules\\Hr\\Notifications\\CenterClosed\:\:via\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Notifications/CenterClosed.php
-
-		-
 			message: '#^Access to an undefined property Modules\\Hr\\Models\\Checklist\:\:\$employee\.$#'
 			identifier: property.notFound
 			count: 1
@@ -11131,34 +11083,10 @@ parameters:
 			path: modules/Hr/app/Notifications/ChecklistAssigned.php
 
 		-
-			message: '#^Method Modules\\Hr\\Notifications\\ChecklistAssigned\:\:via\(\) has parameter \$notifiable with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: modules/Hr/app/Notifications/ChecklistAssigned.php
-
-		-
-			message: '#^Method Modules\\Hr\\Notifications\\ChecklistAssigned\:\:via\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Notifications/ChecklistAssigned.php
-
-		-
 			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
 			identifier: property.notFound
 			count: 1
 			path: modules/Hr/app/Notifications/ContractsAutoRenewedSummary.php
-
-		-
-			message: '#^Method Modules\\Hr\\Notifications\\ContractsAutoRenewedSummary\:\:via\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Notifications/ContractsAutoRenewedSummary.php
-
-		-
-			message: '#^Method Modules\\Hr\\Notifications\\ContractsExpiringAutoRenewWarning\:\:via\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Notifications/ContractsExpiringAutoRenewWarning.php
 
 		-
 			message: '#^Method Modules\\Hr\\Notifications\\FolderShared\:\:toArray\(\) has parameter \$notifiable with no type specified\.$#'
@@ -11168,18 +11096,6 @@ parameters:
 
 		-
 			message: '#^Method Modules\\Hr\\Notifications\\FolderShared\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Notifications/FolderShared.php
-
-		-
-			message: '#^Method Modules\\Hr\\Notifications\\FolderShared\:\:via\(\) has parameter \$notifiable with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: modules/Hr/app/Notifications/FolderShared.php
-
-		-
-			message: '#^Method Modules\\Hr\\Notifications\\FolderShared\:\:via\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/Hr/app/Notifications/FolderShared.php
@@ -11251,18 +11167,6 @@ parameters:
 			path: modules/Hr/app/Notifications/NewCenterCreated.php
 
 		-
-			message: '#^Method Modules\\Hr\\Notifications\\NewCenterCreated\:\:via\(\) has parameter \$notifiable with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: modules/Hr/app/Notifications/NewCenterCreated.php
-
-		-
-			message: '#^Method Modules\\Hr\\Notifications\\NewCenterCreated\:\:via\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Notifications/NewCenterCreated.php
-
-		-
 			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name_ar\.$#'
 			identifier: property.notFound
 			count: 2
@@ -11282,18 +11186,6 @@ parameters:
 
 		-
 			message: '#^Method Modules\\Hr\\Notifications\\NewEmployeeWelcome\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Notifications/NewEmployeeWelcome.php
-
-		-
-			message: '#^Method Modules\\Hr\\Notifications\\NewEmployeeWelcome\:\:via\(\) has parameter \$notifiable with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: modules/Hr/app/Notifications/NewEmployeeWelcome.php
-
-		-
-			message: '#^Method Modules\\Hr\\Notifications\\NewEmployeeWelcome\:\:via\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/Hr/app/Notifications/NewEmployeeWelcome.php

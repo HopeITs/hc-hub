@@ -2,19 +2,22 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\Folder;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Modules\Hr\Models\Folder;
 
-class FolderShared extends Notification
+class FolderShared extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
     public function __construct(public Folder $folder, public string $creatorName) {}
 
-    public function via($notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'archive';
     }
 
     public function toArray($notifiable): array

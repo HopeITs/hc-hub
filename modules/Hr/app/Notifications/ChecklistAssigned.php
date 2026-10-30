@@ -2,13 +2,16 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\Checklist;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Modules\Hr\Models\Checklist;
 
-class ChecklistAssigned extends Notification
+class ChecklistAssigned extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
     protected string $type;
 
@@ -20,9 +23,9 @@ class ChecklistAssigned extends Notification
         $this->type = $type;
     }
 
-    public function via($notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'checklists';
     }
 
     public function toDatabase($notifiable): array

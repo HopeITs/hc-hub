@@ -7,6 +7,7 @@ use App\Livewire\ActivityLog\ActivityLogModule;
 use App\Livewire\Dashboard\Index as DashboardIndex;
 use App\Livewire\Feedback\FeedbackIndex;
 use App\Livewire\Notifications\Index;
+use App\Livewire\Notifications\Settings as NotificationSettings;
 use App\Livewire\Settings\Password;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
@@ -39,6 +40,7 @@ Route::group(
             require base_path('modules/Hr/routes/web.php');
 
             Route::get('/notifications', Index::class)->name('notifications.index');
+            Route::get('/notifications/settings', NotificationSettings::class)->name('notifications.settings');
 
             Route::get('/activity-log', ActivityLogModule::class)
                 ->name('activity-log.index')

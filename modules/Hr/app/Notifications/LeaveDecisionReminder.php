@@ -2,9 +2,13 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\LeaveRequest;
+use App\Enums\NotificationKind;
+use App\Enums\NotificationPriority;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Modules\Hr\Models\LeaveRequest;
 
 /**
  * The one reminder a pending leave request gets (DEC-05 revision 2, G-C-1):
@@ -13,19 +17,29 @@ use Illuminate\Notifications\Notification;
  * or every one on leave), HR gets the decide wording instead (G-C-18).
  * In-app only.
  */
-class LeaveDecisionReminder extends Notification
+class LeaveDecisionReminder extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
     public function __construct(
         public LeaveRequest $leaveRequest,
         public string $recipientType = 'manager', // manager | hr | hr_decider
     ) {}
 
-    /** @return array<int, string> */
-    public function via(object $notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'leaves';
+    }
+
+    public function inboxKind(): NotificationKind
+    {
+        return NotificationKind::Alert;
+    }
+
+    public function inboxPriority(object $notifiable): NotificationPriority
+    {
+        return NotificationPriority::Important;
     }
 
     /** @return array<string, mixed> */

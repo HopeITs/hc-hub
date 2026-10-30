@@ -2,16 +2,18 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Concerns\RoutesToInbox;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class TestNotification extends Notification
+class TestNotification extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
-    public function via($notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'hub';
     }
 
     public function toArray($notifiable): array

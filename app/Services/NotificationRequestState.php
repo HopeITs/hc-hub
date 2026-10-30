@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\UserNotification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Models\LeaveRequest;
@@ -63,16 +65,17 @@ class NotificationRequestState
      * ones this class marks "Already handled", so the bell never counts a
      * request the list itself says needs nothing more. They stay unread.
      */
-    public function unreadCount(User $user): int
+    public function unreadCount(User $user, ?int $unread = null): int
     {
-        $unread = $user->unreadNotifications()->count();
+        // Snoozed rows are out of sight until they wake, so they do not count.
+        $unread ??= $this->visibleUnread($user)->count();
 
         if ($unread === 0) {
             return 0;
         }
 
         // Only a notice asking for a decision or a review can become handled.
-        $actionable = $user->unreadNotifications()
+        $actionable = $this->visibleUnread($user)
             ->where(fn ($query) => $query
                 ->where('data', 'like', '%"action":"decide"%')
                 ->orWhere('data', 'like', '%"action":"review"%'))
@@ -99,6 +102,12 @@ class NotificationRequestState
             $subject,
             LeaveRequest::query()->with($this->relations())->find($subject['id']),
         );
+    }
+
+    /** @return Builder<UserNotification> */
+    private function visibleUnread(User $user): Builder
+    {
+        return UserNotification::query()->forUser($user)->whereNull('read_at')->visible();
     }
 
     /** @return array{id: int, action: ?string}|null */

@@ -2,24 +2,27 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Enums\LeaveRequestStatus;
-use Modules\Hr\Models\LeaveRequest;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use LogicException;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Models\LeaveRequest;
 
-class ActionLeaveRequest extends Notification
+class ActionLeaveRequest extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
     public function __construct(
         public LeaveRequest $leaveRequest,
         public string $recipientType = 'employee',// employee | hr
     ) {}
 
-    public function via(object $notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'leaves';
     }
 
     public function toArray(object $notifiable): array

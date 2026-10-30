@@ -2,7 +2,7 @@
 
 namespace Modules\Hr\Tests\Feature;
 
-use App\Livewire\Notifications\Dropdown as NotificationsDropdown;
+use App\Livewire\Notifications\Bell as NotificationsBell;
 use App\Livewire\Notifications\Index as NotificationsIndex;
 use App\Models\TaskAttempt;
 use App\Models\User;
@@ -1124,7 +1124,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $leaveRequest->delete();
 
         Livewire::actingAs($hr)
-            ->test(NotificationsDropdown::class)
+            ->test(NotificationsBell::class)
             ->call('openNotification', $notification->id)
             ->assertNoRedirect()
             ->assertDispatched('toast');
@@ -1144,7 +1144,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $hr->syncRoles([]);
 
         Livewire::actingAs($hr->fresh())
-            ->test(NotificationsDropdown::class)
+            ->test(NotificationsBell::class)
             ->call('openNotification', $notification->id)
             ->assertNoRedirect()
             ->assertDispatched('toast');
@@ -1161,7 +1161,7 @@ class LeaveRequestWorkflowTest extends TestCase
         $notification = $hr->notifications()->first();
 
         Livewire::actingAs($hr)
-            ->test(NotificationsDropdown::class)
+            ->test(NotificationsBell::class)
             ->call('openNotification', $notification->id)
             ->assertRedirect();
     }

@@ -2,10 +2,13 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\LeaveRequest;
+use App\Enums\NotificationPriority;
+use App\Notifications\Concerns\RoutesToInbox;
+use App\Notifications\InboxNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
+use Modules\Hr\Models\LeaveRequest;
 
 /**
  * HR objected to a decided leave request (C3 G3): it is pending again, back
@@ -13,9 +16,10 @@ use Illuminate\Support\Str;
  * again; the requester is told why their request is pending once more. The
  * note is visible to both by decision (DEC-05 revision, G5).
  */
-class LeaveRequestObjected extends Notification
+class LeaveRequestObjected extends Notification implements InboxNotification
 {
     use Queueable;
+    use RoutesToInbox;
 
     public function __construct(
         public LeaveRequest $leaveRequest,
@@ -23,10 +27,14 @@ class LeaveRequestObjected extends Notification
         public string $recipientType = 'manager', // manager | employee
     ) {}
 
-    /** @return array<int, string> */
-    public function via(object $notifiable): array
+    public function inboxModule(): string
     {
-        return ['database'];
+        return 'leaves';
+    }
+
+    public function inboxPriority(object $notifiable): NotificationPriority
+    {
+        return NotificationPriority::Important;
     }
 
     /** @return array<string, mixed> */
