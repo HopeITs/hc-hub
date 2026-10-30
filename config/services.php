@@ -32,6 +32,15 @@ return [
         'key' => env('RESEND_KEY'),
     ],
 
+    /*
+    | Cloudflare Turnstile, the human check on the sign-in form
+    | (App\Support\Turnstile). Off until both keys are set.
+    */
+    'turnstile' => [
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

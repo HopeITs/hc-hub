@@ -6,13 +6,16 @@ use App\Models\Center;
 use App\Models\City;
 use App\Models\Department;
 use App\Models\InAppFeedback;
+use App\Models\KnownDevice;
 use App\Models\Permission;
 use App\Models\Program;
 use App\Models\Role;
 use App\Models\SavedTableView;
 use App\Models\TaskAttempt;
+use App\Models\TrustedDevice;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Passkeys\Passkey;
 use Modules\Hr\Models\AnnualLeaveRule;
 use Modules\Hr\Models\Attachment;
 use Modules\Hr\Models\Badge;
@@ -72,6 +75,11 @@ final class MorphMap
         'user' => User::class,
         'role' => Role::class,
         'permission' => Permission::class,
+
+        // Sign-in (task 1.1): Fortify's passkeys, trusted and known browsers
+        'passkey' => Passkey::class,
+        'trusted_device' => TrustedDevice::class,
+        'known_device' => KnownDevice::class,
 
         // HR master data
         'city' => City::class,

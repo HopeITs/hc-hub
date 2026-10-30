@@ -42,5 +42,11 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
+        <!-- Auth port (task 1.1): no auth log files from parallel workers, no Cloudflare calls,
+             no required two-factor unless a test switches it on. -->
+        <env name="LOG_AUTH_STACK" value="null" force="true"/>
+        <env name="TURNSTILE_SITE_KEY" value="" force="true"/>
+        <env name="TURNSTILE_SECRET_KEY" value="" force="true"/>
+        <env name="AUTH_TWO_FACTOR_ENFORCED" value="off" force="true"/>
     </php>
 </phpunit>

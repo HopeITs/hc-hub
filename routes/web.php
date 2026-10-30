@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\ActiveLivewirePermissionMiddleware;
+use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Livewire\AccessManagement\Index as AccessManagementIndex;
 use App\Livewire\ActivityLog\ActivityLogModule;
 use App\Livewire\Dashboard\Index as DashboardIndex;
@@ -26,7 +27,9 @@ Route::group(
         Livewire::setUpdateRoute(fn ($handle) => Route::post('/livewire/update', $handle)
             ->middleware(['web', ActiveLivewirePermissionMiddleware::class]));
 
-        Route::middleware(['auth'])->group(function () {
+        // EnsureTwoFactorIsEnabled keeps someone whose role requires two-factor
+        // on the security page (routes/auth.php) until they have set it up.
+        Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () {
             Route::get('/', DashboardIndex::class)
                 ->name('dashboard');
 

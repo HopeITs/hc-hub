@@ -1,6 +1,9 @@
 <?php
 
+use Illuminate\Support\Str;
+use Monolog\Formatter\SyslogFormatter;
 use Monolog\Handler\NullHandler;
+use Monolog\Handler\SocketHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
@@ -51,6 +54,51 @@ return [
     */
 
     'channels' => [
+
+        /*
+        | The sign-in audit trail (App\Listeners\LogAuthenticationEvent):
+        | storage/logs/auth-*.log. LOG_AUTH_STACK lists its channels; a
+        | non-string value (env() turns "null" and booleans into those)
+        | disables it.
+        */
+        'auth' => [
+            'driver' => 'stack',
+            'channels' => explode(',', is_string($authStack = env('LOG_AUTH_STACK', 'auth_daily')) ? $authStack : 'null'),
+            'ignore_exceptions' => false,
+        ],
+
+        'auth_daily' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/auth.log'),
+            'level' => 'info',
+            'max_files' => 90,
+            'replace_placeholders' => true,
+        ],
+
+        /*
+        | Optional off-server copy of the auth audit trail (ported from
+        | hc-tracking): each line as RFC 5424 syslog over TLS, enabled with
+        |   LOG_AUTH_STACK=auth_daily,auth_remote
+        |   LOG_AUTH_REMOTE_URL=tls://logs.example.org:6514
+        | Keep auth_daily first so the local line is written before the remote
+        | send. Short timeouts keep a dead collector from stalling a sign-in.
+        */
+        'auth_remote' => [
+            'driver' => 'monolog',
+            'level' => 'info',
+            'handler' => SocketHandler::class,
+            'handler_with' => [
+                'connectionString' => (string) env('LOG_AUTH_REMOTE_URL', ''),
+                'connectionTimeout' => 3.0,
+                'timeout' => 2.0,
+                'writingTimeout' => 2.0,
+            ],
+            'formatter' => SyslogFormatter::class,
+            'formatter_with' => [
+                'applicationName' => Str::slug((string) env('APP_NAME', 'laravel')),
+            ],
+            'processors' => [PsrLogMessageProcessor::class],
+        ],
 
         'stack' => [
             'driver' => 'stack',

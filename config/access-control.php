@@ -325,19 +325,26 @@ return [
     'livewire_exempt' => [
 
         // --- Authentication -------------------------------------------------
-        // Reached before a session exists, or acting only on the caller's own
-        // account. A permission check would be meaningless: there is no active
-        // role yet. Login is rate limited per account and per IP.
-        'auth.login' => ['login', 'updatedEmail'],
-        'auth.register' => ['register'],
-        'auth.forgot-password' => ['sendPasswordResetLink'],
-        'auth.reset-password' => ['resetPassword'],
-        'auth.confirm-password' => ['confirmPassword'],
-        'auth.verify-email' => ['sendVerification', 'logout'],
+        // Sign-in, password reset and password confirmation are Fortify's
+        // plain HTTP routes (task 1.1), not Livewire components.
         // switchTo() calls User::setActiveRole(), which aborts unless the role
         // is already assigned to this user; it grants nothing new.
         'auth.role-switcher' => ['switchTo', 'refreshRoles'],
         'settings.password' => ['updatePassword'],
+        // The security page acts only on the caller's own account (two-factor,
+        // emailed codes, passkeys, devices). Every method that changes
+        // something re-checks the password confirmation itself
+        // (RequiresConfirmedPassword); the rest only reload or close.
+        'settings.security' => [
+            'setEmailTwoFactor', 'loadPasskeys', 'confirmDelete', 'deletePasskey',
+            'onTwoFactorEnabled', 'disable', 'signOutOtherDevices', 'forgetTrustedDevices',
+            // Computed, read-only, and scoped to the signed-in account.
+            'signInCheck', 'signedInDevices', 'trustedDevices',
+        ],
+        'settings.two-factor-setup' => [
+            'startTwoFactorSetup', 'showVerificationIfNecessary', 'confirmTwoFactor', 'resetVerification', 'closeModal',
+        ],
+        'settings.recovery-codes' => ['regenerateRecoveryCodes'],
 
         // --- Confirmation dialogs -------------------------------------------
         // These only render a "are you sure?" prompt. The action it confirms
@@ -621,5 +628,29 @@ return [
         // (ProfileChangeRequests::canPropose); nothing reaches the profile until
         // HR of the employee's city approves it in the inbox (section 5.1).
         'employee.employee-profile' => ['openSection', 'saveSection', 'reloadSection', 'openProposal', 'submitProposal', ...$closeGuard],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Required two-factor authentication
+    |--------------------------------------------------------------------------
+    |
+    | Ported from hc-tracking (task 1.1). Anyone whose ACTIVE role is listed in
+    | required_roles must give an emailed code at every password sign-in, and
+    | is kept on the security page until they turn on the authenticator app
+    | when they have no email (App\Http\Middleware\EnsureTwoFactorIsEnabled).
+    | Two-factor is optional for every role today: each person turns on email
+    | codes, the authenticator app or passkeys from Settings > Security.
+    | AUTH_TWO_FACTOR_ENFORCED=false switches the requirement off.
+    */
+    'two_factor' => [
+        // Fails closed: only an explicit false/0/off/no turns it off; unset,
+        // empty or unrecognised values keep it on.
+        'enforced' => ! in_array(
+            is_string($twoFactorSetting = env('AUTH_TWO_FACTOR_ENFORCED')) ? strtolower(trim($twoFactorSetting)) : $twoFactorSetting,
+            [false, '0', 'off', 'no'],
+            true,
+        ),
+        'required_roles' => [],
     ],
 ];

@@ -1,144 +1,198 @@
 <?php
 
-namespace Tests\Feature\Auth;
-
-use App\Livewire\Auth\Login;
 use App\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Laravel\Fortify\Features;
 use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
-use Tests\TestCase;
+use Modules\Hr\Models\Employee;
+use Spatie\Permission\Models\Role;
 
-class AuthenticationTest extends TestCase
-{
-    use RefreshDatabase;
+test('login screen can be rendered', function () {
+    $this->get(route('login'))
+        ->assertOk()
+        ->assertSee(__('security.email_or_username'));
+});
 
-    public function test_login_screen_can_be_rendered(): void
-    {
-        $response = $this->get('/login');
+test('users can authenticate with their email and password', function () {
+    $user = User::factory()->create();
 
-        $response->assertStatus(200);
-    }
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect(route('dashboard'));
 
-    public function test_users_can_authenticate_using_the_login_screen(): void
-    {
-        $user = User::factory()->create();
+    $this->assertAuthenticatedAs($user);
+});
 
-        $response = Livewire::test(Login::class)
-            ->set('email', $user->email)
-            ->set('password', 'password')
-            ->call('login');
+test('users can authenticate with their employee username', function () {
+    $employee = Employee::factory()->create(['username' => 'rana.darwish']);
+    $user = User::factory()->create(['employee_id' => $employee->id]);
 
-        $response
-            ->assertHasNoErrors()
-            ->assertRedirect(route('dashboard', absolute: false));
+    $this->post(route('login.store'), [
+        'email' => 'rana.darwish',
+        'password' => 'password',
+    ])->assertSessionHasNoErrors();
 
-        $this->assertAuthenticated();
-    }
+    $this->assertAuthenticatedAs($user);
+});
 
-    public function test_remember_me_queues_the_recaller_cookie(): void
-    {
-        $user = $this->makeLoginableUser();
+test('the email is matched case-insensitively', function () {
+    $user = User::factory()->create(['email' => 'rana@example.org']);
 
-        Livewire::test(Login::class)
-            ->set('email', $user->email)
-            ->set('password', 'password')
-            ->set('remember', true)
-            ->call('login')
-            ->assertHasNoErrors();
+    $this->post(route('login.store'), [
+        'email' => 'Rana@Example.org',
+        'password' => 'password',
+    ])->assertSessionHasNoErrors();
 
-        $this->assertAuthenticated();
+    $this->assertAuthenticatedAs($user);
+});
 
-        // Laravel only queues the recaller cookie AND persists a remember_token
-        // when the remember flag reaches Auth::attempt() as true.
-        $this->assertTrue(
-            \Illuminate\Support\Facades\Cookie::hasQueued(auth()->guard()->getRecallerName()),
-            'The remember-me recaller cookie should be queued when remember is checked.',
-        );
-        $this->assertNotNull(
-            $user->fresh()->remember_token,
-            'A remember_token should be persisted so the user is recognised on return.',
-        );
-    }
+test('login always lands on the dashboard, never on the page visited before', function () {
+    $user = User::factory()->create();
 
-    public function test_login_without_remember_does_not_queue_the_recaller_cookie(): void
-    {
-        $user = $this->makeLoginableUser();
+    $this->get(route('settings.password'));
 
-        Livewire::test(Login::class)
-            ->set('email', $user->email)
-            ->set('password', 'password')
-            ->set('remember', false)
-            ->call('login')
-            ->assertHasNoErrors();
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ])->assertRedirect(route('dashboard'));
+});
 
-        $this->assertAuthenticated();
-        $this->assertFalse(
-            \Illuminate\Support\Facades\Cookie::hasQueued(auth()->guard()->getRecallerName()),
-            'The recaller cookie must not be queued when remember is unchecked.',
-        );
-    }
+test('logging in regenerates the session', function () {
+    $user = User::factory()->create();
 
-    public function test_login_form_binds_the_remember_checkbox_to_livewire(): void
-    {
-        Livewire::test(Login::class)
-            ->assertSeeHtml('wire:model="remember"');
-    }
+    $this->get(route('login'));
+    $before = session()->getId();
 
-    public function test_users_can_not_authenticate_with_invalid_password(): void
-    {
-        $user = User::factory()->create();
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
 
-        $response = Livewire::test(Login::class)
-            ->set('email', $user->email)
-            ->set('password', 'wrong-password')
-            ->call('login');
+    expect(session()->getId())->not->toBe($before);
+});
 
-        $response->assertHasErrors('email');
+test('logging in activates the first role and only that one', function () {
+    $user = User::factory()->create();
+    $first = Role::findOrCreate('HR-SYR', 'web');
+    $second = Role::findOrCreate('super-admin', 'web');
+    $user->assignRole([$first, $second]);
+    DB::table('model_has_roles')->where('role_id', $second->id)->update(['is_active' => true]);
 
-        $this->assertGuest();
-    }
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ])->assertSessionHasNoErrors();
 
-    public function test_users_can_logout(): void
-    {
-        $user = User::factory()->create();
+    $active = DB::table('model_has_roles')
+        ->where('model_id', $user->id)
+        ->where('is_active', true)
+        ->pluck('role_id')
+        ->all();
 
-        $response = $this->actingAs($user)->post('/logout');
+    expect($active)->toBe([min($first->id, $second->id)])
+        ->and(session('active_role_id'))->toBe(min($first->id, $second->id));
+});
 
-        // A4: the sign-in page that follows keeps the user's language, so the
-        // redirect goes to the localized home rather than the bare root.
-        $response->assertRedirect(LaravelLocalization::localizeUrl('/', 'en'));
+test('users whose employee is inactive cannot log in', function () {
+    $user = User::factory()->create(['employee_id' => Employee::factory()->inactive()->create()->id]);
 
-        $this->assertGuest();
-    }
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ])->assertSessionHasErrors('email');
 
-    /**
-     * Build a minimal, loginable user directly against the real schema.
-     *
-     * The shared UserFactory/EmployeeFactory chain is drifted from the current
-     * migrations (inserts non-existent columns like `name_en`), so we bypass it
-     * here to keep the remember-me assertions independent of that breakage.
-     */
-    private function makeLoginableUser(): User
-    {
-        $employeeId = \Illuminate\Support\Facades\DB::table('employees')->insertGetId([
-            'first_name_en' => 'Test',
-            'first_name_ar' => 'اختبار',
-            'last_name_en' => 'User',
-            'last_name_ar' => 'مستخدم',
-            'username' => 'test_user_'.uniqid(),
-            'is_active' => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+    $this->assertGuest();
+});
 
-        $user = new User;
-        $user->email = 'remember_test_'.uniqid().'@example.com';
-        $user->password = \Illuminate\Support\Facades\Hash::make('password');
-        $user->employee_id = $employeeId;
-        $user->remember_token = null;
-        $user->save();
+test('remember me issues a remember cookie', function () {
+    $user = User::factory()->create();
 
-        return $user;
-    }
-}
+    $response = $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+        'remember' => 'on',
+    ]);
+
+    $response->assertSessionHasNoErrors()->assertCookie(Auth::guard()->getRecallerName());
+    $this->assertAuthenticatedAs($user);
+});
+
+test('without remember me no remember cookie is issued', function () {
+    $user = User::factory()->create();
+
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ])->assertCookieMissing(Auth::guard()->getRecallerName());
+
+    $this->assertAuthenticatedAs($user);
+});
+
+test('users can not authenticate with a wrong password', function () {
+    $user = User::factory()->create();
+
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'wrong-password',
+    ])->assertSessionHasErrors('password');
+
+    $this->assertGuest();
+});
+
+test('a wrong password shows the error under the password field', function () {
+    $user = User::factory()->create();
+
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'wrong-password',
+    ]);
+
+    $html = $this->get(route('login'))->getContent();
+
+    $passwordStart = (int) strpos($html, 'id="password"');
+    $emailMarkup = substr($html, (int) strpos($html, 'id="email"'), $passwordStart - (int) strpos($html, 'id="email"'));
+    $passwordMarkup = substr($html, $passwordStart, (int) strpos($html, 'name="remember"') - $passwordStart);
+
+    expect($passwordMarkup)->toContain(__('auth.failed'))
+        ->and($emailMarkup)->not->toContain(__('auth.failed'));
+});
+
+test('an unknown identifier shows the error under the login field', function () {
+    $this->post(route('login.store'), [
+        'email' => 'nobody@example.org',
+        'password' => 'whatever',
+    ])->assertSessionHasErrors('email');
+
+    $this->assertGuest();
+});
+
+test('users with two factor enabled are redirected to the two factor challenge', function () {
+    $user = User::factory()->withTwoFactor()->create();
+
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ])->assertRedirect(route('two-factor.login'));
+
+    $this->assertGuest();
+});
+
+test('users can logout and land on the localized home', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('logout'))
+        ->assertRedirect(LaravelLocalization::localizeUrl('/', 'en'));
+
+    $this->assertGuest();
+});
+
+test('password reset is offered from the login page', function () {
+    expect(Features::enabled(Features::resetPasswords()))->toBeTrue();
+
+    $this->get(route('login'))->assertSee(route('password.request'), false);
+});

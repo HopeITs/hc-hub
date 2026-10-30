@@ -7,6 +7,7 @@
     },
     "dependencies": {
         "@amcharts/amcharts5": "^5.14.3",
+        "@laravel/passkeys": "^0.2.0",
         "chart.js": "^4.5.1",
         "clock-timepicker": "^1.0.8",
         "concurrently": "^9.0.1",

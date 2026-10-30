@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Turnstile;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Vite;
@@ -40,7 +41,7 @@ class SecurityHeaders
             );
         }
 
-        $csp = $this->contentSecurityPolicy(Vite::cspNonce());
+        $csp = $this->contentSecurityPolicy(Vite::cspNonce(), $this->turnstileOrigin($request));
         $cspHeader = config('security-headers.csp.report_only')
             ? 'Content-Security-Policy-Report-Only'
             : 'Content-Security-Policy';
@@ -50,15 +51,29 @@ class SecurityHeaders
         return $response;
     }
 
-    private function contentSecurityPolicy(string $nonce): string
+    private function contentSecurityPolicy(string $nonce, ?string $turnstileOrigin = null): string
     {
         $directives = config('security-headers.csp.directives');
         $directives['script-src'][] = "'nonce-{$nonce}'";
+
+        if ($turnstileOrigin !== null) {
+            $directives['script-src'][] = $turnstileOrigin;
+            $directives['frame-src'] = ["'self'", $turnstileOrigin];
+        }
 
         return collect($directives)
             ->map(fn (array $sources, string $directive) => trim(
                 $directive.' '.implode(' ', array_unique($sources)),
             ))
             ->implode('; ');
+    }
+
+    /**
+     * Cloudflare's origin for the Turnstile widget, on the login page only
+     * and only while the human check is on.
+     */
+    private function turnstileOrigin(Request $request): ?string
+    {
+        return Turnstile::isEnabled() && $request->routeIs('login') ? Turnstile::Origin : null;
     }
 }

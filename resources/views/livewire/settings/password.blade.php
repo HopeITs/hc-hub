@@ -4,9 +4,18 @@
 
 <div class="w-full px-12 py-8 space-y-8">
 
-    <h1 class="text-h2 font-bold text-secondary-dark">
-        {{ __('general.my-account') }}
-    </h1>
+    <div class="flex flex-wrap items-end justify-between gap-4">
+        <h1 class="text-h2 font-bold text-secondary-dark">
+            {{ __('general.my-account') }}
+        </h1>
+
+        {{-- Two-factor, passkeys and devices (task 1.1). --}}
+        <a href="{{ route('settings.security') }}" wire:navigate data-test="security-settings-link"
+           class="inline-flex min-h-11 items-center gap-2 rounded-control border-[1.5px] border-line bg-card px-4 text-body font-bold text-ink transition hover:bg-hover">
+            <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+            {{ __('security.page_title') }}
+        </a>
+    </div>
 
     <div class="w-full bg-white rounded-surface shadow-[0px_0px_25px_-14px_rgba(0,_0,_0,_0.30)] border border-neutral-200 p-9 max-w-3xl">
 

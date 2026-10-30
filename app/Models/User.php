@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Traits\HasPublicUuid;
 use Closure;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -17,6 +18,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\PasskeyUser;
+use Laravel\Fortify\PasskeyAuthenticatable;
+use Laravel\Fortify\TwoFactorAuthenticatable;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\Folder;
@@ -26,13 +30,23 @@ use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Traits\HasRoles;
 use WeakReference;
 
-class User extends Authenticatable implements HasLocalePreference
+class User extends Authenticatable implements HasLocalePreference, PasskeyUser
 {
-    use HasFactory, HasPublicUuid, HasRoles, LogsActivity, Notifiable;
+    use HasFactory, HasPublicUuid, HasRoles, LogsActivity, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
     protected $fillable = ['email', 'password', 'employee_id'];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = ['password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes'];
+
+    /**
+     * Mirror the column default so a user not yet round-tripped through the
+     * database still reports emailed sign-in codes as off.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'email_two_factor_enabled' => false,
+    ];
 
     /**
      * Per-instance (so per-request) memo for role and permission answers.
@@ -96,6 +110,50 @@ class User extends Authenticatable implements HasLocalePreference
             ->where(fn (Builder $query): Builder => $query
                 ->whereNull($teamField)
                 ->orWhere($teamField, getPermissionsTeamId()));
+    }
+
+    /**
+     * The browsers that skip this user's second sign-in step
+     * (App\Actions\Fortify\TrustedDevices).
+     *
+     * @return HasMany<TrustedDevice, $this>
+     */
+    public function trustedDevices(): HasMany
+    {
+        return $this->hasMany(TrustedDevice::class);
+    }
+
+    /**
+     * Whether the linked employee is active: the only accounts that may sign
+     * in (EnsureAccountIsActive applies the same rule to every request).
+     */
+    public function hasActiveEmployee(): bool
+    {
+        return $this->employee_id !== null
+            && (bool) DB::table('employees')->where('id', $this->employee_id)->value('is_active');
+    }
+
+    /**
+     * Whether each password sign-in must be followed by an emailed code: the
+     * user turned it on, or their role requires two-factor authentication.
+     */
+    public function usesEmailTwoFactor(): bool
+    {
+        return ($this->email_two_factor_enabled && $this->email !== '')
+            || EnsureTwoFactorIsEnabled::emailCodeRequiredFor($this);
+    }
+
+    /**
+     * The name authenticators show for a passkey: the employee's name, else
+     * the email.
+     */
+    public function getPasskeyDisplayName(): string
+    {
+        $profile = $this->profile;
+
+        $name = $profile instanceof Employee ? $profile->nameForLocale(app()->getLocale()) : '';
+
+        return $name !== '' ? $name : $this->email;
     }
 
     public function folders(): HasMany
@@ -446,6 +504,8 @@ class User extends Authenticatable implements HasLocalePreference
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_confirmed_at' => 'datetime',
+            'email_two_factor_enabled' => 'boolean',
         ];
     }
 

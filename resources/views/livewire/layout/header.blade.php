@@ -155,6 +155,15 @@
                                 <span>@lang('general.my-account')</span>
                             </a>
 
+                            <a href="{{ route('settings.security') }}" data-test="security-menu-item"
+                                class="flex items-center gap-3 px-3 py-2 text-body font-medium text-neutral-800 transition rounded-surface hover:bg-neutral-100/90 hover:shadow-e1">
+                                <svg class="text-neutral-800 size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="1.8" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z" />
+                                </svg>
+                                <span>@lang('security.page_title')</span>
+                            </a>
+
                             {{-- D3, phones only: the header's help button does not fit there. Same panel, no request. --}}
                             <button type="button" role="menuitem" data-help-menu-item
                                 x-on:click="open = false; $dispatch('help-open')"

@@ -109,12 +109,6 @@ parameters:
 			path: app/Livewire/AccessManagement/Index.php
 
 		-
-			message: '#^Method App\\Livewire\\Actions\\Logout\:\:__invoke\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Livewire/Actions/Logout.php
-
-		-
 			message: '#^Method App\\Livewire\\ActivityLog\\ActivityLogModule\:\:render\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -131,24 +125,6 @@ parameters:
 			identifier: argument.templateType
 			count: 1
 			path: app/Livewire/ActivityLog/ActivityLogTable.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_active\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Auth/Login.php
-
-		-
-			message: '#^Method App\\Livewire\\Auth\\Login\:\:render\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Livewire/Auth/Login.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type App\\Models\\User\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Livewire/Auth/Login.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'

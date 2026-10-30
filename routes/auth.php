@@ -1,32 +1,36 @@
 <?php
 
-use App\Http\Controllers\Auth\VerifyEmailController;
-use App\Livewire\Actions\Logout;
-use App\Livewire\Auth\ConfirmPassword;
-use App\Livewire\Auth\ForgotPassword;
-use App\Livewire\Auth\Login;
-use App\Livewire\Auth\ResetPassword;
-use App\Livewire\Auth\VerifyEmail;
+use App\Http\Controllers\Auth\EmailTwoFactorController;
+use App\Livewire\Settings\Security;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware('guest')->group(function () {
-    Route::get('login', Login::class)->name('login');
-    Route::get('forgot-password', ForgotPassword::class)->name('password.request');
-    Route::get('reset-password/{token}', ResetPassword::class)->name('password.reset');
+/*
+| Sign-in for the whole hub (task 1.1): Fortify's routes (login, logout,
+| two-factor challenge, password confirmation and reset, passkeys, the
+| two-factor settings endpoints), required here so they sit inside the
+| /en, /ar locale group like every other page. FortifyServiceProvider stops
+| Fortify from registering them a second time without the prefix.
+*/
+Route::group(['namespace' => 'Laravel\Fortify\Http\Controllers'], function () {
+    require base_path('vendor/laravel/fortify/routes/routes.php');
 });
 
-Route::middleware('auth')->group(function () {
-    Route::get('verify-email', VerifyEmail::class)
-        ->name('verification.notice');
+// Fortify gives "send me a reset link" no limit of its own.
+$routes = app('router')->getRoutes();
+$routes->refreshNameLookups();
+$routes->getByName('password.email')?->middleware('throttle:password-reset-link');
 
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
-
-    Route::get('confirm-password', ConfirmPassword::class)
-        ->name('password.confirm');
-
+// Second sign-in step for people who use emailed codes (after the password).
+Route::middleware('guest')->controller(EmailTwoFactorController::class)->group(function () {
+    Route::get('email-two-factor-challenge', 'create')->name('email-two-factor.login');
+    Route::post('email-two-factor-challenge', 'store')->middleware('throttle:two-factor')->name('email-two-factor.login.store');
+    Route::post('email-two-factor-challenge/resend', 'resend')->middleware('throttle:email-two-factor-resend')->name('email-two-factor.resend');
 });
 
-Route::post('logout', Logout::class)
-    ->name('logout');
+/*
+| The security page stays open to someone who still has to turn on two-factor
+| authentication: EnsureTwoFactorIsEnabled sends them here to do it.
+*/
+Route::middleware(['auth', 'password.confirm'])->group(function () {
+    Route::get('settings/security', Security::class)->name('settings.security');
+});
