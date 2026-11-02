@@ -146,8 +146,9 @@ test('it copies HR rows with their ids, aliases, prefixed permissions and public
         ->toEqual((object) ['subject_type' => 'employee', 'causer_type' => 'user']);
 
     // Permissions renamed like migration 2026_10_29_000002; recruitment ones are not in the hub.
-    expect(DB::table('permissions')->whereIn('id', [1, 6, 64])->pluck('name', 'id')->all())
+    expect(DB::table('permissions')->whereIn('id', [1, 6])->pluck('name', 'id')->all())
         ->toBe([1 => 'hub.access-management.view', 6 => 'hr.employees.view'])
+        ->and(DB::table('permissions')->where('name', 'like', 'recruitment%')->exists())->toBeFalse()
         ->and(DB::table('role_has_permissions')->where('role_id', 3)->pluck('permission_id')->all())->toBe([6]);
 
     // The hub's seeded roles gave way to the source's ids.
@@ -258,6 +259,24 @@ test('a second run changes nothing, and rows gone from the source are pruned', f
     expect($third->tables['activity_log']['pruned'])->toBe(1)
         ->and(DB::table('activity_log')->where('id', 2)->exists())->toBeFalse()
         ->and(DB::table('entity_xref')->where('source_table', 'hchr_activity_log')->pluck('source_id')->all())->toBe(['1']);
+});
+
+test('a permission only the hub has moves off a source id with its grants', function () {
+    $hubOnly = DB::table('permissions')->where('name', 'media.requests.view-own')->first();
+    $role = DB::table('roles')->insertGetId(['name' => 'media-tester', 'guard_name' => 'web']);
+    DB::table('role_has_permissions')->insert(['permission_id' => $hubOnly->id, 'role_id' => $role]);
+    // An HR permission on the same id in the source.
+    source()->table('permissions')->where('id', $hubOnly->id)->delete();
+    sourceRows('permissions', [['id' => $hubOnly->id, 'name' => 'contracts.view', 'guard_name' => 'web']]);
+
+    $report = app(HrImporter::class)->run(dryRun: false);
+
+    $moved = DB::table('permissions')->where('name', 'media.requests.view-own')->first();
+
+    expect($report->blocking)->toBe([])
+        ->and(DB::table('permissions')->where('id', $hubOnly->id)->value('name'))->toBe('hr.contracts.view')
+        ->and($moved->id)->not->toBe($hubOnly->id)
+        ->and(DB::table('role_has_permissions')->where('role_id', $role)->pluck('permission_id')->all())->toBe([$moved->id]);
 });
 
 test('the source connection is read-only', function () {

@@ -6,6 +6,7 @@ use App\Support\MorphMap;
 use App\Traits\HasPublicUuid;
 use Illuminate\Database\Connection;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -613,6 +614,52 @@ final class HrImporter
                 DB::table($plan->table)->where('id', $collidingId)->delete();
                 $this->report->replacedTargetRows[] = "{$plan->table} #{$collidingId} ({$row['name']}) → source #{$row['id']}";
             }
+        }
+
+        $this->relocateHubOnlyRows($plan, $pivots);
+    }
+
+    /**
+     * A row only the hub has (a module's permission, say) that sits on the id
+     * of a source row would be overwritten by the upsert, and its grants would
+     * pass to the source row. It moves to a free id first, with its grants.
+     * A row an earlier run imported keeps its id: the source row updates it.
+     *
+     * @param  array<string, string>  $pivots  pivot table => column pointing at the row
+     */
+    private function relocateHubOnlyRows(TablePlan $plan, array $pivots): void
+    {
+        $sourceNames = array_column($plan->rows, 'name', 'id');
+        $imported = DB::table('entity_xref')
+            ->where('source_system', self::SOURCE_SYSTEM)
+            ->where('source_table', $plan->sourceTable)
+            ->pluck('source_id')
+            ->flip();
+        $nextId = max((int) DB::table($plan->table)->max('id'), (int) $this->source->table($plan->table)->max('id')) + 1;
+
+        foreach (DB::table($plan->table)->whereIn('id', array_keys($sourceNames))->get() as $hubRow) {
+            if ($hubRow->name === $sourceNames[$hubRow->id] || $imported->has((string) $hubRow->id)) {
+                continue;
+            }
+
+            // Grants out, row moved, grants back: the name is unique, so the
+            // row cannot exist twice, and the grants hold a key to it.
+            $grants = [];
+            foreach ($pivots as $pivot => $column) {
+                $grants[$pivot] = DB::table($pivot)->where($column, $hubRow->id)->get()
+                    ->map(fn (object $grant): array => [$column => $nextId] + (array) $grant)
+                    ->all();
+                DB::table($pivot)->where($column, $hubRow->id)->delete();
+            }
+
+            DB::table($plan->table)->where('id', $hubRow->id)->delete();
+            DB::table($plan->table)->insert(['id' => $nextId] + Arr::except((array) $hubRow, 'id'));
+
+            foreach ($grants as $pivot => $rows) {
+                DB::table($pivot)->insert($rows);
+            }
+            $this->report->replacedTargetRows[] = "{$plan->table} #{$hubRow->id} ({$hubRow->name}) moved to #{$nextId} for source #{$hubRow->id}";
+            $nextId++;
         }
     }
 
