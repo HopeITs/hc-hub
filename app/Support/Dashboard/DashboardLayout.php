@@ -15,7 +15,6 @@ use Modules\Hr\Livewire\Dashboard\ContractTypeEmployeesStatistics;
 use Modules\Hr\Livewire\Dashboard\DecisionsCard;
 use Modules\Hr\Livewire\Dashboard\DepartmentEmployeeStatistics;
 use Modules\Hr\Livewire\Dashboard\EmployeeNotesCard;
-use Modules\Hr\Livewire\Dashboard\ForYouNow;
 use Modules\Hr\Livewire\Dashboard\JobLevelEmployeeStatistics;
 use Modules\Hr\Livewire\Dashboard\LateCard;
 use Modules\Hr\Livewire\Dashboard\LeaveBalanceCard;
@@ -64,8 +63,8 @@ class DashboardLayout
     public const WIDGETS = [
         // Were fixed above the grid (prompt 7); tiles now, to move, resize, pin or hide (media-request b183c0c).
         'late' => ['clock', [3, 1], [12, 3], [12, 1], true],
-        'decide' => ['alert', [3, 2], [12, 6], [4, 3], true],
-        'for-you' => ['bolt', [4, 1], [12, 4], [8, 2], true],
+        // The work inbox: the decisions, then the rest of the inbox (it took over "For you now").
+        'decide' => ['inbox', [3, 2], [12, 6], [6, 3], true],
         'my-leaves' => ['my-leaves', [3, 1], [12, 2], [5, 1], true],
         'notes' => ['edit', [2, 2], [12, 8], [5, 3], true],
         'team' => ['users', [3, 2], [12, 8], [3, 4], true],
@@ -105,7 +104,6 @@ class DashboardLayout
     public const COMPONENTS = [
         'late' => LateCard::class,
         'decide' => DecisionsCard::class,
-        'for-you' => ForYouNow::class,
         'my-leaves' => MyLeavesCard::class,
         'notes' => EmployeeNotesCard::class,
         'team' => TeamCard::class,
@@ -132,10 +130,10 @@ class DashboardLayout
 
     /**
      * Tiles a phone does not draw, to keep its home screen light (media-request
-     * 88a5e75): the today's-events slideshow. Only what is shown changes; the
-     * saved layout keeps them for a larger screen.
+     * 88a5e75): the today's-events slideshow and the statistics charts. Only
+     * what is shown changes; the saved layout keeps them for a larger screen.
      */
-    public const PHONE_HIDDEN = ['today-events'];
+    public const PHONE_HIDDEN = ['today-events', 'stats-department', 'stats-job-level', 'stats-contract-type', 'stats-no-leaves', 'stats-salary'];
 
     /** Tiles that come in more than one look: key => allowed looks, the first is the default. */
     public const LOOKS = ['clock' => ['digital', 'analog']];
@@ -154,7 +152,6 @@ class DashboardLayout
     private const PAGES = [
         'late' => ['nav.inbox', 'nav.hr.contracts', 'nav.my-team.contracts'],
         'decide' => ['nav.inbox'],
-        'for-you' => ['nav.inbox'],
         'pending-requests' => ['nav.my-team.hand-out', 'nav.inbox'],
         'my-leaves' => ['nav.my-space.leaves'],
         'leave-balance' => ['nav.my-space.leaves'],
@@ -403,7 +400,7 @@ class DashboardLayout
     }
 
     /**
-     * Today's dashboard, in today's order (for-you, my leaves, notes, team,
+     * Today's dashboard, in today's order (late, work inbox, my leaves, notes, team,
      * news, calendar, upcoming leaves, today's and upcoming events, pending
      * requests, checklist, badges); then the role family's shortcuts; then,
      * hidden, everything else the person may add.
