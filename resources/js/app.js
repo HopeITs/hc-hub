@@ -112,6 +112,9 @@ import './feedback.js';
 // Asks before leaving a page with unsaved changes (B2).
 import './unsaved.js';
 
+// The assistant's browser-side model (Puter.js), loaded only when used.
+import './assistant-puter.js';
+
 import './password-toggle.js';
 import './password-strength.js';
 import './scatter-chart.js';
