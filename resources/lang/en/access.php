@@ -75,6 +75,7 @@ return [
         'archives' => 'Archived files',
         'checklists' => 'Checklist items',
         'activity-log' => 'Activity log',
+        'requests' => 'Media requests',
     ],
     'actions' => [
         'view' => 'View', 'view-own' => 'View own', 'view-all' => 'View all',
@@ -84,5 +85,6 @@ return [
         'manage-employees' => 'Manage employee access', 'manage-roles' => 'Manage roles',
         'manage-permissions' => 'Manage permissions', 'share' => 'Share',
         'download' => 'Download', 'deliver' => 'Confirm delivery', 'receive' => 'Confirm return',
+        'approve' => 'Approve', 'work' => 'Work on', 'view-log' => 'View log',
     ],
 ];

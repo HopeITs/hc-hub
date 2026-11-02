@@ -24,7 +24,14 @@ function permissionNamesById(): array
 test('the frozen mapping covers exactly the catalogue', function () {
     $renames = permissionPrefixMigration()::renames();
 
-    expect(array_values($renames))->toEqualCanonicalizing(AccessPermissionCatalog::names())
+    // The rename only covers the names that existed before the modules were ported;
+    // tracking.* and media.* permissions are created already prefixed by their own migrations.
+    $renamed = array_values(array_filter(
+        AccessPermissionCatalog::names(),
+        fn (string $name) => in_array(explode('.', $name)[0], ['hr', 'hub'], true),
+    ));
+
+    expect(array_values($renames))->toEqualCanonicalizing($renamed)
         ->and($renames['contracts.export'])->toBe('hr.contracts.export')
         ->and($renames['access-management.manage-roles'])->toBe('hub.access-management.manage-roles')
         ->and($renames['activity-log.view'])->toBe('hub.activity-log.view');

@@ -38,6 +38,7 @@ Route::group(
             Route::get('settings/password', Password::class)->name('settings.password');
 
             require base_path('modules/Hr/routes/web.php');
+            require base_path('modules/Media/routes/web.php');
 
             Route::get('/notifications', Index::class)->name('notifications.index');
             Route::get('/notifications/settings', NotificationSettings::class)->name('notifications.settings');
