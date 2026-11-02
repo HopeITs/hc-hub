@@ -124,7 +124,7 @@ test('the desk tour walks the top bar, then the desk and its panels', function (
     $this->actingAs(User::factory()->role('Team Member')->create())
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertSeeInOrder(['Every page, by your role', 'It answers and acts', 'Your initials', 'The dots move it', 'Add a panel', 'Come back any time'])
+        ->assertSeeInOrder(['Every page, by your role', 'It answers and acts', 'Your account', 'The dots move it', 'Add a panel', 'Come back any time'])
         ->assertDontSee('data-desk-customize-trigger', false)
         ->assertSee('data-desk-add', false);
 });

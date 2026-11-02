@@ -8,6 +8,7 @@ use App\Models\DonorReport;
 use App\Models\ProposalReviewer;
 use App\Models\User;
 use Closure;
+use Illuminate\Support\Str;
 
 /**
  * Every page the Tracking Desk can open, with the rule that decides who may.
@@ -105,6 +106,31 @@ final class Destinations
         }
 
         return $groups;
+    }
+
+    /**
+     * The sidebar link the given route lights up, with its group's heading.
+     *
+     * A register's own sub-pages (projects.show…) light up their register's
+     * link, unless the page has a link of its own (reports.monthly-matrix is
+     * not reports.index).
+     *
+     * @return array{route: string, label: string, group: string, group_label: string}|null
+     */
+    public function currentFor(User $user, string $routeName): ?array
+    {
+        $links = collect($this->sidebarFor($user))
+            ->flatMap(fn (array $group): array => array_map(fn (array $item): array => [
+                'route' => $item['route'],
+                'label' => $item['label'],
+                'group' => $group['group'],
+                'group_label' => $group['label'],
+            ], $group['items']));
+
+        return $links->firstWhere('route', $routeName)
+            ?? $links->first(fn (array $link): bool => $link['route'] !== 'dashboard'
+                && str_ends_with($link['route'], '.index')
+                && str_starts_with($routeName, Str::beforeLast($link['route'], '.index').'.'));
     }
 
     /**
