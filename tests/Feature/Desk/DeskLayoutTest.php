@@ -67,12 +67,25 @@ test('a panel the viewer may not see cannot be added, and a bad size is ignored'
     expect($user->fresh()->desk_layout)->toBeNull();
 });
 
-test('the customize sheet lists locked panels with the reason', function () {
+test('the customize sheet no longer lists the panels a role may not see', function () {
     Livewire::actingAs(User::factory()->role('Team Member')->create())
         ->test('pages::desk.index')
-        ->assertSeeHtml('data-locked-panel="money"')
-        ->assertSee(__('desk.panel.money.locked'))
-        ->assertDontSeeHtml('data-locked-panel="needs"');
+        ->assertDontSeeHtml('data-locked-panel')
+        ->assertDontSee(__('desk.panel.money.locked'));
+});
+
+test('the customize sheet says there is nothing to add once every allowed panel is placed', function () {
+    $user = User::factory()->create();
+    $allowed = array_keys(app(Panels::class)->availableTo($user));
+    $user->desk_layout = array_map(fn (string $panel): array => ['panel' => $panel, 'size' => 'M'], $allowed);
+    $user->save();
+
+    expect(deskPanelIds($user))->toBe($allowed);
+
+    Livewire::actingAs($user)
+        ->test('pages::desk.index')
+        ->assertSeeHtml('x-show="draft.length === '.count($allowed).'" data-nothing-to-add')
+        ->assertSee(__('desk.nothing_to_add'));
 });
 
 test('the customize sheet saves its whole draft only on Done, dropping what the viewer may not place', function () {

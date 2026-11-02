@@ -54,15 +54,7 @@
                                     <button type="button" class="dk-btn dk-sm" x-on:click="add('{{ $panel['id'] }}', '{{ $panel['size'] }}')"><x-desk.icon name="plus" />{{ __('desk.add') }}</button>
                                 </li>
                             @endforeach
-                            @if ($this->locked === [])
-                                <li x-show="draft.length === {{ count($library) }}"><span class="dk-li-t"><span class="dk-is">{{ __('desk.nothing_to_add') }}</span></span></li>
-                            @endif
-                            @foreach ($this->locked as $panel)
-                                <li wire:key="cz-lock-{{ $panel['id'] }}" class="dk-lockd" data-locked-panel="{{ $panel['id'] }}">
-                                    <span class="dk-li-ic"><x-desk.icon name="lock" /></span>
-                                    <span class="dk-li-t"><strong>{{ $panel['title'] }}</strong><span class="dk-is">{{ $panel['reason'] }}</span></span>
-                                </li>
-                            @endforeach
+                            <li x-show="draft.length === {{ count($library) }}" data-nothing-to-add><span class="dk-li-t"><span class="dk-is">{{ __('desk.nothing_to_add') }}</span></span></li>
                         </ul>
                     </section>
                 </div>

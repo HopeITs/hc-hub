@@ -6,6 +6,7 @@ use App\Livewire\Concerns\ManagesAgreementForm;
 use App\Livewire\Concerns\ManagesTransferForm;
 use App\Livewire\Concerns\PreviewsFiles;
 use App\Livewire\Concerns\Proposals\ChartsProposalChronology;
+use App\Livewire\Concerns\Proposals\ManagesFinalReportAcceptance;
 use App\Livewire\Concerns\Proposals\ManagesProposalApproval;
 use App\Livewire\Concerns\Proposals\ManagesProposalFiles;
 use App\Livewire\Concerns\Proposals\ManagesProposalForm;
@@ -39,6 +40,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     use ChartsProposalChronology;
     use ChecksFinanceVisibility;
     use ManagesAgreementForm;
+    use ManagesFinalReportAcceptance;
     use ManagesProposalApproval;
     use ManagesProposalFiles;
     use ManagesProposalForm;
@@ -178,7 +180,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     public function proposal(): Proposal
     {
         return Proposal::query()
-            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'status', 'notes', 'updated_at'])
+            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'status', 'notes', 'updated_at', 'donor_id', 'final_report_accepted_on', 'final_report_accepted_by'])
             ->findOrFail($this->proposalId);
     }
 
@@ -312,6 +314,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
             $this->planMilestones, $this->planTaskRows, $this->planGroups, $this->planGanttPayload, $this->planWindow, $this->planProjectOptions,
             $this->projectFiles, $this->documents, $this->deadlines, $this->warnings, $this->lifecycle, $this->chronology,
             $this->arrivals, $this->vitals, $this->term, $this->tabs, $this->proposalFiles, $this->reviewStages, $this->needAssessments, $this->approvalSubject, $this->approvalPreview,
+            $this->canRecordFinalReportAcceptance, $this->finalReportAcceptance,
         );
     }
 };
@@ -345,8 +348,8 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
             @include('pages.proposals._show-actions')
         </header>
     @else
-        <a class="dk-back" href="{{ route('dashboard') }}" wire:navigate data-proposal-back><x-desk.icon name="back" class="dk-flip" />{{ __('desk.your_desk') }}</a>
         <x-ui.detail-header
+            :back="\App\Support\BackUrl::for(route('proposals.index'))"
             :breadcrumbs="[
                 ['label' => __('common.proposals'), 'url' => route('proposals.index')],
                 ['label' => $this->proposal->name],

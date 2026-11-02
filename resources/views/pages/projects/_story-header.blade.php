@@ -20,7 +20,7 @@
     $canArchiveProject = auth()->user()?->can('delete', $project) ?? false;
 @endphp
 
-<a class="dk-back" href="{{ route('projects.index') }}" wire:navigate data-story-back><x-desk.icon name="back" class="dk-flip" />{{ __('common.projects') }}</a>
+<a class="dk-back" href="{{ \App\Support\BackUrl::for(route('projects.index')) }}" wire:navigate data-story-back><x-desk.icon name="back" class="dk-flip" />{{ __('common.projects') }}</a>
 
 <header class="dk-pjh">
     <div class="dk-pjh-main">

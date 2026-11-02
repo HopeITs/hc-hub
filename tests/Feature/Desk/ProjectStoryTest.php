@@ -103,7 +103,7 @@ test('a proposal on no project still opens its own page on the desk', function (
     $this->actingAs(userWithRole('General Manager'))
         ->get(route('proposals.show', ['proposal' => $loose, 'tab' => 'plan']))
         ->assertOk()
-        ->assertSeeHtml('data-proposal-back')
+        ->assertSeeHtml('data-detail-back')
         ->assertSeeHtml('data-tab-panel="plan"');
 });
 
@@ -127,7 +127,7 @@ test('the Story embeds the chosen proposal on the asked tab and ignores a propos
         ->assertSet('tab', 'deadlines')
         ->assertSeeHtml('data-tab-panel="deadlines"')
         ->assertSeeHtml('data-embedded-proposal-head')
-        ->assertDontSeeHtml('data-proposal-back');
+        ->assertDontSeeHtml('data-detail-back');
 
     Livewire::actingAs($viewer)->withQueryParams(['proposal' => (string) $stranger->id])
         ->test('pages::projects.show', ['project' => $project])

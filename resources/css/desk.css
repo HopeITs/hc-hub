@@ -763,6 +763,8 @@ button.dk-step.dk-go:hover,button.dk-step.dk-go:focus-visible{ background:var(--
 .dk-tg-n{ grid-area:n;min-width:0;font-size:14px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
 .dk-tg-n .dk-mono{ color:var(--ink-3);font-weight:700;font-size:12px }
 .dk-tg-n .dk-is{ font-weight:400;font-size:12.5px }
+.dk-tg-n a{ color:inherit;text-decoration:none }
+.dk-tg-n a:hover{ text-decoration:underline }
 .dk-tg-s{ grid-area:s;justify-self:end }
 .dk-tg-b{ grid-area:b;min-width:0;display:block }
 .dk-tg-b .dk-meter{ margin:0 }
@@ -948,8 +950,6 @@ button.dk-step.dk-go:hover,button.dk-step.dk-go:focus-visible{ background:var(--
 .dk-lib .dk-li-ic{ width:34px;height:34px;border-radius:9px;background:var(--sunk);display:grid;place-items:center;flex:none;color:var(--ink-2) }
 .dk-lib .dk-li-t{ flex:1;min-width:0 }
 .dk-lib .dk-li-t strong{ font-size:14px }
-.dk-lib .dk-lockd{ opacity:.65 }
-.dk-adm li.dk-lockd{ color:var(--faint) }
 .dk-adm li svg.dk-i{ width:14px;height:14px;margin-inline-end:6px }
 .dk-eyebrow+h2{ margin-top:2px }
 @media (max-width: 1280px){ .dk-panel[style*="--span:3"]{ grid-column:span 6 }

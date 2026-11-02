@@ -19,6 +19,7 @@ use App\Http\Controllers\TaskFileDownloadController;
 use App\Http\Controllers\TaskFilePreviewController;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Http\Middleware\RedirectProposalToStory;
+use App\Models\DonorReport;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -172,6 +173,10 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
     Route::livewire('funding-agreements/{donorProposal}', 'pages::funding-agreements.show')
         ->can('funding-agreements.view')
         ->name('funding-agreements.show');
+
+    Route::livewire('donor-reports', 'pages::donor-reports.index')
+        ->can('viewAny', DonorReport::class)
+        ->name('donor-reports.index');
 
     Route::livewire('donor-reports/compose', 'pages::donor-reports.compose')
         ->can('reports.aggregate')
