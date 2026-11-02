@@ -2,9 +2,9 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\Employee;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
+use Modules\Hr\Models\Employee;
 
 /**
  * A staff member reported their own digital-ID card lost. Sent to HR of the
@@ -38,7 +38,7 @@ class DigitalIdReportedLost extends Notification
                 'en' => __('digital_id.notification.body', ['name' => $this->employee->nameForLocale('en')], 'en'),
                 'ar' => __('digital_id.notification.body', ['name' => $this->employee->nameForLocale('ar')], 'ar'),
             ],
-            'url' => route('employees.show', $this->employee->username),
+            'url' => filled($this->employee->username) ? route('employees.show', $this->employee->username) : null,
         ];
     }
 }

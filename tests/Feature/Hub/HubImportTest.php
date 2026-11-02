@@ -272,3 +272,15 @@ test('the hub:import command prints the dry-run report', function () {
         ->expectsOutputToContain('programs #4 parent_id: set')
         ->assertSuccessful();
 });
+
+test('employees without a username are imported with NULL, a blank one too', function () {
+    sourceRows('employees', [
+        ['id' => 280, 'first_name_en' => 'No', 'first_name_ar' => 'بلا', 'last_name_en' => 'Login', 'last_name_ar' => 'حساب', 'username' => null, 'city_id' => 1],
+        ['id' => 281, 'first_name_en' => 'Blank', 'first_name_ar' => 'فارغ', 'last_name_en' => 'Name', 'last_name_ar' => 'اسم', 'username' => '', 'city_id' => 1],
+    ]);
+
+    $report = app(HrImporter::class)->run(dryRun: false);
+
+    expect($report->blocking)->toBe([])
+        ->and(DB::table('employees')->whereIn('id', [280, 281])->pluck('username')->all())->toBe([null, null]);
+});

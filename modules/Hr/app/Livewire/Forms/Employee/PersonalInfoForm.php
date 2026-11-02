@@ -2,8 +2,6 @@
 
 namespace Modules\Hr\Livewire\Forms\Employee;
 
-use Modules\Hr\Enums\Nationality;
-use Modules\Hr\Models\Employee;
 use App\Models\Role;
 use App\Models\User;
 use App\Rules\SafeImage;
@@ -20,6 +18,8 @@ use Livewire\Attributes\Validate;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
 use Livewire\WithFileUploads;
+use Modules\Hr\Enums\Nationality;
+use Modules\Hr\Models\Employee;
 
 class PersonalInfoForm extends Form
 {
@@ -146,7 +146,7 @@ class PersonalInfoForm extends Form
     /**
      * When true, a platform login account (work email) is created/kept for the
      * employee. When false, the employee exists without platform access — the
-     * username is still required (used for the profile page and QR scan ID).
+     * username is then optional (it drives the profile page URL when set).
      *
      * B5 (DEC-04, B5D-Q8): a new volunteer gets an account when their first
      * contract starts (EmployeeActivation), never from this form. HR can still
@@ -192,9 +192,11 @@ class PersonalInfoForm extends Form
             ],
             'work_phone' => ['nullable', 'regex:/^09\d{8}$/'],
             'personal_phone' => ['nullable', 'regex:/^09\d{8}$/'],
-            // Username is always required: it drives the profile page and QR scan ID.
+            // Optional (decided 2026-10-30), except for an account: the login is built from it.
+            // Without one the employee has no profile page link.
             'username' => [
-                'required',
+                Rule::requiredIf(fn (): bool => (bool) $this->create_account),
+                'nullable',
                 Rule::unique('employees', 'username')->ignore($this->employee?->id),
             ],
         ];
@@ -292,7 +294,7 @@ class PersonalInfoForm extends Form
 
     /**
      * Save what is there as a draft (B5D-Q1-Q3, Q10): the eight name fields,
-     * governorate, national ID and username are required; everything else is
+     * governorate and national ID are required; everything else is
      * checked only when filled in. Never for a record that is already complete.
      */
     public function saveDraft(): Employee

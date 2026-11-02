@@ -2,10 +2,10 @@
 
 namespace Modules\Hr\Notifications;
 
-use Modules\Hr\Models\Employee;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Modules\Hr\Models\Employee;
 
 class NewEmployeeWelcome extends Notification implements ShouldQueue
 {
@@ -32,7 +32,7 @@ class NewEmployeeWelcome extends Notification implements ShouldQueue
                 'en' => "Let's welcome $emp->name_en to the team, we’re excited to have them join us!",
                 'ar' => "أهلًا وسهلًا بـ$emp->name_ar في فريقنا!",
             ],
-            'url' => route('employees.show', $this->employee->username),
+            'url' => filled($this->employee->username) ? route('employees.show', $this->employee->username) : null,
         ];
     }
 }

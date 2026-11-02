@@ -47,14 +47,14 @@ class UnsavedWorkProtectionTest extends TestCase
     {
         [$hr, $employee] = $this->hrAndEmployee();
 
-        // Saved from the Profile tab; username lives on Contact.
+        // Saved from the Profile tab; the personal phone lives on Contact.
         Livewire::actingAs($hr)
             ->test(EmployeeEdit::class, ['employee' => $employee])
-            ->set('infoForm.username', '')
+            ->set('infoForm.personal_phone', '12')
             ->call('saveInformation')
-            ->assertHasErrors('infoForm.username')
+            ->assertHasErrors('infoForm.personal_phone')
             ->assertSet('activeTab', 'information')
-            ->assertSeeHtml("go('infoForm.username', 'contact')");
+            ->assertSeeHtml("go('infoForm.personal_phone', 'contact')");
     }
 
     public function test_a_profile_error_links_to_the_profile_tab(): void
@@ -144,9 +144,9 @@ class UnsavedWorkProtectionTest extends TestCase
         Livewire::actingAs($hr)
             ->test(EmployeeEdit::class, ['employee' => $employee])
             ->set('infoForm.first_name_en', 'Changed but unsaved')
-            ->set('infoForm.username', '')
+            ->set('infoForm.personal_phone', '12')
             ->call('saveInformation')
-            ->assertHasErrors('infoForm.username')
+            ->assertHasErrors('infoForm.personal_phone')
             ->assertNotDispatched('form-saved')
             ->assertSet('infoForm.first_name_en', 'Changed but unsaved');
 

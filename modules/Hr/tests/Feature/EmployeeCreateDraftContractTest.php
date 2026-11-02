@@ -69,9 +69,10 @@ class EmployeeCreateDraftContractTest extends TestCase
             ->set('infoForm.nationality', 1)
             ->set('infoForm.national_number', '12345678903')
             ->set('infoForm.city_id', $fixtures['city']->id)
-            // username left blank on purpose — it lives on Contact, never visited.
+            // A malformed work phone on purpose — it lives on Contact, never visited.
+            ->set('infoForm.work_phone', '123')
             ->call('saveInformation')
-            ->assertHasErrors('infoForm.username')
+            ->assertHasErrors('infoForm.work_phone')
             ->assertSet('activeTab', 'contact')
             ->assertSet('showDraftPrompt', false);
     }

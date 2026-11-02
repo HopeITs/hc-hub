@@ -69,17 +69,43 @@ class EmployeeOnboardingTest extends TestCase
         Notification::assertNothingSent();
     }
 
-    public function test_a_draft_needs_names_governorate_national_id_and_username(): void
+    public function test_a_draft_needs_names_governorate_and_national_id_but_no_username(): void
     {
         $city = $this->makeCity('ALP', '001');
 
         Livewire::actingAs($this->hr($city))->test(EmployeeCreate::class)
             ->set('infoForm.first_name_en', 'Only')
             ->call('saveDraftRecord')
-            ->assertHasErrors(['infoForm.first_name_ar', 'infoForm.mother_name_en', 'infoForm.city_id', 'infoForm.national_number', 'infoForm.username'])
-            ->assertHasNoErrors(['infoForm.gender', 'infoForm.marital_status']);
+            ->assertHasErrors(['infoForm.first_name_ar', 'infoForm.mother_name_en', 'infoForm.city_id', 'infoForm.national_number'])
+            ->assertHasNoErrors(['infoForm.gender', 'infoForm.marital_status', 'infoForm.username']);
 
         $this->assertSame(0, Employee::query()->drafts()->count());
+    }
+
+    public function test_an_employee_without_a_login_is_saved_without_a_username(): void
+    {
+        $city = $this->makeCity('ALP', '001');
+
+        $this->draftMinimum(Livewire::actingAs($this->hr($city))->test(EmployeeCreate::class), $city)
+            ->set('infoForm.username', '  ')
+            ->call('saveDraftRecord')
+            ->assertHasNoErrors();
+
+        $this->assertNull(Employee::query()->drafts()->sole()->username);
+    }
+
+    public function test_an_account_still_needs_a_username(): void
+    {
+        $city = $this->makeCity('ALP', '001');
+
+        $employee = Employee::factory()->create([
+            'city_id' => $city->id, 'username' => null, 'is_active' => true, 'record_status' => Employee::RECORD_COMPLETE,
+        ]);
+
+        Livewire::actingAs($this->hr($city, 'hr.employees.update'))->test(EmployeeEdit::class, ['employee' => $employee])
+            ->set('infoForm.create_account', true)
+            ->call('saveInformation')
+            ->assertHasErrors('infoForm.username');
     }
 
     public function test_another_hr_officer_in_the_city_resumes_and_completes_the_draft(): void
