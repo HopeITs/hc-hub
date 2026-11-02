@@ -376,7 +376,7 @@
 /* Page content keeps its 28px top space; the rail's first icon starts on that same line. A stray gap on the sidebar's flex column pushed the icons 34px lower. */
 @layer components {
     .dk-side { gap: 0; }
-    .dk-hello { padding-top: 0; }
+    .dk-hello { padding-top: 16px; }
     .dk-scope main { padding-top: 28px; }
     .dk-side-scroll, html:not(.dk-nav-open) .dk-side-scroll { padding-top: 28px; }
     .dk-top { background: var(--paper); backdrop-filter: none; -webkit-backdrop-filter: none; }

@@ -59,34 +59,19 @@ final class Panels
     ];
 
     /**
-     * The ready layouts the Customize sheet offers, keyed by their lang key
-     * (desk.ready.<key>), each loading one RoleLayouts entry.
-     *
-     * @var array<string, string>
-     */
-    private const array ReadyLayouts = [
-        'manager' => 'General Manager',
-        'meal' => 'MEAL',
-        'finance' => 'Financial',
-        'relations' => 'Public Relations Manager',
-        'media' => 'Media Team',
-        'member' => 'Team Member',
-    ];
-
-    /**
-     * The Desk's "Start something" buttons. Each opens a register with
+     * The Desk's "Start something" buttons, with Flux icon names. Each opens a register with
      * ?quick=create, which presses that page's own create button
      * (resources/js/desk-ask.js), so the usual form and permissions apply.
      *
      * @var list<array{key: string, route: string, ability: string, icon: string}>
      */
     private const array QuickActions = [
-        ['key' => 'task', 'route' => 'tasks.index', 'ability' => 'tasks.create', 'icon' => 'check'],
-        ['key' => 'report', 'route' => 'reports.index', 'ability' => 'reports.create', 'icon' => 'file'],
-        ['key' => 'proposal', 'route' => 'proposals.index', 'ability' => 'proposals.create', 'icon' => 'edit'],
-        ['key' => 'project', 'route' => 'projects.index', 'ability' => 'projects.create', 'icon' => 'folder'],
+        ['key' => 'task', 'route' => 'tasks.index', 'ability' => 'tasks.create', 'icon' => 'clipboard-document-check'],
+        ['key' => 'report', 'route' => 'reports.index', 'ability' => 'reports.create', 'icon' => 'document-chart-bar'],
+        ['key' => 'proposal', 'route' => 'proposals.index', 'ability' => 'proposals.create', 'icon' => 'document-plus'],
+        ['key' => 'project', 'route' => 'projects.index', 'ability' => 'projects.create', 'icon' => 'folder-plus'],
         ['key' => 'milestone', 'route' => 'milestones.index', 'ability' => 'milestones.create', 'icon' => 'flag'],
-        ['key' => 'transfer', 'route' => 'transfers.index', 'ability' => 'transfers.create', 'icon' => 'coins'],
+        ['key' => 'transfer', 'route' => 'transfers.index', 'ability' => 'transfers.create', 'icon' => 'banknotes'],
     ];
 
     /**
@@ -393,27 +378,6 @@ final class Panels
     public function iconOf(string $id): string
     {
         return $this->definitions()[$id]['icon'] ?? 'grid';
-    }
-
-    /**
-     * Every ready layout cleaned for this viewer (forbidden panels left
-     * out), for the Customize sheet; layouts left empty are dropped.
-     *
-     * @return array<string, list<array{panel: string, size: string, cols: int, rows: int}>>
-     */
-    public function readyLayoutsFor(User $user): array
-    {
-        $ready = [];
-
-        foreach (self::ReadyLayouts as $key => $role) {
-            $layout = $this->fillRows($this->clean(array_map(fn (array $entry): array => ['panel' => $entry[0], 'size' => $entry[1]], self::RoleLayouts[$role]), $user));
-
-            if ($layout !== []) {
-                $ready[$key] = $layout;
-            }
-        }
-
-        return $ready;
     }
 
     /**

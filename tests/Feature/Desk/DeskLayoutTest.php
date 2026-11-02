@@ -152,6 +152,40 @@ test('the customize sheet saves its whole draft only on Done, dropping what the 
     expect($user->fresh()->desk_layout)->toBeNull();
 });
 
+test('the desk has no My day clock or density switch', function () {
+    Livewire::actingAs(User::factory()->role('Team Member')->create())
+        ->test('pages::desk.index')
+        ->assertDontSeeHtml('data-desk-day')
+        ->assertDontSeeHtml('data-desk-density');
+});
+
+test('the command strip has no Ask button and keeps the quick actions', function () {
+    Livewire::actingAs(User::factory()->role('Super Admin')->create())
+        ->test('pages::desk.index')
+        ->assertDontSeeHtml('data-desk-start-ask')
+        ->assertSeeHtml('data-desk-start-action="task"');
+});
+
+test('the customize sheet offers no ready layouts', function () {
+    Livewire::actingAs(User::factory()->role('Team Member')->create())
+        ->test('pages::desk.index')
+        ->assertSeeHtml('data-desk-customize')
+        ->assertDontSeeHtml('data-customize-ready')
+        ->assertDontSeeHtml('data-ready-layout');
+});
+
+test('a card is sized only from its own edges, with no size controls in its menu or the customize sheet', function () {
+    Livewire::actingAs(User::factory()->role('Team Member')->create())
+        ->test('desk.panels.tasks', ['size' => 'L', 'gridCols' => 5, 'gridRows' => 3])
+        ->assertSeeHtml('data-resize="start"')
+        ->assertDontSeeHtml('deskGridPicker')
+        ->assertDontSeeHtml('menuitemradio');
+
+    Livewire::actingAs(User::factory()->role('Team Member')->create())
+        ->test('pages::desk.index')
+        ->assertDontSeeHtml('for="cz-tasks"');
+});
+
 test('the annual plans panel is gone, even from a layout saved before', function () {
     $user = User::factory()->role('Super Admin')->create(['desk_layout' => [['panel' => 'plans', 'size' => 'L'], ['panel' => 'needs', 'size' => 'L']]]);
 
