@@ -16,6 +16,8 @@
 @import './data-viz.css';
 @import './notifications.css';
 @import './desk.css';
+@import './desk-cards.css';
+@import './desk-grid.css';
 @import './desk-register.css';
 @import './desk-story.css';
 @import './desk-shell.css';
