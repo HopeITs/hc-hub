@@ -150,29 +150,21 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
 <div data-desk x-data="{ removed: null, applied: null, timer: null }" x-on:dk-panel-removed="removed = $event.detail; applied = null; clearTimeout(timer); timer = setTimeout(() => removed = null, 6000)" x-on:dk-layout-applied="applied = $event.detail; removed = null; clearTimeout(timer); timer = setTimeout(() => applied = null, 8000)">
     <section class="dk-hello" data-desk-hello>
         <div class="dk-hello-main">
-            <p class="dk-eyebrow">{{ now()->translatedFormat(__('formats.date_long')) }} · {{ auth()->user()->name }}</p>
-            {{-- The briefing: the counts link down to the Needs you panel when it is on the desk. --}}
-            <h1>{{ rtrim($this->greeting(), '.!') }}{{ __('desk.sentence_end') }}
-                @if ($n === 0)
-                    {{ __('desk.hello_none') }}
-                @elseif ($needsPlaced)
-                    <a href="#dk-panel-needs" class="dk-hello-link" title="{{ __('desk-cards.hero.needs_link') }}">{!! trans_choice('desk.hello_count', $n, ['count' => $n]) !!}</a>
-                @else
-                    {!! trans_choice('desk.hello_count', $n, ['count' => $n]) !!}
-                @endif
-            </h1>
-            <p class="dk-lede">
-                @if ($n === 0)
-                    {{ __('desk.lede_done') }}
-                @elseif ($needs['late'] > 0 && $needsPlaced)
-                    <a href="#dk-panel-needs" class="dk-hello-link dk-late" title="{{ __('desk-cards.hero.late_link') }}">{{ trans_choice('desk.lede_late', $needs['late'], ['count' => $needs['late']]) }}</a>
-                @elseif ($needs['late'] > 0)
-                    {{ trans_choice('desk.lede_late', $needs['late'], ['count' => $needs['late']]) }}
-                @else
-                    {{ __('desk.lede_none_late') }}
-                @endif
-            </p>
+            <p class="dk-eyebrow">{{ now()->translatedFormat(__('formats.date_long')) }}</p>
+            <h1>{{ rtrim($this->greeting(), '.!') }}</h1>
         </div>
+
+        {{-- The day in two figures, across from the greeting; they lead down to the Needs you panel when that is on the desk. --}}
+        @if ($n === 0)
+            <p class="dk-hello-clear">{{ __('desk.hello_none') }}</p>
+        @else
+            <{{ $needsPlaced ? 'a href=#dk-panel-needs' : 'div' }} class="dk-hello-figs" @if ($needsPlaced) title="{{ __('desk-cards.hero.needs_link') }}" @endif data-desk-hello-figures>
+                <span class="dk-hello-fig"><b class="dk-num">{{ $n }}</b><span>{{ trans_choice('desk.hero_needs', $n) }}</span></span>
+                @if ($needs['late'] > 0)
+                    <span class="dk-hello-fig dk-late"><b class="dk-num">{{ $needs['late'] }}</b><span>{{ trans_choice('desk.hero_late', $needs['late']) }}</span></span>
+                @endif
+            </{{ $needsPlaced ? 'a' : 'div' }}>
+        @endif
 
         {{-- The command strip: the quick actions. Customize opens from the top bar's Panels button. --}}
         <div class="dk-start" data-desk-start>
