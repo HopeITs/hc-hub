@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use Tests\Support\HubPaths;
 use App\Models\City;
 use App\Models\Role;
 use App\Models\User;
@@ -15,6 +14,7 @@ use Modules\Hr\Enums\EmployeeStatus;
 use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Models\Employee;
 use Symfony\Component\Finder\Finder;
+use Tests\Support\HubPaths;
 use Tests\TestCase;
 
 /**
