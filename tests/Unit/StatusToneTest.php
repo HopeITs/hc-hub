@@ -10,7 +10,7 @@ use App\Enums\TaskStatus;
 /**
  * Every enum under app/Enums that implements HasStatusTone.
  *
- * @return array<string, class-string<HasStatusTone&\UnitEnum>>
+ * @return array<string, class-string<HasStatusTone&UnitEnum>>
  */
 function statusToneEnums(): array
 {

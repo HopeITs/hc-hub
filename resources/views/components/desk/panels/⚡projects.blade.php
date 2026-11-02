@@ -172,7 +172,7 @@ new class extends Component
     $stages = __('desk.stages');
 @endphp
 
-<x-desk.panel :facets="$pg['facets']" :filtered="$active !== 'all' || ($hasOthers && $scope !== 'mine')" id="projects" :register="$shownLens === 'dates' ? 'timeline.index' : 'projects.index'" :size="$size" :index="$index" :total="$total" :count="$list->count()">
+<x-desk.panel :facets="$pg['facets']" :filtered="$active !== 'all' || ($hasOthers && $scope !== 'mine')" id="projects" :register="$shownLens === 'dates' ? 'timeline.index' : 'projects.index'" :size="$size" :cols="$gridCols" :height="$gridRows" :index="$index" :total="$total" :count="$list->count()">
     <x-slot:filters>
         @if ($hasOthers)
             <div class="contents" data-filter-defaults='{"scope":"mine"}'>

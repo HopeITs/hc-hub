@@ -33,7 +33,6 @@
                 <span class="dk-inner">
                     <flux:icon.magnifying-glass variant="outline" class="size-5" />
                     <span class="dk-ph">{{ __('desk.ask_placeholder') }}</span>
-                    <kbd>/</kbd>
                 </span>
             </button>
 

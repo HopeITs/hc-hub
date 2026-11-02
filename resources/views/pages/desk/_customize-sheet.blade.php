@@ -1,6 +1,8 @@
 @php
     $library = $this->library;
     $starting = app(\App\Support\Desk\Panels::class)->startingLayoutFor(auth()->user());
+    $ready = app(\App\Support\Desk\Panels::class)->readyLayoutsFor(auth()->user());
+    $columns = \App\Support\Desk\Panels::Sizes;
 @endphp
 
 {{--
@@ -25,6 +27,26 @@
                 </div>
 
                 <div class="dk-sh-b">
+                    @if ($ready !== [])
+                        <section class="dk-adm" data-customize-ready>
+                            <h3>{{ __('desk.ready.title') }}</h3>
+                            <p class="dk-is">{{ __('desk.ready.lede') }}</p>
+                            <div class="dk-ready">
+                                @foreach ($ready as $key => $readyLayout)
+                                    <button type="button" class="dk-ready-card" x-on:click="load(@js($readyLayout))" aria-label="{{ __('desk.ready.load') }}: {{ __("desk.ready.{$key}") }}" data-ready-layout="{{ $key }}">
+                                        <span class="dk-ready-map" aria-hidden="true">
+                                            @foreach ($readyLayout as $entry)
+                                                <i style="--span:{{ $columns[$entry['size']] }}"></i>
+                                            @endforeach
+                                        </span>
+                                        <strong>{{ __("desk.ready.{$key}") }}</strong>
+                                        <span class="dk-is dk-num">{{ trans_choice('desk.ready.panels', count($readyLayout), ['count' => count($readyLayout)]) }}</span>
+                                    </button>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
+
                     <section class="dk-adm">
                         <h3 x-text="{{ \Illuminate\Support\Js::from(__('desk.on_your_desk', ['count' => '__N__'])) }}.replace('__N__', draft.length)">{{ __('desk.on_your_desk', ['count' => count($layout)]) }}</h3>
                         <ul class="dk-lib dk-lib-order">
@@ -61,6 +83,7 @@
 
                 <div class="dk-sh-f">
                     <button type="button" class="dk-btn" x-on:click="reset()"><x-desk.icon name="undo" />{{ __('desk.reset_layout') }}</button>
+                    <span class="dk-is dk-num dk-draft-n" x-text="{{ \Illuminate\Support\Js::from(['zero' => trans_choice('desk.draft_count', 0), 'one' => trans_choice('desk.draft_count', 1), 'two' => trans_choice('desk.draft_count', 2, ['count' => 2]), 'few' => trans_choice('desk.draft_count', 3, ['count' => '__N__']), 'many' => trans_choice('desk.draft_count', 11, ['count' => '__N__'])]) }}[draft.length === 0 ? 'zero' : draft.length === 1 ? 'one' : draft.length === 2 ? 'two' : draft.length <= 10 ? 'few' : 'many'].replace('__N__', draft.length)"></span>
                     <span class="dk-pspace"></span>
                     <button type="button" class="dk-btn dk-ghost" x-on:click="discard()">{{ __('common.cancel') }}</button>
                     <button type="button" class="dk-btn dk-primary" x-on:click="save()" data-customize-done>{{ __('desk.done') }}</button>

@@ -35,6 +35,15 @@ trait IsDeskPanel
     #[Reactive]
     public string $size = 'M';
 
+    /**
+     * The panel's exact cell size on the free grid (0 = the size's default).
+     */
+    #[Reactive]
+    public int $gridCols = 0;
+
+    #[Reactive]
+    public int $gridRows = 0;
+
     #[Reactive]
     public int $index = 0;
 

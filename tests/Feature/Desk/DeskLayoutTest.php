@@ -38,6 +38,55 @@ test('a saved layout drops forbidden, unknown and repeated panels and fixes a ba
     ]);
 });
 
+test('every role opens on full rows, with no empty columns', function (string $role) {
+    $row = 0;
+
+    foreach (app(Panels::class)->layoutFor(User::factory()->role($role)->create()) as $entry) {
+        $row += $entry['cols'];
+        expect($row)->toBeLessThanOrEqual(12);
+        $row %= 12;
+    }
+
+    expect($row)->toBe(0);
+})->with(['General Manager', 'Public Relations Manager', 'Public Relations', 'MEAL', 'Financial', 'Managers', 'Media Team', 'Team Member']);
+
+test('a free resize saves the exact cells, kept within the grid limits', function () {
+    $user = User::factory()->role('Team Member')->create();
+    $desk = Livewire::actingAs($user)->test('pages::desk.index');
+    $saved = fn (): array => collect($user->fresh()->desk_layout)->firstWhere('panel', 'tasks');
+
+    $desk->call('resizePanelTo', 'tasks', 5, 3);
+    expect($saved())->toMatchArray(['cols' => 5, 'rows' => 3]);
+
+    $desk->call('resizePanelTo', 'tasks', 1, 1);
+    expect($saved())->toMatchArray(['cols' => Panels::MinCols, 'rows' => Panels::MinRows]);
+
+    $desk->call('resizePanelTo', 'tasks', 99, 99);
+    expect($saved())->toMatchArray(['cols' => Panels::MaxCols, 'rows' => Panels::MaxRows]);
+});
+
+test('pulling a card from its start edge pins its column, until it no longer fits or is moved', function () {
+    $user = User::factory()->role('Team Member')->create();
+    $desk = Livewire::actingAs($user)->test('pages::desk.index');
+    $saved = fn (): array => collect($user->fresh()->desk_layout)->firstWhere('panel', 'tasks');
+
+    $desk->call('resizePanelTo', 'tasks', 4, 4, 9)->assertSeeHtml('#dk-panel-tasks { --col: 9; }');
+    expect($saved())->toMatchArray(['cols' => 4, 'col' => 9])
+        ->and(collect(app(Panels::class)->layoutFor($user->fresh()))->firstWhere('panel', 'tasks')['col'])->toBe(9);
+
+    $desk->call('resizePanelTo', 'tasks', 6, 4, 9);
+    expect($saved())->not->toHaveKey('col');
+
+    $desk->call('resizePanelTo', 'tasks', 4, 4, 9)->call('movePanel', 'tasks', 0);
+    expect($saved())->not->toHaveKey('col');
+});
+
+test('a card saved narrower than the minimum opens at the minimum', function () {
+    $user = User::factory()->role('Team Member')->create(['desk_layout' => [['panel' => 'tasks', 'size' => 'S', 'cols' => 1, 'rows' => 4]]]);
+
+    expect(app(Panels::class)->layoutFor($user)[0]['cols'])->toBe(Panels::MinCols);
+});
+
 test('resizing, moving, removing, adding and resetting are saved on the user at once', function () {
     $user = User::factory()->role('Team Member')->create();
     $desk = Livewire::actingAs($user)->test('pages::desk.index');
