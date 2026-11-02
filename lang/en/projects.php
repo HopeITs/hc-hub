@@ -239,6 +239,7 @@ return [
     'scope_to_project' => 'Scope to this project',
     'indicator_scoped_here' => 'Scoped to this project',
     'indicator_scoped' => 'Indicator scoped to this project.',
+    'new_indicator' => 'New indicator',
     'filters' => 'Filters',
     'remove_filter' => 'Remove filter :filter',
     'open' => 'Open',

@@ -175,6 +175,7 @@ new #[Layout('layouts::desk'), Title('titles.report')] class extends Component {
 <x-desk.record-sheet register="pages::reports.index" :close-url="route('reports.index')" :title="$planIndicator->indicator->name">
 <section class="@container/detail flex min-h-full w-full flex-1 flex-col gap-8 bg-white text-secondary-dark dark:bg-surface-0 dark:text-ink">
     <x-ui.detail-header
+        :back="\App\Support\BackUrl::for(route('reports.index'))"
         :breadcrumbs="[
             ['label' => __('common.reports'), 'url' => route('reports.index')],
             ['label' => $planIndicator->indicator->name],

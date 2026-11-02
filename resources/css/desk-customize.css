@@ -117,10 +117,6 @@
     .dk-cz-pick svg.dk-i { flex: none; width: 16px; height: 16px; color: var(--ink-3); }
     .dk-cz-none { margin-block-start: 16px; font-size: 13px; color: var(--ink-3); }
 
-    .dk-cz-locked { margin-block-start: 18px; }
-    .dk-cz-locked li { display: flex; align-items: center; gap: 10px; min-height: 36px; padding-inline: 8px; font-size: 13px; color: var(--faint); }
-    .dk-cz-locked svg.dk-i { width: 14px; height: 14px; flex: none; }
-
     .dk-cz-f { flex: none; }
     .dk-cz-sum { margin: 0; }
 

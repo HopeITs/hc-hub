@@ -155,9 +155,39 @@ test('the dates lens opens the timeline as its full register', function () {
     Project::factory()->create();
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())->test('desk.panels.projects', ['size' => 'XL'])
+        ->assertSeeHtml('href="'.route('timeline.index').'"')
+        ->call('setLens', 'stage')
         ->assertSeeHtml('href="'.route('projects.index').'"')
         ->call('setLens', 'dates')
         ->assertSeeHtml('href="'.route('timeline.index').'"');
+});
+
+test('the projects panel opens on the dates lens and keeps start and end under the name in every lens', function () {
+    Project::factory()->create(['name' => 'Aleppo Wells', 'start_date' => '2026-01-01', 'end_date' => '2026-12-31']);
+    Project::factory()->create(['name' => 'Undated Clinic', 'start_date' => null, 'end_date' => null]);
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())->test('desk.panels.projects', ['size' => 'XL'])
+        ->assertSet('lens', 'dates')
+        ->assertSeeHtml('data-lens="dates"')
+        ->call('setLens', 'stage')
+        ->assertSeeHtml('data-lens="stage"')
+        ->assertSee('Jan 2026 → Dec 2026')
+        ->assertSee('— → —')
+        ->call('setLens', 'nonsense')
+        ->assertSet('lens', 'dates');
+});
+
+test('a target behind links to its indicator and to its project', function () {
+    $project = Project::factory()->create(['name' => 'Aleppo Wells']);
+    $indicator = Indicator::factory()->forProject($project->id)->create(['name' => 'People reached', 'baseline' => 0, 'target' => 1000]);
+    $user = User::factory()->role('Super Admin')->create();
+    insertIndicatorProgress($indicator->id, $user->id, '2026-03-31', '10.00');
+
+    Livewire::actingAs($user)->test('desk.panels.targets', ['size' => 'L'])
+        ->assertSeeHtml('href="'.route('indicators.index', ['inspect' => $indicator->id]).'" wire:navigate')
+        ->assertSeeHtml('href="'.route('projects.show', $project).'" wire:navigate')
+        ->assertSee('People reached')
+        ->assertSee('Aleppo Wells');
 });
 
 test('someone who owns no project sees every project without picking a scope', function () {

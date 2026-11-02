@@ -156,19 +156,8 @@
                                 </section>
                             @endforeach
 
-                            <p class="dk-cz-none" x-show="draft.length === {{ count($library) }}" x-cloak>{{ __('desk.nothing_to_add') }}</p>
+                            <p class="dk-cz-none" x-show="draft.length === {{ count($library) }}" data-nothing-to-add x-cloak>{{ __('desk.nothing_to_add') }}</p>
                             <p class="dk-cz-none" x-show="draft.length !== {{ count($library) }} && search !== '' && ! anyMatches()" x-cloak>{{ __('desk.customize_sheet.no_match') }}</p>
-
-                            @if ($this->locked !== [])
-                                <ul class="dk-cz-locked">
-                                    @foreach ($this->locked as $panel)
-                                        <li wire:key="cz-lock-{{ $panel['id'] }}" data-locked-panel="{{ $panel['id'] }}" title="{{ $panel['reason'] }}" x-show="matchesSearch({{ \Illuminate\Support\Js::from(mb_strtolower($panel['title'])) }})">
-                                            <x-desk.icon name="lock" />
-                                            <span>{{ $panel['title'] }}</span>
-                                        </li>
-                                    @endforeach
-                                </ul>
-                            @endif
                         </div>
                     </section>
                 </div>

@@ -72,10 +72,18 @@ test('the donor report builder goes only to reports.aggregate holders, reporting
     $responsible = User::factory()->role('Team Member')->create(['employee_id' => $employeeId]);
     DonorReport::factory()->create(['responsible_employee_id' => $employeeId]);
 
-    expect(deskPageRoutes(User::factory()->role('Team Member')->create()))->not->toContain('donor-reports.compose')->not->toContain('reporting-duties.index')
-        ->and(deskPageRoutes($responsible))->toContain('reporting-duties.index')->not->toContain('donor-reports.compose')
-        ->and(deskPageRoutes(User::factory()->role('Financial')->create()))->toContain('reporting-duties.index')->not->toContain('donor-reports.compose')
-        ->and(deskPageRoutes(User::factory()->role('MEAL')->create()))->toContain('donor-reports.compose');
+    expect(deskPageRoutes(User::factory()->role('Team Member')->create()))->not->toContain('donor-reports.compose')->not->toContain('reporting-duties.index')->not->toContain('donor-reports.index')
+        ->and(deskPageRoutes($responsible))->toContain('reporting-duties.index', 'donor-reports.index')->not->toContain('donor-reports.compose')
+        ->and(deskPageRoutes(User::factory()->role('Financial')->create()))->toContain('reporting-duties.index', 'donor-reports.index')->not->toContain('donor-reports.compose')
+        ->and(deskPageRoutes(User::factory()->role('MEAL')->create()))->toContain('donor-reports.compose', 'donor-reports.index');
+});
+
+test('the donor reports register sits under monitoring and evaluation, labelled Donor reports, the builder labelled Reports', function () {
+    $groups = collect(app(Destinations::class)->sidebarFor(User::factory()->role('Super Admin')->create()))->keyBy('group');
+    $items = collect($groups->get('monitoring_evaluation')['items'])->keyBy('route');
+
+    expect($items->get('donor-reports.index')['label'])->toBe('Donor reports')
+        ->and($items->get('donor-reports.compose')['label'])->toBe('Reports');
 });
 
 test('funding pages follow the module permissions of each role', function () {

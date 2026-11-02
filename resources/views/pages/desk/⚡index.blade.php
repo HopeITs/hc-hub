@@ -19,7 +19,8 @@ use Livewire\Component;
  * panels they arranged (or their role's default) on a twelve-column grid.
  * Every change to the arrangement is saved on users.desk_layout at once.
  */
-new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Component {
+new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Component
+{
     use ArrangesPanels;
     use ReadsDashboardAttention;
     use ReadsDashboardWork;
@@ -41,17 +42,6 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
     public function library(): array
     {
         return app(Panels::class)->availableTo(auth()->user());
-    }
-
-    /**
-     * Panels the viewer's role does not open, with the reason, for the Customize sheet.
-     *
-     * @return array<string, array{id: string, title: string, reason: string}>
-     */
-    #[Computed]
-    public function locked(): array
-    {
-        return app(Panels::class)->lockedFor(auth()->user());
     }
 
     /**
@@ -115,6 +105,7 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
         $user->save();
         unset($this->layout);
     }
+
     /**
      * @template TModel of Model
      *

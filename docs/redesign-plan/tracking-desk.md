@@ -53,9 +53,9 @@ All navigation goes through `App\Support\Desk\Destinations`, which feeds the Ask
 
 ### Stage 1: top bar and Desk
 
-The sidebar, the old top header and the dashboard pages were deleted. See `.ai/rules/desk.md` for the full list of deleted files and the rule for each panel:
+The sidebar, the old top header and the dashboard pages were deleted in stage 1. Since shell v2 (`ee5c3850`) a sidebar is back as `x-desk.side-nav`: an icon rail fed by `Destinations::sidebarFor()`, expandable to labels, overlaid on mobile. See `.ai/rules/desk.md` for the full list of deleted files and the rule for each panel:
 
-- **Risks panel:** a 3×3 heat map (likelihood × severity, added in stage 6) above the list (open risks first, then risks that happened).
+- **Risks panel:** removed after the 23 Oct 2026 meeting (`205cc05b`); the heat map lives on the project page. (Earlier: a 3×3 heat map above the list.)
 - **Projects panel:** the stage comes from the proposal stage plus the project status. Health is "off track" when an item is late, "watch" when something is due within 7 days, and "on track" otherwise.
 - **Waiting on others** collects four things:
   - late tasks I created that are assigned to others

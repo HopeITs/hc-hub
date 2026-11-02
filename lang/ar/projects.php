@@ -239,6 +239,7 @@ return [
     'scope_to_project' => 'تخصيص لهذا المشروع',
     'indicator_scoped_here' => 'مخصّص لهذا المشروع',
     'indicator_scoped' => 'خُصّص المؤشر لهذا المشروع.',
+    'new_indicator' => 'مؤشر جديد',
     'filters' => 'الفلاتر',
     'remove_filter' => 'إزالة الفلتر :filter',
     'open' => 'فتح',

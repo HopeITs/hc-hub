@@ -25,6 +25,8 @@
 
 /* flux.css already scans Flux's own stubs; these are the app's views and Laravel's pagination views. */
 @source '../views';
+/* StatusTone writes its badge/dot classes in PHP, so Tailwind must scan it too. */
+@source '../../app/Enums/StatusTone.php';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 
 /*

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
+use App\Models\DonorReport;
 use App\Models\ProposalReviewer;
 use App\Models\User;
 use Closure;
@@ -144,6 +145,7 @@ final class Destinations
             $page('reports.monthly-matrix', 'navigation.monthly_matrix', 'table', 'table-cells', 'monitoring_evaluation', $can('reports.view')),
             $page('monthly-reports.index', 'navigation.monthly_reports', 'cal', 'newspaper', 'monitoring_evaluation', $can('reports.view'), 'monthly-reports'),
             $page('report-templates.index', 'navigation.report_templates', 'file', 'clipboard-document-check', 'monitoring_evaluation', $can('report-templates.manage'), 'report-templates'),
+            $page('donor-reports.index', 'navigation.donor_reports', 'file', 'document-text', 'monitoring_evaluation', fn (User $user): bool => $user->can('viewAny', DonorReport::class)),
             $page('donor-reports.compose', 'navigation.donor_report_builder', 'file', 'document-plus', 'monitoring_evaluation', $can('reports.aggregate')),
             $page('reporting-duties.index', 'navigation.reporting_duties', 'file', 'inbox-stack', 'monitoring_evaluation', fn (User $user): bool => $user->can('funding-agreements.update') || $user->hasReportingDuties(), 'donor-reports'),
 
