@@ -48,5 +48,13 @@
         <env name="TURNSTILE_SITE_KEY" value="" force="true"/>
         <env name="TURNSTILE_SECRET_KEY" value="" force="true"/>
         <env name="AUTH_TWO_FACTOR_ENFORCED" value="off" force="true"/>
+        <!-- A developer's AI provider keys must not put the assistant into every page the suite checks. -->
+        <env name="GEMINI_API_KEY" value="" force="true"/>
+        <env name="GROQ_API_KEY" value="" force="true"/>
+        <env name="OPENROUTER_API_KEY" value="" force="true"/>
+        <env name="CEREBRAS_API_KEY" value="" force="true"/>
+        <env name="MISTRAL_API_KEY" value="" force="true"/>
+        <env name="ASSISTANT_PUTER" value="false" force="true"/>
+        <env name="ASSISTANT_PROVIDERS" value="gemini,groq,openrouter,cerebras,mistral" force="true"/>
     </php>
 </phpunit>
