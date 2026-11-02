@@ -26,7 +26,6 @@
         ['names', __('employees.onboarding.need-names'), 'information', $names],
         ['city_id', trans_choice('general.city', 1), 'information', ['city_id']],
         ['national_number', __('general.national_number'), 'information', ['national_number']],
-        ['username', __('general.username'), 'contact', ['username']],
     ];
     $completeNeeds = [
         ['gender', __('general.gender'), 'information', ['gender']],

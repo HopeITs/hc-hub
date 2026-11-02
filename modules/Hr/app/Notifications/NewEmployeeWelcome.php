@@ -35,7 +35,7 @@ class NewEmployeeWelcome extends Notification implements InboxNotification, Shou
                 'en' => "Let's welcome $emp->name_en to the team, we’re excited to have them join us!",
                 'ar' => "أهلًا وسهلًا بـ$emp->name_ar في فريقنا!",
             ],
-            'url' => route('employees.show', $this->employee->username),
+            'url' => filled($this->employee->username) ? route('employees.show', $this->employee->username) : null,
         ];
     }
 }

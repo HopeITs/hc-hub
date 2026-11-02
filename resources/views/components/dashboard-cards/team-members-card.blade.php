@@ -104,9 +104,11 @@
                 <!-- Actions -->
                 <div class="flex items-center flex-shrink-0 gap-2 ms-4">
 
-                    <a href="{{ route('employees.show', ['employee' => $member?->username]) }}" wire:navigate title="{{ __('general.view-profile') }}" aria-label="{{ __('general.view-profile') }}">
-                        <x-icons.user class="transition text-secondary-light hover:text-primary" />
-                    </a>
+                    @if (filled($member?->username))
+                        <a href="{{ route('employees.show', ['employee' => $member->username]) }}" wire:navigate title="{{ __('general.view-profile') }}" aria-label="{{ __('general.view-profile') }}">
+                            <x-icons.user class="transition text-secondary-light hover:text-primary" />
+                        </a>
+                    @endif
 
                     @if ($phone)
                         <a href="tel:{{ $phone }}" title="{{ __('dashboard.call') }}" aria-label="{{ __('dashboard.call') }}">

@@ -104,6 +104,9 @@ final class HrImporter
     /** @var array<string, list<string>> pay columns stored in clear; a figure in one blocks the run */
     private const PLAINTEXT_PAY_COLUMNS = ['badges' => ['amount', 'current_salary', 'new_salary']];
 
+    /** @var array<string, list<string>> optional columns where a blank value is stored as NULL (as the model does) */
+    private const BLANK_TO_NULL_COLUMNS = ['employees' => ['username']];
+
     /** @var array<string, list<string>> Core fix #2: names with stray spaces */
     private const TRIMMED_COLUMNS = ['cities' => ['name_en', 'name_ar']];
 
@@ -407,6 +410,12 @@ final class HrImporter
             if (($row[$column] ?? null) !== null) {
                 $problem = "{$table}.{$column} value(s) hold a pay figure outside the encrypted columns.";
                 $payProblems[$problem] = ($payProblems[$problem] ?? 0) + 1;
+            }
+        }
+
+        foreach (self::BLANK_TO_NULL_COLUMNS[$table] ?? [] as $column) {
+            if (is_string($row[$column] ?? null) && trim($row[$column]) === '') {
+                $row[$column] = null;
             }
         }
 

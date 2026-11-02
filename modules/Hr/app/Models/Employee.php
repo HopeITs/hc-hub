@@ -671,6 +671,25 @@ class Employee extends Model implements HasMedia
         return Attribute::get(fn (): ?string => $this->account?->email);
     }
 
+    /**
+     * Optional (decided 2026-10-30): an employee without a login may have no
+     * username. A blank one is stored as NULL, never '', so a lookup by an
+     * empty username can never match an employee.
+     *
+     * @return Attribute<string|null, string|null>
+     */
+    protected function username(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value): ?string => $value,
+            set: function (?string $value): ?string {
+                $username = trim((string) $value);
+
+                return $username === '' ? null : $username;
+            },
+        );
+    }
+
     protected function firstName(): Attribute
     {
         return Attribute::make(

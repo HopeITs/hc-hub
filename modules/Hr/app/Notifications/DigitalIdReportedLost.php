@@ -46,7 +46,7 @@ class DigitalIdReportedLost extends Notification implements InboxNotification
                 'en' => __('digital_id.notification.body', ['name' => $this->employee->nameForLocale('en')], 'en'),
                 'ar' => __('digital_id.notification.body', ['name' => $this->employee->nameForLocale('ar')], 'ar'),
             ],
-            'url' => route('employees.show', $this->employee->username),
+            'url' => filled($this->employee->username) ? route('employees.show', $this->employee->username) : null,
         ];
     }
 }

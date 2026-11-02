@@ -135,6 +135,8 @@ class GlobalSearch extends Component
 
         return DirectoryAccess::constrain($query, auth()->user())
             // The directory's row set: people who hold a visible position.
+            // A person is opened through their username; one without has no profile page.
+            ->whereNotNull('username')
             ->whereHas('contracts.position', fn (Builder $position) => $position->visible())
             ->where(function (Builder $names) use ($words): void {
                 foreach ($words as $word) {
