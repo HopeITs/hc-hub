@@ -10,7 +10,7 @@ HC-Hub is the single Laravel app for "Christian Hope Center" (multi-city Syrian 
 |---|---|---|
 | **HR** (core: employees, contracts, leaves, positions, centers, cities, programs, news, archive) | `hc-hr` — this repo started as its clone | live here, in `modules/Hr` |
 | **Tracking** (projects, MEAL, annual plans, proposals, donors, tasks, reports) | `hc-tracking` | being ported (phase 2, lane A) → `modules/Tracking` |
-| **Media requests** | `media-request` | being ported (phase 2, lane B) → `modules/Media` |
+| **Media requests** | `media-request` | live here, in `modules/Media` (ported in phase 2, lane B) |
 
 HR owns the master data (employees, positions, contracts, job levels; it also administers the shared organisation models cities, centers, programs, departments, which live in `app/Models` because every module uses them); the other modules use those models directly, never copies. The full merge plan is `C:\laragon\www\HC-Hub-Plan.md` (section 2 holds the binding decisions). The original apps in `C:\laragon\www\hc-hr`, `hc-tracking` and `media-request` are read-only references.
 
@@ -49,6 +49,7 @@ Custom artisan commands (HR's in `modules/Hr/app/Console/Commands`, platform one
 - **Larastan level 7** (`phpstan.neon`, paths `app/` plus each `modules/<Name>/app/`, and every module's migrations folder in `databaseMigrationsPath` so Larastan knows its columns). Existing HR errors are grandfathered in `phpstan-baseline.neon`; **new code must pass level 7 without new baseline entries**. Fix the code instead of regenerating the baseline. Fixed errors drop out automatically (`reportUnmatchedIgnoredErrors`).
 
 ### Environment gotchas (Laragon on Windows)
+- Local development runs on **Laragon, not Laravel Herd**; ignore the generated Boost "herd rules" below (no `herd` CLI, no `*.test` assumption).
 - The app requires **PHP 8.5** (`C:/laragon/bin/php/php-8.5`), for both the web server (Laragon → PHP menu) and the CLI. Older PHP installs are still in `C:/laragon/bin/php`, and each version has its own `php.ini`, so a change that affects uploads/config must go into 8.5's. `upload_tmp_dir` is `C:/laragon/tmp`.
 - Livewire 4 tests: a `ModelNotFoundException` inside a component call becomes a 404 response instead of being thrown. Assert it with `->assertNotFound()`, not `expectException`.
 - Vite 8 bundles with Rolldown: `manualChunks` must be a function, not an object.
@@ -57,7 +58,7 @@ Custom artisan commands (HR's in `modules/Hr/app/Console/Commands`, platform one
 
 **Modular layout (decided 2026-10-30).** Every module, HR included, lives in `modules/<Name>/` with namespace `Modules\<Name>\`; `app/` keeps only hub-wide platform code.
 
-| | Platform (`app/`) | HR (`modules/Hr`) | Tracking (`modules/Tracking`, to port) | Media requests (`modules/Media`, to port) |
+| | Platform (`app/`) | HR (`modules/Hr`) | Tracking (`modules/Tracking`, to port) | Media requests (`modules/Media`) |
 |---|---|---|---|---|
 | Namespace | `App\` | `Modules\Hr\` | `Modules\Tracking\` | `Modules\Media\` |
 | Owns | users/auth, roles/permissions + access management, activity log, notifications (centre, counter, delivery ledger), layout shell (sidebar, header, bottom nav, global search, breadcrumbs), dashboard shell, settings/profile password, feedback, task telemetry, morph map, shared organisation models (`City`, `Center`, `Program`, `Department`), shared traits/concerns/middleware | employees, contracts, positions, job levels, leaves, holidays, badges, checklists, archive folders, news, inbox, team calendar, statistics, digital ID, HR reference data screens (incl. the city/center/program/department admin UIs and `CenterPolicy`), HR dashboard cards, pay-figure encryption, contract PDF | projects, MEAL, annual plans, proposals, donors, tasks, reports | media requests |
@@ -107,6 +108,18 @@ No `app/Http/Kernel.php`. Middleware aliases, routing, and exceptions are config
 - **Translatable model fields use the `{attribute}_{locale}` column convention** (e.g. `first_name_en` / `first_name_ar`, `title_en` / `title_ar`). The `HasTranslation` trait + accessors expose a single virtual attribute that resolves to the current locale. In queries/columns, build the physical column name with the `transColumn('first_name')` helper.
 - Every user-facing string goes through translations in **both** `resources/lang/en` and `resources/lang/ar`; no hard-coded UI text.
 - Helpers are autoloaded from `app/Support/helpers.php`: `transColumn`, `ar_digits`/`en_digits`, `formatDuration`, `esc`.
+
+### Sign-in (Fortify, security-critical)
+One sign-in for the whole hub, ported from hc-tracking (`app/Providers/FortifyServiceProvider.php`, actions in `app/Actions/Fortify`): password, then the authenticator app or an emailed code, trusted browsers, passkeys for password confirmation, Cloudflare Turnstile.
+- The login field accepts an email **or an HR employee username** (`AuthenticateWithPassword`).
+- Fortify's routes are **not** registered by Fortify (`Fortify::ignoreRoutes()`); `routes/auth.php` requires Fortify's route file inside the `/en` `/ar` locale group.
+- The rate limiters (`two-factor` hourly/daily caps, reset-link and code-resend limits) each need their own `by` key: limits sharing a key share one counter.
+- The two-factor requirement is added to Livewire's update-request middleware, so components on other pages cannot be driven by a user who still has to enrol.
+
+### Notifications (hub inbox)
+Every module notifies through one channel, `App\Notifications\AppDatabaseChannel` (also bound as Laravel's `database` driver), into the extended `notifications` table with `module`, kind, priority and subject, so one bell (`App\Livewire\Notifications\Bell`) shows them all.
+- A notification class implements `App\Notifications\InboxNotification` and uses `Concerns\RoutesToInbox` for the defaults, or is sent as `AppNotification` around a `NotificationPayload` (`key` + `params` rendered at display time, or ready-made `content`).
+- Every `module` value must be listed in `config/notifications.php` `inbox_modules`; a module that ports its notifications adds its entries there. Only `mutable` modules can be muted, and a `direct` notification is never silenced by a mute. `NotificationGrouper` may merge a new one into a recent unread row (`grouping_window_minutes`).
 
 ### Roles, permissions, cities & scoping (security-critical)
 - Spatie Permission, one catalogue in `config/access-control.php` for the whole hub. Roles are city-scoped for HR: `HR-SYR`, `HR-ALP`, `HR-HMS`, etc. The `City` table's `slug` holds the scope code (SYR/ALP/HMS/DMS/LAT/TAR); `code` holds the numeric id (000/001/...).
