@@ -2,10 +2,10 @@
 
 namespace Modules\Hr\Livewire\Forms\Employee;
 
-use Modules\Hr\Models\Course;
-use Modules\Hr\Models\Employee;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
+use Modules\Hr\Models\Course;
+use Modules\Hr\Models\Employee;
 
 class CourseForm extends Form
 {
@@ -100,7 +100,7 @@ class CourseForm extends Form
         unset($this->courses[$index]);
 
         if (isset($id)) {
-            $this->employee->courses()->findOrFail($id)->delete();
+            $this->employee->courses()->findOrFail((int) $id)->delete();
         }
         $this->courses = array_values($this->courses);
     }
@@ -116,7 +116,7 @@ class CourseForm extends Form
                 ->toArray();
 
             if (array_key_exists('id', $course) && isset($course['id'])) {
-                $this->course = $this->employee->courses()->findOrFail($course['id']);
+                $this->course = $this->employee->courses()->findOrFail((int) $course['id']);
                 $this->course->update($data);
             } else {
                 $data['employee_id'] = $this->employee->id;

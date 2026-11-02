@@ -2,10 +2,10 @@
 
 namespace Modules\Hr\Models;
 
-use Modules\Hr\Casts\EncryptedSalary;
 use App\Traits\HasTranslation;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Hr\Casts\EncryptedSalary;
 
 class ContractPayTier extends Model
 {
@@ -31,6 +31,7 @@ class ContractPayTier extends Model
         return $this->belongsTo(Contract::class);
     }
 
+    /** @return Attribute<string|null, string|null> */
     protected function condition(): Attribute
     {
         return Attribute::make(

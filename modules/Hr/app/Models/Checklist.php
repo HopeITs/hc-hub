@@ -4,6 +4,7 @@ namespace Modules\Hr\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -31,22 +32,26 @@ class Checklist extends Model
         'returned_at' => 'datetime',
     ];
 
-    public function employee()
+    /** @return BelongsTo<Employee, $this> */
+    public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
 
-    public function item()
+    /** @return BelongsTo<ChecklistItem, $this> */
+    public function item(): BelongsTo
     {
         return $this->belongsTo(ChecklistItem::class, 'item_id');
     }
 
-    public function delivered()
+    /** @return BelongsTo<Employee, $this> */
+    public function delivered(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'delivered_id');
     }
 
-    public function receiver()
+    /** @return BelongsTo<Employee, $this> */
+    public function receiver(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'receiver_id');
     }

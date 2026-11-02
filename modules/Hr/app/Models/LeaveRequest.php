@@ -3,8 +3,6 @@
 namespace Modules\Hr\Models;
 
 use App\Models\User;
-use Modules\Hr\Enums\LeaveRequestStatus;
-use Modules\Hr\Services\LeaveRequestPricing;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Carbon;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Services\LeaveRequestPricing;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -64,6 +64,7 @@ class LeaveRequest extends Model
         };
     }
 
+    /** @return BelongsTo<LeaveBalance, $this> */
     public function leaveBalance(): BelongsTo
     {
         return $this->belongsTo(LeaveBalance::class);
@@ -81,6 +82,7 @@ class LeaveRequest extends Model
         );
     }
 
+    /** @return BelongsTo<Employee, $this> */
     public function alternativeEmployee(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'alternative_employee_id');

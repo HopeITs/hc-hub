@@ -4,6 +4,7 @@ namespace Modules\Hr\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
@@ -25,12 +26,14 @@ class Course extends Model implements HasMedia
         'has_certificate' => 'boolean',
     ];
 
-    public function employee()
+    /** @return BelongsTo<Employee, $this> */
+    public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
 
-    public function category()
+    /** @return BelongsTo<CourseCategory, $this> */
+    public function category(): BelongsTo
     {
         return $this->belongsTo(CourseCategory::class, 'category_id');
     }

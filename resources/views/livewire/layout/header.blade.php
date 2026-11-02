@@ -16,7 +16,7 @@
 
 <nav id="app-navbar" dir="{{ $isRtl ? 'rtl' : 'ltr' }}"
     style="padding-top: env(safe-area-inset-top, 0px)"
-    class="fixed inset-x-0 top-0 z-30 w-screen bg-white md:w-full dark:bg-neutral-800 border-b border-neutral-200 dark:border-neutral-700">
+    class="fixed inset-x-0 top-0 z-30 w-screen bg-base md:w-full border-b border-line-soft">
 
     {{--
         Everything below `sm` is tightened purely to buy horizontal room. The row
@@ -100,7 +100,7 @@
 
                             <span
                                 class="absolute bottom-0.5 {{ $isRtl ? 'start-0.5' : 'end-0.5' }}
-                                         size-2 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+                                         size-2 rounded-full bg-ink-2 ring-2 ring-card"></span>
                         </span>
                     </button>
 

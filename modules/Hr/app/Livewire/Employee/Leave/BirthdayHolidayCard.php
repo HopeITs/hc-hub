@@ -3,11 +3,11 @@
 namespace Modules\Hr\Livewire\Employee\Leave;
 
 use App\Livewire\Concerns\WithFeedback;
+use Carbon\CarbonImmutable;
+use Livewire\Component;
 use Modules\Hr\Models\BirthdayHolidayChoice;
 use Modules\Hr\Models\Holiday;
 use Modules\Hr\Services\BirthdayHoliday;
-use Carbon\CarbonImmutable;
-use Livewire\Component;
 
 /**
  * The volunteer's birthday holiday and, for a direct manager, the moved days
@@ -41,7 +41,9 @@ class BirthdayHolidayCard extends Component
     {
         [$holidayId, $year] = array_map('intval', explode(':', $key, 2));
         $contract = auth()->user()?->profile?->latestActiveContract();
-        abort_unless($contract, 403);
+        if ($contract === null) {
+            abort(403);
+        }
 
         $this->validate(["picked.{$key}" => 'required|date']);
 

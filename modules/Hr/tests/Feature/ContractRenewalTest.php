@@ -730,8 +730,8 @@ class ContractRenewalTest extends TestCase
             ->get(route('contracts.renew', $source))
             ->getContent();
 
-        // resources/css/app.css: "a low-opacity #BE1F24 reads as pink, which is
-        // not allowed in this UI". Opacity-modified brand utilities are the way
+        // resources/css/app.css: "a low-opacity red reads as pink, which the
+        // identity forbids". Opacity-modified brand utilities are the way
         // that creeps back in, so pin it on both renewal surfaces.
         foreach (['bg-primary/', 'border-primary/', 'text-primary/'] as $tinted) {
             $this->assertStringNotContainsString($tinted, $modal, "The modal uses {$tinted}.");

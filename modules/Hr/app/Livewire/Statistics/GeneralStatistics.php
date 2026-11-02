@@ -2,8 +2,8 @@
 
 namespace Modules\Hr\Livewire\Statistics;
 
-use Modules\Hr\Models\Contract;
 use Livewire\Component;
+use Modules\Hr\Models\Contract;
 
 class GeneralStatistics extends Component
 {
@@ -23,7 +23,6 @@ class GeneralStatistics extends Component
     {
         $locale = app()->getLocale();
         $titleCol = $locale === 'ar' ? 'title_ar' : 'title_en';
-        $deptCol = $locale === 'ar' ? 'name_ar' : 'name_en';
 
         $user = auth()->user();
         if (! $user) {
@@ -42,7 +41,7 @@ class GeneralStatistics extends Component
                 ->first();
 
             $this->positionTitle = $this->contract?->position?->$titleCol ?? '—';
-            $this->departmentName = $this->contract?->position?->department?->$deptCol ?? '—';
+            $this->departmentName = $this->contract?->position?->department->name ?? '—';
             $this->joinedOn = $this->contract?->start_date ? date('d M Y', strtotime($this->contract->start_date)) : '—';
             $this->workEmail = $user->email ?? '—';
         } else {

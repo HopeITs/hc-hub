@@ -35,6 +35,7 @@ class Department extends Model
             ->dontSubmitEmptyLogs();
     }
 
+    /** @return Attribute<string|null, string|null> */
     protected function description(): Attribute
     {
         return Attribute::make(

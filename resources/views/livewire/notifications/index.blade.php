@@ -86,11 +86,11 @@
                     @if($state && $state['state'] !== 'info')
                         <p class="mt-1 flex flex-wrap items-center gap-x-2 text-caption">
                             @if($state['state'] === 'awaiting')
-                                <span class="rounded-full bg-neutral-100 px-2 py-0.5 font-semibold text-primary">@lang('general.notification-state.awaiting')</span>
+                                <x-status tone="attn" icon="alert" :label="__('general.notification-state.awaiting')" />
                             @elseif($state['state'] === 'handled')
-                                <span class="rounded-full bg-neutral-100 px-2 py-0.5 font-semibold text-secondary-medium">@lang('general.notification-state.handled')</span>
+                                <x-status tone="done" icon="check" :label="__('general.notification-state.handled')" />
                             @else
-                                <span class="rounded-full bg-neutral-100 px-2 py-0.5 font-semibold text-secondary-medium">@lang('general.notification-state.unavailable')</span>
+                                <x-status tone="stop" icon="ban" :label="__('general.notification-state.unavailable')" />
                             @endif
                             @if($state['status'])
                                 <span class="text-secondary-medium">@lang('general.notification-state.status', ['status' => $state['status']])</span>

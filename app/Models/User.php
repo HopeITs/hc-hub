@@ -76,6 +76,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
         return $this->locale ?: null;
     }
 
+    /** @return BelongsTo<Employee, $this> */
     public function profile(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'employee_id');
@@ -157,11 +158,13 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
         return $name !== '' ? $name : $this->email;
     }
 
+    /** @return HasMany<Folder, $this> */
     public function folders(): HasMany
     {
         return $this->hasMany(Folder::class, 'user_id');
     }
 
+    /** @return BelongsToMany<Folder, $this> */
     public function accessibleFolders(): BelongsToMany
     {
         return $this->belongsToMany(Folder::class);
@@ -373,7 +376,10 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser
                 return true;
             }
 
-            if ($this->permissions()->where('name', $permission)->exists()) {
+            // The direct grants are read once and checked in memory: one query
+            // per distinct permission was ~30 queries on a city HR's dashboard.
+            // Granting or revoking unsets this relation and forgets the memo.
+            if ($this->permissions->contains('name', $permission)) {
                 return true;
             }
 

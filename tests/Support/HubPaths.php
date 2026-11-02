@@ -23,6 +23,33 @@ final class HubPaths
         return [resource_path('views'), ...self::modules('resources/views')];
     }
 
+    /**
+     * The file behind a view path (e.g. 'livewire/dashboard/team-card.blade.php'),
+     * wherever it lives: platform first, as the view finder searches.
+     */
+    public static function view(string $relative): string
+    {
+        foreach (self::views() as $root) {
+            if (is_file($root.'/'.$relative)) {
+                return $root.'/'.$relative;
+            }
+        }
+
+        return resource_path('views/'.$relative);
+    }
+
+    /** The file behind a lang path (e.g. 'en/leaves.php'), platform first. */
+    public static function langFile(string $relative): string
+    {
+        foreach (self::lang() as $root) {
+            if (is_file($root.'/'.$relative)) {
+                return $root.'/'.$relative;
+            }
+        }
+
+        return lang_path($relative);
+    }
+
     /** @return list<string> lang/ and every modules/<Name>/lang */
     public static function lang(): array
     {

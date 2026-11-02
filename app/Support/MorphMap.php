@@ -7,10 +7,12 @@ use App\Models\City;
 use App\Models\Department;
 use App\Models\InAppFeedback;
 use App\Models\KnownDevice;
+use App\Models\NavigationPreference;
 use App\Models\NotificationMute;
 use App\Models\Permission;
 use App\Models\Program;
 use App\Models\Role;
+use App\Models\SavedDashboardLayout;
 use App\Models\SavedTableView;
 use App\Models\TaskAttempt;
 use App\Models\TrustedDevice;
@@ -130,6 +132,10 @@ final class MorphMap
         'news' => News::class,
         'in_app_feedback' => InAppFeedback::class,
         'saved_table_view' => SavedTableView::class,
+
+        // Dashboard and navigation preferences
+        'saved_dashboard_layout' => SavedDashboardLayout::class,
+        'navigation_preference' => NavigationPreference::class,
 
         // Hub inbox (notifications)
         'user_notification' => UserNotification::class,

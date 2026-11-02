@@ -34,7 +34,7 @@
 
         {{-- Label --}}
         <span
-            class="flex-1 text-body text-left  ms-2 rtl:me-2 rtl:text-right whitespace-nowrap text-inherit group-hover:text-inherit"
+            class="flex-1 text-body text-start ms-2 whitespace-nowrap text-inherit group-hover:text-inherit"
             x-show="!sidebarCollapsed || open"
         >
             {{ $title }}

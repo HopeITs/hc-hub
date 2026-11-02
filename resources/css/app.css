@@ -3,6 +3,12 @@
 @import '../../vendor/livewire/flux/dist/flux.css';
 
 @import "flowbite/src/themes/default";
+/* After Flowbite's theme, so every hue family resolves to a brand value. */
+@import './palette-lock.css';
+/* Shared component classes (chips, tags, buttons, fields, tables). */
+@import './components.css';
+/* The dashboard's tile grid (resources/js/dashboard/home-screen.js). */
+@import './dashboard.css';
 
 @plugin "flowbite/plugin";
 @source "../../node_modules/flowbite";
@@ -111,6 +117,20 @@
     }
 }
 
+/* ==================================================================
+   Visual identity — Hope Center, as implemented in media-request
+   (media-request/public/css/app.css is the reference).
+   ------------------------------------------------------------------
+   One flat red (#BE1F24) and the Hope Center neutrals. No other hue,
+   anywhere: not for statuses, charts, alerts or success messages
+   (palette-lock.css enforces it). Red has exactly three jobs: the
+   primary action, the current stage / current page, and what waits on
+   the viewer or is late. Status = icon + words + fill shape.
+
+   Every colour is a Tailwind theme variable, so it is also a utility
+   (bg-card, text-ink-2, border-line-soft …). Dark mode redefines the
+   same variables further down: the neutrals invert, the red stays.
+   ================================================================== */
 body {
     font-family: var(--font-sans);
     color: var(--color-neutral-800);
@@ -153,6 +173,8 @@ html[lang="ar"] body {
     --color-secondary-medium: #6d6e71;
     --color-secondary-light: #939598;
     --color-secondary-soft: #E6E7E8;
+    --color-secondary-line: #BCBEC0; /* = line */
+    --color-secondary-mist: #F3F3F4; /* = soft */
 
     --color-neutral-50: #F3F3F4; /* media-request --soft / --hover */
     --color-neutral-100: #EEEFF0; /* a step between --soft and --surface, so hover:bg-neutral-100 on bg-neutral-50 shows (Hope Center grey; media-request has none here) */
@@ -171,6 +193,7 @@ html[lang="ar"] body {
     --color-neutral-950: #161617; /* dark --bg */
 
 
+    /* Browser black is not a brand colour; "black" text is ink. */
     --color-black: #414042;
     --tag-remove-btn-bg--hover: #BE1F24;
 
@@ -179,6 +202,7 @@ html[lang="ar"] body {
        sm = its --shadow-sm, lg = its --shadow (menus, dialogs). */
     --shadow-xs: 0 1px 2px 0 rgba(65, 64, 66, 0.06);
     --shadow-sm: 0 1px 3px rgba(65, 64, 66, 0.08);
+    --shadow: 0 6px 24px rgba(65, 64, 66, 0.14); /* media-request --shadow (popovers, dialogs) */
     --shadow-md: 0 2px 8px -2px rgba(65, 64, 66, 0.1);
     --shadow-lg: 0 6px 24px rgba(65, 64, 66, 0.14);
 
@@ -212,6 +236,8 @@ html[lang="ar"] body {
     --color-field: #FFFFFF; /* --field */
     --color-base: #FFFFFF; /* --bg: top bar, sidebar */
     --color-focus: #414042; /* --focus */
+    --color-ring: rgb(65 64 66 / 0.12); /* 3px ring around a focused input */
+    --color-backdrop: rgb(20 19 21 / 0.45); /* behind dialogs */
 
     /* Legacy light greys that had only arbitrary-hex classes; tokens keep
        their exact light value and give them a dark one. */
@@ -267,6 +293,8 @@ html[lang="ar"] body {
         --color-field: #1B1B1D;
         --color-base: #161617;
         --color-focus: #E6E7E8;
+        --color-ring: rgb(230 231 232 / 0.18);
+        --color-backdrop: rgb(0 0 0 / 0.6);
 
         --color-accent: #E6E7E8;
         --color-accent-content: #E6E7E8;
@@ -276,6 +304,8 @@ html[lang="ar"] body {
         --color-secondary-medium: #BCBEC0;
         --color-secondary-light: #939598;
         --color-secondary-soft: #2A2A2D;
+        --color-secondary-line: #4A4A4E;
+        --color-secondary-mist: #1E1E20;
 
         --color-neutral-50: #1E1E20;
         --color-neutral-100: #2A2A2D;
@@ -324,6 +354,8 @@ html[lang="ar"] body {
     --color-field: #1B1B1D;
     --color-base: #161617;
     --color-focus: #E6E7E8;
+    --color-ring: rgb(230 231 232 / 0.18);
+    --color-backdrop: rgb(0 0 0 / 0.6);
 
     --color-accent: #E6E7E8;
     --color-accent-content: #E6E7E8;
@@ -333,6 +365,8 @@ html[lang="ar"] body {
     --color-secondary-medium: #BCBEC0;
     --color-secondary-light: #939598;
     --color-secondary-soft: #2A2A2D;
+    --color-secondary-line: #4A4A4E;
+    --color-secondary-mist: #1E1E20;
 
     --color-neutral-50: #1E1E20;
     --color-neutral-100: #2A2A2D;
@@ -422,20 +456,7 @@ html[lang="ar"] body {
     }
 }
 
-@layer theme {
-    .dark {
-        --color-accent: var(--color-white);
-        --color-accent-content: var(--color-white);
-        --color-accent-foreground: var(--color-neutral-800);
-    }
-
-    .tagify {
-        --tags-focus-border-color: var(--color-primary) !important;
-    }
-}
-
 @layer base {
-
     *,
     ::after,
     ::before,
@@ -443,16 +464,92 @@ html[lang="ar"] body {
     ::file-selector-button {
         border-color: var(--color-gray-200, currentColor);
     }
+
+    html {
+        background-color: var(--color-soft);
+        -webkit-text-size-adjust: 100%;
+    }
+
+    /* Rendering: real kerning, no faked bold/italic (Somar Sans ships every
+       weight in use) and the smoothest glyph drawing each system offers. */
+    body {
+        font-family: 'SomarSans', sans-serif;
+        color: var(--color-ink);
+        background-color: var(--color-soft);
+
+        /* The type scale's base (14px, the hub's decision; Arabic line-height 1.7 below). */
+        font-size: var(--text-body);
+        line-height: var(--text-body--line-height);
+        text-rendering: optimizeLegibility;
+        font-kerning: normal;
+        font-synthesis: none;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    h1 {
+        font-size: var(--text-h1);
+        line-height: var(--text-h1--line-height);
+        font-weight: 800;
+        text-wrap: balance;
+    }
+
+    table {
+        font-size: var(--text-table);
+    }
+
+    th {
+        font-size: var(--text-th);
+    }
+
 }
+
+
+/* Colours the browser paints on its own — blue by default in every engine. */
 :root {
+    accent-color: var(--color-primary); /* native checkbox / radio / range / progress */
 
     --livewire-progress-bar-color: var(--color-primary);
 
     /* Custom overlay scrollbar (public/js/custom-scrollbar.js) */
     --csb-color: var(--color-line);
     --csb-hover: var(--color-ink-3);
-
 }
+
+::selection {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+}
+
+/* Focus: 2px solid ink outline, 2px offset — never red. Unlayered on purpose,
+   so it outranks the focus-visible:outline-primary / ring-primary utilities
+   still in the views (an unlayered rule beats any layered one). */
+:focus-visible {
+    outline-color: var(--color-focus);
+    outline-offset: 2px;
+    --tw-ring-color: var(--color-focus);
+}
+
+/* Inputs on focus: ink border + 3px ring. An invalid field keeps its red border. */
+:is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="button"], [type="submit"], [type="color"]), select, textarea):focus:not([aria-invalid="true"]) {
+    border-color: var(--color-focus);
+    box-shadow: 0 0 0 3px var(--color-ring);
+    outline: none;
+}
+
+/* Tabular figures for numbers in tables, counters and dates. Tailwind's
+   `tabular-nums` works too; `num` also isolates the run inside RTL text. */
+@utility num {
+    font-variant-numeric: tabular-nums;
+    unicode-bidi: isolate;
+}
+
+@layer theme {
+    .tagify {
+        --tags-focus-border-color: var(--color-focus) !important;
+    }
+}
+
 [data-flux-field]:not(ui-radio, ui-checkbox) {
     @apply grid gap-2;
 }
@@ -461,11 +558,7 @@ html[lang="ar"] body {
     @apply !mb-0 !leading-tight;
 }
 
-input:focus[data-flux-control],
-textarea:focus[data-flux-control],
-select:focus[data-flux-control] {
-    @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
-}
+/* Flux controls on focus follow the input rule above (ink border + ring). */
 
 
 [type="text"],
@@ -514,15 +607,15 @@ input[type="date"]::-moz-focus-inner {
 /* Font family/size are left untouched — only colours change.          */
 /* ------------------------------------------------------------------ */
 select option {
-    background-color: var(--color-card);
-    color: var(--color-secondary-dark);
+    background-color: var(--color-field);
+    color: var(--color-ink);
 }
 
 select option:hover,
 select option:focus,
 select option:checked {
-    background-color: var(--color-secondary-dark);
-    color: var(--color-card);
+    background-color: var(--color-ink);
+    color: var(--color-on-ink);
 }
 
 @layer components {
@@ -532,9 +625,9 @@ select option:checked {
         --clock-timepicker-accent-color: var(--color-primary);
         --clock-timepicker-font-family: 'SomarSans', 'Lato', ui-sans-serif, system-ui, sans-serif;
         --clock-timepicker-popup-background: var(--color-card);
-        --clock-timepicker-popup-border: 1px solid var(--color-neutral-200);
-        --clock-timepicker-popup-border-radius: 0.375rem;
-        --clock-timepicker-popup-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --clock-timepicker-popup-border: 1px solid var(--color-line-soft);
+        --clock-timepicker-popup-border-radius: var(--radius-control);
+        --clock-timepicker-popup-shadow: var(--shadow);
         --clock-timepicker-popup-size: 240px;
         --clock-timepicker-face-color: var(--color-neutral-100);
         --clock-timepicker-face-hover-color: var(--color-neutral-200);
@@ -542,7 +635,7 @@ select option:checked {
         --clock-timepicker-outer-numbers-color: var(--color-neutral-800);
         --clock-timepicker-inner-numbers-color: var(--color-neutral-500);
         --clock-timepicker-header-background: var(--color-primary);
-        --clock-timepicker-header-font-color: #ffffff;
+        --clock-timepicker-header-font-color: var(--color-on-brand);
         --clock-timepicker-header-selection-background: rgba(255, 255, 255, 0.25);
         --clock-timepicker-button-color: var(--color-primary);
         --clock-timepicker-button-ok-color: var(--color-primary);
@@ -558,9 +651,9 @@ select option:checked {
         line-height: 1.25rem;
         color: var(--color-ink);
         background-color: var(--color-field);
-        border: 1px solid var(--color-line);
-        border-radius: 0.375rem;
-        box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        border: 1.5px solid var(--color-line);
+        border-radius: var(--radius-control);
+        box-shadow: none;
         transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         cursor: pointer;
     }
@@ -570,13 +663,13 @@ select option:checked {
     }
 
     clock-timepicker > input:hover:not(:disabled) {
-        border-color: var(--color-neutral-400);
+        border-color: var(--color-ink-2);
     }
 
     clock-timepicker > input:focus {
         outline: none;
-        border-color: var(--color-primary);
-        box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-secondary-light) 40%, transparent);
+        border-color: var(--color-focus);
+        box-shadow: 0 0 0 3px var(--color-ring);
     }
 
     clock-timepicker > input:disabled {
@@ -613,23 +706,23 @@ select option:checked {
     .time-input-native::-webkit-datetime-edit-hour-field:focus,
     .time-input-native::-webkit-datetime-edit-minute-field:focus,
     .time-input-native::-webkit-datetime-edit-second-field:focus {
-        background-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
-        color: var(--color-primary);
+        background-color: var(--color-ink);
+        color: var(--color-on-ink);
         outline: none;
         border-radius: 0.125rem;
     }
 
     .select2-container--default .select2-selection--single {
-        height: 37.6px !important;
+        height: 46px !important;
         padding: 0.5rem 0.75rem !important;
         font-size: 0.875rem !important;
         color: var(--color-ink) !important;
         background-color: var(--color-field) !important;
-        border: 1px solid var(--color-line) !important;
-        border-radius: 0.375rem !important;
+        border: 1.5px solid var(--color-line) !important;
+        border-radius: var(--radius-control) !important;
 
 
-        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1) !important;
+        box-shadow: none !important;
 
         display: flex !important;
         align-items: center !important;
@@ -647,30 +740,30 @@ select option:checked {
 
     .select2-container--default.select2-container--focus .select2-selection--single,
     .select2-container--default.select2-container--open .select2-selection--single {
-        border-color: var(--color-primary) !important;
-        box-shadow: none !important;
+        border-color: var(--color-focus) !important;
+        box-shadow: 0 0 0 3px var(--color-ring) !important;
         outline: none !important;
     }
 
 
-    /* Result option — default (no hover): white bg, #58595b text */
+    /* Result option — default (no hover): field bg, ink text */
     .select2-container--default .select2-results__option {
-        background-color: var(--color-card) !important;
-        color: var(--color-secondary-dark) !important;
+        background-color: var(--color-field) !important;
+        color: var(--color-ink) !important;
         padding-inline-start: 12px !important; /* double the default 6px start padding */
     }
 
-    /* Hover / keyboard-highlighted option: #58595b bg, white text */
+    /* Hover / keyboard-highlighted option: solid ink fill, on-ink text */
     .select2-container--default .select2-results__option--highlighted,
     .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
-        background-color: var(--color-secondary-dark) !important;
-        color: var(--color-card) !important;
+        background-color: var(--color-ink) !important;
+        color: var(--color-on-ink) !important;
     }
 
     /* Currently-selected option (when not hovered) follows the default look */
     .select2-container--default .select2-results__option--selected {
-        background-color: var(--color-card) !important;
-        color: var(--color-secondary-dark) !important;
+        background-color: var(--color-field) !important;
+        color: var(--color-ink) !important;
     }
 
     /* Only when the results list actually scrolls (flagged with .results--scroll
@@ -746,7 +839,7 @@ select option:checked {
 
 
     .select2-container--default .select2-selection--single .select2-selection__arrow {
-        background-image: url("data:image/svg+xml,%3csvg aria-hidden='true' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 10 6'%3e %3cpath stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 1 4 4 4-4'/%3e %3c/svg%3e") !important;
+        background-image: url("data:image/svg+xml,%3csvg aria-hidden='true' xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 10 6'%3e %3cpath stroke='%23939598' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 1 4 4 4-4'/%3e %3c/svg%3e") !important;
         background-repeat: no-repeat !important;
         background-size: 0.75em 0.75em !important;
         height: 100% !important;
@@ -802,7 +895,7 @@ select option:checked {
     }
 
     button.org-id-card:focus-visible {
-        outline: 2px solid var(--color-primary);
+        outline: 2px solid var(--color-focus);
         outline-offset: 2px;
     }
 
@@ -1283,7 +1376,7 @@ li:has(> ul:not(.hidden)) .nav-chevron {
         margin-inline: -1rem;
         padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
         background: var(--color-base);
-        border-top: 1px solid var(--color-neutral-200);
+        border-top: 1px solid var(--color-line-soft);
     }
 
     .m1-action-bar > * {
@@ -1378,7 +1471,7 @@ li:has(> ul:not(.hidden)) .nav-chevron {
    Dialogs and sheets (z-50) cover it. */
 @media (max-width: 47.99rem) {
     body:has(.app-bottom-nav) #main-content {
-        padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px));
     }
 
     html:has(.m1-action-bar) .app-bottom-nav,

@@ -2,10 +2,10 @@
 
 namespace Modules\Hr\Livewire\Forms\Employee;
 
-use Modules\Hr\Models\Employee;
-use Modules\Hr\Models\Experience;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\Experience;
 
 class ExperienceForm extends Form
 {
@@ -96,7 +96,7 @@ class ExperienceForm extends Form
 
         foreach ($this->experiences as $index => $experienceData) {
             if (array_key_exists('id', $experienceData) && isset($experienceData['id'])) {
-                $this->experience = $this->employee->experiences()->findOrFail($experienceData['id']);
+                $this->experience = $this->employee->experiences()->findOrFail((int) $experienceData['id']);
                 $this->experience->update(collect($experienceData)
                     ->except(['exp_attachment', 'file_name', 'id'])
                     ->toArray());

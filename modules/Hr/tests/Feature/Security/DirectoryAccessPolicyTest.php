@@ -2,12 +2,12 @@
 
 namespace Modules\Hr\Tests\Feature\Security;
 
-use App\Livewire\Dashboard\Index as DashboardIndex;
 use App\Models\City;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Dashboard\TeamCard;
 use Modules\Hr\Livewire\Employee\EmployeeProfile;
 use Modules\Hr\Livewire\Position\Directory;
 use Modules\Hr\Livewire\Position\OrgChart;
@@ -432,13 +432,13 @@ class DirectoryAccessPolicyTest extends TestCase
         $this->makeContractFor($formerDeputy, ['position_id' => $deputyPosition->id, 'is_active' => false]);
 
         $staffTeam = Livewire::actingAs($this->makeUser($this->aleppo, 'employee', [], $viewerEmployee))
-            ->test(DashboardIndex::class)
-            ->viewData('teamMembers');
+            ->test(TeamCard::class)
+            ->viewData('members');
         $this->assertFalse($staffTeam->contains('id', $formerDeputy->id));
 
         $managementTeam = Livewire::actingAs($this->makeUser($this->aleppo, 'general-manager', [], $viewerEmployee))
-            ->test(DashboardIndex::class)
-            ->viewData('teamMembers');
+            ->test(TeamCard::class)
+            ->viewData('members');
         $this->assertTrue($managementTeam->contains('id', $formerDeputy->id));
     }
 

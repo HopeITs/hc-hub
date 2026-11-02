@@ -2,10 +2,6 @@
 
 namespace Modules\Hr\Livewire\Forms\Employee;
 
-use Modules\Hr\Enums\BadgeSubtype;
-use Modules\Hr\Enums\BadgeType;
-use Modules\Hr\Models\Badge;
-use Modules\Hr\Models\Employee;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -13,6 +9,10 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Form;
+use Modules\Hr\Enums\BadgeSubtype;
+use Modules\Hr\Enums\BadgeType;
+use Modules\Hr\Models\Badge;
+use Modules\Hr\Models\Employee;
 
 class BadgeForm extends Form
 {
@@ -140,7 +140,9 @@ class BadgeForm extends Form
                 ->badges()
                 ->find((int) $id);
 
-            abort_unless($badge, 404);
+            if ($badge === null) {
+                abort(404);
+            }
 
             Gate::authorize('delete', $badge);
             $badge->delete();
@@ -207,7 +209,9 @@ class BadgeForm extends Form
 
                 $existingBadge = $this->employee->badges()->find((int) $badge['id']);
 
-                abort_unless($existingBadge, 404);
+                if ($existingBadge === null) {
+                    abort(404);
+                }
 
                 $existingBadge->update($values);
             });

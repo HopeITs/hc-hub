@@ -3,13 +3,15 @@
 namespace Modules\Hr\Livewire\Dashboard;
 
 use App\Livewire\Concerns\HandlesLoadFailure;
+use App\Livewire\Concerns\IsDashboardTile;
+use Livewire\Component;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Support\StatisticsCache;
-use Livewire\Component;
 
 class SalaryPerEmployeeStatistics extends Component
 {
     use HandlesLoadFailure;
+    use IsDashboardTile;
 
     /**
      * salary_per is stored as a tinyint (see the contracts migration:

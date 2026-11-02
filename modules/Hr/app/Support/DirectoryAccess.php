@@ -2,12 +2,12 @@
 
 namespace Modules\Hr\Support;
 
-use Modules\Hr\Models\Contract;
-use Modules\Hr\Models\Employee;
 use App\Models\User;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Employee;
 
 /**
  * Who may see a colleague in the in-app directory, and how much of them.
@@ -96,6 +96,11 @@ final class DirectoryAccess
     /**
      * Restrict an employee query to the rows $user may see at the Directory
      * tier. The query form of canSeeDirectory(); keep the two in step.
+     *
+     * @template TModel of \Illuminate\Database\Eloquent\Model
+     *
+     * @param  Builder<TModel>  $employees
+     * @return Builder<TModel>
      */
     public static function constrain(Builder $employees, ?User $user): Builder
     {

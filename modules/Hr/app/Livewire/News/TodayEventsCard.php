@@ -2,13 +2,16 @@
 
 namespace Modules\Hr\Livewire\News;
 
-use Modules\Hr\Models\Employee;
-use Modules\Hr\Models\News;
+use App\Livewire\Concerns\IsDashboardTile;
 use Carbon\Carbon;
 use Livewire\Component;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\News;
 
 class TodayEventsCard extends Component
 {
+    use IsDashboardTile;
+
     public array $events = [];
 
     public function mount(): void

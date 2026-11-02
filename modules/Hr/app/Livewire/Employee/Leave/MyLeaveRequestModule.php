@@ -2,20 +2,11 @@
 
 namespace Modules\Hr\Livewire\Employee\Leave;
 
-use Modules\Hr\Enums\LeaveRequestStatus;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Concerns\GuardsModalClose;
 use App\Livewire\Concerns\HandlesLoadFailure;
 use App\Livewire\Concerns\TracksTaskAttempt;
 use App\Livewire\Concerns\WithFeedback;
-use Modules\Hr\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
-use Modules\Hr\Livewire\Forms\LeaveRequestForm;
-use Modules\Hr\Models\LeaveBalance;
-use Modules\Hr\Models\LeaveRequest;
-use Modules\Hr\Services\LeaveAlternativeEmployees;
-use Modules\Hr\Services\LeaveNotificationService;
-use Modules\Hr\Services\TeamCoverage;
-use Modules\Hr\Support\Leave\LeaveQuote;
 use Blade;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -26,6 +17,15 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
+use Modules\Hr\Livewire\Forms\LeaveRequestForm;
+use Modules\Hr\Models\LeaveBalance;
+use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Services\LeaveAlternativeEmployees;
+use Modules\Hr\Services\LeaveNotificationService;
+use Modules\Hr\Services\TeamCoverage;
+use Modules\Hr\Support\Leave\LeaveQuote;
 use Throwable;
 
 class MyLeaveRequestModule extends Component
@@ -57,6 +57,14 @@ class MyLeaveRequestModule extends Component
     /** C2: ?new=1 (the header's New button) opens the new-request dialog once. */
     #[Url(as: 'new', except: false)]
     public bool $startNew = false;
+
+    /**
+     * With ?new=1, ?date=Y-m-d (the dashboard calendar's "Request leave for
+     * this day") prefills the new request's dates. Client input: anything but
+     * a real date from today on is ignored, and the form validates as usual.
+     */
+    #[Url(as: 'date', except: '')]
+    public string $startDate = '';
 
     public string $statusFilter = 'all';
 
@@ -92,7 +100,10 @@ class MyLeaveRequestModule extends Component
         if ($this->startNew) {
             $this->startNew = false;
             $this->create();
+            $this->prefillStartDate();
         }
+
+        $this->startDate = '';
     }
 
     public function setActiveTab(string $status)
@@ -230,7 +241,7 @@ class MyLeaveRequestModule extends Component
         $balance = auth()->user()->profile?->latestActiveContract()
             ?->leaveBalances()
             ->with('leaveType')
-            ->find($value);
+            ->find((int) $value);
 
         if ($balance && ! $balance->isAnnual()) {
             $this->form->type = 'day';
@@ -502,6 +513,21 @@ class MyLeaveRequestModule extends Component
 
             return null;
         }
+    }
+
+    private function prefillStartDate(): void
+    {
+        $date = preg_match('/^\d{4}-\d{2}-\d{2}$/', $this->startDate) === 1
+            ? Carbon::createFromFormat('!Y-m-d', $this->startDate)
+            : null;
+
+        if (! $date || $date->format('Y-m-d') !== $this->startDate || $date->lt(today())) {
+            return;
+        }
+
+        $this->form->start_at = $this->form->end_at = $this->form->leave_date = $this->startDate;
+        // A prefilled date is not an edit: closing the form untouched asks nothing.
+        $this->markClean();
     }
 
     private function finishSave(LeaveRequest $leaveRequest, string $kind): void

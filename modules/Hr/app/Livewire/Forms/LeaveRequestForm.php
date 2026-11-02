@@ -2,17 +2,6 @@
 
 namespace Modules\Hr\Livewire\Forms;
 
-use Modules\Hr\Enums\LeaveRequestStatus;
-use Modules\Hr\Exceptions\LeaveDecisionAlreadyMade;
-use Modules\Hr\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
-use Modules\Hr\Models\Employee;
-use Modules\Hr\Models\LeaveBalance;
-use Modules\Hr\Models\LeaveRequest;
-use Modules\Hr\Services\LeaveAlternativeEmployees;
-use Modules\Hr\Services\LeaveDecisionAuthority;
-use Modules\Hr\Services\LeaveRequestPricing;
-use Modules\Hr\Support\Leave\LeaveQuote;
-use Modules\Hr\Support\Leave\LeaveWindow;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Contracts\Cache\LockTimeoutException;
@@ -24,6 +13,17 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 use LogicException;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Exceptions\LeaveDecisionAlreadyMade;
+use Modules\Hr\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\LeaveBalance;
+use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Services\LeaveAlternativeEmployees;
+use Modules\Hr\Services\LeaveDecisionAuthority;
+use Modules\Hr\Services\LeaveRequestPricing;
+use Modules\Hr\Support\Leave\LeaveQuote;
+use Modules\Hr\Support\Leave\LeaveWindow;
 use Throwable;
 
 class LeaveRequestForm extends Form
@@ -390,7 +390,7 @@ class LeaveRequestForm extends Form
         $activeContract = $this->targetEmployee()?->latestActiveContract();
         $leaveBalance = $activeContract?->leaveBalances()
             ->with(['leaveType', 'contract.position.center'])
-            ->find($this->leave_balance_id);
+            ->find((int) $this->leave_balance_id);
 
         if (! $leaveBalance) {
             throw ValidationException::withMessages([
@@ -508,7 +508,7 @@ class LeaveRequestForm extends Form
             $balance = $requester->latestActiveContract()
                 ?->leaveBalances()
                 ->with(['leaveType', 'contract.position.center'])
-                ->find($this->leave_balance_id);
+                ->find((int) $this->leave_balance_id);
 
             $editing = $this->leaveRequest?->exists ? $this->leaveRequest : null;
 

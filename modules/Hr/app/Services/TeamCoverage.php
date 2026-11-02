@@ -2,17 +2,17 @@
 
 namespace Modules\Hr\Services;
 
+use App\Models\User;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use InvalidArgumentException;
 use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\LeaveRequest;
 use Modules\Hr\Models\Position;
-use App\Models\User;
 use Modules\Hr\Support\DirectoryAccess;
-use Carbon\CarbonImmutable;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
-use InvalidArgumentException;
 
 /**
  * Whose absences a viewer may see, at which level, and what the team's
@@ -177,7 +177,7 @@ final class TeamCoverage
                 }
             });
 
-        return array_map(fn (array $people) => collect($people)->sortBy('name')->values()->all(), $byDate);
+        return array_map(fn (array $people): array => array_values(collect($people)->sortBy('name')->all()), $byDate);
     }
 
     /**
@@ -746,7 +746,7 @@ final class TeamCoverage
 
     private function governorate(Position $position): ?int
     {
-        $cityId = $position->center?->city_id ?? $position->city_id;
+        $cityId = $position->center !== null ? $position->center->city_id : $position->city_id;
 
         return $cityId === null ? null : (int) $cityId;
     }
