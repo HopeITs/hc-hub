@@ -402,34 +402,31 @@
     .dk-seg-fill .dk-seg-l { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dk-seg-fill .dk-num { flex: none; }
 
-    /* At a glance: a grid of figure tiles that always fills the card: three columns (two rows of six) from M to W, one row at XL. */
-    .dk-pb > .dk-glance { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-    .dk-glance > li { display: flex; min-width: 0; min-height: 0; background: var(--paper); container-type: inline-size; }
-    .dk-glance > li:last-child:nth-child(odd) { grid-column: span 2; }
-    .dk-gl-a { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 10px 16px; color: inherit; text-decoration: none; transition: background .15s; }
-    a.dk-gl-a:hover { background: var(--tint); }
-    a.dk-gl-a:hover strong { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
-    .dk-gl-a strong { font-size: clamp(22px, 17cqi, 44px); font-weight: 800; letter-spacing: -.02em; line-height: 1; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
+    /* At a glance: one typographic row of figures split by hairlines, no boxes; wraps to two or three per line on narrow cards. */
+    .dk-pb > .dk-glance { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: center; row-gap: 16px; margin: 0; padding: 0; list-style: none; }
+    .dk-glance > li { display: flex; min-width: 0; padding-inline: 16px; border-inline-start: 1px solid var(--line); }
+    .dk-glance > li:nth-child(2n + 1) { border-inline-start: 0; padding-inline-start: 0; }
+    .dk-gl-a { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-block: 4px; border-radius: 8px; color: inherit; text-decoration: none; }
+    a.dk-gl-a:hover strong { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+    a.dk-gl-a:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 4px; }
+    .dk-gl-a strong { font-size: clamp(26px, 4.4cqi, 44px); font-weight: 800; letter-spacing: -.03em; line-height: 1; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
     .dk-gl-l { font-size: 12.5px; line-height: 1.35; color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    .dk-gl-d { align-self: flex-start; display: block; height: 20px; line-height: 20px; padding-inline: 7px; border-radius: 999px; background: var(--sunk); font-size: 11.5px; font-weight: 700; color: var(--ink-3); white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
-    .dk-gl-d.dk-good { color: var(--good); background: var(--good-soft); }
-    .dk-gl-d.dk-bad { color: var(--bad); background: var(--bad-soft); }
+    .dk-gl-d { font-size: 12px; font-weight: 700; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dk-gl-d.dk-good { color: var(--good); }
+    .dk-gl-d.dk-bad { color: var(--bad); }
     @container pb (min-width: 420px) {
         .dk-pb > .dk-glance { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .dk-glance > li:last-child:nth-child(odd) { grid-column: auto; }
-        .dk-glance > li:last-child:nth-child(3n + 1) { grid-column: span 3; }
-        .dk-glance > li:last-child:nth-child(3n + 2) { grid-column: span 2; }
+        .dk-glance > li:nth-child(2n + 1) { border-inline-start: 1px solid var(--line); padding-inline-start: 16px; }
+        .dk-glance > li:nth-child(3n + 1) { border-inline-start: 0; padding-inline-start: 0; }
         .dk-pb > .dk-glance:is([data-figs="2"], [data-figs="4"]) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .dk-glance:is([data-figs="2"], [data-figs="4"]) > li { grid-column: auto !important; }
+        .dk-glance:is([data-figs="2"], [data-figs="4"]) > li:nth-child(2n + 1) { border-inline-start: 0; padding-inline-start: 0; }
+        .dk-glance:is([data-figs="2"], [data-figs="4"]) > li:nth-child(2n) { border-inline-start: 1px solid var(--line); padding-inline-start: 16px; }
     }
-    @container pb (min-width: 560px) {
-        .dk-pb > .dk-glance:is([data-figs="1"], [data-figs="2"], [data-figs="3"], [data-figs="4"]) { grid-template-columns: repeat(var(--figs), minmax(0, 1fr)); }
-    }
-    /* One row only on the full-width card; L and W keep three columns, two rows. */
-    @container pb (min-width: 1000px) {
-        .dk-pb > .dk-glance { grid-template-columns: repeat(var(--figs), minmax(0, 1fr)); }
-        .dk-glance > li { grid-column: auto !important; }
-        .dk-gl-a { padding-inline: 20px; }
+    /* One row on wide cards. */
+    @container pb (min-width: 860px) {
+        .dk-pb > .dk-glance, .dk-pb > .dk-glance:is([data-figs]) { grid-template-columns: repeat(var(--figs), minmax(0, 1fr)); }
+        .dk-glance > li, .dk-glance:is([data-figs]) > li:nth-child(n) { border-inline-start: 1px solid var(--line); padding-inline: 20px; }
+        .dk-glance > li:first-child, .dk-glance:is([data-figs]) > li:first-child { border-inline-start: 0; padding-inline-start: 0; }
     }
 
     /* Waiting on others: kind icon · what is stuck and since when · days waiting and Poke. */

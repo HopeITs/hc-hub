@@ -164,7 +164,7 @@ new class extends Component {
     $pg = $this->paginate($list, self::PerPage);
 @endphp
 
-<x-desk.panel :facets="$pg['facets']" :filtered="$state !== ''" id="matrix" register="reports.monthly-matrix" :size="$size" :index="$index" :total="$total" :count="($counts['late'] ?? 0) > 0 ? $counts['late'] : null">
+<x-desk.panel :facets="$pg['facets']" :filtered="$state !== ''" id="matrix" register="reports.monthly-matrix" :size="$size" :cols="$gridCols" :height="$gridRows" :index="$index" :total="$total" :count="($counts['late'] ?? 0) > 0 ? $counts['late'] : null">
     <x-slot:filters>
         <div class="contents" data-filter-defaults='{"state":""}'>
             <x-ui.header-filter-select :label="__('desk.facet.status')" wire:model="state" :value="$state" deferred>
