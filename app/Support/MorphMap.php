@@ -44,6 +44,12 @@ use Modules\Hr\Models\Position;
 use Modules\Hr\Models\ProfileChangeRequest;
 use Modules\Hr\Models\Relative;
 use Modules\Hr\Models\TerminationReason;
+use Modules\Media\Models\MediaAssistantLesson;
+use Modules\Media\Models\MediaAssistantLog;
+use Modules\Media\Models\MediaDashboard;
+use Modules\Media\Models\MediaProofread;
+use Modules\Media\Models\MediaRequest;
+use Modules\Media\Models\MediaRequestComment;
 
 /**
  * The hub's global, enforced morph map (Relation::enforceMorphMap).
@@ -120,5 +126,13 @@ final class MorphMap
         'news' => News::class,
         'in_app_feedback' => InAppFeedback::class,
         'saved_table_view' => SavedTableView::class,
+
+        // Media requests
+        'media_request' => MediaRequest::class,
+        'media_request_comment' => MediaRequestComment::class,
+        'media_assistant_lesson' => MediaAssistantLesson::class,
+        'media_assistant_log' => MediaAssistantLog::class,
+        'media_dashboard' => MediaDashboard::class,
+        'media_proofread' => MediaProofread::class,
     ];
 }

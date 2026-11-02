@@ -7,6 +7,7 @@ parameters:
     paths:
         - app/
         - modules/Hr/app/
+        - modules/Media/app/
 
     level: 7
 
@@ -14,6 +15,7 @@ parameters:
     databaseMigrationsPath:
         - database/migrations
         - modules/Hr/database/migrations
+        - modules/Media/database/migrations
 
     # Existing HR code is grandfathered in phpstan-baseline.neon. New code
     # (Tracking, Media and anything added to HR) must pass level 7 outright:

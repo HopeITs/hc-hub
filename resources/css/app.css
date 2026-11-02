@@ -16,6 +16,9 @@
 /* select2 is required by 20+ Blade views; its stylesheet must load globally. */
 @import "select2/dist/css/select2.min.css";
 
+/* Media requests (modules/Media): media-request's own stylesheet, every rule scoped to .mr. */
+@import '../../modules/Media/resources/css/media.css';
+
 /* ------------------------------------------------------------------
    Somar Sans — the same files and faces as media-request (the brand's
    source of truth): its hinted TTFs (v1.002) for 400/500/600/700/800,

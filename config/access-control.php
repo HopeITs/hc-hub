@@ -51,6 +51,9 @@ return [
 
     'role_baselines' => [
         'general-manager' => [
+            'media.requests.view-own', 'media.requests.create', 'media.requests.work',
+            'media.requests.approve', 'media.requests.manage', 'media.requests.view-log',
+            'media.requests.export',
             'hr.statistics.view', 'hr.employees.view', 'hr.employees.create', 'hr.employees.update', 'hr.employees.export',
             'hr.contracts.view', 'hr.contracts.create', 'hr.contracts.update', 'hr.contracts.export',
             'hr.programs.view', 'hr.programs.create', 'hr.programs.update', 'hr.centers.view',
@@ -64,6 +67,9 @@ return [
             'hr.badges.view',
         ],
         'manager' => [
+            'media.requests.view-own', 'media.requests.create', 'media.requests.work',
+            'media.requests.approve', 'media.requests.manage', 'media.requests.view-log',
+            'media.requests.export',
             // Read-only, and only their direct reports' contracts (G-C-8):
             // see Contract::scopeVisibleTo().
             'hr.contracts.view',
@@ -79,6 +85,11 @@ return [
             'hr.leaves.create', 'hr.leaves.update', 'hr.archives.view',
             'hr.archives.create', 'hr.archives.update', 'hr.archives.delete', 'hr.archives.share',
             'hr.archives.download', 'hr.checklists.view-own', 'hr.project-basics.view',
+            // Media requests: approving, working and managing are bound to the
+            // person by MediaRequestPolicy (program manager / media team /
+            // media manager, read from HR contracts), so every role may open them.
+            'media.requests.view-own', 'media.requests.create', 'media.requests.work',
+            'media.requests.approve', 'media.requests.manage',
         ],
     ],
 
@@ -97,6 +108,7 @@ return [
         'hr.archives' => ['view', 'create', 'update', 'delete', 'share', 'download'],
         'hr.checklists' => ['view-own', 'view-all', 'manage', 'deliver', 'receive'],
         'hub.activity-log' => ['view'],
+        'media.requests' => ['view-own', 'create', 'approve', 'work', 'manage', 'view-log', 'export'],
     ],
 
     /*
@@ -298,6 +310,45 @@ return [
         ],
         // Streams the whole org directory to CSV; had no check of its own.
         'position.directory' => ['exportCsv' => 'hr.positions.export'],
+
+        // --- Media requests (modules/Media) ----------------------------------
+        // Permissions only open the actions; MediaRequestPolicy binds each step
+        // of a request to its owner (requester, program manager, media manager,
+        // assignee) and MediaRequestWorkflow checks it again.
+        'media-requests.request-wizard' => [
+            'open' => 'media.requests.create',
+            'submit' => 'media.requests.create',
+            'analyze' => 'media.requests.create',
+        ],
+        'media-requests.show' => [
+            'approveProgram' => 'media.requests.approve',
+            'approveMedia' => 'media.requests.approve',
+            'reject' => 'media.requests.approve',
+            'askInfo' => 'media.requests.view-own',
+            'assign' => 'media.requests.manage',
+            'hold' => 'media.requests.manage',
+            'resume' => 'media.requests.manage',
+            'approveInternal' => 'media.requests.manage',
+            'returnToDesigner' => 'media.requests.manage',
+            'claim' => 'media.requests.work',
+            'start' => 'media.requests.work',
+            'shareDraft' => 'media.requests.work',
+            'sendResult' => 'media.requests.work',
+            'markReady' => 'media.requests.work',
+            'deliver' => 'media.requests.work',
+            'reply' => 'media.requests.view-own',
+            'approveResult' => 'media.requests.view-own',
+            'requestChanges' => 'media.requests.view-own',
+            'cancel' => 'media.requests.view-own',
+            'nudge' => 'media.requests.view-own',
+            'comment' => 'media.requests.view-own',
+            'attachFiles' => 'media.requests.view-own',
+        ],
+        'media-requests.pack' => ['requestFiles' => 'media.requests.create'],
+        'media-requests.pack-quick' => ['requestFiles' => 'media.requests.create'],   // HC_PACK on the media home screen
+        'media-requests.log' => ['exportCsv' => 'media.requests.export'],
+        // Teaching the request assistant: the page needs view-log; the component also checks the media manager.
+        'media-requests.assistant-log' => ['saveLesson' => 'media.requests.view-log', 'deleteLesson' => 'media.requests.view-log', 'teach' => 'media.requests.view-log'],
     ],
 
     /*
@@ -621,5 +672,27 @@ return [
         // (ProfileChangeRequests::canPropose); nothing reaches the profile until
         // HR of the employee's city approves it in the inbox (section 5.1).
         'employee.employee-profile' => ['openSection', 'saveSection', 'reloadSection', 'openProposal', 'submitProposal', ...$closeGuard],
+
+        // --- Media requests (modules/Media) ----------------------------------
+        // Wizard steps and tile choices only change form state; submit()
+        // validates every step again and the workflow re-checks the policy.
+        'media-requests.request-wizard' => ['close', 'chooseType', 'next', 'back', 'goTo', 'applyProof'],
+        // Filters and re-renders; the lists are scoped to the caller's own
+        // requests and programs in render(), and the routes are gated.
+        'media-requests.index' => ['setActiveTab', 'refreshList'],
+        'media-requests.show' => ['refreshRequest', 'applyProof', 'dropResultUpload'],
+        'media-requests.log' => ['resetFilters'],
+        // A filter on a read-only list; closing the lesson form only clears it.
+        'media-requests.assistant-log' => ['setFilter', 'cancelTeach'],
+        // The media home page: every action reads and writes only the signed-in
+        // person's own layout and notes (media_dashboards.user_id = auth id),
+        // and the layout is cleaned against what that person may see.
+        // openRequest checks the request's view policy; the notification ones
+        // act on the caller's own notifications.
+        'media-requests.dashboard' => ['saveLayout', 'resetLayout', 'saveNotes', 'shiftMonth', 'thisMonth', 'openRequest', 'closeRequest', 'openNotification', 'markAllRead', 'toggleBell', 'openRequestNotes', 'bellShow', 'bellMore', 'pickDay', 'closeDay'],
+        // The proofreader: open/close only change the window; check is limited per person per day.
+        'media-requests.proofreader-panel' => ['open', 'close', 'check', 'accept', 'again', 'openSaved', 'deleteSaved', 'download', 'updatedFile'],
+        // The files page: moving between folders only; every request shown is checked with visibleTo.
+        'media-requests.drive' => ['open', 'up'],
     ],
 ];

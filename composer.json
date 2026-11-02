@@ -45,6 +45,9 @@
             "Modules\\Hr\\": "modules/Hr/app/",
             "Modules\\Hr\\Database\\Factories\\": "modules/Hr/database/factories/",
             "Modules\\Hr\\Database\\Seeders\\": "modules/Hr/database/seeders/",
+            "Modules\\Media\\": "modules/Media/app/",
+            "Modules\\Media\\Database\\Factories\\": "modules/Media/database/factories/",
+            "Modules\\Media\\Database\\Seeders\\": "modules/Media/database/seeders/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
         },
@@ -55,7 +58,8 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/",
-            "Modules\\Hr\\Tests\\": "modules/Hr/tests/"
+            "Modules\\Hr\\Tests\\": "modules/Hr/tests/",
+            "Modules\\Media\\Tests\\": "modules/Media/tests/"
         }
     },
     "scripts": {

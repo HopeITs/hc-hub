@@ -54,6 +54,7 @@ return [
         'project-basics' => 'أساسيات المشروع', 'news' => 'الأخبار', 'badges' => 'الشارات',
         'archives' => 'الملفات المؤرشفة', 'checklists' => 'عناصر قائمة التسليم',
         'activity-log' => 'سجل النشاط',
+        'requests' => 'طلبات الميديا',
     ],
     'actions' => [
         'view' => 'عرض', 'view-own' => 'عرض الخاص', 'view-all' => 'عرض الكل',
@@ -63,5 +64,6 @@ return [
         'manage-roles' => 'إدارة الأدوار', 'manage-permissions' => 'إدارة الصلاحيات',
         'share' => 'مشاركة', 'download' => 'تنزيل', 'deliver' => 'تأكيد التسليم',
         'receive' => 'تأكيد الإرجاع',
+        'approve' => 'موافقة', 'work' => 'تنفيذ', 'view-log' => 'عرض السجل',
     ],
 ];

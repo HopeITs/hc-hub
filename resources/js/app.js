@@ -17,6 +17,9 @@ import select2 from 'select2';
 
 select2();
 
+// Media requests (modules/Media): home screen grid and page helpers (window.mr*).
+import '../../modules/Media/resources/js/media.js';
+
 // select2's own messages ("No results found", "Searching…") in the page's
 // language. The strings come from resources/lang through a meta tag in the
 // head (partials/head.blade.php); without it select2 keeps its English ones.
