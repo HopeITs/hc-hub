@@ -7,7 +7,6 @@ import './charts';
 import './count-up';
 import './desk-ask';
 import './desk-customize';
-import './desk-day';
 import './desk-filters';
 import './desk-grid';
 import './desk-hero';

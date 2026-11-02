@@ -488,24 +488,10 @@
 .dk-seg button{ border:0;background:none;height:26px;padding-inline:9px;border-radius:7px;font-size:12px;font-weight:700;color:var(--ink-3);cursor:pointer;display:inline-flex;align-items:center;gap:5px;white-space:nowrap }
 .dk-seg button[aria-pressed="true"]{ background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12) }
 .dk-seg button svg.dk-i{ width:15px;height:15px }
-.dk-hello{ display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,320px);grid-template-areas:"main day" "start start";align-items:end;gap:18px 32px;padding-block:4px 24px }
+.dk-hello{ display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"main" "start";align-items:end;gap:18px 32px;padding-block:4px 24px }
 .dk-hello-main{ grid-area:main;min-width:0 }
-/* My day: clock, date and what is left of the work day (desk-day.js) */
-.dk-day{ grid-area:day;display:grid;gap:6px;padding:14px 16px 16px;background:var(--paper);border:1px solid var(--line);border-radius:var(--panel-r);box-shadow:var(--panel-shadow) }
-.dk-day-h{ display:flex;align-items:center;justify-content:space-between;gap:8px }
-.dk-day-h .dk-eyebrow{ margin:0 }
-.dk-day-clock{ display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin:0 }
-.dk-day-clock time{ font-size:34px;font-weight:800;line-height:1;letter-spacing:-.02em;color:var(--ink) }
-.dk-day-clock span{ font-size:13px;color:var(--ink-3) }
-.dk-day-left{ margin:0;font-size:13px;font-weight:700;color:var(--ink-2) }
-.dk-day-pop{ width:230px;padding:12px;gap:8px }
-.dk-day-pop label{ display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:700;color:var(--ink-2) }
-.dk-day-pop .dk-is{ margin:0 }
-/* Start something: the Ask button first, then pill-shaped create actions; one scrolling row on phones */
+/* Start something: pill-shaped create actions; one scrolling row on phones */
 .dk-start{ grid-area:start;display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;min-width:0 }
-.dk-start-ask,.dk-scope .dk-start-ask{ display:inline-flex;align-items:center;gap:10px;height:44px;padding-inline:16px 10px;border-radius:999px;border:0;background:var(--ink);color:var(--paper);font-weight:800;font-size:14px;cursor:pointer;flex:none;transition:transform .08s,opacity .15s }
-.dk-start-ask:hover{ opacity:.9 }
-.dk-start-ask:active{ transform:scale(.98) }
 .dk-start-row{ display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap }
 .dk-start-h{ font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-inline-end:2px }
 [lang="ar"] .dk-start-h{ letter-spacing:0;font-size:13px }
@@ -517,21 +503,8 @@
 [dir="rtl"] .dk-undo{ translate:50% 0;padding:8px 16px 8px 8px }
 .dk-undo .dk-btn{ background:var(--paper);color:var(--ink);border-color:transparent }
 .dk-undo .dk-iconbtn{ color:var(--paper) }
-/* Customize: ready layouts as small maps of their panels */
-.dk-ready{ display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px }
-.dk-ready-card{ display:grid;gap:4px;text-align:start;padding:10px;border-radius:14px;border:1px solid var(--line);background:var(--paper);cursor:pointer;color:var(--ink);transition:border-color .15s,box-shadow .15s }
-.dk-ready-card:hover,.dk-ready-card:focus-visible{ border-color:var(--ink-3);box-shadow:var(--panel-shadow) }
-.dk-ready-card strong{ font-size:13.5px }
-.dk-ready-card .dk-is{ margin:0;font-size:12px }
-.dk-ready-map{ display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:9px;gap:3px;padding:6px;border-radius:9px;background:var(--sunk);margin-bottom:4px }
-.dk-ready-map i{ grid-column:span var(--span);border-radius:3px;background:var(--line-2) }
-.dk-ready-map i:first-child{ background:var(--brand) }
 .dk-draft-n{ margin:0 }
-@media (max-width: 1020px){ .dk-hello{ grid-template-columns:minmax(0,1fr);grid-template-areas:"main" "day" "start" } .dk-day{ max-width:420px } }
-@media (max-width: 760px){ .dk-day{ max-width:none }
-.dk-start{ flex-wrap:nowrap;flex-direction:column;align-items:stretch }
-.dk-start-ask{ justify-content:flex-start }
-.dk-start-ask span{ flex:1;text-align:start }
+@media (max-width: 760px){ .dk-start{ flex-wrap:nowrap;flex-direction:column;align-items:stretch }
 .dk-start-row{ flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding-inline:16px;scroll-snap-type:x proximity }
 .dk-start-row::-webkit-scrollbar{ display:none }
 .dk-start-btn{ scroll-snap-align:start }
@@ -572,9 +545,6 @@
 .dk-pop{ position:absolute;z-index:25;top:34px;inset-inline-end:0;width:220px;background:var(--paper);border:1px solid var(--line);border-radius:12px;box-shadow:var(--dk-shadow);padding:8px;display:grid;gap:2px }
 .dk-pop-h{ font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:2px 6px }
 [lang="ar"] .dk-pop-h{ letter-spacing:0;font-size:12px }
-.dk-pop .dk-sizes{ display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:2px 2px 6px;border-bottom:1px solid var(--line);margin-bottom:4px }
-.dk-pop .dk-sizes button{ height:30px;border-radius:7px;border:1px solid var(--line-2);background:none;font-weight:800;font-size:12px;cursor:pointer }
-.dk-pop .dk-sizes button[aria-checked="true"]{ background:var(--ink);color:var(--paper);border-color:var(--ink) }
 .dk-pop>button{ display:flex;align-items:center;gap:8px;height:34px;padding-inline:8px;border:0;background:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);text-align:start }
 .dk-pop>button:hover{ background:var(--sunk) }
 .dk-pop>button.dk-danger{ color:var(--bad) }

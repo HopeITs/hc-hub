@@ -63,15 +63,6 @@ return [
     'hero' => [
         'needs_link' => 'Jump to the decisions waiting on you',
         'late_link' => 'Jump to the late decisions',
-        'ring' => 'Work day progress',
-        'ask_label' => 'Ask or find anything',
-        'ask_title' => 'Ask anything',
-        'ask_help' => 'Find a project, a person or a page',
-    ],
-    'density' => [
-        'label' => 'Desk density',
-        'comfortable' => 'Comfortable',
-        'compact' => 'Compact',
     ],
     'deck' => [
         'progress' => 'Decision :n of :total',

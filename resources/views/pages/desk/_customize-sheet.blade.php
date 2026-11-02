@@ -1,12 +1,10 @@
 @php
     $library = $this->library;
     $starting = app(\App\Support\Desk\Panels::class)->startingLayoutFor(auth()->user());
-    $ready = app(\App\Support\Desk\Panels::class)->readyLayoutsFor(auth()->user());
-    $columns = \App\Support\Desk\Panels::Sizes;
 @endphp
 
 {{--
-    Customize your desk: what is on it (size, remove), what can be added, and
+    Customize your desk: what is on it (remove), what can be added, and
     a reset to the role's layout. Every change here is a draft kept in the
     browser (deskCustomize, resources/js/desk-customize.js) until "Done"
     saves it in one call (saveLayout); closing the sheet any other way drops it.
@@ -27,26 +25,6 @@
                 </div>
 
                 <div class="dk-sh-b">
-                    @if ($ready !== [])
-                        <section class="dk-adm" data-customize-ready>
-                            <h3>{{ __('desk.ready.title') }}</h3>
-                            <p class="dk-is">{{ __('desk.ready.lede') }}</p>
-                            <div class="dk-ready">
-                                @foreach ($ready as $key => $readyLayout)
-                                    <button type="button" class="dk-ready-card" x-on:click="load(@js($readyLayout))" aria-label="{{ __('desk.ready.load') }}: {{ __("desk.ready.{$key}") }}" data-ready-layout="{{ $key }}">
-                                        <span class="dk-ready-map" aria-hidden="true">
-                                            @foreach ($readyLayout as $entry)
-                                                <i style="--span:{{ $columns[$entry['size']] }}"></i>
-                                            @endforeach
-                                        </span>
-                                        <strong>{{ __("desk.ready.{$key}") }}</strong>
-                                        <span class="dk-is dk-num">{{ trans_choice('desk.ready.panels', count($readyLayout), ['count' => count($readyLayout)]) }}</span>
-                                    </button>
-                                @endforeach
-                            </div>
-                        </section>
-                    @endif
-
                     <section class="dk-adm">
                         <h3 x-text="{{ \Illuminate\Support\Js::from(__('desk.on_your_desk', ['count' => '__N__'])) }}.replace('__N__', draft.length)">{{ __('desk.on_your_desk', ['count' => count($layout)]) }}</h3>
                         <ul class="dk-lib dk-lib-order">
@@ -54,12 +32,6 @@
                                 <li wire:key="cz-on-{{ $panel['id'] }}" x-show="has('{{ $panel['id'] }}')" x-bind:style="{ order: position('{{ $panel['id'] }}') }" data-customize-on="{{ $panel['id'] }}">
                                     <span class="dk-li-ic"><x-desk.icon :name="$panel['icon']" /></span>
                                     <span class="dk-li-t"><strong>{{ $panel['title'] }}</strong><span class="dk-is">{{ $panel['description'] }}</span></span>
-                                    <label class="dk-sr" for="cz-{{ $panel['id'] }}">{{ __('desk.size') }}</label>
-                                    <select class="dk-mini" id="cz-{{ $panel['id'] }}" x-bind:value="sizeOf('{{ $panel['id'] }}')" x-on:change="resize('{{ $panel['id'] }}', $event.target.value)">
-                                        @foreach (array_keys(\App\Support\Desk\Panels::Sizes) as $option)
-                                            <option value="{{ $option }}">{{ __("desk.size_{$option}") }}</option>
-                                        @endforeach
-                                    </select>
                                     <button type="button" class="dk-iconbtn dk-sm" x-on:click="remove('{{ $panel['id'] }}')" aria-label="{{ __('desk.remove') }}"><x-desk.icon name="x" /></button>
                                 </li>
                             @endforeach

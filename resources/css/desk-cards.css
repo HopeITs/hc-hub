@@ -1,6 +1,6 @@
 /* Desk cards: Project flow, My notes, Past the deadline, the Needs you Focus
- * deck and the My team load meter, then the sheet card language, spotlight,
- * density and the hero (briefing, day ring, command strip). Own classes only, all prefixed dk-, in
+ * deck and the My team load meter, then the sheet card language,
+ * density and the hero (briefing, command strip). Own classes only, all prefixed dk-, in
  * @layer components like desk.css. Colours are desk.css :root aliases of the
  * tokens.css tokens, so Graphite .dark applies without a second block. Width
  * changes use the panel body's `pb` container, never [style*="--span"]. */
@@ -192,7 +192,6 @@
      * eyebrow title, the count as a figure at the end, tools on hover and the
      * grip only on hover. Resize rules stay in desk.css. */
     :root { --panel-r: 12px; --panel-pad: 16px; --panel-shadow: 0 1px 1px color-mix(in srgb, var(--ink) 4%, transparent), 0 10px 28px -18px color-mix(in srgb, var(--ink) 22%, transparent); }
-    :root[data-desk-density="compact"] { --row-unit: 88px; --grid-gap: 12px; --panel-pad: 12px; }
     .dk-panel { border-color: color-mix(in srgb, var(--line) 80%, transparent); }
     .dk-panel.dk-needs { border-color: color-mix(in srgb, var(--line) 80%, transparent); }
     .dk-panel.dk-needs::before { content: none; }
@@ -211,65 +210,27 @@
     .dk-pf { padding: 4px 12px 4px var(--panel-pad); min-height: 44px; border-top-color: color-mix(in srgb, var(--line) 70%, transparent); }
     [dir="rtl"] .dk-pf { padding: 4px var(--panel-pad) 4px 12px; }
     .dk-panel .dk-items > li { min-height: 56px; }
-    :root[data-desk-density="compact"] .dk-panel .dk-items > li { padding-block: 8px; min-height: 48px; }
-    :root[data-desk-density="compact"] .dk-od > li { padding-block: 6px; }
-    :root[data-desk-density="compact"] .dk-ph { min-height: 44px; padding-top: 8px; }
-    :root[data-desk-density="compact"] .dk-ph > .dk-pc { font-size: 22px; }
-    :root[data-desk-density="compact"] .dk-hello { padding-bottom: 16px; }
 
     /* Keyboard focus inside a sheet reads on both themes. */
     .dk-panel :is(a, button, [tabindex]):focus-visible { outline: 2px solid var(--ink-2); outline-offset: 2px; }
 
-    /* Spotlight: on a pointer desktop, the sheet you are on stays bright and
-     * the others recede a little. filter, not opacity: the rise animation
-     * holds opacity with fill-mode both. Never while dragging or resizing. */
-    @media (hover: hover) and (min-width: 1024px) {
-        .dk-grid > .dk-panel { transition: box-shadow .2s, transform .2s, opacity .2s, filter .25s ease; }
-        .dk-grid:has(> .dk-panel:hover):not(:has(.dk-dragging, .dk-resizing)) > .dk-panel:not(:hover, :focus-within) { filter: opacity(.82) saturate(.75); }
-    }
-    @media (prefers-reduced-motion: reduce) { .dk-grid > .dk-panel { transition: none; } }
-
-    /* ── Hero: briefing, day ring, command strip ──────────────────── */
-    .dk-hello { grid-template-columns: minmax(0, 1fr) auto; }
+    /* ── Hero: briefing, command strip ──────────────────── */
+    .dk-hello { grid-template-columns: minmax(0, 1fr); }
     .dk-hello h1 .dk-hello-link { color: inherit; text-decoration: underline; text-decoration-thickness: .06em; text-underline-offset: .16em; text-decoration-color: color-mix(in srgb, currentColor 28%, transparent); transition: text-decoration-color .15s ease; }
     .dk-hello-link:hover, .dk-hello-link:focus-visible { text-decoration-color: currentColor; }
     .dk-hello-link:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 3px; border-radius: 4px; }
     .dk-lede .dk-hello-link { color: var(--bad); font-weight: 700; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--bad) 35%, transparent); }
 
-    .dk-day { grid-area: day; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 20px; width: min(100%, 380px); padding: 16px 20px; background: var(--paper); border: 1px solid color-mix(in srgb, var(--line) 80%, transparent); border-radius: var(--panel-r); box-shadow: var(--panel-shadow); }
-    .dk-day-ring { position: relative; width: 112px; height: 112px; display: grid; place-items: center; }
-    .dk-day-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
-    [dir="rtl"] .dk-day-ring svg { transform: rotate(-90deg) scaleY(-1); }
-    .dk-day-track, .dk-day-arc { fill: none; stroke-width: 6; }
-    .dk-day-track { stroke: var(--sunk); }
-    .dk-day-arc { stroke: var(--ink); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; }
-    @media (prefers-reduced-motion: no-preference) { .dk-day-arc { transition: stroke-dashoffset .9s cubic-bezier(.2, .7, .2, 1); } }
-    .dk-day-ring time { position: relative; font-size: 26px; font-weight: 800; line-height: 1; letter-spacing: -.02em; color: var(--ink); }
-    .dk-day-side { display: grid; gap: 4px; min-width: 0; justify-items: start; }
-    .dk-day-h { width: 100%; }
-    .dk-day-left { margin: 0; font-size: 15px; font-weight: 800; line-height: 1.3; color: var(--ink); }
-    .dk-day-date { margin: 0; font-size: 12.5px; color: var(--ink-3); }
-    .dk-density { margin-top: 8px; }
 
-    .dk-start { display: flex; flex-wrap: nowrap; align-items: stretch; gap: 0; padding: 4px; background: var(--paper); border: 1px solid color-mix(in srgb, var(--line) 80%, transparent); border-radius: var(--panel-r); box-shadow: var(--panel-shadow); }
-    .dk-start-ask, .dk-scope .dk-start-ask { flex: 0 1 360px; min-width: 240px; height: 44px; justify-content: flex-start; gap: 10px; padding-inline: 14px 10px; border-radius: 9px; }
-    .dk-start-ask:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 2px; }
-    .dk-start-ask-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: start; font-weight: 600; }
-    .dk-start-row { flex: 1; display: flex; align-items: stretch; gap: 0; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-inline-start: 4px; }
-    .dk-start-row::-webkit-scrollbar { display: none; }
-    .dk-start-btn { position: relative; height: 44px; gap: 8px; padding-inline: 14px; border: 0; border-radius: 8px; background: none; font-size: 13.5px; }
-    .dk-start-btn + .dk-start-btn::before { content: ""; position: absolute; inset-inline-start: 0; inset-block: 12px; width: 1px; background: var(--line); }
-    .dk-start-btn:hover { background: var(--tint); }
-    .dk-start-btn:hover::before, .dk-start-btn:hover + .dk-start-btn::before { opacity: 0; }
-    .dk-start-btn:focus-visible { outline: 2px solid var(--ink-2); outline-offset: -2px; }
-    @media (max-width: 1020px) { .dk-hello { grid-template-columns: minmax(0, 1fr); } .dk-day { width: min(100%, 420px); } }
+    .dk-start { display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; }
+    .dk-start-row { flex: 1 1 auto; display: flex; flex-wrap: wrap; align-items: stretch; gap: 8px; min-width: 0; }
+    .dk-start-btn { flex: 1 1 auto; justify-content: center; height: 48px; gap: 10px; padding-inline: 16px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--paper); color: var(--ink); font-size: 14px; font-weight: 700; }
+    .dk-start-ic { flex: none; width: 22px; height: 22px; }
+    .dk-start-btn .dk-start-ic { color: var(--brand-ink); }
+    .dk-start-btn:hover { border-color: var(--brand-ink); background: var(--tint); }
+    .dk-start-btn:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 2px; }
     @media (max-width: 760px) {
-        .dk-day { width: 100%; gap: 16px; padding: 16px; }
-        .dk-day-ring { width: 96px; height: 96px; }
-        .dk-day-ring time { font-size: 22px; }
-        .dk-start { flex-direction: column; }
-        .dk-start-ask, .dk-scope .dk-start-ask { flex: none; min-width: 0; width: 100%; }
-        .dk-start-row { margin-inline: 0; padding-inline: 0; padding-top: 4px; scroll-snap-type: x proximity; }
-        .dk-start-btn { padding-inline: 12px; }
+        .dk-start-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-inline: 0; padding-inline: 0; overflow: visible; }
+        .dk-start-btn { justify-content: flex-start; padding-inline: 12px; font-size: 13.5px; white-space: normal; }
     }
 }

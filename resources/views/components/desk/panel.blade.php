@@ -68,12 +68,6 @@
                 <x-desk.icon name="more" />
             </button>
             <div class="dk-pop" role="menu" x-show="menu" x-cloak>
-                <p class="dk-pop-h">{{ __('desk.size') }}</p>
-                <div class="dk-sizes">
-                    @foreach (array_keys($sizes) as $option)
-                        <button type="button" role="menuitemradio" aria-checked="{{ $option === $size ? 'true' : 'false' }}" title="{{ __("desk.size_{$option}") }}" x-on:click="menu = false; $wire.$parent.resizePanel('{{ $id }}', '{{ $option }}')">{{ $option }}</button>
-                    @endforeach
-                </div>
                 @if ($index > 1)
                     <button type="button" role="menuitem" x-on:click="menu = false; $wire.$parent.movePanel('{{ $id }}', 0)"><x-desk.icon name="arrow" class="dk-up" />{{ __('desk.move_to_top') }}</button>
                 @endif
@@ -109,7 +103,7 @@
         <footer class="dk-pf" data-panel-foot>{{ $foot }}</footer>
     @endisset
 
-    {{-- Free cell resize (desk-grid.js): pull the side edges for width, top or bottom for height, the corner for both. The menu's sizes do the same from the keyboard. --}}
+    {{-- Free cell resize (desk-grid.js), the only way to size a card: pull the side edges for width, top or bottom for height, the corner for both. --}}
     @foreach (['end', 'start', 'top', 'bottom', 'corner'] as $edge)
         <span class="dk-rz dk-rz-{{ $edge }}" data-resize="{{ $edge }}" title="{{ __('desk.panel_resize') }}" aria-hidden="true"></span>
     @endforeach
