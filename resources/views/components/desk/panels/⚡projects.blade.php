@@ -2,13 +2,13 @@
 
 use App\Enums\MilestoneStatus;
 use App\Enums\MonthlyReportStatus;
-use App\Enums\ProjectStatus;
 use App\Enums\RagStatus;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
 use App\Models\Indicator;
 use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\TransfersTracking;
+use App\Support\Desk\DeskWork;
 use App\Support\Desk\ProjectStage;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -30,7 +30,7 @@ new class extends Component {
 
     public string $lens = 'stage';
 
-    public string $scope = 'mine';
+    public string $scope = 'all';
 
     public function setLens(string $lens): void
     {
@@ -64,9 +64,8 @@ new class extends Component {
     {
         $money = $this->canViewFundingPosition();
 
-        return $this->visible(Project::query(), 'projects')
+        return DeskWork::projectsOnCard(auth()->user())
             ->select(['id', 'slug', 'name', 'status', 'start_date', 'end_date', 'user_id'])
-            ->where('status', '!=', ProjectStatus::Archived)
             ->with([
                 'user:id,first_name_en,last_name_en,first_name_ar,last_name_ar',
                 'proposals:id,name,status,donor_id',
@@ -149,9 +148,8 @@ new class extends Component {
 
 @php
     $lines = $this->lines;
-    $mine = $this->projects->where('user_id', auth()->user()->employee_id ?? 0);
-    $hasOthers = $mine->isNotEmpty() && $mine->count() !== $this->projects->count();
-    $base = $hasOthers && $scope === 'mine' ? $mine : $this->projects;
+    ['hasOthers' => $hasOthers, 'shown' => $shownByDefault] = DeskWork::projectScopeOf($this->projects, auth()->user());
+    $base = $scope === 'mine' ? $shownByDefault : $this->projects;
     $filters = [
         'all' => fn ($project): bool => true,
         'attention' => fn ($project): bool => $lines[$project->id]['health'] !== 'good' && $lines[$project->id]['stage'] < 7,
@@ -171,13 +169,13 @@ new class extends Component {
     $stages = __('desk.stages');
 @endphp
 
-<x-desk.panel :facets="$pg['facets']" :filtered="$active !== 'all' || ($hasOthers && $scope !== 'mine')" id="projects" :register="$shownLens === 'dates' ? 'timeline.index' : 'projects.index'" :size="$size" :cols="$gridCols" :height="$gridRows" :index="$index" :total="$total" :count="$list->count()">
+<x-desk.panel :facets="$pg['facets']" :filtered="$active !== 'all' || ($hasOthers && $scope !== 'all')" id="projects" :register="$shownLens === 'dates' ? 'timeline.index' : 'projects.index'" :size="$size" :cols="$gridCols" :height="$gridRows" :index="$index" :total="$total" :count="$list->count()">
     <x-slot:filters>
         @if ($hasOthers)
-            <div class="contents" data-filter-defaults='{"scope":"mine"}'>
+            <div class="contents" data-filter-defaults='{"scope":"all"}'>
                 <x-ui.header-filter-select :label="__('desk.scope')" wire:model="scope" :value="$scope" deferred>
-                    <option value="mine">{{ __('desk.scope_mine_projects') }}</option>
                     <option value="all">{{ __('desk.filter_all') }}</option>
+                    <option value="mine">{{ __('desk.scope_mine_projects') }}</option>
                 </x-ui.header-filter-select>
             </div>
         @endif
