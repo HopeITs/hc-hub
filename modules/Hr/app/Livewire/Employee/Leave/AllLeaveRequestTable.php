@@ -2,9 +2,13 @@
 
 namespace Modules\Hr\Livewire\Employee\Leave;
 
-use Modules\Hr\Enums\LeaveRequestStatus;
 use App\Livewire\Concerns\HasScreenListStates;
 use App\Livewire\Concerns\WithFeedback;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Gate;
+use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Livewire\Forms\LeaveRequestForm;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
@@ -12,10 +16,6 @@ use Modules\Hr\Models\LeaveBalance;
 use Modules\Hr\Models\LeaveRequest;
 use Modules\Hr\Models\LeaveType;
 use Modules\Hr\Services\LeaveRequestReview;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Gate;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Columns\DateColumn;
 use RamonRietdijk\LivewireTables\Columns\SelectColumn;
@@ -39,6 +39,7 @@ class AllLeaveRequestTable extends LivewireTable
     protected $listeners = [
         'filterStatus' => 'setStatusFilter',
         'leaveRequestDecisionSaved' => 'refreshTable',
+        'leaveRequestSaved' => 'refreshTable',
     ];
 
     public function setStatusFilter(string $status): void

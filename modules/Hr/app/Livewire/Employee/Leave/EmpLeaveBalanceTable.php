@@ -2,16 +2,16 @@
 
 namespace Modules\Hr\Livewire\Employee\Leave;
 
-use Modules\Hr\Enums\LeaveTypeCases;
-use Modules\Hr\Exports\EmployeeLeaveBalanceExport;
 use App\Livewire\Concerns\HasScreenListStates;
-use Modules\Hr\Livewire\Forms\LeaveBalanceForm;
-use Modules\Hr\Models\Employee;
-use Modules\Hr\Models\LeaveBalance;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Blade;
 use Maatwebsite\Excel\Facades\Excel;
+use Modules\Hr\Enums\LeaveTypeCases;
+use Modules\Hr\Exports\EmployeeLeaveBalanceExport;
+use Modules\Hr\Livewire\Forms\LeaveBalanceForm;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\LeaveBalance;
 use RamonRietdijk\LivewireTables\Columns\Column;
 use RamonRietdijk\LivewireTables\Livewire\LivewireTable;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -28,7 +28,10 @@ class EmpLeaveBalanceTable extends LivewireTable
 
     protected string $model = Employee::class;
 
-    protected $listeners = ['exportExcel' => 'exportExcel'];
+    protected $listeners = [
+        'exportExcel' => 'exportExcel',
+        'refreshEmpLeaveBalanceTable' => '$refresh',
+    ];
 
     public function edit($id)
     {
