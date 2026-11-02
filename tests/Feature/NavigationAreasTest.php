@@ -45,15 +45,20 @@ class NavigationAreasTest extends TestCase
         $reference = ['org.chart', 'centers.index', 'programs.index', 'positions.index'];
         $hrWork = ['employees.index', 'contracts.index', 'leaves.all', 'default-deliverables.index', 'badges.index', 'news.index', 'statistics.general', 'statistics.contract'];
 
+        // The Media requests area (MediaNavigation): a requester gets the home screen only.
+        $mediaRequester = ['media-requests.home'];
+        $mediaAdministrator = ['media-requests.home', 'media-requests.index', 'media-requests.drive', 'media-requests.pack'];
+        $mediaAll = [...$mediaAdministrator, 'media-requests.approvals', 'media-requests.board', 'media-requests.stats', 'media-requests.log', 'media-requests.assistant'];
+
         $expected = [
             // C0-Q4 (answer 2): an employee keeps only the org chart; a manager also centers and programs.
-            'employee' => [...self::MY_SPACE, 'org.chart'],
-            'manager' => [...self::MY_SPACE, 'org.chart', 'centers.index', 'programs.index', 'leaves.all', 'contracts.index', 'news.index', 'inbox'],
-            'general-manager' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'inbox'],
+            'employee' => [...self::MY_SPACE, 'org.chart', ...$mediaRequester],
+            'manager' => [...self::MY_SPACE, 'org.chart', 'centers.index', 'programs.index', 'leaves.all', 'contracts.index', 'news.index', 'inbox', ...$mediaRequester],
+            'general-manager' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'inbox', ...$mediaRequester],
             'HR-ALP' => [...self::MY_SPACE, ...$reference, ...self::BASICS, ...$hrWork, 'leaves.balance', 'inbox'],
-            'HR-SYR' => [...self::MY_SPACE, ...$reference, ...self::BASICS, 'holidays.index', ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
+            'HR-SYR' => [...self::MY_SPACE, ...$reference, ...self::BASICS, 'holidays.index', ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox', ...$mediaAdministrator],
             // The D3 feedback list follows an IT contract, not a role (InAppFeedbackTest).
-            'super-admin' => [...self::MY_SPACE, ...$reference, ...self::BASICS, 'holidays.index', ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox'],
+            'super-admin' => [...self::MY_SPACE, ...$reference, ...self::BASICS, 'holidays.index', ...$hrWork, 'leaves.balance', 'access-management.index', 'activity-log.index', 'inbox', ...$mediaAll],
         ];
 
         foreach ($expected as $role => $routes) {

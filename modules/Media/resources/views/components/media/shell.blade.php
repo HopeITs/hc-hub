@@ -11,28 +11,18 @@
 @props(['bare' => false])
 @php
     $user = auth()->user();
-    $team = app(\Modules\Media\Support\MediaTeam::class);
-    $isMediaTeam = $team->isMember($user->profile) || $team->canActAsMediaManager($user);
-    $managesPrograms = $team->managedProgramIds($user->profile) !== [] || $user->myRole() === 'super-admin';
-    $nav = $team->isRequesterOnly($user) ? [] : array_filter([
-        ['media-requests.home', 'nav.home', 'home', $user->hasActivePermission('media.requests.view-own'), ['media-requests.home']],
-        ['media-requests.index', 'nav.my', 'inbox', $user->hasActivePermission('media.requests.view-own'), ['media-requests.index', 'media-requests.show']],
-        ['media-requests.approvals', 'nav.approvals', 'shield', $managesPrograms && $user->hasActivePermission('media.requests.approve'), ['media-requests.approvals']],
-        ['media-requests.board', 'nav.board', 'board', $isMediaTeam && $user->hasActivePermission('media.requests.work'), ['media-requests.board']],
-        ['media-requests.drive', 'nav.drive', 'layers', $user->hasActivePermission('media.requests.view-own'), ['media-requests.drive']],
-        ['media-requests.stats', 'nav.stats', 'chart', $isMediaTeam && $user->hasActivePermission('media.requests.work'), ['media-requests.stats']],
-        ['media-requests.pack', 'nav.pack', 'box', $user->hasActivePermission('media.requests.create'), ['media-requests.pack']],
-        ['media-requests.log', 'nav.log', 'list', $isMediaTeam && $user->hasActivePermission('media.requests.view-log'), ['media-requests.log']],
-        ['media-requests.assistant', 'nav.assistant', 'spark', $isMediaTeam && $user->hasActivePermission('media.requests.view-log'), ['media-requests.assistant']],
-    ], fn ($item) => $item[3]);
+    // A requester has the home screen only, so the bar is not drawn for them.
+    $nav = app(\Modules\Media\Support\MediaTeam::class)->isRequesterOnly($user)
+        ? []
+        : app(\Modules\Media\Support\MediaNavigation::class)->pagesFor($user);
 @endphp
 <div {{ $attributes->class(['mr']) }}
      x-data x-init="document.documentElement.dataset.gotIt = @js(__('media.hint.gotIt')); document.documentElement.dataset.back = @js(__('media.d.back'))">
     @if (! $bare && $nav !== [])
         <nav class="mr-nav" aria-label="{{ __('media.app') }}">
-            @foreach ($nav as [$route, $label, $icon, , $active])
-                <a href="{{ route($route) }}" wire:navigate @if (request()->routeIs(...$active)) aria-current="page" @endif>
-                    <x-ic :n="$icon" />{{ __('media.'.$label) }}
+            @foreach ($nav as $page)
+                <a href="{{ route($page['route']) }}" wire:navigate @if (request()->routeIs(...$page['active'])) aria-current="page" @endif>
+                    <x-ic :n="$page['icon']" />{{ __('media.nav.'.$page['key']) }}
                 </a>
             @endforeach
             @if ($user->hasActivePermission('media.requests.create'))

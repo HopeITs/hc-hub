@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\User;
 use Modules\Hr\Services\HolidayProjects;
 use Modules\Hr\Services\WorkInbox;
+use Modules\Media\Support\MediaNavigation;
 use Throwable;
 
 /**
@@ -128,6 +129,8 @@ final class Navigation
             $user->canReadFeedback() ? self::item('nav.settings.feedback', __('feedback.inbox.title'), 'feedback.index', ['feedback.*'], 'activity-log') : null,
         ]));
 
+        $media = self::mediaItems($user);
+
         // Organisation (reference pages, C0-Q4) comes last: C0 put it under My
         // space, but there its long list pushed a manager's My team below the
         // fold. Frequent work first is C1's objective (c1-implementation.md §2).
@@ -135,6 +138,7 @@ final class Navigation
             ['id' => 'my-space', 'label' => __('general.nav.area.my-space'), 'items' => $mySpace],
             $myTeam !== [] ? ['id' => 'my-team', 'label' => __('general.nav.area.my-team'), 'items' => $myTeam] : null,
             $hrOps !== [] ? ['id' => 'hr', 'label' => __('general.nav.area.hr'), 'items' => $hrOps] : null,
+            $media !== [] ? ['id' => 'media', 'label' => __('media.app'), 'items' => $media] : null,
             $settings !== [] ? ['id' => 'settings', 'label' => __('general.nav.area.settings'), 'items' => $settings] : null,
             $organisation !== [] ? ['id' => 'organisation', 'label' => __('general.nav.organisation'), 'items' => $organisation] : null,
         ]));
@@ -309,6 +313,26 @@ final class Navigation
         }
 
         return ['count' => $count, 'route' => 'inbox'];
+    }
+
+    /**
+     * The media module's pages (MediaNavigation, the same list as its own page
+     * links), drawn with the sidebar's icons.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function mediaItems(User $user): array
+    {
+        $icons = [
+            'home' => 'home', 'my' => 'clipboard-list', 'approvals' => 'check', 'board' => 'checklist',
+            'drive' => 'folder', 'stats' => 'statistics', 'pack' => 'archived', 'log' => 'activity-log',
+            'assistant' => 'guide',
+        ];
+
+        return array_map(
+            fn (array $page): array => self::item('nav.media.'.$page['key'], __('media.nav.'.$page['key']), $page['route'], $page['active'], $icons[$page['key']]),
+            app(MediaNavigation::class)->pagesFor($user),
+        );
     }
 
     /** @return array<string, mixed> */
