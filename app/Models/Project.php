@@ -514,6 +514,11 @@ class Project extends Model implements TracksActivity
         $query->where(fn (Builder $inner) => $inner->whereNull('projects.center_id')->orWhereNotIn('projects.center_id', HrCenter::inactiveIds()));
     }
 
+    /**
+     * Limit the query to projects still being delivered.
+     *
+     * @param  Builder<static>  $query
+     */
     #[Scope]
     protected function open(Builder $query): void
     {
