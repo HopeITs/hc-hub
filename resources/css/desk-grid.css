@@ -108,11 +108,33 @@
     @media (max-width: 760px) { .dk-rz { display: none; } }
 
     .dk-resizing-doc, .dk-resizing-doc * { -webkit-user-select: none !important; user-select: none !important; }
+    /* While one card is pulled, the others ignore the pointer crossing them: no handles, grips or hover states lighting up. */
+    .dk-resizing-doc .dk-grid > .dk-panel:not(.dk-resizing) { pointer-events: none; }
     .dk-resizing-doc:is([data-resize-edge="end"], [data-resize-edge="start"]) * { cursor: ew-resize !important; }
     .dk-resizing-doc:is([data-resize-edge="top"], [data-resize-edge="bottom"]) * { cursor: ns-resize !important; }
     .dk-resizing-doc[data-resize-edge="corner"] * { cursor: nwse-resize !important; }
     [dir="rtl"].dk-resizing-doc[data-resize-edge="corner"] * { cursor: nesw-resize !important; }
     .dk-panel.dk-resizing { box-shadow: 0 0 0 1.5px var(--ink-3); }
+
+    /* The live outline of a pull (desk-grid.js): it follows the pointer to the pixel while the cards glide to whole cells under it, then lands on the card's cells and fades. Placed in grid pixels, so physical left/top. */
+    .dk-resize-ghost {
+        position: absolute; left: 0; top: 0; z-index: 20; box-sizing: border-box; pointer-events: none;
+        border-radius: var(--panel-r); border: 2px solid color-mix(in srgb, var(--brand) 75%, transparent);
+        background: color-mix(in srgb, var(--brand) 7%, transparent);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 10%, transparent), 0 22px 44px -26px color-mix(in srgb, var(--ink) 45%, transparent);
+        will-change: transform, width, height;
+    }
+    .dk-resize-ghost.dk-landing {
+        opacity: 0;
+        transition: transform .22s cubic-bezier(.25, .8, .25, 1), width .22s cubic-bezier(.25, .8, .25, 1), height .22s cubic-bezier(.25, .8, .25, 1), opacity .22s ease-in;
+    }
+    @media (prefers-reduced-motion: reduce) { .dk-resize-ghost.dk-landing { transition: none; } }
+
+    /* While a card is pulled or carried: cards gliding past the Desk's side never widen the page (no horizontal scrollbar), and the ambient field holds still so the glass cards are not re-blurred every frame. */
+    .dk-resizing-doc, .dk-moving-doc { overflow-x: clip; }
+    /* A row that grows past the window's height must not bring the page's scrollbar in and narrow the whole Desk mid-pull. */
+    html:has([data-desk-grid]) { scrollbar-gutter: stable; }
+    :is(.dk-resizing-doc, .dk-moving-doc) [data-desk]::before { animation-play-state: paused; }
 
     .dk-resize-badge { position: absolute; z-index: 10; inset-block-start: 50%; inset-inline-start: 50%; translate: -50% -50%; pointer-events: none; padding: 6px 14px; border-radius: 999px; background: var(--ink); color: var(--paper); font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: .02em; white-space: nowrap; }
     [dir="rtl"] .dk-resize-badge { translate: 50% -50%; }
