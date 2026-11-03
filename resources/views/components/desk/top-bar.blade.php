@@ -46,7 +46,6 @@
                 <span class="dk-inner">
                     <flux:icon.magnifying-glass variant="outline" class="size-5" />
                     <span class="dk-ph">{{ __('desk.ask_placeholder') }}</span>
-                    <kbd aria-hidden="true" x-text="/Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘ K' : @js(__('navigation.search_shortcut'))">{{ __('navigation.search_shortcut') }}</kbd>
                 </span>
             </button>
 

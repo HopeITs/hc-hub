@@ -78,7 +78,7 @@
     html.dk-scrolled .dk-top { box-shadow: 0 10px 24px -18px rgb(16 24 40 / .32); }
     .dark.dk-scrolled .dk-top { box-shadow: 0 12px 28px -16px rgb(0 0 0 / .7); }
 
-    .dk-top-in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 560px) minmax(max-content, 1fr); align-items: center; gap: 16px; height: var(--top-h); padding-inline: 24px max(16px, calc((100% - 1680px) / 2 + 16px)); }
+    .dk-top-in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 480px) minmax(max-content, 1fr); align-items: center; gap: 16px; height: var(--top-h); padding-inline: 24px max(16px, calc((100% - 1680px) / 2 + 16px)); }
     .dk-top-start { min-width: 0; display: flex; align-items: center; gap: 6px; container: top-start / inline-size; }
     .dk-top-end { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
     .dk-top-menu, .dk-top-mark { display: none; }
@@ -106,15 +106,35 @@
     @keyframes dk-where-in-rtl { from { opacity: 0; transform: translateX(4px); } to { opacity: 1; transform: none; } }
     @keyframes dk-thread-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 
-    /* The Ask bar: the bar's one wide control, with its shortcut on the end. */
+    /* The Ask bar: the bar's one wide control, no shortcut hint (Ctrl K, ⌘ K and / still open it). */
     .dk-top-find { min-width: 0; display: flex; align-items: center; gap: 8px; }
     .dk-top-find .dk-ask { margin-inline: 0; max-width: none; box-shadow: 0 1px 2px rgb(16 24 40 / .05); transition: border-color .15s, box-shadow .15s, background .15s, transform .08s; }
     .dk-top-find .dk-ask:hover { border-color: var(--ink-3); box-shadow: 0 2px 8px -2px rgb(16 24 40 / .12); }
     .dk-top-find .dk-ask:active { transform: scale(.992); }
-    .dk-top-find .dk-ask kbd { margin-inline-start: auto; flex: none; display: inline-flex; align-items: center; height: 22px; padding-inline: 7px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
     .dk-panels-btn { height: 44px; border-radius: 999px; padding-inline: 16px; flex: none; transition: border-color .15s, background .15s, transform .08s; }
     .dk-panels-btn:hover { border-color: var(--ink-3); }
     .dk-panels-btn:active { transform: scale(.96); }
+
+    /*
+     * From 721px (below it Ask is desk.css's bottom bar) Ask and Panels share the tools dock's look: 42px paper capsules,
+     * a hairline border and the same soft lift, so the bar reads as one family.
+     */
+    @media (min-width: 721px) {
+        .dk-top-find .dk-ask, .dk-panels-btn { height: 42px; border: 1px solid var(--line); background: var(--paper); box-shadow: 0 1px 2px rgb(16 24 40 / .04), 0 6px 16px -10px rgb(16 24 40 / .18); }
+        .dark .dk-top-find .dk-ask, .dark .dk-panels-btn { box-shadow: none; }
+        .dk-top-find .dk-ask { gap: 10px; padding-inline: 15px; color: var(--ink-3); }
+        /* !important: the icons' size-5 utility sits in a later layer. */
+        .dk-top-find .dk-ask svg { width: 18px !important; height: 18px !important; stroke-width: 1.8; transition: color .15s; }
+        /* .dk-ph is also the panel header class (desk-cards.css), whose 52px min-height and 12px/4px padding pushed the text down. */
+        .dk-top-find .dk-ask .dk-ph { min-height: 0; padding: 0; font-size: 14px; font-weight: 500; line-height: 1.2; }
+        .dk-top-find .dk-ask:hover, .dk-panels-btn:hover { border-color: var(--line-2); box-shadow: 0 1px 2px rgb(16 24 40 / .05), 0 10px 22px -12px rgb(16 24 40 / .26); }
+        .dark .dk-top-find .dk-ask:hover, .dark .dk-panels-btn:hover { box-shadow: none; }
+        .dk-top-find .dk-ask:hover svg, .dk-panels-btn:hover svg { color: var(--ink); }
+        .dk-top-find .dk-ask:focus-visible, .dk-panels-btn:focus-visible { outline: none; border-color: var(--ink-3); box-shadow: 0 0 0 3px var(--sunk); }
+        .dk-panels-btn { gap: 8px; padding-inline: 14px 17px; color: var(--ink-2); font-size: 14px; font-weight: 700; }
+        .dk-panels-btn svg { width: 18px !important; height: 18px !important; stroke-width: 1.8; transition: color .15s; }
+        .dk-panels-btn:hover { background: var(--paper); }
+    }
 
     /* Tools: bell, help, language and theme in one slim floating dock (40px), 32px round buttons, a tiny count chip on the bell. */
     .dk-tools { display: flex; align-items: center; gap: 6px; height: 42px; padding-inline: 8px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 1px 2px rgb(16 24 40 / .04), 0 6px 16px -10px rgb(16 24 40 / .18); }
@@ -150,8 +170,9 @@
     .dk-usermenu { display: flex; margin-inline-start: 10px; }
     .dk-me { display: flex; line-height: 0; padding: 0; border: 0; border-radius: 999px; background: none; cursor: pointer; transition: transform .08s; }
     .dk-me:active { transform: scale(.95); }
-    .dk-top .dk-me .dk-avatar { display: block; width: 42px; height: 42px; border-radius: 999px; box-shadow: 0 0 0 1px var(--line); transition: box-shadow .15s; }
-    .dk-me:hover .dk-avatar, .dk-me[aria-expanded="true"] .dk-avatar { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--line-2); }
+    .dk-top .dk-me .dk-avatar { display: block; width: 42px; height: 42px; border-radius: 999px; transition: filter .15s, box-shadow .15s; }
+    /* No ring on the photo; hover or an open menu only dims it a little. The ring below is for keyboard focus only. */
+    .dk-me:hover .dk-avatar, .dk-me[aria-expanded="true"] .dk-avatar { filter: brightness(.92); }
     .dk-me:focus-visible { outline: none; }
     .dk-me:focus-visible .dk-avatar { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink-3); }
     .dk-avatar-lg { width: 40px; height: 40px; font-size: 14px; flex: none; }
@@ -185,7 +206,7 @@
 
     @media (max-width: 1099px) {
         .dk-panels-l { display: none; }
-        .dk-panels-btn { width: 44px; padding-inline: 0; }
+        .dk-panels-btn { width: auto; aspect-ratio: 1; padding-inline: 0; }
     }
 
     /* ---------- Narrow screens: no rail, the menu button lays the sidebar over the page ---------- */
@@ -208,12 +229,11 @@
         .dk-top-start { flex: none; container-type: normal; }
         .dk-where { display: none; }
         .dk-top-find { flex: 1; }
-        .dk-top-find .dk-ask kbd { display: none; }
         .dk-top-end { gap: 2px; }
     }
 
     @media (max-width: 560px) {
-        .dk-top-find .dk-ask .dk-ph, .dk-top-find .dk-ask kbd { display: none; }
+        .dk-top-find .dk-ask .dk-ph { display: none; }
         /* desk.css makes Ask a fixed bottom bar up to 720px; on a phone it is a round search button in the bar instead. */
         .dk-top-find .dk-ask { position: static; flex: none; width: 44px; height: 44px; padding: 0; justify-content: center; border: 1px solid var(--line-2); border-radius: 999px; background: var(--paper); backdrop-filter: none; -webkit-backdrop-filter: none; }
         .dk-top-find .dk-ask .dk-inner { display: contents; }
@@ -355,21 +375,77 @@
 
 /* ---------- Ask bar additions ---------- */
 @layer components {
-    .dk-pal-busy { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line-2); border-top-color: var(--ink-2); animation: dk-spin .7s linear infinite; flex: none; }
-    @keyframes dk-spin { to { transform: rotate(360deg); } }
-    .dk-pal-try { padding: 12px 10px 6px; display: grid; gap: 8px; }
-    .dk-pal-try > p { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
-    [lang="ar"] .dk-pal-try > p { letter-spacing: 0; font-size: 12.5px; }
-    .dk-pal-try .dk-is { font-size: 13px; color: var(--ink-3); }
-    .dk-pal-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-    .dk-pal-chips .dk-chip { height: 34px; }
-    .dk-pal-chips .dk-chip.dk-sel, .dk-pal-chips .dk-chip:hover { border-color: var(--ink-2); color: var(--ink); background: var(--sunk); }
-    .dk-pal-act .dk-ic { background: var(--brand-soft); color: var(--brand-ink); }
-    .dk-pal-act > span:last-child { font-weight: 700; }
+    /*
+     * The Ask palette: a sheet over a frosted page. The input row carries a scanning line while Livewire answers;
+     * suggestions sit on the Desk's dot-thread; answers read as big live figures; result rows have round icons like the
+     * top bar's tools, and the highlighted row (mouse or arrows) shows the ↵ that opens it.
+     */
+    .dk-pal-scrim { backdrop-filter: blur(6px) saturate(1.2); -webkit-backdrop-filter: blur(6px) saturate(1.2); }
+    .dk-pal { width: min(640px, calc(100% - 32px)); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 30px 70px -24px rgb(16 24 40 / .45), 0 2px 6px rgb(16 24 40 / .06); animation: dk-pal-in .22s cubic-bezier(.2, .8, .2, 1); }
+    .dark .dk-pal { box-shadow: 0 30px 70px -20px rgb(0 0 0 / .7); }
+    @keyframes dk-pal-in { from { opacity: 0; transform: translate(-50%, -10px) scale(.98); } to { opacity: 1; transform: translateX(-50%); } }
+
+    .dk-pal-in { position: relative; height: 64px; gap: 12px; padding-inline: 20px 14px; }
+    .dk-pal-in > svg.dk-i { width: 20px; height: 20px; flex: none; color: var(--ink-3); transition: color .15s; }
+    .dk-pal-in:focus-within > svg.dk-i { color: var(--ink); }
+    .dk-pal-in input { font-size: 17px; font-weight: 500; letter-spacing: -.005em; color: var(--ink); }
+    .dk-pal-in input::placeholder { color: var(--faint); }
+    .dk-pal-busy { position: absolute; inset-inline: 0; bottom: -1px; height: 2px; background: linear-gradient(90deg, transparent, var(--brand), transparent) no-repeat; background-size: 40% 100%; animation: dk-pal-scan 1s ease-in-out infinite; pointer-events: none; }
+    @keyframes dk-pal-scan { from { background-position: -70% 0; } to { background-position: 170% 0; } }
+    .dk-pal-in .dk-pal-esc { flex: none; height: 24px; padding-inline: 9px; border: 0; border-radius: 999px; background: var(--sunk); color: var(--ink-3); font: inherit; font-size: 11px; font-weight: 700; letter-spacing: .02em; cursor: pointer; transition: background .15s, color .15s; }
+    .dk-pal-in .dk-pal-esc:hover { background: var(--line); color: var(--ink); }
+    .dk-pal-in .dk-pal-esc:focus-visible { outline: 2px solid var(--ink-3); outline-offset: 2px; }
+
+    .dk-pal-list { padding: 4px 8px 10px; scrollbar-width: thin; }
+    .dk-pal-g { display: flex; align-items: center; gap: 10px; margin: 0; padding: 16px 10px 6px; font-size: 11px; }
+    .dk-pal-g::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+    /* Rows: a round icon, the label over its context, and ↵ on the highlighted one. */
+    .dk-pal-i { position: relative; min-height: 50px; padding: 7px 10px; border-radius: 14px; color: var(--ink); text-decoration: none; transition: background .12s; }
+    .dk-pal-t { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dk-pal-t small { margin-top: 1px; font-size: 12.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
+    .dk-pal-i .dk-ic { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink-3); transition: border-color .12s, color .12s; }
+    .dk-pal-i.dk-sel .dk-ic, .dk-pal-i:hover .dk-ic { border-color: var(--line-2); color: var(--ink); }
+    .dk-pal-act .dk-ic, .dk-pal-act.dk-sel .dk-ic, .dk-pal-act:hover .dk-ic { border-color: transparent; background: var(--brand-soft); color: var(--brand-ink); }
+    .dk-pal-act .dk-pal-t { font-weight: 700; }
     .dk-pal-i[aria-disabled="true"] { opacity: .55; cursor: default; }
+    .dk-pal-ret { flex: none; display: grid; place-items: center; width: 26px; height: 22px; border-radius: 7px; background: var(--paper); box-shadow: 0 0 0 1px var(--line); color: var(--ink-3); font-size: 13px; font-weight: 700; line-height: 1; opacity: 0; transform: translateX(-4px); transition: opacity .12s, transform .12s; }
+    .dk-pal-ret svg.dk-i { width: 13px; height: 13px; }
+    [dir="rtl"] .dk-pal-ret { transform: translateX(4px) scaleX(-1); }
+    :is(.dk-pal-i, .dk-pal-q).dk-sel .dk-pal-ret { opacity: 1; transform: none; }
+    [dir="rtl"] :is(.dk-pal-i, .dk-pal-q).dk-sel .dk-pal-ret { transform: scaleX(-1); }
+
+    /* Suggestions: one thread of rings; the highlighted question's ring turns brand, like the top bar's current page. */
+    .dk-pal-try { display: grid; }
+    .dk-pal-thread { position: relative; display: grid; gap: 2px; }
+    .dk-pal-thread::before { content: ""; position: absolute; inset-block: 20px; inset-inline-start: 22px; width: 2px; border-radius: 2px; background: var(--line); }
+    .dk-pal-q { position: relative; display: flex; align-items: center; gap: 14px; width: 100%; min-height: 40px; padding-block: 6px; padding-inline: 16px 10px; border: 0; border-radius: 14px; background: none; color: var(--ink-2); font: inherit; text-align: start; cursor: pointer; transition: background .12s, color .12s; }
+    .dk-pal-q > i { position: relative; flex: none; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line-2); background: var(--paper); transition: border-color .15s, border-width .15s; }
+    .dk-pal-q.dk-sel, .dk-pal-q:hover, .dk-pal-i.dk-sel, .dk-pal-i:hover { background: var(--sunk); color: var(--ink); }
+    .dk-pal-q.dk-sel > i { border: 4px solid var(--brand); }
+    .dk-pal-q:hover:not(.dk-sel) > i { border-color: var(--ink-3); }
+
+    /* Nothing found: a quiet heading above the suggestions. */
+    .dk-pal-none { display: grid; gap: 4px; padding: 18px 12px 4px; }
+    .dk-pal-none strong { font-size: 17px; font-weight: 800; letter-spacing: -.01em; color: var(--ink); }
+    .dk-pal-none span { font-size: 13.5px; color: var(--ink-3); }
+
+    /* Answers: the figure is the headline, with a live brand dot (they are read from the same data as the panels). */
+    .dk-answer { display: flex; align-items: flex-start; gap: 14px; margin: 10px 2px 2px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(135deg, var(--sunk), var(--paper) 70%); font-size: 13.5px; color: var(--ink-3); }
+    .dk-answer > i { flex: none; width: 10px; height: 10px; margin-top: 9px; border-radius: 50%; background: var(--brand); animation: dk-pal-live 2.2s ease-out infinite; }
+    @keyframes dk-pal-live { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 45%, transparent); } 70%, 100% { box-shadow: 0 0 0 9px transparent; } }
+    .dk-answer > div { display: grid; gap: 3px; min-width: 0; }
+    .dk-answer strong { display: block; margin: 0; font-size: 20px; font-weight: 800; line-height: 1.25; letter-spacing: -.015em; color: var(--ink); }
+
+    .dk-pal-foot { align-items: center; gap: 4px 18px; padding: 10px 20px; font-size: 12px; }
+    .dk-pal-foot > span { display: inline-flex; align-items: center; gap: 6px; }
+    .dk-pal-foot kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding-inline: 5px; border: 0; border-radius: 6px; background: var(--sunk); font-family: inherit; font-size: 11px; font-weight: 700; color: var(--ink-2); }
+    .dk-pal-foot kbd svg.dk-i { width: 12px; height: 12px; }
+    [dir="rtl"] .dk-pal-foot kbd svg.dk-i { transform: scaleX(-1); }
 
     @media (prefers-reduced-motion: reduce) {
-        .dk-pal-busy { animation: none; }
+        .dk-pal, .dk-answer > i { animation: none; }
+        .dk-pal-busy { animation: none; background-size: 100% 100%; opacity: .6; }
     }
 }
 
@@ -391,7 +467,7 @@
 /* ---------- Top bar: Ask and Panels icons ---------- */
 @layer components {
     .dk-top-find .dk-ask svg, .dk-panels-btn svg { color: var(--ink-3); flex: none; }
-    .dk-panels-btn { background: var(--sunk); }
+    @media (max-width: 720px) { .dk-panels-btn { background: var(--sunk); } }
 }
 
 /*

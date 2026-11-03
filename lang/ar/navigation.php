@@ -44,5 +44,4 @@ return [
     'help_report_hint' => 'أخبر فريق تقنية المعلومات بما حدث',
     'help_install_hint' => 'افتح HC Tracking في نافذة خاصة به',
     'display' => 'اللغة والمظهر',
-    'search_shortcut' => 'Ctrl K',
 ];
