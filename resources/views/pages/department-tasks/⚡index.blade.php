@@ -8,6 +8,7 @@ use App\Enums\TaskKind;
 use App\Enums\TaskStatus;
 use App\Models\HrDepartment;
 use App\Models\Milestone;
+use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\Task;
 use Flux\Flux;
@@ -82,6 +83,18 @@ new #[Layout('layouts::desk'), Title('titles.department_tasks')] class extends C
     public string $returnReason = '';
 
     /**
+     * The projects whose center HR has deactivated, read once so the
+     * «Paused» chip costs no query per row (D-66, W-02).
+     *
+     * @return list<int>
+     */
+    #[Computed]
+    public function pausedProjectIds(): array
+    {
+        return Project::pausedIds();
+    }
+
+    /**
      * Every department task the viewer may see, filtered in memory.
      *
      * @return Collection<int, Task>
@@ -98,7 +111,7 @@ new #[Layout('layouts::desk'), Title('titles.department_tasks')] class extends C
                 'source' => fn (MorphTo $morphTo) => $morphTo
                     ->constrain([
                         Proposal::class => fn ($query) => $query->select(['id', 'slug', 'name', 'status']),
-                        Milestone::class => fn ($query) => $query->select(['id', 'slug', 'name', 'proposal_id']),
+                        Milestone::class => fn ($query) => $query->select(['id', 'slug', 'name', 'proposal_id', 'project_id']),
                     ])
                     ->morphWith([Milestone::class => ['proposal:id,slug,name,status']]),
             ])

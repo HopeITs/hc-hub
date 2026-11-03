@@ -6,6 +6,7 @@ use App\Enums\TaskStatus;
 use App\Livewire\Concerns\Dashboard\ReadsDashboardAttention;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
 use App\Models\Milestone;
+use App\Models\Project;
 use App\Models\Task;
 use App\Support\Desk\DeskWork;
 use App\Support\Desk\TeamScope;
@@ -122,6 +123,18 @@ new class extends Component {
     }
 
     /**
+     * The projects whose center HR has deactivated, read once for the whole
+     * list so the «Paused» chip costs no query per row (D-66, W-02).
+     *
+     * @return list<int>
+     */
+    #[Computed]
+    public function pausedProjectIds(): array
+    {
+        return Project::pausedIds();
+    }
+
+    /**
      * task id => its project or proposal name.
      *
      * @return array<int, string>
@@ -219,7 +232,7 @@ new class extends Component {
                 <li wire:key="tk-{{ $task->id }}" @class(['dk-done' => $done])>
                     <div class="dk-tk-main">
                         <a href="{{ route('tasks.show', $task) }}" wire:navigate class="dk-tk-t" title="{{ $task->title }}">@if ($task->kind !== TaskKind::General)<span class="dk-ms">{{ $task->kind->label() }}</span>@endif{{ $task->title }}</a>
-                        <p class="dk-is"><span class="dk-tk-p" title="{{ $this->parents[$task->id] }}">{{ $this->parents[$task->id] }}</span>@if ($task->due_date !== null)<span @class(['dk-bad' => $overdue])> · {{ $overdue ? __('desk.tasks_late_since', ['date' => $task->due_date->translatedFormat(__('desk.date_short'))]) : $task->due_date->translatedFormat(__('desk.date_short')) }}</span>@endif</p>
+                        <p class="dk-is"><span class="dk-tk-p" title="{{ $this->parents[$task->id] }}">{{ $this->parents[$task->id] }}</span>@if ($task->due_date !== null)<span @class(['dk-bad' => $overdue])> · {{ $overdue ? __('desk.tasks_late_since', ['date' => $task->due_date->translatedFormat(__('desk.date_short'))]) : $task->due_date->translatedFormat(__('desk.date_short')) }}</span>@endif<x-tasks.paused-chip :task="$task" :paused-ids="$this->pausedProjectIds" class="ms-1.5" /></p>
                     </div>
                     <span class="dk-tk-av" title="{{ $people->implode(', ') }}">
                         @foreach ($assignees->take(3) as $employee)

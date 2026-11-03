@@ -10,6 +10,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\QueryException;
 
 /**
  * A center from the HR database (hchr_centers): a building in a city that
@@ -55,6 +56,27 @@ class HrCenter extends HrModel
         return $centers
             ->sortBy([fn (self $a, self $b): int => [mb_strtolower($a->name), $a->id] <=> [mb_strtolower($b->name), $b->id]])
             ->values();
+    }
+
+    /**
+     * The ids of the centers HR has deactivated, from the same in-memory
+     * lookup as the names: the one list a SQL filter needs to pause the
+     * projects standing on them (D-66), with no query across connections.
+     *
+     * @return list<int>
+     */
+    public static function inactiveIds(): array
+    {
+        try {
+            $rows = self::rememberedHrLookup(fn (): array => self::loadLookup());
+        } catch (QueryException) {
+            return [];
+        }
+
+        return array_values(array_map(
+            fn (array $row): int => (int) $row['id'],
+            array_filter($rows, fn (array $row): bool => ! (bool) $row['is_active']),
+        ));
     }
 
     /**

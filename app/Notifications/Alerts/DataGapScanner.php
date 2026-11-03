@@ -41,6 +41,7 @@ final class DataGapScanner implements Scanner
         $sent = 0;
 
         $active = Project::query()
+            ->notPaused()
             ->where('status', ProjectStatus::Active->value)
             ->withCount(['milestones', 'indicators'])
             ->get(['id', 'name', 'user_id', 'end_date']);
@@ -84,6 +85,7 @@ final class DataGapScanner implements Scanner
         $open = array_values(array_filter(ProjectStatus::cases(), fn (ProjectStatus $status): bool => $status->isOpen()));
 
         return array_values(Project::query()
+            ->notPaused()
             ->whereIn('status', array_map(fn (ProjectStatus $status): string => $status->value, $open))
             ->whereNotNull('program_id')
             ->distinct()

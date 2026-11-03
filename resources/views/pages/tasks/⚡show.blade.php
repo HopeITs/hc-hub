@@ -8,6 +8,7 @@ use App\Livewire\Concerns\Tasks\ManagesSubtasks;
 use App\Livewire\Concerns\Tasks\ManagesTaskAttachments;
 use App\Models\HrEmployee;
 use App\Models\Milestone;
+use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskAttachment;
 use App\Support\TaskWorkflow;
@@ -55,6 +56,18 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
     public array $assignedTo = [];
 
     public bool $evidenceRequired = false;
+
+    /**
+     * The projects whose center HR has deactivated, read once so the
+     * «Paused» chip costs no query per row (D-66, W-02).
+     *
+     * @return list<int>
+     */
+    #[Computed]
+    public function pausedProjectIds(): array
+    {
+        return Project::pausedIds();
+    }
 
     /**
      * What to fix, when the approver sends an Under review task back.
@@ -241,6 +254,7 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
             @elseif ($this->task->source instanceof \App\Models\Milestone)
                 <span class="font-medium">{{ $this->task->source->name }} · {{ $this->task->source->ownerName() }}</span>
             @endif
+            <x-tasks.paused-chip :task="$this->task" :paused-ids="$this->pausedProjectIds" :full="true" />
             <span>{{ __('tasks.assigned_to_name', ['name' => $assignees->isEmpty() ? __('common.not_assigned') : $assignees->map->name->implode(', ')]) }}</span>
             <span>{{ __('tasks.created_by_name', ['name' => $this->task->creator->name]) }}</span>
             @if ($this->task->parentTask !== null)

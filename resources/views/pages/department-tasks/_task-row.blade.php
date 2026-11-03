@@ -19,6 +19,7 @@
         <p class="flex min-w-0 flex-wrap items-center gap-2">
             <span @class(['truncate text-sm font-semibold', $mutedText.' line-through decoration-secondary-light' => $isDone, $inkText => ! $isDone]) dir="auto">{{ $task->title }}</span>
             <span class="inline-flex shrink-0 items-center rounded-md border border-secondary-light px-1.5 py-0.5 text-[11px] font-semibold {{ $mutedText }}">{{ $task->kind->label() }}</span>
+            <x-tasks.paused-chip :task="$task" :paused-ids="$this->pausedProjectIds" />
             @if ($state !== null)
                 <x-ui.enum-badge :case="$state" />
             @endif
