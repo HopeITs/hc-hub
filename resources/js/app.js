@@ -25,6 +25,7 @@ import './side-nav';
 import './task-board';
 import './theme-color';
 import './theme-transition';
+import './top-bar';
 import './tour';
 
 /**

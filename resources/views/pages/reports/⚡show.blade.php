@@ -49,7 +49,7 @@ new #[Layout('layouts::desk'), Title('titles.report')] class extends Component {
                 'planIndicator.source',
                 // Every figure on the target, for its achievement by the shared rule.
                 'planIndicator.reports:id,plan_indicator_id,status,planned_date,value',
-                'user:id,hr_user_id',
+                'user:id,hr_user_id,employee_id',
                 'monthlyReport:id,slug',
             ])
             ->findOrFail($this->reportId);

@@ -51,6 +51,17 @@ return [
             'driver' => null,
         ],
 
+        // The HR application's storage/app folder, read only, for employee
+        // photos. Nothing here is ever served directly: EmployeeAvatarController
+        // streams a photo to signed-in users only, as HR itself does.
+        'hr' => [
+            'driver' => 'local',
+            'root' => env('HR_STORAGE_PATH') ?: base_path('../hc-hr/storage/app'),
+            'serve' => false,
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

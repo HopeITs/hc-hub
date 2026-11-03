@@ -83,7 +83,7 @@
     </div>
 
     <div class="col-start-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs @3xl/detail:contents">
-        {{-- Assignees: initials, the first name in full, the rest counted. --}}
+        {{-- Assignees: photos, the first name in full, the rest counted. --}}
         <div class="flex min-w-0 items-center gap-2">
             @if ($assignees->isEmpty())
                 <span class="size-6 shrink-0 rounded-full border border-dashed border-secondary-light" aria-hidden="true"></span>
@@ -91,9 +91,7 @@
             @else
                 <span class="flex shrink-0 -space-x-1.5 rtl:space-x-reverse" aria-hidden="true">
                     @foreach ($assignees->take(2) as $employee)
-                        <span class="inline-flex size-6 items-center justify-center rounded-full bg-secondary-soft text-[10px] font-bold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">
-                            {{ mb_strtoupper(collect(preg_split('/\s+/u', trim($employee->name)))->filter()->take(2)->map(fn (string $part): string => mb_substr($part, 0, 1))->implode('')) }}
-                        </span>
+                        <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($employee->id)" class="size-6 rounded-full ring-2 ring-white dark:ring-surface-1" />
                     @endforeach
                 </span>
                 <span class="truncate font-medium {{ $inkText }}" title="{{ $assignees->map->name->implode(', ') }}">

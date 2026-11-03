@@ -76,7 +76,7 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
         $sortingByModule = $this->sortField === 'module';
 
         return Activity::query()
-            ->with('actor:id,hr_user_id')
+            ->with('actor:id,hr_user_id,employee_id')
             ->when($this->module !== '', fn (Builder $query) => $query->where('module', $this->module))
             ->when(ctype_digit($this->actor), fn (Builder $query) => $query->where('actor_id', (int) $this->actor))
             ->when($term !== '', fn (Builder $query) => $query->where(fn (Builder $query) => $query

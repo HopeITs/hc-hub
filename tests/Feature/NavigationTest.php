@@ -125,3 +125,38 @@ test('the logo link keeps a single accessible name while the light and dark logo
         ->and($logo->item(0)->getAttribute('aria-label'))->toBe(__('desk.logo_label'))
         ->and($logo->item(0)->getAttribute('href'))->toBe(route('dashboard'));
 });
+
+test('the current page is the sidebar link it lights up, a register lighting up for its own sub-pages', function () {
+    $user = User::factory()->role('Super Admin')->create();
+    $destinations = app(Destinations::class);
+
+    expect($destinations->currentFor($user, 'dashboard'))->toMatchArray(['route' => 'dashboard', 'group' => 'overview'])
+        ->and($destinations->currentFor($user, 'projects.show'))->toMatchArray(['route' => 'projects.index', 'group' => 'projects_delivery', 'group_label' => __('navigation.group_projects_delivery')])
+        ->and($destinations->currentFor($user, 'reports.monthly-matrix')['route'])->toBe('reports.monthly-matrix')
+        ->and($destinations->currentFor($user, 'notifications.index'))->toBeNull();
+});
+
+test('the top bar says where you are: the sidebar group, then the current page', function () {
+    $html = $this->actingAs(User::factory()->role('Super Admin')->create())->get(route('projects.index'))->assertOk()->getContent();
+    $xpath = new DOMXPath(tap(new DOMDocument, fn (DOMDocument $document) => $document->loadHTML($html, LIBXML_NOERROR | LIBXML_NOWARNING)));
+
+    $where = $xpath->query('//*[@data-desk-top-bar]//nav[@data-top-where]')->item(0);
+    $page = $xpath->query('.//a', $where)->item(0);
+
+    expect(trim($xpath->query('.//li[1]', $where)->item(0)->textContent))->toBe(__('navigation.group_projects_delivery'))
+        ->and(trim($page->textContent))->toBe(__('common.projects'))
+        ->and($page->getAttribute('href'))->toBe(route('projects.index'))
+        ->and($page->getAttribute('aria-current'))->toBe('page');
+});
+
+test('the help menu holds the tour, the guideline and the bug report behind one button', function () {
+    $html = $this->actingAs(User::factory()->role('Team Member')->create())->get(route('dashboard'))->assertOk()->getContent();
+    $xpath = new DOMXPath(tap(new DOMDocument, fn (DOMDocument $document) => $document->loadHTML($html, LIBXML_NOERROR | LIBXML_NOWARNING)));
+
+    $menu = $xpath->query('//*[@data-desk-top-bar]//*[@data-help-menu]')->item(0);
+
+    expect($xpath->query('.//button[@data-help-trigger]', $menu)->item(0)->getAttribute('aria-haspopup'))->toBe('menu')
+        ->and($xpath->query('.//*[@role="menu"]//*[@data-test="tour-start-button"]', $menu))->toHaveCount(1)
+        ->and($xpath->query('.//*[@role="menu"]//a[@data-guideline]', $menu))->toHaveCount(1)
+        ->and($xpath->query('.//*[@role="menu"]//a[@data-report-bug]', $menu))->toHaveCount(1);
+});

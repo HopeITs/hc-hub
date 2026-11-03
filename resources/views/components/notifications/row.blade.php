@@ -3,7 +3,8 @@
 @php
     $presenter = app(\App\Notifications\NotificationPresenter::class);
     $isUnread = $notification->read_at === null;
-    $isSnoozed = $notification->snoozed_until !== null && $notification->snoozed_until->isFuture();
+    $senderPhoto = $presenter->senderPhoto($notification);
+    $isSnoozed =$notification->snoozed_until !== null && $notification->snoozed_until->isFuture();
     $quickLabels = __('notifications.quick.labels');
     $glyphTone = match ($notification->priority) {
         \App\Enums\NotificationPriority::Critical => 'bg-primary dark:bg-status-critical dark:text-surface-0 text-white shadow-[0_3px_10px_-3px_rgba(16,24,40,0.35)]',
@@ -42,7 +43,11 @@
             'opacity-60 saturate-50' => ! $isUnread,
             'group-hover/glyph:scale-90 group-hover/glyph:opacity-0 in-data-selecting:scale-90 in-data-selecting:opacity-0 group-has-[:checked]/glyph:opacity-0' => $selectable,
         ]) aria-hidden="true">
-            <flux:icon :name="$presenter->moduleIcon($notification->module)" variant="mini" class="size-[1.125rem]" />
+            @if ($senderPhoto !== null)
+                <x-ui.avatar :src="$senderPhoto" class="size-full rounded-full" />
+            @else
+                <flux:icon :name="$presenter->moduleIcon($notification->module)" variant="mini" class="size-[1.125rem]" />
+            @endif
         </span>
 
         @if ($selectable)
@@ -59,8 +64,12 @@
             />
         @endif
 
-        @if ($notification->kind === \App\Enums\NotificationKind::Action)
-            <span class="pointer-events-none absolute -end-1 -bottom-1 z-[11] flex size-5 items-center justify-center rounded-full bg-secondary-dark text-[0.5625rem] font-bold tracking-tight text-white ring-2 ring-white transition-opacity group-has-[:checked]/glyph:opacity-0 dark:bg-ink dark:text-surface-0 dark:ring-surface-1" aria-hidden="true">{{ $notification->actor?->initials() ?? '·' }}</span>
+        @if ($senderPhoto !== null)
+            <span @class(['pointer-events-none absolute -end-1 -bottom-1 z-[11] flex size-5 items-center justify-center rounded-full ring-2 ring-white transition-opacity group-has-[:checked]/glyph:opacity-0 dark:ring-surface-1', $glyphTone]) aria-hidden="true">
+                <flux:icon :name="$presenter->moduleIcon($notification->module)" variant="micro" class="size-3" />
+            </span>
+        @elseif ($notification->kind === \App\Enums\NotificationKind::Action)
+            <x-ui.avatar :src="$notification->actor?->avatarUrl()" class="pointer-events-none absolute -end-1 -bottom-1 z-[11] size-5 rounded-full ring-2 ring-white transition-opacity group-has-[:checked]/glyph:opacity-0 dark:ring-surface-1" aria-hidden="true" />
         @else
             <span class="pointer-events-none absolute -end-1 -bottom-1 z-[11] flex size-5 items-center justify-center rounded-full bg-secondary-dark text-white ring-2 ring-white transition-opacity group-has-[:checked]/glyph:opacity-0 dark:bg-ink dark:text-surface-0 dark:ring-surface-1" aria-hidden="true">
                 @if ($notification->kind === \App\Enums\NotificationKind::Alert)

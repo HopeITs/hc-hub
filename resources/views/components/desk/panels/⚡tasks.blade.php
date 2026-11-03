@@ -211,7 +211,8 @@ new class extends Component {
                 @php
                     $done = $task->status === TaskStatus::Done;
                     $overdue = ! $done && $task->due_date !== null && $task->due_date->lt($today);
-                    $people = $task->taskAssignees->map(fn ($assignee) => $assignee->employee?->name)->filter()->values();
+                    $assignees = $task->taskAssignees->map(fn ($assignee) => $assignee->employee)->filter()->values();
+                    $people = $assignees->map(fn ($employee) => $employee->name);
                     $steps = $done ? [] : $this->steps($task);
                     $toReview = $task->status === TaskStatus::UnderReview && TaskWorkflow::approves($user, $task);
                 @endphp
@@ -221,8 +222,8 @@ new class extends Component {
                         <p class="dk-is"><span class="dk-tk-p" title="{{ $this->parents[$task->id] }}">{{ $this->parents[$task->id] }}</span>@if ($task->due_date !== null)<span @class(['dk-bad' => $overdue])> · {{ $overdue ? __('desk.tasks_late_since', ['date' => $task->due_date->translatedFormat(__('desk.date_short'))]) : $task->due_date->translatedFormat(__('desk.date_short')) }}</span>@endif</p>
                     </div>
                     <span class="dk-tk-av" title="{{ $people->implode(', ') }}">
-                        @foreach ($people->take(3) as $name)
-                            <span class="dk-av dk-av-xs">{{ collect(preg_split('/\s+/u', trim($name)))->take(2)->map(fn ($part) => mb_substr($part, 0, 1))->implode('') }}</span>
+                        @foreach ($assignees->take(3) as $employee)
+                            <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($employee->id)" class="dk-av dk-av-xs" />
                         @endforeach
                         @if ($people->count() > 3)<span class="dk-av dk-av-xs dk-num">+{{ $people->count() - 3 }}</span>@endif
                     </span>

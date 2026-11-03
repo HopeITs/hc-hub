@@ -38,4 +38,11 @@ return [
     'reporting_duties' => 'مهام التقارير',
     'monthly_matrix' => 'المصفوفة الشهرية',
     'tools' => 'الأدوات',
+    'help' => 'المساعدة',
+    'help_tour_hint' => 'جولة إرشادية في هذه الصفحة خطوة بخطوة',
+    'help_guideline_hint' => 'الدليل المكتوب، في علامة تبويب جديدة',
+    'help_report_hint' => 'أخبر فريق تقنية المعلومات بما حدث',
+    'help_install_hint' => 'افتح HC Tracking في نافذة خاصة به',
+    'display' => 'اللغة والمظهر',
+    'search_shortcut' => 'Ctrl K',
 ];

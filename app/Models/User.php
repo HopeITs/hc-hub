@@ -633,15 +633,19 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     }
 
     /**
-     * Get the user initials.
+     * The URL of this user's HR photo, or HR's default picture without one.
      */
-    public function initials(): string
+    public function avatarUrl(): string
     {
-        $initials = Str::initials($this->name, true);
+        return HrEmployee::avatarUrl($this->employee_id);
+    }
 
-        return Str::length($initials) > 1
-            ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
-            : $initials;
+    /**
+     * The user's own HR photo, or null when HR holds none.
+     */
+    public function photoUrl(): ?string
+    {
+        return HrEmployee::photoUrl($this->employee_id);
     }
 
     /**

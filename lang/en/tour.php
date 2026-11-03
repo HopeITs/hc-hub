@@ -54,7 +54,7 @@ return [
     'tools' => [
         'kicker' => 'The top',
         'title' => 'Notifications and help',
-        'body' => 'The bell opens your inbox. Beside it: install the app, report a problem, the written guide, and the sparkle that replays this tour.',
+        'body' => 'The bell opens your inbox. The question mark beside it holds the tour, the written guide, Report a problem and, when your browser offers it, Install app.',
     ],
     'locale' => [
         'kicker' => 'The top',
@@ -63,12 +63,12 @@ return [
     ],
     'profile' => [
         'kicker' => 'The top',
-        'title' => 'Your initials',
-        'body' => 'Your name, Security, notification preferences and Log out.',
+        'title' => 'Your account',
+        'body' => 'Your name and email, Security and Log out.',
     ],
     'help' => [
         'kicker' => 'All done',
         'title' => 'Come back any time',
-        'body' => 'This button replays the tour on every page, tailored to what is on screen.',
+        'body' => 'The question mark replays the tour on every page, tailored to what is on screen. Press / or Ctrl K to find anything.',
     ],
 ];

@@ -218,7 +218,7 @@ new #[Layout('layouts::desk'), Title('titles.project')] class extends Component 
                 'media' => fn ($query) => $query
                     ->select(['id', 'mediable_type', 'mediable_id', 'collection', 'original_name', 'type', 'size', 'uploaded_at', 'uploaded_by'])
                     ->whereNotIn('collection', $hiddenCollections)
-                    ->with('uploader:id,hr_user_id')
+                    ->with('uploader:id,hr_user_id,employee_id')
                     ->orderByDesc('uploaded_at')
                     ->orderByDesc('id'),
             ])

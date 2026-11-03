@@ -657,16 +657,6 @@ document.addEventListener('alpine:init', () => {
             return new Intl.DateTimeFormat(this.locale, { month: 'short', year: 'numeric', timeZone: 'UTC' }).format(new Date(toIso(dayNumber)));
         },
 
-        initials(name) {
-            return String(name ?? '')
-                .split(/[\s,]+/)
-                .filter(Boolean)
-                .slice(0, 2)
-                .map((part) => part[0])
-                .join('')
-                .toUpperCase();
-        },
-
         isCriticalShown(row) {
             return this.showCritical && row.critical === true;
         },

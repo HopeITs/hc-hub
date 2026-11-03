@@ -9,6 +9,7 @@ use App\Enums\ProposalPhase;
 use App\Enums\ProposalStatus;
 use App\Models\Donor;
 use App\Models\DonorProposal;
+use App\Models\HrEmployee;
 use App\Models\Milestone;
 use App\Models\Project;
 use App\Models\Proposal;
@@ -364,6 +365,7 @@ trait BuildsPortfolioGantt
             statusLabel: $project->status->label(),
             tone: $this->projectTone($project),
             owner: $project->user?->name,
+            ownerAvatar: $project->user === null ? null : HrEmployee::avatarUrl($project->user->id),
             url: route('projects.show', $project),
         ) + [
             'planUrl' => route('projects.show', $project),
