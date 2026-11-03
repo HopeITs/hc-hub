@@ -206,6 +206,24 @@ test('the header filter select renders the programs dropdown instead of a native
         ->and(trim($xpath->query('//*[@data-header-filter-select]//*[@data-selected="true"]')->item(0)->textContent))->toBe('Aleppo');
 });
 
+test('the header filter select names its button by the label and the current choice', function () {
+    $html = Blade::render(<<<'BLADE'
+        <x-ui.header-filter-select id="city-filter" label="City" value="aleppo" wire:model.live="city">
+            <option value="aleppo">Aleppo</option>
+            <option value="raqqa">Ar-Raqqa</option>
+        </x-ui.header-filter-select>
+    BLADE);
+    $document = new DOMDocument;
+    @$document->loadHTML($html);
+    $xpath = new DOMXPath($document);
+    $button = $xpath->query('//button[@id="city-filter"]')->item(0);
+
+    expect($button->getAttribute('aria-labelledby'))->toBe('city-filter-label city-filter-value')
+        ->and($button->hasAttribute('aria-label'))->toBeFalse()
+        ->and(trim($xpath->query('//label[@id="city-filter-label"]')->item(0)->textContent))->toBe('City')
+        ->and(trim($xpath->query('//button[@id="city-filter"]//*[@id="city-filter-value"]')->item(0)->textContent))->toBe('Aleppo');
+});
+
 test('the stat tile shows a value over a denominator', function () {
     $html = Blade::render('<x-ui.stat-tile label="Targeted" :value="6" :denominator="8" unit="projects" />');
 
