@@ -712,7 +712,8 @@ test('the project form lays its fields along a three-section rail with no native
     expect($xpath->query($dialog)->length)->toBe(1)
         ->and($headings)->toBe(['Details', 'Placement', 'Beneficiaries'])
         ->and($xpath->query($dialog.'//select')->length)->toBe(0)
-        ->and($xpath->query($dialog.'//*[@data-form-select]')->length)->toBe(3)
+        // Center, city and host center (the last two only while no center is chosen, W-01), program, owner.
+        ->and($xpath->query($dialog.'//*[@data-form-select]')->length)->toBe(5)
         ->and($xpath->query($dialog.'[@*[name()="wire:close"]="closeProjectModal"]')->length)->toBe(1)
         ->and($xpath->query($dialog.'//form[@*[name()="wire:submit"]="saveProject"]')->length)->toBe(1);
 });
@@ -765,4 +766,41 @@ test('the project form is rendered only while its modal is open', function () {
         ->call('openCreateModal')
         ->set('sectorIds', newProjectSectorIds())
         ->assertSeeHtml('wire:model="targetBeneficiaries"');
+});
+
+test('a hosted project says which center hosts it and a centered one does not', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $idleb = insertHrCity('Idleb', 'إدلب');
+    $aleppo = insertHrCity('Aleppo', 'حلب');
+    $host = insertHrCenter($aleppo, 'Head Office Aleppo', 'المكتب الرئيسي حلب');
+    Project::factory()->hostedBy($host)->create(['name' => 'Wells Idleb', 'city_id' => $idleb]);
+    Project::factory()->create(['name' => 'Aleppo Clinics', 'city_id' => $aleppo, 'center_id' => $host]);
+
+    $page = Livewire::actingAs($user)->test('pages::projects.index')
+        ->assertSeeText('Hosted by Head Office Aleppo')
+        ->assertSeeHtml('data-test="hosted-by-badge"')
+        ->assertDontSeeText('Projects without a center');
+
+    expect(substr_count($page->html(), 'data-test="hosted-by-badge"'))->toBe(1);
+});
+
+test('hosted projects add no query per row to the directory', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $host = insertHrCenter(insertHrCity('Aleppo', 'حلب'), 'Head Office Aleppo');
+    Project::factory()->hostedBy($host)->create();
+
+    $countQueries = function () use ($user): int {
+        $queries = 0;
+        DB::listen(function () use (&$queries): void {
+            $queries++;
+        });
+        Livewire::actingAs($user)->test('pages::projects.index');
+
+        return $queries;
+    };
+
+    $withOne = $countQueries();
+    Project::factory()->count(4)->hostedBy($host)->create();
+
+    expect($countQueries())->toBeLessThanOrEqual($withOne);
 });

@@ -96,6 +96,8 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
                 'target_boys',
                 'target_girls',
                 'city_id',
+                'center_id',
+                'host_center_id',
                 'program_id',
                 'user_id',
                 'updated_at',
@@ -164,7 +166,8 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
             return 0;
         }
 
-        return Project::query()->whereNull('center_id')->count();
+        // A hosted project (W-01) is placed, not unmapped.
+        return Project::query()->whereNull('center_id')->whereNull('host_center_id')->count();
     }
 
     /**
@@ -181,6 +184,7 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
 
         return Project::query()
             ->whereNull('center_id')
+            ->whereNull('host_center_id')
             ->orderBy('name')
             ->get(['id', 'slug', 'name']);
     }

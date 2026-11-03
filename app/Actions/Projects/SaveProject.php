@@ -7,6 +7,7 @@ namespace App\Actions\Projects;
 use App\Enums\ProjectStatus;
 use App\Jobs\CheckProgramLogframe;
 use App\Models\HrCenter;
+use App\Models\HrCity;
 use App\Models\HrEmployee;
 use App\Models\Program;
 use App\Models\Project;
@@ -24,8 +25,11 @@ use Illuminate\Validation\ValidationException;
  * A new project is always a `draft` without dates: dates are `prohibited`
  * while the project is a draft and arrive with the approval (T08). The
  * status is never an input; an edit keeps it. A project runs from an HR
- * center (D-30): the city is the center's and is written here, and only one
- * open project may hold a (center, program) pair, checked by
+ * center (D-30): the city is the center's and is written here. A project in
+ * a city with no center is instead hosted by another center (D-55, W-01):
+ * it keeps the city sent with it, `center_id` stays null and
+ * `host_center_id` names the host. One or the other, never both. Only one
+ * open project may hold a (center ?? city, program) pair, checked by
  * Project::openProjectFor() under the program's row lock.
  *
  * The keys are camelCase so a ValidationException maps onto the Livewire
@@ -39,7 +43,11 @@ final class SaveProject
      * «Program — Center». `sectorIds` (T34) is required on create; on edit
      * the sectors change only when the key is sent.
      *
-     * @param  array{name?: ?string, description?: ?string, startDate?: ?string, endDate?: ?string, targetBeneficiaries?: int|string|null, targetMen?: int|string|null, targetWomen?: int|string|null, targetBoys?: int|string|null, targetGirls?: int|string|null, centerId?: int|string|null, programId?: int|string|null, userId?: int|string|null, sectorIds?: list<int|string>}  $data
+     * `cityId` is read only when no center is sent (a hosted project); with a
+     * center the city is the center's. `hostCenterId` is refused beside a
+     * center and forced to null once a center is set.
+     *
+     * @param  array{name?: ?string, description?: ?string, startDate?: ?string, endDate?: ?string, targetBeneficiaries?: int|string|null, targetMen?: int|string|null, targetWomen?: int|string|null, targetBoys?: int|string|null, targetGirls?: int|string|null, centerId?: int|string|null, hostCenterId?: int|string|null, cityId?: int|string|null, programId?: int|string|null, userId?: int|string|null, sectorIds?: list<int|string>}  $data
      */
     public function handle(?Project $existing, array $data, User $actor): Project
     {
@@ -69,6 +77,8 @@ final class SaveProject
             $validated = $this->validate($input, $project, $mayReassign);
 
             $center = $validated['centerId'] === null ? null : HrCenter::remembered((int) $validated['centerId']);
+            $hostCenterId = $center === null ? $this->positiveInteger($validated['hostCenterId']) : null;
+            $cityId = $this->positiveInteger($validated['cityId']);
 
             if (! $project->exists) {
                 $project->status = ProjectStatus::Draft;
@@ -83,7 +93,8 @@ final class SaveProject
                 'target_boys' => $this->nullableInteger($validated['targetBoys']),
                 'target_girls' => $this->nullableInteger($validated['targetGirls']),
                 'center_id' => $center?->id,
-                'city_id' => $center === null ? $project->city_id : $center->city_id,
+                'host_center_id' => $hostCenterId,
+                'city_id' => $center !== null ? $center->city_id : ($cityId ?? $project->city_id),
                 'program_id' => $mayReassign ? (int) $validated['programId'] : $project->program_id,
                 'user_id' => $mayReassign ? (int) $validated['userId'] : $project->user_id,
             ]);
@@ -125,7 +136,7 @@ final class SaveProject
     {
         $blank = fn (mixed $value): mixed => is_string($value) && trim($value) === '' ? null : (is_string($value) ? trim($value) : $value);
 
-        $keys = ['name', 'description', 'startDate', 'endDate', 'targetBeneficiaries', 'targetMen', 'targetWomen', 'targetBoys', 'targetGirls', 'centerId', 'programId', 'userId'];
+        $keys = ['name', 'description', 'startDate', 'endDate', 'targetBeneficiaries', 'targetMen', 'targetWomen', 'targetBoys', 'targetGirls', 'centerId', 'hostCenterId', 'cityId', 'programId', 'userId'];
 
         $normalized = array_combine($keys, array_map(fn (string $key): mixed => $blank($data[$key] ?? null), $keys));
         $normalized['sectorIds'] = array_key_exists('sectorIds', $data) ? array_values((array) $data['sectorIds']) : null;
@@ -142,6 +153,10 @@ final class SaveProject
         $isDraft = ! $project->exists || $project->status === ProjectStatus::Draft;
         $mustHoldDates = $project->exists && in_array($project->status, [ProjectStatus::Approved, ProjectStatus::Active], true);
         $savedCenterId = $project->exists ? $project->center_id : null;
+        // A placement (center or host) is required on create, and on edit once
+        // the project has one; a legacy row with neither stays editable until W-02.
+        $placementRequired = ! $project->exists || $savedCenterId !== null || $project->host_center_id !== null;
+        $isHosted = $input['centerId'] === null && $input['hostCenterId'] !== null;
 
         $input['name'] ??= $project->exists ? null : $this->defaultName($input);
 
@@ -156,7 +171,8 @@ final class SaveProject
             'targetBoys' => ['nullable', 'integer', 'min:0', 'max:4294967295'],
             'targetGirls' => ['nullable', 'integer', 'min:0', 'max:4294967295'],
             'centerId' => [
-                Rule::when(! $project->exists || $savedCenterId !== null, ['required'], ['nullable']),
+                Rule::when($placementRequired, ['required_without:hostCenterId'], ['nullable']),
+                'nullable',
                 'integer',
                 function (string $attribute, mixed $value, Closure $fail) use ($savedCenterId): void {
                     $center = HrCenter::remembered((int) $value);
@@ -165,6 +181,28 @@ final class SaveProject
                         $fail(__('projects.choose_the_center'));
                     }
                 },
+            ],
+            'hostCenterId' => [
+                'nullable',
+                'integer',
+                function (string $attribute, mixed $value, Closure $fail) use ($input): void {
+                    if ($input['centerId'] !== null) {
+                        $fail((string) $input['centerId'] === (string) $value ? __('projects.cannot_host_own_center') : __('projects.choose_center_or_host'));
+
+                        return;
+                    }
+
+                    $host = HrCenter::remembered((int) $value);
+
+                    if ($host === null || ! $host->is_active) {
+                        $fail(__('projects.choose_the_center'));
+                    }
+                },
+            ],
+            'cityId' => [
+                Rule::when($isHosted, ['required'], ['nullable']),
+                'integer',
+                Rule::exists(HrCity::class, 'id'),
             ],
             'programId' => $mayReassign
                 ? ['required', 'integer', Rule::exists(Program::class, 'id')]
@@ -184,8 +222,12 @@ final class SaveProject
             'endDate.prohibited' => __('projects.dates_prohibited_draft'),
             'startDate.required' => __('projects.dates_required'),
             'endDate.required' => __('projects.dates_required'),
-            'centerId.required' => __('projects.choose_the_center'),
+            'centerId.required_without' => __('projects.choose_center_or_host'),
             'centerId.integer' => __('projects.choose_the_center'),
+            'hostCenterId.integer' => __('projects.choose_the_center'),
+            'cityId.required' => __('projects.choose_the_city'),
+            'cityId.integer' => __('projects.choose_the_city'),
+            'cityId.exists' => __('projects.choose_the_city'),
             'programId.required' => __('projects.select_a_program_2'),
             'programId.exists' => __('projects.the_selected_program_is_no_longer_available'),
             'userId.required' => __('projects.select_a_project_owner'),
@@ -218,14 +260,15 @@ final class SaveProject
     }
 
     /**
-     * «Program — Center» once both are chosen.
+     * «Program — Center» once both are chosen; the host center stands in
+     * for a hosted project.
      *
      * @param  array<string, mixed>  $input
      */
     private function defaultName(array $input): ?string
     {
         $programId = $this->positiveInteger($input['programId']);
-        $centerId = $this->positiveInteger($input['centerId']);
+        $centerId = $this->positiveInteger($input['centerId']) ?? $this->positiveInteger($input['hostCenterId']);
 
         if ($programId === null || $centerId === null) {
             return null;
@@ -238,24 +281,27 @@ final class SaveProject
     }
 
     /**
-     * One open project per (center, program) (D-30a): a create, or an edit
-     * that moves the center or program of an open project, is refused when
-     * another one already holds the pair. Nothing is written.
+     * One open project per (center ?? city, program) (D-30a, D-55): a create,
+     * or an edit that moves the placement or program of an open project, is
+     * refused when another one already holds the pair. Nothing is written. A
+     * legacy row with neither center nor host is not checked until W-02.
      */
     private function refuseSecondOpenProject(Project $project): void
     {
-        $claimsPair = $project->center_id !== null
+        $claimsPair = ($project->center_id !== null || $project->host_center_id !== null)
             && $project->status->isOpen()
-            && (! $project->exists || $project->isDirty(['center_id', 'program_id']));
+            && (! $project->exists || $project->isDirty(['center_id', 'host_center_id', 'city_id', 'program_id']));
 
         if (! $claimsPair) {
             return;
         }
 
-        $open = Project::openProjectFor($project->center_id, $project->program_id, $project->exists ? $project->id : null);
+        $open = Project::openProjectFor($project->center_id, (int) $project->city_id, $project->program_id, $project->exists ? $project->id : null);
 
         if ($open !== null) {
-            throw ValidationException::withMessages(['centerId' => __('projects.open_project_exists', ['name' => $open->name])]);
+            $field = $project->center_id !== null ? 'centerId' : 'hostCenterId';
+
+            throw ValidationException::withMessages([$field => __('projects.open_project_exists', ['name' => $open->name])]);
         }
     }
 

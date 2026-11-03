@@ -127,7 +127,7 @@ trait ManagesProposalForm
      * search, at most ProjectPickerLimit of them, plus the ones already
      * chosen so a narrowed search never hides a choice.
      *
-     * @return list<array{id: int, name: string, place: string}>
+     * @return list<array{id: int, name: string, place: string, hosted: ?string}>
      */
     #[Computed]
     public function proposalPickerProjects(): array
@@ -149,7 +149,7 @@ trait ManagesProposalForm
     /**
      * The chosen projects while creating, each with its beneficiaries input.
      *
-     * @return list<array{id: int, name: string, place: string}>
+     * @return list<array{id: int, name: string, place: string, hosted: ?string}>
      */
     #[Computed]
     public function proposalChosenProjects(): array
@@ -165,7 +165,7 @@ trait ManagesProposalForm
      * The projects already linked to the proposal being edited, each with its
      * beneficiaries input. Links themselves change on the proposal page.
      *
-     * @return list<array{id: int, name: string, place: string}>
+     * @return list<array{id: int, name: string, place: string, hosted: ?string}>
      */
     #[Computed]
     public function proposalLinkedProjects(): array
@@ -175,7 +175,7 @@ trait ManagesProposalForm
         }
 
         $projects = Project::query()
-            ->select(['projects.id', 'projects.name', 'projects.center_id', 'projects.program_id', 'projects.city_id'])
+            ->select(['projects.id', 'projects.name', 'projects.center_id', 'projects.host_center_id', 'projects.program_id', 'projects.city_id'])
             ->whereHas('proposals', fn (Builder $query) => $query->whereKey($this->editingProposalId))
             ->with('city:id,name_en,name_ar')
             ->orderBy('projects.name')
@@ -236,7 +236,7 @@ trait ManagesProposalForm
      * projects and the counts of framework nodes, milestones and tasks, plus
      * the number of a renewal draft that already exists. Counts only.
      *
-     * @return array{projects: list<array{id: int, name: string, place: string}>, results: int, milestones: int, tasks: int, existingDraft: ?string}|null
+     * @return array{projects: list<array{id: int, name: string, place: string, hosted: ?string}>, results: int, milestones: int, tasks: int, existingDraft: ?string}|null
      */
     #[Computed]
     public function renewalPreview(): ?array
@@ -248,7 +248,7 @@ trait ManagesProposalForm
         }
 
         $projects = $previous->projects()
-            ->select(['projects.id', 'projects.name', 'projects.center_id', 'projects.program_id', 'projects.city_id'])
+            ->select(['projects.id', 'projects.name', 'projects.center_id', 'projects.host_center_id', 'projects.program_id', 'projects.city_id'])
             ->with('city:id,name_en,name_ar')
             ->orderBy('projects.id')
             ->get();
@@ -556,7 +556,7 @@ trait ManagesProposalForm
     {
         return Project::query()
             ->linkableToProposals()
-            ->select(['id', 'name', 'center_id', 'program_id', 'city_id'])
+            ->select(['id', 'name', 'center_id', 'host_center_id', 'program_id', 'city_id'])
             ->with('city:id,name_en,name_ar')
             ->orderBy('name')
             ->orderBy('id');
@@ -585,21 +585,25 @@ trait ManagesProposalForm
      * for shows its id.
      *
      * @param  iterable<Project>  $projects
-     * @return list<array{id: int, name: string, place: string}>
+     * @return list<array{id: int, name: string, place: string, hosted: ?string}>
      */
     private function projectRows(iterable $projects): array
     {
         $rows = [];
 
         foreach ($projects as $project) {
+            // A hosted project (W-01) carries its host as a badge instead of a center in the place line.
+            $isHosted = $project->host_center_id !== null;
+
             $rows[] = [
                 'id' => $project->id,
                 'name' => $project->name,
-                'place' => implode(' · ', [
-                    $this->centerName($project->center_id),
+                'place' => implode(' · ', array_values(array_filter([
+                    $isHosted ? null : $this->centerName($project->center_id),
                     $this->programName($project->program_id),
                     $project->city->name ?? __('common.unknown_city'),
-                ]),
+                ], fn (?string $part): bool => $part !== null))),
+                'hosted' => $isHosted ? $this->centerName($project->host_center_id) : null,
             ];
         }
 

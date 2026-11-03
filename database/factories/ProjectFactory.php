@@ -100,6 +100,18 @@ class ProjectFactory extends Factory
     }
 
     /**
+     * A project with no center in its city, followed up by the given HR
+     * center (D-55, W-01): `center_id` stays null.
+     */
+    public function hostedBy(int $hostCenterId): static
+    {
+        return $this->state([
+            'center_id' => null,
+            'host_center_id' => $hostCenterId,
+        ]);
+    }
+
+    /**
      * Indicate a project with a headline total but no disaggregation agreed.
      *
      * The two are allowed to disagree; this state makes that case reachable.

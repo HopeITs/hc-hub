@@ -202,6 +202,7 @@ new #[Layout('layouts::desk'), Title('titles.project')] class extends Component 
                 'target_girls',
                 'city_id',
                 'center_id',
+                'host_center_id',
                 'program_id',
                 'user_id',
                 'updated_at',

@@ -42,6 +42,7 @@
                 </span>
             @endif
             · {{ $project->city?->name ?? __('common.unknown_city') }}
+            <x-projects.host-center-badge :project="$project" class="ms-1.5 align-middle" />
             <x-projects.sector-chips :sectors="$project->sectors" class="ms-1.5 inline-flex! align-middle" data-test="project-sectors" />
         </div>
 
