@@ -119,6 +119,8 @@ import './unsaved.js';
 
 // Typed examples in empty fields' placeholders (data-typewriter).
 import './typewriter.js';
+// The assistant's browser-side model (Puter.js), loaded only when used.
+import './assistant-puter.js';
 
 import './password-toggle.js';
 import './password-strength.js';

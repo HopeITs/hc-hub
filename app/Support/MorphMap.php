@@ -21,6 +21,7 @@ use App\Models\UserNotification;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Passkeys\Passkey;
 use Modules\Hr\Models\AnnualLeaveRule;
+use Modules\Hr\Models\AssistantConversation;
 use Modules\Hr\Models\Attachment;
 use Modules\Hr\Models\Badge;
 use Modules\Hr\Models\BirthdayHolidayChoice;
@@ -47,6 +48,7 @@ use Modules\Hr\Models\LeaveRequest;
 use Modules\Hr\Models\LeaveRequestNote;
 use Modules\Hr\Models\LeaveType;
 use Modules\Hr\Models\News;
+use Modules\Hr\Models\PolicyDocument;
 use Modules\Hr\Models\Position;
 use Modules\Hr\Models\ProfileChangeRequest;
 use Modules\Hr\Models\Relative;
@@ -153,5 +155,9 @@ final class MorphMap
         'media_assistant_log' => MediaAssistantLog::class,
         'media_dashboard' => MediaDashboard::class,
         'media_proofread' => MediaProofread::class,
+
+        // HR AI assistant
+        'policy_document' => PolicyDocument::class,
+        'assistant_conversation' => AssistantConversation::class,
     ];
 }

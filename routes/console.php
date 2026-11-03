@@ -11,6 +11,7 @@ use Modules\Hr\Console\Commands\DeactivateEmployee;
 use Modules\Hr\Console\Commands\ProcessContractAutoRenewals;
 use Modules\Hr\Console\Commands\SendContractExpirationWarnings;
 use Modules\Hr\Console\Commands\SendLeaveDecisionReminders;
+use Modules\Hr\Console\Commands\SyncPolicies;
 use Modules\Media\Console\Commands\SendDeadlineReminders;
 
 Artisan::command('inspire', function () {
@@ -27,6 +28,8 @@ Schedule::command(DeactivateEmployee::class)->weekly();
 Schedule::command(SendDeadlineReminders::class)->dailyAt('08:30')->timezone('Asia/Damascus')->withoutOverlapping();
 // X2-I / DEC-10: task-attempt telemetry is deleted after 90 days.
 Schedule::command(PruneTaskAttempts::class)->dailyAt('03:10');
+// The HR assistant's copy of the policies in Drive (unchanged files are not re-read).
+Schedule::command(SyncPolicies::class)->dailyAt('02:30')->withoutOverlapping();
 // D3 / DEC-08: in-app feedback is deleted after one year (InAppFeedback::prunable()).
 Schedule::command('model:prune', ['--model' => [InAppFeedback::class]])->dailyAt('03:20');
 Schedule::call(function () {

@@ -5,6 +5,7 @@ use Modules\Hr\Http\Controllers\ArchiveFileController;
 use Modules\Hr\Http\Controllers\EmployeeAvatarController;
 use Modules\Hr\Http\Controllers\EmployeeDocumentController;
 use Modules\Hr\Livewire\Archives\ArchivedFilesModule;
+use Modules\Hr\Livewire\Assistant\Chat as AssistantChat;
 use Modules\Hr\Livewire\Badges\BadgesModule;
 use Modules\Hr\Livewire\Basics\CourseCategoryModule;
 use Modules\Hr\Livewire\ChecklistItems\AllItems;
@@ -38,6 +39,10 @@ Route::get('my-profile', EmployeeProfile::class)->name('my-profile');
 // C3: the work inbox. No permission of its own: every row comes from a
 // source's scoped query and every action re-checks its domain policy.
 Route::get('inbox', InboxIndex::class)->name('inbox');
+// The AI assistant. No permission of its own: every signed-in user may
+// ask, and the Assistant service only reads what the asker may read. The
+// page 404s while the assistant is switched off or has no key.
+Route::get('assistant', AssistantChat::class)->name('assistant');
 
 // Basic project routes
 require __DIR__.'/basic-project.php';

@@ -25,6 +25,8 @@ use Modules\Hr\Policies\DigitalIdPolicy;
 use Modules\Hr\Policies\EmployeePolicy;
 use Modules\Hr\Policies\LeaveRequestPolicy;
 use Modules\Hr\Policies\PositionPolicy;
+use Modules\Hr\Services\Assistant\ChatModel;
+use Modules\Hr\Services\Assistant\ModelRouter;
 use Modules\Hr\Services\SalaryCipher;
 use ReflectionClass;
 
@@ -59,6 +61,9 @@ class HrServiceProvider extends ServiceProvider
         // figures" warning that goes with it - is built once per request
         // rather than once per contract row rendered.
         $this->app->singleton(SalaryCipher::class);
+
+        // The AI assistant asks whichever configured AI provider answers first.
+        $this->app->bind(ChatModel::class, ModelRouter::class);
 
         // Jobs queued by hc-hr before the move serialized its notifications as
         // App\Notifications\X. Resolve those names to the moved classes, so a
