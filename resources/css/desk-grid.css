@@ -8,9 +8,8 @@
 @layer components {
     /* ── Responsive spans ─────────────────────────────────────────── */
     .dk-grid > .dk-panel { grid-column: span var(--span-r, var(--span)); }
-    /* --col pins a card pulled from its start edge; only the full 12-column grid honours it. */
     @media (min-width: 1280px) {
-        .dk-grid > .dk-panel { grid-column: var(--col, auto) / span var(--span); }
+        .dk-grid > .dk-panel { grid-column: span var(--span); }
     }
     @media (max-width: 1279px) {
         .dk-panel:is([data-cols="1"], [data-cols="2"], [data-cols="3"]) { --span-r: 4; }

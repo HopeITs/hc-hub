@@ -21,6 +21,11 @@ use Illuminate\Support\Str;
  * get their role's default. A stored layout is always read through
  * layoutFor(), which drops panels the person may no longer see and unknown
  * ids or sizes, so a changed permission never shows a forbidden panel.
+ *
+ * Every layout is read flush (flush()): the cards, in order, fill rows of
+ * exactly twelve columns and each row shares one height, so the Desk never
+ * shows a hole between cards. resources/js/desk-rows.js mirrors these rules
+ * for the live preview while a card is dragged or resized.
  */
 final class Panels
 {
@@ -304,40 +309,27 @@ final class Panels
     /**
      * How the true rows of a layout span below 1280px, where a card's width
      * alone would break them (8 + 4 becomes 12 + 6, and the 6 then sits beside
-     * a card of another height). A row is true when its two or three cards
-     * total twelve columns, share one height and none is pinned: two cards
-     * halve the width, a third takes the full width under them.
+     * a card of another height). A row is true when its two to four cards
+     * total twelve columns and share one height: two cards halve the width, a
+     * third takes the full width under them, and four make two halved lines.
      *
-     * @param  list<array{panel: string, size: string, cols: int, rows: int, col?: int}>  $layout
+     * @param  list<array{panel: string, size: string, cols: int, rows: int}>  $layout
      * @return array<string, int> panel => columns
      */
     public function narrowSpansOf(array $layout): array
     {
         $spans = [];
-        $row = [];
 
-        foreach ($layout as $entry) {
-            if (array_sum(array_column($row, 'cols')) + $entry['cols'] > self::MaxCols) {
-                $row = [];
-            }
-
-            $row[] = $entry;
-
-            if (array_sum(array_column($row, 'cols')) !== self::MaxCols) {
-                continue;
-            }
-
-            $isTrueRow = in_array(count($row), [2, 3], true)
-                && count(array_unique(array_column($row, 'rows'))) === 1
-                && array_column($row, 'col') === [];
+        foreach ($this->rowsIn($layout) as $row) {
+            $isTrueRow = in_array(count($row), [2, 3, 4], true)
+                && array_sum(array_column($row, 'cols')) === self::MaxCols
+                && count(array_unique(array_column($row, 'rows'))) === 1;
 
             if ($isTrueRow) {
                 foreach ($row as $i => $cell) {
-                    $spans[$cell['panel']] = $i < 2 ? 6 : self::MaxCols;
+                    $spans[$cell['panel']] = $i < 2 || count($row) === 4 ? 6 : self::MaxCols;
                 }
             }
-
-            $row = [];
         }
 
         return $spans;
@@ -422,32 +414,7 @@ final class Panels
      */
     public function startingLayoutFor(User $user): array
     {
-        return $this->fillRows($this->clean($this->defaultLayoutFor($user), $user));
-    }
-
-    /**
-     * A prepared layout loses cards the viewer may not see, which can leave a
-     * row short: widen the last card of each short row to the grid's edge.
-     * A layout the person arranged themselves never comes through here.
-     *
-     * @param  list<array{panel: string, size: string, cols: int, rows: int}>  $layout
-     * @return list<array{panel: string, size: string, cols: int, rows: int}>
-     */
-    private function fillRows(array $layout): array
-    {
-        $used = 0;
-
-        foreach ($layout as $i => $entry) {
-            $next = $layout[$i + 1]['cols'] ?? self::MaxCols + 1;
-            $used += $entry['cols'];
-
-            if ($used + $next > self::MaxCols) {
-                $layout[$i] = $this->sized($entry['panel'], $entry['size'], $entry['cols'] + self::MaxCols - $used, $entry['rows']);
-                $used = 0;
-            }
-        }
-
-        return $layout;
+        return $this->clean($this->defaultLayoutFor($user), $user);
     }
 
     /**
@@ -524,33 +491,111 @@ final class Panels
 
             $seen[$panel] = true;
             $size = is_string($size) && isset(self::Sizes[$size]) ? $size : $available[$panel]['size'];
-            $layout[] = $this->sized($panel, $size, $entry['cols'] ?? null, $entry['rows'] ?? null, $entry['col'] ?? null);
+            $layout[] = $this->sized($panel, $size, $entry['cols'] ?? null, $entry['rows'] ?? null);
         }
 
-        return $layout;
+        return $this->flush($layout);
+    }
+
+    /**
+     * The layout with no hole in it: its cards, in order, fill rows of
+     * exactly twelve columns (a short row's cards share the spare columns,
+     * fitRow()), and every card in a row takes the row's tallest height.
+     * A layout that is already flush comes back unchanged.
+     *
+     * @param  list<array{panel: string, size: string, cols: int, rows: int}>  $layout
+     * @return list<array{panel: string, size: string, cols: int, rows: int}>
+     */
+    public function flush(array $layout): array
+    {
+        $flushed = [];
+
+        foreach ($this->rowsIn($layout) as $row) {
+            $height = max(array_column($row, 'rows'));
+
+            foreach ($this->fitRow(array_column($row, 'cols')) as $i => $cols) {
+                $flushed[] = $this->sized($row[$i]['panel'], $row[$i]['size'], $cols, $height);
+            }
+        }
+
+        return $flushed;
+    }
+
+    /**
+     * The layout cut into rows, in order: a card that would pass the
+     * twelfth column starts the next row.
+     *
+     * @template TEntry of array{cols: int}
+     *
+     * @param  list<TEntry>  $layout
+     * @return list<non-empty-list<TEntry>>
+     */
+    public function rowsIn(array $layout): array
+    {
+        $rows = [];
+        $row = [];
+
+        foreach ($layout as $entry) {
+            if ($row !== [] && array_sum(array_column($row, 'cols')) + $entry['cols'] > self::MaxCols) {
+                $rows[] = $row;
+                $row = [];
+            }
+
+            $row[] = $entry;
+        }
+
+        if ($row !== []) {
+            $rows[] = $row;
+        }
+
+        return $rows;
+    }
+
+    /**
+     * One row's widths scaled to exactly twelve columns, in proportion and
+     * never under MinCols: the spare column goes to the card that lost the
+     * most in rounding, so 4 + 4 widens to 6 + 6 and 7 + 5 stays as it is.
+     *
+     * @param  list<int>  $cols
+     * @return list<int>
+     */
+    public function fitRow(array $cols): array
+    {
+        $total = array_sum($cols);
+
+        if ($total === self::MaxCols || $total === 0) {
+            return $cols;
+        }
+
+        $shares = array_map(fn (int $width): float => $width * self::MaxCols / $total, $cols);
+        $fitted = array_map(fn (float $share): int => max(self::MinCols, (int) floor($share)), $shares);
+
+        while (array_sum($fitted) < self::MaxCols) {
+            $gaps = array_map(fn (float $share, int $width): float => $share - $width, $shares, $fitted);
+            $fitted[array_search(max($gaps), $gaps, true)]++;
+        }
+
+        while (array_sum($fitted) > self::MaxCols) {
+            $over = array_map(fn (float $share, int $width): float => $width > self::MinCols ? $width - $share : -INF, $shares, $fitted);
+            $fitted[array_search(max($over), $over, true)]--;
+        }
+
+        return $fitted;
     }
 
     /**
      * One layout entry with its exact cell size: stored cols/rows clamped to
      * the grid, or (older layouts, size-only entries) the size's columns and
-     * the panel's own height. size always names the nearest S…XL step. col is
-     * the grid column a card pulled from its start edge stays pinned to, left
-     * out when it would not fit, so the card goes back to flowing in order.
+     * the panel's own height. size always names the nearest S…XL step.
      *
-     * @return array{panel: string, size: string, cols: int, rows: int, col?: int}
+     * @return array{panel: string, size: string, cols: int, rows: int}
      */
-    public function sized(string $panel, string $size, mixed $cols = null, mixed $rows = null, mixed $col = null): array
+    public function sized(string $panel, string $size, mixed $cols = null, mixed $rows = null): array
     {
         $cols = is_numeric($cols) ? max(self::MinCols, min(self::MaxCols, (int) $cols)) : (self::Sizes[$size] ?? 4);
         $rows = is_numeric($rows) ? max(self::MinRows, min(self::MaxRows, (int) $rows)) : max(self::MinRows, min(self::MaxRows, $this->rowsOf($panel)));
 
-        $entry = ['panel' => $panel, 'size' => $this->nearestSize($cols), 'cols' => $cols, 'rows' => $rows];
-
-        if (is_numeric($col) && (int) $col >= 1 && (int) $col + $cols - 1 <= self::MaxCols) {
-            $entry['col'] = (int) $col;
-        }
-
-        return $entry;
+        return ['panel' => $panel, 'size' => $this->nearestSize($cols), 'cols' => $cols, 'rows' => $rows];
     }
 
     /**

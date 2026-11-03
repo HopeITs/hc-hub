@@ -179,11 +179,6 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
     </div>
 
 
-    @foreach ($layout as $entry)
-        @if (isset($entry['col']))
-            <style>#dk-panel-{{ $entry['panel'] }} { --col: {{ $entry['col'] }}; }</style>
-        @endif
-    @endforeach
     {{-- Below 1280px a true row keeps together (desk-grid.css reads --span-r only there). --}}
     @foreach (app(Panels::class)->narrowSpansOf($layout) as $panel => $span)
         <style>#dk-panel-{{ $panel }} { --span-r: {{ $span }}; }</style>

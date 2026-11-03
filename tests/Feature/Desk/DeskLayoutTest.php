@@ -33,9 +33,34 @@ test('a saved layout drops forbidden, unknown and repeated panels and fixes a ba
     ]]);
 
     expect(app(Panels::class)->layoutFor($user))->toBe([
-        ['panel' => 'tasks', 'size' => 'L', 'cols' => 6, 'rows' => 4],
+        ['panel' => 'tasks', 'size' => 'XL', 'cols' => 12, 'rows' => 4],
         ['panel' => 'needs', 'size' => 'XL', 'cols' => 12, 'rows' => 4],
     ]);
+});
+
+test('a saved layout with holes opens flush: every row fills twelve columns at its tallest card\'s height', function () {
+    $user = User::factory()->role('Team Member')->create(['desk_layout' => [
+        ['panel' => 'tasks', 'size' => 'W', 'cols' => 7, 'rows' => 4],
+        ['panel' => 'needs', 'size' => 'W', 'cols' => 7, 'rows' => 5],
+        ['panel' => 'notes', 'size' => 'S', 'cols' => 3, 'rows' => 2],
+        ['panel' => 'coming', 'size' => 'M', 'cols' => 4, 'rows' => 6],
+    ]]);
+
+    expect(array_map(fn (array $entry): array => [$entry['panel'], $entry['cols'], $entry['rows']], app(Panels::class)->layoutFor($user)))->toBe([
+        ['tasks', 12, 4],
+        ['needs', 8, 5],
+        ['notes', 4, 5],
+        ['coming', 12, 6],
+    ]);
+});
+
+test('a short row shares the spare columns in proportion, never under the minimum, and a full row is left alone', function () {
+    $panels = app(Panels::class);
+
+    expect($panels->fitRow([4, 4]))->toBe([6, 6])
+        ->and($panels->fitRow([3, 3, 3]))->toBe([4, 4, 4])
+        ->and($panels->fitRow([7, 5]))->toBe([7, 5])
+        ->and($panels->fitRow([12, 3]))->toBe([9, 3]);
 });
 
 test('every role opens on full rows, with no empty columns', function (string $role) {
@@ -50,39 +75,53 @@ test('every role opens on full rows, with no empty columns', function (string $r
     expect($row)->toBe(0);
 })->with(['General Manager', 'Public Relations Manager', 'Public Relations', 'MEAL', 'Financial', 'Managers', 'Media Team', 'Team Member']);
 
-test('a free resize saves the exact cells, kept within the grid limits', function () {
+test('a drag or pulled edge saves the arrangement it showed, kept within the grid limits', function () {
     $user = User::factory()->role('Team Member')->create();
     $desk = Livewire::actingAs($user)->test('pages::desk.index');
-    $saved = fn (): array => collect($user->fresh()->desk_layout)->firstWhere('panel', 'tasks');
+    $layout = app(Panels::class)->layoutFor($user);
+    $shown = array_map(fn (array $entry): array => ['panel' => $entry['panel'], 'cols' => $entry['cols'], 'rows' => $entry['rows']], $layout);
+    $shown[0] = ['panel' => 'needs', 'cols' => 8, 'rows' => 6];
+    $shown[1] = ['panel' => 'overdue', 'cols' => 4, 'rows' => 6];
 
-    $desk->call('resizePanelTo', 'tasks', 5, 3);
-    expect($saved())->toMatchArray(['cols' => 5, 'rows' => 3]);
+    $desk->call('arrangePanels', $shown);
+    expect(array_slice(array_map(fn (array $entry): array => [$entry['panel'], $entry['cols'], $entry['rows']], app(Panels::class)->layoutFor($user->fresh())), 0, 2))
+        ->toBe([['needs', 8, 6], ['overdue', 4, 6]]);
 
-    $desk->call('resizePanelTo', 'tasks', 1, 1);
-    expect($saved())->toMatchArray(['cols' => Panels::MinCols, 'rows' => Panels::MinRows]);
-
-    $desk->call('resizePanelTo', 'tasks', 99, 99);
-    expect($saved())->toMatchArray(['cols' => Panels::MaxCols, 'rows' => Panels::MaxRows]);
+    $shown[0]['rows'] = 99;
+    $shown[1]['rows'] = 99;
+    $desk->call('arrangePanels', $shown);
+    expect(collect($user->fresh()->desk_layout)->firstWhere('panel', 'needs'))->toMatchArray(['rows' => Panels::MaxRows]);
 });
 
-test('pulling a card from its start edge pins its column, until it no longer fits or is moved', function () {
+test('an arrangement that does not hold exactly the placed panels is ignored', function () {
     $user = User::factory()->role('Team Member')->create();
     $desk = Livewire::actingAs($user)->test('pages::desk.index');
-    $saved = fn (): array => collect($user->fresh()->desk_layout)->firstWhere('panel', 'tasks');
+    $shown = array_map(fn (array $entry): array => ['panel' => $entry['panel'], 'cols' => $entry['cols'], 'rows' => $entry['rows']], app(Panels::class)->layoutFor($user));
 
-    $desk->call('resizePanelTo', 'tasks', 4, 4, 9)->assertSeeHtml('#dk-panel-tasks { --col: 9; }');
-    expect($saved())->toMatchArray(['cols' => 4, 'col' => 9])
-        ->and(collect(app(Panels::class)->layoutFor($user->fresh()))->firstWhere('panel', 'tasks')['col'])->toBe(9);
+    $desk->call('arrangePanels', array_slice($shown, 1))
+        ->call('arrangePanels', [...$shown, ['panel' => 'money', 'cols' => 12, 'rows' => 4]])
+        ->call('arrangePanels', [...$shown, $shown[0]]);
 
-    $desk->call('resizePanelTo', 'tasks', 6, 4, 9);
-    expect($saved())->not->toHaveKey('col');
+    expect($user->fresh()->desk_layout)->toBeNull();
+});
 
-    $desk->call('resizePanelTo', 'tasks', 4, 4, 9)->call('movePanel', 'tasks', 0);
-    expect($saved())->not->toHaveKey('col');
+test('moving a card from its menu trades places, never shapes', function () {
+    $user = User::factory()->role('Team Member')->create();
+    $shape = fn (array $layout): array => array_map(fn (array $entry): array => [$entry['cols'], $entry['rows']], $layout);
+    $before = app(Panels::class)->layoutFor($user);
+
+    Livewire::actingAs($user)->test('pages::desk.index')->call('movePanel', 'projects', 0);
+    $after = app(Panels::class)->layoutFor($user->fresh());
+
+    expect($after[0]['panel'])->toBe('projects')
+        ->and($shape($after))->toBe($shape($before));
 });
 
 test('a card saved narrower than the minimum opens at the minimum', function () {
-    $user = User::factory()->role('Team Member')->create(['desk_layout' => [['panel' => 'tasks', 'size' => 'S', 'cols' => 1, 'rows' => 4]]]);
+    $user = User::factory()->role('Team Member')->create(['desk_layout' => [
+        ['panel' => 'tasks', 'size' => 'S', 'cols' => 1, 'rows' => 4],
+        ['panel' => 'needs', 'size' => 'W', 'cols' => 9, 'rows' => 4],
+    ]]);
 
     expect(app(Panels::class)->layoutFor($user)[0]['cols'])->toBe(Panels::MinCols);
 });
