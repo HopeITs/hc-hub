@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\QueryException;
 
 /**
  * @property int $id
@@ -136,6 +137,27 @@ class Project extends Model implements TracksActivity
         $hostCenterId = $this->activityAttribute('host_center_id');
 
         return $hostCenterId === null ? null : HrCenter::remembered((int) $hostCenterId);
+    }
+
+    /**
+     * Whether the project's own center is one HR has since deactivated
+     * (D-66, W-02). A hosted project is never affected by its host, and a
+     * project with no center, or one HR cannot be read for, is not marked.
+     * Read from the in-memory HR lookup, so a list costs no query per row.
+     */
+    public function hasInactiveCenter(): bool
+    {
+        $centerId = $this->activityAttribute('center_id');
+
+        if ($centerId === null) {
+            return false;
+        }
+
+        try {
+            return HrCenter::remembered((int) $centerId)?->is_active === false;
+        } catch (QueryException) {
+            return false;
+        }
     }
 
     /**

@@ -201,7 +201,7 @@ return [
     'host_center' => 'Host center',
     'select_a_host_center' => 'Select a host center',
     'select_a_city' => 'Select a city',
-    'host_center_help' => 'No center in the project\'s city? Choose the city and the center that follows the project up.',
+    'host_center_help' => 'No center in the project\'s city? Choose the center that follows the project up.',
     'choose_center_or_host' => 'Choose a physical center or a host center.',
     'cannot_host_own_center' => 'A project cannot be hosted by its own center.',
     'choose_the_city' => 'Choose the city.',
@@ -257,4 +257,8 @@ return [
     'more_actions_for' => 'More actions for :name',
     'ends' => 'Ends',
     'ended' => 'Ended',
+    'add_center' => 'Add center',
+    'no_centers_in_city' => 'No centers in this city yet',
+    'choose_the_city_first' => 'Choose the city first',
+    'center_inactive_badge' => 'Center inactive',
 ];
