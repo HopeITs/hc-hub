@@ -74,6 +74,18 @@ test('an assignee of someone else\'s task goes no further than under review, whi
     expect(fn () => app(CompleteTask::class)->handle($task->fresh()))->toThrow(ValidationException::class);
 });
 
+test('a review notice replaces the plain status change for the person it reaches', function () {
+    $creator = userWithRole('Managers', insertHrEmployee());
+    $worker = userWithRole('Team Member', insertHrEmployee());
+    $task = workflowTask($creator, [$worker->employee_id]);
+
+    moveAs($worker, $task, TaskStatus::UnderReview);
+    moveAs($creator, $task, TaskStatus::InProgress, 'Add the photos');
+
+    expect($creator->notifications()->where('subject_id', $task->id)->count())->toBe(1)
+        ->and($worker->notifications()->where('subject_id', $task->id)->count())->toBe(1);
+});
+
 test('the creator approves an under review task, or sends it back only with a note the assignees receive', function () {
     $creator = userWithRole('Managers', insertHrEmployee());
     $worker = userWithRole('Team Member', insertHrEmployee());
