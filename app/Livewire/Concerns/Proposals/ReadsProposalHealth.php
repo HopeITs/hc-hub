@@ -7,6 +7,7 @@ namespace App\Livewire\Concerns\Proposals;
 use App\Enums\ProposalPhase;
 use App\Enums\ProposalStatus;
 use App\Enums\TaskStatus;
+use App\Models\Donor;
 use App\Models\DonorProposal;
 use App\Models\DonorReport;
 use App\Models\PlanIndicator;
@@ -226,6 +227,15 @@ trait ReadsProposalHealth
                 'key' => 'agreement-status-inconsistent',
                 'text' => __('funding_agreements.proposal_status_inconsistent_with_agreement'),
                 'tab' => 'funding',
+                'critical' => false,
+            ];
+        }
+
+        if (Donor::query()->pending()->whereKey($this->proposal->donor_id)->exists()) {
+            $warnings[] = [
+                'key' => 'donor-pending',
+                'text' => __('proposals.donor_request_pending'),
+                'tab' => 'status',
                 'critical' => false,
             ];
         }

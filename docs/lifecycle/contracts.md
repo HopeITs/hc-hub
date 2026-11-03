@@ -161,6 +161,7 @@ GenerateExpectedTransfers  // queued listener of FundingAgreementRecorded + job 
 **T30:** `projects.center_id` unsigned big int null, indexed, **no FK** (HR connection).
 > **W-01:** `projects.host_center_id` unsigned big int null, indexed `projects_host_center_id_index`, **no FK** (HR connection). Rule: a project has a physical center (`center_id`) **or** a host center (`host_center_id`), never both and never neither once W-02 ships; `city_id` is always set. The open-project rule keys on `(center_id ?? city_id, program_id)`: `Project::openProjectFor(?int $centerId, int $cityId, int $programId, ?int $exceptId = null): ?Project` — when `$centerId` is null it matches projects with `center_id IS NULL` in that city and program.
 **T34:** `sectors` + `project_sector` (owned by B3, see §12).
+**W-04 (D-57):** `donors.approval_status` varchar(10) NOT NULL default `approved` (`DonorApprovalStatus`: `Pending = 'pending'`, `Approved = 'approved'`), `donors.requested_by` FK `users` null nullOnDelete, `donors.approved_by` FK `users` null nullOnDelete, `donors.approved_at` datetime null. Index on `approval_status`.
 
 ## §8 Permissions and default holders
 Nine roles (fixed): Super Admin, General Manager, Managers, MEAL, Financial, Media Team, Public Relations, Public Relations Manager, Team Member. Super Admin holds everything technically (`Role::booted()`) but **appears in no business list, no fallback and no test as the only account** (D-20a). `permissions:sync` only adds.
@@ -183,6 +184,7 @@ Nine roles (fixed): Super Admin, General Manager, Managers, MEAL, Financial, Med
 | `targets.create/update` | **MEAL only** (revoke from GM and Managers, D-23) | — |
 | `funding-agreements.view/create/update` | existing holders **+ Public Relations Manager** (D-31b) | — |
 | `proposals.update` | existing (Financial, PR Manager, GM) | also gates approve, transitions, final-report acceptance |
+| `donors.approve` (W-04, D-57) | **General Manager** only (plus `Super Admin` through the administrator roles rule); `donors.create` is unchanged (PR, PR Manager, GM) | — |
 
 No `media-deliverables` module: department tasks use `tasks.*` / `milestones.*` with a server-side department condition (T31).
 
@@ -501,6 +503,9 @@ final class App\Notifications\Recipients\OversightRecipients
 | `proposal.project_linked` / `proposal.project_unlinked` | proposals | D | all | no | none | T06 |
 | `proposal.deleted` | proposals | D | all | no | none | T12 |
 | `agreement.recorded` (`FundingAgreementRecorded`) | funding-agreements | I | all | no | Finance, PR Manager (no amounts for others) | T09 |
+| `donor.requested` | donors | I | none | no | `General Manager` holders of `donors.approve` | W-04 |
+| `donor.approved` | donors | I | none | no | `requested_by` | W-04 |
+| `donor.declined` | donors | I | none | no | `requested_by` | W-04 |
 | `transfer.generated` | transfers | I | mgmt | no | Finance | T09 |
 | `transfer.received` | transfers | I | mgmt | no | PR Manager, Finance | existing |
 | `transfer.late` | transfers | I | mgmt | no | Finance, PR Manager | existing |

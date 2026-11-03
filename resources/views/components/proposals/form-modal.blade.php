@@ -14,6 +14,8 @@
     'open' => false,
     'editing' => false,
     'donors' => [],
+    'donorPending' => false,
+    'canAddDonor' => false,
     'pickerProjects' => [],
     'chosenProjects' => [],
     'linkedProjects' => [],
@@ -117,11 +119,26 @@
                         </div>
                     </x-ui.form-field>
                 @else
-                    <x-ui.form-select wire:model="donorId" :label="__('funding_agreements.donor')" :placeholder="__('funding_agreements.select_a_donor')" required class="@2xl/modal:col-span-2">
-                        @foreach ($donors as $donor)
-                            <option value="{{ $donor->id }}">{{ $donor->name }}</option>
-                        @endforeach
-                    </x-ui.form-select>
+                    <div class="flex flex-wrap items-end gap-2 @2xl/modal:col-span-2" data-donor-field>
+                        <x-ui.form-select wire:model.live="donorId" id="proposal-donor" :label="__('funding_agreements.donor')" :placeholder="__('funding_agreements.select_a_donor')" required class="min-w-0 flex-1">
+                            @foreach ($donors as $donor)
+                                <option value="{{ $donor->id }}">{{ $donor->name }}@if ($donor->isPending()) — {{ __('donors.pending_badge') }}@endif</option>
+                            @endforeach
+                        </x-ui.form-select>
+
+                        @if ($canAddDonor)
+                            <x-ui.button type="button" tone="secondary" icon="plus" wire:click="$dispatch('open-donor-request')" data-test="add-donor-button">
+                                {{ __('donors.add_donor') }}
+                            </x-ui.button>
+                        @endif
+                    </div>
+
+                    @if ($donorPending)
+                        <div role="status" data-donor-pending class="flex items-start gap-2 rounded-md border border-status-warn bg-status-warn-soft px-3 py-2 text-sm @2xl/modal:col-span-2">
+                            <flux:icon.clock variant="micro" class="mt-0.5 size-4 shrink-0" />
+                            <span>{{ __('proposals.donor_request_pending_banner') }}</span>
+                        </div>
+                    @endif
                 @endif
 
                 @if ($showsMoney)

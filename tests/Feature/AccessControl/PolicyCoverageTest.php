@@ -2,7 +2,6 @@
 
 use App\Models\Account;
 use App\Models\Activity;
-use App\Models\Donor;
 use App\Models\DonorProposal;
 use App\Models\FundingAgreementInstallment;
 use App\Models\HrCenter;
@@ -66,7 +65,6 @@ function modelsGuardedWithoutPolicy(): array
     return [
         Account::class => ['accounts', 'accounts.* permissions on the admin accounts page and the transfer forms.'],
         Activity::class => ['activity-log', 'The global log needs activity-log.view; a record\'s own Activity tab follows that record\'s page.'],
-        Donor::class => ['donors', 'donors.* permissions (ManagesDonorForm).'],
         DonorProposal::class => ['funding-agreements', 'funding-agreements.* permissions (ManagesAgreementForm).'],
         FundingAgreementInstallment::class => ['funding-agreements', 'The payment schedule of an agreement: written only by SaveAgreementInstallments under funding-agreements.update (T09).'],
         HrCenter::class => [null, 'Read-only mirror of the HR database; never written here.'],

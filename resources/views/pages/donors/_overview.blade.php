@@ -242,6 +242,7 @@
                                 <div class="min-w-0">
                                     <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                                         <span class="text-base leading-tight font-bold {{ $inkText }}">{{ $donor->name }}</span>
+                                        <x-donors.pending-badge :donor="$donor" class="ms-2" />
                                         <x-ui.enum-badge :case="$donor->type" />
                                     </div>
                                     <p class="mt-0.5 truncate text-xs {{ $mutedText }}">

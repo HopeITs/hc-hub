@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 
 /**
  * The proposal form v2 (T06): create from one or more projects, or edit the
@@ -110,7 +111,46 @@ trait ManagesProposalForm
     #[Computed]
     public function proposalDonors(): Collection
     {
-        return Donor::query()->select(['id', 'name'])->orderBy('name')->orderBy('id')->get();
+        $keptDonorId = $this->editingProposalId === null
+            ? null
+            : Proposal::query()->whereKey($this->editingProposalId)->value('donor_id');
+
+        return Donor::query()
+            ->select(['id', 'name', 'approval_status'])
+            ->where(fn (Builder $query) => $query
+                ->pickableBy($this->proposalActor())
+                ->when($keptDonorId !== null, fn (Builder $inner) => $inner->orWhere('donors.id', $keptDonorId)))
+            ->orderBy('name')
+            ->orderBy('id')
+            ->get();
+    }
+
+    /**
+     * Whether the chosen donor is a request the General Manager has not
+     * approved yet (D-57): the form shows a banner and SaveProposal refuses.
+     */
+    #[Computed]
+    public function proposalDonorIsPending(): bool
+    {
+        return is_numeric($this->donorId)
+            && $this->proposalDonors->contains(fn (Donor $donor): bool => $donor->id === (int) $this->donorId && $donor->isPending());
+    }
+
+    /**
+     * The donor request form (a nested component) saved a new donor: choose
+     * it. Only a donor the user may pick is accepted, so a forged id selects
+     * nothing.
+     */
+    #[On('donor-requested')]
+    public function donorRequested(int $donorId): void
+    {
+        Gate::authorize('donors.create');
+
+        if (Donor::query()->pickableBy($this->proposalActor())->whereKey($donorId)->exists()) {
+            $this->donorId = (string) $donorId;
+            unset($this->proposalDonors);
+            $this->js("document.getElementById('proposal-donor')?.focus()");
+        }
     }
 
     /**
