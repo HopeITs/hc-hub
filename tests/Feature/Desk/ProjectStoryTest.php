@@ -2,11 +2,13 @@
 
 use App\Enums\ProjectStatus;
 use App\Enums\ProposalStatus;
+use App\Enums\ReviewStage;
 use App\Models\Activity;
 use App\Models\DonorProposal;
 use App\Models\MonthlyReport;
 use App\Models\Project;
 use App\Models\Proposal;
+use App\Models\ProposalReviewer;
 use App\Models\UserNotification;
 use Livewire\Livewire;
 
@@ -96,6 +98,33 @@ test('every proposal link lands on its project Story with the proposal, tab and 
     'a tab' => [['tab' => 'plan'], ['ptab' => 'plan']],
     'the record-agreement link' => [['record_agreement' => '1'], ['record_agreement' => 1]],
 ]);
+
+test('a bare proposal link opened by a reviewer it still waits on lands on their own review; a tab they ask for wins', function () {
+    $project = storyProject(ProposalStatus::ConceptNoteReview);
+    $proposal = $project->proposals()->first();
+    $employeeId = insertHrEmployee(firstNameEn: 'Lina', lastNameEn: 'Reviewer');
+    ProposalReviewer::factory()->create(['proposal_id' => $proposal->id, 'stage' => ReviewStage::ConceptNote, 'employee_id' => $employeeId]);
+    $reviewer = userWithRole('Team Member', $employeeId);
+
+    $this->actingAs($reviewer)
+        ->get(route('proposals.show', $proposal))
+        ->assertRedirect(route('projects.show', ['project' => $project, 'proposal' => $proposal->id, 'ptab' => 'status']).'#my-review');
+
+    $this->actingAs($reviewer)
+        ->get(route('proposals.show', ['proposal' => $proposal, 'tab' => 'plan']))
+        ->assertRedirect(route('projects.show', ['project' => $project, 'proposal' => $proposal->id, 'ptab' => 'plan']).'#proposal');
+});
+
+test('a reviewer who already marked the proposal seen lands on the proposal as before', function () {
+    $project = storyProject(ProposalStatus::ConceptNoteReview);
+    $proposal = $project->proposals()->first();
+    $employeeId = insertHrEmployee(firstNameEn: 'Lina', lastNameEn: 'Reviewer');
+    ProposalReviewer::factory()->seen()->create(['proposal_id' => $proposal->id, 'stage' => ReviewStage::ConceptNote, 'employee_id' => $employeeId]);
+
+    $this->actingAs(userWithRole('Team Member', $employeeId))
+        ->get(route('proposals.show', $proposal))
+        ->assertRedirect(route('projects.show', ['project' => $project, 'proposal' => $proposal->id]).'#proposal');
+});
 
 test('a proposal on no project still opens its own page on the desk', function () {
     $loose = Activity::withoutRecording(fn () => Proposal::factory()->create());

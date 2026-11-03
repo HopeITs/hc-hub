@@ -13,7 +13,13 @@
  * no signal has nothing for this viewer and leaves the sheet. "Done" on an
  * unedited choice tells the Desk (dk-layout-applied) what to offer as Undo,
  * once the save went through.
+ *
+ * The draft keeps the Desk's rows flush (desk-rows.js): adding, removing,
+ * moving and pulling an edge on the map never leave a hole, and the map shows
+ * exactly the rows the Desk will have.
  */
+import { flush, resized, sameLayout } from './desk-rows';
+
 document.addEventListener('alpine:init', () => {
     window.Alpine.data('deskCustomize', (starting, ready = [], favourite = null, panels = {}, texts = {}) => ({
         open: false,
@@ -84,7 +90,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         layoutToSave(entries) {
-            return entries.map(({ panel, size, cols, rows, col }) => ({ panel, size, cols, rows, col }));
+            return entries.map(({ panel, size, cols, rows }) => ({ panel, size, cols, rows }));
         },
 
         /* A reset of a desk already on the role's layout changes nothing; of a saved desk it clears the saved one, even when the panels match. */
@@ -208,11 +214,11 @@ document.addEventListener('alpine:init', () => {
         },
 
         cellStyle(entry) {
-            return { '--c': entry.cols ?? panels[entry.panel]?.cols ?? 4, '--r': entry.rows ?? panels[entry.panel]?.rows ?? 4, '--col': entry.col ?? 'auto' };
+            return { '--c': entry.cols ?? panels[entry.panel]?.cols ?? 4, '--r': entry.rows ?? panels[entry.panel]?.rows ?? 4 };
         },
 
         edit(draft) {
-            this.draft = draft;
+            this.draft = flush(draft);
             this.resetting = false;
             this.selected = null;
         },
@@ -242,7 +248,7 @@ document.addEventListener('alpine:init', () => {
             this.$nextTick(() => (neighbourRemove ?? search).focus());
         },
 
-        /* A pinned column would fight the new order, so a moved card flows again. */
+        /* As the panel menu's Move earlier / later: the cards trade places, never shapes, so every slot keeps its size. */
         move(panel, step) {
             const index = this.draft.findIndex((entry) => entry.panel === panel);
             const target = index + step;
@@ -251,12 +257,11 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            const draft = this.draft.map((entry) => ({ ...entry }));
-            const [moved] = draft.splice(index, 1);
+            const order = this.draft.map((entry) => entry.panel);
 
-            delete moved.col;
-            draft.splice(target, 0, moved);
-            this.edit(draft);
+            order.splice(index, 1);
+            order.splice(target, 0, panel);
+            this.edit(this.draft.map((slot, i) => ({ ...slot, panel: order[i] })));
 
             /* Re-inserting a node drops its focus; at either end the button is disabled, so its partner takes over. */
             const atEnd = target === 0 || target === this.draft.length - 1;
@@ -269,63 +274,29 @@ document.addEventListener('alpine:init', () => {
             return `${entry.cols ?? panels[entry.panel]?.cols} × ${entry.rows ?? panels[entry.panel]?.rows}`;
         },
 
-        /* The Desk's own resize on the preview: width in columns (3–12), height in row units (2–8), RTL-aware; Esc puts the card back. */
+        /* The Desk's own resize on the preview (desk-rows.js): every edge of every card, the next card sliding into columns freed at the Desk's side; RTL-aware, Esc puts it back. */
         startResize(event, panel, edge) {
             const cell = event.target.closest('.dk-cz-cell');
             const grid = cell.parentElement;
             const before = this.draft.map((entry) => ({ ...entry }));
-            const entry = this.draft.find((candidate) => candidate.panel === panel);
-            const startCols = Number(entry.cols ?? panels[panel]?.cols ?? 4);
-            const startRows = Number(entry.rows ?? panels[panel]?.rows ?? 4);
+            const index = before.findIndex((candidate) => candidate.panel === panel);
             const style = getComputedStyle(grid);
             const rtl = style.direction === 'rtl';
             const gap = parseFloat(style.columnGap) || 0;
-            const box = grid.getBoundingClientRect();
-            const cellBox = cell.getBoundingClientRect();
-            const colWidth = (box.width + gap) / 12;
-            const rowHeight = (cellBox.height + gap) / startRows;
-            const startColumn = Math.round((rtl ? box.right - cellBox.right : cellBox.left - box.left) / colWidth) + 1;
-            const endLine = startColumn + startCols;
+            const colWidth = (grid.getBoundingClientRect().width + gap) / 12;
+            const rowHeight = (cell.getBoundingClientRect().height + gap) / before[index].rows;
             const startX = event.clientX;
             const startY = event.clientY;
 
             this.resizing = { panel, edge };
 
             const onMove = (moved) => {
-                const dx = (moved.clientX - startX) * (rtl ? -1 : 1);
-                const dy = moved.clientY - startY;
-                const widthSteps = Math.round(dx / colWidth);
-                const heightSteps = Math.round(dy / rowHeight);
-                let cols = startCols;
-                let rows = startRows;
+                const stepsX = Math.round(((moved.clientX - startX) * (rtl ? -1 : 1)) / colWidth);
+                const stepsY = Math.round((moved.clientY - startY) / rowHeight);
 
-                if (edge === 'end' || edge === 'corner') {
-                    cols = startCols + widthSteps;
-                } else if (edge === 'start') {
-                    cols = startCols - widthSteps;
-                }
+                this.draft = resized(before, index, edge, stepsX, stepsY);
 
-                if (edge === 'bottom' || edge === 'corner') {
-                    rows = startRows + heightSteps;
-                } else if (edge === 'top') {
-                    rows = startRows - heightSteps;
-                }
-
-                cols = Math.max(3, Math.min(edge === 'start' ? endLine - 1 : 12, cols));
-                rows = Math.max(2, Math.min(8, rows));
-
-                this.draft = before.map((candidate) => {
-                    if (candidate.panel !== panel) {
-                        return candidate;
-                    }
-
-                    const { col: pinned, ...rest } = candidate;
-                    const col = edge === 'start' ? endLine - cols : pinned;
-
-                    return { ...rest, cols, rows, ...(col && col + cols <= 13 ? { col } : {}) };
-                });
-
-                const changed = cols !== startCols || rows !== startRows;
+                const changed = ! sameLayout(this.draft, before);
 
                 this.resetting = changed ? false : this.resetting;
                 this.selected = changed ? null : this.selected;

@@ -437,7 +437,6 @@
 .dk-rail{ top:calc(env(safe-area-inset-top,0px) + 56px) }
 .dk-ask{ position:fixed;z-index:40;left:0;right:0;bottom:0;max-width:none;height:auto;margin:0;border-radius:0;border:0;border-top:1px solid var(--line);background:var(--header-bg);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px)) }
 .dk-ask .dk-inner{ display:flex;align-items:center;gap:10px;width:100%;height:46px;padding-inline:14px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper) }
-.dk-ask kbd{ display:none }
 .dk-toast{ bottom:calc(84px + env(safe-area-inset-bottom,0px)) }
 .dk-scope main{ padding-block:20px 120px }
 .dk-items>li{ grid-template-columns:14px minmax(0,1fr) }
@@ -525,6 +524,8 @@
 /* Staggered rise on first paint; Livewire morphs keep the element, so it does not replay */
 @keyframes dk-rise{ from{ opacity:0;translate:0 10px } to{ opacity:1;translate:none } }
 @media (prefers-reduced-motion: no-preference){ .dk-grid>.dk-panel{ animation:dk-rise .42s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(min(var(--i,0),10) * 45ms) } }
+/* The rise plays once per visit: after it (html.dk-desk-settled, desk-grid.js) a card that is moved or re-rendered never fades out and in again. Unlayered like the rule above, or it would lose to it. */
+.dk-desk-settled .dk-grid>.dk-panel{ animation:none }
 .dk-ph{ display:flex;align-items:flex-start;gap:8px;padding:14px 16px 8px 12px;min-width:0 }
 [dir="rtl"] .dk-ph{ padding:14px 12px 8px 16px }
 .dk-ph h2{ font-size:15px;font-weight:800;line-height:1.3;padding-top:3px;min-width:0;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden }

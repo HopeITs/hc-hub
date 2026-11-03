@@ -14,6 +14,7 @@ use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\ProposalReviewer;
 use App\Models\User;
+use App\Notifications\Alerts\NotificationSettings;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -68,9 +69,36 @@ test('the panel lists each reviewer with slot, state and note, and warns about a
         ->assertSee(__('proposals.reviewer_not_seen'))
         ->assertSee('Budget lines look fine.')
         ->assertSee(__('proposals.inactive_account'))
-        ->assertSee(__('proposals.position_vacant'))
+        ->assertSee(__('proposals.position_not_set'))
+        ->assertSee(__('proposals.position_not_set_hint'))
         ->assertSee(ReviewerSlot::MealManager->label());
 })->with(['en', 'ar']);
+
+test('a vacant slot blames HR only when a position is set for it and nobody holds it', function () {
+    $proposal = panelProposal();
+    ProposalReviewer::factory()->create(['proposal_id' => $proposal->id, 'stage' => ReviewStage::ConceptNote, 'employee_id' => insertHrEmployee()]);
+    $unheld = insertHrPosition(insertHrDepartment('Monitoring'), 'MEAL Manager');
+    app(NotificationSettings::class)->save(['proposal_default_reviewers' => ['meal_manager' => $unheld, 'finance_manager' => null, 'fundraising_manager' => null, 'ceo' => null]]);
+
+    reviewersPanel(userWithRole('Financial'), $proposal)
+        ->assertSeeHtml('data-vacant-slot="meal_manager" data-vacant-reason="no-holder"')
+        ->assertSeeHtml('data-vacant-slot="ceo" data-vacant-reason="not-set"')
+        ->assertSee(__('proposals.position_vacant_hint'))
+        ->assertSee(__('proposals.position_not_set_hint'));
+});
+
+test('the viewer\'s own row in the open stage is where review links land, and nobody else\'s is', function () {
+    $proposal = panelProposal();
+    [$mine, $user] = reviewerWithLogin($proposal);
+    ProposalReviewer::factory()->create(['proposal_id' => $proposal->id, 'stage' => ReviewStage::ConceptNote, 'employee_id' => insertHrEmployee()]);
+
+    $reviewerView = reviewersPanel($user, $proposal)->html();
+    $outsiderView = reviewersPanel(userWithRole('Financial'), $proposal)->html();
+
+    expect(substr_count($reviewerView, 'id="my-review"'))->toBe(1)
+        ->and($reviewerView)->toMatch('/<li\s+id="my-review"[^>]*data-reviewer-row="'.$mine->id.'"/')
+        ->and($outsiderView)->not->toContain('id="my-review"');
+});
 
 test('a reviewer marks the proposal as seen with a note', function () {
     $proposal = panelProposal();

@@ -1,31 +1,44 @@
 /**
- * The Desk's free cell grid (pages/desk/⚡index, components/desk/panel).
+ * The Desk's cell grid (pages/desk/⚡index, components/desk/panel). Its rows
+ * are always flush (desk-rows.js): the cards fill every row's twelve columns
+ * and share its height, so there is never a hole between them.
  *
  * Move: the whole panel header is the handle. A mouse picks the panel up
  * after a few pixels of travel; touch and pen pick it up after a 400ms press
- * and hold (so a swipe still scrolls). While it is carried the other panels
- * slide out of the way (FLIP), showing exactly where it will land; dropping
- * asks the host page to movePanel() to that place. Esc puts everything back.
+ * and hold (so a swipe still scrolls). Over the middle of another card it
+ * joins that card's row, before or after it; over that card's top or bottom
+ * band it gets a row of its own above or below. The other cards slide and
+ * resize (FLIP) to show exactly where it will land; dropping asks the host
+ * page to arrangePanels(). Esc puts everything back.
  *
- * Resize: handles on the inline-end and inline-start edges (width), the top
- * and bottom edges (height) and the bottom inline-end corner (both). The card
- * itself snaps to whole cells as you pull, with a "6 × 4" badge, and the others
- * slide aside, so what you see is what is saved; releasing asks the host page
- * to resizePanelTo(panel, cols, rows). Esc cancels. RTL-aware throughout.
- * Pulling the top edge scrolls the page with the card, so its bottom stays put.
- * Pulling the inline-start edge pins the card's column (--col), so its far edge
- * stays put; a pin that no longer fits is dropped and the card flows in order.
+ * Resize: every card can be pulled from all four edges and the corner
+ * (desk-rows.js resized). An inline edge between cards trades columns with
+ * the neighbour; one on the Desk's side, pulled inward, lets the next card
+ * slide into the freed columns. The top edge trades height with the row
+ * above, and on the first row grows the row upward: the page scrolls by the
+ * same amount, so the card's bottom stays where it was on screen. The bottom
+ * edge makes the whole row taller. The cards snap to whole cells as you pull,
+ * with a "6 × 4" badge; releasing asks the host page to arrangePanels(). Esc
+ * cancels. RTL-aware throughout.
  *
  * Delegated from document so panels Livewire re-renders keep working.
  */
 
+import { joined, resized, rowsIn, sameLayout } from './desk-rows';
+
 const moveThreshold = 6;
 const holdDelay = 400;
-const minCols = 3; // Panels::MinCols
 const interactive = 'a, button, input, select, textarea, label, [role="menu"], [contenteditable], [data-panel-search]';
+
+/* One calm glide for every card that makes room: no overshoot, so nothing wobbles while a card is pulled or carried. */
+const glide = '.22s cubic-bezier(.25, .8, .25, 1)';
+/* A pulled edge changes cell only once the pointer is well past the halfway line, so a hand resting near it does not make the cards flick back and forth. */
+const stickiness = 0.65;
 
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isPhone = () => window.matchMedia('(max-width: 760px)').matches;
+/* Below 1280px widths collapse to fixed steps (desk-grid.css), so only heights are pulled there. */
+const isNarrow = () => window.matchMedia('(max-width: 1279px)').matches;
 
 function panelOf(target) {
     return target instanceof Element ? target.closest('[data-desk-grid] > .dk-panel') : null;
@@ -33,6 +46,59 @@ function panelOf(target) {
 
 function panelsIn(grid) {
     return [...grid.querySelectorAll(':scope > .dk-panel')];
+}
+
+/** The grid's layout as desk-rows.js reads it: its cards in order, at their current cells. */
+function layoutOf(grid) {
+    return panelsIn(grid).map((panel) => ({ panel: panel.dataset.panel, cols: Number(panel.dataset.cols) || 4, rows: Number(panel.dataset.rows) || 4 }));
+}
+
+function setCells(panel, cols, rows) {
+    panel.style.setProperty('--span', cols);
+    panel.style.setProperty('--rows', rows);
+    panel.dataset.cols = cols;
+    panel.dataset.rows = rows;
+}
+
+/**
+ * Put the grid's cards in the layout's order and at its cells. They are
+ * re-inserted before whatever follows the last card, so Livewire's loop
+ * markers around them stay where they were.
+ */
+function lay(grid, layout) {
+    const cards = panelsIn(grid);
+    const byId = new Map(cards.map((panel) => [panel.dataset.panel, panel]));
+    const anchor = cards.at(-1)?.nextSibling ?? null;
+    let slot = cards[0] ?? null;
+
+    /* Only a card out of place is moved: re-inserting a node restarts its animations, so the rest are left alone. */
+    layout.forEach(({ panel, cols, rows }) => {
+        const card = byId.get(panel);
+
+        if (! card) {
+            return;
+        }
+
+        if (card === slot) {
+            slot = nextCard(slot);
+        } else {
+            grid.insertBefore(card, slot ?? anchor);
+        }
+
+        if (Number(card.dataset.cols) !== cols || Number(card.dataset.rows) !== rows) {
+            setCells(card, cols, rows);
+        }
+    });
+}
+
+function nextCard(card) {
+    let next = card.nextElementSibling;
+
+    while (next && ! next.classList.contains('dk-panel')) {
+        next = next.nextElementSibling;
+    }
+
+    return next;
 }
 
 /**
@@ -101,17 +167,19 @@ function flip(grid, mutate, carried = move?.panel) {
     grid.getBoundingClientRect();
 
     others.forEach((panel) => {
-        panel.style.transition = 'transform .32s cubic-bezier(.2, .9, .25, 1.12)';
+        panel.style.transition = `transform ${glide}`;
         panel.style.transform = '';
     });
 }
 
-/** Keep the carried panel under the pointer wherever its slot moved to. */
+/** Keep the carried panel under the pointer wherever its slot moved to, even when the slot made it smaller. */
 function follow(x, y) {
-    const { panel, grabX, grabY } = move;
+    const { panel } = move;
 
     panel.style.transform = '';
     const slot = panel.getBoundingClientRect();
+    const grabX = Math.min(move.grabX, slot.width - 24);
+    const grabY = Math.min(move.grabY, slot.height - 24);
 
     panel.style.transform = `translate(${x - grabX - slot.left}px, ${y - grabY - slot.top}px) scale(1.02)`;
 }
@@ -120,7 +188,8 @@ function pickUp() {
     const { panel, grid } = move;
 
     move.active = true;
-    move.order = panelsIn(grid);
+    move.layout = layoutOf(grid);
+    move.placed = move.layout;
     panel.classList.add('dk-dragging');
     grid.classList.add('dk-moving');
     document.documentElement.classList.add('dk-moving-doc');
@@ -128,6 +197,11 @@ function pickUp() {
     autoScroll();
 }
 
+/**
+ * Where a drop at (x, y) would put the card: over another card's top or
+ * bottom band a row of its own, over its middle that card's row, before or
+ * after it by which half the pointer is on.
+ */
 function reflow(x, y) {
     const { panel, grid } = move;
 
@@ -141,16 +215,25 @@ function reflow(x, y) {
     }
 
     const box = target.getBoundingClientRect();
+    const band = Math.min(box.height / 4, 80);
     const { rtl } = metrics(grid);
     const along = rtl ? box.right - x : x - box.left;
-    const after = box.width > 0 && along > box.width / 2;
-    const reference = after ? target.nextElementSibling : target;
+    let place = along > box.width / 2 ? 'after' : 'before';
 
-    if (reference === panel || (after ? target.nextElementSibling === panel : target.previousElementSibling === panel && ! after)) {
+    if (y < box.top + band) {
+        place = 'above';
+    } else if (y > box.bottom - band) {
+        place = 'below';
+    }
+
+    const placed = joined(move.layout, panel.dataset.panel, target.dataset.panel, place);
+
+    if (sameLayout(placed, move.placed)) {
         return;
     }
 
-    flip(grid, () => grid.insertBefore(panel, reference));
+    move.placed = placed;
+    flip(grid, () => lay(grid, placed));
 }
 
 function autoScroll() {
@@ -164,6 +247,16 @@ function autoScroll() {
 
     if (speed) {
         window.scrollBy(0, speed);
+    }
+
+    /* The pointer is read on every event but the Desk is touched once per frame at most. */
+    if (move.dirty) {
+        move.dirty = false;
+        reflow(move.x, move.y);
+    }
+
+    if (speed || move.moved !== `${move.x},${move.y}`) {
+        move.moved = `${move.x},${move.y}`;
         follow(move.x, move.y);
     }
 
@@ -171,7 +264,7 @@ function autoScroll() {
 }
 
 function settle(panel) {
-    panel.style.transition = reducedMotion() ? '' : 'transform .26s cubic-bezier(.2, .9, .25, 1.12)';
+    panel.style.transition = reducedMotion() ? '' : `transform ${glide}`;
     panel.style.transform = '';
     setTimeout(() => {
         panel.style.transition = '';
@@ -181,6 +274,11 @@ function settle(panel) {
 function endMove(commit) {
     if (! move) {
         return;
+    }
+
+    if (commit && move.active && move.dirty) {
+        move.dirty = false;
+        reflow(move.x, move.y);
     }
 
     const current = move;
@@ -198,26 +296,41 @@ function endMove(commit) {
         swallowClick = false;
     }, 0);
 
-    const { panel, grid, order } = current;
-    const position = panelsIn(grid).indexOf(panel);
+    const { panel, grid, layout, placed } = current;
 
     panel.classList.remove('dk-dragging');
     grid.classList.remove('dk-moving');
     document.documentElement.classList.remove('dk-moving-doc');
 
-    if (! commit) {
-        flip(grid, () => order.forEach((item) => grid.append(item)));
+    if (! commit || sameLayout(layout, placed)) {
+        flip(grid, () => lay(grid, layout));
         settle(panel);
 
         return;
     }
 
     settle(panel);
+    seenHint();
+    save(grid, layout, placed);
+}
 
-    if (position !== current.from) {
-        seenHint();
-        hostOf(panel)?.movePanel(panel.dataset.panel, position);
-    }
+/**
+ * Ask the host page to keep the new arrangement, then let every card whose
+ * cells changed fit its rows again (desk-filters.js).
+ */
+function save(grid, before, after) {
+    const changed = panelsIn(grid).filter((panel) => {
+        const was = before.find((entry) => entry.panel === panel.dataset.panel);
+        const now = after.find((entry) => entry.panel === panel.dataset.panel);
+
+        return ! was || ! now || was.cols !== now.cols || was.rows !== now.rows;
+    });
+    const saving = hostOf(grid.querySelector(':scope > .dk-panel'))?.arrangePanels(after.map(({ panel, cols, rows }) => ({ panel, cols, rows })));
+
+    Promise.resolve(saving).finally(() => {
+        panelsIn(grid).forEach((card) => delete card.dataset.resizing);
+        changed.forEach(fitAgain);
+    });
 }
 
 document.addEventListener('pointerdown', (event) => {
@@ -241,7 +354,6 @@ document.addEventListener('pointerdown', (event) => {
         y: event.clientY,
         grabX: event.clientX - box.left,
         grabY: event.clientY - box.top,
-        from: panelsIn(grid).indexOf(panel),
         active: false,
         hold: 0,
         frame: 0,
@@ -269,8 +381,7 @@ document.addEventListener('pointermove', (event) => {
         }
 
         event.preventDefault();
-        reflow(event.clientX, event.clientY);
-        follow(event.clientX, event.clientY);
+        move.dirty = true;
     }
 });
 
@@ -299,14 +410,6 @@ document.addEventListener('contextmenu', (event) => {
 
 let resize = null;
 
-function setCells(panel, cols, rows, col) {
-    panel.style.setProperty('--col', col ?? 'auto');
-    panel.style.setProperty('--span', cols);
-    panel.style.setProperty('--rows', rows);
-    panel.dataset.cols = cols;
-    panel.dataset.rows = rows;
-}
-
 /**
  * While data-resizing is on, the panel does not fit its rows (desk-filters.js):
  * that round trip would re-render it at its saved size mid-pull. Lift it once
@@ -317,25 +420,39 @@ function fitAgain(panel) {
     panel.dispatchEvent(new CustomEvent('dk-panel-resized'));
 }
 
-function applyResize(cols, rows) {
-    const { panel, grid, badge, edge, m, endLine, pinned } = resize;
-    const col = edge === 'start' ? endLine - cols : (pinned !== null && pinned + cols <= 13 ? pinned : null);
-    const grownRows = rows - resize.rows;
+/** A card's cell box in grid pixels, its transform left out. */
+function boxOf(panel) {
+    return { left: panel.offsetLeft, top: panel.offsetTop, right: panel.offsetLeft + panel.offsetWidth, bottom: panel.offsetTop + panel.offsetHeight };
+}
 
-    badge.textContent = `${cols} × ${rows}`;
+const pixelsOf = (cells, unit, gap) => cells * unit + (cells - 1) * gap;
+const cellsOf = (pixels, unit, gap) => (pixels + gap) / (unit + gap);
 
-    if (cols === resize.cols && rows === resize.rows) {
-        return;
+/** Past what the card can reach, the outline gives a little, like a rubber band, instead of stopping dead. */
+function giving(size, min, max) {
+    if (size > max) {
+        return max + Math.min(28, (size - max) * 0.2);
     }
 
-    resize.cols = cols;
-    resize.rows = rows;
-    resize.col = col;
-    flip(grid, () => setCells(panel, cols, rows, col), panel);
-
-    if (edge === 'top' && grownRows) {
-        window.scrollBy(0, grownRows * (m.rowUnit + m.rowGap));
+    if (size < min) {
+        return min - Math.min(28, (min - size) * 0.2);
     }
+
+    return size;
+}
+
+/** Whole cells reached, kept until the outline is clearly in the next cell. */
+function settled(cells, current, min, max) {
+    const reached = Math.abs(cells - current) > stickiness ? Math.round(cells) : current;
+
+    return Math.max(min, Math.min(max, reached));
+}
+
+/** The fewest and most cells a card can reach along one axis (desk-rows.js decides). */
+function reach(layout, index, edge, axis, start) {
+    const far = [99, -99].map((steps) => resized(layout, index, edge, axis === 'x' ? steps : 0, axis === 'y' ? steps : 0)[index][axis === 'x' ? 'cols' : 'rows']);
+
+    return [Math.min(start, ...far), Math.max(start, ...far)];
 }
 
 document.addEventListener('pointerdown', (event) => {
@@ -346,37 +463,59 @@ document.addEventListener('pointerdown', (event) => {
         return;
     }
 
+    const grid = panel.closest('[data-desk-grid]');
+    const edge = handle.dataset.resize;
+
     event.preventDefault();
     event.stopPropagation();
 
-    const grid = panel.closest('[data-desk-grid]');
-    const badge = document.createElement('b');
+    if (isNarrow() && ! ['top', 'bottom'].includes(edge)) {
+        return;
+    }
+
+    const layout = layoutOf(grid);
+    const index = panelsIn(grid).indexOf(panel);
     const m = metrics(grid);
-    const box = panel.getBoundingClientRect();
+    const box = boxOf(panel);
     const gridBox = grid.getBoundingClientRect();
-    const fromStart = m.rtl ? gridBox.right - box.right : box.left - gridBox.left;
-    const startCols = Number(panel.dataset.cols) || 4;
-    const pinned = parseInt(getComputedStyle(panel).getPropertyValue('--col'), 10);
+    const inline = ['end', 'corner'].includes(edge) ? 'end' : edge === 'start' ? 'start' : null;
+    const sideX = inline === null ? null : (inline === 'end') !== m.rtl ? 'right' : 'left';
+    const sideY = ['bottom', 'corner'].includes(edge) ? 'bottom' : edge === 'top' ? 'top' : null;
+    const ghost = document.createElement('div');
+    const badge = document.createElement('b');
 
     badge.className = 'dk-resize-badge';
-    panel.append(badge);
+    badge.textContent = `${layout[index].cols} × ${layout[index].rows}`;
+    ghost.className = 'dk-resize-ghost';
+    ghost.append(badge);
+    grid.append(ghost);
 
     resize = {
         panel,
         grid,
+        ghost,
         badge,
-        edge: handle.dataset.resize,
+        edge,
+        index,
+        layout,
+        placed: layout,
+        firstRow: rowsIn(layout)[0].includes(index),
+        scrolled: 0,
         m,
-        startX: event.clientX,
-        startY: event.clientY,
-        startCols,
-        endLine: Math.round(fromStart / (m.column + m.colGap)) + 1 + startCols,
-        pinned: Number.isNaN(pinned) ? null : pinned,
-        startRows: Number(panel.dataset.rows) || 4,
+        inline,
+        sideX,
+        sideY,
+        /* Where the pointer sits from the edge it took, so the outline does not jump to the pointer. */
+        offsetX: sideX ? box[sideX] - (event.clientX - gridBox.left) : 0,
+        offsetY: sideY ? box[sideY] - (event.clientY - gridBox.top) : 0,
+        cols: reach(layout, index, edge, 'x', layout[index].cols),
+        rows: reach(layout, index, edge, 'y', layout[index].rows),
+        clientX: event.clientX,
+        clientY: event.clientY,
+        frame: 0,
     };
-    resize.cols = resize.startCols;
-    resize.rows = resize.startRows;
-    resize.col = resize.pinned;
+
+    drawOutline(box);
 
     try {
         handle.setPointerCapture(event.pointerId);
@@ -384,81 +523,158 @@ document.addEventListener('pointerdown', (event) => {
         // Capture is a nicety; document listeners still see the drag.
     }
 
-    panel.dataset.resizing = '';
+    panelsIn(grid).forEach((card) => (card.dataset.resizing = ''));
     panel.classList.add('dk-resizing');
     document.documentElement.classList.add('dk-resizing-doc');
-    document.documentElement.dataset.resizeEdge = resize.edge;
-    applyResize(resize.cols, resize.rows);
+    document.documentElement.dataset.resizeEdge = edge;
 }, true);
 
+// The pointer is read on every event but the Desk is touched once per frame at most.
 document.addEventListener('pointermove', (event) => {
     if (! resize) {
         return;
     }
 
     event.preventDefault();
-
-    const { m, edge, startX, startY, startCols, startRows, endLine } = resize;
-    const inline = (event.clientX - startX) * (m.rtl ? -1 : 1);
-    const block = event.clientY - startY;
-    const stepsX = Math.round(inline / (m.column + m.colGap));
-    const stepsY = Math.round(block / (m.rowUnit + m.rowGap));
-
-    let cols = startCols;
-    let rows = startRows;
-
-    if (edge === 'end' || edge === 'corner') {
-        cols = startCols + stepsX;
-    } else if (edge === 'start') {
-        cols = startCols - stepsX;
-    }
-
-    if (edge === 'bottom' || edge === 'corner') {
-        rows = startRows + stepsY;
-    } else if (edge === 'top') {
-        rows = startRows - stepsY;
-    }
-
-    applyResize(Math.max(minCols, Math.min(edge === 'start' ? endLine - 1 : 12, cols)), Math.max(2, Math.min(8, rows)));
+    resize.clientX = event.clientX;
+    resize.clientY = event.clientY;
+    resize.frame ||= requestAnimationFrame(pull);
 });
+
+/**
+ * Where the pulled edges are now: the fixed edges stay on the card's cell
+ * box and the pulled ones follow the pointer (giving a little past what the
+ * card can reach), with the whole cells that outline covers.
+ */
+function outline() {
+    const { panel, grid, m, sideX, sideY, offsetX, offsetY, index } = resize;
+    const gridBox = grid.getBoundingClientRect();
+    const box = boxOf(panel);
+    const rect = { ...box };
+    let { cols, rows } = resize.placed[index];
+
+    if (sideX) {
+        const fixed = sideX === 'right' ? box.left : box.right;
+        const pointer = resize.clientX - gridBox.left + offsetX;
+        const size = giving(sideX === 'right' ? pointer - fixed : fixed - pointer, pixelsOf(resize.cols[0], m.column, m.colGap), pixelsOf(resize.cols[1], m.column, m.colGap));
+
+        rect.left = sideX === 'right' ? fixed : fixed - size;
+        rect.right = sideX === 'right' ? fixed + size : fixed;
+        cols = settled(cellsOf(size, m.column, m.colGap), cols, ...resize.cols);
+    }
+
+    if (sideY) {
+        const fixed = sideY === 'bottom' ? box.top : box.bottom;
+        const pointer = resize.clientY - gridBox.top + offsetY;
+        const size = giving(sideY === 'bottom' ? pointer - fixed : fixed - pointer, pixelsOf(resize.rows[0], m.rowUnit, m.rowGap), pixelsOf(resize.rows[1], m.rowUnit, m.rowGap));
+
+        rect.top = sideY === 'bottom' ? fixed : fixed - size;
+        rect.bottom = sideY === 'bottom' ? fixed + size : fixed;
+        rows = settled(cellsOf(size, m.rowUnit, m.rowGap), rows, ...resize.rows);
+    }
+
+    return { rect, cols, rows };
+}
+
+function drawOutline(rect) {
+    const { ghost } = resize;
+
+    ghost.style.transform = `translate3d(${rect.left}px, ${rect.top}px, 0)`;
+    ghost.style.width = `${rect.right - rect.left}px`;
+    ghost.style.height = `${rect.bottom - rect.top}px`;
+}
+
+/**
+ * One frame of a pull: the outline follows the pointer, and when it covers
+ * other whole cells the cards glide to the new arrangement under it.
+ */
+function pull() {
+    if (! resize) {
+        return;
+    }
+
+    resize.frame = 0;
+
+    const { panel, grid, badge, edge, index, layout, m, inline, sideY } = resize;
+    const { cols, rows } = outline();
+    const start = layout[index];
+    const stepsX = inline === 'start' ? start.cols - cols : cols - start.cols;
+    const stepsY = sideY === 'top' ? start.rows - rows : rows - start.rows;
+    const placed = resized(layout, index, edge, inline ? stepsX : 0, sideY ? stepsY : 0);
+
+    if (! sameLayout(placed, resize.placed)) {
+        const grown = placed[index].rows - resize.placed[index].rows;
+
+        resize.placed = placed;
+        badge.textContent = `${placed[index].cols} × ${placed[index].rows}`;
+        flip(grid, () => lay(grid, placed), panel);
+
+        if (edge === 'top' && resize.firstRow && grown) {
+            scrollWith(grown * (m.rowUnit + m.rowGap));
+        }
+    }
+
+    drawOutline(outline().rect);
+}
+
+/** The first row grown from its top: scroll by what it grew, so its bottom stays where it was on screen and its top follows the pointer. */
+function scrollWith(by) {
+    const before = window.scrollY;
+
+    window.scrollTo({ top: before + by, behavior: 'instant' });
+    resize.scrolled += window.scrollY - before;
+}
 
 function endResize(commit) {
     if (! resize) {
         return;
     }
 
-    const { panel, grid, badge, cols, rows, col, startCols, startRows } = resize;
+    /* A frame still waiting holds the last pointer position: apply it first, so what is saved is what was under the pointer. */
+    if (commit && resize.frame) {
+        cancelAnimationFrame(resize.frame);
+        pull();
+    }
 
-    resize = null;
-    badge.remove();
+    const current = resize;
+    const { panel, grid, ghost, layout, placed } = current;
+
+    cancelAnimationFrame(current.frame);
     panel.classList.remove('dk-resizing');
     document.documentElement.classList.remove('dk-resizing-doc');
     delete document.documentElement.dataset.resizeEdge;
 
-    if (cols === startCols && rows === startRows) {
-        panel.style.removeProperty('--col');
-        fitAgain(panel);
-
-        return;
+    if (! commit || sameLayout(layout, placed)) {
+        flip(grid, () => lay(grid, layout), panel);
+        window.scrollTo({ top: window.scrollY - current.scrolled, behavior: 'instant' });
+        panelsIn(grid).forEach(fitAgain);
+    } else {
+        seenHint();
+        save(grid, layout, placed);
     }
 
-    if (! commit) {
-        flip(grid, () => {
-            setCells(panel, startCols, startRows);
-            panel.style.removeProperty('--col');
-        }, panel);
-        fitAgain(panel);
-
-        return;
-    }
-
-    seenHint();
-
-    const saving = hostOf(panel)?.resizePanelTo(panel.dataset.panel, cols, rows, col);
-
-    saving?.then(() => panel.style.removeProperty('--col'));
-    Promise.resolve(saving).finally(() => fitAgain(panel));
+    /* The outline lands on the card's final cells and fades, so the release reads as one motion. */
+    ghost.classList.add('dk-landing');
+    drawOutline(boxOf(panel));
+    resize = null;
+    setTimeout(() => ghost.remove(), reducedMotion() ? 0 : 240);
 }
+
+/* ── Entrance ─────────────────────────────────────────────────────── */
+
+/*
+ * The cards rise in once, when the Desk opens (desk.css dk-rise). After that
+ * html.dk-desk-settled turns the entrance off, so a card Livewire or a drag
+ * moves in the page never fades out and in again.
+ */
+function settleEntrance() {
+    clearTimeout(settleEntrance.timer);
+    settleEntrance.timer = setTimeout(() => document.documentElement.classList.add('dk-desk-settled'), 1200);
+}
+
+settleEntrance();
+document.addEventListener('livewire:navigating', () => document.documentElement.classList.remove('dk-desk-settled'));
+document.addEventListener('livewire:navigated', settleEntrance);
 
 /* ── Shared release / cancel ──────────────────────────────────────── */
 

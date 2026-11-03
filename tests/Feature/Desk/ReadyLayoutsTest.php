@@ -146,15 +146,15 @@ test('a layout left with a single panel is not offered', function () {
     expect(readyLayout($user->fresh(), 'impact'))->toBeNull();
 });
 
-test('below 1280px a true row keeps together: two cards halve, a third goes under them, and an uneven row is left alone', function () {
+test('below 1280px a true row keeps together: two cards halve, a third goes under them, four make two lines, and an uneven row is left alone', function () {
     $panels = app(Panels::class);
-    $cell = fn (string $panel, int $cols, int $rows, array $extra = []): array => ['panel' => $panel, 'size' => 'L', 'cols' => $cols, 'rows' => $rows, ...$extra];
+    $cell = fn (string $panel, int $cols, int $rows): array => ['panel' => $panel, 'size' => 'L', 'cols' => $cols, 'rows' => $rows];
 
     expect($panels->narrowSpansOf([$cell('a', 8, 5), $cell('b', 4, 5)]))->toBe(['a' => 6, 'b' => 6])
         ->and($panels->narrowSpansOf([$cell('a', 4, 4), $cell('b', 4, 4), $cell('c', 4, 4)]))->toBe(['a' => 6, 'b' => 6, 'c' => 12])
+        ->and($panels->narrowSpansOf([$cell('a', 3, 4), $cell('b', 3, 4), $cell('c', 3, 4), $cell('d', 3, 4)]))->toBe(['a' => 6, 'b' => 6, 'c' => 6, 'd' => 6])
         ->and($panels->narrowSpansOf([$cell('a', 12, 2)]))->toBe([])
-        ->and($panels->narrowSpansOf([$cell('a', 8, 5), $cell('b', 4, 3)]))->toBe([])
-        ->and($panels->narrowSpansOf([$cell('a', 8, 5, ['col' => 1]), $cell('b', 4, 5)]))->toBe([]);
+        ->and($panels->narrowSpansOf([$cell('a', 8, 5), $cell('b', 4, 3)]))->toBe([]);
 
     $user = userWithRole('Financial', insertHrEmployee());
     $user->desk_layout = readyLayout($user, 'money')['entries'];
@@ -562,7 +562,7 @@ test('arabic signals isolate each amount, and english text stays clean', functio
 test('undo restores the saved layout exactly, as the sheet sends it back', function () {
     $user = userWithRole('Financial', insertHrEmployee());
     $panels = app(Panels::class);
-    $before = [$panels->sized('needs', 'L', 7, 4, 2), $panels->sized('transfers', 'M', 5, 3)];
+    $before = [$panels->sized('needs', 'L', 7, 4), $panels->sized('transfers', 'M', 5, 4)];
     $user->desk_layout = $before;
     $user->save();
 

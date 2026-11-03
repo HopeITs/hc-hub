@@ -3,6 +3,7 @@
 return [
     'accounts' => 'Accounts',
     'actions' => 'Actions',
+    'filter_choice' => ':label, :choice',
     'add' => 'Add',
     'active' => 'Active',
     'all_accounts' => 'All accounts',

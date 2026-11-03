@@ -573,8 +573,8 @@ return [
                 'body' => 'أزال :actor :employee من مراجعي المقترح «:subject»',
             ],
             'reviewer_seen' => [
-                'title' => 'اطّلاع مراجع',
-                'body' => 'اطّلع :actor على المقترح «:subject»',
+                'title' => 'أنهى مراجع مراجعته',
+                'body' => 'راجَع :actor المقترح «:subject»',
             ],
             'reviewer_note_updated' => 'عدّل :actor ملاحظة مراجعته على المقترح «:subject»',
             'need_assessment_added' => [

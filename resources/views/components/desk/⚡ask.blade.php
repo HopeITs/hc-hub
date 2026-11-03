@@ -319,20 +319,29 @@ new class extends Component {
                         x-on:keydown.arrow-up.prevent="move(-1)"
                         x-on:keydown.enter.prevent="choose()"
                     >
+                    {{-- While Livewire answers, a red line scans along the input row's bottom edge. --}}
                     <span class="dk-pal-busy" wire:loading.delay wire:target="query" aria-hidden="true"></span>
-                    <kbd>{{ __('desk.key_esc') }}</kbd>
+                    <button type="button" class="dk-pal-esc" x-on:click="hide()" aria-label="{{ __('common.close') }}">{{ __('desk.key_esc') }}</button>
                 </div>
 
                 <div class="dk-pal-list" x-ref="list">
                     @if ($results['suggestions'] !== [])
+                        {{-- Example questions on the Desk's dot-thread; the highlighted one takes the brand ring. --}}
                         <div class="dk-pal-try" data-ask-suggestions>
-                            <p>{{ $results['groups'] === [] && $results['answers'] === [] && trim($query) !== '' ? __('desk.ask_nothing_title') : __('desk.ask_try') }}</p>
                             @if (trim($query) !== '')
-                                <span class="dk-is">{{ __('desk.ask_nothing_body') }}</span>
+                                <div class="dk-pal-none">
+                                    <strong>{{ __('desk.ask_nothing_title') }}</strong>
+                                    <span>{{ __('desk.ask_nothing_body') }}</span>
+                                </div>
                             @endif
-                            <div class="dk-pal-chips">
+                            <p class="dk-pal-g">{{ __('desk.ask_try') }}</p>
+                            <div class="dk-pal-thread">
                                 @foreach ($results['suggestions'] as $suggestion)
-                                    <button type="button" class="dk-chip" data-pi="{{ $index }}" x-bind:class="{ 'dk-sel': selected === {{ $index }} }" x-on:click="ask(@js($suggestion))">{{ $suggestion }}</button>
+                                    <button type="button" class="dk-pal-q" data-pi="{{ $index }}" x-bind:class="{ 'dk-sel': selected === {{ $index }} }" x-on:click="ask(@js($suggestion))">
+                                        <i aria-hidden="true"></i>
+                                        <span class="dk-pal-t">{{ $suggestion }}</span>
+                                        <span class="dk-pal-ret" aria-hidden="true"><x-desk.icon name="enter" /></span>
+                                    </button>
                                     @php
                                         $index++;
                                     @endphp
@@ -342,7 +351,15 @@ new class extends Component {
                     @endif
 
                     @foreach ($results['answers'] as $answer)
-                        <div class="dk-answer" data-ask-answer><strong>{{ $answer['title'] }}</strong>{{ $answer['body'] }}</div>
+                        <div class="dk-answer" data-ask-answer>
+                            <i aria-hidden="true"></i>
+                            <div>
+                                <strong>{{ $answer['title'] }}</strong>
+                                @if ($answer['body'] !== '')
+                                    <span>{{ $answer['body'] }}</span>
+                                @endif
+                            </div>
+                        </div>
                     @endforeach
 
                     @foreach ($results['groups'] as $group)
@@ -350,7 +367,8 @@ new class extends Component {
                         @foreach ($group['items'] as $item)
                             <a href="{{ $item['href'] }}" wire:navigate @class(['dk-pal-i', 'dk-pal-act' => $item['action'] ?? false]) data-pi="{{ $index }}" x-bind:class="{ 'dk-sel': selected === {{ $index }} }" x-on:click="hide()" @if ($item['action'] ?? false) data-ask-action @endif>
                                 <span class="dk-ic"><x-desk.icon :name="$item['icon']" /></span>
-                                <span>{{ $item['label'] }}@if ($item['sub'] !== '')<small>{{ $item['sub'] }}</small>@endif</span>
+                                <span class="dk-pal-t">{{ $item['label'] }}@if ($item['sub'] !== '')<small>{{ $item['sub'] }}</small>@endif</span>
+                                <span class="dk-pal-ret" aria-hidden="true"><x-desk.icon name="enter" /></span>
                             </a>
                             @php
                                 $index++;
@@ -361,13 +379,14 @@ new class extends Component {
                     @if ($results['ai'] && trim($query) !== '')
                         {{-- Reserved for a later AI fallback (config desk.ask_ai); off today. --}}
                         <div class="dk-pal-g">{{ __('desk.ask_group_ai') }}</div>
-                        <span class="dk-pal-i" aria-disabled="true" data-ask-ai><span class="dk-ic"><x-desk.icon name="spark" /></span><span>{{ __('desk.ask_ai', ['question' => $query]) }}</span></span>
+                        <span class="dk-pal-i" aria-disabled="true" data-ask-ai><span class="dk-ic"><x-desk.icon name="spark" /></span><span class="dk-pal-t">{{ __('desk.ask_ai', ['question' => $query]) }}</span></span>
                     @endif
                 </div>
 
                 <div class="dk-pal-foot">
                     <span><kbd>↑</kbd> <kbd>↓</kbd> {{ __('desk.ask_move') }}</span>
-                    <span><kbd>{{ __('desk.key_enter') }}</kbd> {{ __('desk.ask_open') }}</span>
+                    <span><kbd><x-desk.icon name="enter" /></kbd> {{ __('desk.ask_open') }}</span>
+                    <span><kbd>{{ __('desk.key_esc') }}</kbd> {{ __('desk.ask_close') }}</span>
                 </div>
             </div>
         </div>

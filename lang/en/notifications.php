@@ -573,8 +573,8 @@ return [
                 'body' => ':actor removed :employee from the reviewers of “:subject”',
             ],
             'reviewer_seen' => [
-                'title' => 'Reviewer has seen the proposal',
-                'body' => ':actor has seen “:subject”',
+                'title' => 'Reviewer finished their review',
+                'body' => ':actor reviewed “:subject”',
             ],
             'reviewer_note_updated' => ':actor updated their review note on “:subject”',
             'need_assessment_added' => [

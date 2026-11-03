@@ -10,6 +10,7 @@ use Livewire\Component;
  * My reviews: the proposals and concept notes still waiting on the viewer's
  * own review (ProposalReviewer::awaitingReview: not marked seen, and the
  * proposal is still in that stage), one row per proposal, oldest ask first.
+ * Review opens straight on the viewer's own review (ProposalStoryLink::review).
  */
 new class extends Component {
     use IsDeskPanel;
@@ -29,7 +30,7 @@ new class extends Component {
         return ProposalReviewer::query()
             ->forEmployee((int) $employeeId)
             ->awaitingReview()
-            ->with('proposal:id,slug,name,status')
+            ->with(['proposal:id,slug,name,status', 'proposal.projects:projects.id,projects.slug'])
             ->oldest('created_at')
             ->get()
             ->unique('proposal_id')
@@ -56,7 +57,7 @@ new class extends Component {
                     <span class="dk-pill dk-act dk-rv-s">{{ $review->stage->label() }}</span>
                     <span @class(['dk-rv-m dk-is', 'dk-bad' => $long]) title="{{ $review->created_at?->translatedFormat(__('formats.date_long')) }}">{{ __('desk.asked_on', ['when' => \App\Support\Desk\RelativeDay::for($review->created_at)]) }}@if ($long) · {{ __('desk.review_waiting_long') }}@endif · {{ $review->slot->label() }}</span>
                     @if ($review->proposal !== null)
-                        <a href="{{ route('proposals.show', $review->proposal) }}" wire:navigate @class(['dk-btn dk-sm dk-rv-a', 'dk-primary' => $long])>{{ __('desk.review_action') }}</a>
+                        <a href="{{ \App\Support\ProposalStoryLink::review(auth()->user(), $review->proposal) }}" wire:navigate @class(['dk-btn dk-sm dk-rv-a', 'dk-primary' => $long])>{{ __('desk.review_action') }}</a>
                     @endif
                 </li>
             @endforeach

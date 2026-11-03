@@ -10,7 +10,7 @@
     $addingStage = \App\Enums\ReviewStage::forAddingIn($this->proposal->status);
 @endphp
 
-<section aria-labelledby="reviewers-heading" class="min-w-0" data-proposal-reviewers>
+<section id="{{ \App\Support\ProposalStoryLink::Reviewers }}" aria-labelledby="reviewers-heading" class="min-w-0 scroll-mt-36" data-proposal-reviewers>
     <div class="flex flex-wrap items-end justify-between gap-3 border-b pb-3 {{ $hairline }}">
         <div class="min-w-0">
             <h2 id="reviewers-heading" class="text-lg font-bold {{ $inkText }}">{{ __('proposals.reviewers') }}</h2>
@@ -33,7 +33,8 @@
 
             <ul class="mt-2 divide-y {{ $hairline }}">
                 @foreach ($group['rows'] as $row)
-                    <li class="flex flex-col gap-3 py-3 @2xl/detail:flex-row @2xl/detail:items-start" wire:key="reviewer-{{ $row['id'] }}" data-reviewer-row="{{ $row['id'] }}">
+                    {{-- The viewer's row in the open stage is where ProposalStoryLink::review() lands; the margin clears the sticky top bar and section tabs. --}}
+                    <li @if ($row['isMine'] && $group['isOpen']) id="{{ \App\Support\ProposalStoryLink::MyReview }}" @endif class="flex scroll-mt-36 flex-col gap-3 py-3 @2xl/detail:flex-row @2xl/detail:items-start" wire:key="reviewer-{{ $row['id'] }}" data-reviewer-row="{{ $row['id'] }}">
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-center gap-2">
                                 <x-ui.employee-chip :employee="$row['employee']" compact />
@@ -85,14 +86,14 @@
                     </li>
                 @endforeach
 
-                @foreach ($group['vacant'] as $vacantSlot)
-                    <li class="flex flex-wrap items-center gap-2 py-3" wire:key="vacant-{{ $group['stage']->value }}-{{ $vacantSlot->value }}" data-vacant-slot="{{ $vacantSlot->value }}">
+                @foreach ($group['vacant'] as $vacant)
+                    <li class="flex flex-wrap items-center gap-2 py-3" wire:key="vacant-{{ $group['stage']->value }}-{{ $vacant['slot']->value }}" data-vacant-slot="{{ $vacant['slot']->value }}" data-vacant-reason="{{ $vacant['isSet'] ? 'no-holder' : 'not-set' }}">
                         <span class="inline-flex items-center gap-1 rounded-md bg-status-warn-soft px-2 py-0.5 text-[11px] font-semibold text-status-warn">
                             <flux:icon.exclamation-triangle variant="micro" class="size-3.5" aria-hidden="true" />
-                            {{ __('proposals.position_vacant') }}
+                            {{ $vacant['isSet'] ? __('proposals.position_vacant') : __('proposals.position_not_set') }}
                         </span>
-                        <span class="text-sm font-medium {{ $inkText }}">{{ $vacantSlot->label() }}</span>
-                        <span class="w-full text-xs {{ $mutedText }}">{{ __('proposals.position_vacant_hint') }}</span>
+                        <span class="text-sm font-medium {{ $inkText }}">{{ $vacant['slot']->label() }}</span>
+                        <span class="w-full text-xs {{ $mutedText }}">{{ $vacant['isSet'] ? __('proposals.position_vacant_hint') : __('proposals.position_not_set_hint') }}</span>
                     </li>
                 @endforeach
             </ul>
