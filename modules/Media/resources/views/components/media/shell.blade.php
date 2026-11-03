@@ -22,12 +22,12 @@
         <nav class="mr-nav" aria-label="{{ __('media.app') }}">
             @foreach ($nav as $page)
                 <a href="{{ route($page['route']) }}" wire:navigate @if (request()->routeIs(...$page['active'])) aria-current="page" @endif>
-                    <x-ic :n="$page['icon']" />{{ __('media.nav.'.$page['key']) }}
+                    <x-media.ic :n="$page['icon']" />{{ __('media.nav.'.$page['key']) }}
                 </a>
             @endforeach
             @if ($user->hasActivePermission('media.requests.create'))
                 <a href="{{ app(\Modules\Media\Support\HcGenerator::class)->url() }}" target="_blank" rel="noopener" lang="en">
-                    <x-ic n="wand" />HC Generator
+                    <x-media.ic n="wand" />HC Generator
                 </a>
             @endif
         </nav>

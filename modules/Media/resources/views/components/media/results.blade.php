@@ -19,7 +19,7 @@
                         @if (str_starts_with((string) $m->mime_type, 'image/') && $m->mime_type !== 'image/svg+xml')
                             <img src="{{ route('media-requests.files', ['media' => $m, 'view' => 1]) }}" alt="{{ $m->file_name }}" loading="lazy">
                         @else
-                            <span class="rpi"><x-ic :n="$m->mime_type === 'application/pdf' ? 'file' : 'download'" /><small class="ltr">{{ strtoupper(pathinfo($m->file_name, PATHINFO_EXTENSION)) }}</small></span>
+                            <span class="rpi"><x-media.ic :n="$m->mime_type === 'application/pdf' ? 'file' : 'download'" /><small class="ltr">{{ strtoupper(pathinfo($m->file_name, PATHINFO_EXTENSION)) }}</small></span>
                         @endif
                         <span class="rpn ltr">{{ $m->file_name }}</span>
                     </a>

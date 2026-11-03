@@ -36,20 +36,20 @@
                     <a href="{{ route('media-requests.show', $r) }}" wire:navigate @class(['kc', 'mine' => $mine])>
                         @if ($mine || $yours || $r->priority === 'high' || $r->isLate())
                             <div class="row">
-                                @if ($mine)<span class="tag act"><x-ic n="arrow" class="flip" />{{ __('media.tag.act') }}</span>@endif
-                                @if ($yours && ! $mine)<span class="tag soft"><x-ic n="user" />{{ __('media.spec.yours') }}</span>@endif
+                                @if ($mine)<span class="tag act"><x-media.ic n="arrow" class="flip" />{{ __('media.tag.act') }}</span>@endif
+                                @if ($yours && ! $mine)<span class="tag soft"><x-media.ic n="user" />{{ __('media.spec.yours') }}</span>@endif
                                 @if ($r->priority === 'high')<span class="tag rush">{{ __('media.prio.high') }}</span>@endif
-                                @if ($r->isLate())<span class="tag late"><x-ic n="flame" />{{ __('media.tag.late') }}</span>@endif
+                                @if ($r->isLate())<span class="tag late"><x-media.ic n="flame" />{{ __('media.tag.late') }}</span>@endif
                             </div>
                         @endif
                         <x-media.name :r="$r" class="nm" />
-                        <div class="row"><x-media.status :r="$r" :late="false" />@if ($r->wantsPrint())<span class="tag soft"><x-ic n="printer" />{{ __('media.tag.withPrint') }}</span>@endif @if ($r->needsQuote() && $r->isOpen())<span class="tag rush">{{ __('media.tag.quote') }}</span>@endif @if ($spec)<span class="tag soft spec"><x-ic :n="config('media-requests.specialties.'.$spec.'.icon')" />{{ __('media.spec.'.$spec) }}</span>@endif</div>
+                        <div class="row"><x-media.status :r="$r" :late="false" />@if ($r->wantsPrint())<span class="tag soft"><x-media.ic n="printer" />{{ __('media.tag.withPrint') }}</span>@endif @if ($r->needsQuote() && $r->isOpen())<span class="tag rush">{{ __('media.tag.quote') }}</span>@endif @if ($spec)<span class="tag soft spec"><x-media.ic :n="config('media-requests.specialties.'.$spec.'.icon')" />{{ __('media.spec.'.$spec) }}</span>@endif</div>
                         <div class="kfoot">
                             @if ($r->isOpen() && $r->owner())
-                                <span><x-ic n="user" /><b class="owner">{{ $r->ownerName() }}</b>@if ($r->status_changed_at)<span class="sub">· {{ $r->status_changed_at->diffForHumans(null, true) }}</span>@endif</span>
+                                <span><x-media.ic n="user" /><b class="owner">{{ $r->ownerName() }}</b>@if ($r->status_changed_at)<span class="sub">· {{ $r->status_changed_at->diffForHumans(null, true) }}</span>@endif</span>
                             @endif
                             <span class="kref">
-                                @if ($r->needed_on)<span><x-ic n="cal" /><span class="num">{{ $r->needed_on->format('d-m-Y') }}</span></span>@endif
+                                @if ($r->needed_on)<span><x-media.ic n="cal" /><span class="num">{{ $r->needed_on->format('d-m-Y') }}</span></span>@endif
                                 <span class="id num ltr">{{ $r->reference }}</span>
                             </span>
                         </div>

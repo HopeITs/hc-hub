@@ -8,13 +8,13 @@
             <p class="lead">{{ __('media.h.log.l') }}</p>
         </div>
         @activepermission('media.requests.export')
-            <button type="button" class="btn btn-o" wire:click="exportCsv"><x-ic n="download" />{{ __('media.lg.export') }}</button>
+            <button type="button" class="btn btn-o" wire:click="exportCsv"><x-media.ic n="download" />{{ __('media.lg.export') }}</button>
         @endactivepermission
     </div>
 
     <div class="filters">
         <div class="search">
-            <x-ic n="search" />
+            <x-media.ic n="search" />
             <label for="lg-q" class="vh">{{ __('media.lg.ph') }}</label>
             <input id="lg-q" class="inp" type="search" wire:model.live.debounce.350ms="search" placeholder="{{ __('media.lg.ph') }}">
         </div>
@@ -26,7 +26,7 @@
         <label class="sub" style="display:flex;align-items:center;gap:6px">{{ __('media.lg.from') }}<input type="date" class="inp" style="width:auto" wire:model.live="from"></label>
         <label class="sub" style="display:flex;align-items:center;gap:6px">{{ __('media.lg.to') }}<input type="date" class="inp" style="width:auto" wire:model.live="to"></label>
         @if ($search || $event || $from || $to)
-            <button type="button" class="btn-q" wire:click="resetFilters"><x-ic n="reset" />{{ __('media.lg.reset') }}</button>
+            <button type="button" class="btn-q" wire:click="resetFilters"><x-media.ic n="reset" />{{ __('media.lg.reset') }}</button>
         @endif
     </div>
 
@@ -66,9 +66,9 @@
 
     @if ($rows->hasPages())
         <div class="btnline" style="justify-content:center;margin-top:16px">
-            @if (! $rows->onFirstPage())<button type="button" class="btn btn-o btn-sm" wire:click="previousPage"><x-ic n="back" class="flip" /></button>@endif
+            @if (! $rows->onFirstPage())<button type="button" class="btn btn-o btn-sm" wire:click="previousPage"><x-media.ic n="back" class="flip" /></button>@endif
             <span class="sub" style="align-self:center">{{ $rows->currentPage() }} / {{ $rows->lastPage() }}</span>
-            @if ($rows->hasMorePages())<button type="button" class="btn btn-o btn-sm" wire:click="nextPage"><x-ic n="arrow" class="flip" /></button>@endif
+            @if ($rows->hasMorePages())<button type="button" class="btn btn-o btn-sm" wire:click="nextPage"><x-media.ic n="arrow" class="flip" /></button>@endif
         </div>
     @endif
 </div>

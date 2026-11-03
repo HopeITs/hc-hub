@@ -12,11 +12,11 @@
     <a href="{{ route('media-requests.show', $r) }}" wire:navigate @class(['rc', 'mine' => $mine])>
         <div class="rc-top">
             <div class="rc-tags">
-                @if ($mine)<span class="tag act"><x-ic n="arrow" class="flip" />{{ __('media.tag.act') }}</span>@endif
+                @if ($mine)<span class="tag act"><x-media.ic n="arrow" class="flip" />{{ __('media.tag.act') }}</span>@endif
                 <x-media.status :r="$r" />
-                @if ($r->rush_reason && $r->isOpen())<span class="tag rush"><x-ic n="flame" />{{ __('media.tag.rush') }}</span>@endif
+                @if ($r->rush_reason && $r->isOpen())<span class="tag rush"><x-media.ic n="flame" />{{ __('media.tag.rush') }}</span>@endif
             </div>
-            <span class="rc-type"><x-ic :n="$svcIcon" />{{ __('media.svc.'.$catalog->serviceKey($r->service)) }}@unless ($r->isPack()) · {{ __('media.type.'.$r->type) }}@endunless</span>
+            <span class="rc-type"><x-media.ic :n="$svcIcon" />{{ __('media.svc.'.$catalog->serviceKey($r->service)) }}@unless ($r->isPack()) · {{ __('media.type.'.$r->type) }}@endunless</span>
         </div>
 
         <x-media.name :r="$r" class="rc-title" />
@@ -25,10 +25,10 @@
             <div class="meta">
                 <span class="num ltr">{{ $r->reference }}</span>
                 @if ($r->isOpen() && $r->owner())
-                    <span><x-ic n="user" />{{ __('media.meta.with', ['who' => '']) }}<b class="owner">{{ $r->ownerName() }}</b></span>
+                    <span><x-media.ic n="user" />{{ __('media.meta.with', ['who' => '']) }}<b class="owner">{{ $r->ownerName() }}</b></span>
                 @endif
                 @if ($r->needed_on)
-                    <span><x-ic n="cal" /><span class="num">{{ $r->needed_on->format('d-m-Y') }}</span></span>
+                    <span><x-media.ic n="cal" /><span class="num">{{ $r->needed_on->format('d-m-Y') }}</span></span>
                 @endif
             </div>
             @if (! in_array($r->status, ['rejected', 'cancelled'], true))

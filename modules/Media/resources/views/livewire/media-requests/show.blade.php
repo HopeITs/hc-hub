@@ -19,7 +19,7 @@
 <x-media.shell :bare="$embedded">
 <div>
     @unless ($embedded)
-    <a href="{{ route('media-requests.index') }}" wire:navigate class="crumb"><x-ic n="back" class="flip" />{{ __('media.nav.my') }}</a>
+    <a href="{{ route('media-requests.index') }}" wire:navigate class="crumb"><x-media.ic n="back" class="flip" />{{ __('media.nav.my') }}</a>
     @endunless
 
     {{-- Title --}}
@@ -27,19 +27,19 @@
         <div class="row">
             <span class="tag soft num ltr">{{ $r->reference }}</span>
             <x-media.status :r="$r" />
-            @if ($r->wantsPrint())<span class="tag soft"><x-ic n="printer" />{{ __('media.tag.withPrint') }} · <span class="num">{{ $r->answer('printQty') }}</span></span>@endif
-            @if ($r->needsQuote() && $r->isOpen())<span class="tag rush"><x-ic n="alert" />{{ __('media.tag.quote') }}</span>@endif
-            @if ($specialty)<span class="tag soft" title="{{ __('media.spec.title') }}"><x-ic :n="config('media-requests.specialties.'.$specialty.'.icon')" />{{ __('media.spec.'.$specialty) }}</span>@endif
+            @if ($r->wantsPrint())<span class="tag soft"><x-media.ic n="printer" />{{ __('media.tag.withPrint') }} · <span class="num">{{ $r->answer('printQty') }}</span></span>@endif
+            @if ($r->needsQuote() && $r->isOpen())<span class="tag rush"><x-media.ic n="alert" />{{ __('media.tag.quote') }}</span>@endif
+            @if ($specialty)<span class="tag soft" title="{{ __('media.spec.title') }}"><x-media.ic :n="config('media-requests.specialties.'.$specialty.'.icon')" />{{ __('media.spec.'.$specialty) }}</span>@endif
             @if ($r->priority)<span class="tag soft">{{ __('media.prio') }}: {{ __('media.prio.'.$r->priority) }}</span>@endif
-            @if ($r->rush_reason && $r->isOpen())<span class="tag rush"><x-ic n="flame" />{{ __('media.tag.rush') }}</span>@endif
+            @if ($r->rush_reason && $r->isOpen())<span class="tag rush"><x-media.ic n="flame" />{{ __('media.tag.rush') }}</span>@endif
         </div>
         <h1 style="text-align:start"><x-media.name :r="$r" /></h1>
         <div class="meta">
-            <span><x-ic :n="$svcIcon" />{{ __('media.svc.'.$catalog->serviceKey($r->service)) }}@unless ($r->isPack()) · {{ __('media.type.'.$r->type) }}@endunless</span>
-            <span><x-ic n="user" />{{ $name($r->requester) }}</span>
-            <span><x-ic n="cal" /><span class="num">{{ $r->created_at->format('d-m-Y') }}</span></span>
+            <span><x-media.ic :n="$svcIcon" />{{ __('media.svc.'.$catalog->serviceKey($r->service)) }}@unless ($r->isPack()) · {{ __('media.type.'.$r->type) }}@endunless</span>
+            <span><x-media.ic n="user" />{{ $name($r->requester) }}</span>
+            <span><x-media.ic n="cal" /><span class="num">{{ $r->created_at->format('d-m-Y') }}</span></span>
             @can('update', $r)
-                <button type="button" class="btn-q" x-on:click="$dispatch('media-wizard-open', { id: {{ $r->id }} })"><x-ic n="edit" />{{ __('media.ew.btn') }}</button>
+                <button type="button" class="btn-q" x-on:click="$dispatch('media-wizard-open', { id: {{ $r->id }} })"><x-media.ic n="edit" />{{ __('media.ew.btn') }}</button>
             @endcan
         </div>
     </header>
@@ -56,7 +56,7 @@
 
     {{-- Printing with an unknown budget: the team sends a quote first; the requester knows it is coming. --}}
     @if ($r->needsQuote() && $r->isOpen())
-        <div class="banner soft" style="margin-bottom:18px"><x-ic n="alert" /><span>{{ $isRequester ? __('media.quote.mine') : __('media.quote.banner') }}</span></div>
+        <div class="banner soft" style="margin-bottom:18px"><x-media.ic n="alert" /><span>{{ $isRequester ? __('media.quote.mine') : __('media.quote.banner') }}</span></div>
     @endif
 
     {{-- A shoot: which team covers the place, or that a service agreement does. --}}
@@ -64,17 +64,17 @@
         @php($teams = \App\Models\City::whereIn('slug', $team->areaTeams($r))->get()->sortBy(fn ($c) => array_search($c->slug, $team->areaTeams($r)))->map(fn ($c) => $locale === 'ar' ? $c->name_ar : $c->name_en)->implode(' / '))
         @php($cityName = $locale === 'ar' ? $r->city->name_ar : $r->city->name_en)
         @if ($team->underAgreement($r))
-            <div class="banner soft" style="margin-bottom:14px"><x-ic n="alert" /><span>{{ __('media.cov.agreement', ['city' => $cityName]) }}</span></div>
+            <div class="banner soft" style="margin-bottom:14px"><x-media.ic n="alert" /><span>{{ __('media.cov.agreement', ['city' => $cityName]) }}</span></div>
         @elseif ($members->isNotEmpty() && $members->doesntContain(fn ($m) => $team->coversArea($m, $r)))
-            <div class="banner soft" style="margin-bottom:14px"><x-ic n="alert" /><span>{{ __('media.cov.none', ['city' => $cityName, 'teams' => $teams]) }}</span></div>
+            <div class="banner soft" style="margin-bottom:14px"><x-media.ic n="alert" /><span>{{ __('media.cov.none', ['city' => $cityName, 'teams' => $teams]) }}</span></div>
         @elseif ($members->isNotEmpty() || $isRequester)
-            <p class="sub" style="margin:-6px 0 14px;display:flex;gap:6px;align-items:center"><x-ic n="camera" />{{ __('media.cov.note', ['city' => $cityName, 'teams' => $teams]) }}</p>
+            <p class="sub" style="margin:-6px 0 14px;display:flex;gap:6px;align-items:center"><x-media.ic n="camera" />{{ __('media.cov.note', ['city' => $cityName, 'teams' => $teams]) }}</p>
         @endif
     @endif
 
     {{-- Tracker: every stage and who holds it now --}}
     @if (in_array($r->status, [S::Rejected, S::Cancelled], true))
-        <div class="banner stop" style="margin-bottom:20px"><x-ic n="x" /><div><b>{{ S::label($r->status) }}</b>
+        <div class="banner stop" style="margin-bottom:20px"><x-media.ic n="x" /><div><b>{{ S::label($r->status) }}</b>
             @php($why = $history->first(fn ($a) => in_array($a->description, ['rejected', 'cancelled'], true))?->properties->get('note'))
             @if ($why)<p class="sub">{{ $why }}</p>@endif
         </div></div>
@@ -91,7 +91,7 @@
                 @foreach ($steps as $i => $step)
                     @php($s = $i < $current ? 'done' : ($i === $current ? 'cur' : 'todo'))
                     <li data-s="{{ $s }}" @if ($s === 'cur') aria-current="step" @endif>
-                        <span class="dot">@if ($s === 'done')<x-ic n="check" />@elseif ($s === 'cur')<x-ic :n="$stepIcon[$step] ?? 'clock'" />@else{{ $i + 1 }}@endif</span>
+                        <span class="dot">@if ($s === 'done')<x-media.ic n="check" />@elseif ($s === 'cur')<x-media.ic :n="$stepIcon[$step] ?? 'clock'" />@else{{ $i + 1 }}@endif</span>
                         <span>{{ __('media.sp.'.$step) }}@if ($s === 'cur' && $r->owner())<span class="ow" style="display:block">{{ $r->ownerName() }}</span>@endif</span>
                     </li>
                 @endforeach
@@ -111,7 +111,7 @@
                     <b class="num">{{ $r->needed_on?->format('d-m-Y') ?? '—' }}</b>
                 </div>
                 @can('nudge', $r)
-                    <button type="button" class="btn btn-o btn-sm" wire:click="nudge"><x-ic n="bell" />{{ __('media.nudge', ['who' => $r->ownerName()]) }}</button>
+                    <button type="button" class="btn btn-o btn-sm" wire:click="nudge"><x-media.ic n="bell" />{{ __('media.nudge', ['who' => $r->ownerName()]) }}</button>
                 @endcan
             </div>
         </section>
@@ -123,7 +123,7 @@
             <div class="tabs" role="tablist">
                 @foreach (['overview' => ['tab.overview', 'list'], 'conversation' => ['tab.conversation', 'msg'], 'history' => ['tab.activity', 'clock']] as $key => [$label, $icon])
                     <button type="button" role="tab" x-on:click="tab = '{{ $key }}'" :aria-selected="tab === '{{ $key }}'">
-                        <x-ic :n="$icon" />{{ __('media.'.$label) }}
+                        <x-media.ic :n="$icon" />{{ __('media.'.$label) }}
                         @if ($key === 'conversation' && $r->comments->isNotEmpty())<span class="cnt num">{{ $r->comments->count() }}</span>@endif
                     </button>
                 @endforeach
@@ -174,13 +174,13 @@
                     <ul class="files">
                         {{-- The archive (open files) is the media team's only. --}}
                         @foreach (array_filter(['draft' => $r->draft_link, 'result' => $r->result_link, 'archive' => $team->seesArchive(auth()->user()) ? $r->archive_link : null]) as $kind => $href)
-                            <li><a href="{{ $href }}" target="_blank" rel="noopener noreferrer"><x-ic n="link" />{{ __('media.link.'.$kind) }}</a></li>
+                            <li><a href="{{ $href }}" target="_blank" rel="noopener noreferrer"><x-media.ic n="link" />{{ __('media.link.'.$kind) }}</a></li>
                         @endforeach
                         @foreach ($packFiles as $file)
-                            <li><span><x-ic n="box" /><span class="ltr">{{ $file['path'] }}</span></span></li>
+                            <li><span><x-media.ic n="box" /><span class="ltr">{{ $file['path'] }}</span></span></li>
                         @endforeach
                         @foreach ($r->getMedia('attachments') as $media)
-                            <li><a href="{{ route('media-requests.files', $media) }}"><x-ic n="download" /><span class="ltr">{{ $media->file_name }}</span></a></li>
+                            <li><a href="{{ route('media-requests.files', $media) }}"><x-media.ic n="download" /><span class="ltr">{{ $media->file_name }}</span></a></li>
                         @endforeach
                     </ul>
                     @if (! $r->draft_link && ! $r->result_link && ! $r->archive_link && $packFiles->isEmpty() && $r->getMedia('attachments')->isEmpty() && $r->getMedia('results')->isEmpty())
@@ -192,16 +192,16 @@
                     @can('attach', $r)
                         <form wire:submit="attachFiles" style="margin-top:14px;display:grid;gap:8px">
                             <label class="drop">
-                                <span class="di"><x-ic n="upload" /></span>
+                                <span class="di"><x-media.ic n="upload" /></span>
                                 <b>{{ __('media.as.drop') }}</b>
                                 <span class="sub">{{ __('media.as.max') }}</span>
                                 <input type="file" multiple wire:model="uploads" class="vh">
                             </label>
                             @if ($uploads)
-                                <button type="submit" class="btn btn-o"><x-ic n="upload" />{{ __('media.att.file') }} ({{ count($uploads) }})</button>
+                                <button type="submit" class="btn btn-o"><x-media.ic n="upload" />{{ __('media.att.file') }} ({{ count($uploads) }})</button>
                             @endif
-                            @error('uploads')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
-                            @error('uploads.*')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                            @error('uploads')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
+                            @error('uploads.*')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                         </form>
                     @endcan
                 </section>
@@ -226,10 +226,10 @@
                         <label for="mr-body" class="vh">{{ __('media.cm.label') }}</label>
                         <div class="row">
                             <textarea id="mr-body" class="inp" rows="2" wire:model="body" placeholder="{{ __('media.cm.ph') }}" x-data="mrTypewriter(@js(__('media.ex.comment')))"></textarea>
-                            <button type="submit" class="btn btn-p" aria-label="{{ __('media.cm.send') }}"><x-ic n="send" class="flip" /></button>
+                            <button type="submit" class="btn btn-p" aria-label="{{ __('media.cm.send') }}"><x-media.ic n="send" class="flip" /></button>
                         </div>
-                        <button type="button" class="btn-q proofbtn" x-on:click="$dispatch('media-proofread-open', { text: document.getElementById('mr-body').value, target: 'body' })"><x-ic n="check" />{{ __('media.proof.check') }}</button>
-                        @error('body')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                        <button type="button" class="btn-q proofbtn" x-on:click="$dispatch('media-proofread-open', { text: document.getElementById('mr-body').value, target: 'body' })"><x-media.ic n="check" />{{ __('media.proof.check') }}</button>
+                        @error('body')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                     </form>
                 @endcan
             </section>
@@ -238,12 +238,12 @@
                 <ol class="thread" style="margin:0">
                     @foreach ($history as $a)
                         <li class="ev sys">
-                            <span class="av sm"><x-ic :n="$evIcon[$a->description] ?? 'clock'" /></span>
+                            <span class="av sm"><x-media.ic :n="$evIcon[$a->description] ?? 'clock'" /></span>
                             <div>
                                 <span><span class="who">{{ $a->causer?->profile?->nameForLocale($locale) ?? '—' }}</span> {{ __('media.ev.'.$a->description, \Modules\Media\Notifications\MediaRequestUpdated::localizeParams(array_intersect_key($a->properties->all(), ['prio' => 1, 'n' => 1]) + ['to' => $a->properties->get('assignee') ?? $a->properties->get('target'), 'role' => $a->properties->get('target') ? null : $a->properties->get('owner')], $locale)) }}</span>
                                 <time>{{ $a->created_at->format('d-m-Y H:i') }}</time>
                                 @if ($a->properties->get('note'))<div class="note">{{ $a->properties->get('note') }}</div>@endif
-                                @if ($a->properties->get('link'))<a class="btn-q" style="padding:0;min-height:32px" href="{{ $a->properties->get('link') }}" target="_blank" rel="noopener noreferrer"><x-ic n="link" />{{ __('media.link.open') }}</a>@endif
+                                @if ($a->properties->get('link'))<a class="btn-q" style="padding:0;min-height:32px" href="{{ $a->properties->get('link') }}" target="_blank" rel="noopener noreferrer"><x-media.ic n="link" />{{ __('media.link.open') }}</a>@endif
                                 @if ($changes = $a->properties->get('changes'))<p class="sub">{{ \Modules\Media\Livewire\MediaRequests\Log::details($a, $catalog) }}</p>@endif
                             </div>
                         </li>
@@ -256,7 +256,7 @@
         <aside>
             <section @class(['card act', 'mine' => $isOwner]) aria-labelledby="mr-act">
                 <div class="act-h">
-                    <x-ic :n="$isOwner ? 'arrow' : ($r->isOpen() ? 'clock' : 'check')" @class(['flip' => $isOwner]) />
+                    <x-media.ic :n="$isOwner ? 'arrow' : ($r->isOpen() ? 'clock' : 'check')" @class(['flip' => $isOwner]) />
                     <h2 id="mr-act">{{ $isOwner ? __('media.act.title') : ($r->isOpen() ? __('media.act.status') : __('media.act.closedTitle')) }}</h2>
                 </div>
 
@@ -267,7 +267,7 @@
                 <div class="stack" style="gap:12px">
                     @can('approveProgram', $r)
                         <p class="act-p" style="margin:0">{{ __('media.act.pm') }}</p>
-                        <button type="button" class="btn btn-p btn-w" wire:click="approveProgram" wire:loading.attr="data-loading"><span class="spin"></span><x-ic n="check" />{{ __('media.act.approve') }}</button>
+                        <button type="button" class="btn btn-p btn-w" wire:click="approveProgram" wire:loading.attr="data-loading"><span class="spin"></span><x-media.ic n="check" />{{ __('media.act.approve') }}</button>
                     @endcan
 
                     @can('approveMedia', $r)
@@ -277,14 +277,14 @@
                                 <legend>{{ __('media.fm.prio') }}</legend>
                                 <div class="choices">
                                     @foreach (config('media-requests.priorities') as $p)
-                                        <label class="choice"><input type="radio" value="{{ $p }}" wire:model="priority" name="priority"><span><x-ic n="check" class="ck" />{{ __('media.prio.'.$p) }}</span></label>
+                                        <label class="choice"><input type="radio" value="{{ $p }}" wire:model="priority" name="priority"><span><x-media.ic n="check" class="ck" />{{ __('media.prio.'.$p) }}</span></label>
                                     @endforeach
                                 </div>
                             </fieldset>
                             <div class="field" style="margin:0">
                                 <label for="mr-planned">{{ __('media.fm.planned') }}</label>
                                 <input id="mr-planned" class="inp" type="date" min="{{ today()->toDateString() }}" wire:model="plannedFor">
-                                @error('plannedFor')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                                @error('plannedFor')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                             </div>
                             <div class="field" style="margin:0">
                                 <label for="mr-assignee">{{ __('media.fm.officer') }}</label>
@@ -292,15 +292,15 @@
                                     <option value="">{{ __('media.fm.letClaim') }}</option>
                                     @include('livewire.media-requests.partials.assignee-options')
                                 </select>
-                                @error('assigneeId')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                                @error('assigneeId')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                             </div>
-                            <button type="submit" class="btn btn-p btn-w" wire:loading.attr="data-loading"><span class="spin"></span><x-ic n="check" />{{ __('media.act.mmApprove') }}</button>
+                            <button type="submit" class="btn btn-p btn-w" wire:loading.attr="data-loading"><span class="spin"></span><x-media.ic n="check" />{{ __('media.act.mmApprove') }}</button>
                         </form>
                     @endcan
 
                     @can('claim', $r)
                         <p class="act-p" style="margin:0">{{ __('media.act.claimIntro') }}</p>
-                        <button type="button" class="btn btn-p btn-w" wire:click="claim" wire:loading.attr="data-loading"><span class="spin"></span><x-ic n="user" />{{ __('media.act.claim') }}</button>
+                        <button type="button" class="btn btn-p btn-w" wire:click="claim" wire:loading.attr="data-loading"><span class="spin"></span><x-media.ic n="user" />{{ __('media.act.claim') }}</button>
                     @endcan
 
                     @can('assign', $r)
@@ -313,13 +313,13 @@
                                 </select>
                                 <button type="submit" class="btn btn-o">{{ __('media.act.assign') }}</button>
                             </div>
-                            @error('assigneeId')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                            @error('assigneeId')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                         </form>
                     @endcan
 
                     @can('start', $r)
                         <p class="act-p" style="margin:0">{{ __('media.act.start') }}</p>
-                        <button type="button" class="btn btn-p btn-w" wire:click="start" wire:loading.attr="data-loading"><span class="spin"></span><x-ic n="play" />{{ __('media.act.startBtn') }}</button>
+                        <button type="button" class="btn btn-p btn-w" wire:click="start" wire:loading.attr="data-loading"><span class="spin"></span><x-media.ic n="play" />{{ __('media.act.startBtn') }}</button>
                     @endcan
 
                     @can('work', $r)
@@ -329,18 +329,18 @@
                             <div class="field" style="margin:0">
                                 <label for="mr-link">{{ __('media.fm.link') }} <span class="sub">({{ __('media.fm.optional') }})</span></label>
                                 <input id="mr-link" class="inp ltr" type="url" wire:model="link" placeholder="https://…" @error('link') aria-invalid="true" @enderror>
-                                @error('link')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                                @error('link')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                             </div>
                             <div class="field" style="margin:0">
                                 <label class="drop resdrop" for="mr-result-files">
-                                    <span class="di"><x-ic n="upload" /></span>
+                                    <span class="di"><x-media.ic n="upload" /></span>
                                     <span><b>{{ __('media.fm.files') }}</b><small class="sub">{{ __('media.fm.filesHint') }}</small></span>
                                     <input id="mr-result-files" type="file" multiple class="vh" wire:model="resultUploads"
                                            accept="{{ collect(explode(',', \Modules\Media\Services\MediaRequestWorkflow::RESULT_FILES))->map(fn ($e) => '.'.$e)->implode(',') }}">
                                     <span class="spin" wire:loading wire:target="resultUploads"></span>
                                 </label>
-                                @error('resultUploads.*')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
-                                @error('files.*')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                                @error('resultUploads.*')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
+                                @error('files.*')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                                 @if ($resultUploads)
                                     <ul class="resprev">
                                         @foreach ($resultUploads as $i => $file)
@@ -348,10 +348,10 @@
                                                 @if (str_starts_with((string) $file->getMimeType(), 'image/') && $file->getMimeType() !== 'image/svg+xml')
                                                     <img src="{{ $file->temporaryUrl() }}" alt="">
                                                 @else
-                                                    <span class="rpi"><x-ic n="file" /><small class="ltr">{{ strtoupper($file->getClientOriginalExtension()) }}</small></span>
+                                                    <span class="rpi"><x-media.ic n="file" /><small class="ltr">{{ strtoupper($file->getClientOriginalExtension()) }}</small></span>
                                                 @endif
                                                 <span class="rpn ltr">{{ $file->getClientOriginalName() }}</span>
-                                                <button type="button" class="iconbtn" wire:click="dropResultUpload({{ $i }})" aria-label="{{ __('media.proof.delete') }}"><x-ic n="x" /></button>
+                                                <button type="button" class="iconbtn" wire:click="dropResultUpload({{ $i }})" aria-label="{{ __('media.proof.delete') }}"><x-media.ic n="x" /></button>
                                             </li>
                                         @endforeach
                                     </ul>
@@ -361,42 +361,42 @@
                                 <label for="mr-work-note">{{ __('media.fm.note') }}</label>
                                 <textarea id="mr-work-note" class="inp" rows="2" wire:model="note"></textarea>
                             </div>
-                            <button type="submit" class="btn btn-p btn-w" wire:loading.attr="data-loading"><span class="spin"></span><x-ic n="send" class="flip" />{{ __($r->is_internal_ok ? 'media.act.sendReq' : 'media.act.sendInt') }}</button>
-                            <button type="button" class="btn btn-o btn-w" wire:click="shareDraft"><x-ic n="eye" />{{ __('media.act.draft') }}</button>
+                            <button type="submit" class="btn btn-p btn-w" wire:loading.attr="data-loading"><span class="spin"></span><x-media.ic n="send" class="flip" />{{ __($r->is_internal_ok ? 'media.act.sendReq' : 'media.act.sendInt') }}</button>
+                            <button type="button" class="btn btn-o btn-w" wire:click="shareDraft"><x-media.ic n="eye" />{{ __('media.act.draft') }}</button>
                         </form>
                     @endcan
 
                     @can('reviewInternal', $r)
                         <p class="act-p" style="margin:0">{{ __('media.act.int') }}</p>
-                        @if ($r->result_link)<a class="btn btn-g btn-w" href="{{ $r->result_link }}" target="_blank" rel="noopener noreferrer"><x-ic n="eye" />{{ __('media.link.result') }}</a>@endif
+                        @if ($r->result_link)<a class="btn btn-g btn-w" href="{{ $r->result_link }}" target="_blank" rel="noopener noreferrer"><x-media.ic n="eye" />{{ __('media.link.result') }}</a>@endif
                         <x-media.results :r="$r" latest class="compact" />
-                        <button type="button" class="btn btn-p btn-w" wire:click="approveInternal" wire:loading.attr="data-loading"><span class="spin"></span><x-ic n="check" />{{ __('media.act.intOk') }}</button>
+                        <button type="button" class="btn btn-p btn-w" wire:click="approveInternal" wire:loading.attr="data-loading"><span class="spin"></span><x-media.ic n="check" />{{ __('media.act.intOk') }}</button>
                         <div class="act-sep" style="margin:4px 0"></div>
                         <div class="field" style="margin:0">
                             <label for="mr-int-note">{{ __('media.fm.intBack') }}</label>
                             <textarea id="mr-int-note" class="inp" rows="2" wire:model="note"></textarea>
-                            @error('note')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                            @error('note')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                         </div>
-                        <button type="button" class="btn btn-o btn-w" wire:click="returnToDesigner"><x-ic n="back" class="flip" />{{ __('media.act.intBack') }}</button>
+                        <button type="button" class="btn btn-o btn-w" wire:click="returnToDesigner"><x-media.ic n="back" class="flip" />{{ __('media.act.intBack') }}</button>
                     @endcan
 
                     @can('reviewResult', $r)
                         <p class="act-p" style="margin:0">{{ __('media.act.review') }}</p>
-                        @if ($r->result_link)<a class="btn btn-g btn-w" href="{{ $r->result_link }}" target="_blank" rel="noopener noreferrer"><x-ic n="eye" />{{ __('media.link.result') }}</a>@endif
+                        @if ($r->result_link)<a class="btn btn-g btn-w" href="{{ $r->result_link }}" target="_blank" rel="noopener noreferrer"><x-media.ic n="eye" />{{ __('media.link.result') }}</a>@endif
                         <x-media.results :r="$r" latest class="compact" />
-                        <button type="button" class="btn btn-p btn-w" wire:click="approveResult" wire:loading.attr="data-loading"><span class="spin"></span><x-ic n="check" />{{ __('media.act.resultOk') }}</button>
+                        <button type="button" class="btn btn-p btn-w" wire:click="approveResult" wire:loading.attr="data-loading"><span class="spin"></span><x-media.ic n="check" />{{ __('media.act.resultOk') }}</button>
                         <div class="act-sep" style="margin:4px 0"></div>
                         <div class="field" style="margin:0">
                             <label for="mr-changes">{{ __('media.fm.changes') }}</label>
                             <textarea id="mr-changes" class="inp" rows="2" wire:model="note"></textarea>
-                            @error('note')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                            @error('note')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                         </div>
-                        <button type="button" class="btn btn-o btn-w" wire:click="requestChanges"><x-ic n="edit" />{{ __('media.act.changes') }}</button>
+                        <button type="button" class="btn btn-o btn-w" wire:click="requestChanges"><x-media.ic n="edit" />{{ __('media.act.changes') }}</button>
                     @endcan
 
                     @can('markReady', $r)
                         <p class="act-p" style="margin:0">{{ __('media.act.prod') }}</p>
-                        <button type="button" class="btn btn-p btn-w" wire:click="markReady" wire:loading.attr="data-loading"><span class="spin"></span><x-ic n="box" />{{ __('media.act.ready') }}</button>
+                        <button type="button" class="btn btn-p btn-w" wire:click="markReady" wire:loading.attr="data-loading"><span class="spin"></span><x-media.ic n="box" />{{ __('media.act.ready') }}</button>
                     @endcan
 
                     @can('deliver', $r)
@@ -408,10 +408,10 @@
                                 <div class="field" style="margin:0">
                                     <label for="mr-archive">{{ __('media.fm.archive') }}</label>
                                     <input id="mr-archive" class="inp ltr" type="url" wire:model="link" placeholder="https://…" @error('archive_link') aria-invalid="true" @enderror>
-                                    @error('archive_link')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                                    @error('archive_link')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                                 </div>
                             @endif
-                            <button type="submit" class="btn btn-p btn-w" wire:loading.attr="data-loading"><span class="spin"></span><x-ic n="check" />{{ __($r->isPack() ? 'media.act.packBtn' : 'media.act.deliverBtn') }}</button>
+                            <button type="submit" class="btn btn-p btn-w" wire:loading.attr="data-loading"><span class="spin"></span><x-media.ic n="check" />{{ __($r->isPack() ? 'media.act.packBtn' : 'media.act.deliverBtn') }}</button>
                         </form>
                     @endcan
 
@@ -420,23 +420,23 @@
                             <p class="act-p" style="margin:0">{{ __('media.act.info') }}</p>
                             @php($question = $history->firstWhere('description', 'info'))
                             @if ($question?->properties->get('note'))
-                                <div class="banner brand"><x-ic n="msg" /><span>{{ $question->properties->get('note') }}</span></div>
+                                <div class="banner brand"><x-media.ic n="msg" /><span>{{ $question->properties->get('note') }}</span></div>
                             @endif
                             <div class="field" style="margin:0">
                                 <label for="mr-reply">{{ __('media.fm.reply') }}</label>
                                 <textarea id="mr-reply" class="inp" rows="3" wire:model="note"></textarea>
-                                @error('note')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                                @error('note')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                             </div>
-                            <button type="submit" class="btn btn-p btn-w"><x-ic n="send" class="flip" />{{ __('media.act.reply') }}</button>
+                            <button type="submit" class="btn btn-p btn-w"><x-media.ic n="send" class="flip" />{{ __('media.act.reply') }}</button>
                         </form>
                     @endcan
 
                     @can('resume', $r)
-                        <button type="button" class="btn btn-p btn-w" wire:click="resume"><x-ic n="play" />{{ __('media.act.resume') }}</button>
+                        <button type="button" class="btn btn-p btn-w" wire:click="resume"><x-media.ic n="play" />{{ __('media.act.resume') }}</button>
                     @endcan
 
                     @if ($r->status === S::Delivered && $r->archive_link)
-                        <a class="btn btn-o btn-w" href="{{ $r->archive_link }}" target="_blank" rel="noopener noreferrer"><x-ic n="link" />{{ __('media.d.archive') }}</a>
+                        <a class="btn btn-o btn-w" href="{{ $r->archive_link }}" target="_blank" rel="noopener noreferrer"><x-media.ic n="link" />{{ __('media.d.archive') }}</a>
                     @elseif (! $r->isOpen() && $r->status !== S::Delivered)
                         <p class="act-p" style="margin:0">{{ __('media.act.closed') }}</p>
                     @endif
@@ -445,18 +445,18 @@
                 @if ($sideActions)
                     <div class="act-sep"></div>
                     <div x-data="{ open: false }">
-                        <button type="button" class="btn-q" style="padding:0" x-on:click="open = !open" :aria-expanded="open"><x-ic n="more" />{{ __('media.act.more') }}</button>
+                        <button type="button" class="btn-q" style="padding:0" x-on:click="open = !open" :aria-expanded="open"><x-media.ic n="more" />{{ __('media.act.more') }}</button>
                         <div x-show="open" x-cloak class="stack" style="gap:8px;margin-top:10px">
                             <div class="field" style="margin:0">
                                 <label for="mr-side-note">{{ __('media.fm.reason') }}</label>
                                 <textarea id="mr-side-note" class="inp" rows="2" wire:model="note"></textarea>
-                                @error('note')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                                @error('note')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                             </div>
                             <div class="btnline">
-                                @can('askInfo', $r)<button type="button" class="btn btn-o btn-sm" wire:click="askInfo"><x-ic n="alert" />{{ __('media.act.needInfo') }}</button>@endcan
-                                @can('hold', $r)<button type="button" class="btn btn-o btn-sm" wire:click="hold"><x-ic n="pause" />{{ __('media.act.hold') }}</button>@endcan
-                                @can('reject', $r)<button type="button" class="btn btn-o btn-sm" x-on:click="mrConfirm(@js(__('media.act.confirmReject')), { ok: @js(__('media.act.reject')), cancel: @js(__('media.confirm.back')), danger: true }).then((yes) => yes && $wire.reject())"><x-ic n="x" />{{ __('media.act.reject') }}</button>@endcan
-                                @can('cancel', $r)<button type="button" class="btn btn-o btn-sm" x-on:click="mrConfirm(@js(__('media.act.confirmCancel')), { ok: @js(__('media.act.cancel')), cancel: @js(__('media.confirm.back')), danger: true }).then((yes) => yes && $wire.cancel())"><x-ic n="x" />{{ __('media.act.cancel') }}</button>@endcan
+                                @can('askInfo', $r)<button type="button" class="btn btn-o btn-sm" wire:click="askInfo"><x-media.ic n="alert" />{{ __('media.act.needInfo') }}</button>@endcan
+                                @can('hold', $r)<button type="button" class="btn btn-o btn-sm" wire:click="hold"><x-media.ic n="pause" />{{ __('media.act.hold') }}</button>@endcan
+                                @can('reject', $r)<button type="button" class="btn btn-o btn-sm" x-on:click="mrConfirm(@js(__('media.act.confirmReject')), { ok: @js(__('media.act.reject')), cancel: @js(__('media.confirm.back')), danger: true }).then((yes) => yes && $wire.reject())"><x-media.ic n="x" />{{ __('media.act.reject') }}</button>@endcan
+                                @can('cancel', $r)<button type="button" class="btn btn-o btn-sm" x-on:click="mrConfirm(@js(__('media.act.confirmCancel')), { ok: @js(__('media.act.cancel')), cancel: @js(__('media.confirm.back')), danger: true }).then((yes) => yes && $wire.cancel())"><x-media.ic n="x" />{{ __('media.act.cancel') }}</button>@endcan
                             </div>
                         </div>
                     </div>

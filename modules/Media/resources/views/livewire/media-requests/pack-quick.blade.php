@@ -1,7 +1,7 @@
 {{-- HC_PACK in a card or the side panel: type and the files appear here; tick and ask for them here. --}}
 <div class="pq">
     <div class="search" style="max-width:none">
-        <x-ic n="search" />
+        <x-media.ic n="search" />
         <label for="pq-{{ $place }}" class="vh">{{ __('media.hp.ph') }}</label>
         <input id="pq-{{ $place }}" class="inp" type="search" autocomplete="off" wire:model.live.debounce.300ms="search"
                x-on:keydown.enter.prevent placeholder="{{ __('media.dash.packPh') }}" x-data="mrTypewriter(@js(__('media.ex.pack')))">
@@ -15,7 +15,7 @@
         </div>
     @else
         @if ($group !== '')
-            <button type="button" class="chip on pq-in" wire:click="$set('group', '')"><x-ic n="x" />{{ __('media.hp.'.$group) }}</button>
+            <button type="button" class="chip on pq-in" wire:click="$set('group', '')"><x-media.ic n="x" />{{ __('media.hp.'.$group) }}</button>
         @endif
         @if ($files->isEmpty())
             <p class="acempty">{{ __('media.hp.none') }}</p>
@@ -36,9 +36,9 @@
 
     <div class="pq-foot">
         @if ($selected)
-            <button type="button" class="btn btn-p btn-sm" wire:click="requestFiles" wire:loading.attr="data-loading"><span class="spin"></span><x-ic n="download" />{{ __('media.hp.sel', ['n' => count($selected)]) }} · {{ __('media.hp.get') }}</button>
+            <button type="button" class="btn btn-p btn-sm" wire:click="requestFiles" wire:loading.attr="data-loading"><span class="spin"></span><x-media.ic n="download" />{{ __('media.hp.sel', ['n' => count($selected)]) }} · {{ __('media.hp.get') }}</button>
         @endif
-        <a class="btn-q" href="{{ route('media-requests.pack', array_filter(['q' => trim($search), 'group' => $group])) }}" wire:navigate>{{ __('media.dash.packAll') }}<x-ic n="arrow" class="flip" /></a>
+        <a class="btn-q" href="{{ route('media-requests.pack', array_filter(['q' => trim($search), 'group' => $group])) }}" wire:navigate>{{ __('media.dash.packAll') }}<x-media.ic n="arrow" class="flip" /></a>
     </div>
-    @error('paths')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+    @error('paths')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
 </div>

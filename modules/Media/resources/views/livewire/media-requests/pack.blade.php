@@ -16,7 +16,7 @@
 
     <div class="filters">
         <div class="search" style="max-width:none">
-            <x-ic n="search" />
+            <x-media.ic n="search" />
             <label for="hp-q" class="vh">{{ __('media.hp.ph') }}</label>
             <input id="hp-q" class="inp" type="search" wire:model.live.debounce.350ms="search" placeholder="{{ __('media.hp.ph') }}" x-data="mrTypewriter(@js(__('media.ex.pack')))">
         </div>
@@ -34,14 +34,14 @@
         <div class="groups">
             @foreach ($groups as [$key])
                 <button type="button" class="group" wire:click="$set('group', '{{ $key }}')">
-                    <x-ic :n="$groupIcon[$key] ?? 'box'" />
+                    <x-media.ic :n="$groupIcon[$key] ?? 'box'" />
                     <b><x-media.bi :k="'media.hp.'.$key" col /></b>
                     <span class="sub">{{ __('media.hp.count', ['n' => $counts[$key] ?? 0]) }}</span>
                 </button>
             @endforeach
         </div>
     @elseif ($files->isEmpty())
-        <div class="empty"><x-ic n="search" /><b>{{ __('media.hp.none') }}</b></div>
+        <div class="empty"><x-media.ic n="search" /><b>{{ __('media.hp.none') }}</b></div>
     @else
         <p class="sub" style="margin-bottom:8px">{{ __('media.hp.count', ['n' => $files->count()]) }}</p>
         <ul class="list">
@@ -60,12 +60,12 @@
 
     @if ($chosen->isNotEmpty())
         <form class="packbar" wire:submit="requestFiles">
-            <b><x-ic n="check" />{{ __('media.hp.sel', ['n' => $chosen->count()]) }}</b>
+            <b><x-media.ic n="check" />{{ __('media.hp.sel', ['n' => $chosen->count()]) }}</b>
             <label for="hp-note" class="vh">{{ __('media.hp.note') }}</label>
             <input id="hp-note" class="inp" type="text" wire:model="note" placeholder="{{ __('media.hp.note') }}">
             <button type="button" class="btn btn-g" wire:click="$set('selected', [])">{{ __('media.hp.clear') }}</button>
-            <button type="submit" class="btn btn-p" wire:loading.attr="data-loading"><span class="spin"></span><x-ic n="download" />{{ __('media.hp.get') }}</button>
-            @error('paths')<p class="err" style="flex-basis:100%"><x-ic n="alert" />{{ $message }}</p>@enderror
+            <button type="submit" class="btn btn-p" wire:loading.attr="data-loading"><span class="spin"></span><x-media.ic n="download" />{{ __('media.hp.get') }}</button>
+            @error('paths')<p class="err" style="flex-basis:100%"><x-media.ic n="alert" />{{ $message }}</p>@enderror
         </form>
     @endif
 </div>

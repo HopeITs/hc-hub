@@ -69,7 +69,7 @@
                 <ul class="hbars">
                     @foreach ($timingRows as [$key, $icon, $n])
                         <li title="{{ $n }} · {{ $pct($n, $timed) }}%">
-                            <span class="k"><x-ic :n="$icon" />{{ __('media.stats.t.'.$key) }}</span>
+                            <span class="k"><x-media.ic :n="$icon" />{{ __('media.stats.t.'.$key) }}</span>
                             <span class="bar"><i style="width:{{ $pct($n, $timed) }}%"></i></span>
                             <b class="num">{{ $n }} <small>{{ $pct($n, $timed) }}%</small></b>
                         </li>
@@ -86,7 +86,7 @@
             @forelse ($s['bySpecialty'] as $row)
                 @if ($loop->first)<ul class="hbars">@endif
                 <li title="{{ $row['n'] }} · {{ $pct($row['n'], $s['requests']['created']) }}%">
-                    <span class="k">@if ($row['key'] !== 'other')<x-ic :n="config('media-requests.specialties.'.$row['key'].'.icon')" />{{ __('media.spec.'.$row['key']) }}@else{{ __('media.stats.otherField') }}@endif</span>
+                    <span class="k">@if ($row['key'] !== 'other')<x-media.ic :n="config('media-requests.specialties.'.$row['key'].'.icon')" />{{ __('media.spec.'.$row['key']) }}@else{{ __('media.stats.otherField') }}@endif</span>
                     <span class="bar"><i style="width:{{ $pct($row['n'], $max) }}%"></i></span>
                     <b class="num">{{ $row['n'] }}</b>
                 </li>
@@ -131,10 +131,10 @@
                         @foreach ($s['people'] as $p)
                             <tr>
                                 <th scope="row">{{ $p['employee']->nameForLocale($locale) }}
-                                    @foreach ($p['skills'] as $sk)<x-ic :n="config('media-requests.specialties.'.$sk.'.icon')" class="skill" title="{{ __('media.spec.'.$sk) }}" />@endforeach</th>
+                                    @foreach ($p['skills'] as $sk)<x-media.ic :n="config('media-requests.specialties.'.$sk.'.icon')" class="skill" title="{{ __('media.spec.'.$sk) }}" />@endforeach</th>
                                 <td class="n num">{{ $p['delivered'] }}</td>
                                 <td class="n num">{{ $p['timed'] ? $pct($p['onTime'], $p['timed']).'%' : '—' }}</td>
-                                <td class="n num">@if ($p['early'])<span class="earlyme"><x-ic n="bolt" />{{ $p['early'] }}</span>@else 0 @endif</td>
+                                <td class="n num">@if ($p['early'])<span class="earlyme"><x-media.ic n="bolt" />{{ $p['early'] }}</span>@else 0 @endif</td>
                                 <td class="n num">{{ $p['returned'] }}</td>
                                 <td class="n num">{{ $p['working'] }}</td>
                                 <td class="n num">{{ $p['holding'] }}</td>

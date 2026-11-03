@@ -17,16 +17,16 @@
             <p class="lead">{{ __('media.h.my.l') }}</p>
         </div>
         @activepermission('media.requests.create')
-            <button type="button" class="btn btn-p btn-lg" x-on:click="$dispatch('media-wizard-open')"><x-ic n="plus" />{{ __('media.btn.new') }}</button>
+            <button type="button" class="btn btn-p btn-lg" x-on:click="$dispatch('media-wizard-open')"><x-media.ic n="plus" />{{ __('media.btn.new') }}</button>
         @endactivepermission
     </section>
 
     @activepermission('media.requests.create')
         <form class="askbar" x-data="{ text: '' }" x-on:submit.prevent="if (text.trim()) { $dispatch('media-wizard-open', { prompt: text }); text = '' }">
-            <x-ic n="spark" class="spark" />
+            <x-media.ic n="spark" class="spark" />
             <label for="ask" class="vh">{{ __('media.ai.title') }}</label>
             <input id="ask" x-model="text" type="text" autocomplete="off" placeholder="{{ __('media.ai.ph') }}" x-data="mrTypewriter(@js(__('media.ai.examples')))">
-            <button class="btn btn-o" type="submit"><x-ic n="spark" />{{ __('media.ai.go') }}</button>
+            <button class="btn btn-o" type="submit"><x-media.ic n="spark" />{{ __('media.ai.go') }}</button>
         </form>
     @endactivepermission
 
@@ -34,7 +34,7 @@
         @foreach ($tiles as $key => [$label, $icon, $hot])
             <button type="button" wire:click="setActiveTab('{{ $key }}')" aria-pressed="{{ $tab === $key ? 'true' : 'false' }}"
                     @class(['stat', 'hot' => $hot && $counts[$key] > 0])>
-                <x-ic :n="$icon" @class(['flip' => $icon === 'arrow']) />
+                <x-media.ic :n="$icon" @class(['flip' => $icon === 'arrow']) />
                 <span class="sl">{{ __('media.'.$label) }}</span>
                 <span class="sn num">{{ $counts[$key] ?? 0 }}</span>
             </button>
@@ -43,7 +43,7 @@
 
     <div class="filters">
         <div class="search">
-            <x-ic n="search" />
+            <x-media.ic n="search" />
             <label for="q" class="vh">{{ __('media.q.ph') }}</label>
             <input id="q" class="inp" type="search" wire:model.live.debounce.350ms="search" placeholder="{{ __('media.q.ph') }}" x-data="mrTypewriter(@js(__('media.ex.search')))">
         </div>
@@ -59,7 +59,7 @@
 
     @if ($requests->isEmpty())
         <div class="empty">
-            <x-ic n="inbox" />
+            <x-media.ic n="inbox" />
             <b>{{ $counts['all'] ? __('media.list.none') : __('media.list.empty') }}</b>
             @unless ($counts['all']){{ __('media.list.empty.l') }}@endunless
         </div>

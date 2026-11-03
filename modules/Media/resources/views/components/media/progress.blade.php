@@ -24,7 +24,7 @@
 @endphp
 @if ($key)
     <p {{ $attributes->class(['progress', 'act' => in_array($key, ['infoYou', 'reviewYou'], true), 'live' => $key === 'working']) }}>
-        <x-ic :n="$icon" />
+        <x-media.ic :n="$icon" />
         <span>{{ __('media.progress.'.$key, ['name' => $who ?? __('media.progress.someone')]) }}@if ($r->status_changed_at && in_array($key, ['working', 'taken', 'infoYou', 'info'], true)) <small class="sub">· {{ $r->status_changed_at->diffForHumans() }}</small>@endif</span>
     </p>
 @endif

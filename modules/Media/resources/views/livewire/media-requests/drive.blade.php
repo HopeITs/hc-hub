@@ -10,7 +10,7 @@
             <p class="lead">{{ __('media.drive.lead') }}</p>
         </div>
         <div class="search" style="max-width:340px;width:100%">
-            <x-ic n="search" />
+            <x-media.ic n="search" />
             <label for="drive-q" class="vh">{{ __('media.drive.search') }}</label>
             <input id="drive-q" class="inp" type="search" wire:model.live.debounce.300ms="search" placeholder="{{ __('media.drive.search') }}" x-data="mrTypewriter(@js(__('media.ex.search')))">
         </div>
@@ -18,17 +18,17 @@
 
     {{-- Where you are --}}
     <nav class="crumbs" aria-label="{{ __('media.drive.where') }}">
-        <button type="button" wire:click="up('root')" @class(['on' => ! $programObj])><x-ic n="home" />{{ __('media.drive.all') }}</button>
+        <button type="button" wire:click="up('root')" @class(['on' => ! $programObj])><x-media.ic n="home" />{{ __('media.drive.all') }}</button>
         @if ($programObj)
-            <x-ic n="arrow" class="flip sep" />
+            <x-media.ic n="arrow" class="flip sep" />
             <button type="button" wire:click="up('program')" @class(['on' => ! $cityObj]) class="ltr">{{ trim($programObj->code.' '.$programObj->slug) }}</button>
         @endif
         @if ($cityObj)
-            <x-ic n="arrow" class="flip sep" />
+            <x-media.ic n="arrow" class="flip sep" />
             <button type="button" wire:click="up('city')" @class(['on' => ! $requestObj]) class="ltr">{{ trim($cityObj->code.' '.$cityObj->slug) }}</button>
         @endif
         @if ($requestObj)
-            <x-ic n="arrow" class="flip sep" />
+            <x-media.ic n="arrow" class="flip sep" />
             <span class="on ltr">{{ $requestObj->reference }}</span>
         @endif
     </nav>
@@ -38,7 +38,7 @@
         <ul class="drivegrid">
             @forelse ($found as $r)
                 <li><a href="{{ route('media-requests.drive', ['p' => $r->program_id, 'c' => $r->city_id, 'r' => $r->id]) }}" wire:navigate class="dfolder">
-                    <span class="dico"><x-ic n="inbox" /></span>
+                    <span class="dico"><x-media.ic n="inbox" /></span>
                     <span class="dname ltr">{{ $r->reference }}</span>
                     <span class="dsub ltr">{{ $r->displayName() }}</span>
                     <span class="dsub ltr">{{ trim($r->program?->code.' '.$r->program?->slug) }} / {{ trim($r->city?->code.' '.$r->city?->slug) }}</span>
@@ -54,7 +54,7 @@
             <div class="dreq-h">
                 <h2 class="ltr">{{ $r->displayName() }}</h2>
                 <x-media.status :r="$r" />
-                <a href="{{ route('media-requests.show', $r) }}" wire:navigate class="btn btn-o btn-sm"><x-ic n="eye" />{{ __('media.drive.openRequest') }}</a>
+                <a href="{{ route('media-requests.show', $r) }}" wire:navigate class="btn btn-o btn-sm"><x-media.ic n="eye" />{{ __('media.drive.openRequest') }}</a>
             </div>
 
             @php($links = array_filter(['draft' => $r->draft_link, 'result' => $r->result_link, 'archive' => app(\Modules\Media\Support\MediaTeam::class)->seesArchive(auth()->user()) ? $r->archive_link : null]))
@@ -62,7 +62,7 @@
                 <ul class="drivegrid">
                     @foreach ($links as $kind => $href)
                         <li><a href="{{ $href }}" target="_blank" rel="noopener noreferrer" class="dfolder dlink">
-                            <span class="dico"><x-ic n="link" /></span>
+                            <span class="dico"><x-media.ic n="link" /></span>
                             <span class="dname">{{ __('media.link.'.$kind) }}</span>
                             <span class="dsub ltr">{{ parse_url($href, PHP_URL_HOST) }}</span>
                         </a></li>
@@ -82,7 +82,7 @@
                                 @if (str_starts_with((string) $m->mime_type, 'image/') && $m->mime_type !== 'image/svg+xml')
                                     <img src="{{ route('media-requests.files', ['media' => $m, 'view' => 1]) }}" alt="{{ $m->file_name }}" loading="lazy">
                                 @else
-                                    <span class="rpi"><x-ic n="file" /><small class="ltr">{{ strtoupper(pathinfo($m->file_name, PATHINFO_EXTENSION)) }}</small></span>
+                                    <span class="rpi"><x-media.ic n="file" /><small class="ltr">{{ strtoupper(pathinfo($m->file_name, PATHINFO_EXTENSION)) }}</small></span>
                                 @endif
                                 <span class="rpn ltr">{{ $m->file_name }}</span>
                             </a></li>
@@ -92,7 +92,7 @@
             @endif
 
             @if (! $links && $r->media->isEmpty())
-                <div class="wempty" style="min-height:160px"><span class="ei"><x-ic n="file" /></span><span>{{ __('media.drive.emptyRequest') }}</span></div>
+                <div class="wempty" style="min-height:160px"><span class="ei"><x-media.ic n="file" /></span><span>{{ __('media.drive.emptyRequest') }}</span></div>
             @endif
         </div>
     @else
@@ -100,7 +100,7 @@
         <ul class="drivegrid">
             @forelse ($folders as $f)
                 <li><button type="button" class="dfolder" wire:click="open('{{ $f['level'] }}', {{ $f['id'] }})">
-                    <span class="dico"><x-ic :n="$f['level'] === 'request' ? 'inbox' : 'layers'" /></span>
+                    <span class="dico"><x-media.ic :n="$f['level'] === 'request' ? 'inbox' : 'layers'" /></span>
                     <span class="dname ltr">{{ $f['name'] }}</span>
                     @if (! empty($f['sub']))<span class="dsub ltr">{{ $f['sub'] }}</span>@endif
                     <span class="dsub">

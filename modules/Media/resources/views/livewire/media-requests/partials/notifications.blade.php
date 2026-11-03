@@ -13,13 +13,13 @@
         <button type="button" role="tab" wire:click="bellShow('all')" @class(['on' => $bell['filter'] === 'all']) :aria-selected="@js($bell['filter'] === 'all')">{{ __('media.bell.all') }}</button>
     </div>
     @if ($bell['unread'])
-        <button type="button" class="btn-q readall" wire:click="markAllRead"><x-ic n="check" />{{ __('media.bell.readAll') }}</button>
+        <button type="button" class="btn-q readall" wire:click="markAllRead"><x-media.ic n="check" />{{ __('media.bell.readAll') }}</button>
     @endif
 </div>
 
 <div class="bellscroll">
 @if ($bell['total'] === 0)
-    <div class="wempty"><span class="ei"><x-ic n="bell" /></span><span>{{ $bell['filter'] === 'unread' ? __('media.bell.noneUnread') : __('media.bell.none') }}</span></div>
+    <div class="wempty"><span class="ei"><x-media.ic n="bell" /></span><span>{{ $bell['filter'] === 'unread' ? __('media.bell.noneUnread') : __('media.bell.none') }}</span></div>
 @else
     @foreach (['today', 'week', 'earlier'] as $part)
         @continue(empty($bell['sections'][$part]))

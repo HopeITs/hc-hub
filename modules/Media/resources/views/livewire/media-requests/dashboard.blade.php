@@ -42,13 +42,13 @@
         </div>
         <div class="btnline">
             <template x-if="! editing">
-                <button type="button" class="btn btn-o" x-on:click="startEdit()"><x-ic n="layers" />{{ __('media.dash.customise') }}</button>
+                <button type="button" class="btn btn-o" x-on:click="startEdit()"><x-media.ic n="layers" />{{ __('media.dash.customise') }}</button>
             </template>
             <template x-if="editing">
                 <span class="btnline">
-                    <button type="button" class="btn btn-g" x-on:click="mrConfirm(@js(__('media.dash.resetConfirm')), { ok: @js(__('media.dash.reset')), cancel: @js(__('media.confirm.back')) }).then((yes) => yes && $wire.resetLayout())"><x-ic n="reset" />{{ __('media.dash.reset') }}</button>
-                    <button type="button" class="btn btn-o" x-on:click="gallery = true" :disabled="hiddenItems().length === 0"><x-ic n="plus" />{{ __('media.dash.add') }}</button>
-                    <button type="button" class="btn btn-p" x-on:click="done()"><x-ic n="check" />{{ __('media.dash.done') }}</button>
+                    <button type="button" class="btn btn-g" x-on:click="mrConfirm(@js(__('media.dash.resetConfirm')), { ok: @js(__('media.dash.reset')), cancel: @js(__('media.confirm.back')) }).then((yes) => yes && $wire.resetLayout())"><x-media.ic n="reset" />{{ __('media.dash.reset') }}</button>
+                    <button type="button" class="btn btn-o" x-on:click="gallery = true" :disabled="hiddenItems().length === 0"><x-media.ic n="plus" />{{ __('media.dash.add') }}</button>
+                    <button type="button" class="btn btn-p" x-on:click="done()"><x-media.ic n="check" />{{ __('media.dash.done') }}</button>
                 </span>
             </template>
         </div>
@@ -72,11 +72,11 @@
                  wire:key="tile-{{ $key }}">
 
                 {{-- Edit controls: remove outside the top corner (like a phone), pin and resize inside the tile so they never overlap a neighbour. --}}
-                <button type="button" class="tbtn t-remove" x-show="editing" x-cloak x-on:click="remove('{{ $key }}')" aria-label="{{ __('media.dash.hide') }}: {{ $label($key) }}"><x-ic n="x" /></button>
+                <button type="button" class="tbtn t-remove" x-show="editing" x-cloak x-on:click="remove('{{ $key }}')" aria-label="{{ __('media.dash.hide') }}: {{ $label($key) }}"><x-media.ic n="x" /></button>
                 @unless ($cards->isApp($key))
-                    <button type="button" class="tbtn t-pin" x-show="editing" x-cloak x-on:click="togglePin('{{ $key }}')" :aria-pressed="pinned('{{ $key }}')" aria-label="{{ __('media.dash.pin') }}: {{ $label($key) }}"><x-ic n="pin" /></button>
+                    <button type="button" class="tbtn t-pin" x-show="editing" x-cloak x-on:click="togglePin('{{ $key }}')" :aria-pressed="pinned('{{ $key }}')" aria-label="{{ __('media.dash.pin') }}: {{ $label($key) }}"><x-media.ic n="pin" /></button>
                     @if (isset($looks[$key]))
-                        <button type="button" class="tbtn t-style" x-show="editing" x-cloak x-on:click="cycleStyle('{{ $key }}')" aria-label="{{ __('media.dash.style') }}: {{ $label($key) }}" title="{{ __('media.dash.style') }}"><x-ic n="clock" /><span x-text="styleOf('{{ $key }}') === 'analog' ? @js(__('media.dash.look.digital')) : @js(__('media.dash.look.analog'))"></span></button>
+                        <button type="button" class="tbtn t-style" x-show="editing" x-cloak x-on:click="cycleStyle('{{ $key }}')" aria-label="{{ __('media.dash.style') }}: {{ $label($key) }}" title="{{ __('media.dash.style') }}"><x-media.ic n="clock" /><span x-text="styleOf('{{ $key }}') === 'analog' ? @js(__('media.dash.look.digital')) : @js(__('media.dash.look.analog'))"></span></button>
                     @endif
                 @endunless
                 @if ($cards->canResize($key))
@@ -95,16 +95,16 @@
                     {{-- App shortcut. On a computer one click shows its card in the side panel, two open the page; on a phone a tap opens the page. --}}
                     @if ($key === 'app.new')
                         <button type="button" class="app" x-on:click="if (! editing) $dispatch('media-wizard-open')">
-                            <span class="appicon brand"><x-ic n="plus" /></span><span class="appname">{{ $label($key) }}</span>
+                            <span class="appicon brand"><x-media.ic n="plus" /></span><span class="appname">{{ $label($key) }}</span>
                         </button>
                     @elseif ($key === 'app.generator')
                         {{-- The centre's do-it-yourself site, in a new tab. --}}
                         <a class="app" href="{{ app(\Modules\Media\Support\HcGenerator::class)->url() }}" target="_blank" rel="noopener" x-on:dblclick="miniPage('{{ $key }}')" data-hint="dblclick" data-hint-text="{{ __('media.dash.pageOpen') }}">
-                            <span class="appicon"><x-ic n="wand" /></span><span class="appname" lang="en">{{ $label($key) }}</span>
+                            <span class="appicon"><x-media.ic n="wand" /></span><span class="appname" lang="en">{{ $label($key) }}</span>
                         </a>
                     @else
                         <a class="app" href="{{ route($cards->route($key)) }}" x-on:dblclick="miniPage('{{ $key }}')" data-hint="dblclick" data-hint-text="{{ __('media.dash.pageOpen') }}">
-                            <span class="appicon"><x-ic :n="$cards->icon($key)" />
+                            <span class="appicon"><x-media.ic :n="$cards->icon($key)" />
                                 @if ($key === 'app.my' && $waiting->count())<span class="cnt num">{{ $waiting->count() }}</span>@endif
                                 @if ($key === 'app.bell' && $user->unreadNotifications()->count())<span class="cnt num">{{ $user->unreadNotifications()->count() }}</span>@endif
                             </span>
@@ -119,17 +119,17 @@
                     {{-- Made small, the card is an icon (with its count) that opens it at its usual size. --}}
                     @php($count = match ($key) { 'late' => count($late['items'] ?? []), 'decide' => $decisions->count(), 'waiting' => $waiting->count(), 'mine' => $mine->filter->isOpen()->count(), 'bell' => $user->unreadNotifications()->count(), default => 0 })
                     <button type="button" class="app wmini" x-on:click="if (! editing) peekSoon($event, '{{ $key }}')" x-on:dblclick="miniPage('{{ $key }}')" :aria-expanded="peek === '{{ $key }}'">
-                        <span class="appicon"><x-ic :n="$cards->icon($key)" />@if ($count)<span class="cnt num">{{ $count }}</span>@endif</span>
+                        <span class="appicon"><x-media.ic :n="$cards->icon($key)" />@if ($count)<span class="cnt num">{{ $count }}</span>@endif</span>
                         <span class="appname">{{ $label($key) }}</span>
                     </button>
                     {{-- Widget --}}
                     {{-- popover: made small, the card opens from its icon in a side panel (see peekOpen). --}}
                     <section class="w" aria-labelledby="wt-{{ $key }}" tabindex="-1" popover="manual">
-                        <button type="button" class="iconbtn wclose" x-on:click="closePeek()" aria-label="{{ __('media.close') }}"><x-ic n="x" /></button>
+                        <button type="button" class="iconbtn wclose" x-on:click="closePeek()" aria-label="{{ __('media.close') }}"><x-media.ic n="x" /></button>
                         @unless (in_array($key, ['clock', 'ask', 'late', 'decide'], true))
                             <header class="wh">
-                                <h2 id="wt-{{ $key }}"><x-ic :n="$cards->icon($key)" />{{ $label($key) }}</h2>
-                                <x-ic n="pin" class="pinmark" x-show="pinned('{{ $key }}')" x-cloak />
+                                <h2 id="wt-{{ $key }}"><x-media.ic :n="$cards->icon($key)" />{{ $label($key) }}</h2>
+                                <x-media.ic n="pin" class="pinmark" x-show="pinned('{{ $key }}')" x-cloak />
                                 @if ($key === 'waiting' && ! $here)<a href="{{ route('media-requests.index') }}" wire:navigate class="btn-q" style="min-height:30px;padding:0;font-size:14px">{{ __('media.dash.all') }}</a>@endif
                             </header>
                         @else
@@ -140,10 +140,10 @@
                             @switch($key)
                                 @case('ask')
                                     <form class="askbar" x-data="{ text: '' }" x-on:submit.prevent="if (text.trim()) { $dispatch('media-wizard-open', { prompt: text }); text = '' }">
-                                        <x-ic n="spark" class="spark" />
+                                        <x-media.ic n="spark" class="spark" />
                                         <label for="ask" class="vh">{{ __('media.ai.title') }}</label>
                                         <input id="ask" x-model="text" type="text" autocomplete="off" placeholder="{{ __('media.ai.ph') }}" x-data="mrTypewriter(@js(__('media.ai.examples')))">
-                                        <button class="btn btn-o" type="submit"><x-ic n="spark" /><span class="ask-go">{{ __('media.ai.go') }}</span></button>
+                                        <button class="btn btn-o" type="submit"><x-media.ic n="spark" /><span class="ask-go">{{ __('media.ai.go') }}</span></button>
                                     </form>
                                     @break
 
@@ -153,7 +153,7 @@
                                         <p class="flowsum">
                                             @if ($flow['total'] === 0){{ __('media.flow.empty.'.$flow['scope']) }}
                                             @else<b>{{ rtrim(trans_choice('media.flow.total.'.$flow['scope'], $flow['total'], ['n' => $flow['total']]), ':') }}</b>@endif
-                                            @if ($flow['waitingYou'])<span class="flowyou"><x-ic n="arrow" class="flip" />{{ trans_choice('media.flow.you', $flow['waitingYou'], ['n' => $flow['waitingYou']]) }}</span>@endif
+                                            @if ($flow['waitingYou'])<span class="flowyou"><x-media.ic n="arrow" class="flip" />{{ trans_choice('media.flow.you', $flow['waitingYou'], ['n' => $flow['waitingYou']]) }}</span>@endif
                                         </p>
 
                                         <ol class="flowline" role="tablist">
@@ -162,7 +162,7 @@
                                                 <li @class(['fnone' => $items->isEmpty(), 'end' => in_array($stage, ['done', 'stopped'], true)])>
                                                     <button type="button" role="tab" class="fnode" @disabled($items->isEmpty())
                                                             x-on:click="stage = @js($stage)" :aria-selected="stage === @js($stage)" :class="{ on: stage === @js($stage) }" aria-haspopup="dialog">
-                                                        <span class="fi"><x-ic :n="\Modules\Media\Support\RequestFlow::ICONS[$stage]" /></span>
+                                                        <span class="fi"><x-media.ic :n="\Modules\Media\Support\RequestFlow::ICONS[$stage]" /></span>
                                                         <b class="num">{{ $items->count() }}</b>
                                                         <span class="fl">{{ __('media.flow.stage.'.$stage) }}</span>
                                                     </button>
@@ -177,8 +177,8 @@
                                             @continue($items->isEmpty())
                                             <div class="daypop flowpop" role="dialog" aria-modal="true" aria-labelledby="flow-t-{{ $stage }}" x-show="stage === @js($stage)" x-cloak>
                                                 <div class="bellhead">
-                                                    <h2 id="flow-t-{{ $stage }}"><x-ic :n="\Modules\Media\Support\RequestFlow::ICONS[$stage]" />{{ __('media.flow.stage.'.$stage) }} <span class="num sub">{{ $items->count() }}</span></h2>
-                                                    <button type="button" class="iconbtn" x-on:click="stage = null" aria-label="{{ __('media.close') }}"><x-ic n="x" /></button>
+                                                    <h2 id="flow-t-{{ $stage }}"><x-media.ic :n="\Modules\Media\Support\RequestFlow::ICONS[$stage]" />{{ __('media.flow.stage.'.$stage) }} <span class="num sub">{{ $items->count() }}</span></h2>
+                                                    <button type="button" class="iconbtn" x-on:click="stage = null" aria-label="{{ __('media.close') }}"><x-media.ic n="x" /></button>
                                                 </div>
                                             <ul class="wlist flowlist">
                                                 @foreach ($items->take(30) as $r)
@@ -186,9 +186,9 @@
                                                         <x-media.name :r="$r" class="nm" />
                                                         <span class="meta" style="font-size:13px">
                                                             <x-media.status :r="$r" />
-                                                            @if ($r->assignee)<span><x-ic n="user" />{{ $r->assignee->nameForLocale($locale) }}</span>@endif
+                                                            @if ($r->assignee)<span><x-media.ic n="user" />{{ $r->assignee->nameForLocale($locale) }}</span>@endif
                                                             @if ($r->status_changed_at && $r->isOpen())<span class="sub">{{ __('media.flow.since', ['t' => $r->status_changed_at->diffForHumans(null, true)]) }}</span>@endif
-                                                            @if ($r->needed_on)<span><x-ic n="cal" /><span class="num">{{ $r->needed_on->format('d-m-Y') }}</span></span>@endif
+                                                            @if ($r->needed_on)<span><x-media.ic n="cal" /><span class="num">{{ $r->needed_on->format('d-m-Y') }}</span></span>@endif
                                                         </span>
                                                     </a></li>
                                                 @endforeach
@@ -274,14 +274,14 @@
 
                                 @case('waiting')
                                     @if ($waiting->isEmpty())
-                                        <div class="wempty"><span class="ei"><x-ic n="check" /></span><span>{{ $onTeam ? __('media.home.clear') : __('media.home.nothingForYou') }}</span></div>
+                                        <div class="wempty"><span class="ei"><x-media.ic n="check" /></span><span>{{ $onTeam ? __('media.home.clear') : __('media.home.nothingForYou') }}</span></div>
                                     @else
                                         <ul class="wlist">
                                             @foreach ($waiting->take(8) as $r)
                                                 <li>
                                                     <a {{ $go($r) }}>
                                                         <x-media.name :r="$r" class="nm" />
-                                                        <span class="meta" style="font-size:13px"><x-media.status :r="$r" />@if ($r->needed_on)<span><x-ic n="cal" /><span class="num">{{ $r->needed_on->format('d-m-Y') }}</span></span>@endif</span>
+                                                        <span class="meta" style="font-size:13px"><x-media.status :r="$r" />@if ($r->needed_on)<span><x-media.ic n="cal" /><span class="num">{{ $r->needed_on->format('d-m-Y') }}</span></span>@endif</span>
                                                     </a>
                                                 </li>
                                             @endforeach
@@ -291,14 +291,14 @@
 
                                 @case('mine')
                                     @if ($mine->isEmpty())
-                                        <div class="wempty"><span class="ei"><x-ic n="inbox" /></span><span>{{ __('media.dash.mineNone') }}</span></div>
+                                        <div class="wempty"><span class="ei"><x-media.ic n="inbox" /></span><span>{{ __('media.dash.mineNone') }}</span></div>
                                     @else
                                         <ul class="wlist">
                                             @foreach ($mine as $r)
                                                 <li @class(['done' => ! $r->isOpen()])>
                                                     <a {{ $go($r) }}>
                                                         <x-media.name :r="$r" class="nm" />
-                                                        <span class="meta" style="font-size:13px"><x-media.status :r="$r" />@if ($r->needed_on)<span><x-ic n="cal" /><span class="num">{{ $r->needed_on->format('d-m-Y') }}</span></span>@endif</span>
+                                                        <span class="meta" style="font-size:13px"><x-media.status :r="$r" />@if ($r->needed_on)<span><x-media.ic n="cal" /><span class="num">{{ $r->needed_on->format('d-m-Y') }}</span></span>@endif</span>
                                                         @if ($r->isOpen())<x-media.progress :r="$r" />@endif
                                                     </a>
                                                 </li>
@@ -314,9 +314,9 @@
                                 @case('calendar')
                                     <div class="cal">
                                         <div class="calnav">
-                                            <button type="button" class="iconbtn" wire:click="shiftMonth(-1)" aria-label="{{ __('media.cal.prev') }}"><x-ic n="back" class="flip" /></button>
+                                            <button type="button" class="iconbtn" wire:click="shiftMonth(-1)" aria-label="{{ __('media.cal.prev') }}"><x-media.ic n="back" class="flip" /></button>
                                             <b class="calttl">{{ $months[$calendar['first']->month - 1] }} <span class="num">{{ $calendar['first']->year }}</span></b>
-                                            <button type="button" class="iconbtn" wire:click="shiftMonth(1)" aria-label="{{ __('media.cal.next') }}"><x-ic n="arrow" class="flip" /></button>
+                                            <button type="button" class="iconbtn" wire:click="shiftMonth(1)" aria-label="{{ __('media.cal.next') }}"><x-media.ic n="arrow" class="flip" /></button>
                                             @unless ($calendar['first']->isSameMonth(now()))
                                                 <button type="button" class="btn-q" style="min-height:32px" wire:click="thisMonth">{{ __('media.cal.today') }}</button>
                                             @endunless
@@ -345,7 +345,7 @@
                                         <textarea id="dash-notes" class="inp notes" wire:model="notes" placeholder="{{ __('media.dash.notesPh') }}"
                                                   x-on:input="saved = false"
                                                   x-on:input.debounce.800ms="$wire.saveNotes().then(() => saved = true)"></textarea>
-                                        <p class="sub notesstate" aria-live="polite"><x-ic n="shield" /><span x-text="saved ? @js(__('media.dash.notesSaved')) : @js(__('media.dash.notesSaving'))"></span></p>
+                                        <p class="sub notesstate" aria-live="polite"><x-media.ic n="shield" /><span x-text="saved ? @js(__('media.dash.notesSaved')) : @js(__('media.dash.notesSaving'))"></span></p>
                                     </div>
                                     @break
 
@@ -355,7 +355,7 @@
                                         @foreach ($team as $row)
                                             @if ($row['employee'] === null)
                                                 <li class="crew-claim">
-                                                    <span class="who"><x-ic n="inbox" />{{ __('media.dash.toClaim') }} <b class="num">{{ $row['n'] }}</b></span>
+                                                    <span class="who"><x-media.ic n="inbox" />{{ __('media.dash.toClaim') }} <b class="num">{{ $row['n'] }}</b></span>
                                                     @foreach ($row['taken']->take(2) as $r)<a {{ $go($r) }} class="job"><span class="ltr">{{ $r->title ?: $r->item_code }}</span></a>@endforeach
                                                 </li>
                                                 @continue
@@ -364,9 +364,9 @@
                                                 <span class="who">
                                                     <span @class(['dot', 'busy' => $row['now']->isNotEmpty(), 'idle' => $row['n'] === 0])></span>
                                                     <b>{{ $row['employee']->nameForLocale($locale) }}</b>
-                                                    @if ($row['boost'])<span class="earlyme boostme" title="{{ trans_choice('media.boost.person', $row['boost'], ['n' => $row['boost']]) }}"><x-ic n="rocket" /><span class="num">{{ $row['boost'] }}</span></span>@endif
-                                                    @if ($row['early'])<span class="earlyme" title="{{ trans_choice('media.early.person', $row['early'], ['n' => $row['early']]) }}"><x-ic n="bolt" /><span class="num">{{ $row['early'] }}</span></span>@endif
-                                                    @foreach (app(\Modules\Media\Support\MediaTeam::class)->skillsOf($row['employee']) as $s)<x-ic :n="config('media-requests.specialties.'.$s.'.icon')" class="skill" title="{{ __('media.spec.'.$s) }}" />@endforeach
+                                                    @if ($row['boost'])<span class="earlyme boostme" title="{{ trans_choice('media.boost.person', $row['boost'], ['n' => $row['boost']]) }}"><x-media.ic n="rocket" /><span class="num">{{ $row['boost'] }}</span></span>@endif
+                                                    @if ($row['early'])<span class="earlyme" title="{{ trans_choice('media.early.person', $row['early'], ['n' => $row['early']]) }}"><x-media.ic n="bolt" /><span class="num">{{ $row['early'] }}</span></span>@endif
+                                                    @foreach (app(\Modules\Media\Support\MediaTeam::class)->skillsOf($row['employee']) as $s)<x-media.ic :n="config('media-requests.specialties.'.$s.'.icon')" class="skill" title="{{ __('media.spec.'.$s) }}" />@endforeach
                                                     <small class="sub">@if ($row['employee']->city)· {{ $locale === 'ar' ? $row['employee']->city->name_ar : $row['employee']->city->name_en }}@endif @if ($hours = app(\Modules\Media\Support\MediaTeam::class)->workHoursOf($row['employee']))· <span class="num ltr" title="{{ __('media.people.partTime') }}">{{ $hours }}</span>@endif</small>
                                                 </span>
                                                 @if ($now = $row['now']->first())
@@ -392,15 +392,15 @@
                                 @if ($late)
                                         @php($oldest = $late['items']->first())
                                         <section class="lateband" role="alert" aria-live="polite">
-                                            <span class="lb-ico"><x-ic n="clock" /></span>
+                                            <span class="lb-ico"><x-media.ic n="clock" /></span>
                                             <span class="lb-t">
                                                 <b>{{ trans_choice('media.late.'.$late['scope'], $late['items']->count(), ['n' => $late['items']->count()]) }}</b>
                                                 <span>{{ $late['items']->take(3)->map(fn ($r) => ($r->title ?: $r->item_code).($late['scope'] === 'team' && $r->assignee ? ' ('.$r->assignee->nameForLocale($locale).')' : ''))->implode($locale === 'ar' ? '، ' : ', ') }}@if ($late['items']->count() > 3) …@endif</span>
                                             </span>
-                                            <button type="button" class="btn btn-p btn-sm" wire:click="openRequest({{ $oldest->id }})" aria-label="{{ __('media.late.open', ['days' => $oldest->needed_on->diffForHumans(null, true)]) }}"><x-ic n="arrow" class="flip" /><span class="lb-go">{{ __('media.late.open', ['days' => $oldest->needed_on->diffForHumans(null, true)]) }}</span></button>
+                                            <button type="button" class="btn btn-p btn-sm" wire:click="openRequest({{ $oldest->id }})" aria-label="{{ __('media.late.open', ['days' => $oldest->needed_on->diffForHumans(null, true)]) }}"><x-media.ic n="arrow" class="flip" /><span class="lb-go">{{ __('media.late.open', ['days' => $oldest->needed_on->diffForHumans(null, true)]) }}</span></button>
                                         </section>
                                 @else
-                                    <div class="wempty"><span class="ei"><x-ic n="check" /></span><span>{{ __('media.late.none') }}</span></div>
+                                    <div class="wempty"><span class="ei"><x-media.ic n="check" /></span><span>{{ __('media.late.none') }}</span></div>
                                 @endif
                                     @break
                                 @case('decide')
@@ -419,18 +419,18 @@
                                                  x-on:keydown.arrow-right="if (! all) show(i + (getComputedStyle($el).direction === 'rtl' ? -1 : 1))"
                                                  x-on:keydown.arrow-left="if (! all) show(i - (getComputedStyle($el).direction === 'rtl' ? -1 : 1))">
                                             <div class="decide-h">
-                                                <h2 id="decide-t"><x-ic n="alert" />{{ trans_choice('media.decide.title', $decisions->count(), ['n' => $decisions->count()]) }}</h2>
+                                                <h2 id="decide-t"><x-media.ic n="alert" />{{ trans_choice('media.decide.title', $decisions->count(), ['n' => $decisions->count()]) }}</h2>
                                                 @if ($decisions->count() > 1)
                                                     <span class="btnline">
                                                         <template x-if="! all">
                                                             <span class="btnline">
-                                                                <button type="button" class="iconbtn" x-on:click="show(i - 1)" aria-label="{{ __('media.decide.prev') }}"><x-ic n="back" class="flip" /></button>
+                                                                <button type="button" class="iconbtn" x-on:click="show(i - 1)" aria-label="{{ __('media.decide.prev') }}"><x-media.ic n="back" class="flip" /></button>
                                                                 <span class="num dcount" aria-live="polite"><span x-text="i + 1">1</span> / {{ $decisions->count() }}</span>
-                                                                <button type="button" class="iconbtn" x-on:click="show(i + 1)" aria-label="{{ __('media.decide.next') }}"><x-ic n="arrow" class="flip" /></button>
+                                                                <button type="button" class="iconbtn" x-on:click="show(i + 1)" aria-label="{{ __('media.decide.next') }}"><x-media.ic n="arrow" class="flip" /></button>
                                                             </span>
                                                         </template>
                                                         <button type="button" class="btn-q dtoggle" x-on:click="toggle()">
-                                                            <x-ic n="layers" /><span x-text="all ? @js(__('media.decide.one')) : @js(__('media.decide.all'))">{{ __('media.decide.all') }}</span>
+                                                            <x-media.ic n="layers" /><span x-text="all ? @js(__('media.decide.one')) : @js(__('media.decide.all'))">{{ __('media.decide.all') }}</span>
                                                         </button>
                                                     </span>
                                                 @endif
@@ -443,14 +443,14 @@
                                                     <article @class(['dcard', 'old' => $since->lt(now()->subDay())]) wire:key="dc-{{ $r->id }}"
                                                              :class="{ off: ! (all || i === {{ $loop->index }}) }" @unless ($loop->first) style="display:none" x-init="$el.style.removeProperty('display')" @endunless
                                                              aria-roledescription="slide" aria-label="{{ $loop->iteration }} / {{ $decisions->count() }}">
-                                                        <span class="dwhat"><x-ic :n="['pm' => 'shield', 'mm' => 'shield', 'check' => 'eye', 'review' => 'eye', 'info' => 'msg'][$what]" />{{ __('media.decide.'.$what) }}</span>
+                                                        <span class="dwhat"><x-media.ic :n="['pm' => 'shield', 'mm' => 'shield', 'check' => 'eye', 'review' => 'eye', 'info' => 'msg'][$what]" />{{ __('media.decide.'.$what) }}</span>
                                                         <x-media.name :r="$r" class="nm" />
                                                         <span class="dmeta">
-                                                            <span><x-ic n="user" />{{ $r->requester?->nameForLocale($locale) }}</span>
-                                                            @if ($r->needed_on)<span><x-ic n="cal" /><span class="num">{{ $r->needed_on->format('d-m-Y') }}</span></span>@endif
+                                                            <span><x-media.ic n="user" />{{ $r->requester?->nameForLocale($locale) }}</span>
+                                                            @if ($r->needed_on)<span><x-media.ic n="cal" /><span class="num">{{ $r->needed_on->format('d-m-Y') }}</span></span>@endif
                                                             <span class="dsince">{{ __('media.decide.since', ['t' => $since->diffForHumans()]) }}</span>
                                                         </span>
-                                                        <button type="button" class="btn btn-p btn-sm" wire:click="openRequest({{ $r->id }})"><x-ic n="arrow" class="flip" />{{ __('media.decide.open.'.$what) }}</button>
+                                                        <button type="button" class="btn btn-p btn-sm" wire:click="openRequest({{ $r->id }})"><x-media.ic n="arrow" class="flip" />{{ __('media.decide.open.'.$what) }}</button>
                                                     </article>
                                                 @endforeach
                                             </div>
@@ -464,14 +464,14 @@
                                             @endif
                                         </section>
                                 @else
-                                    <div class="wempty"><span class="ei"><x-ic n="check" /></span><span>{{ __('media.decide.none') }}</span></div>
+                                    <div class="wempty"><span class="ei"><x-media.ic n="check" /></span><span>{{ __('media.decide.none') }}</span></div>
                                 @endif
                                     @break
                                 @case('showcase')
                                     {{-- The latest designs delivered: one at a time, every few seconds; paused on hover or focus;
                                          arrows, dots and the keyboard move it; a picture opens its request. --}}
                                     @if ($showcase === [])
-                                        <div class="wempty"><span class="ei"><x-ic n="image" /></span><span>{{ __('media.show.empty') }}</span></div>
+                                        <div class="wempty"><span class="ei"><x-media.ic n="image" /></span><span>{{ __('media.show.empty') }}</span></div>
                                     @else
                                         <div class="showcase" x-data="{ i: 0, n: {{ count($showcase) }}, paused: false, t: null, pop: null, slides: @js($showcase),
                                                 go(d) { this.i = (this.i + d + this.n) % this.n },
@@ -493,8 +493,8 @@
                                                 </figure>
                                             @endforeach
                                             @if (count($showcase) > 1)
-                                                <button type="button" class="iconbtn snav prev" x-on:click="go(-1)" aria-label="{{ __('media.show.prev') }}"><x-ic n="back" class="flip" /></button>
-                                                <button type="button" class="iconbtn snav next" x-on:click="go(1)" aria-label="{{ __('media.show.next') }}"><x-ic n="arrow" class="flip" /></button>
+                                                <button type="button" class="iconbtn snav prev" x-on:click="go(-1)" aria-label="{{ __('media.show.prev') }}"><x-media.ic n="back" class="flip" /></button>
+                                                <button type="button" class="iconbtn snav next" x-on:click="go(1)" aria-label="{{ __('media.show.next') }}"><x-media.ic n="arrow" class="flip" /></button>
                                                 <div class="sdots" role="tablist">
                                                     @foreach ($showcase as $k => $s)<button type="button" role="tab" x-on:click="i = {{ $k }}" :aria-selected="i === {{ $k }}" :class="{ on: i === {{ $k }} }" aria-label="{{ $k + 1 }}"></button>@endforeach
                                                 </div>
@@ -505,14 +505,14 @@
                                                 <div class="sheet-back showpop-back" x-show="pop" x-cloak x-transition.opacity x-on:click.self="pop = null"
                                                      x-on:keydown.escape.window="pop = null">
                                                     <div class="showpop" role="dialog" aria-modal="true" :aria-label="pop?.name">
-                                                        <button type="button" class="iconbtn showpop-x" x-on:click="pop = null" aria-label="{{ __('media.close') }}"><x-ic n="x" /></button>
+                                                        <button type="button" class="iconbtn showpop-x" x-on:click="pop = null" aria-label="{{ __('media.close') }}"><x-media.ic n="x" /></button>
                                                         <img :src="pop?.src" :alt="pop?.name">
                                                         <div class="showpop-f">
                                                             <div>
                                                                 <b class="ltr" x-text="pop?.name"></b>
                                                                 <span class="sub"><span x-text="pop?.program"></span><span x-show="pop?.by"> · <span x-text="pop?.by"></span></span> · <span class="num" x-text="pop?.on"></span></span>
                                                             </div>
-                                                            <button type="button" class="btn btn-o btn-sm" x-show="pop?.canOpen" x-on:click="const id = pop.id; pop = null; $wire.openRequest(id)"><x-ic n="list" />{{ __('media.show.track') }}</button>
+                                                            <button type="button" class="btn btn-o btn-sm" x-show="pop?.canOpen" x-on:click="const id = pop.id; pop = null; $wire.openRequest(id)"><x-media.ic n="list" />{{ __('media.show.track') }}</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -541,15 +541,15 @@
         <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="gal-t" x-show="gallery" x-transition:enter="sheet-in" x-transition:leave="sheet-out">
             <div class="sheet-h">
                 <h2 id="gal-t">{{ __('media.dash.add') }}</h2>
-                <button type="button" class="iconbtn" x-on:click="gallery = false" aria-label="{{ __('media.close') }}"><x-ic n="x" /></button>
+                <button type="button" class="iconbtn" x-on:click="gallery = false" aria-label="{{ __('media.close') }}"><x-media.ic n="x" /></button>
             </div>
             <div class="gal">
                 @foreach ($layout as $item)
                     @php($key = $item['key'])
                     <button type="button" class="galitem" x-show="hidden('{{ $key }}')" x-on:click="add('{{ $key }}')">
-                        <span @class(['appicon', 'brand' => $key === 'app.new'])><x-ic :n="$cards->icon($key)" /></span>
+                        <span @class(['appicon', 'brand' => $key === 'app.new'])><x-media.ic :n="$cards->icon($key)" /></span>
                         <span><b>{{ $label($key) }}</b><small>{{ __($cards->isApp($key) ? 'media.dash.kindApp' : 'media.dash.kindWidget') }}</small></span>
-                        <x-ic n="plus" />
+                        <x-media.ic n="plus" />
                     </button>
                 @endforeach
             </div>
@@ -566,14 +566,14 @@
         <div class="daypop-back" wire:click.self="closeDay" x-data x-on:keydown.escape.window="$wire.closeDay()">
             <div class="daypop" role="dialog" aria-modal="true" aria-labelledby="day-t">
                 <div class="bellhead">
-                    <h2 id="day-t"><x-ic n="cal" />{{ $picked->translatedFormat('l') }} <span class="num">{{ $picked->format('d-m-Y') }}</span></h2>
-                    <button type="button" class="iconbtn" wire:click="closeDay" aria-label="{{ __('media.close') }}"><x-ic n="x" /></button>
+                    <h2 id="day-t"><x-media.ic n="cal" />{{ $picked->translatedFormat('l') }} <span class="num">{{ $picked->format('d-m-Y') }}</span></h2>
+                    <button type="button" class="iconbtn" wire:click="closeDay" aria-label="{{ __('media.close') }}"><x-media.ic n="x" /></button>
                 </div>
 
                 @if ($canAsk)
-                    <button type="button" class="btn btn-p" style="width:100%" x-on:click="$wire.closeDay(); $dispatch('media-wizard-open', { date: @js($pickedDay) })"><x-ic n="plus" />{{ __('media.cal.newOnDay') }}</button>
+                    <button type="button" class="btn btn-p" style="width:100%" x-on:click="$wire.closeDay(); $dispatch('media-wizard-open', { date: @js($pickedDay) })"><x-media.ic n="plus" />{{ __('media.cal.newOnDay') }}</button>
                 @elseif (! app(\Modules\Media\Support\WorkCalendar::class)->isWorkDay($picked))
-                    <p class="hint workhint warn"><x-ic n="alert" />{{ __('media.err.weekend') }}</p>
+                    <p class="hint workhint warn"><x-media.ic n="alert" />{{ __('media.err.weekend') }}</p>
                 @elseif ($picked->lt(today()))
                     <p class="hint">{{ __('media.cal.past') }}</p>
                 @endif
@@ -586,7 +586,7 @@
                         @foreach ($dayRequests as $r)
                             <li><a href="#" wire:click.prevent="openRequest({{ $r->id }}); closeDay()">
                                 <x-media.name :r="$r" class="nm" />
-                                <span class="meta" style="font-size:13px"><x-media.status :r="$r" />@if ($r->assignee)<span><x-ic n="user" />{{ $r->assignee->nameForLocale($locale) }}</span>@endif</span>
+                                <span class="meta" style="font-size:13px"><x-media.status :r="$r" />@if ($r->assignee)<span><x-media.ic n="user" />{{ $r->assignee->nameForLocale($locale) }}</span>@endif</span>
                             </a></li>
                         @endforeach
                     </ul>
@@ -600,8 +600,8 @@
         <div class="belldrop-back" wire:click.self="toggleBell" x-data x-on:keydown.escape.window="$wire.toggleBell()">
             <div class="belldrop" role="dialog" aria-modal="true" aria-labelledby="bell-t">
                 <div class="bellhead">
-                    <h2 id="bell-t"><x-ic n="bell" />{{ __('media.bell.title') }}</h2>
-                    <button type="button" class="iconbtn" wire:click="toggleBell" aria-label="{{ __('media.close') }}"><x-ic n="x" /></button>
+                    <h2 id="bell-t"><x-media.ic n="bell" />{{ __('media.bell.title') }}</h2>
+                    <button type="button" class="iconbtn" wire:click="toggleBell" aria-label="{{ __('media.close') }}"><x-media.ic n="x" /></button>
                 </div>
                 @include('livewire.media-requests.partials.notifications')
             </div>
@@ -611,7 +611,7 @@
     @if ($openRequest)
         <div class="sheet-back reqpanel-back" wire:click.self="closeRequest" x-data x-on:keydown.escape.window="$wire.closeRequest()">
             <div class="reqpanel" role="dialog" aria-modal="true" aria-label="{{ $openRequest->displayName() }}">
-                <button type="button" class="iconbtn reqpanel-x" wire:click="closeRequest" aria-label="{{ __('media.close') }}"><x-ic n="x" /></button>
+                <button type="button" class="iconbtn reqpanel-x" wire:click="closeRequest" aria-label="{{ __('media.close') }}"><x-media.ic n="x" /></button>
                 <livewire:media-requests.show :media-request="$openRequest" :embedded="true" :key="'open-'.$openRequest->id" />
             </div>
         </div>

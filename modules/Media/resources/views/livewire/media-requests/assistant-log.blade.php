@@ -32,7 +32,7 @@
         @foreach ($tiles as $key => [$label, $icon])
             <button type="button" wire:click="setFilter('{{ $key }}')" aria-pressed="{{ $filter === $key ? 'true' : 'false' }}"
                     @class(['stat', 'hot' => in_array($key, ['missed', 'corrected'], true) && $counts[$key] > 0])>
-                <x-ic :n="$icon" />
+                <x-media.ic :n="$icon" />
                 <span class="sl">{{ __('media.'.$label) }}</span>
                 <span class="sn num">{{ $counts[$key] }}</span>
             </button>
@@ -42,7 +42,7 @@
     @if ($filter === 'lessons')
         {{-- Everything taught so far: the word, and what it means. --}}
         @if ($lessons->isEmpty())
-            <div class="empty"><x-ic n="spark" /><b>{{ __('media.al.noLessons') }}</b></div>
+            <div class="empty"><x-media.ic n="spark" /><b>{{ __('media.al.noLessons') }}</b></div>
         @else
             <div class="tablewrap">
                 <table class="tbl">
@@ -60,7 +60,7 @@
                                 <td data-l="{{ __('media.al.t.by') }}">{{ $l->teacher?->nameForLocale($locale) ?? '—' }} <small class="sub num">{{ $l->created_at->format('d-m-Y') }}</small></td>
                                 <td style="text-align:end">
                                     @if ($canTeach)
-                                        <button type="button" class="btn-q" x-on:click="mrConfirm(@js(__('media.al.t.forget', ['p' => $l->phrase]))).then(ok => ok && $wire.deleteLesson({{ $l->id }}))"><x-ic n="x" />{{ __('media.al.t.delete') }}</button>
+                                        <button type="button" class="btn-q" x-on:click="mrConfirm(@js(__('media.al.t.forget', ['p' => $l->phrase]))).then(ok => ok && $wire.deleteLesson({{ $l->id }}))"><x-media.ic n="x" />{{ __('media.al.t.delete') }}</button>
                                     @endif
                                 </td>
                             </tr>
@@ -70,7 +70,7 @@
             </div>
         @endif
     @elseif ($rows->isEmpty())
-        <div class="empty"><x-ic n="spark" /><b>{{ __('media.al.none') }}</b></div>
+        <div class="empty"><x-media.ic n="spark" /><b>{{ __('media.al.none') }}</b></div>
     @else
         <div class="tablewrap">
             <table class="tbl">
@@ -99,11 +99,11 @@
                                         @if ($row->needed_on)<span class="num">{{ $row->needed_on->format('d-m-Y') }}</span>@endif
                                     </span>
                                 @else
-                                    <span class="chip attn"><x-ic n="alert" />{{ __('media.al.notUnderstood') }}</span>
+                                    <span class="chip attn"><x-media.ic n="alert" />{{ __('media.al.notUnderstood') }}</span>
                                 @endif
                                 {{-- Taught since: how it reads this line now. --}}
                                 @if ($row->lesson)
-                                    <span class="chip ok" style="margin-top:6px;white-space:normal" dir="auto"><x-ic n="spark" />{{ __('media.al.t.now') }} {{ $means($row->lesson) }}</span>
+                                    <span class="chip ok" style="margin-top:6px;white-space:normal" dir="auto"><x-media.ic n="spark" />{{ __('media.al.t.now') }} {{ $means($row->lesson) }}</span>
                                 @endif
                             </td>
                             <td data-l="{{ __('media.al.col.final') }}">
@@ -112,7 +112,7 @@
                                         <span>{{ $guess($row->final_service, $row->final_type) }}</span>
                                         <span class="sub num ltr">{{ $row->mediaRequest->reference }}</span>
                                     </a>
-                                    @if ($row->is_corrected)<span class="tag rush" style="margin-top:4px"><x-ic n="edit" />{{ __('media.al.changed') }}</span>@endif
+                                    @if ($row->is_corrected)<span class="tag rush" style="margin-top:4px"><x-media.ic n="edit" />{{ __('media.al.changed') }}</span>@endif
                                 @else
                                     <span class="sub">{{ __('media.al.notSent') }}</span>
                                 @endif
@@ -121,7 +121,7 @@
                             @if ($canTeach)
                                 <td style="text-align:end;white-space:nowrap">
                                     @if ($teaching !== $row->id)
-                                        <button type="button" class="btn btn-o btn-sm" wire:click="teach({{ $row->id }})"><x-ic n="spark" />{{ __($row->lesson ? 'media.al.t.again' : 'media.al.t.teach') }}</button>
+                                        <button type="button" class="btn btn-o btn-sm" wire:click="teach({{ $row->id }})"><x-media.ic n="spark" />{{ __($row->lesson ? 'media.al.t.again' : 'media.al.t.teach') }}</button>
                                     @endif
                                 </td>
                             @endif
@@ -136,7 +136,7 @@
                                             <label for="t-phrase">{{ __('media.al.t.phrase') }}</label>
                                             <input id="t-phrase" class="inp" dir="auto" maxlength="120" wire:model="phrase" autofocus>
                                             <p class="hint">{{ __('media.al.t.phraseHint') }}</p>
-                                            @error('phrase')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                                            @error('phrase')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                                         </div>
                                         <div class="field full">
                                             <label for="t-words">{{ __('media.al.t.keywords') }}</label>
@@ -151,7 +151,7 @@
                                                 <option value="">—</option>
                                                 @foreach ($kinds as $k => $label)<option value="{{ $k }}">{{ $label }}</option>@endforeach
                                             </select>
-                                            @error('kind')<p class="err"><x-ic n="alert" />{{ $message }}</p>@enderror
+                                            @error('kind')<p class="err"><x-media.ic n="alert" />{{ $message }}</p>@enderror
                                         </div>
                                         @if ($kind === '001.new')
                                             <div class="field">
@@ -192,7 +192,7 @@
                                             </select>
                                         </div>
                                         <div class="btnline full">
-                                            <button type="submit" class="btn btn-p btn-sm" wire:loading.attr="data-loading"><span class="spin"></span><x-ic n="check" />{{ __('media.al.t.save') }}</button>
+                                            <button type="submit" class="btn btn-p btn-sm" wire:loading.attr="data-loading"><span class="spin"></span><x-media.ic n="check" />{{ __('media.al.t.save') }}</button>
                                             <button type="button" class="btn btn-g btn-sm" wire:click="cancelTeach">{{ __('media.wz.cancel') }}</button>
                                         </div>
                                     </form>
@@ -206,9 +206,9 @@
 
         @if ($rows->hasPages())
             <div class="btnline" style="justify-content:center;margin-top:16px">
-                @if (! $rows->onFirstPage())<button type="button" class="btn btn-o btn-sm" wire:click="previousPage"><x-ic n="back" class="flip" /></button>@endif
+                @if (! $rows->onFirstPage())<button type="button" class="btn btn-o btn-sm" wire:click="previousPage"><x-media.ic n="back" class="flip" /></button>@endif
                 <span class="sub" style="align-self:center">{{ $rows->currentPage() }} / {{ $rows->lastPage() }}</span>
-                @if ($rows->hasMorePages())<button type="button" class="btn btn-o btn-sm" wire:click="nextPage"><x-ic n="arrow" class="flip" /></button>@endif
+                @if ($rows->hasMorePages())<button type="button" class="btn btn-o btn-sm" wire:click="nextPage"><x-media.ic n="arrow" class="flip" /></button>@endif
             </div>
         @endif
     @endif

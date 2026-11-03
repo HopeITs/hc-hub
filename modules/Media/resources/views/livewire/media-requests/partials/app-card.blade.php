@@ -2,13 +2,13 @@
      The icon and this card are both drawn; the tile's own size picks one (container query in app.css). --}}
 @php($d = $apps[$key] ?? ['rows' => []])
 <div class="appcard" tabindex="-1" popover="manual">
-    <button type="button" class="iconbtn wclose" x-on:click="closePeek()" aria-label="{{ __('media.close') }}"><x-ic n="x" /></button>
+    <button type="button" class="iconbtn wclose" x-on:click="closePeek()" aria-label="{{ __('media.close') }}"><x-media.ic n="x" /></button>
     @if ($href)
         <a class="ach" href="{{ $href }}" @if ($external) target="_blank" rel="noopener" @else wire:navigate @endif>
-            <span class="appicon"><x-ic :n="$cards->icon($key)" /></span><span @if ($key === 'app.generator') lang="en" @endif>{{ $label($key) }}</span><x-ic n="arrow" class="flip go" />
+            <span class="appicon"><x-media.ic :n="$cards->icon($key)" /></span><span @if ($key === 'app.generator') lang="en" @endif>{{ $label($key) }}</span><x-media.ic n="arrow" class="flip go" />
         </a>
     @else
-        <span class="ach"><span class="appicon brand"><x-ic :n="$cards->icon($key)" /></span><span>{{ $label($key) }}</span></span>
+        <span class="ach"><span class="appicon brand"><x-media.ic :n="$cards->icon($key)" /></span><span>{{ $label($key) }}</span></span>
     @endif
 
     @if ($key === 'app.new')
@@ -16,7 +16,7 @@
             <label for="ask-app" class="vh">{{ __('media.ai.title') }}</label>
             <textarea id="ask-app" class="inp" rows="2" x-model="text" placeholder="{{ __('media.ai.ph') }}" x-data="mrTypewriter(@js(__('media.ai.examples')))"
                       x-on:keydown.enter.prevent="$el.form.requestSubmit()"></textarea>
-            <button type="submit" class="btn btn-p btn-sm"><x-ic n="plus" />{{ __('media.dash.card.app.new') }}</button>
+            <button type="submit" class="btn btn-p btn-sm"><x-media.ic n="plus" />{{ __('media.dash.card.app.new') }}</button>
         </form>
     @elseif ($key === 'app.pack')
         <livewire:media-requests.pack-quick place="app" wire:key="pq-app" />

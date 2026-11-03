@@ -8,7 +8,7 @@
     </div>
 
     @if ($requests->isEmpty())
-        <div class="empty"><x-ic n="shield" /><b>{{ __('media.list.none.approvals') }}</b></div>
+        <div class="empty"><x-media.ic n="shield" /><b>{{ __('media.list.none.approvals') }}</b></div>
     @else
         <ul class="rcs">
             @foreach ($requests as $r)

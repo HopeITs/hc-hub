@@ -2,7 +2,7 @@
 @if ($field['key'] === 'eventDate' && ($presetDate ?? null) && ! ($changeEventDate ?? false) && ($answers['eventDate'] ?? null) === $presetDate)
     <div class="field full presetday" wire:key="fld-eventDate-preset">
         <span class="lbl"><x-media.bi k="media.f.eventDate" /></span>
-        <p><x-ic n="cal" /><b>{{ \Illuminate\Support\Carbon::parse($presetDate)->translatedFormat('l') }} <span class="num">{{ \Illuminate\Support\Carbon::parse($presetDate)->format('d-m-Y') }}</span></b>
+        <p><x-media.ic n="cal" /><b>{{ \Illuminate\Support\Carbon::parse($presetDate)->translatedFormat('l') }} <span class="num">{{ \Illuminate\Support\Carbon::parse($presetDate)->format('d-m-Y') }}</span></b>
             <span class="sub">{{ __('media.wz.fromCalendar') }}</span>
             <button type="button" class="btn-q" wire:click="$set('changeEventDate', true)">{{ __('media.wz.change') }}</button></p>
     </div>
@@ -49,7 +49,7 @@
                 <label class="choice" wire:key="opt-{{ $key }}-{{ $option }}">
                     <input type="{{ $type === 'checks' ? 'checkbox' : 'radio' }}" value="{{ $option }}" wire:model.live="{{ $model }}" name="{{ $model }}">
                     <span>
-                        <x-ic n="check" class="ck" />
+                        <x-media.ic n="check" class="ck" />
                         @if ($pic)<x-media.pic :name="$pic" :mode="$picMode" class="pic" />@endif
                         <span class="bi"><span>{{ $label }}</span>@if ($label2 !== $label)<span class="bi2" lang="{{ $other }}">{{ $label2 }}</span>@endif</span>
                         @if ($info)<span class="pinfo">{{ $info }}</span>@endif
@@ -57,7 +57,7 @@
                 </label>
             @endforeach
         </div>
-        @if ($error)<p class="err" role="alert"><x-ic n="alert" />{{ $error }}</p>@endif
+        @if ($error)<p class="err" role="alert"><x-media.ic n="alert" />{{ $error }}</p>@endif
     </fieldset>
 @else
     <div @class(['field', 'full' => $full]) wire:key="field-{{ $key }}">
@@ -85,7 +85,7 @@
                        wire:model.blur="{{ $model }}" placeholder="{{ $placeholder }}" @if ($error) aria-invalid="true" @endif>
             @endif
         @endif
-        @if ($error)<p class="err" role="alert"><x-ic n="alert" />{{ $error }}</p>@endif
+        @if ($error)<p class="err" role="alert"><x-media.ic n="alert" />{{ $error }}</p>@endif
     </div>
 @endif
 @endif
