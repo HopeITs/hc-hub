@@ -60,7 +60,7 @@
         @endif
 
         @if ($notification->kind === \App\Enums\NotificationKind::Action)
-            <span class="pointer-events-none absolute -end-1 -bottom-1 z-[11] flex size-5 items-center justify-center rounded-full bg-secondary-dark text-[0.5625rem] font-bold tracking-tight text-white ring-2 ring-white transition-opacity group-has-[:checked]/glyph:opacity-0 dark:bg-ink dark:text-surface-0 dark:ring-surface-1" aria-hidden="true">{{ $notification->actor?->initials() ?? '·' }}</span>
+            <x-ui.avatar :src="$notification->actor?->avatarUrl()" class="pointer-events-none absolute -end-1 -bottom-1 z-[11] size-5 rounded-full ring-2 ring-white transition-opacity group-has-[:checked]/glyph:opacity-0 dark:ring-surface-1" aria-hidden="true" />
         @else
             <span class="pointer-events-none absolute -end-1 -bottom-1 z-[11] flex size-5 items-center justify-center rounded-full bg-secondary-dark text-white ring-2 ring-white transition-opacity group-has-[:checked]/glyph:opacity-0 dark:bg-ink dark:text-surface-0 dark:ring-surface-1" aria-hidden="true">
                 @if ($notification->kind === \App\Enums\NotificationKind::Alert)

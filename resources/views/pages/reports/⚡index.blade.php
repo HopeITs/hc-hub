@@ -217,7 +217,7 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
     {
         return $this->visibleReports()
             ->select(['id', 'plan_indicator_id', 'user_id', 'status', 'planned_date', 'value', 'submit_date', 'is_seen_by_meal', 'monthly_report_id'])
-            ->with([...$this->targetRelations(), 'user:id,hr_user_id', 'monthlyReport:id,slug'])
+            ->with([...$this->targetRelations(), 'user:id,hr_user_id,employee_id', 'monthlyReport:id,slug'])
             ->withCount('files')
             ->orderByDesc('planned_date')
             ->orderByDesc('id')

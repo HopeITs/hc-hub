@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 /**
  * An employee from the HR database (hchr_employees).
@@ -59,6 +59,20 @@ class HrEmployee extends HrModel
 
     private const PickerCacheSeconds = 300;
 
+    private const AvatarCacheKey = 'hr.employees.avatars';
+
+    /**
+     * Where each Spatie disk of the HR app keeps its files, inside HR's storage/app.
+     *
+     * @var array<string, string>
+     */
+    private const AvatarDiskFolders = ['public' => 'public', 'local' => 'private'];
+
+    /**
+     * HR's own picture for an employee with no photo, copied into public/images.
+     */
+    public const DefaultAvatar = 'images/default-avatar.png';
+
     protected $table = 'employees';
 
     /**
@@ -90,6 +104,67 @@ class HrEmployee extends HrModel
         }
 
         return array_values($query->pluck('id')->map(fn (mixed $id): int => (int) $id)->all());
+    }
+
+    /**
+     * Where the employee's HR photo sits on the `hr` disk, or null without one.
+     *
+     * HR keeps photos as Spatie media in the `avatar` collection. Every photo
+     * row is read in one query and cached for five minutes, so a page showing
+     * many people asks HR once. Only image files with a plain file name count.
+     *
+     * @return array{path: string, mime: string, version: int}|null
+     */
+    public static function avatarOf(int $employeeId): ?array
+    {
+        /** @var array<int, array{path: string, mime: string, version: int}> $avatars */
+        $avatars = Cache::memo()->remember(self::AvatarCacheKey, self::PickerCacheSeconds, function (): array {
+            $avatars = [];
+
+            $rows = DB::connection('hr')->table('media')
+                ->select(['id', 'model_id', 'file_name', 'mime_type', 'disk', 'updated_at'])
+                ->where('model_type', 'App\Models\Employee')
+                ->where('collection_name', 'avatar')
+                ->orderBy('id')
+                ->get();
+
+            foreach ($rows as $row) {
+                $folder = self::AvatarDiskFolders[$row->disk] ?? null;
+                $fileName = (string) $row->file_name;
+
+                if ($folder === null || $fileName === '' || basename($fileName) !== $fileName || ! str_starts_with((string) $row->mime_type, 'image/')) {
+                    continue;
+                }
+
+                $avatars[(int) $row->model_id] = [
+                    'path' => $folder.'/'.$row->id.'/'.$fileName,
+                    'mime' => (string) $row->mime_type,
+                    'version' => $row->updated_at === null ? (int) $row->id : (int) strtotime((string) $row->updated_at),
+                ];
+            }
+
+            return $avatars;
+        });
+
+        return $avatars[$employeeId] ?? null;
+    }
+
+    /**
+     * The URL of the employee's photo, or HR's default picture without one.
+     *
+     * The photo URL goes through EmployeeAvatarController, which needs a
+     * signed-in user; `v` changes when HR replaces the photo, so browsers
+     * fetch the new one.
+     */
+    public static function avatarUrl(?int $employeeId): string
+    {
+        $avatar = $employeeId === null ? null : self::avatarOf($employeeId);
+
+        if ($avatar === null) {
+            return asset(self::DefaultAvatar);
+        }
+
+        return route('employees.avatar', ['employee' => $employeeId, 'v' => $avatar['version']]);
     }
 
     /**
@@ -220,18 +295,6 @@ class HrEmployee extends HrModel
     protected function secondaryName(): Attribute
     {
         return Attribute::get(fn (): string => Locale::current() === Locale::Arabic ? $this->name_en : $this->name_ar);
-    }
-
-    /**
-     * Initials from the English name, matching User::initials().
-     */
-    public function initials(): string
-    {
-        $initials = Str::initials($this->name_en, true);
-
-        return Str::length($initials) > 1
-            ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
-            : $initials;
     }
 
     /**

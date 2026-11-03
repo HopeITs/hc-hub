@@ -6,6 +6,7 @@
     </div>
 @else
     <div {{ $attributes->class('flex min-w-0 items-center gap-2.5') }}>
+        <x-ui.avatar :src="$user->avatarUrl()" @class(['shrink-0 rounded-full', 'size-6' => $compact, 'size-8' => ! $compact]) aria-hidden="true" />
         <div class="min-w-0">
             <p class="truncate text-sm font-medium text-secondary-dark dark:text-ink">{{ $user->name }}</p>
             @unless ($compact)

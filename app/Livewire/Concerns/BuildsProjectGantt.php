@@ -9,6 +9,7 @@ use App\Enums\ResultType;
 use App\Enums\TaskStatus;
 use App\Models\ActivitySchedule;
 use App\Models\DonorReport;
+use App\Models\HrEmployee;
 use App\Models\Milestone;
 use App\Models\Project;
 use App\Models\Proposal;
@@ -45,6 +46,7 @@ use Illuminate\Support\Collection;
  *     statusLabel: string|null,
  *     tone: string,
  *     owner: string|null,
+ *     ownerAvatar: string|null,
  *     summary: bool,
  *     diamond: bool,
  *     url: string|null,
@@ -464,6 +466,7 @@ trait BuildsProjectGantt
                 statusLabel: $milestone->status->label(),
                 tone: $this->milestoneTone($milestone),
                 owner: $milestone->responsibleUser?->name,
+                ownerAvatar: $milestone->responsibleUser === null ? null : HrEmployee::avatarUrl($milestone->responsibleUser->id),
                 summary: $hasChildren,
                 diamond: ! $hasChildren && ($milestone->planned_end_date === null || $milestone->planned_end_date->equalTo($milestone->planned_start_date)),
                 url: route('milestones.show', $milestone),
@@ -729,6 +732,7 @@ trait BuildsProjectGantt
         ?string $statusLabel = null,
         string $tone = 'neutral',
         ?string $owner = null,
+        ?string $ownerAvatar = null,
         bool $summary = false,
         bool $diamond = false,
         ?string $url = null,
@@ -755,6 +759,7 @@ trait BuildsProjectGantt
             'statusLabel' => $statusLabel,
             'tone' => $tone,
             'owner' => $owner,
+            'ownerAvatar' => $ownerAvatar,
             'summary' => $summary,
             'diamond' => $diamond,
             'url' => $url,

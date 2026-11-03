@@ -487,6 +487,17 @@ function createHrSchema(): void
         $table->boolean('is_active')->default(true);
         $table->timestamps();
     });
+
+    $schema->create('media', function (Blueprint $table): void {
+        $table->id();
+        $table->string('model_type');
+        $table->unsignedBigInteger('model_id');
+        $table->string('collection_name');
+        $table->string('file_name');
+        $table->string('mime_type')->nullable();
+        $table->string('disk');
+        $table->timestamps();
+    });
 }
 
 /**
@@ -608,6 +619,23 @@ function insertHrEmployee(?int $cityId = null, string $firstNameEn = 'Sami', str
         'last_name_ar' => $lastNameAr,
         'username' => fake()->unique()->userName(),
         'is_active' => $isActive,
+    ]);
+}
+
+/**
+ * Insert an HR employee photo row (Spatie media, avatar collection) and return its id.
+ */
+function insertHrAvatar(int $employeeId, string $fileName = 'photo.png', string $disk = 'public', string $mimeType = 'image/png'): int
+{
+    return DB::connection('hr')->table('media')->insertGetId([
+        'model_type' => 'App\Models\Employee',
+        'model_id' => $employeeId,
+        'collection_name' => 'avatar',
+        'file_name' => $fileName,
+        'mime_type' => $mimeType,
+        'disk' => $disk,
+        'created_at' => now(),
+        'updated_at' => now(),
     ]);
 }
 

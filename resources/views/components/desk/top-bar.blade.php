@@ -6,11 +6,6 @@
     $other = $current === \App\Enums\Locale::Arabic ? \App\Enums\Locale::English : \App\Enums\Locale::Arabic;
     $otherName = $other === \App\Enums\Locale::Arabic ? 'العربية' : 'English';
     $names = preg_split('/\s+/u', trim((string) $user?->name)) ?: [];
-    $initials = collect($names)
-        ->filter()
-        ->take(2)
-        ->map(fn (string $word): string => mb_strtoupper(mb_substr($word, 0, 1)))
-        ->implode('');
     $firstName = $names[0] ?? '';
     $routeName = request()->route()?->getName() ?? '';
     $where = $user ? app(\App\Support\Desk\Destinations::class)->currentFor($user, $routeName) : null;
@@ -99,7 +94,6 @@
                                 <span class="dk-menu-t"><strong>{{ __('desk.install_app') }}</strong><small>{{ __('navigation.help_install_hint') }}</small></span>
                             </button>
                         </span>
-                        <p class="dk-menu-foot">{!! __('navigation.help_shortcuts', ['slash' => '<kbd>/</kbd>', 'combo' => '<kbd>'.e(__('navigation.search_shortcut')).'</kbd>']) !!}</p>
                     </div>
                 </div>
 
@@ -121,13 +115,13 @@
             @auth
                 <div class="dk-pmenu dk-usermenu" x-data="hcTopMenu" x-on:click.outside="close()" x-on:keydown.escape.stop="close(true)" data-tour="profile" data-user-menu>
                     <button type="button" class="dk-me" x-ref="trigger" x-on:click="toggle()" x-on:keydown.arrow-down.prevent="show(true)" x-bind:aria-expanded="open.toString()" aria-haspopup="menu" aria-label="{{ __('desk.account_menu') }}" data-user-menu-trigger>
-                        <span class="dk-avatar">{{ $initials }}</span>
+                        <x-ui.avatar :src="$user?->avatarUrl()" class="dk-avatar" />
                         <span class="dk-me-n">{{ $firstName }}</span>
                         <flux:icon.chevron-down variant="micro" class="dk-me-chev" />
                     </button>
                     <div class="dk-pop dk-menu dk-usermenu-pop" role="menu" aria-label="{{ __('desk.account_menu') }}" x-ref="menu" x-show="open" x-cloak x-on:keydown="navigate($event)" x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from">
                         <div class="dk-usermenu-who">
-                            <span class="dk-avatar dk-avatar-lg">{{ $initials }}</span>
+                            <x-ui.avatar :src="$user?->avatarUrl()" class="dk-avatar dk-avatar-lg" />
                             <span class="min-w-0">
                                 <strong>{{ $user->name }}</strong>
                                 <small>{{ $user->email }}</small>
