@@ -12,6 +12,7 @@ use App\Enums\ProposalStatus;
 use App\Enums\ReportStatus;
 use App\Enums\TaskStatus;
 use App\Models\DonorReport;
+use App\Models\HrCenter;
 use App\Models\HrDepartment;
 use App\Models\Milestone;
 use App\Models\MonthlyReport;
@@ -73,6 +74,7 @@ final class DeadlineCatalog
     private function tasks(string $limit): array
     {
         $tasks = Task::query()
+            ->notPaused()
             ->select(['id', 'title', 'due_date', 'created_by'])
             ->whereNull('department_id')
             ->whereNotNull('due_date')
@@ -190,6 +192,7 @@ final class DeadlineCatalog
     {
         $milestones = Milestone::query()
             ->leftJoin('projects', 'projects.id', '=', 'milestones.project_id')
+            ->where(fn ($query) => $query->whereNull('projects.center_id')->orWhereNotIn('projects.center_id', HrCenter::inactiveIds()))
             ->whereNotNull('milestones.planned_end_date')
             ->whereDate('milestones.planned_end_date', '<=', $limit)
             ->whereNotIn('milestones.status', [MilestoneStatus::Reached->value, MilestoneStatus::Cancelled->value])
@@ -375,6 +378,7 @@ final class DeadlineCatalog
         $open = array_map(fn (ProjectStatus $status): string => $status->value, array_filter(ProjectStatus::cases(), fn (ProjectStatus $status): bool => $status->isOpen()));
 
         $projects = Project::query()
+            ->notPaused()
             ->whereIn('status', $open)
             ->whereNotNull('end_date')
             ->whereDate('end_date', '<=', $limit)

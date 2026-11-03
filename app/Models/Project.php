@@ -470,6 +470,50 @@ class Project extends Model implements TracksActivity
      *
      * @param  Builder<static>  $query
      */
+    /**
+     * Whether the project's non-report work is paused (D-66, W-02): its own
+     * center exists and HR has deactivated it. A hosted project is never
+     * paused by its host. Nothing is closed and no date or status changes.
+     */
+    public function isPaused(): bool
+    {
+        return $this->hasInactiveCenter();
+    }
+
+    /**
+     * The ids of the paused projects: one query, with the inactive center
+     * ids passed as values (HR is another connection, so no join).
+     *
+     * @return list<int>
+     */
+    public static function pausedIds(): array
+    {
+        return array_values(self::query()->paused()->pluck('projects.id')->map(fn (mixed $id): int => (int) $id)->all());
+    }
+
+    /**
+     * Only the projects whose own center HR has deactivated.
+     *
+     * @param  Builder<Project>  $query
+     */
+    #[Scope]
+    protected function paused(Builder $query): void
+    {
+        $query->whereIn('projects.center_id', HrCenter::inactiveIds());
+    }
+
+    /**
+     * Everything except the paused projects: scanners and alerts call this
+     * once, never re-reading HR inside a loop.
+     *
+     * @param  Builder<Project>  $query
+     */
+    #[Scope]
+    protected function notPaused(Builder $query): void
+    {
+        $query->where(fn (Builder $inner) => $inner->whereNull('projects.center_id')->orWhereNotIn('projects.center_id', HrCenter::inactiveIds()));
+    }
+
     #[Scope]
     protected function open(Builder $query): void
     {

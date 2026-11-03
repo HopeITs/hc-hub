@@ -33,7 +33,7 @@ final class OffTrackIndicatorScanner implements Scanner
             return 0;
         }
 
-        $indicators = Indicator::query()->with('progress')->get();
+        $indicators = Indicator::query()->notPaused()->with('progress')->get();
         $owners = $this->ownerUsers(array_values($indicators->pluck('project_id')->filter()->map(fn (mixed $id): int => (int) $id)->unique()->all()));
         $meal = $this->resolver->usersWithRoles(['MEAL']);
         $paceStage = 'pace:'.$now->year;

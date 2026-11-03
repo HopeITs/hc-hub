@@ -123,6 +123,7 @@ final class ProjectDatesScanner implements Scanner
         $to = $today->toDateString();
 
         return Project::query()
+            ->notPaused()
             ->where('status', ProjectStatus::Active->value)
             ->where(function ($query) use ($events, $from, $to): void {
                 foreach (array_keys($events) as $key) {
