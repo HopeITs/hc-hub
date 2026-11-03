@@ -43,7 +43,6 @@ return [
     'help_guideline_hint' => 'The written guide, in a new tab',
     'help_report_hint' => 'Tell the IT team what went wrong',
     'help_install_hint' => 'Open HC Tracking in its own window',
-    'help_shortcuts' => 'Press :slash or :combo to find anything',
     'display' => 'Language and theme',
     'search_shortcut' => 'Ctrl K',
 ];

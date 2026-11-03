@@ -43,7 +43,6 @@ return [
     'help_guideline_hint' => 'الدليل المكتوب، في علامة تبويب جديدة',
     'help_report_hint' => 'أخبر فريق تقنية المعلومات بما حدث',
     'help_install_hint' => 'افتح HC Tracking في نافذة خاصة به',
-    'help_shortcuts' => 'اضغط :slash أو :combo للبحث عن أي شيء',
     'display' => 'اللغة والمظهر',
     'search_shortcut' => 'Ctrl K',
 ];
