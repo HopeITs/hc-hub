@@ -78,7 +78,7 @@
     html.dk-scrolled .dk-top { box-shadow: 0 10px 24px -18px rgb(16 24 40 / .32); }
     .dark.dk-scrolled .dk-top { box-shadow: 0 12px 28px -16px rgb(0 0 0 / .7); }
 
-    .dk-top-in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 560px) minmax(max-content, 1fr); align-items: center; gap: 16px; height: var(--top-h); padding-inline: 24px 16px; }
+    .dk-top-in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 560px) minmax(max-content, 1fr); align-items: center; gap: 16px; height: var(--top-h); padding-inline: 24px max(16px, calc((100% - 1680px) / 2 + 16px)); }
     .dk-top-start { min-width: 0; display: flex; align-items: center; gap: 6px; container: top-start / inline-size; }
     .dk-top-end { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
     .dk-top-menu, .dk-top-mark { display: none; }
@@ -116,19 +116,27 @@
     .dk-panels-btn:hover { border-color: var(--ink-3); }
     .dk-panels-btn:active { transform: scale(.96); }
 
-    /* Tools: bare round buttons, no box around them; only language + theme share a segmented capsule. */
-    .dk-tools { align-items: center; gap: 2px; }
-    .dk-top .dk-tools .dk-iconbtn, .dk-tools [data-notification-bell] > button { position: relative; width: 40px !important; min-width: 40px; height: 40px !important; padding: 0; border-radius: 12px !important; color: var(--ink-2) !important; background: transparent; box-shadow: none !important; transition: background .15s, color .15s, transform .08s; }
+    /* Tools: bell, help, language and theme in one slim floating dock (40px), 32px round buttons, a tiny count chip on the bell. */
+    .dk-tools { display: flex; align-items: center; gap: 6px; height: 42px; padding-inline: 8px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 1px 2px rgb(16 24 40 / .04), 0 6px 16px -10px rgb(16 24 40 / .18); }
+    .dark .dk-tools { box-shadow: none; }
+    .dk-top .dk-tools .dk-iconbtn, .dk-tools [data-notification-bell] > button { position: relative; width: 32px !important; min-width: 32px !important; height: 32px !important; padding: 0; border-radius: 999px !important; color: var(--ink-3) !important; background: transparent !important; box-shadow: none !important; transition: background .15s, color .15s, transform .08s; }
+    .dk-top .dk-tools .dk-iconbtn svg, .dk-tools [data-notification-bell] > button svg { width: 18px !important; height: 18px !important; stroke-width: 1.6; }
     .dk-top .dk-tools .dk-iconbtn:hover, .dk-tools [data-notification-bell] > button:hover, .dk-top .dk-tools .dk-iconbtn[aria-expanded="true"], .dk-tools [data-notification-bell] > button[aria-expanded="true"] { background: var(--sunk) !important; color: var(--ink) !important; }
+    /* !important: the bell's own Tailwind utilities sit in a later layer. */
+    /* Every tool is a flex box, so no button sits on a text baseline (the help menu's wrapper was a block and dropped its button). */
+    .dk-tools > .dk-pmenu { display: flex; }
+    /* The unread count rides the bell's top corner, cut out of the dock by a paper ring. */
+    .dk-tools [data-unread-count] { top: -3px !important; inset-inline-end: -5px !important; min-width: 17px !important; height: 17px !important; padding-inline: 4px !important; font-size: 10px !important; font-weight: 700 !important; line-height: 17px !important; letter-spacing: -.01em; box-shadow: 0 0 0 2px var(--paper) !important; --tw-ring-shadow: 0 0 #0000 !important; pointer-events: none; }
     .dk-top .dk-tools .dk-iconbtn:active, .dk-tools [data-notification-bell] > button:active { transform: scale(.92); }
 
     .dk-fresh { position: absolute; top: 8px; inset-inline-end: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 2px var(--paper); animation: dk-fresh 2.4s ease-out infinite; }
     @keyframes dk-fresh { 0% { box-shadow: 0 0 0 2px var(--paper), 0 0 0 2px var(--brand); } 70%, 100% { box-shadow: 0 0 0 2px var(--paper), 0 0 0 9px transparent; } }
 
-    .dk-seg { display: inline-flex; align-items: center; gap: 2px; padding: 3px; margin-inline-start: 4px; border-radius: 13px; background: var(--sunk); }
-    .dk-top .dk-tools .dk-seg .dk-iconbtn { width: 34px !important; min-width: 34px; height: 34px !important; border-radius: 10px !important; }
-    .dk-top .dk-tools .dk-seg .dk-iconbtn:hover { background: var(--paper) !important; box-shadow: 0 1px 2px rgb(16 24 40 / .14) !important; }
-    .dk-seg-lang { font-size: 13px !important; font-weight: 800 !important; }
+    .dk-seg { display: contents; }
+    .dk-seg-lang { font-size: 15px !important; font-weight: 600 !important; line-height: 1 !important; }
+    /* Somar Sans inks ع 3.5px below the line's middle and EN 1.5px above it; the padding puts each glyph on the icons' centre line. */
+    .dk-top .dk-tools .dk-seg-lang[lang="ar"] { padding-bottom: 7px; }
+    .dk-top .dk-tools .dk-seg-lang[lang="en"] { padding-top: 3px; }
     .dk-seg-theme svg { animation: dk-turn .4s cubic-bezier(.2, .8, .2, 1); }
     @keyframes dk-turn { from { opacity: 0; transform: rotate(-70deg) scale(.6); } to { opacity: 1; transform: none; } }
 
@@ -138,17 +146,14 @@
     .dk-tip:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
     .dk-tip[aria-expanded="true"]::after { opacity: 0 !important; transition-delay: 0s !important; }
 
-    /* The avatar button: initials, then the first name and a chevron where there is room. */
-    .dk-usermenu { padding-inline-start: 11px; }
-    .dk-usermenu::before { content: ""; position: absolute; inset-block: 12px; inset-inline-start: 0; width: 1px; background: var(--line); }
-    .dk-me { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 4px; padding-inline-end: 10px; border: 1px solid transparent; border-radius: 999px; background: none; color: var(--ink); cursor: pointer; transition: background .15s, border-color .15s, transform .08s; }
-    .dk-me:hover { background: var(--sunk); }
-    .dk-me[aria-expanded="true"] { background: var(--sunk); border-color: var(--line); }
-    .dk-me:active { transform: scale(.97); }
-    .dk-me-n { font-size: 14px; font-weight: 700; max-width: 12ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .dk-me-chev { width: 16px; height: 16px; color: var(--ink-3); transition: transform .2s cubic-bezier(.2, .8, .2, 1); }
-    .dk-me[aria-expanded="true"] .dk-me-chev { transform: rotate(180deg); }
-    .dk-top .dk-avatar { background: var(--ink); color: var(--paper); box-shadow: 0 0 0 2px var(--paper), 0 0 0 3px var(--line-2); }
+    /* The avatar button: the photo alone, its end on the page content's edge (the bar's end padding matches .dk-wrap). */
+    .dk-usermenu { display: flex; margin-inline-start: 10px; }
+    .dk-me { display: flex; line-height: 0; padding: 0; border: 0; border-radius: 999px; background: none; cursor: pointer; transition: transform .08s; }
+    .dk-me:active { transform: scale(.95); }
+    .dk-top .dk-me .dk-avatar { display: block; width: 42px; height: 42px; border-radius: 999px; box-shadow: 0 0 0 1px var(--line); transition: box-shadow .15s; }
+    .dk-me:hover .dk-avatar, .dk-me[aria-expanded="true"] .dk-avatar { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--line-2); }
+    .dk-me:focus-visible { outline: none; }
+    .dk-me:focus-visible .dk-avatar { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink-3); }
     .dk-avatar-lg { width: 40px; height: 40px; font-size: 14px; flex: none; }
 
     /* Help and avatar menus: rows with an icon, a label and a hint; they grow out of their button. */
@@ -177,11 +182,6 @@
     .dk-usermenu-who small { display: block; font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dk-usermenu-out { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--line); }
     .dk-narrow-tools { display: none; }
-
-    @media (max-width: 1279px) {
-        .dk-me { padding: 3px; }
-        .dk-me-n, .dk-me-chev { display: none; }
-    }
 
     @media (max-width: 1099px) {
         .dk-panels-l { display: none; }
@@ -221,8 +221,6 @@
         /* The language and theme pair moves into the avatar menu. */
         .dk-seg { display: none; }
         .dk-narrow-tools { display: grid; gap: 1px; }
-        .dk-usermenu { padding-inline-start: 0; }
-        .dk-usermenu::before { display: none; }
     }
 
     @media (prefers-reduced-motion: reduce) {

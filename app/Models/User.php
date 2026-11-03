@@ -641,6 +641,14 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     }
 
     /**
+     * The user's own HR photo, or null when HR holds none.
+     */
+    public function photoUrl(): ?string
+    {
+        return HrEmployee::photoUrl($this->employee_id);
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

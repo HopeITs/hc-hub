@@ -158,10 +158,19 @@ class HrEmployee extends HrModel
      */
     public static function avatarUrl(?int $employeeId): string
     {
+        return self::photoUrl($employeeId) ?? asset(self::DefaultAvatar);
+    }
+
+    /**
+     * The URL of the employee's own HR photo, or null without one (for
+     * places that show something else rather than the default picture).
+     */
+    public static function photoUrl(?int $employeeId): ?string
+    {
         $avatar = $employeeId === null ? null : self::avatarOf($employeeId);
 
         if ($avatar === null) {
-            return asset(self::DefaultAvatar);
+            return null;
         }
 
         return route('employees.avatar', ['employee' => $employeeId, 'v' => $avatar['version']]);
