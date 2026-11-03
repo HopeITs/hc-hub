@@ -518,8 +518,9 @@ test('the project directory renders within its query budget', function () {
     // + one count of the projects without a center (shown to managers)
     // + the two HR queries of EmployeeProfile behind the owner chips' positions
     // + the sector filter's options and the list preview's sector eager load (T34).
+    // + one read of the HR centers lookup for the «Center inactive» badge (W-02), flat however many rows.
     // + one load of the linked proposals' statuses for the funding badge (T08).
-    expect($queries)->toBeLessThanOrEqual(24);
+    expect($queries)->toBeLessThanOrEqual(25);
 });
 
 test('a list preview names only the relations a project has and flags a materialised risk', function () {

@@ -201,7 +201,7 @@ return [
     'host_center' => 'المركز المضيف',
     'select_a_host_center' => 'اختر مركزًا مضيفًا',
     'select_a_city' => 'اختر مدينة',
-    'host_center_help' => 'لا مركز في مدينة المشروع؟ اختر المدينة والمركز الذي يتابع المشروع.',
+    'host_center_help' => 'لا مركز في مدينة المشروع؟ اختر المركز الذي يتابع المشروع.',
     'choose_center_or_host' => 'اختر مركزاً فعلياً أو مركزاً مضيفاً',
     'cannot_host_own_center' => 'لا يمكن أن يستضيف المركز مشروعه',
     'choose_the_city' => 'اختر المدينة',
@@ -257,4 +257,8 @@ return [
     'more_actions_for' => 'إجراءات أخرى لـ :name',
     'ends' => 'ينتهي',
     'ended' => 'انتهى',
+    'add_center' => 'إضافة مركز',
+    'no_centers_in_city' => 'لا توجد مراكز في هذه المدينة بعد',
+    'choose_the_city_first' => 'اختر المدينة أولاً',
+    'center_inactive_badge' => 'المركز متوقف',
 ];
