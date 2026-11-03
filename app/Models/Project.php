@@ -45,6 +45,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property int|null $target_girls
  * @property int $city_id
  * @property int|null $center_id
+ * @property int|null $host_center_id
  * @property int $program_id
  * @property int $user_id
  * @property string $schedule_weekend
@@ -65,6 +66,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
     'target_girls',
     'city_id',
     'center_id',
+    'host_center_id',
     'program_id',
     'user_id',
     'schedule_weekend',
@@ -125,24 +127,76 @@ class Project extends Model implements TracksActivity
     }
 
     /**
-     * The open (draft, approved, active) project already holding a center and
-     * program, if any: there is at most one per pair (D-30a).
+     * The HR center that follows up a project with no physical center in its
+     * city (D-55, W-01), read from the same in-memory lookup as center().
+     * Null for a project that runs from its own center.
+     */
+    public function hostCenter(): ?HrCenter
+    {
+        $hostCenterId = $this->activityAttribute('host_center_id');
+
+        return $hostCenterId === null ? null : HrCenter::remembered((int) $hostCenterId);
+    }
+
+    /**
+     * Whether the project is followed up by a host center rather than run
+     * from a center of its own.
+     */
+    public function isHosted(): bool
+    {
+        return $this->activityAttribute('host_center_id') !== null;
+    }
+
+    /**
+     * Where the project is, for every list and card: its center's name, or
+     * «{city} · hosted by {host center}» for a hosted project, or the city
+     * alone while the project is not yet mapped. Needs `city` loaded.
+     */
+    public function locationLabel(): string
+    {
+        $center = $this->center();
+
+        if ($center !== null) {
+            return $center->name;
+        }
+
+        $city = $this->city->name ?? __('common.unknown_city');
+        $host = $this->hostCenter();
+
+        if ($host === null) {
+            $hostCenterId = $this->activityAttribute('host_center_id');
+
+            return $hostCenterId === null ? $city : __('projects.hosted_location', ['city' => $city, 'center' => '#'.$hostCenterId]);
+        }
+
+        return __('projects.hosted_location', ['city' => $city, 'center' => $host->name]);
+    }
+
+    /**
+     * The open (draft, approved, active) project already holding a placement
+     * and program, if any: there is at most one per pair (D-30a). The
+     * placement is the center when there is one, else the city of a hosted
+     * project (`center_id IS NULL` in that city, D-55 / W-01).
      *
      * Locks the program row first, so a caller inside a transaction holds off
      * every other create, restore or relink for the same program until it
      * commits. Call it inside the transaction that writes the project.
      */
-    public static function openProjectFor(int $centerId, int $programId, ?int $exceptId = null): ?self
+    public static function openProjectFor(?int $centerId, int $cityId, int $programId, ?int $exceptId = null): ?self
     {
         Program::query()->whereKey($programId)->lockForUpdate()->value('id');
 
         return static::query()
-            ->where('center_id', $centerId)
+            ->when(
+                $centerId !== null,
+                fn (Builder $query) => $query->where('center_id', $centerId),
+                fn (Builder $query) => $query->whereNull('center_id')->where('city_id', $cityId),
+            )
             ->where('program_id', $programId)
             ->whereIn('status', self::openStatusValues())
             ->when($exceptId !== null, fn (Builder $query) => $query->whereKeyNot($exceptId))
             ->orderBy('id')
-            ->first(['id', 'slug', 'name', 'status', 'center_id', 'program_id']);
+            ->first(['id', 'slug', 'name', 'status', 'city_id', 'center_id', 'host_center_id', 'program_id']);
     }
 
     /**

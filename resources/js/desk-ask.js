@@ -65,6 +65,14 @@ document.addEventListener('alpine:init', () => {
         },
 
         onGlobalKey(event) {
+            // Ctrl K (⌘ K on a Mac) opens or closes Ask from anywhere, even from inside a field.
+            if ((event.ctrlKey || event.metaKey) && ! event.altKey && ! event.shiftKey && event.key.toLowerCase() === 'k') {
+                event.preventDefault();
+                this.open ? this.hide() : this.show();
+
+                return;
+            }
+
             // Keys typed while the palette is still opening land in its input instead of being lost.
             const input = document.getElementById('dk-pal-q');
 

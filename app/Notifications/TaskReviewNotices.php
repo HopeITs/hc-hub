@@ -6,8 +6,10 @@ namespace App\Notifications;
 
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
+use App\Models\Activity;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\UserNotification;
 use Carbon\CarbonImmutable;
 
 /**
@@ -15,6 +17,10 @@ use Carbon\CarbonImmutable;
  * a task for review (its creator hears, with the date), and its approver
  * sent it back with a note (its assignees hear, with the note). Both travel
  * as catalog events an administrator can switch off.
+ *
+ * Each notice carries the move's task.status_changed activity, so the
+ * fan-out of that activity skips everyone the notice already reached; when
+ * the fan-out ran first, its lone row for that person gives way to the notice.
  */
 final class TaskReviewNotices
 {
@@ -49,6 +55,16 @@ final class TaskReviewNotices
         }
 
         $recipients = $this->filter->apply($userIds, $catalog['module'], $actor->id, $userIds, $userIds);
+        $activityId = $this->statusChangeActivityId($actor, $task);
+
+        if ($activityId !== null) {
+            UserNotification::query()
+                ->whereIn('notifiable_id', $recipients)
+                ->where('notifiable_type', (new User)->getMorphClass())
+                ->where('activity_id', $activityId)
+                ->where('data->count', 1)
+                ->delete();
+        }
 
         User::query()->whereKey($recipients)->get()->each(fn (User $user) => $user->notify(new AppNotification(new NotificationPayload(
             kind: NotificationKind::Action,
@@ -59,6 +75,23 @@ final class TaskReviewNotices
             subjectType: $task->getMorphClass(),
             subjectId: (int) $task->getKey(),
             actorId: $actor->id,
+            activityId: $activityId,
         ))));
+    }
+
+    /**
+     * The activity the move itself recorded, when recording was on.
+     */
+    private function statusChangeActivityId(User $actor, Task $task): ?int
+    {
+        $id = Activity::query()
+            ->where('subject_type', $task->getMorphClass())
+            ->where('subject_id', $task->getKey())
+            ->where('event', 'task.status_changed')
+            ->where('actor_id', $actor->id)
+            ->latest('id')
+            ->value('id');
+
+        return $id === null ? null : (int) $id;
     }
 }

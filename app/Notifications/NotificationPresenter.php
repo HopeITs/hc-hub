@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Notifications;
 
 use App\Enums\Locale;
+use App\Enums\NotificationKind;
 use App\Models\UserNotification;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\HtmlString;
@@ -135,6 +136,7 @@ final class NotificationPresenter
             'read_url' => route('notifications.read', $notification->id),
             'icon' => $this->desktopIcon($notification->module, $notification->priority->value),
             'image' => $this->desktopBanner($notification->module, $notification->priority->value, $locale),
+            'avatar' => $this->senderPhoto($notification),
             'created_at' => (string) $notification->created_at?->toIso8601String(),
         ];
     }
@@ -161,6 +163,19 @@ final class NotificationPresenter
         $tile = "notification-banners/tiles/{$module}-{$priority}.png";
 
         return asset(is_file(public_path($tile)) ? $tile : 'app-icons/icon-192.png');
+    }
+
+    /**
+     * The HR photo of the person a notification comes from: only an action
+     * by someone who has one; alerts and digests never show a face.
+     */
+    public function senderPhoto(UserNotification $notification): ?string
+    {
+        if ($notification->kind !== NotificationKind::Action || $notification->actor_id === null) {
+            return null;
+        }
+
+        return $notification->actor?->photoUrl();
     }
 
     public function moduleLabel(string $module, ?string $locale = null): string

@@ -8,12 +8,14 @@ use App\Actions\Projects\RestoreProject;
 use App\Actions\Projects\SaveProject;
 use App\Enums\ProjectStatus;
 use App\Models\HrCenter;
+use App\Models\HrCity;
 use App\Models\HrEmployee;
 use App\Models\HrProgram;
 use App\Models\Program;
 use App\Models\Project;
 use App\Support\SimilarProjects;
 use Flux\Flux;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Gate;
@@ -67,6 +69,15 @@ trait ManagesProjectForm
     public string $targetGirls = '';
 
     public string $centerId = '';
+
+    /**
+     * The host center and the city of a project with no center of its own
+     * (D-55, W-01). Both are read only while no center is chosen; with a
+     * center the server takes the center's city and clears the host.
+     */
+    public string $hostCenterId = '';
+
+    public string $cityId = '';
 
     public string $programId = '';
 
@@ -126,6 +137,18 @@ trait ManagesProjectForm
     }
 
     /**
+     * Active HR cities for a hosted project's city picker, in the interface
+     * language. Named apart from the directory's cityOptions() filter.
+     *
+     * @return Collection<int, HrCity>
+     */
+    #[Computed]
+    public function hostCityOptions(): Collection
+    {
+        return HrCity::query()->where('is_active', true)->select(['id', 'name_en', 'name_ar'])->orderBy(HrCity::nameColumn())->orderBy('id')->get();
+    }
+
+    /**
      * Who can own a project: the managers of programs (loaded from HR into
      * programs.manager_id), plus, when editing, the project's present owner so
      * the form still shows them.
@@ -166,10 +189,31 @@ trait ManagesProjectForm
         $this->proposeName();
     }
 
-    public function updatedCenterId(): void
+    /**
+     * Choosing a center drops the host center and the city: both belong to a
+     * hosted project only, and the server takes the city from the center.
+     */
+    public function updatedCenterId(string $value): void
+    {
+        $this->confirmNewProject = false;
+
+        if ($value !== '') {
+            $this->hostCenterId = '';
+            $this->cityId = '';
+        }
+
+        $this->proposeName();
+    }
+
+    public function updatedHostCenterId(): void
     {
         $this->confirmNewProject = false;
         $this->proposeName();
+    }
+
+    public function updatedCityId(): void
+    {
+        $this->confirmNewProject = false;
     }
 
     public function updatedName(): void
@@ -199,7 +243,7 @@ trait ManagesProjectForm
         return array_values($matches->map(fn (Project $project): array => [
             'id' => $project->id,
             'name' => $project->name,
-            'center' => $project->center_id === null ? __('proposals.no_center') : (HrCenter::remembered($project->center_id)->name ?? '#'.$project->center_id),
+            'center' => $project->center_id === null && $project->host_center_id === null ? __('proposals.no_center') : $project->locationLabel(),
             'program' => $this->hrProgramName($project->program_id),
             'status' => $project->status->label(),
         ])->all());
@@ -215,16 +259,26 @@ trait ManagesProjectForm
     #[Computed]
     public function existingPairProject(): ?array
     {
-        if (! $this->showProjectModal || $this->editingProjectId !== null || ! ctype_digit($this->centerId) || ! ctype_digit($this->programId)) {
+        if (! $this->showProjectModal || $this->editingProjectId !== null || ! ctype_digit($this->programId)) {
             return null;
         }
 
-        $centerId = (int) $this->centerId;
+        $placement = $this->chosenPlacement();
+
+        if ($placement === null) {
+            return null;
+        }
+
+        ['centerId' => $centerId, 'cityId' => $cityId] = $placement;
         $programId = (int) $this->programId;
-        $open = Project::openProjectFor($centerId, $programId);
+        $open = Project::openProjectFor($centerId, $cityId, $programId);
         $found = $open ?? Project::query()
-            ->select(['id', 'slug', 'name', 'status', 'center_id', 'program_id'])
-            ->where('center_id', $centerId)
+            ->select(['id', 'slug', 'name', 'status', 'city_id', 'center_id', 'host_center_id', 'program_id'])
+            ->when(
+                $centerId !== null,
+                fn (Builder $query) => $query->where('center_id', $centerId),
+                fn (Builder $query) => $query->whereNull('center_id')->where('city_id', $cityId),
+            )
             ->where('program_id', $programId)
             ->orderByDesc('id')
             ->first();
@@ -262,6 +316,28 @@ trait ManagesProjectForm
         Flux::toast(variant: 'success', text: __('projects.project_restored_as', ['status' => $status->label()]));
     }
 
+    /**
+     * The placement the form has chosen so far, as the pair the open-project
+     * rule keys on: the center (with its city), or, for a hosted project,
+     * null with the chosen city. Null until enough is chosen.
+     *
+     * @return array{centerId: int|null, cityId: int}|null
+     */
+    private function chosenPlacement(): ?array
+    {
+        if (ctype_digit($this->centerId)) {
+            $center = HrCenter::remembered((int) $this->centerId);
+
+            return $center === null ? null : ['centerId' => $center->id, 'cityId' => $center->city_id];
+        }
+
+        if (ctype_digit($this->hostCenterId) && ctype_digit($this->cityId)) {
+            return ['centerId' => null, 'cityId' => (int) $this->cityId];
+        }
+
+        return null;
+    }
+
     private function hrProgramName(int $programId): string
     {
         try {
@@ -274,16 +350,19 @@ trait ManagesProjectForm
     }
 
     /**
-     * Name a new project «Program — Center» once both are chosen, unless the
-     * person already typed a name of their own.
+     * Name a new project «Program — Center» once both are chosen (the host
+     * center stands in for a hosted project), unless the person already
+     * typed a name of their own.
      */
     protected function proposeName(): void
     {
-        if ($this->editingProjectId !== null || ! ctype_digit($this->programId) || ! ctype_digit($this->centerId)) {
+        $placementId = ctype_digit($this->centerId) ? $this->centerId : $this->hostCenterId;
+
+        if ($this->editingProjectId !== null || ! ctype_digit($this->programId) || ! ctype_digit($placementId)) {
             return;
         }
 
-        $center = HrCenter::remembered((int) $this->centerId);
+        $center = HrCenter::remembered((int) $placementId);
         $program = Program::query()->find((int) $this->programId, ['id']);
 
         if ($center === null || $program === null || ($this->name !== '' && $this->name !== $this->proposedName)) {
@@ -328,6 +407,7 @@ trait ManagesProjectForm
                 'target_girls',
                 'city_id',
                 'center_id',
+                'host_center_id',
                 'program_id',
                 'user_id',
             ])
@@ -349,6 +429,9 @@ trait ManagesProjectForm
         $this->targetBoys = self::formInteger($project->target_boys);
         $this->targetGirls = self::formInteger($project->target_girls);
         $this->centerId = $project->center_id === null ? '' : (string) $project->center_id;
+        $this->hostCenterId = $project->host_center_id === null ? '' : (string) $project->host_center_id;
+        // The city is only offered while the project has no center of its own.
+        $this->cityId = $project->center_id === null ? (string) $project->city_id : '';
         $this->savedCenterId = $project->center_id;
         $this->programId = (string) $project->program_id;
         $this->userId = (string) $project->user_id;
@@ -381,6 +464,8 @@ trait ManagesProjectForm
             'targetBoys' => $this->targetBoys,
             'targetGirls' => $this->targetGirls,
             'centerId' => $this->centerId,
+            'hostCenterId' => $this->hostCenterId,
+            'cityId' => $this->cityId,
             'programId' => $this->programId,
             'userId' => $this->userId,
             'sectorIds' => $this->sectorIds,
@@ -425,6 +510,8 @@ trait ManagesProjectForm
         $this->targetBoys = '';
         $this->targetGirls = '';
         $this->centerId = '';
+        $this->hostCenterId = '';
+        $this->cityId = '';
         $this->savedCenterId = null;
         $this->savedStatus = null;
         $this->proposedName = '';

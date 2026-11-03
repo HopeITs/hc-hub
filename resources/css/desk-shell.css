@@ -68,32 +68,122 @@
 
     .dk-side-scrim { display: none; }
 
-    /* ---------- Top bar ---------- */
-    .dk-top-in { display: flex; align-items: center; gap: 12px; height: var(--top-h); padding-inline: 20px; }
+    /*
+     * ---------- Top bar ----------
+     * Three zones on a grid: where you are | the Ask bar | tools and avatar. The middle track
+     * keeps the Ask bar centred on the page; the end track never shrinks below its buttons,
+     * and the start track gives up its room first (its breadcrumb folds by container query).
+     */
+    .dk-top { transition: box-shadow .2s ease; }
+    html.dk-scrolled .dk-top { box-shadow: 0 10px 24px -18px rgb(16 24 40 / .32); }
+    .dark.dk-scrolled .dk-top { box-shadow: 0 12px 28px -16px rgb(0 0 0 / .7); }
+
+    .dk-top-in { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 560px) minmax(max-content, 1fr); align-items: center; gap: 16px; height: var(--top-h); padding-inline: 24px max(16px, calc((100% - 1680px) / 2 + 16px)); }
+    .dk-top-start { min-width: 0; display: flex; align-items: center; gap: 6px; container: top-start / inline-size; }
+    .dk-top-end { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
     .dk-top-menu, .dk-top-mark { display: none; }
     .dk-top-mark img { width: 32px; height: 32px; display: block; }
-    .dk-top-find { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .dk-top-find .dk-ask { margin-inline: 0; max-width: 560px; }
-    .dk-panels-btn { height: 44px; border-radius: 999px; padding-inline: 16px; flex: none; }
-    .dk-panels-btn:hover { border-color: var(--ink-3); }
-    .dk-tools { align-items: center; }
-    .dk-tools [data-notification-bell] > button { width: 40px !important; height: 40px !important; border-radius: 10px !important; color: var(--ink-2) !important; }
-    .dk-tools [data-notification-bell] > button:hover { background: var(--sunk) !important; box-shadow: none !important; }
-    .dk-wide-tool { display: inline-flex; }
-    .dk-narrow-tools { display: none; }
 
-    .dk-usermenu-pop { width: 260px; top: 46px; }
-    .dk-usermenu-pop > a, .dk-usermenu-pop .dk-narrow-tools > a, .dk-usermenu-pop button[role="menuitem"] { display: flex; align-items: center; gap: 10px; height: 38px; padding-inline: 10px; border: 0; background: none; border-radius: 8px; font-size: 13.5px; font-weight: 700; color: var(--ink); text-decoration: none; cursor: pointer; width: 100%; text-align: start; }
-    .dk-usermenu-pop > a:hover, .dk-usermenu-pop .dk-narrow-tools > a:hover, .dk-usermenu-pop button[role="menuitem"]:hover { background: var(--sunk); }
-    .dk-usermenu-pop .dk-danger { color: var(--bad); }
-    .dk-usermenu-who { display: flex; align-items: center; gap: 10px; padding: 6px 8px 10px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+    /* Where you are: the sidebar group, then the page on the Desk's dot-thread; the ring is the current-page marker. */
+    .dk-where { min-width: 0; animation: dk-where-in .32s cubic-bezier(.2, .8, .2, 1) both; }
+    .dk-where ol { display: flex; align-items: center; min-width: 0; }
+    .dk-where li { display: flex; align-items: center; gap: 8px; min-width: 0; white-space: nowrap; }
+    .dk-where li.dk-where-g { flex: 0 1 auto; }
+    .dk-where li.dk-where-p { flex: 0 2 auto; }
+    .dk-where i { flex: none; border-radius: 50%; }
+    .dk-where-g i { width: 8px; height: 8px; border: 2px solid var(--line-2); }
+    .dk-where-g span { font-size: 11.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); overflow: hidden; text-overflow: ellipsis; }
+    [lang="ar"] .dk-where-g span { letter-spacing: 0; text-transform: none; font-size: 12.5px; }
+    .dk-where-p::before { content: ""; flex: none; width: 22px; height: 2px; margin-inline-start: 2px; border-radius: 2px; background: var(--line-2); transform-origin: left center; animation: dk-thread-in .42s .08s cubic-bezier(.2, .8, .2, 1) both; }
+    [dir="rtl"] .dk-where-p::before { transform-origin: right center; }
+    .dk-where-p i { width: 12px; height: 12px; border: 3px solid var(--brand); background: var(--paper); }
+    .dk-where-p a { font-size: 15px; font-weight: 800; color: var(--ink); text-decoration: none; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.005em; }
+    .dk-where-p a:not([aria-current]):hover { text-decoration: underline; text-decoration-thickness: 2px; text-decoration-color: var(--line-2); text-underline-offset: 5px; }
+    @container top-start (max-width: 220px) { .dk-where-g { display: none !important; } .dk-where-p::before { display: none; } }
+    @container top-start (max-width: 110px) { .dk-where { display: none; } }
+    @keyframes dk-where-in { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+    [dir="rtl"] .dk-where { animation-name: dk-where-in-rtl; }
+    @keyframes dk-where-in-rtl { from { opacity: 0; transform: translateX(4px); } to { opacity: 1; transform: none; } }
+    @keyframes dk-thread-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+    /* The Ask bar: the bar's one wide control, with its shortcut on the end. */
+    .dk-top-find { min-width: 0; display: flex; align-items: center; gap: 8px; }
+    .dk-top-find .dk-ask { margin-inline: 0; max-width: none; box-shadow: 0 1px 2px rgb(16 24 40 / .05); transition: border-color .15s, box-shadow .15s, background .15s, transform .08s; }
+    .dk-top-find .dk-ask:hover { border-color: var(--ink-3); box-shadow: 0 2px 8px -2px rgb(16 24 40 / .12); }
+    .dk-top-find .dk-ask:active { transform: scale(.992); }
+    .dk-top-find .dk-ask kbd { margin-inline-start: auto; flex: none; display: inline-flex; align-items: center; height: 22px; padding-inline: 7px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+    .dk-panels-btn { height: 44px; border-radius: 999px; padding-inline: 16px; flex: none; transition: border-color .15s, background .15s, transform .08s; }
+    .dk-panels-btn:hover { border-color: var(--ink-3); }
+    .dk-panels-btn:active { transform: scale(.96); }
+
+    /* Tools: bell, help, language and theme in one slim floating dock (40px), 32px round buttons, a tiny count chip on the bell. */
+    .dk-tools { display: flex; align-items: center; gap: 6px; height: 42px; padding-inline: 8px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 1px 2px rgb(16 24 40 / .04), 0 6px 16px -10px rgb(16 24 40 / .18); }
+    .dark .dk-tools { box-shadow: none; }
+    .dk-top .dk-tools .dk-iconbtn, .dk-tools [data-notification-bell] > button { position: relative; width: 32px !important; min-width: 32px !important; height: 32px !important; padding: 0; border-radius: 999px !important; color: var(--ink-3) !important; background: transparent !important; box-shadow: none !important; transition: background .15s, color .15s, transform .08s; }
+    .dk-top .dk-tools .dk-iconbtn svg, .dk-tools [data-notification-bell] > button svg { width: 18px !important; height: 18px !important; stroke-width: 1.6; }
+    .dk-top .dk-tools .dk-iconbtn:hover, .dk-tools [data-notification-bell] > button:hover, .dk-top .dk-tools .dk-iconbtn[aria-expanded="true"], .dk-tools [data-notification-bell] > button[aria-expanded="true"] { background: var(--sunk) !important; color: var(--ink) !important; }
+    /* !important: the bell's own Tailwind utilities sit in a later layer. */
+    /* Every tool is a flex box, so no button sits on a text baseline (the help menu's wrapper was a block and dropped its button). */
+    .dk-tools > .dk-pmenu { display: flex; }
+    /* The unread count rides the bell's top corner, cut out of the dock by a paper ring. */
+    .dk-tools [data-unread-count] { top: -3px !important; inset-inline-end: -5px !important; min-width: 17px !important; height: 17px !important; padding-inline: 4px !important; font-size: 10px !important; font-weight: 700 !important; line-height: 17px !important; letter-spacing: -.01em; box-shadow: 0 0 0 2px var(--paper) !important; --tw-ring-shadow: 0 0 #0000 !important; pointer-events: none; }
+    .dk-top .dk-tools .dk-iconbtn:active, .dk-tools [data-notification-bell] > button:active { transform: scale(.92); }
+
+    .dk-fresh { position: absolute; top: 8px; inset-inline-end: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 2px var(--paper); animation: dk-fresh 2.4s ease-out infinite; }
+    @keyframes dk-fresh { 0% { box-shadow: 0 0 0 2px var(--paper), 0 0 0 2px var(--brand); } 70%, 100% { box-shadow: 0 0 0 2px var(--paper), 0 0 0 9px transparent; } }
+
+    .dk-seg { display: contents; }
+    .dk-seg-lang { font-size: 15px !important; font-weight: 600 !important; line-height: 1 !important; }
+    /* Somar Sans inks ع 3.5px below the line's middle and EN 1.5px above it; the padding puts each glyph on the icons' centre line. */
+    .dk-top .dk-tools .dk-seg-lang[lang="ar"] { padding-bottom: 7px; }
+    .dk-top .dk-tools .dk-seg-lang[lang="en"] { padding-top: 3px; }
+    .dk-seg-theme svg { animation: dk-turn .4s cubic-bezier(.2, .8, .2, 1); }
+    @keyframes dk-turn { from { opacity: 0; transform: rotate(-70deg) scale(.6); } to { opacity: 1; transform: none; } }
+
+    /* Tooltips: shown after a short hover rest or at once on keyboard focus, never over an open menu. */
+    .dk-tip::after { content: attr(data-tip); position: absolute; z-index: 45; top: calc(100% + 8px); left: 50%; transform: translate(-50%, -3px); padding: 5px 9px; border-radius: 7px; background: var(--ink); color: var(--paper); font-size: 12px; font-weight: 700; line-height: 1.4; letter-spacing: 0; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .12s, transform .12s; }
+    @media (hover: hover) { .dk-tip:hover::after { opacity: 1; transform: translate(-50%, 0); transition-delay: .45s; } }
+    .dk-tip:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
+    .dk-tip[aria-expanded="true"]::after { opacity: 0 !important; transition-delay: 0s !important; }
+
+    /* The avatar button: the photo alone, its end on the page content's edge (the bar's end padding matches .dk-wrap). */
+    .dk-usermenu { display: flex; margin-inline-start: 10px; }
+    .dk-me { display: flex; line-height: 0; padding: 0; border: 0; border-radius: 999px; background: none; cursor: pointer; transition: transform .08s; }
+    .dk-me:active { transform: scale(.95); }
+    .dk-top .dk-me .dk-avatar { display: block; width: 42px; height: 42px; border-radius: 999px; box-shadow: 0 0 0 1px var(--line); transition: box-shadow .15s; }
+    .dk-me:hover .dk-avatar, .dk-me[aria-expanded="true"] .dk-avatar { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--line-2); }
+    .dk-me:focus-visible { outline: none; }
+    .dk-me:focus-visible .dk-avatar { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink-3); }
+    .dk-avatar-lg { width: 40px; height: 40px; font-size: 14px; flex: none; }
+
+    /* Help and avatar menus: rows with an icon, a label and a hint; they grow out of their button. */
+    .dk-menu { top: calc(100% + 8px); width: 300px; padding: 6px; border-radius: 14px; gap: 1px; transform-origin: top right; }
+    [dir="rtl"] .dk-menu { transform-origin: top left; }
+    .dk-menu .dk-pop-h { padding: 6px 10px 4px; }
+    .dk-menu [role="menuitem"] { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 40px; height: auto; padding: 8px 10px; border: 0; border-radius: 10px; background: none; color: var(--ink); font: inherit; text-align: start; text-decoration: none; cursor: pointer; }
+    .dk-menu [role="menuitem"]:hover, .dk-menu [role="menuitem"]:focus-visible { background: var(--sunk); outline: none; }
+    .dk-menu [role="menuitem"]:focus-visible { box-shadow: inset 0 0 0 2px var(--line-2); }
+    .dk-menu-ic { width: 20px; height: 20px; flex: none; color: var(--ink-3); transition: color .12s; }
+    .dk-menu [role="menuitem"]:hover .dk-menu-ic, .dk-menu [role="menuitem"]:focus-visible .dk-menu-ic { color: var(--ink); }
+    .dk-menu-t { flex: 1; min-width: 0; display: grid; }
+    .dk-menu-t strong { font-size: 13.5px; font-weight: 700; line-height: 1.35; }
+    .dk-menu-t small { font-size: 12px; font-weight: 500; line-height: 1.35; color: var(--ink-3); }
+    .dk-menu-ext { width: 16px; height: 16px; flex: none; color: var(--faint); }
+    .dk-menu .dk-danger, .dk-menu .dk-danger .dk-menu-ic { color: var(--bad); }
+    .dk-menu-foot { margin-top: 4px; padding: 9px 10px 4px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-3); }
+    .dk-menu-foot kbd { margin-inline: 2px; }
+    .dk-menu-in { transition: opacity .14s cubic-bezier(.2, .8, .2, 1), transform .16s cubic-bezier(.2, .8, .2, 1); }
+    .dk-menu-out { transition: opacity .09s ease-in, transform .09s ease-in; }
+    .dk-menu-from { opacity: 0; transform: translateY(-4px) scale(.97); }
+
+    .dk-usermenu-pop { width: 280px; }
+    .dk-usermenu-who { display: flex; align-items: center; gap: 12px; padding: 8px 10px 12px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
     .dk-usermenu-who strong { display: block; font-size: 14px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dk-usermenu-who small { display: block; font-size: 12px; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dk-usermenu-out { margin-top: 4px; padding-top: 4px; border-top: 1px solid var(--line); }
+    .dk-narrow-tools { display: none; }
 
     @media (max-width: 1099px) {
-        .dk-wide-tool { display: none !important; }
-        .dk-narrow-tools { display: grid; gap: 2px; }
         .dk-panels-l { display: none; }
         .dk-panels-btn { width: 44px; padding-inline: 0; }
     }
@@ -114,17 +204,31 @@
         .dk-side .dk-side-l { display: block !important; }
         .dk-side .dk-side-badge { position: static !important; width: auto !important; min-width: 20px !important; height: 20px !important; padding-inline: 6px !important; font-size: 11px !important; background: var(--brand-soft) !important; box-shadow: none !important; }
         .dk-top-menu, .dk-top-mark { display: inline-flex; }
-        .dk-top-in { padding-inline: 10px; gap: 6px; }
+        .dk-top-in { display: flex; padding-inline: 10px; gap: 6px; }
+        .dk-top-start { flex: none; container-type: normal; }
+        .dk-where { display: none; }
+        .dk-top-find { flex: 1; }
+        .dk-top-find .dk-ask kbd { display: none; }
+        .dk-top-end { gap: 2px; }
     }
 
     @media (max-width: 560px) {
         .dk-top-find .dk-ask .dk-ph, .dk-top-find .dk-ask kbd { display: none; }
-        .dk-top-find .dk-ask { flex: none; width: 44px; padding-inline: 0; justify-content: center; }
+        /* desk.css makes Ask a fixed bottom bar up to 720px; on a phone it is a round search button in the bar instead. */
+        .dk-top-find .dk-ask { position: static; flex: none; width: 44px; height: 44px; padding: 0; justify-content: center; border: 1px solid var(--line-2); border-radius: 999px; background: var(--paper); backdrop-filter: none; -webkit-backdrop-filter: none; }
+        .dk-top-find .dk-ask .dk-inner { display: contents; }
         .dk-top-find { justify-content: flex-start; }
+        /* The language and theme pair moves into the avatar menu. */
+        .dk-seg { display: none; }
+        .dk-narrow-tools { display: grid; gap: 1px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
         html.dk-nav-animate .dk-app, .dk-side { transition: none; }
+        .dk-where, .dk-where-p::before, .dk-seg-theme svg, .dk-fresh { animation: none; }
+        .dk-menu-in, .dk-menu-out { transition: opacity .1s linear; }
+        .dk-menu-from { transform: none; }
+        .dk-top :active { transform: none !important; }
     }
 }
 
@@ -284,16 +388,10 @@
 
 }
 
-/* ---------- Top bar tools: one gray capsule of round buttons (the old header look) ---------- */
+/* ---------- Top bar: Ask and Panels icons ---------- */
 @layer components {
-    .dk-capsule { display: inline-flex; align-items: center; gap: 2px; padding: 4px; border-radius: 999px; background: var(--sunk); border: 1px solid var(--line); }
-    .dk-capsule .dk-iconbtn, .dk-capsule [data-notification-bell] > button { width: 36px !important; min-width: 36px; height: 36px !important; padding: 0; border-radius: 999px !important; color: var(--ink-2) !important; background: transparent; transition: background .15s, color .15s, box-shadow .15s; }
-    .dk-capsule .dk-iconbtn:hover, .dk-capsule [data-notification-bell] > button:hover, .dk-capsule [data-notification-bell] > button[aria-expanded="true"] { background: var(--paper) !important; color: var(--ink) !important; box-shadow: 0 1px 2px rgb(16 24 40 / .12) !important; }
-    .dk-capsule [data-locale-toggle] button { font-size: 13px; font-weight: 800; }
-    .dk-capsule .dk-wide-tool { display: inline-flex; }
     .dk-top-find .dk-ask svg, .dk-panels-btn svg { color: var(--ink-3); flex: none; }
     .dk-panels-btn { background: var(--sunk); }
-    @media (max-width: 1099px) { .dk-capsule .dk-wide-tool { display: none !important; } }
 }
 
 /*

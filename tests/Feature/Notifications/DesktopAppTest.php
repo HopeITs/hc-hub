@@ -185,3 +185,33 @@ test('every module has a banner for both popup urgencies in both languages, and 
     expect($presenter->toBroadcast(desktopAppNotification($user), 'ar')['image'])->toBe(asset('notification-banners/ar/system-important.png'))
         ->and($presenter->desktopBanner('tasks', 'info', 'en'))->toBeNull();
 });
+
+test('a notification from a person carries their HR photo, and nothing when they have none or it is an alert', function () {
+    $presenter = app(NotificationPresenter::class);
+    [$reader, $withPhoto, $withoutPhoto] = Activity::withoutRecording(fn () => [
+        User::factory()->create(),
+        User::factory()->create(['employee_id' => insertHrEmployee()]),
+        User::factory()->create(['employee_id' => insertHrEmployee()]),
+    ]);
+    insertHrAvatar($withPhoto->employee_id);
+
+    $from = function (?User $actor, NotificationKind $kind) use ($reader): UserNotification {
+        $reader->notify(new AppNotification(new NotificationPayload(
+            kind: $kind,
+            module: 'tasks',
+            priority: NotificationPriority::Important,
+            key: 'notifications.test_message',
+            params: [],
+            subjectType: null,
+            subjectId: null,
+            actorId: $actor?->id,
+        )));
+
+        return UserNotification::query()->forUser($reader)->where('actor_id', $actor?->id)->where('kind', $kind)->firstOrFail();
+    };
+
+    expect($presenter->toBroadcast($from($withPhoto, NotificationKind::Action), 'en')['avatar'])->toBe($withPhoto->photoUrl())
+        ->and($withPhoto->photoUrl())->toContain('/employees/'.$withPhoto->employee_id.'/avatar')
+        ->and($presenter->toBroadcast($from($withoutPhoto, NotificationKind::Action), 'en')['avatar'])->toBeNull()
+        ->and($presenter->toBroadcast($from($withPhoto, NotificationKind::Alert), 'en')['avatar'])->toBeNull();
+});

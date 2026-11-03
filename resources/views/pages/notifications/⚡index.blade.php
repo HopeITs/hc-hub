@@ -99,7 +99,7 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
         return $this->filteredQuery()
             ->whereNull('read_at')
             ->where('priority', NotificationPriority::Critical->value)
-            ->with('actor:id,hr_user_id')
+            ->with('actor:id,hr_user_id,employee_id')
             ->latest()
             ->limit(self::PinnedLimit)
             ->get();
@@ -117,7 +117,7 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
             ->when($this->showsPinned, fn (Builder $query) => $query->where(
                 fn (Builder $query) => $query->whereNotNull('read_at')->orWhere('priority', '!=', NotificationPriority::Critical->value),
             ))
-            ->with('actor:id,hr_user_id')
+            ->with('actor:id,hr_user_id,employee_id')
             ->latest()
             ->limit($this->perPage + 1)
             ->get();

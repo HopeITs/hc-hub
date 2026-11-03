@@ -38,4 +38,11 @@ return [
     'reporting_duties' => 'My Reporting Duties',
     'monthly_matrix' => 'Monthly Matrix',
     'tools' => 'Tools',
+    'help' => 'Help',
+    'help_tour_hint' => 'A guided walk through this page',
+    'help_guideline_hint' => 'The written guide, in a new tab',
+    'help_report_hint' => 'Tell the IT team what went wrong',
+    'help_install_hint' => 'Open HC Tracking in its own window',
+    'display' => 'Language and theme',
+    'search_shortcut' => 'Ctrl K',
 ];

@@ -40,8 +40,9 @@ final class RestoreProject
                 throw ValidationException::withMessages(['status' => __('projects.only_archived_can_be_restored')]);
             }
 
-            if ($locked->center_id !== null) {
-                $open = Project::openProjectFor($locked->center_id, $locked->program_id, $locked->id);
+            // A legacy row with neither center nor host is not checked until W-02 maps it.
+            if ($locked->center_id !== null || $locked->host_center_id !== null) {
+                $open = Project::openProjectFor($locked->center_id, (int) $locked->city_id, $locked->program_id, $locked->id);
 
                 if ($open !== null) {
                     throw ValidationException::withMessages(['status' => __('projects.open_project_exists', ['name' => $open->name])]);

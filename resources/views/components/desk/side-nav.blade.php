@@ -4,11 +4,8 @@
     $user = auth()->user();
     $groups = app(\App\Support\Desk\Destinations::class)->sidebarFor($user);
     $moduleCounts = $showsInbox ? app(\App\Notifications\UnreadCounts::class)->for($user)['modules'] : [];
-    $currentRoute = request()->route()?->getName() ?? '';
-    /* A register's own sub-pages (projects.show…) light up their register's link, unless the page has a link of its own (reports.monthly-matrix is not reports.index). */
-    $hasExactLink = collect($groups)->pluck('items')->flatten(1)->contains('route', $currentRoute);
-    $isCurrent = fn (string $route): bool => $currentRoute === $route
-        || (! $hasExactLink && $route !== 'dashboard' && str_ends_with($route, '.index') && str_starts_with($currentRoute, \Illuminate\Support\Str::beforeLast($route, '.index').'.'));
+    $currentLink = app(\App\Support\Desk\Destinations::class)->currentFor($user, request()->route()?->getName() ?? '')['route'] ?? null;
+    $isCurrent = fn (string $route): bool => $route === $currentLink;
 @endphp
 
 {{--

@@ -45,7 +45,7 @@ new class extends Component {
                     $query->orWhere(fn (Builder $query) => $query->where('subject_type', $type)->whereIn('subject_id', $ids));
                 }
             })
-            ->with('actor:id,hr_user_id')
+            ->with('actor:id,hr_user_id,employee_id')
             ->latest('id')
             ->limit($this->limit + 1)
             ->get();
@@ -70,7 +70,7 @@ new class extends Component {
             <ol class="dk-hist">
                 @foreach ($this->entries->take($limit) as $activity)
                     <li wire:key="activity-{{ $activity->id }}">
-                        <span class="dk-av dk-sm" aria-hidden="true">{{ $activity->actor?->initials() ?? '·' }}</span>
+                        <x-ui.avatar :src="$activity->actor?->avatarUrl()" class="dk-av dk-sm" aria-hidden="true" />
                         <span>{{ $presenter->sentence($activity) }}<span class="dk-d"> · <time datetime="{{ $activity->created_at?->toIso8601String() }}">{{ $activity->created_at?->translatedFormat(__('formats.date')) }}</time></span></span>
                     </li>
                 @endforeach

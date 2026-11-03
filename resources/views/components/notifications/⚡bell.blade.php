@@ -65,7 +65,7 @@ new class extends Component {
             ->when($this->tab === 'unread', fn ($query) => $query->whereNull('read_at'))
             ->when($this->tab === 'alerts', fn ($query) => $query->whereIn('kind', [NotificationKind::Alert->value, NotificationKind::Digest->value]))
             ->when($this->module !== '', fn ($query) => $query->where('module', $this->module))
-            ->with('actor:id,hr_user_id')
+            ->with('actor:id,hr_user_id,employee_id')
             ->orderByRaw('case when read_at is null and priority = ? then 0 else 1 end', [NotificationPriority::Critical->value])
             ->latest()
             ->limit(30)

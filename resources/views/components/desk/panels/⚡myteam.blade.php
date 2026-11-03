@@ -44,7 +44,7 @@ new class extends Component {
     }
 
     /**
-     * @return list<array{employeeId: int, name: string, initials: string, title: string, overdue: int, open: int, load: string, lateReports: int, userId: int|null, relation: string}>
+     * @return list<array{employeeId: int, name: string, title: string, overdue: int, open: int, load: string, lateReports: int, userId: int|null, relation: string}>
      */
     #[Computed]
     public function people(): array
@@ -79,7 +79,6 @@ new class extends Component {
                 ...$person,
                 'open' => $openTasks,
                 'load' => TeamScope::load($openTasks, $person['overdue']),
-                'initials' => $user?->initials() ?? mb_substr($person['name'], 0, 1),
                 'title' => (string) (HrEmployee::positionSummary($person['employeeId']) ?? ''),
                 'lateReports' => $user === null ? 0 : (int) ($lateReports[$user->id] ?? 0),
                 'userId' => $user?->id,
@@ -163,7 +162,7 @@ new class extends Component {
                     $behind = $person['overdue'] + $person['lateReports'];
                 @endphp
                 <li wire:key="pp-{{ $person['employeeId'] }}">
-                    <span class="dk-av" aria-hidden="true">{{ $person['initials'] }}</span>
+                    <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($person['employeeId'])" class="dk-av" aria-hidden="true" />
                     <span class="dk-tm-who">
                         <strong title="{{ $person['name'] }}">{{ $person['name'] }}</strong>
                         <span class="dk-is" title="{{ $person['title'] }}">{{ __('desk.relation.'.$person['relation']) }}@if ($person['title'] !== '') · {{ $person['title'] }}@endif</span>

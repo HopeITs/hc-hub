@@ -234,6 +234,8 @@ async function renderDesktopPopup(payload) {
     const options = {
         body: payload.image ? '' : payload.text,
         ...(payload.image ? { image: payload.image } : { icon: payload.icon || APP_ICON }),
+        // A notification from a person carries their HR photo as the icon.
+        ...(payload.avatar ? { icon: payload.avatar } : {}),
         badge: APP_BADGE,
         tag: POPUP_TAG,
         renotify: true,

@@ -38,7 +38,7 @@
             @if ($media->uploader === null)
                 <span class="text-xs text-secondary-medium dark:text-ink-muted">{{ __('common.not_assigned') }}</span>
             @else
-                <flux:avatar size="xs" :name="$media->uploader->name" :initials="$media->uploader->initials()" />
+                <flux:avatar size="xs" :name="$media->uploader->name" :src="$media->uploader->avatarUrl()" />
                 <span class="truncate text-xs text-secondary-medium dark:text-ink-muted">{{ $media->uploader->name }}</span>
             @endif
         </div>

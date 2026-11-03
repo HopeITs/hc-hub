@@ -183,7 +183,7 @@ final class CloneProposalForRenewal
     private function projects(Proposal $previous): array
     {
         $linked = $previous->projects()
-            ->select(['projects.id', 'projects.name', 'projects.status', 'projects.center_id', 'projects.program_id'])
+            ->select(['projects.id', 'projects.name', 'projects.status', 'projects.city_id', 'projects.center_id', 'projects.host_center_id', 'projects.program_id'])
             ->orderBy('projects.id')
             ->get();
 
@@ -209,8 +209,8 @@ final class CloneProposalForRenewal
 
             $target = $project;
 
-            if ($project->status->value === 'closed' && $project->center_id !== null) {
-                $open = Project::openProjectFor($project->center_id, $project->program_id, $project->id);
+            if ($project->status->value === 'closed' && ($project->center_id !== null || $project->host_center_id !== null)) {
+                $open = Project::openProjectFor($project->center_id, (int) $project->city_id, $project->program_id, $project->id);
 
                 if ($open !== null) {
                     $target = $open;

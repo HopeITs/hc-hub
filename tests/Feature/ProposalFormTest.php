@@ -471,6 +471,18 @@ test('the project picker lists linkable projects with their center and city, and
         ->assertDontSeeText('Bakery Support');
 });
 
+test('the project picker labels a hosted project with its host center', function () {
+    $idleb = insertHrCity('Idleb', 'إدلب');
+    $host = insertHrCenter(insertHrCity('Aleppo', 'حلب'), 'Head Office Aleppo', 'المكتب الرئيسي حلب');
+    $wells = Project::factory()->hostedBy($host)->create(['name' => 'Wells Idleb', 'city_id' => $idleb]);
+
+    openProposalCreateForm(userWithRole('Financial'))
+        ->assertSeeText('Wells Idleb')
+        ->assertSeeText($wells->program->name.' · Idleb')
+        ->assertSeeText('Hosted by Head Office Aleppo')
+        ->assertDontSeeText('No center');
+});
+
 test('a skipped concept note asks for the reason in Arabic and the preset reason saves the proposal draft', function () {
     $project = Project::factory()->create();
     $actor = userWithRole('Financial');
