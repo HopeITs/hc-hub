@@ -85,7 +85,7 @@
     /* ── Resize handles: edges and corner ─────────────────────────── */
     .dk-rz { position: absolute; z-index: 9; touch-action: none; -webkit-user-select: none; user-select: none; opacity: 0; transition: opacity .15s ease; }
     .dk-rz::after { content: ""; position: absolute; border-radius: 99px; background: var(--ink-3); transition: background .15s, transform .15s; }
-    .dk-rz:hover::after { background: var(--brand); }
+    .dk-rz:hover::after { background: var(--ink-2); }
     .dk-rz-end, .dk-rz-start { inset-block: 24px; width: 14px; cursor: ew-resize; }
     .dk-rz-end { inset-inline-end: -7px; }
     .dk-rz-start { inset-inline-start: -7px; }
@@ -97,7 +97,7 @@
     .dk-rz-corner { inset-block-end: -4px; inset-inline-end: -4px; width: 24px; height: 24px; cursor: nwse-resize; }
     [dir="rtl"] .dk-rz-corner { cursor: nesw-resize; }
     .dk-rz-corner::after { inset-block-end: 8px; inset-inline-end: 8px; width: 10px; height: 10px; border-radius: 0; background: none; border-block-end: 2.5px solid var(--ink-3); border-inline-end: 2.5px solid var(--ink-3); border-end-end-radius: 6px; }
-    .dk-rz-corner:hover::after { background: none; border-color: var(--brand); }
+    .dk-rz-corner:hover::after { background: none; border-color: var(--ink-2); }
     @media (hover: hover) {
         .dk-grid > .dk-panel:hover .dk-rz { opacity: 1; }
     }
@@ -119,9 +119,9 @@
     /* The live outline of a pull (desk-grid.js): it follows the pointer to the pixel while the cards glide to whole cells under it, then lands on the card's cells and fades. Placed in grid pixels, so physical left/top. */
     .dk-resize-ghost {
         position: absolute; left: 0; top: 0; z-index: 20; box-sizing: border-box; pointer-events: none;
-        border-radius: var(--panel-r); border: 2px solid color-mix(in srgb, var(--brand) 75%, transparent);
-        background: color-mix(in srgb, var(--brand) 7%, transparent);
-        box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand) 10%, transparent), 0 22px 44px -26px color-mix(in srgb, var(--ink) 45%, transparent);
+        border-radius: var(--panel-r); border: 2px solid color-mix(in srgb, var(--ink-3) 60%, transparent);
+        background: color-mix(in srgb, var(--ink-3) 8%, transparent);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--ink-3) 10%, transparent), 0 22px 44px -26px color-mix(in srgb, var(--ink) 45%, transparent);
         will-change: transform, width, height;
     }
     .dk-resize-ghost.dk-landing {
