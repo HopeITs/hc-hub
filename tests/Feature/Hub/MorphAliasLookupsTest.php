@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\Livewire;
+use Modules\Hr\Livewire\Dashboard\UpcomingEventsCard;
 use Modules\Hr\Livewire\Forms\NewsForm;
 use Modules\Hr\Models\Folder;
 use Modules\Hr\Models\News;
@@ -75,7 +76,9 @@ test('dashboard events include news targeted at the viewer\'s employee and city'
     $dashboard = Livewire::actingAs($user)->test(DashboardIndex::class)->instance();
 
     $todayTitles = $dashboard->todayEvents->where('event_type', 'news')->pluck('title_en')->sort()->values()->all();
-    $upcomingTitles = $dashboard->upcomingEvents->pluck('title_en')->sort()->values()->all();
+    // The upcoming events moved to their own dashboard tile.
+    $upcomingTitles = Livewire::actingAs($user)->test(UpcomingEventsCard::class)
+        ->viewData('upcomingEvents')->pluck('title_en')->sort()->values()->all();
 
     expect($todayTitles)->toBe(['Today for me', 'Today for my city'])
         ->and($upcomingTitles)->toBe(['Soon for me', 'Soon for my city']);

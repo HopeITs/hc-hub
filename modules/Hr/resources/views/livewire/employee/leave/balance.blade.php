@@ -31,7 +31,8 @@ use Modules\Hr\Enums\LeaveRequestStatus;
 
     <x-modal.dialog max-width="6xl" id="showModal" :title="$modalTitle" wire:model.defer="showModal" close-action="requestClose" wire:ignore.self>
 
-        <form wire:submit.prevent="save" class="space-y-4 sheet:flex-1 sheet:flex sheet:flex-col">
+        {{-- Enter and Save take the same path: confirm, then save. --}}
+        <form wire:submit.prevent="confirmSave" class="space-y-4 sheet:flex-1 sheet:flex sheet:flex-col">
             <x-forms.errors-validation-list/>
             <div class="grid md:grid-cols-3 gap-4">
                 <div class="md:col-span-1">
@@ -92,11 +93,9 @@ use Modules\Hr\Enums\LeaveRequestStatus;
                 @endif
             </div>
             <x-modal.actions>
-                <x-primary-button type="button" wire:click="confirmSave"
-                                  class="!w-auto">@lang('general.save')</x-primary-button>
+                <x-primary-button type="submit" class="!w-auto">@lang('general.save')</x-primary-button>
                 {{-- Closes through the guard, like Escape and the header close: no link, no submit. --}}
-                <x-primary-button type="button" :show-spinner="false" x-on:click="close()"
-                                  class="!bg-secondary-light !w-auto">@lang('general.cancel')</x-primary-button>
+                <x-button variant="quiet" :loading="false" x-on:click="close()">@lang('general.cancel')</x-button>
             </x-modal.actions>
         </form>
     </x-modal.dialog>

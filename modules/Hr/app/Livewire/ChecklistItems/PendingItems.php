@@ -4,10 +4,10 @@ namespace Modules\Hr\Livewire\ChecklistItems;
 
 use App\Livewire\Concerns\HandlesLoadFailure;
 use App\Livewire\Concerns\WithFeedback;
-use Modules\Hr\Models\Checklist;
-use Modules\Hr\Services\ChecklistWorkflow;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Modules\Hr\Models\Checklist;
+use Modules\Hr\Services\ChecklistWorkflow;
 
 class PendingItems extends Component
 {
@@ -34,7 +34,9 @@ class PendingItems extends Component
     {
         $employee = Auth::user()?->profile;
 
-        abort_unless($employee, 403);
+        if ($employee === null) {
+            abort(403);
+        }
 
         // The list above is scoped to this employee, but the id arrives from
         // the browser and must be re-scoped here — the read being safe never

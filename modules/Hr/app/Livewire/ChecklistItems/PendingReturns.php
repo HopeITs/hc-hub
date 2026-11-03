@@ -4,10 +4,10 @@ namespace Modules\Hr\Livewire\ChecklistItems;
 
 use App\Livewire\Concerns\HandlesLoadFailure;
 use App\Livewire\Concerns\WithFeedback;
-use Modules\Hr\Models\Checklist;
-use Modules\Hr\Services\ChecklistWorkflow;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Modules\Hr\Models\Checklist;
+use Modules\Hr\Services\ChecklistWorkflow;
 
 class PendingReturns extends Component
 {
@@ -34,7 +34,9 @@ class PendingReturns extends Component
     {
         $employee = Auth::user()?->profile;
 
-        abort_unless($employee, 403);
+        if ($employee === null) {
+            abort(403);
+        }
 
         // Re-scoped to the nominated receiver; the id in the payload is not
         // evidence that this user is entitled to close the return.

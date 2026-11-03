@@ -1,12 +1,7 @@
-{{-- A tag (media-request .tag): neutral by default (.tag.soft = surface fill, text colour);
-     `brand` is the red tag (.tag.act). Other colours are the legacy status pairs, which
-     task 1.3 moves to media-request's neutral + icon style. --}}
-@props(['color' => 'neutral'])
-@php
-    $tone = match ($color) {
-        'neutral' => 'bg-neutral-200 text-neutral-800',
-        'brand' => 'bg-primary text-white',
-        default => "bg-{$color}-100 text-{$color}-800",
-    };
-@endphp
-<span class="{{ $tone }} text-[13px] font-bold leading-normal me-2 px-[9px] py-0.5 rounded-inset ">{{$slot}}</span>
+{{--
+    Legacy: a neutral fact ("Per month", "Yes"). Colour carried no meaning the
+    words did not, and the identity has no other hue, so `color` is accepted and
+    ignored; this is <x-tag variant="soft">. A status uses <x-status> instead.
+--}}
+@props(['color' => null])
+<x-tag variant="soft" {{ $attributes->class('me-2') }}>{{ $slot }}</x-tag>

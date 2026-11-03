@@ -31,6 +31,7 @@ class Position extends Model
     // Relationships
     // --------------------------------------------
 
+    /** @return HasMany<Contract, $this> */
     public function contracts(): HasMany
     {
         return $this->hasMany(Contract::class, 'position_id');
@@ -40,6 +41,8 @@ class Position extends Model
      * Active contracts on this position. Employees may hold multiple positions
      * simultaneously; each position lists every active contract here. For the
      * employee's single "primary" contract elsewhere, use Employee::latestActiveContract().
+     *
+     * @return HasMany<Contract, $this>
      */
     public function activeContracts(): HasMany
     {
@@ -48,46 +51,55 @@ class Position extends Model
             ->with('employee');
     }
 
+    /** @return BelongsTo<Center, $this> */
     public function center(): BelongsTo
     {
         return $this->belongsTo(Center::class, 'center_id');
     }
 
+    /** @return BelongsTo<Program, $this> */
     public function program(): BelongsTo
     {
         return $this->belongsTo(Program::class, 'program_id');
     }
 
+    /** @return BelongsTo<City, $this> */
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class, 'city_id');
     }
 
+    /** @return BelongsTo<JobLevel, $this> */
     public function jobLevel(): BelongsTo
     {
         return $this->belongsTo(JobLevel::class, 'job_level_id');
     }
 
+    /** @return BelongsTo<Department, $this> */
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'department_id');
     }
 
+    /** @return BelongsTo<self, $this> */
     public function directManager(): BelongsTo
     {
         return $this->belongsTo(self::class, 'direct_manager_id');
     }
 
+    /** @return BelongsTo<self, $this> */
     public function techManager(): BelongsTo
     {
         return $this->belongsTo(self::class, 'tech_manager_id');
     }
 
+    /** @return HasMany<self, $this> */
     public function directTeam(): HasMany
     {
         return $this->hasMany(self::class, 'direct_manager_id')->orderByGrade();
     }
 
+    /** @return HasMany<self, $this> */
     public function techTeam(): HasMany
     {
         return $this->hasMany(self::class, 'tech_manager_id')->orderByGrade();
@@ -288,6 +300,7 @@ class Position extends Model
     // Accessors & Mutators
     // --------------------------------------------
 
+    /** @return Attribute<string|null, string|null> */
     protected function title(): Attribute
     {
         return Attribute::make(

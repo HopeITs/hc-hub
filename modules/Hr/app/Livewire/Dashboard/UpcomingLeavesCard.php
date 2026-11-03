@@ -3,10 +3,11 @@
 namespace Modules\Hr\Livewire\Dashboard;
 
 use App\Livewire\Concerns\HandlesLoadFailure;
-use Modules\Hr\Services\TeamCoverage;
+use App\Livewire\Concerns\IsDashboardTile;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Livewire\Component;
+use Modules\Hr\Services\TeamCoverage;
 
 /**
  * Upcoming leaves on the home page. Since C4 it reads TeamCoverage (C5), the
@@ -22,6 +23,7 @@ use Livewire\Component;
 class UpcomingLeavesCard extends Component
 {
     use HandlesLoadFailure;
+    use IsDashboardTile;
 
     public const HORIZON_DAYS = 61;
 

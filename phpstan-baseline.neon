@@ -115,18 +115,6 @@ parameters:
 			path: app/Livewire/ActivityLog/ActivityLogModule.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/ActivityLog/ActivityLogTable.php
-
-		-
-			message: '#^Unable to resolve the template type TMapWithKeysValue in call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\User\>\:\:mapWithKeys\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: app/Livewire/ActivityLog/ActivityLogTable.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 4
@@ -187,84 +175,6 @@ parameters:
 			path: app/Livewire/Concerns/HandlesLoadFailure.php
 
 		-
-			message: '#^Access to an undefined property App\\Livewire\\Dashboard\\Index\:\:\$deliveredItems\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Dashboard\\Index\:\:\$myBadges\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Dashboard\\Index\:\:\$pendingRequests\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Dashboard\\Index\:\:\$teamMembers\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property App\\Livewire\\Dashboard\\Index\:\:\$upcomingEvents\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$code\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 6
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$canViewAvatar\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$contracts\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
 			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$daysLeftText\.$#'
 			identifier: property.notFound
 			count: 1
@@ -274,12 +184,6 @@ parameters:
 			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$departmentName\.$#'
 			identifier: property.notFound
 			count: 2
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$displayName\.$#'
-			identifier: property.notFound
-			count: 1
 			path: app/Livewire/Dashboard/Index.php
 
 		-
@@ -307,27 +211,9 @@ parameters:
 			path: app/Livewire/Dashboard/Index.php
 
 		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$groupRank\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$jobLevelGrade\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name_en\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
 			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$positionTitle\.$#'
 			identifier: property.notFound
-			count: 4
+			count: 2
 			path: app/Livewire/Dashboard/Index.php
 
 		-
@@ -337,27 +223,21 @@ parameters:
 			path: app/Livewire/Dashboard/Index.php
 
 		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\News\:\:\$daysLeftText\.$#'
+			message: '#^Access to an undefined property Modules\\Hr\\Models\\News\:\:\$event_description\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Livewire/Dashboard/Index.php
 
 		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\News\:\:\$event_description\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Dashboard/Index.php
-
-		-
 			message: '#^Access to an undefined property Modules\\Hr\\Models\\News\:\:\$event_timestamp\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Livewire/Dashboard/Index.php
 
 		-
 			message: '#^Access to an undefined property Modules\\Hr\\Models\\News\:\:\$event_title\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: app/Livewire/Dashboard/Index.php
 
 		-
@@ -369,30 +249,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property Modules\\Hr\\Models\\News\:\:\$image_url\.$#'
 			identifier: property.notFound
-			count: 2
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Hr\\Models\\Position\>\|Modules\\Hr\\Models\\Position\:\:activeContracts\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Cannot access property \$city on int\|Modules\\Hr\\Models\\Employee\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Cannot access property \$groupRank on int\|Modules\\Hr\\Models\\Employee\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Cannot access property \$jobLevelGrade on int\|Modules\\Hr\\Models\\Employee\.$#'
-			identifier: property.nonObject
 			count: 1
 			path: app/Livewire/Dashboard/Index.php
 
@@ -400,30 +256,6 @@ parameters:
 			message: '#^Cannot call method translatedFormat\(\) on Carbon\\Carbon\|string\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Method App\\Livewire\\Dashboard\\Index\:\:getDeliveredItemsProperty\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Method App\\Livewire\\Dashboard\\Index\:\:getMyBadgesProperty\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Method App\\Livewire\\Dashboard\\Index\:\:getPendingRequestsProperty\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Method App\\Livewire\\Dashboard\\Index\:\:getTeamMembersProperty\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
 			path: app/Livewire/Dashboard/Index.php
 
 		-
@@ -439,50 +271,8 @@ parameters:
 			path: app/Livewire/Dashboard/Index.php
 
 		-
-			message: '#^Method App\\Livewire\\Dashboard\\Index\:\:getUpcomingEventsProperty\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Method App\\Livewire\\Dashboard\\Index\:\:loadDeliveredItems\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Method App\\Livewire\\Dashboard\\Index\:\:loadMyBadges\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Method App\\Livewire\\Dashboard\\Index\:\:loadPendingRequests\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Method App\\Livewire\\Dashboard\\Index\:\:loadTeamMembers\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Method App\\Livewire\\Dashboard\\Index\:\:loadUpcomingEvents\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
 			message: '#^Method App\\Livewire\\Dashboard\\Index\:\:render\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:each\(\) expects callable\(Illuminate\\Database\\Eloquent\\Model, int\)\: mixed, Closure\(Modules\\Hr\\Models\\Employee\)\: void given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Livewire/Dashboard/Index.php
 
@@ -529,93 +319,9 @@ parameters:
 			path: app/Livewire/Dashboard/Index.php
 
 		-
-			message: '#^Relation ''account'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 4
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Relation ''delivered'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Badge model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Relation ''item'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Relation ''jobLevel'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 5
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Unable to resolve the template type TMapValue in call to method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Contract\>\:\:map\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>\(Expression\)" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 9
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>grade" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 2
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>title_en" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Livewire/Dashboard/Index.php
-
-		-
-			message: '#^Using nullsafe property access on non\-nullable type mixed\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
+			count: 3
 			path: app/Livewire/Dashboard/Index.php
 
 		-
@@ -691,12 +397,6 @@ parameters:
 			path: app/Livewire/Layout/Breadcrumbs.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:visible\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/Livewire/Layout/GlobalSearch.php
-
-		-
 			message: '#^Method App\\Livewire\\Layout\\GlobalSearch\:\:pages\(\) should return list\<array\<string, string\>\> but returns array\<int, array\{route\: string, area\: string, label\: string, label_en\: string, label_ar\: string\}\>\.$#'
 			identifier: return.type
 			count: 1
@@ -715,12 +415,6 @@ parameters:
 			path: app/Livewire/Layout/GlobalSearch.php
 
 		-
-			message: '#^Parameter \#1 \$sql of method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:orWhereRaw\(\) expects literal\-string, non\-falsy\-string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Livewire/Layout/GlobalSearch.php
-
-		-
 			message: '#^Parameter \#1 \$value of function collect expects Illuminate\\Contracts\\Support\\Arrayable\<int\<0, max\>, string\>\|iterable\<int\<0, max\>, string\>\|null, list\<string\>\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -731,12 +425,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/Livewire/Layout/Header.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:contracts\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Livewire/Layout/Sidebar.php
 
 		-
 			message: '#^Method App\\Livewire\\Layout\\Sidebar\:\:close\(\) has no return type specified\.$#'
@@ -775,12 +463,6 @@ parameters:
 			path: app/Models/Center.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Modules\\Hr\\Models\\Employee\>\:\:activeNow\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Models/Center.php
-
-		-
 			message: '#^Class App\\Models\\Center uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
 			count: 1
@@ -788,18 +470,6 @@ parameters:
 
 		-
 			message: '#^Method App\\Models\\Center\:\:activeEmployeesQuery\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Center.php
-
-		-
-			message: '#^Method App\\Models\\Center\:\:address\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Center.php
-
-		-
-			message: '#^Method App\\Models\\Center\:\:city\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
 			identifier: missingType.generics
 			count: 1
 			path: app/Models/Center.php
@@ -823,26 +493,8 @@ parameters:
 			path: app/Models/Center.php
 
 		-
-			message: '#^Method App\\Models\\Center\:\:name\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Center.php
-
-		-
-			message: '#^Method App\\Models\\Center\:\:positions\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: app/Models/Center.php
-
-		-
 			message: '#^Method App\\Models\\Center\:\:setTranslatableAttribute\(\) has parameter \$value with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: app/Models/Center.php
-
-		-
-			message: '#^Relation ''allContracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
 			count: 1
 			path: app/Models/Center.php
 
@@ -861,12 +513,6 @@ parameters:
 		-
 			message: '#^Method App\\Models\\City\:\:getTranslatableAttribute\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: app/Models/City.php
-
-		-
-			message: '#^Method App\\Models\\City\:\:name\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
 			count: 1
 			path: app/Models/City.php
 
@@ -896,12 +542,6 @@ parameters:
 
 		-
 			message: '#^Class App\\Models\\Department uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/Department.php
-
-		-
-			message: '#^Method App\\Models\\Department\:\:description\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
 			identifier: missingType.generics
 			count: 1
 			path: app/Models/Department.php
@@ -1021,12 +661,6 @@ parameters:
 			path: app/Models/Program.php
 
 		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: app/Models/Program.php
-
-		-
 			message: '#^Method App\\Models\\SavedTableView\:\:user\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
 			identifier: missingType.generics
 			count: 1
@@ -1045,12 +679,6 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Models/User.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pivot\.$#'
 			identifier: property.notFound
 			count: 1
@@ -1063,19 +691,7 @@ parameters:
 			path: app/Models/User.php
 
 		-
-			message: '#^Method App\\Models\\User\:\:accessibleFolders\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/User.php
-
-		-
 			message: '#^Method App\\Models\\User\:\:broadcastRecipientsQuery\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: '#^Method App\\Models\\User\:\:folders\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
 			identifier: missingType.generics
 			count: 1
 			path: app/Models/User.php
@@ -1089,12 +705,6 @@ parameters:
 		-
 			message: '#^Method App\\Models\\User\:\:newMorphToMany\(\) should return Illuminate\\Database\\Eloquent\\Relations\\MorphToMany\<TRelatedModel of Illuminate\\Database\\Eloquent\\Model, TDeclaringModel of Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Relations\\MorphPivot, ''pivot''\> but returns Illuminate\\Database\\Eloquent\\Relations\\MorphToMany@anonymous/app/Models/User\.php\:\d+\.$#'
 			identifier: return.type
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: '#^Method App\\Models\\User\:\:profile\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
 			count: 1
 			path: app/Models/User.php
 
@@ -1113,12 +723,6 @@ parameters:
 		-
 			message: '#^Property App\\Models\\User\:\:\$authMemoRegistry with generic class WeakReference does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: app/Models/User.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
 			count: 1
 			path: app/Models/User.php
 
@@ -1273,12 +877,6 @@ parameters:
 			path: app/Support/AccessPermissionCatalog.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:contracts\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: app/Support/Navigation.php
-
-		-
 			message: '#^Method App\\Support\\Navigation\:\:flatten\(\) has parameter \$nav with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1399,18 +997,6 @@ parameters:
 			path: modules/Hr/app/Casts/EncryptedSalary.php
 
 		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Console/Commands/BackfillLeaveBalances.php
-
-		-
-			message: '#^Relation ''leaveBalances'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Console/Commands/BackfillLeaveBalances.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -1423,34 +1009,10 @@ parameters:
 			path: modules/Hr/app/Console/Commands/CheckSalaryKey.php
 
 		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Console/Commands/DeactivateContract.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Console/Commands/DeactivateContract.php
-
-		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Console/Commands/DeactivateEmployee.php
-
-		-
 			message: '#^Method Modules\\Hr\\Console\\Commands\\FixPositionEmployeeCounts\:\:handle\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: modules/Hr/app/Console/Commands/FixPositionEmployeeCounts.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Console/Commands/ImportEmployeeImages.php
 
 		-
 			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
@@ -1465,54 +1027,6 @@ parameters:
 			path: modules/Hr/app/Console/Commands/ImportEmployeeImages.php
 
 		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Console/Commands/ImportEmployeeJoinDates.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Console/Commands/ProcessContractAutoRenewals.php
-
-		-
-			message: '#^Parameter \#1 \$groupBy of method Illuminate\\Support\\Collection\<int,Modules\\Hr\\Models\\Contract\>\:\:groupBy\(\) expects \(callable\(Modules\\Hr\\Models\\Contract, int\)\: int\)\|list\<Closure\|string\>\|string, Closure\(Modules\\Hr\\Models\\Contract\)\: \(int\|null\) given\.$#'
-			identifier: argument.type
-			count: 1
-			path: modules/Hr/app/Console/Commands/ProcessContractAutoRenewals.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Console/Commands/ProcessContractAutoRenewals.php
-
-		-
-			message: '#^Strict comparison using \!\=\= between \(int\|string\) and null will always evaluate to true\.$#'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: modules/Hr/app/Console/Commands/ProcessContractAutoRenewals.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$leaveBalances\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Console/Commands/RecalculateLeaveBalances.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Console/Commands/RecalculateLeaveBalances.php
-
-		-
-			message: '#^Relation ''leaveBalances'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Console/Commands/RecalculateLeaveBalances.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 2
@@ -1523,24 +1037,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: modules/Hr/app/Console/Commands/RecalculateLeaveBalances.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Console/Commands/SendContractExpirationWarnings.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Console/Commands/SendContractExpirationWarnings.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Console/Commands/SendContractExpirationWarnings.php
 
 		-
 			message: '#^Unable to resolve the template type TKey in call to function collect$#'
@@ -1559,12 +1055,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: modules/Hr/app/Console/Commands/SendContractExpirationWarnings.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Console/Commands/SendLeaveDecisionReminders.php
 
 		-
 			message: '#^Method Modules\\Hr\\Console\\Commands\\SendLeaveDecisionReminders\:\:dueRequests\(\) has no return type specified\.$#'
@@ -1673,12 +1163,6 @@ parameters:
 			identifier: missingType.generics
 			count: 1
 			path: modules/Hr/app/Enums/KinshipType.php
-
-		-
-			message: '#^Class Modules\\Hr\\Enums\\LeaveRequestStatus extends generic class BenSampo\\Enum\\Enum but does not specify its types\: TValue$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Enums/LeaveRequestStatus.php
 
 		-
 			message: '#^Method Modules\\Hr\\Enums\\LeaveRequestStatus\:\:getLocalizedName\(\) return type has no value type specified in iterable type array\.$#'
@@ -2119,12 +1603,6 @@ parameters:
 			path: modules/Hr/app/Exports/PositionExport.php
 
 		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Http/Controllers/ContractExportController.php
-
-		-
 			message: '#^Method Modules\\Hr\\Http\\Controllers\\ContractExportController\:\:pdf\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2156,12 +1634,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Hr\\Models\\Folder\>\|Modules\\Hr\\Models\\Folder\:\:\$users\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Archives/ArchivedFilesModule.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
 			path: modules/Hr/app/Livewire/Archives/ArchivedFilesModule.php
@@ -2557,12 +2029,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Archives/ArchivedFilesModule.php
 
 		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Badge\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 3
-			path: modules/Hr/app/Livewire/Badges/BadgesModule.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\Badges\\BadgesModule\:\:currencyLabel\(\) has parameter \$v with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -2599,25 +2065,7 @@ parameters:
 			path: modules/Hr/app/Livewire/Badges/BadgesModule.php
 
 		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Badge model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Badges/BadgesModule.php
-
-		-
-			message: '#^Relation ''evaluation'' is not found in Modules\\Hr\\Models\\Badge model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Badges/BadgesModule.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Badges/BadgesTable.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
 			path: modules/Hr/app/Livewire/Badges/BadgesTable.php
@@ -2636,12 +2084,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:visibleTo\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Badges/BadgesTable.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Modules\\Hr\\Models\\Employee\>\:\:visibleTo\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: modules/Hr/app/Livewire/Badges/BadgesTable.php
@@ -2689,12 +2131,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Badges/BadgesTable.php
 
 		-
-			message: '#^Relation ''badges'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Badges/BadgesTable.php
-
-		-
 			message: '#^Relation ''positions'' is not found in App\\Models\\Department model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
@@ -2703,12 +2139,6 @@ parameters:
 		-
 			message: '#^Relation ''positions'' is not found in App\\Models\\Program model\.$#'
 			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Badges/BadgesTable.php
-
-		-
-			message: '#^Unable to resolve the template type TMapWithKeysValue in call to method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Employee\>\:\:mapWithKeys\(\)$#'
-			identifier: argument.templateType
 			count: 1
 			path: modules/Hr/app/Livewire/Badges/BadgesTable.php
 
@@ -2873,12 +2303,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: modules/Hr/app/Livewire/Basics/ChecklistItemTable.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\City\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Basics/CityModule.php
 
 		-
 			message: '#^Call to an undefined method App\\Models\\City\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\City\>\:\:forceFill\(\)\.$#'
@@ -3235,12 +2659,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Basics/DepartmentTable.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\City\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Basics/HolidayModule.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Hr\\Models\\Holiday\>\|Modules\\Hr\\Models\\Holiday\:\:\$created_by\.$#'
 			identifier: property.notFound
 			count: 1
@@ -3327,12 +2745,6 @@ parameters:
 		-
 			message: '#^Property Modules\\Hr\\Livewire\\Basics\\HolidayModule\:\:\$listeners has no type specified\.$#'
 			identifier: missingType.property
-			count: 1
-			path: modules/Hr/app/Livewire/Basics/HolidayModule.php
-
-		-
-			message: '#^Unable to resolve the template type TMapWithKeysValue in call to method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\City\>\:\:mapWithKeys\(\)$#'
-			identifier: argument.templateType
 			count: 1
 			path: modules/Hr/app/Livewire/Basics/HolidayModule.php
 
@@ -3649,12 +3061,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Basics/TerminationReasonTable.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/AllItems.php
-
-		-
 			message: '#^Access to an undefined property Modules\\Hr\\Livewire\\ChecklistItems\\AllItems\:\:\$items\.$#'
 			identifier: property.notFound
 			count: 1
@@ -3675,18 +3081,6 @@ parameters:
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\ChecklistItems\\AllItems\:\:render\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/AllItems.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/AllItems.php
-
-		-
-			message: '#^Relation ''item'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
 			count: 1
 			path: modules/Hr/app/Livewire/ChecklistItems/AllItems.php
 
@@ -3721,12 +3115,6 @@ parameters:
 			path: modules/Hr/app/Livewire/ChecklistItems/DoneRequestsTable.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:latestActiveContract\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/DoneRequestsTable.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\ChecklistItems\\DoneRequestsTable\:\:emptyStateCreate\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -3739,22 +3127,10 @@ parameters:
 			path: modules/Hr/app/Livewire/ChecklistItems/DoneRequestsTable.php
 
 		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/DoneRequestsTable.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 8
 			path: modules/Hr/app/Livewire/ChecklistItems/DoneRequestsTable.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/PendingDeliversCounter.php
 
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\ChecklistItems\\PendingDeliversCounter\:\:render\(\) has no return type specified\.$#'
@@ -3767,12 +3143,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: modules/Hr/app/Livewire/ChecklistItems/PendingDeliversCounter.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/ChecklistItems/PendingItems.php
 
 		-
 			message: '#^Access to an undefined property Modules\\Hr\\Livewire\\ChecklistItems\\PendingItems\:\:\$items\.$#'
@@ -3793,34 +3163,10 @@ parameters:
 			path: modules/Hr/app/Livewire/ChecklistItems/PendingItems.php
 
 		-
-			message: '#^Parameter \#1 \$boolean of function abort_unless expects bool, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/PendingItems.php
-
-		-
 			message: '#^Property Modules\\Hr\\Livewire\\ChecklistItems\\PendingItems\:\:\$notes type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/Hr/app/Livewire/ChecklistItems/PendingItems.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/PendingItems.php
-
-		-
-			message: '#^Relation ''item'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/PendingItems.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/ChecklistItems/PendingReturns.php
 
 		-
 			message: '#^Access to an undefined property Modules\\Hr\\Livewire\\ChecklistItems\\PendingReturns\:\:\$items\.$#'
@@ -3841,34 +3187,10 @@ parameters:
 			path: modules/Hr/app/Livewire/ChecklistItems/PendingReturns.php
 
 		-
-			message: '#^Parameter \#1 \$boolean of function abort_unless expects bool, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/PendingReturns.php
-
-		-
 			message: '#^Property Modules\\Hr\\Livewire\\ChecklistItems\\PendingReturns\:\:\$notes type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/Hr/app/Livewire/ChecklistItems/PendingReturns.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/PendingReturns.php
-
-		-
-			message: '#^Relation ''item'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/PendingReturns.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/ChecklistItems/PendingReturnsCounter.php
 
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\ChecklistItems\\PendingReturnsCounter\:\:render\(\) has no return type specified\.$#'
@@ -3893,42 +3215,6 @@ parameters:
 			identifier: nullCoalesce.offset
 			count: 1
 			path: modules/Hr/app/Livewire/Contract/Concerns/DrivesContractComposer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\City\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\ContractType\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
 
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\Contract\\ContractCreate\:\:applyComposerPayload\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
@@ -4051,18 +3337,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
 
 		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Position\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:sortBy\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
-
-		-
 			message: '#^Property Modules\\Hr\\Models\\Contract\:\:\$contract_type_id \(int\<0, max\>\) does not accept int\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -4083,36 +3357,6 @@ parameters:
 		-
 			message: '#^Property Modules\\Hr\\Models\\Contract\:\:\$start_date \(Carbon\\Carbon\|null\) does not accept string\.$#'
 			identifier: assign.propertyType
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Position\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:all\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:values\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
 			count: 1
 			path: modules/Hr/app/Livewire/Contract/ContractCreate.php
 
@@ -4159,88 +3403,10 @@ parameters:
 			path: modules/Hr/app/Livewire/Contract/ContractDetails.php
 
 		-
-			message: '#^Relation ''contractType'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractDetails.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractDetails.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractDetails.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: modules/Hr/app/Livewire/Contract/ContractDetails.php
-
-		-
-			message: '#^Relation ''contractType'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractDrawer.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractDrawer.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractDrawer.php
-
-		-
-			message: '#^Relation ''terminationReason'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractDrawer.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\City\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\ContractType\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
 
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\Contract\\ContractEdit\:\:applyComposerPayload\(\) has parameter \$payload with no value type specified in iterable type array\.$#'
@@ -4351,18 +3517,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
 
 		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Position\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
-
-		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:sortBy\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
-
-		-
 			message: '#^Property Modules\\Hr\\Models\\Contract\:\:\$contract_type_id \(int\<0, max\>\) does not accept int\|null\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -4383,30 +3537,6 @@ parameters:
 		-
 			message: '#^Property Modules\\Hr\\Models\\Contract\:\:\$start_date \(Carbon\\Carbon\|null\) does not accept string\.$#'
 			identifier: assign.propertyType
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Position\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:all\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Support\\Collection\<int,array\<string, mixed\>\>\:\:values\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
 			count: 1
 			path: modules/Hr/app/Livewire/Contract/ContractEdit.php
 
@@ -4447,24 +3577,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Contract/ContractRenewModal.php
 
 		-
-			message: '#^Relation ''contractType'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractRenewModal.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractRenewModal.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Contract/ContractRenewModal.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\Contract\\ContractsModule\:\:render\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4485,13 +3597,13 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$end_date\.$#'
 			identifier: property.notFound
-			count: 3
+			count: 2
 			path: modules/Hr/app/Livewire/Contract/ContractsTable.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_active\.$#'
 			identifier: property.notFound
-			count: 3
+			count: 2
 			path: modules/Hr/app/Livewire/Contract/ContractsTable.php
 
 		-
@@ -4515,7 +3627,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$type\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: modules/Hr/app/Livewire/Contract/ContractsTable.php
 
 		-
@@ -4557,7 +3669,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isTerminated\(\)\.$#'
 			identifier: method.notFound
-			count: 3
+			count: 2
 			path: modules/Hr/app/Livewire/Contract/ContractsTable.php
 
 		-
@@ -4699,38 +3811,8 @@ parameters:
 			path: modules/Hr/app/Livewire/Contract/ContractsTable.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:latestActiveContract\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/CalendarCard.php
-
-		-
 			message: '#^Cannot call method startOfWeek\(\) on Carbon\\Carbon\|string\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/CalendarCard.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\CalendarCard\:\:formatDay\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/CalendarCard.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\CalendarCard\:\:mount\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/CalendarCard.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\CalendarCard\:\:next\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/CalendarCard.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\CalendarCard\:\:prev\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: modules/Hr/app/Livewire/Dashboard/CalendarCard.php
 
@@ -4825,126 +3907,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Dashboard/EmployeeNotesCard.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$leaveType\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:availableLeaves\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:latestActiveContract\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:countStarting\(\) has parameter \$rows with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:inboxRow\(\) has parameter \$row with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:inboxRow\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:partAdminShortcuts\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:partBalance\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:partContractsEnding\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:partDecisions\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:partEmployeesWaiting\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:partInbox\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:partInboxItems\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:partKeyFigures\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:partMyItems\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:partMyRequests\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:partTeamOff\(\) return type has no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:render\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\ForYouNow\:\:startFlag\(\) has parameter \$row with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/ForYouNow.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\JobLevelEmployeeStatistics\:\:render\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4961,12 +3923,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: modules/Hr/app/Livewire/Dashboard/JobLevelEmployeeStatistics.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:availableLeaves\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/MyLeavesCard.php
 
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\MyLeavesCard\:\:mount\(\) has no return type specified\.$#'
@@ -5047,24 +4003,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Dashboard/NoLeavesEmployeesStatistics.php
 
 		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/NoLeavesEmployeesStatistics.php
-
-		-
-			message: '#^Relation ''leaveBalances'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/NoLeavesEmployeesStatistics.php
-
-		-
-			message: '#^Relation ''leaveRequests'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/NoLeavesEmployeesStatistics.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\Dashboard\\SalaryPerEmployeeStatistics\:\:render\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -5090,12 +4028,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$department_title\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/SoonEndingContractsCard.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
 			identifier: property.notFound
 			count: 1
 			path: modules/Hr/app/Livewire/Dashboard/SoonEndingContractsCard.php
@@ -5143,18 +4075,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Dashboard/SoonEndingContractsCard.php
 
 		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/SoonEndingContractsCard.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Dashboard/SoonEndingContractsCard.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>avatar_url" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -5177,12 +4097,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: modules/Hr/app/Livewire/Dashboard/UpcomingLeavesCard.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Position\:\:\$title\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/Employee/EmployeeCreate.php
 
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\Employee\\EmployeeCreate\:\:citiesForDraft\(\) return type has no value type specified in iterable type array\.$#'
@@ -5281,18 +4195,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/EmployeeCreate.php
 
 		-
-			message: '#^Unable to resolve the template type TMapWithKeysValue in call to method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Position\>\:\:mapWithKeys\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeCreate.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:employee\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeDrawer.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\Employee\\EmployeeDrawer\:\:assignments\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -5311,28 +4213,10 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/EmployeeDrawer.php
 
 		-
-			message: '#^Relation ''account'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeDrawer.php
-
-		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeDrawer.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>grade" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: modules/Hr/app/Livewire/Employee/EmployeeDrawer.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/Employee/EmployeeEdit.php
 
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\Employee\\EmployeeEdit\:\:addAttachment\(\) has no return type specified\.$#'
@@ -5575,40 +4459,10 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/EmployeeEdit.php
 
 		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeEdit.php
-
-		-
-			message: '#^Relation ''item'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeEdit.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeEdit.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\Employee\\EmployeeModule\:\:render\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: modules/Hr/app/Livewire/Employee/EmployeeModule.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$allContracts\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$badges\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
 
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\Employee\\EmployeeProfile\:\:guardedDialogs\(\) return type has no value type specified in iterable type array\.$#'
@@ -5671,56 +4525,8 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
 
 		-
-			message: '#^Property Modules\\Hr\\Livewire\\Employee\\EmployeeProfile\:\:\$employee \(Modules\\Hr\\Models\\Employee\) does not accept Illuminate\\Database\\Eloquent\\Model\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
-
-		-
 			message: '#^Property Modules\\Hr\\Livewire\\Employee\\EmployeeProfile\:\:\$proposalFile has no type specified\.$#'
 			identifier: missingType.property
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
-
-		-
-			message: '#^Relation ''account'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
-
-		-
-			message: '#^Relation ''allContracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
-
-		-
-			message: '#^Relation ''badges'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
-
-		-
-			message: '#^Relation ''courses'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
-
-		-
-			message: '#^Relation ''educations'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
-
-		-
-			message: '#^Relation ''experiences'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
-
-		-
-			message: '#^Relation ''relatives'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
 			count: 1
 			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
 
@@ -5729,12 +4535,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: modules/Hr/app/Livewire/Employee/EmployeeProfile.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Modules\\Hr\\Models\\Contract\>\:\:inCity\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeStatistics.php
 
 		-
 			message: '#^Cannot call method translatedFormat\(\) on Illuminate\\Support\\Carbon\|string\.$#'
@@ -5767,12 +4567,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/EmployeeStatistics.php
 
 		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeStatistics.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$account\.$#'
 			identifier: property.notFound
 			count: 2
@@ -5786,12 +4580,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$state\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeTable.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
 			path: modules/Hr/app/Livewire/Employee/EmployeeTable.php
@@ -5947,12 +4735,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/EmployeeTable.php
 
 		-
-			message: '#^Unable to resolve the template type TMapWithKeysValue in call to method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Employee\>\:\:mapWithKeys\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/EmployeeTable.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -5966,12 +4748,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Hr\\Models\\LeaveRequest\>\|Modules\\Hr\\Models\\LeaveRequest\:\:\$status\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestModule.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
 			identifier: property.notFound
 			count: 1
 			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestModule.php
@@ -6229,12 +5005,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestModule.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$city_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
 			identifier: property.notFound
 			count: 1
@@ -6248,12 +5018,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$hr_approved\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
 			count: 1
 			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
@@ -6277,25 +5041,7 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
 
 		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Hr\\Models\\LeaveRequest\>\|Modules\\Hr\\Models\\LeaveRequest\:\:delete\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:allAvailableLeaves\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:availableLeaves\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
@@ -6361,46 +5107,16 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
 
 		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
-
-		-
-			message: '#^Unable to resolve the template type TMapWithKeysValue in call to method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Employee\>\:\:mapWithKeys\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: modules/Hr/app/Livewire/Employee/Leave/AllLeaveRequestTable.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:latestActiveContract\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/Employee/Leave/BirthdayHolidayCard.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\Employee\\Leave\\BirthdayHolidayCard\:\:render\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: modules/Hr/app/Livewire/Employee/Leave/BirthdayHolidayCard.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/EmpLeaveBalanceModule.php
 
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\Employee\\Leave\\EmpLeaveBalanceModule\:\:confirmSave\(\) has no return type specified\.$#'
@@ -6475,12 +5191,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/Leave/EmpLeaveBalanceTable.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:positions\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/EmpLeaveBalanceTable.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\Employee\\Leave\\EmpLeaveBalanceTable\:\:edit\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -6523,33 +5233,9 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/Leave/EmpLeaveBalanceTable.php
 
 		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: modules/Hr/app/Livewire/Employee/Leave/EmpLeaveBalanceTable.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
 			identifier: property.notFound
-			count: 4
-			path: modules/Hr/app/Livewire/Employee/Leave/MyLeaveRequestModule.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:allAvailableLeaves\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/MyLeaveRequestModule.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:availableLeaves\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/MyLeaveRequestModule.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:latestActiveContract\(\)\.$#'
-			identifier: method.notFound
-			count: 1
+			count: 2
 			path: modules/Hr/app/Livewire/Employee/Leave/MyLeaveRequestModule.php
 
 		-
@@ -6649,18 +5335,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/Leave/MyLeaveRequestModule.php
 
 		-
-			message: '#^Parameter \#1 \$employee of method Modules\\Hr\\Services\\LeaveAlternativeEmployees\:\:for\(\) expects Modules\\Hr\\Models\\Employee, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/MyLeaveRequestModule.php
-
-		-
-			message: '#^Parameter \#1 \$requester of method Modules\\Hr\\Livewire\\Forms\\LeaveRequestForm\:\:previewQuote\(\) expects Modules\\Hr\\Models\\Employee, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: modules/Hr/app/Livewire/Employee/Leave/MyLeaveRequestModule.php
-
-		-
 			message: '#^Parameter \#1 \$string of function trim expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -6700,12 +5374,6 @@ parameters:
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$end_at\.$#'
 			identifier: property.notFound
 			count: 2
-			path: modules/Hr/app/Livewire/Employee/Leave/MyLeaveRequestTable.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
 			path: modules/Hr/app/Livewire/Employee/Leave/MyLeaveRequestTable.php
 
 		-
@@ -6805,46 +5473,10 @@ parameters:
 			path: modules/Hr/app/Livewire/Employee/Leave/UpdateLeaveRequest.php
 
 		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/EmployeeCards/ManageDigitalId.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$hr_hotline\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/EmployeeCards/ShowDigitalId.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/EmployeeCards/ShowDigitalId.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/EmployeeCards/ShowDigitalId.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\EmployeeCards\\ShowDigitalId\:\:render\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: modules/Hr/app/Livewire/EmployeeCards/ShowDigitalId.php
-
-		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/EmployeeCards/ShowDigitalId.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$payTiers\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/Forms/ContractForm.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Hr\\Models\\Position\>\|Modules\\Hr\\Models\\Position\:\:canAssign\(\)\.$#'
@@ -6903,12 +5535,6 @@ parameters:
 		-
 			message: '#^Offset ''condition_en'' on array\{condition_en\: string, condition_ar\: string, amount\: mixed\} on left side of \?\? always exists and is not nullable\.$#'
 			identifier: nullCoalesce.offset
-			count: 1
-			path: modules/Hr/app/Livewire/Forms/ContractForm.php
-
-		-
-			message: '#^Relation ''payTiers'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
 			count: 1
 			path: modules/Hr/app/Livewire/Forms/ContractForm.php
 
@@ -7039,18 +5665,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Forms/Employee/BadgeForm.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Forms/Employee/ChecklistForm.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$checklists\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Forms/Employee/ChecklistForm.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\Forms\\Employee\\ChecklistForm\:\:setEmployeeAndAllItems\(\) has parameter \$allItems with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
 			count: 1
@@ -7083,12 +5697,6 @@ parameters:
 		-
 			message: '#^Property Modules\\Hr\\Livewire\\Forms\\Employee\\CourseForm\:\:\$courses type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/Forms/Employee/CourseForm.php
-
-		-
-			message: '#^Relation ''courses'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
 			count: 1
 			path: modules/Hr/app/Livewire/Forms/Employee/CourseForm.php
 
@@ -7157,12 +5765,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/Hr/app/Livewire/Forms/Employee/ItemForm.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$account\.$#'
-			identifier: property.notFound
-			count: 5
-			path: modules/Hr/app/Livewire/Forms/Employee/PersonalInfoForm.php
 
 		-
 			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$direct_manager_id\.$#'
@@ -7495,24 +6097,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Forms/Employee/RelativeForm.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 3
-			path: modules/Hr/app/Livewire/Forms/LeaveBalanceForm.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/Forms/LeaveBalanceForm.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$work_hour_per_day\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Forms/LeaveBalanceForm.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\Forms\\LeaveBalanceForm\:\:rules\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7597,24 +6181,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Forms/LeaveBalanceForm.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/Forms/LeaveRequestForm.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$employee_id\.$#'
-			identifier: property.notFound
-			count: 3
-			path: modules/Hr/app/Livewire/Forms/LeaveRequestForm.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/Forms/LeaveRequestForm.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\Forms\\LeaveRequestForm\:\:rules\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7623,18 +6189,6 @@ parameters:
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\Forms\\LeaveRequestForm\:\:targetEmployee\(\) should return Modules\\Hr\\Models\\Employee\|null but returns Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Hr\\Models\\Employee\>\|Modules\\Hr\\Models\\Employee\|null\.$#'
 			identifier: return.type
-			count: 1
-			path: modules/Hr/app/Livewire/Forms/LeaveRequestForm.php
-
-		-
-			message: '#^Method Modules\\Hr\\Livewire\\Forms\\LeaveRequestForm\:\:targetEmployee\(\) should return Modules\\Hr\\Models\\Employee\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: modules/Hr/app/Livewire/Forms/LeaveRequestForm.php
-
-		-
-			message: '#^Parameter \#1 \$contract of method Modules\\Hr\\Services\\LeaveRequestPricing\:\:quote\(\) expects Modules\\Hr\\Models\\Contract, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: modules/Hr/app/Livewire/Forms/LeaveRequestForm.php
 
@@ -7969,18 +6523,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Forms/ProgramManagement/ProgramForm.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Support\\HigherOrderCollectionProxy\<string, Modules\\Hr\\Models\\Employee, Illuminate\\Support\\Collection\<int, Modules\\Hr\\Models\\Employee\>\>\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Inbox/Index.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Checklist\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Inbox/Index.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 1
@@ -8065,12 +6607,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Inbox/Index.php
 
 		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Inbox/Index.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\News\\NewsCreate\:\:render\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -8087,12 +6623,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: modules/Hr/app/Livewire/News/NewsModule.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/News/NewsTable.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Modules\\Hr\\Models\\News\>\:\:visibleTo\(\)\.$#'
@@ -8155,38 +6685,14 @@ parameters:
 			path: modules/Hr/app/Livewire/News/NewsTable.php
 
 		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/News/TodayEventsCard.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/News/TodayEventsCard.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\News\\TodayEventsCard\:\:render\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: modules/Hr/app/Livewire/News/TodayEventsCard.php
 
 		-
-			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Employee\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: argument.unresolvableType
-			count: 1
-			path: modules/Hr/app/Livewire/News/TodayEventsCard.php
-
-		-
 			message: '#^Property Modules\\Hr\\Livewire\\News\\TodayEventsCard\:\:\$events type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Livewire/News/TodayEventsCard.php
-
-		-
-			message: '#^Return type of call to method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Employee\>\:\:map\(\) contains unresolvable type\.$#'
-			identifier: method.unresolvableReturnType
 			count: 1
 			path: modules/Hr/app/Livewire/News/TodayEventsCard.php
 
@@ -8236,12 +6742,6 @@ parameters:
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:visible\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: modules/Hr/app/Livewire/Position/Directory.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:visible\(\)\.$#'
-			identifier: method.notFound
-			count: 3
 			path: modules/Hr/app/Livewire/Position/Directory.php
 
 		-
@@ -8419,12 +6919,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Position/OrgChart.php
 
 		-
-			message: '#^Relation ''positions'' is not found in App\\Models\\Center model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Position/OrgChart.php
-
-		-
 			message: '#^Relation ''positions'' is not found in App\\Models\\Program model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
@@ -8459,12 +6953,6 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: modules/Hr/app/Livewire/Position/PositionCreate.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Position\:\:\$title\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Position/PositionEdit.php
 
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\Position\\PositionEdit\:\:render\(\) has no return type specified\.$#'
@@ -8953,12 +7441,6 @@ parameters:
 			path: modules/Hr/app/Livewire/ProgramManagement/Center/CentersTable.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\City\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesModule.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Hr\\Models\\DefaultDeliverable\>\|Modules\\Hr\\Models\\DefaultDeliverable\:\:\$city_id\.$#'
 			identifier: property.notFound
 			count: 1
@@ -8978,12 +7460,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Hr\\Models\\DefaultDeliverable\>\|Modules\\Hr\\Models\\DefaultDeliverable\:\:\$item_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesModule.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
 			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesModule.php
@@ -9055,36 +7531,6 @@ parameters:
 			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesModule.php
 
 		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesModule.php
-
-		-
-			message: '#^Relation ''department'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesModule.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesModule.php
-
-		-
-			message: '#^Unable to resolve the template type TMapWithKeysValue in call to method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Employee\>\:\:mapWithKeys\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesModule.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesTable.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Collection\<int, Modules\\Hr\\Models\\DefaultDeliverable\>\|Modules\\Hr\\Models\\DefaultDeliverable\:\:delete\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -9141,30 +7587,6 @@ parameters:
 		-
 			message: '#^Relation ''centers'' is not found in App\\Models\\City model\.$#'
 			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesTable.php
-
-		-
-			message: '#^Relation ''contracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesTable.php
-
-		-
-			message: '#^Relation ''department'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesTable.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesTable.php
-
-		-
-			message: '#^Unable to resolve the template type TMapWithKeysValue in call to method Illuminate\\Database\\Eloquent\\Collection\<int,Modules\\Hr\\Models\\Employee\>\:\:mapWithKeys\(\)$#'
-			identifier: argument.templateType
 			count: 1
 			path: modules/Hr/app/Livewire/ProgramManagement/DefaultDeliverable/DefaultDeliverablesTable.php
 
@@ -9349,12 +7771,6 @@ parameters:
 			path: modules/Hr/app/Livewire/ProgramManagement/Program/Update.php
 
 		-
-			message: '#^Access to an undefined property App\\Models\\Center\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/Statistics/ContractStatistics.php
-
-		-
 			message: '#^Method Modules\\Hr\\Livewire\\Statistics\\ContractStatistics\:\:contractTypeIdsForCategory\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -9409,18 +7825,6 @@ parameters:
 			path: modules/Hr/app/Livewire/Statistics/ContractStatistics.php
 
 		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 4
-			path: modules/Hr/app/Livewire/Statistics/ContractStatistics.php
-
-		-
-			message: '#^Relation ''positions'' is not found in App\\Models\\Center model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: modules/Hr/app/Livewire/Statistics/ContractStatistics.php
-
-		-
 			message: '#^Relation ''positions'' is not found in App\\Models\\Program model\.$#'
 			identifier: larastan.relationExistence
 			count: 1
@@ -9431,18 +7835,6 @@ parameters:
 			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
 			path: modules/Hr/app/Livewire/Statistics/ContractStatistics.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Livewire/Statistics/GeneralStatistics.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Livewire/Statistics/GeneralStatistics.php
 
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\Statistics\\GeneralStatistics\:\:render\(\) has no return type specified\.$#'
@@ -9493,22 +7885,10 @@ parameters:
 			path: modules/Hr/app/Livewire/Statistics/GeneralStatistics.php
 
 		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Livewire/Statistics/GeneralStatistics.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>\(Expression\)" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
-			count: 2
-			path: modules/Hr/app/Livewire/Statistics/GeneralStatistics.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Holiday\:\:\$name\.$#'
-			identifier: property.notFound
 			count: 1
-			path: modules/Hr/app/Livewire/Team/Calendar.php
+			path: modules/Hr/app/Livewire/Statistics/GeneralStatistics.php
 
 		-
 			message: '#^Method Modules\\Hr\\Livewire\\Team\\Calendar\:\:holidayLabels\(\) has parameter \$user with no type specified\.$#'
@@ -9589,18 +7969,6 @@ parameters:
 			path: modules/Hr/app/Models/Badge.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\Badge\:\:employee\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Badge.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Badge\:\:evaluation\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Badge.php
-
-		-
 			message: '#^Method Modules\\Hr\\Models\\Badge\:\:scopeVisibleTo\(\) has parameter \$query with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
 			identifier: missingType.generics
 			count: 1
@@ -9643,30 +8011,6 @@ parameters:
 			path: modules/Hr/app/Models/Checklist.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\Checklist\:\:delivered\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Checklist.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Checklist\:\:employee\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Checklist.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Checklist\:\:item\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Checklist.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Checklist\:\:receiver\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Checklist.php
-
-		-
 			message: '#^Class Modules\\Hr\\Models\\ChecklistItem uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
 			count: 1
@@ -9697,37 +8041,7 @@ parameters:
 			path: modules/Hr/app/Models/Contract.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\Contract\:\:contractType\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Contract.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Contract\:\:employee\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Contract.php
-
-		-
 			message: '#^Method Modules\\Hr\\Models\\Contract\:\:getDurationAttribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Contract.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Contract\:\:leaveBalances\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Contract.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Contract\:\:payTiers\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Contract.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Contract\:\:position\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: modules/Hr/app/Models/Contract.php
@@ -9793,12 +8107,6 @@ parameters:
 			path: modules/Hr/app/Models/Contract.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\Contract\:\:terminationReason\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Contract.php
-
-		-
 			message: '#^Property Modules\\Hr\\Models\\Contract\:\:\$sensitiveLogAttributes \(array\) on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.property
 			count: 1
@@ -9809,12 +8117,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/Hr/app/Models/Contract.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\ContractPayTier\:\:condition\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/ContractPayTier.php
 
 		-
 			message: '#^Method Modules\\Hr\\Models\\ContractPayTier\:\:contract\(\) has no return type specified\.$#'
@@ -9853,12 +8155,6 @@ parameters:
 			path: modules/Hr/app/Models/ContractType.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\ContractType\:\:name\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/ContractType.php
-
-		-
 			message: '#^Method Modules\\Hr\\Models\\ContractType\:\:setTranslatableAttribute\(\) has parameter \$value with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -9867,18 +8163,6 @@ parameters:
 		-
 			message: '#^Class Modules\\Hr\\Models\\Course uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Course.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Course\:\:category\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Course.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Course\:\:employee\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: modules/Hr/app/Models/Course.php
 
@@ -9949,43 +8233,7 @@ parameters:
 			path: modules/Hr/app/Models/Education.php
 
 		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$account\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$contracts\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Models/Employee.php
-
-		-
 			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$father_name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$first_name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$last_name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name\.$#'
 			identifier: property.notFound
 			count: 1
 			path: modules/Hr/app/Models/Employee.php
@@ -10021,25 +8269,7 @@ parameters:
 			path: modules/Hr/app/Models/Employee.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:account\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:address\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
 			message: '#^Method Modules\\Hr\\Models\\Employee\:\:allAvailableLeaves\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:allContracts\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: modules/Hr/app/Models/Employee.php
@@ -10051,80 +8281,14 @@ parameters:
 			path: modules/Hr/app/Models/Employee.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:badges\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:checklists\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:city\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:contractTypes\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:contracts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:courses\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
 			message: '#^Method Modules\\Hr\\Models\\Employee\:\:defaultDeliverItems\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
 			identifier: missingType.generics
 			count: 1
 			path: modules/Hr/app/Models/Employee.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:educations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
 			message: '#^Method Modules\\Hr\\Models\\Employee\:\:employeeAttachments\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:evaluations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:experiences\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:father_name\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:firstName\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
 			count: 1
 			path: modules/Hr/app/Models/Employee.php
 
@@ -10147,62 +8311,8 @@ parameters:
 			path: modules/Hr/app/Models/Employee.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:items\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:jobLevels\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:lastName\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:lastSavedBy\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:long_fullname\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:mother_name\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:name\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:positions\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsToMany does not specify its types\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \(2\-4 required\)$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
 			message: '#^Method Modules\\Hr\\Models\\Employee\:\:realContracts\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
 			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:relatives\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: modules/Hr/app/Models/Employee.php
 
@@ -10287,12 +8397,6 @@ parameters:
 		-
 			message: '#^Method Modules\\Hr\\Models\\Employee\:\:setTranslatableAttribute\(\) has parameter \$value with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: modules/Hr/app/Models/Employee.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Employee\:\:workEmail\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
 			count: 1
 			path: modules/Hr/app/Models/Employee.php
 
@@ -10387,20 +8491,8 @@ parameters:
 			path: modules/Hr/app/Models/Folder.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\Holiday\:\:creator\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Holiday.php
-
-		-
 			message: '#^Method Modules\\Hr\\Models\\Holiday\:\:getTranslatableAttribute\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Holiday.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Holiday\:\:name\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
 			count: 1
 			path: modules/Hr/app/Models/Holiday.php
 
@@ -10465,12 +8557,6 @@ parameters:
 			path: modules/Hr/app/Models/JobLevel.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\JobLevel\:\:name\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/JobLevel.php
-
-		-
 			message: '#^Method Modules\\Hr\\Models\\JobLevel\:\:positions\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10483,24 +8569,6 @@ parameters:
 			path: modules/Hr/app/Models/JobLevel.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$end_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Models/LeaveBalance.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Models/LeaveBalance.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$start_date\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Models/LeaveBalance.php
-
-		-
 			message: '#^Class Modules\\Hr\\Models\\LeaveBalance uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
 			identifier: missingType.generics
 			count: 1
@@ -10509,12 +8577,6 @@ parameters:
 		-
 			message: '#^Method Modules\\Hr\\Models\\LeaveBalance\:\:canRequestAnnualLeave\(\) has parameter \$requestedHours with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: modules/Hr/app/Models/LeaveBalance.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\LeaveBalance\:\:contract\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
 			count: 1
 			path: modules/Hr/app/Models/LeaveBalance.php
 
@@ -10537,40 +8599,10 @@ parameters:
 			path: modules/Hr/app/Models/LeaveBalance.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\LeaveBalance\:\:leaveRequests\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/LeaveBalance.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\LeaveBalance\:\:leaveType\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/LeaveBalance.php
-
-		-
 			message: '#^Method Modules\\Hr\\Models\\LeaveBalance\:\:splitIntoDays\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/Hr/app/Models/LeaveBalance.php
-
-		-
-			message: '#^Parameter \#1 \$contract of method Modules\\Hr\\Services\\LeaveRequestPricing\:\:hoursPerDayFor\(\) expects Modules\\Hr\\Models\\Contract, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: modules/Hr/app/Models/LeaveBalance.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Models/LeaveRequest.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$positions\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Models/LeaveRequest.php
 
 		-
 			message: '#^Call to an undefined method Carbon\\Carbon\:\:floatDiffInRealHours\(\)\.$#'
@@ -10580,18 +8612,6 @@ parameters:
 
 		-
 			message: '#^Class Modules\\Hr\\Models\\LeaveRequest uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/LeaveRequest.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\LeaveRequest\:\:alternativeEmployee\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/LeaveRequest.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\LeaveRequest\:\:leaveBalance\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
 			identifier: missingType.generics
 			count: 1
 			path: modules/Hr/app/Models/LeaveRequest.php
@@ -10705,12 +8725,6 @@ parameters:
 			path: modules/Hr/app/Models/LeaveType.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\LeaveType\:\:name\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/LeaveType.php
-
-		-
 			message: '#^Method Modules\\Hr\\Models\\LeaveType\:\:setTranslatableAttribute\(\) has parameter \$value with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -10753,25 +8767,7 @@ parameters:
 			path: modules/Hr/app/Models/News.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Models/Position.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:activeNow\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
 			message: '#^Class Modules\\Hr\\Models\\Position uses generic trait Illuminate\\Database\\Eloquent\\Factories\\HasFactory but does not specify its types\: TFactory$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Position\:\:activeContracts\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
 			identifier: missingType.generics
 			count: 1
 			path: modules/Hr/app/Models/Position.php
@@ -10779,42 +8775,6 @@ parameters:
 		-
 			message: '#^Method Modules\\Hr\\Models\\Position\:\:cardRelations\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Position\:\:center\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Position\:\:city\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Position\:\:contracts\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Position\:\:department\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Position\:\:directManager\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Position\:\:directTeam\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
 			count: 1
 			path: modules/Hr/app/Models/Position.php
 
@@ -10827,18 +8787,6 @@ parameters:
 		-
 			message: '#^Method Modules\\Hr\\Models\\Position\:\:getTranslatableAttribute\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Position\:\:jobLevel\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Position\:\:program\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
 			count: 1
 			path: modules/Hr/app/Models/Position.php
 
@@ -10897,25 +8845,7 @@ parameters:
 			path: modules/Hr/app/Models/Position.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\Position\:\:techManager\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\BelongsTo does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Position\:\:techTeam\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
 			message: '#^Method Modules\\Hr\\Models\\Position\:\:techTeamRecursive\(\) return type with generic class Illuminate\\Database\\Eloquent\\Relations\\HasMany does not specify its types\: TRelatedModel, TDeclaringModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/Position.php
-
-		-
-			message: '#^Method Modules\\Hr\\Models\\Position\:\:title\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
 			identifier: missingType.generics
 			count: 1
 			path: modules/Hr/app/Models/Position.php
@@ -10999,12 +8929,6 @@ parameters:
 			path: modules/Hr/app/Models/TerminationReason.php
 
 		-
-			message: '#^Method Modules\\Hr\\Models\\TerminationReason\:\:title\(\) return type with generic class Illuminate\\Database\\Eloquent\\Casts\\Attribute does not specify its types\: TGet, TSet$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Models/TerminationReason.php
-
-		-
 			message: '#^Method Modules\\Hr\\Notifications\\ActionLeaveBalance\:\:__construct\(\) has parameter \$balance with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -11017,34 +8941,10 @@ parameters:
 			path: modules/Hr/app/Notifications/ActionLeaveBalance.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/ActionLeaveRequest.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$leaveType\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/ActionLeaveRequest.php
-
-		-
 			message: '#^Method Modules\\Hr\\Notifications\\ActionLeaveRequest\:\:toArray\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/Hr/app/Notifications/ActionLeaveRequest.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/CenterClosed.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/CenterClosed.php
 
 		-
 			message: '#^Method Modules\\Hr\\Notifications\\CenterClosed\:\:toArray\(\) has parameter \$notifiable with no type specified\.$#'
@@ -11059,18 +8959,6 @@ parameters:
 			path: modules/Hr/app/Notifications/CenterClosed.php
 
 		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Checklist\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/ChecklistAssigned.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Checklist\:\:\$item\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/ChecklistAssigned.php
-
-		-
 			message: '#^Method Modules\\Hr\\Notifications\\ChecklistAssigned\:\:toDatabase\(\) has parameter \$notifiable with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -11081,12 +8969,6 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: modules/Hr/app/Notifications/ChecklistAssigned.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/ContractsAutoRenewedSummary.php
 
 		-
 			message: '#^Method Modules\\Hr\\Notifications\\FolderShared\:\:toArray\(\) has parameter \$notifiable with no type specified\.$#'
@@ -11101,58 +8983,10 @@ parameters:
 			path: modules/Hr/app/Notifications/FolderShared.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/HRSawLeaveRequest.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$leaveType\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/HRSawLeaveRequest.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/LeaveDecisionReminder.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$leaveType\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/LeaveDecisionReminder.php
-
-		-
 			message: '#^Using nullsafe method call on non\-nullable type Carbon\\Carbon\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
 			path: modules/Hr/app/Notifications/LeaveDecisionReminder.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/LeaveRequestObjected.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$leaveType\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/LeaveRequestObjected.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/NewCenterCreated.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/NewCenterCreated.php
 
 		-
 			message: '#^Method Modules\\Hr\\Notifications\\NewCenterCreated\:\:toArray\(\) has parameter \$notifiable with no type specified\.$#'
@@ -11191,62 +9025,8 @@ parameters:
 			path: modules/Hr/app/Notifications/NewEmployeeWelcome.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/NewLeaveRequest.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$leaveType\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Notifications/NewLeaveRequest.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Observers/ContractObserver.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$account\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Observers/EmployeeObserver.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Badge\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Policies/BadgePolicy.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Policies/LeaveRequestPolicy.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/BirthdayHoliday.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Services/BirthdayHoliday.php
-
-		-
 			message: '#^Parameter \#1 \$employee of method Modules\\Hr\\Services\\BirthdayHoliday\:\:activeContractOf\(\) expects Modules\\Hr\\Models\\Employee\|null, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: modules/Hr/app/Services/BirthdayHoliday.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
 			count: 1
 			path: modules/Hr/app/Services/BirthdayHoliday.php
 
@@ -11299,12 +9079,6 @@ parameters:
 			path: modules/Hr/app/Services/ChecklistWorkflow.php
 
 		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$payTiers\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/ContractAutoRenewalService.php
-
-		-
 			message: '#^Property Modules\\Hr\\Models\\Contract\:\:\$end_date \(Carbon\\Carbon\|null\) does not accept string\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -11317,38 +9091,8 @@ parameters:
 			path: modules/Hr/app/Services/ContractAutoRenewalService.php
 
 		-
-			message: '#^Relation ''payTiers'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: modules/Hr/app/Services/ContractAutoRenewalService.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: modules/Hr/app/Services/ContractAutoRenewalService.php
-
-		-
 			message: '#^Method Modules\\Hr\\Services\\ContractPdfRenderer\:\:browsershot\(\) should return Modules\\Hr\\Support\\InspectableBrowsershot but returns Spatie\\Browsershot\\Browsershot\.$#'
 			identifier: return.type
-			count: 1
-			path: modules/Hr/app/Services/ContractPdfRenderer.php
-
-		-
-			message: '#^Relation ''contractType'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Services/ContractPdfRenderer.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Services/ContractPdfRenderer.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
 			count: 1
 			path: modules/Hr/app/Services/ContractPdfRenderer.php
 
@@ -11365,48 +9109,6 @@ parameters:
 			path: modules/Hr/app/Services/ContractPdfRenderer.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/DigitalIdManager.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/DigitalIdManager.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Services/DigitalIdManager.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$contracts\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/DigitalIdManager.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$contractType\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/EmployeeTimeline.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Services/EmployeeTimeline.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$terminationReason\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/EmployeeTimeline.php
-
-		-
 			message: '#^Method Modules\\Hr\\Services\\EmployeeTimeline\:\:ownBadges\(\) return type with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
 			count: 1
@@ -11419,18 +9121,6 @@ parameters:
 			path: modules/Hr/app/Services/EmployeeTimeline.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$city\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/HolidayProjects.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/HolidayProjects.php
-
-		-
 			message: '#^Property Modules\\Hr\\Services\\HolidayProjects\:\:\$all with generic class Illuminate\\Support\\Collection does not specify its types\: TKey, TValue$#'
 			identifier: missingType.generics
 			count: 1
@@ -11441,18 +9131,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: modules/Hr/app/Services/HolidayProjects.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$grade\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/LeaveAlternativeEmployees.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/LeaveAlternativeEmployees.php
 
 		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Illuminate\\Database\\Eloquent\\Model\>\:\:inCity\(\)\.$#'
@@ -11537,24 +9215,6 @@ parameters:
 			identifier: missingType.generics
 			count: 1
 			path: modules/Hr/app/Services/LeaveAlternativeEmployees.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$contractType\.$#'
-			identifier: property.notFound
-			count: 3
-			path: modules/Hr/app/Services/LeaveBalanceService.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Services/LeaveBalanceService.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$leaveBalances\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/LeaveBalanceService.php
 
 		-
 			message: '#^Method Modules\\Hr\\Services\\LeaveBalanceService\:\:annualCarryOver\(\) has parameter \$contract with no type specified\.$#'
@@ -11797,88 +9457,16 @@ parameters:
 			path: modules/Hr/app/Services/LeaveBalanceService.php
 
 		-
-			message: '#^Relation ''allContracts'' is not found in Modules\\Hr\\Models\\Employee model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Services/LeaveBalanceService.php
-
-		-
-			message: '#^Relation ''contractType'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: modules/Hr/app/Services/LeaveBalanceService.php
-
-		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: modules/Hr/app/Services/LeaveBalanceService.php
-
-		-
-			message: '#^Relation ''leaveBalances'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Services/LeaveBalanceService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 3
-			path: modules/Hr/app/Services/LeaveDecisionAuthority.php
-
-		-
 			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),mixed\>\:\:filter\(\) expects \(callable\(mixed, int\|string\)\: bool\)\|null, Closure\(Modules\\Hr\\Models\\Employee\|null\)\: \(bool\|null\) given\.$#'
 			identifier: argument.type
 			count: 1
 			path: modules/Hr/app/Services/LeaveDecisionAuthority.php
 
 		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Services/LeaveDecisionAuthority.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 5
-			path: modules/Hr/app/Services/LeaveNotificationService.php
-
-		-
 			message: '#^Parameter \#1 \$users of method Modules\\Hr\\Services\\LeaveNotificationService\:\:eligibleUniqueUsers\(\) expects Illuminate\\Support\\Collection\<int, App\\Models\\User\|null\>, Illuminate\\Support\\Collection\<int, App\\Models\\User\> given\.$#'
 			identifier: argument.type
 			count: 6
 			path: modules/Hr/app/Services/LeaveNotificationService.php
-
-		-
-			message: '#^Unable to resolve the template type TFlatMapKey in call to method Illuminate\\Support\\Collection\<int,mixed\>\:\:flatMap\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: modules/Hr/app/Services/LeaveNotificationService.php
-
-		-
-			message: '#^Unable to resolve the template type TFlatMapValue in call to method Illuminate\\Support\\Collection\<int,mixed\>\:\:flatMap\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: modules/Hr/app/Services/LeaveNotificationService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/LeaveRequestNextStep.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/LeaveRequestNextStep.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Employee\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 3
-			path: modules/Hr/app/Services/LeaveRequestNextStep.php
 
 		-
 			message: '#^Method Modules\\Hr\\Services\\LeaveRequestNextStep\:\:isOneFemale\(\) has parameter \$managers with generic class Illuminate\\Support\\Collection but does not specify its types\: TKey, TValue$#'
@@ -11893,56 +9481,14 @@ parameters:
 			path: modules/Hr/app/Services/LeaveRequestNextStep.php
 
 		-
-			message: '#^Unable to resolve the template type TMapValue in call to method Illuminate\\Support\\Collection\<int,App\\Models\\User\>\:\:map\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: modules/Hr/app/Services/LeaveRequestNextStep.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$base_days\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/LeaveRequestPricing.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/LeaveRequestPricing.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/LeaveRequestPricing.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 4
-			path: modules/Hr/app/Services/LeaveRequestPricing.php
-
-		-
 			message: '#^Call to an undefined method Carbon\\Carbon\:\:floatDiffInRealHours\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: modules/Hr/app/Services/LeaveRequestPricing.php
 
 		-
-			message: '#^Parameter \#1 \$contract of method Modules\\Hr\\Services\\LeaveRequestPricing\:\:pendingHours\(\) expects Modules\\Hr\\Models\\Contract, Illuminate\\Database\\Eloquent\\Model given\.$#'
-			identifier: argument.type
-			count: 1
-			path: modules/Hr/app/Services/LeaveRequestPricing.php
-
-		-
 			message: '#^Parameter \$excludedDates of class Modules\\Hr\\Support\\Leave\\LeaveQuote constructor expects array\<int, array\{date\: string, reason\: ''holiday''\|''weekend''\}\>, array\<int, array\{date\: string, reason\: string\}\> given\.$#'
 			identifier: argument.type
-			count: 1
-			path: modules/Hr/app/Services/LeaveRequestPricing.php
-
-		-
-			message: '#^Relation ''positions'' is not found in App\\Models\\Center model\.$#'
-			identifier: larastan.relationExistence
 			count: 1
 			path: modules/Hr/app/Services/LeaveRequestPricing.php
 
@@ -11984,18 +9530,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$account\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/ProfileChangeRequests.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Services/ProfileChangeRequests.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$is_active\.$#'
 			identifier: property.notFound
 			count: 1
 			path: modules/Hr/app/Services/ProfileChangeRequests.php
@@ -12043,24 +9577,6 @@ parameters:
 			path: modules/Hr/app/Services/ProfileChangeRequests.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$city_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/TeamCoverage.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$code\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/TeamCoverage.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 3
-			path: modules/Hr/app/Services/TeamCoverage.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$employee\.$#'
 			identifier: property.notFound
 			count: 1
@@ -12073,45 +9589,9 @@ parameters:
 			path: modules/Hr/app/Services/TeamCoverage.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$grade\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Services/TeamCoverage.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$leaveType\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/TeamCoverage.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/TeamCoverage.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Services/TeamCoverage.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Contract\:\:\$position\.$#'
-			identifier: property.notFound
-			count: 2
-			path: modules/Hr/app/Services/TeamCoverage.php
-
-		-
 			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:inCity\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: modules/Hr/app/Services/TeamCoverage.php
-
-		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:latestActiveContract\(\)\.$#'
-			identifier: method.notFound
-			count: 2
 			path: modules/Hr/app/Services/TeamCoverage.php
 
 		-
@@ -12295,24 +9775,6 @@ parameters:
 			path: modules/Hr/app/Services/TeamCoverage.php
 
 		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 3
-			path: modules/Hr/app/Services/TeamCoverage.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: modules/Hr/app/Services/TeamCoverage.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>city_id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: modules/Hr/app/Services/TeamCoverage.php
-
-		-
 			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
 			identifier: nullsafe.neverNull
 			count: 1
@@ -12320,30 +9782,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$city\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/WorkInbox.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contract\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/WorkInbox.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$leaveType\.$#'
-			identifier: property.notFound
-			count: 1
-			path: modules/Hr/app/Services/WorkInbox.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Checklist\:\:\$employee\.$#'
-			identifier: property.notFound
-			count: 4
-			path: modules/Hr/app/Services/WorkInbox.php
-
-		-
-			message: '#^Access to an undefined property Modules\\Hr\\Models\\Checklist\:\:\$item\.$#'
 			identifier: property.notFound
 			count: 1
 			path: modules/Hr/app/Services/WorkInbox.php
@@ -12403,40 +9841,10 @@ parameters:
 			path: modules/Hr/app/Services/WorkInbox.php
 
 		-
-			message: '#^Relation ''employee'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
-			count: 2
-			path: modules/Hr/app/Services/WorkInbox.php
-
-		-
-			message: '#^Relation ''item'' is not found in Modules\\Hr\\Models\\Checklist model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Services/WorkInbox.php
-
-		-
 			message: '#^Strict comparison using \!\=\= between Carbon\\Carbon and null will always evaluate to true\.$#'
 			identifier: notIdentical.alwaysTrue
 			count: 1
 			path: modules/Hr/app/Services/WorkInbox.php
-
-		-
-			message: '#^Method Modules\\Hr\\Support\\DirectoryAccess\:\:constrain\(\) has parameter \$employees with generic class Illuminate\\Database\\Eloquent\\Builder but does not specify its types\: TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Support/DirectoryAccess.php
-
-		-
-			message: '#^Method Modules\\Hr\\Support\\DirectoryAccess\:\:constrain\(\) return type with generic class Illuminate\\Database\\Eloquent\\Builder does not specify its types\: TModel$#'
-			identifier: missingType.generics
-			count: 1
-			path: modules/Hr/app/Support/DirectoryAccess.php
-
-		-
-			message: '#^Relation ''position'' is not found in Modules\\Hr\\Models\\Contract model\.$#'
-			identifier: larastan.relationExistence
-			count: 1
-			path: modules/Hr/app/Support/DirectoryAccess.php
 
 		-
 			message: '#^Unable to resolve the template type TCacheValue in call to static method Illuminate\\Cache\\Repository\:\:remember\(\)$#'

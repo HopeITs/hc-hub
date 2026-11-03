@@ -13,6 +13,7 @@ class TerminationReason extends Model
 
     protected $fillable = ['title_en', 'title_ar'];
 
+    /** @return Attribute<string|null, string|null> */
     protected function title(): Attribute
     {
         return Attribute::make(

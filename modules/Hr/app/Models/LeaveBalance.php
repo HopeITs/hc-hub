@@ -2,12 +2,13 @@
 
 namespace Modules\Hr\Models;
 
-use Modules\Hr\Enums\LeaveTypeCases;
-use Modules\Hr\Services\LeaveRequestPricing;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Hr\Enums\LeaveTypeCases;
+use Modules\Hr\Services\LeaveRequestPricing;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -20,6 +21,7 @@ class LeaveBalance extends Model
     /** @var array{0: float|null}|null */
     private ?array $workHoursPerDay = null;
 
+    /** @return BelongsTo<Contract, $this> */
     public function contract(): BelongsTo
     {
         return $this->belongsTo(Contract::class, 'contract_id');
@@ -171,12 +173,14 @@ class LeaveBalance extends Model
         return $result;
     }
 
+    /** @return BelongsTo<LeaveType, $this> */
     public function leaveType(): BelongsTo
     {
         return $this->belongsTo(LeaveType::class, 'type_id');
     }
 
-    public function leaveRequests()
+    /** @return HasMany<LeaveRequest, $this> */
+    public function leaveRequests(): HasMany
     {
         return $this->hasMany(LeaveRequest::class);
     }

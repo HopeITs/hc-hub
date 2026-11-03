@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\Position;
@@ -35,12 +36,14 @@ class Center extends Model
         return Carbon::createFromFormat('H:i:s', $this->close_at)->format('H:i');
     }
 
+    /** @return BelongsTo<City, $this> */
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
     }
 
-    public function positions()
+    /** @return HasMany<Position, $this> */
+    public function positions(): HasMany
     {
         return $this->hasMany(Position::class);
     }
@@ -84,6 +87,7 @@ class Center extends Model
             ->dontSubmitEmptyLogs();
     }
 
+    /** @return Attribute<string|null, string|null> */
     protected function name(): Attribute
     {
         return Attribute::make(
@@ -92,6 +96,7 @@ class Center extends Model
         );
     }
 
+    /** @return Attribute<string|null, string|null> */
     protected function address(): Attribute
     {
         return Attribute::make(

@@ -2,11 +2,11 @@
 
 namespace Modules\Hr\Services;
 
+use App\Models\User;
+use Illuminate\Support\Collection;
 use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\LeaveRequest;
-use App\Models\User;
-use Illuminate\Support\Collection;
 
 /**
  * Describes where a leave request stands and who acts on it next, from the
@@ -179,12 +179,12 @@ class LeaveRequestNextStep
 
     /**
      * @param  Collection<int, User>  $managers
-     * @return Collection<int, string>
+     * @return Collection<int, non-falsy-string>
      */
     private function decidingManagerNames(Collection $managers): Collection
     {
         return $managers
-            ->map(fn (User $user) => $user->profile?->name)
+            ->map(fn (User $user): ?string => $user->profile?->name)
             ->filter()
             ->unique()
             ->values();
@@ -194,7 +194,7 @@ class LeaveRequestNextStep
      * "your manager A" / "your managers A or B" / "… A, B or C"; "the direct
      * manager A" when the reader is not the requester.
      *
-     * @param  Collection<int, string>  $names
+     * @param  Collection<int, non-falsy-string>  $names
      */
     private function managerPhrase(Collection $names, bool $forRequester = true, bool $female = false): string
     {

@@ -37,16 +37,16 @@ class ChecklistAssigned extends Notification implements InboxNotification
             $titleEn = 'Deliver Item';
             $titleAr = 'تسليم عنصر';
 
-            $bodyEn = "Please deliver {$item} to {$employee?->name_en}";
-            $bodyAr = "يرجى تسليم {$item} إلى {$employee?->name_ar}";
+            $bodyEn = "Please deliver {$item} to {$employee?->nameForLocale('en')}";
+            $bodyAr = "يرجى تسليم {$item} إلى {$employee?->nameForLocale('ar')}";
 
             $url = route('checklist-items.pending-delivers');
         } else {
             $titleEn = 'Receive Item';
             $titleAr = 'استلام عنصر';
 
-            $bodyEn = "Please receive {$item} from {$employee?->name_en}";
-            $bodyAr = "يرجى استلام {$item} من {$employee?->name_ar}";
+            $bodyEn = "Please receive {$item} from {$employee?->nameForLocale('en')}";
+            $bodyAr = "يرجى استلام {$item} من {$employee?->nameForLocale('ar')}";
 
             $url = route('checklist-items.pending-returns');
         }

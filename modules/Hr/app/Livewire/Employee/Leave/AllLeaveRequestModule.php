@@ -2,12 +2,18 @@
 
 namespace Modules\Hr\Livewire\Employee\Leave;
 
-use Modules\Hr\Enums\LeaveRequestStatus;
-use Modules\Hr\Exceptions\LeaveDecisionAlreadyMade;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Concerns\GuardsModalClose;
 use App\Livewire\Concerns\TracksTaskAttempt;
 use App\Livewire\Concerns\WithFeedback;
+use Blade;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Exceptions\LeaveDecisionAlreadyMade;
 use Modules\Hr\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use Modules\Hr\Livewire\Forms\LeaveRequestForm;
 use Modules\Hr\Models\Employee;
@@ -18,12 +24,6 @@ use Modules\Hr\Services\LeaveNotificationService;
 use Modules\Hr\Services\LeaveRequestNextStep;
 use Modules\Hr\Services\TeamCoverage;
 use Modules\Hr\Support\Leave\LeaveQuote;
-use Blade;
-use Carbon\Carbon;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Gate;
-use Livewire\Attributes\Url;
-use Livewire\Component;
 use Throwable;
 
 class AllLeaveRequestModule extends Component
@@ -343,6 +343,8 @@ class AllLeaveRequestModule extends Component
         $this->toast();
 
         $this->refreshCounts();
+        // The table is its own component: re-rendering this one leaves its rows stale.
+        $this->dispatch('leaveRequestSaved')->to(AllLeaveRequestTable::class);
     }
 
     public function confirmDelete($id)
@@ -361,6 +363,7 @@ class AllLeaveRequestModule extends Component
         $this->clearLinkedLeave();
         $this->refreshCounts();
         $this->toast();
+        $this->dispatch('leaveRequestSaved')->to(AllLeaveRequestTable::class);
 
     }
 

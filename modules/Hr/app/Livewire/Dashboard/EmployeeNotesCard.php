@@ -3,11 +3,12 @@
 namespace Modules\Hr\Livewire\Dashboard;
 
 use App\Livewire\Concerns\HandlesLoadFailure;
+use App\Livewire\Concerns\IsDashboardTile;
 use App\Livewire\Concerns\WithFeedback;
-use Modules\Hr\Models\EmployeeNote;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
+use Modules\Hr\Models\EmployeeNote;
 
 /**
  * The signed-in user's personal notes on the dashboard.
@@ -29,6 +30,7 @@ use Livewire\Component;
 class EmployeeNotesCard extends Component
 {
     use HandlesLoadFailure;
+    use IsDashboardTile;
     use WithFeedback;
 
     #[Locked]

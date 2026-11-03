@@ -47,6 +47,7 @@ class LeaveType extends Model
             ->dontSubmitEmptyLogs();
     }
 
+    /** @return Attribute<string|null, string|null> */
     protected function name(): Attribute
     {
         return Attribute::make(

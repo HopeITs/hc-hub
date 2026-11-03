@@ -2,13 +2,13 @@
 
 namespace Modules\Hr\Livewire\Forms\Employee;
 
+use Illuminate\Validation\Rule;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\Form;
 use Modules\Hr\Enums\EducationStatus;
 use Modules\Hr\Enums\EducationType;
 use Modules\Hr\Models\Education;
 use Modules\Hr\Models\Employee;
-use Illuminate\Validation\Rule;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-use Livewire\Form;
 
 class EducationForm extends Form
 {
@@ -84,7 +84,7 @@ class EducationForm extends Form
         unset($this->educations[$index]);
 
         if (isset($id)) {
-            $this->employee->educations()->find($id)?->delete();
+            $this->employee->educations()->find((int) $id)?->delete();
         }
 
         $this->educations = array_values($this->educations);
@@ -96,7 +96,7 @@ class EducationForm extends Form
 
         foreach ($this->educations as $index => $education) {
             if (isset($education['id'])) {
-                $this->education = $this->employee->educations()->findOrFail($education['id']);
+                $this->education = $this->employee->educations()->findOrFail((int) $education['id']);
                 $this->education->update(collect($education)
                     ->except(['edu_attachment', 'file_name', 'id'])
                     ->toArray());

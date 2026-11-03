@@ -50,6 +50,7 @@ class Holiday extends Model
         return $this->hasMany(HolidayProject::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
@@ -86,6 +87,7 @@ class Holiday extends Model
                 ->whereDate('end_date', '>=', $from->toDateString())));
     }
 
+    /** @return Attribute<string|null, string|null> */
     protected function name(): Attribute
     {
         return Attribute::make(

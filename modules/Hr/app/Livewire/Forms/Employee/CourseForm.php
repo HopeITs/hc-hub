@@ -2,10 +2,10 @@
 
 namespace Modules\Hr\Livewire\Forms\Employee;
 
-use Modules\Hr\Models\Course;
-use Modules\Hr\Models\Employee;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
+use Modules\Hr\Models\Course;
+use Modules\Hr\Models\Employee;
 
 class CourseForm extends Form
 {
@@ -50,13 +50,13 @@ class CourseForm extends Form
         $rules = [
             'courses' => ['array'],
             'courses.*.id' => ['nullable', 'exists:courses,id'],
-            'courses.*.category_id' => ['required', 'exists:course_categories,id'],
+            'courses.*.category_id' => ['nullable', 'exists:course_categories,id'],
             'courses.*.title' => ['required', 'string', 'max:255'],
             'courses.*.organization' => ['required', 'string', 'max:255'],
             'courses.*.place' => ['nullable', 'integer', 'min:1', 'max:2'],
             'courses.*.granted_by' => ['nullable', 'string', 'max:255'],
             'courses.*.notes' => ['nullable', 'string'],
-            'courses.*.end_date' => ['required', 'date', 'after_or_equal:courses.*.start_date'],
+            'courses.*.end_date' => ['nullable', 'date'],
             'courses.*.has_certificate' => ['nullable', 'boolean'],
             'courses.*.duration' => ['nullable', 'string', 'max:255'],
             'courses.*.status' => ['required', 'integer', 'min:1', 'max:5'],
@@ -100,7 +100,7 @@ class CourseForm extends Form
         unset($this->courses[$index]);
 
         if (isset($id)) {
-            $this->employee->courses()->findOrFail($id)->delete();
+            $this->employee->courses()->findOrFail((int) $id)->delete();
         }
         $this->courses = array_values($this->courses);
     }
@@ -112,10 +112,11 @@ class CourseForm extends Form
         foreach ($this->courses as $index => $course) {
             $data = collect($course)
                 ->except(['course_attachment', 'file_name', 'id'])
+                ->map(fn ($value) => $value === '' ? null : $value)
                 ->toArray();
 
             if (array_key_exists('id', $course) && isset($course['id'])) {
-                $this->course = $this->employee->courses()->findOrFail($course['id']);
+                $this->course = $this->employee->courses()->findOrFail((int) $course['id']);
                 $this->course->update($data);
             } else {
                 $data['employee_id'] = $this->employee->id;

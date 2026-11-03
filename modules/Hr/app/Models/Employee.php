@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Modules\Hr\Database\Factories\EmployeeFactory;
@@ -169,11 +170,13 @@ class Employee extends Model implements HasMedia
         return $this->latestActiveContract()?->position->department;
     }
 
+    /** @return BelongsTo<City, $this> */
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function lastSavedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'last_saved_by');
@@ -248,12 +251,14 @@ class Employee extends Model implements HasMedia
             ->orWhereDoesntHave('realContracts'));
     }
 
-    public function allContracts()
+    /** @return HasMany<Contract, $this> */
+    public function allContracts(): HasMany
     {
         return $this->hasMany(Contract::class, 'employee_id');
     }
 
-    public function contracts()
+    /** @return HasMany<Contract, $this> */
+    public function contracts(): HasMany
     {
         return $this->hasMany(Contract::class, 'employee_id')
             ->activeNow();
@@ -291,8 +296,8 @@ class Employee extends Model implements HasMedia
 
         return $contracts
             ->sortBy([
-                fn ($a, $b) => ($a->position?->jobLevel?->grade ?? PHP_INT_MAX) <=> ($b->position?->jobLevel?->grade ?? PHP_INT_MAX),
-                fn ($a, $b) => $b->created_at <=> $a->created_at,
+                fn (Contract $a, Contract $b): int => ($a->position?->jobLevel?->grade ?? PHP_INT_MAX) <=> ($b->position?->jobLevel?->grade ?? PHP_INT_MAX),
+                fn (Contract $a, Contract $b): int => $b->created_at <=> $a->created_at,
             ])
             ->first();
     }
@@ -323,6 +328,7 @@ class Employee extends Model implements HasMedia
         return $this->hasMany(DefaultDeliverable::class, 'employee_id');
     }
 
+    /** @return BelongsToMany<Position, $this> */
     public function positions(): BelongsToMany
     {
         return $this->belongsToMany(Position::class, 'contracts', 'employee_id', 'position_id')
@@ -350,37 +356,44 @@ class Employee extends Model implements HasMedia
         });
     }
 
-    public function educations()
+    /** @return HasMany<Education, $this> */
+    public function educations(): HasMany
     {
         return $this->hasMany(Education::class);
     }
 
-    public function courses()
+    /** @return HasMany<Course, $this> */
+    public function courses(): HasMany
     {
         return $this->hasMany(Course::class);
     }
 
-    public function experiences()
+    /** @return HasMany<Experience, $this> */
+    public function experiences(): HasMany
     {
         return $this->hasMany(Experience::class);
     }
 
-    public function badges()
+    /** @return HasMany<Badge, $this> */
+    public function badges(): HasMany
     {
         return $this->hasMany(Badge::class);
     }
 
-    public function evaluations()
+    /** @return HasMany<Evaluation, $this> */
+    public function evaluations(): HasMany
     {
         return $this->hasMany(Evaluation::class);
     }
 
-    public function relatives()
+    /** @return HasMany<Relative, $this> */
+    public function relatives(): HasMany
     {
         return $this->hasMany(Relative::class);
     }
 
-    public function checklists()
+    /** @return HasMany<Checklist, $this> */
+    public function checklists(): HasMany
     {
         return $this->hasMany(Checklist::class);
     }
@@ -390,22 +403,26 @@ class Employee extends Model implements HasMedia
         return $this->getMedia('attachments');
     }
 
-    public function items()
+    /** @return HasMany<EmployeeItem, $this> */
+    public function items(): HasMany
     {
         return $this->hasMany(EmployeeItem::class);
     }
 
+    /** @return BelongsToMany<JobLevel, $this> */
     public function jobLevels(): BelongsToMany
     {
         return $this->belongsToMany(JobLevel::class, 'contracts', 'employee_id', 'job_level_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'work_days', 'work_hours']);
     }
 
+    /** @return BelongsToMany<ContractType, $this> */
     public function contractTypes(): BelongsToMany
     {
         return $this->belongsToMany(ContractType::class, 'contracts', 'employee_id', 'contract_type_id')->withPivot(['id', 'contract_type_id', 'department_id', 'job_level_id', 'is_active', 'start_date', 'end_date', 'terminated_at', 'salary', 'currency', 'weekly_hours', 'work_days', 'work_hours']);
     }
 
-    public function account()
+    /** @return HasOne<User, $this> */
+    public function account(): HasOne
     {
         return $this->hasOne(User::class, 'employee_id');
     }
@@ -427,9 +444,9 @@ class Employee extends Model implements HasMedia
                 $perDay = $leave->contract ? $pricing->hoursPerDayFor($leave->contract) : null;
                 [$days, $rest] = LeaveRequestPricing::splitDays($pending, $perDay);
 
-                $leave->pending_total_hours = $pending;
-                $leave->pending_days = $days;
-                $leave->pending_hours = $rest;
+                $leave->setAttribute('pending_total_hours', $pending);
+                $leave->setAttribute('pending_days', $days);
+                $leave->setAttribute('pending_hours', $rest);
             }
         }
 
@@ -647,17 +664,19 @@ class Employee extends Model implements HasMedia
         });
     }
 
+    /** @return Attribute<non-falsy-string, never> */
     protected function long_fullname(): Attribute
     {
         return Attribute::get(
-            fn () => "{$this->first_name} {$this->father_name} {$this->last_name}",
+            fn (): string => "{$this->first_name} {$this->father_name} {$this->last_name}",
         );
     }
 
+    /** @return Attribute<non-falsy-string, never> */
     protected function name(): Attribute
     {
         return Attribute::get(
-            fn () => "{$this->first_name} {$this->last_name}",
+            fn (): string => "{$this->first_name} {$this->last_name}",
         );
     }
 
@@ -666,6 +685,7 @@ class Employee extends Model implements HasMedia
      * colleagues uses this and work_phone, never personal_email/personal_phone,
      * which stay on the HR-only private profile section.
      */
+    /** @return Attribute<string|null, never> */
     protected function workEmail(): Attribute
     {
         return Attribute::get(fn (): ?string => $this->account?->email);
@@ -690,6 +710,7 @@ class Employee extends Model implements HasMedia
         );
     }
 
+    /** @return Attribute<string|null, string|null> */
     protected function firstName(): Attribute
     {
         return Attribute::make(
@@ -698,6 +719,7 @@ class Employee extends Model implements HasMedia
         );
     }
 
+    /** @return Attribute<string|null, string|null> */
     protected function lastName(): Attribute
     {
         return Attribute::make(
@@ -706,6 +728,7 @@ class Employee extends Model implements HasMedia
         );
     }
 
+    /** @return Attribute<string|null, string|null> */
     protected function father_name(): Attribute
     {
         return Attribute::make(
@@ -714,6 +737,7 @@ class Employee extends Model implements HasMedia
         );
     }
 
+    /** @return Attribute<string|null, string|null> */
     protected function mother_name(): Attribute
     {
         return Attribute::make(
@@ -722,6 +746,7 @@ class Employee extends Model implements HasMedia
         );
     }
 
+    /** @return Attribute<string|null, string|null> */
     protected function address(): Attribute
     {
         return Attribute::make(

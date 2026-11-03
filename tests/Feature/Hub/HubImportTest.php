@@ -50,7 +50,7 @@ function hrFixture(): void
         'username' => 'fredy.youssef', 'city_id' => 1, 'last_saved_by' => 20, 'created_at' => $now, 'updated_at' => $now,
     ]]);
     sourceRows('users', [[
-        'id' => 20, 'email' => 'fredy@example.test', 'password' => 'hash', 'employee_id' => 7, 'last_seen_at' => $now,
+        'id' => 20, 'email' => 'fredy@example.test', 'password' => 'hash', 'employee_id' => 7, 'legacy_theme' => 'dark',
     ]]);
     sourceRows('positions', [
         ['id' => 5, 'title_en' => 'Officer', 'title_ar' => 'موظف', 'department_id' => 1, 'job_level_id' => 1, 'program_id' => 3, 'city_id' => 1, 'direct_manager_id' => 6],
@@ -94,7 +94,7 @@ beforeEach(function () {
             ->reject(fn (array $column): bool => $column['name'] === 'uuid'
                 || ($table === 'programs' && in_array($column['name'], ['parent_id', 'top_level_code'], true)))
             ->map(fn (array $column): string => '"'.$column['name'].'"'.($column['default'] === null ? '' : ' DEFAULT '.$column['default']))
-            ->when($table === 'users', fn ($columns) => $columns->push('"last_seen_at"'));
+            ->when($table === 'users', fn ($columns) => $columns->push('"legacy_theme"'));
 
         source()->statement('CREATE TABLE "hchr_'.$table.'" ('.$columns->implode(', ').')');
     }
@@ -118,7 +118,7 @@ test('a dry run reports counts, orphans and open questions and writes nothing', 
             'contracts_bak_20261019' => 'backup copy (decided: skip)',
             'vacancies' => 'no such table in the hub (0 rows)',
         ])
-        ->and($report->droppedColumns)->toBe(['users' => ['last_seen_at']])
+        ->and($report->droppedColumns)->toBe(['users' => ['legacy_theme']])
         ->and($report->orphans)->toBe(['activity_log.subject_id (contract) -> contracts' => 1])
         ->and($report->openIssues)->toHaveCount(1)
         ->and($report->openIssues[0])->toContain('no user without an employee');

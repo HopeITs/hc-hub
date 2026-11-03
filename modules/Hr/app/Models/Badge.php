@@ -7,6 +7,7 @@ use App\Traits\RedactsSensitiveActivityLog;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -46,12 +47,14 @@ class Badge extends Model
         'date' => 'datetime:d-m-Y',
     ];
 
-    public function employee()
+    /** @return BelongsTo<Employee, $this> */
+    public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
 
-    public function evaluation()
+    /** @return BelongsTo<Evaluation, $this> */
+    public function evaluation(): BelongsTo
     {
         return $this->belongsTo(Evaluation::class);
     }

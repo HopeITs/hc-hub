@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\UiSheetController;
 use App\Http\Middleware\ActiveLivewirePermissionMiddleware;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Livewire\AccessManagement\Index as AccessManagementIndex;
@@ -57,6 +58,9 @@ Route::group(
             Route::get('/access-management', AccessManagementIndex::class)
                 ->middleware('active_permission:hub.access-management.view')
                 ->name('access-management.index');
+
+            // The component sheet: local and testing only (404 anywhere else), see UiSheetController.
+            Route::get('/_ui', UiSheetController::class)->name('ui-sheet');
 
         });
 

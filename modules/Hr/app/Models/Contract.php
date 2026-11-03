@@ -2,18 +2,20 @@
 
 namespace Modules\Hr\Models;
 
-use Modules\Hr\Casts\EncryptedSalary;
-use Modules\Hr\Enums\ContractType as ContractTypeEnum;
 use App\Models\User;
 use App\Traits\RedactsSensitiveActivityLog;
 use Carbon\Carbon;
 use Closure;
+use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Hr\Casts\EncryptedSalary;
 use Modules\Hr\Database\Factories\ContractFactory;
+use Modules\Hr\Enums\ContractType as ContractTypeEnum;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
@@ -117,12 +119,14 @@ class Contract extends Model
     //        );
     //    }
 
-    public function employee()
+    /** @return BelongsTo<Employee, $this> */
+    public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'employee_id');
     }
 
-    public function position()
+    /** @return BelongsTo<Position, $this> */
+    public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class, 'position_id');
     }
@@ -146,7 +150,7 @@ class Contract extends Model
 
     /**
      * A named contracts view (B4 presets): `active` (default), `ending-soon`,
-     * `ended`, `draft`. Shared by the contracts table and the home page's
+     * `ended`, `not-renewed`, `draft`. Shared by the contracts table and the home page's
      * "ending soon" figure (C4), so the count and the list it opens agree.
      * It only narrows; combine it with visibleTo() for the role's scope.
      */
@@ -176,6 +180,23 @@ class Contract extends Model
                     ->orWhereNotNull('contracts.termination_reason_id')
                     ->orWhere('contracts.is_active', false)
                     ->orWhereDate('contracts.end_date', '<', $today));
+            }),
+            // Ended (not ended early) within the last $endingSoonDays days, the
+            // person is still on staff, and nothing newer was made for them:
+            // the home page's late band (prompt 7) counts this very view.
+            'not-renewed' => $query->where(function (Builder $q) use ($notDraft, $today, $endingSoonDays) {
+                $notDraft($q);
+                $q->whereNull('contracts.terminated_at')
+                    ->whereNull('contracts.termination_reason_id')
+                    ->whereNotNull('contracts.end_date')
+                    ->whereDate('contracts.end_date', '<', $today)
+                    ->whereDate('contracts.end_date', '>=', $today->copy()->subDays($endingSoonDays))
+                    ->whereHas('employee', fn (Builder $e) => $e->where('is_active', true))
+                    ->whereNotExists(fn ($later) => $later->selectRaw('1')
+                        ->from('contracts as later')
+                        ->whereColumn('later.employee_id', 'contracts.employee_id')
+                        ->whereColumn('later.id', '!=', 'contracts.id')
+                        ->whereColumn('later.start_date', '>=', 'contracts.start_date'));
             }),
             'draft' => $query->where('contracts.type', ContractTypeEnum::Draft),
             default => $query->where($running),
@@ -274,22 +295,26 @@ class Contract extends Model
         });
     }
 
-    public function contractType()
+    /** @return BelongsTo<ContractType, $this> */
+    public function contractType(): BelongsTo
     {
         return $this->belongsTo(ContractType::class, 'contract_type_id');
     }
 
-    public function terminationReason()
+    /** @return BelongsTo<TerminationReason, $this> */
+    public function terminationReason(): BelongsTo
     {
         return $this->belongsTo(TerminationReason::class, 'termination_reason_id');
     }
 
-    public function leaveBalances()
+    /** @return HasMany<LeaveBalance, $this> */
+    public function leaveBalances(): HasMany
     {
         return $this->hasMany(LeaveBalance::class, 'contract_id');
     }
 
-    public function payTiers()
+    /** @return HasMany<ContractPayTier, $this> */
+    public function payTiers(): HasMany
     {
         return $this->hasMany(ContractPayTier::class)->orderBy('sort_order');
     }

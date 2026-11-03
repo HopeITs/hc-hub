@@ -5,11 +5,11 @@ namespace Modules\Hr\Livewire\Employee\Leave;
 use App\Livewire\Concerns\AuthorizesActivePermissions;
 use App\Livewire\Concerns\GuardsModalClose;
 use App\Livewire\Concerns\WithFeedback;
+use Blade;
+use Livewire\Component;
 use Modules\Hr\Livewire\Employee\Leave\Concerns\FormatsLeaveDuration;
 use Modules\Hr\Livewire\Forms\LeaveBalanceForm;
 use Modules\Hr\Models\LeaveBalance;
-use Blade;
-use Livewire\Component;
 
 class EmpLeaveBalanceModule extends Component
 {
@@ -68,7 +68,7 @@ class EmpLeaveBalanceModule extends Component
         $this->form->reset();
 
         $this->toast();
-
+        $this->dispatch('refreshEmpLeaveBalanceTable');
     }
 
     protected function guardedEntries(string $dialog): array

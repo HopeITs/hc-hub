@@ -2,12 +2,12 @@
 
 namespace Modules\Hr\Livewire\Forms\Employee;
 
-use Modules\Hr\Models\Checklist;
-use Modules\Hr\Models\Employee;
 use App\Models\User;
-use Modules\Hr\Notifications\ChecklistAssigned;
 use Illuminate\Support\Collection;
 use Livewire\Form;
+use Modules\Hr\Models\Checklist;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Notifications\ChecklistAssigned;
 
 class ChecklistForm extends Form
 {
@@ -77,7 +77,7 @@ class ChecklistForm extends Form
                     'delivered_id' => $deliveredId,
                 ];
 
-                if ($isFullyReturned || $existing === null || $existing->delivered_status === null) {
+                if ($isFullyReturned || $existing === null) {
                     $values = array_merge($values, [
                         'item_id' => $itemData['item_id'],
                         'employee_id' => $this->employee->id,

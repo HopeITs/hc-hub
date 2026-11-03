@@ -1,7 +1,10 @@
-{{-- Sidebar links swap pages through wire:navigate instead of a full reload. --}}
-@props(['active' => false, 'icon' => null, 'badge' => null, 'badgeLabel' => null])
+{{-- Sidebar links swap pages through wire:navigate instead of a full reload.
+     Current page (identity rule): ink text on the hover fill, with the brand
+     red as a bar on the start edge, never a red fill. `favourite` adds the
+     star (favourite-star): ['id', 'starred', 'full', 'max']. --}}
+@props(['active' => false, 'icon' => null, 'badge' => null, 'badgeLabel' => null, 'favourite' => null])
 
-<li class="w-full">
+<li class="relative w-full group/item">
     <a
         wire:navigate
         title="{{ trim(strip_tags($slot)) }}"
@@ -25,7 +28,7 @@
         {{-- Label --}}
         <span
             class="
-                text-body flex-1 ms-2 rtl:me-2 text-left rtl:text-right whitespace-nowrap
+                text-body flex-1 ms-2 text-start whitespace-nowrap
                 text-inherit group-hover:text-inherit
             "
             x-show="!sidebarCollapsed || open"
@@ -35,10 +38,15 @@
 
         {{-- A count (the work inbox): beside the label, or on the icon when the sidebar is collapsed. --}}
         @if ($badge !== null)
-            <span class="ms-2 min-w-6 rounded-full px-1.5 py-0.5 text-center text-caption font-bold leading-none bg-primary text-white"
+            <span class="ms-2 min-w-6 rounded-full px-1.5 py-0.5 text-center text-caption font-bold leading-none bg-primary text-on-brand"
                   :class="sidebarCollapsed && !open ? 'md:absolute md:top-0 md:end-0 md:ms-0' : ''"
                   aria-label="{{ $badgeLabel ?? $badge }}" data-testid="nav-badge">{{ $badge }}</span>
         @endif
 
     </a>
+
+    @if ($favourite)
+        <x-layouts.app.sidebar.favourite-star :id="$favourite['id']" :label="trim(strip_tags($slot))"
+            :starred="$favourite['starred']" :full="$favourite['full']" :max="$favourite['max']" />
+    @endif
 </li>

@@ -24,6 +24,7 @@ use Modules\Hr\Notifications\HRSawLeaveRequest;
 use Modules\Hr\Notifications\NewLeaveRequest;
 use Modules\Hr\Services\LeaveNotificationService;
 use PHPUnit\Framework\Attributes\DataProvider;
+use ReflectionClass;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -1195,6 +1196,43 @@ class LeaveRequestWorkflowTest extends TestCase
         $this->assertSame($employee->id, $leave->leaveBalance->contract->employee_id);
     }
 
+    public function test_enter_in_the_request_form_confirms_like_the_save_button(): void
+    {
+        [$manager, $leave] = $this->createManagerEditFixture();
+
+        // The form named a save() that does not exist: Enter in any field gave a 500.
+        Livewire::actingAs($manager)
+            ->test(AllLeaveRequestModule::class)
+            ->call('edit', $leave->id)
+            ->assertSeeHtml('wire:submit.prevent="confirmSave"')
+            ->assertDontSeeHtml('wire:submit.prevent="save"')
+            ->assertDontSeeHtml('wire:click="confirmSave"');
+    }
+
+    public function test_saving_or_deleting_a_request_refreshes_the_all_leaves_table(): void
+    {
+        [$manager, $leave] = $this->createManagerEditFixture();
+
+        // The table is its own component: without the event a saved request
+        // only appeared after reloading the page.
+        Livewire::actingAs($manager)
+            ->test(AllLeaveRequestModule::class)
+            ->call('edit', $leave->id)
+            ->set('form.reason', 'Changed by the direct manager')
+            ->call('processSave')
+            ->assertHasNoErrors()
+            ->assertDispatched('leaveRequestSaved');
+
+        Livewire::actingAs($manager)
+            ->test(AllLeaveRequestModule::class)
+            ->call('delete', ['id' => $leave->id])
+            ->assertDispatched('leaveRequestSaved');
+
+        $this->assertDatabaseMissing('leave_requests', ['id' => $leave->id, 'deleted_at' => null]);
+        $this->assertSame('refreshTable', (new ReflectionClass(AllLeaveRequestTable::class))
+            ->getProperty('listeners')->getDefaultValue()['leaveRequestSaved'] ?? null);
+    }
+
     public function test_gb6_a_manager_cannot_move_a_team_members_request_onto_their_own_balance(): void
     {
         [$manager, $leave] = $this->createManagerEditFixture();
@@ -1432,8 +1470,10 @@ class LeaveRequestWorkflowTest extends TestCase
         $manager = $this->makeDirectManagerOf($leave, asEmployeeOnly: true);
 
         Livewire::actingAs($manager)
-            ->test(\Modules\Hr\Livewire\Dashboard\ForYouNow::class)
-            ->assertSeeHtml('data-testid="for-you-decisions-count"');
+            ->test(\Modules\Hr\Livewire\Dashboard\DecisionsCard::class)
+            ->assertViewHas('decisions', fn (array $decisions) => $decisions['total'] === 1)
+            ->assertSeeHtml('data-testid="decision-card"')
+            ->assertSeeHtml('data-decision="leave:'.$leave->id.':decide"');
     }
 
     public function test_n03_hr_reads_you_not_the_hr_team_in_the_next_step(): void

@@ -2,17 +2,17 @@
 
 namespace Modules\Hr\Services;
 
+use App\Models\User;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use InvalidArgumentException;
 use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\LeaveRequest;
 use Modules\Hr\Models\Position;
-use App\Models\User;
 use Modules\Hr\Support\DirectoryAccess;
-use Carbon\CarbonImmutable;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
-use InvalidArgumentException;
 
 /**
  * Whose absences a viewer may see, at which level, and what the team's
@@ -114,6 +114,70 @@ final class TeamCoverage
         }
 
         return $this->hasReports($viewer) ? self::LEVEL_MANAGER : self::LEVEL_COLLEAGUE;
+    }
+
+    /**
+     * The employee ids in $scope that $viewer may see, at any level: the same
+     * people the calendar draws, for a surface that lists people rather than
+     * their absences (the dashboard's birthdays tile). A scope the viewer may
+     * not use gives no one, as everywhere else here.
+     *
+     * @return array<int, int>
+     */
+    public function memberIds(User $viewer, string $scope): array
+    {
+        return array_map('intval', array_keys($this->members($viewer, $scope)));
+    }
+
+    /**
+     * Birthdays in [$from, $to] of the people in $scope that $viewer may see:
+     * the team calendar's day labels, on the same rule as the dashboard's
+     * birthdays tile. Only the day leaves this method, never the year or an
+     * age, and the key is opaque. A 29 February birthday is kept on 1 March
+     * in other years, as recurring holidays are.
+     *
+     * @return array<string, list<array{key: string, name: string, avatar: string, is_self: bool}>> keyed by Y-m-d
+     */
+    public function birthdays(User $viewer, string $scope, CarbonImmutable $from, CarbonImmutable $to, ?int $cityId = null): array
+    {
+        [$from, $to] = $this->bounded($from, $to);
+        $members = $this->members($viewer, $scope, $cityId);
+
+        if ($members === []) {
+            return [];
+        }
+
+        // month-day => the dates it falls on in the range
+        $dates = [];
+        for ($day = $from; $day->lte($to); $day = $day->addDay()) {
+            $dates[$day->format('m-d')][] = $day->toDateString();
+
+            if ($day->format('m-d') === '03-01' && ! $day->isLeapYear()) {
+                $dates['02-29'][] = $day->toDateString();
+            }
+        }
+
+        $byDate = [];
+
+        Employee::query()
+            ->select([...DirectoryAccess::COLUMNS, 'actual_dob'])
+            ->whereIn('id', array_keys($members))
+            ->where('is_active', true)
+            ->whereNotNull('actual_dob')
+            ->with('media')
+            ->get()
+            ->each(function (Employee $employee) use ($dates, $members, &$byDate) {
+                foreach ($dates[$employee->actual_dob->format('m-d')] ?? [] as $date) {
+                    $byDate[$date][] = [
+                        'key' => 'b-'.substr(hash('sha256', $employee->getKey().'|'.$date.'|'.session()->getId()), 0, 12),
+                        'name' => (string) $employee->name,
+                        'avatar' => $employee->avatar_url,
+                        'is_self' => $members[$employee->getKey()]['is_self'],
+                    ];
+                }
+            });
+
+        return array_map(fn (array $people): array => array_values(collect($people)->sortBy('name')->all()), $byDate);
     }
 
     /**
@@ -682,7 +746,7 @@ final class TeamCoverage
 
     private function governorate(Position $position): ?int
     {
-        $cityId = $position->center?->city_id ?? $position->city_id;
+        $cityId = $position->center !== null ? $position->center->city_id : $position->city_id;
 
         return $cityId === null ? null : (int) $cityId;
     }

@@ -2,18 +2,18 @@
 
 namespace Modules\Hr\Livewire\Statistics;
 
-use Modules\Hr\Enums\ContractPlace;
-use Modules\Hr\Enums\ContractType as ContractTypeEnum;
 use App\Livewire\Concerns\ScopesToAuthorizedCity;
 use App\Models\Center;
 use App\Models\City;
-use Modules\Hr\Models\Contract;
-use Modules\Hr\Models\ContractType;
-use Modules\Hr\Models\Position;
 use App\Models\Program;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
+use Modules\Hr\Enums\ContractPlace;
+use Modules\Hr\Enums\ContractType as ContractTypeEnum;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\Position;
 
 class ContractStatistics extends Component
 {
@@ -66,7 +66,7 @@ class ContractStatistics extends Component
                 $this->cards[] = [
                     'name' => $program->slug,
                     'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
-                    'color' => 'bg-primary',
+                    'color' => 'bg-ink text-on-ink',
                     'program_slug' => $program->slug,
                 ] + $this->getCardBreakdown($contractsQuery);
             }
@@ -87,7 +87,7 @@ class ContractStatistics extends Component
                 $this->cards[] = [
                     'name' => $center->name,
                     'centers' => null,
-                    'color' => 'bg-green-500',
+                    'color' => 'bg-surface text-ink',
                     'center_id' => $center->id,
                 ] + $this->getCardBreakdown($contractsQuery);
             }
@@ -111,7 +111,7 @@ class ContractStatistics extends Component
                 $this->cards[] = [
                     'name' => $program->name,
                     'centers' => (clone $positionsQuery)->whereNotNull('center_id')->distinct('center_id')->count(),
-                    'color' => 'bg-primary',
+                    'color' => 'bg-ink text-on-ink',
                     'program_slug' => $program->slug,
                 ] + $this->getCardBreakdown($contractsQuery);
             }
@@ -134,7 +134,7 @@ class ContractStatistics extends Component
                 $this->cards[] = [
                     'name' => $center->name,
                     'centers' => null,
-                    'color' => 'bg-green-500',
+                    'color' => 'bg-surface text-ink',
                     'center_id' => $center->id,
                 ] + $this->getCardBreakdown($contractsQuery);
             }

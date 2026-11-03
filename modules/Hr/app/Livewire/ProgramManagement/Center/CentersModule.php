@@ -9,10 +9,10 @@ use App\Livewire\Concerns\WithFeedback;
 use App\Models\Center;
 use App\Models\City;
 use App\Models\User;
-use Modules\Hr\Notifications\NewCenterCreated;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Modules\Hr\Notifications\NewCenterCreated;
 
 class CentersModule extends Component
 {
@@ -144,6 +144,7 @@ class CentersModule extends Component
         $this->resetErrorBag();
         $this->resetValidation();
         $this->dispatch('closeModal');
+        $this->dispatch('refreshCentersTable');
 
         $this->toast();
     }
