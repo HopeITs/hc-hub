@@ -141,7 +141,7 @@ trait ReadsDonorRegister
         }
 
         return $this->filteredQuery()
-            ->select(['donors.id', 'donors.name', 'donors.type', 'donors.contact_person', 'donors.email', 'donors.phone', 'donors.country', 'donors.next_step', 'donors.next_step_due_on', 'donors.last_contacted_on', 'donors.updated_at'])
+            ->select(['donors.id', 'donors.name', 'donors.type', 'donors.contact_person', 'donors.email', 'donors.phone', 'donors.country', 'donors.next_step', 'donors.next_step_due_on', 'donors.last_contacted_on', 'donors.updated_at', 'donors.approval_status'])
             ->when($canTransfers, fn (Builder $query) => $query->selectSub($nextDue, 'next_due_date'))
             ->withCount('donorProposals')
             ->with($relations)

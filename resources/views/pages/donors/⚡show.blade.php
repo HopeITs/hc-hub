@@ -44,7 +44,7 @@ new #[Layout('layouts::desk'), Title('titles.donor')] class extends Component {
     public function donor(): Donor
     {
         return Donor::query()
-            ->select(['id', 'name', 'type', 'contact_person', 'email', 'phone', 'country', 'notes', 'last_contacted_on', 'next_step', 'next_step_due_on', 'updated_at'])
+            ->select(['id', 'name', 'type', 'contact_person', 'email', 'phone', 'country', 'notes', 'last_contacted_on', 'next_step', 'next_step_due_on', 'updated_at', 'approval_status'])
             ->withCount('donorProposals')
             ->findOrFail($this->donorId);
     }
@@ -264,6 +264,7 @@ new #[Layout('layouts::desk'), Title('titles.donor')] class extends Component {
         title-class="text-3xl! font-bold! leading-none! tracking-tight! @3xl/detail:text-[2.5rem]!"
     >
         <x-slot:meta>
+            <x-donors.pending-badge :donor="$donor" />
             @if ($donor->type !== null)
                 <x-ui.enum-badge :case="$donor->type" />
             @else

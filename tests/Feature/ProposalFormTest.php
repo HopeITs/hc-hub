@@ -1,8 +1,10 @@
 <?php
 
+use App\Actions\Donors\ApproveDonor;
 use App\Actions\Proposals\SaveProposal;
 use App\Enums\AssignmentStatus;
 use App\Enums\Currency;
+use App\Enums\DonorApprovalStatus;
 use App\Enums\ProjectStatus;
 use App\Enums\ProposalStatus;
 use App\Models\Activity;
@@ -561,4 +563,94 @@ test('editing from the register changes the beneficiaries and asks for a reason 
         ->assertSet('showProposalModal', false);
 
     expect(DB::table('project_proposal')->where('proposal_id', $proposal->id)->value('target_beneficiaries'))->toBe(450);
+});
+
+test('a proposal cannot be created for a donor the General Manager has not approved', function () {
+    $project = Project::factory()->create();
+    $requester = userWithRole('Financial');
+    $donor = Donor::factory()->pending($requester)->create();
+
+    $errors = refusedSave(fn () => saveProposal($requester, null, proposalFormData([$project->id], ['donorId' => $donor->id])));
+
+    expect($errors['donorId'])->toBe([__('proposals.donor_request_pending')])
+        ->and(Proposal::query()->count())->toBe(0);
+});
+
+test('the same form saves once the donor is approved', function () {
+    $project = Project::factory()->create();
+    $requester = userWithRole('Financial');
+    $manager = userWithRole('General Manager');
+    $donor = Donor::factory()->pending($requester)->create();
+
+    $this->actingAs($manager);
+    app(ApproveDonor::class)->handle($donor, $manager);
+
+    $proposal = saveProposal($requester, null, proposalFormData([$project->id], ['donorId' => $donor->id]));
+
+    expect($proposal->donor_id)->toBe($donor->id);
+});
+
+test('changing the donor of a proposal to a pending one is refused', function () {
+    $proposal = linkedProposal(ProposalStatus::ConceptNoteReview);
+    $requester = userWithRole('Financial');
+    $donor = Donor::factory()->pending($requester)->create();
+
+    $errors = refusedSave(fn () => saveProposal($requester, $proposal, proposalEditData($proposal, ['donorId' => $donor->id])));
+
+    expect($errors['donorId'])->toBe([__('proposals.donor_request_pending')])
+        ->and(DB::table('proposals')->find($proposal->id)->donor_id)->not->toBe($donor->id);
+});
+
+test('editing other details of a proposal whose donor is still pending is not blocked by the donor rule', function () {
+    $proposal = linkedProposal(ProposalStatus::ConceptNote);
+    $proposal->donor->forceFill(['approval_status' => DonorApprovalStatus::Pending])->save();
+
+    saveProposal(userWithRole('Financial'), $proposal, proposalEditData($proposal, ['name' => 'Renamed while pending']));
+
+    expect($proposal->fresh()->name)->toBe('Renamed while pending');
+});
+
+test('the donor picker hides other people\'s pending requests but shows your own', function () {
+    $requester = userWithRole('Public Relations Manager');
+    $other = userWithRole('Financial');
+    Donor::factory()->create(['name' => 'Approved Aid']);
+    Donor::factory()->pending($requester)->create(['name' => 'Requested Relief']);
+
+    openProposalCreateForm($requester)->assertSee('Approved Aid')->assertSee('Requested Relief');
+    openProposalCreateForm($other)->assertSee('Approved Aid')->assertDontSee('Requested Relief');
+});
+
+test('choosing a donor that is pending shows the banner and refuses to save', function () {
+    $project = Project::factory()->create();
+    $requester = userWithRole('Public Relations Manager');
+    $donor = Donor::factory()->pending($requester)->create(['name' => 'Requested Relief']);
+
+    fillProposalBasics(openProposalCreateForm($requester))
+        ->set('projectIds', [(string) $project->id])
+        ->set('donorId', (string) $donor->id)
+        ->assertSeeHtml('data-donor-pending')
+        ->assertSeeHtml('role="status"')
+        ->assertSee(__('proposals.donor_request_pending_banner'))
+        ->call('saveProposal')
+        ->assertHasErrors(['donorId']);
+
+    expect(Proposal::query()->count())->toBe(0);
+});
+
+test('a donor requested from the form is selected and the banner shows', function () {
+    $requester = userWithRole('Public Relations Manager');
+    $donor = Donor::factory()->pending($requester)->create();
+
+    openProposalCreateForm($requester)
+        ->dispatch('donor-requested', donorId: $donor->id)
+        ->assertSet('donorId', (string) $donor->id)
+        ->assertSeeHtml('data-donor-pending');
+});
+
+test('a donor requested by someone else cannot be selected through the event', function () {
+    $donor = Donor::factory()->pending(userWithRole('Public Relations'))->create();
+
+    openProposalCreateForm(userWithRole('Financial'))
+        ->dispatch('donor-requested', donorId: $donor->id)
+        ->assertSet('donorId', '');
 });

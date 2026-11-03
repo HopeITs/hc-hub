@@ -6,13 +6,16 @@ namespace App\Models;
 
 use App\Concerns\HasSlug;
 use App\Concerns\RecordsActivity;
+use App\Enums\DonorApprovalStatus;
 use App\Enums\DonorType;
 use App\Notifications\TracksActivity;
 use Carbon\CarbonImmutable;
 use Database\Factories\DonorFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -27,6 +30,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $country
  * @property string|null $notes
  * @property bool $is_internal
+ * @property DonorApprovalStatus $approval_status
+ * @property int|null $requested_by
+ * @property int|null $approved_by
+ * @property CarbonImmutable|null $approved_at
  * @property CarbonImmutable|null $last_contacted_on
  * @property string|null $next_step
  * @property CarbonImmutable|null $next_step_due_on
@@ -50,6 +57,45 @@ class Donor extends Model implements TracksActivity
     public function isInternal(): bool
     {
         return $this->is_internal;
+    }
+
+    /**
+     * Whether the General Manager has yet to approve this donor (D-57).
+     */
+    public function isPending(): bool
+    {
+        return $this->approval_status === DonorApprovalStatus::Pending;
+    }
+
+    /**
+     * The user who asked for this donor, when it began as a request (D-57).
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function requester(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'requested_by');
+    }
+
+    /**
+     * Donors the user may pick on a form: every approved donor, plus the
+     * pending requests the user made themselves (D-57).
+     *
+     * @param  Builder<Donor>  $query
+     */
+    public function scopePickableBy(Builder $query, User $user): void
+    {
+        $query->where(fn (Builder $inner) => $inner
+            ->where('donors.approval_status', DonorApprovalStatus::Approved->value)
+            ->orWhere('donors.requested_by', $user->id));
+    }
+
+    /**
+     * @param  Builder<Donor>  $query
+     */
+    public function scopePending(Builder $query): void
+    {
+        $query->where('donors.approval_status', DonorApprovalStatus::Pending->value);
     }
 
     /**
@@ -108,6 +154,8 @@ class Donor extends Model implements TracksActivity
     {
         return [
             'is_internal' => 'boolean',
+            'approval_status' => DonorApprovalStatus::class,
+            'approved_at' => 'datetime',
             'type' => DonorType::class,
             'last_contacted_on' => 'date',
             'next_step_due_on' => 'date',
@@ -117,6 +165,26 @@ class Donor extends Model implements TracksActivity
     public function activityModule(): string
     {
         return 'donors';
+    }
+
+    /**
+     * A donor requested by someone who cannot approve it is a request, not a
+     * new donor (D-57).
+     */
+    /**
+     * The approval columns are recorded as donor.requested / approved /
+     * declined, never as a field edit.
+     *
+     * @return list<string>
+     */
+    protected function activityExcludedFields(): array
+    {
+        return ['approval_status', 'requested_by', 'approved_by', 'approved_at'];
+    }
+
+    protected function activityCreatedEvent(): string
+    {
+        return $this->activityAttribute('approval_status') === DonorApprovalStatus::Pending ? 'donor.requested' : 'donor.created';
     }
 
     public function activityLabel(): string

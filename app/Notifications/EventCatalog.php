@@ -213,6 +213,12 @@ final class EventCatalog
                 'report_template.confirmed' => self::entry('report-templates', $now, 'module_map', $all, activity: 'report_template.confirmed'),
                 'report_template.lines_added' => self::entry('report-templates', $now, 'module_map', $all, activity: 'report_template.lines_added'),
             ],
+            // donors (W-04, D-57)
+            [
+                'donor.requested' => self::entry('donors', $now, 'module_map', OversightMode::None, activity: 'donor.requested'),
+                'donor.approved' => self::entry('donors', $now, 'module_map', OversightMode::None, activity: 'donor.approved'),
+                'donor.declined' => self::entry('donors', $now, 'module_map', OversightMode::None, activity: 'donor.declined'),
+            ],
             // donor-reports
             [
                 'donor_report.saved' => self::entry('donor-reports', $digest, 'module_map', $all, activity: 'donor_report.saved'),

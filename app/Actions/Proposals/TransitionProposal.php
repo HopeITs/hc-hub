@@ -167,7 +167,7 @@ final class TransitionProposal
     {
         $isMet = match ($requirement) {
             'linked_project' => $proposal->projects()->exists(),
-            'donor' => $proposal->donor_id !== null,
+            'donor' => $proposal->donor_id !== null && ! Donor::query()->pending()->whereKey($proposal->donor_id)->exists(),
             'planned_dates' => $proposal->planned_date_begin !== null && $proposal->planned_date_end !== null,
             'budget' => $proposal->requested_budget !== null && $proposal->requested_currency !== null,
             'target_beneficiaries' => ! $proposal->projects()
@@ -183,7 +183,7 @@ final class TransitionProposal
 
         return match ($requirement) {
             'linked_project' => __('proposals.link_project_first'),
-            'donor' => __('proposals.choose_the_donor'),
+            'donor' => $proposal->donor_id === null ? __('proposals.choose_the_donor') : __('proposals.donor_request_pending'),
             'planned_dates' => __('proposals.planned_dates_required'),
             'budget' => __('proposals.budget_required'),
             'target_beneficiaries' => __('proposals.beneficiaries_required'),

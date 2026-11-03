@@ -25,6 +25,8 @@ function contractEventKeys(): array
         'monthly_report.returned', 'monthly_report.reopen_requested', 'monthly_report.reopen_decided', 'monthly_report.reopen_escalated',
         'report_template.pending', 'report_template.confirmed', 'report_template.lines_added',
         'donor_report.saved', 'donor_report.submitted', 'donor_report.due', 'donor_report.overdue',
+        // W-04 (D-57): a donor requested from the proposal form, and the General Manager's decision.
+        'donor.requested', 'donor.approved', 'donor.declined',
         'department_task.created', 'department_task.due', 'department_task.overdue', 'department_task.delivered', 'department_task.returned',
         'library_indicator.created', 'library_indicator.updated', 'library_indicator.deactivated', 'library_indicator.reactivated',
         'meal_coverage.assigned', 'meal_coverage.responsible_changed', 'meal_coverage.project_assigned',
@@ -100,7 +102,7 @@ test('importance, oversight and critical follow the contract', function () {
             'project.activated', 'project.approved', 'proposal.approved', 'proposal.status_changed',
         ])
         ->and($management)->toBe(['transfer.generated', 'transfer.late', 'transfer.received'])
-        ->and($none)->toBe(['department_task.created', 'department_task.delivered', 'department_task.due', 'department_task.returned', 'nudge.sent', 'proposal.plan_rebased', 'task_review.sent_back', 'task_review.submitted']);
+        ->and($none)->toBe(['department_task.created', 'department_task.delivered', 'department_task.due', 'department_task.returned', 'donor.approved', 'donor.declined', 'donor.requested', 'nudge.sent', 'proposal.plan_rebased', 'task_review.sent_back', 'task_review.submitted']);
 });
 
 test('every key has a title and a body in English and Arabic', function () {

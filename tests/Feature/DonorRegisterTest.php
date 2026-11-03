@@ -337,3 +337,77 @@ test('exporting needs the donors view permission', function () {
         ->call('exportCsv')
         ->assertForbidden();
 });
+
+/*
+|--------------------------------------------------------------------------
+| Pending donor requests (W-04, D-57)
+|--------------------------------------------------------------------------
+*/
+
+test('the General Manager sees the pending requests above the register with who asked', function () {
+    $requester = userWithRole('Public Relations Manager');
+    Donor::factory()->pending($requester)->create(['name' => 'Nordic Relief Fund']);
+    Donor::factory()->create(['name' => 'Approved Aid']);
+
+    Livewire::actingAs(userWithRole('General Manager'))->test('pages::donors.index')
+        ->assertSeeHtml('data-pending-requests')
+        ->assertSee('Nordic Relief Fund')
+        ->assertSee($requester->name);
+});
+
+test('someone who cannot approve sees no pending section but the Pending badge on the row', function () {
+    Donor::factory()->pending($this->user)->create(['name' => 'Nordic Relief Fund']);
+
+    donorRegister()
+        ->assertDontSeeHtml('data-pending-requests')
+        ->assertSee('Nordic Relief Fund')
+        ->assertSee(__('donors.pending_badge'));
+});
+
+test('the General Manager approves a request from the page', function () {
+    $donor = Donor::factory()->pending(userWithRole('Public Relations'))->create();
+
+    Livewire::actingAs(userWithRole('General Manager'))->test('pages::donors.index')
+        ->call('approveDonor', $donor->id)
+        ->assertDontSeeHtml('data-pending-requests');
+
+    expect($donor->fresh()->isPending())->toBeFalse();
+});
+
+test('approving from the page needs donors.approve', function () {
+    $donor = Donor::factory()->pending(userWithRole('Public Relations'))->create();
+
+    Livewire::actingAs(userWithRole('Public Relations Manager'))->test('pages::donors.index')
+        ->call('approveDonor', $donor->id)
+        ->assertForbidden();
+
+    expect($donor->fresh()->isPending())->toBeTrue();
+});
+
+test('declining asks for a reason of at least ten characters', function () {
+    $donor = Donor::factory()->pending(userWithRole('Public Relations'))->create();
+
+    Livewire::actingAs(userWithRole('General Manager'))->test('pages::donors.index')
+        ->call('confirmDecline', $donor->id)
+        ->assertSet('showDeclineModal', true)
+        ->set('declineReason', 'No.')
+        ->call('declineDonor')
+        ->assertHasErrors(['declineReason'])
+        ->set('declineReason', 'We already fund this donor elsewhere.')
+        ->call('declineDonor')
+        ->assertHasNoErrors()
+        ->assertSet('showDeclineModal', false);
+
+    expect(Donor::query()->whereKey($donor->id)->exists())->toBeFalse();
+});
+
+test('the agreement form offers approved donors and your own requests only', function () {
+    $requester = userWithRole('Financial');
+    Donor::factory()->create(['name' => 'Approved Aid']);
+    Donor::factory()->pending($requester)->create(['name' => 'Mine Pending']);
+    Donor::factory()->pending(userWithRole('Public Relations'))->create(['name' => 'Theirs Pending']);
+
+    $options = Livewire::actingAs($requester)->test('pages::funding-agreements.index')->instance()->donorOptions->pluck('name')->all();
+
+    expect($options)->toContain('Approved Aid', 'Mine Pending')->not->toContain('Theirs Pending');
+});

@@ -10,6 +10,10 @@ return [
         'narrative' => 'سردي',
         'financial' => 'مالي',
     ],
+    'donor_approval_status' => [
+        'pending' => 'قيد الموافقة',
+        'approved' => 'تمت الموافقة',
+    ],
     'donor_type' => [
         'bilateral' => 'ثنائي',
         'foundation' => 'مؤسسة',

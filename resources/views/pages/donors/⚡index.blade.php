@@ -1,5 +1,7 @@
 <?php
 
+use App\Actions\Donors\ApproveDonor;
+use App\Actions\Donors\DeclineDonor;
 use App\Actions\Donors\DeleteDonor;
 use App\Enums\Currency;
 use App\Enums\DonorType;
@@ -12,7 +14,10 @@ use App\Livewire\Concerns\FiltersFinanceRegister;
 use App\Livewire\Concerns\ManagesDonorForm;
 use App\Models\Donor;
 use Flux\Flux;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -72,6 +77,13 @@ new #[Layout('layouts::desk'), Title('titles.donors')] class extends Component {
 
     #[Url(except: '')]
     public string $flag = '';
+
+    public bool $showDeclineModal = false;
+
+    #[Locked]
+    public ?int $decliningDonorId = null;
+
+    public string $declineReason = '';
 
     public bool $showDeleteModal = false;
     #[Locked]
@@ -148,6 +160,84 @@ new #[Layout('layouts::desk'), Title('titles.donors')] class extends Component {
             variant: 'success',
             text: $isCreate ? __('donors.donor_created') : __('donors.donor_updated'),
         );
+    }
+
+    /**
+     * The donor requests waiting for the General Manager, oldest first. Empty
+     * for anyone who cannot approve (D-57).
+     *
+     * @return Collection<int, Donor>
+     */
+    #[Computed]
+    public function pendingRequests(): Collection
+    {
+        if (! Auth::user()->can('donors.approve')) {
+            return new Collection;
+        }
+
+        return Donor::query()
+            ->pending()
+            ->select(['id', 'name', 'requested_by', 'created_at'])
+            ->with('requester:id,hr_user_id')
+            ->orderBy('created_at')
+            ->orderBy('id')
+            ->get();
+    }
+
+    public function approveDonor(int $donorId): void
+    {
+        $donor = Donor::query()->pending()->findOrFail($donorId);
+
+        app(ApproveDonor::class)->handle($donor, Auth::user());
+
+        unset($this->pendingRequests);
+        Flux::toast(variant: 'success', text: __('donors.donor_approved'));
+    }
+
+    public function confirmDecline(int $donorId): void
+    {
+        Gate::authorize('donors.approve');
+
+        Donor::query()->pending()->findOrFail($donorId);
+
+        $this->resetValidation();
+        $this->declineReason = '';
+        $this->decliningDonorId = $donorId;
+        $this->showDeclineModal = true;
+    }
+
+    public function cancelDecline(): void
+    {
+        $this->resetValidation();
+        $this->declineReason = '';
+        $this->decliningDonorId = null;
+        $this->showDeclineModal = false;
+    }
+
+    public function declineDonor(): void
+    {
+        if ($this->decliningDonorId === null) {
+            $this->cancelDecline();
+
+            return;
+        }
+
+        $donor = Donor::query()->pending()->findOrFail($this->decliningDonorId);
+
+        Gate::authorize('approve', $donor);
+
+        $this->validate(
+            ['declineReason' => ['required', 'string', 'min:10', 'max:2000']],
+            ['declineReason.required' => __('donors.give_a_reason_of_at_least_ten_characters'), 'declineReason.min' => __('donors.give_a_reason_of_at_least_ten_characters')],
+        );
+
+        app(DeclineDonor::class)->handle($donor, $this->declineReason, Auth::user());
+
+        $this->cancelDecline();
+        unset($this->pendingRequests);
+        $this->resetPage();
+
+        Flux::toast(variant: 'success', text: __('donors.donor_request_declined'));
     }
 
     public function confirmDelete(int $donorId): void
@@ -329,6 +419,8 @@ new #[Layout('layouts::desk'), Title('titles.donors')] class extends Component {
         </x-slot:actions>
 
 
+    @include('pages.donors._pending-requests')
+
     @if (! $this->hasAnyDonor)
         <x-ui.empty-state icon="building-library" :heading="__('donors.no_donors_yet')" :body="__('donors.add_the_first_donor')" />
     @elseif ($showsOverview)
@@ -340,6 +432,19 @@ new #[Layout('layouts::desk'), Title('titles.donors')] class extends Component {
     @endif
 
     <x-donors.form-modal :open="$showDonorModal" :editing="$editingDonorId !== null" :type-options="$this->donorTypeOptions" />
+
+    <x-ui.confirm-modal
+        wire:model="showDeclineModal"
+        close="cancelDecline"
+        tone="neutral"
+        :title="__('donors.decline_this_request')"
+        :message="__('donors.the_requester_is_told_why_a_donor_a_proposal_uses_stays')"
+        confirm="declineDonor"
+        :confirm-label="__('donors.decline_request')"
+        confirm-test="confirm-decline-donor"
+    >
+        <x-ui.form-textarea wire:model="declineReason" :label="__('donors.reason_for_declining')" rows="3" maxlength="2000" required />
+    </x-ui.confirm-modal>
 
     <x-ui.confirm-modal
         wire:model="showDeleteModal"

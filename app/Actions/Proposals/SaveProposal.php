@@ -235,6 +235,8 @@ final class SaveProposal
             if ($proposal !== null) {
                 $this->checkDonorChange($validator, $input, $proposal);
             }
+
+            $this->checkDonorApproved($validator, $input, $proposal);
         });
 
         $validator->validate();
@@ -306,6 +308,30 @@ final class SaveProposal
 
         if (! $isOpen || $proposal->donorProposals()->exists()) {
             $validator->errors()->add('donorId', __('proposals.the_donor_cannot_change_after_the_concept_note'));
+        }
+    }
+
+    /**
+     * A donor the General Manager has not approved yet cannot be chosen
+     * (D-57). A proposal that already carries one keeps saving its other
+     * details; only choosing it is refused.
+     *
+     * @param  array<string, mixed>  $input
+     */
+    private function checkDonorApproved(ValidatorInstance $validator, array $input, ?Proposal $proposal): void
+    {
+        if ($validator->errors()->has('donorId') || ! is_numeric($input['donorId'] ?? null)) {
+            return;
+        }
+
+        $donorId = (int) $input['donorId'];
+
+        if ($proposal !== null && $donorId === $proposal->donor_id) {
+            return;
+        }
+
+        if (Donor::query()->pending()->whereKey($donorId)->exists()) {
+            $validator->errors()->add('donorId', __('proposals.donor_request_pending'));
         }
     }
 

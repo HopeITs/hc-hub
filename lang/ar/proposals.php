@@ -459,4 +459,6 @@ return [
     'renewal_chain_none' => 'ليس ضمن سلسلة تجديد',
     'renewal_chain_current' => 'هذا المقترح',
     'last_year_achievement' => 'العام الماضي: :value (:percent٪)',
+    'donor_request_pending' => 'طلب المانح قيد الموافقة. يجب أن يوافق المدير العام أولاً',
+    'donor_request_pending_banner' => 'طلب المانح قيد الموافقة — يجب أن يوافق المدير العام عليه قبل أن يمكن حفظ هذا المقترح.',
 ];
