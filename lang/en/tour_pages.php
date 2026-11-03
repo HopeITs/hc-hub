@@ -37,6 +37,11 @@ return [
         'annual_plans_index' => ['intro' => ['title' => 'Annual plans', 'body' => 'The plan for each year, by program. Create one, filter by year, and open it to plan the details.']],
         'annual_plans_show' => ['intro' => ['title' => 'Annual plan detail', 'body' => 'One year of one program: its targets, budget and the people responsible.']],
         'projects_index' => ['intro' => ['title' => 'Projects', 'body' => 'All projects with their progress, budget and team. Filter down to a program, status or lead, then open one to manage it.']],
+        'reviews_index' => [
+            'intro' => ['title' => 'My reviews', 'body' => 'The concept notes and proposals waiting for your review, oldest first. A wait over a week turns red.'],
+            'filters' => ['title' => 'What to show', 'body' => 'Waiting on me lists what still needs you; All my reviews adds the ones you finished; Asked by me shows who still owes you a review.'],
+            'table' => ['title' => 'Your reviews', 'body' => 'Press Review to open the proposal right on your note. Add a note if you like, then press Mark as reviewed.'],
+        ],
         'projects_show' => ['intro' => ['title' => 'Project detail', 'body' => 'One project end to end: schedule, milestones, tasks, budget, team and how it links to the results it serves.']],
         'timeline_index' => [
             'intro' => ['title' => 'Timeline', 'body' => 'Every project on a shared time axis, so overlaps and gaps are obvious.'],
@@ -60,7 +65,7 @@ return [
             'vital' => ['title' => 'Vital signs', 'body' => 'The headline readings for this proposal; each one opens the tab behind it.'],
             'lanes' => ['title' => 'Work lanes', 'body' => 'The tasks that move the proposal forward, grouped by stage.'],
             'warnings' => ['title' => 'Warnings', 'body' => 'Anything missing or late that could hold the proposal up.'],
-            'reviewers' => ['title' => 'Reviewers', 'body' => 'Who must read this proposal at each stage and whether they have seen it; add or remove reviewers here if you may.'],
+            'reviewers' => ['title' => 'Reviewers', 'body' => 'Who must read this proposal at each stage and whether they have reviewed it; add or remove reviewers here if you may.'],
             'logframe' => ['title' => 'Logical Framework', 'body' => 'The Impact, Outcome, Output and Activity tree of this proposal; start from the program framework or build your own.'],
             'calendar' => ['title' => 'Activity calendar', 'body' => 'The months each activity is scheduled in.'],
             'targets' => ['title' => 'Indicators & Targets', 'body' => 'One row per indicator and one column per center; an empty cell means no target, and zero is a real target.'],

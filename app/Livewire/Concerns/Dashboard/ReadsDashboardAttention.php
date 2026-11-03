@@ -12,6 +12,7 @@ use App\Models\ProposalReviewer;
 use App\Models\Risk;
 use App\Models\Task;
 use App\Models\TransfersTracking;
+use App\Support\ProposalStoryLink;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -142,10 +143,11 @@ trait ReadsDashboardAttention
                 href: route('risks.index', ['project' => $risk->project_id, 'status' => 'happened']),
             ));
 
-        $reviews = $this->awaitingReviews()
+        $viewer = auth()->user();
+        $reviews = $viewer === null ? new Collection : $this->awaitingReviews()
             ->limit(self::AttentionLimit)
             ->get()
-            ->map(function (ProposalReviewer $review) use ($today): array {
+            ->map(function (ProposalReviewer $review) use ($today, $viewer): array {
                 $daysAsked = (int) $review->created_at?->startOfDay()->diffInDays($today);
 
                 return $this->attentionEntry(
@@ -155,7 +157,7 @@ trait ReadsDashboardAttention
                     title: $review->proposal->name,
                     context: __('dashboard.review_asked_of_you', ['stage' => $review->stage->label()]),
                     daysLate: null,
-                    href: route('proposals.show', $review->proposal),
+                    href: ProposalStoryLink::review($viewer, $review->proposal),
                     badge: trans_choice('dashboard.review_asked_days', $daysAsked, ['count' => $daysAsked]),
                 );
             });
@@ -199,7 +201,7 @@ trait ReadsDashboardAttention
                 fn (Builder $query) => $query->forEmployee((int) $employeeId),
             )
             ->awaitingReview()
-            ->with('proposal:id,slug,name,status')
+            ->with(['proposal:id,slug,name,status', 'proposal.projects:projects.id,projects.slug'])
             ->oldest('id');
     }
 

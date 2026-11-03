@@ -133,7 +133,8 @@ final class DeskWork
     }
 
     /**
-     * Reviewers who have not opened the proposals of the user's projects.
+     * Other reviewers who have not reviewed the proposals of the user's
+     * projects; the user's own row waits on them, not on someone else.
      *
      * @return Builder<ProposalReviewer>
      */
@@ -141,6 +142,7 @@ final class DeskWork
     {
         return ProposalReviewer::query()
             ->whereNull('seen_at')
+            ->where('employee_id', '!=', $user->employee_id ?? 0)
             ->whereIn('proposal_id', DB::table('project_proposal')->select('proposal_id')->whereIn('project_id', self::projectsOwnedBy($user)));
     }
 

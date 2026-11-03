@@ -41,7 +41,7 @@ use Livewire\Attributes\Locked;
  * @property int $proposalId
  * @property-read Proposal $proposal  #[Computed] proposal()
  * @property-read Collection<int, Media> $proposalFiles  #[Computed] proposalFiles()
- * @property-read list<array{stage: ReviewStage, isOpen: bool, rows: list<array{id: int, employee: HrEmployee|null, employeeId: int, slot: ReviewerSlot, seenAt: CarbonImmutable|null, note: string|null, noteAt: CarbonImmutable|null, isActive: bool, isMine: bool, isRemovable: bool}>, vacant: list<ReviewerSlot>}> $reviewStages  #[Computed] reviewStages()
+ * @property-read list<array{stage: ReviewStage, isOpen: bool, rows: list<array{id: int, employee: HrEmployee|null, employeeId: int, slot: ReviewerSlot, seenAt: CarbonImmutable|null, note: string|null, noteAt: CarbonImmutable|null, isActive: bool, isMine: bool, isRemovable: bool}>, vacant: list<array{slot: ReviewerSlot, isSet: bool}>}> $reviewStages  #[Computed] reviewStages()
  */
 trait ManagesProposalReviewers
 {
@@ -69,10 +69,11 @@ trait ManagesProposalReviewers
 
     /**
      * Each stage that has reviewers or takes them now, with its rows and the
-     * default slots that are vacant and have no row. One HR query for names,
-     * one for active flags.
+     * default slots that are vacant and have no row, each saying whether a
+     * position is set for it (else nobody holds that position in HR). One HR
+     * query for names, one for active flags.
      *
-     * @return list<array{stage: ReviewStage, isOpen: bool, rows: list<array{id: int, employee: HrEmployee|null, employeeId: int, slot: ReviewerSlot, seenAt: CarbonImmutable|null, note: string|null, noteAt: CarbonImmutable|null, isActive: bool, isMine: bool, isRemovable: bool}>, vacant: list<ReviewerSlot>}>
+     * @return list<array{stage: ReviewStage, isOpen: bool, rows: list<array{id: int, employee: HrEmployee|null, employeeId: int, slot: ReviewerSlot, seenAt: CarbonImmutable|null, note: string|null, noteAt: CarbonImmutable|null, isActive: bool, isMine: bool, isRemovable: bool}>, vacant: list<array{slot: ReviewerSlot, isSet: bool}>}>
      */
     #[Computed]
     public function reviewStages(): array
@@ -95,6 +96,7 @@ trait ManagesProposalReviewers
 
         $active = array_flip(MealCoverage::activeEmployeeIds($employeeIds));
         $myEmployeeId = auth()->user()?->employee_id;
+        $positionIds = Slots::positionIds();
         $stages = [];
 
         foreach (ReviewStage::cases() as $stage) {
@@ -122,9 +124,12 @@ trait ManagesProposalReviewers
                     'isMine' => $myEmployeeId !== null && (int) $myEmployeeId === $row->employee_id,
                     'isRemovable' => $row->isRemovable(),
                 ])->all()),
-                'vacant' => $stageRows->isEmpty() ? [] : array_values(array_filter(
-                    ReviewerSlot::defaultSlots(),
-                    fn (ReviewerSlot $slot): bool => ! in_array($slot, $taken, true) && Slots::holderOf($slot->value) === null,
+                'vacant' => $stageRows->isEmpty() ? [] : array_values(array_map(
+                    fn (ReviewerSlot $slot): array => ['slot' => $slot, 'isSet' => $positionIds[$slot->value] !== null],
+                    array_filter(
+                        ReviewerSlot::defaultSlots(),
+                        fn (ReviewerSlot $slot): bool => ! in_array($slot, $taken, true) && Slots::holderOf($slot->value) === null,
+                    ),
                 )),
             ];
         }

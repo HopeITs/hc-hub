@@ -12,6 +12,7 @@ use App\Models\HrEmployee;
 use App\Models\MonthlyReport;
 use App\Models\ProposalReviewer;
 use App\Models\Task;
+use App\Support\ProposalStoryLink;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -56,7 +57,7 @@ trait ReadsDeskDecisions
         $reviews = ProposalReviewer::query()
             ->when($user->employee_id === null, fn (Builder $query) => $query->whereRaw('1 = 0'), fn (Builder $query) => $query->forEmployee((int) $user->employee_id))
             ->awaitingReview()
-            ->with(['proposal:id,slug,name,status', 'addedBy:id,employee_id,hr_user_id'])
+            ->with(['proposal:id,slug,name,status', 'proposal.projects:projects.id,projects.slug', 'addedBy:id,employee_id,hr_user_id'])
             ->oldest('id')
             ->get()
             ->unique('proposal_id')
@@ -68,7 +69,7 @@ trait ReadsDeskDecisions
                 who: $review->addedBy?->name ?? '',
                 since: $review->created_at,
                 due: null,
-                href: route('proposals.show', $review->proposal),
+                href: ProposalStoryLink::review($user, $review->proposal),
             ));
 
         $reports = $this->visible(MonthlyReport::query(), 'reports')
