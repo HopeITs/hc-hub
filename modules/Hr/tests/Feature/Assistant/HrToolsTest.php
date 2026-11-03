@@ -183,7 +183,7 @@ class HrToolsTest extends TestCase
         $this->assertSame([$pending->id], array_column($result['requests'], 'id'));
         $this->assertSame('Aleppo Worker', $result['requests'][0]['employee']);
         $this->assertSame('2026-05-04', $result['requests'][0]['start']);
-        $this->assertSame(LeaveRequestStatus::getLocalizedName(LeaveRequestStatus::Pending)['value'], $result['requests'][0]['status']);
+        $this->assertSame(LeaveRequestStatus::of(0)->label(), $result['requests'][0]['status']);
         // The requester has no direct manager, so HR in scope decides (C3-Q1).
         $this->assertTrue($result['requests'][0]['you_can_decide']);
         $this->assertNotEmpty($result['requests'][0]['current_step']);

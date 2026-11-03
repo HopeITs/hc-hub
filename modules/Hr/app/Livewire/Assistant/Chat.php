@@ -287,7 +287,7 @@ class Chat extends Component
     public function placeholder(): string
     {
         return '<div class="flex flex-1 items-center justify-center gap-2 p-6 text-small text-ink-2" role="status">'
-            .'<span class="inline-block size-4 shrink-0 animate-spin rounded-full border-2 border-current border-e-transparent" aria-hidden="true"></span>'.e(__('assistant.widget.loading')).'</div>';
+            .'<span class="hc-spin" aria-hidden="true"></span>'.e(__('assistant.widget.loading')).'</div>';
     }
 
     public function render(): View

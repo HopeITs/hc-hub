@@ -17,7 +17,6 @@ use Modules\Hr\Models\ChecklistItem;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\ContractType;
 use Modules\Hr\Models\Employee;
-use Modules\Hr\Models\Folder;
 use Modules\Hr\Models\LeaveBalance;
 use Modules\Hr\Models\LeaveRequest;
 use Modules\Hr\Models\LeaveType;
@@ -436,7 +435,7 @@ class EmployeeTools
             'start' => $request->start_at->format($request->type === 'hour' ? 'Y-m-d H:i' : 'Y-m-d'),
             'end' => $request->end_at->format($request->type === 'hour' ? 'Y-m-d H:i' : 'Y-m-d'),
             'duration' => $this->plain($request->duration),
-            'status' => LeaveRequestStatus::getLocalizedName((int) $request->status)['value'],
+            'status' => LeaveRequestStatus::of($request->status)->label(),
         ])->values()->all()];
     }
 
@@ -520,10 +519,6 @@ class EmployeeTools
             $result['shared_folders'] = [];
 
             foreach ($user->accessibleFolders()->with('media')->orderBy('name')->get() as $folder) {
-                if (! $folder instanceof Folder) {
-                    continue;
-                }
-
                 $result['shared_folders'][] = [
                     'folder' => $folder->name,
                     'files' => $folder->getMedia('archived_files')

@@ -6,7 +6,8 @@ use App\Models\City;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Modules\Hr\Enums\ContractType as ContractTypeEnum;
+use Modules\Hr\Enums\ContractStatus;
+use Modules\Hr\Enums\EmployeeStatus;
 use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\ContractType;
@@ -211,7 +212,7 @@ class HrTools
                     'department' => $place['department'],
                     'center' => $place['center'],
                     'city' => $place['city'] ?? Related::text(Related::one($employee, 'city', City::class)),
-                    'status' => $this->employeeStatus($employee),
+                    'status' => EmployeeStatus::for($employee)->label(),
                 ], fn ($value) => filled($value));
             })->values()->all(),
             'truncated' => $employees->count() > $limit ?: null,
@@ -259,7 +260,7 @@ class HrTools
             'name' => $employee->nameForLocale($locale),
             'username' => $employee->username,
             'city' => Related::text(Related::one($employee, 'city', City::class)),
-            'status' => $this->employeeStatus($employee),
+            'status' => EmployeeStatus::for($employee)->label(),
             'contracts' => $contracts->map(fn (Contract $contract) => array_filter([
                 ...Related::place(Related::one($contract, 'position', Position::class)),
                 'contract_type' => Related::one($contract, 'contractType', ContractType::class)?->{"name_{$locale}"},
@@ -267,7 +268,7 @@ class HrTools
                 'end_date' => $contract->end_date?->format('Y-m-d'),
                 'weekly_hours' => $contract->weekly_hours,
                 'auto_renew' => (bool) $contract->auto_renew,
-                'status' => $this->contractStatus($contract),
+                'status' => ContractStatus::for($contract)->label(),
             ], fn ($value) => filled($value) || $value === false))->values()->all(),
             'leave_balances' => $this->leaveBalances($employee),
             'recent_leave_requests' => $requests->map(fn (LeaveRequest $request) => $this->leaveRequestRow($request, $locale))->values()->all(),
@@ -319,7 +320,8 @@ class HrTools
             ->limit($limit + 1)
             ->get();
 
-        $authority = app(LeaveDecisionAuthority::class);
+        $authority = LeaveDecisionAuthority::forOnePass();
+        $authority->primeScope($user, $requests->pluck('id'));
         $nextStep = app(LeaveRequestNextStep::class);
 
         return [
@@ -448,7 +450,7 @@ class HrTools
             'start' => $request->start_at->format($request->type === 'hour' ? 'Y-m-d H:i' : 'Y-m-d'),
             'end' => $request->end_at->format($request->type === 'hour' ? 'Y-m-d H:i' : 'Y-m-d'),
             'duration' => $this->plain($request->duration),
-            'status' => LeaveRequestStatus::getLocalizedName((int) $request->status)['value'],
+            'status' => LeaveRequestStatus::of($request->status)->label(),
         ];
     }
 
@@ -470,35 +472,6 @@ class HrTools
         $limit = filter_var($args['limit'] ?? self::DEFAULT_LIMITS[$tool], FILTER_VALIDATE_INT);
 
         return $limit === false ? self::DEFAULT_LIMITS[$tool] : max(1, min(self::MAX_LIMITS[$tool], $limit));
-    }
-
-    /**
-     * An employee's state as the lists word it: a draft record, active,
-     * waiting for a first contract, or inactive.
-     */
-    private function employeeStatus(Employee $employee): string
-    {
-        return match (true) {
-            $employee->isDraft() => __('employees.onboarding.status-incomplete'),
-            (bool) $employee->is_active => __('general.active'),
-            $employee->isAwaitingContract() => __('employees.onboarding.status-awaiting'),
-            default => __('general.inactive'),
-        };
-    }
-
-    /**
-     * A contract's state as the Contracts table words it, from the type, the
-     * active flag and the dates, in the table's own order.
-     */
-    private function contractStatus(Contract $contract): string
-    {
-        return match (true) {
-            (int) $contract->type === ContractTypeEnum::Draft => ContractTypeEnum::getLocalizedName(ContractTypeEnum::Draft)['value'],
-            $contract->isTerminated() => __('contracts.status-terminated'),
-            (bool) $contract->is_active => __('general.active'),
-            $contract->end_date !== null && $contract->end_date->isPast() => __('contracts.status-expired'),
-            default => __('general.inactive'),
-        };
     }
 
     /** The formatted labels carry <strong> markup for the cards. */

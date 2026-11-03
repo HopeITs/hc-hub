@@ -96,8 +96,8 @@
 >
     @if ($isPanel)
         <div class="flex items-center gap-2 border-b border-line-soft px-3 py-1.5">
-            <x-assistant.button variant="quiet" size="sm" icon="plus" wire:click="clear" x-on:click="history = false" data-testid="assistant-new">{{ __('assistant.clear') }}</x-assistant.button>
-            <x-assistant.button variant="link" size="sm" icon="clock" class="ms-auto" x-on:click="history = ! history" x-bind:aria-expanded="history.toString()" aria-expanded="false" data-testid="assistant-history-toggle">{{ __('assistant.history.title') }}</x-assistant.button>
+            <x-button variant="quiet" size="sm" icon="plus" wire:click="clear" x-on:click="history = false" data-testid="assistant-new">{{ __('assistant.clear') }}</x-button>
+            <x-button variant="link" size="sm" icon="clock" class="ms-auto" x-on:click="history = ! history" x-bind:aria-expanded="history.toString()" aria-expanded="false" data-testid="assistant-history-toggle">{{ __('assistant.history.title') }}</x-button>
         </div>
 
         <div class="min-h-0 flex-1 overflow-y-auto px-3 py-3" data-csb-exclude>
@@ -105,7 +105,7 @@
 
             <div x-show="! history">
                 <p class="mb-3 flex items-start gap-2 text-caption text-ink-3" data-testid="assistant-disclaimer">
-                    <x-assistant.ic name="info" class="mt-0.5 size-3.5 shrink-0" />
+                    <x-ic name="info" class="mt-0.5 size-3.5 shrink-0" />
                     <span>{{ __('assistant.disclaimer') }}</span>
                     @if ($usesPuter)
                         <a href="https://developer.puter.com" target="_blank" rel="noopener" class="underline">{{ __('assistant.puter.credit') }}</a>
@@ -121,20 +121,16 @@
             @include('livewire.assistant.partials.question-form')
         </div>
     @else
-        <header class="mb-6 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-            <div class="min-w-0">
-                <h1 class="text-2xl font-extrabold text-ink">{{ __('assistant.title') }}</h1>
-                <p class="mt-1.5 max-w-[64ch] text-body text-ink-2">{{ __('assistant.lead') }}</p>
-            </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <x-assistant.button variant="outline" size="sm" icon="clock" x-on:click="history = ! history" x-bind:aria-expanded="history.toString()" aria-expanded="false" data-testid="assistant-history-toggle">
+        <x-page-header :title="__('assistant.title')" :lead="__('assistant.lead')">
+            <x-slot:actions>
+                <x-button variant="outline" size="sm" icon="clock" x-on:click="history = ! history" x-bind:aria-expanded="history.toString()" aria-expanded="false" data-testid="assistant-history-toggle">
                     {{ __('assistant.history.title') }}
-                </x-assistant.button>
-                <x-assistant.button variant="outline" size="sm" icon="plus" wire:click="clear" x-on:click="history = false" data-testid="assistant-new">
+                </x-button>
+                <x-button variant="outline" size="sm" icon="plus" wire:click="clear" x-on:click="history = false" data-testid="assistant-new">
                     {{ __('assistant.clear') }}
-                </x-assistant.button>
-            </div>
-        </header>
+                </x-button>
+            </x-slot:actions>
+        </x-page-header>
 
         <div class="mb-4">
             @include('livewire.assistant.partials.history')
@@ -143,7 +139,7 @@
         <div x-show="! history">
             {{-- AI answers can be wrong: HR has the final word. --}}
             <p class="mb-4 flex items-start gap-2 rounded-surface border border-line-soft bg-soft px-4 py-3 text-small text-ink-2" data-testid="assistant-disclaimer">
-                <x-assistant.ic name="info" class="mt-0.5 text-ink-3" />
+                <x-ic name="info" class="mt-0.5 text-ink-3" />
                 <span>{{ __('assistant.disclaimer') }}</span>
                 @if ($usesPuter)
                     <a href="https://developer.puter.com" target="_blank" rel="noopener" class="underline">{{ __('assistant.puter.credit') }}</a>

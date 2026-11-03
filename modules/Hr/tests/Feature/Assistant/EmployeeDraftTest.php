@@ -87,9 +87,11 @@ class EmployeeDraftTest extends TestCase
 
         $this->assertSame('invalid', $result['status']);
         $this->assertNotEmpty($result['errors']);
-        foreach (['first_name_ar', 'last_name_en', 'mother_name_ar', 'city_id', 'gender', 'marital_status', 'national_number', 'username'] as $field) {
+        foreach (['first_name_ar', 'last_name_en', 'mother_name_ar', 'city_id', 'gender', 'marital_status', 'national_number'] as $field) {
             $this->assertContains($field, $result['fields']);
         }
+        // The hub's username is optional (decided 2026-10-30).
+        $this->assertNotContains('username', $result['fields']);
         $this->assertSame($before, Employee::query()->count());
     }
 

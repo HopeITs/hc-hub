@@ -91,7 +91,7 @@
                     aria-label="{{ __('assistant.widget.close') }}"
                     title="{{ __('assistant.widget.close') }}"
                 >
-                    <x-assistant.ic name="x" />
+                    <x-ic name="x" />
                 </button>
             </header>
 
@@ -117,7 +117,7 @@
             data-testid="assistant-launcher"
         >
             <x-icons.assistant class="size-6" x-show="! open" />
-            <x-assistant.ic name="x" class="size-6" x-show="open" x-cloak />
+            <x-ic name="x" class="size-6" x-show="open" x-cloak />
         </button>
     </div>
 @endif

@@ -24,17 +24,17 @@
 >
     <div class="flex flex-wrap items-center justify-between gap-2">
         <h3 id="{{ $titleId }}" class="flex items-center gap-2 text-body font-semibold text-ink">
-            <x-assistant.ic :name="$card['icon']" class="text-ink-2" />
+            <x-ic :name="$card['icon']" class="text-ink-2" />
             {{ $card['title'] }}
         </h3>
         @if ($state === 'pending')
-            <x-assistant.status tone="attn" icon="pen" :label="__('assistant.draft.states.pending')" />
+            <x-status tone="attn" icon="pen" :label="__('assistant.draft.states.pending')" />
         @elseif ($state === 'submitted')
-            <x-assistant.status tone="done" icon="check" :label="__('assistant.draft.states.submitted')" />
+            <x-status tone="done" icon="check" :label="__('assistant.draft.states.submitted')" />
         @elseif ($state === 'cancelled')
-            <x-assistant.status tone="stop" icon="ban" :label="__('assistant.draft.states.cancelled')" />
+            <x-status tone="stop" icon="ban" :label="__('assistant.draft.states.cancelled')" />
         @else
-            <x-assistant.status tone="stop" icon="alert" :label="__('assistant.draft.states.failed')" />
+            <x-status tone="stop" icon="alert" :label="__('assistant.draft.states.failed')" />
         @endif
     </div>
 
@@ -48,12 +48,12 @@
     @if ($state === 'pending')
         <p class="mt-3 text-caption text-ink-3">{{ __('assistant.draft.check') }}</p>
         <div class="mt-3 flex flex-wrap gap-2">
-            <x-assistant.button variant="primary" size="sm" icon="check" wire:click="confirmDraft('{{ $proposal['id'] }}')" data-testid="assistant-draft-confirm">
+            <x-button variant="primary" size="sm" icon="check" wire:click="confirmDraft('{{ $proposal['id'] }}')" data-testid="assistant-draft-confirm">
                 {{ __('assistant.draft.confirm') }}
-            </x-assistant.button>
-            <x-assistant.button variant="outline" size="sm" wire:click="cancelDraft('{{ $proposal['id'] }}')" data-testid="assistant-draft-cancel">
+            </x-button>
+            <x-button variant="outline" size="sm" wire:click="cancelDraft('{{ $proposal['id'] }}')" data-testid="assistant-draft-cancel">
                 {{ __('assistant.draft.cancel') }}
-            </x-assistant.button>
+            </x-button>
         </div>
     @endif
 </section>

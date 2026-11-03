@@ -11,15 +11,15 @@
 @if ($isLatest)
     <div class="flex flex-wrap gap-2" data-testid="assistant-create-choice" data-kind="{{ $choice['kind'] ?? '' }}">
         @if ($choice['chat'] ?? false)
-            <x-assistant.button variant="primary" size="sm" icon="pen" :loading="false"
+            <x-button variant="primary" size="sm" icon="pen" :loading="false"
                       x-on:click="submit(@js(__('assistant.choice.continue-message')))" data-testid="assistant-choice-chat">
                 {{ __('assistant.choice.continue') }}
-            </x-assistant.button>
+            </x-button>
         @endif
         @if (filled($choice['url'] ?? null))
-            <x-assistant.button variant="outline" size="sm" icon="arrow" :href="$choice['url']" data-testid="assistant-choice-page">
+            <x-button variant="outline" size="sm" icon="arrow" :href="$choice['url']" data-testid="assistant-choice-page">
                 {{ __('assistant.choice.open', ['what' => $choice['label'] ?? '']) }}
-            </x-assistant.button>
+            </x-button>
         @endif
     </div>
 @endif

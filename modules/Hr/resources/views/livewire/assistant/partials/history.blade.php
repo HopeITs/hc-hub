@@ -30,7 +30,7 @@
                         aria-label="{{ __('assistant.history.delete') }}: {{ $conversation->title }}"
                         title="{{ __('assistant.history.delete') }}"
                     >
-                        <x-assistant.ic name="trash" />
+                        <x-ic name="trash" />
                     </button>
                 </li>
             @endforeach

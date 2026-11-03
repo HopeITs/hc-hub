@@ -96,6 +96,8 @@ class AssistantChatTest extends TestCase
         $this->available();
         $user = $this->employee();
 
+        $this->assertArrayNotHasKey('nav.my-space.assistant', Navigation::shortcuts($user));
+
         $ids = collect(Navigation::for($user)['areas'])->flatMap(fn ($area) => $area['items'])->pluck('id');
         $this->assertNotContains('nav.my-space.assistant', $ids);
     }
