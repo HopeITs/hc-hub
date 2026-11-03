@@ -2,6 +2,7 @@
 
 use App\Enums\ProposalStatus;
 use App\Enums\ReviewStage;
+use App\Models\DonorProposal;
 use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\ProposalReviewer;
@@ -225,6 +226,28 @@ test('a review on a project opens straight on the viewer\'s own review in that p
     Livewire::actingAs($user)->test('desk.panels.reviews', ['size' => 'M'])->assertSee($onReview);
     expect(Livewire::actingAs($user)->test('desk.panels.needs', ['size' => 'L'])->get('decisions')->first()['href'])->toBe($onReview);
 });
+
+test('any reviewer goes from My reviews to their open review box in one click, and sees amounts only with money permission', function (string $role, bool $seesMoney) {
+    $employeeId = insertHrEmployee(firstNameEn: 'Lina', lastNameEn: 'Reviewer');
+    $user = userWithRole($role, $employeeId);
+    $waiting = myReview($employeeId, 'Water Access', ProposalStatus::ConceptNoteReview);
+    $project = Project::factory()->create();
+    $waiting->proposal->projects()->attach($project->id);
+    DonorProposal::factory()->create(['proposal_id' => $waiting->proposal_id, 'budget' => 987654]);
+    $story = route('projects.show', ['project' => $project, 'proposal' => $waiting->proposal_id, 'ptab' => 'status']);
+
+    Livewire::actingAs($user)->test('pages::reviews.index')->assertSee($story.'#my-review');
+
+    $this->actingAs($user)->get($story)
+        ->assertSeeHtml('id="my-review"')
+        ->assertSeeHtml('data-mark-seen')
+        ->assertSee(__('proposals.mark_as_seen'))
+        ->{$seesMoney ? 'assertSeeHtml' : 'assertDontSeeHtml'}('data-funding-envelope');
+})->with([
+    'MEAL Manager' => ['MEAL', false],
+    'fundraising (Public Relations Manager)' => ['Public Relations Manager', false],
+    'finance' => ['Financial', true],
+]);
 
 test('a finished review on All opens the proposal, not the review box', function () {
     [$employeeId, $user] = reviewerLogin();

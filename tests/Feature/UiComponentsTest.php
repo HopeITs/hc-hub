@@ -218,10 +218,8 @@ test('the header filter select names its button by the label and the current cho
     $xpath = new DOMXPath($document);
     $button = $xpath->query('//button[@id="city-filter"]')->item(0);
 
-    expect($button->getAttribute('aria-labelledby'))->toBe('city-filter-label city-filter-value')
-        ->and($button->hasAttribute('aria-label'))->toBeFalse()
-        ->and(trim($xpath->query('//label[@id="city-filter-label"]')->item(0)->textContent))->toBe('City')
-        ->and(trim($xpath->query('//button[@id="city-filter"]//*[@id="city-filter-value"]')->item(0)->textContent))->toBe('Aleppo');
+    expect($button->getAttribute('aria-label'))->toBe('City, Aleppo')
+        ->and(trim($button->textContent))->toBe('Aleppo');
 });
 
 test('the stat tile shows a value over a denominator', function () {

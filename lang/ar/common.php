@@ -3,6 +3,7 @@
 return [
     'accounts' => 'الحسابات',
     'actions' => 'الإجراءات',
+    'filter_choice' => ':label، :choice',
     'add' => 'إضافة',
     'active' => 'نشط',
     'all_accounts' => 'كل الحسابات',

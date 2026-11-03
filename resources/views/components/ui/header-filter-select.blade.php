@@ -43,6 +43,8 @@
     $selectedLabel = collect($options)->firstWhere('value', $selectedValue)['label']
         ?? $employeeLabels->get($selectedValue)
         ?? ($options[0]['label'] ?? '');
+    /* The draft choice's label in the browser (deferred filters only). */
+    $draftLabel = Illuminate\Support\Js::from(collect($options)->pluck('label', 'value')).'[String(value('.Illuminate\Support\Js::from($model).'))] ?? '.Illuminate\Support\Js::from($options[0]['label'] ?? '');
     $id ??= 'header-filter-'.substr(md5($model.'|'.$label), 0, 12);
     $searchable ??= $employees || count($options) > 7;
     $searchLabel ??= $label;
@@ -54,23 +56,24 @@
 
 {{-- `deferred` hands the choice to the host dialog's pick() (finance filters, Desk panel filters), which keeps it as a draft until the dialog applies it; the label and the check read the draft through the host's value()/is(). --}}
 <div class="min-w-0" data-header-filter-select @if ($deferred) data-filter-models="{{ json_encode([$model]) }}" @endif>
-    <label for="{{ $id }}" id="{{ $id }}-label" class="mb-1.5 block text-[11px] font-semibold uppercase leading-4 tracking-[0.1em] text-secondary-medium dark:text-ink-muted">
+    <label for="{{ $id }}" class="mb-1.5 block text-[11px] font-semibold uppercase leading-4 tracking-[0.1em] text-secondary-medium dark:text-ink-muted">
         {{ $label }}
     </label>
 
+    {{-- The button is named "label, current choice" so screen readers hear what is picked, not only what the filter is. --}}
     <flux:dropdown position="bottom" align="start" class="filter-picker block! w-full!" x-data="filterMenu" :data-employees-url="$employeesUrl" data-model="{{ $model }}">
         <flux:button
             :id="$id"
             variant="outline"
             icon:trailing="chevron-up-down"
             class="w-full! justify-between!"
-            aria-labelledby="{{ $id }}-label {{ $id }}-value"
+            :aria-label="__('common.filter_choice', ['label' => $label, 'choice' => $selectedLabel])"
             x-on:click="openEmployees()"
         >
             @if ($deferred)
-                <span id="{{ $id }}-value" class="flex min-w-0"><span class="truncate" x-text="{{ Illuminate\Support\Js::from(collect($options)->pluck('label', 'value')) }}[String(value('{{ $model }}'))] ?? {{ Illuminate\Support\Js::from($options[0]['label'] ?? '') }}">{{ $selectedLabel }}</span></span>
+                <span class="truncate" x-text="{{ $draftLabel }}" x-effect="$el.closest('button').setAttribute('aria-label', {{ Illuminate\Support\Js::from(__('common.filter_choice', ['label' => $label, 'choice' => ''])) }} + ({{ $draftLabel }}))">{{ $selectedLabel }}</span>
             @else
-                <span id="{{ $id }}-value" class="flex min-w-0"><span class="truncate">{{ $selectedLabel }}</span></span>
+                <span class="truncate">{{ $selectedLabel }}</span>
             @endif
         </flux:button>
 
