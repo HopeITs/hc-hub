@@ -127,6 +127,16 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     }
 
     /**
+     * The lines on this user's private To-do desk panel.
+     *
+     * @return HasMany<UserTodo, $this>
+     */
+    public function todos(): HasMany
+    {
+        return $this->hasMany(UserTodo::class);
+    }
+
+    /**
      * The tasks this user raised.
      *
      * @return HasMany<Task, $this>

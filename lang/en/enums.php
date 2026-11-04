@@ -74,6 +74,8 @@ return [
         'final_report_acceptance' => 'Final report acceptance',
         'need_assessment' => 'Need assessment',
         'donor_approval' => 'Donor approval',
+        'negotiation' => 'Negotiation file',
+        'amendment' => 'Amendment',
         'report_submission' => 'Delivered report',
     ],
     'reporting_period' => [
@@ -90,6 +92,14 @@ return [
         'due' => 'To submit',
         'overdue' => 'Overdue',
         'submitted' => 'Submitted',
+    ],
+    'status_note_kind' => [
+        'transition' => 'Status change',
+        'correction' => 'Correction',
+        'negotiation' => 'Negotiation',
+        'on_hold' => 'Put on hold',
+        'off_hold' => 'Taken off hold',
+        'extension' => 'Extension',
     ],
     'review_stage' => [
         'concept_note' => 'Concept note',
@@ -128,6 +138,14 @@ return [
         'acknowledged' => 'Acknowledged',
         'rejected' => 'Rejected',
         'superseded' => 'Superseded',
+    ],
+    'status_note_kind' => [
+        'transition' => 'Status change',
+        'correction' => 'Correction',
+        'negotiation' => 'Negotiation',
+        'on_hold' => 'Put on hold',
+        'off_hold' => 'Taken off hold',
+        'extension' => 'Extension',
     ],
     'project_status' => [
         'draft' => 'Draft',

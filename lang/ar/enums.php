@@ -74,6 +74,8 @@ return [
         'final_report_acceptance' => 'موافقة الممول على التقرير الختامي',
         'need_assessment' => 'تقييم الاحتياج',
         'donor_approval' => 'موافقة المانح',
+        'negotiation' => 'ملف التفاوض',
+        'amendment' => 'ملحق التمديد',
         'report_submission' => 'التقرير المُسلَّم',
     ],
     'reporting_period' => [
@@ -90,6 +92,14 @@ return [
         'due' => 'بانتظار التسليم',
         'overdue' => 'متأخر',
         'submitted' => 'سُلِّم',
+    ],
+    'status_note_kind' => [
+        'transition' => 'تغيير حالة',
+        'correction' => 'تصحيح',
+        'negotiation' => 'تفاوض',
+        'on_hold' => 'تعليق',
+        'off_hold' => 'إلغاء التعليق',
+        'extension' => 'تمديد',
     ],
     'review_stage' => [
         'concept_note' => 'المذكرة المفاهيمية',
@@ -128,6 +138,14 @@ return [
         'acknowledged' => 'تم التأكيد',
         'rejected' => 'مرفوض',
         'superseded' => 'مستبدل',
+    ],
+    'status_note_kind' => [
+        'transition' => 'تغيير حالة',
+        'correction' => 'تصحيح',
+        'negotiation' => 'تفاوض',
+        'on_hold' => 'تعليق',
+        'off_hold' => 'رفع التعليق',
+        'extension' => 'تمديد',
     ],
     'project_status' => [
         'draft' => 'مسودة',

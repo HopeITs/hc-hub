@@ -15,7 +15,7 @@ The one place for every name, value, signature, payload, column and permission t
 | ProposalDraft | `proposal draft` | planning | proposal | ✔ |
 | ProposalReview | `proposal review` | planning | proposal | ✔ new |
 | Submitted | `submitted` | planning | proposal | ✔ |
-| OnHold | `on hold` | planning | stage of the pre-hold status | ✔ new |
+| OnHold | `on hold` | planning | its own stage | ✘ `@deprecated` (W-06, D-58: history rendering only; no transition in or out, rows migrated back to their pre-hold status with the flag set) |
 | Approved | `approved` | implementation | grant | ✔ |
 | Active | `active` | monitoring | grant | ✔ |
 | Completed | `completed` | archived | grant | ✔ terminal |
@@ -23,7 +23,8 @@ The one place for every name, value, signature, payload, column and permission t
 | FinalReports | `final reports` | closure | grant | ✘ `@deprecated` (history rendering only; no transition in or out; rows migrated to `active` by T04) |
 
 - `ProposalPhase` gains `Ideation = 'ideation'` as its first case. Phase and stage are derived, **never stored**. Every `match` is exhaustive with no `default`.
-- `ProposalStatus::live(): list<self>`: every case except `FinalReports`. Pickers, filters and charts iterate `live()`, never `cases()`.
+- `ProposalStatus::live(): list<self>`: every case except `FinalReports` and `OnHold`. Pickers, filters and charts iterate `live()`, never `cases()`.
+- **W-06 (D-58):** "on hold" is `proposals.on_hold_since IS NOT NULL` (§7), allowed only while the status is `concept note submitted` or `submitted`. A proposal on hold keeps its status; `Proposal::isOnHold()` reads the flag and `Proposal::statusLabel()` is the one place the two are put together as "Submitted (On hold)". Its `StatusTone` is `warn`.
 - `isApprovedByDonor()`: approved, active, completed (and the deprecated final reports).
 - "Pre-hold / pre-rejection status" = the status of the latest `proposal_status_notes` row before it entered hold or rejection.
 
@@ -37,17 +38,13 @@ The one place for every name, value, signature, payload, column and permission t
 | concept note review | concept note submitted | `effective_date` | TransitionProposal |
 | concept note | proposal draft | `reason` (skip reason, D-03) | TransitionProposal |
 | concept note submitted | proposal draft | `effective_date` (donor accepted the concept note) | TransitionProposal |
-| concept note submitted | on hold | `reason`, `remind_on` | TransitionProposal |
 | concept note submitted | rejected | `reason_min_10`, `effective_date` | TransitionProposal |
 | proposal draft | proposal review | `budget`, `planned_dates`, `target_beneficiaries` | TransitionProposal |
 | proposal review | proposal draft | `reason` | TransitionProposal |
 | proposal review | submitted | `effective_date`, `target_beneficiaries` | TransitionProposal |
 | submitted | proposal draft | `reason` (donor asked to resubmit) | TransitionProposal |
-| submitted | on hold | `reason`, `remind_on` | TransitionProposal |
 | submitted | rejected | `reason_min_10`, `effective_date` | TransitionProposal |
-| on hold (pre-hold = concept note submitted) | proposal draft · rejected | the target row's keys | TransitionProposal |
-| on hold (pre-hold = submitted) | submitted · proposal draft · rejected | the target row's keys | TransitionProposal |
-| submitted · on hold (pre-hold = submitted) | approved | — | **ApproveProposal only** (T08) |
+| submitted | approved | — | **ApproveProposal only** (T08) |
 | approved | active | — | **ActivateProject only** (T08; called by T33) |
 | active | completed | `final_report`, `effective_date` | TransitionProposal |
 | rejected · completed | any live status except approved | `reason` | **CorrectProposalStatus only** (`is_correction = true`) |
@@ -66,7 +63,7 @@ Key meanings:
 
 Rules:
 - Every move writes exactly one `ProposalStatusNote` (`status`, `context`, `effective_date`, `changed_by`, `is_correction`) in the same transaction as the status. `context` is NOT NULL: a move without a reason writes the translated standard note.
-- Entering `on hold` sets `status_remind_on`; leaving clears it.
+- **A proposal on hold keeps its status (W-06, D-58).** Every move out of `submitted` / `concept note submitted` clears `on_hold_since` and `status_remind_on`, as does approval. `remind_on` is no longer a transition requirement key: `SetProposalOnHold` validates it.
 - Messages never reveal an amount (the budget gate message names no figure).
 
 ## §3 Project statuses and transitions
@@ -90,6 +87,7 @@ Rules:
 
 ## §4 Status writers (guard tests enforce this)
 - `proposals.status` is written only in: `App\Actions\Proposals\TransitionProposal`, `CorrectProposalStatus`, `ApproveProposal`, `App\Actions\Projects\ActivateProject`, and the T04 data migration. Enforced by `tests/Feature/ProposalStatusWriteGuardTest.php` (source scan). `status` is **not** in `Proposal`'s `#[Fillable]`.
+- **W-06:** `proposals.on_hold_since` is set and cleared only in `App\Actions\Proposals\SetProposalOnHold` and `ClearProposalOnHold`, which write no status; `TransitionProposal` and `ApproveProposal` clear it as part of the move they make, and the W-06 data migration sets it once. Enforced by a second source scan in the same guard test. `on_hold_since` is **not** in `Proposal`'s `#[Fillable]`.
 - `projects.status` is written only in: `SaveProject` (create = draft), `ApproveProjectFromProposal`, `ActivateProject`, `CloseProject`, `ReopenProjectAsDraft`, `ArchiveProject`, `RestoreProject`, and the T05 data migration. Enforced by `tests/Feature/ProjectStatusWriteGuardTest.php` (T05; T08 extends its allowlist).
 
 ## §5 Domain events
@@ -110,7 +108,7 @@ All are `final`, `declare(strict_types=1)`, with `Gate::authorize` inside and `h
 ```php
 // T04, app/Actions/Proposals
 TransitionProposal::handle(Proposal $proposal, ProposalStatus $to, ProposalStatus $expectedFrom, array $input): TransitionResult
-    // @param array{reason?: string, effective_date?: string, remind_on?: string} $input
+    // @param array{reason?: string, effective_date?: string} $input   (W-06 dropped remind_on: holds are not moves)
 CorrectProposalStatus::handle(Proposal $proposal, ProposalStatus $to, ProposalStatus $expectedFrom, string $reason): TransitionResult
 RecordFinalReportAcceptance::handle(Proposal $proposal, CarbonImmutable $acceptedOn): Proposal   // acceptor = auth user
 // App\Support\TransitionResult (readonly): ProposalStatusNote $note, list<string> $warnings  (warning keys: no_agreement, all_projects_archived, reviewers_unseen)
@@ -120,6 +118,12 @@ SaveProposal::handle(?Proposal $existing, array $data, User $actor): Proposal
 LinkProposalProject::handle(Proposal $proposal, int $projectId, ?int $targetBeneficiaries = null): void
 UnlinkProposalProject::handle(Proposal $proposal, int $projectId): void
 ReopenProjectAsDraft::handle(Project $project): void          // called inside SaveProposal/LinkProposalProject transactions
+
+// W-06 (D-58), app/Actions/Proposals — the only writers of on_hold_since; neither writes a status
+SetProposalOnHold::handle(Proposal $proposal, ProposalStatus $expectedStatus, array $input): ProposalStatusNote
+    // @param array{reason: string, remind_on: string} $input   (remind_on: after:today)
+    // refused unless the status is `submitted` or `concept note submitted`
+ClearProposalOnHold::handle(Proposal $proposal, ProposalStatus $expectedStatus, ?string $note = null): ProposalStatusNote
 
 // T07
 InviteDefaultReviewers::handle(Proposal $proposal, ReviewStage $stage): void   // called inside TransitionProposal's transaction
@@ -136,6 +140,16 @@ ApproveProposal::handle(Proposal $proposal, ProposalStatus $expectedFrom, array 
 ApproveProjectFromProposal::handle(Project $project, string $via): bool   // $via ∈ {proposal_approval, owner_acknowledgement}; idempotent
 ActivateProject::handle(Project $project, string $via): void              // Team B (T33) may call. Requires project approved + dated;
                                                                           // moves its still-`approved` donor-approved proposals → active (one note each)
+// W-07 (D-59), app/Actions/Proposals
+AddNegotiationNote::handle(Proposal $proposal, ProposalStatus $expectedStatus, array $input): ProposalStatusNote
+    // @param array{text: string, file?: UploadedFile|null}; allowed only when status = submitted; Gate::authorize('update', $proposal); writes no status
+// W-08 (D-60), app/Actions/Proposals
+ExtendProposal::handle(Proposal $proposal, ProposalStatus $expectedStatus, array $input): ProposalStatusNote
+    // @param array{new_date_end: string, reason: string, file?: UploadedFile|null}; allowed only for active; Gate::authorize('update', $proposal);
+    // new_date_end after the current effective end; not a status writer. Widens linked approved/active projects through App\Support\ProjectPeriods::widen()
+// App\Support\ProjectPeriods::widen(Project $project, CarbonImmutable $begin, CarbonImmutable $end): bool
+    // saves the wider dates (never shortens); dispatches ProjectPeriodChanged only when the project is active and the dates changed
+
 // T09, app/Actions/FundingAgreements
 SaveFundingAgreement (existing; donor written from the proposal)
 SaveAgreementInstallments::handle(DonorProposal $agreement, array $installments): void  // @param list<array{sequence:int, amount:string, currency:string, scheduled_date:string}>
@@ -165,6 +179,8 @@ DetachRisk::handle(Proposal $proposal, int $riskId): void
 **T09:** `funding_agreement_installments` (`funding_agreement_id` FK `donor_proposal` cascade, `sequence`, `amount` decimal(14,2), `currency`, `scheduled_date`; unique `(funding_agreement_id, sequence)`); `transfers_tracking`: `source` varchar(20) default `manual` (`manual`|`auto`), `installment_id` FK `funding_agreement_installments` null nullOnDelete (unique when not null), `arrival_date` date null.
 **T30:** `projects.center_id` unsigned big int null, indexed, **no FK** (HR connection).
 > **W-01:** `projects.host_center_id` unsigned big int null, indexed `projects_host_center_id_index`, **no FK** (HR connection). Rule: a project has a physical center (`center_id`) **or** a host center (`host_center_id`), never both and never neither once W-02 ships; `city_id` is always set. The open-project rule keys on `(center_id ?? city_id, program_id)`: `Project::openProjectFor(?int $centerId, int $cityId, int $programId, ?int $exceptId = null): ?Project` — when `$centerId` is null it matches projects with `center_id IS NULL` in that city and program.
+**W-06 (D-58):** `proposals.on_hold_since` date null, after `status_remind_on`, no index. "On hold" = not null, allowed only while the status is `concept note submitted` or `submitted`. Plus `proposal_status_notes.kind` varchar(20) NOT NULL default `transition` — **W-07's column, added here because W-06 needs `on_hold` / `off_hold` first**, with W-07's definition exactly (`StatusNoteKind`: `Transition = 'transition'`, `Correction = 'correction'`, `Negotiation = 'negotiation'`, `OnHold = 'on_hold'`, `OffHold = 'off_hold'`, `Extension = 'extension'`); backfill `is_correction = 1` → `correction`. W-07 and W-08 reuse the enum rather than redefine it.
+
 **T34:** `sectors` + `project_sector` (owned by B3, see §12).
 **W-04 (D-57):** `donors.approval_status` varchar(10) NOT NULL default `approved` (`DonorApprovalStatus`: `Pending = 'pending'`, `Approved = 'approved'`), `donors.requested_by` FK `users` null nullOnDelete, `donors.approved_by` FK `users` null nullOnDelete, `donors.approved_at` datetime null. Index on `approval_status`.
 **W-09 (D-61):** `risk_library` (`id`, `title_en`, `title_ar`, `category` varchar(40) null, `default_likelihood`, `default_severity` (same scale as `risks`), `is_active` bool default 1, `sort_order`, timestamps; unique `title_en`); `risks.name_en` varchar(255) null (copied from `title_en` at pick time; `name` carries `title_ar`); `risks.library_risk_id` FK `risk_library` null `restrictOnDelete`; `risks.result_id` FK `results` null `cascadeOnDelete`; `risks.proposal_id` FK `proposals` null `cascadeOnDelete`; `risks.project_id` becomes nullable; index `(proposal_id, result_id)`. Rule: a new risk row has `library_risk_id`, `proposal_id` and `result_id`; `name`/`impact` are copied from the library at pick time so the proposal keeps its wording if the library changes.
@@ -503,6 +519,7 @@ final class App\Notifications\Recipients\OversightRecipients
 | `proposal.need_assessment_added` | proposals | D | all | no | owner, MEAL Manager slot | T07 |
 | `proposal.approved` | proposals | I | all | yes | Finance, owners, program managers, MEAL Manager slot, PR Manager, reviewers | T08 |
 | `proposal.approved_without_agreement` (D-26) | funding-agreements | I | all | no | PR, Finance, CEO slot | T08 |
+| `proposal.extended` (W-08, D-60) | proposals | I | all | no | linked project owners, Financial watchers (names and dates only) | W-08 |
 | `proposal.on_hold_reminder` | proposals | I | all | no | proposal owner, editors | T21 |
 | `proposal.final_report_accepted` (D-02c) | proposals | I | all | no | owner, program manager | T04 |
 | `proposal.beneficiaries_changed` (D-25) | proposals | I | all | no | MEAL officer, MEAL Manager slot | T06 |

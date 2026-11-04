@@ -27,6 +27,10 @@ function contractEventKeys(): array
         'donor_report.saved', 'donor_report.submitted', 'donor_report.due', 'donor_report.overdue',
         // W-04 (D-57): a donor requested from the proposal form, and the General Manager's decision.
         'donor.requested', 'donor.approved', 'donor.declined',
+        // W-07 (D-59): a negotiation note recorded while a proposal is submitted.
+        'proposal.negotiation_noted',
+        // W-08 (D-60): an active proposal extended to a later end date.
+        'proposal.extended',
         'department_task.created', 'department_task.due', 'department_task.overdue', 'department_task.delivered', 'department_task.returned',
         'library_indicator.created', 'library_indicator.updated', 'library_indicator.deactivated', 'library_indicator.reactivated',
         'meal_coverage.assigned', 'meal_coverage.responsible_changed', 'meal_coverage.project_assigned',
