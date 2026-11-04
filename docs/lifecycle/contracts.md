@@ -136,6 +136,10 @@ ApproveProposal::handle(Proposal $proposal, ProposalStatus $expectedFrom, array 
 ApproveProjectFromProposal::handle(Project $project, string $via): bool   // $via ∈ {proposal_approval, owner_acknowledgement}; idempotent
 ActivateProject::handle(Project $project, string $via): void              // Team B (T33) may call. Requires project approved + dated;
                                                                           // moves its still-`approved` donor-approved proposals → active (one note each)
+// W-07 (D-59), app/Actions/Proposals
+AddNegotiationNote::handle(Proposal $proposal, ProposalStatus $expectedStatus, array $input): ProposalStatusNote
+    // @param array{text: string, file?: UploadedFile|null}; allowed only when status = submitted; Gate::authorize('update', $proposal); writes no status
+
 // T09, app/Actions/FundingAgreements
 SaveFundingAgreement (existing; donor written from the proposal)
 SaveAgreementInstallments::handle(DonorProposal $agreement, array $installments): void  // @param list<array{sequence:int, amount:string, currency:string, scheduled_date:string}>
@@ -162,6 +166,7 @@ GenerateExpectedTransfers  // queued listener of FundingAgreementRecorded + job 
 > **W-01:** `projects.host_center_id` unsigned big int null, indexed `projects_host_center_id_index`, **no FK** (HR connection). Rule: a project has a physical center (`center_id`) **or** a host center (`host_center_id`), never both and never neither once W-02 ships; `city_id` is always set. The open-project rule keys on `(center_id ?? city_id, program_id)`: `Project::openProjectFor(?int $centerId, int $cityId, int $programId, ?int $exceptId = null): ?Project` — when `$centerId` is null it matches projects with `center_id IS NULL` in that city and program.
 **T34:** `sectors` + `project_sector` (owned by B3, see §12).
 **W-04 (D-57):** `donors.approval_status` varchar(10) NOT NULL default `approved` (`DonorApprovalStatus`: `Pending = 'pending'`, `Approved = 'approved'`), `donors.requested_by` FK `users` null nullOnDelete, `donors.approved_by` FK `users` null nullOnDelete, `donors.approved_at` datetime null. Index on `approval_status`.
+**W-07 (D-59):** `proposal_status_notes.kind` varchar(20) NOT NULL default `transition` (`StatusNoteKind`: `Transition = 'transition'`, `Correction = 'correction'`, `Negotiation = 'negotiation'`, `OnHold = 'on_hold'`, `OffHold = 'off_hold'`, `Extension = 'extension'`); backfill `is_correction = 1` → `correction`. `MediaCollection::Negotiation = 'negotiation'` (file linked to the note through `media.subject` = the note).
 
 ## §8 Permissions and default holders
 Nine roles (fixed): Super Admin, General Manager, Managers, MEAL, Financial, Media Team, Public Relations, Public Relations Manager, Team Member. Super Admin holds everything technically (`Role::booted()`) but **appears in no business list, no fallback and no test as the only account** (D-20a). `permissions:sync` only adds.

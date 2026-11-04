@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'negotiation_pending_suffix' => ' — بانتظار المراجعة: :names',
     'review_meeting_suffix' => ' — اجتماع المراجعة :at',
     'system' => 'النظام',
     'report_template_org_wide_targets' => 'المستهدفات على مستوى المنظمة',
@@ -577,6 +578,10 @@ return [
                 'body' => 'راجَع :actor المقترح «:subject»',
             ],
             'reviewer_note_updated' => 'عدّل :actor ملاحظة مراجعته على المقترح «:subject»',
+            'negotiation_noted' => [
+                'title' => 'ملاحظة تفاوض جديدة',
+                'body' => 'سجّل :actor ملاحظة تفاوض مع المانح على المقترح «:subject»:pending',
+            ],
             'need_assessment_added' => [
                 'title' => 'إضافة تقييم احتياج',
                 'body' => 'أرفق :actor تقييم احتياج بالمقترح «:subject»',

@@ -56,6 +56,34 @@
     </x-ui.confirm-modal>
 
     <x-ui.modal
+        wire:model="showNegotiationModal"
+        size="md"
+        :title="__('proposals.add_negotiation_note')"
+        :description="__('proposals.negotiation_note_help')"
+        submit="saveNegotiationNote"
+        close="closeNegotiationModal"
+        required-note
+        data-test="negotiation-modal"
+    >
+        @if ($showNegotiationModal)
+            <div class="grid gap-y-4">
+                <x-ui.form-textarea wire:model="negotiationText" :label="__('proposals.what_the_donor_asked_for')" required autofocus />
+                <x-ui.form-file
+                    wire:model="negotiationFile"
+                    :label="__('proposals.attachment_optional')"
+                    :accept="collect(FileType::values())->map(fn ($extension) => '.'.$extension)->implode(',')"
+                />
+            </div>
+        @endif
+
+        <x-slot:actions>
+            <x-ui.button type="submit" tone="primary" wire:loading.attr="disabled" wire:target="negotiationFile,saveNegotiationNote" data-test="save-negotiation-note-button">
+                {{ __('proposals.add_negotiation_note') }}
+            </x-ui.button>
+        </x-slot:actions>
+    </x-ui.modal>
+
+    <x-ui.modal
         wire:model="showFileModal"
         size="md"
         :title="$editingFileId === null ? __('proposals.upload_file') : __('proposals.edit_file')"

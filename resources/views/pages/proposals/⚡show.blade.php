@@ -7,6 +7,7 @@ use App\Livewire\Concerns\ManagesTransferForm;
 use App\Livewire\Concerns\PreviewsFiles;
 use App\Livewire\Concerns\Proposals\ChartsProposalChronology;
 use App\Livewire\Concerns\Proposals\ManagesFinalReportAcceptance;
+use App\Livewire\Concerns\Proposals\ManagesNegotiationNotes;
 use App\Livewire\Concerns\Proposals\ManagesProposalApproval;
 use App\Livewire\Concerns\Proposals\ManagesProposalFiles;
 use App\Livewire\Concerns\Proposals\ManagesProposalForm;
@@ -41,6 +42,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     use ChecksFinanceVisibility;
     use ManagesAgreementForm;
     use ManagesFinalReportAcceptance;
+    use ManagesNegotiationNotes;
     use ManagesProposalApproval;
     use ManagesProposalFiles;
     use ManagesProposalForm;
@@ -223,7 +225,8 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     public function statusNotes(): Collection
     {
         return ProposalStatusNote::query()
-            ->select(['id', 'proposal_id', 'status', 'context', 'date'])
+            ->select(['id', 'proposal_id', 'status', 'context', 'date', 'kind'])
+            ->with('media')
             ->where('proposal_id', $this->proposalId)
             ->orderByDesc('date')
             ->orderByDesc('id')

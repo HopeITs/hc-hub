@@ -9,6 +9,7 @@ use App\Enums\MilestoneStatus;
 use App\Enums\ProjectStatus;
 use App\Enums\ProposalStatus;
 use App\Enums\ReviewStage;
+use App\Enums\StatusNoteKind;
 use App\Events\ProposalStatusChanged;
 use App\Models\Donor;
 use App\Models\Milestone;
@@ -82,6 +83,7 @@ final class TransitionProposal
                 'meeting_at' => filled($validated['meeting_at'] ?? null) ? CarbonImmutable::parse($validated['meeting_at']) : null,
                 'changed_by' => Auth::id(),
                 'is_correction' => false,
+                'kind' => StatusNoteKind::Transition,
             ]);
 
             if ($reviewStage !== null) {

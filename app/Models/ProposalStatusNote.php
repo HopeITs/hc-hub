@@ -6,12 +6,14 @@ namespace App\Models;
 
 use App\Concerns\RecordsParentActivity;
 use App\Enums\ProposalStatus;
+use App\Enums\StatusNoteKind;
 use Carbon\CarbonImmutable;
 use Database\Factories\ProposalStatusNoteFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 
 /**
@@ -24,11 +26,12 @@ use Illuminate\Support\Str;
  * @property CarbonImmutable $date
  * @property CarbonImmutable|null $meeting_at
  * @property bool $is_correction
+ * @property StatusNoteKind $kind
  * @property int|null $changed_by
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
-#[Fillable(['proposal_id', 'status', 'context', 'date', 'meeting_at', 'is_correction', 'changed_by'])]
+#[Fillable(['proposal_id', 'status', 'context', 'date', 'meeting_at', 'is_correction', 'kind', 'changed_by'])]
 class ProposalStatusNote extends Model
 {
     /** @use HasFactory<ProposalStatusNoteFactory> */
@@ -37,10 +40,11 @@ class ProposalStatusNote extends Model
     /**
      * Mirror the column default so an unrefreshed note still reports it.
      *
-     * @var array<string, bool>
+     * @var array<string, bool|string>
      */
     protected $attributes = [
         'is_correction' => false,
+        'kind' => 'transition',
     ];
 
     /**
@@ -65,6 +69,16 @@ class ProposalStatusNote extends Model
     }
 
     /**
+     * The files attached to a negotiation note.
+     *
+     * @return MorphMany<Media, $this>
+     */
+    public function media(): MorphMany
+    {
+        return $this->morphMany(Media::class, 'mediable');
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string|class-string>
@@ -76,6 +90,7 @@ class ProposalStatusNote extends Model
             'date' => 'date',
             'meeting_at' => 'immutable_datetime',
             'is_correction' => 'boolean',
+            'kind' => StatusNoteKind::class,
         ];
     }
 
@@ -89,7 +104,8 @@ class ProposalStatusNote extends Model
 
     protected function parentActivityEvent(string $hook): ?string
     {
-        return $hook === 'created' ? 'proposal.status_note_added' : null;
+        // A negotiation note logs its own event (AddNegotiationNote) with names only.
+        return $hook === 'created' && $this->kind !== StatusNoteKind::Negotiation ? 'proposal.status_note_added' : null;
     }
 
     /**
