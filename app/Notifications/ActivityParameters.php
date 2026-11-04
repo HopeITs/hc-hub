@@ -73,6 +73,13 @@ final class ActivityParameters
                 : ['localized_list' => array_map(fn (string $name): array => ['en' => $name, 'ar' => $name], $names)];
         }
 
+        if (array_key_exists('pending_reviewers', $activity->properties)) {
+            $pending = array_values(array_filter((array) $activity->properties['pending_reviewers'], fn (mixed $names): bool => is_array($names)));
+            $params['pending'] = $pending === []
+                ? ''
+                : ['trans' => 'notifications.negotiation_pending_suffix', 'params' => ['names' => ['localized_list' => $pending]]];
+        }
+
         if (array_key_exists('meeting', $activity->properties)) {
             $params['meeting'] = is_string($activity->properties['meeting'])
                 ? ['trans' => 'notifications.review_meeting_suffix', 'params' => ['at' => ['datetime' => $activity->properties['meeting']]]]

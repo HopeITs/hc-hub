@@ -231,7 +231,7 @@ new class extends Component {
                 @endphp
                 <li wire:key="tk-{{ $task->id }}" @class(['dk-done' => $done])>
                     <div class="dk-tk-main">
-                        <a href="{{ route('tasks.show', $task) }}" wire:navigate class="dk-tk-t" title="{{ $task->title }}">@if ($task->kind !== TaskKind::General)<span class="dk-ms">{{ $task->kind->label() }}</span>@endif{{ $task->title }}</a>
+                        <a href="{{ $task->reportUrl() ?? route('tasks.show', $task) }}" wire:navigate class="dk-tk-t" title="{{ $task->title }}">@if ($task->kind !== TaskKind::General)<span class="dk-ms">{{ $task->kind->label() }}</span>@endif{{ $task->title }}</a>
                         <p class="dk-is"><span class="dk-tk-p" title="{{ $this->parents[$task->id] }}">{{ $this->parents[$task->id] }}</span>@if ($task->due_date !== null)<span @class(['dk-bad' => $overdue])> · {{ $overdue ? __('desk.tasks_late_since', ['date' => $task->due_date->translatedFormat(__('desk.date_short'))]) : $task->due_date->translatedFormat(__('desk.date_short')) }}</span>@endif<x-tasks.paused-chip :task="$task" :paused-ids="$this->pausedProjectIds" class="ms-1.5" /></p>
                     </div>
                     <span class="dk-tk-av" title="{{ $people->implode(', ') }}">
