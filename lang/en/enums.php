@@ -215,8 +215,8 @@ return [
         'conducted' => 'Conducted',
     ],
     'donor_attribution' => [
-        'shared' => 'Shared (highest target)',
-        'split' => 'Split (sum of targets)',
+        'shared' => 'Count once (highest target)',
+        'split' => 'Add together (sum of targets)',
     ],
     'result_type' => [
         'impact' => 'Impact',
@@ -229,6 +229,7 @@ return [
         'general' => 'General',
         'media_deliverable' => 'Media deliverable',
         'financial' => 'Financial',
+        'report' => 'Report',
     ],
     'deliverable_kind' => [
         'video' => 'Video',
