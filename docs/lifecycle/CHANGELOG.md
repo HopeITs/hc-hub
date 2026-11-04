@@ -49,5 +49,6 @@ Agents never read this file. It records how the pack differs from the original p
 | R31 | D-27a self-funded relinking: T27 adds a read-only "projects without any proposal" check (runbook row 12a); Dev 1 decides per row (manual **Create Proposal** on «تمويل ذاتي — Hope»). No new command, no DML | coordinator ruling (T27 gap) | low |
 | R32 | Stale ruling numbers removed from prompts: T18 "R9 cut list" → README cut list; T29 "R11" → "flood check"; T27/T29 read command flags, env names and the `UnreadableStoredFile` log fields from `contracts.md §16` instead of `handoffs/T22.md` | the numbers pointed at unrelated rulings; §16 is now the frozen source | none |
 | W-04 | `contracts.md` §7 (donors approval columns), §8 (`donors.approve`), §15.2 (`donor.requested|approved|declined`) | D-57: a donor added from the proposal form is a pending request until the General Manager approves it | low |
+| W-13 | `contracts.md` §12.2 (`TaskKind::Report`, `tasks.reportable_*`), §6 (`SyncReportTask`), §15.2 (reuse `task.assigned/completed`) | D-64: a donor report assigned to a responsible becomes a report task, closed on submit | low |
 
 Items marked ⚑ are listed in `contracts.md §17` for Dev 1 to confirm at CP1.

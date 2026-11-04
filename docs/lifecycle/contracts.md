@@ -154,6 +154,12 @@ ExtendProposal::handle(Proposal $proposal, ProposalStatus $expectedStatus, array
 SaveFundingAgreement (existing; donor written from the proposal)
 SaveAgreementInstallments::handle(DonorProposal $agreement, array $installments): void  // @param list<array{sequence:int, amount:string, currency:string, scheduled_date:string}>
 GenerateExpectedTransfers  // queued listener of FundingAgreementRecorded + job dispatched after SaveAgreementInstallments; idempotent per installment_id
+
+// W-13 (D-64), app/Actions/Tasks
+SyncReportTask::handle(DonorReport $report): ?Task
+    // creates the task for the current responsible when none is open, reassigns the open one when the responsible changed,
+    // completes it when the report is submitted. Called by the assignment and submission actions inside their transactions.
+    // No Gate: the caller (the report action) has already authorised.
 ```
 
 ## §7 Schema owned by Team A (frozen at CP1)
@@ -303,7 +309,8 @@ final class App\Support\SupervisionMap {
 
 ### §12.2 Proposal planning (T31)
 - `milestones.proposal_id` + `is_final_report` (columns by T03); T31 makes `milestones.project_id` nullable (at least one of `proposal_id`/`project_id` is set; checked in the action). Milestones are shared at proposal level; a center-specific one also carries `project_id`.
-- `tasks`: `department_id` (HR id, no FK, indexed), `kind` varchar(30) default `general` (`TaskKind`: `general`, `media_deliverable`, `financial`), `media_kinds` JSON null (`DeliverableKind`: `video`, `photos`, `file`, `text`), `delivery_state` varchar(20) null (`DeliveryState`: `requested`, `delivered`, `accepted`, `returned`), `requested_on`, `delivered_on` date null, `delivered_link` varchar(2048) null, `delivered_text` text null, `accepted_at` datetime null, `returned_reason` text null.
+- `tasks`: `department_id` (HR id, no FK, indexed), `kind` varchar(30) default `general` (`TaskKind`: `general`, `media_deliverable`, `financial`, `report` (W-13, D-64)), `media_kinds` JSON null (`DeliverableKind`: `video`, `photos`, `file`, `text`), `delivery_state` varchar(20) null (`DeliveryState`: `requested`, `delivered`, `accepted`, `returned`), `requested_on`, `delivered_on` date null, `delivered_link` varchar(2048) null, `delivered_text` text null, `accepted_at` datetime null, `returned_reason` text null.
+  - **W-13 (D-64):** `tasks.reportable_type` varchar(255) null, `tasks.reportable_id` unsigned big int null, index `tasks_reportable_index` (`reportable_type`, `reportable_id`); morph map key `donor_report` (later `monthly_report`). At most **one open** (status ≠ done) report task per reportable, enforced in `SyncReportTask` under the report's lock.
 - `proposal_plan_shifts` ledger: `proposal_id` FK cascade, `approval_note_id` FK `proposal_status_notes` (unique), `delta_days` int, `shifted` int, timestamps. Shift once per approval.
 - Rebase trigger: `ProposalStatusChanged` with `to = approved` (**not** `ProjectActivated`). Delta = `actual_date_begin − planned_date_begin`. Planned dates are clipped to `actual_date_end`. Dates a user edited after creation are left alone (tracked by `milestones.planned_dates_edited_at` / `tasks.planned_dates_edited_at`, datetime null).
 - Visibility: a department task is visible to `tasks.view` holders whose current HR department (`EmployeeProfile`) equals `tasks.department_id`, its assignee, and proposal-rights holders. `financial` tasks: Finance only. No money anywhere on **Department Tasks**.
@@ -541,6 +548,7 @@ final class App\Notifications\Recipients\OversightRecipients
 | `report_template.lines_added` | report-templates | I | all | no | owner | T33 |
 | `donor_report.saved` / `.submitted` | donor-reports | D | all | no | responsible employee | T19 |
 | `donor_report.due` / `.overdue` | donor-reports | I | all | no | responsible employee (exempt from `funding-agreements.view`, routed to My Reporting Duties) | T19 |
+| `task.assigned` / `task.completed` (W-13, D-64: reused for `TaskKind::Report`; no new key) | tasks | existing | existing | existing | existing | W-13 |
 | `department_task.created` | tasks | I | none | no | department head and members | T31 |
 | `department_task.due` | tasks | I | none | no | assignee, department | T31 |
 | `department_task.overdue` | tasks | I | all | no | assignee, department, requester | T31 |

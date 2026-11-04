@@ -215,8 +215,8 @@ return [
         'conducted' => 'نُفّذ',
     ],
     'donor_attribution' => [
-        'shared' => 'مشترك (المستهدف الأعلى)',
-        'split' => 'مقسّم (مجموع المستهدفات)',
+        'shared' => 'يُحتسب مرة واحدة (المستهدف الأعلى)',
+        'split' => 'تُجمع (مجموع المستهدفات)',
     ],
     'result_type' => [
         'impact' => 'الأثر',
@@ -229,6 +229,7 @@ return [
         'general' => 'عامة',
         'media_deliverable' => 'تسليم إعلامي',
         'financial' => 'مالية',
+        'report' => 'تقرير',
     ],
     'deliverable_kind' => [
         'video' => 'فيديو',
