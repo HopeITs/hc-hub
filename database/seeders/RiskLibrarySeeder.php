@@ -8,9 +8,9 @@ use App\Support\DefaultRiskLibrary;
 use Illuminate\Database\Seeder;
 
 /**
- * The starting risk library (W-09, D-61). DefaultRiskLibrary::ensure() is
- * the one idempotent rule, shared with the data migration; the list is empty
- * until MEAL supplies it, so this inserts nothing today.
+ * The starting risk library (W-09, D-61): MEAL's Theory of Change risk
+ * matrix. DefaultRiskLibrary::ensure() is the one idempotent rule, shared
+ * with the data migrations, so a re-seed inserts only what is missing.
  */
 class RiskLibrarySeeder extends Seeder
 {
