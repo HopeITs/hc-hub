@@ -33,6 +33,7 @@ $groups = [
     'meal-coverage' => ['manage'],
     'supervisions' => ['manage'],
     'sectors' => ['view', 'manage'],
+    'risk-library' => ['manage'],
     'report-templates' => ['manage'],
     'evidence-types' => ['manage'],
     'narrative-questions' => ['manage'],
@@ -166,7 +167,7 @@ return [
             'targets.create', 'targets.update', 'targets.delete',
             'indicator-library.create', 'indicator-library.update', 'indicator-library.delete',
             'reports.reopen', 'reports.aggregate',
-            ...$mealOnly, 'sectors.manage',
+            ...$mealOnly, 'sectors.manage', 'risk-library.manage',
         ],
         'Financial' => [
             ...$viewEverything, ...$financeViews, ...$fundraisingViews, ...$taskWriter,

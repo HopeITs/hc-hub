@@ -557,6 +557,14 @@ return [
                 'title' => 'فكّ ربط مشروع',
                 'body' => 'فكّ :actor ربط مشروع من «:subject»',
             ],
+            'risk_attached' => [
+                'title' => 'إضافة خطر',
+                'body' => 'أضاف :actor الخطر «:value» إلى «:subject»',
+            ],
+            'risk_detached' => [
+                'title' => 'إزالة خطر',
+                'body' => 'أزال :actor الخطر «:value» من «:subject»',
+            ],
             'updated' => 'حدّث :actor المقترح «:subject»',
             'deleted' => [
                 'title' => 'حذف مقترح',

@@ -557,6 +557,14 @@ return [
                 'title' => 'Project unlinked',
                 'body' => ':actor unlinked a project from “:subject”',
             ],
+            'risk_attached' => [
+                'title' => 'Risk added',
+                'body' => ':actor added the risk “:value” to “:subject”',
+            ],
+            'risk_detached' => [
+                'title' => 'Risk removed',
+                'body' => ':actor removed the risk “:value” from “:subject”',
+            ],
             'updated' => ':actor updated the proposal “:subject”',
             'deleted' => [
                 'title' => 'Proposal deleted',

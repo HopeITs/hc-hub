@@ -52,3 +52,6 @@ Agents never read this file. It records how the pack differs from the original p
 | W-13 | `contracts.md` §12.2 (`TaskKind::Report`, `tasks.reportable_*`), §6 (`SyncReportTask`), §15.2 (reuse `task.assigned/completed`) | D-64: a donor report assigned to a responsible becomes a report task, closed on submit | low |
 
 Items marked ⚑ are listed in `contracts.md §17` for Dev 1 to confirm at CP1.
+
+## 2026-11-04: W-09 (D-61) risk library
+- `contracts.md`: §6 `AttachLibraryRisk`/`DetachRisk`; §7 `risk_library` and the new `risks` columns; §8 `risk-library.manage`; §15.2 `proposal.risk_attached`/`proposal.risk_detached`. Risks come only from the MEAL library and live on a logframe result. Dev 1 rulings (4 Nov): the risk keeps both languages (`risks.name_en`); the library is managed by the MEAL Manager slot holder; picking a library risk onto a proposal is optional.

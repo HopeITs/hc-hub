@@ -155,6 +155,11 @@ SaveFundingAgreement (existing; donor written from the proposal)
 SaveAgreementInstallments::handle(DonorProposal $agreement, array $installments): void  // @param list<array{sequence:int, amount:string, currency:string, scheduled_date:string}>
 GenerateExpectedTransfers  // queued listener of FundingAgreementRecorded + job dispatched after SaveAgreementInstallments; idempotent per installment_id
 
+// W-09 (D-61), app/Actions/Proposals
+AttachLibraryRisk::handle(Proposal $proposal, int $resultId, int $libraryRiskId, array $overrides): Risk
+    // @param array{likelihood?: int, severity?: int, solution?: string}; result loaded through $proposal->results()->whereKey($resultId)->firstOrFail()
+DetachRisk::handle(Proposal $proposal, int $riskId): void
+
 // W-13 (D-64), app/Actions/Tasks
 SyncReportTask::handle(DonorReport $report): ?Task
     // creates the task for the current responsible when none is open, reassigns the open one when the responsible changed,
@@ -186,6 +191,7 @@ SyncReportTask::handle(DonorReport $report): ?Task
 **W-04 (D-57):** `donors.approval_status` varchar(10) NOT NULL default `approved` (`DonorApprovalStatus`: `Pending = 'pending'`, `Approved = 'approved'`), `donors.requested_by` FK `users` null nullOnDelete, `donors.approved_by` FK `users` null nullOnDelete, `donors.approved_at` datetime null. Index on `approval_status`.
 **W-07 (D-59):** `proposal_status_notes.kind` varchar(20) NOT NULL default `transition` (`StatusNoteKind`: `Transition = 'transition'`, `Correction = 'correction'`, `Negotiation = 'negotiation'`, `OnHold = 'on_hold'`, `OffHold = 'off_hold'`, `Extension = 'extension'`); backfill `is_correction = 1` → `correction`. `MediaCollection::Negotiation = 'negotiation'` (file linked to the note through `media.subject` = the note).
 **W-08 (D-60):** `proposals.extended_date_end` date null, `proposals.extension_reason` text null; `MediaCollection::Amendment = 'amendment'` (file linked to the `extension` note, as W-07). `Proposal::effectiveDateEnd(): ?CarbonImmutable` = `extended_date_end ?? actual_date_end`; every reader of the end date for an active proposal (deadline scanners, agreement remaining period, donor report periods, project widening) uses it.
+**W-09 (D-61):** `risk_library` (`id`, `title_en`, `title_ar`, `category` varchar(40) null, `default_likelihood`, `default_severity` (same scale as `risks`), `is_active` bool default 1, `sort_order`, timestamps; unique `title_en`); `risks.name_en` varchar(255) null (copied from `title_en` at pick time; `name` carries `title_ar`); `risks.library_risk_id` FK `risk_library` null `restrictOnDelete`; `risks.result_id` FK `results` null `cascadeOnDelete`; `risks.proposal_id` FK `proposals` null `cascadeOnDelete`; `risks.project_id` becomes nullable; index `(proposal_id, result_id)`. Rule: a new risk row has `library_risk_id`, `proposal_id` and `result_id`; `name`/`impact` are copied from the library at pick time so the proposal keeps its wording if the library changes.
 
 ## §8 Permissions and default holders
 Nine roles (fixed): Super Admin, General Manager, Managers, MEAL, Financial, Media Team, Public Relations, Public Relations Manager, Team Member. Super Admin holds everything technically (`Role::booted()`) but **appears in no business list, no fallback and no test as the only account** (D-20a). `permissions:sync` only adds.
@@ -209,6 +215,7 @@ Nine roles (fixed): Super Admin, General Manager, Managers, MEAL, Financial, Med
 | `funding-agreements.view/create/update` | existing holders **+ Public Relations Manager** (D-31b) | — |
 | `proposals.update` | existing (Financial, PR Manager, GM) | also gates approve, transitions, final-report acceptance |
 | `donors.approve` (W-04, D-57) | **General Manager** only (plus `Super Admin` through the administrator roles rule); `donors.create` is unchanged (PR, PR Manager, GM) | — |
+| `risk-library.manage` (W-09, D-61) | MEAL, General Manager; `risks.create/update/delete` keep their holders and now mean "on a proposal's logframe" | MEAL Manager slot holder (add, edit, remove, reorder library entries) |
 
 No `media-deliverables` module: department tasks use `tasks.*` / `milestones.*` with a server-side department condition (T31).
 
@@ -528,6 +535,7 @@ final class App\Notifications\Recipients\OversightRecipients
 | `proposal.targets_saved` | proposals | D | all | no | none | T13 |
 | `proposal.project_linked` / `proposal.project_unlinked` | proposals | D | all | no | none | T06 |
 | `proposal.deleted` | proposals | D | all | no | none | T12 |
+| `proposal.risk_attached` / `proposal.risk_detached` (names only) | proposals | D | all | no | none | W-09 |
 | `agreement.recorded` (`FundingAgreementRecorded`) | funding-agreements | I | all | no | Finance, PR Manager (no amounts for others) | T09 |
 | `donor.requested` | donors | I | none | no | `General Manager` holders of `donors.approve` | W-04 |
 | `donor.approved` | donors | I | none | no | `requested_by` | W-04 |

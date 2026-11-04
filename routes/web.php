@@ -21,6 +21,7 @@ use App\Http\Controllers\TaskFilePreviewController;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Http\Middleware\RedirectProposalToStory;
 use App\Models\DonorReport;
+use App\Models\RiskLibrary;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -283,6 +284,10 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
     Route::livewire('admin/sectors', 'pages::admin.sectors')
         ->can('sectors.view')
         ->name('admin.sectors.index');
+
+    Route::livewire('admin/risk-library', 'pages::admin.risk-library')
+        ->can('viewAny', RiskLibrary::class)
+        ->name('admin.risk-library.index');
 
     Route::livewire('admin/evidence-types', 'pages::admin.evidence-types')
         ->can('evidence-types.manage')
