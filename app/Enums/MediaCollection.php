@@ -30,6 +30,7 @@ enum MediaCollection: string
     case NeedAssessment = 'need assessment';
     case DonorApproval = 'donor_approval';
     case ReportSubmission = 'report_submission';
+    case Negotiation = 'negotiation';
 
     /**
      * Whether this collection holds signed funding paperwork.

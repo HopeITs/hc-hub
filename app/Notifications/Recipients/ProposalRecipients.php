@@ -31,6 +31,10 @@ use App\Support\Slots;
  * removed reviewer and the MEAL Manager skip the permission check for these
  * events.
  *
+ * A negotiation note (proposal.negotiation_noted, W-07, D-59) tells the
+ * proposal's reviewers and the CEO slot holder, besides the usual watchers;
+ * the reviewers and the CEO skip the permission check for it.
+ *
  * The approval rebase (proposal.plan_rebased, T31) is the system's: it tells
  * the project owners, and only when a milestone or task date was cut at the
  * grant end, so they can re-plan it. No watcher hears of it, and the owners
@@ -50,7 +54,9 @@ final class ProposalRecipients extends WatcherRecipients
 
     private const NeedAssessmentAdded = 'proposal.need_assessment_added';
 
-    private const ReviewEvents = [self::ReviewRequested, self::ReviewerAdded, self::ReviewerRemoved, self::ReviewerSeen, self::NeedAssessmentAdded];
+    private const NegotiationNoted = 'proposal.negotiation_noted';
+
+    private const ReviewEvents = [self::ReviewRequested, self::ReviewerAdded, self::ReviewerRemoved, self::ReviewerSeen, self::NeedAssessmentAdded, self::NegotiationNoted];
 
     private const PlanRebased = 'proposal.plan_rebased';
 
@@ -76,6 +82,10 @@ final class ProposalRecipients extends WatcherRecipients
             self::ReviewerAdded, self::ReviewerRemoved => $this->idsFromProperty($activity, 'employee_id'),
             self::ReviewerSeen => $this->projectOwnerIds($activity),
             self::NeedAssessmentAdded => $this->uniqueIds([...$this->projectOwnerIds($activity), Slots::holderOf('meal_manager')]),
+            self::NegotiationNoted => $this->uniqueIds([
+                ...ProposalReviewer::query()->where('proposal_id', $activity->subject_id)->pluck('employee_id')->all(),
+                Slots::holderOf('ceo'),
+            ]),
             self::PlanRebased => $this->hasClippedDates($activity) ? $this->projectOwnerIds($activity) : [],
             default => [],
         };
@@ -122,6 +132,7 @@ final class ProposalRecipients extends WatcherRecipients
         $employeeIds = match ($activity->event) {
             self::ReviewerRemoved => [...$employeeIds, ...$this->idsFromProperty($activity, 'employee_id')],
             self::NeedAssessmentAdded => [...$employeeIds, Slots::holderOf('meal_manager')],
+            self::NegotiationNoted => [...$employeeIds, Slots::holderOf('ceo')],
             default => $employeeIds,
         };
 

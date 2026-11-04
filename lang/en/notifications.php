@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'negotiation_pending_suffix' => ' — still to review: :names',
     'review_meeting_suffix' => ' — review meeting :at',
     'system' => 'The system',
     'report_template_org_wide_targets' => 'the organization-wide targets',
@@ -577,6 +578,10 @@ return [
                 'body' => ':actor reviewed “:subject”',
             ],
             'reviewer_note_updated' => ':actor updated their review note on “:subject”',
+            'negotiation_noted' => [
+                'title' => 'Negotiation note added',
+                'body' => ':actor recorded a donor negotiation note on “:subject”:pending',
+            ],
             'need_assessment_added' => [
                 'title' => 'Need assessment added',
                 'body' => ':actor attached a need assessment to “:subject”',
