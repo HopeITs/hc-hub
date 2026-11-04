@@ -462,3 +462,24 @@ test('New Concept Note is offered only to proposal creators on a project that ca
     'no proposals.create' => ['Managers', ProjectStatus::Draft],
     'archived project' => ['Financial', ProjectStatus::Archived],
 ]);
+
+test('the project page says which center hosts a hosted project', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $idleb = insertHrCity('Idleb', 'إدلب');
+    $host = insertHrCenter(insertHrCity('Aleppo', 'حلب'), 'Head Office Aleppo', 'المكتب الرئيسي حلب');
+    $project = Project::factory()->hostedBy($host)->create(['name' => 'Wells Idleb', 'city_id' => $idleb]);
+
+    $this->actingAs($user)
+        ->get(route('projects.show', $project))
+        ->assertOk()
+        ->assertSeeText('Idleb')
+        ->assertSeeText('Hosted by Head Office Aleppo')
+        ->assertSee('data-test="hosted-by-badge"', false);
+
+    $centered = Project::factory()->create(['name' => 'Aleppo Clinics', 'center_id' => $host]);
+
+    $this->actingAs($user)
+        ->get(route('projects.show', $centered))
+        ->assertOk()
+        ->assertDontSee('data-test="hosted-by-badge"', false);
+});

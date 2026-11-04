@@ -36,12 +36,11 @@
                     @else
                         {{ $this->centerSummary['name'] }}
                     @endif
-                    @if ($this->centerSummary['inactive'])
-                        <span class="dk-pill dk-bad">{{ __('projects.center_inactive') }}</span>
-                    @endif
+                    <x-projects.center-inactive-badge :inactive="$this->centerSummary['inactive']" class="ms-1.5 align-middle" />
                 </span>
             @endif
             · {{ $project->city?->name ?? __('common.unknown_city') }}
+            <x-projects.host-center-badge :project="$project" class="ms-1.5 align-middle" />
             <x-projects.sector-chips :sectors="$project->sectors" class="ms-1.5 inline-flex! align-middle" data-test="project-sectors" />
         </div>
 

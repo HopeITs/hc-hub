@@ -18,7 +18,9 @@ use Carbon\CarbonImmutable;
 use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -258,6 +260,43 @@ class Task extends Model implements TracksActivity
         $source = $this->loadedSource();
 
         return $source instanceof Milestone ? $source->project_id : null;
+    }
+
+    /**
+     * Whether this task belongs to a paused project (D-66, W-02): its source
+     * is that project, or a milestone of it. The chip on a task only says so;
+     * the due date and status stay. Pass the paused ids once per render.
+     *
+     * @param  list<int>|null  $pausedProjectIds  from Project::pausedIds()
+     */
+    public function isPaused(?array $pausedProjectIds = null): bool
+    {
+        $source = $this->loadedSource();
+        $projectId = match (true) {
+            $source instanceof Project => $source->id,
+            $source instanceof Milestone => $source->project_id,
+            default => null,
+        };
+
+        return $projectId !== null && in_array($projectId, $pausedProjectIds ?? Project::pausedIds(), true);
+    }
+
+    /**
+     * Leaves out the tasks of a paused project: those whose source is the
+     * project, or one of its milestones. Program-, proposal- and
+     * annual-plan-level tasks are never paused.
+     *
+     * @param  Builder<Task>  $query
+     */
+    #[Scope]
+    protected function notPaused(Builder $query): void
+    {
+        $paused = Project::query()->paused()->select('projects.id');
+
+        $query
+            ->where(fn (Builder $inner) => $inner->where('tasks.source_type', '!=', 'project')->orWhereNotIn('tasks.source_id', $paused))
+            ->where(fn (Builder $inner) => $inner->where('tasks.source_type', '!=', 'milestone')
+                ->orWhereNotIn('tasks.source_id', Milestone::query()->select('milestones.id')->whereIn('milestones.project_id', $paused)));
     }
 
     /**

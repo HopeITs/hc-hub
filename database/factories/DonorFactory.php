@@ -2,8 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Enums\DonorApprovalStatus;
 use App\Enums\DonorType;
 use App\Models\Donor;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -34,6 +36,17 @@ class DonorFactory extends Factory
             'country' => fake()->country(),
             'notes' => fake()->sentence(),
         ];
+    }
+
+    /**
+     * A donor request the General Manager has yet to approve (D-57).
+     */
+    public function pending(?User $requester = null): static
+    {
+        return $this->state(fn () => [
+            'approval_status' => DonorApprovalStatus::Pending,
+            'requested_by' => $requester?->id,
+        ]);
     }
 
     /**

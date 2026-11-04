@@ -607,6 +607,20 @@ return [
             'updated' => ':actor updated the funding agreement “:subject”',
             'deleted' => ':actor deleted the funding agreement “:subject”',
         ],
+        'donor' => [
+            'requested' => [
+                'title' => 'Donor request',
+                'body' => '“:subject” was requested as a donor by :actor and needs your approval',
+            ],
+            'approved' => [
+                'title' => 'Donor approved',
+                'body' => ':actor approved the donor “:subject”',
+            ],
+            'declined' => [
+                'title' => 'Donor request declined',
+                'body' => ':actor declined the donor request “:subject”: :note',
+            ],
+        ],
         'donor_report' => [
             'created' => ':actor added the donor report “:subject”',
             'file_added' => ':actor added :file to the donor report “:subject”',

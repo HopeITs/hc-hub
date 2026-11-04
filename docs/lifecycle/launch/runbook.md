@@ -20,6 +20,7 @@ Placeholders: `<db>` the tracking schema, `<hr_db>` the HR schema, `<app-path>` 
 6. [Part C: rollback](#6-part-c-rollback)
 7. [Human items before go-live](#7-human-items-before-go-live)
 8. [Never](#8-never)
+9. [Wave 2](#9-wave-2)
 
 ---
 
@@ -454,3 +455,14 @@ On the copy as on production:
 - Never put secrets, personal data or amounts in any document.
 
 Superseded, do not build: `report-templates:seed-existing` and `donor_attribution_confirmed_at` (replaced by `report-templates:prefill-active` and T13's setting); importing the Syria Cross / Children University workbooks (D-54).
+
+---
+
+## 9. Wave 2
+
+### W-02: map the legacy projects to HR centers ⛁
+After the release that carries the `projects.host_center_id` migration (W-01) and the «Add center» form:
+1. `<php> artisan hr:map-project-centers --dry-run`: compare **Matched / Ambiguous / No center / Conflicts** with the approved list (D-30c).
+2. `<php> artisan hr:map-project-centers --apply`
+3. `<php> artisan hr:map-project-centers --apply` again: the second run changes nothing.
+- **Expected:** every matched project has a `center_id`, so the proposal picker stops showing «No center» for it. A project in a city with no HR center stays unmapped on purpose: open it and give it a host center (D-55). Nothing is closed or archived.

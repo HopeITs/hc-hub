@@ -10,6 +10,10 @@ return [
         'narrative' => 'Narrative',
         'financial' => 'Financial',
     ],
+    'donor_approval_status' => [
+        'pending' => 'Pending',
+        'approved' => 'Approved',
+    ],
     'donor_type' => [
         'bilateral' => 'Bilateral',
         'foundation' => 'Foundation',

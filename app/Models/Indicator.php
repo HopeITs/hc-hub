@@ -13,6 +13,8 @@ use Carbon\CarbonImmutable;
 use Database\Factories\IndicatorFactory;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -227,6 +229,19 @@ class Indicator extends Model implements TracksActivity
             'target' => 'decimal:2',
             'is_tracking_only' => 'boolean',
         ];
+    }
+
+    /**
+     * Leaves out the indicators of a project whose center is inactive (D-66,
+     * W-02); an indicator with no project is never paused.
+     *
+     * @param  Builder<Indicator>  $query
+     */
+    #[Scope]
+    protected function notPaused(Builder $query): void
+    {
+        $query->where(fn (Builder $inner) => $inner->whereNull('indicators.project_id')
+            ->orWhereNotIn('indicators.project_id', Project::query()->paused()->select('projects.id')));
     }
 
     public function activityModule(): string

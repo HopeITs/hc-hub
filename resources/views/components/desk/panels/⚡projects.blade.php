@@ -66,8 +66,9 @@ new class extends Component
         $money = $this->canViewFundingPosition();
 
         return DeskWork::projectsOnCard(auth()->user())
-            ->select(['id', 'slug', 'name', 'status', 'start_date', 'end_date', 'user_id'])
+            ->select(['id', 'slug', 'name', 'status', 'start_date', 'end_date', 'city_id', 'center_id', 'host_center_id', 'user_id'])
             ->with([
+                'city:id,name_en,name_ar',
                 'user:id,first_name_en,last_name_en,first_name_ar,last_name_ar',
                 'proposals:id,name,status,donor_id',
                 'proposals.donor:id,name',
@@ -210,6 +211,8 @@ new class extends Component
                         <a href="{{ route('projects.show', $project) }}" wire:navigate title="{{ $project->name }}">@if ($line['attention'] > 0)<span class="dk-att" title="{{ trans_choice('desk.attention_items', $line['attention'], ['count' => $line['attention']]) }}">{{ $line['attention'] }}</span>@endif{{ $project->name }}</a>
                         <span class="dk-is dk-num" data-project-dates>{{ $project->start_date?->translatedFormat('M Y') ?? '—' }} → {{ $project->end_date?->translatedFormat('M Y') ?? '—' }}</span>
                         <span class="dk-is" title="{{ $line['donor'] }}">{{ $line['donor'] !== '' ? $line['donor'] : __('desk.no_donor_yet') }} · {{ $project->user?->name ?? '—' }}</span>
+                        <x-projects.host-center-badge :project="$project" class="dk-is" />
+                        <x-projects.center-inactive-badge :project="$project" class="dk-is" />
                     </div>
                     <div class="dk-pj-l">
                         @switch($shownLens)

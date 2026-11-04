@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Database\QueryException;
 
 /**
  * @property int $id
@@ -45,6 +46,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
  * @property int|null $target_girls
  * @property int $city_id
  * @property int|null $center_id
+ * @property int|null $host_center_id
  * @property int $program_id
  * @property int $user_id
  * @property string $schedule_weekend
@@ -65,6 +67,7 @@ use Illuminate\Database\Eloquent\Relations\MorphOne;
     'target_girls',
     'city_id',
     'center_id',
+    'host_center_id',
     'program_id',
     'user_id',
     'schedule_weekend',
@@ -125,24 +128,97 @@ class Project extends Model implements TracksActivity
     }
 
     /**
-     * The open (draft, approved, active) project already holding a center and
-     * program, if any: there is at most one per pair (D-30a).
+     * The HR center that follows up a project with no physical center in its
+     * city (D-55, W-01), read from the same in-memory lookup as center().
+     * Null for a project that runs from its own center.
+     */
+    public function hostCenter(): ?HrCenter
+    {
+        $hostCenterId = $this->activityAttribute('host_center_id');
+
+        return $hostCenterId === null ? null : HrCenter::remembered((int) $hostCenterId);
+    }
+
+    /**
+     * Whether the project's own center is one HR has since deactivated
+     * (D-66, W-02). A hosted project is never affected by its host, and a
+     * project with no center, or one HR cannot be read for, is not marked.
+     * Read from the in-memory HR lookup, so a list costs no query per row.
+     */
+    public function hasInactiveCenter(): bool
+    {
+        $centerId = $this->activityAttribute('center_id');
+
+        if ($centerId === null) {
+            return false;
+        }
+
+        try {
+            return HrCenter::remembered((int) $centerId)?->is_active === false;
+        } catch (QueryException) {
+            return false;
+        }
+    }
+
+    /**
+     * Whether the project is followed up by a host center rather than run
+     * from a center of its own.
+     */
+    public function isHosted(): bool
+    {
+        return $this->activityAttribute('host_center_id') !== null;
+    }
+
+    /**
+     * Where the project is, for every list and card: its center's name, or
+     * «{city} · hosted by {host center}» for a hosted project, or the city
+     * alone while the project is not yet mapped. Needs `city` loaded.
+     */
+    public function locationLabel(): string
+    {
+        $center = $this->center();
+
+        if ($center !== null) {
+            return $center->name;
+        }
+
+        $city = $this->city->name ?? __('common.unknown_city');
+        $host = $this->hostCenter();
+
+        if ($host === null) {
+            $hostCenterId = $this->activityAttribute('host_center_id');
+
+            return $hostCenterId === null ? $city : __('projects.hosted_location', ['city' => $city, 'center' => '#'.$hostCenterId]);
+        }
+
+        return __('projects.hosted_location', ['city' => $city, 'center' => $host->name]);
+    }
+
+    /**
+     * The open (draft, approved, active) project already holding a placement
+     * and program, if any: there is at most one per pair (D-30a). The
+     * placement is the center when there is one, else the city of a hosted
+     * project (`center_id IS NULL` in that city, D-55 / W-01).
      *
      * Locks the program row first, so a caller inside a transaction holds off
      * every other create, restore or relink for the same program until it
      * commits. Call it inside the transaction that writes the project.
      */
-    public static function openProjectFor(int $centerId, int $programId, ?int $exceptId = null): ?self
+    public static function openProjectFor(?int $centerId, int $cityId, int $programId, ?int $exceptId = null): ?self
     {
         Program::query()->whereKey($programId)->lockForUpdate()->value('id');
 
         return static::query()
-            ->where('center_id', $centerId)
+            ->when(
+                $centerId !== null,
+                fn (Builder $query) => $query->where('center_id', $centerId),
+                fn (Builder $query) => $query->whereNull('center_id')->where('city_id', $cityId),
+            )
             ->where('program_id', $programId)
             ->whereIn('status', self::openStatusValues())
             ->when($exceptId !== null, fn (Builder $query) => $query->whereKeyNot($exceptId))
             ->orderBy('id')
-            ->first(['id', 'slug', 'name', 'status', 'center_id', 'program_id']);
+            ->first(['id', 'slug', 'name', 'status', 'city_id', 'center_id', 'host_center_id', 'program_id']);
     }
 
     /**
@@ -387,6 +463,55 @@ class Project extends Model implements TracksActivity
         }
 
         return (int) array_sum($parts);
+    }
+
+    /**
+     * Limit the query to projects still being delivered.
+     *
+     * @param  Builder<static>  $query
+     */
+    /**
+     * Whether the project's non-report work is paused (D-66, W-02): its own
+     * center exists and HR has deactivated it. A hosted project is never
+     * paused by its host. Nothing is closed and no date or status changes.
+     */
+    public function isPaused(): bool
+    {
+        return $this->hasInactiveCenter();
+    }
+
+    /**
+     * The ids of the paused projects: one query, with the inactive center
+     * ids passed as values (HR is another connection, so no join).
+     *
+     * @return list<int>
+     */
+    public static function pausedIds(): array
+    {
+        return array_values(self::query()->paused()->pluck('projects.id')->map(fn (mixed $id): int => (int) $id)->all());
+    }
+
+    /**
+     * Only the projects whose own center HR has deactivated.
+     *
+     * @param  Builder<Project>  $query
+     */
+    #[Scope]
+    protected function paused(Builder $query): void
+    {
+        $query->whereIn('projects.center_id', HrCenter::inactiveIds());
+    }
+
+    /**
+     * Everything except the paused projects: scanners and alerts call this
+     * once, never re-reading HR inside a loop.
+     *
+     * @param  Builder<Project>  $query
+     */
+    #[Scope]
+    protected function notPaused(Builder $query): void
+    {
+        $query->where(fn (Builder $inner) => $inner->whereNull('projects.center_id')->orWhereNotIn('projects.center_id', HrCenter::inactiveIds()));
     }
 
     /**

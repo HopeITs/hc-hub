@@ -69,6 +69,7 @@
                 <tr wire:key="donor-{{ $donor->id }}-{{ $lineCurrency ?? 'none' }}" data-donor-row data-donor="{{ $donor->id }}">
                     <td data-label="{{ __('donors.donor') }}" data-wide>
                         <span @class(['line-clamp-2 max-w-64 font-semibold', $mutedText => $isRepeat]) title="{{ $donor->name }}">{{ $donor->name }}</span>
+                        <x-donors.pending-badge :donor="$donor" class="mt-1" />
                         @unless ($isRepeat)
                             <span class="sub max-w-64 truncate">{{ $identity }}</span>
                         @endunless

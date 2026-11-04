@@ -32,6 +32,8 @@
                 </p>
                 <p class="dk-pjl-meta">
                     <span>{{ $project->city?->name ?? __('common.unknown_city') }}</span>
+                    <x-projects.host-center-badge :project="$project" />
+                    <x-projects.center-inactive-badge :project="$project" />
                     <span aria-hidden="true">·</span>
                     <span class="truncate">{{ $project->program->name }}</span>
                     @if ($status === '')

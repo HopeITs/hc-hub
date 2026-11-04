@@ -472,4 +472,6 @@ return [
     'renewal_chain_none' => 'Not part of a renewal chain.',
     'renewal_chain_current' => 'This proposal',
     'last_year_achievement' => 'Last year: :value (:percent%)',
+    'donor_request_pending' => 'Donor request pending. The General Manager must approve it first.',
+    'donor_request_pending_banner' => 'Donor request pending — the General Manager must approve it before this proposal can be saved.',
 ];

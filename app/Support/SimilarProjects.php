@@ -43,7 +43,8 @@ final class SimilarProjects
         $needed = (int) ceil(count($patterns) / 2);
 
         return Project::query()
-            ->select(['projects.id', 'projects.slug', 'projects.name', 'projects.status', 'projects.center_id', 'projects.program_id'])
+            ->select(['projects.id', 'projects.slug', 'projects.name', 'projects.status', 'projects.city_id', 'projects.center_id', 'projects.host_center_id', 'projects.program_id'])
+            ->with('city:id,name_en,name_ar')
             ->where('projects.status', '!=', ProjectStatus::Archived->value)
             ->when($programId !== null, fn ($query) => $query->where('projects.program_id', $programId))
             ->when($excludeCenterId !== null, fn ($query) => $query->where(

@@ -16,6 +16,7 @@ use Closure;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -100,7 +101,7 @@ trait ManagesAgreementForm
     #[Computed]
     public function donorOptions(): Collection
     {
-        return Donor::query()->select(['id', 'name'])->orderBy('name')->orderBy('id')->get();
+        return Donor::query()->select(['id', 'name', 'approval_status'])->pickableBy(Auth::user())->orderBy('name')->orderBy('id')->get();
     }
 
     /**

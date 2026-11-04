@@ -607,6 +607,20 @@ return [
             'updated' => 'حدّث :actor اتفاقية التمويل «:subject»',
             'deleted' => 'حذف :actor اتفاقية التمويل «:subject»',
         ],
+        'donor' => [
+            'requested' => [
+                'title' => 'طلب مانح',
+                'body' => 'طلب :actor إضافة المانح «:subject» وهو بانتظار موافقتك',
+            ],
+            'approved' => [
+                'title' => 'تمت الموافقة على المانح',
+                'body' => 'وافق :actor على المانح «:subject»',
+            ],
+            'declined' => [
+                'title' => 'تم رفض طلب المانح',
+                'body' => 'رفض :actor طلب المانح «:subject»: :note',
+            ],
+        ],
         'donor_report' => [
             'created' => 'أضاف :actor تقرير المانح «:subject»',
             'file_added' => 'أضاف :actor الملف :file إلى تقرير المانح «:subject»',

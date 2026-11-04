@@ -7,6 +7,8 @@
         :open="$showProposalModal"
         :editing="$editingProposalId !== null"
         :donors="$showProposalModal ? $this->proposalDonors : []"
+        :donor-pending="$showProposalModal && $this->proposalDonorIsPending"
+        :can-add-donor="auth()->user()->can('donors.create')"
         :picker-projects="$this->proposalPickerProjects"
         :chosen-projects="$this->proposalChosenProjects"
         :linked-projects="$this->proposalLinkedProjects"
@@ -18,3 +20,7 @@
         :renewal="$this->renewalPreview"
         :stored-number="$editingProposalId !== null ? $internalProjectNumber : null"
     />
+
+@can('donors.create')
+    <livewire:donors.request-form />
+@endcan

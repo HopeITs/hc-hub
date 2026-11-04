@@ -2,6 +2,7 @@
 
 use App\Actions\Proposals\TransitionProposal;
 use App\Enums\Currency;
+use App\Enums\DonorApprovalStatus;
 use App\Enums\ProposalStatus;
 use App\Events\ProposalStatusChanged;
 use App\Models\Project;
@@ -291,4 +292,15 @@ test('the retired final reports status moves to active with one note per proposa
     expect(DB::table('proposals')->find($retiredId)->status)->toBe('active')
         ->and(DB::table('proposal_status_notes')->where('proposal_id', $retiredId)->pluck('context')->all())->toBe([__('proposals.final_reports_status_retired')])
         ->and(DB::table('proposal_status_notes')->where('proposal_id', $activeId)->count())->toBe(0);
+});
+
+test('the donor requirement refuses a donor the General Manager has not approved', function () {
+    $proposal = transitionableProposal(ProposalStatus::ConceptNote);
+    $proposal->donor->forceFill(['approval_status' => DonorApprovalStatus::Pending])->save();
+
+    $errors = refusedTransition(fn () => transition(userWithRole('Financial'), $proposal, ProposalStatus::ConceptNoteReview));
+
+    expect($errors['donor'])->toBe([__('proposals.donor_request_pending')])
+        ->and($proposal->fresh()->status)->toBe(ProposalStatus::ConceptNote)
+        ->and($proposal->statusNotes()->count())->toBe(0);
 });

@@ -23,6 +23,15 @@ trait RemembersHrLookup
     private static array $hrLookup = ['app' => null, 'loaded_at' => 0.0, 'entries' => [], 'absent' => []];
 
     /**
+     * Drop the remembered lookup so the next read reloads it from HR: for a
+     * test that changes HR data mid-request, or code that just wrote to it.
+     */
+    public static function forgetRememberedLookup(): void
+    {
+        self::$hrLookup = ['app' => null, 'loaded_at' => 0.0, 'entries' => [], 'absent' => []];
+    }
+
+    /**
      * Every entry of the lookup, keyed by HR id.
      *
      * @param  Closure(): array<int, mixed>  $load

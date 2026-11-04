@@ -7,6 +7,7 @@ namespace App\Livewire\Concerns;
 use App\Actions\Donors\SaveDonor;
 use App\Enums\DonorType;
 use App\Models\Donor;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -137,6 +138,7 @@ trait ManagesDonorForm
         $donor = app(SaveDonor::class)->handle(
             $this->editingDonorId === null ? null : Donor::query()->findOrFail($this->editingDonorId),
             $validated,
+            Auth::user(),
         );
 
         $isCreate = $donor->wasRecentlyCreated;
