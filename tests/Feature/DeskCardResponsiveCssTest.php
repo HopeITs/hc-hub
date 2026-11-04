@@ -63,3 +63,17 @@ test('monthly reports hide the oldest months on a narrow card so the name stays 
         ->and($css)->toMatch('/@container pb \(max-width: 293px\)\{ \.dk-mx2-r>:not\(:first-child\):nth-last-child\(n\+4\)\{ display:none \} \}/')
         ->and($css)->not->toContain('repeat(var(--months)');
 });
+
+test('the top bar and the page column pad by the same edge so the breadcrumb, greeting and panels share one start and end line', function () {
+    $css = deskStylesheets();
+
+    expect($css)
+        ->toContain('--page-edge: max(var(--page-gutter), calc((100% - var(--page-w)) / 2));')
+        ->toMatch('/\.dk-top-in \{[^}]*padding-inline: var\(--page-edge\); \}/')
+        ->toContain('.dk-wrap{ max-width:none;padding-left:max(var(--page-edge),env(safe-area-inset-left,0px));padding-right:max(var(--page-edge),env(safe-area-inset-right,0px)) }')
+        ->not->toContain('1680px');
+});
+
+test('desk panels sit 20px apart on wide screens', function () {
+    expect(deskStylesheets())->toContain(':root{ --row-unit:104px;--grid-gap:20px;');
+});
