@@ -14,6 +14,11 @@ return [
         'pending' => 'Pending',
         'approved' => 'Approved',
     ],
+    'program_request_status' => [
+        'pending' => 'Pending',
+        'created' => 'Created',
+        'declined' => 'Declined',
+    ],
     'donor_type' => [
         'bilateral' => 'Bilateral',
         'foundation' => 'Foundation',

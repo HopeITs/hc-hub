@@ -338,6 +338,16 @@ class Project extends Model implements TracksActivity
     }
 
     /**
+     * The proposal location rows this project stands for (W-34a).
+     *
+     * @return HasMany<ProposalLocation, $this>
+     */
+    public function proposalLocations(): HasMany
+    {
+        return $this->hasMany(ProposalLocation::class);
+    }
+
+    /**
      * The sectors this project covers (contracts.md §12.5). Written only
      * through App\Actions\Projects\SyncProjectSectors.
      *

@@ -23,7 +23,7 @@ final class ProposalTransitions
      */
     private const array Map = [
         'concept note' => [
-            'concept note review' => ['linked_project', 'donor', 'planned_dates'],
+            'concept note review' => ['locations', 'donor', 'planned_dates'],
             'proposal draft' => ['reason'],
         ],
         'concept note review' => [

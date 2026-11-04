@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
                 MealSeeder::class,
                 FinanceSeeder::class,
                 RealDataSeeder::class,
+                ProposalLocationSeeder::class,
                 SectorSeeder::class,
                 EvidenceTypeSeeder::class,
                 NarrativeQuestionSeeder::class,

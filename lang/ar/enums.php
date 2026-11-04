@@ -14,6 +14,11 @@ return [
         'pending' => 'قيد الموافقة',
         'approved' => 'تمت الموافقة',
     ],
+    'program_request_status' => [
+        'pending' => 'معلّق',
+        'created' => 'أُنشئ',
+        'declined' => 'مرفوض',
+    ],
     'donor_type' => [
         'bilateral' => 'ثنائي',
         'foundation' => 'مؤسسة',

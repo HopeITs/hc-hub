@@ -527,6 +527,16 @@ return [
             'updated' => 'حدّث :actor المانح «:subject»',
             'deleted' => 'حذف :actor المانح «:subject»',
         ],
+        'program_request' => [
+            'opened' => [
+                'title' => 'برنامج مطلوب في HR',
+                'body' => 'يحتاج المقترح «:subject» إلى إنشاء البرنامج «:name» في HR',
+            ],
+            'linked' => [
+                'title' => 'ربط برنامج',
+                'body' => 'ربط :actor برنامج HR «:name» الذي طلبه المقترح «:subject»',
+            ],
+        ],
         'proposal' => [
             'created' => [
                 'title' => 'إنشاء مقترح',
@@ -552,6 +562,10 @@ return [
             'project_unlinked' => [
                 'title' => 'فكّ ربط مشروع',
                 'body' => 'فكّ :actor ربط مشروع من «:subject»',
+            ],
+            'locations_changed' => [
+                'title' => 'تغيير المواقع',
+                'body' => 'غيّر :actor مواقع المقترح «:subject»',
             ],
             'updated' => 'حدّث :actor المقترح «:subject»',
             'deleted' => [

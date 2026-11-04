@@ -13,8 +13,10 @@ use App\Models\Milestone;
 use App\Models\MonthlyReport;
 use App\Models\PlanIndicator;
 use App\Models\Program;
+use App\Models\ProgramRequest;
 use App\Models\Project;
 use App\Models\Proposal;
+use App\Models\ProposalLocation;
 use App\Models\Report;
 use App\Models\ReportFile;
 use App\Models\ReportTemplate;
@@ -58,6 +60,8 @@ test('the morph map registers exactly the target sources, task sources, media ow
         'supervision' => Supervision::class,
         'monthly_report' => MonthlyReport::class,
         'report_template' => ReportTemplate::class,
+        'proposal_location' => ProposalLocation::class,
+        'program_request' => ProgramRequest::class,
     ]);
 });
 

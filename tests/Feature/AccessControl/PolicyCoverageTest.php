@@ -28,6 +28,7 @@ use App\Models\NotificationMute;
 use App\Models\Permission;
 use App\Models\PlanIndicator;
 use App\Models\ProjectActivityStatus;
+use App\Models\ProposalLocationCenter;
 use App\Models\ProposalReviewer;
 use App\Models\ProposalStatusNote;
 use App\Models\ReportFile;
@@ -101,6 +102,7 @@ function modelsGuardedWithoutPolicy(): array
         ScheduleBaseline::class => ['projects', 'Part of a project schedule (ProjectPolicy::update).'],
         ScheduleBaselineItem::class => ['projects', 'Part of a project schedule (ProjectPolicy::update).'],
         ScheduleDependency::class => ['projects', 'Part of a project schedule (ProjectPolicy::update).'],
+        ProposalLocationCenter::class => ['proposals', 'A center of a proposal location row: written only through SaveProposal and the link wrappers under ProposalLocationPolicy (W-34a).'],
         TaskAssignee::class => ['tasks', 'Follows its task (TaskPolicy).'],
         TaskAttachment::class => ['tasks', 'Follows its task (TaskPolicy); the download controllers check it.'],
         TransfersTracking::class => ['transfers', 'transfers.* permissions (ManagesTransferForm).'],

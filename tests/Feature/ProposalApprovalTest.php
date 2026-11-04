@@ -12,6 +12,7 @@ use App\Models\DonorProposal;
 use App\Models\Media;
 use App\Models\Project;
 use App\Models\Proposal;
+use App\Models\ProposalLocation;
 use App\Models\ProposalStatusNote;
 use App\Models\User;
 use App\Models\UserNotification;
@@ -329,6 +330,34 @@ test('a proposal with no linked project cannot be approved', function () {
 
     expect($errors['linked_project'][0])->toBe(__('proposals.link_project_first'))
         ->and($proposal->fresh()->status)->toBe(ProposalStatus::Submitted);
+});
+
+test('a location row without a responsible refuses the approval with the incomplete message and writes nothing', function () {
+    $proposal = submittedProposal();
+    $project = linkedProject($proposal);
+    ProposalLocation::factory()->for($proposal)->create(['program_id' => $project->program_id, 'responsible_employee_id' => null]);
+    Event::fake([ProposalStatusChanged::class]);
+
+    $errors = refusedApproval(fn () => approve(userWithRole('Financial'), $proposal));
+
+    expect($errors['locations_complete'])->toBe([__('proposals.locations_incomplete')])
+        ->and($proposal->fresh()->status)->toBe(ProposalStatus::Submitted)
+        ->and($proposal->statusNotes()->count())->toBe(0)
+        ->and($project->fresh()->start_date)->toBeNull();
+
+    Event::assertNotDispatched(ProposalStatusChanged::class);
+});
+
+test('a proposal whose rows all carry a project approves as before', function () {
+    $proposal = submittedProposal();
+    $project = linkedProject($proposal);
+    ProposalLocation::factory()->for($proposal)->forProject($project)->create();
+
+    $result = approve(userWithRole('Financial'), $proposal);
+
+    expect($proposal->fresh()->status)->toBe(ProposalStatus::Approved)
+        ->and($result->approvedProjectIds)->toBe([$project->id])
+        ->and($result->warnings)->not->toContain('location_linked_existing');
 });
 
 test('the donor approval needs a file or a note of at least ten characters', function () {

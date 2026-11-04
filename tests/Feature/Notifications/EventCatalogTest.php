@@ -40,6 +40,8 @@ function contractEventKeys(): array
         'nudge.sent',
         // Task workflow: submitted for review / sent back with a note; user-approved 2026-10-27, not yet in §15.2.
         'task_review.submitted', 'task_review.sent_back',
+        // W-34a (D-62): proposal location rows (counts only) and the program requests they open.
+        'proposal.locations_changed', 'program_request.opened', 'program_request.linked',
     ];
 }
 
@@ -92,7 +94,7 @@ test('importance, oversight and critical follow the contract', function () {
         'meal_coverage.assigned', 'meal_coverage.project_assigned', 'meal_coverage.responsible_changed',
         'program.logframe_missing',
         'project.archived', 'project.created', 'project.sectors_changed',
-        'proposal.created', 'proposal.deleted', 'proposal.need_assessment_added', 'proposal.project_linked', 'proposal.project_unlinked',
+        'proposal.created', 'proposal.deleted', 'proposal.locations_changed', 'proposal.need_assessment_added', 'proposal.project_linked', 'proposal.project_unlinked',
         'proposal.reviewer_removed', 'proposal.reviewer_seen', 'proposal.targets_saved',
         'result.created', 'result.deleted', 'result.updated',
         'supervision.added', 'supervision.removed',

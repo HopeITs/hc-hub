@@ -40,8 +40,9 @@ final class SaveProject
     /**
      * `startDate` and `endDate` are only accepted for a project that is no
      * longer a draft. `name` may be blank on create: it defaults to
-     * «Program — Center». `sectorIds` (T34) is required on create; on edit
-     * the sectors change only when the key is sent.
+     * «Program — Center». `sectorIds` (T34) is required on create when the
+     * key is sent (the form always sends it; a materialised draft sends
+     * none); on edit the sectors change only when the key is sent.
      *
      * `cityId` is read only when no center is sent (a hosted project); with a
      * center the city is the center's. `hostCenterId` is refused beside a
@@ -107,11 +108,13 @@ final class SaveProject
 
             $project->save();
 
-            // A new project needs at least one sector (D-47); an edit syncs
-            // only when the caller sends the sectors, so a caller that does
-            // not know about them never clears them.
-            if ($existing === null || $input['sectorIds'] !== null) {
-                app(SyncProjectSectors::class)->handle($project, $input['sectorIds'] ?? [], requireOne: $existing === null);
+            // A new project from the form needs at least one sector (D-47);
+            // a caller that sends no `sectorIds` at all (the W-34a
+            // materialiser) creates it without sectors, for its owner to add.
+            // An edit syncs only when the caller sends the sectors, so a
+            // caller that does not know about them never clears them.
+            if ($input['sectorIds'] !== null) {
+                app(SyncProjectSectors::class)->handle($project, $input['sectorIds'], requireOne: $existing === null);
             }
 
             return $project;
@@ -212,7 +215,7 @@ final class SaveProject
                 : ['nullable'],
             // Reported with the other fields; SyncProjectSectors checks it again
             // (and which sectors are usable) under the project lock.
-            'sectorIds' => $project->exists ? ['nullable', 'array'] : ['required', 'array', 'min:1'],
+            'sectorIds' => $project->exists || $input['sectorIds'] === null ? ['nullable', 'array'] : ['required', 'array', 'min:1'],
         ];
 
         /** @var array<string, mixed> $validated */

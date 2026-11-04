@@ -9,6 +9,7 @@ use App\Enums\OversightMode;
 use App\Events\FundingAgreementRecorded;
 use App\Events\ProjectActivated;
 use App\Events\ProjectPeriodChanged;
+use App\Events\ProposalLocationsChanged;
 use App\Events\ProposalStatusChanged;
 use App\Notifications\Alerts\NotificationSettings;
 use LogicException;
@@ -175,6 +176,10 @@ final class EventCatalog
                 'proposal.project_linked' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.project_linked'),
                 'proposal.project_unlinked' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.project_unlinked'),
                 'proposal.deleted' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.deleted'),
+                // W-34a: location rows (counts only) and the program requests they open.
+                'proposal.locations_changed' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.locations_changed', event: ProposalLocationsChanged::class),
+                'program_request.opened' => self::entry('proposals', $now, 'module_map', $all, activity: 'program_request.opened'),
+                'program_request.linked' => self::entry('proposals', $now, 'module_map', $all, activity: 'program_request.linked'),
                 // T31: the approval moved the plan to the grant period; the project owners hear of it only when a date was cut at the grant end.
                 'proposal.plan_rebased' => self::entry('proposals', $now, 'module_map', OversightMode::None, activity: 'proposal.plan_rebased'),
             ],

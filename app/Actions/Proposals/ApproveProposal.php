@@ -13,6 +13,7 @@ use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\ProposalStatusNote;
 use App\Support\ApprovalResult;
+use App\Support\ProposalLocationRows;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,10 @@ use Illuminate\Validation\Validator as ValidatorInstance;
  * Approve a proposal on the donor's decision (contracts.md §2, §6; D-04, D-26).
  *
  * One transaction: the proposal row is locked and compared with the status the
- * caller saw, then the proposal, its one audit note and every linked project
+ * caller saw, its location rows must be complete (`locations_complete`,
+ * W-34a), the projects those rows still lack are materialised
+ * (MaterialiseProposalLocations: drafts created and linked, open projects
+ * reused), then the proposal, its one audit note and every linked project
  * (locked in ascending id) are written together. Approval is not activation:
  * a project becomes `active` only when MEAL confirms its report template.
  * ProposalStatusChanged fires after the commit.
@@ -40,7 +44,10 @@ final class ApproveProposal
 
     public const OutcomeSkipped = 'skipped';
 
-    public function __construct(private ApproveProjectFromProposal $approveProject) {}
+    public function __construct(
+        private ApproveProjectFromProposal $approveProject,
+        private MaterialiseProposalLocations $materialiseLocations,
+    ) {}
 
     /**
      * @param  array{actual_date_begin: string, actual_date_end: string, decision_date: string, note?: ?string, approval_note?: ?string}  $input
@@ -53,6 +60,12 @@ final class ApproveProposal
             Gate::authorize('approve', $locked);
 
             $this->assertApprovable($locked, $expectedFrom);
+
+            if (ProposalLocationRows::incompleteRowIds($locked) !== []) {
+                throw ValidationException::withMessages(['locations_complete' => __('proposals.locations_incomplete')]);
+            }
+
+            $materialised = $this->materialiseLocations->handle($locked, (int) Auth::id());
 
             $projects = $this->lockLinkedProjects($locked);
 
@@ -96,7 +109,7 @@ final class ApproveProposal
                 $moved['approved'],
                 $moved['waiting'],
                 $moved['skipped'],
-                $hadAgreement ? [] : ['no_agreement'],
+                [...$materialised->warnings, ...($hadAgreement ? [] : ['no_agreement'])],
             );
         });
 

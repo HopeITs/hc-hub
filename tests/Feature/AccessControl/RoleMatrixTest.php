@@ -77,10 +77,11 @@ test('holders of each lifecycle permission are exactly the contract roles', func
     'proposals.update' => ['proposals.update', ['Financial', 'Public Relations Manager', 'General Manager']],
 ]);
 
-test('only Super Admin, General Manager and Public Relations Manager may add projects by default', function () {
+test('only Super Admin, General Manager, Public Relations Manager and Financial may add projects by default', function () {
+    // Financial since W-34a: approving a proposal materialises its projects.
     $holders = Role::query()->whereHas('permissions', fn ($query) => $query->where('name', 'projects.create'))->pluck('name')->all();
 
-    expect($holders)->toEqualCanonicalizing(['Super Admin', 'General Manager', 'Public Relations Manager']);
+    expect($holders)->toEqualCanonicalizing(['Super Admin', 'General Manager', 'Public Relations Manager', 'Financial']);
 });
 
 test('only Super Admin manages organisation notification settings by default', function () {
@@ -127,6 +128,7 @@ test('each role holds every view permission plus exactly its approved write perm
         'tasks.create', 'tasks.update',
         'donors.create', 'donors.update', 'donors.delete',
         'proposals.create', 'proposals.update', 'proposals.delete', 'proposals.manage-reviewers',
+        'projects.create',
         'funding-agreements.create', 'funding-agreements.update', 'funding-agreements.delete',
         'transfers.create', 'transfers.update', 'transfers.delete',
         'accounts.create', 'accounts.update', 'accounts.delete',

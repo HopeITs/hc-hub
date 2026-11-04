@@ -165,6 +165,18 @@ class Proposal extends Model implements TracksActivity
     }
 
     /**
+     * The location rows of this proposal (contracts.md §7, W-34a): one per
+     * city and program, in form order. Written only through SaveProposal,
+     * the link wrappers and the backfill.
+     *
+     * @return HasMany<ProposalLocation, $this>
+     */
+    public function locations(): HasMany
+    {
+        return $this->hasMany(ProposalLocation::class)->orderBy('sort')->orderBy('id');
+    }
+
+    /**
      * The one donor that funds this proposal.
      *
      * A co-funder is a separate proposal. The funding agreement, if any, must

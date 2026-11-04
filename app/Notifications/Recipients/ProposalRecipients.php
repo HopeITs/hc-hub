@@ -35,6 +35,12 @@ use App\Support\Slots;
  * the project owners, and only when a milestone or task date was cut at the
  * grant end, so they can re-plan it. No watcher hears of it, and the owners
  * (who hold no proposals.view) skip the permission check for it.
+ *
+ * Program requests (W-34a, contracts §15.2): an opened request reaches the
+ * HR liaison slot holder (Slots, contracts §9) directly, beside the Public
+ * Relations Manager who watches every proposal event; a linked request
+ * reaches the proposal owner. Both may hold no proposals.view, so they skip
+ * the permission check for these two events.
  */
 final class ProposalRecipients extends WatcherRecipients
 {
@@ -53,6 +59,10 @@ final class ProposalRecipients extends WatcherRecipients
     private const ReviewEvents = [self::ReviewRequested, self::ReviewerAdded, self::ReviewerRemoved, self::ReviewerSeen, self::NeedAssessmentAdded];
 
     private const PlanRebased = 'proposal.plan_rebased';
+
+    private const ProgramRequestOpened = 'program_request.opened';
+
+    private const ProgramRequestLinked = 'program_request.linked';
 
     protected function roles(): array
     {
@@ -77,6 +87,8 @@ final class ProposalRecipients extends WatcherRecipients
             self::ReviewerSeen => $this->projectOwnerIds($activity),
             self::NeedAssessmentAdded => $this->uniqueIds([...$this->projectOwnerIds($activity), Slots::holderOf('meal_manager')]),
             self::PlanRebased => $this->hasClippedDates($activity) ? $this->projectOwnerIds($activity) : [],
+            self::ProgramRequestOpened => $this->uniqueIds([Slots::holderOf(Slots::HrLiaison)]),
+            self::ProgramRequestLinked => $this->projectOwnerIds($activity),
             default => [],
         };
     }
@@ -111,6 +123,10 @@ final class ProposalRecipients extends WatcherRecipients
             return $this->hasClippedDates($activity)
                 ? $this->uniqueIds(array_values(app(EmployeeRecipients::class)->usersFor($this->projectOwnerIds($activity))))
                 : [];
+        }
+
+        if (in_array($activity->event, [self::ProgramRequestOpened, self::ProgramRequestLinked], true)) {
+            return $this->uniqueIds(array_values(app(EmployeeRecipients::class)->usersFor($this->directEmployeeIds($activity))));
         }
 
         if (! in_array($activity->event, self::ReviewEvents, true)) {

@@ -7,6 +7,7 @@ use App\Enums\ProposalStatus;
 use App\Events\ProposalStatusChanged;
 use App\Models\Project;
 use App\Models\Proposal;
+use App\Models\ProposalLocation;
 use App\Models\ProposalStatusNote;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -16,7 +17,8 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * A proposal at the given status that meets every §2 requirement: one linked
- * project with beneficiaries and a requested budget.
+ * project with beneficiaries, one complete location row (W-34a) and a
+ * requested budget.
  */
 function transitionableProposal(ProposalStatus $status, ?ProposalStatus $preHold = null): Proposal
 {
@@ -26,6 +28,7 @@ function transitionableProposal(ProposalStatus $status, ?ProposalStatus $preHold
         'requested_currency' => Currency::Usd,
     ]);
     $proposal->projects()->attach(Project::factory()->create()->id, ['target_beneficiaries' => 400]);
+    ProposalLocation::factory()->for($proposal)->complete()->create();
 
     if ($preHold !== null) {
         ProposalStatusNote::factory()->create(['proposal_id' => $proposal->id, 'status' => $preHold, 'context' => 'Sent.']);
@@ -109,7 +112,7 @@ test('a missing requirement refuses the move with its message and writes nothing
         ->and($proposal->fresh()->status)->toBe($from)
         ->and($proposal->statusNotes()->count())->toBe(0);
 })->with([
-    'linked_project' => [ProposalStatus::ConceptNote, ProposalStatus::ConceptNoteReview, [], fn (Proposal $p) => $p->projects()->detach(), 'linked_project', 'proposals.link_project_first'],
+    'locations (a linked project alone is no longer enough)' => [ProposalStatus::ConceptNote, ProposalStatus::ConceptNoteReview, [], fn (Proposal $p) => $p->locations()->delete(), 'locations', 'proposals.locations_required'],
     'reason' => [ProposalStatus::ConceptNoteReview, ProposalStatus::ConceptNote, ['reason' => '  '], fn () => null, 'reason', 'proposals.reason_required'],
     'reason_min_10' => [ProposalStatus::Submitted, ProposalStatus::Rejected, ['reason' => 'No fit.', 'effective_date' => '2026-10-13'], fn () => null, 'reason', 'proposals.rejection_reason'],
     'effective_date' => [ProposalStatus::ProposalReview, ProposalStatus::Submitted, ['effective_date' => '2026-10-14'], fn () => null, 'effective_date', 'proposals.date_not_future'],

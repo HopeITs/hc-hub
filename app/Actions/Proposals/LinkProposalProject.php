@@ -6,8 +6,10 @@ namespace App\Actions\Proposals;
 
 use App\Actions\Projects\ReopenProjectAsDraft;
 use App\Enums\ProjectStatus;
+use App\Events\ProposalLocationsChanged;
 use App\Models\Project;
 use App\Models\Proposal;
+use App\Support\ProposalLocationRows;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -20,6 +22,11 @@ use Illuminate\Validation\ValidationException;
  * tampered id is refused with one message. A closed project is reopened as
  * a draft in the same transaction. Linking a project already on the
  * proposal changes nothing, its beneficiaries included.
+ *
+ * Since W-34a a link is also a location row (contracts.md §7): the row
+ * waiting on the project's city and program is filled, else one is added
+ * with the project's placement, and ProposalLocationsChanged fires after
+ * commit. Kept for one release behind the rows, then removed.
  *
  * Pivot writes fire no model events, so the link is recorded explicitly,
  * with the project's name and never an amount.
@@ -59,8 +66,16 @@ final class LinkProposalProject
                 'project_id' => $project->id,
                 'project' => $project->name,
             ]);
+
+            $counts = app(ProposalLocationRows::class)->attachProject($locked, $project);
+
+            if ($counts['added'] + $counts['changed'] > 0) {
+                $locked->recordActivity('proposal.locations_changed', [], $counts);
+                ProposalLocationsChanged::dispatch($locked->id, auth()->user()?->id, $counts['added'], $counts['removed'], $counts['changed']);
+            }
         });
 
         $proposal->unsetRelation('projects');
+        $proposal->unsetRelation('locations');
     }
 }

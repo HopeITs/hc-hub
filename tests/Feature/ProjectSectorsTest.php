@@ -175,13 +175,22 @@ describe('the project form', function () {
         expect(Project::query()->count())->toBe(0);
     });
 
-    it('requires the sector on the action too, whoever calls it', function () {
+    it('requires the sector on the action too whenever sectors are sent, whoever calls it', function () {
         $this->actingAs($this->user);
 
-        expect(fn () => app(SaveProject::class)->handle(null, ($this->form)(), $this->user))
+        expect(fn () => app(SaveProject::class)->handle(null, ($this->form)(['sectorIds' => []]), $this->user))
             ->toThrow(ValidationException::class, 'Choose at least one sector.');
 
         expect(Project::query()->count())->toBe(0);
+    });
+
+    it('creates a project without sectors when the caller sends none at all, as the W-34a materialiser does', function () {
+        $this->actingAs($this->user);
+
+        $project = app(SaveProject::class)->handle(null, ($this->form)(), $this->user);
+
+        expect(projectSectorIds($project->id))->toBe([])
+            ->and(Activity::query()->where('event', 'project.sectors_changed')->count())->toBe(0);
     });
 
     it('loads the linked sectors on edit and lets an older project without sectors be saved as it is', function () {

@@ -12,6 +12,7 @@ use App\Enums\ProposalStatus;
 use App\Models\DonorProposal;
 use App\Models\Project;
 use App\Models\Proposal;
+use App\Models\ProposalLocation;
 use App\Models\TransfersTracking;
 use App\Models\UserNotification;
 use Database\Seeders\RolesAndPermissionsSeeder;
@@ -45,6 +46,7 @@ test('a proposal goes from a draft project to an approved, active grant with an 
         'planned_date_end' => '2027-10-31',
     ]);
     $proposal->projects()->attach($project->id, ['target_beneficiaries' => 120]);
+    ProposalLocation::factory()->for($proposal)->forProject($project)->create();
 
     expect($project->status)->toBe(ProjectStatus::Draft)
         ->and($project->start_date)->toBeNull()
