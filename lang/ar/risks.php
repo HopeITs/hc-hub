@@ -38,4 +38,5 @@ return [
     'severity' => 'الشدة',
     'the_risk_and_its_mitigation_notes_are_removed_nothing_else_i' => 'سيُحذف الخطر وملاحظات التخفيف الخاصة به. لن يتأثر أي شيء آخر.',
     'the_selected_project_is_no_longer_available' => 'المشروع المحدد لم يعد متاحًا.',
+    'high_risks' => 'مخاطر عالية',
 ];

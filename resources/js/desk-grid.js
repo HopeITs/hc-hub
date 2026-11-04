@@ -5,10 +5,9 @@
  *
  * Move: the whole panel header is the handle. A mouse picks the panel up
  * after a few pixels of travel; touch and pen pick it up after a 400ms press
- * and hold (so a swipe still scrolls). Over the middle of another card it
- * joins that card's row, before or after it; over that card's top or bottom
- * band it gets a row of its own above or below. The other cards slide and
- * resize (FLIP) to show exactly where it will land; dropping asks the host
+ * and hold (so a swipe still scrolls). The card is carried as it is: over
+ * another card the two trade places, each keeping its own size, and nothing
+ * else moves. The swapped card slides (FLIP) to show it; dropping asks the host
  * page to arrangePanels(). Esc puts everything back.
  *
  * Resize: every card can be pulled from all four edges and the corner
@@ -24,7 +23,7 @@
  * Delegated from document so panels Livewire re-renders keep working.
  */
 
-import { joined, resized, rowsIn, sameLayout } from './desk-rows';
+import { inserted, resized, rowsIn, sameLayout, swapped } from './desk-rows';
 
 const moveThreshold = 6;
 const holdDelay = 400;
@@ -198,42 +197,49 @@ function pickUp() {
 }
 
 /**
- * Where a drop at (x, y) would put the card: over another card's top or
- * bottom band a row of its own, over its middle that card's row, before or
- * after it by which half the pointer is on.
+ * Which card a drop at (x, y) would trade places with. The other cards stay
+ * still while the card is carried (moving them under the pointer made them
+ * flick); the one under it is only ringed, and the swap happens on drop.
  */
 function reflow(x, y) {
     const { panel, grid } = move;
 
     panel.style.pointerEvents = 'none';
-    const target = panelOf(document.elementFromPoint(x, y));
+    let target = panelOf(document.elementFromPoint(x, y));
 
     panel.style.pointerEvents = '';
 
-    if (! target || target === panel || target.closest('[data-desk-grid]') !== grid) {
+    if (target === panel || target?.closest('[data-desk-grid]') !== grid) {
+        target = null;
+    }
+
+    /* The outer quarter of a card's inline edges drops beside it; its middle swaps with it. */
+    let place = 'swap';
+
+    if (target) {
+        const box = target.getBoundingClientRect();
+        const along = metrics(grid).rtl ? box.right - x : x - box.left;
+        const edge = Math.min(box.width / 4, 120);
+
+        place = along < edge ? 'before' : along > box.width - edge ? 'after' : 'swap';
+    }
+
+    if (target === move.target && place === move.place) {
         return;
     }
 
-    const box = target.getBoundingClientRect();
-    const band = Math.min(box.height / 4, 80);
-    const { rtl } = metrics(grid);
-    const along = rtl ? box.right - x : x - box.left;
-    let place = along > box.width / 2 ? 'after' : 'before';
+    move.target?.classList.remove('dk-drop', 'dk-drop-before', 'dk-drop-after');
+    target?.classList.add(place === 'swap' ? 'dk-drop' : `dk-drop-${place}`);
+    move.target = target;
+    move.place = place;
 
-    if (y < box.top + band) {
-        place = 'above';
-    } else if (y > box.bottom - band) {
-        place = 'below';
+    if (! target) {
+        move.placed = move.layout;
+    } else if (place === 'swap') {
+        move.placed = swapped(move.layout, panel.dataset.panel, target.dataset.panel);
+    } else {
+        move.placed = inserted(move.layout, panel.dataset.panel, target.dataset.panel, place);
     }
-
-    const placed = joined(move.layout, panel.dataset.panel, target.dataset.panel, place);
-
-    if (sameLayout(placed, move.placed)) {
-        return;
-    }
-
-    move.placed = placed;
-    flip(grid, () => lay(grid, placed));
 }
 
 function autoScroll() {
@@ -298,17 +304,27 @@ function endMove(commit) {
 
     const { panel, grid, layout, placed } = current;
 
+    current.target?.classList.remove('dk-drop', 'dk-drop-before', 'dk-drop-after');
     panel.classList.remove('dk-dragging');
     grid.classList.remove('dk-moving');
     document.documentElement.classList.remove('dk-moving-doc');
 
     if (! commit || sameLayout(layout, placed)) {
-        flip(grid, () => lay(grid, layout));
         settle(panel);
 
         return;
     }
 
+    /* The carried card glides from under the pointer into its new slot, the swapped one slides into the old slot. */
+    const from = panel.getBoundingClientRect();
+
+    flip(grid, () => lay(grid, placed), panel);
+    panel.style.transition = 'none';
+    panel.style.transform = '';
+    const to = panel.getBoundingClientRect();
+
+    panel.style.transform = `translate(${from.left - to.left}px, ${from.top - to.top}px)`;
+    panel.getBoundingClientRect();
     settle(panel);
     seenHint();
     save(grid, layout, placed);
