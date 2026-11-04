@@ -363,7 +363,6 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
             ]"
             :title="$this->proposal->name"
             :unread="app(\App\Notifications\UnreadSubjects::class)->has(auth()->user(), 'proposal', $this->proposal->id)"
-            title-class="text-3xl! font-bold! leading-none! tracking-tight! @3xl/detail:text-[2.5rem]!"
         >
             <x-slot:meta>
                 <x-ui.project-number :number="$this->proposal->internal_project_number" kind="internal" label />
