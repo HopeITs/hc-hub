@@ -46,6 +46,8 @@ use Illuminate\Support\Facades\DB;
  * @property CarbonImmutable $planned_date_end
  * @property CarbonImmutable|null $actual_date_begin
  * @property CarbonImmutable|null $actual_date_end
+ * @property CarbonImmutable|null $extended_date_end
+ * @property string|null $extension_reason
  * @property ProposalStatus $status
  * @property-read ProposalPhase $phase
  * @property string|null $notes
@@ -366,6 +368,34 @@ class Proposal extends Model implements TracksActivity
     }
 
     /**
+     * The grant's end date: the extended one once the proposal was extended
+     * (W-08, D-60), else the actual end set at approval. The original
+     * `actual_date_end` stays untouched.
+     */
+    public function effectiveDateEnd(): ?CarbonImmutable
+    {
+        return $this->extended_date_end ?? $this->actual_date_end;
+    }
+
+    /**
+     * Whether an active proposal runs to an extended end date (W-08), the
+     * case the calendar marks.
+     */
+    public function isExtendedAndActive(): bool
+    {
+        return $this->status === ProposalStatus::Active && $this->extended_date_end !== null;
+    }
+
+    /**
+     * The day the calendar shows the proposal's end on: the extended end of
+     * an active proposal, else the planned end.
+     */
+    public function calendarEndDate(): CarbonImmutable
+    {
+        return $this->isExtendedAndActive() ? $this->extended_date_end : $this->planned_date_end;
+    }
+
+    /**
      * The status the proposal held before it last entered $status: the
      * pre-hold status for on hold, the pre-rejection one for rejected.
      *
@@ -499,6 +529,7 @@ class Proposal extends Model implements TracksActivity
             'planned_date_end' => 'date',
             'actual_date_begin' => 'date',
             'actual_date_end' => 'date',
+            'extended_date_end' => 'date',
             'requested_budget' => 'decimal:2',
             'requested_currency' => Currency::class,
             'status_remind_on' => 'date',

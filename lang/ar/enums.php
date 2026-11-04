@@ -75,6 +75,7 @@ return [
         'need_assessment' => 'تقييم الاحتياج',
         'donor_approval' => 'موافقة المانح',
         'negotiation' => 'ملف التفاوض',
+        'amendment' => 'ملحق التمديد',
         'report_submission' => 'التقرير المُسلَّم',
     ],
     'reporting_period' => [

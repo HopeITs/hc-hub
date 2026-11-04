@@ -582,6 +582,10 @@ return [
                 'title' => 'ملاحظة تفاوض جديدة',
                 'body' => 'سجّل :actor ملاحظة تفاوض مع المانح على المقترح «:subject»:pending',
             ],
+            'extended' => [
+                'title' => 'تمديد مقترح',
+                'body' => 'مدّد :actor المقترح «:subject» حتى :value',
+            ],
             'need_assessment_added' => [
                 'title' => 'إضافة تقييم احتياج',
                 'body' => 'أرفق :actor تقييم احتياج بالمقترح «:subject»',

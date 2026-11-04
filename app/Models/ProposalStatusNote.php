@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Str;
 
 /**
@@ -68,6 +69,16 @@ class ProposalStatusNote extends Model
     }
 
     /**
+     * The files attached to a negotiation or extension note.
+     *
+     * @return MorphMany<Media, $this>
+     */
+    public function media(): MorphMany
+    {
+        return $this->morphMany(Media::class, 'mediable');
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string|class-string>
@@ -93,7 +104,8 @@ class ProposalStatusNote extends Model
 
     protected function parentActivityEvent(string $hook): ?string
     {
-        return $hook === 'created' ? 'proposal.status_note_added' : null;
+        // Negotiation and extension notes log their own event (AddNegotiationNote, ExtendProposal) with names and dates only.
+        return $hook === 'created' && ! in_array($this->kind, [StatusNoteKind::Negotiation, StatusNoteKind::Extension], true) ? 'proposal.status_note_added' : null;
     }
 
     /**

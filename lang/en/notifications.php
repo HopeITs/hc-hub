@@ -582,6 +582,10 @@ return [
                 'title' => 'Negotiation note added',
                 'body' => ':actor recorded a donor negotiation note on “:subject”:pending',
             ],
+            'extended' => [
+                'title' => 'Proposal extended',
+                'body' => ':actor extended “:subject” until :value',
+            ],
             'need_assessment_added' => [
                 'title' => 'Need assessment added',
                 'body' => ':actor attached a need assessment to “:subject”',

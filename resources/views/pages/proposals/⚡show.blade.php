@@ -10,6 +10,7 @@ use App\Livewire\Concerns\Proposals\ManagesFinalReportAcceptance;
 use App\Livewire\Concerns\Proposals\ManagesNegotiationNotes;
 use App\Livewire\Concerns\Proposals\ManagesProposalApproval;
 use App\Livewire\Concerns\Proposals\ManagesProposalFiles;
+use App\Livewire\Concerns\Proposals\ManagesProposalExtension;
 use App\Livewire\Concerns\Proposals\ManagesProposalForm;
 use App\Livewire\Concerns\Proposals\ManagesProposalPlan;
 use App\Livewire\Concerns\Proposals\ManagesProposalRecord;
@@ -44,6 +45,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     use ManagesFinalReportAcceptance;
     use ManagesNegotiationNotes;
     use ManagesProposalApproval;
+    use ManagesProposalExtension;
     use ManagesProposalFiles;
     use ManagesProposalForm;
     use ManagesProposalPlan;
@@ -119,6 +121,8 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
         }
 
         $this->recordAgreementLink = false;
+
+        $this->openExtensionFromLink();
     }
 
     /**
@@ -182,7 +186,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     public function proposal(): Proposal
     {
         return Proposal::query()
-            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'status', 'notes', 'updated_at', 'donor_id', 'final_report_accepted_on', 'final_report_accepted_by'])
+            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'extended_date_end', 'extension_reason', 'status', 'notes', 'updated_at', 'donor_id', 'final_report_accepted_on', 'final_report_accepted_by'])
             ->findOrFail($this->proposalId);
     }
 
