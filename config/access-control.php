@@ -136,6 +136,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Department manager (W-14, D-65)
+    |--------------------------------------------------------------------------
+    |
+    | Reading a whole department's tasks — the desk Tasks panel's `department`
+    | scope and the department-tasks page — belongs to department managers,
+    | which D-65 defines as an HR job level rather than a role or a permission.
+    | App\Support\EmployeeProfile::isDepartmentManager() is the one definition;
+    | it matches this name against job_levels.name_en or name_ar on a
+    | normalised string, since HR may store the dash differently. Unrelated to
+    | the task_department_* keys above, which scope what a user sees at all.
+    */
+    'department_manager_job_level' => 'Department Manager – Grade 5',
+
+    /*
+    |--------------------------------------------------------------------------
     | Role baselines
     |--------------------------------------------------------------------------
     |

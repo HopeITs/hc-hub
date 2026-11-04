@@ -9,6 +9,7 @@ use App\Concerns\RecordsActivity;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Notifications\ActivityRecorder;
 use App\Notifications\TracksActivity;
+use App\Support\EmployeeProfile;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -552,6 +553,22 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
                 ? []
                 : array_map('intval', HrDepartment::employeeIdsInDepartment($departmentId));
         });
+    }
+
+    /**
+     * Whether this user may read their whole HR department's tasks — the desk
+     * Tasks panel's `department` scope and the department-tasks page (W-14).
+     *
+     * D-65 makes this an HR job level, not a role or a permission: only a
+     * department manager qualifies, so a Managers or General Manager role
+     * holder gets it only when their level matches. Administrator roles keep
+     * it through the administrator-roles rule. Memoized per user instance,
+     * since the panel and the policy both read it.
+     */
+    public function canSeeDepartmentTasks(): bool
+    {
+        return once(fn (): bool => $this->isAdministrator()
+            || ($this->employee_id !== null && EmployeeProfile::isDepartmentManager($this->employee_id)));
     }
 
     /**

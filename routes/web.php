@@ -22,6 +22,7 @@ use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Http\Middleware\RedirectProposalToStory;
 use App\Models\DonorReport;
 use App\Models\RiskLibrary;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -125,7 +126,7 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
         ->name('tasks.index');
 
     Route::livewire('department-tasks', 'pages::department-tasks.index')
-        ->can('tasks.view')
+        ->can('viewDepartmentQueue', Task::class)
         ->name('department-tasks.index');
 
     Route::livewire('tasks/{task}', 'pages::tasks.show')

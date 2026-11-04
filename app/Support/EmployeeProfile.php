@@ -94,6 +94,55 @@ final class EmployeeProfile
     }
 
     /**
+     * Whether the employee's current position carries the department-manager
+     * job level (W-14, D-65). This is the one definition of "department
+     * manager": the level name matches
+     * config('access-control.department_manager_job_level').
+     *
+     * Both HR names are tried, so the answer never depends on the interface
+     * language — self::for()['job_level'] is localised and must not be used
+     * here. The comparison is normalised because HR may store the dash, the
+     * spacing or the capitalisation differently. Nothing is stored locally and
+     * no extra HR query is made: the remembered lookup already holds the level.
+     */
+    public static function isDepartmentManager(int $employeeId): bool
+    {
+        /** @var array<string, mixed>|false|null $entry */
+        $entry = self::rememberedHrLookupEntry($employeeId, fn (): array => self::load());
+
+        if (! is_array($entry) || $entry['is_active'] !== true) {
+            return false;
+        }
+
+        $wanted = self::normalizedJobLevel((string) config('access-control.department_manager_job_level'));
+
+        if ($wanted === '') {
+            return false;
+        }
+
+        foreach ([$entry['job_level_en'], $entry['job_level_ar']] as $name) {
+            if (is_string($name) && self::normalizedJobLevel($name) === $wanted) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * A job level name reduced to what the comparison cares about: every dash
+     * variant as "-" with no space around it, runs of whitespace as one space,
+     * trimmed and case-folded.
+     */
+    private static function normalizedJobLevel(string $name): string
+    {
+        $name = str_replace(["\u{2010}", "\u{2011}", "\u{2012}", "\u{2013}", "\u{2014}", "\u{2015}", "\u{2212}"], '-', $name);
+        $name = preg_replace('/\s*-\s*/u', '-', $name) ?? $name;
+
+        return mb_strtolower(trim(preg_replace('/\s+/u', ' ', $name) ?? $name));
+    }
+
+    /**
      * The employee currently holding a position (latest start date), null when vacant.
      */
     public static function holderOfPosition(int $positionId): ?int
