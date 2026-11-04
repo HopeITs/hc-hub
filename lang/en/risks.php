@@ -38,4 +38,5 @@ return [
     'severity' => 'Severity',
     'the_risk_and_its_mitigation_notes_are_removed_nothing_else_i' => 'The risk and its mitigation notes are removed. Nothing else is affected.',
     'the_selected_project_is_no_longer_available' => 'The selected project is no longer available.',
+    'high_risks' => 'High risks',
 ];
