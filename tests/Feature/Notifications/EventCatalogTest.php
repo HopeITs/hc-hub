@@ -96,7 +96,7 @@ test('importance, oversight and critical follow the contract', function () {
         'meal_coverage.assigned', 'meal_coverage.project_assigned', 'meal_coverage.responsible_changed',
         'program.logframe_missing',
         'project.archived', 'project.created', 'project.sectors_changed',
-        'proposal.created', 'proposal.deleted', 'proposal.need_assessment_added', 'proposal.project_linked', 'proposal.project_unlinked',
+        'proposal.created', 'proposal.deleted', 'proposal.need_assessment_added', 'proposal.negotiation_noted', 'proposal.project_linked', 'proposal.project_unlinked',
         'proposal.reviewer_removed', 'proposal.reviewer_seen', 'proposal.risk_attached', 'proposal.risk_detached', 'proposal.targets_saved',
         'result.created', 'result.deleted', 'result.updated',
         'supervision.added', 'supervision.removed',

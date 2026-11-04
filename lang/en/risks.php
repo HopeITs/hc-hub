@@ -63,4 +63,5 @@ return [
     'moved_notice_link' => 'Open the proposals',
 
     'heat_axes' => 'Rows: likelihood, high at the top. Columns: severity, low to high.',
+    'high_risks' => 'High risks',
 ];
