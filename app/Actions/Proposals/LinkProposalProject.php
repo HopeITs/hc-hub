@@ -19,7 +19,8 @@ use Illuminate\Validation\ValidationException;
  * query every picker uses, so an archived, owner-rejected, missing or
  * tampered id is refused with one message. A closed project is reopened as
  * a draft in the same transaction. Linking a project already on the
- * proposal changes nothing, its beneficiaries included.
+ * proposal changes nothing, its beneficiaries included. A payroll proposal
+ * (W-32) never takes a project.
  *
  * Pivot writes fire no model events, so the link is recorded explicitly,
  * with the project's name and never an amount.
@@ -32,6 +33,10 @@ final class LinkProposalProject
             $locked = Proposal::query()->whereKey($proposal->getKey())->lockForUpdate()->firstOrFail();
 
             Gate::authorize('update', $locked);
+
+            if ($locked->isPayroll()) {
+                throw ValidationException::withMessages(['projectIds' => __('proposals.payroll_has_no_projects')]);
+            }
 
             if ($targetBeneficiaries !== null && $targetBeneficiaries < 1) {
                 throw ValidationException::withMessages(['beneficiaries' => __('proposals.enter_at_least_one_beneficiary')]);

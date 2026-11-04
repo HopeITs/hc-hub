@@ -519,3 +519,16 @@ test('the proposals search hint says it also matches the internal number', funct
         ->test('pages::proposals.index')
         ->assertSeeHtml('placeholder="Name, number or notes"');
 });
+
+test('the pipeline counts payroll proposals beside project ones, and the kind filter narrows it', function () {
+    $user = User::factory()->role('Financial')->create();
+    Proposal::factory()->create(['status' => ProposalStatus::ProposalDraft]);
+    Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    $planning = fn (array $query = []): int => collect(Livewire::actingAs($user)->withQueryParams($query)->test('pages::proposals.index')->instance()->pipeline)
+        ->firstWhere('phase', ProposalPhase::Planning)['count'];
+
+    expect($planning())->toBe(2)
+        ->and($planning(['kind' => 'payroll']))->toBe(1)
+        ->and($planning(['kind' => 'project']))->toBe(1);
+});

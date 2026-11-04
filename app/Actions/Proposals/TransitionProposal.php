@@ -54,7 +54,7 @@ final class TransitionProposal
                 throw ValidationException::withMessages(['status' => __('proposals.stale_status')]);
             }
 
-            $requirements = ProposalTransitions::requirements($from, $to);
+            $requirements = ProposalTransitions::requirements($from, $to, $locked->kind);
 
             if ($requirements === null) {
                 throw ValidationException::withMessages([
@@ -168,6 +168,7 @@ final class TransitionProposal
                 ->where(fn ($query) => $query->whereNull('project_proposal.target_beneficiaries')->orWhere('project_proposal.target_beneficiaries', '<', 1))
                 ->exists(),
             'final_report' => $this->hasFinalReport($proposal),
+            'narrative' => Proposal::isNarrativeComplete($proposal->narrative),
             'reason', 'reason_min_10', 'effective_date' => true,
         };
 
@@ -182,17 +183,19 @@ final class TransitionProposal
             'budget' => __('proposals.budget_required'),
             'target_beneficiaries' => __('proposals.beneficiaries_required'),
             'final_report' => __('proposals.final_report_required'),
+            'narrative' => __('proposals.narrative_required'),
         };
     }
 
     /**
      * D-02c: the final-report milestone is reached, the final report file is
      * filed, and (unless the proposal is self-funded) the donor's acceptance
-     * is recorded. The acceptance email is optional.
+     * is recorded. The acceptance email is optional. A payroll proposal has
+     * no milestone (W-32): the file and the acceptance close it.
      */
     private function hasFinalReport(Proposal $proposal): bool
     {
-        $milestoneReached = Milestone::query()
+        $milestoneReached = $proposal->isPayroll() || Milestone::query()
             ->where('proposal_id', $proposal->id)
             ->where('is_final_report', true)
             ->where('status', MilestoneStatus::Reached)

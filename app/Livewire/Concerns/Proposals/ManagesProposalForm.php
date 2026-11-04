@@ -6,6 +6,7 @@ namespace App\Livewire\Concerns\Proposals;
 
 use App\Actions\Proposals\CloneProposalForRenewal;
 use App\Actions\Proposals\SaveProposal;
+use App\Enums\ProposalKind;
 use App\Enums\ProposalStatus;
 use App\Models\Donor;
 use App\Models\HrCenter;
@@ -52,6 +53,12 @@ trait ManagesProposalForm
     #[Locked]
     public ?int $editingProposalId = null;
 
+    /**
+     * The proposal kind (W-32): chosen on create only. On edit it holds the
+     * stored kind for display and is never sent, so SaveProposal keeps it.
+     */
+    public string $kind = 'project';
+
     public string $name = '';
 
     public string $internalProjectNumber = '';
@@ -77,6 +84,9 @@ trait ManagesProposalForm
     public string $plannedDateEnd = '';
 
     public string $notes = '';
+
+    /** What a payroll proposal covers (W-32, at least 50 characters). */
+    public string $narrative = '';
 
     public string $startingStage = 'concept note';
 
@@ -337,7 +347,7 @@ trait ManagesProposalForm
         }
 
         $proposal = Proposal::query()
-            ->select(['id', 'name', 'notes', 'status', 'planned_date_begin', 'planned_date_end'])
+            ->select(['id', 'name', 'notes', 'status', 'kind', 'planned_date_begin', 'planned_date_end'])
             ->find((int) $this->previousProposalId);
 
         return $proposal !== null
@@ -372,7 +382,7 @@ trait ManagesProposalForm
         abort_if($scope !== null && $scope !== $proposalId, 404);
 
         $showsMoney = SaveProposal::canSeeMoney($this->proposalActor());
-        $columns = ['id', 'name', 'donor_id', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'notes', 'status'];
+        $columns = ['id', 'name', 'donor_id', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'notes', 'narrative', 'status', 'kind'];
 
         // The budget is read only for someone who may see money (contracts.md §8).
         $proposal = Proposal::query()
@@ -389,6 +399,8 @@ trait ManagesProposalForm
         $this->plannedDateBegin = $proposal->planned_date_begin->toDateString();
         $this->plannedDateEnd = $proposal->planned_date_end->toDateString();
         $this->notes = $proposal->notes ?? '';
+        $this->kind = $proposal->kind->value;
+        $this->narrative = $proposal->narrative ?? '';
 
         if ($showsMoney) {
             $this->requestedBudget = $proposal->requested_budget ?? '';
@@ -412,6 +424,42 @@ trait ManagesProposalForm
     {
         $this->projectIds = array_values(array_unique(array_map('strval', array_filter($this->projectIds, 'is_scalar'))));
         $this->beneficiaries = array_intersect_key($this->beneficiaries, array_flip($this->projectIds));
+    }
+
+    /**
+     * Choosing payroll on create drops the projects, beneficiaries, renewal
+     * and skip choices a project proposal had: payroll takes none of them.
+     * An edit never changes the kind, so the stored one is put back.
+     */
+    public function updatedKind(): void
+    {
+        if ($this->editingProposalId !== null) {
+            $this->kind = Proposal::query()->select(['id', 'kind'])->find($this->editingProposalId)->kind->value ?? ProposalKind::Project->value;
+
+            return;
+        }
+
+        if (ProposalKind::tryFrom($this->kind) === null) {
+            $this->kind = ProposalKind::Project->value;
+        }
+
+        $this->resetValidation();
+
+        if ($this->kind === ProposalKind::Payroll->value) {
+            $this->projectIds = [];
+            $this->beneficiaries = [];
+            $this->previousProposalId = '';
+            $this->startingStage = ProposalStatus::ConceptNote->value;
+            $this->skipReason = '';
+        }
+    }
+
+    /**
+     * Whether the form is filling in a payroll proposal.
+     */
+    public function isPayrollForm(): bool
+    {
+        return $this->kind === ProposalKind::Payroll->value;
     }
 
     public function removeChosenProject(int $projectId): void
@@ -543,6 +591,8 @@ trait ManagesProposalForm
         $this->plannedDateBegin = '';
         $this->plannedDateEnd = '';
         $this->notes = '';
+        $this->kind = ProposalKind::Project->value;
+        $this->narrative = '';
         $this->startingStage = ProposalStatus::ConceptNote->value;
         $this->skipReason = '';
         $this->previousProposalId = '';
@@ -553,7 +603,10 @@ trait ManagesProposalForm
      * their beneficiaries and the starting stage; edit sends the linked
      * projects' beneficiaries. The budget is sent only by a money holder.
      *
-     * @return array{name: string, internalProjectNumber: string, donorId: string|null, beneficiaries: array<int|string, int|string|null>, beneficiariesReason: string|null, plannedDateBegin: string|null, plannedDateEnd: string|null, notes: string, projectIds?: list<string>, startingStage?: string, skipReason?: string|null, requestedBudget?: string|null, requestedCurrency?: string|null}
+     * A payroll proposal (W-32) sends its narrative and, on create, its kind;
+     * it never sends projects, beneficiaries or a starting stage.
+     *
+     * @return array{name: string, internalProjectNumber: string, donorId: string|null, beneficiaries: array<int|string, int|string|null>, beneficiariesReason: string|null, plannedDateBegin: string|null, plannedDateEnd: string|null, notes: string, narrative?: string|null, kind?: string, projectIds?: list<string>, startingStage?: string, skipReason?: string|null, requestedBudget?: string|null, requestedCurrency?: string|null}
      */
     private function proposalFormData(bool $isCreate): array
     {
@@ -572,7 +625,19 @@ trait ManagesProposalForm
             'notes' => $this->notes,
         ];
 
+        $isPayroll = $this->isPayrollForm();
+
+        if ($isPayroll) {
+            $data['beneficiaries'] = [];
+            $data['beneficiariesReason'] = null;
+            $data['narrative'] = $this->narrative === '' ? null : $this->narrative;
+        }
+
         if ($isCreate) {
+            $data['kind'] = $this->kind;
+        }
+
+        if ($isCreate && ! $isPayroll) {
             $data['projectIds'] = $this->projectIds;
             $data['startingStage'] = $this->startingStage;
             $data['skipReason'] = $this->startingStage === ProposalStatus::ProposalDraft->value ? $this->skipReason : null;

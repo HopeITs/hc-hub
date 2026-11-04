@@ -9,6 +9,9 @@
             @foreach ($column['items'] as $boardProposal)
                 <x-desk.board-card :href="route('proposals.show', $boardProposal)" wire:key="proposal-card-{{ $boardProposal->id }}" data-test="proposal-board-card-{{ $boardProposal->id }}">
                     <strong>{{ $boardProposal->name }}</strong>
+                    @if ($boardProposal->isPayroll())
+                        <x-ui.enum-badge :case="$boardProposal->kind" class="self-start" data-payroll-chip="{{ $boardProposal->id }}" />
+                    @endif
                     @if ($canAgreements && $boardProposal->donor !== null)
                         <span class="dk-is">{{ $boardProposal->donor->name }}</span>
                     @endif

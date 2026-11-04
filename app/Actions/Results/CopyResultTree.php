@@ -48,6 +48,10 @@ final class CopyResultTree
         $root = DB::transaction(function () use ($sourceRoot, $proposal): Result {
             $lockedProposal = Proposal::query()->whereKey($proposal->getKey())->lockForUpdate()->firstOrFail();
 
+            if ($lockedProposal->isPayroll()) {
+                $this->refuse('proposal', 'results_framework.payroll_has_no_framework');
+            }
+
             if (ProposalFramework::isStructureLocked($lockedProposal) && ! Gate::allows('results.update')) {
                 $this->refuse('structure', 'results_framework.structural_lock');
             }

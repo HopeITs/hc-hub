@@ -4,7 +4,10 @@
     $mutedText, $inkText, $hairline, $amount, $term, $chronology and
     $arrivals.
 --}}
-            @include('pages.proposals._show-reviewers')
+            {{-- A payroll proposal (W-32) has no concept-note or proposal review, so no reviewers. --}}
+            @unless ($this->proposal->isPayroll())
+                @include('pages.proposals._show-reviewers')
+            @endunless
 
             @if ($this->finalReportAcceptance !== null)
                 {{-- The donor accepted the final report (D-02c): the last requirement before the proposal closes. --}}

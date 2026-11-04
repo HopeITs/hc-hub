@@ -83,6 +83,7 @@ return [
     'indicator_scope' => 'المؤشر: :name',
     'result_scope' => 'النتيجة: :statement',
     'proposal_read_only' => 'هذا المقترح مرفوض أو مكتمل، لذا مؤشراته ومستهدفاته للقراءة فقط.',
+    'payroll_has_no_targets' => 'مقترح الرواتب ليس له مؤشرات ولا مستهدفات.',
     'entry_inactive' => 'هذا المؤشر معطّل في المكتبة.',
     'entry_outside_proposal_programs' => 'هذا المؤشر لا يتبع برنامج هذا المقترح',
     'level_incompatible' => 'هذا المؤشر يتبع مستوى :level. اختر عقدة من هذا المستوى.',

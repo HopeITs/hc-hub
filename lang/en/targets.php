@@ -83,6 +83,7 @@ return [
     'indicator_scope' => 'Indicator: :name',
     'result_scope' => 'Result: :statement',
     'proposal_read_only' => 'This proposal is rejected or completed, so its indicators and targets are read-only.',
+    'payroll_has_no_targets' => 'A payroll proposal has no indicators or targets.',
     'entry_inactive' => 'This library indicator is deactivated.',
     'entry_outside_proposal_programs' => "This indicator doesn't belong to this proposal's program.",
     'level_incompatible' => 'This indicator belongs at the :level level. Choose a node at that level.',

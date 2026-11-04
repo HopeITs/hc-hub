@@ -163,6 +163,10 @@ return [
         'closure' => 'Closure',
         'archived' => 'Archived',
     ],
+    'proposal_kind' => [
+        'project' => 'Project',
+        'payroll' => 'Payroll',
+    ],
     'proposal_status' => [
         'concept_note' => 'Concept Note',
         'concept_note_review' => 'Concept Note Review',

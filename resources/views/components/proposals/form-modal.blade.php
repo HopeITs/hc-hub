@@ -10,12 +10,17 @@
     W-34a replaces its contents with location rows. A concept-note section belongs between Locations and
     Dates and arrives with W-24 — it is left out rather than rendered empty.
 
+    W-32: a kind switch opens Identity on create (project or payroll, one line each). A payroll proposal
+    shows a Narrative section after Donor and leaves out Locations, the starting stage and the renewal
+    preset; its attachment is filed on the proposal's Documents tab. On edit the kind is a locked chip.
+
     Create chooses the projects (a server-searched picker, each row naming its center, program and city)
     with a beneficiaries input beside each chosen one. Edit shows the linked projects with their
     beneficiaries only: links change on the proposal page's Projects tab. The budget is rendered only for a
     money holder; for anyone else the whole section is absent, not hidden.
 --}}
 @use('App\Enums\Currency')
+@use('App\Enums\ProposalKind')
 @use('App\Enums\ProposalStatus')
 @props([
     'open' => false,
@@ -33,11 +38,13 @@
     'storedNumber' => null,
     'renewable' => [],
     'renewal' => null,
+    'kind' => 'project',
 ])
 
 @php
     $mutedText = 'text-secondary-medium dark:text-ink-muted';
-    $isRenewal = $renewal !== null;
+    $isPayroll = $kind === ProposalKind::Payroll->value;
+    $isRenewal = $renewal !== null && ! $isPayroll;
     $projectRows = $editing ? $linkedProjects : ($isRenewal ? $renewal['projects'] : $chosenProjects);
     $chosenCount = count($chosenProjects);
     $projectsError = $errors->first('projectIds') ?: $errors->first('beneficiaries');
@@ -49,12 +56,14 @@
      * a failure from the same map, so the two can never disagree.
      */
     $sectionFields = [
-        __('proposals.section_identity') => ['previousProposalId', 'name', 'internalProjectNumber'],
+        __('proposals.section_identity') => ['kind', 'previousProposalId', 'name', 'internalProjectNumber'],
         __('proposals.section_donor') => ['donorId'],
-        __('proposals.section_locations') => ['projectIds', 'beneficiaries', 'beneficiariesReason', ...array_map(fn (array $row): string => 'beneficiaries.'.$row['id'], $projectRows)],
+        ...($isPayroll
+            ? [__('proposals.section_narrative') => ['narrative']]
+            : [__('proposals.section_locations') => ['projectIds', 'beneficiaries', 'beneficiariesReason', ...array_map(fn (array $row): string => 'beneficiaries.'.$row['id'], $projectRows)]]),
         __('proposals.section_planned_dates') => ['plannedDateBegin', 'plannedDateEnd'],
         __('proposals.section_budget') => ['requestedBudget', 'requestedCurrency'],
-        __('proposals.section_start') => ['startingStage', 'skipReason'],
+        ...($isPayroll ? [] : [__('proposals.section_start') => ['startingStage', 'skipReason']]),
         __('proposals.section_notes') => ['notes'],
     ];
 
@@ -68,7 +77,7 @@
     wire:model="showProposalModal"
     size="xl"
     :title="$editing ? __('proposals.edit_proposal') : __('proposals.add_proposal')"
-    :description="$editing ? __('proposals.status_moves_only_through_change_status') : __('proposals.a_new_proposal_starts_at_the_concept_note')"
+    :description="$editing ? __('proposals.status_moves_only_through_change_status') : ($isPayroll ? __('proposals.a_new_payroll_proposal_starts_as_a_draft') : __('proposals.a_new_proposal_starts_at_the_concept_note'))"
     submit="saveProposal"
     close="closeProposalModal"
     required-note
@@ -95,7 +104,31 @@
              W-03 makes the number read-only; until then the editable field keeps this slot. --}}
         <x-ui.form-section :title="__('proposals.section_identity')" :fields="$sectionFields[__('proposals.section_identity')]" data-test="identity-section">
             <div class="grid gap-x-4 gap-y-3 @2xl/modal:grid-cols-2">
-                @if (! $editing && $renewable !== [])
+                @if ($editing)
+                    <p class="flex flex-wrap items-center gap-2 text-sm {{ $mutedText }} @2xl/modal:col-span-2" data-test="proposal-kind-locked">
+                        <span>{{ __('proposals.proposal_kind') }}</span>
+                        <x-ui.enum-badge :case="ProposalKind::from($kind)" />
+                        <span class="text-xs">{{ __('proposals.the_kind_cannot_change') }}</span>
+                    </p>
+                @else
+                    <div class="@2xl/modal:col-span-2" data-test="proposal-kind-switch">
+                        <x-ui.form-segmented
+                            wire:model.live="kind"
+                            :label="__('proposals.proposal_kind')"
+                            required
+                            :options="[
+                                ['value' => ProposalKind::Project->value, 'label' => ProposalKind::Project->label(), 'test' => 'kind-project'],
+                                ['value' => ProposalKind::Payroll->value, 'label' => ProposalKind::Payroll->label(), 'test' => 'kind-payroll'],
+                            ]"
+                        />
+                        <ul class="mt-1.5 grid gap-0.5 text-xs {{ $mutedText }}">
+                            <li><span class="font-semibold">{{ ProposalKind::Project->label() }}:</span> {{ __('proposals.kind_project_help') }}</li>
+                            <li><span class="font-semibold">{{ ProposalKind::Payroll->label() }}:</span> {{ __('proposals.kind_payroll_help') }}</li>
+                        </ul>
+                    </div>
+                @endif
+
+                @if (! $editing && ! $isPayroll && $renewable !== [])
                 <div class="grid gap-y-3 @2xl/modal:col-span-2" data-test="renewal-preset">
                     <x-ui.form-select wire:model.live="previousProposalId" :label="__('proposals.previous_proposal_label')" :placeholder="__('proposals.choose_previous')" :help="__('proposals.choose_previous')" data-test="previous-proposal-select">
                         @foreach ($renewable as $option)
@@ -176,8 +209,25 @@
         </x-ui.form-section>
         @endunless
 
+        {{-- 2b · Narrative, payroll only (W-32): what the payroll covers. The
+             attachment is filed on the Documents tab once the proposal exists. --}}
+        @if ($isPayroll)
+            <x-ui.form-section :title="__('proposals.section_narrative')" :fields="$sectionFields[__('proposals.section_narrative')]" data-test="narrative-section">
+                <div class="grid gap-y-2">
+                    <x-ui.form-textarea wire:model="narrative" :label="__('proposals.narrative_label')" :help="__('proposals.narrative_help')" required rows="4" dir="auto" />
+                    @unless ($editing)
+                        <p class="flex items-start gap-1.5 text-xs {{ $mutedText }}" data-test="payroll-attachment-hint">
+                            <flux:icon.paper-clip variant="micro" class="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+                            <span>{{ __('proposals.payroll_attachment_hint') }}</span>
+                        </p>
+                    @endunless
+                </div>
+            </x-ui.form-section>
+        @endif
+
         {{-- 3 · Locations. W-34a replaces the picker inside with its rows; the
-             section and its place in the order stay. --}}
+             section and its place in the order stay. Absent for payroll. --}}
+        @unless ($isPayroll)
         <x-ui.form-section
             :title="__('proposals.section_locations')"
             :hint="$editing ? __('proposals.links_change_in_the_projects_tab') : __('proposals.beneficiaries_can_wait_until_the_proposal_review')"
@@ -251,6 +301,7 @@
                 @endif
             </div>
         </x-ui.form-section>
+        @endunless
 
         {{-- W-24 adds the concept-note section here, between Locations and Dates. --}}
 
@@ -277,7 +328,7 @@
         @endif
 
         {{-- 6 · Starting stage, on create only. --}}
-        @unless ($editing || $isRenewal)
+        @unless ($editing || $isRenewal || $isPayroll)
             <x-ui.form-section :title="__('proposals.section_start')" :fields="$sectionFields[__('proposals.section_start')]">
                 <div class="grid gap-y-3">
                     <x-ui.form-segmented

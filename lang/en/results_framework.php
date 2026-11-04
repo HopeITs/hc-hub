@@ -63,6 +63,7 @@ return [
     'week_range' => 'The week number must be between 1 and 5.',
     'month_outside_period' => 'This month is outside the proposal period.',
     'structural_lock' => 'The framework is locked after submission. Ask MEAL to change its structure.',
+    'payroll_has_no_framework' => 'A payroll proposal has no logframe.',
     'parent_gone' => 'That parent was just removed. Choose another parent.',
     'proposal_group' => 'Proposal · :name',
     'contributes_to_program' => 'Contributes to the program framework:',

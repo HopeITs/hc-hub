@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Currency;
+use App\Enums\ProposalKind;
 use App\Enums\ProposalPhase;
 use App\Enums\ProposalStatus;
 use App\Livewire\Concerns\ChecksFinanceVisibility;
@@ -41,7 +42,7 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
      *
      * @var list<string>
      */
-    private const FILTERS = ['search', 'status', 'phase', 'donor', 'currency', 'flag'];
+    private const FILTERS = ['search', 'status', 'phase', 'donor', 'currency', 'flag', 'proposalKind'];
 
     #[Url(except: '')]
     public string $search = '';
@@ -60,6 +61,13 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
 
     #[Url(except: '')]
     public string $flag = '';
+
+    /**
+     * The kind filter (W-32): '' for both, `project` or `payroll`. Named apart
+     * from the form's own `$kind`, and kept as ?kind= in the address bar.
+     */
+    #[Url(as: 'kind', except: '')]
+    public string $proposalKind = '';
 
     /**
      * A project id from New Concept Note on the project page: the create form
@@ -125,6 +133,10 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
             $this->phase = '';
         }
 
+        if (ProposalKind::tryFrom($this->proposalKind) === null) {
+            $this->proposalKind = '';
+        }
+
         // The donor filter narrows by funding agreements, so it exists only for a viewer who may see them.
         if (! ctype_digit($this->donor) || ! $this->canViewAgreements()) {
             $this->donor = '';
@@ -141,7 +153,7 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
 
     public function clearFilters(): void
     {
-        $this->reset(['search', 'status', 'phase', 'donor', 'currency', 'flag']);
+        $this->reset(['search', 'status', 'phase', 'donor', 'currency', 'flag', 'proposalKind']);
         $this->resetRegisterFilters();
         $this->resetPage();
     }
@@ -152,7 +164,7 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
     $showsOverview = $this->view === 'overview';
     $canAgreements = $this->canViewAgreements();
     $canTransfers = $canAgreements && $this->canViewTransfers();
-    $activeFilterCount = collect([$this->search, $this->status, $this->phase, $this->donor, $this->currency, $this->flag, $this->year])
+    $activeFilterCount = collect([$this->search, $this->status, $this->phase, $this->donor, $this->currency, $this->flag, $this->proposalKind, $this->year])
         ->filter(fn (string $value): bool => $value !== '')
         ->count();
     $total = $showsOverview ? $this->proposals->total() : $this->proposalCount;
@@ -174,6 +186,7 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
         'phase' => $this->phase,
         'currency' => $this->currency,
         'flag' => $this->flag,
+        'proposalKind' => $this->proposalKind,
     ];
     $selectedYear = $canTransfers ? $this->selectedYear() : null;
     $yearOnly = $canTransfers && $this->yearOnly();
@@ -208,6 +221,10 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
             'count' => $stop['count'],
             'test' => 'phase-'.$stop['phase']->value,
         ], $this->pipeline),
+    ];
+    $kindPills = [
+        ['default' => true, 'label' => __('finance_tables.all'), 'model' => 'proposalKind', 'value' => '', 'active' => $chosen['proposalKind'] === ''],
+        ...array_map(fn (ProposalKind $case): array => [...$setPill('proposalKind', $case->value, $case->label()), 'test' => 'kind-filter-'.$case->value], ProposalKind::cases()),
     ];
     $currencyPills = [
         ['default' => true, 'label' => __('finance_tables.all'), 'model' => 'currency', 'value' => '', 'active' => $chosen['currency'] === ''],
@@ -260,6 +277,8 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
                         @endif
 
                         <x-funding.pills :label="__('common.status')" :pills="$statusPills" />
+
+                        <x-funding.pills :label="__('proposals.proposal_kind')" :pills="$kindPills" />
 
                         {{-- The Overview view chooses the phase on its own pipeline rail. --}}
                         @unless ($showsOverview)

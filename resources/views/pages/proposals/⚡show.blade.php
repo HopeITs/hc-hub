@@ -73,6 +73,12 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     private const TABS = ['status', 'deadlines', 'funding', 'projects', 'logframe', 'targets', 'plan', 'reports', 'documents'];
 
     /**
+     * The tabs a payroll proposal offers (W-32): it has no projects, logframe,
+     * targets, plan, deadlines or donor reports, so those tabs are absent.
+     */
+    private const PAYROLL_TABS = ['status', 'funding', 'documents'];
+
+    /**
      * Which tab's content is shown beneath the fixed header.
      *
      * Round-trips through the query string as ?ptab= (so it never collides
@@ -153,7 +159,9 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
             $this->tab = 'plan';
         }
 
-        if (! in_array($this->tab, self::TABS, true) || ($this->tab === 'funding' && ! $this->canViewAgreements())) {
+        $offered = $this->proposal->isPayroll() ? self::PAYROLL_TABS : self::TABS;
+
+        if (! in_array($this->tab, $offered, true) || ($this->tab === 'funding' && ! $this->canViewAgreements())) {
             $this->tab = 'status';
         }
     }
@@ -169,6 +177,14 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     #[Computed]
     public function tabs(): array
     {
+        if ($this->proposal->isPayroll()) {
+            return [
+                ['key' => 'status', 'label' => __('proposals.status_history'), 'count' => $this->statusNotes->count()],
+                ...($this->canViewAgreements() ? [['key' => 'funding', 'label' => __('common.funding'), 'count' => $this->agreements->count()]] : []),
+                ['key' => 'documents', 'label' => __('proposals.documents'), 'count' => $this->proposalFiles->count() + $this->projectFiles->count()],
+            ];
+        }
+
         return [
             ['key' => 'status', 'label' => __('proposals.status_history'), 'count' => $this->statusNotes->count()],
             ['key' => 'deadlines', 'label' => __('proposals.deadlines'), 'count' => count($this->deadlines)],
@@ -186,7 +202,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     public function proposal(): Proposal
     {
         return Proposal::query()
-            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'extended_date_end', 'extension_reason', 'status', 'notes', 'updated_at', 'donor_id', 'final_report_accepted_on', 'final_report_accepted_by'])
+            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'extended_date_end', 'extension_reason', 'status', 'kind', 'notes', 'updated_at', 'donor_id', 'final_report_accepted_on', 'final_report_accepted_by'])
             ->findOrFail($this->proposalId);
     }
 
@@ -348,6 +364,9 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
                     @endif
                 </h4>
                 <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs {{ $mutedText }}">
+                    @if ($this->proposal->isPayroll())
+                        <x-ui.enum-badge :case="$this->proposal->kind" :aria-label="__('proposals.payroll_kind_badge')" data-test="payroll-kind-chip" />
+                    @endif
                     <x-ui.project-number :number="$this->proposal->internal_project_number" kind="internal" label />
                     <span class="tabular-nums">{{ __('proposals.planned_range', ['begin' => $this->proposal->planned_date_begin?->translatedFormat(__('formats.date')), 'end' => $this->proposal->planned_date_end?->translatedFormat(__('formats.date'))]) }}</span>
                 </p>
@@ -365,6 +384,9 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
             :unread="app(\App\Notifications\UnreadSubjects::class)->has(auth()->user(), 'proposal', $this->proposal->id)"
         >
             <x-slot:meta>
+                @if ($this->proposal->isPayroll())
+                    <x-ui.enum-badge :case="$this->proposal->kind" :aria-label="__('proposals.payroll_kind_badge')" data-test="payroll-kind-chip" />
+                @endif
                 <x-ui.project-number :number="$this->proposal->internal_project_number" kind="internal" label />
                 <span class="tabular-nums">{{ __('proposals.planned_range', ['begin' => $this->proposal->planned_date_begin?->translatedFormat(__('formats.date')), 'end' => $this->proposal->planned_date_end?->translatedFormat(__('formats.date'))]) }}</span>
                 @if ($this->proposal->actual_date_begin !== null)

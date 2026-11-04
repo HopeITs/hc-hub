@@ -3,6 +3,7 @@
 use App\Actions\Proposals\TransitionProposal;
 use App\Enums\Currency;
 use App\Enums\DonorApprovalStatus;
+use App\Enums\ProposalKind;
 use App\Enums\ProposalStatus;
 use App\Events\ProposalStatusChanged;
 use App\Models\Project;
@@ -290,4 +291,14 @@ test('the donor requirement refuses a donor the General Manager has not approved
     expect($errors['donor'])->toBe([__('proposals.donor_request_pending')])
         ->and($proposal->fresh()->status)->toBe(ProposalStatus::ConceptNote)
         ->and($proposal->statusNotes()->count())->toBe(0);
+});
+
+test('the project table is the default and the payroll kind leaves it untouched (W-32)', function () {
+    expect(ProposalTransitions::map())->toBe(ProposalTransitions::map(ProposalKind::Project))
+        ->and(ProposalTransitions::requirements(ProposalStatus::ProposalDraft, ProposalStatus::ProposalReview))->toBe(['budget', 'planned_dates', 'target_beneficiaries'])
+        ->and(ProposalTransitions::correctionTargets(ProposalStatus::Completed))->toBe(array_values(array_filter(
+            ProposalStatus::live(),
+            fn (ProposalStatus $to): bool => $to !== ProposalStatus::Completed && $to !== ProposalStatus::Approved,
+        )))
+        ->and(ProposalTransitions::map(ProposalKind::Payroll))->not->toHaveKeys(['concept note review', 'concept note submitted', 'proposal review']);
 });

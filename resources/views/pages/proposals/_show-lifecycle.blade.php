@@ -19,7 +19,8 @@
         })"
         data-lifecycle
     >
-        <ol class="grid min-w-[56rem] grid-cols-9 @3xl/detail:min-w-0">
+        {{-- Nine stops for a project proposal, five for payroll (W-32). --}}
+        <ol @class(['grid @3xl/detail:min-w-0', 'min-w-[56rem] grid-cols-9' => count($this->lifecycle) === 9, 'min-w-[32rem] grid-cols-5' => count($this->lifecycle) !== 9])>
             @foreach ($this->lifecycle as $index => $stop)
                 <li
                     class="relative flex min-w-0 flex-col items-center gap-1.5"

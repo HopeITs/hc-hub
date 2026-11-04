@@ -52,6 +52,8 @@ abstract class ProposalsIndexPageHost extends Component
 
     public string $flag = '';
 
+    public string $proposalKind = '';
+
     public string $forProject = '';
 
     private function forgetReadings(): void {}

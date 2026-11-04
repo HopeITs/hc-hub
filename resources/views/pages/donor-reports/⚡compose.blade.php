@@ -3,6 +3,7 @@
 use App\Actions\DonorReports\ComposeDonorReport;
 use App\Actions\DonorReports\SaveDonorReportSnapshot;
 use App\Enums\DonorReportType;
+use App\Enums\ProposalKind;
 use App\Enums\ProposalStatus;
 use App\Enums\ReportAudience;
 use App\Enums\ReportingPeriod;
@@ -82,6 +83,7 @@ new #[Layout('layouts::desk'), Title('titles.donor_report_builder')] class exten
         return Proposal::query()
             ->whereIn('status', $approved)
             ->whereHas('donor', fn (Builder $query) => $query->where('is_internal', false))
+            ->where('kind', ProposalKind::Project)
             ->orderBy('name')
             ->get(['id', 'name', 'internal_project_number', 'donor_id', 'status', 'actual_date_begin', 'actual_date_end', 'extended_date_end']);
     }
