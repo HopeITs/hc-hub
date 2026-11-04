@@ -64,6 +64,14 @@
         background-color: var(--paper);
     }
 
+    /* A phone finger needs 44px, not the desktop 36px. */
+    @media (max-width: 720px) {
+        .dk-scope .dk-reg-bar .filter-picker [data-flux-button] {
+            min-height: 44px;
+            height: 44px;
+        }
+    }
+
     /*
      * The page's own actions (x-ui.button / flux:button, the funding Filters
      * trigger) read as the Desk's .dk-btn. x-ui.button tones are !important
