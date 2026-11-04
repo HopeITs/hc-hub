@@ -32,7 +32,7 @@ The one place for every name, value, signature, payload, column and permission t
 
 | From | To | `requirements()` keys | Writer |
 |---|---|---|---|
-| concept note | concept note review | `linked_project`, `donor`, `planned_dates` | TransitionProposal |
+| concept note | concept note review | `locations` (≥ 1 row with a city), `donor`, `planned_dates` (W-34a; was `linked_project`) | TransitionProposal |
 | concept note review | concept note | `reason` | TransitionProposal |
 | concept note review | concept note submitted | `effective_date` | TransitionProposal |
 | concept note | proposal draft | `reason` (skip reason, D-03) | TransitionProposal |
@@ -47,13 +47,15 @@ The one place for every name, value, signature, payload, column and permission t
 | submitted | rejected | `reason_min_10`, `effective_date` | TransitionProposal |
 | on hold (pre-hold = concept note submitted) | proposal draft · rejected | the target row's keys | TransitionProposal |
 | on hold (pre-hold = submitted) | submitted · proposal draft · rejected | the target row's keys | TransitionProposal |
-| submitted · on hold (pre-hold = submitted) | approved | — | **ApproveProposal only** (T08) |
+| submitted · on hold (pre-hold = submitted) | approved | `locations_complete` (W-34a; was "≥ 1 linked project") | **ApproveProposal only** (T08) |
 | approved | active | — | **ActivateProject only** (T08; called by T33) |
 | active | completed | `final_report`, `effective_date` | TransitionProposal |
 | rejected · completed | any live status except approved | `reason` | **CorrectProposalStatus only** (`is_correction = true`) |
 
 Key meanings:
-- `linked_project`: at least 1 linked project.
+- `linked_project`: at least 1 linked project. Kept for one release behind the rows (W-34a: linking a project = a row with `project_id`), then removed.
+- `locations` (W-34a, D-62): at least 1 `proposal_locations` row with a city. Message `proposals.locations_required`.
+- `locations_complete` (W-34a, D-62): every `proposal_locations` row has program **and** responsible **and** (center or `is_new`), and no `program_requests` row of the proposal is still `pending`. Checked by `ApproveProposal`. Message `proposals.locations_incomplete`.
 - `donor`: `donor_id` is set.
 - `planned_dates`: `planned_date_begin` and `planned_date_end` are set.
 - `reason`: required text.
@@ -101,6 +103,7 @@ Plain Laravel event classes in `app/Events/`, `final`, readonly promoted propert
 | `ProjectActivated` | `int $projectId, ?int $proposalId, CarbonImmutable $startDate, CarbonImmutable $endDate, string $via` | `ActivateProject`; `$via` ∈ {`template_confirmation`} | T17 (generate monthly reports), T21 |
 | `ProjectPeriodChanged` | `int $projectId, CarbonImmutable $oldStart, CarbonImmutable $oldEnd, CarbonImmutable $newStart, CarbonImmutable $newEnd` | `ApproveProjectFromProposal` when an **active** project's dates change | T17 (add months), T21 |
 | `FundingAgreementRecorded` | `int $fundingAgreementId, int $proposalId, ?int $actorId` (`$fundingAgreementId` = `donor_proposal.id`) | `SaveFundingAgreement` on create | T09 (`GenerateExpectedTransfers`), T21 |
+| `ProposalLocationsChanged` (W-34a, D-62) | `int $proposalId, ?int $actorId, int $added, int $removed, int $changed` (counts only, no names) | `SaveProposal` when the location rows changed; `LinkProposalProject` / `UnlinkProposalProject` | no notification, activity only (`proposal.locations_changed`); W-35 |
 
 Event classes land on `main` as **stubs by CP1** (day 3) and are dispatched by CP2 (day 6), so Team B can write listeners from day 4.
 
@@ -120,6 +123,18 @@ SaveProposal::handle(?Proposal $existing, array $data, User $actor): Proposal
 LinkProposalProject::handle(Proposal $proposal, int $projectId, ?int $targetBeneficiaries = null): void
 UnlinkProposalProject::handle(Proposal $proposal, int $projectId): void
 ReopenProjectAsDraft::handle(Project $project): void          // called inside SaveProposal/LinkProposalProject transactions
+
+// W-34a (D-62): SaveProposal also accepts
+//   locations?: list<array{city_id: int|string, program_id?: int|string|null, responsible_employee_id?: int|string|null,
+//                          center_ids?: list<int|string>, is_new?: bool, new_program_name_en?: ?string, new_program_name_ar?: ?string}>
+//   Validation: city active in HR; centers belong to the city; program exists; responsible is an active HR employee;
+//   is_new + no program → both names required, creates/updates the program_requests row. Rows are replaced as a set
+//   inside the proposal transaction (diff by (city_id, program_id), delete removed); ProposalLocationsChanged after commit.
+//   `projectIds` (create) stays accepted for one release: each id becomes a row with `project_id` through LinkProposalProject.
+MaterialiseProposalLocations::handle(Proposal $proposal, int $actorId): MaterialisationResult   // W-34a slice 2, called inside ApproveProposal's transaction before ApproveProjectFromProposal
+    // MaterialisationResult (readonly): list<int> $createdProjectIds, list<int> $linkedProjectIds, list<int> $waitingLocationIds, list<string> $warnings (warning key: location_linked_existing)
+    // preview(Proposal $proposal): MaterialisationResult  — read-only counts for the approve modal
+// LinkProposalProject / UnlinkProposalProject keep their signatures and also insert / delete the matching proposal_locations row (city, program, center copied from the project; responsible = projects.user_id; is_new = false).
 
 // T07
 InviteDefaultReviewers::handle(Proposal $proposal, ReviewStage $stage): void   // called inside TransitionProposal's transaction
@@ -163,6 +178,39 @@ GenerateExpectedTransfers  // queued listener of FundingAgreementRecorded + job 
 **T34:** `sectors` + `project_sector` (owned by B3, see §12).
 **W-04 (D-57):** `donors.approval_status` varchar(10) NOT NULL default `approved` (`DonorApprovalStatus`: `Pending = 'pending'`, `Approved = 'approved'`), `donors.requested_by` FK `users` null nullOnDelete, `donors.approved_by` FK `users` null nullOnDelete, `donors.approved_at` datetime null. Index on `approval_status`.
 
+**W-34a (D-62):**
+```
+proposal_locations
+  id
+  proposal_id        FK proposals cascadeOnDelete
+  city_id            unsigned big int, HR id, no FK, NOT NULL
+  program_id         FK programs nullOnDelete, NULL allowed
+  responsible_employee_id  unsigned big int, HR id, no FK, NULL allowed
+  is_new             boolean default false   -- "no program/center exists yet for this row"
+  project_id         FK projects nullOnDelete, NULL  -- filled on approval (or when linked to an existing project)
+  sort               unsigned small int
+  timestamps
+  unique (proposal_id, city_id, program_id)  -- program_id NULL rows are not covered by the unique index; app rule: at most one NULL-program row per city
+
+proposal_location_centers
+  proposal_location_id  FK proposal_locations cascadeOnDelete
+  center_id             unsigned big int, HR id, no FK
+  primary (proposal_location_id, center_id)
+
+program_requests                      -- only for is_new rows without a program
+  id
+  proposal_location_id  FK cascadeOnDelete, unique
+  name_en, name_ar      string
+  status                string(20): pending | created | declined
+  hr_program_id         unsigned big int null  -- set when HR creates it and PR Manager links it
+  requested_by          FK users nullOnDelete
+  timestamps
+```
+- `project_proposal` pivot **stays**. A location row with `project_id` is the same link; `Proposal::projects()` keeps working for everything downstream (approval, aggregation, M&E).
+- `projects.city_id` stays required; `projects.center_id` nullable (T30). W-01 adds `host_center_id`. A row with several centers creates **one project per center** (one open project per center + program, contracts §3); a row with no center creates one project on `city_id` only (W-01 rule: physical center or host center, host = the row's assigned center per D-55).
+- Morph keys: `proposal_location`, `program_request` (AppServiceProvider + MorphMapTest). Both record activity on the proposal (`RecordsParentActivity`).
+- `ProgramRequestStatus`: `Pending = 'pending'`, `Created = 'created'`, `Declined = 'declined'`. Index names: `proposal_locations_proposal_city_program_unique`, `proposal_locations_project_id_foreign`, `proposal_locations_program_id_foreign`, `proposal_location_centers_location_id_foreign`, `program_requests_proposal_location_id_unique`, `program_requests_requested_by_foreign`, `program_requests_status_index`.
+
 ## §8 Permissions and default holders
 Nine roles (fixed): Super Admin, General Manager, Managers, MEAL, Financial, Media Team, Public Relations, Public Relations Manager, Team Member. Super Admin holds everything technically (`Role::booted()`) but **appears in no business list, no fallback and no test as the only account** (D-20a). `permissions:sync` only adds.
 
@@ -184,6 +232,7 @@ Nine roles (fixed): Super Admin, General Manager, Managers, MEAL, Financial, Med
 | `targets.create/update` | **MEAL only** (revoke from GM and Managers, D-23) | — |
 | `funding-agreements.view/create/update` | existing holders **+ Public Relations Manager** (D-31b) | — |
 | `proposals.update` | existing (Financial, PR Manager, GM) | also gates approve, transitions, final-report acceptance |
+| `projects.create` (W-34a, D-62) | existing (PR Manager, GM) **plus Financial** | approval materialises the proposal's projects through `SaveProject`, so every approver holds it; `permissions:sync` adds it |
 | `donors.approve` (W-04, D-57) | **General Manager** only (plus `Super Admin` through the administrator roles rule); `donors.create` is unchanged (PR, PR Manager, GM) | — |
 
 No `media-deliverables` module: department tasks use `tasks.*` / `milestones.*` with a server-side department condition (T31).
@@ -191,6 +240,7 @@ No `media-deliverables` module: department tasks use `tasks.*` / `milestones.*` 
 ## §9 Settings and slots
 - `notification_settings` key `proposal_default_reviewers` = `{meal_manager: ?int, finance_manager: ?int, fundraising_manager: ?int, ceo: ?int}` → **HR position id** (not a person). It resolves to the current holder (active contract) at use time through `EmployeeProfile`. A vacant slot → a warning, skipped.
 - `App\Support\Slots::holderOf(string $slot): ?int` (employee id; T07) is the one resolver used by T07, T08, T14, T15, T17 (`meal_manager`) and T21.
+- **HR liaison slot (W-34a, D-62):** `notification_settings` key `hr_liaison_position` = `?int` HR position id (default null), resolved by `Slots::holderOf('hr_liaison')` with the same vacancy rule; the direct recipient of `program_request.opened` (§15.2). Not a reviewer slot (`ReviewerSlot` unchanged). The admin select lands with W-34a slice 3.
 - `App\Enums\ReviewerSlot`: `meal_manager`, `finance_manager`, `fundraising_manager`, `ceo`, `project_owner`, `program_manager`, `additional` (declaration order = priority). `App\Enums\ReviewStage`: `concept_note`, `proposal`.
 - `monthly_report_due_working_days` default 5 (T17).
 - **Working calendar (D-22):** `App\Notifications\Alerts\WorkingCalendar::forProject(Project $project): WorkingCalendar` (T21 slice 2) returns a calendar with the same API (`isWorkingDay`, `addWorkingDays`, `lastWorkingDayOnOrBefore`, …) over `projects.working_days`, else the global working days. Callers that have a project use it; the rest keep the global calendar.
@@ -533,6 +583,9 @@ final class App\Notifications\Recipients\OversightRecipients
 | `program.logframe_missing` (T14, post-window; key reserved) | results | D | all | no | MEAL Manager slot, MEAL role | T14 |
 | `annual_plan.missing` (D-44a, from 2027; key reserved) | annual-plans | I | all | no | program manager, MEAL | later |
 | `supervision.added` / `supervision.removed` | access-management | D | all | no | module map (`UserRecipients`) | T23 |
+| `proposal.locations_changed` (`ProposalLocationsChanged`, W-34a) | proposals | D | all | no | none (activity only; counts, no names) | W-34a |
+| `program_request.opened` (W-34a) | proposals | I | all | no | PR Manager slot + HR mailbox slot (new slot in `Slots`): "Proposal X needs program «name» in HR" | W-34a |
+| `program_request.linked` (W-34a) | proposals | I | all | no | proposal owner | W-34a |
 
 Rows with `/` are separate keys (two or more entries). Post-window keys are added by their tasks when built: `annual_plan.*` (T24) and `proposal.budget_lines_updated` (T25), §18. `project.created`, `project.closed`, `project.archived`, `transfer.received` and `transfer.late` map existing activity events; their owning tasks only verify the names. If a sibling prompt names a key not in this table, the owning task adds it to the same module group and tells Dev 3; do not rename.
 - **Alert (not a catalog key):** `notifications.alerts.escalation.supervisor` (T23), sent by `EscalationScanner` at the program-manager stage next to `escalation.manager`; ledger stage `supervisor:{due}`; recipients = active supervisors (`SupervisionMap`, §10) of the item's named people.
