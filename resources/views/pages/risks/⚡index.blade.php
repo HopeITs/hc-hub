@@ -440,6 +440,12 @@ new #[Layout('layouts::desk'), Title('titles.risks')] class extends Component {
             </button>
         </x-slot:filters>
 
+    <p class="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-secondary-soft bg-ground px-3 py-2.5 type-meta text-secondary-dark dark:border-line dark:bg-surface-2 dark:text-ink" data-test="risk-register-moved-notice">
+        <flux:icon.information-circle variant="micro" class="size-4 shrink-0" aria-hidden="true" />
+        <span>{{ __('risks.moved_notice') }}</span>
+        <a href="{{ route('proposals.index') }}" wire:navigate class="font-semibold underline decoration-secondary-light underline-offset-2 hover:text-primary dark:hover:text-brand-text">{{ __('risks.moved_notice_link') }}</a>
+    </p>
+
     @php $chart = $this->projectRiskChart; $landscape = $this->riskLandscape; @endphp
     @if (count($chart['categories']) > 0)
         <div x-data="{ open: true }" class="overflow-hidden rounded-xl border border-secondary-soft bg-white shadow-card dark:border-transparent dark:bg-surface-1 dark:shadow-raised">

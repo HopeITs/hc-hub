@@ -23,6 +23,7 @@ use App\Models\Report;
 use App\Models\ReportTemplate;
 use App\Models\Result;
 use App\Models\Risk;
+use App\Models\RiskLibrary;
 use App\Models\Role;
 use App\Models\StrategicPillar;
 use App\Models\Strategy;
@@ -265,6 +266,7 @@ class AppServiceProvider extends ServiceProvider
             'task' => Task::class,
             'strategy' => Strategy::class,
             'risk' => Risk::class,
+            'risk_library' => RiskLibrary::class,
             'indicator' => Indicator::class,
             'plan_indicator' => PlanIndicator::class,
             'result' => Result::class,

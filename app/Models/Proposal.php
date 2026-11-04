@@ -325,6 +325,17 @@ class Proposal extends Model implements TracksActivity
     }
 
     /**
+     * The risks picked from the library onto this proposal's logframe
+     * (W-09, D-61).
+     *
+     * @return HasMany<Risk, $this>
+     */
+    public function risks(): HasMany
+    {
+        return $this->hasMany(Risk::class);
+    }
+
+    /**
      * The indicator targets committed in this proposal.
      *
      * @return MorphMany<PlanIndicator, $this>
