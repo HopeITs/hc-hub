@@ -11,8 +11,10 @@
  * page to arrangePanels(). Esc puts everything back.
  *
  * Resize: every card can be pulled from all four edges and the corner
- * (desk-rows.js resized). An inline edge between cards trades columns with
- * the neighbour; one on the Desk's side, pulled inward, lets the next card
+ * (desk-rows.js resized). An end edge with cards after it takes their columns
+ * and, once they have no room, wraps them to the next row; a start edge
+ * between cards trades columns with the neighbour; one on the Desk's side,
+ * pulled inward, lets the next card
  * slide into the freed columns. The top edge trades height with the row
  * above, and on the first row grows the row upward: the page scrolls by the
  * same amount, so the card's bottom stays where it was on screen. The bottom
@@ -515,6 +517,7 @@ document.addEventListener('pointerdown', (event) => {
         index,
         layout,
         placed: layout,
+        wanted: { cols: layout[index].cols, rows: layout[index].rows },
         firstRow: rowsIn(layout)[0].includes(index),
         scrolled: 0,
         m,
@@ -560,14 +563,17 @@ document.addEventListener('pointermove', (event) => {
 /**
  * Where the pulled edges are now: the fixed edges stay on the card's cell
  * box and the pulled ones follow the pointer (giving a little past what the
- * card can reach), with the whole cells that outline covers.
+ * card can reach), with the whole cells that outline covers. Stickiness is
+ * kept against the cells last asked for, not the cells the card got: a card
+ * that wraps its neighbours down jumps wider than asked, and measuring from
+ * there would let a resting hand wrap and unwrap them.
  */
 function outline() {
-    const { panel, grid, m, sideX, sideY, offsetX, offsetY, index } = resize;
+    const { panel, grid, m, sideX, sideY, offsetX, offsetY } = resize;
     const gridBox = grid.getBoundingClientRect();
     const box = boxOf(panel);
     const rect = { ...box };
-    let { cols, rows } = resize.placed[index];
+    let { cols, rows } = resize.wanted;
 
     if (sideX) {
         const fixed = sideX === 'right' ? box.left : box.right;
@@ -614,6 +620,8 @@ function pull() {
     const { panel, grid, badge, edge, index, layout, m, inline, sideY } = resize;
     const { cols, rows } = outline();
     const start = layout[index];
+
+    resize.wanted = { cols, rows };
     const stepsX = inline === 'start' ? start.cols - cols : cols - start.cols;
     const stepsY = sideY === 'top' ? start.rows - rows : rows - start.rows;
     const placed = resized(layout, index, edge, inline ? stepsX : 0, sideY ? stepsY : 0);
