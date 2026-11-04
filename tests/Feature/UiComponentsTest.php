@@ -162,7 +162,7 @@ test('the page header matches the directory title and count design without a des
 
     expect($html)->toContain('Projects')
         ->and($html)->toContain('8')
-        ->and($html)->toContain('text-3xl! font-bold! leading-none!')
+        ->and($html)->toContain('page-title!')
         ->and($html)->toContain('bg-primary')
         ->and($html)->toContain('data-page-header-controls')
         ->and($html)->not->toContain('Delivery sites.');

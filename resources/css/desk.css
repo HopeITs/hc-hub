@@ -74,10 +74,12 @@
 .dk-scope main{ padding-block:28px 96px }
 /* Desk greeting */
 .dk-hello{ display:grid;gap:10px;padding-block:8px 28px }
-.dk-eyebrow{ font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3) }
+/* HR's eyebrow: 12px caps in secondary-light (#939598); the faint grey is a deliberate user choice despite its 2.7:1 contrast */
+.dk-eyebrow{ font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint) }
+.dk-scope .dk-eyebrow:has(+ h1){ margin-bottom:4px }
 [lang="ar"] .dk-eyebrow{ letter-spacing:0;font-size:13px }
-.dk-hello h1{ font-size:clamp(30px,4.6vw,52px);line-height:1.08;font-weight:800;letter-spacing:-.02em;text-wrap:balance;max-width:20ch }
-[lang="ar"] .dk-hello h1{ letter-spacing:0;line-height:1.3 }
+/* Size, weight and colour come from .page-title (typography.css), shared by every page title */
+.dk-hello h1{ text-wrap:balance;max-width:20ch }
 .dk-hello h1 em{ font-style:normal;color:var(--brand-ink) }
 .dk-lede{ font-size:17px;color:var(--ink-2);max-width:60ch }
 .dk-desk{ display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:28px 44px;align-items:start }
@@ -191,8 +193,7 @@
 .dk-crumb{ font-size:13px;color:var(--ink-3);margin-top:18px }
 .dk-crumb a{ text-decoration:none;color:var(--ink-2);font-weight:700 }
 .dk-story-h{ display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);gap:24px 48px;align-items:end;padding-block:8px 26px }
-.dk-story-h h1{ font-size:clamp(34px,5vw,60px);line-height:1.02;font-weight:800;letter-spacing:-.025em;text-wrap:balance }
-[lang="ar"] .dk-story-h h1{ letter-spacing:0;line-height:1.25 }
+.dk-story-h h1{ text-wrap:balance }
 .dk-story-h .dk-lede{ margin-top:14px;font-size:17.5px }
 .dk-next{ background:var(--paper);border-radius:16px;padding:22px 22px 20px;box-shadow:var(--dk-shadow);display:grid;gap:12px;position:relative }
 .dk-next .dk-eyebrow{ display:flex;align-items:center;gap:8px;color:var(--brand-ink) }
@@ -510,7 +511,7 @@
 .dk-start-row::-webkit-scrollbar{ display:none }
 .dk-start-btn{ scroll-snap-align:start }
  }
-.dk-hello h1{ font-size:clamp(26px,3.2vw,40px);max-width:none }
+.dk-hello h1{ max-width:none }
 .dk-hello .dk-lede{ font-size:15.5px }
 /* Every panel is the same height (--panel-h), so rows and columns stay aligned whatever is resized or moved */
 /* Panels are a fixed height each (body never spills), measured in row units: a panel spans --rows units of --row-unit plus the gaps between them, so --panel-h is always its real height */
@@ -910,7 +911,7 @@ button.dk-step.dk-go:hover,button.dk-step.dk-go:focus-visible{ background:var(--
 [lang="ar"] .dk-ms{ letter-spacing:0;font-size:11.5px }
 /* registers */
 .dk-reg-h{ display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin:14px 0 12px }
-.dk-reg-h h1{ font-size:clamp(28px,3.4vw,44px);font-weight:800;letter-spacing:-.02em;display:flex;align-items:center;gap:10px }
+.dk-reg-h h1{ display:flex;align-items:center;gap:10px }
 .dk-reg-h .dk-pc{ font-size:14px;height:26px;min-width:30px }
 .dk-reg-views button{ height:32px;font-size:13px;padding-inline:12px }
 .dk-reg-bar{ display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;border-block:1px solid var(--line);margin-bottom:12px }

@@ -145,6 +145,11 @@
     /* Fast start, long soft settle: the sidebar's collapse, expand and mobile drawer motion. */
     --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 
+    /* Page titles (.page-title in typography.css): HR's h1, 34px at a 1.2 line height in #414042 (an HR grey, not in the brand palette). */
+    --text-h1: 2.125rem;
+    --text-h1--line-height: 1.2;
+    --color-heading: #414042;
+
     /* Tracking Desk: figures stay in Somar Sans with tabular-nums (no mono face), per the approved font set. */
 
     /* Tracking Desk surfaces and ink (light). Dark values live in the .dark block. */
@@ -213,6 +218,7 @@
         --color-tint: #242528;
         --color-sunk: #111214;
         --color-desk-ink: #ececee;
+        --color-heading: var(--color-desk-ink);
         --color-desk-ink-2: #c4c6ca;
         --color-desk-ink-3: #a8aaae;
         --color-desk-faint: #8a8c93;
