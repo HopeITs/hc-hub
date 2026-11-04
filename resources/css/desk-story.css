@@ -208,7 +208,7 @@
 
 /* Work's panels and the sub-tab buttons colour themselves with utilities, so the card look sits in that layer. */
 @layer utilities {
-    .dk-story .dk-pjsec [data-panel] { border-color: var(--line); border-radius: 14px; background: var(--paper); box-shadow: none; }
+    .dk-story .dk-pjsec [data-panel] { border-color: var(--color-panel-border); border-radius: var(--radius-panel); background: var(--paper); box-shadow: none; }
     .dk-story .dk-subtabs [role="tab"] { border-bottom-width: 0; }
 
     /*

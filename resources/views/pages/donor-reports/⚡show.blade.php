@@ -268,7 +268,7 @@ new #[Layout('layouts::desk'), Title('titles.donor_report')] class extends Compo
 
     {{-- Who delivers it. --}}
     <section class="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]" data-tour="donor-report-delivery">
-        <div class="rounded-xl border border-secondary-soft p-4 dark:border-transparent dark:bg-surface-1 dark:shadow-raised">
+        <x-ui.panel as="div" :clip="false" class="p-4">
             <h2 class="text-sm font-semibold">{{ __('donor_reports.responsible') }}</h2>
             <x-ui.employee-chip :employee="$responsible['employee'] ?? null" class="mt-2" />
             @if ($responsible !== null && ! $responsible['reachable'])
@@ -278,9 +278,9 @@ new #[Layout('layouts::desk'), Title('titles.donor_report')] class extends Compo
                 <h3 class="mt-4 text-sm font-semibold">{{ __('donor_reports.notes') }}</h3>
                 <p class="mt-1 whitespace-pre-line text-sm" dir="auto">{{ $report->notes }}</p>
             @endif
-        </div>
+        </x-ui.panel>
 
-        <div class="rounded-xl border border-secondary-soft p-4 dark:border-transparent dark:bg-surface-1 dark:shadow-raised" data-delivered-files>
+        <x-ui.panel as="div" :clip="false" class="p-4" data-delivered-files>
             <div class="flex flex-wrap items-baseline justify-between gap-2">
                 <h2 class="text-sm font-semibold">{{ __('donor_reports.delivered_files') }} <span class="tabular-nums {{ $muted }}">{{ $this->files->count() }}</span></h2>
                 @if ($report->audience === \App\Enums\ReportAudience::Donor && ! $report->isSubmitted())
@@ -325,7 +325,7 @@ new #[Layout('layouts::desk'), Title('titles.donor_report')] class extends Compo
                     </form>
                 @endcan
             @endif
-        </div>
+        </x-ui.panel>
     </section>
 
     @if ($this->versions->count() > 1)

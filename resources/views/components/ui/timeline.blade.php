@@ -104,7 +104,7 @@
         </div>
     @endif
 
-    <div class="flex flex-col divide-y divide-board-line rounded-xl border border-board-line bg-board shadow-card dark:shadow-raised dark:border-transparent">
+    <x-ui.panel as="div" :clip="false" class="flex flex-col divide-y divide-board-line">
         @if ($rows->isEmpty())
             {{ $slot }}
         @endif
@@ -150,5 +150,5 @@
                 </p>
             </div>
         @endforeach
-    </div>
+    </x-ui.panel>
 </div>

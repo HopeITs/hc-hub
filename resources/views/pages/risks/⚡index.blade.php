@@ -461,7 +461,7 @@ new #[Layout('layouts::desk'), Title('titles.risks')] class extends Component {
 
     @php $chart = $this->projectRiskChart; $landscape = $this->riskLandscape; @endphp
     @if (count($chart['categories']) > 0)
-        <div x-data="{ open: true }" class="overflow-hidden rounded-xl border border-secondary-soft bg-white shadow-card dark:border-transparent dark:bg-surface-1 dark:shadow-raised">
+        <x-ui.panel as="div" x-data="{ open: true }">
             <button
                 type="button"
                 x-on:click="open = !open"
@@ -497,7 +497,7 @@ new #[Layout('layouts::desk'), Title('titles.risks')] class extends Component {
                     :height="max(count($chart['categories']) * 44, 160)"
                 />
             </div>
-        </div>
+        </x-ui.panel>
     @endif
 
     @if ($view === 'board')

@@ -14,6 +14,28 @@ function deskStylesheets(): string
     return $combined;
 }
 
+test('desk panels take their radius and border from the shared panel tokens', function () {
+    $css = deskStylesheets();
+
+    expect($css)
+        ->toContain('--panel-r: var(--radius-panel);')
+        ->toContain('.dk-panel { border-color: var(--color-panel-border); }')
+        ->toContain('.dk-panel.dk-needs { border-color: var(--color-panel-border); }')
+        ->not->toContain('--panel-r: 12px');
+});
+
+test('panels restyled inside registers, record sheets and the project story keep the shared panel tokens', function () {
+    $css = deskStylesheets();
+
+    preg_match('/\[data-desk-register\] \[data-panel\],\s*\[data-desk-register\] \[data-data-table\] \{([^}]*)\}/', $css, $register);
+    preg_match('/\.dk-record-body \[data-panel\] \{([^}]*)\}/', $css, $record);
+    preg_match('/\.dk-story \.dk-pjsec \[data-panel\] \{([^}]*)\}/', $css, $story);
+
+    expect($register[1])->toContain('border: 1px solid var(--color-panel-border);')->toContain('border-radius: var(--radius-panel);')
+        ->and($record[1])->toContain('border-top: 1px solid var(--color-panel-border);')
+        ->and($story[1])->toContain('border-color: var(--color-panel-border);')->toContain('border-radius: var(--radius-panel);');
+});
+
 test('desk stylesheets never select on the inline --span style', function () {
     expect(deskStylesheets())->not->toContain('[style*="--span');
 });

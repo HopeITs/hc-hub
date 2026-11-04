@@ -28,7 +28,7 @@
                             'label' => __('common.watching'),
                             'icon' => 'eye',
                             'risks' => $watchingRisks,
-                            'laneClasses' => 'border-secondary-soft bg-white dark:border-line dark:bg-surface-1',
+                            'laneClasses' => 'border-panel-border bg-white dark:bg-surface-1',
                             'headerClasses' => 'bg-board-head text-secondary-medium dark:bg-surface-2 dark:text-ink-muted',
                         ],
                     ], fn ($lane) => $lane['risks']->isNotEmpty()));
@@ -36,7 +36,7 @@
                 <div class="p-4">
                     <div @class(['grid gap-4', '@lg/detail:grid-cols-2' => count($riskLanes) === 2])>
                         @foreach ($riskLanes as $lane)
-                            <div class="overflow-hidden rounded-xl border {{ $lane['laneClasses'] }}" wire:key="project-risk-lane-{{ $lane['key'] }}">
+                            <div class="overflow-hidden rounded-panel border {{ $lane['laneClasses'] }}" wire:key="project-risk-lane-{{ $lane['key'] }}">
                                 <div class="flex items-center gap-1.5 px-3 py-2 {{ $lane['headerClasses'] }}">
                                     <flux:icon :name="$lane['icon']" variant="micro" class="size-4" />
                                     <p class="type-label">{{ $lane['label'] }}</p>

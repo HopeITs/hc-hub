@@ -62,6 +62,15 @@ test('the stylesheet exposes the project design tokens', function () {
     ]);
 });
 
+test('panels share one radius token and one border token that follows the line colour in both themes', function () {
+    $tokens = file_get_contents(dirname(__DIR__, 2).'/resources/css/tokens.css');
+    [$light, $dark] = explode('.dark {', $tokens, 2);
+
+    expect($light)->toContain('--radius-panel: 0.75rem;')
+        ->toContain('--color-panel-border: var(--color-line);')
+        ->and($dark)->toContain('--color-panel-border: var(--color-line);');
+});
+
 test('the stylesheet never selects elements by their translated text', function () {
     expect(stylesheetSource())->not->toMatch('/\[(aria-label|title|placeholder|alt)\s*[~|^$*]?=/');
 });
