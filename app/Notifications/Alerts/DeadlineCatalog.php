@@ -341,7 +341,10 @@ final class DeadlineCatalog
     private function proposals(string $limit): array
     {
         return array_values(Proposal::query()
-            ->whereNotIn('status', [ProposalStatus::Completed->value, ProposalStatus::Rejected->value, ProposalStatus::OnHold->value])
+            // A held proposal is `submitted` since W-06 (D-58), so the hold is
+            // read from its flag; it stays out of the deadline chase either way.
+            ->whereNotIn('status', [ProposalStatus::Completed->value, ProposalStatus::Rejected->value])
+            ->whereNull('on_hold_since')
             ->whereDate('planned_date_end', '<=', $limit)
             ->get(['id', 'name', 'planned_date_end', 'status'])
             ->map(fn (Proposal $proposal): DeadlineItem => new DeadlineItem(

@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Concerns\RecordsParentActivity;
 use App\Enums\ProposalStatus;
+use App\Enums\StatusNoteKind;
 use Carbon\CarbonImmutable;
 use Database\Factories\ProposalStatusNoteFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -21,6 +22,7 @@ use Illuminate\Support\Str;
  * @property int $proposal_id
  * @property ProposalStatus $status
  * @property string $context
+ * @property StatusNoteKind $kind
  * @property CarbonImmutable $date
  * @property CarbonImmutable|null $meeting_at
  * @property bool $is_correction
@@ -28,19 +30,20 @@ use Illuminate\Support\Str;
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
-#[Fillable(['proposal_id', 'status', 'context', 'date', 'meeting_at', 'is_correction', 'changed_by'])]
+#[Fillable(['proposal_id', 'status', 'context', 'kind', 'date', 'meeting_at', 'is_correction', 'changed_by'])]
 class ProposalStatusNote extends Model
 {
     /** @use HasFactory<ProposalStatusNoteFactory> */
     use HasFactory, RecordsParentActivity;
 
     /**
-     * Mirror the column default so an unrefreshed note still reports it.
+     * Mirror the column defaults so an unrefreshed note still reports them.
      *
-     * @var array<string, bool>
+     * @var array<string, bool|string>
      */
     protected $attributes = [
         'is_correction' => false,
+        'kind' => StatusNoteKind::Transition->value,
     ];
 
     /**
@@ -73,6 +76,7 @@ class ProposalStatusNote extends Model
     {
         return [
             'status' => ProposalStatus::class,
+            'kind' => StatusNoteKind::class,
             'date' => 'date',
             'meeting_at' => 'immutable_datetime',
             'is_correction' => 'boolean',

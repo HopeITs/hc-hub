@@ -129,6 +129,14 @@ return [
         'rejected' => 'مرفوض',
         'superseded' => 'مستبدل',
     ],
+    'status_note_kind' => [
+        'transition' => 'تغيير حالة',
+        'correction' => 'تصحيح',
+        'negotiation' => 'تفاوض',
+        'on_hold' => 'تعليق',
+        'off_hold' => 'رفع التعليق',
+        'extension' => 'تمديد',
+    ],
     'project_status' => [
         'draft' => 'مسودة',
         'submitted' => 'مقدَّم',

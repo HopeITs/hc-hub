@@ -129,6 +129,14 @@ return [
         'rejected' => 'Rejected',
         'superseded' => 'Superseded',
     ],
+    'status_note_kind' => [
+        'transition' => 'Status change',
+        'correction' => 'Correction',
+        'negotiation' => 'Negotiation',
+        'on_hold' => 'Put on hold',
+        'off_hold' => 'Taken off hold',
+        'extension' => 'Extension',
+    ],
     'project_status' => [
         'draft' => 'Draft',
         'submitted' => 'Submitted',
