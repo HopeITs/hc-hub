@@ -104,8 +104,8 @@ class ProposalStatusNote extends Model
 
     protected function parentActivityEvent(string $hook): ?string
     {
-        // A negotiation note logs its own event (AddNegotiationNote) with names only.
-        return $hook === 'created' && $this->kind !== StatusNoteKind::Negotiation ? 'proposal.status_note_added' : null;
+        // Negotiation and extension notes log their own event (AddNegotiationNote, ExtendProposal) with names and dates only.
+        return $hook === 'created' && ! in_array($this->kind, [StatusNoteKind::Negotiation, StatusNoteKind::Extension], true) ? 'proposal.status_note_added' : null;
     }
 
     /**

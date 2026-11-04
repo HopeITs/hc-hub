@@ -342,10 +342,12 @@ final class DeadlineCatalog
     {
         return array_values(Proposal::query()
             ->whereNotIn('status', [ProposalStatus::Completed->value, ProposalStatus::Rejected->value, ProposalStatus::OnHold->value])
-            ->whereDate('planned_date_end', '<=', $limit)
-            ->get(['id', 'name', 'planned_date_end', 'status'])
+            ->whereRaw('(case when status = ? then coalesce(extended_date_end, actual_date_end, planned_date_end) else planned_date_end end) <= ?', [ProposalStatus::Active->value, $limit])
+            ->get(['id', 'name', 'planned_date_end', 'actual_date_end', 'extended_date_end', 'status'])
             ->map(fn (Proposal $proposal): DeadlineItem => new DeadlineItem(
-                'proposal', $proposal->id, 'proposals', $proposal->name, $proposal->planned_date_end, [], self::FinanceWatchers,
+                'proposal', $proposal->id, 'proposals', $proposal->name,
+                $proposal->status === ProposalStatus::Active ? ($proposal->effectiveDateEnd() ?? $proposal->planned_date_end) : $proposal->planned_date_end,
+                [], self::FinanceWatchers,
             ))->all());
     }
 

@@ -35,6 +35,10 @@ use App\Support\Slots;
  * proposal's reviewers and the CEO slot holder, besides the usual watchers;
  * the reviewers and the CEO skip the permission check for it.
  *
+ * An extension (proposal.extended, W-08, D-60) tells the owners of the linked
+ * projects, besides the usual watchers; the owners skip the permission check.
+ * The activity carries names and dates only.
+ *
  * The approval rebase (proposal.plan_rebased, T31) is the system's: it tells
  * the project owners, and only when a milestone or task date was cut at the
  * grant end, so they can re-plan it. No watcher hears of it, and the owners
@@ -59,6 +63,8 @@ final class ProposalRecipients extends WatcherRecipients
     private const ReviewEvents = [self::ReviewRequested, self::ReviewerAdded, self::ReviewerRemoved, self::ReviewerSeen, self::NeedAssessmentAdded, self::NegotiationNoted];
 
     private const PlanRebased = 'proposal.plan_rebased';
+
+    private const Extended = 'proposal.extended';
 
     protected function roles(): array
     {
@@ -87,6 +93,7 @@ final class ProposalRecipients extends WatcherRecipients
                 Slots::holderOf('ceo'),
             ]),
             self::PlanRebased => $this->hasClippedDates($activity) ? $this->projectOwnerIds($activity) : [],
+            self::Extended => $this->projectOwnerIds($activity),
             default => [],
         };
     }
@@ -121,6 +128,10 @@ final class ProposalRecipients extends WatcherRecipients
             return $this->hasClippedDates($activity)
                 ? $this->uniqueIds(array_values(app(EmployeeRecipients::class)->usersFor($this->projectOwnerIds($activity))))
                 : [];
+        }
+
+        if ($activity->event === self::Extended) {
+            return $this->uniqueIds(array_values(app(EmployeeRecipients::class)->usersFor($this->projectOwnerIds($activity))));
         }
 
         if (! in_array($activity->event, self::ReviewEvents, true)) {

@@ -75,6 +75,7 @@ return [
         'need_assessment' => 'Need assessment',
         'donor_approval' => 'Donor approval',
         'negotiation' => 'Negotiation file',
+        'amendment' => 'Amendment',
         'report_submission' => 'Delivered report',
     ],
     'reporting_period' => [

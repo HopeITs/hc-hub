@@ -139,6 +139,12 @@ ActivateProject::handle(Project $project, string $via): void              // Tea
 // W-07 (D-59), app/Actions/Proposals
 AddNegotiationNote::handle(Proposal $proposal, ProposalStatus $expectedStatus, array $input): ProposalStatusNote
     // @param array{text: string, file?: UploadedFile|null}; allowed only when status = submitted; Gate::authorize('update', $proposal); writes no status
+// W-08 (D-60), app/Actions/Proposals
+ExtendProposal::handle(Proposal $proposal, ProposalStatus $expectedStatus, array $input): ProposalStatusNote
+    // @param array{new_date_end: string, reason: string, file?: UploadedFile|null}; allowed only for active; Gate::authorize('update', $proposal);
+    // new_date_end after the current effective end; not a status writer. Widens linked approved/active projects through App\Support\ProjectPeriods::widen()
+// App\Support\ProjectPeriods::widen(Project $project, CarbonImmutable $begin, CarbonImmutable $end): bool
+    // saves the wider dates (never shortens); dispatches ProjectPeriodChanged only when the project is active and the dates changed
 
 // T09, app/Actions/FundingAgreements
 SaveFundingAgreement (existing; donor written from the proposal)
@@ -167,6 +173,7 @@ GenerateExpectedTransfers  // queued listener of FundingAgreementRecorded + job 
 **T34:** `sectors` + `project_sector` (owned by B3, see §12).
 **W-04 (D-57):** `donors.approval_status` varchar(10) NOT NULL default `approved` (`DonorApprovalStatus`: `Pending = 'pending'`, `Approved = 'approved'`), `donors.requested_by` FK `users` null nullOnDelete, `donors.approved_by` FK `users` null nullOnDelete, `donors.approved_at` datetime null. Index on `approval_status`.
 **W-07 (D-59):** `proposal_status_notes.kind` varchar(20) NOT NULL default `transition` (`StatusNoteKind`: `Transition = 'transition'`, `Correction = 'correction'`, `Negotiation = 'negotiation'`, `OnHold = 'on_hold'`, `OffHold = 'off_hold'`, `Extension = 'extension'`); backfill `is_correction = 1` → `correction`. `MediaCollection::Negotiation = 'negotiation'` (file linked to the note through `media.subject` = the note).
+**W-08 (D-60):** `proposals.extended_date_end` date null, `proposals.extension_reason` text null; `MediaCollection::Amendment = 'amendment'` (file linked to the `extension` note, as W-07). `Proposal::effectiveDateEnd(): ?CarbonImmutable` = `extended_date_end ?? actual_date_end`; every reader of the end date for an active proposal (deadline scanners, agreement remaining period, donor report periods, project widening) uses it.
 
 ## §8 Permissions and default holders
 Nine roles (fixed): Super Admin, General Manager, Managers, MEAL, Financial, Media Team, Public Relations, Public Relations Manager, Team Member. Super Admin holds everything technically (`Role::booted()`) but **appears in no business list, no fallback and no test as the only account** (D-20a). `permissions:sync` only adds.
@@ -501,6 +508,7 @@ final class App\Notifications\Recipients\OversightRecipients
 | `proposal.need_assessment_added` | proposals | D | all | no | owner, MEAL Manager slot | T07 |
 | `proposal.approved` | proposals | I | all | yes | Finance, owners, program managers, MEAL Manager slot, PR Manager, reviewers | T08 |
 | `proposal.approved_without_agreement` (D-26) | funding-agreements | I | all | no | PR, Finance, CEO slot | T08 |
+| `proposal.extended` (W-08, D-60) | proposals | I | all | no | linked project owners, Financial watchers (names and dates only) | W-08 |
 | `proposal.on_hold_reminder` | proposals | I | all | no | proposal owner, editors | T21 |
 | `proposal.final_report_accepted` (D-02c) | proposals | I | all | no | owner, program manager | T04 |
 | `proposal.beneficiaries_changed` (D-25) | proposals | I | all | no | MEAL officer, MEAL Manager slot | T06 |

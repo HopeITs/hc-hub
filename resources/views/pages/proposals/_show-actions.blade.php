@@ -17,6 +17,9 @@
     @if ($this->proposal->status === \App\Enums\ProposalStatus::Submitted)
     <x-ui.button size="sm" icon="chat-bubble-left-ellipsis" class="min-h-10 touch-manipulation" wire:click="openNegotiationModal" data-test="add-negotiation-note">{{ __('proposals.add_negotiation_note') }}</x-ui.button>
     @endif
+    @if ($this->proposal->status === \App\Enums\ProposalStatus::Active)
+    <x-ui.button size="sm" icon="calendar-days" class="min-h-10 touch-manipulation" wire:click="openExtensionModal" data-test="open-extension-modal">{{ __('proposals.extend_proposal') }}</x-ui.button>
+    @endif
     @if ($this->canRecordFinalReportAcceptance)
     <x-ui.button tone="primary" size="sm" icon="document-check" class="min-h-10 touch-manipulation" wire:click="openAcceptanceModal" data-test="open-final-report-modal">{{ __('proposals.record_final_report_acceptance') }}</x-ui.button>
     @endif
