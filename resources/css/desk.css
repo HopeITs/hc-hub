@@ -916,6 +916,8 @@ button.dk-step.dk-go:hover,button.dk-step.dk-go:focus-visible{ background:var(--
 .dk-reg-bar{ display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;border-block:1px solid var(--line);margin-bottom:12px }
 .dk-reg-q{ display:flex;align-items:center;gap:8px;flex:1 1 240px;max-width:420px;height:36px;padding-inline:12px;border:1px solid var(--line-2);border-radius:10px;background:var(--paper);color:var(--ink-3) }
 .dk-reg-q input{ border:0;background:none;outline:none;flex:1;min-width:0;font-size:14px }
+.dk-reg-q input::placeholder{ color:var(--ink-3);opacity:1 }
+@media (max-width:720px){ .dk-reg-q{ height:44px } }
 .dk-reg-bar .dk-mini{ height:36px }
 .dk-tbl-wrap{ overflow-x:auto;background:var(--paper);border:1px solid var(--line);border-radius:12px }
 .dk-tbl{ width:100%;border-collapse:collapse;font-size:13.5px;min-width:760px }
