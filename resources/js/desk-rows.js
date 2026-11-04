@@ -166,43 +166,53 @@ export function resized(entries, index, edge, stepsX, stepsY) {
 }
 
 /**
- * The layout with one card dropped next to another: 'before' or 'after' it
- * joins that card's row (the row shares its twelve columns again and the card
- * takes the row's height), 'above' or 'below' it gets a row of its own. The
- * row it left closes up. A row already holding four cards cannot take a fifth,
- * so the card gets a row of its own beside it instead.
+ * The layout with one card dropped on another: the two trade places and each
+ * keeps its own size. Every other card stays exactly where it was.
  */
-export function joined(entries, panel, target, place) {
+export function swapped(entries, panel, target) {
+    const next = entries.map((entry) => ({ ...entry }));
+    const from = next.findIndex((entry) => entry.panel === panel);
+    const to = next.findIndex((entry) => entry.panel === target);
+
+    if (from < 0 || to < 0 || from === to) {
+        return next;
+    }
+
+    [next[from], next[to]] = [next[to], next[from]];
+
+    return next;
+}
+
+/**
+ * The layout with one card dropped beside another ('before' or 'after' it):
+ * the card joins that row keeping its own width, the row shares its twelve
+ * columns again (fitRow) at its own height, and the row it left closes up.
+ * A row already holding four cards cannot take a fifth, so it is left as it was.
+ */
+export function inserted(entries, panel, target, place) {
     const rows = rowsIn(entries).map((row) => row.map((i) => ({ ...entries[i] })));
     const from = rows.findIndex((row) => row.some((entry) => entry.panel === panel));
     const source = rows[from];
     const carried = source.find((entry) => entry.panel === panel);
     const sameRow = source.some((entry) => entry.panel === target);
 
+    if (! sameRow && rows.find((row) => row.some((entry) => entry.panel === target)).length >= MaxCols / MinCols) {
+        return entries.map((entry) => ({ ...entry }));
+    }
+
     source.splice(source.indexOf(carried), 1);
 
-    if (sameRow && (place === 'before' || place === 'after')) {
-        source.splice(source.findIndex((entry) => entry.panel === target) + (place === 'after' ? 1 : 0), 0, carried);
-
-        return rows.flat();
+    if (! sameRow) {
+        if (source.length) {
+            fitRow(source.map((entry) => entry.cols)).forEach((cols, i) => (source[i].cols = cols));
+        } else {
+            rows.splice(from, 1);
+        }
     }
 
-    if (source.length) {
-        fitRow(source.map((entry) => entry.cols)).forEach((cols, i) => (source[i].cols = cols));
-    } else {
-        rows.splice(from, 1);
-    }
+    const row = rows.find((candidate) => candidate.some((entry) => entry.panel === target));
 
-    const at = rows.findIndex((row) => row.some((entry) => entry.panel === target));
-    const row = rows[at];
-
-    if (place === 'above' || place === 'below' || row.length >= MaxCols / MinCols) {
-        rows.splice(at + (place === 'above' || place === 'before' ? 0 : 1), 0, [{ ...carried, cols: MaxCols }]);
-
-        return rows.flat();
-    }
-
-    row.splice(row.findIndex((entry) => entry.panel === target) + (place === 'after' ? 1 : 0), 0, { ...carried, rows: row[0].rows });
+    row.splice(row.findIndex((entry) => entry.panel === target) + (place === 'after' ? 1 : 0), 0, { ...carried, rows: row[0]?.rows ?? carried.rows });
     fitRow(row.map((entry) => entry.cols)).forEach((cols, i) => (row[i].cols = cols));
 
     return rows.flat();

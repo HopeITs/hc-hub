@@ -162,6 +162,13 @@ test('the customize sheet no longer lists the panels a role may not see', functi
         ->assertDontSee(__('desk.panel.money.locked'));
 });
 
+test('the customize sheet offers the To-do panel under Add, with the work panels', function () {
+    Livewire::actingAs(User::factory()->role('Team Member')->create())
+        ->test('pages::desk.index')
+        ->assertSeeHtml('x-show="isAddable(\'todo\')" data-customize-add="todo"')
+        ->assertSee(__('desk.customize_sheet.add_panel', ['panel' => __('desk.panel.todo.title')]));
+});
+
 test('the customize sheet says there is nothing to add once every allowed panel is placed', function () {
     $user = User::factory()->create();
     $allowed = array_keys(app(Panels::class)->availableTo($user));

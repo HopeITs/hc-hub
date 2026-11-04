@@ -196,7 +196,7 @@ final class Panels
     private const array ReadyKinds = [
         'money' => 'money', 'transfers' => 'money', 'pipeline' => 'money', 'donors' => 'money',
         'myteam' => 'people', 'waiting' => 'people', 'reviews' => 'people',
-        'needs' => 'work', 'coming' => 'work', 'overdue' => 'work', 'tasks' => 'work', 'deliverables' => 'work', 'projects' => 'work', 'flow' => 'work', 'milestones' => 'work', 'notes' => 'work',
+        'needs' => 'work', 'coming' => 'work', 'overdue' => 'work', 'tasks' => 'work', 'deliverables' => 'work', 'projects' => 'work', 'flow' => 'work', 'milestones' => 'work', 'notes' => 'work', 'todo' => 'work',
         'targets' => 'results', 'validate' => 'results', 'matrix' => 'results', 'templates' => 'results', 'duties' => 'results', 'glance' => 'results',
     ];
 
@@ -687,6 +687,7 @@ final class Panels
             'glance' => ['icon' => 'chart', 'size' => 'XL', 'rows' => 3, 'register' => null, 'allows' => $everyone],
             'flow' => ['icon' => 'chart', 'size' => 'XL', 'rows' => 2, 'register' => 'projects.index', 'allows' => $can('projects.view')],
             'notes' => ['icon' => 'file', 'size' => 'L', 'rows' => 4, 'register' => null, 'allows' => $everyone],
+            'todo' => ['icon' => 'check', 'size' => 'S', 'rows' => 4, 'register' => null, 'allows' => $everyone],
             'overdue' => ['icon' => 'flag', 'size' => 'L', 'rows' => 4, 'register' => null, 'allows' => $everyone],
             'needs' => ['icon' => 'flag', 'size' => 'L', 'register' => null, 'allows' => $everyone],
             'waiting' => ['icon' => 'users', 'size' => 'M', 'register' => null, 'allows' => $everyone],
