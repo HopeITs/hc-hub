@@ -7,6 +7,7 @@ namespace App\Support\Desk;
 use App\Models\DonorReport;
 use App\Models\ProposalReviewer;
 use App\Models\RiskLibrary;
+use App\Models\Task;
 use App\Models\User;
 use Closure;
 use Illuminate\Support\Str;
@@ -182,7 +183,7 @@ final class Destinations
             $page('admin.accounts.index', 'common.accounts', 'coins', 'building-library', 'funding_finance', $can('accounts.view'), 'accounts'),
 
             $page('tasks.index', 'common.tasks', 'check', 'check-circle', 'workspace', $can('tasks.view'), 'tasks'),
-            $page('department-tasks.index', 'titles.department_tasks', 'board', 'building-office-2', 'workspace', $can('tasks.view')),
+            $page('department-tasks.index', 'titles.department_tasks', 'board', 'building-office-2', 'workspace', fn (User $user): bool => $user->can('viewDepartmentQueue', Task::class)),
             $page('calendar.index', 'common.my_calendar', 'cal', 'calendar', 'workspace', $can('calendar.view')),
             $page('notifications.index', 'desk.notifications', 'bell', 'bell', 'workspace', $everyone),
 

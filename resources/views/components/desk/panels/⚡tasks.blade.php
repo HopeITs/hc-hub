@@ -63,9 +63,39 @@ new class extends Component {
 
     public function updatedScope(string $scope): void
     {
-        $this->scope = in_array($scope, ['team', 'department'], true) ? $scope : 'mine';
+        $this->scope = $scope;
+        unset($this->activeScope, $this->rows);
+        /* activeScope() is the one definition, so an unknown or refused value lands on `mine`. */
+        $this->scope = $this->activeScope;
         $this->page = 0;
-        unset($this->rows);
+    }
+
+    /**
+     * The scope actually read, whatever the property holds.
+     *
+     * IsDeskPanel::applyFilters() assigns the filter properties directly, so
+     * it never runs updatedScope(); routing every read through here keeps one
+     * definition and refuses `department` server-side for anyone who is not a
+     * department manager (W-14, D-65). `team` is unchanged.
+     */
+    #[Computed]
+    public function activeScope(): string
+    {
+        if ($this->scope === 'department') {
+            return $this->hasDepartment ? 'department' : 'mine';
+        }
+
+        return $this->scope === 'team' ? 'team' : 'mine';
+    }
+
+    /**
+     * Whether the "My department" choice is offered at all: a department
+     * manager's, decided once in User::canSeeDepartmentTasks() (D-65).
+     */
+    #[Computed]
+    public function hasDepartment(): bool
+    {
+        return auth()->user()?->canSeeDepartmentTasks() === true;
     }
 
     /**
@@ -173,12 +203,13 @@ new class extends Component {
     private function base(): Builder
     {
         $user = auth()->user();
+        $scope = $this->activeScope;
 
-        if ($this->scope === 'mine') {
+        if ($scope === 'mine') {
             return DeskWork::myTasks($user);
         }
 
-        $employeeIds = $this->scope === 'team' ? array_keys(TeamScope::for($user)) : $user->departmentEmployeeIds();
+        $employeeIds = $scope === 'team' ? array_keys(TeamScope::for($user)) : $user->departmentEmployeeIds();
 
         return $this->visible(Task::query(), 'tasks')
             ->whereNull('parent_task_id')
@@ -197,15 +228,17 @@ new class extends Component {
     $user = auth()->user();
 @endphp
 
-<x-desk.panel :facets="$pg['facets']" :filtered="$scope !== 'mine'" id="tasks" register="tasks.index" :size="$size" :cols="$gridCols" :height="$gridRows" :index="$index" :total="$total" :count="$open->count()">
+<x-desk.panel :facets="$pg['facets']" :filtered="$this->activeScope !== 'mine'" id="tasks" register="tasks.index" :size="$size" :cols="$gridCols" :height="$gridRows" :index="$index" :total="$total" :count="$open->count()">
     <x-slot:filters>
         <div class="contents" data-filter-defaults='{"scope":"mine"}'>
-            <x-ui.header-filter-select :label="__('desk.whose')" wire:model="scope" :value="$scope" deferred>
+            <x-ui.header-filter-select :label="__('desk.whose')" wire:model="scope" :value="$this->activeScope" deferred>
                 <option value="mine">{{ __('desk.scope_mine_tasks') }}</option>
                 @if ($this->hasTeam)
                     <option value="team">{{ __('desk.scope_team') }}</option>
                 @endif
-                <option value="department">{{ __('desk.scope_department') }}</option>
+                @if ($this->hasDepartment)
+                    <option value="department">{{ __('desk.scope_department') }}</option>
+                @endif
             </x-ui.header-filter-select>
         </div>
     </x-slot:filters>
