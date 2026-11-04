@@ -236,9 +236,11 @@ final class App\Support\EmployeeProfile {
     /** @return list<int> */ public static function employeeIdsInDepartment(int $departmentId): array;
     public static function managerOf(int $employeeId): ?int;          // HR direct manager (positions.direct_manager_id holder)
     public static function holderOfPosition(int $positionId): ?int;   // active-contract holder, latest start_date
+    public static function isDepartmentManager(int $employeeId): bool; // W-14 (D-65)
 }
 ```
 - Current position = the active contract (`contracts.is_active = 1`); several active → latest `start_date` (logged warning); none → `null` / inactive.
+- **W-14 (D-65):** `isDepartmentManager()` is the one definition of "department manager": the employee's current position's job level matches `config('access-control.department_manager_job_level')` (default `Department Manager – Grade 5`). The comparison is on a normalised string (case, whitespace and the dash variants `-` `–` `—` `‑`) against `job_levels.name_en` **or** `name_ar`, so it does not depend on the interface language; it reads the remembered lookup, adds no HR query, and stores nothing locally. `User::canSeeDepartmentTasks()` delegates to it and is the only gate of the desk Tasks panel's `department` scope and the `department-tasks` page; administrator roles (§8) bypass it, and `Managers` / General Manager get it only when their HR job level matches.
 - `App\Models\HrCenter` (`centers`) and `HrJobLevel` (`job_levels`) extend `HrModel` (read-only), with `options()` via `RemembersHrLookup`.
 - `Project::center()` resolves through the lookup (no cross-connection relation). The project's city is always the center's city, written by the server.
 - `Project::openProjectFor(?int $centerId, int $cityId, int $programId, ?int $exceptId = null): ?Project` (see §3; W-01).
