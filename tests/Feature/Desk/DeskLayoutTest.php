@@ -93,6 +93,44 @@ test('a drag or pulled edge saves the arrangement it showed, kept within the gri
     expect(collect($user->fresh()->desk_layout)->firstWhere('panel', 'needs'))->toMatchArray(['rows' => Panels::MaxRows]);
 });
 
+test('a card dropped into a full row is saved there, and the card it pushed opens the next row', function () {
+    $user = User::factory()->role('Team Member')->create();
+    $pushed = [
+        ['panel' => 'needs', 'cols' => 3, 'rows' => 4],
+        ['panel' => 'overdue', 'cols' => 3, 'rows' => 4],
+        ['panel' => 'tasks', 'cols' => 3, 'rows' => 4],
+        ['panel' => 'flow', 'cols' => 3, 'rows' => 4],
+        ['panel' => 'notes', 'cols' => 4, 'rows' => 5],
+        ['panel' => 'coming', 'cols' => 4, 'rows' => 5],
+        ['panel' => 'milestones', 'cols' => 4, 'rows' => 5],
+        ['panel' => 'projects', 'cols' => 12, 'rows' => 4],
+    ];
+
+    Livewire::actingAs($user)->test('pages::desk.index')->call('arrangePanels', $pushed);
+
+    expect(array_map(fn (array $entry): array => ['panel' => $entry['panel'], 'cols' => $entry['cols'], 'rows' => $entry['rows']], app(Panels::class)->layoutFor($user->fresh())))
+        ->toBe($pushed);
+});
+
+test('a card grown past its neighbours is saved wider, with them wrapped to the start of the next row', function () {
+    $user = User::factory()->role('Team Member')->create();
+    $grown = [
+        ['panel' => 'needs', 'cols' => 4, 'rows' => 3],
+        ['panel' => 'notes', 'cols' => 8, 'rows' => 3],
+        ['panel' => 'overdue', 'cols' => 3, 'rows' => 4],
+        ['panel' => 'flow', 'cols' => 3, 'rows' => 4],
+        ['panel' => 'tasks', 'cols' => 3, 'rows' => 4],
+        ['panel' => 'coming', 'cols' => 3, 'rows' => 4],
+        ['panel' => 'milestones', 'cols' => 6, 'rows' => 4],
+        ['panel' => 'projects', 'cols' => 6, 'rows' => 4],
+    ];
+
+    Livewire::actingAs($user)->test('pages::desk.index')->call('arrangePanels', $grown);
+
+    expect(array_map(fn (array $entry): array => ['panel' => $entry['panel'], 'cols' => $entry['cols'], 'rows' => $entry['rows']], app(Panels::class)->layoutFor($user->fresh())))
+        ->toBe($grown);
+});
+
 test('an arrangement that does not hold exactly the placed panels is ignored', function () {
     $user = User::factory()->role('Team Member')->create();
     $desk = Livewire::actingAs($user)->test('pages::desk.index');

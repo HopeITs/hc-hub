@@ -215,7 +215,7 @@ new #[Layout('layouts::desk'), Title('titles.donor_report_builder')] class exten
 
 @php
     $muted = 'text-secondary-medium dark:text-ink-muted';
-    $panel = 'rounded-xl border border-secondary-soft p-4 sm:p-5 dark:border-transparent dark:bg-surface-1 dark:shadow-raised';
+    $panel = 'rounded-panel border border-panel-border p-4 sm:p-5 dark:bg-surface-1 dark:shadow-raised';
     $preview = $this->preview;
     $proposal = $this->selectedProposal;
     $slotHint = DonorReportResponsibles::slotFor(DonorReportType::tryFrom($type) ?? DonorReportType::Narrative);

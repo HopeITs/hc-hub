@@ -226,13 +226,14 @@
     }
 
     /* ── Sheets: the panel card language ──────────────────────────────
-     * Overrides desk.css's panel look (same layer, later file): 12px radius,
-     * a hairline and a soft lift instead of a heavy box, an uppercase
+     * Overrides desk.css's panel look (same layer, later file): the shared
+     * panel radius and border tokens (tokens.css, as x-ui.panel), a soft lift
+     * instead of a heavy box, an uppercase
      * eyebrow title, the count as a figure at the end, tools on hover and the
      * grip only on hover. Resize rules stay in desk.css. */
-    :root { --panel-r: 12px; --panel-pad: 16px; --panel-shadow: 0 1px 1px color-mix(in srgb, var(--ink) 4%, transparent), 0 10px 28px -18px color-mix(in srgb, var(--ink) 22%, transparent); }
-    .dk-panel { border-color: color-mix(in srgb, var(--line) 80%, transparent); }
-    .dk-panel.dk-needs { border-color: color-mix(in srgb, var(--line) 80%, transparent); }
+    :root { --panel-r: var(--radius-panel); --panel-pad: 16px; --panel-shadow: 0 1px 1px color-mix(in srgb, var(--ink) 4%, transparent), 0 10px 28px -18px color-mix(in srgb, var(--ink) 22%, transparent); }
+    .dk-panel { border-color: var(--color-panel-border); }
+    .dk-panel.dk-needs { border-color: var(--color-panel-border); }
     .dk-panel.dk-needs::before { content: none; }
 
     .dk-ph, [dir="rtl"] .dk-ph { position: relative; align-items: center; gap: 2px; min-height: 52px; padding: 12px var(--panel-pad) 4px calc(var(--panel-pad) + 4px); }
@@ -256,7 +257,6 @@
     /* ── Hero: briefing, command strip ──────────────────── */
     /* The greeting on one side, the day's two figures across from it; on a narrow screen they sit under it. */
     .dk-hello { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "main figs" "start start"; }
-    .dk-hello h1 { margin: 4px 0 0; }
     .dk-hello-figs, .dk-hello-clear { grid-area: figs; align-self: end; margin: 0; }
     .dk-hello-figs { display: flex; color: inherit; text-decoration: none; border-radius: 10px; }
     .dk-hello-figs:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 4px; }
@@ -264,10 +264,10 @@
     .dk-hello-fig { display: flex; align-items: center; gap: 10px; padding-inline: 20px; border-inline-start: 1px solid var(--line-2); }
     .dk-hello-fig:first-child { padding-inline-start: 0; border-inline-start: 0; }
     .dk-hello-fig:last-child { padding-inline-end: 0; }
-    .dk-hello-fig b { font-size: clamp(28px, 3vw, 40px); font-weight: 800; line-height: 1; letter-spacing: -.02em; color: var(--ink); }
+    /* The figures wear .page-title, so they match the greeting beside them; the late figure adds text-brand-ink! to stay red like its label. */
     .dk-hello-fig > span { max-width: 9ch; font-size: 13px; font-weight: 600; line-height: 1.25; color: var(--ink-2); transition: color .15s ease; }
     a.dk-hello-figs:hover .dk-hello-fig > span { color: var(--ink); }
-    .dk-hello-fig.dk-late b, .dk-hello-fig.dk-late > span, a.dk-hello-figs:hover .dk-hello-fig.dk-late > span { color: var(--brand-ink); }
+    .dk-hello-fig.dk-late > span, a.dk-hello-figs:hover .dk-hello-fig.dk-late > span { color: var(--brand-ink); }
     @media (max-width: 760px) {
         .dk-hello { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main" "figs" "start"; }
     }

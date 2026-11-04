@@ -229,7 +229,7 @@ new #[Layout('layouts::desk'), Title('titles.funding_agreement')] class extends 
         ]"
         :title="$donor->name.' · '.$proposal->name"
         :unread="app(\App\Notifications\UnreadSubjects::class)->has(auth()->user(), 'donor_proposal', $this->agreementId)"
-        title-class="text-3xl! font-bold! leading-tight! tracking-tight! text-balance @3xl/detail:text-[2.5rem]!"
+        title-class="text-balance"
     >
         <x-slot:meta>
             <x-ui.project-number :number="$proposal->internal_project_number" kind="internal" label class="{{ $inkText }}" />
