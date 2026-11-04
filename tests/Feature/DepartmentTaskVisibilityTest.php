@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\Scopes\TaskVisibilityScope;
 use App\Models\Task;
 use App\Models\User;
+use App\Support\Desk\Panels;
 use Livewire\Livewire;
 
 /**
@@ -196,6 +197,16 @@ test('another job level is not the manager level', function () {
     $officer = userWithRole('Media Team', insertHrDepartmentManager($media, 'Senior Officer – Grade 4'));
 
     expect($officer->canSeeDepartmentTasks())->toBeFalse();
+});
+
+test('the deliverables panel follows the page: offered to a department manager only', function () {
+    $media = insertHrDepartment('Media');
+    $manager = userWithRole('Financial', insertHrDepartmentManager($media));
+    $officer = userWithRole('Financial', departmentVisibilityEmployee($media));
+    $panels = app(Panels::class);
+
+    expect(array_column($panels->layoutFor($manager), 'panel'))->toContain('deliverables')
+        ->and(array_column($panels->layoutFor($officer), 'panel'))->not->toContain('deliverables');
 });
 
 test('an administrator keeps the department scope without an HR job level', function () {

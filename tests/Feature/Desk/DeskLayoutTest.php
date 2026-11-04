@@ -15,7 +15,8 @@ function deskPanelIds(User $user): array
 test('each role starts from its own layout, and a Super Admin from the General Manager one', function () {
     expect(deskPanelIds(User::factory()->role('Team Member')->create()))->toBe(['needs', 'overdue', 'flow', 'notes', 'tasks', 'coming', 'milestones', 'projects'])
         ->and(deskPanelIds(User::factory()->role('Super Admin')->create()))->toContain('glance', 'money', 'pipeline')
-        ->and(deskPanelIds(User::factory()->role('Financial')->create()))->toBe(['needs', 'overdue', 'flow', 'money', 'transfers', 'deliverables', 'duties', 'projects']);
+        /* A department manager, so the deliverables panel is still offered (W-14, D-65). */
+        ->and(deskPanelIds(User::factory()->role('Financial')->create(['employee_id' => insertHrDepartmentManager()])))->toBe(['needs', 'overdue', 'flow', 'money', 'transfers', 'deliverables', 'duties', 'projects']);
 });
 
 test('a role without a layout falls back to the Team Member one, minus what it may not see', function () {
