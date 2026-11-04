@@ -177,7 +177,20 @@ describe('the strategy page', function () {
             ->assertSee('Economic empowerment')
             ->assertSee('Alpha Program')
             ->assertSee('Loose Program')
-            ->assertSee(__('strategies.no_pillar'));
+            ->assertSee(__('strategies.not_under_pillar'));
+    });
+
+    it('labels every pillar and program action in words for a manager', function () {
+        $pillar = StrategicPillar::factory()->for($this->strategy)->create(['code' => 'P1']);
+        $placed = Program::factory()->create(['strategy_id' => $this->strategy->id, 'strategic_pillar_id' => $pillar->id]);
+        $loose = Program::factory()->create(['strategy_id' => $this->strategy->id]);
+
+        strategyPage($this->manager, $this->strategy)
+            ->assertSeeHtml('data-test="create-pillar"')
+            ->assertSeeHtml('data-test="edit-pillar-'.$pillar->id.'">'.__('strategies.edit_pillar').'</button>')
+            ->assertSeeHtml('data-test="delete-pillar-'.$pillar->id.'">'.__('strategies.delete_pillar').'</button>')
+            ->assertSeeHtml('data-test="assign-program-'.$placed->id.'">'.__('strategies.move_to_pillar').'</button>')
+            ->assertSeeHtml('data-test="assign-program-'.$loose->id.'">'.__('strategies.assign_pillar').'</button>');
     });
 
     it('creates, edits, assigns and deletes through the dialogs', function () {

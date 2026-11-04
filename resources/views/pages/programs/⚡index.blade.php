@@ -67,7 +67,7 @@ new #[Layout('layouts::desk'), Title('titles.programs')] class extends Component
 
     public function updatedGap(): void
     {
-        $this->gap = in_array($this->gap, ['no_strategy', 'no_manager'], true) ? $this->gap : '';
+        $this->gap = in_array($this->gap, ['no_strategy', 'no_manager', 'no_plan'], true) ? $this->gap : '';
         $this->resetVisiblePrograms();
     }
 
@@ -152,7 +152,11 @@ new #[Layout('layouts::desk'), Title('titles.programs')] class extends Component
             ->when($this->strategy !== '', fn (Builder $query) => $query->where('strategy_id', (int) $this->strategy))
             ->when($this->manager !== '', fn (Builder $query) => $query->where('manager_id', (int) $this->manager))
             ->when($this->gap === 'no_strategy', fn (Builder $query) => $query->whereNull('strategy_id'))
-            ->when($this->gap === 'no_manager', fn (Builder $query) => $query->whereNull('manager_id'));
+            ->when($this->gap === 'no_manager', fn (Builder $query) => $query->whereNull('manager_id'))
+            ->when($this->gap === 'no_plan', fn (Builder $query) => $query->whereDoesntHave(
+                'annualPlans',
+                fn (Builder $plans) => $plans->where('year', now()->year)->whereHas('planIndicators'),
+            ));
     }
 
     /** @return Collection<int, Strategy> */
@@ -255,6 +259,21 @@ new #[Layout('layouts::desk'), Title('titles.programs')] class extends Component
             <x-ui.header-filter-select id="program-manager" :label="__('programs.manager')" :search-label="__('programs.search_managers')" wire:model.live="manager" :value="$manager" employees>
                 <option value="">{{ __('common.all_managers') }}</option>
             </x-ui.header-filter-select>
+
+            @php
+                $gapLabel = match ($gap) {
+                    'no_plan' => __('programs.gap_no_plan', ['year' => now()->year]),
+                    'no_strategy' => __('programs.gap_no_strategy'),
+                    'no_manager' => __('programs.gap_no_manager'),
+                    default => null,
+                };
+            @endphp
+            @if ($gapLabel !== null)
+                <span class="dk-chip dk-gapchip" data-gap-filter-chip>
+                    <span>{{ $gapLabel }}</span>
+                    <button type="button" wire:click="$set('gap', '')" aria-label="{{ __('programs.clear_gap_named', ['name' => $gapLabel]) }}" data-test="clear-gap-filter">{{ __('programs.clear_gap') }}<x-desk.icon name="x" /></button>
+                </span>
+            @endif
         </x-slot:filters>
     
     <div class="flex justify-end"><span wire:loading.delay.flex wire:target="search,strategy,manager,gap,clearFilters" class="hidden items-center gap-1.5 text-xs text-secondary-medium dark:text-ink-muted"><flux:icon.arrow-path class="size-3.5 animate-spin" /> {{ __('common.updating') }}</span>@if ($filtersAreActive)<flux:button size="sm" variant="ghost" wire:click="clearFilters">{{ __('common.reset_filters') }}</flux:button>@endif</div>

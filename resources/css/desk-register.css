@@ -345,3 +345,10 @@
         .dk-pjl-peek { display: none; }
     }
 }
+
+/* A register narrowed to a gap ("No 2026 plan"): the chip names it, its button clears it. */
+@layer components {
+    .dk-gapchip { background: var(--ink); border-color: var(--ink); color: var(--paper); cursor: default; }
+    .dk-gapchip button { display: inline-flex; align-items: center; gap: 4px; margin-inline-start: 2px; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+    .dk-gapchip button svg.dk-i { width: 14px; height: 14px; }
+}

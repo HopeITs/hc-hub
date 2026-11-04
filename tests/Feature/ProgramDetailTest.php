@@ -45,6 +45,26 @@ test('program detail shows the program its strategy and its manager', function (
         ->assertSeeText('ليلى حداد');
 });
 
+test('the program breadcrumb leads back through the strategies list and the program strategy', function () {
+    $strategy = Strategy::factory()->create(['name' => 'Country Strategy']);
+    $program = Program::factory()->create(['name' => 'Water Security', 'strategy_id' => $strategy->id]);
+
+    $this->actingAs(User::factory()->role('General Manager')->create())
+        ->get(route('programs.show', $program))
+        ->assertSee('<a href="'.route('strategies.index').'" wire:navigate>'.__('common.strategies').'</a>', false)
+        ->assertSee('<a href="'.route('strategies.show', $strategy).'" wire:navigate>Country Strategy</a>', false)
+        ->assertSee('<span aria-current="page">Water Security</span>', false);
+});
+
+test('the program back link returns to the strategy page it was opened from', function () {
+    $strategy = Strategy::factory()->create();
+    $program = Program::factory()->create(['strategy_id' => $strategy->id]);
+
+    $this->actingAs(User::factory()->role('General Manager')->create())
+        ->get(route('programs.show', $program), ['referer' => route('strategies.show', $strategy)])
+        ->assertSee('class="dk-back" href="'.route('strategies.show', $strategy).'" wire:navigate', false);
+});
+
 test('program detail lists only its own projects', function () {
     $user = User::factory()->role('General Manager')->create();
     $subject = Program::factory()->create();

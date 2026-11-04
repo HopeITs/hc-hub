@@ -252,10 +252,12 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
 
 <section class="dk-story @container/detail flex flex-col gap-6" data-story>
     <div>
-        <a class="dk-back" href="{{ route('programs.index') }}" wire:navigate data-story-back><x-desk.icon name="back" class="dk-flip" />{{ __('common.programs') }}</a>
+        <a class="dk-back" href="{{ \App\Support\BackUrl::for(route('programs.index')) }}" wire:navigate data-story-back><x-desk.icon name="back" class="dk-flip" />{{ __('common.programs') }}</a>
 
         <nav class="dk-crumb" aria-label="{{ __('ui.breadcrumb') }}">
             @if ($this->program->strategy)
+                <a href="{{ route('strategies.index') }}" wire:navigate>{{ __('common.strategies') }}</a>
+                ›
                 <a href="{{ route('strategies.show', $this->program->strategy) }}" wire:navigate>{{ $this->program->strategy->name }}</a>
             @else
                 <span>{{ __('common.strategy_not_assigned') }}</span>
