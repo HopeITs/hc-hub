@@ -62,7 +62,8 @@
                             </div>
 
                             <div class="flex shrink-0 items-center gap-2">
-                                <x-ui.button tone="ghost" size="sm" icon="eye" :href="route('monthly-reports.show', $rowReport)" wire:navigate :aria-label="__('common.view_name', ['name' => $rowReport->period->translatedFormat('F Y')])" />
+                                {{-- Named with its project: two projects share every month, and "View September 2026" twice told a screen reader nothing. --}}
+                                <x-ui.button tone="ghost" size="sm" icon="eye" class="max-sm:size-11" :href="route('monthly-reports.show', $rowReport)" wire:navigate :aria-label="__('common.view_name', ['name' => $groupProject->name.' · '.$rowReport->period->translatedFormat('F Y')])" />
                                 @if ($row['can_fill'])
                                     <x-ui.button
                                         size="sm"

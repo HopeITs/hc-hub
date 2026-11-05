@@ -58,7 +58,8 @@ new #[Layout('layouts::desk'), Title('titles.monthly_report')] class extends Com
         </div>
 
         @if ($this->rows === [])
-            <x-ui.empty-state icon="chart-bar" :heading="__('monthly_reports.no_lines')" :body="__('monthly_reports.no_lines_body')" />
+            {{-- "Can still be submitted" is advice for whoever submits it; to a validator, or once it is submitted, it only confuses. --}}
+            <x-ui.empty-state icon="chart-bar" :heading="__('monthly_reports.no_lines')" :body="$abilities['submit'] ? __('monthly_reports.no_lines_body') : null" />
         @else
             <x-monthly-reports.lines-grid :rows="$this->rows" :figures="$figures" />
         @endif

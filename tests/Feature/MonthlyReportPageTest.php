@@ -387,6 +387,45 @@ test('MEAL marks a submitted report as seen and the page shows when', function (
     expect($report->fresh()->seen_by_meal_at)->not->toBeNull();
 });
 
+/*
+| Page review, 5 Nov 2026: a validator reading a locked report was told it was
+| "Saved" and that it "can still be submitted", and the header named the
+| project three times.
+*/
+
+test('a validator reading a submitted report with no lines sees no save state and no submit advice', function () {
+    $report = mrsReport(mrsProject(), status: MonthlyReportStatus::Submitted);
+
+    mrsPage($report, $this->officer)
+        ->assertSeeHtml('data-test="validate-button"')
+        ->assertSeeText(__('monthly_reports.no_lines'))
+        ->assertDontSeeText(__('monthly_reports.no_lines_body'))
+        ->assertDontSeeHtml('data-save-state');
+});
+
+test('the preparer of a draft with no lines is still told it can be submitted, and sees the save state', function () {
+    $this->travelTo('2026-11-20 10:00:00');
+    $report = mrsReport(mrsProject(), '2026-11-01');
+
+    mrsPage($report)
+        ->assertSeeText(__('monthly_reports.no_lines_body'))
+        ->assertSeeHtml('data-save-state');
+});
+
+test('the header links the project once and says "Not seen yet" only while the report waits for MEAL', function () {
+    $project = mrsProject();
+    $validated = mrsReport($project, '2026-09-01', MonthlyReportStatus::Validated);
+    $submitted = mrsReport($project, '2026-10-01', MonthlyReportStatus::Submitted);
+    $projectLink = 'href="'.route('projects.show', $project).'"';
+
+    $html = mrsPage($validated, $this->officer)->html();
+
+    expect(substr_count($html, $projectLink))->toBe(1);
+
+    mrsPage($validated, $this->officer)->assertDontSeeText(__('monthly_reports.not_seen_yet'));
+    mrsPage($submitted, $this->officer)->assertSeeText(__('monthly_reports.not_seen_yet'));
+});
+
 test('Refresh Lines adds the line of a target confirmed after the month opened', function () {
     $project = mrsProject();
     $report = mrsReport($project);

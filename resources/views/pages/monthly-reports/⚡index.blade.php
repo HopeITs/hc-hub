@@ -35,12 +35,30 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
 
     /**
      * MEAL lands on its queue when it prepares nothing itself (T17B Q3).
+     * Someone who cannot validate never lands there, even from a link: the
+     * queue would only ever be empty for them.
      */
     public function mount(): void
     {
-        if (! in_array($this->tab, ['mine', 'validate'], true)) {
-            $this->tab = $this->myProjectIds() === [] && auth()->user()->can('reports.approve') ? 'validate' : 'mine';
+        $offered = $this->canValidate() ? ['mine', 'validate'] : ['mine'];
+
+        if (! in_array($this->tab, $offered, true)) {
+            $this->tab = $this->myProjectIds() === [] && $this->canValidate() ? 'validate' : 'mine';
         }
+    }
+
+    /**
+     * Whether this user has a validation queue at all: the first guard of
+     * MonthlyReport::validatableBy(). Without it "To validate" was offered to
+     * every Team Member and Public Relations Manager, and could only ever say
+     * "Nothing to validate" (page review, 5 Nov 2026).
+     */
+    #[Computed]
+    public function canValidate(): bool
+    {
+        $user = auth()->user();
+
+        return $user->can('reports.approve') && ! $user->hasRole('General Manager');
     }
 
     /**
@@ -156,6 +174,31 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
     }
 
     /**
+     * Every report this validator may act on, in a status a validator deals
+     * with: submitted or validated. A draft is still the preparer's and is
+     * never listed here, whichever status is chosen.
+     *
+     * The city, project and month options are built from this, not from the
+     * status-filtered queue: built from the queue, a month chosen before the
+     * status changed dropped out of its own list, so its trigger fell back to
+     * "Any month" while the rows were still narrowed to it (page review,
+     * 5 Nov 2026).
+     *
+     * @return Collection<int, MonthlyReport>
+     */
+    #[Computed]
+    public function validatable(): Collection
+    {
+        return MonthlyReport::query()
+            ->validatableBy(auth()->user())
+            ->where('status', '!=', MonthlyReportStatus::Draft)
+            ->with(['project:id,slug,name,city_id', 'submitter:id,hr_user_id'])
+            ->orderBy('period')
+            ->orderBy('id')
+            ->get(['id', 'slug', 'project_id', 'period', 'status', 'submitted_at', 'submitted_by', 'seen_by_meal_at']);
+    }
+
+    /**
      * The validator queue (contracts §13.1 item 6), submitted by default.
      *
      * @return Collection<int, MonthlyReport>
@@ -163,13 +206,9 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
     #[Computed]
     public function queue(): Collection
     {
-        return MonthlyReport::query()
-            ->validatableBy(auth()->user())
-            ->when($this->selectedStatus !== null, fn (Builder $query) => $query->where('status', $this->selectedStatus))
-            ->with(['project:id,slug,name,city_id', 'submitter:id,hr_user_id'])
-            ->orderBy('period')
-            ->orderBy('id')
-            ->get(['id', 'slug', 'project_id', 'period', 'status', 'submitted_at', 'submitted_by', 'seen_by_meal_at']);
+        return $this->selectedStatus === null
+            ? $this->validatable
+            : $this->validatable->filter(fn (MonthlyReport $report): bool => $report->status === $this->selectedStatus)->values();
     }
 
     /**
@@ -204,7 +243,7 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
     #[Computed]
     public function cityNames(): array
     {
-        $ids = $this->queue->map(fn (MonthlyReport $report): ?int => $report->project->city_id === null ? null : (int) $report->project->city_id)->filter()->unique()->values()->all();
+        $ids = $this->validatable->map(fn (MonthlyReport $report): ?int => $report->project->city_id === null ? null : (int) $report->project->city_id)->filter()->unique()->values()->all();
 
         if ($ids === []) {
             return [];
@@ -219,7 +258,7 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
     #[Computed]
     public function monthOptions(): array
     {
-        return $this->queue->mapWithKeys(fn (MonthlyReport $report): array => [$report->period->format('Y-m') => $report->period->translatedFormat('F Y')])->sortKeys()->all();
+        return $this->validatable->mapWithKeys(fn (MonthlyReport $report): array => [$report->period->format('Y-m') => $report->period->translatedFormat('F Y')])->sortKeys()->all();
     }
 
     public function clearFilters(): void
@@ -241,10 +280,10 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
     data-monthly-reports-intro
     :view="$tab"
     view-model="tab"
-    :views="[
+    :views="array_filter([
         'mine' => ['icon' => 'file', 'label' => __('monthly_reports.tab_mine')],
-        'validate' => ['icon' => 'check', 'label' => __('monthly_reports.tab_validate')],
-    ]"
+        'validate' => $this->canValidate ? ['icon' => 'check', 'label' => __('monthly_reports.tab_validate')] : null,
+    ])"
 >
         @if ($tab === 'validate')
             <x-slot:filters>
@@ -257,7 +296,7 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
 
                 <x-ui.header-filter-select :label="__('common.project')" wire:model.live="project" :value="$project">
                     <option value="">{{ __('targets.any_project') }}</option>
-                    @foreach ($this->queue->pluck('project')->unique('id')->sortBy('name') as $projectOption)
+                    @foreach ($this->validatable->pluck('project')->unique('id')->sortBy('name') as $projectOption)
                         <option value="{{ $projectOption->id }}">{{ $projectOption->name }}</option>
                     @endforeach
                 </x-ui.header-filter-select>

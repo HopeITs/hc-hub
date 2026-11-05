@@ -1,17 +1,11 @@
-{{-- "To validate" on ⚡index.blade.php: the MEAL queue (MonthlyReport::validatableBy()), filtered in memory. --}}
+{{-- "To validate" on ⚡index.blade.php: the MEAL queue (MonthlyReport::validatableBy()), filtered in memory. The filters' one way back is the register bar's Clear; this panel used to repeat it as "Reset filters". --}}
 @use('App\Enums\MonthlyReportStatus')
 <x-ui.panel>
-    @if ($filtersAreActive)
-        <x-slot:toolbar>
-            <flux:button size="sm" variant="ghost" class="text-secondary-medium! dark:text-ink-muted!" wire:click="clearFilters">{{ __('common.reset_filters') }}</flux:button>
-        </x-slot:toolbar>
-    @endif
-
     @if ($this->filteredQueue->isEmpty())
         <x-ui.empty-state
             icon="check-badge"
             :heading="$filtersAreActive ? __('monthly_reports.empty_filtered') : __('monthly_reports.empty_validate')"
-            :body="$filtersAreActive ? __('common.change_the_search_or_filters_and_try_again') : __('monthly_reports.empty_validate_body')"
+            :body="$filtersAreActive ? __('common.change_the_filters_and_try_again') : __('monthly_reports.empty_validate_body')"
         />
     @else
         <div class="divide-y divide-secondary-soft dark:divide-line">
@@ -29,7 +23,7 @@
                         <p class="flex flex-wrap items-center gap-2">
                             <span class="text-base font-bold" dir="auto">{{ $queued->project->name }}</span>
                             <x-monthly-reports.state-chip :state="$queuedState" />
-                            @if ($queued->seen_by_meal_at === null)
+                            @if ($queued->seen_by_meal_at === null && $queued->status === MonthlyReportStatus::Submitted)
                                 <span class="inline-flex items-center gap-1 text-xs font-semibold text-secondary-medium dark:text-ink-muted">
                                     <span class="size-1.5 rounded-full bg-primary dark:bg-ink" aria-hidden="true"></span>
                                     {{ __('monthly_reports.not_seen_yet') }}
@@ -47,7 +41,7 @@
                         </p>
                     </div>
 
-                    <x-ui.button tone="ghost" size="sm" icon="eye" :href="route('monthly-reports.show', $queued)" wire:navigate :aria-label="__('common.view_name', ['name' => $queued->project->name.' · '.$queued->period->translatedFormat('F Y')])" />
+                    <x-ui.button tone="ghost" size="sm" icon="eye" class="max-sm:size-11" :href="route('monthly-reports.show', $queued)" wire:navigate :aria-label="__('common.view_name', ['name' => $queued->project->name.' · '.$queued->period->translatedFormat('F Y')])" />
                 </article>
             @endforeach
         </div>

@@ -197,3 +197,87 @@ test('a Team Member sees the months of a project they own without Fill and is re
 
     expect($november->fresh()->prepared_by)->toBeNull();
 });
+
+/*
+| Page review, 5 Nov 2026: what a first-time MEAL Manager and preparer
+| tripped over on this list.
+*/
+
+test('a month kept while the status changes still names itself on its filter', function () {
+    $project = mrpProject($this->aleppo);
+    mrpMonth($project, '2026-09-01', MonthlyReportStatus::Validated);
+    mrpMonth($project, '2026-10-01', MonthlyReportStatus::Submitted);
+    $meal = userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal'));
+    $monthTrigger = fn (string $choice): string => 'aria-label="'.e(__('common.filter_choice', ['label' => __('monthly_reports.month'), 'choice' => $choice])).'"';
+
+    Livewire::actingAs($meal)->test('pages::monthly-reports.index')
+        ->set('month', '2026-10')
+        ->set('status', 'validated')
+        ->assertSeeHtml($monthTrigger('October 2026'))
+        ->assertDontSeeHtml($monthTrigger(__('monthly_reports.any_month')));
+});
+
+test('the queue never lists a draft, even for every status', function () {
+    $project = mrpProject($this->aleppo);
+    $draft = mrpMonth($project, '2026-11-01');
+    $submitted = mrpMonth($project, '2026-10-01', MonthlyReportStatus::Submitted);
+    $validated = mrpMonth($project, '2026-09-01', MonthlyReportStatus::Validated);
+
+    Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
+        ->test('pages::monthly-reports.index')
+        ->set('status', 'all')
+        ->assertSeeHtml('data-validate-row="'.$submitted->id.'"')
+        ->assertSeeHtml('data-validate-row="'.$validated->id.'"')
+        ->assertDontSeeHtml('data-validate-row="'.$draft->id.'"');
+});
+
+test('"Not seen yet" marks only a submitted report still waiting for its first look', function () {
+    $project = mrpProject($this->aleppo);
+    mrpMonth($project, '2026-09-01', MonthlyReportStatus::Validated, ['seen_by_meal_at' => null]);
+    mrpMonth($project, '2026-10-01', MonthlyReportStatus::Submitted, ['seen_by_meal_at' => null]);
+
+    Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
+        ->test('pages::monthly-reports.index')
+        ->assertSeeText(__('monthly_reports.not_seen_yet'))
+        ->set('status', 'validated')
+        ->assertDontSeeText(__('monthly_reports.not_seen_yet'));
+});
+
+test('active filters offer one way back, and an empty result does not mention a search', function () {
+    mrpMonth(mrpProject($this->aleppo), '2026-09-01', MonthlyReportStatus::Submitted);
+
+    Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
+        ->test('pages::monthly-reports.index')
+        ->set('month', '2026-01')
+        ->assertSeeText(__('desk.register.clear'))
+        ->assertDontSeeText(__('common.reset_filters'))
+        ->assertSeeText(__('monthly_reports.empty_filtered'))
+        ->assertSeeText(__('common.change_the_filters_and_try_again'))
+        ->assertDontSeeText(__('common.change_the_search_or_filters_and_try_again'));
+});
+
+test('each month\'s view link on "My reports" names its project', function () {
+    $this->travelTo('2026-11-20 10:00:00');
+    mrpMonth(mrpProject($this->aleppo, name: 'Hope Center Aleppo'), '2026-09-01');
+    mrpMonth(mrpProject($this->aleppo, name: 'Micro Aleppo'), '2026-09-01');
+
+    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+        ->assertSeeHtml('aria-label="'.e(__('common.view_name', ['name' => 'Hope Center Aleppo · September 2026'])).'"')
+        ->assertSeeHtml('aria-label="'.e(__('common.view_name', ['name' => 'Micro Aleppo · September 2026'])).'"');
+});
+
+test('someone who cannot validate is not offered an empty "To validate" tab', function () {
+    $this->travelTo('2026-11-20 10:00:00');
+    mrpMonth(mrpProject($this->aleppo), '2026-09-01');
+
+    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+        ->assertDontSeeHtml('data-desk-register-view="validate"')
+        ->assertSet('tab', 'mine');
+
+    Livewire::withQueryParams(['tab' => 'validate'])->actingAs($this->owner)->test('pages::monthly-reports.index')
+        ->assertSet('tab', 'mine');
+
+    Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
+        ->test('pages::monthly-reports.index')
+        ->assertSeeHtml('data-desk-register-view="validate"');
+});

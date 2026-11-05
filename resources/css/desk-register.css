@@ -70,6 +70,12 @@
             min-height: 44px;
             height: 44px;
         }
+
+        /* The register's view switch too (My reports / To validate, Table / Board): desk.css draws it 32px tall. */
+        .dk-scope .dk-reg-views button {
+            min-height: 44px;
+            height: 44px;
+        }
     }
 
     /*
