@@ -627,6 +627,10 @@ return [
                 'title' => 'On-hold reminder',
                 'body' => '“:subject” is still on hold',
             ],
+            'concept_note_updated' => [
+                'title' => 'Concept note updated',
+                'body' => ':actor updated the concept note of “:subject”',
+            ],
             'targets_saved' => [
                 'title' => 'Targets saved',
                 'body' => ':actor saved the targets of “:subject”',

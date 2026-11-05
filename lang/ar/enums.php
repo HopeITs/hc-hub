@@ -69,6 +69,7 @@ return [
         'entered' => 'مُدخل (البسط والمقام)',
     ],
     'media_collection' => [
+        'concept_note' => 'المذكرة المفاهيمية',
         'proposal' => 'مقترح',
         'agreement' => 'اتفاقية',
         'mou' => 'مذكرة تفاهم',

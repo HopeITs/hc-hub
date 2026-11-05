@@ -174,6 +174,8 @@ final class EventCatalog
                 'proposal.on_hold_reminder' => self::entry('proposals', $now, 'scanner', $all),
                 'proposal.final_report_accepted' => self::entry('proposals', $now, 'module_map', $all, activity: 'proposal.final_report_accepted'),
                 'proposal.beneficiaries_changed' => self::entry('proposals', $now, 'module_map', $all, activity: 'proposal.beneficiaries_changed'),
+                // W-24: the concept note changed. A movement worth recording, not worth interrupting anyone for.
+                'proposal.concept_note_updated' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.concept_note_updated'),
                 'proposal.targets_saved' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.targets_saved'),
                 'proposal.project_linked' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.project_linked'),
                 'proposal.project_unlinked' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.project_unlinked'),

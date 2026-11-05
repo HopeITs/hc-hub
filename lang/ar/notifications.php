@@ -627,6 +627,10 @@ return [
                 'title' => 'تذكير بمقترح معلّق',
                 'body' => 'ما زال المقترح «:subject» معلّقًا',
             ],
+            'concept_note_updated' => [
+                'title' => 'تحديث المذكرة المفاهيمية',
+                'body' => 'حدّث :actor المذكرة المفاهيمية للمقترح «:subject»',
+            ],
             'targets_saved' => [
                 'title' => 'حفظ المستهدفات',
                 'body' => 'حفظ :actor مستهدفات المقترح «:subject»',

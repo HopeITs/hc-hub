@@ -3,12 +3,13 @@
     (proposals/index and proposals/show). Its wire:model bindings resolve against that page's component.
 
     Sections, in reading and tab order (D-62, W-10): identity (renewal preset, name, number); donor;
-    locations; planned dates; budget; starting stage (create only); notes last. Reordering the markup is
-    what sets the tab order, so keep the submit button in the actions slot, after everything.
+    locations; concept note; planned dates; budget; starting stage (create only); notes last. Reordering
+    the markup is what sets the tab order, so keep the submit button in the actions slot, after everything.
 
-    Two sections are slots their own tasks fill. Locations still holds the project picker (`projectIds`);
-    W-34a replaces its contents with location rows. A concept-note section belongs between Locations and
-    Dates and arrives with W-24 — it is left out rather than rendered empty.
+    Locations still holds the project picker (`projectIds`); W-34a replaces its contents with location
+    rows. The concept note (W-24) offers the text and the document; neither is required, and the
+    document is filed on the saved proposal, so a renewal — whose contents are copied, not typed — does
+    not show the section at all.
 
     Create chooses the projects (a server-searched picker, each row naming its center, program and city)
     with a beneficiaries input beside each chosen one. Edit shows the linked projects with their
@@ -16,7 +17,9 @@
     money holder; for anyone else the whole section is absent, not hidden.
 --}}
 @use('App\Enums\Currency')
+@use('App\Enums\FileType')
 @use('App\Enums\ProposalStatus')
+@use('Illuminate\Support\Str')
 @props([
     'open' => false,
     'editing' => false,
@@ -52,6 +55,7 @@
         __('proposals.section_identity') => ['previousProposalId', 'name', 'internalProjectNumber'],
         __('proposals.section_donor') => ['donorId'],
         __('proposals.section_locations') => ['projectIds', 'beneficiaries', 'beneficiariesReason', ...array_map(fn (array $row): string => 'beneficiaries.'.$row['id'], $projectRows)],
+        __('proposals.concept_note.section') => ['conceptNote', 'conceptNoteFile'],
         __('proposals.section_planned_dates') => ['plannedDateBegin', 'plannedDateEnd'],
         __('proposals.section_budget') => ['requestedBudget', 'requestedCurrency'],
         __('proposals.section_start') => ['startingStage', 'skipReason'],
@@ -252,7 +256,29 @@
             </div>
         </x-ui.form-section>
 
-        {{-- W-24 adds the concept-note section here, between Locations and Dates. --}}
+        {{-- 4 · Concept note (W-24): the text, the document, or both. Neither is required. --}}
+        @unless ($isRenewal)
+        <x-ui.form-section :title="__('proposals.concept_note.section')" :fields="$sectionFields[__('proposals.concept_note.section')]" data-test="concept-note-section">
+            <div class="grid gap-y-3">
+                <x-ui.form-textarea
+                    wire:model="conceptNote"
+                    :label="__('proposals.concept_note.text_label')"
+                    :help="__('proposals.concept_note.text_help')"
+                    rows="5"
+                    dir="auto"
+                />
+
+                <x-ui.form-file
+                    wire:model="conceptNoteFile"
+                    :label="__('proposals.concept_note.file_label')"
+                    :help="__('proposals.concept_note.file_help')"
+                    :accept="collect(FileType::values())->map(fn ($extension) => '.'.$extension)->implode(',')"
+                    :types="Str::upper(implode(', ', FileType::values()))"
+                    max-size="5 MB"
+                />
+            </div>
+        </x-ui.form-section>
+        @endunless
 
         {{-- 4 · Dates. --}}
         <x-ui.form-section :title="__('proposals.section_planned_dates')" :fields="$sectionFields[__('proposals.section_planned_dates')]">

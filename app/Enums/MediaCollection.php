@@ -19,6 +19,7 @@ enum MediaCollection: string
 {
     use HasTranslatedLabel;
 
+    case ConceptNote = 'concept_note';
     case Proposal = 'proposal';
     case Agreement = 'agreement';
     case Mou = 'mou';
