@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'internal_number_exhausted' => 'All 999 internal proposal numbers for :year have been assigned.',
     'accepted_file_types' => 'Accepted: :types, up to 5 MB.',
     'achievement_counts_approved_reports_only' => 'Achievement counts approved reports only.',
     'across_count_proposals' => '{0} Across no proposals|{1} Across :count proposal|[2,*] Across :count proposals',

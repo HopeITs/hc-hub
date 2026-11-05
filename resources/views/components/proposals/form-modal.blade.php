@@ -130,12 +130,11 @@
 
                 <x-ui.form-input wire:model="name" :label="__('proposals.proposal_name')" maxlength="255" required autofocus dir="auto" />
 
+                @if ($editing && filled($storedNumber))
                 <div class="min-w-0">
-                    <x-ui.form-input wire:model="internalProjectNumber" :label="__('common.internal_project_number')" maxlength="50" dir="ltr" required />
-                    @if ($editing && filled($storedNumber))
                         <x-ui.project-number :number="$storedNumber" kind="internal" class="mt-1.5 text-xs {{ $mutedText }}" />
-                    @endif
                 </div>
+                @endif
             </div>
         </x-ui.form-section>
 

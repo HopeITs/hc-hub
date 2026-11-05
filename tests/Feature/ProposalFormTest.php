@@ -132,7 +132,7 @@ test('creating a proposal stores its donor, projects, beneficiaries and first no
 
     expect(DB::table('proposals')->find($proposal->id))
         ->name->toBe('Winter Shelter Response')
-        ->internal_project_number->toBe('HC-2026-951')
+        ->internal_project_number->toBe('26-001')
         ->donor_id->toBe($data['donorId'])
         ->status->toBe('concept note')
         ->planned_date_begin->toBe('2026-11-01')

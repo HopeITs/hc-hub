@@ -56,7 +56,7 @@ final class CloneProposalForRenewal
      * `plannedDateBegin`, `plannedDateEnd`, `name` and `notes` default to the
      * previous proposal's, the dates moved one year on.
      *
-     * @param  array{internalProjectNumber: string, name?: ?string, notes?: ?string, plannedDateBegin?: ?string, plannedDateEnd?: ?string}  $data
+     * @param  array{name?: ?string, notes?: ?string, plannedDateBegin?: ?string, plannedDateEnd?: ?string}  $data
      * @return CloneResult
      */
     public function handle(Proposal $previous, array $data, User $user): array
@@ -139,7 +139,6 @@ final class CloneProposalForRenewal
 
         $renewal = app(SaveProposal::class)->handle(null, [
             'name' => isset($data['name']) && $data['name'] !== '' ? (string) $data['name'] : $previous->name,
-            'internalProjectNumber' => (string) $data['internalProjectNumber'],
             'donorId' => $previous->donor_id,
             'projectIds' => $projects['ids'],
             'beneficiaries' => $projects['beneficiaries'],

@@ -11,12 +11,13 @@ use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\ProposalStatusNote;
 use App\Models\User;
-use Closure;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator as ValidatorInstance;
 
 /**
@@ -29,9 +30,6 @@ use Illuminate\Validation\Validator as ValidatorInstance;
  * transaction. An edit never touches links or status: it changes the details,
  * the donor while the concept note is still in the house, the budget (money
  * holders only) and the beneficiaries of the projects already linked.
- *
- * The internal number's unique race is left to the caller: the page catches
- * the narrowed UniqueConstraintViolationException around this action.
  */
 final class SaveProposal
 {
@@ -44,7 +42,7 @@ final class SaveProposal
      * `beneficiaries` is keyed by project id. The budget fields are ignored
      * entirely for a user who may not see money.
      *
-     * @param  array{name: string, internalProjectNumber: string, donorId: int|string|null, projectIds?: list<int|string>, beneficiaries?: array<int|string, int|string|null>, beneficiariesReason?: ?string, requestedBudget?: string|int|float|null, requestedCurrency?: ?string, plannedDateBegin: ?string, plannedDateEnd: ?string, notes?: ?string, startingStage?: string, skipReason?: ?string, previousProposalId?: int|null}  $data
+     * @param  array{name: string, donorId: int|string|null, projectIds?: list<int|string>, beneficiaries?: array<int|string, int|string|null>, beneficiariesReason?: ?string, requestedBudget?: string|int|float|null, requestedCurrency?: ?string, plannedDateBegin: ?string, plannedDateEnd: ?string, notes?: ?string, startingStage?: string, skipReason?: ?string, previousProposalId?: int|null}  $data
      */
     public function handle(?Proposal $existing, array $data, User $actor): Proposal
     {
@@ -68,6 +66,7 @@ final class SaveProposal
         $proposal = DB::transaction(function () use ($input, $actor, $projectIds, $beneficiaries): Proposal {
             $proposal = new Proposal;
             $this->fillDetails($proposal, $input, $actor);
+            $proposal->internal_project_number = $this->nextNumber((string) $input['plannedDateBegin']);
             $proposal->previous_proposal_id = isset($input['previousProposalId']) ? (int) $input['previousProposalId'] : null;
             $proposal->save();
 
@@ -147,7 +146,7 @@ final class SaveProposal
      */
     private function normalize(array $data): array
     {
-        foreach (['name', 'internalProjectNumber', 'notes', 'skipReason', 'beneficiariesReason'] as $field) {
+        foreach (['name', 'notes', 'skipReason', 'beneficiariesReason'] as $field) {
             if (is_string($data[$field] ?? null)) {
                 $data[$field] = trim($data[$field]);
             }
@@ -168,23 +167,8 @@ final class SaveProposal
      */
     private function validate(array $input, User $actor, ?Proposal $proposal, bool $requiresBeneficiariesReason, ?Collection $linked = null): void
     {
-        $storedNumber = $proposal?->internal_project_number;
-
         $rules = [
             'name' => ['required', 'string', 'max:255'],
-            'internalProjectNumber' => [
-                'required',
-                'string',
-                'max:50',
-                Rule::unique('proposals', 'internal_project_number')->ignore($proposal?->id),
-                // TEMP- marks the placeholders the migration wrote. A proposal
-                // still holding one saves unchanged, but nobody types a new one.
-                function (string $attribute, mixed $value, Closure $fail) use ($storedNumber): void {
-                    if (Proposal::isPlaceholderNumber((string) $value) && $value !== $storedNumber) {
-                        $fail(__('proposals.internal_project_number_prefix_reserved'));
-                    }
-                },
-            ],
             'donorId' => ['required', 'integer', Rule::exists(Donor::class, 'id')],
             'beneficiaries' => ['array'],
             'beneficiaries.*' => ['nullable', 'integer', 'min:1'],
@@ -348,7 +332,6 @@ final class SaveProposal
 
         $proposal->fill([
             'name' => (string) $input['name'],
-            'internal_project_number' => (string) $input['internalProjectNumber'],
             'planned_date_begin' => (string) $input['plannedDateBegin'],
             'planned_date_end' => (string) $input['plannedDateEnd'],
             'notes' => $notes === '' ? null : $notes,
@@ -365,6 +348,32 @@ final class SaveProposal
             $proposal->requested_budget = $budget === null || $budget === '' ? null : (string) $budget;
             $proposal->requested_currency = $currency === null || $currency === '' ? null : Currency::from((string) $currency);
         }
+    }
+
+    private function nextNumber(string $plannedStart): string
+    {
+        $year = CarbonImmutable::parse($plannedStart)->year;
+        $prefix = sprintf('%02d-', $year % 100);
+
+        DB::table('proposal_number_sequences')->insertOrIgnore(['year' => $year, 'last_number' => 0]);
+        $sequence = DB::table('proposal_number_sequences')->where('year', $year)->lockForUpdate()->first();
+        $lastNumber = (int) $sequence->last_number;
+
+        foreach (Proposal::query()->where('internal_project_number', 'like', $prefix.'%')->pluck('internal_project_number') as $number) {
+            if (preg_match('/^'.preg_quote($prefix, '/').'([0-9]{3})$/', $number, $matches)) {
+                $lastNumber = max($lastNumber, (int) $matches[1]);
+            }
+        }
+
+        if ($lastNumber >= 999) {
+            throw ValidationException::withMessages([
+                'plannedDateBegin' => __('proposals.internal_number_exhausted', ['year' => $year]),
+            ]);
+        }
+
+        DB::table('proposal_number_sequences')->where('year', $year)->update(['last_number' => $lastNumber + 1]);
+
+        return $prefix.str_pad((string) ($lastNumber + 1), 3, '0', STR_PAD_LEFT);
     }
 
     /**

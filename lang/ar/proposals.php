@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'internal_number_exhausted' => 'تم تعيين جميع أرقام المقترحات الداخلية الـ 999 لعام :year.',
     'accepted_file_types' => 'المقبول: :types، بحد أقصى 5 ميغابايت.',
     'achievement_counts_approved_reports_only' => 'يُحتسب الإنجاز من التقارير المعتمدة فقط.',
     'across_count_proposals' => '{0} لا توجد مقترحات|{1} في مقترح واحد|{2} في مقترحين|[3,10] في :count مقترحات|[11,*] في :count مقترحًا',

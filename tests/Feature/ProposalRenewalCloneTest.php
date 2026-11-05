@@ -22,7 +22,6 @@ use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 const RENEWAL_TREE_COPIER = 'App\Actions\Results\CopyResultTree';
 
@@ -269,12 +268,13 @@ test('a failure rolls the whole clone back', function () {
         ->and([DB::table('proposals')->count(), DB::table('results')->count(), DB::table('milestones')->count()])->toBe($before);
 });
 
-test('a duplicate internal number is refused with nothing written', function () {
+test('a renewal ignores a supplied number and generates its own', function () {
     ['previous' => $previous] = renewalSource();
 
-    expect(fn () => app(CloneProposalForRenewal::class)->handle($previous, renewalData(['internalProjectNumber' => 'HC-2026-310']), renewalActor()))
-        ->toThrow(ValidationException::class)
-        ->and(DB::table('proposals')->where('previous_proposal_id', $previous->id)->count())->toBe(0);
+    $result = app(CloneProposalForRenewal::class)->handle($previous, renewalData(['internalProjectNumber' => 'HC-2026-310']), renewalActor());
+
+    expect($result['proposal']->internal_project_number)->toBe('27-001')
+        ->and(DB::table('proposals')->where('previous_proposal_id', $previous->id)->count())->toBe(1);
 });
 
 test('a proposal cannot renew itself or one of its successors', function () {
