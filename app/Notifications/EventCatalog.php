@@ -168,6 +168,8 @@ final class EventCatalog
                 'proposal.reviewer_removed' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.reviewer_removed'),
                 'proposal.reviewer_seen' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.reviewer_seen'),
                 'proposal.need_assessment_added' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.need_assessment_added'),
+                'proposal.negotiation_noted' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.negotiation_noted'),
+                'proposal.extended' => self::entry('proposals', $now, 'module_map', $all, activity: 'proposal.extended'),
                 'proposal.approved' => self::entry('proposals', $now, 'module_map', $all, critical: true, activity: 'proposal.approved'),
                 'proposal.on_hold_reminder' => self::entry('proposals', $now, 'scanner', $all),
                 'proposal.final_report_accepted' => self::entry('proposals', $now, 'module_map', $all, activity: 'proposal.final_report_accepted'),
@@ -176,6 +178,8 @@ final class EventCatalog
                 'proposal.project_linked' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.project_linked'),
                 'proposal.project_unlinked' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.project_unlinked'),
                 'proposal.deleted' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.deleted'),
+                'proposal.risk_attached' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.risk_attached'),
+                'proposal.risk_detached' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.risk_detached'),
                 // W-34a: location rows (counts only) and the program requests they open.
                 'proposal.locations_changed' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.locations_changed', event: ProposalLocationsChanged::class),
                 'program_request.opened' => self::entry('proposals', $now, 'module_map', $all, activity: 'program_request.opened'),

@@ -9,6 +9,7 @@ use App\Enums\MilestoneStatus;
 use App\Enums\ProjectStatus;
 use App\Enums\ProposalStatus;
 use App\Enums\ReviewStage;
+use App\Enums\StatusNoteKind;
 use App\Events\ProposalStatusChanged;
 use App\Models\Donor;
 use App\Models\Milestone;
@@ -39,7 +40,7 @@ use Illuminate\Validation\Validator as ValidatorInstance;
 final class TransitionProposal
 {
     /**
-     * @param  array{reason?: string, effective_date?: string, remind_on?: string, meeting_at?: string}  $input
+     * @param  array{reason?: string, effective_date?: string, meeting_at?: string}  $input
      */
     public function handle(Proposal $proposal, ProposalStatus $to, ProposalStatus $expectedFrom, array $input): TransitionResult
     {
@@ -54,11 +55,7 @@ final class TransitionProposal
                 throw ValidationException::withMessages(['status' => __('proposals.stale_status')]);
             }
 
-            $requirements = ProposalTransitions::requirements(
-                $from,
-                $to,
-                $from === ProposalStatus::OnHold ? $locked->statusBefore(ProposalStatus::OnHold) : null,
-            );
+            $requirements = ProposalTransitions::requirements($from, $to);
 
             if ($requirements === null) {
                 throw ValidationException::withMessages([
@@ -70,7 +67,10 @@ final class TransitionProposal
             $validated = $this->validate($locked, $requirements, $input, $reviewStage !== null);
 
             $locked->status = $to;
-            $locked->status_remind_on = $to === ProposalStatus::OnHold ? $validated['remind_on'] : null;
+            // Leaving the status drops the hold with it (D-58, W-06): the flag
+            // and its reminder belong to a proposal that stayed where it was.
+            $locked->on_hold_since = null;
+            $locked->status_remind_on = null;
             $locked->save();
 
             $reason = trim((string) ($validated['reason'] ?? ''));
@@ -83,6 +83,7 @@ final class TransitionProposal
                 'meeting_at' => filled($validated['meeting_at'] ?? null) ? CarbonImmutable::parse($validated['meeting_at']) : null,
                 'changed_by' => Auth::id(),
                 'is_correction' => false,
+                'kind' => StatusNoteKind::Transition,
             ]);
 
             if ($reviewStage !== null) {
@@ -104,9 +105,9 @@ final class TransitionProposal
      * Every failure is reported at once, each under its own key.
      *
      * @param  list<string>  $requirements
-     * @param  array{reason?: string, effective_date?: string, remind_on?: string, meeting_at?: string}  $input
+     * @param  array{reason?: string, effective_date?: string, meeting_at?: string}  $input
      * @param  bool  $opensReview  only a move into a review status takes a meeting time
-     * @return array{reason?: string, effective_date?: string, remind_on?: string, meeting_at?: string|null}
+     * @return array{reason?: string, effective_date?: string, meeting_at?: string|null}
      */
     private function validate(Proposal $proposal, array $requirements, array $input, bool $opensReview): array
     {
@@ -129,13 +130,6 @@ final class TransitionProposal
             $messages['effective_date.before_or_equal'] = __('proposals.date_not_future');
         }
 
-        if (in_array('remind_on', $requirements, true)) {
-            $rules['remind_on'] = ['required', 'date_format:Y-m-d', 'after:today'];
-            $messages['remind_on.required'] = __('proposals.remind_on_future');
-            $messages['remind_on.date_format'] = __('proposals.remind_on_future');
-            $messages['remind_on.after'] = __('proposals.remind_on_future');
-        }
-
         if ($opensReview) {
             $rules['meeting_at'] = ['nullable', 'date', 'after:now'];
             $messages['meeting_at.date'] = __('proposals.meeting_after_now');
@@ -156,7 +150,7 @@ final class TransitionProposal
             }
         });
 
-        /** @var array{reason?: string, effective_date?: string, remind_on?: string, meeting_at?: string|null} */
+        /** @var array{reason?: string, effective_date?: string, meeting_at?: string|null} */
         return $validator->validate();
     }
 
@@ -177,7 +171,7 @@ final class TransitionProposal
                 ->where(fn ($query) => $query->whereNull('project_proposal.target_beneficiaries')->orWhere('project_proposal.target_beneficiaries', '<', 1))
                 ->exists(),
             'final_report' => $this->hasFinalReport($proposal),
-            'reason', 'reason_min_10', 'effective_date', 'remind_on' => true,
+            'reason', 'reason_min_10', 'effective_date' => true,
         };
 
         if ($isMet) {

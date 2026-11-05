@@ -38,6 +38,7 @@ class DatabaseSeeder extends Seeder
                 RealDataSeeder::class,
                 ProposalLocationSeeder::class,
                 SectorSeeder::class,
+                RiskLibrarySeeder::class,
                 EvidenceTypeSeeder::class,
                 NarrativeQuestionSeeder::class,
             ]);

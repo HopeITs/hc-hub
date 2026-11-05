@@ -27,6 +27,7 @@ use App\Models\Report;
 use App\Models\ReportFile;
 use App\Models\Result;
 use App\Models\Risk;
+use App\Models\RiskLibrary;
 use App\Models\Sector;
 use App\Models\Strategy;
 use App\Models\Task;
@@ -52,6 +53,7 @@ test('the seeders populate every table in the schema', function () {
         Proposal::class,
         DonorProposal::class,
         Risk::class,
+        RiskLibrary::class,
         Milestone::class,
         Task::class,
         TaskAssignee::class,
