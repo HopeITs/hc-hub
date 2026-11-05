@@ -179,6 +179,9 @@ return [
             'pace' => '“:subject” is behind pace: :achieved% achieved against :expected% expected by now',
             'silent' => 'No progress has been recorded for “:subject” since :date',
         ],
+        'responsible_inactive' => [
+            'project' => '“:subject” is still owned by :person, who has left — reassign it',
+        ],
         'data_gap' => [
             'no_milestones' => 'The active project “:subject” has no milestones',
             'no_indicators' => 'The active project “:subject” has no indicators',
@@ -312,6 +315,7 @@ return [
             'report_approve' => 'Approve',
             'transfer_mark_received' => 'Mark received',
             'agreement_record' => 'Record agreement',
+            'project_reassign' => 'Reassign',
             'alert_snooze' => 'Snooze reminder',
             'assignment_acknowledge' => 'Acknowledge',
             'assignment_reject' => 'Reject',
@@ -612,6 +616,10 @@ return [
             'on_hold_reminder' => [
                 'title' => 'On-hold reminder',
                 'body' => '“:subject” is still on hold',
+            ],
+            'responsible_inactive' => [
+                'title' => 'Responsible has left',
+                'body' => '“:subject” is still named after somebody who has left',
             ],
             'targets_saved' => [
                 'title' => 'Targets saved',
