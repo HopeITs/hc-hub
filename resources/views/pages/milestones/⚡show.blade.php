@@ -452,13 +452,13 @@ new #[Layout('layouts::desk'), Title('titles.milestone')] class extends Componen
     $selectedParentMilestone = $parentMilestoneId === '' ? null : $this->parentOptions->firstWhere('id', (int) $parentMilestoneId);
 @endphp
 
-<x-desk.record-sheet register="pages::milestones.index" :close-url="route('milestones.index')" :title="$this->milestone->name" :subtitle="$this->milestone->ownerName()">
-<section class="@container/detail flex min-h-full w-full flex-1 flex-col gap-4 bg-white text-secondary-dark dark:bg-surface-0 dark:text-ink" aria-labelledby="milestone-detail-heading">
+<section class="@container/detail flex w-full flex-1 flex-col gap-4 text-secondary-dark dark:text-ink" aria-labelledby="milestone-detail-heading">
     <x-ui.detail-header
         :back="\App\Support\BackUrl::for(route('milestones.index'))"
         id="milestone-detail-heading"
         :breadcrumbs="[
             ['label' => __('common.milestones'), 'url' => route('milestones.index')],
+            ...($this->milestone->project !== null ? [array_filter(['label' => $this->milestone->project->name, 'url' => auth()->user()->can('view', $this->milestone->project) ? route('projects.show', $this->milestone->project) : null])] : []),
             ['label' => $this->milestone->name],
         ]"
         :title="$this->milestone->name"
@@ -696,4 +696,3 @@ new #[Layout('layouts::desk'), Title('titles.milestone')] class extends Componen
         </x-slot:actions>
     </x-ui.modal>
 </section>
-</x-desk.record-sheet>

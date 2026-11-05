@@ -56,6 +56,10 @@ final class SaveActivitySchedule
             // The status may have moved since the page loaded: decide on the locked row.
             Gate::authorize('update', [ActivitySchedule::class, $locked]);
 
+            if ($locked->isPayroll()) {
+                $this->refuse('proposal', 'results_framework.payroll_has_no_framework');
+            }
+
             $activity = Result::query()
                 ->proposalFramework($locked->id)
                 ->where('type', ResultType::Activity->value)

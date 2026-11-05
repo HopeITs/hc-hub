@@ -104,7 +104,7 @@ test('each role holds every view permission plus exactly its approved write perm
 })->with([
     'Team Member' => ['Team Member', []],
     'Media Team' => ['Media Team', ['tasks.create', 'tasks.update', 'reports.create', 'reports.update']],
-    'Public Relations' => ['Public Relations', ['tasks.create', 'tasks.update', 'reports.create', 'reports.update']],
+    'Public Relations' => ['Public Relations', ['tasks.create', 'tasks.update', 'reports.create', 'reports.update', 'ai.draft']],
     'Public Relations Manager' => ['Public Relations Manager', [
         ...FUNDRAISING_VIEWS,
         'tasks.create', 'tasks.update', 'reports.create', 'reports.update',
@@ -113,6 +113,7 @@ test('each role holds every view permission plus exactly its approved write perm
         'funding-agreements.view', 'funding-agreements.create', 'funding-agreements.update',
         'proposals.manage-reviewers', 'proposals.correct-status',
         'reports.reopen', 'reports.aggregate',
+        'ai.draft',
     ]],
     'MEAL' => ['MEAL', [
         'tasks.create', 'tasks.update', 'reports.create', 'reports.update', 'reports.approve', 'reports.mark-seen',
@@ -123,6 +124,7 @@ test('each role holds every view permission plus exactly its approved write perm
         'reports.reopen', 'reports.aggregate',
         'meal-coverage.manage', 'sectors.manage', 'risk-library.manage',
         'report-templates.manage', 'evidence-types.manage', 'narrative-questions.manage',
+        'ai.draft',
     ]],
     'Financial' => ['Financial', [
         ...FINANCE_VIEWS, ...FUNDRAISING_VIEWS,
@@ -144,21 +146,35 @@ test('each role holds every view permission plus exactly its approved write perm
         'risks.create', 'risks.update', 'risks.delete',
         'indicators.create', 'indicators.update',
         'results.create', 'results.update',
+        'ai.draft',
     ]],
 ]);
 
-test('the General Manager holds everything except role and permission management, the MEAL-only work and notification settings', function () {
+test('the General Manager holds everything except role and permission management, the MEAL-only work, notification settings and AI drafting', function () {
     $granted = Role::findByName('General Manager', 'web')->permissions->pluck('name')->all();
     $expected = Permission::query()
         ->whereNotIn('name', [
             'access-management.manage-roles', 'access-management.manage-permissions', 'reports.mark-seen', 'notification-settings.manage',
             'reports.reopen', 'meal-coverage.manage', 'report-templates.manage', 'evidence-types.manage', 'narrative-questions.manage',
             'targets.create', 'targets.update',
+            'ai.draft',
         ])
         ->pluck('name')
         ->all();
 
     expect($granted)->toEqualCanonicalizing($expected);
+});
+
+test('AI drafting is piloted with MEAL, both Public Relations roles and Managers', function () {
+    $holders = Role::query()->whereHas('permissions', fn ($query) => $query->where('name', 'ai.draft'))->pluck('name')->all();
+
+    expect($holders)->toEqualCanonicalizing(['Super Admin', 'MEAL', 'Public Relations', 'Public Relations Manager', 'Managers']);
+});
+
+test('only Super Admin and General Manager see the AI usage log by default', function () {
+    $holders = Role::query()->whereHas('permissions', fn ($query) => $query->where('name', 'ai.view-usage'))->pluck('name')->all();
+
+    expect($holders)->toEqualCanonicalizing(['Super Admin', 'General Manager']);
 });
 
 test('Super Admin holds every permission in the catalog', function () {

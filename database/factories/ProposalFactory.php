@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ProposalKind;
 use App\Enums\ProposalStatus;
 use App\Models\Donor;
 use App\Models\Proposal;
@@ -37,6 +38,18 @@ class ProposalFactory extends Factory
             'planned_date_end' => fn (array $attributes): string => CarbonImmutable::parse($attributes['planned_date_begin'])
                 ->addYear()->toDateString(),
         ];
+    }
+
+    /**
+     * Indicate that the proposal funds a center's payroll (D-55b, W-32): it
+     * carries a narrative and stays apart from projects and MEAL.
+     */
+    public function payroll(): static
+    {
+        return $this->state([
+            'kind' => ProposalKind::Payroll,
+            'narrative' => 'Volunteer salaries and equipment for the Micro Aleppo center during 2027.',
+        ]);
     }
 
     /**

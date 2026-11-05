@@ -86,7 +86,7 @@ trait ReadsProposalBoard
      */
     protected function boardQuery(): Builder
     {
-        $columns = ['proposals.id', 'proposals.slug', 'proposals.name', 'proposals.status', 'proposals.on_hold_since', 'proposals.status_remind_on', 'proposals.planned_date_begin', 'proposals.donor_id'];
+        $columns = ['proposals.id', 'proposals.slug', 'proposals.name', 'proposals.status', 'proposals.kind', 'proposals.on_hold_since', 'proposals.status_remind_on', 'proposals.planned_date_begin', 'proposals.donor_id'];
 
         if ($this->canViewAgreements()) {
             array_push($columns, 'proposals.requested_budget', 'proposals.requested_currency');

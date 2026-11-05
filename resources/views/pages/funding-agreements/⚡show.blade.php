@@ -216,9 +216,8 @@ new #[Layout('layouts::desk'), Title('titles.funding_agreement')] class extends 
     ])->all();
 @endphp
 
-<x-desk.record-sheet register="pages::funding-agreements.index" :close-url="route('funding-agreements.index')" :title="$donor->name.' · '.$proposal->name">
 <section
-    class="agreement-page @container/detail flex min-h-full w-full flex-1 flex-col bg-white text-secondary-dark dark:bg-surface-0 dark:text-ink"
+    class="agreement-page @container/detail flex w-full flex-1 flex-col text-secondary-dark dark:text-ink"
     x-data="{ lit: null, tranches: @js($tranchesForDial) }"
 >
     <x-ui.detail-header
@@ -348,4 +347,3 @@ new #[Layout('layouts::desk'), Title('titles.funding_agreement')] class extends 
         :confirming-delete="$confirmingTransferDelete"
     />
 </section>
-</x-desk.record-sheet>

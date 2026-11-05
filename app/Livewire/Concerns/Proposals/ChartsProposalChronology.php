@@ -308,7 +308,9 @@ trait ChartsProposalChronology
     }
 
     /**
-     * The lifecycle rail: nine stops, each with the date it was reached.
+     * The lifecycle rail: nine stops, each with the date it was reached. A
+     * payroll proposal (W-32) never passes the concept-note or review stops,
+     * so its rail is its own five: draft, submitted, approved, active, completed.
      *
      * The nine stops are the merged line (W-25): `on hold` is no longer one of
      * them. A hold is drawn as a chip on the current stop instead (`held`),
@@ -324,6 +326,11 @@ trait ChartsProposalChronology
         $isRejected = $this->proposal->status === ProposalStatus::Rejected;
         $isOnHold = $this->proposal->isOnHold();
         $stops = ProposalStatus::lifecycle();
+
+        if ($this->proposal->isPayroll()) {
+            $payrollStops = [ProposalStatus::ProposalDraft, ProposalStatus::Submitted, ProposalStatus::Approved, ProposalStatus::Active, ProposalStatus::Completed];
+            $stops = array_values(array_filter($stops, fn (ProposalStatus $stop): bool => in_array($stop, $payrollStops, true)));
+        }
         $reached = (int) array_search($this->proposal->lifecycleStop(), $stops, true);
         $dates = $this->statusNotes->sortBy('date')->groupBy(fn (ProposalStatusNote $note): string => $note->status->value);
 

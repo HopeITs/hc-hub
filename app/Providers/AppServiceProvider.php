@@ -131,6 +131,7 @@ class AppServiceProvider extends ServiceProvider
     protected function registerDevCommands(): void
     {
         DevCommands::artisan('schedule:work', 'scheduler');
+        DevCommands::artisan('queue:listen ai --queue=ai --tries=1 --timeout=0', 'ai-queue');
     }
 
     /**

@@ -71,17 +71,6 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
     }
 
     /**
-     * The "Start something" buttons the viewer may use.
-     *
-     * @return list<array{key: string, label: string, icon: string, href: string}>
-     */
-    #[Computed]
-    public function quickActions(): array
-    {
-        return app(Panels::class)->quickActionsFor(auth()->user());
-    }
-
-    /**
      * How many decisions wait on the viewer, and how many of those are late,
      * for the greeting: the same rows as the Needs you panel's This week view.
      *
@@ -157,18 +146,6 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
             </{{ $needsPlaced ? 'a' : 'div' }}>
         @endif
 
-        {{-- The command strip: the quick actions. Customize opens from the top bar's Panels button. --}}
-        <div class="dk-start" data-desk-start>
-            @if ($this->quickActions !== [])
-                <div class="dk-start-row" role="group" aria-label="{{ __('desk.start_title') }}">
-                    @foreach ($this->quickActions as $action)
-                        <a href="{{ $action['href'] }}" wire:navigate class="dk-start-btn" data-desk-start-action="{{ $action['key'] }}">
-                            <flux:icon :name="$action['icon']" variant="outline" class="dk-start-ic" /><span>{{ $action['label'] }}</span>
-                        </a>
-                    @endforeach
-                </div>
-            @endif
-        </div>
     </section>
 
     {{-- First visit: one gentle hint, dismissed for good (kept in this browser). --}}

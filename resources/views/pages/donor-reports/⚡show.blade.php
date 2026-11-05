@@ -216,8 +216,7 @@ new #[Layout('layouts::desk'), Title('titles.donor_report')] class extends Compo
     ];
 @endphp
 
-<x-desk.record-sheet register="pages::reporting-duties.index" :close-url="route('reporting-duties.index')" :title="$report->title">
-<section class="@container/detail flex min-h-full w-full flex-1 flex-col gap-8 bg-white text-secondary-dark dark:bg-surface-0 dark:text-ink" data-donor-report-page>
+<section class="@container/detail flex w-full flex-1 flex-col gap-8 text-secondary-dark dark:text-ink" data-donor-report-page>
     <x-ui.detail-header :back="\App\Support\BackUrl::for(route('reporting-duties.index'))" :breadcrumbs="$breadcrumbs" :title="$report->title">
         <x-slot:meta>
             <span>{{ $report->type->label() }}</span>
@@ -379,4 +378,3 @@ new #[Layout('layouts::desk'), Title('titles.donor_report')] class extends Compo
 
     <x-donor-reports.submit-modal :open="$showSubmitModal" :needs-file="$submissionNeedsFile" :file-count="$submissionFileCount" />
 </section>
-</x-desk.record-sheet>

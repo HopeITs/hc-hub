@@ -926,3 +926,59 @@ test('a rejected proposal still draws its side exit and wears no chip', function
     expect(array_filter($stops, fn (array $stop): bool => $stop['state'] === 'rejected'))->toHaveCount(1)
         ->and(array_filter($stops, fn (array $stop): bool => $stop['held']))->toBeEmpty();
 });
+
+/*
+| W-32 slice 2: a payroll proposal's page offers Status, Documents and
+| Funding only, names its kind in the header and reads Money and Time.
+*/
+
+test('a payroll proposal offers only the status, documents and funding tabs', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    $component = Livewire::actingAs($user)->test('pages::proposals.show', ['proposal' => $proposal]);
+
+    expect(array_column($component->instance()->tabs, 'key'))->toBe(['status', 'funding', 'documents']);
+
+    expect(array_map(fn (array $stop): string => $stop['status']->value, $component->instance()->lifecycle))->toBe(['proposal draft', 'submitted', 'approved', 'active', 'completed']);
+
+    $component->assertSeeHtml('data-test="payroll-kind-chip"')
+        ->assertDontSeeHtml('data-proposal-reviewers')
+        ->assertDontSeeText(__('proposals.tab_logframe'))
+        ->assertDontSeeText(__('proposals.tab_targets'))
+        ->set('tab', 'logframe')
+        ->assertSet('tab', 'status')
+        ->set('tab', 'documents')
+        ->assertSet('tab', 'documents');
+});
+
+test('a stale bookmark to a project tab opens a payroll proposal on its status', function () {
+    $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->withQueryParams(['ptab' => 'targets'])
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->assertSet('tab', 'status');
+});
+
+test('a project proposal keeps every tab and shows no payroll chip', function () {
+    $proposal = Proposal::factory()->create();
+
+    $component = Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::proposals.show', ['proposal' => $proposal]);
+
+    expect(array_column($component->instance()->tabs, 'key'))->toContain('projects', 'logframe', 'targets', 'plan');
+    $component->assertDontSeeHtml('data-test="payroll-kind-chip"');
+});
+
+test('a payroll proposal reads money and time only, and time opens the status tab', function () {
+    $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    $vitals = Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->instance()
+        ->vitals;
+
+    expect(array_column($vitals, 'key'))->toBe(['money', 'time'])
+        ->and(collect($vitals)->firstWhere('key', 'time')['tab'])->toBe('status');
+});

@@ -6,6 +6,7 @@ namespace App\Livewire\Concerns\Proposals;
 
 use App\Actions\Proposals\CorrectProposalStatus;
 use App\Actions\Proposals\TransitionProposal;
+use App\Enums\ProposalKind;
 use App\Enums\ProposalStatus;
 use App\Enums\ReviewStage;
 use App\Models\HrEmployee;
@@ -95,7 +96,7 @@ trait ManagesProposalStatus
     {
         return $this->statusProposalId === null
             ? null
-            : Proposal::query()->select(['id', 'status'])->find($this->statusProposalId);
+            : Proposal::query()->select(['id', 'status', 'kind'])->find($this->statusProposalId);
     }
 
     /**
@@ -128,7 +129,7 @@ trait ManagesProposalStatus
             return [];
         }
 
-        $requirements = ProposalTransitions::requirements($subject->status, $to) ?? [];
+        $requirements = ProposalTransitions::requirements($subject->status, $to, $subject->kind) ?? [];
         $fields = [];
 
         if (array_intersect($requirements, ['reason', 'reason_min_10']) !== []) {
@@ -268,7 +269,7 @@ trait ManagesProposalStatus
     {
         $from = ProposalStatus::tryFrom($this->statusExpectedFrom);
 
-        return $from === null ? [] : ProposalTransitions::correctionTargets($from);
+        return $from === null ? [] : ProposalTransitions::correctionTargets($from, $this->statusSubject?->kind ?? ProposalKind::Project);
     }
 
     /**

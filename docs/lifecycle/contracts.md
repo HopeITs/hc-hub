@@ -25,6 +25,7 @@ The one place for every name, value, signature, payload, column and permission t
 - `ProposalPhase` gains `Ideation = 'ideation'` as its first case. Phase and stage are derived, **never stored**. Every `match` is exhaustive with no `default`.
 - `ProposalStatus::live(): list<self>`: every case except `FinalReports` and `OnHold`. Pickers, filters and charts iterate `live()`, never `cases()`.
 - **W-06 (D-58):** "on hold" is `proposals.on_hold_since IS NOT NULL` (§7), allowed only while the status is `concept note submitted` or `submitted`. A proposal on hold keeps its status; `Proposal::isOnHold()` reads the flag and `Proposal::statusLabel()` is the one place the two are put together as "Submitted (On hold)". Its `StatusTone` is `warn`.
+- **W-32 (D-55b):** a payroll proposal starts in `proposal draft` (never `concept note`); `ProposalPhase` unchanged.
 - `isApprovedByDonor()`: approved, active, completed (and the deprecated final reports).
 - "Pre-hold / pre-rejection status" = the status of the latest `proposal_status_notes` row before it entered hold or rejection.
 
@@ -67,6 +68,14 @@ Rules:
 - Every move writes exactly one `ProposalStatusNote` (`status`, `context`, `effective_date`, `changed_by`, `is_correction`) in the same transaction as the status. `context` is NOT NULL: a move without a reason writes the translated standard note.
 - **A proposal on hold keeps its status (W-06, D-58).** Every move out of `submitted` / `concept note submitted` clears `on_hold_since` and `status_remind_on`, as does approval. `remind_on` is no longer a transition requirement key: `SetProposalOnHold` validates it.
 - Messages never reveal an amount (the budget gate message names no figure).
+
+**W-32 (D-55b): payroll rows.** New rows (payroll only; `ProposalTransitions::requirements()` gains the kind from the proposal): `proposal draft → submitted` keys `budget`, `planned_dates`, `narrative`, `effective_date`; `submitted → proposal draft` `reason`; `submitted → rejected` `reason_min_10`, `effective_date`; `submitted → approved` **ApproveProposal only**; `approved → active` **ApproveProposal** (same transaction, right after `approved`: a payroll proposal has nothing to wait for); `active → completed` `final_report`, `effective_date` where `final_report` for payroll = the `final_report` file + `final_report_accepted_on/by` (no milestone). Project-kind rows are untouched. Key meaning `narrative`: `narrative` is set (≥ 50 chars).
+
+*W-32 rulings (4 Nov, for Dev 1 to confirm):*
+- `concept note → proposal draft` `reason` is a payroll row **used only at creation**: `SaveProposal` creates the proposal (column default `concept note`, first note) and moves it straight to `proposal draft` through `TransitionProposal` with the standard note "payroll proposal", in one transaction, exactly like the D-03 skip. No other move leads into `concept note`, `concept note review`, `concept note submitted` or `proposal review` for payroll.
+- `ProposalTransitions::targets()` and `correctionTargets()` take the kind as well. Payroll correction targets: `proposal draft`, `submitted`, `active`, `completed`, `rejected` (never `approved`, never the current status).
+- `final_report` for payroll with an internal (self-funded) donor = the `final_report` file only.
+- Hold (W-06) is allowed for a `submitted` payroll proposal; extension (W-08) for an `active` one (no projects to widen).
 
 ## §3 Project statuses and transitions
 `App\Enums\ProjectStatus`: Draft `draft`, **Approved `approved` (live)**, Active `active`, Closed `closed`, Archived `archived`. `Submitted` is `@deprecated` (history only). `ProjectStatus::live()` = draft, approved, active, closed, archived. **Open** = draft, approved, active (`isOpen()`).
@@ -152,6 +161,8 @@ RestoreProject::handle(Project $project): ProjectStatus
 ApproveProposal::handle(Proposal $proposal, ProposalStatus $expectedFrom, array $input): ApprovalResult
     // @param array{actual_date_begin: string, actual_date_end: string, decision_date: string, note?: ?string, approval_note?: ?string} $input
     // ApprovalResult (readonly): list<int> $approvedProjectIds, list<int> $waitingProjectIds, list<int> $skippedProjectIds, list<string> $warnings
+    // W-32 (D-55b): $input gains nothing; for payroll actual_date_* default to the planned dates when absent; ApprovalResult lists are empty;
+    // payroll → approved then active in one transaction (two notes), no project work, ProposalStatusChanged twice after commit
 ApproveProjectFromProposal::handle(Project $project, string $via): bool   // $via ∈ {proposal_approval, owner_acknowledgement}; idempotent
 ActivateProject::handle(Project $project, string $via): void              // Team B (T33) may call. Requires project approved + dated;
                                                                           // moves its still-`approved` donor-approved proposals → active (one note each)
@@ -241,6 +252,7 @@ program_requests                      -- only for is_new rows without a program
 - `projects.city_id` stays required; `projects.center_id` nullable (T30). W-01 adds `host_center_id`. A row with several centers creates **one project per center** (one open project per center + program, contracts §3); a row with no center creates one project on `city_id` only (W-01 rule: physical center or host center, host = the row's assigned center per D-55).
 - Morph keys: `proposal_location`, `program_request` (AppServiceProvider + MorphMapTest). Both record activity on the proposal (`RecordsParentActivity`).
 - `ProgramRequestStatus`: `Pending = 'pending'`, `Created = 'created'`, `Declined = 'declined'`. Index names: `proposal_locations_proposal_city_program_unique`, `proposal_locations_project_id_foreign`, `proposal_locations_program_id_foreign`, `proposal_location_centers_location_id_foreign`, `program_requests_proposal_location_id_unique`, `program_requests_requested_by_foreign`, `program_requests_status_index`.
+**W-32 (D-55b):** `proposals.kind` varchar(10) NOT NULL default `project` (`ProposalKind`: `Project = 'project'`, `Payroll = 'payroll'`), `proposals.narrative` text null (payroll only). Index on `kind`. The kind is set on create only and never changes; a renewal keeps it (W-32 ruling: a payroll renewal copies the narrative, donor and dates, never projects, framework or plan).
 
 ## §8 Permissions and default holders
 Nine roles (fixed): Super Admin, General Manager, Managers, MEAL, Financial, Media Team, Public Relations, Public Relations Manager, Team Member. Super Admin holds everything technically (`Role::booted()`) but **appears in no business list, no fallback and no test as the only account** (D-20a). `permissions:sync` only adds.
@@ -467,6 +479,7 @@ final class App\Support\SupervisionMap {
 - **Center target:** `split` → Σ the targets; `shared` → the highest.
 - **Percentages:** only through `pooledRatioSql()`/`pooledRatio()` (§13); never an average of percentages.
 - No money in the matrix. Donor reports (T19) exclude internal (self-funding) donors.
+- **W-32 (D-55b) exclusions:** `DonorReportAggregator`, the matrix, targets, indicator coverage, `MealCoverage`, the Projects and Logframe tabs, location rows (W-34a) and stage templates (W-12, unless a template is marked `kind = payroll`: add `proposal_kind` to the template table with default `project`) all skip `kind = payroll`. *W-32 ruling (4 Nov):* W-12 and W-34a are not on `main` yet, so their exclusions land with those tasks.
 
 ### §14.1 Figures and views (T18, T19)
 - **Counts:** sum of validated values in the window. `is_cumulative`: the latest validated value in the window, never a sum.

@@ -1,81 +1,120 @@
-{{-- The Pillars section of strategies/show (T32, D-35); logic in ManagesStrategicPillars. --}}
+{{--
+    "How the strategy is built" on strategies/show (logic in
+    ManagesStrategicPillars): each pillar as a typographic section with its
+    programs as rows (the first three, then a "Show N more" toggle), then the
+    programs under no pillar. Rows read pillarGroups(), which reads
+    allPrograms(). Pillar dialogs at the end.
+--}}
 @php
     $groups = $this->pillarGroups;
     $canManagePillars = auth()->user()->can('strategies.update');
+    $unassignedCount = count($groups['unassigned']);
+    $visibleRows = 3;
 @endphp
 
-<x-ui.panel :title="__('strategies.pillars')" :subtitle="__('strategies.pillars_intro')" :count="count($groups['pillars'])" data-tour="strategy-pillars" data-test="strategy-pillars">
-    @if ($canManagePillars)
-        <x-slot:toolbar>
-            <x-ui.button tone="primary" icon="plus" size="sm" wire:click="openCreatePillarModal" wire:loading.attr="disabled" wire:target="openCreatePillarModal" data-test="create-pillar">
-                {{ __('strategies.add_pillar') }}
-            </x-ui.button>
-        </x-slot:toolbar>
+<section class="dk-build" aria-labelledby="strategy-build-heading" data-tour="strategy-pillars" data-test="strategy-pillars">
+    <header class="dk-build-h">
+        <div class="min-w-0">
+            <h2 class="dk-build-title" id="strategy-build-heading">{{ __('strategies.how_built') }}</h2>
+            <p class="dk-build-intro">{{ __('strategies.how_built_intro') }}</p>
+        </div>
+        @if ($canManagePillars)
+            <button type="button" class="dk-btn" wire:click="openCreatePillarModal" wire:loading.attr="disabled" wire:target="openCreatePillarModal" data-test="create-pillar"><x-desk.icon name="plus" />{{ __('strategies.add_pillar') }}</button>
+        @endif
+    </header>
+
+    @if ($this->allPrograms->isEmpty())
+        <div class="dk-build-none" data-test="strategy-no-programs">
+            <p>{{ __('strategies.no_programs_linked_here') }}</p>
+            @if ($this->canLinkPrograms)
+                <button type="button" class="dk-btn" wire:click="openProgramsModal({{ $this->strategyId }})" data-test="strategy-empty-link-programs">{{ __('strategies.link_programs') }}</button>
+            @endif
+        </div>
     @endif
 
-    @if ($groups['pillars'] === [] && $groups['unassigned'] === [])
-        <x-ui.empty-state
-            icon="building-library"
-            :heading="__('strategies.no_pillars_yet')"
-            :body="$canManagePillars ? __('strategies.no_pillars_body_editor') : __('strategies.no_pillars_body_viewer')"
-        />
+    @if ($unassignedCount > 0)
+        <p class="dk-build-note" data-test="unassigned-notice">
+            <span>{!! trans_choice('strategies.unassigned_notice', $unassignedCount, ['count' => '<bdi>'.$unassignedCount.'</bdi>']) !!}</span>
+            <a href="#unassigned-programs" class="dk-slink">{{ __('strategies.assign_them') }}<x-desk.icon name="arrow" class="dk-flip" /></a>
+        </p>
+    @endif
+
+    @if ($groups['pillars'] === [])
+        <p class="dk-build-empty">{{ $canManagePillars ? __('strategies.no_pillars_body_editor') : __('strategies.no_pillars_body_viewer') }}</p>
     @else
-        <div class="grid gap-3 p-4 @2xl/detail:grid-cols-2 @5xl/detail:grid-cols-3">
+        <div class="dk-pillars">
             @foreach ($groups['pillars'] as $group)
                 @php
                     $pillar = $group['pillar'];
+                    $programCount = count($group['programs']);
+                    $hiddenCount = max(0, $programCount - $visibleRows);
                 @endphp
-                <article class="flex min-w-0 flex-col gap-3 rounded-lg border border-secondary-soft p-3 dark:border-line" wire:key="pillar-{{ $pillar->id }}" data-test="pillar-card-{{ $pillar->id }}">
-                    <header class="flex items-start gap-2">
-                        <span class="inline-flex shrink-0 items-center rounded-md bg-secondary-dark px-2 py-0.5 text-xs font-bold text-white dark:bg-ink dark:text-surface-0" dir="ltr">{{ $pillar->code }}</span>
-                        <div class="min-w-0 flex-1">
-                            <h3 class="text-sm font-bold text-secondary-dark dark:text-ink" dir="auto">{{ $pillar->localizedName() }}</h3>
+                <article class="dk-pillar" wire:key="pillar-{{ $pillar->id }}" x-data="{ more: false }" aria-labelledby="pillar-{{ $pillar->id }}-name" data-test="pillar-card-{{ $pillar->id }}">
+                    <header class="dk-pillar-h">
+                        <div class="min-w-0">
+                            <h3 class="dk-pillar-name" id="pillar-{{ $pillar->id }}-name">
+                                <span class="dk-pcode" dir="ltr">{{ $pillar->code }}</span>
+                                <span dir="auto">{{ $pillar->localizedName() }}</span>
+                            </h3>
                             @if ($pillar->localizedGoal() !== null)
-                                <p class="type-meta text-secondary-medium dark:text-ink-muted" dir="auto">{{ $pillar->localizedGoal() }}</p>
+                                <p class="dk-pillar-goal" dir="auto">{{ $pillar->localizedGoal() }}</p>
                             @endif
                         </div>
-                        @if ($canManagePillars)
-                            <div class="flex shrink-0 items-center">
-                                <x-ui.button tone="ghost" size="sm" icon="pencil-square" wire:click="openEditPillarModal({{ $pillar->id }})" :aria-label="__('strategies.edit_pillar')" data-test="edit-pillar-{{ $pillar->id }}" />
-                                <x-ui.button tone="ghost" size="sm" icon="trash" wire:click="confirmDeletePillar({{ $pillar->id }})" :aria-label="__('strategies.delete_pillar')" data-test="delete-pillar-{{ $pillar->id }}" />
-                            </div>
-                        @endif
+                        <div class="dk-pillar-meta">
+                            <span class="dk-num">{{ trans_choice('strategies.count_program', $programCount, ['count' => $programCount]) }}</span>
+                            @if ($canManagePillars)
+                                <button type="button" class="dk-slink" wire:click="openEditPillarModal({{ $pillar->id }})" aria-label="{{ __('strategies.edit_pillar_named', ['name' => $pillar->code]) }}" data-test="edit-pillar-{{ $pillar->id }}">{{ __('strategies.edit_pillar') }}</button>
+                                <button type="button" class="dk-slink dk-danger" wire:click="confirmDeletePillar({{ $pillar->id }})" aria-label="{{ __('strategies.delete_pillar_named', ['name' => $pillar->code]) }}" data-test="delete-pillar-{{ $pillar->id }}">{{ __('strategies.delete_pillar') }}</button>
+                            @endif
+                        </div>
                     </header>
 
                     @if ($group['programs'] === [])
-                        <p class="type-meta text-secondary-medium dark:text-ink-muted">{{ __('strategies.pillar_no_programs') }}</p>
+                        <p class="dk-build-empty">{{ __('strategies.pillar_no_programs') }}</p>
                     @else
-                        <ul class="flex flex-col gap-1.5">
+                        <ul class="dk-sprows">
                             @foreach ($group['programs'] as $program)
-                                @include('pages.strategies._show-pillar-program', ['program' => $program])
+                                @include('pages.strategies._show-pillar-program', ['program' => $program, 'folded' => $loop->index >= $visibleRows, 'assignLabel' => 'move'])
                             @endforeach
                         </ul>
+
+                        @if ($hiddenCount > 0)
+                            <button
+                                type="button"
+                                class="dk-slink"
+                                x-on:click="more = ! more"
+                                x-bind:aria-expanded="more ? 'true' : 'false'"
+                                x-text="more ? @js(__('strategies.show_fewer')) : @js(trans_choice('strategies.show_more_programs', $hiddenCount, ['count' => $hiddenCount]))"
+                                aria-expanded="false"
+                                data-test="pillar-show-more-{{ $pillar->id }}"
+                            >{{ trans_choice('strategies.show_more_programs', $hiddenCount, ['count' => $hiddenCount]) }}</button>
+                        @endif
                     @endif
                 </article>
             @endforeach
-
-            <article class="flex min-w-0 flex-col gap-3 rounded-lg border border-dashed border-secondary-light p-3 dark:border-line-strong" data-test="pillar-card-unassigned">
-                <header class="flex items-start gap-2">
-                    <span class="inline-flex shrink-0 items-center gap-1 rounded-md bg-secondary-soft px-2 py-0.5 text-xs font-semibold text-secondary-dark dark:bg-surface-2 dark:text-ink">
-                        <flux:icon.minus-circle variant="micro" class="size-3.5" aria-hidden="true" />
-                        {{ __('strategies.no_pillar') }}
-                    </span>
-                    <p class="type-meta min-w-0 flex-1 text-secondary-medium dark:text-ink-muted">{{ __('strategies.no_pillar_help') }}</p>
-                </header>
-
-                @if ($groups['unassigned'] === [])
-                    <p class="type-meta text-secondary-medium dark:text-ink-muted">—</p>
-                @else
-                    <ul class="flex flex-col gap-1.5">
-                        @foreach ($groups['unassigned'] as $program)
-                            @include('pages.strategies._show-pillar-program', ['program' => $program])
-                        @endforeach
-                    </ul>
-                @endif
-            </article>
         </div>
     @endif
-</x-ui.panel>
+
+    @if ($unassignedCount > 0)
+        <article class="dk-pillar dk-pillar-none" id="unassigned-programs" aria-labelledby="unassigned-programs-name" data-test="pillar-card-unassigned">
+            <header class="dk-pillar-h">
+                <div class="min-w-0">
+                    <h3 class="dk-pillar-name" id="unassigned-programs-name">{{ __('strategies.not_under_pillar') }}</h3>
+                    <p class="dk-pillar-goal">{{ __('strategies.no_pillar_help') }}</p>
+                </div>
+                <div class="dk-pillar-meta">
+                    <span class="dk-num">{{ trans_choice('strategies.count_program', $unassignedCount, ['count' => $unassignedCount]) }}</span>
+                </div>
+            </header>
+
+            <ul class="dk-sprows">
+                @foreach ($groups['unassigned'] as $program)
+                    @include('pages.strategies._show-pillar-program', ['program' => $program, 'folded' => false, 'assignLabel' => 'choose'])
+                @endforeach
+            </ul>
+        </article>
+    @endif
+</section>
 
 @if ($canManagePillars)
     <x-ui.modal

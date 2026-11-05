@@ -12,6 +12,9 @@
                     @if ($boardProposal->isOnHold())
                         <x-ui.hold-chip class="self-start" />
                     @endif
+                    @if ($boardProposal->isPayroll())
+                        <x-ui.enum-badge :case="$boardProposal->kind" class="self-start" data-payroll-chip="{{ $boardProposal->id }}" />
+                    @endif
                     @if ($canAgreements && $boardProposal->donor !== null)
                         <span class="dk-is">{{ $boardProposal->donor->name }}</span>
                     @endif

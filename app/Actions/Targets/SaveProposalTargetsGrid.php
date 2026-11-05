@@ -69,6 +69,10 @@ final class SaveProposalTargetsGrid
         return DB::transaction(function () use ($proposal, $cells): array {
             $locked = Proposal::query()->whereKey($proposal->getKey())->lockForUpdate()->with('projects')->firstOrFail();
 
+            if ($locked->isPayroll()) {
+                throw ValidationException::withMessages(['proposal' => __('targets.payroll_has_no_targets')]);
+            }
+
             if ($locked->status->isTerminal()) {
                 throw ValidationException::withMessages(['proposal' => __('targets.proposal_read_only')]);
             }

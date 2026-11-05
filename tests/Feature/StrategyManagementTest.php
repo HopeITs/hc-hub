@@ -214,6 +214,7 @@ test('the add strategy control is hidden from team members and meal staff', func
     $this->actingAs($user)
         ->get(route('strategies.index'))
         ->assertOk()
+        ->assertDontSee(__('strategies.new_strategy'))
         ->assertDontSee(__('strategies.add_strategy'));
 })->with([
     'team member' => 'Team Member',
@@ -226,21 +227,21 @@ test('the add strategy control is visible to managers', function () {
     $this->actingAs($manager)
         ->get(route('strategies.index'))
         ->assertOk()
-        ->assertSeeText(__('strategies.add_strategy'));
+        ->assertSeeHtml('data-test="create-strategy-button"')
+        ->assertSeeText(__('strategies.new_strategy'));
 });
 
-test('every role can open a strategy through the view icon, not the name', function (string $roleName) {
+test('every role can open a strategy through a labelled Open link, not the name', function (string $roleName) {
     $user = User::factory()->role($roleName)->create();
-    $strategy = Strategy::factory()->create(['name' => 'Country Strategy']);
+    $strategy = Strategy::factory()->create(['name' => 'Country Strategy', 'start_year' => 2016, 'end_year' => 2020]);
 
     $html = $this->actingAs($user)->get(route('strategies.index'))->getContent();
 
-    // The view icon links to the strategy...
+    // The Open link carries a visible label and names the strategy for screen readers...
     expect($html)
-        ->toContain(route('strategies.show', $strategy))
-        ->toContain(__('common.view_name', ['name' => 'Country Strategy']))
-        // ...but the name itself is plain text, not a link.
-        ->not->toContain('<a href="'.route('strategies.show', $strategy).'" wire:navigate class="truncate font-semibold');
+        ->toContain('href="'.route('strategies.show', $strategy).'" wire:navigate class="dk-slink" aria-label="'.__('strategies.open_named', ['name' => 'Country Strategy']).'">'.__('strategies.open'))
+        // ...while the name itself is plain text, not a link.
+        ->toContain('<strong>Country Strategy</strong>');
 })->with([
     'team member' => 'Team Member',
     'meal' => 'MEAL',
@@ -249,7 +250,8 @@ test('every role can open a strategy through the view icon, not the name', funct
 ]);
 
 test('the strategy buttons follow their own permission, not create alone', function (string $permission, array $shown, array $hidden) {
-    Strategy::factory()->create(['name' => 'Button strategy']);
+    // A past strategy with nothing linked is the one row that may offer Delete.
+    Strategy::factory()->create(['name' => 'Button strategy', 'start_year' => 2016, 'end_year' => 2020]);
     Role::create(['name' => 'Strategy Clerk', 'guard_name' => 'web'])->givePermissionTo($permission);
     $clerk = User::factory()->role('Strategy Clerk')->create();
 
@@ -264,7 +266,8 @@ test('the strategy buttons follow their own permission, not create alone', funct
     }
 })->with([
     'create only' => ['strategies.create', ['create-strategy-button'], ['edit-strategy-button', 'delete-strategy-button']],
-    'update only' => ['strategies.update', ['edit-strategy-button'], ['create-strategy-button', 'delete-strategy-button']],
+    // Editing moved to the strategy page: the list shows no edit button, even with strategies.update.
+    'update only' => ['strategies.update', [], ['edit-strategy-button', 'create-strategy-button', 'delete-strategy-button']],
     'delete only' => ['strategies.delete', ['delete-strategy-button'], ['create-strategy-button', 'edit-strategy-button']],
 ]);
 

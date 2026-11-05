@@ -9,6 +9,7 @@ use App\Models\Task;
 use App\Models\TaskAttachment;
 use App\Models\User;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
 test('guests are redirected from task detail', function () {
     $task = Task::factory()->create();
@@ -331,4 +332,23 @@ test('the add subtask form is rendered only while its modal is open', function (
         ->assertDontSeeHtml('data-test="new-subtask-title-input"')
         ->call('openAddSubtaskModal')
         ->assertSeeHtml('data-test="new-subtask-title-input"');
+});
+
+test('the milestone breadcrumb links only for viewers who may open the milestone', function () {
+    $milestone = Milestone::factory()->create(['name' => 'Distribution ready']);
+    $task = Task::factory()->create(['source_type' => 'milestone', 'source_id' => $milestone->id]);
+    $milestoneLink = 'href="'.route('milestones.show', $milestone).'"';
+
+    $this->actingAs(User::factory()->role('General Manager')->create())
+        ->get(route('tasks.show', $task))
+        ->assertOk()
+        ->assertSee($milestoneLink, false);
+
+    Role::create(['name' => 'Task Viewer', 'guard_name' => 'web'])->givePermissionTo('tasks.view');
+
+    $this->actingAs(User::factory()->role('Task Viewer')->create())
+        ->get(route('tasks.show', $task))
+        ->assertOk()
+        ->assertSeeText('Distribution ready')
+        ->assertDontSee($milestoneLink, false);
 });

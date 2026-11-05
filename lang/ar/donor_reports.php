@@ -9,6 +9,7 @@ return [
     'already_submitted' => 'سُلِّم هذا التقرير بالفعل',
     'no_validated_data' => 'لا بيانات متحقق منها في هذه الفترة',
     'self_funded' => 'المقترحات الممولة ذاتيًا لا تُرفع بها تقارير للمانح',
+    'payroll_has_final_report_only' => 'لمقترح الرواتب تقرير ختامي فقط، فلا يُبنى له تقرير للمانح',
     'agreement_required' => 'سجّل الاتفاقية قبل حفظ التقرير',
     'default_title' => 'تقرير :type · :start – :end',
 

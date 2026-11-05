@@ -379,3 +379,36 @@ test('the on hold facet keeps only held proposals and the row reads Submitted (O
     // The status picker offers no hold option: a hold is not a status.
     proposalRegister()->assertDontSeeHtml('"value":"on hold"');
 });
+
+/*
+| W-32 slice 2: payroll proposals carry a chip, and a kind facet narrows the
+| table, the board and the calendar alike.
+*/
+
+test('the kind filter narrows the rows and the board, and a payroll row carries its chip', function () {
+    $project = Proposal::factory()->create(['name' => 'Shelter Response', 'planned_date_begin' => '2026-06-10']);
+    $payroll = Proposal::factory()->payroll()->create(['name' => 'Micro Aleppo payroll', 'status' => ProposalStatus::ProposalDraft, 'planned_date_begin' => '2026-06-12']);
+
+    $rowIds = fn (Testable $page): array => $page->instance()->rows->pluck('id')->unique()->sort()->values()->all();
+    $boardIds = fn (Testable $page): array => collect($page->instance()->boardColumns)->flatMap(fn (array $column) => $column['items']->pluck('id'))->sort()->values()->all();
+
+    expect($rowIds(proposalRegister()))->toBe([$project->id, $payroll->id])
+        ->and($rowIds(proposalRegister()->set('proposalKind', 'payroll')))->toBe([$payroll->id])
+        ->and($rowIds(proposalRegister(['kind' => 'project'])))->toBe([$project->id])
+        ->and($boardIds(proposalRegister(['kind' => 'payroll', 'view' => 'board'])))->toBe([$payroll->id]);
+
+    proposalRegister()
+        ->assertSeeHtml('data-payroll-chip="'.$payroll->id.'"')
+        ->assertDontSeeHtml('data-payroll-chip="'.$project->id.'"')
+        ->assertSeeHtml('data-test="kind-filter-payroll"');
+
+    proposalRegister(['view' => 'board'])->assertSeeHtml('data-payroll-chip="'.$payroll->id.'"');
+});
+
+test('an unknown kind in the address bar falls back to both kinds', function () {
+    proposalRegister(['kind' => 'salary'])->assertSet('proposalKind', '');
+});
+
+test('clearing the filters clears the kind', function () {
+    proposalRegister(['kind' => 'payroll'])->call('clearFilters')->assertSet('proposalKind', '');
+});

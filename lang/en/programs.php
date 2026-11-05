@@ -20,6 +20,7 @@ return [
     'showing_count' => 'Showing :shown of :total programs',
     'count_matching_program' => '{1} :count matching program|[2,*] :count matching programs',
     'count_without_manager' => '{1} :count without a manager|[2,*] :count without a manager',
+    'gap_no_plan' => 'No :year plan',
     'count_without_strategy' => '{1} :count without a strategy|[2,*] :count without a strategy',
     'cards_view' => 'Cards view',
     'change_view' => 'Change programs view',
@@ -126,4 +127,8 @@ return [
     'donor_attribution' => 'Donors on one indicator',
     'donor_attribution_help' => 'When several donors fund the same indicator, choose whether the program total counts the highest target once or adds the targets together.',
     'donor_attribution_saved' => 'Donor attribution saved.',
+    'gap_no_strategy' => 'No strategy',
+    'gap_no_manager' => 'No manager',
+    'clear_gap' => 'Clear',
+    'clear_gap_named' => 'Clear the filter :name',
 ];

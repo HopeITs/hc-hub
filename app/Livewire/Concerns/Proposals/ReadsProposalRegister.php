@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Concerns\Proposals;
 
 use App\Enums\ArStatus;
+use App\Enums\ProposalKind;
 use App\Enums\ProposalPhase;
 use App\Enums\ProposalStatus;
 use App\Enums\TaskStatus;
@@ -39,6 +40,7 @@ use Livewire\Attributes\Computed;
  * @property string $donor
  * @property string $currency
  * @property string $flag
+ * @property string $proposalKind
  */
 trait ReadsProposalRegister
 {
@@ -105,6 +107,7 @@ trait ReadsProposalRegister
                 });
             })
             ->when(ProposalStatus::tryFrom($this->status), fn (Builder $query, ProposalStatus $status) => $query->where('proposals.status', $status))
+            ->when(ProposalKind::tryFrom($this->proposalKind), fn (Builder $query, ProposalKind $kind) => $query->where('proposals.kind', $kind))
             // There is no phase column: a phase is a set of statuses, derived
             // from the same match that ProposalStatus::phase() uses.
             ->when(
@@ -174,7 +177,7 @@ trait ReadsProposalRegister
         }
 
         return $this->filteredQuery()
-            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'status', 'on_hold_since', 'updated_at'])
+            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'status', 'kind', 'on_hold_since', 'updated_at'])
             ->with($relations)
             // Task progress is organisation-wide: every viewer sees the same figures.
             ->withCount([
@@ -298,7 +301,7 @@ trait ReadsProposalRegister
     protected function selectLine(Builder $query): Builder
     {
         $query
-            ->select(['proposals.id', 'proposals.slug', 'proposals.name', 'proposals.planned_date_begin', 'proposals.planned_date_end', 'proposals.status', 'proposals.on_hold_since'])
+            ->select(['proposals.id', 'proposals.slug', 'proposals.name', 'proposals.planned_date_begin', 'proposals.planned_date_end', 'proposals.status', 'proposals.kind', 'proposals.on_hold_since'])
             ->withCount(['projects', 'donorProposals']);
 
         if ($this->canViewAgreements()) {

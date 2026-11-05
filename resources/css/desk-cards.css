@@ -1,4 +1,4 @@
-/* Desk cards: Project flow, My notes, Past the deadline, the Needs you Focus
+/* Desk cards: Project flow, Past the deadline, the Needs you Focus
  * deck and the My team load meter, then the sheet card language,
  * density and the hero (briefing, command strip). Own classes only, all prefixed dk-, in
  * @layer components like desk.css. Colours are desk.css :root aliases of the
@@ -69,20 +69,8 @@
         .dk-flow-tip { display: none; }
     }
 
-    /* ── My notes ─────────────────────────────────────────────────── */
-    .dk-notes { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
     /* desk-shell.css sets .dk-pb > * to flex: none; these fill the card. */
-    .dk-pb > :is(.dk-notes, .dk-focus, .dk-celebrate) { flex: 1 1 auto; }
-    .dk-notes-box { flex: 1; min-height: 0; width: 100%; resize: none; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--sunk); color: var(--ink); font-family: var(--font); font-size: 14.5px; line-height: 1.6; transition: border-color .15s ease, background .15s ease; }
-    .dk-notes-box::placeholder { color: var(--faint); }
-    .dk-notes-box:focus { outline: none; border-color: var(--ink-3); background: var(--paper); }
-    .dk-notes-box[aria-invalid="true"] { border-color: var(--bad); }
-    .dk-notes-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12.5px; color: var(--ink-3); }
-    .dk-notes-state { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
-    .dk-notes-state i { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--good); transition: background .2s ease; }
-    .dk-notes-state.dk-saving i { background: var(--warn); animation: dk-cards-blink 1s ease-in-out infinite; }
-    .dk-notes-count { flex: none; }
-    .dk-notes-foot .dk-bad { color: var(--bad); }
+    .dk-pb > :is(.dk-focus, .dk-celebrate) { flex: 1 1 auto; }
 
     /* ── My to-do ─────────────────────────────────────────────────────
      * Input on top, then the open lines (drag by the grip) and the done
@@ -192,7 +180,7 @@
         .dk-celebrate path { animation: dk-cards-draw .5s cubic-bezier(.2, .7, .2, 1) .55s both; }
     }
     @media (prefers-reduced-motion: reduce) {
-        .dk-focus-card, .dk-deck-ring-fg, .dk-notes-state.dk-saving i { transition: none; animation: none; }
+        .dk-focus-card, .dk-deck-ring-fg { transition: none; animation: none; }
     }
     @container pb (max-width: 419px) {
         .dk-focus-card { padding: 16px; }
@@ -256,7 +244,7 @@
 
     /* ── Hero: briefing, command strip ──────────────────── */
     /* The greeting on one side, the day's two figures across from it; on a narrow screen they sit under it. */
-    .dk-hello { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "main figs" "start start"; }
+    .dk-hello { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "main figs"; padding-bottom: 12px; }
     .dk-hello-figs, .dk-hello-clear { grid-area: figs; align-self: end; margin: 0; }
     .dk-hello-figs { display: flex; color: inherit; text-decoration: none; border-radius: 10px; }
     .dk-hello-figs:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 4px; }
@@ -269,7 +257,7 @@
     a.dk-hello-figs:hover .dk-hello-fig > span { color: var(--ink); }
     .dk-hello-fig.dk-late > span, a.dk-hello-figs:hover .dk-hello-fig.dk-late > span { color: var(--brand-ink); }
     @media (max-width: 760px) {
-        .dk-hello { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main" "figs" "start"; }
+        .dk-hello { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main" "figs"; }
     }
 
 

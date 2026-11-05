@@ -537,3 +537,16 @@ test('the pipeline counts a held proposal in its own phase and shows the hold as
         ->assertSeeHtml('data-test="phase-held-planning"')
         ->assertSeeText(trans_choice('proposals.count_on_hold', 1, ['count' => 1]));
 });
+
+test('the pipeline counts payroll proposals beside project ones, and the kind filter narrows it', function () {
+    $user = User::factory()->role('Financial')->create();
+    Proposal::factory()->create(['status' => ProposalStatus::ProposalDraft]);
+    Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    $planning = fn (array $query = []): int => collect(Livewire::actingAs($user)->withQueryParams($query)->test('pages::proposals.index')->instance()->pipeline)
+        ->firstWhere('phase', ProposalPhase::Planning)['count'];
+
+    expect($planning())->toBe(2)
+        ->and($planning(['kind' => 'payroll']))->toBe(1)
+        ->and($planning(['kind' => 'project']))->toBe(1);
+});
