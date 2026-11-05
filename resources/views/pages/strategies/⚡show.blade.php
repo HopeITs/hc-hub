@@ -72,7 +72,7 @@ new #[Layout('layouts::desk'), Title('titles.strategy')] class extends Component
             ->select(['id', 'strategy_id', 'strategic_pillar_id', 'manager_id'])
             ->where('strategy_id', $this->strategyId)
             ->with(['manager:id,first_name_en,last_name_en,first_name_ar,last_name_ar'])
-            ->withCount(['projects', 'annualPlans']);
+            ->withCount(['projects']);
     }
 
     /**
