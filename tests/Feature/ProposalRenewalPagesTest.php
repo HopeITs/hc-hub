@@ -60,7 +60,7 @@ test('saving a renewal goes through the clone and lands a linked concept note', 
         ->call('saveProposal')
         ->assertHasNoErrors();
 
-    $renewal = Proposal::query()->where('internal_project_number', '27-001')->sole();
+    $renewal = Proposal::query()->where('internal_project_number', 'HC-2027-001')->sole();
 
     expect($renewal->previous_proposal_id)->toBe($this->previous->id)
         ->and($renewal->status)->toBe(ProposalStatus::ConceptNote)

@@ -273,7 +273,7 @@ test('a renewal ignores a supplied number and generates its own', function () {
 
     $result = app(CloneProposalForRenewal::class)->handle($previous, renewalData(['internalProjectNumber' => 'HC-2026-310']), renewalActor());
 
-    expect($result['proposal']->internal_project_number)->toBe('27-001')
+    expect($result['proposal']->internal_project_number)->toBe('HC-2027-001')
         ->and(DB::table('proposals')->where('previous_proposal_id', $previous->id)->count())->toBe(1);
 });
 

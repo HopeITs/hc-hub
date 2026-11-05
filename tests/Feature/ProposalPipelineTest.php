@@ -356,23 +356,7 @@ test('a user without proposal permissions sees no edit controls and cannot creat
         ->and(DB::table('proposals')->find($proposal->id))->not->toBeNull();
 });
 
-test('a proposal cannot be created without an internal project number', function () {
-    $user = User::factory()->role('Financial')->create();
-
-    Livewire::actingAs($user)
-        ->test('pages::proposals.index')
-        ->call('openCreateModal')
-        ->set('name', 'Rapid Response Fund')
-        ->set('donorId', (string) insertDonor())->set('projectIds', [(string) Project::factory()->create()->id])->set('internalProjectNumber', '   ')
-        ->set('plannedDateBegin', '2026-01-01')
-        ->set('plannedDateEnd', '2026-12-31')
-        ->call('saveProposal')
-        ->assertHasErrors(['internalProjectNumber' => 'required']);
-
-    expect(DB::table('proposals')->where('name', 'Rapid Response Fund')->exists())->toBeFalse();
-});
-
-test('a new proposal cannot reuse another proposal\'s internal number, whatever its case', function () {
+test('a new proposal gets a generated number whatever internal number the form sends', function (string $typed) {
     $user = User::factory()->role('Financial')->create();
     Proposal::factory()->create(['internal_project_number' => 'HC-2026-044']);
 
@@ -380,74 +364,40 @@ test('a new proposal cannot reuse another proposal\'s internal number, whatever 
         ->test('pages::proposals.index')
         ->call('openCreateModal')
         ->set('name', 'Rapid Response Fund')
-        ->set('donorId', (string) insertDonor())->set('projectIds', [(string) Project::factory()->create()->id])->set('internalProjectNumber', 'hc-2026-044')
+        ->set('donorId', (string) insertDonor())->set('projectIds', [(string) Project::factory()->create()->id])->set('internalProjectNumber', $typed)
         ->set('plannedDateBegin', '2026-01-01')
         ->set('plannedDateEnd', '2026-12-31')
-        ->call('saveProposal')
-        ->assertHasErrors(['internalProjectNumber' => 'unique'])
-        ->assertSee('The internal project number has already been taken.');
-
-    expect(DB::table('proposals')->where('name', 'Rapid Response Fund')->exists())->toBeFalse();
-});
-
-test('the internal project number is trimmed and limited to 50 characters', function () {
-    $user = User::factory()->role('Financial')->create();
-
-    $component = Livewire::actingAs($user)
-        ->test('pages::proposals.index')
-        ->call('openCreateModal')
-        ->set('name', 'Rapid Response Fund')
-        ->set('plannedDateBegin', '2026-01-01')
-        ->set('plannedDateEnd', '2026-12-31')
-        ->set('donorId', (string) insertDonor())->set('projectIds', [(string) Project::factory()->create()->id])->set('internalProjectNumber', str_repeat('A', 51))
-        ->call('saveProposal')
-        ->assertHasErrors(['internalProjectNumber' => 'max']);
-
-    $component->set('internalProjectNumber', '  HC-2026-045  ')
         ->call('saveProposal')
         ->assertHasNoErrors();
 
     expect(DB::table('proposals')->where('name', 'Rapid Response Fund')->value('internal_project_number'))->toBe('HC-2026-045');
-});
+})->with([
+    'blank' => '   ',
+    'too long' => str_repeat('A', 51),
+    'placeholder' => 'TEMP-0099',
+    'lowercase placeholder' => 'temp-0099',
+    'a number already taken' => 'hc-2026-044',
+]);
 
-test('a new internal number cannot use the reserved placeholder prefix', function (string $number) {
+test('editing a proposal never changes its internal number, a placeholder included', function () {
     $user = User::factory()->role('Financial')->create();
+    $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create(['internal_project_number' => 'TEMP-0007']));
 
     Livewire::actingAs($user)
         ->test('pages::proposals.index')
-        ->call('openCreateModal')
-        ->set('name', 'Rapid Response Fund')
-        ->set('donorId', (string) insertDonor())->set('projectIds', [(string) Project::factory()->create()->id])->set('internalProjectNumber', $number)
-        ->set('plannedDateBegin', '2026-01-01')
-        ->set('plannedDateEnd', '2026-12-31')
-        ->call('saveProposal')
-        ->assertHasErrors('internalProjectNumber')
-        ->assertSee(__('proposals.internal_project_number_prefix_reserved'));
-
-    expect(DB::table('proposals')->where('name', 'Rapid Response Fund')->exists())->toBeFalse();
-})->with(['TEMP-0099', 'temp-0099']);
-
-test('a proposal still holding its placeholder saves while the number is left alone, but not with another placeholder', function () {
-    $user = User::factory()->role('Financial')->create();
-    $proposal = Proposal::factory()->create(['internal_project_number' => 'TEMP-0007']);
-
-    $component = Livewire::actingAs($user)
-        ->test('pages::proposals.index')
         ->call('openEditModal', $proposal->id)
         ->assertSet('internalProjectNumber', 'TEMP-0007')
-        ->set('internalProjectNumber', 'TEMP-0008')
-        ->call('saveProposal')
-        ->assertHasErrors('internalProjectNumber');
-
-    $component->set('internalProjectNumber', 'TEMP-0007')
+        ->set('internalProjectNumber', 'HC-2026-047')
         ->set('name', 'Renamed proposal')
         ->call('saveProposal')
         ->assertHasNoErrors();
 
     $stored = DB::table('proposals')->find($proposal->id);
+    $activity = Activity::query()->where('subject_type', 'proposal')->where('subject_id', $proposal->id)->sole();
 
     expect($stored->name)->toBe('Renamed proposal')
-        ->and($stored->internal_project_number)->toBe('TEMP-0007');
+        ->and($stored->internal_project_number)->toBe('TEMP-0007')
+        ->and($activity->changes)->not->toHaveKey('internal_project_number');
 });
 
 test('saving a proposal with its own internal number raises no duplicate error', function () {
@@ -464,31 +414,13 @@ test('saving a proposal with its own internal number raises no duplicate error',
     expect(DB::table('proposals')->find($proposal->id)->notes)->toBe('Checked against the donor letter');
 });
 
-test('changing the internal number is recorded in the activity log and notifies', function () {
-    $user = User::factory()->role('Financial')->create();
-    $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create(['internal_project_number' => 'TEMP-0003']));
-
-    Livewire::actingAs($user)
-        ->test('pages::proposals.index')
-        ->call('openEditModal', $proposal->id)
-        ->set('internalProjectNumber', 'HC-2026-047')
-        ->call('saveProposal')
-        ->assertHasNoErrors();
-
-    $activity = Activity::query()->where('subject_type', 'proposal')->where('subject_id', $proposal->id)->sole();
-
-    expect($activity->event)->toBe('proposal.updated')
-        ->and($activity->changes['internal_project_number'])->toBe(['TEMP-0003', 'HC-2026-047'])
-        ->and($activity->shouldNotify())->toBeTrue();
-});
-
-test('a duplicate that slips past validation shows the duplicate error instead of failing', function () {
+test('a duplicate that slips past the number sequence shows the duplicate error instead of failing', function () {
     $user = User::factory()->role('Financial')->create();
     Proposal::factory()->create(['internal_project_number' => 'HC-2026-048']);
 
-    // Stands in for a colleague saving the same number between this form's
-    // validation and its insert: validation saw a free number, the database
-    // does not.
+    // Stands in for a number written outside the sequence (an import or a
+    // hand edit) landing on the one this save generated: the unique index
+    // refuses the insert.
     Proposal::creating(function (Proposal $proposal): void {
         $proposal->internal_project_number = 'HC-2026-048';
     });
@@ -497,11 +429,12 @@ test('a duplicate that slips past validation shows the duplicate error instead o
         ->test('pages::proposals.index')
         ->call('openCreateModal')
         ->set('name', 'Rapid Response Fund')
-        ->set('donorId', (string) insertDonor())->set('projectIds', [(string) Project::factory()->create()->id])->set('internalProjectNumber', 'HC-2026-049')
+        ->set('donorId', (string) insertDonor())->set('projectIds', [(string) Project::factory()->create()->id])
         ->set('plannedDateBegin', '2026-01-01')
         ->set('plannedDateEnd', '2026-12-31')
         ->call('saveProposal')
         ->assertHasErrors('internalProjectNumber')
+        ->assertSeeHtml('data-test="internal-number-error"')
         ->assertSee('The internal project number has already been taken.')
         ->assertSet('showProposalModal', true);
 
