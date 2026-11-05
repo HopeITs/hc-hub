@@ -41,11 +41,21 @@ trait EditsMonthlyReportLines
     public array $figures = [];
 
     /**
-     * Save the line whose figure just changed.
+     * Save the line whose figure just changed. Livewire sends the whole
+     * array (no key) when several inputs changed in one request, so then
+     * every line is saved.
      */
-    public function updatedFigures(mixed $value, string $key): void
+    public function updatedFigures(mixed $value, ?string $key = null): void
     {
-        $lineId = (int) explode('.', $key)[0];
+        $lineIds = $key === null ? array_keys($this->figures) : [explode('.', $key)[0]];
+
+        foreach ($lineIds as $lineId) {
+            $this->saveLine((int) $lineId);
+        }
+    }
+
+    protected function saveLine(int $lineId): void
+    {
         $this->forgetLineErrors($lineId);
         $line = $this->report->lines->firstWhere('id', $lineId);
 
