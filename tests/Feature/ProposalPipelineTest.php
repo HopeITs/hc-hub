@@ -519,3 +519,21 @@ test('the proposals search hint says it also matches the internal number', funct
         ->test('pages::proposals.index')
         ->assertSeeHtml('placeholder="Name, number or notes"');
 });
+
+test('the pipeline counts a held proposal in its own phase and shows the hold as a sub-count', function () {
+    $held = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
+    $held->forceFill(['on_hold_since' => today()])->save();
+    Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
+
+    $page = Livewire::actingAs(User::factory()->role('Financial')->create())->test('pages::proposals.index');
+    $planning = collect($page->instance()->pipeline)->firstWhere('phase', ProposalPhase::Planning);
+
+    // A hold keeps the status, so both proposals count in Planning (W-06, D-58).
+    expect($planning['count'])->toBe(2)
+        ->and($planning['held'])->toBe(1);
+
+    // The rail lives in the Overview view.
+    $page->set('view', 'overview')
+        ->assertSeeHtml('data-test="phase-held-planning"')
+        ->assertSeeText(trans_choice('proposals.count_on_hold', 1, ['count' => 1]));
+});

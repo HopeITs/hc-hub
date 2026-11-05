@@ -45,6 +45,7 @@ return [
     'flag_no_agreement' => 'No agreement',
     'flag_no_tranches' => 'No tranches',
     'flag_no_transfers' => 'No transfers',
+    'flag_on_hold' => 'On hold',
     'flag_other_currency' => 'Tranche in another currency',
     'flag_report_overdue' => 'Donor report overdue',
     'flag_short' => 'Landed short',

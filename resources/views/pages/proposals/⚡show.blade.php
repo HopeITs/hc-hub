@@ -12,6 +12,7 @@ use App\Livewire\Concerns\Proposals\ManagesProposalApproval;
 use App\Livewire\Concerns\Proposals\ManagesProposalFiles;
 use App\Livewire\Concerns\Proposals\ManagesProposalExtension;
 use App\Livewire\Concerns\Proposals\ManagesProposalForm;
+use App\Livewire\Concerns\Proposals\ManagesProposalHold;
 use App\Livewire\Concerns\Proposals\ManagesProposalPlan;
 use App\Livewire\Concerns\Proposals\ManagesProposalRecord;
 use App\Livewire\Concerns\Proposals\ManagesProposalReviewers;
@@ -48,6 +49,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     use ManagesProposalExtension;
     use ManagesProposalFiles;
     use ManagesProposalForm;
+    use ManagesProposalHold;
     use ManagesProposalPlan;
     use ManagesProposalRecord;
     use ManagesProposalReviewers;
@@ -186,7 +188,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     public function proposal(): Proposal
     {
         return Proposal::query()
-            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'extended_date_end', 'extension_reason', 'status', 'notes', 'concept_note', 'created_at', 'updated_at', 'donor_id', 'final_report_accepted_on', 'final_report_accepted_by'])
+            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'extended_date_end', 'extension_reason', 'status', 'on_hold_since', 'status_remind_on', 'notes', 'concept_note', 'created_at', 'updated_at', 'donor_id', 'final_report_accepted_on', 'final_report_accepted_by'])
             // The donor's name heads the concept-note card (W-24); a name is not money.
             ->with('donor:id,name')
             ->findOrFail($this->proposalId);

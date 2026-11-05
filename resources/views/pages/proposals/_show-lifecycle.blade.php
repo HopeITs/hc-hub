@@ -1,6 +1,8 @@
 {{--
     The lifecycle rail of proposals/show: nine stops, each with the date it
-    was reached. Included by ⚡show.blade.php, whose top PHP block defines
+    was reached. The nine are the merged line (W-25): `on hold` is not a stop,
+    it is a chip on the current one. This file holds no logic — every state,
+    label and flag is decided in ChartsProposalChronology::lifecycle(). Included by ⚡show.blade.php, whose top PHP block defines
     $mutedText, $inkText, $hairline, $amount, $term, $chronology and
     $arrivals.
 --}}
@@ -48,6 +50,10 @@
                         'font-medium '.$inkText => $stop['state'] === 'past',
                         'font-medium '.$mutedText => $stop['state'] === 'ahead',
                     ])>{{ $stop['label'] }}</span>
+
+                    @if ($stop['held'])
+                        <x-ui.hold-chip />
+                    @endif
 
                     <span class="min-h-4 text-center text-[10px] tabular-nums {{ $mutedText }}">
                         @if ($stop['date'] !== null)
