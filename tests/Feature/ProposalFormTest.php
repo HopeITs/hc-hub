@@ -18,6 +18,7 @@ use App\Models\Proposal;
 use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportTesting\Testable;
@@ -733,4 +734,157 @@ test('the validation summary names the sections that hold the problems', functio
         ->assertHasErrors(['name'])
         ->assertSeeHtml('data-form-error-summary')
         ->assertSeeText(__('proposals.section_identity'));
+});
+
+/*
+| W-24 (D-62): the concept note itself — the text in `proposals.concept_note`
+| and the optional document as a `concept_note` media row. Neither is
+| required, and neither is a transition requirement.
+*/
+
+test('the concept note text is trimmed on the way in', function () {
+    $project = Project::factory()->create();
+
+    $proposal = saveProposal(userWithRole('Financial'), null, proposalFormData([$project->id], [
+        'conceptNote' => "  Rehabilitate four wells in rural Aleppo.\n\nThe need assessment is attached.  ",
+    ]));
+
+    expect(DB::table('proposals')->find($proposal->id)->concept_note)
+        ->toBe("Rehabilitate four wells in rural Aleppo.\n\nThe need assessment is attached.");
+});
+
+test('a blank concept note is stored as null, on create and on edit', function () {
+    $project = Project::factory()->create();
+    $actor = userWithRole('Financial');
+
+    $proposal = saveProposal($actor, null, proposalFormData([$project->id], ['conceptNote' => '   ']));
+
+    expect(DB::table('proposals')->find($proposal->id)->concept_note)->toBeNull();
+
+    saveProposal($actor, $proposal, proposalEditData($proposal, ['conceptNote' => 'The donor asked for a short note.']));
+
+    expect(DB::table('proposals')->find($proposal->id)->concept_note)->toBe('The donor asked for a short note.');
+
+    saveProposal($actor, $proposal->fresh(), proposalEditData($proposal->fresh(), ['conceptNote' => '']));
+
+    expect(DB::table('proposals')->find($proposal->id)->concept_note)->toBeNull();
+});
+
+test('a concept note over twenty thousand characters is refused and nothing is written', function () {
+    $project = Project::factory()->create();
+
+    $errors = refusedSave(fn () => saveProposal(userWithRole('Financial'), null, proposalFormData([$project->id], [
+        'conceptNote' => str_repeat('a', 20_001),
+    ])));
+
+    expect($errors['conceptNote'])->toBe([__('proposals.concept_note.too_long')])
+        ->and(DB::table('proposals')->count())->toBe(0);
+});
+
+test('exactly twenty thousand characters is accepted', function () {
+    $project = Project::factory()->create();
+
+    $proposal = saveProposal(userWithRole('Financial'), null, proposalFormData([$project->id], [
+        'conceptNote' => str_repeat('a', 20_000),
+    ]));
+
+    expect(mb_strlen((string) DB::table('proposals')->find($proposal->id)->concept_note))->toBe(20_000);
+});
+
+test('the form files the concept note document under its own collection', function () {
+    // Livewire uploads fail their file rules while the clock is travelled (.ai/rules/tests.md).
+    $this->travelBack();
+
+    $project = Project::factory()->create();
+
+    fillProposalBasics(openProposalCreateForm(userWithRole('Financial')))
+        ->set('projectIds', [(string) $project->id])
+        ->set('conceptNote', 'Four wells, two villages.')
+        ->set('conceptNoteFile', validUpload('concept-note.pdf'))
+        ->call('saveProposal')
+        ->assertHasNoErrors()
+        ->assertSet('showProposalModal', false);
+
+    $proposal = Proposal::query()->sole();
+    $media = DB::table('media')->where('mediable_type', 'proposal')->where('mediable_id', $proposal->id)->sole();
+
+    expect($proposal->concept_note)->toBe('Four wells, two villages.')
+        ->and($media->collection)->toBe('concept_note')
+        ->and($media->original_name)->toBe('concept-note.pdf')
+        ->and($media->encryption_key_id)->not->toBeNull();
+});
+
+test('a second concept note document keeps the older one, newest first', function () {
+    $this->travelBack();
+
+    $project = Project::factory()->create();
+    $actor = userWithRole('Financial');
+
+    fillProposalBasics(openProposalCreateForm($actor))
+        ->set('projectIds', [(string) $project->id])
+        ->set('conceptNoteFile', validUpload('first-draft.pdf'))
+        ->call('saveProposal')
+        ->assertHasNoErrors();
+
+    $proposal = Proposal::query()->sole();
+
+    Livewire::actingAs($actor)->test('pages::proposals.index')
+        ->call('openEditModal', $proposal->id)
+        ->set('conceptNoteFile', validUpload('second-draft.pdf'))
+        ->call('saveProposal')
+        ->assertHasNoErrors();
+
+    expect(DB::table('media')->where('mediable_type', 'proposal')->where('mediable_id', $proposal->id)->count())->toBe(2);
+
+    $page = Livewire::actingAs($actor)->test('pages::proposals.show', ['proposal' => $proposal]);
+
+    expect($page->instance()->conceptNoteFiles->pluck('original_name')->all())
+        ->toBe(['second-draft.pdf', 'first-draft.pdf']);
+});
+
+test('a concept note document of a disallowed type never reaches the form, and the proposal is saved without a file', function () {
+    $this->travelBack();
+
+    $project = Project::factory()->create();
+
+    /*
+     * Livewire's own temporary-upload rules (config/livewire.php) are the same
+     * 5 MB and FileType list the save applies, so a refused file never lands on
+     * the property: the field stays empty and nothing is filed. The action-level
+     * rules in validateConceptNoteFile() are the backstop for any other caller.
+     */
+    fillProposalBasics(openProposalCreateForm(userWithRole('Financial')))
+        ->set('projectIds', [(string) $project->id])
+        ->set('conceptNoteFile', UploadedFile::fake()->create('script.exe', 10, 'application/x-msdownload'))
+        ->assertSet('conceptNoteFile', null)
+        ->call('saveProposal')
+        ->assertHasNoErrors();
+
+    expect(Proposal::query()->count())->toBe(1)
+        ->and(DB::table('media')->count())->toBe(0);
+});
+
+test('the concept note section sits between the locations and the dates', function () {
+    openProposalCreateForm(userWithRole('Financial'))
+        ->assertSeeInOrder([
+            __('proposals.section_identity'),
+            __('proposals.section_donor'),
+            __('proposals.section_locations'),
+            __('proposals.concept_note.section'),
+            __('proposals.section_planned_dates'),
+            __('proposals.section_budget'),
+            __('proposals.section_start'),
+            __('proposals.section_notes'),
+        ])
+        ->assertSeeHtml('wire:model="conceptNote"')
+        ->assertSeeHtml('wire:model="conceptNoteFile"');
+});
+
+test('editing a proposal opens the form with its stored concept note', function () {
+    $proposal = linkedProposal();
+    DB::table('proposals')->where('id', $proposal->id)->update(['concept_note' => 'Stored note.']);
+
+    Livewire::actingAs(userWithRole('Financial'))->test('pages::proposals.index')
+        ->call('openEditModal', $proposal->id)
+        ->assertSet('conceptNote', 'Stored note.');
 });

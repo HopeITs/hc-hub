@@ -19,6 +19,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
 
 new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Component {
@@ -31,6 +32,8 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
     use ManagesProposalStatus;
     use ReadsProposalBoard;
     use ReadsProposalRegister;
+    // The create form carries the concept-note document (W-24).
+    use WithFileUploads;
     use WithPagination;
 
     /** @var list<string> */

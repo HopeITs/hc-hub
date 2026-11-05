@@ -186,7 +186,9 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     public function proposal(): Proposal
     {
         return Proposal::query()
-            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'extended_date_end', 'extension_reason', 'status', 'notes', 'updated_at', 'donor_id', 'final_report_accepted_on', 'final_report_accepted_by'])
+            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'extended_date_end', 'extension_reason', 'status', 'notes', 'concept_note', 'created_at', 'updated_at', 'donor_id', 'final_report_accepted_on', 'final_report_accepted_by'])
+            // The donor's name heads the concept-note card (W-24); a name is not money.
+            ->with('donor:id,name')
             ->findOrFail($this->proposalId);
     }
 
@@ -319,7 +321,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
             $this->proposal, $this->canRecordAgreement, $this->statusNotes, $this->agreements, $this->agreementRows, $this->fundingTranches, $this->donorReports, $this->agreementMoney, $this->moneyByCurrency,
             $this->projects, $this->linkableProjects, $this->tasks, $this->targets, $this->reports,
             $this->planMilestones, $this->planTaskRows, $this->planGroups, $this->planGanttPayload, $this->planWindow, $this->planProjectOptions,
-            $this->projectFiles, $this->documents, $this->deadlines, $this->warnings, $this->lifecycle, $this->chronology,
+            $this->projectFiles, $this->conceptNoteFiles, $this->documents, $this->deadlines, $this->warnings, $this->lifecycle, $this->chronology,
             $this->arrivals, $this->vitals, $this->term, $this->tabs, $this->proposalFiles, $this->reviewStages, $this->needAssessments, $this->approvalSubject, $this->approvalPreview,
             $this->canRecordFinalReportAcceptance, $this->finalReportAcceptance,
         );

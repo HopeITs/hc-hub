@@ -4,6 +4,9 @@
     $mutedText, $inkText, $hairline, $amount, $term, $chronology and
     $arrivals.
 --}}
+            {{-- The concept note first (W-24): in the ideation phase it is what the proposal is. --}}
+            @include('pages.proposals._show-concept-note')
+
             @include('pages.proposals._show-reviewers')
 
             @if ($this->finalReportAcceptance !== null)

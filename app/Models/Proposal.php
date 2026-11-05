@@ -51,6 +51,7 @@ use Illuminate\Support\Facades\DB;
  * @property ProposalStatus $status
  * @property-read ProposalPhase $phase
  * @property string|null $notes
+ * @property string|null $concept_note
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
@@ -63,6 +64,7 @@ use Illuminate\Support\Facades\DB;
     'actual_date_begin',
     'actual_date_end',
     'notes',
+    'concept_note',
     'requested_budget',
     'requested_currency',
     'status_remind_on',
@@ -602,10 +604,13 @@ class Proposal extends Model implements TracksActivity
     }
 
     /**
+     * The concept note (W-24) is a movement of its own: the sentence says it
+     * was updated and names no text, as the other entries name no value.
+     *
      * @return array<string, string>
      */
     public function activityEvents(): array
     {
-        return ['status' => 'status_changed', 'name' => 'updated', 'internal_project_number' => 'updated', 'planned_date_begin' => 'updated', 'planned_date_end' => 'updated'];
+        return ['status' => 'status_changed', 'concept_note' => 'concept_note_updated', 'name' => 'updated', 'internal_project_number' => 'updated', 'planned_date_begin' => 'updated', 'planned_date_end' => 'updated'];
     }
 }

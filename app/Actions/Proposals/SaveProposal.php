@@ -44,7 +44,7 @@ final class SaveProposal
      * `beneficiaries` is keyed by project id. The budget fields are ignored
      * entirely for a user who may not see money.
      *
-     * @param  array{name: string, internalProjectNumber: string, donorId: int|string|null, projectIds?: list<int|string>, beneficiaries?: array<int|string, int|string|null>, beneficiariesReason?: ?string, requestedBudget?: string|int|float|null, requestedCurrency?: ?string, plannedDateBegin: ?string, plannedDateEnd: ?string, notes?: ?string, startingStage?: string, skipReason?: ?string, previousProposalId?: int|null}  $data
+     * @param  array{name: string, internalProjectNumber: string, donorId: int|string|null, projectIds?: list<int|string>, beneficiaries?: array<int|string, int|string|null>, beneficiariesReason?: ?string, requestedBudget?: string|int|float|null, requestedCurrency?: ?string, plannedDateBegin: ?string, plannedDateEnd: ?string, notes?: ?string, conceptNote?: ?string, startingStage?: string, skipReason?: ?string, previousProposalId?: int|null}  $data
      */
     public function handle(?Proposal $existing, array $data, User $actor): Proposal
     {
@@ -147,7 +147,7 @@ final class SaveProposal
      */
     private function normalize(array $data): array
     {
-        foreach (['name', 'internalProjectNumber', 'notes', 'skipReason', 'beneficiariesReason'] as $field) {
+        foreach (['name', 'internalProjectNumber', 'notes', 'conceptNote', 'skipReason', 'beneficiariesReason'] as $field) {
             if (is_string($data[$field] ?? null)) {
                 $data[$field] = trim($data[$field]);
             }
@@ -192,6 +192,8 @@ final class SaveProposal
             'plannedDateBegin' => ['required', 'date'],
             'plannedDateEnd' => ['required', 'date', 'after_or_equal:plannedDateBegin'],
             'notes' => ['nullable', 'string'],
+            // The concept note is never required: no transition asks for it (contracts §2).
+            'conceptNote' => ['nullable', 'string', 'max:20000'],
         ];
 
         $messages = [
@@ -205,6 +207,7 @@ final class SaveProposal
             'plannedDateBegin.required' => __('proposals.set_the_planned_start_date'),
             'plannedDateEnd.required' => __('proposals.set_the_planned_end_date'),
             'plannedDateEnd.after_or_equal' => __('proposals.the_planned_end_cannot_fall_before_the_planned_start'),
+            'conceptNote.max' => __('proposals.concept_note.too_long'),
         ];
 
         if ($proposal === null) {
@@ -355,6 +358,13 @@ final class SaveProposal
         ]);
 
         $proposal->donor_id = (int) $input['donorId'];
+
+        // Only a caller that sent the concept note (W-24) changes it: a caller
+        // that does not know the field leaves what is stored alone.
+        if (array_key_exists('conceptNote', $input)) {
+            $conceptNote = (string) ($input['conceptNote'] ?? '');
+            $proposal->concept_note = $conceptNote === '' ? null : $conceptNote;
+        }
 
         $sentMoney = array_key_exists('requestedBudget', $input) || array_key_exists('requestedCurrency', $input);
 
