@@ -273,6 +273,29 @@ test('the funding position splits committed, received and pending per currency f
         ->and($position['EUR']['received'])->toBe(0.0);
 });
 
+test('each currency line of the funding position counts only the proposals funded in that currency', function () {
+    $user = User::factory()->role('Financial')->create();
+    $donor = Donor::factory()->create();
+
+    foreach ([['USD Grant One', 'USD'], ['USD Grant Two', 'USD'], ['EUR Grant', 'EUR']] as [$name, $currency]) {
+        $proposal = Proposal::factory()->create(['name' => $name]);
+        Proposal::query()->whereKey($proposal->id)->update(['donor_id' => $donor->id]);
+        DonorProposal::factory()->create(['donor_id' => $donor->id, 'proposal_id' => $proposal->id, 'budget' => 1000, 'currency' => $currency]);
+    }
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::proposals.index')
+        ->set('view', 'overview')
+        ->assertSee('Across 2 proposals')
+        ->assertSee('Across 1 proposal')
+        ->assertDontSee('Across 3 proposals');
+
+    $position = $component->instance()->fundingPosition->keyBy('currency');
+
+    expect($position['USD']['proposals'])->toBe(2)
+        ->and($position['EUR']['proposals'])->toBe(1);
+});
+
 test('the funding flow draws one graph per currency and lists unfunded proposals apart', function () {
     $user = User::factory()->role('Financial')->create();
     $donor = Donor::factory()->create(['name' => 'ECHO']);
