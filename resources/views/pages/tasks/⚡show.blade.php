@@ -234,8 +234,7 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
 };
 ?>
 
-<x-desk.record-sheet register="pages::tasks.index" :close-url="route('tasks.index')" :title="$this->task->title" :subtitle="$this->task->sourceLabel()">
-<section class="@container/detail flex min-h-full w-full flex-1 flex-col gap-4 bg-white text-secondary-dark dark:bg-surface-0 dark:text-ink" aria-labelledby="task-detail-heading">
+<section class="@container/detail flex w-full flex-1 flex-col gap-4 text-secondary-dark dark:text-ink" aria-labelledby="task-detail-heading">
     @php $assignees = $this->task->taskAssignees->pluck('employee')->filter(); @endphp
 
     <x-ui.detail-header
@@ -243,6 +242,7 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
         id="task-detail-heading"
         :breadcrumbs="[
             ['label' => __('common.tasks'), 'url' => route('tasks.index')],
+            ...($this->task->source instanceof \App\Models\Milestone ? [array_filter(['label' => $this->task->source->name, 'url' => auth()->user()->can('view', $this->task->source) ? route('milestones.show', $this->task->source) : null])] : []),
             ['label' => $this->task->title],
         ]"
         :title="$this->task->title"
@@ -322,4 +322,3 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
 
     @include('pages.tasks._show-modals')
 </section>
-</x-desk.record-sheet>

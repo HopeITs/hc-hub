@@ -34,6 +34,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
  * @property-read array<int, array{key: string, label: string, count: int}> $tabs  #[Computed] tabs()
  * @property-read Collection<int, Project> $projects  #[Computed] projects()
  * @property-read Collection<int, Media> $proposalFiles  #[Computed] proposalFiles()
+ * @property-read Collection<int, Media> $conceptNoteFiles  #[Computed] conceptNoteFiles()
  * @property-read Collection<int, Media> $projectFiles  #[Computed] projectFiles()
  * @property-read Collection<int, Media> $documents  #[Computed] documents()
  */
@@ -107,6 +108,24 @@ trait ManagesProposalFiles
             ->orderByDesc('uploaded_at')
             ->orderByDesc('id')
             ->get();
+    }
+
+    /**
+     * The concept-note documents filed on this proposal (W-24), newest first:
+     * the first row is the one in force and the rest are its history, since a
+     * replacement is filed beside the older upload rather than over it.
+     *
+     * Read from proposalFiles() in memory, so the ideation card costs no
+     * extra query on a page that already lists the files.
+     *
+     * @return Collection<int, Media>
+     */
+    #[Computed]
+    public function conceptNoteFiles(): Collection
+    {
+        return $this->proposalFiles->filter(
+            fn (Media $media): bool => $media->collection === MediaCollection::ConceptNote,
+        )->values();
     }
 
     /**
@@ -216,7 +235,7 @@ trait ManagesProposalFiles
         );
 
         $this->closeFileModal();
-        unset($this->proposalFiles, $this->documents, $this->tabs);
+        unset($this->proposalFiles, $this->conceptNoteFiles, $this->documents, $this->tabs);
 
         Flux::toast(variant: 'success', text: $isCreate ? __('proposals.file_uploaded') : __('proposals.file_updated'));
     }
@@ -247,7 +266,7 @@ trait ManagesProposalFiles
 
         $this->confirmingFileDelete = false;
         $this->deletingFileId = null;
-        unset($this->proposalFiles, $this->documents, $this->tabs);
+        unset($this->proposalFiles, $this->conceptNoteFiles, $this->documents, $this->tabs);
 
         Flux::toast(variant: 'success', text: __('proposals.file_deleted'));
     }

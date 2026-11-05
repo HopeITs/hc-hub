@@ -31,6 +31,7 @@ return [
         'supervisions' => 'Supervisions',
         'sectors' => 'Sectors',
         'report-templates' => 'Report templates',
+        'risk-library' => 'Risk library',
         'evidence-types' => 'Evidence types',
         'narrative-questions' => 'Narrative questions',
         'tasks' => 'Tasks',
@@ -39,6 +40,7 @@ return [
         'cities' => 'Cities',
         'activity-log' => 'Activity log',
         'notification-settings' => 'Notification settings',
+        'ai' => 'AI assistant',
     ],
     'actions' => [
         'view' => 'View',
@@ -55,5 +57,7 @@ return [
         'aggregate' => 'Aggregate',
         'manage-reviewers' => 'Manage reviewers',
         'correct-status' => 'Correct status',
+        'draft' => 'Draft with AI',
+        'view-usage' => 'View usage',
     ],
 ];

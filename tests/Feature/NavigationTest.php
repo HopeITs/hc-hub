@@ -168,3 +168,15 @@ test('the risk register is no longer in the sidebar, and the risk library is onl
         ->and(deskPageRoutes($general))->not->toContain('admin.risk-library.index')
         ->and(deskPageRoutes(mealManager()))->toContain('admin.risk-library.index');
 });
+
+test('the sidebar folds each group into one row and opens the group of the current page', function () {
+    $this->actingAs(User::factory()->role('Super Admin')->create())
+        ->get(route('projects.index'))
+        ->assertSee('data-side-group-toggle="projects_delivery"', false)
+        ->assertSee('data-side-group-toggle="administration"', false)
+        ->assertDontSee('data-side-group-toggle="overview"', false)
+        ->assertSee('x-data="{ open: true ||', false)
+        ->assertSee('x-data="{ open: false ||', false)
+        ->assertSee('data-side-link="projects.index"', false)
+        ->assertSee('data-side-fly="projects_delivery"', false);
+});

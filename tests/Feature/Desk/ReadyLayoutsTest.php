@@ -591,16 +591,6 @@ test('undo puts someone still on the role default back on null', function () {
     expect($user->fresh()->desk_layout)->toBeNull();
 });
 
-test('the quick actions offer a new donor and agreement only to those who may create them', function () {
-    Livewire::actingAs(userWithRole('Super Admin', insertHrEmployee()))->test('pages::desk.index')
-        ->assertSeeHtml('data-desk-start-action="donor"')
-        ->assertSeeHtml('data-desk-start-action="agreement"');
-
-    Livewire::actingAs(userWithRole('Team Member', insertHrEmployee()))->test('pages::desk.index')
-        ->assertDontSeeHtml('data-desk-start-action="donor"')
-        ->assertDontSeeHtml('data-desk-start-action="agreement"');
-});
-
 test('each choice can say its signal failed', function () {
     $html = Livewire::actingAs(userWithRole('Financial', insertHrEmployee()))->test('pages::desk.index')
         ->assertSeeHtml('data-ready-signal-failed')

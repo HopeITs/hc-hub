@@ -116,3 +116,27 @@ test('once recorded from the page the proposal can close', function () {
 
     expect($proposal->fresh()->status)->toBe(ProposalStatus::Completed);
 });
+
+test('a payroll proposal offers the acceptance with the final report filed and no milestone', function () {
+    $actor = userWithRole('Financial');
+    $proposal = Proposal::factory()->payroll()->create([
+        'status' => ProposalStatus::Active,
+        'donor_id' => Donor::factory()->create(['is_internal' => false])->id,
+    ]);
+
+    Livewire::actingAs($actor)
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->assertDontSeeHtml('data-test="open-final-report-modal"');
+
+    Media::query()->findOrFail(insertMedia('proposal', $proposal->id, $actor->id))->update(['collection' => MediaCollection::FinalReport]);
+
+    Livewire::actingAs($actor)
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->assertSeeHtml('data-test="open-final-report-modal"')
+        ->call('openAcceptanceModal')
+        ->set('finalReportAcceptedOn', '2026-10-10')
+        ->call('recordFinalReportAcceptance')
+        ->assertHasNoErrors();
+
+    expect($proposal->fresh()->final_report_accepted_on?->toDateString())->toBe('2026-10-10');
+});

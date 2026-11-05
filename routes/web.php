@@ -18,6 +18,7 @@ use App\Http\Controllers\ReportFilePreviewController;
 use App\Http\Controllers\SwitchLocaleController;
 use App\Http\Controllers\TaskFileDownloadController;
 use App\Http\Controllers\TaskFilePreviewController;
+use App\Http\Controllers\ToggleNavPinController;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Http\Middleware\RedirectProposalToStory;
 use App\Models\DonorReport;
@@ -42,6 +43,7 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
     Route::get('employees/picker-options', EmployeePickerOptionsController::class)->name('employees.picker-options');
     Route::get('employees/{employee}/avatar', EmployeeAvatarController::class)->whereNumber('employee')->name('employees.avatar');
     Route::post('tour/seen', MarkTourSeenController::class)->middleware('throttle:locale')->name('tour.seen');
+    Route::post('nav/pins', ToggleNavPinController::class)->middleware('throttle:locale')->name('nav.pins.toggle');
 
     Route::livewire('home', 'pages::desk.index')->name('dashboard');
 

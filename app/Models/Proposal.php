@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Concerns\HasSlug;
 use App\Concerns\RecordsActivity;
 use App\Enums\Currency;
+use App\Enums\ProposalKind;
 use App\Enums\ProposalPhase;
 use App\Enums\ProposalStatus;
 use App\Notifications\TracksActivity;
@@ -49,8 +50,11 @@ use Illuminate\Support\Facades\DB;
  * @property CarbonImmutable|null $extended_date_end
  * @property string|null $extension_reason
  * @property ProposalStatus $status
+ * @property ProposalKind $kind
  * @property-read ProposalPhase $phase
  * @property string|null $notes
+ * @property string|null $concept_note
+ * @property string|null $narrative
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
@@ -63,6 +67,8 @@ use Illuminate\Support\Facades\DB;
     'actual_date_begin',
     'actual_date_end',
     'notes',
+    'concept_note',
+    'narrative',
     'requested_budget',
     'requested_currency',
     'status_remind_on',
@@ -83,6 +89,12 @@ class Proposal extends Model implements TracksActivity
      */
     public const PLACEHOLDER_NUMBER_PREFIX = 'TEMP-';
 
+    /**
+     * The shortest narrative a payroll proposal may carry (contracts.md §2,
+     * key `narrative`, W-32).
+     */
+    public const NARRATIVE_MIN_LENGTH = 50;
+
     protected function slugSource(): string
     {
         return $this->name;
@@ -95,6 +107,15 @@ class Proposal extends Model implements TracksActivity
     public static function isPlaceholderNumber(?string $number): bool
     {
         return $number !== null && str_starts_with(mb_strtoupper($number), self::PLACEHOLDER_NUMBER_PREFIX);
+    }
+
+    /**
+     * Whether a payroll narrative says enough: at least 50 characters once
+     * trimmed. The one definition SaveProposal and TransitionProposal share.
+     */
+    public static function isNarrativeComplete(?string $narrative): bool
+    {
+        return mb_strlen(trim((string) $narrative)) >= self::NARRATIVE_MIN_LENGTH;
     }
 
     /**
@@ -111,6 +132,7 @@ class Proposal extends Model implements TracksActivity
      */
     protected $attributes = [
         'status' => 'concept note',
+        'kind' => 'project',
     ];
 
     /**
@@ -165,6 +187,18 @@ class Proposal extends Model implements TracksActivity
     public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class)->withPivot('target_beneficiaries')->withTimestamps();
+    }
+
+    /**
+     * The location rows of this proposal (contracts.md §7, W-34a): one per
+     * city and program, in form order. Written only through SaveProposal,
+     * the link wrappers and the backfill.
+     *
+     * @return HasMany<ProposalLocation, $this>
+     */
+    public function locations(): HasMany
+    {
+        return $this->hasMany(ProposalLocation::class)->orderBy('sort')->orderBy('id');
     }
 
     /**
@@ -502,7 +536,16 @@ class Proposal extends Model implements TracksActivity
      */
     public function transitionTargets(): array
     {
-        return ProposalTransitions::targets($this->status);
+        return ProposalTransitions::targets($this->status, $this->kind);
+    }
+
+    /**
+     * Whether this is a payroll proposal (D-55b, W-32): a center's salaries
+     * and equipment, with no projects, logframe, targets or monthly reports.
+     */
+    public function isPayroll(): bool
+    {
+        return $this->kind === ProposalKind::Payroll;
     }
 
     /**
@@ -536,6 +579,7 @@ class Proposal extends Model implements TracksActivity
     {
         return [
             'status' => ProposalStatus::class,
+            'kind' => ProposalKind::class,
             'planned_date_begin' => 'date',
             'planned_date_end' => 'date',
             'actual_date_begin' => 'date',
@@ -602,10 +646,13 @@ class Proposal extends Model implements TracksActivity
     }
 
     /**
+     * The concept note (W-24) is a movement of its own: the sentence says it
+     * was updated and names no text, as the other entries name no value.
+     *
      * @return array<string, string>
      */
     public function activityEvents(): array
     {
-        return ['status' => 'status_changed', 'name' => 'updated', 'internal_project_number' => 'updated', 'planned_date_begin' => 'updated', 'planned_date_end' => 'updated'];
+        return ['status' => 'status_changed', 'concept_note' => 'concept_note_updated', 'name' => 'updated', 'internal_project_number' => 'updated', 'planned_date_begin' => 'updated', 'planned_date_end' => 'updated', 'narrative' => 'updated'];
     }
 }

@@ -9,6 +9,7 @@ use App\Enums\OversightMode;
 use App\Events\FundingAgreementRecorded;
 use App\Events\ProjectActivated;
 use App\Events\ProjectPeriodChanged;
+use App\Events\ProposalLocationsChanged;
 use App\Events\ProposalStatusChanged;
 use App\Notifications\Alerts\NotificationSettings;
 use LogicException;
@@ -173,12 +174,18 @@ final class EventCatalog
                 'proposal.on_hold_reminder' => self::entry('proposals', $now, 'scanner', $all),
                 'proposal.final_report_accepted' => self::entry('proposals', $now, 'module_map', $all, activity: 'proposal.final_report_accepted'),
                 'proposal.beneficiaries_changed' => self::entry('proposals', $now, 'module_map', $all, activity: 'proposal.beneficiaries_changed'),
+                // W-24: the concept note changed. A movement worth recording, not worth interrupting anyone for.
+                'proposal.concept_note_updated' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.concept_note_updated'),
                 'proposal.targets_saved' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.targets_saved'),
                 'proposal.project_linked' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.project_linked'),
                 'proposal.project_unlinked' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.project_unlinked'),
                 'proposal.deleted' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.deleted'),
                 'proposal.risk_attached' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.risk_attached'),
                 'proposal.risk_detached' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.risk_detached'),
+                // W-34a: location rows (counts only) and the program requests they open.
+                'proposal.locations_changed' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.locations_changed', event: ProposalLocationsChanged::class),
+                'program_request.opened' => self::entry('proposals', $now, 'module_map', $all, activity: 'program_request.opened'),
+                'program_request.linked' => self::entry('proposals', $now, 'module_map', $all, activity: 'program_request.linked'),
                 // T31: the approval moved the plan to the grant period; the project owners hear of it only when a date was cut at the grant end.
                 'proposal.plan_rebased' => self::entry('proposals', $now, 'module_map', OversightMode::None, activity: 'proposal.plan_rebased'),
             ],

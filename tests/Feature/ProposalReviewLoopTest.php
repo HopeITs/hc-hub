@@ -14,6 +14,7 @@ use App\Models\Activity;
 use App\Models\Program;
 use App\Models\Project;
 use App\Models\Proposal;
+use App\Models\ProposalLocation;
 use App\Models\ProposalReviewer;
 use App\Models\User;
 use App\Models\UserNotification;
@@ -59,7 +60,9 @@ function configureReviewSlot(ReviewerSlot $slot, ?int $positionId): void
 function reviewableProposal(ProposalStatus $status = ProposalStatus::ConceptNote): Proposal
 {
     $proposal = Proposal::factory()->create(['status' => $status, 'requested_budget' => '120000.00', 'requested_currency' => Currency::Usd]);
-    $proposal->projects()->attach(Project::factory()->create()->id, ['target_beneficiaries' => 400]);
+    $project = Project::factory()->create();
+    $proposal->projects()->attach($project->id, ['target_beneficiaries' => 400]);
+    ProposalLocation::factory()->for($proposal)->forProject($project)->create();
 
     return $proposal;
 }

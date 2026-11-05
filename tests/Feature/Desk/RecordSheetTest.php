@@ -1,32 +1,39 @@
 <?php
 
+use App\Models\AnnualPlan;
+use App\Models\Donor;
+use App\Models\DonorProposal;
+use App\Models\DonorReport;
 use App\Models\Milestone;
+use App\Models\MonthlyReport;
 use App\Models\Program;
+use App\Models\Report;
 use App\Models\Task;
 use App\Models\User;
 
-test('a record page opens as a sheet over its register, which loads after it', function () {
-    $task = Task::factory()->create(['title' => 'Draft the distribution plan']);
-
+test('every record opens as its own full page, not a sheet over its register', function (string $url) {
     $this->actingAs(User::factory()->role('Super Admin')->create())
-        ->get(route('tasks.show', $task))
+        ->get($url)
         ->assertOk()
         ->assertSee('class="dk-scope"', false)
-        ->assertSee('data-desk-record-host', false)
-        ->assertSee('role="dialog" aria-modal="true"', false)
-        ->assertSee('href="'.route('tasks.index').'" wire:navigate class="dk-iconbtn"', false)
-        ->assertSee('Draft the distribution plan')
-        ->assertDontSee('data-desk-register-view', false);
-});
-
-test('the register behind the sheet is inert so only the sheet takes focus', function () {
-    $milestone = Milestone::factory()->create();
-
-    $this->actingAs(User::factory()->role('Super Admin')->create())
-        ->get(route('milestones.show', $milestone))
-        ->assertOk()
-        ->assertSee('class="dk-record-behind" inert aria-hidden="true"', false);
-});
+        ->assertSee('class="dk-back"', false)
+        ->assertSee('aria-label="'.__('ui.breadcrumb').'"', false)
+        ->assertSee('dk-crumb', false)
+        ->assertDontSee('data-desk-record-host', false)
+        ->assertDontSee('data-desk-record', false)
+        ->assertDontSee('dk-record-sheet', false);
+})->with([
+    'annual plan' => fn () => route('annual-plans.show', AnnualPlan::factory()->create()),
+    'donor report' => fn () => route('donor-reports.show', DonorReport::factory()->create()),
+    'donor report compose' => fn () => route('donor-reports.compose'),
+    'donor' => fn () => route('donors.show', Donor::factory()->create()),
+    'funding agreement' => fn () => route('funding-agreements.show', DonorProposal::factory()->create()),
+    'milestone' => fn () => route('milestones.show', Milestone::factory()->create()),
+    'monthly report' => fn () => route('monthly-reports.show', MonthlyReport::factory()->create()),
+    'report' => fn () => route('reports.show', Report::factory()->create()),
+    'task' => fn () => route('tasks.show', Task::factory()->create()),
+    'program' => fn () => route('programs.show', Program::factory()->create()),
+]);
 
 test('a program opens as its own page, not a sheet over the projects register', function () {
     $program = Program::factory()->create(['name' => 'Children University']);

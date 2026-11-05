@@ -25,7 +25,6 @@
                     'proposal draft' => __('proposals.target_proposal_draft'),
                     'proposal review' => __('proposals.target_proposal_review'),
                     'submitted' => __('proposals.target_submitted'),
-                    'on hold' => __('proposals.target_on_hold'),
                     'rejected' => __('proposals.target_rejected'),
                     'completed' => __('proposals.target_completed'),
                 ];
@@ -61,17 +60,13 @@
                         @if ($chosenTarget !== null)
                             <p class="mt-1.5 text-xs text-secondary-medium dark:text-ink-muted" data-test="status-target-description">{{ $targetDescriptions[$chosenTarget->value] ?? '' }}</p>
                         @endif
-                        @if ($statusFrom === \App\Enums\ProposalStatus::Submitted || $statusFrom === \App\Enums\ProposalStatus::OnHold)
+                        @if ($statusFrom === \App\Enums\ProposalStatus::Submitted)
                             <p class="mt-1.5 text-xs text-secondary-medium dark:text-ink-muted" data-test="status-approve-pointer">{{ __('proposals.approval_has_its_own_step') }}</p>
                         @endif
                     </div>
 
                     @if (in_array('effective_date', $this->statusFields, true))
                         <x-ui.form-input wire:model="statusDate" :label="__('proposals.effective_date')" type="date" :max="now()->toDateString()" required />
-                    @endif
-
-                    @if (in_array('remind_on', $this->statusFields, true))
-                        <x-ui.form-input wire:model="statusRemindOn" :label="__('proposals.remind_me_on')" type="date" :min="now()->addDay()->toDateString()" :help="__('proposals.remind_me_on_help')" required />
                     @endif
 
                     @if (in_array('reason', $this->statusFields, true))

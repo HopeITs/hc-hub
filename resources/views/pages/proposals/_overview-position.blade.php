@@ -75,6 +75,9 @@
                                 @if ($stop['rejected'] > 0)
                                     <span class="font-semibold text-primary dark:text-brand-text">{{ trans_choice('proposals.count_rejected', $stop['rejected'], ['count' => $stop['rejected']]) }}</span>
                                 @endif
+                                @if ($stop['held'] > 0)
+                                    <span class="font-semibold text-status-warn" data-test="phase-held-{{ $stop['phase']->value }}">{{ trans_choice('proposals.count_on_hold', $stop['held'], ['count' => $stop['held']]) }}</span>
+                                @endif
                             </span>
                         </button>
                     </li>

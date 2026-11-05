@@ -13,6 +13,7 @@ use App\Models\DonorProposal;
 use App\Models\Media;
 use App\Models\Project;
 use App\Models\Proposal;
+use App\Models\ProposalLocation;
 use App\Models\ProposalStatusNote;
 use App\Models\User;
 use App\Models\UserNotification;
@@ -342,6 +343,34 @@ test('a proposal with no linked project cannot be approved', function () {
         ->and($proposal->fresh()->status)->toBe(ProposalStatus::Submitted);
 });
 
+test('a location row without a responsible refuses the approval with the incomplete message and writes nothing', function () {
+    $proposal = submittedProposal();
+    $project = linkedProject($proposal);
+    ProposalLocation::factory()->for($proposal)->create(['program_id' => $project->program_id, 'responsible_employee_id' => null]);
+    Event::fake([ProposalStatusChanged::class]);
+
+    $errors = refusedApproval(fn () => approve(userWithRole('Financial'), $proposal));
+
+    expect($errors['locations_complete'])->toBe([__('proposals.locations_incomplete')])
+        ->and($proposal->fresh()->status)->toBe(ProposalStatus::Submitted)
+        ->and($proposal->statusNotes()->count())->toBe(0)
+        ->and($project->fresh()->start_date)->toBeNull();
+
+    Event::assertNotDispatched(ProposalStatusChanged::class);
+});
+
+test('a proposal whose rows all carry a project approves as before', function () {
+    $proposal = submittedProposal();
+    $project = linkedProject($proposal);
+    ProposalLocation::factory()->for($proposal)->forProject($project)->create();
+
+    $result = approve(userWithRole('Financial'), $proposal);
+
+    expect($proposal->fresh()->status)->toBe(ProposalStatus::Approved)
+        ->and($result->approvedProjectIds)->toBe([$project->id])
+        ->and($result->warnings)->not->toContain('location_linked_existing');
+});
+
 test('the donor approval needs a file or a note of at least ten characters', function () {
     $proposal = submittedProposal();
     linkedProject($proposal);
@@ -484,4 +513,38 @@ test('Assignment is unchanged for a project that is not waiting on a donor-appro
     expect($project->fresh()->status)->toBe(ProjectStatus::Draft)
         ->and($project->fresh()->start_date)->toBeNull()
         ->and(Assignment::query()->where('assignable_id', $project->id)->first()->status)->toBe(AssignmentStatus::Acknowledged);
+});
+
+test('a failed caller around a payroll approval leaves it submitted and dispatches neither event', function () {
+    $actor = userWithRole('Financial');
+    $proposal = Proposal::factory()->payroll()->create([
+        'status' => ProposalStatus::Submitted,
+        'planned_date_begin' => '2026-11-01',
+        'planned_date_end' => '2027-10-31',
+    ]);
+    Event::fake([ProposalStatusChanged::class]);
+
+    try {
+        DB::transaction(function () use ($actor, $proposal): void {
+            approve($actor, $proposal);
+
+            throw new RuntimeException('Caller failed after approval.');
+        });
+    } catch (RuntimeException) {
+    }
+
+    expect($proposal->fresh()->status)->toBe(ProposalStatus::Submitted)
+        ->and($proposal->statusNotes()->count())->toBe(0);
+
+    Event::assertNotDispatched(ProposalStatusChanged::class);
+});
+
+test('a project proposal still needs a linked project and stays approved, not active', function () {
+    $proposal = submittedProposal();
+    linkedProject($proposal);
+
+    approve(userWithRole('Financial'), $proposal);
+
+    expect($proposal->fresh()->status)->toBe(ProposalStatus::Approved)
+        ->and($proposal->statusNotes()->pluck('status')->all())->toBe([ProposalStatus::Approved]);
 });

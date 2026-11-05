@@ -13,6 +13,7 @@ use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\ProposalStatusNote;
 use App\Support\ApprovalResult;
+use App\Support\ProposalLocationRows;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -25,10 +26,14 @@ use Illuminate\Validation\Validator as ValidatorInstance;
  * Approve a proposal on the donor's decision (contracts.md §2, §6; D-04, D-26).
  *
  * One transaction: the proposal row is locked and compared with the status the
- * caller saw, then the proposal, its one audit note and every linked project
+ * caller saw, its location rows must be complete (`locations_complete`,
+ * W-34a), the projects those rows still lack are materialised
+ * (MaterialiseProposalLocations: drafts created and linked, open projects
+ * reused), then the proposal, its one audit note and every linked project
  * (locked in ascending id) are written together. Approval is not activation:
  * a project becomes `active` only when MEAL confirms its report template.
- * ProposalStatusChanged fires after the commit.
+ * ProposalStatusChanged fires after the commit. A payroll proposal (W-32)
+ * is the exception: it has no project, so it goes on to `active` at once.
  */
 final class ApproveProposal
 {
@@ -40,7 +45,10 @@ final class ApproveProposal
 
     public const OutcomeSkipped = 'skipped';
 
-    public function __construct(private ApproveProjectFromProposal $approveProject) {}
+    public function __construct(
+        private ApproveProjectFromProposal $approveProject,
+        private MaterialiseProposalLocations $materialiseLocations,
+    ) {}
 
     /**
      * @param  array{actual_date_begin: string, actual_date_end: string, decision_date: string, note?: ?string, approval_note?: ?string}  $input
@@ -54,6 +62,16 @@ final class ApproveProposal
 
             $this->assertApprovable($locked, $expectedFrom);
 
+            if ($locked->isPayroll()) {
+                return $this->approvePayroll($locked, $expectedFrom, $input);
+            }
+
+            if (ProposalLocationRows::incompleteRowIds($locked) !== []) {
+                throw ValidationException::withMessages(['locations_complete' => __('proposals.locations_incomplete')]);
+            }
+
+            $materialised = $this->materialiseLocations->handle($locked, (int) Auth::id());
+
             $projects = $this->lockLinkedProjects($locked);
 
             if ($projects === []) {
@@ -61,30 +79,9 @@ final class ApproveProposal
             }
 
             $validated = $this->validate($locked, $input);
-            $approvalNote = trim((string) ($validated['approval_note'] ?? ''));
             $hadAgreement = $locked->donorProposals()->exists();
 
-            $locked->status = ProposalStatus::Approved;
-            $locked->actual_date_begin = CarbonImmutable::parse($validated['actual_date_begin']);
-            $locked->actual_date_end = CarbonImmutable::parse($validated['actual_date_end']);
-            $locked->approval_note = $approvalNote === '' ? null : $approvalNote;
-            $locked->status_remind_on = null;
-            // Approval ends any hold with it (D-58, W-06).
-            $locked->on_hold_since = null;
-            $locked->save();
-
-            $context = trim((string) ($validated['note'] ?? ''));
-
-            ProposalStatusNote::query()->create([
-                'proposal_id' => $locked->id,
-                'status' => ProposalStatus::Approved,
-                'context' => $context !== '' ? $context : ($approvalNote !== '' ? $approvalNote : __('proposals.approval_proposal_note')),
-                'date' => $validated['decision_date'],
-                'changed_by' => Auth::id(),
-                'is_correction' => false,
-            ]);
-
-            ProposalStatusChanged::dispatch($locked->id, $expectedFrom, ProposalStatus::Approved, Auth::user()?->id);
+            $this->recordApproval($locked, $expectedFrom, $validated);
 
             // T07: the proposal's reviewers are told about the approval here.
 
@@ -98,13 +95,85 @@ final class ApproveProposal
                 $moved['approved'],
                 $moved['waiting'],
                 $moved['skipped'],
-                $hadAgreement ? [] : ['no_agreement'],
+                [...$materialised->warnings, ...($hadAgreement ? [] : ['no_agreement'])],
             );
         });
 
         $proposal->refresh();
 
         return $result;
+    }
+
+    /**
+     * Write `approved` with the grant dates and evidence, its one note and its
+     * event (dispatched after the caller's commit).
+     *
+     * @param  array{actual_date_begin: string, actual_date_end: string, decision_date: string, note?: ?string, approval_note?: ?string}  $validated
+     */
+    private function recordApproval(Proposal $locked, ProposalStatus $expectedFrom, array $validated): void
+    {
+        $approvalNote = trim((string) ($validated['approval_note'] ?? ''));
+
+        $locked->status = ProposalStatus::Approved;
+        $locked->actual_date_begin = CarbonImmutable::parse($validated['actual_date_begin']);
+        $locked->actual_date_end = CarbonImmutable::parse($validated['actual_date_end']);
+        $locked->approval_note = $approvalNote === '' ? null : $approvalNote;
+        $locked->status_remind_on = null;
+        // Approval ends any hold with it (D-58, W-06).
+        $locked->on_hold_since = null;
+        $locked->save();
+
+        $context = trim((string) ($validated['note'] ?? ''));
+
+        ProposalStatusNote::query()->create([
+            'proposal_id' => $locked->id,
+            'status' => ProposalStatus::Approved,
+            'context' => $context !== '' ? $context : ($approvalNote !== '' ? $approvalNote : __('proposals.approval_proposal_note')),
+            'date' => $validated['decision_date'],
+            'changed_by' => Auth::id(),
+            'is_correction' => false,
+        ]);
+
+        ProposalStatusChanged::dispatch($locked->id, $expectedFrom, ProposalStatus::Approved, Auth::user()?->id);
+    }
+
+    /**
+     * A payroll proposal (W-32) has nothing to wait for: it is approved and
+     * activated in the caller's transaction, one note and one event per move.
+     * The grant dates default to the planned ones; no project is touched.
+     *
+     * @param  array<string, mixed>  $input
+     */
+    private function approvePayroll(Proposal $locked, ProposalStatus $expectedFrom, array $input): ApprovalResult
+    {
+        $validated = $this->validate($locked, [
+            ...$input,
+            'actual_date_begin' => filled($input['actual_date_begin'] ?? null) ? $input['actual_date_begin'] : $locked->planned_date_begin->toDateString(),
+            'actual_date_end' => filled($input['actual_date_end'] ?? null) ? $input['actual_date_end'] : $locked->planned_date_end->toDateString(),
+        ]);
+        $hadAgreement = $locked->donorProposals()->exists();
+
+        $this->recordApproval($locked, $expectedFrom, $validated);
+
+        $locked->status = ProposalStatus::Active;
+        $locked->save();
+
+        ProposalStatusNote::query()->create([
+            'proposal_id' => $locked->id,
+            'status' => ProposalStatus::Active,
+            'context' => __('proposals.payroll_active_on_approval'),
+            'date' => $validated['decision_date'],
+            'changed_by' => Auth::id(),
+            'is_correction' => false,
+        ]);
+
+        ProposalStatusChanged::dispatch($locked->id, ProposalStatus::Approved, ProposalStatus::Active, Auth::user()?->id);
+
+        if (! $hadAgreement) {
+            $locked->recordActivity('proposal.approved_without_agreement');
+        }
+
+        return new ApprovalResult([], [], [], $hadAgreement ? [] : ['no_agreement']);
     }
 
     /**

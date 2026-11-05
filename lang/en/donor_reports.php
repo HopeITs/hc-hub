@@ -9,6 +9,7 @@ return [
     'already_submitted' => 'This report was already submitted.',
     'no_validated_data' => 'No validated data in this period.',
     'self_funded' => 'Self-funded proposals have no donor report.',
+    'payroll_has_final_report_only' => 'A payroll proposal has a final report only, so no donor report is built for it.',
     'agreement_required' => 'Record the funding agreement before saving.',
     'default_title' => ':type report · :start – :end',
 

@@ -244,3 +244,187 @@
     .dk-story [data-embedded-proposal] [data-tab-panel] > .mb-6 { margin-block: 12px 0; }
     .dk-story [data-embedded-proposal] [data-relation-tabs] { margin-top: 12px; padding-inline: 4px; }
 }
+
+/*
+ * Strategies (list page; the strategy page reuses the year line, verdict and
+ * attention list): one typographic block per current strategy, then quiet
+ * lists. No tiles: big figures sit on the page split by hairlines.
+ */
+@layer components {
+    /* desk-shell.css turns every .dk-seg into display: contents (and hides it on phones) for the top bar; these tabs stay a visible bar. */
+    .dk-reg-bar .dk-stabs { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 2px; border-radius: 9px; background: var(--sunk); }
+    .dk-stabs button { height: 32px; padding-inline: 12px; font-size: 13px; }
+    .dk-stabs .dk-num { font-weight: 800; color: var(--faint); }
+    .dk-stabs button[aria-pressed="true"] .dk-num { color: var(--ink-3); }
+
+    .dk-strategies { display: grid; gap: 44px; min-width: 0; }
+    .dk-ssec { display: grid; gap: 14px; min-width: 0; }
+    .dk-ssec-h { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+    [lang="ar"] .dk-ssec-h { letter-spacing: 0; font-size: 13px; }
+
+    /* One current strategy: a single statement on a paper surface. */
+    .dk-cstrat { display: grid; gap: 24px; min-width: 0; padding: 28px 28px 22px; border-radius: 18px; background: var(--paper); transition: box-shadow .15s; }
+    .dk-cstrat:hover { box-shadow: 0 0 0 1px var(--line-2); }
+    .dk-cstrat-h { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px 24px; }
+    .dk-cstrat-name { font-size: 30px; font-weight: 800; line-height: 1.15; letter-spacing: -.015em; color: var(--ink); text-wrap: balance; overflow-wrap: anywhere; }
+    .dk-cstrat-meta { margin-top: 6px; font-size: 14.5px; color: var(--ink-3); }
+    .dk-cstrat-meta bdi { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+    .dk-cstrat-h .dk-btn svg.dk-i { width: 16px; height: 16px; }
+    @media (max-width: 640px) {
+        .dk-cstrat { gap: 20px; padding: 20px 16px 16px; }
+        .dk-cstrat-name { font-size: 24px; }
+    }
+
+    /* The year line: .dk-thread with the year under each dot and "Now" over this year. */
+    .dk-yl { padding-block: 24px 22px; }
+    .dk-yl :is(.dk-yl-y, .dk-yl-now) { position: absolute; inset-inline-end: calc(5px - 2rem); width: 4rem; font-size: 12px; font-weight: 700; line-height: 1; text-align: center; white-space: nowrap; color: var(--ink-3); }
+    .dk-yl .dk-yl-y { top: calc(100% + 7px); }
+    .dk-yl .dk-yl-now { bottom: calc(100% + 7px); font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--ink); }
+    [lang="ar"] .dk-yl .dk-yl-now { letter-spacing: 0; font-size: 12px; }
+    .dk-yl li.dk-now :is(.dk-yl-y, .dk-yl-now) { inset-inline-end: calc(7px - 2rem); }
+    .dk-yl li.dk-now .dk-yl-y { font-weight: 800; color: var(--ink); }
+    .dk-yl li.dk-now.dk-good .dk-yl-now { color: var(--good); }
+    .dk-yl li.dk-now.dk-warn .dk-yl-now { color: var(--warn); }
+    .dk-yl li.dk-now.dk-bad .dk-yl-now { color: var(--bad); }
+    .dk-yl li:first-child :is(.dk-yl-y, .dk-yl-now) { inset-inline-start: 0; inset-inline-end: auto; width: auto; text-align: start; }
+    .dk-yl li:last-child:not(:first-child) :is(.dk-yl-y, .dk-yl-now) { inset-inline-end: 0; width: auto; text-align: end; }
+    @media (max-width: 640px) {
+        .dk-yl:has(li:nth-child(7)) li:not(:first-child, :last-child, .dk-now) .dk-yl-y { visibility: hidden; }
+    }
+
+    /* The verdict: one sentence on a soft tint of its tone. */
+    .dk-verdict { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; padding: 14px 18px; border-radius: 12px; background: var(--sunk); font-size: 15.5px; line-height: 1.5; color: var(--ink); }
+    .dk-verdict strong { font-size: 17px; font-weight: 800; }
+    .dk-verdict bdi { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .dk-verdict.dk-good { background: var(--good-soft); }
+    .dk-verdict.dk-good strong { color: var(--good); }
+    .dk-verdict.dk-warn { background: var(--warn-soft); }
+    .dk-verdict.dk-warn strong { color: var(--warn); }
+    .dk-verdict.dk-bad { background: var(--bad-soft); }
+    .dk-verdict.dk-bad strong { color: var(--bad); }
+    .dk-verdict.dk-mute { color: var(--ink-3); }
+
+    /* Four figures in one row: the number, its label under it, hairlines between. */
+    .dk-sfigs { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); row-gap: 18px; margin: 0 -20px; overflow: hidden; }
+    .dk-sfigs > div { display: flex; flex-direction: column; min-width: 0; padding: 2px 20px; border-inline-start: 1px solid var(--line); margin-inline-start: -1px; }
+    .dk-sfigs dt { order: 2; margin-top: 8px; font-size: 13px; font-weight: 700; color: var(--ink-3); }
+    .dk-sfigs dd { order: 1; margin: 0; font-size: 38px; font-weight: 800; line-height: 1.05; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
+    .dk-sfigs dd a { color: inherit; text-decoration: none; }
+    .dk-sfigs dd a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; }
+    .dk-sfigs dd.dk-muted { color: var(--faint); }
+    .dk-sfigs dd.dk-sfig-money { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; font-size: 30px; line-height: 1.15; }
+    .dk-sfigs .dk-sfig-sep { font-weight: 400; color: var(--faint); }
+    .dk-sfigs dd.dk-sfig-sub { order: 3; margin-top: 2px; font-size: 13px; font-weight: 700; line-height: 1.4; letter-spacing: 0; color: var(--ink-2); }
+    @media (max-width: 640px) {
+        .dk-sfigs { margin-inline: -16px; }
+        .dk-sfigs > div { padding-inline: 16px; }
+        .dk-sfigs dd { font-size: 32px; }
+        .dk-sfigs dd.dk-sfig-money { font-size: 24px; }
+    }
+
+    /* "Needs your attention": plain sentences, one labelled link each. */
+    .dk-attn { display: grid; gap: 6px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .dk-attn-h { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+    [lang="ar"] .dk-attn-h { letter-spacing: 0; font-size: 13px; }
+    .dk-attn-i { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px; padding-block: 9px; border-bottom: 1px solid var(--line); }
+    .dk-attn-i:last-child { border-bottom: 0; }
+    .dk-attn-t { position: relative; min-width: 0; padding-inline-start: 18px; font-size: 15px; color: var(--ink); }
+    .dk-attn-t::before { content: ""; position: absolute; inset-inline-start: 0; top: .55em; width: 8px; height: 8px; border-radius: 50%; background: var(--warn); }
+    .dk-attn-i.dk-bad .dk-attn-t::before { background: var(--bad); }
+    .dk-attn-t bdi { font-weight: 800; font-variant-numeric: tabular-nums; }
+    .dk-attn-none { font-size: 15px; color: var(--ink-3); }
+
+    /* Text links and buttons on this page: a label, never an icon alone. */
+    :is(.dk-attn-a, .dk-slink) { display: inline-flex; align-items: center; gap: 5px; min-height: 36px; padding: 0; border: 0; background: none; font: inherit; font-size: 13.5px; font-weight: 800; color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px; white-space: nowrap; cursor: pointer; }
+    :is(.dk-attn-a, .dk-slink):hover { color: var(--ink); text-decoration-color: currentColor; }
+    :is(.dk-attn-a, .dk-slink) svg.dk-i { width: 15px; height: 15px; }
+    .dk-slink.dk-danger { color: var(--bad); }
+
+    /* No current strategy: one sentence and the way to start the next. */
+    .dk-snone { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; padding: 24px 28px; border-radius: 18px; background: var(--paper); }
+    .dk-snone p { max-width: 60ch; font-size: 18px; font-weight: 700; line-height: 1.45; color: var(--ink); }
+
+    /* Upcoming and past: quiet rows split by hairlines. */
+    .dk-slist { display: grid; border-top: 1px solid var(--line); }
+    .dk-slist > li { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; align-items: center; gap: 4px 20px; padding: 12px 2px; border-bottom: 1px solid var(--line); }
+    .dk-slist-main { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; min-width: 0; }
+    .dk-slist-main strong { font-size: 15.5px; font-weight: 800; color: var(--ink); overflow-wrap: anywhere; }
+    .dk-slist-years { font-size: 13px; color: var(--ink-3); }
+    .dk-slist-state { font-size: 13.5px; color: var(--ink-2); }
+    .dk-slist-acts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0 18px; }
+    @media (max-width: 720px) {
+        .dk-slist > li { grid-template-columns: minmax(0, 1fr); }
+        .dk-slist-acts { justify-content: flex-start; }
+    }
+}
+
+/*
+ * The strategy page (2026-11 redesign): its own full page, styled like the
+ * program page's story. The head, then one summary statement on paper (the
+ * year line, the verdict, the figures and the attention list, as on the
+ * list), then "How the strategy is built": each pillar a typographic section
+ * whose programs are rows split by hairlines. No cards, no table.
+ */
+@layer components {
+    .dk-strat { display: grid; gap: 32px; min-width: 0; }
+    .dk-strat .dk-strat-h { padding-bottom: 0; }
+    .dk-strat-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 12px; font-size: 14.5px; color: var(--ink-3); }
+    .dk-strat-meta bdi { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+    .dk-strat-acts { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; }
+    .dk-strat-acts > ui-dropdown > .dk-btn { min-width: 40px; padding-inline: 12px; font-size: 18px; line-height: 1; }
+    .dk-strat-acts > ui-dropdown > .dk-btn > span + span { font-size: 13.5px; }
+    @media (max-width: 1020px) {
+        .dk-strat-acts { justify-content: flex-start; }
+    }
+
+    /* One statement on paper, as a current strategy reads on the list. */
+    .dk-strat-sum { display: grid; gap: 24px; min-width: 0; padding: 28px 28px 22px; border-radius: 18px; background: var(--paper); }
+    @media (max-width: 640px) {
+        .dk-strat-sum { gap: 20px; padding: 20px 16px 16px; }
+    }
+
+    .dk-build { display: grid; gap: 18px; min-width: 0; }
+    .dk-build-h { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+    .dk-build-title { font-size: 24px; font-weight: 800; line-height: 1.2; letter-spacing: -.01em; color: var(--ink); text-wrap: balance; }
+    .dk-build-intro { margin-top: 4px; font-size: 15px; color: var(--ink-3); }
+    .dk-build-empty { font-size: 14.5px; color: var(--ink-3); }
+    .dk-build-none { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding-block: 18px; border-block: 1px solid var(--line); }
+    .dk-build-none p { font-size: 17px; font-weight: 700; color: var(--ink); }
+    .dk-build-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2px 16px; padding: 8px 18px; border-radius: 12px; background: var(--warn-soft); font-size: 15px; color: var(--ink); }
+    .dk-build-note bdi { font-weight: 800; font-variant-numeric: tabular-nums; }
+
+    .dk-pillars { display: grid; border-top: 1px solid var(--line); }
+    .dk-pillar { display: grid; gap: 12px; min-width: 0; padding-block: 22px; border-bottom: 1px solid var(--line); scroll-margin-top: 96px; }
+    .dk-pillar-none { border-top: 1px solid var(--line); }
+    .dk-pillars + .dk-pillar-none { border-top: 0; }
+    .dk-pillar-h { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 6px 24px; }
+    .dk-pillar-name { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; font-size: 19px; font-weight: 800; line-height: 1.3; color: var(--ink); overflow-wrap: anywhere; }
+    .dk-pcode { display: inline-flex; align-items: center; height: 24px; padding-inline: 8px; border-radius: 6px; background: var(--ink); color: var(--paper); font-size: 12px; font-weight: 800; letter-spacing: .02em; transform: translateY(-2px); }
+    .dk-pillar-goal { max-width: 70ch; margin-top: 4px; font-size: 14.5px; line-height: 1.55; color: var(--ink-2); }
+    .dk-pillar-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0 18px; font-size: 13.5px; font-weight: 700; color: var(--ink-3); white-space: nowrap; }
+    .dk-pillar > .dk-slink { justify-self: start; }
+
+    /* Program rows: dot + name, status in words, projects, manager, action. */
+    .dk-sprows { display: grid; border-top: 1px solid var(--line); }
+    .dk-sprow { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(8.5rem, 1fr) minmax(5.5rem, auto) minmax(0, 1.1fr) minmax(6.5rem, auto); align-items: center; gap: 4px 20px; min-height: 52px; padding-block: 8px; border-bottom: 1px solid var(--line); }
+    .dk-sprow:last-child { border-bottom: 0; }
+    .dk-sprow-name { display: flex; align-items: center; gap: 10px; min-width: 0; font-size: 15px; font-weight: 700; color: var(--ink); text-decoration: none; }
+    .dk-sprow-name > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dk-sprow-name:hover > span:last-child { text-decoration: underline; text-underline-offset: 3px; }
+    .dk-pdot { width: 9px; height: 9px; flex: none; border-radius: 50%; background: var(--line-2); }
+    .dk-pdot.dk-good { background: var(--good); }
+    .dk-pdot.dk-warn { background: var(--warn); }
+    .dk-pdot.dk-bad { background: var(--bad); }
+    .dk-sprow-state { font-size: 13.5px; font-weight: 700; color: var(--ink-3); }
+    .dk-sprow-state.dk-good { color: var(--good); }
+    .dk-sprow-state.dk-warn { color: var(--warn); }
+    .dk-sprow-state.dk-bad { color: var(--bad); }
+    .dk-sprow-count { font-size: 13.5px; white-space: nowrap; color: var(--ink-3); }
+    .dk-sprow-act { display: flex; justify-content: flex-end; }
+    @media (max-width: 860px) {
+        .dk-sprow { grid-template-columns: minmax(0, 1fr) auto; gap: 2px 16px; padding-block: 12px; }
+        .dk-sprow > :not(.dk-sprow-name, .dk-sprow-act) { grid-column: 1; padding-inline-start: 19px; }
+        .dk-sprow-act { grid-column: 2; grid-row: 1; align-self: start; }
+        .dk-sprow-state:empty { display: none; }
+    }
+}

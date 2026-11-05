@@ -531,6 +531,16 @@ return [
             'updated' => ':actor updated the donor “:subject”',
             'deleted' => ':actor deleted the donor “:subject”',
         ],
+        'program_request' => [
+            'opened' => [
+                'title' => 'Program needed in HR',
+                'body' => '“:subject” needs the program “:name” created in HR',
+            ],
+            'linked' => [
+                'title' => 'Program linked',
+                'body' => ':actor linked the HR program “:name” requested by “:subject”',
+            ],
+        ],
         'proposal' => [
             'created' => [
                 'title' => 'Proposal created',
@@ -564,6 +574,10 @@ return [
             'risk_detached' => [
                 'title' => 'Risk removed',
                 'body' => ':actor removed the risk “:value” from “:subject”',
+            ],
+            'locations_changed' => [
+                'title' => 'Locations changed',
+                'body' => ':actor changed the locations of “:subject”',
             ],
             'updated' => ':actor updated the proposal “:subject”',
             'deleted' => [
@@ -612,6 +626,10 @@ return [
             'on_hold_reminder' => [
                 'title' => 'On-hold reminder',
                 'body' => '“:subject” is still on hold',
+            ],
+            'concept_note_updated' => [
+                'title' => 'Concept note updated',
+                'body' => ':actor updated the concept note of “:subject”',
             ],
             'targets_saved' => [
                 'title' => 'Targets saved',

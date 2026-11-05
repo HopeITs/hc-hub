@@ -63,6 +63,7 @@ return [
     'week_range' => 'رقم الأسبوع بين 1 و5',
     'month_outside_period' => 'الشهر خارج مدة المقترح',
     'structural_lock' => 'الإطار مقفل بعد الإرسال، اطلب من فريق MEAL تعديل هيكله',
+    'payroll_has_no_framework' => 'مقترح الرواتب ليس له إطار منطقي',
     'parent_gone' => 'حُذفت هذه النتيجة للتو، اختر نتيجة أخرى',
     'proposal_group' => 'المقترح · :name',
     'contributes_to_program' => 'يسهم في إطار البرنامج:',

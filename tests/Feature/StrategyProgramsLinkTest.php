@@ -48,13 +48,15 @@ test('saving links ticked programs, unlinks unticked ones and moves programs fro
 
 test('roles without programs.update can neither open nor save the programs modal', function () {
     $program = Program::factory()->create(['strategy_id' => null]);
+    // A past strategy with no programs is where the list offers "Link programs".
+    Strategy::factory()->create(['start_year' => 2016, 'end_year' => 2020]);
     $user = User::factory()->role('Team Member')->create();
 
     expect($user->can('programs.update'))->toBeFalse();
 
     Livewire::actingAs($user)
         ->test('pages::strategies.index')
-        ->assertDontSeeHtml('data-test="manage-strategy-programs-button"')
+        ->assertDontSeeHtml('data-test="strategy-link-programs"')
         ->call('openProgramsModal', $this->strategy->id)
         ->assertForbidden();
 

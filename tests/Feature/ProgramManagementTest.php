@@ -2,6 +2,8 @@
 
 use App\Enums\ProjectStatus;
 use App\Http\Middleware\SyncProgramsFromHr;
+use App\Models\AnnualPlan;
+use App\Models\PlanIndicator;
 use App\Models\Program;
 use App\Models\Project;
 use App\Models\Strategy;
@@ -345,4 +347,41 @@ test('the assignment sheet names what it assigns and guards unsaved changes', fu
         ->assertSeeHtml('data-discard-guard')
         ->assertSet('originalStrategyId', '')
         ->assertSeeText('Discard your changes?');
+});
+
+test('the no plan gap lists the strategy programs without a plan for this year', function () {
+    $this->travelTo('2026-06-15 09:00:00');
+    $strategy = Strategy::factory()->create();
+    $planned = Program::factory()->create(['name' => 'Planned Program', 'strategy_id' => $strategy->id]);
+    $shell = Program::factory()->create(['name' => 'Shell Program', 'strategy_id' => $strategy->id]);
+    $lastYear = Program::factory()->create(['name' => 'Last Year Program', 'strategy_id' => $strategy->id]);
+    Program::factory()->create(['name' => 'Elsewhere Program', 'strategy_id' => Strategy::factory()->create()->id]);
+
+    PlanIndicator::factory()->forAnnualPlan(AnnualPlan::factory()->create(['program_id' => $planned->id, 'year' => 2026]))->create();
+    AnnualPlan::factory()->create(['program_id' => $shell->id, 'year' => 2026]);
+    PlanIndicator::factory()->forAnnualPlan(AnnualPlan::factory()->create(['program_id' => $lastYear->id, 'year' => 2025]))->create();
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::programs.index')
+        ->set('strategy', (string) $strategy->id)
+        ->set('gap', 'no_plan')
+        ->assertSet('gap', 'no_plan')
+        ->assertSee('Shell Program')
+        ->assertSee('Last Year Program')
+        ->assertDontSee('Planned Program')
+        ->assertDontSee('Elsewhere Program');
+});
+
+test('a register narrowed to a gap names it in a chip with a labelled clear button', function () {
+    $this->travelTo('2026-06-15 09:00:00');
+
+    Livewire::withQueryParams(['gap' => 'no_plan'])
+        ->actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::programs.index')
+        ->assertSeeHtml('data-gap-filter-chip')
+        ->assertSeeText(__('programs.gap_no_plan', ['year' => 2026]))
+        ->assertSeeText(__('programs.clear_gap'))
+        ->set('gap', '')
+        ->assertSet('gap', '')
+        ->assertDontSeeHtml('data-gap-filter-chip');
 });

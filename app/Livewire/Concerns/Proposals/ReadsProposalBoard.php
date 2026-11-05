@@ -25,6 +25,11 @@ trait ReadsProposalBoard
     public const BOARD_COLUMN_LIMIT = 40;
 
     /**
+     * One column per live status. Deprecated cases are not columns: `on hold`
+     * is a flag on the status now (W-06, D-58) and `final reports` was retired
+     * by T04, so both would stand empty for ever — contracts.md §1 requires
+     * every picker, filter and chart to iterate live().
+     *
      * @return list<array{key: string, label: string, count: int, items: Collection<int, Proposal>}>
      */
     #[Computed]
@@ -41,7 +46,7 @@ trait ReadsProposalBoard
                 'count' => $inColumn->count(),
                 'items' => $inColumn->take(self::BOARD_COLUMN_LIMIT),
             ];
-        }, ProposalStatus::cases());
+        }, ProposalStatus::live());
     }
 
     /**
@@ -81,7 +86,7 @@ trait ReadsProposalBoard
      */
     protected function boardQuery(): Builder
     {
-        $columns = ['proposals.id', 'proposals.slug', 'proposals.name', 'proposals.status', 'proposals.status_remind_on', 'proposals.planned_date_begin', 'proposals.donor_id'];
+        $columns = ['proposals.id', 'proposals.slug', 'proposals.name', 'proposals.status', 'proposals.kind', 'proposals.on_hold_since', 'proposals.status_remind_on', 'proposals.planned_date_begin', 'proposals.donor_id'];
 
         if ($this->canViewAgreements()) {
             array_push($columns, 'proposals.requested_budget', 'proposals.requested_currency');

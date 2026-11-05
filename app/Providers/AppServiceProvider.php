@@ -17,8 +17,10 @@ use App\Models\Milestone;
 use App\Models\MonthlyReport;
 use App\Models\PlanIndicator;
 use App\Models\Program;
+use App\Models\ProgramRequest;
 use App\Models\Project;
 use App\Models\Proposal;
+use App\Models\ProposalLocation;
 use App\Models\ProposalStatusNote;
 use App\Models\Report;
 use App\Models\ReportTemplate;
@@ -129,6 +131,7 @@ class AppServiceProvider extends ServiceProvider
     protected function registerDevCommands(): void
     {
         DevCommands::artisan('schedule:work', 'scheduler');
+        DevCommands::artisan('queue:listen ai --queue=ai --tries=1 --timeout=0', 'ai-queue');
     }
 
     /**
@@ -285,6 +288,8 @@ class AppServiceProvider extends ServiceProvider
             'supervision' => Supervision::class,
             'monthly_report' => MonthlyReport::class,
             'report_template' => ReportTemplate::class,
+            'proposal_location' => ProposalLocation::class,
+            'program_request' => ProgramRequest::class,
         ]);
     }
 

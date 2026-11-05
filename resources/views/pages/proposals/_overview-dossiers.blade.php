@@ -41,7 +41,11 @@
                                         @endif
                                         <span class="text-lg leading-tight font-bold {{ $inkText }}">{{ $proposal->name }}</span>
                                         <x-ui.project-number :number="$proposal->internal_project_number" kind="internal" class="text-xs {{ $mutedText }}" />
-                                        <x-ui.enum-badge :case="$proposal->status" />
+                                        <x-ui.enum-badge
+                                            :case="$proposal->status"
+                                            :label="$proposal->statusLabel()"
+                                            :tone="$proposal->isOnHold() ? \App\Enums\StatusTone::Warn : null"
+                                        />
                                         {{-- phase is a read-only accessor over status->phase(), not a column. --}}
                                         <span class="text-xs font-semibold {{ $mutedText }}">{{ $proposal->phase->label() }}</span>
                                     </div>

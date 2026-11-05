@@ -1,0 +1,544 @@
+<?php
+
+use App\Actions\Proposals\LinkProposalProject;
+use App\Actions\Proposals\SaveProposal;
+use App\Actions\Proposals\UnlinkProposalProject;
+use App\Events\ProposalLocationsChanged;
+use App\Models\Activity;
+use App\Models\Donor;
+use App\Models\Program;
+use App\Models\ProgramRequest;
+use App\Models\Project;
+use App\Models\Proposal;
+use App\Models\ProposalLocation;
+use App\Models\User;
+use App\Support\ProposalLocationBackfill;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Validation\ValidationException;
+
+/*
+| W-34a slice 1 (D-62): every proposal carries location rows. SaveProposal
+| validates the rows as a set and replaces them under the proposal lock;
+| LinkProposalProject / UnlinkProposalProject keep a row per linked project;
+| ProposalLocationsChanged fires after commit only; the backfill command gives
+| every existing link its row and is safe to re-run.
+*/
+
+beforeEach(function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+    $this->user = User::factory()->role('Financial')->create();
+    $this->actingAs($this->user);
+
+    $this->aleppo = insertHrCity('Aleppo', 'حلب');
+    $this->homs = insertHrCity('Homs', 'حمص');
+    $this->aleppoCenter = insertHrCenter($this->aleppo, 'Hope Center Aleppo', 'مركز الأمل حلب');
+    $this->homsCenter = insertHrCenter($this->homs, 'Hope Center Homs', 'مركز الأمل حمص');
+    $this->employee = insertHrEmployee($this->aleppo);
+    $this->program = Program::factory()->create();
+});
+
+/**
+ * Create data with location rows instead of projects.
+ *
+ * @param  list<array<string, mixed>>  $locations
+ * @param  array<string, mixed>  $overrides
+ * @return array<string, mixed>
+ */
+function locationFormData(array $locations, array $overrides = []): array
+{
+    return [
+        'name' => 'Winter Shelter Response',
+        'internalProjectNumber' => 'HC-2026-952',
+        'donorId' => Donor::factory()->create()->id,
+        'locations' => $locations,
+        'beneficiaries' => [],
+        'plannedDateBegin' => '2026-11-01',
+        'plannedDateEnd' => '2027-10-31',
+        'notes' => '',
+        'startingStage' => 'concept note',
+        'skipReason' => null,
+        ...$overrides,
+    ];
+}
+
+/**
+ * One complete row for the test's Aleppo fixtures.
+ *
+ * @param  array<string, mixed>  $overrides
+ * @return array<string, mixed>
+ */
+function aleppoRow(array $overrides = []): array
+{
+    return [
+        'city_id' => test()->aleppo,
+        'program_id' => test()->program->id,
+        'responsible_employee_id' => test()->employee,
+        'center_ids' => [test()->aleppoCenter],
+        'is_new' => true,
+        ...$overrides,
+    ];
+}
+
+/**
+ * Edit data for an existing proposal, starting from its stored values.
+ *
+ * @param  array<string, mixed>  $overrides
+ * @return array<string, mixed>
+ */
+function locationEditData(Proposal $proposal, array $overrides = []): array
+{
+    return [
+        'name' => $proposal->name,
+        'internalProjectNumber' => $proposal->internal_project_number,
+        'donorId' => $proposal->donor_id,
+        'plannedDateBegin' => $proposal->planned_date_begin->toDateString(),
+        'plannedDateEnd' => $proposal->planned_date_end->toDateString(),
+        'notes' => $proposal->notes,
+        ...$overrides,
+    ];
+}
+
+/**
+ * The validation errors a refused save reports.
+ *
+ * @return array<string, list<string>>
+ */
+function refusedLocations(callable $save): array
+{
+    try {
+        $save();
+    } catch (ValidationException $exception) {
+        return $exception->errors();
+    }
+
+    throw new RuntimeException('The save was not refused.');
+}
+
+/**
+ * The stored rows of a proposal, in sort order, with their center ids.
+ *
+ * @return list<array<string, mixed>>
+ */
+function storedRows(Proposal $proposal): array
+{
+    return DB::table('proposal_locations')->where('proposal_id', $proposal->id)->orderBy('sort')->orderBy('id')->get()
+        ->map(fn (object $row): array => [
+            ...(array) $row,
+            'center_ids' => DB::table('proposal_location_centers')->where('proposal_location_id', $row->id)->orderBy('center_id')->pluck('center_id')->map(fn ($id): int => (int) $id)->all(),
+        ])
+        ->all();
+}
+
+// ── Create ──────────────────────────────────────────────────────────────
+
+test('a proposal is created with its location rows and their centers', function () {
+    $proposal = app(SaveProposal::class)->handle(null, locationFormData([
+        aleppoRow(),
+        ['city_id' => $this->homs, 'is_new' => false],
+    ]), $this->user);
+
+    $rows = storedRows($proposal);
+
+    expect($rows)->toHaveCount(2)
+        ->and((int) $rows[0]['city_id'])->toBe($this->aleppo)
+        ->and((int) $rows[0]['program_id'])->toBe($this->program->id)
+        ->and((int) $rows[0]['responsible_employee_id'])->toBe($this->employee)
+        ->and((bool) $rows[0]['is_new'])->toBeTrue()
+        ->and($rows[0]['project_id'])->toBeNull()
+        ->and((int) $rows[0]['sort'])->toBe(0)
+        ->and($rows[0]['center_ids'])->toBe([$this->aleppoCenter])
+        ->and((int) $rows[1]['city_id'])->toBe($this->homs)
+        ->and($rows[1]['program_id'])->toBeNull()
+        ->and($rows[1]['responsible_employee_id'])->toBeNull()
+        ->and((bool) $rows[1]['is_new'])->toBeFalse()
+        ->and((int) $rows[1]['sort'])->toBe(1)
+        ->and($rows[1]['center_ids'])->toBe([])
+        ->and(DB::table('program_requests')->count())->toBe(0)
+        ->and($proposal->locations()->count())->toBe(2);
+});
+
+test('a proposal needs at least one location row or one project at creation', function () {
+    $errors = refusedLocations(fn () => app(SaveProposal::class)->handle(null, locationFormData([]), $this->user));
+
+    expect($errors['locations'])->toBe([__('proposals.locations_required')])
+        ->and(Proposal::query()->count())->toBe(0);
+});
+
+test('linking projects at creation still gives every project its own row', function () {
+    $project = Project::factory()->create(['city_id' => $this->aleppo, 'program_id' => $this->program->id, 'user_id' => $this->employee, 'center_id' => $this->aleppoCenter]);
+    $other = Project::factory()->create(['city_id' => $this->homs, 'program_id' => $this->program->id, 'user_id' => $this->employee]);
+
+    $proposal = app(SaveProposal::class)->handle(null, locationFormData([], ['projectIds' => [$project->id, $other->id]]), $this->user);
+
+    $rows = storedRows($proposal);
+
+    expect($rows)->toHaveCount(2)
+        ->and((int) $rows[0]['project_id'])->toBe($project->id)
+        ->and((int) $rows[0]['city_id'])->toBe($this->aleppo)
+        ->and((int) $rows[0]['program_id'])->toBe($this->program->id)
+        ->and((int) $rows[0]['responsible_employee_id'])->toBe($this->employee)
+        ->and((bool) $rows[0]['is_new'])->toBeFalse()
+        ->and($rows[0]['center_ids'])->toBe([$this->aleppoCenter])
+        ->and((int) $rows[1]['project_id'])->toBe($other->id)
+        ->and($rows[1]['center_ids'])->toBe([])
+        ->and($proposal->projects()->count())->toBe(2);
+});
+
+// ── Validation (the set as a whole, every message translated) ───────────
+
+test('a row must name a city that HR knows and has not deactivated', function () {
+    $inactive = insertHrCity('Old Town', 'المدينة القديمة', false);
+
+    $errors = refusedLocations(fn () => app(SaveProposal::class)->handle(null, locationFormData([
+        aleppoRow(),
+        ['city_id' => $inactive],
+        ['city_id' => 999999],
+        ['city_id' => null],
+    ]), $this->user));
+
+    expect($errors['locations.1.city_id'])->toBe([__('proposals.location_choose_the_city')])
+        ->and($errors['locations.2.city_id'])->toBe([__('proposals.location_choose_the_city')])
+        ->and($errors['locations.3.city_id'])->toBe([__('proposals.location_choose_the_city')])
+        ->and($errors)->not->toHaveKey('locations.0.city_id')
+        ->and(Proposal::query()->count())->toBe(0);
+});
+
+test('cities are distinct per program, and one row per city may wait for a program', function () {
+    $errors = refusedLocations(fn () => app(SaveProposal::class)->handle(null, locationFormData([
+        aleppoRow(),
+        aleppoRow(['center_ids' => []]),
+        ['city_id' => $this->homs],
+        ['city_id' => $this->homs],
+    ]), $this->user));
+
+    expect($errors['locations.1.city_id'])->toBe([__('proposals.location_city_duplicate')])
+        ->and($errors['locations.3.city_id'])->toBe([__('proposals.location_city_duplicate')])
+        ->and($errors)->not->toHaveKey('locations.0.city_id')
+        ->and($errors)->not->toHaveKey('locations.2.city_id');
+});
+
+test('a center must belong to the city of its row', function () {
+    $errors = refusedLocations(fn () => app(SaveProposal::class)->handle(null, locationFormData([
+        aleppoRow(['center_ids' => [$this->aleppoCenter, $this->homsCenter]]),
+        aleppoRow(['city_id' => $this->homs, 'center_ids' => [999999]]),
+    ]), $this->user));
+
+    expect($errors['locations.0.center_ids'])->toBe([__('proposals.location_center_not_in_city')])
+        ->and($errors['locations.1.center_ids'])->toBe([__('proposals.location_center_not_in_city')]);
+});
+
+test('a responsible must be an active HR employee', function () {
+    $retired = insertHrEmployee($this->aleppo, 'Nour', 'Saad', 'نور', 'سعد', false);
+
+    $errors = refusedLocations(fn () => app(SaveProposal::class)->handle(null, locationFormData([
+        aleppoRow(['responsible_employee_id' => $retired]),
+        aleppoRow(['city_id' => $this->homs, 'center_ids' => [], 'responsible_employee_id' => 999999]),
+    ]), $this->user));
+
+    expect($errors['locations.0.responsible_employee_id'])->toBe([__('proposals.location_responsible_inactive')])
+        ->and($errors['locations.1.responsible_employee_id'])->toBe([__('proposals.location_responsible_inactive')]);
+});
+
+test('a program must exist in tracking', function () {
+    $errors = refusedLocations(fn () => app(SaveProposal::class)->handle(null, locationFormData([
+        aleppoRow(['program_id' => 999999]),
+    ]), $this->user));
+
+    expect($errors['locations.0.program_id'])->toBe([__('proposals.location_choose_the_program')]);
+});
+
+test('a new row without a program must name the program in both languages', function () {
+    $errors = refusedLocations(fn () => app(SaveProposal::class)->handle(null, locationFormData([
+        aleppoRow(['program_id' => null]),
+        aleppoRow(['city_id' => $this->homs, 'center_ids' => [], 'program_id' => null, 'new_program_name_en' => 'Wells', 'new_program_name_ar' => '']),
+    ]), $this->user));
+
+    expect($errors['locations.0.new_program_name_en'])->toBe([__('proposals.location_program_name_required')])
+        ->and($errors['locations.1.new_program_name_ar'])->toBe([__('proposals.location_program_name_required')])
+        ->and($errors)->not->toHaveKey('locations.1.new_program_name_en');
+});
+
+// ── Program requests ────────────────────────────────────────────────────
+
+test('a new row without a program opens a pending program request on the proposal', function () {
+    $proposal = app(SaveProposal::class)->handle(null, locationFormData([
+        aleppoRow(['program_id' => null, 'new_program_name_en' => 'Wells', 'new_program_name_ar' => 'الآبار']),
+    ]), $this->user);
+
+    $row = storedRows($proposal)[0];
+    $request = DB::table('program_requests')->sole();
+
+    expect((int) $request->proposal_location_id)->toBe((int) $row['id'])
+        ->and($request->name_en)->toBe('Wells')
+        ->and($request->name_ar)->toBe('الآبار')
+        ->and($request->status)->toBe('pending')
+        ->and($request->hr_program_id)->toBeNull()
+        ->and((int) $request->requested_by)->toBe($this->user->id)
+        ->and($row['program_id'])->toBeNull()
+        ->and(Activity::query()->where('event', 'program_request.opened')->sole())
+        ->subject_type->toBe('proposal')
+        ->subject_id->toBe($proposal->id);
+});
+
+test('editing keeps a pending request on its row, renames it, and removes it with the row', function () {
+    $proposal = app(SaveProposal::class)->handle(null, locationFormData([
+        aleppoRow(['program_id' => null, 'new_program_name_en' => 'Wells', 'new_program_name_ar' => 'الآبار']),
+    ]), $this->user);
+    $requestId = (int) DB::table('program_requests')->value('id');
+
+    $proposal = app(SaveProposal::class)->handle($proposal, [
+        ...locationEditData($proposal),
+        'locations' => [aleppoRow(['program_id' => null, 'new_program_name_en' => 'Water Wells', 'new_program_name_ar' => 'آبار المياه'])],
+    ], $this->user);
+
+    expect(DB::table('program_requests')->sole())
+        ->id->toBe($requestId)
+        ->name_en->toBe('Water Wells')
+        ->status->toBe('pending');
+
+    app(SaveProposal::class)->handle($proposal, [
+        ...locationEditData($proposal),
+        'locations' => [['city_id' => $this->homs]],
+    ], $this->user);
+
+    expect(DB::table('program_requests')->count())->toBe(0)
+        ->and(storedRows($proposal))->toHaveCount(1);
+});
+
+// ── Edit: rows replaced as a set ────────────────────────────────────────
+
+test('editing replaces the rows as a set and keeps the rows that already carry a project', function () {
+    $project = Project::factory()->create(['city_id' => $this->aleppo, 'program_id' => $this->program->id, 'user_id' => $this->employee, 'center_id' => $this->aleppoCenter]);
+    $proposal = app(SaveProposal::class)->handle(null, locationFormData([
+        ['city_id' => $this->homs],
+    ], ['projectIds' => [$project->id]]), $this->user);
+
+    $before = storedRows($proposal);
+    $linkedRowId = (int) collect($before)->firstWhere('project_id', $project->id)['id'];
+    $other = insertHrEmployee($this->homs, 'Lina', 'Khoury', 'لينا', 'خوري');
+
+    $proposal = app(SaveProposal::class)->handle($proposal, [
+        ...locationEditData($proposal),
+        'locations' => [
+            aleppoRow(['center_ids' => [$this->aleppoCenter], 'responsible_employee_id' => $other, 'is_new' => false]),
+            ['city_id' => $this->homs, 'program_id' => $this->program->id, 'responsible_employee_id' => $other, 'center_ids' => [$this->homsCenter], 'is_new' => true],
+        ],
+    ], $this->user);
+
+    $after = storedRows($proposal);
+
+    expect($after)->toHaveCount(2)
+        ->and((int) $after[0]['id'])->toBe($linkedRowId)
+        ->and((int) $after[0]['project_id'])->toBe($project->id)
+        ->and((int) $after[0]['responsible_employee_id'])->toBe($other)
+        ->and((int) $after[1]['city_id'])->toBe($this->homs)
+        ->and((int) $after[1]['program_id'])->toBe($this->program->id)
+        ->and($after[1]['center_ids'])->toBe([$this->homsCenter])
+        ->and((bool) $after[1]['is_new'])->toBeTrue()
+        ->and(DB::table('proposal_locations')->where('proposal_id', $proposal->id)->whereNull('program_id')->count())->toBe(0)
+        ->and($proposal->projects()->count())->toBe(1);
+});
+
+test('an edit that sends no locations leaves the rows alone', function () {
+    $proposal = app(SaveProposal::class)->handle(null, locationFormData([aleppoRow()]), $this->user);
+
+    app(SaveProposal::class)->handle($proposal, locationEditData($proposal, ['name' => 'Renamed']), $this->user);
+
+    expect(storedRows($proposal))->toHaveCount(1)
+        ->and($proposal->fresh()->name)->toBe('Renamed');
+});
+
+test('an edit that sends an empty set is refused', function () {
+    $proposal = app(SaveProposal::class)->handle(null, locationFormData([aleppoRow()]), $this->user);
+
+    $errors = refusedLocations(fn () => app(SaveProposal::class)->handle($proposal, [...locationEditData($proposal), 'locations' => []], $this->user));
+
+    expect($errors['locations'])->toBe([__('proposals.locations_required')])
+        ->and(storedRows($proposal))->toHaveCount(1);
+});
+
+test('a user without proposals.update cannot change the rows', function () {
+    $proposal = app(SaveProposal::class)->handle(null, locationFormData([aleppoRow()]), $this->user);
+    $viewer = User::factory()->role('Media Team')->create();
+    $this->actingAs($viewer);
+
+    expect(fn () => app(SaveProposal::class)->handle($proposal, [...locationEditData($proposal), 'locations' => [['city_id' => $this->homs]]], $viewer))
+        ->toThrow(AuthorizationException::class)
+        ->and(storedRows($proposal))->toHaveCount(1);
+});
+
+// ── Event and activity ──────────────────────────────────────────────────
+
+test('ProposalLocationsChanged carries the diff counts and fires after commit only', function () {
+    $seen = [];
+    Event::listen(ProposalLocationsChanged::class, function (ProposalLocationsChanged $event) use (&$seen): void {
+        $seen[] = $event;
+    });
+
+    $proposal = DB::transaction(function () use (&$seen): Proposal {
+        $proposal = app(SaveProposal::class)->handle(null, locationFormData([aleppoRow(), ['city_id' => $this->homs]]), $this->user);
+
+        expect($seen)->toBe([]);
+
+        return $proposal;
+    });
+
+    expect($seen)->toHaveCount(1)
+        ->and($seen[0]->proposalId)->toBe($proposal->id)
+        ->and($seen[0]->actorId)->toBe($this->user->id)
+        ->and($seen[0]->added)->toBe(2)
+        ->and($seen[0]->removed)->toBe(0)
+        ->and($seen[0]->changed)->toBe(0);
+
+    app(SaveProposal::class)->handle($proposal, [
+        ...locationEditData($proposal),
+        'locations' => [aleppoRow(['center_ids' => []]), ['city_id' => $this->homs, 'program_id' => $this->program->id]],
+    ], $this->user);
+
+    expect($seen)->toHaveCount(2)
+        ->and($seen[1]->added)->toBe(1)
+        ->and($seen[1]->removed)->toBe(1)
+        ->and($seen[1]->changed)->toBe(1);
+
+    app(SaveProposal::class)->handle($proposal, locationEditData($proposal, ['name' => 'Renamed']), $this->user);
+
+    expect($seen)->toHaveCount(2);
+});
+
+test('a refused save dispatches nothing and writes nothing', function () {
+    Event::fake([ProposalLocationsChanged::class]);
+
+    refusedLocations(fn () => app(SaveProposal::class)->handle(null, locationFormData([aleppoRow(['center_ids' => [$this->homsCenter]])]), $this->user));
+
+    Event::assertNotDispatched(ProposalLocationsChanged::class);
+    expect(DB::table('proposal_locations')->count())->toBe(0)
+        ->and(Proposal::query()->count())->toBe(0);
+});
+
+test('the change is recorded on the proposal with counts only', function () {
+    $proposal = app(SaveProposal::class)->handle(null, locationFormData([aleppoRow(), ['city_id' => $this->homs]]), $this->user);
+
+    $activity = Activity::query()->where('event', 'proposal.locations_changed')->sole();
+
+    expect($activity->subject_type)->toBe('proposal')
+        ->and($activity->subject_id)->toBe($proposal->id)
+        ->and($activity->properties)->toEqual(['label' => 'Winter Shelter Response', 'notify' => true, 'added' => 2, 'removed' => 0, 'changed' => 0]);
+});
+
+// ── Link / unlink wrappers ──────────────────────────────────────────────
+
+test('linking a project adds its row and unlinking removes it', function () {
+    $proposal = app(SaveProposal::class)->handle(null, locationFormData([['city_id' => $this->homs]]), $this->user);
+    $project = Project::factory()->create(['city_id' => $this->aleppo, 'program_id' => $this->program->id, 'user_id' => $this->employee, 'center_id' => $this->aleppoCenter]);
+    $second = Project::factory()->create(['city_id' => $this->homs, 'program_id' => $this->program->id, 'user_id' => $this->employee]);
+
+    app(LinkProposalProject::class)->handle($proposal, $project->id);
+    app(LinkProposalProject::class)->handle($proposal, $second->id);
+    app(LinkProposalProject::class)->handle($proposal, $project->id);
+
+    $rows = storedRows($proposal);
+    $linked = collect($rows)->firstWhere('project_id', $project->id);
+
+    expect($rows)->toHaveCount(3)
+        ->and((int) $linked['city_id'])->toBe($this->aleppo)
+        ->and((int) $linked['program_id'])->toBe($this->program->id)
+        ->and((int) $linked['responsible_employee_id'])->toBe($this->employee)
+        ->and((bool) $linked['is_new'])->toBeFalse()
+        ->and($linked['center_ids'])->toBe([$this->aleppoCenter]);
+
+    app(UnlinkProposalProject::class)->handle($proposal, $project->id);
+
+    expect(collect(storedRows($proposal))->pluck('project_id')->map(fn ($id) => $id === null ? null : (int) $id)->all())
+        ->toBe([null, $second->id])
+        ->and(DB::table('proposal_location_centers')->count())->toBe(0);
+});
+
+test('linking a project whose city and program already have a waiting row fills that row', function () {
+    $proposal = app(SaveProposal::class)->handle(null, locationFormData([aleppoRow(['center_ids' => []])]), $this->user);
+    $rowId = (int) storedRows($proposal)[0]['id'];
+    $project = Project::factory()->create(['city_id' => $this->aleppo, 'program_id' => $this->program->id, 'user_id' => $this->employee, 'center_id' => $this->aleppoCenter]);
+
+    app(LinkProposalProject::class)->handle($proposal, $project->id);
+
+    $rows = storedRows($proposal);
+
+    expect($rows)->toHaveCount(1)
+        ->and((int) $rows[0]['id'])->toBe($rowId)
+        ->and((int) $rows[0]['project_id'])->toBe($project->id)
+        ->and((bool) $rows[0]['is_new'])->toBeFalse()
+        ->and($rows[0]['center_ids'])->toBe([$this->aleppoCenter]);
+});
+
+// ── Backfill ────────────────────────────────────────────────────────────
+
+test('the backfill gives every existing link a row, keeps multi-city proposals whole, and is idempotent', function () {
+    $owner = $this->employee;
+    $idlib = insertHrCity('Idlib', 'إدلب');
+    $proposal = Proposal::factory()->create();
+    $projects = [
+        Project::factory()->create(['city_id' => $this->aleppo, 'program_id' => $this->program->id, 'user_id' => $owner, 'center_id' => $this->aleppoCenter]),
+        Project::factory()->create(['city_id' => $this->homs, 'program_id' => $this->program->id, 'user_id' => $owner]),
+        Project::factory()->create(['city_id' => $idlib, 'program_id' => $this->program->id, 'user_id' => $owner]),
+    ];
+    foreach ($projects as $project) {
+        DB::table('project_proposal')->insert(['project_id' => $project->id, 'proposal_id' => $proposal->id]);
+    }
+    $bare = Proposal::factory()->create();
+
+    $dry = app(ProposalLocationBackfill::class)->run(apply: false);
+
+    expect($dry)->toMatchArray(['links' => 3, 'already' => 0, 'inserted' => 3, 'merged' => 0, 'proposals_without_links' => 1, 'multi_city_proposals' => 1])
+        ->and(DB::table('proposal_locations')->count())->toBe(0);
+
+    $this->artisan('proposals:backfill-locations', ['--apply' => true])->assertSuccessful();
+
+    $rows = storedRows($proposal);
+
+    expect($rows)->toHaveCount(3)
+        ->and(collect($rows)->pluck('project_id')->map(fn ($id): int => (int) $id)->all())->toBe(array_map(fn (Project $p): int => $p->id, $projects))
+        ->and((int) $rows[0]['responsible_employee_id'])->toBe($owner)
+        ->and((bool) $rows[0]['is_new'])->toBeFalse()
+        ->and($rows[0]['center_ids'])->toBe([$this->aleppoCenter])
+        ->and($rows[1]['center_ids'])->toBe([])
+        ->and(collect($rows)->pluck('sort')->map(fn ($s): int => (int) $s)->all())->toBe([0, 1, 2])
+        ->and(DB::table('proposal_locations')->where('proposal_id', $bare->id)->count())->toBe(0)
+        ->and(Activity::query()->where('event', 'proposal.locations_changed')->count())->toBe(0);
+
+    $again = app(ProposalLocationBackfill::class)->run(apply: true);
+
+    expect($again)->toMatchArray(['links' => 3, 'already' => 3, 'inserted' => 0])
+        ->and(DB::table('proposal_locations')->count())->toBe(3);
+});
+
+test('the backfill dry run is the default and writes nothing', function () {
+    $proposal = Proposal::factory()->create();
+    $project = Project::factory()->create(['city_id' => $this->aleppo, 'program_id' => $this->program->id, 'user_id' => $this->employee]);
+    DB::table('project_proposal')->insert(['project_id' => $project->id, 'proposal_id' => $proposal->id]);
+
+    $this->artisan('proposals:backfill-locations')->expectsOutputToContain('Dry run')->assertSuccessful();
+    $this->artisan('proposals:backfill-locations', ['--apply' => true, '--dry-run' => true])->expectsOutputToContain('Dry run')->assertSuccessful();
+
+    expect(DB::table('proposal_locations')->count())->toBe(0);
+});
+
+// ── Models ──────────────────────────────────────────────────────────────
+
+test('the location models read back through their relations and casts', function () {
+    $location = ProposalLocation::factory()->create(['city_id' => $this->aleppo, 'program_id' => $this->program->id, 'is_new' => true]);
+    $location->centers()->create(['center_id' => $this->aleppoCenter]);
+    $request = ProgramRequest::factory()->create(['proposal_location_id' => $location->id, 'requested_by' => $this->user->id]);
+
+    $location = $location->fresh(['centers', 'programRequest', 'proposal']);
+
+    expect($location->is_new)->toBeTrue()
+        ->and($location->centerIds())->toBe([$this->aleppoCenter])
+        ->and($location->programRequest?->id)->toBe($request->id)
+        ->and($location->programRequest?->status->value)->toBe('pending')
+        ->and($location->programRequest?->isPending())->toBeTrue()
+        ->and($location->proposal)->toBeInstanceOf(Proposal::class)
+        ->and((new ProposalLocation)->getMorphClass())->toBe('proposal_location')
+        ->and((new ProgramRequest)->getMorphClass())->toBe('program_request');
+});

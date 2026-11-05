@@ -15,6 +15,7 @@ use App\Models\Donor;
 use App\Models\Milestone;
 use App\Models\Proposal;
 use App\Models\ProposalStatusNote;
+use App\Support\ProposalLocationRows;
 use App\Support\ProposalTransitions;
 use App\Support\TransitionResult;
 use Carbon\CarbonImmutable;
@@ -54,7 +55,7 @@ final class TransitionProposal
                 throw ValidationException::withMessages(['status' => __('proposals.stale_status')]);
             }
 
-            $requirements = ProposalTransitions::requirements($from, $to);
+            $requirements = ProposalTransitions::requirements($from, $to, $locked->kind);
 
             if ($requirements === null) {
                 throw ValidationException::withMessages([
@@ -161,6 +162,8 @@ final class TransitionProposal
     {
         $isMet = match ($requirement) {
             'linked_project' => $proposal->projects()->exists(),
+            'locations' => $proposal->locations()->exists(),
+            'locations_complete' => ProposalLocationRows::incompleteRowIds($proposal) === [],
             'donor' => $proposal->donor_id !== null && ! Donor::query()->pending()->whereKey($proposal->donor_id)->exists(),
             'planned_dates' => $proposal->planned_date_begin !== null && $proposal->planned_date_end !== null,
             'budget' => $proposal->requested_budget !== null && $proposal->requested_currency !== null,
@@ -168,6 +171,7 @@ final class TransitionProposal
                 ->where(fn ($query) => $query->whereNull('project_proposal.target_beneficiaries')->orWhere('project_proposal.target_beneficiaries', '<', 1))
                 ->exists(),
             'final_report' => $this->hasFinalReport($proposal),
+            'narrative' => Proposal::isNarrativeComplete($proposal->narrative),
             'reason', 'reason_min_10', 'effective_date' => true,
         };
 
@@ -177,22 +181,26 @@ final class TransitionProposal
 
         return match ($requirement) {
             'linked_project' => __('proposals.link_project_first'),
+            'locations' => __('proposals.locations_required'),
+            'locations_complete' => __('proposals.locations_incomplete'),
             'donor' => $proposal->donor_id === null ? __('proposals.choose_the_donor') : __('proposals.donor_request_pending'),
             'planned_dates' => __('proposals.planned_dates_required'),
             'budget' => __('proposals.budget_required'),
             'target_beneficiaries' => __('proposals.beneficiaries_required'),
             'final_report' => __('proposals.final_report_required'),
+            'narrative' => __('proposals.narrative_required'),
         };
     }
 
     /**
      * D-02c: the final-report milestone is reached, the final report file is
      * filed, and (unless the proposal is self-funded) the donor's acceptance
-     * is recorded. The acceptance email is optional.
+     * is recorded. The acceptance email is optional. A payroll proposal has
+     * no milestone (W-32): the file and the acceptance close it.
      */
     private function hasFinalReport(Proposal $proposal): bool
     {
-        $milestoneReached = Milestone::query()
+        $milestoneReached = $proposal->isPayroll() || Milestone::query()
             ->where('proposal_id', $proposal->id)
             ->where('is_final_report', true)
             ->where('status', MilestoneStatus::Reached)

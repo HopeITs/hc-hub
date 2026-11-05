@@ -24,15 +24,13 @@ test('desk panels take their radius and border from the shared panel tokens', fu
         ->not->toContain('--panel-r: 12px');
 });
 
-test('panels restyled inside registers, record sheets and the project story keep the shared panel tokens', function () {
+test('panels restyled inside registers and the project story keep the shared panel tokens', function () {
     $css = deskStylesheets();
 
     preg_match('/\[data-desk-register\] \[data-panel\],\s*\[data-desk-register\] \[data-data-table\] \{([^}]*)\}/', $css, $register);
-    preg_match('/\.dk-record-body \[data-panel\] \{([^}]*)\}/', $css, $record);
     preg_match('/\.dk-story \.dk-pjsec \[data-panel\] \{([^}]*)\}/', $css, $story);
 
     expect($register[1])->toContain('border: 1px solid var(--color-panel-border);')->toContain('border-radius: var(--radius-panel);')
-        ->and($record[1])->toContain('border-top: 1px solid var(--color-panel-border);')
         ->and($story[1])->toContain('border-color: var(--color-panel-border);')->toContain('border-radius: var(--radius-panel);');
 });
 

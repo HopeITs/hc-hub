@@ -2,6 +2,7 @@
 
 use App\Models\Account;
 use App\Models\Activity;
+use App\Models\AiRequest;
 use App\Models\DonorProposal;
 use App\Models\FundingAgreementInstallment;
 use App\Models\HrCenter;
@@ -28,6 +29,7 @@ use App\Models\NotificationMute;
 use App\Models\Permission;
 use App\Models\PlanIndicator;
 use App\Models\ProjectActivityStatus;
+use App\Models\ProposalLocationCenter;
 use App\Models\ProposalReviewer;
 use App\Models\ProposalStatusNote;
 use App\Models\ReportFile;
@@ -63,6 +65,7 @@ use Illuminate\Support\Facades\Gate;
 function modelsGuardedWithoutPolicy(): array
 {
     return [
+        AiRequest::class => ['ai', 'The AI usage ledger: written only by App\Support\Ai\AiGateway, read only under ai.view-usage.'],
         Account::class => ['accounts', 'accounts.* permissions on the admin accounts page and the transfer forms.'],
         Activity::class => ['activity-log', 'The global log needs activity-log.view; a record\'s own Activity tab follows that record\'s page.'],
         DonorProposal::class => ['funding-agreements', 'funding-agreements.* permissions (ManagesAgreementForm).'],
@@ -101,6 +104,7 @@ function modelsGuardedWithoutPolicy(): array
         ScheduleBaseline::class => ['projects', 'Part of a project schedule (ProjectPolicy::update).'],
         ScheduleBaselineItem::class => ['projects', 'Part of a project schedule (ProjectPolicy::update).'],
         ScheduleDependency::class => ['projects', 'Part of a project schedule (ProjectPolicy::update).'],
+        ProposalLocationCenter::class => ['proposals', 'A center of a proposal location row: written only through SaveProposal and the link wrappers under ProposalLocationPolicy (W-34a).'],
         TaskAssignee::class => ['tasks', 'Follows its task (TaskPolicy).'],
         TaskAttachment::class => ['tasks', 'Follows its task (TaskPolicy); the download controllers check it.'],
         TransfersTracking::class => ['transfers', 'transfers.* permissions (ManagesTransferForm).'],

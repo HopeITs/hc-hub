@@ -14,6 +14,11 @@ return [
         'pending' => 'Pending',
         'approved' => 'Approved',
     ],
+    'program_request_status' => [
+        'pending' => 'Pending',
+        'created' => 'Created',
+        'declined' => 'Declined',
+    ],
     'donor_type' => [
         'bilateral' => 'Bilateral',
         'foundation' => 'Foundation',
@@ -64,6 +69,7 @@ return [
         'entered' => 'Entered (numerator and denominator)',
     ],
     'media_collection' => [
+        'concept_note' => 'Concept note',
         'proposal' => 'Proposal',
         'agreement' => 'Agreement',
         'mou' => 'MOU',
@@ -162,6 +168,10 @@ return [
         'monitoring' => 'Monitoring',
         'closure' => 'Closure',
         'archived' => 'Archived',
+    ],
+    'proposal_kind' => [
+        'project' => 'Project',
+        'payroll' => 'Payroll',
     ],
     'proposal_status' => [
         'concept_note' => 'Concept Note',

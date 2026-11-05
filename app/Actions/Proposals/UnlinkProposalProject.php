@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Proposals;
 
+use App\Events\ProposalLocationsChanged;
 use App\Models\PlanIndicator;
 use App\Models\Proposal;
+use App\Support\ProposalLocationRows;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -19,6 +21,9 @@ use Illuminate\Validation\ValidationException;
  * once. A project carrying targets of this proposal that already have
  * reports stays linked; targets without reports stay too and are flagged on
  * the targets tab.
+ *
+ * Since W-34a the project's location row goes with the link (contracts.md
+ * §7), and ProposalLocationsChanged fires after commit.
  */
 final class UnlinkProposalProject
 {
@@ -52,8 +57,16 @@ final class UnlinkProposalProject
                 'project_id' => $project->id,
                 'project' => $project->name,
             ]);
+
+            $counts = app(ProposalLocationRows::class)->detachProject($locked, $project->id);
+
+            if ($counts['removed'] > 0) {
+                $locked->recordActivity('proposal.locations_changed', [], $counts);
+                ProposalLocationsChanged::dispatch($locked->id, auth()->user()?->id, $counts['added'], $counts['removed'], $counts['changed']);
+            }
         });
 
         $proposal->unsetRelation('projects');
+        $proposal->unsetRelation('locations');
     }
 }

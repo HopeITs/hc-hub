@@ -337,3 +337,78 @@ test('the status form is rendered only while its modal is open', function () {
         ->set('newStatus', ProposalStatus::ProposalDraft->value)
         ->assertSeeHtml('wire:model="statusContext"');
 });
+
+/*
+ * W-06 slice 2 (D-58): "On hold" is a flag facet and a chip, never a status
+ * option and never a board column.
+ */
+
+test('the board has a column per live status and none for the retired ones', function () {
+    $held = Proposal::factory()->create(['name' => 'Held proposal', 'status' => ProposalStatus::Submitted]);
+    $held->forceFill(['on_hold_since' => today()])->save();
+
+    $page = proposalRegister()->set('view', 'board');
+    $keys = collect($page->instance()->boardColumns)->pluck('key')->all();
+
+    expect($keys)->not->toContain('on hold', 'final reports')
+        ->and($keys)->toContain('submitted')
+        // The held proposal counts inside its own status, not apart from it.
+        ->and(collect($page->instance()->boardColumns)->firstWhere('key', 'submitted')['items']->pluck('id')->all())
+        ->toBe([$held->id]);
+
+    // The card carries the chip, so a hold is visible without opening the proposal.
+    $page->assertSeeHtml('data-test="on-hold-chip"');
+});
+
+test('the on hold facet keeps only held proposals and the row reads Submitted (On hold)', function () {
+    $held = Proposal::factory()->create(['name' => 'Waiting on donor', 'status' => ProposalStatus::Submitted]);
+    $held->forceFill(['on_hold_since' => today()])->save();
+    $running = Proposal::factory()->create(['name' => 'Still moving', 'status' => ProposalStatus::Submitted]);
+
+    proposalRegister()
+        ->assertSeeText('Waiting on donor')
+        ->assertSeeText('Still moving')
+        ->assertSeeText($held->fresh()->statusLabel());
+
+    // The facet travels in the address bar, like every other register filter.
+    proposalRegister(['flag' => 'on_hold'])
+        ->assertSet('flag', 'on_hold')
+        ->assertSeeText('Waiting on donor')
+        ->assertDontSeeText('Still moving');
+
+    // The status picker offers no hold option: a hold is not a status.
+    proposalRegister()->assertDontSeeHtml('"value":"on hold"');
+});
+
+/*
+| W-32 slice 2: payroll proposals carry a chip, and a kind facet narrows the
+| table, the board and the calendar alike.
+*/
+
+test('the kind filter narrows the rows and the board, and a payroll row carries its chip', function () {
+    $project = Proposal::factory()->create(['name' => 'Shelter Response', 'planned_date_begin' => '2026-06-10']);
+    $payroll = Proposal::factory()->payroll()->create(['name' => 'Micro Aleppo payroll', 'status' => ProposalStatus::ProposalDraft, 'planned_date_begin' => '2026-06-12']);
+
+    $rowIds = fn (Testable $page): array => $page->instance()->rows->pluck('id')->unique()->sort()->values()->all();
+    $boardIds = fn (Testable $page): array => collect($page->instance()->boardColumns)->flatMap(fn (array $column) => $column['items']->pluck('id'))->sort()->values()->all();
+
+    expect($rowIds(proposalRegister()))->toBe([$project->id, $payroll->id])
+        ->and($rowIds(proposalRegister()->set('proposalKind', 'payroll')))->toBe([$payroll->id])
+        ->and($rowIds(proposalRegister(['kind' => 'project'])))->toBe([$project->id])
+        ->and($boardIds(proposalRegister(['kind' => 'payroll', 'view' => 'board'])))->toBe([$payroll->id]);
+
+    proposalRegister()
+        ->assertSeeHtml('data-payroll-chip="'.$payroll->id.'"')
+        ->assertDontSeeHtml('data-payroll-chip="'.$project->id.'"')
+        ->assertSeeHtml('data-test="kind-filter-payroll"');
+
+    proposalRegister(['view' => 'board'])->assertSeeHtml('data-payroll-chip="'.$payroll->id.'"');
+});
+
+test('an unknown kind in the address bar falls back to both kinds', function () {
+    proposalRegister(['kind' => 'salary'])->assertSet('proposalKind', '');
+});
+
+test('clearing the filters clears the kind', function () {
+    proposalRegister(['kind' => 'payroll'])->call('clearFilters')->assertSet('proposalKind', '');
+});

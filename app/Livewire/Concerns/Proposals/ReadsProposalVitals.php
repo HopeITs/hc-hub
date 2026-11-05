@@ -45,6 +45,14 @@ trait ReadsProposalVitals
     #[Computed]
     public function vitals(): array
     {
+        // A payroll proposal (W-32) has no tasks across projects and no targets: money and time only.
+        if ($this->proposal->isPayroll()) {
+            return [
+                ...($this->canViewAgreements() ? [$this->moneyVital()] : []),
+                [...$this->timeVital(), 'tab' => 'status'],
+            ];
+        }
+
         return [
             ...($this->canViewAgreements() ? [$this->moneyVital()] : []),
             $this->workVital(),

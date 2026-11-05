@@ -4,16 +4,24 @@ use App\Actions\FundingAgreements\SaveAgreementInstallments;
 use App\Actions\FundingAgreements\SaveFundingAgreement;
 use App\Actions\Projects\ActivateProject;
 use App\Actions\Proposals\ApproveProposal;
+use App\Actions\Proposals\RecordFinalReportAcceptance;
+use App\Actions\Proposals\SaveProposal;
 use App\Actions\Proposals\TransitionProposal;
 use App\Enums\AssignmentStatus;
 use App\Enums\Currency;
+use App\Enums\MediaCollection;
 use App\Enums\ProjectStatus;
+use App\Enums\ProposalKind;
 use App\Enums\ProposalStatus;
+use App\Models\Donor;
 use App\Models\DonorProposal;
+use App\Models\Media;
 use App\Models\Project;
 use App\Models\Proposal;
+use App\Models\ProposalLocation;
 use App\Models\TransfersTracking;
 use App\Models\UserNotification;
+use Carbon\CarbonImmutable;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Validation\ValidationException;
 
@@ -45,6 +53,7 @@ test('a proposal goes from a draft project to an approved, active grant with an 
         'planned_date_end' => '2027-10-31',
     ]);
     $proposal->projects()->attach($project->id, ['target_beneficiaries' => 120]);
+    ProposalLocation::factory()->for($proposal)->forProject($project)->create();
 
     expect($project->status)->toBe(ProjectStatus::Draft)
         ->and($project->start_date)->toBeNull()
@@ -136,3 +145,51 @@ test('a proposal goes from a draft project to an approved, active grant with an 
 
 test('template confirmation activates the project and generates its monthly report months')
     ->skip('T33 (ConfirmReportTemplate) and T17A (monthly report generation) are not merged yet; step 4 above calls ActivateProject directly.');
+
+test('a payroll proposal goes from draft to completed with the final report only (W-32)', function () {
+    $finance = userWithRole('Financial');
+    $this->actingAs($finance);
+    $today = '2026-10-14';
+
+    // 1. Created as payroll: straight to proposal draft, no project, no concept note to pass.
+    $proposal = app(SaveProposal::class)->handle(null, [
+        'kind' => ProposalKind::Payroll->value,
+        'name' => 'Micro Aleppo payroll 2027',
+        'internalProjectNumber' => 'HC-2026-971',
+        'donorId' => Donor::factory()->create()->id,
+        'narrative' => 'Volunteer salaries and equipment for the Micro Aleppo center during 2027.',
+        'plannedDateBegin' => '2026-11-01',
+        'plannedDateEnd' => '2027-10-31',
+        'requestedBudget' => '48000.00',
+        'requestedCurrency' => 'USD',
+    ], $finance);
+
+    expect($proposal->status)->toBe(ProposalStatus::ProposalDraft)
+        ->and($proposal->transitionTargets())->toBe([ProposalStatus::Submitted]);
+
+    // 2. Finance has entered the budget: it goes to the donor, then the donor approves.
+    app(TransitionProposal::class)->handle($proposal->fresh(), ProposalStatus::Submitted, ProposalStatus::ProposalDraft, ['effective_date' => $today]);
+    $result = app(ApproveProposal::class)->handle($proposal->fresh(), ProposalStatus::Submitted, [
+        'decision_date' => $today,
+        'approval_note' => 'The donor confirmed the payroll grant by email on 13 October.',
+    ]);
+
+    expect($result->approvedProjectIds)->toBe([])
+        ->and($proposal->fresh()->status)->toBe(ProposalStatus::Active)
+        ->and(Project::query()->count())->toBe(0);
+
+    // 3. The final report is filed and accepted: the proposal closes, with no milestone.
+    Media::query()->findOrFail(insertMedia('proposal', $proposal->id, $finance->id))->update(['collection' => MediaCollection::FinalReport]);
+    app(RecordFinalReportAcceptance::class)->handle($proposal->fresh(), CarbonImmutable::parse($today));
+    app(TransitionProposal::class)->handle($proposal->fresh(), ProposalStatus::Completed, ProposalStatus::Active, ['effective_date' => $today]);
+
+    expect($proposal->fresh()->status)->toBe(ProposalStatus::Completed)
+        ->and($proposal->statusNotes()->pluck('status')->all())->toBe([
+            ProposalStatus::ConceptNote,
+            ProposalStatus::ProposalDraft,
+            ProposalStatus::Submitted,
+            ProposalStatus::Approved,
+            ProposalStatus::Active,
+            ProposalStatus::Completed,
+        ]);
+});

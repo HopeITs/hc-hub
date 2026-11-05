@@ -45,6 +45,7 @@ return [
     'flag_no_agreement' => 'بلا اتفاقية',
     'flag_no_tranches' => 'بلا دفعات',
     'flag_no_transfers' => 'بلا تحويلات',
+    'flag_on_hold' => 'معلّق',
     'flag_other_currency' => 'دفعة بعملة أخرى',
     'flag_report_overdue' => 'تقرير مانح متأخر',
     'flag_short' => 'وصلت ناقصة',

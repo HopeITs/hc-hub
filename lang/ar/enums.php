@@ -14,6 +14,11 @@ return [
         'pending' => 'قيد الموافقة',
         'approved' => 'تمت الموافقة',
     ],
+    'program_request_status' => [
+        'pending' => 'معلّق',
+        'created' => 'أُنشئ',
+        'declined' => 'مرفوض',
+    ],
     'donor_type' => [
         'bilateral' => 'ثنائي',
         'foundation' => 'مؤسسة',
@@ -64,6 +69,7 @@ return [
         'entered' => 'مُدخل (البسط والمقام)',
     ],
     'media_collection' => [
+        'concept_note' => 'المذكرة المفاهيمية',
         'proposal' => 'مقترح',
         'agreement' => 'اتفاقية',
         'mou' => 'مذكرة تفاهم',
@@ -162,6 +168,10 @@ return [
         'monitoring' => 'الرصد',
         'closure' => 'الإغلاق',
         'archived' => 'مؤرشف',
+    ],
+    'proposal_kind' => [
+        'project' => 'مشروع',
+        'payroll' => 'رواتب',
     ],
     'proposal_status' => [
         'concept_note' => 'مذكرة مفاهيمية',

@@ -531,6 +531,16 @@ return [
             'updated' => 'حدّث :actor المانح «:subject»',
             'deleted' => 'حذف :actor المانح «:subject»',
         ],
+        'program_request' => [
+            'opened' => [
+                'title' => 'برنامج مطلوب في HR',
+                'body' => 'يحتاج المقترح «:subject» إلى إنشاء البرنامج «:name» في HR',
+            ],
+            'linked' => [
+                'title' => 'ربط برنامج',
+                'body' => 'ربط :actor برنامج HR «:name» الذي طلبه المقترح «:subject»',
+            ],
+        ],
         'proposal' => [
             'created' => [
                 'title' => 'إنشاء مقترح',
@@ -564,6 +574,10 @@ return [
             'risk_detached' => [
                 'title' => 'إزالة خطر',
                 'body' => 'أزال :actor الخطر «:value» من «:subject»',
+            ],
+            'locations_changed' => [
+                'title' => 'تغيير المواقع',
+                'body' => 'غيّر :actor مواقع المقترح «:subject»',
             ],
             'updated' => 'حدّث :actor المقترح «:subject»',
             'deleted' => [
@@ -612,6 +626,10 @@ return [
             'on_hold_reminder' => [
                 'title' => 'تذكير بمقترح معلّق',
                 'body' => 'ما زال المقترح «:subject» معلّقًا',
+            ],
+            'concept_note_updated' => [
+                'title' => 'تحديث المذكرة المفاهيمية',
+                'body' => 'حدّث :actor المذكرة المفاهيمية للمقترح «:subject»',
             ],
             'targets_saved' => [
                 'title' => 'حفظ المستهدفات',

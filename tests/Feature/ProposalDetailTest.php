@@ -1,12 +1,15 @@
 <?php
 
 use App\Enums\Currency;
+use App\Enums\FileType;
+use App\Enums\MediaCollection;
 use App\Enums\ProposalStatus;
 use App\Enums\TaskStatus;
 use App\Models\Activity;
 use App\Models\Donor;
 use App\Models\DonorProposal;
 use App\Models\Indicator;
+use App\Models\Media;
 use App\Models\Milestone;
 use App\Models\PlanIndicator;
 use App\Models\Project;
@@ -17,6 +20,7 @@ use App\Models\Task;
 use App\Models\TransfersTracking;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -394,8 +398,15 @@ test('each tab shows only its own content and the strip counts its records', fun
     expect(collect($component->instance()->tabs)->pluck('count', 'key')->all())
         ->toBe(['status' => 1, 'deadlines' => 1, 'funding' => 1, 'projects' => 0, 'logframe' => null, 'targets' => 0, 'plan' => 1, 'reports' => 0, 'documents' => 0]);
 
+    /*
+     * The Status tab names the donor in plain text inside the concept-note
+     * card (W-24) — the agreement's own content, its link to the donor page
+     * included, still belongs to the Funding tab. The composite foreign key of
+     * §7 forces the agreement's donor to be the proposal's, so the name itself
+     * can no longer tell the two tabs apart.
+     */
     $component->assertSeeText('Board signed off')
-        ->assertDontSeeText('UNICEF')
+        ->assertDontSeeHtml(route('donors.show', Donor::query()->findOrFail($fundingDonorId)))
         ->assertDontSeeText('Draft the budget narrative')
         ->set('tab', 'funding')
         ->assertSeeText('UNICEF')
@@ -720,4 +731,254 @@ test('proposal detail sends the back link to the in-app page the visitor came fr
         ->get(route('proposals.show', $proposal))
         ->assertOk()
         ->assertSeeHtml('href="'.$from.'" wire:navigate data-detail-back');
+});
+
+/*
+| W-24 (D-62): the concept note where people look for it — a card on the
+| Status tab through the ideation phase, folded to one line afterwards.
+*/
+
+test('the ideation phase shows the concept note with its title, donor and created date', function () {
+    $user = User::factory()->role('Financial')->create();
+    $donor = Donor::factory()->create(['name' => 'Aleppo Relief Fund']);
+    $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create([
+        'name' => 'Four Wells, Two Villages',
+        'donor_id' => $donor->id,
+        'status' => ProposalStatus::ConceptNote,
+        'concept_note' => "Rehabilitate four wells.\n\nTwo villages, one pumping station.",
+        'created_at' => '2026-10-02 09:00:00',
+    ]));
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertOk()
+        ->assertSeeHtml('data-concept-note')
+        ->assertSeeText(__('proposals.concept_note.title'))
+        ->assertSeeTextInOrder([
+            'Four Wells, Two Villages',
+            'Aleppo Relief Fund',
+            'Oct 2, 2026',
+            'Rehabilitate four wells.',
+            'Two villages, one pumping station.',
+        ])
+        // Open, not folded: no "view" toggle through the ideation phase.
+        ->assertDontSeeHtml('data-concept-note-toggle');
+});
+
+test('the concept note text is shown as text, never as markup', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create([
+        'status' => ProposalStatus::ConceptNote,
+        'concept_note' => '<script>alert(1)</script> **bold** stays flat',
+    ]));
+
+    $response = $this->actingAs($user)->get(route('proposals.show', $proposal))->assertOk();
+
+    $response->assertSeeText('<script>alert(1)</script> **bold** stays flat')
+        // The raw tag never reaches the page: {{ }} escaped it.
+        ->assertDontSee('<script>alert(1)</script>', escape: false);
+});
+
+test('outside the ideation phase the concept note folds to one line that expands', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create([
+        'status' => ProposalStatus::Submitted,
+        'concept_note' => 'The idea we started from.',
+    ]));
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertOk()
+        ->assertSeeHtml('data-concept-note')
+        ->assertSeeHtml('data-concept-note-toggle')
+        ->assertSeeText(__('proposals.concept_note.view'))
+        // The body is in the page, hidden behind the toggle rather than dropped.
+        ->assertSeeText('The idea we started from.');
+});
+
+test('the concept note document downloads through the protected proposal route', function () {
+    Storage::fake('local');
+
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create(['status' => ProposalStatus::ConceptNote]));
+    $media = Activity::withoutRecording(fn () => Media::factory()->create([
+        'mediable_type' => 'proposal',
+        'mediable_id' => $proposal->id,
+        'collection' => MediaCollection::ConceptNote,
+        'type' => FileType::Pdf,
+        'path' => 'media/proposals/'.$proposal->id.'/concept.pdf',
+        'original_name' => 'concept-note.pdf',
+        'uploaded_by' => $user->id,
+    ]));
+
+    // _file-row offers the download only for a file that is really on the disk.
+    Storage::disk('local')->put($media->path, 'encrypted bytes');
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertOk()
+        ->assertSeeText('concept-note.pdf')
+        ->assertSeeHtml('href="'.route('proposals.files.download', [$proposal, $media]).'"');
+});
+
+test('a proposal with no concept note says so in the ideation phase and shows nothing later', function () {
+    $user = User::factory()->role('Financial')->create();
+    $ideation = Activity::withoutRecording(fn () => Proposal::factory()->create(['status' => ProposalStatus::ConceptNote]));
+    $later = Activity::withoutRecording(fn () => Proposal::factory()->create(['status' => ProposalStatus::Active]));
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $ideation))
+        ->assertOk()
+        ->assertSeeText(__('proposals.concept_note.nothing_recorded'));
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $later))
+        ->assertOk()
+        ->assertDontSeeHtml('data-concept-note');
+});
+
+test('someone without proposals.view cannot open a proposal page at all', function () {
+    $proposal = Proposal::factory()->create(['status' => ProposalStatus::ConceptNote, 'concept_note' => 'Private idea.']);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('proposals.show', $proposal))
+        ->assertForbidden();
+});
+
+/*
+ * W-25 (folded into W-06 slice 2, D-58): the lifecycle stepper draws the
+ * merged line — nine stops, with `on hold` as a chip on the current one.
+ */
+
+test('the lifecycle stepper draws the nine merged stops and marks the current one', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
+
+    $stops = Livewire::actingAs($user)
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->instance()
+        ->lifecycle;
+
+    expect(array_map(fn (array $stop): string => $stop['status']->value, $stops))->toBe([
+        'concept note',
+        'concept note review',
+        'concept note submitted',
+        'proposal draft',
+        'proposal review',
+        'submitted',
+        'approved',
+        'active',
+        'completed',
+    ]);
+
+    // `on hold` is not a stop any more, and the current stop is announced.
+    $current = array_values(array_filter($stops, fn (array $stop): bool => $stop['state'] === 'current'));
+
+    expect($current)->toHaveCount(1)
+        ->and($current[0]['status'])->toBe(ProposalStatus::Submitted)
+        ->and($current[0]['held'])->toBeFalse();
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertOk()
+        ->assertSeeHtml('aria-current="step"')
+        ->assertDontSeeHtml('data-test="on-hold-chip"');
+});
+
+test('a proposal on hold wears the chip on its current stop and reads Submitted (On hold)', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
+    $proposal->forceFill(['on_hold_since' => today()->subWeek(), 'status_remind_on' => today()->addWeek()])->save();
+
+    $stops = Livewire::actingAs($user)
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->instance()
+        ->lifecycle;
+
+    $held = array_values(array_filter($stops, fn (array $stop): bool => $stop['held']));
+
+    // Exactly one chip, on the stop the proposal sits at — never a stop of its own.
+    expect($held)->toHaveCount(1)
+        ->and($held[0]['status'])->toBe(ProposalStatus::Submitted)
+        ->and($held[0]['state'])->toBe('current')
+        ->and(array_map(fn (array $stop): string => $stop['status']->value, $stops))->not->toContain('on hold');
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertOk()
+        ->assertSeeHtml('data-test="on-hold-chip"')
+        ->assertSeeText(__('proposals.on_hold_chip'))
+        ->assertSeeText($proposal->fresh()->statusLabel())
+        ->assertSeeHtml('data-tone="warn"');
+});
+
+test('a rejected proposal still draws its side exit and wears no chip', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Proposal::factory()->create(['status' => ProposalStatus::Rejected]);
+    ProposalStatusNote::factory()->create(['proposal_id' => $proposal->id, 'status' => ProposalStatus::Submitted, 'date' => today()->subMonth()]);
+    ProposalStatusNote::factory()->create(['proposal_id' => $proposal->id, 'status' => ProposalStatus::Rejected, 'date' => today()]);
+
+    $stops = Livewire::actingAs($user)
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->instance()
+        ->lifecycle;
+
+    expect(array_filter($stops, fn (array $stop): bool => $stop['state'] === 'rejected'))->toHaveCount(1)
+        ->and(array_filter($stops, fn (array $stop): bool => $stop['held']))->toBeEmpty();
+});
+
+/*
+| W-32 slice 2: a payroll proposal's page offers Status, Documents and
+| Funding only, names its kind in the header and reads Money and Time.
+*/
+
+test('a payroll proposal offers only the status, documents and funding tabs', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    $component = Livewire::actingAs($user)->test('pages::proposals.show', ['proposal' => $proposal]);
+
+    expect(array_column($component->instance()->tabs, 'key'))->toBe(['status', 'funding', 'documents']);
+
+    expect(array_map(fn (array $stop): string => $stop['status']->value, $component->instance()->lifecycle))->toBe(['proposal draft', 'submitted', 'approved', 'active', 'completed']);
+
+    $component->assertSeeHtml('data-test="payroll-kind-chip"')
+        ->assertDontSeeHtml('data-proposal-reviewers')
+        ->assertDontSeeText(__('proposals.tab_logframe'))
+        ->assertDontSeeText(__('proposals.tab_targets'))
+        ->set('tab', 'logframe')
+        ->assertSet('tab', 'status')
+        ->set('tab', 'documents')
+        ->assertSet('tab', 'documents');
+});
+
+test('a stale bookmark to a project tab opens a payroll proposal on its status', function () {
+    $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->withQueryParams(['ptab' => 'targets'])
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->assertSet('tab', 'status');
+});
+
+test('a project proposal keeps every tab and shows no payroll chip', function () {
+    $proposal = Proposal::factory()->create();
+
+    $component = Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::proposals.show', ['proposal' => $proposal]);
+
+    expect(array_column($component->instance()->tabs, 'key'))->toContain('projects', 'logframe', 'targets', 'plan');
+    $component->assertDontSeeHtml('data-test="payroll-kind-chip"');
+});
+
+test('a payroll proposal reads money and time only, and time opens the status tab', function () {
+    $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    $vitals = Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->instance()
+        ->vitals;
+
+    expect(array_column($vitals, 'key'))->toBe(['money', 'time'])
+        ->and(collect($vitals)->firstWhere('key', 'time')['tab'])->toBe('status');
 });

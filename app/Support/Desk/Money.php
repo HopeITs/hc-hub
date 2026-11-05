@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Desk;
 
 use BackedEnum;
+use Illuminate\Support\Number;
 
 /**
  * An amount the way the Desk writes it: the currency symbol ($, €) or
@@ -19,5 +20,13 @@ final class Money
         $code = $currency instanceof BackedEnum ? (string) $currency->value : $currency;
 
         return (self::Symbols[$code] ?? $code.' ').number_format((float) $amount);
+    }
+
+    /** The same amount shortened for tight spaces: $420K, €3.96M. */
+    public static function compact(float|int|string|null $amount, BackedEnum|string $currency): string
+    {
+        $code = $currency instanceof BackedEnum ? (string) $currency->value : $currency;
+
+        return (self::Symbols[$code] ?? $code.' ').Number::abbreviate((float) $amount, maxPrecision: 2);
     }
 }

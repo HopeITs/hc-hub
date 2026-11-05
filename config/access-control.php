@@ -43,6 +43,7 @@ $groups = [
     'cities' => ['view'],
     'activity-log' => ['view'],
     'notification-settings' => ['manage'],
+    'ai' => ['draft', 'view-usage'],
 ];
 
 $allPermissions = [];
@@ -76,6 +77,10 @@ $reportWriter = ['reports.create', 'reports.update'];
 // entered by MEAL only (D-23).
 $mealOnly = ['meal-coverage.manage', 'report-templates.manage', 'evidence-types.manage', 'narrative-questions.manage'];
 $targetWriter = ['targets.create', 'targets.update'];
+
+// AI trial pilot (user decision 2026-11-05): drafting for MEAL, both Public
+// Relations roles and Managers; the usage log for the General Manager.
+$aiDrafter = ['ai.draft'];
 
 return [
 
@@ -166,7 +171,7 @@ return [
     'role_baselines' => [
         'Team Member' => $viewEverything,
         'Media Team' => [...$viewEverything, ...$taskWriter, ...$reportWriter],
-        'Public Relations' => [...$viewEverything, ...$taskWriter, ...$reportWriter],
+        'Public Relations' => [...$viewEverything, ...$taskWriter, ...$reportWriter, ...$aiDrafter],
         'Public Relations Manager' => [
             ...$viewEverything, ...$fundraisingViews, ...$taskWriter, ...$reportWriter,
             'donors.create', 'donors.update',
@@ -174,6 +179,7 @@ return [
             'projects.create',
             'funding-agreements.view', 'funding-agreements.create', 'funding-agreements.update',
             'reports.reopen', 'reports.aggregate',
+            ...$aiDrafter,
         ],
         'MEAL' => [
             ...$viewEverything, ...$taskWriter, ...$reportWriter, 'reports.approve', 'reports.mark-seen',
@@ -183,11 +189,14 @@ return [
             'indicator-library.create', 'indicator-library.update', 'indicator-library.delete',
             'reports.reopen', 'reports.aggregate',
             ...$mealOnly, 'sectors.manage', 'risk-library.manage',
+            ...$aiDrafter,
         ],
         'Financial' => [
             ...$viewEverything, ...$financeViews, ...$fundraisingViews, ...$taskWriter,
             'donors.create', 'donors.update', 'donors.delete',
             'proposals.create', 'proposals.update', 'proposals.delete', 'proposals.manage-reviewers',
+            // W-34a (Dev 1, 2026-11-04): approving a proposal materialises its projects.
+            'projects.create',
             'funding-agreements.create', 'funding-agreements.update', 'funding-agreements.delete',
             'transfers.create', 'transfers.update', 'transfers.delete',
             'accounts.create', 'accounts.update', 'accounts.delete',
@@ -202,6 +211,7 @@ return [
             'risks.create', 'risks.update', 'risks.delete',
             'indicators.create', 'indicators.update',
             'results.create', 'results.update',
+            ...$aiDrafter,
         ],
         'General Manager' => array_values(array_diff($allPermissions, [
             'access-management.manage-roles',
@@ -211,6 +221,7 @@ return [
             'reports.reopen',
             ...$mealOnly,
             ...$targetWriter,
+            ...$aiDrafter,
         ])),
     ],
 ];

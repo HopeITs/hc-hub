@@ -36,8 +36,7 @@ new #[Layout('layouts::desk'), Title('titles.monthly_report')] class extends Com
     $isEditable = collect($this->rows)->contains(fn (array $row): bool => $row['editable']);
 @endphp
 
-<x-desk.record-sheet register="pages::monthly-reports.index" :close-url="route('monthly-reports.index')" :title="$report->period->translatedFormat('F Y')" :subtitle="$report->project->name">
-<section class="@container/detail flex min-h-full w-full flex-1 flex-col gap-8 bg-white text-secondary-dark dark:bg-surface-0 dark:text-ink">
+<section class="@container/detail flex w-full flex-1 flex-col gap-8 text-secondary-dark dark:text-ink">
     @include('pages.monthly-reports._show-header')
 
     @include('pages.monthly-reports._show-progress')
@@ -75,4 +74,3 @@ new #[Layout('layouts::desk'), Title('titles.monthly_report')] class extends Com
 
     @include('pages.monthly-reports._show-file-modals')
 </section>
-</x-desk.record-sheet>

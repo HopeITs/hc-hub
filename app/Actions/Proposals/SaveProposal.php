@@ -5,12 +5,19 @@ declare(strict_types=1);
 namespace App\Actions\Proposals;
 
 use App\Enums\Currency;
+use App\Enums\ProposalKind;
 use App\Enums\ProposalStatus;
+use App\Events\ProposalLocationsChanged;
 use App\Models\Donor;
+use App\Models\HrCenter;
+use App\Models\HrCity;
+use App\Models\HrEmployee;
+use App\Models\Program;
 use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\ProposalStatusNote;
 use App\Models\User;
+use App\Support\ProposalLocationRows;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -30,19 +37,34 @@ use Illuminate\Validation\Validator as ValidatorInstance;
  * transaction. An edit never touches links or status: it changes the details,
  * the donor while the concept note is still in the house, the budget (money
  * holders only) and the beneficiaries of the projects already linked.
+ *
+ * Location rows (contracts.md §7, W-34a, D-62) come in `locations`: the set
+ * is validated as a whole, then replaced under the proposal lock through
+ * ProposalLocationRows, a new row without a program opens its program
+ * request, and ProposalLocationsChanged fires after commit with the counts.
+ * On create, each `projectIds` entry still becomes a row with `project_id`
+ * through LinkProposalProject, so a form without rows keeps working until
+ * the picker goes (W-34a slice 3).
+ * A payroll proposal (D-55b, W-32) is chosen on create only and never changes
+ * kind. It needs a narrative, links no project and starts in `proposal
+ * draft`: created at the concept note like any other, then moved on at once
+ * with the standard payroll note, the same hop as the D-03 skip.
  */
 final class SaveProposal
 {
     /**
-     * `projectIds`, `startingStage`, `skipReason` and `previousProposalId`
-     * (the proposal a renewal renews, set only by CloneProposalForRenewal)
-     * are read on create only;
-     * `startingStage` is raw form input, validated as `concept note` or
-     * `proposal draft`.
-     * `beneficiaries` is keyed by project id. The budget fields are ignored
-     * entirely for a user who may not see money.
+     * `kind`, `projectIds`, `startingStage`, `skipReason` and
+     * `previousProposalId` (the proposal a renewal renews, set only by
+     * CloneProposalForRenewal) are read on create only;
+     * `kind` is raw form input, validated as a ProposalKind value (default
+     * `project`); `startingStage` is validated as `concept note` or
+     * `proposal draft` and ignored for payroll, which always starts in draft.
+     * `beneficiaries` is keyed by project id; payroll ignores it and
+     * `projectIds`. `narrative` is read for payroll only. The budget fields
+     * are ignored entirely for a user who may not see money. `locations`, when
+     * sent, replaces the rows; an edit that omits it leaves them alone.
      *
-     * @param  array{name: string, donorId: int|string|null, projectIds?: list<int|string>, beneficiaries?: array<int|string, int|string|null>, beneficiariesReason?: ?string, requestedBudget?: string|int|float|null, requestedCurrency?: ?string, plannedDateBegin: ?string, plannedDateEnd: ?string, notes?: ?string, startingStage?: string, skipReason?: ?string, previousProposalId?: int|null}  $data
+     * @param  array{kind?: ?string, name: string, donorId: int|string|null, narrative?: ?string, projectIds?: list<int|string>, locations?: list<array{city_id: int|string|null, program_id?: int|string|null, responsible_employee_id?: int|string|null, center_ids?: list<int|string>, is_new?: bool|int|string|null, new_program_name_en?: ?string, new_program_name_ar?: ?string}>, beneficiaries?: array<int|string, int|string|null>, beneficiariesReason?: ?string, requestedBudget?: string|int|float|null, requestedCurrency?: ?string, plannedDateBegin: ?string, plannedDateEnd: ?string, notes?: ?string, conceptNote?: ?string, startingStage?: string, skipReason?: ?string, previousProposalId?: int|null}  $data
      */
     public function handle(?Proposal $existing, array $data, User $actor): Proposal
     {
@@ -59,12 +81,15 @@ final class SaveProposal
         $input = $this->normalize($data);
         $this->validate($input, $actor, null, false);
 
+        $kind = ProposalKind::from((string) $input['kind']);
         $projectIds = $this->projectIds($input);
         sort($projectIds);
         $beneficiaries = $this->beneficiaries($input);
+        $rows = $this->locationRows($input);
 
-        $proposal = DB::transaction(function () use ($input, $actor, $projectIds, $beneficiaries): Proposal {
+        $proposal = DB::transaction(function () use ($input, $actor, $kind, $projectIds, $beneficiaries, $rows): Proposal {
             $proposal = new Proposal;
+            $proposal->kind = $kind;
             $this->fillDetails($proposal, $input, $actor);
             $proposal->internal_project_number = $this->nextNumber((string) $input['plannedDateBegin']);
             $proposal->previous_proposal_id = isset($input['previousProposalId']) ? (int) $input['previousProposalId'] : null;
@@ -83,9 +108,13 @@ final class SaveProposal
                 app(LinkProposalProject::class)->handle($proposal, $projectId, $beneficiaries[$projectId] ?? null);
             }
 
-            if ($input['startingStage'] === ProposalStatus::ProposalDraft->value) {
+            if ($rows !== null) {
+                $this->announceLocations($proposal, app(ProposalLocationRows::class)->replace($proposal, $rows, $actor), $actor);
+            }
+
+            if ($kind === ProposalKind::Payroll || $input['startingStage'] === ProposalStatus::ProposalDraft->value) {
                 app(TransitionProposal::class)->handle($proposal, ProposalStatus::ProposalDraft, ProposalStatus::ConceptNote, [
-                    'reason' => (string) $input['skipReason'],
+                    'reason' => $kind === ProposalKind::Payroll ? __('proposals.payroll_start_note') : (string) $input['skipReason'],
                 ]);
             }
 
@@ -100,12 +129,14 @@ final class SaveProposal
      */
     private function update(Proposal $existing, array $data, User $actor): Proposal
     {
-        $input = $this->normalize($data);
-
-        $proposal = DB::transaction(function () use ($existing, $input, $actor): Proposal {
+        $proposal = DB::transaction(function () use ($existing, $data, $actor): Proposal {
             $locked = Proposal::query()->whereKey($existing->getKey())->lockForUpdate()->firstOrFail();
 
             Gate::forUser($actor)->authorize('update', $locked);
+
+            // The kind never changes: the stored one decides the rules.
+            $input = $this->normalize([...$data, 'kind' => $locked->kind->value]);
+            $rows = $this->locationRows($input);
 
             /** @var Collection<int, Project> $linked */
             $linked = $locked->projects()->select(['projects.id', 'projects.name'])->orderBy('projects.id')->get();
@@ -129,6 +160,10 @@ final class SaveProposal
                 ]);
             }
 
+            if ($rows !== null) {
+                $this->announceLocations($locked, app(ProposalLocationRows::class)->replace($locked, $rows, $actor), $actor);
+            }
+
             return $locked;
         });
 
@@ -146,14 +181,23 @@ final class SaveProposal
      */
     private function normalize(array $data): array
     {
-        foreach (['name', 'notes', 'skipReason', 'beneficiariesReason'] as $field) {
+        foreach (['name', 'notes', 'conceptNote', 'narrative', 'skipReason', 'beneficiariesReason'] as $field) {
             if (is_string($data[$field] ?? null)) {
                 $data[$field] = trim($data[$field]);
             }
         }
 
+        $data['kind'] = blank($data['kind'] ?? null) ? ProposalKind::Project->value : $data['kind'];
         $data['startingStage'] ??= ProposalStatus::ConceptNote->value;
         $data['beneficiaries'] ??= [];
+
+        // A payroll proposal links no project and always starts in draft.
+        if ($data['kind'] === ProposalKind::Payroll->value) {
+            $data['projectIds'] = [];
+            $data['beneficiaries'] = [];
+            $data['startingStage'] = ProposalStatus::ProposalDraft->value;
+            $data['skipReason'] = null;
+        }
 
         return $data;
     }
@@ -176,6 +220,8 @@ final class SaveProposal
             'plannedDateBegin' => ['required', 'date'],
             'plannedDateEnd' => ['required', 'date', 'after_or_equal:plannedDateBegin'],
             'notes' => ['nullable', 'string'],
+            // The concept note is never required: no transition asks for it (contracts §2).
+            'conceptNote' => ['nullable', 'string', 'max:20000'],
         ];
 
         $messages = [
@@ -189,16 +235,35 @@ final class SaveProposal
             'plannedDateBegin.required' => __('proposals.set_the_planned_start_date'),
             'plannedDateEnd.required' => __('proposals.set_the_planned_end_date'),
             'plannedDateEnd.after_or_equal' => __('proposals.the_planned_end_cannot_fall_before_the_planned_start'),
+            'conceptNote.max' => __('proposals.concept_note.too_long'),
         ];
 
+        $isPayroll = $input['kind'] === ProposalKind::Payroll->value;
+
         if ($proposal === null) {
-            $rules['projectIds'] = ['required', 'array', 'min:1'];
+            $rules['kind'] = ['required', Rule::enum(ProposalKind::class)];
+            $messages['kind.required'] = __('proposals.choose_the_proposal_kind');
+            $messages['kind.enum'] = __('proposals.choose_the_proposal_kind');
+        }
+
+        if ($proposal === null && ! $isPayroll) {
+            $rules['projectIds'] = ['bail', 'required_without:locations', 'array'];
+            $rules['locations'] = ['bail', 'required_without:projectIds', 'array'];
             $rules['startingStage'] = ['required', Rule::in([ProposalStatus::ConceptNote->value, ProposalStatus::ProposalDraft->value])];
             $rules['skipReason'] = ['nullable', 'required_if:startingStage,'.ProposalStatus::ProposalDraft->value, 'string', 'min:10', 'max:5000'];
-            $messages['projectIds.required'] = __('proposals.link_at_least_one_project');
-            $messages['projectIds.min'] = __('proposals.link_at_least_one_project');
+            $messages['projectIds.required_without'] = __('proposals.link_at_least_one_project');
             $messages['skipReason.required_if'] = __('proposals.explain_why_the_concept_note_is_skipped');
             $messages['skipReason.min'] = __('proposals.explain_why_the_concept_note_is_skipped');
+        } else {
+            $rules['locations'] = ['bail', 'sometimes', 'required', 'array'];
+        }
+
+        $messages['locations.required_without'] = __('proposals.locations_required');
+        $messages['locations.required'] = __('proposals.locations_required');
+        $messages['locations.array'] = __('proposals.locations_required');
+
+        if ($isPayroll) {
+            $rules['narrative'] = ['nullable', 'string', 'max:10000'];
         }
 
         if (self::canSeeMoney($actor)) {
@@ -209,7 +274,11 @@ final class SaveProposal
 
         $validator = Validator::make($input, $rules, $messages);
 
-        $validator->after(function (ValidatorInstance $validator) use ($input, $actor, $proposal, $linked): void {
+        $validator->after(function (ValidatorInstance $validator) use ($input, $actor, $proposal, $linked, $isPayroll): void {
+            if ($isPayroll && ! $validator->errors()->has('narrative') && ! Proposal::isNarrativeComplete(is_string($input['narrative'] ?? null) ? $input['narrative'] : null)) {
+                $validator->errors()->add('narrative', __('proposals.narrative_required'));
+            }
+
             $allowedKeys = $proposal === null
                 ? $this->checkProjects($validator, $input, $actor)
                 : array_values(array_map(fn (Project $project): int => $project->id, $linked?->all() ?? []));
@@ -221,9 +290,134 @@ final class SaveProposal
             }
 
             $this->checkDonorApproved($validator, $input, $proposal);
+            $this->checkLocations($validator, $input);
         });
 
         $validator->validate();
+    }
+
+    /**
+     * The location rows as a whole (contracts.md §6, W-34a): every row names
+     * an active HR city; cities are distinct per program, with at most one
+     * row per city still waiting for a program; a program exists in
+     * tracking; every center stands in the row's city; a responsible is an
+     * active HR employee; a new row without a program names it in both
+     * languages. HR is read once per rule, never per row; the centers come
+     * from the in-memory lookup.
+     *
+     * @param  array<string, mixed>  $input
+     */
+    private function checkLocations(ValidatorInstance $validator, array $input): void
+    {
+        $rows = $this->locationRows($input);
+
+        if ($rows === null || $rows === [] || $validator->errors()->has('locations')) {
+            return;
+        }
+
+        $cityIds = array_values(array_unique(array_filter(array_column($rows, 'city_id'))));
+        $programIds = array_values(array_unique(array_filter(array_column($rows, 'program_id'))));
+        $employeeIds = array_values(array_unique(array_filter(array_column($rows, 'responsible_employee_id'))));
+
+        $activeCities = $cityIds === [] ? [] : HrCity::query()->whereKey($cityIds)->where('is_active', true)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
+        $programs = $programIds === [] ? [] : Program::query()->whereKey($programIds)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
+        $activeEmployees = $employeeIds === [] ? [] : HrEmployee::query()->whereKey($employeeIds)->where('is_active', true)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
+        $seen = [];
+
+        foreach ($rows as $index => $row) {
+            $cityOk = $row['city_id'] !== null && in_array($row['city_id'], $activeCities, true);
+
+            if (! $cityOk) {
+                $validator->errors()->add("locations.{$index}.city_id", __('proposals.location_choose_the_city'));
+            } else {
+                $key = $row['city_id'].':'.($row['program_id'] ?? '');
+
+                if (isset($seen[$key])) {
+                    $validator->errors()->add("locations.{$index}.city_id", __('proposals.location_city_duplicate'));
+                }
+
+                $seen[$key] = true;
+            }
+
+            if ($row['program_id'] !== null && ! in_array($row['program_id'], $programs, true)) {
+                $validator->errors()->add("locations.{$index}.program_id", __('proposals.location_choose_the_program'));
+            }
+
+            if ($cityOk) {
+                foreach ($row['center_ids'] as $centerId) {
+                    if (HrCenter::remembered($centerId)?->city_id !== $row['city_id']) {
+                        $validator->errors()->add("locations.{$index}.center_ids", __('proposals.location_center_not_in_city'));
+
+                        break;
+                    }
+                }
+            }
+
+            if ($row['responsible_employee_id'] !== null && ! in_array($row['responsible_employee_id'], $activeEmployees, true)) {
+                $validator->errors()->add("locations.{$index}.responsible_employee_id", __('proposals.location_responsible_inactive'));
+            }
+
+            if ($row['is_new'] && $row['program_id'] === null) {
+                foreach (['new_program_name_en', 'new_program_name_ar'] as $field) {
+                    if ($row[$field] === '') {
+                        $validator->errors()->add("locations.{$index}.{$field}", __('proposals.location_program_name_required'));
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * The sent location rows in one shape: ids as positive integers or
+     * null, centers distinct and ascending, names trimmed. Null when the
+     * form sent no `locations` key at all.
+     *
+     * @param  array<string, mixed>  $input
+     * @return list<array{city_id: int|null, program_id: int|null, responsible_employee_id: int|null, center_ids: list<int>, is_new: bool, new_program_name_en: string, new_program_name_ar: string}>|null
+     */
+    private function locationRows(array $input): ?array
+    {
+        if (! array_key_exists('locations', $input)) {
+            return null;
+        }
+
+        $id = fn (mixed $value): ?int => is_numeric($value) && (int) $value > 0 && (string) (int) $value === (string) $value ? (int) $value : null;
+        $rows = [];
+
+        foreach (is_array($input['locations']) ? array_values($input['locations']) : [] as $row) {
+            $row = is_array($row) ? $row : [];
+            $centerIds = array_values(array_unique(array_filter(array_map($id, is_array($row['center_ids'] ?? null) ? array_values($row['center_ids']) : []))));
+            sort($centerIds);
+
+            $rows[] = [
+                'city_id' => $id($row['city_id'] ?? null),
+                'program_id' => $id($row['program_id'] ?? null),
+                'responsible_employee_id' => $id($row['responsible_employee_id'] ?? null),
+                'center_ids' => $centerIds,
+                'is_new' => filter_var($row['is_new'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'new_program_name_en' => is_string($row['new_program_name_en'] ?? null) ? trim($row['new_program_name_en']) : '',
+                'new_program_name_ar' => is_string($row['new_program_name_ar'] ?? null) ? trim($row['new_program_name_ar']) : '',
+            ];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * Record and announce a change of the rows (counts only, never names or
+     * amounts). Nothing changed → nothing recorded, nothing dispatched. The
+     * event waits for the commit.
+     *
+     * @param  array{added: int, removed: int, changed: int}  $counts
+     */
+    private function announceLocations(Proposal $proposal, array $counts, User $actor): void
+    {
+        if ($counts['added'] + $counts['removed'] + $counts['changed'] === 0) {
+            return;
+        }
+
+        $proposal->recordActivity('proposal.locations_changed', [], $counts);
+        ProposalLocationsChanged::dispatch($proposal->id, $actor->id, $counts['added'], $counts['removed'], $counts['changed']);
     }
 
     /**
@@ -338,6 +532,15 @@ final class SaveProposal
         ]);
 
         $proposal->donor_id = (int) $input['donorId'];
+
+        if (array_key_exists('conceptNote', $input)) {
+            $conceptNote = (string) ($input['conceptNote'] ?? '');
+            $proposal->concept_note = $conceptNote === '' ? null : $conceptNote;
+        }
+
+        if ($input['kind'] === ProposalKind::Payroll->value) {
+            $proposal->narrative = (string) $input['narrative'];
+        }
 
         $sentMoney = array_key_exists('requestedBudget', $input) || array_key_exists('requestedCurrency', $input);
 

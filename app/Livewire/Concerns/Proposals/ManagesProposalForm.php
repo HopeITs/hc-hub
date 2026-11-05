@@ -6,6 +6,10 @@ namespace App\Livewire\Concerns\Proposals;
 
 use App\Actions\Proposals\CloneProposalForRenewal;
 use App\Actions\Proposals\SaveProposal;
+use App\Actions\Proposals\SaveProposalFile;
+use App\Enums\FileType;
+use App\Enums\MediaCollection;
+use App\Enums\ProposalKind;
 use App\Enums\ProposalStatus;
 use App\Models\Donor;
 use App\Models\HrCenter;
@@ -16,6 +20,7 @@ use App\Models\Proposal;
 use App\Models\Result;
 use App\Models\Task;
 use App\Models\User;
+use App\Rules\SecureUpload;
 use App\Support\Like;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,6 +32,7 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 /**
  * The proposal form v2 (T06): create from one or more projects, or edit the
@@ -51,6 +57,12 @@ trait ManagesProposalForm
 
     #[Locked]
     public ?int $editingProposalId = null;
+
+    /**
+     * The proposal kind (W-32): chosen on create only. On edit it holds the
+     * stored kind for display and is never sent, so SaveProposal keeps it.
+     */
+    public string $kind = 'project';
 
     public string $name = '';
 
@@ -77,6 +89,21 @@ trait ManagesProposalForm
     public string $plannedDateEnd = '';
 
     public string $notes = '';
+
+    /** The concept note itself (W-24), stored in `proposals.concept_note`. */
+    public string $conceptNote = '';
+
+    /**
+     * The concept-note document (W-24), filed through SaveProposalFile under
+     * MediaCollection::ConceptNote once the proposal exists. Needs the page
+     * to use WithFileUploads.
+     *
+     * @var TemporaryUploadedFile|null
+     */
+    public $conceptNoteFile = null;
+
+    /** What a payroll proposal covers (W-32, at least 50 characters). */
+    public string $narrative = '';
 
     public string $startingStage = 'concept note';
 
@@ -337,7 +364,7 @@ trait ManagesProposalForm
         }
 
         $proposal = Proposal::query()
-            ->select(['id', 'name', 'notes', 'status', 'planned_date_begin', 'planned_date_end'])
+            ->select(['id', 'name', 'notes', 'status', 'kind', 'planned_date_begin', 'planned_date_end'])
             ->find((int) $this->previousProposalId);
 
         return $proposal !== null
@@ -372,7 +399,7 @@ trait ManagesProposalForm
         abort_if($scope !== null && $scope !== $proposalId, 404);
 
         $showsMoney = SaveProposal::canSeeMoney($this->proposalActor());
-        $columns = ['id', 'name', 'donor_id', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'notes', 'status'];
+        $columns = ['id', 'name', 'donor_id', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'notes', 'concept_note', 'narrative', 'status', 'kind'];
 
         // The budget is read only for someone who may see money (contracts.md §8).
         $proposal = Proposal::query()
@@ -389,6 +416,9 @@ trait ManagesProposalForm
         $this->plannedDateBegin = $proposal->planned_date_begin->toDateString();
         $this->plannedDateEnd = $proposal->planned_date_end->toDateString();
         $this->notes = $proposal->notes ?? '';
+        $this->conceptNote = $proposal->concept_note ?? '';
+        $this->kind = $proposal->kind->value;
+        $this->narrative = $proposal->narrative ?? '';
 
         if ($showsMoney) {
             $this->requestedBudget = $proposal->requested_budget ?? '';
@@ -412,6 +442,42 @@ trait ManagesProposalForm
     {
         $this->projectIds = array_values(array_unique(array_map('strval', array_filter($this->projectIds, 'is_scalar'))));
         $this->beneficiaries = array_intersect_key($this->beneficiaries, array_flip($this->projectIds));
+    }
+
+    /**
+     * Choosing payroll on create drops the projects, beneficiaries, renewal
+     * and skip choices a project proposal had: payroll takes none of them.
+     * An edit never changes the kind, so the stored one is put back.
+     */
+    public function updatedKind(): void
+    {
+        if ($this->editingProposalId !== null) {
+            $this->kind = Proposal::query()->select(['id', 'kind'])->find($this->editingProposalId)->kind->value ?? ProposalKind::Project->value;
+
+            return;
+        }
+
+        if (ProposalKind::tryFrom($this->kind) === null) {
+            $this->kind = ProposalKind::Project->value;
+        }
+
+        $this->resetValidation();
+
+        if ($this->kind === ProposalKind::Payroll->value) {
+            $this->projectIds = [];
+            $this->beneficiaries = [];
+            $this->previousProposalId = '';
+            $this->startingStage = ProposalStatus::ConceptNote->value;
+            $this->skipReason = '';
+        }
+    }
+
+    /**
+     * Whether the form is filling in a payroll proposal.
+     */
+    public function isPayrollForm(): bool
+    {
+        return $this->kind === ProposalKind::Payroll->value;
     }
 
     public function removeChosenProject(int $projectId): void
@@ -448,6 +514,8 @@ trait ManagesProposalForm
             return;
         }
 
+        $this->validateConceptNoteFile();
+
         try {
             $proposal = app(SaveProposal::class)->handle($existing, $this->proposalFormData($existing === null), $this->proposalActor());
         } catch (UniqueConstraintViolationException $exception) {
@@ -462,6 +530,8 @@ trait ManagesProposalForm
             return;
         }
 
+        $this->fileConceptNote($proposal);
+
         $this->showProposalModal = false;
         $this->resetProposalForm();
         $this->proposalSaved($proposal, $existing === null);
@@ -470,6 +540,42 @@ trait ManagesProposalForm
             variant: 'success',
             text: $existing === null ? __('proposals.proposal_created') : __('proposals.proposal_updated'),
         );
+    }
+
+    /**
+     * Check the concept-note document (W-24) before anything is written, with
+     * the Documents tab's rules, so a refusal lands on its own field and no
+     * proposal is created for a file that will not be stored.
+     */
+    private function validateConceptNoteFile(): void
+    {
+        if ($this->conceptNoteFile === null) {
+            return;
+        }
+
+        $allowedTypes = implode(',', FileType::values());
+
+        $this->validate([
+            'conceptNoteFile' => ['bail', 'file', 'max:5120', 'mimes:'.$allowedTypes, 'extensions:'.$allowedTypes, new SecureUpload],
+        ]);
+    }
+
+    /**
+     * File the chosen concept-note document on the saved proposal through the
+     * existing upload path (SaveProposalFile), under its own collection. A
+     * later upload keeps the older row, as the final report does, so the
+     * ideation card can show which one is current and what came before.
+     */
+    private function fileConceptNote(Proposal $proposal): void
+    {
+        if ($this->conceptNoteFile === null) {
+            return;
+        }
+
+        app(SaveProposalFile::class)->handle($proposal, null, $this->conceptNoteFile, [
+            'fileCategory' => MediaCollection::ConceptNote->value,
+            'fileDisplayName' => '',
+        ]);
     }
 
     /**
@@ -543,6 +649,10 @@ trait ManagesProposalForm
         $this->plannedDateBegin = '';
         $this->plannedDateEnd = '';
         $this->notes = '';
+        $this->conceptNote = '';
+        $this->conceptNoteFile = null;
+        $this->kind = ProposalKind::Project->value;
+        $this->narrative = '';
         $this->startingStage = ProposalStatus::ConceptNote->value;
         $this->skipReason = '';
         $this->previousProposalId = '';
@@ -553,7 +663,10 @@ trait ManagesProposalForm
      * their beneficiaries and the starting stage; edit sends the linked
      * projects' beneficiaries. The budget is sent only by a money holder.
      *
-     * @return array{name: string, internalProjectNumber: string, donorId: string|null, beneficiaries: array<int|string, int|string|null>, beneficiariesReason: string|null, plannedDateBegin: string|null, plannedDateEnd: string|null, notes: string, projectIds?: list<string>, startingStage?: string, skipReason?: string|null, requestedBudget?: string|null, requestedCurrency?: string|null}
+     * A payroll proposal (W-32) sends its narrative and, on create, its kind;
+     * it never sends projects, beneficiaries or a starting stage.
+     *
+     * @return array{name: string, internalProjectNumber: string, donorId: string|null, beneficiaries: array<int|string, int|string|null>, beneficiariesReason: string|null, plannedDateBegin: string|null, plannedDateEnd: string|null, notes: string, conceptNote: string|null, narrative?: string|null, kind?: string, projectIds?: list<string>, startingStage?: string, skipReason?: string|null, requestedBudget?: string|null, requestedCurrency?: string|null}
      */
     private function proposalFormData(bool $isCreate): array
     {
@@ -570,9 +683,22 @@ trait ManagesProposalForm
             'plannedDateBegin' => $this->plannedDateBegin === '' ? null : $this->plannedDateBegin,
             'plannedDateEnd' => $this->plannedDateEnd === '' ? null : $this->plannedDateEnd,
             'notes' => $this->notes,
+            'conceptNote' => $this->conceptNote === '' ? null : $this->conceptNote,
         ];
 
+        $isPayroll = $this->isPayrollForm();
+
+        if ($isPayroll) {
+            $data['beneficiaries'] = [];
+            $data['beneficiariesReason'] = null;
+            $data['narrative'] = $this->narrative === '' ? null : $this->narrative;
+        }
+
         if ($isCreate) {
+            $data['kind'] = $this->kind;
+        }
+
+        if ($isCreate && ! $isPayroll) {
             $data['projectIds'] = $this->projectIds;
             $data['startingStage'] = $this->startingStage;
             $data['skipReason'] = $this->startingStage === ProposalStatus::ProposalDraft->value ? $this->skipReason : null;
