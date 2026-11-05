@@ -223,9 +223,16 @@ new #[Layout('layouts::desk'), Title('titles.donor_report_builder')] class exten
     $slotHint = DonorReportResponsibles::slotFor(DonorReportType::tryFrom($type) ?? DonorReportType::Narrative);
 @endphp
 
-<x-desk.record-sheet register="pages::reporting-duties.index" :close-url="route('reporting-duties.index')" :title="__('titles.donor_report_builder')">
-<section class="@container flex min-h-full w-full flex-1 flex-col gap-8 bg-white text-secondary-dark dark:bg-surface-0 dark:text-ink" data-donor-report-builder>
-    <x-ui.page-header heading-id="donor-report-builder-heading" :title="__('titles.donor_report_builder')" />
+<section class="@container flex w-full flex-1 flex-col gap-8 text-secondary-dark dark:text-ink" data-donor-report-builder>
+    <x-ui.detail-header
+        :back="\App\Support\BackUrl::for(route('reporting-duties.index'))"
+        id="donor-report-builder-heading"
+        :breadcrumbs="[
+            ['label' => __('navigation.reporting_duties'), 'url' => route('reporting-duties.index')],
+            ['label' => __('navigation.donor_report_builder')],
+        ]"
+        :title="__('titles.donor_report_builder')"
+    />
 
     {{-- 1. Proposal and period. --}}
     <form wire:submit="compose" class="{{ $panel }} grid grid-cols-1 gap-4" data-tour="donor-report-builder-period">
@@ -298,4 +305,3 @@ new #[Layout('layouts::desk'), Title('titles.donor_report_builder')] class exten
         </form>
     @endif
 </section>
-</x-desk.record-sheet>

@@ -1,6 +1,6 @@
 @props(['breadcrumbs' => [], 'title', 'subtitle' => null, 'titleClass' => null, 'unread' => false, 'back' => null])
 
-<header data-detail-header {{ $attributes->class('flex flex-col gap-3 border-b border-secondary-soft pb-4 dark:border-line') }}>
+<header data-detail-header {{ $attributes->class('flex flex-col gap-3') }}>
     @if ($back !== null)
         <div>
             <a class="dk-back" href="{{ $back }}" wire:navigate data-detail-back><x-desk.icon name="back" class="dk-flip" />{{ __('common.back') }}</a>
@@ -8,16 +8,16 @@
     @endif
 
     @if ($breadcrumbs !== [])
-        <nav aria-label="{{ __('ui.breadcrumb') }}" class="flex flex-wrap items-center gap-1.5 text-xs text-secondary-medium dark:text-ink-muted">
+        <nav aria-label="{{ __('ui.breadcrumb') }}" class="dk-crumb mt-0!">
             @foreach ($breadcrumbs as $index => $crumb)
                 @if ($index > 0)
-                    <span aria-hidden="true" class="text-secondary-light">/</span>
+                    <span aria-hidden="true">›</span>
                 @endif
 
                 @if (isset($crumb['url']))
-                    <a href="{{ $crumb['url'] }}" wire:navigate class="rounded font-medium hover:text-secondary-dark dark:hover:text-ink">{{ $crumb['label'] }}</a>
+                    <a href="{{ $crumb['url'] }}" wire:navigate>{{ $crumb['label'] }}</a>
                 @else
-                    <span aria-current="page" class="font-semibold text-secondary-dark dark:text-ink">{{ $crumb['label'] }}</span>
+                    <span @if ($loop->last) aria-current="page" @endif>{{ $crumb['label'] }}</span>
                 @endif
             @endforeach
         </nav>

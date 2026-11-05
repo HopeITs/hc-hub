@@ -23,7 +23,8 @@
         :back="\App\Support\BackUrl::for(route('monthly-reports.index'))"
     :breadcrumbs="[
         ['label' => __('titles.monthly_reports'), 'url' => route('monthly-reports.index')],
-        ['label' => $headerProject->name.' · '.$monthLabel],
+        array_filter(['label' => $headerProject->name, 'url' => auth()->user()->can('view', $headerProject) ? route('projects.show', $headerProject) : null]),
+        ['label' => $monthLabel],
     ]"
     :title="$monthLabel"
     :subtitle="$headerProject->name"

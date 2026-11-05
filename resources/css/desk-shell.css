@@ -465,10 +465,6 @@
     .dk-story .dk-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1px solid var(--line); border-radius: 14px; background: var(--paper); margin-bottom: 14px; overflow: hidden; }
     .dk-story .dk-facts > div, [dir="rtl"] .dk-story .dk-facts > div { padding: 14px 18px; margin: 0; border: 0; border-inline-end: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 
-    /* Record popups: the record's own header becomes the first card. */
-    .dk-record-body [data-detail-header] { padding: 18px 20px; border: 1px solid var(--line) !important; border-radius: 14px; background: var(--paper); }
-    .dk-record-body { background: var(--ground); }
-
 }
 
 /* ---------- Top bar: Ask and Panels icons ---------- */
