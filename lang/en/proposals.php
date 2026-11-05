@@ -351,6 +351,23 @@ return [
     'section_planned_dates' => 'Planned dates',
     'section_budget' => 'Budget',
     'section_notes' => 'Notes',
+    /*
+     * W-24 (D-62): the concept note itself — the text and the uploaded
+     * document — in the form and on the Status tab.
+     */
+    'concept_note' => [
+        'section' => 'Concept note',
+        'text_label' => 'Concept note',
+        'text_help' => 'The idea in your own words. Leave it empty if the note is a document only.',
+        'file_label' => 'Concept note document (optional)',
+        'file_help' => 'The donor\'s own template or a scan. A new upload replaces the current one and keeps the old in the file history.',
+        'title' => 'Concept note',
+        'view' => 'view',
+        'donor_label' => 'Donor',
+        'created_label' => 'Created',
+        'nothing_recorded' => 'No concept note has been written or filed yet. Add it with "Edit details".',
+        'too_long' => 'The concept note cannot be longer than 20,000 characters.',
+    ],
     'form_error_summary_sections' => 'Check: :sections',
     'projects_label_help' => 'Each project is one center running one program. Closed projects reopen as drafts when linked.',
     'requested_budget_help' => 'The amount asked of the donor. Needed before the proposal goes to review.',

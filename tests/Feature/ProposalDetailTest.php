@@ -1,12 +1,15 @@
 <?php
 
 use App\Enums\Currency;
+use App\Enums\FileType;
+use App\Enums\MediaCollection;
 use App\Enums\ProposalStatus;
 use App\Enums\TaskStatus;
 use App\Models\Activity;
 use App\Models\Donor;
 use App\Models\DonorProposal;
 use App\Models\Indicator;
+use App\Models\Media;
 use App\Models\Milestone;
 use App\Models\PlanIndicator;
 use App\Models\Project;
@@ -17,6 +20,7 @@ use App\Models\Task;
 use App\Models\TransfersTracking;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -394,8 +398,15 @@ test('each tab shows only its own content and the strip counts its records', fun
     expect(collect($component->instance()->tabs)->pluck('count', 'key')->all())
         ->toBe(['status' => 1, 'deadlines' => 1, 'funding' => 1, 'projects' => 0, 'logframe' => null, 'targets' => 0, 'plan' => 1, 'reports' => 0, 'documents' => 0]);
 
+    /*
+     * The Status tab names the donor in plain text inside the concept-note
+     * card (W-24) — the agreement's own content, its link to the donor page
+     * included, still belongs to the Funding tab. The composite foreign key of
+     * §7 forces the agreement's donor to be the proposal's, so the name itself
+     * can no longer tell the two tabs apart.
+     */
     $component->assertSeeText('Board signed off')
-        ->assertDontSeeText('UNICEF')
+        ->assertDontSeeHtml(route('donors.show', Donor::query()->findOrFail($fundingDonorId)))
         ->assertDontSeeText('Draft the budget narrative')
         ->set('tab', 'funding')
         ->assertSeeText('UNICEF')
@@ -720,4 +731,116 @@ test('proposal detail sends the back link to the in-app page the visitor came fr
         ->get(route('proposals.show', $proposal))
         ->assertOk()
         ->assertSeeHtml('href="'.$from.'" wire:navigate data-detail-back');
+});
+
+/*
+| W-24 (D-62): the concept note where people look for it — a card on the
+| Status tab through the ideation phase, folded to one line afterwards.
+*/
+
+test('the ideation phase shows the concept note with its title, donor and created date', function () {
+    $user = User::factory()->role('Financial')->create();
+    $donor = Donor::factory()->create(['name' => 'Aleppo Relief Fund']);
+    $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create([
+        'name' => 'Four Wells, Two Villages',
+        'donor_id' => $donor->id,
+        'status' => ProposalStatus::ConceptNote,
+        'concept_note' => "Rehabilitate four wells.\n\nTwo villages, one pumping station.",
+        'created_at' => '2026-10-02 09:00:00',
+    ]));
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertOk()
+        ->assertSeeHtml('data-concept-note')
+        ->assertSeeText(__('proposals.concept_note.title'))
+        ->assertSeeTextInOrder([
+            'Four Wells, Two Villages',
+            'Aleppo Relief Fund',
+            'Oct 2, 2026',
+            'Rehabilitate four wells.',
+            'Two villages, one pumping station.',
+        ])
+        // Open, not folded: no "view" toggle through the ideation phase.
+        ->assertDontSeeHtml('data-concept-note-toggle');
+});
+
+test('the concept note text is shown as text, never as markup', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create([
+        'status' => ProposalStatus::ConceptNote,
+        'concept_note' => '<script>alert(1)</script> **bold** stays flat',
+    ]));
+
+    $response = $this->actingAs($user)->get(route('proposals.show', $proposal))->assertOk();
+
+    $response->assertSeeText('<script>alert(1)</script> **bold** stays flat')
+        // The raw tag never reaches the page: {{ }} escaped it.
+        ->assertDontSee('<script>alert(1)</script>', escape: false);
+});
+
+test('outside the ideation phase the concept note folds to one line that expands', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create([
+        'status' => ProposalStatus::Submitted,
+        'concept_note' => 'The idea we started from.',
+    ]));
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertOk()
+        ->assertSeeHtml('data-concept-note')
+        ->assertSeeHtml('data-concept-note-toggle')
+        ->assertSeeText(__('proposals.concept_note.view'))
+        // The body is in the page, hidden behind the toggle rather than dropped.
+        ->assertSeeText('The idea we started from.');
+});
+
+test('the concept note document downloads through the protected proposal route', function () {
+    Storage::fake('local');
+
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create(['status' => ProposalStatus::ConceptNote]));
+    $media = Activity::withoutRecording(fn () => Media::factory()->create([
+        'mediable_type' => 'proposal',
+        'mediable_id' => $proposal->id,
+        'collection' => MediaCollection::ConceptNote,
+        'type' => FileType::Pdf,
+        'path' => 'media/proposals/'.$proposal->id.'/concept.pdf',
+        'original_name' => 'concept-note.pdf',
+        'uploaded_by' => $user->id,
+    ]));
+
+    // _file-row offers the download only for a file that is really on the disk.
+    Storage::disk('local')->put($media->path, 'encrypted bytes');
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertOk()
+        ->assertSeeText('concept-note.pdf')
+        ->assertSeeHtml('href="'.route('proposals.files.download', [$proposal, $media]).'"');
+});
+
+test('a proposal with no concept note says so in the ideation phase and shows nothing later', function () {
+    $user = User::factory()->role('Financial')->create();
+    $ideation = Activity::withoutRecording(fn () => Proposal::factory()->create(['status' => ProposalStatus::ConceptNote]));
+    $later = Activity::withoutRecording(fn () => Proposal::factory()->create(['status' => ProposalStatus::Active]));
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $ideation))
+        ->assertOk()
+        ->assertSeeText(__('proposals.concept_note.nothing_recorded'));
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $later))
+        ->assertOk()
+        ->assertDontSeeHtml('data-concept-note');
+});
+
+test('someone without proposals.view cannot open a proposal page at all', function () {
+    $proposal = Proposal::factory()->create(['status' => ProposalStatus::ConceptNote, 'concept_note' => 'Private idea.']);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('proposals.show', $proposal))
+        ->assertForbidden();
 });

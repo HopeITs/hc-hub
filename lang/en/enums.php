@@ -64,6 +64,7 @@ return [
         'entered' => 'Entered (numerator and denominator)',
     ],
     'media_collection' => [
+        'concept_note' => 'Concept note',
         'proposal' => 'Proposal',
         'agreement' => 'Agreement',
         'mou' => 'MOU',
