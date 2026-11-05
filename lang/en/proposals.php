@@ -299,6 +299,22 @@ return [
     'hold_only_while_submitted' => 'A proposal can only be put on hold once it is with the donor, not while it is :status.',
     'taken_off_hold_standard_note' => 'Taken off hold.',
     'on_hold_status_retired' => 'On hold is a flag now, not a status: the proposal is back at the status it was held from.',
+
+    /*
+     * W-06 (D-58): a hold is a flag on the status, so it has its own two
+     * actions instead of a transition. The chip and the counts read "On hold"
+     * on their own; the full label comes from Proposal::statusLabel().
+     */
+    'put_on_hold' => 'Put on hold',
+    'take_off_hold' => 'Take off hold',
+    'put_on_hold_consequence' => 'The proposal keeps its status. Stalled and deadline alerts stop, and we ask for news on the reminder date.',
+    'take_off_hold_consequence' => 'The proposal keeps its status and goes back to the usual reminders.',
+    'why_put_on_hold' => 'Why is it on hold?',
+    'off_hold_note' => 'Note (optional)',
+    'on_hold_chip' => 'On hold',
+    'count_on_hold' => ':count on hold|:count on hold',
+    'put_on_hold_done' => 'Proposal put on hold.',
+    'taken_off_hold_done' => 'Proposal taken off hold.',
     'final_reports_status_retired' => 'Final reports status retired; moved to Active.',
     'record_final_report_acceptance' => 'Record final report acceptance',
     'final_report_acceptance_title' => 'Record final report acceptance',
@@ -394,7 +410,6 @@ return [
     'target_proposal_draft' => 'Start or resume drafting the full proposal.',
     'target_proposal_review' => 'Send the proposal for internal review.',
     'target_submitted' => 'Record that the proposal was sent to the donor.',
-    'target_on_hold' => 'Pause while the donor decides, with a reminder date.',
     'target_rejected' => 'Record that the donor declined.',
     'target_completed' => 'Close the proposal after the final report is accepted.',
     'reviewers' => 'Reviewers',

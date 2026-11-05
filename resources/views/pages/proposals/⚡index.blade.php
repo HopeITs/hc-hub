@@ -37,7 +37,7 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
     use WithPagination;
 
     /** @var list<string> */
-    public const FLAGS = ['no_agreement', 'overdue', 'report_overdue'];
+    public const FLAGS = ['on_hold', 'no_agreement', 'overdue', 'report_overdue'];
 
     /**
      * Every property a filter control writes.
@@ -217,6 +217,7 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
         ...array_map(fn (Currency $case): array => $setPill('currency', $case->value, $case->value), Currency::cases()),
     ];
     $flagPills = array_values(array_filter([
+        ['label' => __('finance_tables.flag_on_hold'), 'model' => 'flag', 'value' => 'on_hold', 'toggle' => true, 'active' => $chosen['flag'] === 'on_hold', 'tone' => 'warn', 'test' => 'flag-on-hold'],
         ['label' => __('finance_tables.flag_no_agreement'), 'model' => 'flag', 'value' => 'no_agreement', 'toggle' => true, 'active' => $chosen['flag'] === 'no_agreement', 'test' => 'flag-no-agreement'],
         $canTransfers ? ['label' => __('finance_tables.flag_has_overdue'), 'model' => 'flag', 'value' => 'overdue', 'toggle' => true, 'active' => $chosen['flag'] === 'overdue', 'tone' => 'critical', 'test' => 'flag-overdue'] : null,
         ['label' => __('finance_tables.flag_report_overdue'), 'model' => 'flag', 'value' => 'report_overdue', 'toggle' => true, 'active' => $chosen['flag'] === 'report_overdue', 'test' => 'flag-report-overdue'],

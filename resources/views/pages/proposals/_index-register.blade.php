@@ -81,7 +81,11 @@
                     </td>
                     <td data-label="{{ __('common.status') }}">
                         @unless ($isRepeat)
-                            <x-ui.enum-badge :case="$proposal->status" />
+                            <x-ui.enum-badge
+                                :case="$proposal->status"
+                                :label="$proposal->statusLabel()"
+                                :tone="$proposal->isOnHold() ? \App\Enums\StatusTone::Warn : null"
+                            />
                         @endunless
                     </td>
                     {{-- phase is a read-only accessor over status->phase(), not a column. --}}

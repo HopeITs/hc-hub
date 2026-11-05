@@ -74,7 +74,8 @@ trait ExportsProposalRegister
 
                 yield [
                     $proposal->name,
-                    $proposal->status->label(),
+                    // One definition of the status label, hold included (W-06, D-58).
+                    $proposal->statusLabel(),
                     $proposal->phase->label(),
                     $proposal->planned_date_begin,
                     $proposal->planned_date_end,

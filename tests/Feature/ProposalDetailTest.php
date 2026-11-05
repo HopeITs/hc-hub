@@ -844,3 +844,85 @@ test('someone without proposals.view cannot open a proposal page at all', functi
         ->get(route('proposals.show', $proposal))
         ->assertForbidden();
 });
+
+/*
+ * W-25 (folded into W-06 slice 2, D-58): the lifecycle stepper draws the
+ * merged line — nine stops, with `on hold` as a chip on the current one.
+ */
+
+test('the lifecycle stepper draws the nine merged stops and marks the current one', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
+
+    $stops = Livewire::actingAs($user)
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->instance()
+        ->lifecycle;
+
+    expect(array_map(fn (array $stop): string => $stop['status']->value, $stops))->toBe([
+        'concept note',
+        'concept note review',
+        'concept note submitted',
+        'proposal draft',
+        'proposal review',
+        'submitted',
+        'approved',
+        'active',
+        'completed',
+    ]);
+
+    // `on hold` is not a stop any more, and the current stop is announced.
+    $current = array_values(array_filter($stops, fn (array $stop): bool => $stop['state'] === 'current'));
+
+    expect($current)->toHaveCount(1)
+        ->and($current[0]['status'])->toBe(ProposalStatus::Submitted)
+        ->and($current[0]['held'])->toBeFalse();
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertOk()
+        ->assertSeeHtml('aria-current="step"')
+        ->assertDontSeeHtml('data-test="on-hold-chip"');
+});
+
+test('a proposal on hold wears the chip on its current stop and reads Submitted (On hold)', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
+    $proposal->forceFill(['on_hold_since' => today()->subWeek(), 'status_remind_on' => today()->addWeek()])->save();
+
+    $stops = Livewire::actingAs($user)
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->instance()
+        ->lifecycle;
+
+    $held = array_values(array_filter($stops, fn (array $stop): bool => $stop['held']));
+
+    // Exactly one chip, on the stop the proposal sits at — never a stop of its own.
+    expect($held)->toHaveCount(1)
+        ->and($held[0]['status'])->toBe(ProposalStatus::Submitted)
+        ->and($held[0]['state'])->toBe('current')
+        ->and(array_map(fn (array $stop): string => $stop['status']->value, $stops))->not->toContain('on hold');
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertOk()
+        ->assertSeeHtml('data-test="on-hold-chip"')
+        ->assertSeeText(__('proposals.on_hold_chip'))
+        ->assertSeeText($proposal->fresh()->statusLabel())
+        ->assertSeeHtml('data-tone="warn"');
+});
+
+test('a rejected proposal still draws its side exit and wears no chip', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Proposal::factory()->create(['status' => ProposalStatus::Rejected]);
+    ProposalStatusNote::factory()->create(['proposal_id' => $proposal->id, 'status' => ProposalStatus::Submitted, 'date' => today()->subMonth()]);
+    ProposalStatusNote::factory()->create(['proposal_id' => $proposal->id, 'status' => ProposalStatus::Rejected, 'date' => today()]);
+
+    $stops = Livewire::actingAs($user)
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->instance()
+        ->lifecycle;
+
+    expect(array_filter($stops, fn (array $stop): bool => $stop['state'] === 'rejected'))->toHaveCount(1)
+        ->and(array_filter($stops, fn (array $stop): bool => $stop['held']))->toBeEmpty();
+});

@@ -310,15 +310,19 @@ trait ChartsProposalChronology
     /**
      * The lifecycle rail: nine stops, each with the date it was reached.
      *
-     * A rejection or a hold sits at the stop the proposal left (lifecycleStop()); a
-     * rejection redraws the stop after it as the rejection rather than the next step.
+     * The nine stops are the merged line (W-25): `on hold` is no longer one of
+     * them. A hold is drawn as a chip on the current stop instead (`held`),
+     * because the proposal keeps its status (W-06, D-58). A rejection sits at
+     * the stop the proposal left (lifecycleStop()) and redraws the stop after
+     * it as the rejection rather than the next step.
      *
-     * @return array<int, array{status: ProposalStatus, label: string, date: CarbonImmutable|null, state: string}>
+     * @return array<int, array{status: ProposalStatus, label: string, date: CarbonImmutable|null, state: string, held: bool}>
      */
     #[Computed]
     public function lifecycle(): array
     {
         $isRejected = $this->proposal->status === ProposalStatus::Rejected;
+        $isOnHold = $this->proposal->isOnHold();
         $stops = ProposalStatus::lifecycle();
         $reached = (int) array_search($this->proposal->lifecycleStop(), $stops, true);
         $dates = $this->statusNotes->sortBy('date')->groupBy(fn (ProposalStatusNote $note): string => $note->status->value);
@@ -340,6 +344,7 @@ trait ChartsProposalChronology
                     $index < $reached || ($isRejected && $index === $reached) => 'past',
                     default => 'ahead',
                 },
+                'held' => $isOnHold && ! $isRejected && $index === $reached,
             ];
         }
 

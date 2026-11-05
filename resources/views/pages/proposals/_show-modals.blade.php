@@ -11,6 +11,71 @@
 
     @include('pages.proposals._final-report-modal')
 
+    {{-- W-06 (D-58): a hold keeps the status, so both dialogs state that in one
+         sentence and neither offers a status picker. --}}
+    <x-ui.confirm-modal
+        wire:model="showHoldModal"
+        tone="neutral"
+        close="closeHoldModal"
+        :title="__('proposals.put_on_hold')"
+        :message="__('proposals.put_on_hold_consequence')"
+        confirm="putOnHold"
+        :confirm-label="__('proposals.put_on_hold')"
+        confirm-test="confirm-put-on-hold"
+        data-test="hold-modal"
+    >
+        @if ($showHoldModal)
+            @if ($holdStale || $errors->has('holdGate'))
+                <div class="mb-4 rounded-lg border border-primary bg-secondary-soft/60 p-3 text-sm text-status-critical" role="alert" data-test="hold-gate-alert">
+                    <ul class="list-disc ps-5">
+                        @foreach ($errors->get('holdGate') as $holdGateMessage)
+                            <li>{{ $holdGateMessage }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="grid gap-4">
+                <x-ui.form-textarea wire:model="holdReason" :label="__('proposals.why_put_on_hold')" rows="3" required autofocus data-test="hold-reason" />
+                <x-ui.form-input
+                    wire:model="holdRemindOn"
+                    :label="__('proposals.remind_me_on')"
+                    type="date"
+                    :min="now()->addDay()->toDateString()"
+                    :help="__('proposals.remind_me_on_help')"
+                    required
+                    data-test="hold-remind-on"
+                />
+            </div>
+        @endif
+    </x-ui.confirm-modal>
+
+    <x-ui.confirm-modal
+        wire:model="showOffHoldModal"
+        tone="neutral"
+        close="closeOffHoldModal"
+        :title="__('proposals.take_off_hold')"
+        :message="__('proposals.take_off_hold_consequence')"
+        confirm="takeOffHold"
+        :confirm-label="__('proposals.take_off_hold')"
+        confirm-test="confirm-take-off-hold"
+        data-test="off-hold-modal"
+    >
+        @if ($showOffHoldModal)
+            @if ($holdStale || $errors->has('holdGate'))
+                <div class="mb-4 rounded-lg border border-primary bg-secondary-soft/60 p-3 text-sm text-status-critical" role="alert" data-test="off-hold-gate-alert">
+                    <ul class="list-disc ps-5">
+                        @foreach ($errors->get('holdGate') as $offHoldGateMessage)
+                            <li>{{ $offHoldGateMessage }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <x-ui.form-textarea wire:model="offHoldNote" :label="__('proposals.off_hold_note')" rows="3" data-test="off-hold-note" />
+        @endif
+    </x-ui.confirm-modal>
+
     @include('pages.proposals._proposal-form')
 
     <x-funding.agreement-modal

@@ -108,7 +108,7 @@ trait ChartsProposalPipeline
      *
      * Ignores the phase filter itself so every stop stays selectable.
      *
-     * @return list<array{phase: ProposalPhase, count: int, rejected: int, money: array<string, float>}>
+     * @return list<array{phase: ProposalPhase, count: int, rejected: int, held: int, money: array<string, float>}>
      */
     #[Computed]
     public function pipeline(): array
@@ -124,7 +124,18 @@ trait ChartsProposalPipeline
             ->groupBy('status')
             ->pluck('total', 'status');
 
-        return array_map(function (ProposalPhase $phase) use ($rows, $counts): array {
+        /*
+         * A proposal on hold is still submitted (W-06, D-58), so it counts
+         * inside its own phase and the hold shows as a sub-count beside it
+         * rather than a stop of its own.
+         */
+        $held = $this->filteredQuery(withPhase: false)
+            ->whereNotNull('proposals.on_hold_since')
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return array_map(function (ProposalPhase $phase) use ($rows, $counts, $held): array {
             $statuses = array_map(fn (ProposalStatus $status): string => $status->value, $phase->statuses());
 
             $money = $rows
@@ -138,6 +149,7 @@ trait ChartsProposalPipeline
                 'phase' => $phase,
                 'count' => (int) collect($statuses)->sum(fn (string $status): int => (int) ($counts[$status] ?? 0)),
                 'rejected' => $phase === ProposalPhase::Archived ? (int) ($counts[ProposalStatus::Rejected->value] ?? 0) : 0,
+                'held' => (int) collect($statuses)->sum(fn (string $status): int => (int) ($held[$status] ?? 0)),
                 'money' => $money,
             ];
         }, ProposalPhase::cases());

@@ -52,8 +52,6 @@ trait ManagesProposalStatus
 
     public string $statusDate = '';
 
-    public string $statusRemindOn = '';
-
     public string $statusMeetingAt = '';
 
     public bool $statusStale = false;
@@ -114,8 +112,9 @@ trait ManagesProposalStatus
     }
 
     /**
-     * The inputs the chosen target needs: reason, effective_date, remind_on,
-     * and the optional review meeting when the target opens a review (T07).
+     * The inputs the chosen target needs: reason, effective_date, and the
+     * optional review meeting when the target opens a review (T07). No move
+     * asks for a reminder date since W-06 (D-58): the hold dialog owns it.
      *
      * @return list<string>
      */
@@ -136,10 +135,8 @@ trait ManagesProposalStatus
             $fields[] = 'reason';
         }
 
-        foreach (['effective_date', 'remind_on'] as $field) {
-            if (in_array($field, $requirements, true)) {
-                $fields[] = $field;
-            }
+        if (in_array('effective_date', $requirements, true)) {
+            $fields[] = 'effective_date';
         }
 
         if (ReviewStage::forReviewStatus($to) !== null) {
@@ -202,14 +199,13 @@ trait ManagesProposalStatus
         $input = array_filter([
             'reason' => in_array('reason', $fields, true) ? trim($this->statusContext) : null,
             'effective_date' => in_array('effective_date', $fields, true) ? $this->statusDate : null,
-            'remind_on' => in_array('remind_on', $fields, true) ? $this->statusRemindOn : null,
             'meeting_at' => in_array('meeting_at', $fields, true) && trim($this->statusMeetingAt) !== '' ? $this->statusMeetingAt : null,
         ], fn (?string $value): bool => $value !== null);
 
         try {
             $result = app(TransitionProposal::class)->handle($proposal, $to, ProposalStatus::from($this->statusExpectedFrom), $input);
         } catch (ValidationException $exception) {
-            $this->showStatusErrors($exception, ['status' => 'newStatus', 'reason' => 'statusContext', 'effective_date' => 'statusDate', 'remind_on' => 'statusRemindOn', 'meeting_at' => 'statusMeetingAt'], 'statusGate');
+            $this->showStatusErrors($exception, ['status' => 'newStatus', 'reason' => 'statusContext', 'effective_date' => 'statusDate', 'meeting_at' => 'statusMeetingAt'], 'statusGate');
 
             return;
         }
@@ -341,7 +337,6 @@ trait ManagesProposalStatus
         $this->newStatus = '';
         $this->statusContext = '';
         $this->statusDate = '';
-        $this->statusRemindOn = '';
         $this->statusMeetingAt = '';
         $this->statusStale = false;
         $this->correctTarget = '';
