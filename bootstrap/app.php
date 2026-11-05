@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureHrAccountIsActive;
 use App\Http\Middleware\EnsureRequestCameThroughTrustedProxy;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Http\Middleware\RedirectToHttps;
+use App\Http\Middleware\RemembersRecentRecord;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\SyncProgramsFromHr;
@@ -48,6 +49,7 @@ return Application::configure(basePath: dirname(__DIR__))
             SetLocale::class,
             SyncProgramsFromHr::class,
             EnsureHrAccountIsActive::class,
+            RemembersRecentRecord::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

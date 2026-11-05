@@ -53,6 +53,20 @@ final class Destinations
     ];
 
     /**
+     * The icon each collapsible sidebar group shows on its own row.
+     */
+    private const array GroupIcons = [
+        'overview' => 'home',
+        'strategy_planning' => 'map',
+        'projects_delivery' => 'briefcase',
+        'monitoring_evaluation' => 'chart-bar',
+        'funding_finance' => 'banknotes',
+        'workspace' => 'squares-2x2',
+        'administration' => 'cog-6-tooth',
+        'you' => 'user-circle',
+    ];
+
+    /**
      * Every destination the given user may open, in display order.
      *
      * @return list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null}>
@@ -86,7 +100,7 @@ final class Destinations
     /**
      * The sidebar: the user's destinations grouped, empty groups left out.
      *
-     * @return list<array{group: string, label: string, items: list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null}>}>
+     * @return list<array{group: string, label: string, icon: string, items: list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null}>}>
      */
     public function sidebarFor(User $user): array
     {
@@ -101,6 +115,7 @@ final class Destinations
             $groups[] = [
                 'group' => $group,
                 'label' => __(self::GroupLabels[$group]),
+                'icon' => self::GroupIcons[$group],
                 'items' => array_values($byGroup->get($group)->all()),
             ];
         }

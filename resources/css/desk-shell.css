@@ -25,7 +25,6 @@
 
     /* ---------- App frame: sidebar column + main column ---------- */
     .dk-app { display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr); min-height: 100dvh; }
-    html.dk-nav-animate .dk-app { transition: grid-template-columns .22s cubic-bezier(.2, .8, .2, 1); }
     .dk-main { min-width: 0; display: flex; flex-direction: column; }
     .dk-main > .dk-scope:not(.dk-top) { flex: 1; display: flex; flex-direction: column; }
     .dk-main > .dk-top { flex: none; }
@@ -70,6 +69,111 @@
     html:not(.dk-nav-open) .dk-side-l { display: none; }
     html:not(.dk-nav-open) .dk-side-badge { position: absolute; top: 7px; inset-inline-end: 9px; min-width: 6px; width: 6px; height: 6px; padding: 0; font-size: 0; background: var(--brand); box-shadow: 0 0 0 2px var(--paper); }
     html:not(.dk-nav-open) .dk-side-a.dk-on .dk-side-badge { background: var(--on-brand); box-shadow: 0 0 0 2px var(--brand); }
+
+    /* ---------- Sidebar v3: zones, folding groups, fly-outs, pins, project context ---------- */
+    /* One rhythm: 2px between rows, a rule-separated 8px gap between zones. */
+    .dk-side-all { display: flex; flex-direction: column; gap: 2px; min-height: 100%; }
+    .dk-side-all > .dk-side-g + .dk-side-g { margin-top: 0; }
+    .dk-side-flat + .dk-side-me, .dk-side-me + .dk-side-fly + .dk-side-g, .dk-side-you { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+    .dk-side-you { margin-top: auto; }
+
+    /* Group rows */
+    .dk-side-gb { width: 100%; border: 0; background: none; cursor: pointer; text-align: start; font: inherit; font-size: 14px; font-weight: 600; }
+    .dk-side-gb.dk-has-on { color: var(--ink); font-weight: 700; }
+    .dk-side-icw { position: relative; display: grid; place-items: center; flex: none; }
+    .dk-side-gchev { width: 16px; height: 16px; flex: none; color: var(--ink-3); }
+    .dk-side-open > .dk-side-gb .dk-side-gchev { transform: rotate(180deg); }
+    .dk-side-g:not(.dk-side-flat):not(.dk-side-me) > ul { gap: 1px; margin-block: 2px 4px; padding-inline-start: 10px; margin-inline-start: 21px; border-inline-start: 1px solid var(--line); }
+    .dk-side-sub { height: 34px; font-size: 13.5px; font-weight: 500; padding-inline: 10px; }
+    .dk-side-sub.dk-on { font-weight: 700; }
+
+    /* Current page: a soft brand tint with a brand edge marker, the same at every width */
+    .dk-side-a.dk-on { background: var(--brand-soft); color: var(--brand-ink); }
+    .dk-side-a.dk-on::before { content: ""; position: absolute; inset-block: 8px; inset-inline-start: -10px; width: 3px; border-radius: 3px; background: var(--brand); }
+    .dk-side-sub.dk-on::before { inset-inline-start: -11px; }
+    .dk-side-a.dk-on .dk-side-badge { background: var(--brand); color: var(--on-brand); }
+    .dark .dk-side-a.dk-on { background: var(--sunk); color: var(--ink); }
+
+    /* Something of yours due soon: the group's count turns brand red, nothing moves */
+    .dk-due .dk-side-badge { background: var(--brand); color: var(--on-brand); }
+
+    /* Pins: a star beside each link, shown on hover or when pinned */
+    .dk-side-li { position: relative; list-style: none; }
+    .dk-side-li > .dk-side-a { padding-inline-end: 34px; }
+    .dk-side-pin { position: absolute; top: 50%; inset-inline-end: 6px; transform: translateY(-50%); width: 24px; height: 24px; border: 0; border-radius: 6px; background: none; color: var(--faint); display: grid; place-items: center; cursor: pointer; opacity: 0; }
+    .dk-side-li:hover .dk-side-pin, .dk-side-pin:focus-visible, .dk-side-pin.dk-pinned { opacity: 1; }
+    .dk-side-pin:hover { background: var(--sunk); color: var(--ink); }
+    .dk-side-pin.dk-pinned { color: var(--brand); }
+    .dk-side-pin.dk-pinned svg { fill: currentColor; }
+
+    /* Personal zone: Pinned + Recent */
+    .dk-side-me ul { display: grid; gap: 1px; }
+    .dk-side-me .dk-side-gh, .dk-side-fly .dk-side-gh { display: block; height: auto; margin: 4px 0 0; padding: 4px 10px; background: none; color: var(--faint); }
+    .dk-side-star { display: none; }
+    .dk-side-empty { margin: 0; padding: 6px 10px; font-size: 12.5px; color: var(--faint); }
+    .dk-side-rec { height: 42px; }
+    .dk-side-rec .dk-side-l { display: grid; line-height: 1.2; }
+    .dk-side-rec small { font-size: 11px; font-weight: 600; color: var(--faint); overflow: hidden; text-overflow: ellipsis; }
+
+    /* Project context mode */
+    .dk-side-ctx { display: flex; flex-direction: column; gap: 2px; }
+    .dk-side-ctx ul { display: grid; gap: 2px; }
+    .dk-side-back { display: inline-flex; align-items: center; gap: 6px; width: max-content; max-width: 100%; height: 30px; padding-inline: 10px; border: 0; border-radius: 8px; background: none; color: var(--ink-3); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+    .dk-side-back:hover { background: var(--sunk); color: var(--ink); }
+    .dk-side-ctx-t { margin: 2px 0 8px; padding: 0 10px 10px; border-bottom: 1px solid var(--line); font-size: 15px; font-weight: 700; line-height: 1.25; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+    /* Fly-out beside the rail */
+    .dk-side-fly { position: fixed; z-index: 75; width: 260px; padding: 6px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--paper); box-shadow: var(--dk-shadow); display: flex; flex-direction: column; gap: 1px; }
+    /* The pointer: a small notch on the edge facing the rail, aimed at the hovered icon's center */
+    .dk-side-fly::before { content: ""; position: absolute; top: calc(var(--dk-fly-caret, 26px) - 6px); inset-inline-start: -7px; width: 12px; height: 12px; background: var(--paper); border-inline-start: 1px solid var(--line-2); border-block-end: 1px solid var(--line-2); transform: rotate(45deg); }
+    [dir="rtl"] .dk-side-fly::before { transform: rotate(-45deg); }
+    /* An invisible bridge over the gap, so the pointer can travel from the icon into the panel */
+    .dk-side-fly::after { content: ""; position: absolute; inset-block: 0; inset-inline-start: -14px; width: 14px; }
+    .dk-side-fly > * { position: relative; }
+    /* The icon whose panel is open stays lit, so the two read as one */
+    .dk-side-a.dk-flying { background: var(--sunk); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line-2); }
+    .dk-side-fly-ic { width: 18px !important; height: 18px !important; flex: none; color: var(--ink-3); }
+    .dk-side-fly .dk-side-a:hover .dk-side-fly-ic, .dk-side-fly .dk-side-a.dk-on .dk-side-fly-ic { color: inherit; }
+    .dk-side-fly-h { margin: 0 0 4px; padding: 8px 10px 8px; border-bottom: 1px solid var(--line); font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); line-height: 24px; }
+    [lang="ar"] .dk-side-fly-h { letter-spacing: 0; font-size: 12px; }
+    .dk-side-fly .dk-side-gh { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 8px; }
+    .dk-side-fly ul { display: grid; gap: 1px; }
+
+    @media (min-width: 900px) {
+        /* The rail: icons only, groups fly out, the personal zone is one star */
+        html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-gchev,
+        html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-pin,
+        html:not(.dk-nav-open) .dk-side-all > .dk-side-g:not(.dk-side-flat) > ul,
+        html:not(.dk-nav-open) .dk-side-me-list,
+        html:not(.dk-nav-open) .dk-side-ctx-t,
+        html:not(.dk-nav-open) .dk-side-back .dk-side-l { display: none !important; }
+        html:not(.dk-nav-open) .dk-side-star { display: flex; }
+        html:not(.dk-nav-open) .dk-side-all { align-items: center; }
+        html:not(.dk-nav-open) .dk-side-all > .dk-side-g:not(.dk-side-flat) { display: flex; justify-content: center; }
+        html:not(.dk-nav-open) .dk-side-all > .dk-side-g { width: 34px; }
+        html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-a.dk-on,
+        html:not(.dk-nav-open) .dk-side-gb.dk-has-on,
+        html:not(.dk-nav-open) .dk-side-ctx .dk-side-a.dk-on { background: var(--brand-soft); color: var(--brand-ink); }
+        html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-a.dk-on::before,
+        html:not(.dk-nav-open) .dk-side-gb.dk-has-on::before,
+        html:not(.dk-nav-open) .dk-side-ctx .dk-side-a.dk-on::before { content: ""; display: block; position: absolute; inset-block: 9px; inset-inline-start: -14px; width: 3px; border-radius: 3px; background: var(--brand); }
+        /* On the rail a count is a small numbered tag tucked into the icon's top corner, inside its circle */
+        html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-badge { position: absolute; top: -3px; inset-inline-end: -3px; width: auto; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; font-size: 10px; font-weight: 800; line-height: 16px; background: var(--brand); color: var(--on-brand); box-shadow: 0 0 0 2px var(--paper); }
+        html:not(.dk-nav-open) .dk-side-ctx { align-items: center; }
+        html:not(.dk-nav-open) .dk-side-back { width: 34px; height: 34px; padding: 0; justify-content: center; }
+    }
+
+    /* Fly-out rows keep their labels even while the rail hides every other label */
+    .dk-side-fly .dk-side-a { width: 100% !important; height: 38px !important; gap: 10px !important; padding-inline: 10px 34px !important; justify-content: flex-start !important; margin: 0 !important; border-radius: 9px !important; }
+    .dk-side-fly .dk-side-rec { height: 42px !important; }
+    .dk-side-fly .dk-side-l { display: block !important; }
+    .dk-side-fly .dk-side-rec .dk-side-l { display: grid !important; }
+    .dk-side-fly .dk-side-a.dk-on::before { display: none !important; }
+    /* In the fly-out a count reads as a quiet numbered pill right after the label, never a blank blob */
+    .dk-side-fly .dk-side-l { flex: 0 1 auto !important; }
+    .dk-side-fly .dk-side-badge { position: static !important; width: auto !important; min-width: 20px !important; height: 20px !important; padding: 0 6px !important; margin-inline-end: auto; border-radius: 999px !important; font-size: 11px !important; font-weight: 800 !important; line-height: 20px !important; background: var(--brand-soft) !important; color: var(--brand-ink) !important; box-shadow: none !important; }
+    .dk-side-fly .dk-side-a.dk-on .dk-side-badge { background: var(--brand) !important; color: var(--on-brand) !important; }
+    .dk-side-fly .dk-side-pin { display: grid !important; }
 
     .dk-side-tip { position: fixed; z-index: 80; transform: translateY(-50%); padding: 6px 10px; border-radius: 8px; background: var(--ink); color: var(--paper); font-size: 13px; font-weight: 700; white-space: nowrap; pointer-events: none; box-shadow: var(--dk-shadow); }
 
@@ -219,7 +323,7 @@
     /* ---------- Narrow screens: no rail, the menu button lays the sidebar over the page ---------- */
     @media (max-width: 899px) {
         .dk-app { grid-template-columns: minmax(0, 1fr); }
-        .dk-side { position: fixed; inset-block: 0; inset-inline-start: 0; width: min(300px, calc(100vw - 48px)); visibility: hidden; opacity: 0; transition: opacity .18s, visibility .18s; box-shadow: var(--dk-shadow); z-index: 70; }
+        .dk-side { position: fixed; inset-block: 0; inset-inline-start: 0; width: min(300px, calc(100vw - 48px)); visibility: hidden; opacity: 0; box-shadow: var(--dk-shadow); z-index: 70; }
         .dk-side-toggle { display: none; }
         html.dk-nav-mobile .dk-side { visibility: visible; opacity: 1; }
         html.dk-nav-mobile .dk-side-scrim { display: block; position: fixed; inset: 0; z-index: 69; background: var(--scrim); }
@@ -251,7 +355,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-        html.dk-nav-animate .dk-app, .dk-side { transition: none; }
+        .dk-side { transition: none; }
         .dk-where, .dk-where-p::before, .dk-seg-theme svg, .dk-fresh { animation: none; }
         .dk-menu-in, .dk-menu-out { transition: opacity .1s linear; }
         .dk-menu-from { transform: none; }

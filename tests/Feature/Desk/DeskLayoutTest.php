@@ -13,13 +13,13 @@ function deskPanelIds(User $user): array
 }
 
 test('each role starts from its own layout, and a Super Admin from the General Manager one', function () {
-    expect(deskPanelIds(User::factory()->role('Team Member')->create()))->toBe(['needs', 'overdue', 'flow', 'notes', 'tasks', 'coming', 'milestones', 'projects'])
+    expect(deskPanelIds(User::factory()->role('Team Member')->create()))->toBe(['needs', 'overdue', 'flow', 'tasks', 'coming', 'milestones', 'projects'])
         ->and(deskPanelIds(User::factory()->role('Super Admin')->create()))->toContain('glance', 'money', 'pipeline')
         ->and(deskPanelIds(User::factory()->role('Financial')->create()))->toBe(['needs', 'overdue', 'flow', 'money', 'transfers', 'deliverables', 'duties', 'projects']);
 });
 
 test('a role without a layout falls back to the Team Member one, minus what it may not see', function () {
-    expect(deskPanelIds(User::factory()->create()))->toBe(['needs', 'overdue', 'notes']);
+    expect(deskPanelIds(User::factory()->create()))->toBe(['needs', 'overdue']);
 });
 
 test('a saved layout drops forbidden, unknown and repeated panels and fixes a bad size', function () {
@@ -42,14 +42,14 @@ test('a saved layout with holes opens flush: every row fills twelve columns at i
     $user = User::factory()->role('Team Member')->create(['desk_layout' => [
         ['panel' => 'tasks', 'size' => 'W', 'cols' => 7, 'rows' => 4],
         ['panel' => 'needs', 'size' => 'W', 'cols' => 7, 'rows' => 5],
-        ['panel' => 'notes', 'size' => 'S', 'cols' => 3, 'rows' => 2],
+        ['panel' => 'todo', 'size' => 'S', 'cols' => 3, 'rows' => 2],
         ['panel' => 'coming', 'size' => 'M', 'cols' => 4, 'rows' => 6],
     ]]);
 
     expect(array_map(fn (array $entry): array => [$entry['panel'], $entry['cols'], $entry['rows']], app(Panels::class)->layoutFor($user)))->toBe([
         ['tasks', 12, 4],
         ['needs', 8, 5],
-        ['notes', 4, 5],
+        ['todo', 4, 5],
         ['coming', 12, 6],
     ]);
 });
@@ -100,9 +100,8 @@ test('a card dropped into a full row is saved there, and the card it pushed open
         ['panel' => 'overdue', 'cols' => 3, 'rows' => 4],
         ['panel' => 'tasks', 'cols' => 3, 'rows' => 4],
         ['panel' => 'flow', 'cols' => 3, 'rows' => 4],
-        ['panel' => 'notes', 'cols' => 4, 'rows' => 5],
-        ['panel' => 'coming', 'cols' => 4, 'rows' => 5],
-        ['panel' => 'milestones', 'cols' => 4, 'rows' => 5],
+        ['panel' => 'coming', 'cols' => 6, 'rows' => 5],
+        ['panel' => 'milestones', 'cols' => 6, 'rows' => 5],
         ['panel' => 'projects', 'cols' => 12, 'rows' => 4],
     ];
 
@@ -116,11 +115,10 @@ test('a card grown past its neighbours is saved wider, with them wrapped to the 
     $user = User::factory()->role('Team Member')->create();
     $grown = [
         ['panel' => 'needs', 'cols' => 4, 'rows' => 3],
-        ['panel' => 'notes', 'cols' => 8, 'rows' => 3],
-        ['panel' => 'overdue', 'cols' => 3, 'rows' => 4],
-        ['panel' => 'flow', 'cols' => 3, 'rows' => 4],
-        ['panel' => 'tasks', 'cols' => 3, 'rows' => 4],
-        ['panel' => 'coming', 'cols' => 3, 'rows' => 4],
+        ['panel' => 'overdue', 'cols' => 8, 'rows' => 3],
+        ['panel' => 'flow', 'cols' => 4, 'rows' => 4],
+        ['panel' => 'tasks', 'cols' => 4, 'rows' => 4],
+        ['panel' => 'coming', 'cols' => 4, 'rows' => 4],
         ['panel' => 'milestones', 'cols' => 6, 'rows' => 4],
         ['panel' => 'projects', 'cols' => 6, 'rows' => 4],
     ];
@@ -254,11 +252,11 @@ test('the desk has no My day clock or density switch', function () {
         ->assertDontSeeHtml('data-desk-density');
 });
 
-test('the command strip has no Ask button and keeps the quick actions', function () {
+test('the desk has no quick-action strip', function () {
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
         ->test('pages::desk.index')
-        ->assertDontSeeHtml('data-desk-start-ask')
-        ->assertSeeHtml('data-desk-start-action="task"');
+        ->assertDontSeeHtml('data-desk-start')
+        ->assertDontSeeHtml('data-desk-start-action');
 });
 
 test('the customize sheet offers the ready layouts', function () {

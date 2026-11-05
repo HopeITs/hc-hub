@@ -53,14 +53,14 @@ final class Panels
      * @var array<string, list<array{0: string, 1: string}>>
      */
     private const array RoleLayouts = [
-        'General Manager' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['glance', 'XL'], ['reviews', 'L'], ['notes', 'L'], ['pipeline', 'L'], ['money', 'L']],
+        'General Manager' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['glance', 'XL'], ['reviews', 'L'], ['pipeline', 'L'], ['money', 'L']],
         'Public Relations Manager' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['coming', 'L'], ['waiting', 'L'], ['pipeline', 'L'], ['money', 'L'], ['projects', 'XL']],
         'Public Relations' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['coming', 'L'], ['tasks', 'L'], ['milestones', 'XL'], ['projects', 'XL']],
         'MEAL' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['validate', 'L'], ['templates', 'L'], ['matrix', 'XL'], ['targets', 'XL'], ['projects', 'XL']],
         'Financial' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['money', 'L'], ['transfers', 'L'], ['deliverables', 'L'], ['duties', 'L'], ['projects', 'XL']],
-        'Managers' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['coming', 'L'], ['notes', 'L'], ['matrix', 'XL'], ['tasks', 'L'], ['myteam', 'L']],
+        'Managers' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['coming', 'L'], ['matrix', 'XL'], ['tasks', 'L'], ['myteam', 'L']],
         'Media Team' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['deliverables', 'L'], ['coming', 'L'], ['tasks', 'XL'], ['projects', 'XL']],
-        'Team Member' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['notes', 'L'], ['tasks', 'L'], ['coming', 'L'], ['milestones', 'L'], ['projects', 'XL']],
+        'Team Member' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['tasks', 'L'], ['coming', 'L'], ['milestones', 'L'], ['projects', 'XL']],
     ];
 
     /**
@@ -144,7 +144,7 @@ final class Panels
         'today' => ['core' => 'needs', 'rows' => [
             [['needs', 7, 4], ['coming', 5, 4]],
             [['overdue', 6, 4], ['tasks', 6, 4]],
-            [['waiting', 8, 3], ['notes', 4, 3]],
+            [['waiting', 12, 3]],
         ]],
         'money' => ['core' => 'money', 'rows' => [
             [['money', 8, 5], ['transfers', 4, 5]],
@@ -196,7 +196,7 @@ final class Panels
     private const array ReadyKinds = [
         'money' => 'money', 'transfers' => 'money', 'pipeline' => 'money', 'donors' => 'money',
         'myteam' => 'people', 'waiting' => 'people', 'reviews' => 'people',
-        'needs' => 'work', 'coming' => 'work', 'overdue' => 'work', 'tasks' => 'work', 'deliverables' => 'work', 'projects' => 'work', 'flow' => 'work', 'milestones' => 'work', 'notes' => 'work', 'todo' => 'work',
+        'needs' => 'work', 'coming' => 'work', 'overdue' => 'work', 'tasks' => 'work', 'deliverables' => 'work', 'projects' => 'work', 'flow' => 'work', 'milestones' => 'work', 'todo' => 'work',
         'targets' => 'results', 'validate' => 'results', 'matrix' => 'results', 'templates' => 'results', 'duties' => 'results', 'glance' => 'results',
     ];
 
@@ -686,7 +686,6 @@ final class Panels
         return [
             'glance' => ['icon' => 'chart', 'size' => 'XL', 'rows' => 3, 'register' => null, 'allows' => $everyone],
             'flow' => ['icon' => 'chart', 'size' => 'XL', 'rows' => 2, 'register' => 'projects.index', 'allows' => $can('projects.view')],
-            'notes' => ['icon' => 'file', 'size' => 'L', 'rows' => 4, 'register' => null, 'allows' => $everyone],
             'todo' => ['icon' => 'check', 'size' => 'S', 'rows' => 4, 'register' => null, 'allows' => $everyone],
             'overdue' => ['icon' => 'flag', 'size' => 'L', 'rows' => 4, 'register' => null, 'allows' => $everyone],
             'needs' => ['icon' => 'flag', 'size' => 'L', 'register' => null, 'allows' => $everyone],

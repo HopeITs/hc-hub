@@ -160,3 +160,15 @@ test('the help menu holds the tour, the guideline and the bug report behind one 
         ->and($xpath->query('.//*[@role="menu"]//a[@data-guideline]', $menu))->toHaveCount(1)
         ->and($xpath->query('.//*[@role="menu"]//a[@data-report-bug]', $menu))->toHaveCount(1);
 });
+
+test('the sidebar folds each group into one row and opens the group of the current page', function () {
+    $this->actingAs(User::factory()->role('Super Admin')->create())
+        ->get(route('projects.index'))
+        ->assertSee('data-side-group-toggle="projects_delivery"', false)
+        ->assertSee('data-side-group-toggle="administration"', false)
+        ->assertDontSee('data-side-group-toggle="overview"', false)
+        ->assertSee('x-data="{ open: true ||', false)
+        ->assertSee('x-data="{ open: false ||', false)
+        ->assertSee('data-side-link="projects.index"', false)
+        ->assertSee('data-side-fly="projects_delivery"', false);
+});

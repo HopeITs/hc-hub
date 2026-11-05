@@ -355,11 +355,6 @@ return [
             'description' => 'Every project on one strip, from proposal to closing, so you see where work piles up and what moves next.',
             'locked' => 'Opens for people who can see projects.',
         ],
-        'notes' => [
-            'title' => 'My notes',
-            'description' => 'Your own quick notes and reminders, private to you, always one glance away.',
-            'locked' => 'Everyone has this panel.',
-        ],
         'todo' => [
             'title' => 'My to-do',
             'description' => 'A short private list: add what you must do, tick it off, drag to reorder. Only you can see it.',

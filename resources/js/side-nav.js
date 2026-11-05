@@ -4,9 +4,16 @@
  * Desktop: an icon rail that expands to labels. The state lives on
  * <html class="dk-nav-open"> (set before first paint by partials/head from
  * localStorage "hc-nav"), so wire:navigate, which keeps <html>, never
- * flashes the other state. While collapsed, hovering or focusing a link
- * shows its label in a floating tip, because the rail's own scroll box
- * would clip a CSS tooltip.
+ * flashes the other state. On the rail, hovering a group shows its links in a
+ * fly-out beside the rail; hovering a plain link shows its label in a tip.
+ * Clicking a group on the rail expands the sidebar and opens that group.
+ *
+ * Expanded, each group folds open in place; the groups a person opened are
+ * remembered (localStorage "hc-nav-groups"), and the group holding the
+ * current page always opens.
+ *
+ * Pins: the star beside a link pins that page to the top of the sidebar
+ * (POST nav/pins, stored on the user). The sidebar has no keyboard shortcuts.
  *
  * Below 900px the rail is hidden; the top bar's menu button lays the full
  * sidebar over the page (<html class="dk-nav-mobile">). Esc, the scrim or
@@ -19,11 +26,23 @@ function closeMobile() {
     document.documentElement.classList.remove('dk-nav-mobile');
 }
 
+function readGroups() {
+    try {
+        const saved = JSON.parse(localStorage.getItem('hc-nav-groups') ?? '[]');
+
+        return Array.isArray(saved) ? saved : [];
+    } catch {
+        return [];
+    }
+}
+
 window.hcSideNavClose = closeMobile;
 
 window.hcSideNavOpenMobile = () => {
     document.documentElement.classList.add('dk-nav-mobile');
 };
+
+document.addEventListener('livewire:navigating', closeMobile);
 
 document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && document.documentElement.classList.contains('dk-nav-mobile')) {
@@ -31,15 +50,39 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-document.addEventListener('livewire:navigating', closeMobile);
-
 document.addEventListener('alpine:init', () => {
-    window.Alpine.data('hcSideNav', () => ({
+    window.Alpine.store('hcNav', {
+        groups: readGroups(),
+
+        isOpen(group) {
+            return this.groups.includes(group);
+        },
+
+        remember(group, open) {
+            this.groups = open ? [...new Set([...this.groups, group])] : this.groups.filter((name) => name !== group);
+
+            try {
+                localStorage.setItem('hc-nav-groups', JSON.stringify(this.groups));
+            } catch {
+                // Without storage the groups simply start closed next time.
+            }
+        },
+    });
+
+    window.Alpine.data('hcSideNav', (config = {}) => ({
         expanded: document.documentElement.classList.contains('dk-nav-open'),
+        pins: config.pins ?? [],
+        pages: config.pages ?? {},
+        context: config.context ?? false,
         tipText: '',
         tipTop: 0,
         tipInset: 0,
         tipSide: 'left',
+        fly: null,
+        flyStyle: {},
+        flyAnchor: null,
+        flyTimer: null,
+        hideTimer: null,
 
         // Keep the rail where it was scrolled: wire:navigate re-renders it on every page.
         init() {
@@ -62,16 +105,17 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        rail() {
+            return ! this.expanded && desktop();
+        },
+
         toggle() {
             this.expanded = ! this.expanded;
             this.untip();
+            this.unfly();
 
-            // Only a click animates the width; restoring the saved state on page load never does.
-            const html = document.documentElement;
-            html.classList.add('dk-nav-animate');
-            html.classList.toggle('dk-nav-open', this.expanded);
-            clearTimeout(this.animationTimer);
-            this.animationTimer = setTimeout(() => html.classList.remove('dk-nav-animate'), 300);
+            // The width switches at once: the sidebar never animates.
+            document.documentElement.classList.toggle('dk-nav-open', this.expanded);
 
             try {
                 localStorage.setItem('hc-nav', this.expanded ? 'open' : 'rail');
@@ -80,10 +124,121 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        /*
+         * A group row opens its links. On the collapsed desktop rail the links
+         * have no room, so the click first expands the sidebar, then opens it.
+         */
+        openGroup(group, name) {
+            if (this.rail()) {
+                this.toggle();
+                group.open = true;
+                this.$store.hcNav.remember(name, true);
+
+                return;
+            }
+
+            group.open = ! group.open;
+            this.$store.hcNav.remember(name, group.open);
+        },
+
+        async pin(route) {
+            const was = [...this.pins];
+            this.pins = this.pins.includes(route) ? this.pins.filter((name) => name !== route) : [...this.pins, route];
+
+            try {
+                const response = await fetch(config.pinUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                    },
+                    body: JSON.stringify({ route }),
+                });
+
+                if (! response.ok) {
+                    throw new Error(String(response.status));
+                }
+
+                this.pins = (await response.json()).pins ?? this.pins;
+            } catch {
+                this.pins = was;
+            }
+        },
+
+        hover(event) {
+            const target = event.target instanceof Element ? event.target : null;
+            const flyer = target?.closest('[data-fly]');
+
+            clearTimeout(this.hideTimer);
+
+            if (flyer && this.rail()) {
+                this.untip();
+                clearTimeout(this.flyTimer);
+                this.flyTimer = setTimeout(() => this.showFly(flyer.dataset.fly, flyer), this.fly ? 0 : 120);
+
+                return;
+            }
+
+            this.tip(event);
+        },
+
+        /*
+         * The fly-out opens beside the icon it belongs to: its title row lines
+         * up with the icon, a pointer on its edge aims at the icon's center,
+         * and the icon stays highlighted while it is open. Near the bottom of
+         * the screen the panel moves up, and the pointer still finds the icon.
+         */
+        showFly(name, anchor) {
+            const box = anchor.getBoundingClientRect();
+            const rtl = document.documentElement.dir === 'rtl';
+            const center = box.top + box.height / 2;
+            const side = rtl
+                ? { right: `${window.innerWidth - box.left + 10}px`, left: 'auto' }
+                : { left: `${box.right + 10}px`, right: 'auto' };
+
+            this.flyAnchor?.classList.remove('dk-flying');
+            this.flyAnchor = anchor;
+            anchor.classList.add('dk-flying');
+
+            // An object, not a string: a string binding replaces the whole style attribute and wipes x-show's display:none on the other fly-outs.
+            const place = (height) => {
+                const top = Math.max(8, Math.min(center - 26, window.innerHeight - height - 8));
+
+                this.flyStyle = { ...side, top: `${top}px`, '--dk-fly-caret': `${center - top}px` };
+            };
+
+            place(0);
+            this.fly = name;
+            this.$nextTick(() => {
+                const panel = this.$root.querySelector(`[data-side-fly="${name}"]`);
+
+                if (panel) {
+                    place(panel.offsetHeight);
+                }
+            });
+        },
+
+        keepFly() {
+            clearTimeout(this.hideTimer);
+        },
+
+        leave() {
+            clearTimeout(this.flyTimer);
+            this.untip();
+            this.hideTimer = setTimeout(() => this.unfly(), 220);
+        },
+
+        unfly() {
+            this.fly = null;
+            this.flyAnchor?.classList.remove('dk-flying');
+            this.flyAnchor = null;
+        },
+
         tip(event) {
             const link = event.target instanceof Element ? event.target.closest('[data-label]') : null;
 
-            if (! link || this.expanded || ! desktop()) {
+            if (! link || ! this.rail()) {
                 this.untip();
 
                 return;
