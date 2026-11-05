@@ -5,6 +5,7 @@ use App\Enums\MilestoneStatus;
 use App\Enums\ProjectStatus;
 use App\Enums\ResultType;
 use App\Models\AnnualPlan;
+use App\Models\DonorProposal;
 use App\Models\Indicator;
 use App\Models\Milestone;
 use App\Models\PlanIndicator;
@@ -15,6 +16,7 @@ use App\Models\Report;
 use App\Models\Result;
 use App\Models\Strategy;
 use App\Models\Task;
+use App\Models\TransfersTracking;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
@@ -75,7 +77,7 @@ test('program detail lists only its own projects', function () {
 
     Livewire::actingAs($user)
         ->test('pages::programs.show', ['program' => $subject])
-        ->assertSet('tab', 'projects')
+        ->assertSet('tab', 'overview')
         ->assertSee('Aleppo Wells')
         ->assertDontSee('Homs Shelter');
 });
@@ -219,7 +221,7 @@ test('program logframe counts statements per level and flags unmeasured ones', f
         ->assertSee('2 statements without indicators');
 });
 
-test('program plan timeline fills the strategy window and totals each plan', function () {
+test('program plan years fill the strategy window and total each plan', function () {
     $user = User::factory()->role('General Manager')->create();
     $strategy = Strategy::factory()->create(['start_year' => 2025, 'end_year' => 2027]);
     $program = Program::factory()->create(['strategy_id' => $strategy->id]);
@@ -232,16 +234,16 @@ test('program plan timeline fills the strategy window and totals each plan', fun
     Report::factory()->approved()->create(['plan_indicator_id' => $target->id]);
     Report::factory()->create(['plan_indicator_id' => $target->id]);
 
-    $timeline = Livewire::actingAs($user)
+    $years = Livewire::actingAs($user)
         ->test('pages::programs.show', ['program' => $program])
         ->set('tab', 'plans')
         ->assertSee('No plan written for this year')
         ->instance()
-        ->planTimeline;
+        ->planYears;
 
-    expect(array_column($timeline, 'year'))->toBe([2025, 2026, 2027])
-        ->and($timeline[0]['plan'])->toBeNull()
-        ->and($timeline[1])->toMatchArray([
+    expect(array_column($years, 'year'))->toBe([2025, 2026, 2027])
+        ->and($years[0]['plan'])->toBeNull()
+        ->and($years[1])->toMatchArray([
             'targets' => 1,
             'attributed' => 0,
             'levels' => ['impact' => 1, 'outcome' => 0, 'output' => 0, 'activity' => 0, 'cross-cutting' => 0],
@@ -285,189 +287,6 @@ test('program detail calculates milestone progress without cancelled milestones'
         ->test('pages::programs.show', ['program' => $program])
         ->assertSee('40%')
         ->assertSee('40 of 100 progress points reached');
-});
-
-test('program detail narrows projects with its delivery search', function () {
-    $program = Program::factory()->create();
-    Project::factory()->create(['program_id' => $program->id, 'name' => 'Water Network Expansion']);
-    Project::factory()->create(['program_id' => $program->id, 'name' => 'Shelter Rehabilitation']);
-
-    Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
-        ->set('projectSearch', 'Water')
-        ->assertSee('Water Network Expansion')
-        ->assertDontSee('Shelter Rehabilitation');
-});
-
-test('program delivery timeline filters projects by status', function () {
-    $program = Program::factory()->create();
-    Project::factory()->create(['program_id' => $program->id, 'name' => 'Water Network Expansion', 'status' => ProjectStatus::Active]);
-    Project::factory()->create(['program_id' => $program->id, 'name' => 'Shelter Rehabilitation', 'status' => ProjectStatus::Closed]);
-
-    Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
-        ->set('projectStatus', 'closed')
-        ->assertSee('Shelter Rehabilitation')
-        ->assertDontSee('Water Network Expansion')
-        ->set('projectStatus', 'not-a-status')
-        ->assertSet('projectStatus', '')
-        ->assertSee('Water Network Expansion');
-});
-
-test('program delivery timeline shows weighted progress per project', function () {
-    $this->travelTo('2026-06-01');
-
-    $program = Program::factory()->create();
-    $project = Project::factory()->create([
-        'program_id' => $program->id,
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-    ]);
-    Milestone::factory()->create(['project_id' => $project->id, 'status' => MilestoneStatus::Reached, 'weight_percentage' => '25.00', 'planned_start_date' => '2026-03-01']);
-    Milestone::factory()->create(['project_id' => $project->id, 'status' => MilestoneStatus::Planned, 'weight_percentage' => '75.00', 'planned_start_date' => '2026-10-01']);
-    Milestone::factory()->create(['project_id' => $project->id, 'status' => MilestoneStatus::Cancelled, 'weight_percentage' => '50.00', 'planned_start_date' => '2020-01-01']);
-
-    $component = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
-        ->assertSee('25%')
-        ->assertSee('1 of 2 milestones reached');
-
-    expect($component->instance()->deliveryWindow['start']->toDateString())->toBe('2026-01-01');
-});
-
-test('program delivery timeline flags schedule slippage and milestones outside the project dates', function () {
-    $this->travelTo('2026-07-02');
-
-    $program = Program::factory()->create();
-    $project = Project::factory()->create([
-        'program_id' => $program->id,
-        'status' => ProjectStatus::Active,
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-    ]);
-    Milestone::factory()->create(['project_id' => $project->id, 'status' => MilestoneStatus::Reached, 'weight_percentage' => '25.00', 'planned_start_date' => '2026-03-01']);
-    Milestone::factory()->create(['project_id' => $project->id, 'status' => MilestoneStatus::Planned, 'weight_percentage' => '75.00', 'planned_start_date' => '2027-05-01']);
-
-    $component = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
-        ->assertSee('Behind schedule')
-        ->assertSee('50% expected by today')
-        ->assertSee('1 milestone outside the delivery window');
-
-    expect($component->instance()->deliveryWindow['end']->toDateString())->toBe('2027-05-31');
-});
-
-test('program delivery timeline marks open projects past their end date', function () {
-    $this->travelTo('2026-09-15');
-
-    $program = Program::factory()->create();
-    $project = Project::factory()->create([
-        'program_id' => $program->id,
-        'status' => ProjectStatus::Active,
-        'start_date' => '2025-01-01',
-        'end_date' => '2026-06-30',
-    ]);
-    Milestone::factory()->create(['project_id' => $project->id, 'status' => MilestoneStatus::Planned, 'weight_percentage' => '100.00', 'planned_start_date' => '2026-05-01']);
-
-    Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
-        ->assertSee('Past end date')
-        ->assertDontSee('outside the delivery window');
-});
-
-test('program delivery timeline ignores an unknown status from the url', function () {
-    $program = Program::factory()->create();
-    Project::factory()->create(['program_id' => $program->id, 'name' => 'Water Network Expansion']);
-
-    Livewire::withQueryParams(['projectStatus' => 'not-a-status'])
-        ->actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
-        ->assertSet('projectStatus', '')
-        ->assertSee('Water Network Expansion');
-});
-
-test('program delivery timeline status buttons filter and clear the list', function () {
-    $program = Program::factory()->create();
-    Project::factory()->create(['program_id' => $program->id, 'name' => 'Water Network Expansion', 'status' => ProjectStatus::Active]);
-    Project::factory()->create(['program_id' => $program->id, 'name' => 'Shelter Rehabilitation', 'status' => ProjectStatus::Closed]);
-
-    Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
-        ->call('filterProjectsByStatus', 'active')
-        ->assertSet('projectStatus', 'active')
-        ->assertDontSee('Shelter Rehabilitation')
-        ->call('filterProjectsByStatus', 'archived')
-        ->assertSee('No projects match these filters')
-        ->call('filterProjectsByStatus', 'bogus')
-        ->assertSet('projectStatus', '')
-        ->assertSee('Shelter Rehabilitation');
-});
-
-test('program delivery search treats wildcard characters literally', function () {
-    $program = Program::factory()->create();
-    Project::factory()->create(['program_id' => $program->id, 'name' => 'Water Network Expansion']);
-    Project::factory()->create(['program_id' => $program->id, 'name' => '100% Coverage Drive']);
-
-    Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
-        ->set('projectSearch', '%')
-        ->assertSee('100% Coverage Drive')
-        ->assertDontSee('Water Network Expansion');
-});
-
-test('program delivery timeline does not rate projects that have not started delivery', function () {
-    $this->travelTo('2026-07-02');
-
-    $program = Program::factory()->create();
-    $project = Project::factory()->create([
-        'program_id' => $program->id,
-        'status' => ProjectStatus::Approved,
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-    ]);
-    Milestone::factory()->create(['project_id' => $project->id, 'status' => MilestoneStatus::Planned, 'weight_percentage' => '100.00', 'planned_start_date' => '2026-06-01']);
-
-    Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
-        ->assertSee('Not started')
-        ->assertDontSee('Behind schedule')
-        ->assertDontSee('expected by today');
-});
-
-test('program delivery timeline marks a finished window as past end even without milestones', function () {
-    $this->travelTo('2026-09-15');
-
-    $program = Program::factory()->create();
-    Project::factory()->create([
-        'program_id' => $program->id,
-        'status' => ProjectStatus::Active,
-        'start_date' => '2025-01-01',
-        'end_date' => '2026-03-31',
-    ]);
-
-    Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
-        ->assertSee('Past end date');
-});
-
-test('program delivery window is not stretched by a mistyped milestone date', function () {
-    $this->travelTo('2026-06-01');
-
-    $program = Program::factory()->create();
-    $project = Project::factory()->create([
-        'program_id' => $program->id,
-        'start_date' => '2026-01-01',
-        'end_date' => '2026-12-31',
-    ]);
-    Milestone::factory()->create(['project_id' => $project->id, 'status' => MilestoneStatus::Planned, 'weight_percentage' => '100.00', 'planned_start_date' => '2035-01-01']);
-
-    $window = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
-        ->assertSee('1 milestone outside the delivery window')
-        ->instance()
-        ->deliveryWindow;
-
-    expect($window['end']->toDateString())->toBe('2026-12-31');
 });
 
 test('program detail links each annual plan year to its plan', function () {
@@ -532,4 +351,153 @@ test('program results chain lists each contributing proposal under the program r
         ->assertSee('Multi-program proposal')
         ->assertSee('Proposal root for the other program.')
         ->assertDontSee('Proposal root for this program.');
+});
+
+test('the program overview ranks the viewer\'s own past-due tasks first and calls the program at risk', function () {
+    $employeeId = insertHrEmployee();
+    $program = Program::factory()->create();
+    $project = Project::factory()->create(['program_id' => $program->id, 'name' => 'Wells Repair']);
+    $mine = Task::factory()->create(['source_type' => 'project', 'source_id' => $project->id, 'due_date' => now()->subDays(3)]);
+    $mine->taskAssignees()->delete();
+    $mine->taskAssignees()->create(['employee_id' => $employeeId]);
+    Task::factory()->create(['source_type' => 'program', 'source_id' => $program->id, 'due_date' => now()->subDay()]);
+    Task::factory()->completed()->create(['source_type' => 'program', 'source_id' => $program->id, 'due_date' => now()->subDay()]);
+    Task::factory()->create(['source_type' => 'program', 'source_id' => $program->id, 'due_date' => now()->addWeek()]);
+
+    $page = Livewire::actingAs(userWithRole('General Manager', $employeeId))
+        ->test('pages::programs.show', ['program' => $program])
+        ->assertSeeHtml('data-program-verdict="at_risk"')
+        ->assertSee('You have 1 task past its due date')
+        ->assertSee('1 more task is past due for others');
+
+    expect(array_column($page->instance()->attention, 'key'))->toBe(['my_tasks', 'tasks'])
+        ->and($page->instance()->healthFigures['pastDueTasks'])->toBe(2);
+});
+
+test('the program overview flags late milestones and a missing monthly report for its project', function () {
+    $program = Program::factory()->create();
+    $project = Project::factory()->create(['program_id' => $program->id, 'name' => 'Shelter Fix', 'status' => ProjectStatus::Active]);
+    Milestone::factory()->create(['project_id' => $project->id, 'status' => MilestoneStatus::Ongoing, 'planned_end_date' => now()->subWeek()]);
+    Milestone::factory()->create(['project_id' => $project->id, 'status' => MilestoneStatus::Reached, 'planned_end_date' => now()->subWeek()]);
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::programs.show', ['program' => $program])
+        ->assertSee('Shelter Fix has 1 late milestone')
+        ->assertSee(route('projects.show', ['project' => $project, 'tab' => 'milestones']), false)
+        ->assertSee('1 active project has no '.now()->subMonthNoOverflow()->translatedFormat('F').' report yet')
+        ->assertSeeHtml('data-ledger-report');
+});
+
+test('the program overview calls a program with nothing late on track', function () {
+    $program = Program::factory()->create();
+    Project::factory()->create(['program_id' => $program->id, 'status' => ProjectStatus::Closed]);
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::programs.show', ['program' => $program])
+        ->assertSeeHtml('data-program-verdict="on_track"')
+        ->assertSee('All clear: nothing is late, missing or slipping.');
+});
+
+test('the program overview shows money only to holders of both money permissions', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+    $program = Program::factory()->create();
+    Project::factory()->create(['program_id' => $program->id]);
+
+    Livewire::actingAs(User::factory()->create())
+        ->test('pages::programs.show', ['program' => $program])
+        ->assertDontSeeHtml('data-ledger-funding')
+        ->assertDontSeeHtml('data-program-funding');
+
+    Livewire::actingAs(User::factory()->role('Financial')->create())
+        ->test('pages::programs.show', ['program' => $program])
+        ->assertSeeHtml('data-ledger-funding')
+        ->assertSeeHtml('data-program-funding');
+});
+
+test('old timeline tab links and unknown tabs fall back to the overview', function () {
+    $program = Program::factory()->create();
+    $user = User::factory()->role('General Manager')->create();
+
+    foreach (['projects', 'timeline'] as $oldTab) {
+        Livewire::withQueryParams(['tab' => $oldTab])->actingAs($user)
+            ->test('pages::programs.show', ['program' => $program])
+            ->assertSet('tab', 'overview')
+            ->assertDontSeeHtml('data-test="program-tab-timeline"');
+    }
+
+    Livewire::actingAs($user)
+        ->test('pages::programs.show', ['program' => $program])
+        ->set('tab', 'bogus')
+        ->assertSet('tab', 'overview');
+});
+
+test('the program overview totals money per project and counts an agreement shared by two projects once', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+    $program = Program::factory()->create();
+    $first = Project::factory()->create(['program_id' => $program->id]);
+    $second = Project::factory()->create(['program_id' => $program->id]);
+    $proposal = Proposal::factory()->create();
+    $proposal->projects()->attach([$first->id, $second->id]);
+    $agreement = DonorProposal::factory()->create(['proposal_id' => $proposal->id, 'budget' => '1000.00', 'currency' => 'USD']);
+    TransfersTracking::factory()->create(['donor_proposal_id' => $agreement->id, 'net_amount_received' => '400.00']);
+
+    $page = Livewire::actingAs(User::factory()->role('Financial')->create())
+        ->test('pages::programs.show', ['program' => $program]);
+
+    expect($page->instance()->programFunding)->toBe([['currency' => 'USD', 'committed' => 1000.0, 'received' => 400.0]])
+        ->and(collect($page->instance()->projectLedger)->pluck('funding')->all())
+        ->each->toBe([['currency' => 'USD', 'committed' => 1000.0, 'received' => 400.0]]);
+});
+
+test('a project needs attention only once its past-due tasks reach the threshold', function () {
+    $program = Program::factory()->create();
+    $project = Project::factory()->create(['program_id' => $program->id, 'status' => ProjectStatus::Closed]);
+    $pastDue = fn () => Task::factory()->create(['source_type' => 'project', 'source_id' => $project->id, 'due_date' => now()->subDays(2)]);
+    $needsAttention = fn (): bool => Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::programs.show', ['program' => $program])
+        ->instance()->projectLedger[0]['needsAttention'];
+
+    foreach (range(1, 2) as $i) {
+        $pastDue();
+    }
+    expect($needsAttention())->toBeFalse();
+
+    $pastDue();
+    expect($needsAttention())->toBeTrue();
+});
+
+test('the tasks tab folds each project group under a header with its open and past-due counts', function () {
+    $program = Program::factory()->create();
+    $project = Project::factory()->create(['program_id' => $program->id, 'name' => 'Folded Project']);
+    Task::factory()->create(['source_type' => 'project', 'source_id' => $project->id, 'due_date' => now()->subDay()]);
+    Task::factory()->create(['source_type' => 'project', 'source_id' => $project->id, 'due_date' => now()->addWeek()]);
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::programs.show', ['program' => $program])
+        ->set('tab', 'tasks')
+        ->assertSeeHtml('data-task-group')
+        ->assertSee('2 open')
+        ->assertSee('1 past due')
+        ->assertSeeHtml('data-test="expand-task-groups"');
+});
+
+test('a late transfer is listed for attention but does not flag the project card', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+    $program = Program::factory()->create();
+    $project = Project::factory()->create(['program_id' => $program->id, 'status' => ProjectStatus::Closed]);
+    $proposal = Proposal::factory()->create();
+    $proposal->projects()->attach($project->id);
+    $agreement = DonorProposal::factory()->create(['proposal_id' => $proposal->id, 'currency' => 'USD']);
+    TransfersTracking::factory()->create([
+        'donor_proposal_id' => $agreement->id,
+        'scheduled_date' => now()->subMonth()->toDateString(),
+        'transfer_date' => null,
+        'ar_status' => 'pending',
+    ]);
+
+    $page = Livewire::actingAs(User::factory()->role('Financial')->create())
+        ->test('pages::programs.show', ['program' => $program]);
+
+    expect(array_column($page->instance()->attention, 'key'))->toContain('transfers')
+        ->and($page->instance()->projectLedger[0]['needsAttention'])->toBeFalse();
 });

@@ -2,9 +2,9 @@
     One task on the program's Tasks tab.
 
     Expects $task (with taskAssignees.employee and source loaded) plus the
-    $inkText / $mutedText tone strings the tab passes down. Below the @3xl
+    $inkText / $mutedText tone strings the tab passes down. Below the @5xl
     container width the columns fold into one meta line under the title;
-    from @3xl the meta wrapper becomes `contents`, so each cell lands in the
+    from @5xl the meta wrapper becomes `contents`, so each cell lands in the
     grid column the tab's column header names.
 --}}
 @php
@@ -17,7 +17,7 @@
 @endphp
 
 <li
-    class="grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-x-3 gap-y-2 py-3.5 @3xl/detail:grid-cols-[1.25rem_minmax(0,1fr)_11rem_6rem_7.5rem_8rem_7rem] @3xl/detail:gap-x-4"
+    class="grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-x-3 gap-y-2 py-3.5 @5xl/detail:grid-cols-[1.25rem_minmax(14rem,1fr)_9rem_5.5rem_7rem_6.5rem_7rem] @5xl/detail:gap-x-4"
     wire:key="task-{{ $task->id }}"
     data-task="{{ $task->id }}"
 >
@@ -54,7 +54,7 @@
         </p>
     </div>
 
-    <div class="col-start-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs @3xl/detail:contents">
+    <div class="col-start-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs @5xl/detail:contents">
         {{-- Assignees: photos, the first name in full, the rest counted. --}}
         <div class="flex min-w-0 items-center gap-2">
             @if ($assignees->isEmpty())
@@ -100,13 +100,13 @@
         </span>
 
         <span class="flex items-center gap-2" role="img" aria-label="{{ __('tasks.progress') }} {{ $progress }}%">
-            <span class="h-1 w-14 overflow-hidden rounded-full bg-secondary-soft dark:bg-surface-2 @3xl/detail:flex-1" aria-hidden="true">
+            <span class="h-1 w-14 overflow-hidden rounded-full bg-secondary-soft dark:bg-surface-2 @5xl/detail:flex-1" aria-hidden="true">
                 <span class="block h-full rounded-full bg-secondary-dark dark:bg-ink-muted" style="width: {{ $progress }}%"></span>
             </span>
             <span class="w-9 text-end font-semibold tabular-nums {{ $progress >= 100 ? $inkText : $mutedText }}">{{ $progress }}%</span>
         </span>
 
-        <span class="@3xl/detail:justify-self-end">
+        <span class="@5xl/detail:justify-self-end">
             <x-ui.enum-badge :case="$task->status" />
         </span>
     </div>
