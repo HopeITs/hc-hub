@@ -39,6 +39,7 @@ return [
         'cities' => 'المدن',
         'activity-log' => 'سجل النشاط',
         'notification-settings' => 'إعدادات الإشعارات',
+        'ai' => 'المساعد الذكي',
     ],
     'actions' => [
         'view' => 'عرض',
@@ -55,5 +56,7 @@ return [
         'aggregate' => 'تجميع',
         'manage-reviewers' => 'إدارة المراجعين',
         'correct-status' => 'تصحيح الحالة',
+        'draft' => 'الصياغة بالذكاء الاصطناعي',
+        'view-usage' => 'عرض الاستخدام',
     ],
 ];

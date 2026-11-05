@@ -44,6 +44,20 @@ return [
             'after_commit' => false,
         ],
 
+        /*
+        | AI calls (App\Jobs\RunAiPrompt) run on their own queue so a slow
+        | model never holds up notifications. retry_after must stay above the
+        | job's 150 s timeout, or a slow answer would be started twice.
+        */
+        'ai' => [
+            'driver' => 'database',
+            'connection' => env('DB_QUEUE_CONNECTION'),
+            'table' => env('DB_QUEUE_TABLE', 'jobs'),
+            'queue' => 'ai',
+            'retry_after' => 200,
+            'after_commit' => true,
+        ],
+
         'beanstalkd' => [
             'driver' => 'beanstalkd',
             'host' => env('BEANSTALKD_QUEUE_HOST', 'localhost'),

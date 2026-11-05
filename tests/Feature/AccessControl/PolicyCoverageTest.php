@@ -2,6 +2,7 @@
 
 use App\Models\Account;
 use App\Models\Activity;
+use App\Models\AiRequest;
 use App\Models\DonorProposal;
 use App\Models\FundingAgreementInstallment;
 use App\Models\HrCenter;
@@ -63,6 +64,7 @@ use Illuminate\Support\Facades\Gate;
 function modelsGuardedWithoutPolicy(): array
 {
     return [
+        AiRequest::class => ['ai', 'The AI usage ledger: written only by App\Support\Ai\AiGateway, read only under ai.view-usage.'],
         Account::class => ['accounts', 'accounts.* permissions on the admin accounts page and the transfer forms.'],
         Activity::class => ['activity-log', 'The global log needs activity-log.view; a record\'s own Activity tab follows that record\'s page.'],
         DonorProposal::class => ['funding-agreements', 'funding-agreements.* permissions (ManagesAgreementForm).'],
