@@ -64,7 +64,7 @@ trait SummarisesIndicators
             }
 
             if ($row['achieved'] !== null) {
-                $achievements[] = $row['achieved'];
+                $achievements[] = max(0.0, min(100.0, $row['achieved']));
             }
 
             if ($row['latestDate'] !== null && ($lastReading === null || $row['latestDate']->greaterThan($lastReading))) {

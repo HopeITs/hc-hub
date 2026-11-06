@@ -648,3 +648,37 @@ test('an inspected target that does not fit its chain says why', function () {
         ->call('openInspectModal', $indicator->id)
         ->assertSee(__('targets.issue_plan_program_differs_from_result'));
 });
+
+test('the chips, cards and pager all render inside the Livewire component', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Indicator::factory()->create(['result_id' => Result::factory()->create()->id, 'name' => 'People reached']);
+
+    $html = $this->actingAs($user)->get(route('indicators.index'))->assertOk()->getContent();
+
+    $document = new DOMDocument;
+    @$document->loadHTML('<?xml encoding="utf-8"?>'.$html);
+    $xpath = new DOMXPath($document);
+    $root = '//section[@*[name()="wire:name"]="pages::indicators.index"]';
+
+    foreach (['//*[@data-test="focus-chip-reporting"]', '//*[@role="radio"]', '//article'] as $inner) {
+        expect($xpath->query($root.$inner)->length)->toBeGreaterThan(0, "{$inner} sits outside the component");
+    }
+});
+
+test('a headline average caps each indicator at one hundred percent and on track is counted against every indicator', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $result = Result::factory()->create();
+    $indicator = Indicator::factory()->create([
+        'result_id' => $result->id,
+        'measure' => IndicatorMeasure::Numeric,
+        'baseline' => 0,
+        'target' => 100,
+    ]);
+    IndicatorProgress::factory()->create(['indicator_id' => $indicator->id, 'value' => 1500, 'date' => now()->subDay()]);
+    Indicator::factory()->create(['result_id' => $result->id]);
+
+    $component = Livewire::actingAs($user)->test('pages::indicators.index');
+
+    expect($component->get('overview')['achieved'])->toBeLessThanOrEqual(100.0);
+    $component->assertSee('of 2');
+});

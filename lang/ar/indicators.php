@@ -56,6 +56,7 @@ return [
     'no_targets_committed_against_this_indicator_yet' => 'لا توجد مستهدفات ملتزَم بها لهذا المؤشر بعد.',
     'not_enough_readings' => 'قراءات غير كافية',
     'off_track' => 'خارج المسار',
+    'count_of_total' => ':count من :total',
     'on_track' => 'على المسار',
     'one_dated_number_with_the_evidence_it_came_from' => 'رقم واحد مؤرخ مع الدليل الذي استُمد منه.',
     'only_an_indicator_carrying_no_targets_can_be_deleted' => 'لا يمكن حذف إلا المؤشر الذي ليست له مستهدفات.',

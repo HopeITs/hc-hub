@@ -220,7 +220,7 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
         ['label' => __('common.indicators'), 'value' => number_format($overview['indicators']), 'tone' => 'neutral'],
         ['label' => __('indicators.readings_logged'), 'value' => number_format($overview['readings']), 'tone' => 'neutral'],
         ['label' => __('indicators.average_achievement'), 'value' => $overview['achieved'] === null ? '—' : number_format($overview['achieved'], 0).'%', 'tone' => $achievementTone],
-        ['label' => __('indicators.on_track'), 'value' => $onTrackShare === null ? '—' : number_format($onTrackShare, 0).'%', 'tone' => $onTrackTone],
+        ['label' => __('indicators.on_track'), 'value' => __('indicators.count_of_total', ['count' => $overview['rag']['green'], 'total' => $overview['indicators']]), 'tone' => $onTrackTone],
     ];
 @endphp
 

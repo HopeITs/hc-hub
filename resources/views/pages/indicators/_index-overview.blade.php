@@ -55,6 +55,7 @@
                 </div>
             </div>
 
+            <div class="min-w-0 flex-1">
                     <p class="type-label text-secondary-medium dark:text-ink-muted">{{ __('indicators.commitments_behind_these_indicators') }}</p>
                     <p class="mt-1 text-sm font-semibold text-secondary-dark dark:text-ink">
                         {{ trans_choice('common.count_target', $overview['targets'], ['count' => $overview['targets']]) }}
@@ -87,7 +88,6 @@
                             @endif
                         </div>
                     @endif
-                </div>
             </div>
         </div>
     </div>

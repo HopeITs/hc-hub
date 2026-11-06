@@ -56,6 +56,7 @@ return [
     'no_targets_committed_against_this_indicator_yet' => 'No targets committed against this indicator yet.',
     'not_enough_readings' => 'Not enough readings',
     'off_track' => 'Off track',
+    'count_of_total' => ':count of :total',
     'on_track' => 'On track',
     'one_dated_number_with_the_evidence_it_came_from' => 'One dated number with the evidence it came from.',
     'only_an_indicator_carrying_no_targets_can_be_deleted' => 'Only an indicator carrying no targets can be deleted.',
