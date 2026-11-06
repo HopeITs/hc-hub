@@ -15,9 +15,8 @@
     <ul class="dk-slist">
         @foreach ($portfolio['upcoming'] as $strategy)
             @php
-                $months = max(1, (int) floor($today->diffInMonths(Carbon::create($strategy['start_year'], 1, 1), true)));
                 $ready = $readiness[$strategy['id']] ?? null;
-                $state = trans_choice('strategies.starts_in_months', $months, ['count' => $months]);
+                $state = __('strategies.starts_on', ['date' => Carbon::create($strategy['start_year'], 1, 1)->translatedFormat(__('formats.month_year'))]);
 
                 if ($strategy['programs_count'] === 0) {
                     $state .= ' · '.__('strategies.no_programs_linked_yet');

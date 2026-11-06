@@ -4,7 +4,7 @@ use App\Support\Desk\Money;
 use App\Support\StrategyRollup;
 
 test('the verdict reads the share of targets on pace', function (int $on, int $total, string $key, string $tone, int $behind) {
-    expect(StrategyRollup::verdict($on, $total))->toBe(['key' => $key, 'tone' => $tone, 'on' => $on, 'total' => $total, 'behind' => $behind]);
+    expect(StrategyRollup::verdict($on, $total))->toBe(['key' => $key, 'tone' => $tone, 'on' => $on, 'total' => $total, 'behind' => $behind, 'unrated' => 0, 'all' => $total]);
 })->with([
     '95 of 100 is on track' => [95, 100, 'on_track', 'good', 5],
     '94 of 100 is mostly on track' => [94, 100, 'mostly_on_track', 'warn', 6],
@@ -13,6 +13,12 @@ test('the verdict reads the share of targets on pace', function (int $on, int $t
     '33 of 35 is mostly on track' => [33, 35, 'mostly_on_track', 'warn', 2],
     '35 of 35 is on track with nobody behind' => [35, 35, 'on_track', 'good', 0],
 ]);
+
+test('targets with no figures yet never let the verdict read "On track", and never soften a worse one', function () {
+    expect(StrategyRollup::verdict(39, 39, 22))->toMatchArray(['key' => 'incomplete', 'tone' => 'warn', 'unrated' => 22, 'all' => 61])
+        ->and(StrategyRollup::verdict(39, 39, 0))->toMatchArray(['key' => 'on_track', 'tone' => 'good'])
+        ->and(StrategyRollup::verdict(1, 2, 5))->toMatchArray(['key' => 'off_track', 'tone' => 'critical', 'all' => 7]);
+});
 
 test('no rated targets means no verdict', function () {
     expect(StrategyRollup::verdict(0, 0))->toBeNull();

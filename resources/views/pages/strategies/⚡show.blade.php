@@ -224,7 +224,7 @@ new #[Layout('layouts::desk'), Title('titles.strategy')] class extends Component
     $rollup = $this->rollup;
     $currentYear = now()->year;
     $spanYears = $strategy->end_year - $strategy->start_year + 1;
-    $verdict = $rollup['results'] === null ? null : \App\Support\StrategyRollup::verdict($rollup['results']['on'], $rollup['results']['total']);
+    $verdict = $rollup['results'] === null ? null : \App\Support\StrategyRollup::verdict($rollup['results']['on'], $rollup['results']['total'], $rollup['results']['unrated']);
     $monthYear = fn (int $year, int $month): string => '<bdi>'.e(\Illuminate\Support\Carbon::create($year, $month)->translatedFormat(__('formats.month_year'))).'</bdi>';
     $deleteBlocker = match (true) {
         $strategy->programs_count > 0 => __('strategies.cannot_delete_has_programs'),

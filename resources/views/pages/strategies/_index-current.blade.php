@@ -37,7 +37,7 @@
         @php
             $rollup = $rollups[$strategy['id']] ?? null;
             $results = $rollup['results'] ?? null;
-            $verdict = $results === null ? null : StrategyRollup::verdict($results['on'], $results['total']);
+            $verdict = $results === null ? null : StrategyRollup::verdict($results['on'], $results['total'], $results['unrated']);
             $funding = $rollup['funding'] ?? null;
             $risks = $rollup['risks'] ?? null;
             $lateReports = $rollup['late']['reports'] ?? null;

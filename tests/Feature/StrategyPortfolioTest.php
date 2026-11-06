@@ -279,7 +279,7 @@ test('a strategy remains active through its ending year', function () {
         ->assertDontSeeText(__('strategies.no_active_strategy'));
 });
 
-test('an upcoming strategy says how soon it starts and how many programs are ready', function () {
+test('an upcoming strategy says when it starts and how many programs are ready', function () {
     $user = User::factory()->role('General Manager')->create();
     $strategy = Strategy::factory()->create(['name' => 'Next Strategy', 'start_year' => 2027, 'end_year' => 2031]);
     Strategy::factory()->create(['name' => 'Empty Strategy', 'start_year' => 2028, 'end_year' => 2032]);
@@ -292,8 +292,8 @@ test('an upcoming strategy says how soon it starts and how many programs are rea
 
     $response
         ->assertOk()
-        ->assertSeeText(trans_choice('strategies.starts_in_months', 6, ['count' => 6]).' · '.trans_choice('strategies.programs_ready', 2, ['planned' => 0, 'total' => 2]))
-        ->assertSeeText(trans_choice('strategies.starts_in_months', 18, ['count' => 18]).' · '.__('strategies.no_programs_linked_yet'));
+        ->assertSeeText(__('strategies.starts_on', ['date' => 'Jan 2027']).' · '.trans_choice('strategies.programs_ready', 2, ['planned' => 0, 'total' => 2]))
+        ->assertSeeText(__('strategies.starts_on', ['date' => 'Jan 2028']).' · '.__('strategies.no_programs_linked_yet'));
 });
 
 test('the strategy portfolio has a clear empty state', function () {
