@@ -1420,6 +1420,80 @@ test('the default due-date sort lists unfinished tasks before done ones', functi
         ->toBe(['Dated open task', 'Undated open task', 'Old finished task']);
 });
 
+test('a view-only user sees plain status and due date text on board cards and a view-only notice', function () {
+    Role::create(['name' => 'Task Viewer', 'guard_name' => 'web'])->givePermissionTo('tasks.view');
+    $viewer = User::factory()->role('Task Viewer')->create();
+    $task = Task::factory()->create(['status' => TaskStatus::Todo, 'due_date' => '2024-03-25']);
+
+    Livewire::actingAs($viewer)
+        ->test('pages::tasks.index')
+        ->set('view', 'board')
+        ->assertDontSee('data-test="task-board-due-date-'.$task->id.'"', false)
+        ->assertDontSee('data-test="task-quick-status-'.$task->id.'"', false)
+        ->assertSee('data-test="task-board-due-date-text-'.$task->id.'"', false)
+        ->assertSee('Mar 25, 2024')
+        ->assertSee('You can view these tasks. Only tasks you created or are assigned to can be changed.');
+});
+
+test('the task creator keeps the editable due date on their board card and sees no view-only notice', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $task = Task::factory()->create(['status' => TaskStatus::Todo, 'created_by' => $user->id]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'board')
+        ->assertSee('data-test="task-board-due-date-'.$task->id.'"', false)
+        ->assertDontSee('data-test="task-board-due-date-text-'.$task->id.'"', false)
+        ->assertDontSee('You can view these tasks.');
+});
+
+test('the task register explains overdue and missed, and labels the related-to filter', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->assertSee('Started, past its due date')
+        ->assertSee('Not started, past its due date')
+        ->assertSee('Anything')
+        ->assertSee('Nothing open is assigned to you.');
+});
+
+test('list cards show the year on a due date outside the current year', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $task = Task::factory()->create(['due_date' => '2024-03-25', 'created_by' => $user->id]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->assertSee('data-test="task-card-due-date-'.$task->id.'"', false)
+        ->assertSee('Mar 25, 2024');
+});
+
+test('stat chips are only coloured when their count is above zero', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->create(['status' => TaskStatus::Todo, 'due_date' => now()->addMonths(2)]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->assertDontSeeHtml('class="dk-bad"')
+        ->assertDontSeeHtml('class="dk-warn"');
+});
+
+test('list cards offer the subtask toggle only when a task has subtasks', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $parent = Task::factory()->create();
+    $loneTask = Task::factory()->create();
+    Task::factory()->subtaskOf($parent)->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('listLayout', 'narrow')
+        ->assertSeeHtml('data-test="task-subtasks-toggle-mobile-'.$parent->id.'"')
+        ->assertDontSeeHtml('data-test="task-subtasks-toggle-mobile-'.$loneTask->id.'"');
+});
+
 test('the task form is rendered only while its drawer is open', function () {
     $user = User::factory()->role('General Manager')->create();
 
@@ -1468,7 +1542,7 @@ test('the list renders only the layout the browser reported', function (?string 
         ->html();
 
     expect(str_contains($html, 'data-test="task-row-'.$task->id.'"'))->toBe($table)
-        ->and(str_contains($html, 'data-test="task-subtasks-toggle-mobile-'.$task->id.'"'))->toBe($cards);
+        ->and(str_contains($html, 'data-test="task-card-'.$task->id.'"'))->toBe($cards);
 })->with([
     'not reported yet renders both' => [null, true, true],
     'wide renders the table' => ['wide', true, false],

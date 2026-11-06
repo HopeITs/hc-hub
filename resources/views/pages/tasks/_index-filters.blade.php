@@ -4,7 +4,19 @@
     view switch, filters and Clear live in the x-desk.register frame.) Included by
     ⚡index.blade.php, whose top PHP block defines $filtersAreActive.
 --}}
-    <div class="flex flex-col gap-3 rounded-2xl border border-secondary-soft bg-secondary-soft/20 p-4 dark:border-line dark:bg-white/[0.03]" data-test="my-tasks-rail">
+    @if (! auth()->user()->can('tasks.update') && ! auth()->user()->can('create', App\Models\Task::class))
+        <p class="flex items-start gap-2 rounded-xl bg-secondary-soft/40 px-3 py-2 text-xs text-secondary-dark dark:bg-white/[0.04] dark:text-ink-muted" data-test="task-view-only-notice">
+            <flux:icon.eye variant="micro" class="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+            {{ __('tasks.view_only_notice') }}
+        </p>
+    @endif
+
+    {{-- Nothing open for the viewer: one quiet line instead of a big empty box. --}}
+    <div @class([
+        'flex rounded-2xl border border-secondary-soft bg-secondary-soft/20 dark:border-line dark:bg-white/[0.03]',
+        'flex-col gap-3 p-4' => $this->myTasksPreview->isNotEmpty(),
+        'flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5' => $this->myTasksPreview->isEmpty(),
+    ]) data-test="my-tasks-rail">
         <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-2">
                 <flux:icon name="user-circle" variant="micro" class="size-5 text-primary dark:text-brand-text" aria-hidden="true" />
@@ -62,13 +74,14 @@
                             href="{{ route('tasks.show', $myTask) }}"
                             wire:navigate
                             title="{{ $myTask->title }}"
+                            dir="auto"
                             x-on:click.stop
                             class="truncate text-sm font-semibold text-secondary-dark hover:text-primary hover:underline dark:text-ink dark:hover:text-status-critical"
                             data-test="my-task-title-{{ $myTask->id }}"
                         >{{ $myTask->title }}</a>
                         <div class="flex items-center justify-between text-xs text-secondary-medium dark:text-ink-muted">
                             <span @class(['font-semibold text-status-critical' => $myTask->isOverdue() || $myTask->isMissed()])>
-                                {{ $myTask->due_date?->translatedFormat('M j') ?? __('tasks.no_due_date') }}
+                                {{ $myTask->due_date?->translatedFormat(__($myTask->due_date->isCurrentYear() ? 'formats.date_short' : 'formats.date')) ?? __('tasks.no_due_date') }}
                             </span>
                             <x-ui.enum-badge :case="$myTask->priority" />
                         </div>
@@ -76,7 +89,7 @@
                 @endforeach
             </div>
         @else
-            <p class="text-sm text-secondary-medium dark:text-ink-muted" data-test="my-tasks-empty">{{ __('common.no_tasks_yet') }}</p>
+            <p class="text-sm text-secondary-medium dark:text-ink-muted" data-test="my-tasks-empty">{{ __('tasks.nothing_open_for_you') }}</p>
         @endif
     </div>
 

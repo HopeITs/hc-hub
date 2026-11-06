@@ -172,7 +172,7 @@ trait FiltersTaskDirectory
                 // a subtask panel in place (client-side, no extra round trip) instead
                 // of sending people to the parent task's own page to see them. Each
                 // subtask's own assignees are loaded the same way as the parent's.
-                'subtasks:id,parent_task_id,title,status,priority,due_date,created_by',
+                'subtasks:id,parent_task_id,title,kind,reportable_type,reportable_id,status,priority,due_date,created_by',
                 'subtasks.taskAssignees.employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar',
             ])
             ->when($search !== '', function (Builder $query) use ($search): void {
