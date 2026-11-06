@@ -176,7 +176,7 @@ test('program management explains that programs come from hr when there are none
         ->assertSeeText('Programs appear here once they are added in the HR system.');
 });
 
-test('program cards are the default and link to their details', function () {
+test('each program is a row that opens its details', function () {
     $program = Program::factory()->create(['name' => 'Water Security']);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
@@ -188,7 +188,7 @@ test('program cards are the default and link to their details', function () {
         ->assertDontSee('matching program');
 });
 
-test('program cards load eight initially and four more on request', function () {
+test('the program list loads eight initially and four more on request', function () {
     foreach (range(1, 9) as $number) {
         Program::factory()->create(['name' => 'Program '.str_pad((string) $number, 2, '0', STR_PAD_LEFT)]);
     }
@@ -288,7 +288,7 @@ test('the manager filter lists only people who manage a program, with their coun
         ->assertSee('Not assigned (1)');
 });
 
-test('each card says what is late, at risk or unfunded in its projects', function () {
+test('each row says what is late, at risk or unfunded in its projects', function () {
     $this->travelTo('2026-09-15 09:00:00');
 
     $troubled = Program::factory()->create(['name' => 'Troubled Program']);
@@ -314,7 +314,7 @@ test('a program with no strategy reads "Not linked yet" with an Assign shortcut'
         ->assertSee('Assign a strategy and manager to Orphan Program');
 });
 
-test('the card list says how many of the programs are showing', function () {
+test('the list says how many of the programs are showing', function () {
     foreach (range(1, 9) as $number) {
         Program::factory()->create(['name' => 'Program '.str_pad((string) $number, 2, '0', STR_PAD_LEFT)]);
     }
@@ -384,4 +384,73 @@ test('a register narrowed to a gap names it in a chip with a labelled clear butt
         ->set('gap', '')
         ->assertSet('gap', '')
         ->assertDontSeeHtml('data-gap-filter-chip');
+});
+
+test('each program has one status word and the three tab counts add up to the list', function () {
+    $this->travelTo('2026-09-15 09:00:00');
+
+    $late = Program::factory()->create(['name' => 'Late Program']);
+    Project::factory()->create(['program_id' => $late->id, 'status' => ProjectStatus::Active, 'end_date' => '2026-08-01']);
+    Program::factory()->unassigned()->create(['name' => 'Unlinked Program']);
+
+    $page = Livewire::actingAs(User::factory()->role('General Manager')->create())->test('pages::programs.index');
+
+    expect($page->instance()->focusCounts)->toMatchArray(['attention' => 1, 'setup' => 1, 'ontrack' => 0, 'total' => 2]);
+
+    $page->assertSeeHtml('data-status="attention"')
+        ->assertSeeHtml('data-status="setup"')
+        ->assertSee('Needs attention')
+        ->assertSee('Not set up yet');
+});
+
+test('the status buttons narrow the list and pressing the active one clears it', function () {
+    $this->travelTo('2026-09-15 09:00:00');
+
+    $late = Program::factory()->create(['name' => 'Late Program']);
+    Project::factory()->create(['program_id' => $late->id, 'status' => ProjectStatus::Active, 'end_date' => '2026-08-01']);
+    Program::factory()->unassigned()->create(['name' => 'Unlinked Program']);
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::programs.index')
+        ->call('setFocus', 'attention')
+        ->assertSet('focus', 'attention')
+        ->assertSee('Late Program')
+        ->assertDontSee('Unlinked Program')
+        ->call('setFocus', 'attention')
+        ->assertSet('focus', '')
+        ->assertSee('Unlinked Program')
+        ->call('setFocus', 'nonsense')
+        ->assertSet('focus', '');
+});
+
+test('late programs come first, then unfunded ones, then the ones still to set up', function () {
+    $this->travelTo('2026-09-15 09:00:00');
+
+    $fine = Program::factory()->create(['name' => 'Aaa Unfunded Program']);
+    Project::factory()->create(['program_id' => $fine->id, 'status' => ProjectStatus::Closed, 'end_date' => '2026-12-01']);
+    Program::factory()->unassigned()->create(['name' => 'Bbb Unlinked Program']);
+    $late = Program::factory()->create(['name' => 'Zzz Late Program']);
+    Project::factory()->create(['program_id' => $late->id, 'status' => ProjectStatus::Active, 'end_date' => '2026-08-01']);
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::programs.index')
+        ->assertSeeInOrder(['Zzz Late Program', 'Aaa Unfunded Program', 'Bbb Unlinked Program']);
+});
+
+test('the manager filter sits behind More filters and the controls stay inside the component', function () {
+    Program::factory()->create(['name' => 'Water Security']);
+
+    $html = Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::programs.index')
+        ->html();
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
+    $xpath = new DOMXPath($dom);
+    $root = '//section[@*[name()="wire:name"]="pages::programs.index"]';
+
+    foreach (['more-filters-button', 'focus-tab-attention', 'focus-tab-setup', 'focus-tab-ontrack'] as $control) {
+        expect($xpath->query($root.'//*[@data-test="'.$control.'"]')->length)->toBeGreaterThan(0, "{$control} sits outside the component");
+    }
+    expect($xpath->query($root.'//ul[@data-test="program-list"]//li')->length)->toBeGreaterThan(0);
 });
