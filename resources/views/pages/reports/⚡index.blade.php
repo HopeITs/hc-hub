@@ -58,6 +58,10 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
     #[Url(except: '')]
     public string $overdue = '';
 
+    /** attention | progress | approved: the three plain answers at the top of the page. */
+    #[Url(except: '')]
+    public string $focus = '';
+
     /**
      * Which shape the report feed renders in: a flat searchable list, or
      * reports grouped by project and indicator to surface the connections
@@ -112,6 +116,12 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
         $this->resetPage();
     }
 
+    public function setFocus(string $focus): void
+    {
+        $this->focus = $this->focus === $focus || ! in_array($focus, ['attention', 'progress', 'approved'], true) ? '' : $focus;
+        $this->resetPage();
+    }
+
     public function toggleOverdue(): void
     {
         $this->overdue = $this->overdue === '' ? '1' : '';
@@ -133,6 +143,7 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
         $this->project = '';
         $this->target = '';
         $this->overdue = '';
+        $this->focus = '';
         $this->clearStrategyFilter();
     }
 
@@ -177,13 +188,45 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
      *
      * @return Builder<Report>
      */
-    private function visibleReports(): Builder
+    private function visibleReports(bool $withFocus = true): Builder
     {
         return $this->scopedReports()
             ->when($this->status !== '', fn ($query) => $query->where('status', $this->status))
             ->when($this->seenByMeal === 'seen', fn ($query) => $query->where('is_seen_by_meal', true))
             ->when($this->seenByMeal === 'unseen', fn ($query) => $query->where('is_seen_by_meal', false))
-            ->when($this->overdue !== '', fn ($query) => $query->overdue());
+            ->when($this->overdue !== '', fn ($query) => $query->overdue())
+            ->when($withFocus && $this->focus === 'attention', fn ($query) => $query->where(fn ($query) => $query
+                ->where(fn ($late) => $late->overdue())
+                ->orWhere('status', ReportStatus::Reviewed->value)))
+            ->when($withFocus && $this->focus === 'progress', fn ($query) => $query
+                ->where('status', ReportStatus::Draft->value)
+                ->whereDate('planned_date', '>=', today()))
+            ->when($withFocus && $this->focus === 'approved', fn ($query) => $query->where('status', ReportStatus::Approved->value));
+    }
+
+    /**
+     * How many reports sit under each headline button. Disjoint and exhaustive
+     * (a draft is late or in progress, a reviewed report is waiting, the rest is
+     * approved), and read under every filter except the button itself, so a
+     * click shows exactly that many.
+     *
+     * @return array{attention: int, progress: int, approved: int, total: int}
+     */
+    #[Computed]
+    public function focusCounts(): array
+    {
+        $row = $this->visibleReports(withFocus: false)
+            ->toBase()
+            ->selectRaw('count(*) as total')
+            ->selectRaw("coalesce(sum(case when status = 'approved' then 1 else 0 end), 0) as approved")
+            ->selectRaw("coalesce(sum(case when status = 'reviewed' or (status = 'draft' and date(planned_date) < ?) then 1 else 0 end), 0) as attention", [today()->toDateString()])
+            ->first();
+
+        $total = (int) $row->total;
+        $approved = (int) $row->approved;
+        $attention = (int) $row->attention;
+
+        return ['attention' => $attention, 'progress' => $total - $approved - $attention, 'approved' => $approved, 'total' => $total];
     }
 
     /**
@@ -223,6 +266,8 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
             ->select(['id', 'plan_indicator_id', 'user_id', 'status', 'planned_date', 'value', 'submit_date', 'is_seen_by_meal', 'monthly_report_id'])
             ->with([...$this->targetRelations(), 'user:id,hr_user_id,employee_id', 'monthlyReport:id,slug'])
             ->withCount('files')
+            // Late drafts, then reports waiting for approval, then other drafts, then approved.
+            ->orderByRaw("case when status = 'draft' and date(planned_date) < ? then 0 when status = 'reviewed' then 1 when status = 'draft' then 2 else 3 end", [today()->toDateString()])
             ->orderByDesc('planned_date')
             ->orderByDesc('id')
             ->paginate(15);
@@ -305,19 +350,9 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
 ?>
 
 @php
-    $filtersAreActive = $search !== '' || $status !== '' || $seenByMeal !== '' || $author !== '' || $project !== '' || $target !== '' || $overdue !== '' || $this->strategyFilter !== null;
-    $insights = $this->insights;
-
-    $statusSegments = collect(ReportStatus::cases())->map(fn (ReportStatus $case): array => [
-        'key' => $case->value,
-        'label' => $case->label(),
-        'count' => (int) ($insights['statusCounts'][$case->value] ?? 0),
-        'tone' => match ($case) {
-            ReportStatus::Draft => 'neutral',
-            ReportStatus::Reviewed => 'warn',
-            ReportStatus::Approved => 'good',
-        },
-    ])->all();
+    $filtersAreActive = $search !== '' || $status !== '' || $seenByMeal !== '' || $author !== '' || $project !== '' || $target !== '' || $overdue !== '' || $focus !== '' || $this->strategyFilter !== null;
+    $focusCounts = $this->focusCounts;
+    $insights = ['total' => $focusCounts['total']];
 
     // A badly missed target is 'critical' (the brand red), not 'warn': this
     // app's tone vocabulary already reserves red for exactly that signal
@@ -375,13 +410,6 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
             ->implode(' ');
     };
 
-    $figures = [
-        ['key' => 'total', 'label' => __('reports.total_reports'), 'value' => $insights['total'], 'suffix' => '', 'sub' => null, 'tone' => ''],
-        ['key' => 'achievement', 'label' => __('reports.avg_target_achievement'), 'value' => $insights['avgAchievement'] ?? 0, 'suffix' => $insights['avgAchievement'] === null ? '' : '%', 'sub' => $insights['avgAchievement'] === null ? __('ui.no_records') : __('reports.approved_reports_only'), 'tone' => $achievementTextClass($insights['avgAchievement'])],
-        ['key' => 'awaiting', 'label' => __('reports.awaiting_meal_review'), 'value' => $insights['unseen'], 'suffix' => '', 'sub' => __('reports.of_total', ['total' => $insights['total']]), 'tone' => $insights['unseen'] > 0 ? 'text-status-warn' : 'text-status-good'],
-        // Status counts already sit in the strip below; what a manager is late on does not.
-        ['key' => 'overdue', 'label' => __('reports.overdue_drafts'), 'value' => $insights['overdue'], 'suffix' => '', 'sub' => __('reports.drafts_past_the_period_they_cover'), 'tone' => $insights['overdue'] > 0 ? 'text-primary dark:text-brand-text' : 'text-status-good'],
-    ];
 @endphp
 
 <x-desk.register
@@ -408,13 +436,6 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
     <x-slot:filters>
             <x-desk.strategy-chip :strategy="$this->strategyFilter" />
 
-            <x-ui.header-filter-select :label="__('reports.reported_by')" wire:model.live="author" :value="$author">
-                <option value="">{{ __('common.anyone') }}</option>
-                @foreach ($this->authorOptions as $authorOption)
-                    <option value="{{ $authorOption->id }}">{{ $authorOption->name }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
-
             <x-ui.header-filter-select :label="__('common.project')" wire:model.live="project" :value="$project">
                 <option value="">{{ __('targets.any_project') }}</option>
                 <option value="none">{{ __('common.organisation_wide') }}</option>
@@ -422,65 +443,31 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
                     <option value="{{ $projectOption->id }}">{{ $projectOption->name }}</option>
                 @endforeach
             </x-ui.header-filter-select>
-        </x-slot:filters>
 
-    <div class="dk-reg-summary">
-            <div class="flex flex-col gap-6">
-                {{-- The portfolio's figures, set directly on the page rather than boxed into cards: the numbers are the point. Dividers only apply once the grid is a single row — grid-cols-2 wrapping and a manual border produced an orphaned line at in-between widths. --}}
-                <div class="grid grid-cols-2 gap-x-6 gap-y-6 border-y border-secondary-soft py-6 @xl/directory:grid-cols-4 @xl/directory:divide-x @xl/directory:divide-secondary-soft dark:border-line @xl/directory:dark:divide-line">
-                    @foreach ($figures as $index => $figure)
-                        <div
-                            class="logframe-reveal @xl/directory:ps-6 @xl/directory:first:ps-0"
-                            style="--logframe-order: {{ $index }}"
-                            wire:key="figure-{{ $figure['key'] }}"
-                        >
-                            <p class="type-label text-secondary-medium dark:text-ink-muted">{{ $figure['label'] }}</p>
-                            <p
-                                class="mt-1.5 text-4xl leading-none font-extrabold tabular-nums {{ $figure['tone'] }}"
-                                x-data="countUp({{ (int) $figure['value'] }})"
-                                x-text="display + '{{ $figure['suffix'] }}'"
-                            >{{ $figure['value'] }}{{ $figure['suffix'] }}</p>
-                            @if ($figure['sub'] !== null)
-                                <p class="mt-1 text-xs text-secondary-medium dark:text-ink-muted">{{ $figure['sub'] }}</p>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
+            <div class="contents" x-data="{ open: @js($author !== '' || $seenByMeal !== '') }">
+                <button type="button" class="dk-btn" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" data-test="more-filters-button">
+                    <flux:icon.adjustments-horizontal variant="micro" class="size-4" />
+                    {{ __('reports.more_filters') }}
+                </button>
 
-                <div class="flex flex-col gap-3 @2xl/directory:flex-row @2xl/directory:items-center @2xl/directory:justify-between">
-                    <x-ui.status-strip :label="__('common.status')" :segments="$statusSegments" :active="$status" wire-model="status" class="min-w-0 flex-1" />
+                <div class="contents" x-show="open" x-cloak>
+                    <x-ui.header-filter-select :label="__('reports.reported_by')" wire:model.live="author" :value="$author">
+                        <option value="">{{ __('common.anyone') }}</option>
+                        @foreach ($this->authorOptions as $authorOption)
+                            <option value="{{ $authorOption->id }}">{{ $authorOption->name }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
 
-                    <div class="flex flex-wrap items-center gap-2">
-                        <button
-                            type="button"
-                            wire:click="toggleOverdue"
-                            aria-pressed="{{ $overdue !== '' ? 'true' : 'false' }}"
-                            data-test="overdue-chip"
-                            @class([
-                                'inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 type-meta font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium',
-                                'border-primary bg-primary dark:bg-ink dark:text-surface-0 dark:border-ink text-white' => $overdue !== '',
-                                'border-secondary-soft bg-white text-secondary-medium hover:border-secondary-light hover:text-secondary-dark dark:border-line dark:bg-surface-1 dark:text-ink-muted dark:hover:text-ink' => $overdue === '',
-                            ])
-                        >
-                            <flux:icon.clock variant="micro" class="size-3.5" aria-hidden="true" />
-                            {{ __('reports.overdue_drafts') }}
-                            <span class="tabular-nums">{{ $insights['overdue'] }}</span>
-                        </button>
-
-                        <x-ui.view-toggle
-                            :label="__('reports.meal_review')"
-                            wire-model="seenByMeal"
-                            :active="$seenByMeal"
-                            :options="[
-                                ['key' => '', 'label' => __('reports.any')],
-                                ['key' => 'seen', 'label' => __('reports.seen_by_meal'), 'icon' => 'eye'],
-                                ['key' => 'unseen', 'label' => __('reports.not_yet_seen'), 'icon' => 'eye-slash'],
-                            ]"
-                        />
-                    </div>
+                    <x-ui.header-filter-select :label="__('reports.meal_review')" wire:model.live="seenByMeal" :value="$seenByMeal">
+                        <option value="">{{ __('reports.any') }}</option>
+                        <option value="seen">{{ __('reports.seen_by_meal') }}</option>
+                        <option value="unseen">{{ __('reports.not_yet_seen') }}</option>
+                    </x-ui.header-filter-select>
                 </div>
             </div>
-        </div>
+        </x-slot:filters>
+
+    @include('pages.reports._index-focus-bar')
 
 
     @if ($this->scopedTargetLabel !== null)
