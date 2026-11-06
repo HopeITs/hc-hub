@@ -644,10 +644,11 @@ test('the list view computes stat tiles with one aggregate query instead of load
     // paginate() itself issues a count query plus the page's select query;
     // the stat tiles add one aggregate select on top of that, the eager
     // load of each row's own subtasks (for the inline expand panel) adds a
-    // fourth, and the "My Tasks" rail's own capped preview query a fifth —
-    // five total, not a second full (board-sized) fetch of every task with
-    // its relations just to count a handful of numbers.
-    expect($taskTableQueries)->toHaveCount(5);
+    // fourth, the "My Tasks" rail's own capped preview query a fifth, and
+    // the "To review" tab badge's count a sixth — six total, not a second
+    // full (board-sized) fetch of every task with its relations just to
+    // count a handful of numbers.
+    expect($taskTableQueries)->toHaveCount(6);
 });
 
 test('the My Tasks rail visually distinguishes tasks assigned to the viewer from tasks the viewer only delegated', function () {
@@ -1493,6 +1494,41 @@ test('list cards offer the subtask toggle only when a task has subtasks', functi
         ->set('listLayout', 'narrow')
         ->assertSeeHtml('data-test="task-subtasks-toggle-mobile-'.$parent->id.'"')
         ->assertDontSeeHtml('data-test="task-subtasks-toggle-mobile-'.$loneTask->id.'"');
+});
+
+test('the scope tabs show my tasks, tasks I assigned and tasks waiting for my review', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $me = insertHrEmployee(firstNameEn: 'Signed', lastNameEn: 'InUser');
+    $user->forceFill(['employee_id' => $me])->save();
+
+    $assignedToMe = Task::factory()->create(['title' => 'Assigned to me task']);
+    $assignedToMe->taskAssignees()->delete();
+    $assignedToMe->taskAssignees()->create(['employee_id' => $me]);
+    Task::factory()->create(['title' => 'I assigned this task', 'created_by' => $user->id, 'status' => TaskStatus::Todo]);
+    Task::factory()->create(['title' => 'Waiting for my review task', 'created_by' => $user->id, 'status' => TaskStatus::UnderReview]);
+    Task::factory()->create(['title' => 'Somebody else review task', 'status' => TaskStatus::UnderReview]);
+
+    $titles = fn ($component) => $component->instance()->tasks->getCollection()->pluck('title')->sort()->values()->all();
+
+    $component = Livewire::actingAs($user)->test('pages::tasks.index')->set('view', 'list')
+        ->assertSeeHtml('data-test="task-scope-tabs"')
+        ->assertSeeHtml('data-test="task-scope-review-count"');
+
+    expect($titles($component->call('setScope', 'mine')))->toBe(['Assigned to me task'])
+        ->and($titles($component->call('setScope', 'assigned')))->toBe(['I assigned this task', 'Waiting for my review task'])
+        ->and($titles($component->call('setScope', 'review')))->toBe(['Waiting for my review task'])
+        ->and($component->instance()->tasksAwaitingMyReview)->toBe(1)
+        ->and($titles($component->call('setScope', 'anything-else')))->toHaveCount(4)
+        ->and($component->get('scope'))->toBe('');
+});
+
+test('the assigned to me tab is empty for a user with no employee record', function () {
+    $user = User::factory()->role('General Manager')->create(['employee_id' => null]);
+    Task::factory()->create();
+
+    $component = Livewire::actingAs($user)->test('pages::tasks.index')->set('view', 'list')->call('setScope', 'mine');
+
+    expect($component->instance()->tasks->total())->toBe(0);
 });
 
 test('the task form is rendered only while its drawer is open', function () {

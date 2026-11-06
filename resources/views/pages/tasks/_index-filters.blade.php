@@ -4,6 +4,28 @@
     view switch, filters and Clear live in the x-desk.register frame.) Included by
     ⚡index.blade.php, whose top PHP block defines $filtersAreActive.
 --}}
+    {{-- Whose tasks: one click to the viewer's own work, or what waits for their review. --}}
+    <nav class="-mb-1 flex gap-1 overflow-x-auto border-b border-secondary-soft dark:border-line" aria-label="{{ __('tasks.tabs_label') }}" data-test="task-scope-tabs">
+        @foreach (['' => __('tasks.tab_all'), 'mine' => __('tasks.tab_mine'), 'assigned' => __('tasks.tab_assigned'), 'review' => __('tasks.tab_review')] as $scopeKey => $scopeLabel)
+            <button
+                type="button"
+                wire:click="setScope('{{ $scopeKey }}')"
+                aria-current="{{ $scope === $scopeKey ? 'page' : 'false' }}"
+                data-test="task-scope-{{ $scopeKey === '' ? 'all' : $scopeKey }}"
+                @class([
+                    '-mb-px inline-flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-secondary-medium',
+                    'border-primary text-secondary-dark dark:border-brand-text dark:text-ink' => $scope === $scopeKey,
+                    'border-transparent text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink' => $scope !== $scopeKey,
+                ])
+            >
+                {{ $scopeLabel }}
+                @if ($scopeKey === 'review' && $this->tasksAwaitingMyReview > 0)
+                    <span class="rounded-full bg-primary px-1.5 text-[11px] font-bold text-white tabular-nums dark:bg-status-critical dark:text-surface-0" data-test="task-scope-review-count">{{ $this->tasksAwaitingMyReview }}</span>
+                @endif
+            </button>
+        @endforeach
+    </nav>
+
     @if (! auth()->user()->can('tasks.update') && ! auth()->user()->can('create', App\Models\Task::class))
         <p class="flex items-start gap-2 rounded-xl bg-secondary-soft/40 px-3 py-2 text-xs text-secondary-dark dark:bg-white/[0.04] dark:text-ink-muted" data-test="task-view-only-notice">
             <flux:icon.eye variant="micro" class="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
