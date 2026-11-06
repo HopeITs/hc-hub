@@ -14,6 +14,7 @@ use App\Models\Task;
 use App\Models\TransfersTracking;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -177,6 +178,56 @@ trait FindsFocusedTypeDates
     }
 
     /**
+     * The related-dates rows of a composite type (donor follow-ups + donor
+     * reports, project starts + ends): up to $limit upcoming rows across all
+     * of its sources, or, only when no source has anything upcoming, the
+     * $limit most recent past ones in chronological order. Choosing per source
+     * instead would let one source's past fallback crowd out the other's
+     * upcoming dates. $rows(true) returns every source's upcoming rows,
+     * $rows(false) every source's past rows (see datedRecords()).
+     *
+     * @template TRow of array{date: ?CarbonInterface}
+     *
+     * @param  callable(bool): \Illuminate\Support\Collection<int, TRow>  $rows
+     * @return \Illuminate\Support\Collection<int, TRow>
+     */
+    protected function upcomingOrRecentRows(callable $rows, int $limit = 15): \Illuminate\Support\Collection
+    {
+        $upcoming = $rows(true)
+            ->sortBy(fn (array $row): int => $row['date']?->getTimestamp() ?? 0)
+            ->values()
+            ->take($limit);
+
+        if ($upcoming->isNotEmpty()) {
+            return $upcoming;
+        }
+
+        return $rows(false)
+            ->sortByDesc(fn (array $row): int => $row['date']?->getTimestamp() ?? 0)
+            ->take($limit)
+            ->reverse()
+            ->values();
+    }
+
+    /**
+     * Up to $limit records whose $column is today or later (nearest first)
+     * when $upcoming, otherwise before today (most recent first).
+     *
+     * @template TModel of Model
+     *
+     * @param  Builder<TModel>  $query
+     * @return Collection<int, TModel>
+     */
+    protected function datedRecords(Builder $query, string $column, bool $upcoming, int $limit = 15): Collection
+    {
+        $today = CarbonImmutable::today()->toDateString();
+
+        return $upcoming
+            ? (clone $query)->where($column, '>=', $today)->orderBy($column)->limit($limit)->get()
+            : (clone $query)->where($column, '<', $today)->orderByDesc($column)->limit($limit)->get();
+    }
+
+    /**
      * The related-dates list for the currently focused type: title, date,
      * an optional sub-label (which of a composite type's two sources this
      * row came from) and how to open it — a modal action for milestones and
@@ -264,9 +315,10 @@ trait FindsFocusedTypeDates
                 'subLabel' => null,
                 'date' => $transfer->scheduled_date,
             ]),
-            'donor' => ($this->canViewDonors() ? $this->upcomingOrRecent(
+            'donor' => $this->upcomingOrRecentRows(fn (bool $upcoming): \Illuminate\Support\Collection => ($this->canViewDonors() ? $this->datedRecords(
                 Donor::query()->whereNotNull('next_step_due_on')->whereHas('proposals.projects', fn (Builder $query) => $query->whereIn('projects.user_id', $employeeIds)),
-                'next_step_due_on'
+                'next_step_due_on',
+                $upcoming
             ) : new Collection)->map(fn (Donor $donor): array => [
                 'kind' => 'link',
                 'id' => $donor->id,
@@ -275,11 +327,12 @@ trait FindsFocusedTypeDates
                 'subLabel' => __('calendar.donor_follow_up'),
                 'date' => $donor->next_step_due_on,
             ])->concat(
-                ($this->canViewAgreements() ? $this->upcomingOrRecent(
+                ($this->canViewAgreements() ? $this->datedRecords(
                     DonorReport::query()
                         ->whereHas('donorProposal.proposal.projects', fn (Builder $query) => $query->whereIn('projects.user_id', $employeeIds))
                         ->with('donorProposal:id,slug'),
-                    'due_on'
+                    'due_on',
+                    $upcoming
                 ) : new Collection)->map(fn (DonorReport $report): array => [
                     'kind' => 'link',
                     'id' => $report->id,
@@ -288,10 +341,11 @@ trait FindsFocusedTypeDates
                     'subLabel' => __('calendar.donor_report_due'),
                     'date' => $report->due_on,
                 ])
-            )->sortBy('date')->values()->take(15),
-            'project' => $this->upcomingOrRecent(
+            )),
+            'project' => $this->upcomingOrRecentRows(fn (bool $upcoming): \Illuminate\Support\Collection => $this->datedRecords(
                 Project::query()->whereIn('user_id', $employeeIds)->whereNotNull('start_date'),
-                'start_date'
+                'start_date',
+                $upcoming
             )->map(fn (Project $project): array => [
                 'kind' => 'link',
                 'id' => $project->id,
@@ -300,9 +354,10 @@ trait FindsFocusedTypeDates
                 'subLabel' => __('calendar.project_starts'),
                 'date' => $project->start_date,
             ])->concat(
-                $this->upcomingOrRecent(
+                $this->datedRecords(
                     Project::query()->whereIn('user_id', $employeeIds)->whereNotNull('end_date'),
-                    'end_date'
+                    'end_date',
+                    $upcoming
                 )->map(fn (Project $project): array => [
                     'kind' => 'link',
                     'id' => $project->id,
@@ -311,7 +366,7 @@ trait FindsFocusedTypeDates
                     'subLabel' => __('calendar.project_ends'),
                     'date' => $project->end_date,
                 ])
-            )->sortBy('date')->values()->take(15),
+            )),
             default => new \Illuminate\Support\Collection,
         };
     }

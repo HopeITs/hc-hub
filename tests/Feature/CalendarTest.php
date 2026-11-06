@@ -797,6 +797,50 @@ test('the related-dates panel lists both occurrences of a composite type with cl
         ->assertSee(__('calendar.project_ends'));
 });
 
+test('the related-dates panel lists upcoming project ends instead of past project starts', function () {
+    $this->travelTo(Carbon::create(2026, 11, 6, 9));
+    $employeeId = insertHrEmployee();
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
+    $projects = Project::factory()->count(3)->sequence(
+        ['name' => 'Closing Soon A', 'start_date' => Carbon::create(2024, 3, 1), 'end_date' => Carbon::create(2026, 12, 31)],
+        ['name' => 'Closing Soon B', 'start_date' => Carbon::create(2024, 7, 1), 'end_date' => Carbon::create(2026, 12, 31)],
+        ['name' => 'Closing Later', 'start_date' => Carbon::create(2025, 1, 1), 'end_date' => Carbon::create(2027, 3, 31)],
+    )->create(['user_id' => $employeeId]);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::calendar.index')
+        ->call('focusOnlyType', 'project');
+
+    $items = $component->instance()->focusedItems;
+
+    expect($items)->toHaveCount(3)
+        ->and($items->pluck('subLabel')->unique()->all())->toBe([__('calendar.project_ends')])
+        ->and($items->pluck('id')->all())->toEqualCanonicalizing($projects->pluck('id')->all())
+        ->and($items->last()['title'])->toBe('Closing Later');
+
+    $component->assertSeeText(trans_choice('calendar.items_count', 3, ['count' => 3]));
+});
+
+test('the related-dates panel falls back to the most recent past dates across both project sources when nothing is upcoming', function () {
+    $this->travelTo(Carbon::create(2026, 11, 6, 9));
+    $employeeId = insertHrEmployee();
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
+    $project = Project::factory()->create([
+        'user_id' => $employeeId,
+        'start_date' => Carbon::create(2024, 3, 1),
+        'end_date' => Carbon::create(2026, 9, 30),
+    ]);
+
+    $items = Livewire::actingAs($user)
+        ->test('pages::calendar.index')
+        ->call('focusOnlyType', 'project')
+        ->instance()
+        ->focusedItems;
+
+    expect($items->pluck('subLabel')->all())->toBe([__('calendar.project_starts'), __('calendar.project_ends')])
+        ->and($items->pluck('id')->unique()->all())->toBe([$project->id]);
+});
+
 test('opening the day-detail list shows every visible item on that day and can edit or navigate to each', function () {
     $employeeId = insertHrEmployee();
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
