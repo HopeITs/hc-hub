@@ -6,6 +6,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | --- | --- |
 | app/Actions/Fortify/AuthenticateWithHrAccount.php | .ai/rules/actions-fortify.md |
 | {resources/views/pages/transfers/**,resources/views/pages/funding-agreements/**,resources/views/pages/donors/**,resources/views/pages/proposals/**,resources/views/pages/admin/⚡accounts.blade.php} | .ai/rules/admin.md |
+| resources/views/pages/activity/** | .ai/rules/activity.md |
 | app/Notifications/Alerts/** | .ai/rules/alerts.md |
 | resources/views/pages/annual-plans/** | .ai/rules/annual-plans.md |
 | app/** | .ai/rules/app-2.md |
