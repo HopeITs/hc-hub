@@ -399,7 +399,7 @@ test('the page shows what was achieved against what was committed, counting appr
         ->and($component->get('overview')['targetsAchieved'])->toBe(0);
 
     $component->call('openInspectModal', $indicator->id)
-        ->assertSee('0 of 1 targets achieved')
+        ->assertSee('0 of 1 targets met')
         ->assertSee('150 pending approval')
         ->assertSeeHtml('href="'.e(route('reports.index', ['create' => 1, 'target' => $target->id])).'"');
 });
