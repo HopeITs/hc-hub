@@ -9,6 +9,7 @@ use App\Enums\ReviewStage;
 use App\Models\Donor;
 use App\Models\DonorReport;
 use App\Models\Milestone;
+use App\Models\MonthlyReport;
 use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\ProposalStatusNote;
@@ -17,6 +18,7 @@ use App\Models\Scopes\TaskVisibilityScope;
 use App\Models\Task;
 use App\Models\TransfersTracking;
 use App\Models\User;
+use App\Support\MonthlyReportPeriods;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -48,7 +50,7 @@ trait BuildsCalendarGrid
      * view, the plain list of visible days instead — `weeks` is null then
      * and `days` is populated, and vice versa in month view.
      *
-     * @return array{month: CarbonImmutable, weeks: ?array<int, array<int, CarbonImmutable>>, days: ?array<int, CarbonImmutable>, milestonesByDay: \Illuminate\Support\Collection<string, Collection<int, Milestone>>, tasksByDay: \Illuminate\Support\Collection<string, Collection<int, Task>>, reportsByDay: \Illuminate\Support\Collection<string, Collection<int, Report>>, proposalsByDay: \Illuminate\Support\Collection<string, Collection<int, Proposal>>, transfersByDay: \Illuminate\Support\Collection<string, Collection<int, TransfersTracking>>, donorFollowUpsByDay: \Illuminate\Support\Collection<string, Collection<int, Donor>>, donorReportsByDay: \Illuminate\Support\Collection<string, Collection<int, DonorReport>>, projectStartsByDay: \Illuminate\Support\Collection<string, Collection<int, Project>>, projectEndsByDay: \Illuminate\Support\Collection<string, Collection<int, Project>>, reviewMeetingsByDay: \Illuminate\Support\Collection<string, Collection<int, ProposalStatusNote>>, unscheduledTasks: Collection<int, Task>, nowOffsetPercent: float}
+     * @return array{month: CarbonImmutable, weeks: ?array<int, array<int, CarbonImmutable>>, days: ?array<int, CarbonImmutable>, milestonesByDay: \Illuminate\Support\Collection<string, Collection<int, Milestone>>, tasksByDay: \Illuminate\Support\Collection<string, Collection<int, Task>>, reportsByDay: \Illuminate\Support\Collection<string, Collection<int, Report>>, monthlyReportsByDay: \Illuminate\Support\Collection<string, Collection<int, MonthlyReport>>, proposalsByDay: \Illuminate\Support\Collection<string, Collection<int, Proposal>>, transfersByDay: \Illuminate\Support\Collection<string, Collection<int, TransfersTracking>>, donorFollowUpsByDay: \Illuminate\Support\Collection<string, Collection<int, Donor>>, donorReportsByDay: \Illuminate\Support\Collection<string, Collection<int, DonorReport>>, projectStartsByDay: \Illuminate\Support\Collection<string, Collection<int, Project>>, projectEndsByDay: \Illuminate\Support\Collection<string, Collection<int, Project>>, reviewMeetingsByDay: \Illuminate\Support\Collection<string, Collection<int, ProposalStatusNote>>, unscheduledTasks: Collection<int, Task>, nowOffsetPercent: float}
      */
     #[Computed]
     public function calendar(): array
@@ -121,6 +123,18 @@ trait BuildsCalendarGrid
                 ->get()
                 ->groupBy(fn (Report $report): string => $report->planned_date->toDateString());
 
+        $monthlyReportsByDay = $employeeIds === [] || ! $this->isTypeShown('monthly_report')
+            ? new \Illuminate\Support\Collection
+            : $this->scopedMonthlyReports($employeeIds, $reportUserIds)
+                // A month's report falls due a few working days after that
+                // month ends, so the reports due on screen belong to months
+                // up to two before the first day shown.
+                ->whereBetween('period', [$gridStart->subMonths(2)->startOfMonth()->toDateString(), $gridEnd->toDateString()])
+                ->get()
+                ->filter(fn (MonthlyReport $report): bool => $this->monthlyReportDueOn($report)->betweenIncluded($gridStart, $gridEnd))
+                ->sortBy(fn (MonthlyReport $report): int => $this->monthlyReportDueOn($report)->getTimestamp())
+                ->groupBy(fn (MonthlyReport $report): string => $this->monthlyReportDueOn($report)->toDateString());
+
         $unscheduledTasks = $employeeIds === [] || ! $this->showTasks
             ? new Collection
             : Task::query()
@@ -154,7 +168,7 @@ trait BuildsCalendarGrid
         $projectEndsByDay = $employeeIds === [] || ! $this->showProjects
             ? new Collection
             : Project::query()
-                ->select(['id', 'name', 'end_date'])
+                ->select(['id', 'name', 'status', 'end_date'])
                 ->whereIn('user_id', $employeeIds)
                 ->whereNotNull('end_date')
                 ->whereBetween('end_date', [$gridStart->toDateString(), $gridEnd->toDateString()])
@@ -236,6 +250,7 @@ trait BuildsCalendarGrid
             'milestonesByDay' => $milestonesByDay,
             'tasksByDay' => $tasksByDay,
             'reportsByDay' => $reportsByDay,
+            'monthlyReportsByDay' => $monthlyReportsByDay,
             'proposalsByDay' => $proposalsByDay,
             'transfersByDay' => $transfersByDay,
             'donorFollowUpsByDay' => $donorFollowUpsByDay,
@@ -246,5 +261,35 @@ trait BuildsCalendarGrid
             'unscheduledTasks' => $unscheduledTasks,
             'nowOffsetPercent' => ($now->hour * 60 + $now->minute) / (24 * 60) * 100,
         ];
+    }
+
+    /**
+     * The monthly reports the calendar shows for these people: reports of
+     * the projects they own, or that one of them prepared, limited to months
+     * that must be reported (at least one line), the same rule the alert
+     * scanners use for a report's deadline.
+     *
+     * @param  array<int, int>  $employeeIds
+     * @param  array<int, int>  $preparerUserIds
+     * @return Builder<MonthlyReport>
+     */
+    protected function scopedMonthlyReports(array $employeeIds, array $preparerUserIds): Builder
+    {
+        return MonthlyReport::query()
+            ->select(['id', 'slug', 'project_id', 'period', 'status', 'prepared_by'])
+            ->with('project')
+            ->whereHas('lines')
+            ->where(fn (Builder $query) => $query
+                ->whereIn('project_id', Project::query()->whereIn('user_id', $employeeIds)->select('id'))
+                ->orWhereIn('prepared_by', $preparerUserIds === [] ? [0] : $preparerUserIds));
+    }
+
+    /**
+     * The day a monthly report is due: the configured number of working days
+     * after its month ends, on its project's working calendar.
+     */
+    protected function monthlyReportDueOn(MonthlyReport $report): CarbonImmutable
+    {
+        return MonthlyReportPeriods::fromLoaded($report->project, new Collection)->dueDate($report->period->startOfMonth());
     }
 }

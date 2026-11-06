@@ -56,6 +56,11 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     $calendar = $this->calendar;
     $today = \Carbon\CarbonImmutable::today();
     $hasEmployee = auth()->user()->employee_id !== null;
+    $canAddMilestone = auth()->user()->can('create', App\Models\Milestone::class);
+    $canAddTask = auth()->user()->can('create', App\Models\Task::class);
+    // Someone who may add neither gets no Add button and no click-a-day menu,
+    // instead of an empty dropdown.
+    $canAdd = $canAddMilestone || $canAddTask;
 
     $proposalTone = function (\App\Models\Proposal $proposal) use ($today): string {
         if ($proposal->actual_date_end !== null) {
@@ -78,6 +83,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
         'milestone' => 'bg-funding',
         'task' => 'bg-status-warn',
         'report' => 'bg-primary dark:bg-status-critical',
+        'monthly_report' => 'bg-transparent ring-1 ring-inset ring-primary dark:ring-status-critical',
         'proposal' => 'bg-status-active',
         'transfer' => 'bg-status-good',
         'donor' => 'bg-secondary-dark dark:bg-ink-muted',
@@ -92,6 +98,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
         'milestone' => 'ring-funding',
         'task' => 'ring-status-warn',
         'report' => 'ring-primary',
+        'monthly_report' => 'ring-primary',
         'proposal' => 'ring-status-active',
         'transfer' => 'ring-status-good',
         'donor' => 'ring-secondary-dark dark:ring-ink-muted',
@@ -102,6 +109,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
         'milestone' => 'text-funding',
         'task' => 'text-status-warn',
         'report' => 'text-primary dark:text-brand-text',
+        'monthly_report' => 'text-primary dark:text-brand-text',
         'proposal' => 'text-status-active',
         'transfer' => 'text-status-good',
         'donor' => 'text-secondary-dark dark:text-ink-faint',
@@ -112,6 +120,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
         'milestone' => __('tasks.milestone'),
         'task' => __('tasks.task'),
         'report' => __('calendar.report_deadline'),
+        'monthly_report' => __('calendar.monthly_report_due'),
         'proposal' => __('calendar.proposal_deadline'),
         'transfer' => __('calendar.transfer'),
         'donor' => __('calendar.donor_follow_up'),
@@ -126,6 +135,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
         'milestone' => ['milestonesByDay'],
         'task' => ['tasksByDay'],
         'report' => ['reportsByDay'],
+        'monthly_report' => ['monthlyReportsByDay'],
         'proposal' => ['proposalsByDay', 'reviewMeetingsByDay'],
         'transfer' => ['transfersByDay'],
         'donor' => ['donorFollowUpsByDay', 'donorReportsByDay'],
@@ -135,7 +145,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     // Every per-day grouping, regardless of type — used to tell whether a
     // day has anything on it at all, so its content area can open the
     // day-detail list instead of the "add" menu.
-    $allGroupKeys = ['milestonesByDay', 'tasksByDay', 'reportsByDay', 'proposalsByDay', 'transfersByDay', 'donorFollowUpsByDay', 'donorReportsByDay', 'projectStartsByDay', 'projectEndsByDay', 'reviewMeetingsByDay'];
+    $allGroupKeys = ['milestonesByDay', 'tasksByDay', 'reportsByDay', 'monthlyReportsByDay', 'proposalsByDay', 'transfersByDay', 'donorFollowUpsByDay', 'donorReportsByDay', 'projectStartsByDay', 'projectEndsByDay', 'reviewMeetingsByDay'];
 
     $focusedType = $this->focusedType();
 
@@ -185,7 +195,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
                 class="fixed z-50 min-w-40 rounded-md border border-secondary-soft bg-white py-1 shadow-lg dark:border-line dark:bg-surface-3 dark:shadow-raised"
                 data-test="calendar-context-menu"
             >
-                @can('create', App\Models\Milestone::class)
+                @if ($canAddMilestone)
                 <button
                     type="button"
                     x-on:click="menuOpen = false; $wire.openCreateModal(menuDate)"
@@ -195,8 +205,8 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
                     <flux:icon.flag variant="micro" class="size-4" />
                     {{ __('milestones.add_milestone') }}
                 </button>
-                @endcan
-                @can('create', App\Models\Task::class)
+                @endif
+                @if ($canAddTask)
                     <button
                         type="button"
                         x-on:click="menuOpen = false; $wire.openCreateTaskModal(menuDate)"
@@ -206,7 +216,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
                         <flux:icon.clipboard-document-check variant="micro" class="size-4" />
                         {{ __('tasks.add_task') }}
                     </button>
-                @endcan
+                @endif
             </div>
         </div>
 

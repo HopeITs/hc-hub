@@ -35,7 +35,7 @@
                                 @if ($task->isReportTask())
                                     <x-ui.enum-badge :case="$task->kind" data-test="report-task-chip" />
                                 @endif
-                                <a href="{{ $task->reportUrl() ?? route('tasks.show', $task) }}" wire:navigate class="min-w-0 truncate text-sm font-semibold text-secondary-dark hover:text-primary hover:underline dark:text-ink dark:hover:text-status-critical" data-test="task-board-card-{{ $task->id }}">
+                                <a href="{{ $task->reportUrl() ?? route('tasks.show', $task) }}" wire:navigate dir="auto" title="{{ $task->title }}" class="min-w-0 truncate text-sm font-semibold text-secondary-dark hover:text-primary hover:underline dark:text-ink dark:hover:text-status-critical" data-test="task-board-card-{{ $task->id }}">
                                     {{ $task->title }}
                                 </a>
                             </div>
@@ -52,7 +52,7 @@
                             </div>
                         </div>
 
-                        <p class="-mt-1.5 truncate text-xs text-secondary-medium dark:text-ink-muted">{{ $task->sourceLabel() }}</p>
+                        <p dir="auto" class="-mt-1.5 truncate text-start text-xs text-secondary-medium dark:text-ink-muted" title="{{ $task->sourceLabel() }}">{{ $task->sourceLabel() }}</p>
 
                         <div class="flex flex-wrap items-center gap-1.5 text-xs">
                             @if (! $canUpdate)
@@ -76,16 +76,23 @@
 
                             <div @class(['inline-flex items-center gap-1 rounded-full px-2 py-1 font-semibold', 'bg-status-critical-soft text-primary dark:text-status-critical' => $isOverdue, 'bg-secondary-soft text-secondary-medium dark:bg-white/10 dark:text-ink-muted' => ! $isOverdue])>
                                 {{ FluxMarkup::icon('calendar-days', 'micro', 'size-3 shrink-0') }}
-                                <input
-                                    type="date"
-                                    value="{{ $task->due_date?->toDateString() }}"
-                                    wire:change="rescheduleTask({{ $task->id }}, $event.target.value)"
-                                    @disabled($isDueDateLocked)
-                                    aria-label="{{ __('tasks.due_date_2') }}: {{ $task->title }}"
-                                    title="{{ $isDueDateLocked ? __('tasks.only_the_task_creator_can_change_the_due_date') : '' }}"
-                                    class="w-24 border-0 bg-transparent p-0 tabular-nums focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
-                                    data-test="task-board-due-date-{{ $task->id }}"
-                                />
+                                @if ($isDueDateLocked)
+                                    {{-- Plain text: a greyed-out date box reads as broken to someone who may only look. --}}
+                                    <span
+                                        class="tabular-nums"
+                                        @if ($canUpdate) title="{{ __('tasks.only_the_task_creator_can_change_the_due_date') }}" @endif
+                                        data-test="task-board-due-date-text-{{ $task->id }}"
+                                    >{{ $task->due_date?->translatedFormat(__($task->due_date->isCurrentYear() ? 'formats.date_short' : 'formats.date')) ?? __('tasks.no_due_date') }}</span>
+                                @else
+                                    <input
+                                        type="date"
+                                        value="{{ $task->due_date?->toDateString() }}"
+                                        wire:change="rescheduleTask({{ $task->id }}, $event.target.value)"
+                                        aria-label="{{ __('tasks.due_date_2') }}: {{ $task->title }}"
+                                        class="w-24 border-0 bg-transparent p-0 tabular-nums focus:ring-0 focus:outline-none"
+                                        data-test="task-board-due-date-{{ $task->id }}"
+                                    />
+                                @endif
                             </div>
 
                             @if ($task->subtasks_count > 0)
@@ -155,15 +162,16 @@
                         </div>
 
                         {{-- Non-pointer alternative to the drag-and-drop status change above,
-                             matching the milestone board's established fallback pattern. --}}
+                             matching the milestone board's established fallback pattern. Left
+                             out where the status can't change (done, or not the viewer's task):
+                             the column already says the status. --}}
+                        @if ($canMove && ! $isDone)
                         <label class="block">
                             <span class="sr-only">{{ __('tasks.change_status') }}</span>
                             <select
                                 wire:change="quickSetStatus({{ $task->id }}, $event.target.value)"
                                 wire:loading.attr="disabled"
                                 wire:target="quickSetStatus"
-                                @disabled($isDone || ! $canMove)
-                                title="{{ $isDone ? __('tasks.completed_tasks_cannot_change_status') : '' }}"
                                 class="w-full rounded-lg border border-secondary-soft bg-white px-2 py-1.5 text-xs text-secondary-dark disabled:cursor-not-allowed disabled:opacity-60 dark:border-line dark:bg-surface-1 dark:text-ink"
                                 data-test="task-quick-status-{{ $task->id }}"
                             >
@@ -172,6 +180,7 @@
                                 @endforeach
                             </select>
                         </label>
+                        @endif
 
                         <div x-show="subtasksOpen[{{ $task->id }}]" x-cloak class="flex flex-col gap-1.5 rounded-lg bg-secondary-soft/30 p-2 dark:bg-white/[0.04]">
                             @foreach ($task->subtasks as $subtask)
