@@ -711,3 +711,23 @@ test('indicators can be filtered by the donor funding their targets', function (
         ->assertSet('donor', '')
         ->assertSee('Unfunded indicator');
 });
+
+test('the filtered indicators download as a CSV without formula injection', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $result = Result::factory()->create();
+    Indicator::factory()->create(['result_id' => $result->id, 'name' => '=HYPERLINK("x")']);
+    Indicator::factory()->create(['result_id' => $result->id, 'name' => 'Left out']);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->set('search', 'HYPERLINK')
+        ->call('exportIndicators')
+        ->assertFileDownloaded('indicators-'.now()->toDateString().'.csv');
+
+    ob_start();
+    $response = $component->instance()->exportIndicators();
+    $response->sendContent();
+    $csv = ob_get_clean();
+
+    expect($csv)->toContain("'=HYPERLINK")->not->toContain('Left out');
+});

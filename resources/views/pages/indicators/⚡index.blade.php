@@ -3,6 +3,7 @@
 use App\Enums\IndicatorMeasure;
 use App\Livewire\Concerns\FiltersByStrategy;
 use App\Livewire\Concerns\Indicators\BuildsIndicatorRows;
+use App\Livewire\Concerns\Indicators\ExportsIndicators;
 use App\Livewire\Concerns\Indicators\InspectsIndicatorChain;
 use App\Livewire\Concerns\Indicators\ManagesIndicatorForm;
 use App\Livewire\Concerns\Indicators\ManagesIndicatorReadings;
@@ -20,6 +21,7 @@ use Livewire\WithPagination;
 
 new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Component {
     use BuildsIndicatorRows;
+    use ExportsIndicators;
     use FiltersByStrategy;
     use InspectsIndicatorChain;
     use ManagesIndicatorForm;
@@ -278,6 +280,9 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
         </x-slot:filters>
 
         <x-slot:actions>
+            <x-ui.button icon="arrow-down-tray" class="min-h-11 max-sm:h-11! self-end touch-manipulation @sm/directory:min-h-10" wire:click="exportIndicators" data-test="export-indicators-button">
+                {{ __('indicators.export_csv') }}
+            </x-ui.button>
             @can('indicators.create')<x-ui.button tone="primary" icon="plus" class="min-h-11 max-sm:h-11! self-end touch-manipulation @sm/directory:min-h-10" wire:click="openCreateModal" data-test="create-indicator-button" data-quick-create>
                 {{ __('indicators.add_indicator') }}
             </x-ui.button>@endcan
