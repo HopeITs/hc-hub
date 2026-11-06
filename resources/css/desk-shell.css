@@ -349,8 +349,12 @@
         .dk-top-find .dk-ask { position: static; flex: none; width: 44px; height: 44px; padding: 0; justify-content: center; border: 1px solid var(--line-2); border-radius: 999px; background: var(--paper); backdrop-filter: none; -webkit-backdrop-filter: none; }
         .dk-top-find .dk-ask .dk-inner { display: contents; }
         .dk-top-find { justify-content: flex-start; }
-        /* The language and theme pair moves into the avatar menu. */
-        .dk-seg { display: none; }
+        /* The language and theme pair moves into the avatar menu. Scoped to
+           the top bar's tools: a bare .dk-seg also hid every other segmented
+           control on a phone — the register view switches (My reports / To
+           validate), the Desk panels' switches and the strategy status tabs
+           (page review, 5 Nov 2026). */
+        .dk-top .dk-tools .dk-seg { display: none; }
         .dk-narrow-tools { display: grid; gap: 1px; }
     }
 

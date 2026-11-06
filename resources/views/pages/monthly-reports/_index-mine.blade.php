@@ -1,83 +1,96 @@
-{{-- "My reports" on ⚡index.blade.php: every generated month of the user's projects, oldest first, on one thread per project. --}}
+{{-- "My reports" on ⚡index.blade.php: the months waiting on the preparer first ("Needs you"), then one block per project: its name and month strip, what holds the whole project back (said once), its months that still need something, and the validated ones folded away. --}}
 @if ($this->myMonths === [])
     <x-ui.empty-state icon="calendar-days" :heading="__('monthly_reports.empty_mine')" :body="__('monthly_reports.empty_mine_body')" />
 @else
     <div class="flex flex-col gap-10">
-        @foreach ($this->myMonths as $group)
+        @if ($this->needsYou !== [])
+            <section class="flex flex-col gap-3" aria-labelledby="needs-you-heading" data-needs-you>
+                <h2 id="needs-you-heading" class="text-lg font-bold">{{ __('monthly_reports.needs_you') }}</h2>
+
+                <x-ui.panel>
+                    <ul class="flex flex-col divide-y divide-secondary-soft dark:divide-line" role="list">
+                        @foreach ($this->needsYou as $item)
+                            @include('pages.monthly-reports._index-month-row', ['row' => $item['row'], 'rowProject' => $item['project'], 'inThread' => false, 'projectHasIndicators' => true])
+                        @endforeach
+                    </ul>
+                </x-ui.panel>
+            </section>
+        @endif
+
+        @foreach ($this->visibleGroups as $group)
             @php
                 $groupProject = $group['project'];
+                $stripLabel = collect($group['strip'])
+                    ->map(fn (array $row): string => $row['report']->period->translatedFormat('F Y').': '.($row['overdue'] ? __('monthly_reports.overdue') : __('monthly_reports.states.'.$row['state'])))
+                    ->implode(', ');
             @endphp
             <section class="flex flex-col gap-3" aria-labelledby="project-months-{{ $groupProject->id }}" wire:key="project-months-{{ $groupProject->id }}">
-                <h2 id="project-months-{{ $groupProject->id }}" class="text-lg font-bold" dir="auto">
-                    @can('projects.view')
-                        <a href="{{ route('projects.show', $groupProject) }}" wire:navigate class="hover:underline">{{ $groupProject->name }}</a>
-                    @else
-                        {{ $groupProject->name }}
-                    @endcan
-                </h2>
+                <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                    <h2 id="project-months-{{ $groupProject->id }}" class="text-lg font-bold" dir="auto">
+                        @can('projects.view')
+                            <a href="{{ route('projects.show', $groupProject) }}" wire:navigate class="hover:underline">{{ $groupProject->name }}</a>
+                        @else
+                            {{ $groupProject->name }}
+                        @endcan
+                    </h2>
 
-                <ol class="relative flex flex-col before:absolute before:inset-y-3 before:start-[5px] before:w-px before:bg-secondary-soft dark:before:bg-line" role="list">
-                    @foreach ($group['months'] as $row)
-                        @php
-                            $rowReport = $row['report'];
-                        @endphp
-                        <li
-                            class="relative flex flex-wrap items-center gap-x-4 gap-y-2 py-3 ps-7"
-                            data-month="{{ $row['key'] }}" data-month-state="{{ $row['state'] }}"
-                            wire:key="month-{{ $rowReport->id }}"
-                        >
-                            <span @class([
-                                'absolute start-0 top-1/2 size-[11px] -translate-y-1/2 rounded-full ring-4 ring-white dark:ring-surface-0',
-                                'bg-status-good' => $row['state'] === 'validated',
-                                'bg-secondary-dark dark:bg-ink' => $row['state'] === 'submitted',
-                                'bg-status-warn' => in_array($row['state'], ['returned', 'reopen_pending'], true),
-                                'bg-primary' => $row['overdue'],
-                                'border-2 border-secondary-light bg-white dark:border-line-strong dark:bg-surface-0' => ! $row['overdue'] && in_array($row['state'], ['draft', 'upcoming'], true),
-                            ]) aria-hidden="true"></span>
+                    {{-- The project's year at a glance: one square per generated month, coloured by its state. --}}
+                    <div class="flex flex-wrap items-center gap-1" role="img" aria-label="{{ __('monthly_reports.month_strip_label', ['months' => $stripLabel]) }}" data-month-strip="{{ $groupProject->id }}">
+                        @foreach ($group['strip'] as $stripRow)
+                            @php
+                                $stripState = $stripRow['overdue'] ? 'overdue' : $stripRow['state'];
+                            @endphp
+                            <span
+                                @class([
+                                    'size-3.5 rounded-[4px]',
+                                    'bg-status-good' => $stripState === 'validated',
+                                    'bg-secondary-dark dark:bg-ink' => $stripState === 'submitted',
+                                    'bg-status-warn' => in_array($stripState, ['returned', 'reopen_pending'], true),
+                                    'bg-primary' => $stripState === 'overdue',
+                                    'border-2 border-secondary-light dark:border-line-strong' => in_array($stripState, ['draft', 'upcoming'], true),
+                                ])
+                                data-strip-month="{{ $stripRow['key'] }}" data-strip-state="{{ $stripState }}"
+                                title="{{ $stripRow['report']->period->translatedFormat('F Y') }}"
+                            ></span>
+                        @endforeach
+                    </div>
+                </div>
 
-                            <div class="min-w-36 flex-1">
-                                <p class="flex flex-wrap items-center gap-2">
-                                    <span class="text-base font-bold">{{ $rowReport->period->translatedFormat('F Y') }}</span>
-                                    <x-monthly-reports.state-chip :state="$row['state']" />
-                                    @if ($row['overdue'])
-                                        <span class="inline-flex items-center gap-1 rounded-md border border-primary bg-status-critical-soft px-1.5 py-0.5 text-xs font-semibold text-status-critical" data-overdue="{{ $row['key'] }}">
-                                            <flux:icon.exclamation-triangle variant="micro" class="size-3.5" aria-hidden="true" />
-                                            {{ __('monthly_reports.overdue') }}
-                                        </span>
-                                    @endif
-                                </p>
-                                <p class="mt-0.5 flex flex-wrap gap-x-3 type-meta text-secondary-medium dark:text-ink-muted">
-                                    @if ($row['due'] !== null)
-                                        <span class="tabular-nums">{{ __('monthly_reports.due_on', ['date' => $row['due']->translatedFormat(__('formats.date'))]) }}</span>
-                                    @else
-                                        <span>{{ __('monthly_reports.no_indicators_this_month') }}</span>
-                                    @endif
-                                    @if ($row['blocked'] !== null)
-                                        <span class="inline-flex items-center gap-1" data-blocked="{{ $row['key'] }}">
-                                            <flux:icon.lock-closed variant="micro" class="size-3" aria-hidden="true" />
-                                            {{ $row['blocked'] }}
-                                        </span>
-                                    @endif
-                                </p>
-                            </div>
+                @if ($group['notice'] !== null)
+                    <p class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg bg-status-warn-soft px-3 py-2 text-sm text-secondary-dark dark:text-ink" data-project-notice="{{ $groupProject->id }}">
+                        <span class="inline-flex items-center gap-1.5">
+                            <flux:icon.exclamation-triangle variant="micro" class="size-4 shrink-0 text-status-warn" aria-hidden="true" />
+                            {{ $group['notice'] }}
+                        </span>
+                        @can('projects.view')
+                            <a href="{{ route('projects.show', $groupProject) }}" wire:navigate class="font-semibold underline underline-offset-2">{{ __('monthly_reports.open_project') }}</a>
+                        @endcan
+                    </p>
+                @elseif (! $group['hasIndicators'])
+                    <p class="type-meta text-secondary-medium dark:text-ink-muted">{{ __('monthly_reports.project_no_indicators') }}</p>
+                @endif
 
-                            <div class="flex shrink-0 items-center gap-2">
-                                <x-ui.button tone="ghost" size="sm" icon="eye" :href="route('monthly-reports.show', $rowReport)" wire:navigate :aria-label="__('common.view_name', ['name' => $rowReport->period->translatedFormat('F Y')])" />
-                                @if ($row['can_fill'])
-                                    <x-ui.button
-                                        size="sm"
-                                        tone="primary"
-                                        icon="pencil-square"
-                                        wire:click="fillMonth({{ $rowReport->id }})"
-                                        wire:loading.attr="disabled"
-                                        wire:target="fillMonth({{ $rowReport->id }})"
-                                        data-fill="{{ $rowReport->id }}"
-                                    >{{ __('monthly_reports.fill') }}</x-ui.button>
-                                @endif
-                            </div>
-                        </li>
-                    @endforeach
-                </ol>
+                @if ($group['folded'] !== [])
+                    <details class="group" data-validated-fold="{{ $groupProject->id }}">
+                        <summary class="inline-flex cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink">
+                            <flux:icon.chevron-right variant="micro" class="size-4 transition-transform group-open:rotate-90 rtl:-scale-x-100" aria-hidden="true" />
+                            {{ trans_choice('monthly_reports.validated_months', count($group['folded']), ['count' => count($group['folded'])]) }}
+                        </summary>
+                        <ol class="relative mt-1 flex flex-col before:absolute before:inset-y-3 before:start-[5px] before:w-px before:bg-secondary-soft dark:before:bg-line" role="list">
+                            @foreach ($group['folded'] as $row)
+                                @include('pages.monthly-reports._index-month-row', ['row' => $row, 'rowProject' => $groupProject, 'inThread' => true, 'projectHasIndicators' => $group['hasIndicators']])
+                            @endforeach
+                        </ol>
+                    </details>
+                @endif
+
+                @if ($group['open'] !== [])
+                    <ol class="relative flex flex-col before:absolute before:inset-y-3 before:start-[5px] before:w-px before:bg-secondary-soft dark:before:bg-line" role="list">
+                        @foreach ($group['open'] as $row)
+                            @include('pages.monthly-reports._index-month-row', ['row' => $row, 'rowProject' => $groupProject, 'inThread' => true, 'projectHasIndicators' => $group['hasIndicators']])
+                        @endforeach
+                    </ol>
+                @endif
             </section>
         @endforeach
     </div>
