@@ -63,7 +63,9 @@
                             ['milestone', 'showMilestones', 'tasks.milestone', 'calendar-filter-milestones'],
                             ['task', 'showTasks', 'tasks.task', 'calendar-filter-tasks'],
                             ['report', 'showReports', 'calendar.report_deadline', 'calendar-filter-reports'],
+                            ['monthly_report', 'showMonthlyReports', 'calendar.monthly_report_due', 'calendar-filter-monthly-reports'],
                         ] as [$typeKey, $showProp, $labelKey, $testHook])
+                            @continue(! $this->canSeeType($typeKey))
                             <div class="group flex items-center gap-1 rounded-md hover:bg-secondary-soft dark:hover:bg-white/[0.06]" role="option" aria-selected="{{ $$showProp ? 'true' : 'false' }}">
                                 <button type="button" data-flux-menu-item wire:click="toggleType('{{ $typeKey }}')" class="flex min-w-0 flex-1 cursor-pointer items-center gap-2 px-2 py-1.5 text-start text-sm" data-test="{{ $testHook }}">
                                     <span class="size-1.5 shrink-0 rounded-full {{ $typeDotClasses[$typeKey] }}"></span>
@@ -135,22 +137,24 @@
             </x-ui.multi-select-popover>
             </div>
 
+            @if ($canAdd)
             <flux:dropdown position="bottom-end" class="filter-picker">
                 <x-ui.button tone="primary" icon="plus" icon:trailing="chevron-down" data-test="calendar-add-button">{{ __('common.add') }}</x-ui.button>
                 <flux:menu class="filter-menu">
-                    @can('create', App\Models\Milestone::class)
+                    @if ($canAddMilestone)
                         <flux:menu.item wire:click="openCreateModal" data-test="calendar-add-milestone-button">
                             <flux:icon.flag variant="micro" class="size-4" />
                             {{ __('milestones.add_milestone') }}
                         </flux:menu.item>
-                    @endcan
-                    @can('create', App\Models\Task::class)
+                    @endif
+                    @if ($canAddTask)
                         <flux:menu.item wire:click="openCreateTaskModal" data-test="calendar-add-task-button">
                             <flux:icon.clipboard-document-check variant="micro" class="size-4" />
                             {{ __('tasks.add_task') }}
                         </flux:menu.item>
-                    @endcan
+                    @endif
                 </flux:menu>
             </flux:dropdown>
+            @endif
         </div>
     </div>

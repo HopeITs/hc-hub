@@ -7,6 +7,7 @@ namespace App\Livewire\Concerns\Calendar;
 use App\Models\Donor;
 use App\Models\DonorReport;
 use App\Models\Milestone;
+use App\Models\MonthlyReport;
 use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\Report;
@@ -78,6 +79,9 @@ trait FindsFocusedTypeDates
                 Report::query()->whereIn('user_id', User::query()->whereIn('employee_id', $employeeIds)->pluck('id')),
                 'planned_date'
             ),
+            'monthly_report' => $this->canSeeType('monthly_report')
+                ? $this->upcomingOrRecentRows(fn (bool $upcoming): \Illuminate\Support\Collection => $this->monthlyReportRows($employeeIds, $upcoming), 1)->first()['date'] ?? null
+                : null,
             'proposal' => ! $this->canViewProposals() ? null : $this->nearestOrLatestDate(
                 Proposal::query()->whereHas('projects', fn (Builder $query) => $query->whereIn('projects.user_id', $employeeIds)),
                 'planned_date_end'
@@ -228,6 +232,38 @@ trait FindsFocusedTypeDates
     }
 
     /**
+     * The monthly reports these people must deliver that fall due today or
+     * later ($upcoming) or before today, as related-dates rows dated on each
+     * report's due date. Due dates are computed (see monthlyReportDueOn()),
+     * so they cannot be filtered in SQL; the window is kept to the last two
+     * years of months.
+     *
+     * @param  array<int, int>  $employeeIds
+     * @return \Illuminate\Support\Collection<int, array{kind: 'link', id: int, url: string, title: string, subLabel: string, date: CarbonImmutable}>
+     */
+    protected function monthlyReportRows(array $employeeIds, bool $upcoming): \Illuminate\Support\Collection
+    {
+        $today = CarbonImmutable::today();
+        $preparerUserIds = User::query()->whereIn('employee_id', $employeeIds)->pluck('id')->all();
+
+        return $this->scopedMonthlyReports($employeeIds, $preparerUserIds)
+            ->where('period', '>=', CarbonImmutable::today()->subYears(2)->startOfMonth()->toDateString())
+            ->get()
+            ->filter(fn (MonthlyReport $report): bool => $upcoming
+                ? $this->monthlyReportDueOn($report)->greaterThanOrEqualTo($today)
+                : $this->monthlyReportDueOn($report)->lessThan($today))
+            ->map(fn (MonthlyReport $report): array => [
+                'kind' => 'link',
+                'id' => $report->id,
+                'url' => route('monthly-reports.show', $report),
+                'title' => $report->project->name,
+                'subLabel' => $report->period->translatedFormat(__('formats.month_year')),
+                'date' => $this->monthlyReportDueOn($report),
+            ])
+            ->values();
+    }
+
+    /**
      * The related-dates list for the currently focused type: title, date,
      * an optional sub-label (which of a composite type's two sources this
      * row came from) and how to open it — a modal action for milestones and
@@ -290,6 +326,9 @@ trait FindsFocusedTypeDates
                 'subLabel' => null,
                 'date' => $report->planned_date,
             ]),
+            'monthly_report' => $this->canSeeType('monthly_report')
+                ? $this->upcomingOrRecentRows(fn (bool $upcoming): \Illuminate\Support\Collection => $this->monthlyReportRows($employeeIds, $upcoming))
+                : new \Illuminate\Support\Collection,
             'proposal' => ($this->canViewProposals() ? $this->upcomingOrRecent(
                 Proposal::query()->whereHas('projects', fn (Builder $query) => $query->whereIn('projects.user_id', $employeeIds)),
                 'planned_date_end'

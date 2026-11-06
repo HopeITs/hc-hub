@@ -1,16 +1,23 @@
 <?php
 
+use App\Enums\ProjectStatus;
+use App\Enums\ReportStatus;
 use App\Enums\TaskStatus;
 use App\Models\Donor;
 use App\Models\DonorProposal;
 use App\Models\DonorReport;
 use App\Models\Milestone;
+use App\Models\MonthlyReport;
+use App\Models\MonthlyReportLine;
 use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\Report;
 use App\Models\Task;
 use App\Models\TransfersTracking;
 use App\Models\User;
+use App\Support\MonthlyReportPeriods;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 
@@ -651,6 +658,7 @@ test('narrowing the type filter to exactly one type shows the focused banner, an
         ->assertDontSee('data-test="calendar-focused-banner"', false)
         ->set('showTasks', false)
         ->set('showReports', false)
+        ->set('showMonthlyReports', false)
         ->set('showProposals', false)
         ->set('showTransfers', false)
         ->set('showDonors', false)
@@ -717,6 +725,7 @@ test('narrowing to a single type via toggleType jumps the grid to its nearest oc
         ->test('pages::calendar.index')
         ->set('showTasks', false)
         ->set('showReports', false)
+        ->set('showMonthlyReports', false)
         ->set('showProposals', false)
         ->set('showTransfers', false)
         ->set('showDonors', false)
@@ -787,6 +796,7 @@ test('the related-dates panel lists both occurrences of a composite type with cl
         ->set('showMilestones', false)
         ->set('showTasks', false)
         ->set('showReports', false)
+        ->set('showMonthlyReports', false)
         ->set('showProposals', false)
         ->set('showTransfers', false)
         ->call('toggleType', 'donor')
@@ -933,4 +943,114 @@ test('an active proposal with an extended end shows on the extended day, marked 
     Livewire::actingAs($user)->test('pages::calendar.index')->set('month', '2026-08')
         ->assertSee('data-test="calendar-proposal-'.$extended->id.'"', false)
         ->assertSee('data-test="calendar-proposal-extended-'.$extended->id.'"', false);
+});
+
+test('someone who may add neither milestones nor tasks gets no Add button and no click-a-day menu', function () {
+    $employeeId = insertHrEmployee();
+    $viewer = linkUserToEmployee(User::factory()->role('Team Member')->create(), $employeeId);
+
+    Livewire::actingAs($viewer)
+        ->test('pages::calendar.index')
+        ->assertOk()
+        ->assertDontSee('data-test="calendar-add-button"', false)
+        ->assertDontSee('data-test="calendar-context-add-milestone"', false)
+        ->assertDontSee('data-test="calendar-context-add-task"', false)
+        ->assertDontSee('menuOpen = true', false);
+
+    Livewire::actingAs(linkUserToEmployee(User::factory()->role('General Manager')->create(), insertHrEmployee()))
+        ->test('pages::calendar.index')
+        ->assertSee('data-test="calendar-add-button"', false)
+        ->assertSee('menuOpen = true', false);
+});
+
+test('a task, report and project whose date passed with the work unfinished are marked late, finished ones are not', function () {
+    $this->travelTo(Carbon::create(2026, 6, 20, 9));
+    $employeeId = insertHrEmployee();
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
+
+    $lateTask = Task::factory()->create(['due_date' => Carbon::create(2026, 6, 10), 'status' => TaskStatus::InProgress]);
+    $doneTask = Task::factory()->create(['due_date' => Carbon::create(2026, 6, 10), 'status' => TaskStatus::Done]);
+    foreach ([$lateTask, $doneTask] as $task) {
+        $task->taskAssignees()->delete();
+        $task->taskAssignees()->create(['employee_id' => $employeeId]);
+    }
+
+    $lateReport = Report::factory()->create(['user_id' => $user->id, 'planned_date' => Carbon::create(2026, 6, 10), 'status' => ReportStatus::Draft]);
+    $approvedReport = Report::factory()->create(['user_id' => $user->id, 'planned_date' => Carbon::create(2026, 6, 10), 'status' => ReportStatus::Approved]);
+
+    $openProject = Project::factory()->status(ProjectStatus::Active)->create(['user_id' => $employeeId, 'start_date' => Carbon::create(2025, 1, 1), 'end_date' => Carbon::create(2026, 6, 10)]);
+    $closedProject = Project::factory()->status(ProjectStatus::Closed)->create(['user_id' => $employeeId, 'start_date' => Carbon::create(2025, 1, 1), 'end_date' => Carbon::create(2026, 6, 10)]);
+
+    Livewire::actingAs($user)
+        ->test('pages::calendar.index')
+        ->set('month', '2026-06')
+        ->assertSee('data-test="calendar-late-task-'.$lateTask->id.'"', false)
+        ->assertDontSee('data-test="calendar-late-task-'.$doneTask->id.'"', false)
+        ->assertSee('data-test="calendar-late-report-'.$lateReport->id.'"', false)
+        ->assertDontSee('data-test="calendar-late-report-'.$approvedReport->id.'"', false)
+        ->assertSee('data-test="calendar-late-project-end-'.$openProject->id.'"', false)
+        ->assertDontSee('data-test="calendar-late-project-end-'.$closedProject->id.'"', false)
+        ->assertSeeText(__('calendar.ends_name', ['name' => $openProject->name]));
+});
+
+test('a monthly report appears on its due date and is marked late once that date passes as a draft', function () {
+    $this->travelTo(Carbon::create(2026, 7, 20, 9));
+    $employeeId = insertHrEmployee();
+    $viewer = linkUserToEmployee(User::factory()->role('Team Member')->create(), $employeeId);
+    $project = Project::factory()->create(['user_id' => $employeeId]);
+
+    $draft = MonthlyReport::factory()->for($project)->create(['period' => Carbon::create(2026, 6, 1)]);
+    $validated = MonthlyReport::factory()->for($project)->validated()->create(['period' => Carbon::create(2026, 5, 1)]);
+    $lineless = MonthlyReport::factory()->for($project)->create(['period' => Carbon::create(2026, 4, 1)]);
+    MonthlyReportLine::factory()->for($draft)->create();
+    MonthlyReportLine::factory()->for($validated)->create();
+
+    $periods = MonthlyReportPeriods::fromLoaded($project, new EloquentCollection);
+    $draftDue = $periods->dueDate(CarbonImmutable::create(2026, 6, 1));
+    $validatedDue = $periods->dueDate(CarbonImmutable::create(2026, 5, 1));
+
+    $component = Livewire::actingAs($viewer)->test('pages::calendar.index');
+
+    $component->set('month', $draftDue->format('Y-m'))
+        ->assertSeeHtml('data-test="calendar-day-'.$draftDue->toDateString().'"')
+        ->assertSee('data-test="calendar-monthly-report-'.$draft->id.'"', false)
+        ->assertSee('data-test="calendar-late-monthly-report-'.$draft->id.'"', false)
+        ->assertDontSee('data-test="calendar-monthly-report-'.$lineless->id.'"', false);
+
+    $component->set('month', $validatedDue->format('Y-m'))
+        ->assertSee('data-test="calendar-monthly-report-'.$validated->id.'"', false)
+        ->assertDontSee('data-test="calendar-late-monthly-report-'.$validated->id.'"', false);
+
+    expect($component->instance()->calendar['monthlyReportsByDay']->get($validatedDue->toDateString())?->pluck('id')->all())->toBe([$validated->id]);
+});
+
+test('focusing on monthly reports lists their due dates in the related-dates panel', function () {
+    $this->travelTo(Carbon::create(2026, 7, 20, 9));
+    $employeeId = insertHrEmployee();
+    $viewer = linkUserToEmployee(User::factory()->role('Team Member')->create(), $employeeId);
+    $project = Project::factory()->create(['user_id' => $employeeId]);
+    $report = MonthlyReport::factory()->for($project)->create(['period' => Carbon::create(2026, 7, 1)]);
+    MonthlyReportLine::factory()->for($report)->create();
+
+    $items = Livewire::actingAs($viewer)
+        ->test('pages::calendar.index')
+        ->call('focusOnlyType', 'monthly_report')
+        ->assertSet('showTasks', false)
+        ->instance()
+        ->focusedItems;
+
+    expect($items->pluck('id')->all())->toBe([$report->id])
+        ->and($items->first()['date']->toDateString())->toBe(MonthlyReportPeriods::fromLoaded($project, new EloquentCollection)->dueDate(CarbonImmutable::create(2026, 7, 1))->toDateString());
+});
+
+test('a busy day shows its item count for phone screens', function () {
+    $employeeId = insertHrEmployee();
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
+    Project::factory()->count(3)->create(['user_id' => $employeeId, 'start_date' => Carbon::create(2025, 1, 1), 'end_date' => Carbon::create(2026, 12, 31)]);
+
+    Livewire::actingAs($user)
+        ->test('pages::calendar.index')
+        ->set('month', '2026-12')
+        ->assertSee('data-test="calendar-day-count-2026-12-31"', false)
+        ->assertSeeText(trans_choice('calendar.items_short', 3, ['count' => 3]));
 });

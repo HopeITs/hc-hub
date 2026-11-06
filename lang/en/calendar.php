@@ -28,5 +28,10 @@ return [
     'time_period' => 'Time period',
     'transfer' => 'Transfer',
     'week' => 'Week',
+    'monthly_report_due' => 'Monthly report due',
+    'items_short' => '{1} :count item|[2,*] :count items',
+    'late' => 'Late',
+    'starts_name' => 'Starts: :name',
+    'ends_name' => 'Ends: :name',
     'review_meeting' => 'Review meeting',
 ];

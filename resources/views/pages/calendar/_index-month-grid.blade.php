@@ -22,10 +22,13 @@
                             @endphp
                             <div
                                 wire:key="calendar-day-{{ $day->toDateString() }}"
+                                @if ($canAdd)
                                 x-on:click="menuOpen = true; menuX = $event.clientX; menuY = $event.clientY; menuDate = '{{ $day->toDateString() }}'"
                                 x-on:contextmenu.prevent="menuOpen = true; menuX = $event.clientX; menuY = $event.clientY; menuDate = '{{ $day->toDateString() }}'"
+                                @endif
                                 @class([
-                                    'flex min-h-28 cursor-pointer flex-col gap-1 border-b border-e border-secondary-soft p-1.5 text-start last:border-e-0 [&:nth-child(7n)]:border-e-0 hover:bg-secondary-soft/40 dark:border-line dark:hover:bg-surface-2 transition-opacity',
+                                    'flex min-h-28 flex-col gap-1 border-b border-e border-secondary-soft p-1.5 text-start last:border-e-0 [&:nth-child(7n)]:border-e-0 dark:border-line transition-opacity',
+                                    'cursor-pointer hover:bg-secondary-soft/40 dark:hover:bg-surface-2' => $canAdd,
                                     'opacity-40' => ! $isCurrentMonth,
                                     'opacity-50' => $focusedType !== null && $dayFocusedCount === 0,
                                     'ring-2 ring-inset '.$typeRingClasses[$focusedType ?? 'milestone'] => $focusedType !== null && $dayFocusedCount > 0,
@@ -40,8 +43,15 @@
                                     {{ $day->day }}
                                 </span>
 
+                                @if ($dayItemCount > 0)
+                                    {{-- Phone cells are too narrow for chip names: a count opens the day list instead. --}}
+                                    <button type="button" wire:click.stop="openDayDetail('{{ $day->toDateString() }}')" class="w-fit cursor-pointer rounded bg-secondary-soft px-1 py-0.5 text-[10px] font-semibold text-secondary-dark sm:hidden dark:bg-surface-2 dark:text-ink" data-test="calendar-day-count-{{ $day->toDateString() }}">
+                                        {{ trans_choice('calendar.items_short', $dayItemCount, ['count' => $dayItemCount]) }}
+                                    </button>
+                                @endif
+
                                 <div
-                                    class="flex min-h-4 flex-1 flex-col gap-1"
+                                    class="flex min-h-4 flex-1 flex-col gap-1 max-sm:[&>*]:hidden"
                                     x-data="taskDropList('my-calendar', (wire, id) => wire.rescheduleTask(id, '{{ $day->toDateString() }}'))"
                                     @if ($dayItemCount > 0)
                                         wire:click.stop="openDayDetail('{{ $day->toDateString() }}')"
@@ -50,7 +60,7 @@
                                         data-test="calendar-day-content-{{ $day->toDateString() }}"
                                     @endif
                                 >
-                                    @include('pages.calendar._item-chips', ['day' => $day, 'calendar' => $calendar, 'markerTone' => $this->markerTone(...), 'taskTone' => $this->taskTone(...), 'reportTone' => $this->reportTone(...), 'proposalTone' => $proposalTone, 'transferTone' => $this->transferTone(...), 'donorFollowUpTone' => $this->donorFollowUpTone(...), 'donorReportTone' => $this->donorReportTone(...), 'projectTone' => $projectTone, 'typeDotClasses' => $typeDotClasses])
+                                    @include('pages.calendar._item-chips', ['day' => $day, 'calendar' => $calendar, 'markerTone' => $this->markerTone(...), 'taskTone' => $this->taskTone(...), 'reportTone' => $this->reportTone(...), 'monthlyReportTone' => $this->monthlyReportTone(...), 'isMonthlyReportLate' => $this->isMonthlyReportLate(...), 'proposalTone' => $proposalTone, 'transferTone' => $this->transferTone(...), 'donorFollowUpTone' => $this->donorFollowUpTone(...), 'donorReportTone' => $this->donorReportTone(...), 'projectTone' => $projectTone, 'projectEndTone' => $this->projectEndTone(...), 'isLate' => $this->isLate(...), 'typeDotClasses' => $typeDotClasses])
                                 </div>
                             </div>
                         @endforeach
