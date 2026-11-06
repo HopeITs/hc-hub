@@ -248,7 +248,7 @@ test('program plan years fill the strategy window and total each plan', function
     $years = Livewire::actingAs($user)
         ->test('pages::programs.show', ['program' => $program])
         ->set('tab', 'plans')
-        ->assertSee('No plan written for this year')
+        ->assertSee('No plan')
         ->instance()
         ->planYears;
 

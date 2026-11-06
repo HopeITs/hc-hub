@@ -5,6 +5,8 @@ use App\Enums\DonorAttribution;
 use App\Enums\MonthlyReportStatus;
 use App\Livewire\Concerns\AddsQuickTask;
 use App\Livewire\Concerns\Programs\LinksProgram;
+use App\Livewire\Concerns\Programs\ManagesProgramPlans;
+use App\Livewire\Concerns\Programs\ManagesProgramResults;
 use App\Livewire\Concerns\Programs\ManagesProgramTasks;
 use App\Livewire\Concerns\Programs\ReadsProgramDelivery;
 use App\Livewire\Concerns\Programs\TracksProgramHealth;
@@ -30,6 +32,8 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
     use AddsQuickTask;
     use FiltersResultsChain;
     use LinksProgram;
+    use ManagesProgramPlans;
+    use ManagesProgramResults;
     use ManagesProgramTasks;
     use ReadsProgramDelivery;
     use TracksProgramHealth;
@@ -409,15 +413,9 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
         @elseif ($tab === 'tasks')
             @include('pages.programs._show-tasks-tab')
         @elseif ($tab === 'plans')
-            <x-ui.plan-years :slots="$this->planYears" :strategy="$program->strategy" />
+            @include('pages.programs._show-plans-tab')
         @else
-            <x-ui.logframe :chain="$this->chain" :summary="$this->resultSummary">
-                @can('results.create')
-                    <x-slot:start>
-                        <x-ui.button tone="primary" icon="plus" :href="route('results.index')" wire:navigate>{{ __('results_framework.chain_start') }}</x-ui.button>
-                    </x-slot:start>
-                @endcan
-            </x-ui.logframe>
+            @include('pages.programs._show-results-tab')
         @endif
     </div>
 
