@@ -8,6 +8,7 @@ use App\Livewire\Concerns\Targets\ManagesTargetForm;
 use App\Livewire\Concerns\Targets\NarrowsTargetFormOptions;
 use App\Livewire\Concerns\Targets\ReadsTargets;
 use App\Models\Indicator;
+use App\Models\PlanIndicator;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -96,7 +97,6 @@ new #[Layout('layouts::desk'), Title('titles.targets')] class extends Component 
         'in_progress' => ['label' => __('targets.status_in_progress'), 'count' => $pulse['in_progress'], 'fill' => 'bg-secondary-dark dark:bg-ink-muted', 'text' => 'text-secondary-dark dark:text-ink', 'dot' => 'bg-secondary-dark dark:bg-ink-muted'],
         'not_started' => ['label' => __('targets.status_not_started'), 'count' => $pulse['not_started'], 'fill' => 'bg-secondary-light', 'text' => 'text-secondary-light', 'dot' => 'bg-secondary-light'],
     ];
-    $shareOf = fn (int $part): float => $pulse['total'] > 0 ? round($part / $pulse['total'] * 100, 1) : 0;
     $formatValue = fn (float $value): string => fmod($value, 1.0) === 0.0 ? number_format($value) : number_format($value, 2);
     $resultMark = fn (?ResultType $type): string => match ($type) {
         ResultType::Impact => 'bg-secondary-dark ring-secondary-dark dark:bg-ink dark:ring-ink',
@@ -105,6 +105,7 @@ new #[Layout('layouts::desk'), Title('titles.targets')] class extends Component 
         ResultType::Activity => 'bg-transparent ring-secondary-medium dark:ring-ink-muted',
         ResultType::CrossCutting => 'bg-secondary-light ring-secondary-light dark:bg-ink-muted dark:ring-ink-muted',
     };
+    $deletingTargetName = $deletingTargetId === null ? null : Indicator::query()->whereKey(PlanIndicator::query()->whereKey($deletingTargetId)->value('indicator_id'))->value('name');
     $groups = $this->targets->groupBy(fn ($target) => $target->indicator->result_id);
 @endphp
 
@@ -123,29 +124,6 @@ new #[Layout('layouts::desk'), Title('titles.targets')] class extends Component 
         <x-desk.register-search :label="__('targets.search_targets')" :placeholder="__('common.indicator_name')" wire:model.live.debounce.300ms="search" />
     </x-slot:search>
     <x-slot:filters>
-
-            <x-ui.header-filter-select :label="__('targets.committed_in')" wire:model.live="sourceType" :value="$sourceType">
-                <option value="">{{ __('targets.any_source') }}</option>
-                @foreach ($sourceTypeLabels as $sourceKey => $sourceLabel)
-                    <option value="{{ $sourceKey }}">{{ $sourceLabel }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
-
-            <x-ui.header-filter-select :label="__('common.project')" wire:model.live="project" :value="$project">
-                <option value="">{{ __('targets.any_project') }}</option>
-                <option value="none">{{ __('common.organisation_wide') }}</option>
-                @foreach ($this->projectOptions as $projectOption)
-                    <option value="{{ $projectOption->id }}">{{ $projectOption->name }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
-
-            <x-ui.header-filter-select :label="__('common.period')" wire:model.live="period" :value="$period">
-                <option value="">{{ __('targets.all_periods') }}</option>
-                @foreach (Period::cases() as $periodCase)
-                    <option value="{{ $periodCase->value }}">{{ $periodCase->label() }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
-
             <x-ui.header-filter-select :label="__('common.program')" wire:model.live="program" :value="$program">
                 <option value="">{{ __('targets.any_program') }}</option>
                 @foreach ($this->programOptions as $programOption)
@@ -153,23 +131,54 @@ new #[Layout('layouts::desk'), Title('titles.targets')] class extends Component 
                 @endforeach
             </x-ui.header-filter-select>
 
-            <x-ui.header-filter-select :label="__('targets.donor')" wire:model.live="donor" :value="$donor">
-                <option value="">{{ __('targets.any_donor') }}</option>
-                @foreach ($this->donorOptions as $donorOption)
-                    <option value="{{ $donorOption->id }}">{{ $donorOption->name }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
+            <div class="contents" x-data="{ open: @js($sourceType !== '' || $project !== '' || $period !== '' || $donor !== '' || $year !== '') }">
+                <button type="button" class="dk-btn" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" data-test="more-filters-button">
+                    <flux:icon.adjustments-horizontal variant="micro" class="size-4" />
+                    {{ __('targets.more_filters') }}
+                </button>
 
-            <x-ui.header-filter-select :label="__('targets.year')" wire:model.live="year" :value="$year">
-                <option value="">{{ __('targets.all_years') }}</option>
-                @foreach ($this->yearOptions as $yearOption)
-                    <option value="{{ $yearOption }}">{{ $yearOption }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
+                <div class="contents" x-show="open" x-cloak>
+                    <x-ui.header-filter-select :label="__('targets.committed_in')" wire:model.live="sourceType" :value="$sourceType">
+                        <option value="">{{ __('targets.any_source') }}</option>
+                        @foreach ($sourceTypeLabels as $sourceKey => $sourceLabel)
+                            <option value="{{ $sourceKey }}">{{ $sourceLabel }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+
+                    <x-ui.header-filter-select :label="__('common.project')" wire:model.live="project" :value="$project">
+                        <option value="">{{ __('targets.any_project') }}</option>
+                        <option value="none">{{ __('common.organisation_wide') }}</option>
+                        @foreach ($this->projectOptions as $projectOption)
+                            <option value="{{ $projectOption->id }}">{{ $projectOption->name }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+
+                    <x-ui.header-filter-select :label="__('common.period')" wire:model.live="period" :value="$period">
+                        <option value="">{{ __('targets.all_periods') }}</option>
+                        @foreach (Period::cases() as $periodCase)
+                            <option value="{{ $periodCase->value }}">{{ $periodCase->label() }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+
+                    <x-ui.header-filter-select :label="__('targets.donor')" wire:model.live="donor" :value="$donor">
+                        <option value="">{{ __('targets.any_donor') }}</option>
+                        @foreach ($this->donorOptions as $donorOption)
+                            <option value="{{ $donorOption->id }}">{{ $donorOption->name }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+
+                    <x-ui.header-filter-select :label="__('targets.year')" wire:model.live="year" :value="$year">
+                        <option value="">{{ __('targets.all_years') }}</option>
+                        @foreach ($this->yearOptions as $yearOption)
+                            <option value="{{ $yearOption }}">{{ $yearOption }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+                </div>
+            </div>
         </x-slot:filters>
 
 
-    {{-- Pulse: the filtered portfolio as one sentence and one proportional bar. --}}
+    {{-- Headline: one sentence and three buttons that filter the list. --}}
     @include('pages.targets._index-pulse')
 
     @include('pages.targets._index-list')
@@ -179,7 +188,7 @@ new #[Layout('layouts::desk'), Title('titles.targets')] class extends Component 
     <x-ui.confirm-modal
         wire:model="showDeleteModal"
         close="cancelDelete"
-        :title="__('targets.delete_this_target')"
+        :title="__('targets.delete_named_target', ['name' => $deletingTargetName ?? '—'])"
         :message="__('targets.only_a_target_with_no_reports_can_be_deleted_otherwise_every')"
         confirm="deleteTarget"
         :confirm-label="__('targets.delete_target')"

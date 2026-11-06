@@ -70,6 +70,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | resources/views/pages/strategies/⚡show.blade.php, resources/views/pages/strategies/⚡index.blade.php | .ai/rules/strategies.md |
 | {app/Support/AgreementMoney.php,app/Support/Tranches.php,app/Models/TransfersTracking.php} | .ai/rules/support-models.md |
 | resources/views/pages/tasks/**, resources/views/pages/tasks/_list-group.blade.php | .ai/rules/tasks.md |
+| {resources/views/pages/targets/**,app/Livewire/Concerns/Targets/**} | .ai/rules/targets.md |
 | tests/** | .ai/rules/tests.md |
 | resources/views/pages/transfers/** | .ai/rules/transfers.md |
 | resources/views/{components/ui/page-header.blade.php,pages/**}, resources/views/{components/ui/header-filter-select.blade.php,pages/**}, resources/views/components/ui/detail-header.blade.php | .ai/rules/ui.md |
