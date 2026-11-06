@@ -1,10 +1,11 @@
-@props(['employee', 'compact' => false])
+@props(['employee', 'compact' => false, 'empty' => null])
 
 {{-- An HR employee shown by name in the interface language, with the other language beside it
-     and, unless compact, their current position · job level · department · center from HR. --}}
+     and, unless compact, their current position · job level · department · center from HR.
+     empty: what to say when there is nobody (default "Not assigned"). --}}
 @if ($employee === null)
     <div {{ $attributes->class('flex min-w-0 items-center gap-2.5') }}>
-        <p class="truncate text-sm text-secondary-medium dark:text-ink-muted">{{ __('common.not_assigned') }}</p>
+        <p class="truncate text-sm text-secondary-medium dark:text-ink-muted">{{ $empty ?? __('common.not_assigned') }}</p>
     </div>
 @else
     @php

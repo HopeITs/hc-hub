@@ -304,6 +304,19 @@
     .dk-verdict.dk-bad strong { color: var(--bad); }
     .dk-verdict.dk-mute { color: var(--ink-3); }
 
+    /* A strategy with no programs linked: one warm line in place of the year line, figures and attention list. */
+    .dk-snotset { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; padding: 16px 18px; border-radius: 12px; background: var(--warn-soft); }
+    .dk-snotset > p:first-child { flex: 1 1 22rem; margin: 0; font-size: 15.5px; line-height: 1.5; color: var(--ink); }
+    .dk-snotset strong { font-size: 17px; font-weight: 800; color: var(--warn); }
+    .dk-snotset-who { flex-basis: 100%; margin: 0; font-size: 13.5px; color: var(--ink-3); }
+
+    /* Touch screens: the tabs, the Open buttons and the figure links are at least 44px to tap (page review 6 Nov 2026). */
+    @media (pointer: coarse) {
+        .dk-stabs button { height: auto; min-height: 44px; }
+        .dk-strategies .dk-btn, .dk-snotset .dk-btn, .dk-slist .dk-slink { min-height: 44px; }
+        .dk-sfigs dd a { display: inline-block; min-width: 44px; min-height: 44px; }
+    }
+
     /* Four figures in one row: the number, its label under it, hairlines between. */
     .dk-sfigs { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); row-gap: 18px; margin: 0 -20px; overflow: hidden; }
     .dk-sfigs > div { display: flex; flex-direction: column; min-width: 0; padding: 2px 20px; border-inline-start: 1px solid var(--line); margin-inline-start: -1px; }
@@ -388,8 +401,6 @@
     .dk-build-title { font-size: 24px; font-weight: 800; line-height: 1.2; letter-spacing: -.01em; color: var(--ink); text-wrap: balance; }
     .dk-build-intro { margin-top: 4px; font-size: 15px; color: var(--ink-3); }
     .dk-build-empty { font-size: 14.5px; color: var(--ink-3); }
-    .dk-build-none { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding-block: 18px; border-block: 1px solid var(--line); }
-    .dk-build-none p { font-size: 17px; font-weight: 700; color: var(--ink); }
     .dk-build-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2px 16px; padding: 8px 18px; border-radius: 12px; background: var(--warn-soft); font-size: 15px; color: var(--ink); }
     .dk-build-note bdi { font-weight: 800; font-variant-numeric: tabular-nums; }
 

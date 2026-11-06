@@ -1,7 +1,8 @@
 {{--
     Current strategies: one typographic block per active strategy (name, the
     year line, the verdict, four figures, what needs attention). A figure the
-    viewer may not see (null in StrategyRollup) is never drawn. With no active
+    viewer may not see (null in StrategyRollup) is never drawn. A strategy with
+    no programs linked shows x-strategies.not-set-up instead of all of that. With no active
     strategy, one sentence says so and offers to start the next one.
 --}}
 @php
@@ -36,7 +37,7 @@
         @php
             $rollup = $rollups[$strategy['id']] ?? null;
             $results = $rollup['results'] ?? null;
-            $verdict = $results === null ? null : StrategyRollup::verdict($results['on'], $results['total']);
+            $verdict = $results === null ? null : StrategyRollup::verdict($results['on'], $results['total'], $results['unrated']);
             $funding = $rollup['funding'] ?? null;
             $risks = $rollup['risks'] ?? null;
             $lateReports = $rollup['late']['reports'] ?? null;
@@ -44,6 +45,7 @@
             $attention = $rollup === null ? [] : StrategyAttention::items($strategy['id'], $rollup, $strategyReadiness, $currentYear);
             $showsAttention = $rollup !== null && ($rollup['late'] !== null || $risks !== null || $strategyReadiness !== null);
             $yearOfSpan = $currentYear - $strategy['start_year'] + 1;
+            $notSetUp = $strategy['programs_count'] === 0;
         @endphp
 
         <article
@@ -69,6 +71,9 @@
                 </a>
             </header>
 
+            @if ($notSetUp)
+                <x-strategies.not-set-up :strategy-id="$strategy['id']" :can-link="$this->canLinkPrograms" />
+            @else
             <x-strategies.year-line :start="$strategy['start_year']" :end="$strategy['end_year']" :current="$currentYear" :tone="$verdict['tone'] ?? null" />
 
             <x-strategies.verdict :results="$results" />
@@ -76,7 +81,7 @@
             <dl class="dk-sfigs">
                 <div>
                     <dt>{{ __('common.programs') }}</dt>
-                    <dd><a href="{{ route('programs.index', ['strategy' => $strategy['id']]) }}" wire:navigate data-test="strategy-programs-link">{{ $strategy['programs_count'] }}</a></dd>
+                    <dd><a href="{{ route('programs.index', ['strategy' => $strategy['id']]) }}" wire:navigate aria-label="{{ trans_choice('strategies.programs_link_label', $strategy['programs_count'], ['count' => $strategy['programs_count']]) }}" data-test="strategy-programs-link">{{ $strategy['programs_count'] }}</a></dd>
                 </div>
 
                 @if ($funding !== null)
@@ -118,6 +123,7 @@
 
             @if ($showsAttention)
                 <x-strategies.attention-list :items="$attention" />
+            @endif
             @endif
         </article>
     @endforeach
