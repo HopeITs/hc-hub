@@ -745,3 +745,43 @@ test('the padlock on an indicator that cannot be deleted is focusable and named'
         ->test('pages::indicators.index')
         ->assertSeeHtml('role="img" tabindex="0" aria-label="'.e(__('indicators.indicators_carrying_targets_cannot_be_deleted')).'"');
 });
+
+test('a reading far above the target shows a warning but can still be saved', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $indicator = Indicator::factory()->create(['measure' => IndicatorMeasure::Numeric, 'baseline' => 0, 'target' => 100]);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->call('openProgressModal', $indicator->id)
+        ->set('progressValue', '150');
+
+    expect($component->get('progressValueWarning'))->toBeNull();
+
+    $component->set('progressValue', '250');
+    expect($component->get('progressValueWarning'))->toContain('250%');
+
+    $component->call('saveProgress')->assertHasNoErrors();
+    expect($indicator->progress()->count())->toBe(1);
+});
+
+test('the result list names the program so similar results can be told apart', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $program = Program::factory()->create(['name' => 'Study Zone']);
+    Result::factory()->create(['program_id' => $program->id, 'statement' => 'Students supported.']);
+
+    Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->call('openCreateModal')
+        ->assertSee('Study Zone · ');
+});
+
+test('long indicator names stay readable in the table view', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $name = 'Percentage of assisted households reporting satisfied emergency shelter and needs';
+    Indicator::factory()->create(['name' => $name]);
+
+    Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->set('view', 'table')
+        ->assertSeeHtml('title="'.$name.'"');
+});

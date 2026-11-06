@@ -43,6 +43,7 @@ return [
     'reports_approved' => 'التقارير المعتمدة',
     'reports_total' => 'التقارير',
     'reports_overdue' => 'التقارير المتأخرة',
+    'reading_far_above_target' => 'هذه القيمة تساوي :percent% من المستهدف (:target). راجع الرقم قبل الحفظ.',
     'latest' => 'آخر قيمة',
     'lifetime_target' => 'المستهدف الإجمالي',
     'log_a_reading' => 'تسجيل قراءة',

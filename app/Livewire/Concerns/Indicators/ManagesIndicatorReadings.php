@@ -9,6 +9,7 @@ use App\Models\Indicator;
 use App\Models\IndicatorProgress;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
 /**
@@ -73,6 +74,29 @@ trait ManagesIndicatorReadings
         $this->progressNotes = (string) ($reading->notes ?? '');
         $this->progressSourceOfVerification = (string) ($reading->source_of_verification ?? '');
         $this->showProgressModal = true;
+    }
+
+    /**
+     * A gentle prompt, never a block, when the typed reading is at least double
+     * the indicator's target: usually a slipped digit or a unit mix-up.
+     */
+    #[Computed]
+    public function progressValueWarning(): ?string
+    {
+        if ($this->progressIndicatorId === null || ! is_numeric($this->progressValue)) {
+            return null;
+        }
+
+        $target = Indicator::query()->whereKey($this->progressIndicatorId)->value('target');
+
+        if ($target === null || (float) $target <= 0 || (float) $this->progressValue < 2 * (float) $target) {
+            return null;
+        }
+
+        return __('indicators.reading_far_above_target', [
+            'percent' => number_format((float) $this->progressValue / (float) $target * 100, 0),
+            'target' => rtrim(rtrim(number_format((float) $target, 2), '0'), '.'),
+        ]);
     }
 
     public function saveProgress(): void

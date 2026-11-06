@@ -24,7 +24,7 @@
 
                     <x-ui.form-select wire:model.live="indicatorResultId" :label="__('indicators.result')" :placeholder="__('indicators.select_a_result')" required>
                         @foreach ($this->resultOptions as $resultOption)
-                            <option value="{{ $resultOption->id }}">{{ $resultOption->type->label() }} · {{ Str::limit($resultOption->statement, 60) }}</option>
+                            <option value="{{ $resultOption->id }}">{{ $resultOption->program?->name ?? __('common.unassigned') }} · {{ $resultOption->type->label() }} · {{ Str::limit($resultOption->statement, 70) }}</option>
                         @endforeach
                     </x-ui.form-select>
 

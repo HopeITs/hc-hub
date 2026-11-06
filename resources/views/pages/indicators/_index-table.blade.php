@@ -36,7 +36,7 @@
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2">
                                         <span aria-hidden="true" class="size-2 shrink-0 rounded-full ring-2 ring-inset {{ $levelMarks[$indicator->result->type->value] }}"></span>
-                                        <p class="truncate text-sm font-semibold"><bdi>{{ $indicator->name }}</bdi></p>
+                                        <p class="text-sm font-semibold" title="{{ $indicator->name }}"><bdi>{{ $indicator->name }}</bdi></p>
                                     </div>
                                     <p class="mt-0.5 truncate type-meta text-secondary-medium dark:text-ink-muted">
                                         {{ Str::limit($indicator->result->statement, 60) }}

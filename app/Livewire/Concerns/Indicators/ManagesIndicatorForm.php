@@ -63,7 +63,7 @@ trait ManagesIndicatorForm
     #[Computed]
     public function resultOptions(): Collection
     {
-        return Result::query()->select(['id', 'statement', 'type'])->orderBy('id')->get();
+        return Result::query()->select(['id', 'statement', 'type', 'program_id'])->with('program:id')->orderBy('id')->get();
     }
 
     /** @return Collection<int, Program> */

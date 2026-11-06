@@ -43,6 +43,7 @@ return [
     'reports_approved' => 'Reports approved',
     'reports_total' => 'Reports',
     'reports_overdue' => 'Reports overdue',
+    'reading_far_above_target' => 'This is :percent% of the target (:target). Check the number before saving.',
     'latest' => 'Latest',
     'lifetime_target' => 'Lifetime target',
     'log_a_reading' => 'Log a reading',
