@@ -280,6 +280,29 @@ trait BuildsIndicatorRows
     }
 
     /**
+     * The donors behind any indicator's targets, for the donor filter.
+     *
+     * @return list<string>
+     */
+    #[Computed]
+    public function donorOptions(): array
+    {
+        $labels = [];
+
+        foreach ($this->rows as $row) {
+            foreach ($row['funders'] as $funder) {
+                if ($funder['type'] === 'donor') {
+                    $labels[$funder['label']] = $funder['label'];
+                }
+            }
+        }
+
+        natcasesort($labels);
+
+        return array_values($labels);
+    }
+
+    /**
      * Whether one indicator survives the current filters.
      *
      * `$focus` is passed in so focusCounts() can ask the same question with a
@@ -307,6 +330,10 @@ trait BuildsIndicatorRows
         }
 
         if ($this->program !== '' && $this->program !== 'none' && $indicator->result->program_id !== (int) $this->program) {
+            return false;
+        }
+
+        if ($this->donor !== '' && ! in_array($this->donor, array_column($row['funders'], 'label'), true)) {
             return false;
         }
 

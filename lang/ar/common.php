@@ -41,6 +41,8 @@ return [
     'my_reviews' => 'مراجعاتي',
     'delete_name' => 'حذف :name',
     'description' => 'الوصف',
+    'donor' => 'المانح',
+    'all_donors' => 'كل المانحين',
     'donors' => 'المانحون',
     'download_name' => 'تنزيل :name',
     'drop_a_file_here' => 'أفلت ملفًا هنا',

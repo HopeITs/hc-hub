@@ -40,7 +40,7 @@
                             <x-ui.enum-badge :case="$row['rag']" class="shrink-0" />
                         </div>
 
-                        <h3 class="text-base font-bold leading-snug text-secondary-dark dark:text-ink">{{ $indicator->name }}</h3>
+                        <h3 class="text-base font-bold leading-snug text-secondary-dark dark:text-ink"><bdi>{{ $indicator->name }}</bdi></h3>
 
                         {{-- The rail: baseline, where we are, where the calendar says we should be, target. --}}
                         <div>

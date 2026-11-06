@@ -6,11 +6,14 @@ use App\Enums\RagStatus;
 use App\Enums\ReportStatus;
 use App\Enums\ResultType;
 use App\Models\AnnualPlan;
+use App\Models\Donor;
+use App\Models\DonorProposal;
 use App\Models\Indicator;
 use App\Models\IndicatorProgress;
 use App\Models\PlanIndicator;
 use App\Models\Program;
 use App\Models\Project;
+use App\Models\Proposal;
 use App\Models\Report;
 use App\Models\Result;
 use App\Models\User;
@@ -681,4 +684,30 @@ test('a headline average caps each indicator at one hundred percent and on track
 
     expect($component->get('overview')['achieved'])->toBeLessThanOrEqual(100.0);
     $component->assertSee('of 2');
+});
+
+test('indicators can be filtered by the donor funding their targets', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $result = Result::factory()->create();
+    $funded = Indicator::factory()->create(['result_id' => $result->id, 'name' => 'Funded indicator']);
+    Indicator::factory()->create(['result_id' => $result->id, 'name' => 'Unfunded indicator']);
+
+    $donor = Donor::factory()->create(['name' => 'Caritas Test']);
+    $proposal = Proposal::factory()->create(['donor_id' => $donor->id]);
+    DonorProposal::factory()->create(['proposal_id' => $proposal->id, 'donor_id' => $donor->id]);
+    PlanIndicator::factory()->create([
+        'indicator_id' => $funded->id,
+        'source_type' => 'proposal',
+        'source_id' => $proposal->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->assertSee('Unfunded indicator')
+        ->set('donor', 'Caritas Test')
+        ->assertSee('Funded indicator')
+        ->assertDontSee('Unfunded indicator')
+        ->call('clearFilters')
+        ->assertSet('donor', '')
+        ->assertSee('Unfunded indicator');
 });

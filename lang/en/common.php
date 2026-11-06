@@ -41,6 +41,8 @@ return [
     'my_reviews' => 'My reviews',
     'delete_name' => 'Delete :name',
     'description' => 'Description',
+    'donor' => 'Donor',
+    'all_donors' => 'All donors',
     'donors' => 'Donors',
     'download_name' => 'Download :name',
     'drop_a_file_here' => 'Drop a file here',

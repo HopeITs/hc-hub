@@ -40,6 +40,10 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
     #[Url(except: '')]
     public string $program = '';
 
+    /** A donor's name, to keep only the indicators one of its proposals funds. */
+    #[Url(except: '')]
+    public string $donor = '';
+
     /** One of the RagStatus values, or '' for every rating including unrated. */
     #[Url(except: '')]
     public string $rag = '';
@@ -113,12 +117,18 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
         $this->resetPage();
     }
 
+    public function updatedDonor(): void
+    {
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
         $this->search = '';
         $this->result = '';
         $this->measure = '';
         $this->program = '';
+        $this->donor = '';
         $this->rag = '';
         $this->focus = '';
         $this->clearStrategyFilter();
@@ -148,7 +158,7 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
      */
     protected function forgetIndicators(): void
     {
-        foreach (['allIndicators', 'rows', 'filteredRows', 'pagedRows', 'overview', 'focusCounts', 'inspected', 'inspectedReadings'] as $property) {
+        foreach (['allIndicators', 'rows', 'donorOptions', 'filteredRows', 'pagedRows', 'overview', 'focusCounts', 'inspected', 'inspectedReadings'] as $property) {
             unset($this->{$property});
         }
     }
@@ -158,7 +168,7 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
 @php
     use App\Enums\ResultType;
 
-    $filtersAreActive = $search !== '' || $result !== '' || $measure !== '' || $program !== '' || $rag !== '' || $focus !== '' || $this->strategyFilter !== null;
+    $filtersAreActive = $search !== '' || $result !== '' || $measure !== '' || $program !== '' || $donor !== '' || $rag !== '' || $focus !== '' || $this->strategyFilter !== null;
     $overview = $this->overview;
     $paged = $this->pagedRows;
     $focusCounts = $this->focusCounts;
@@ -245,6 +255,13 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
                 @endforeach
             </x-ui.header-filter-select>
 
+            <x-ui.header-filter-select :label="__('common.donor')" wire:model.live="donor" :value="$donor">
+                <option value="">{{ __('common.all_donors') }}</option>
+                @foreach ($this->donorOptions as $donorOption)
+                    <option value="{{ $donorOption }}">{{ $donorOption }}</option>
+                @endforeach
+            </x-ui.header-filter-select>
+
             <x-ui.header-filter-select :label="__('indicators.result')" wire:model.live="result" :value="$result">
                 <option value="">{{ __('indicators.all_results') }}</option>
                 @foreach ($this->resultOptions as $resultOption)
@@ -261,7 +278,7 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
         </x-slot:filters>
 
         <x-slot:actions>
-            @can('indicators.create')<x-ui.button tone="primary" icon="plus" class="min-h-11 self-end touch-manipulation @sm/directory:min-h-10" wire:click="openCreateModal" data-test="create-indicator-button" data-quick-create>
+            @can('indicators.create')<x-ui.button tone="primary" icon="plus" class="min-h-11 max-sm:h-11! self-end touch-manipulation @sm/directory:min-h-10" wire:click="openCreateModal" data-test="create-indicator-button" data-quick-create>
                 {{ __('indicators.add_indicator') }}
             </x-ui.button>@endcan
         </x-slot:actions>

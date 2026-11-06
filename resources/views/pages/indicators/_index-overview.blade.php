@@ -42,7 +42,7 @@
                             wire:key="rag-legend-{{ $segment['key'] }}"
                             aria-pressed="{{ $rag === $segment['key'] ? 'true' : 'false' }}"
                             @class([
-                                'inline-flex items-center gap-1.5 rounded-md px-1 py-0.5 type-meta transition-colors focus-visible:outline-2 focus-visible:outline-secondary-medium',
+                                'inline-flex items-center gap-1.5 rounded-md px-1 py-0.5 max-sm:min-h-11 type-meta transition-colors focus-visible:outline-2 focus-visible:outline-secondary-medium',
                                 'font-bold text-secondary-dark dark:text-ink' => $rag === $segment['key'],
                                 'text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink' => $rag !== $segment['key'],
                             ])
@@ -66,7 +66,7 @@
                     <p class="mt-0.5 type-meta tabular-nums text-secondary-medium dark:text-ink-muted">
                         {{ __('indicators.count_of_total_targets_achieved', ['count' => $overview['targetsAchieved'], 'total' => $overview['targets']]) }}
                         @if ($overview['overdueReports'] > 0)
-                            · <span class="font-semibold text-status-warn">{{ trans_choice('indicators.count_report_overdue', $overview['overdueReports'], ['count' => $overview['overdueReports']]) }}</span>
+                            · <button type="button" wire:click="setFocus('reporting')" aria-pressed="{{ $focus === 'reporting' ? 'true' : 'false' }}" class="font-semibold text-status-warn underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-secondary-medium">{{ trans_choice('indicators.count_report_overdue', $overview['overdueReports'], ['count' => $overview['overdueReports']]) }}</button>
                         @endif
                     </p>
 
