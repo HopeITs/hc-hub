@@ -249,10 +249,14 @@ trait BuildsIndicatorRows
                 ? null
                 : $latestReading->date->startOfDay()->diffInDays($today, false);
 
+            $rag = $indicator->ragStatus($windowStart, $windowEnd);
+            $stale = $daysSinceReading === null || $daysSinceReading > $this->freshnessDays($indicator->frequency);
+
             $rows[$indicator->id] = [
                 'indicator' => $indicator,
                 'achieved' => $indicator->percentAchieved(),
-                'rag' => $indicator->ragStatus($windowStart, $windowEnd),
+                'rag' => $rag,
+                'status' => $this->statusFor($readings->count(), $stale, $rag),
                 'baseline' => (float) ($indicator->baseline ?? 0),
                 'targetValue' => $indicator->target === null ? null : (float) $indicator->target,
                 'latest' => $latest,
@@ -263,7 +267,7 @@ trait BuildsIndicatorRows
                 'readings' => $readings->count(),
                 'series' => $readings->map(fn (IndicatorProgress $reading): float => (float) $reading->value)->all(),
                 // No reading at all is the most stale an indicator can be.
-                'stale' => $daysSinceReading === null || $daysSinceReading > $this->freshnessDays($indicator->frequency),
+                'stale' => $stale,
                 'daysSinceReading' => $daysSinceReading,
                 'targets' => $targetRows,
                 'targetsAchieved' => $targetsAchieved,
@@ -277,6 +281,26 @@ trait BuildsIndicatorRows
         }
 
         return $rows;
+    }
+
+    /**
+     * The one plain word an indicator is shown under.
+     *
+     * A rating that is behind always wins; a green one only counts as on track
+     * while its last measurement is recent enough to trust.
+     *
+     * @return 'unmeasured'|'late'|'watch'|'stale'|'ontrack'|'notarget'
+     */
+    protected function statusFor(int $readings, bool $stale, ?RagStatus $rag): string
+    {
+        return match (true) {
+            $readings === 0 => 'unmeasured',
+            $rag === RagStatus::Red => 'late',
+            $rag === RagStatus::Amber => 'watch',
+            $stale => 'stale',
+            $rag === RagStatus::Green => 'ontrack',
+            default => 'notarget',
+        };
     }
 
     /**
@@ -349,6 +373,18 @@ trait BuildsIndicatorRows
             return false;
         }
 
+        if ($focus === 'ontrack' && $row['status'] !== 'ontrack') {
+            return false;
+        }
+
+        if ($focus === 'attention' && ! in_array($row['status'], ['watch', 'late'], true)) {
+            return false;
+        }
+
+        if ($focus === 'waiting' && ! in_array($row['status'], ['unmeasured', 'stale'], true)) {
+            return false;
+        }
+
         if ($focus === 'offtrack' && ! in_array($row['rag'], [RagStatus::Amber, RagStatus::Red], true)) {
             return false;
         }
@@ -393,6 +429,8 @@ trait BuildsIndicatorRows
     {
         return collect($this->rows)
             ->filter(fn (array $row): bool => $this->matchesFilters($row))
+            // What needs a hand comes first; the sort is stable, so each group stays in name order.
+            ->sortBy(fn (array $row): int => ['late' => 0, 'watch' => 1, 'stale' => 2, 'unmeasured' => 3, 'notarget' => 4, 'ontrack' => 5][$row['status']])
             ->values();
     }
 

@@ -61,9 +61,6 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
     #[Url(except: '')]
     public string $focus = '';
 
-    /** 'cards' draws the trajectory cards, 'table' lists every figure in one grid. */
-    #[Url(except: 'cards')]
-    public string $view = 'cards';
 
     /**
      * Deep links from the rest of the chain.
@@ -184,65 +181,10 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
         ResultType::Activity->value => 'bg-transparent ring-secondary-medium dark:ring-ink-muted',
         ResultType::CrossCutting->value => 'bg-secondary-light ring-secondary-light dark:bg-ink-muted dark:ring-ink-muted',
     ];
-
-    $levelAccents = [
-        ResultType::Impact->value => 'bg-secondary-dark dark:bg-ink',
-        ResultType::Outcome->value => 'bg-primary',
-        ResultType::Output->value => 'bg-secondary-light',
-        ResultType::Activity->value => 'bg-secondary-soft ring-1 ring-inset ring-secondary-medium dark:bg-surface-2 dark:ring-ink-muted',
-        ResultType::CrossCutting->value => 'bg-secondary-medium dark:bg-ink-muted',
-    ];
-
-    $ragSegments = [
-        ['key' => App\Enums\RagStatus::Green->value, 'label' => App\Enums\RagStatus::Green->label(), 'count' => $overview['rag']['green'], 'fill' => 'bg-status-good', 'dot' => 'bg-status-good'],
-        ['key' => App\Enums\RagStatus::Amber->value, 'label' => App\Enums\RagStatus::Amber->label(), 'count' => $overview['rag']['amber'], 'fill' => 'bg-status-warn', 'dot' => 'bg-status-warn'],
-        ['key' => App\Enums\RagStatus::Red->value, 'label' => App\Enums\RagStatus::Red->label(), 'count' => $overview['rag']['red'], 'fill' => 'bg-primary dark:bg-status-critical', 'dot' => 'bg-primary dark:bg-status-critical'],
-        ['key' => 'unrated', 'label' => __('indicators.unrated'), 'count' => $overview['unrated'], 'fill' => 'bg-secondary-soft dark:bg-line-strong', 'dot' => 'bg-secondary-light'],
-    ];
-
-    $focusChips = [
-        ['key' => 'offtrack', 'label' => __('indicators.off_track'), 'icon' => 'arrow-trending-down', 'count' => $focusCounts['offtrack']],
-        ['key' => 'stale', 'label' => __('indicators.needs_a_reading'), 'icon' => 'clock', 'count' => $focusCounts['stale']],
-        ['key' => 'reporting', 'label' => __('indicators.reporting_overdue'), 'icon' => 'document-text', 'count' => $focusCounts['reporting']],
-        ['key' => 'unmeasured', 'label' => __('indicators.never_measured'), 'icon' => 'exclamation-triangle', 'count' => $focusCounts['unmeasured']],
-        ['key' => 'untargeted', 'label' => __('indicators.no_target'), 'icon' => 'flag', 'count' => $focusCounts['untargeted']],
-    ];
-
-    $onTrackShare = $overview['rated'] === 0 ? null : ($overview['rag']['green'] / $overview['rated']) * 100;
-
-    $achievementTone = match (true) {
-        $overview['achieved'] === null => 'neutral',
-        $overview['achieved'] >= $overview['elapsed'] * 0.9 => 'good',
-        $overview['achieved'] >= $overview['elapsed'] * 0.7 => 'warn',
-        default => 'critical',
-    };
-    $onTrackTone = match (true) {
-        $onTrackShare === null => 'neutral',
-        $onTrackShare >= 80 => 'good',
-        $onTrackShare >= 50 => 'warn',
-        default => 'critical',
-    };
-    $toneClass = fn (string $tone): string => match ($tone) {
-        'good' => 'text-status-good',
-        'warn' => 'text-status-warn',
-        'critical' => 'text-primary dark:text-brand-text',
-        default => '',
-    };
-    $headline = [
-        ['label' => __('common.indicators'), 'value' => number_format($overview['indicators']), 'tone' => 'neutral'],
-        ['label' => __('indicators.readings_logged'), 'value' => number_format($overview['readings']), 'tone' => 'neutral'],
-        ['label' => __('indicators.average_achievement'), 'value' => $overview['achieved'] === null ? '—' : number_format($overview['achieved'], 0).'%', 'tone' => $achievementTone],
-        ['label' => __('indicators.on_track'), 'value' => __('indicators.count_of_total', ['count' => $overview['rag']['green'], 'total' => $overview['indicators']]), 'tone' => $onTrackTone],
-    ];
 @endphp
 
 <x-desk.register class="@container/directory" heading-id="indicator-directory-heading" :title="__('common.indicators')" :count="$overview['indicators']">
     
-        <x-slot:figures>
-            @foreach ($headline as $cell)
-                <span wire:key="indicator-headline-{{ $loop->index }}"><b class="dk-num {{ $toneClass($cell['tone']) }}">{{ $cell['value'] }}</b> {{ $cell['label'] }}</span>@unless ($loop->last) · @endunless
-            @endforeach
-        </x-slot:figures>
         <x-slot:search>
             <x-desk.register-search :label="__('indicators.search_indicators')" :placeholder="__('indicators.indicator_or_result_statement')" wire:model.live.debounce.300ms="search" />
         </x-slot:search>
@@ -257,26 +199,35 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
                 @endforeach
             </x-ui.header-filter-select>
 
-            <x-ui.header-filter-select :label="__('common.donor')" wire:model.live="donor" :value="$donor">
-                <option value="">{{ __('common.all_donors') }}</option>
-                @foreach ($this->donorOptions as $donorOption)
-                    <option value="{{ $donorOption }}">{{ $donorOption }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
+            <div class="contents" x-data="{ open: @js($donor !== '' || $result !== '' || $measure !== '') }">
+                <button type="button" class="dk-btn" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" data-test="more-filters-button">
+                    <flux:icon.adjustments-horizontal variant="micro" class="size-4" />
+                    {{ __('indicators.more_filters') }}
+                </button>
 
-            <x-ui.header-filter-select :label="__('indicators.result')" wire:model.live="result" :value="$result">
-                <option value="">{{ __('indicators.all_results') }}</option>
-                @foreach ($this->resultOptions as $resultOption)
-                    <option value="{{ $resultOption->id }}">{{ Str::limit($resultOption->statement, 50) }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
+                <div class="contents" x-show="open" x-cloak>
+                <x-ui.header-filter-select :label="__('common.donor')" wire:model.live="donor" :value="$donor">
+                    <option value="">{{ __('common.all_donors') }}</option>
+                    @foreach ($this->donorOptions as $donorOption)
+                        <option value="{{ $donorOption }}">{{ $donorOption }}</option>
+                    @endforeach
+                </x-ui.header-filter-select>
 
-            <x-ui.header-filter-select :label="__('indicators.measure')" wire:model.live="measure" :value="$measure">
-                <option value="">{{ __('indicators.all_measures') }}</option>
-                @foreach (IndicatorMeasure::cases() as $measureCase)
-                    <option value="{{ $measureCase->value }}">{{ $measureCase->label() }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
+                <x-ui.header-filter-select :label="__('indicators.result')" wire:model.live="result" :value="$result">
+                    <option value="">{{ __('indicators.all_results') }}</option>
+                    @foreach ($this->resultOptions as $resultOption)
+                        <option value="{{ $resultOption->id }}">{{ Str::limit($resultOption->statement, 50) }}</option>
+                    @endforeach
+                </x-ui.header-filter-select>
+
+                <x-ui.header-filter-select :label="__('indicators.measure')" wire:model.live="measure" :value="$measure">
+                    <option value="">{{ __('indicators.all_measures') }}</option>
+                    @foreach (IndicatorMeasure::cases() as $measureCase)
+                        <option value="{{ $measureCase->value }}">{{ $measureCase->label() }}</option>
+                    @endforeach
+                </x-ui.header-filter-select>
+                </div>
+            </div>
         </x-slot:filters>
 
         <x-slot:actions>
@@ -288,8 +239,6 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
             </x-ui.button>@endcan
         </x-slot:actions>
     
-    @include('pages.indicators._index-overview')
-
     @include('pages.indicators._index-focus-bar')
 
     @if ($paged->isEmpty())
@@ -306,10 +255,8 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
                 </x-slot:action>
             </x-ui.empty-state>
         </x-ui.panel>
-    @elseif ($view === 'table')
-        @include('pages.indicators._index-table')
     @else
-        @include('pages.indicators._index-cards')
+        @include('pages.indicators._index-list')
     @endif
 
     @include('pages.indicators._index-inspect-modal')

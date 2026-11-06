@@ -112,7 +112,7 @@ trait SummarisesIndicators
     {
         $counts = [];
 
-        foreach (['offtrack', 'stale', 'reporting', 'unmeasured', 'untargeted'] as $focus) {
+        foreach (['ontrack', 'attention', 'waiting', 'offtrack', 'stale', 'reporting', 'unmeasured', 'untargeted'] as $focus) {
             $counts[$focus] = collect($this->rows)
                 ->filter(fn (array $row): bool => $this->matchesFilters($row, $focus))
                 ->count();

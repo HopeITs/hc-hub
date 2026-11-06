@@ -146,14 +146,14 @@ test('a reading can be logged against an indicator', function () {
         ->and($reading->recorded_by)->toBe($user->id);
 });
 
-test('an indicator with no target shows an em dash instead of percent achieved', function () {
+test('an indicator with no target shows no percent and reads as not measured yet', function () {
     $user = User::factory()->role('General Manager')->create();
     $indicator = Indicator::factory()->untargeted()->create(['name' => 'Untargeted indicator']);
 
     Livewire::actingAs($user)
         ->test('pages::indicators.index')
         ->assertSee('Untargeted indicator')
-        ->assertSee('—');
+        ->assertSee('Not measured yet');
 
     expect($indicator->percentAchieved())->toBeNull();
 });
@@ -309,17 +309,6 @@ test('the delete and reading dialogs are driven by a boolean the modal can bind 
         ->assertSet('showProgressModal', false);
 });
 
-test('the table view renders the same indicators as the cards', function () {
-    $user = User::factory()->role('General Manager')->create();
-    Indicator::factory()->create(['name' => 'Wells rehabilitated']);
-
-    Livewire::actingAs($user)
-        ->test('pages::indicators.index')
-        ->set('view', 'table')
-        ->assertSee('Wells rehabilitated')
-        ->assertSee('Baseline to target');
-});
-
 test('a new reading refreshes the figures in the same request', function () {
     $user = User::factory()->role('General Manager')->create();
     $indicator = Indicator::factory()->create(['baseline' => 0, 'target' => 200]);
@@ -399,7 +388,6 @@ test('the page shows what was achieved against what was committed, counting appr
         ->and($component->get('overview')['targetsAchieved'])->toBe(0);
 
     $component->call('openInspectModal', $indicator->id)
-        ->assertSee('0 of 1 targets met')
         ->assertSee('150 pending approval')
         ->assertSeeHtml('href="'.e(route('reports.index', ['create' => 1, 'target' => $target->id])).'"');
 });
@@ -652,7 +640,7 @@ test('an inspected target that does not fit its chain says why', function () {
         ->assertSee(__('targets.issue_plan_program_differs_from_result'));
 });
 
-test('the chips, cards and pager all render inside the Livewire component', function () {
+test('the focus tabs and the indicator list render inside the Livewire component', function () {
     $user = User::factory()->role('General Manager')->create();
     Indicator::factory()->create(['result_id' => Result::factory()->create()->id, 'name' => 'People reached']);
 
@@ -663,12 +651,12 @@ test('the chips, cards and pager all render inside the Livewire component', func
     $xpath = new DOMXPath($document);
     $root = '//section[@*[name()="wire:name"]="pages::indicators.index"]';
 
-    foreach (['//*[@data-test="focus-chip-reporting"]', '//*[@role="radio"]', '//article'] as $inner) {
+    foreach (['//*[@data-test="focus-tab-attention"]', '//ul[@data-test="indicator-list"]//li'] as $inner) {
         expect($xpath->query($root.$inner)->length)->toBeGreaterThan(0, "{$inner} sits outside the component");
     }
 });
 
-test('a headline average caps each indicator at one hundred percent and on track is counted against every indicator', function () {
+test('a headline average caps each indicator at one hundred percent', function () {
     $user = User::factory()->role('General Manager')->create();
     $result = Result::factory()->create();
     $indicator = Indicator::factory()->create([
@@ -683,7 +671,6 @@ test('a headline average caps each indicator at one hundred percent and on track
     $component = Livewire::actingAs($user)->test('pages::indicators.index');
 
     expect($component->get('overview')['achieved'])->toBeLessThanOrEqual(100.0);
-    $component->assertSee('of 2');
 });
 
 test('indicators can be filtered by the donor funding their targets', function () {
@@ -732,7 +719,7 @@ test('the filtered indicators download as a CSV without formula injection', func
     expect($csv)->toContain("'=HYPERLINK")->not->toContain('Left out');
 });
 
-test('the padlock on an indicator that cannot be deleted is focusable and named', function () {
+test('an indicator carrying targets offers a disabled delete that says why', function () {
     $user = User::factory()->role('General Manager')->create();
     $indicator = Indicator::factory()->create();
     PlanIndicator::factory()->create([
@@ -743,7 +730,7 @@ test('the padlock on an indicator that cannot be deleted is focusable and named'
 
     Livewire::actingAs($user)
         ->test('pages::indicators.index')
-        ->assertSeeHtml('role="img" tabindex="0" aria-label="'.e(__('indicators.indicators_carrying_targets_cannot_be_deleted')).'"');
+        ->assertSee(__('indicators.indicators_carrying_targets_cannot_be_deleted'));
 });
 
 test('a reading far above the target shows a warning but can still be saved', function () {
@@ -775,18 +762,7 @@ test('the result list names the program so similar results can be told apart', f
         ->assertSee('Study Zone · ');
 });
 
-test('long indicator names stay readable in the table view', function () {
-    $user = User::factory()->role('General Manager')->create();
-    $name = 'Percentage of assisted households reporting satisfied emergency shelter and needs';
-    Indicator::factory()->create(['name' => $name]);
-
-    Livewire::actingAs($user)
-        ->test('pages::indicators.index')
-        ->set('view', 'table')
-        ->assertSeeHtml('title="'.$name.'"');
-});
-
-test('the delete dialog names the indicator and the table subtitle no longer promises money', function () {
+test('the delete dialog names the indicator', function () {
     $user = User::factory()->role('General Manager')->create();
     $indicator = Indicator::factory()->create(['name' => 'Meals distributed']);
 
@@ -795,17 +771,32 @@ test('the delete dialog names the indicator and the table subtitle no longer pro
         ->call('confirmDelete', $indicator->id)
         ->assertSet('showDeleteModal', true)
         ->assertSee('“Meals distributed” will be deleted.')
-        ->set('view', 'table')
-        ->assertDontSee('the money behind it')
-        ->assertSee('Scroll sideways to see every column.');
+        ->assertDontSee('the money behind it');
 });
 
-test('the rating bar is out of the tab order because its legend holds the same buttons', function () {
+test('each indicator shows one plain status and what needs a hand comes first', function () {
     $user = User::factory()->role('General Manager')->create();
-    Indicator::factory()->create();
+    $result = Result::factory()->create();
+    $fresh = Indicator::factory()->create(['result_id' => $result->id, 'name' => 'AAA on track', 'baseline' => 0, 'target' => 100, 'frequency' => Period::Annual]);
+    IndicatorProgress::factory()->create(['indicator_id' => $fresh->id, 'value' => 100, 'date' => now()->subDay()]);
+    $old = Indicator::factory()->create(['result_id' => $result->id, 'name' => 'BBB old reading', 'baseline' => 0, 'target' => 100, 'frequency' => Period::Monthly]);
+    IndicatorProgress::factory()->create(['indicator_id' => $old->id, 'value' => 100, 'date' => now()->subMonths(8)]);
+    Indicator::factory()->create(['result_id' => $result->id, 'name' => 'CCC never measured']);
 
-    Livewire::actingAs($user)
-        ->test('pages::indicators.index')
-        ->assertSeeHtml('tabindex="-1"')
-        ->assertSeeHtml('data-test="rag-band-unrated"');
+    $component = Livewire::actingAs($user)->test('pages::indicators.index');
+    $rows = $component->instance()->rows();
+
+    expect($rows[$fresh->id]['status'])->toBe('ontrack')
+        ->and($rows[$old->id]['status'])->toBe('stale');
+
+    $component
+        ->assertSeeInOrder(['BBB old reading', 'CCC never measured', 'AAA on track'])
+        ->assertSee('Reading is old')
+        ->assertSee('Waiting for a reading');
+
+    expect($component->get('focusCounts'))->toMatchArray(['ontrack' => 1, 'waiting' => 2, 'attention' => 0]);
+
+    $component->call('setFocus', 'waiting')
+        ->assertSee('BBB old reading')
+        ->assertDontSee('AAA on track');
 });
