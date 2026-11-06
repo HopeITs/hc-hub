@@ -10,7 +10,8 @@
             :count="$overview['indicators']"
             :subtitle="__('indicators.every_indicator_with_its_trend_and_the_money_behind_it')"
         >
-            <div class="overflow-x-auto">
+            <p class="px-4 pb-2 type-meta text-secondary-medium @6xl/directory:hidden dark:text-ink-muted">{{ __('indicators.swipe_for_more_columns') }}</p>
+            <div class="overflow-x-auto" tabindex="0" role="region" aria-label="{{ __('indicators.table') }}">
                 <div class="min-w-[68rem]">
                     <div class="grid grid-cols-[minmax(0,1fr)_8rem_7rem_7rem_9rem_5.5rem_5rem_9rem] items-center gap-3 border-b border-secondary-soft bg-board-head px-4 py-2 dark:border-line">
                         <span class="type-label text-secondary-medium dark:text-ink-muted">{{ __('common.indicator_name') }}</span>

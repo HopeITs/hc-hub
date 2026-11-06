@@ -309,6 +309,17 @@ trait ManagesIndicatorForm
         $this->showDeleteModal = true;
     }
 
+    /**
+     * The name of the indicator the open delete dialog is about.
+     */
+    #[Computed]
+    public function deletingIndicatorName(): ?string
+    {
+        return $this->deletingIndicatorId === null
+            ? null
+            : Indicator::query()->whereKey($this->deletingIndicatorId)->value('name');
+    }
+
     public function cancelDelete(): void
     {
         $this->deletingIndicatorId = null;

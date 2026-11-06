@@ -785,3 +785,27 @@ test('long indicator names stay readable in the table view', function () {
         ->set('view', 'table')
         ->assertSeeHtml('title="'.$name.'"');
 });
+
+test('the delete dialog names the indicator and the table subtitle no longer promises money', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $indicator = Indicator::factory()->create(['name' => 'Meals distributed']);
+
+    Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->call('confirmDelete', $indicator->id)
+        ->assertSet('showDeleteModal', true)
+        ->assertSee('“Meals distributed” will be deleted.')
+        ->set('view', 'table')
+        ->assertDontSee('the money behind it')
+        ->assertSee('Scroll sideways to see every column.');
+});
+
+test('the rating bar is out of the tab order because its legend holds the same buttons', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Indicator::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->assertSeeHtml('tabindex="-1"')
+        ->assertSeeHtml('data-test="rag-band-unrated"');
+});

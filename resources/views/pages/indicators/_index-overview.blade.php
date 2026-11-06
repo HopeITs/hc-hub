@@ -12,11 +12,12 @@
                     <p class="type-meta text-secondary-medium dark:text-ink-muted">{{ __('indicators.rated_against_percent_of_the_year_elapsed', ['percent' => number_format($overview['elapsed'], 0)]) }}</p>
                 </div>
 
-                <div class="mt-2 flex h-2.5 w-full overflow-hidden rounded-full bg-secondary-soft dark:bg-surface-2" role="group" aria-label="{{ __('indicators.how_the_ratings_split') }}">
+                <div class="mt-2 flex h-2.5 w-full overflow-hidden rounded-full bg-secondary-soft dark:bg-surface-2" aria-hidden="true">
                     @foreach ($ragSegments as $segment)
                         @if ($segment['count'] > 0)
                             <button
                                 type="button"
+                                tabindex="-1"
                                 wire:click="setRag('{{ $segment['key'] }}')"
                                 wire:key="rag-band-{{ $segment['key'] }}"
                                 data-test="rag-band-{{ $segment['key'] }}"

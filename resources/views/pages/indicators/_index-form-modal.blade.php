@@ -81,7 +81,7 @@
         wire:model="showDeleteModal"
         close="cancelDelete"
         :title="__('indicators.delete_this_indicator')"
-        :message="__('indicators.only_an_indicator_carrying_no_targets_can_be_deleted')"
+        :message="$this->deletingIndicatorName !== null ? __('indicators.delete_named_indicator_message', ['name' => $this->deletingIndicatorName]) : __('indicators.only_an_indicator_carrying_no_targets_can_be_deleted')"
         confirm="deleteIndicator"
         :confirm-label="__('indicators.delete_indicator')"
         confirm-test="confirm-delete-indicator"
