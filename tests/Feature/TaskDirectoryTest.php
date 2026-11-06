@@ -1456,6 +1456,7 @@ test('the task register explains overdue and missed, and labels the related-to f
         ->assertSee('Started, past its due date')
         ->assertSee('Not started, past its due date')
         ->assertSee('Anything')
+        ->assertSee('Any date')
         ->assertSee('Nothing open is assigned to you.');
 });
 

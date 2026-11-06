@@ -186,7 +186,7 @@ return [
         'search_list' => 'ابحث في هذه القائمة',
         'clear' => 'مسح',
         'due' => 'الموعد',
-        'due_any' => 'الموعد: أي',
+        'due_any' => 'أي تاريخ',
         'empty_column' => 'فارغ',
         'more_items' => '+:count',
         'nothing_matches' => 'لا شيء مطابق. امسح فلترًا.',

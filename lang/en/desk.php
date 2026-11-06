@@ -186,7 +186,7 @@ return [
         'search_list' => 'Search this list',
         'clear' => 'Clear',
         'due' => 'Due',
-        'due_any' => 'Due: any',
+        'due_any' => 'Any date',
         'empty_column' => 'Empty',
         'more_items' => '+:count',
         'nothing_matches' => 'Nothing matches. Clear a filter.',
