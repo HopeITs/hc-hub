@@ -399,7 +399,7 @@ test('the page shows what was achieved against what was committed, counting appr
         ->and($component->get('overview')['targetsAchieved'])->toBe(0);
 
     $component->call('openInspectModal', $indicator->id)
-        ->assertSee('0 of 1 targets achieved')
+        ->assertSee('0 of 1 targets met')
         ->assertSee('150 pending approval')
         ->assertSeeHtml('href="'.e(route('reports.index', ['create' => 1, 'target' => $target->id])).'"');
 });
@@ -710,4 +710,38 @@ test('indicators can be filtered by the donor funding their targets', function (
         ->call('clearFilters')
         ->assertSet('donor', '')
         ->assertSee('Unfunded indicator');
+});
+
+test('the filtered indicators download as a CSV without formula injection', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $result = Result::factory()->create();
+    Indicator::factory()->create(['result_id' => $result->id, 'name' => '=HYPERLINK("x")']);
+    Indicator::factory()->create(['result_id' => $result->id, 'name' => 'Left out']);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->set('search', 'HYPERLINK')
+        ->call('exportIndicators')
+        ->assertFileDownloaded('indicators-'.now()->toDateString().'.csv');
+
+    ob_start();
+    $response = $component->instance()->exportIndicators();
+    $response->sendContent();
+    $csv = ob_get_clean();
+
+    expect($csv)->toContain("'=HYPERLINK")->not->toContain('Left out');
+});
+
+test('the padlock on an indicator that cannot be deleted is focusable and named', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $indicator = Indicator::factory()->create();
+    PlanIndicator::factory()->create([
+        'indicator_id' => $indicator->id,
+        'source_type' => 'annual_plan',
+        'source_id' => AnnualPlan::factory()->create(['year' => 2026])->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->assertSeeHtml('role="img" tabindex="0" aria-label="'.e(__('indicators.indicators_carrying_targets_cannot_be_deleted')).'"');
 });

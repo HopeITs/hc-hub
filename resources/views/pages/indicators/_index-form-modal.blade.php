@@ -46,6 +46,7 @@
                     <x-ui.form-segmented
                         wire:model.live="indicatorMeasure"
                         :label="__('indicators.measure')"
+                        class="@2xl/modal:col-span-2"
                         required
                         :options="collect(IndicatorMeasure::cases())->map(fn (IndicatorMeasure $measureCase): array => ['value' => $measureCase->value, 'label' => $measureCase->label()])->all()"
                     />
@@ -53,6 +54,7 @@
                     <x-ui.form-segmented
                         wire:model="frequency"
                         :label="__('indicators.frequency')"
+                        class="@2xl/modal:col-span-2"
                         required
                         :options="collect(Period::cases())->map(fn (Period $periodCase): array => ['value' => $periodCase->value, 'label' => $periodCase->label()])->all()"
                     />
