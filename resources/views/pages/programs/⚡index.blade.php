@@ -3,6 +3,7 @@
 use App\Enums\ProjectStatus;
 use App\Support\Like;
 use App\Models\HrEmployee;
+use App\Models\HrProgram;
 use App\Models\Program;
 use App\Models\Project;
 use App\Models\Strategy;
@@ -133,12 +134,10 @@ new #[Layout('layouts::desk'), Title('titles.programs')] class extends Component
 
         return Program::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $query) use ($search): void {
-                    $query
-                        ->whereNameLike($search)
-                        ->orWhereHas('strategy', fn (Builder $query) => $query->where('name', 'like', Like::contains($search)))
-                        ->orWhereIn('manager_id', HrEmployee::idsMatchingName($search));
-                });
+                $query->where(Like::everyWord($search, fn (Builder $query, string $word) => $query
+                    ->whereIn('programs.id', HrProgram::idsMatchingName($word, acrossLayouts: false))
+                    ->orWhereHas('strategy', Like::word('name', $word))
+                    ->orWhereIn('manager_id', HrEmployee::idsMatchingName($word, acrossLayouts: false))));
             })
             ->when($this->strategy === self::Unassigned, fn (Builder $query) => $query->whereNull('strategy_id'))
             ->when($this->strategy !== '' && $this->strategy !== self::Unassigned, fn (Builder $query) => $query->where('strategy_id', (int) $this->strategy))

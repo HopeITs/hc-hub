@@ -101,9 +101,9 @@ trait TracksProgramHealth
         $openMilestone = fn ($query) => $query->whereNotIn('status', [MilestoneStatus::Reached->value, MilestoneStatus::Cancelled->value]);
 
         $projects = Project::query()
-            ->select(['id', 'slug', 'name', 'status', 'start_date', 'end_date', 'program_id', 'user_id'])
+            ->select(['id', 'slug', 'name', 'status', 'start_date', 'end_date', 'program_id', 'user_id', 'city_id'])
             ->where('program_id', $this->programId)
-            ->with(['user:id,first_name_en,last_name_en,first_name_ar,last_name_ar'])
+            ->with(['user:id,first_name_en,last_name_en,first_name_ar,last_name_ar', 'city'])
             ->withSum(['milestones as weight_total' => fn ($query) => $query->where('status', '!=', MilestoneStatus::Cancelled->value)], 'weight_percentage')
             ->withSum(['milestones as weight_reached' => fn ($query) => $query->where('status', MilestoneStatus::Reached->value)], 'weight_percentage')
             ->withCount([

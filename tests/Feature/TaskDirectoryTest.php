@@ -202,7 +202,7 @@ test('creating a task rejects an unrecognized source type', function () {
     expect(Task::query()->count())->toBe(0);
 });
 
-test('creating a task with no assignee at all is rejected', function () {
+test('a task can be created with no assignee at all', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
@@ -213,9 +213,9 @@ test('creating a task with no assignee at all is rejected', function () {
         ->set('taskSourceId', (string) Proposal::factory()->create()->id)
         ->set('assignedTo', [])
         ->call('saveTask')
-        ->assertHasErrors(['assignedTo']);
+        ->assertHasNoErrors();
 
-    expect(Task::query()->count())->toBe(0);
+    expect(Task::query()->sole()->taskAssignees()->count())->toBe(0);
 });
 
 test('creating a task rejects invalid workflow values and progress', function (string $property, string $value) {
@@ -346,7 +346,7 @@ test('toggleAssignee adds and removes an assignee directly from the list row', f
     expect($task->refresh()->taskAssignees->pluck('employee_id')->all())->toBe([$alice]);
 });
 
-test('toggleAssignee refuses to remove the last remaining assignee', function () {
+test('toggleAssignee removes the last assignee and leaves the task unassigned', function () {
     $user = User::factory()->role('General Manager')->create();
     $alice = insertHrEmployee();
     $task = Task::factory()->create();
@@ -355,10 +355,9 @@ test('toggleAssignee refuses to remove the last remaining assignee', function ()
 
     Livewire::actingAs($user)
         ->test('pages::tasks.index')
-        ->call('toggleAssignee', $task->id, $alice)
-        ->assertDispatched('toast-show');
+        ->call('toggleAssignee', $task->id, $alice);
 
-    expect($task->refresh()->taskAssignees->pluck('employee_id')->all())->toBe([$alice]);
+    expect($task->refresh()->taskAssignees)->toBeEmpty();
 });
 
 test('the list row assignee trigger opens a shared popover fed by the employee list', function () {
@@ -699,11 +698,10 @@ test('quickCreateTask opens the drawer pre-filled with the title and the group c
     Livewire::actingAs($user)
         ->test('pages::tasks.index')
         ->call('quickCreateTask', 'Another task', null, (string) $milestone->id)
-        ->assertSet('showTaskDrawer', true)
-        ->assertSet('taskSourceType', 'milestone')
-        ->assertSet('taskSourceId', (string) $milestone->id);
+        ->assertSet('showTaskDrawer', false);
 
-    expect(Task::query()->count())->toBe(0);
+    expect(Task::query()->sole()->only(['title', 'source_type', 'source_id']))
+        ->toBe(['title' => 'Another task', 'source_type' => 'milestone', 'source_id' => $milestone->id]);
 });
 
 test('quickCreateTask does nothing for a blank title', function () {
@@ -764,16 +762,40 @@ test('quickCreateTask falls back to the drawer when neither a milestone nor an a
     expect(Task::query()->count())->toBe(0);
 });
 
-test('quickCreateTask falls back to the drawer when the signed-in user has no linked HR employee', function () {
+test('quickCreateTask creates the task unassigned when the signed-in user has no linked HR employee', function () {
     $user = User::factory()->role('General Manager')->create(['employee_id' => null]);
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
         ->test('pages::tasks.index')
-        ->call('quickCreateTask', 'Unassignable task', null, (string) $milestone->id)
-        ->assertSet('showTaskDrawer', true);
+        ->call('quickCreateTask', 'Unassigned task', null, (string) $milestone->id)
+        ->assertSet('showTaskDrawer', false);
 
-    expect(Task::query()->count())->toBe(0);
+    expect(Task::query()->sole()->taskAssignees()->count())->toBe(0);
+});
+
+test('an inline add row whose assignees were all removed creates the task unassigned', function () {
+    $employeeId = insertHrEmployee();
+    $user = User::factory()->role('General Manager')->create(['employee_id' => $employeeId]);
+    $milestone = Milestone::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->call('toggleTaskDraftAssignee', 'row-1', $employeeId)
+        ->call('toggleTaskDraftAssignee', 'row-1', $employeeId)
+        ->call('quickCreateTask', 'Nobody yet', null, (string) $milestone->id, 'row-1');
+
+    expect(Task::query()->sole()->taskAssignees()->count())->toBe(0);
+});
+
+test('the shared assignee popover offers to remove every assignee', function () {
+    Task::factory()->create();
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->assertSeeHtml('data-test="assignee-remove-all"')
+        ->assertSee('Remove all assignees');
 });
 
 test('the list view inline add task row honours its own due date priority status and assignees', function () {
@@ -962,7 +984,7 @@ test('toggleSubtaskDraftAssignee removes an employee already in the draft', func
     expect(invade($component->instance())->subtaskDraft($parent->fresh(['taskAssignees']))['assignees'])->toBe([]);
 });
 
-test('addSubtaskQuick falls back to the parents own assignees when the draft has none', function () {
+test('addSubtaskQuick adds the subtask unassigned when the draft removed every assignee', function () {
     $user = User::factory()->role('General Manager')->create();
     $alice = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
     $parent = Task::factory()->create();
@@ -976,7 +998,7 @@ test('addSubtaskQuick falls back to the parents own assignees when the draft has
 
     $subtask = Task::query()->where('title', 'Untouched assignees')->sole();
 
-    expect($subtask->taskAssignees->pluck('employee_id')->all())->toBe([$alice]);
+    expect($subtask->taskAssignees)->toBeEmpty();
 });
 
 test('dropping a task into a different board column persists the status change', function () {
@@ -1426,16 +1448,11 @@ test('quick actions stay silent on the board, except moving a card, and still to
 
 test('a refused quick action still explains itself on the board', function () {
     $user = User::factory()->role('General Manager')->create();
-    $alice = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
-    $task = Task::factory()->create();
-    $task->taskAssignees()->delete();
-    $task->taskAssignees()->create(['employee_id' => $alice]);
+    $task = Task::factory()->completed()->create();
 
     Livewire::actingAs($user)
         ->test('pages::tasks.index')
         ->set('view', 'board')
-        ->call('toggleAssignee', $task->id, $alice)
+        ->call('toggleComplete', $task->id)
         ->assertDispatched('toast-show');
-
-    expect($task->taskAssignees()->count())->toBe(1);
 });

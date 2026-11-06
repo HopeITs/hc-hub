@@ -5,6 +5,7 @@ use App\Enums\DonorAttribution;
 use App\Enums\MonthlyReportStatus;
 use App\Livewire\Concerns\AddsQuickTask;
 use App\Livewire\Concerns\Programs\LinksProgram;
+use App\Livewire\Concerns\Programs\ManagesProgramTasks;
 use App\Livewire\Concerns\Programs\ReadsProgramDelivery;
 use App\Livewire\Concerns\Programs\TracksProgramHealth;
 use App\Livewire\Concerns\Results\FiltersResultsChain;
@@ -29,6 +30,7 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
     use AddsQuickTask;
     use FiltersResultsChain;
     use LinksProgram;
+    use ManagesProgramTasks;
     use ReadsProgramDelivery;
     use TracksProgramHealth;
 
@@ -151,19 +153,12 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
     #[Computed]
     public function tasks(): Collection
     {
-        $projectIds = $this->allProjects->modelKeys();
-        $milestoneIds = Milestone::query()->whereIn('project_id', $projectIds)->pluck('id');
-
-        return Task::query()
-            ->select(['id', 'source_type', 'source_id', 'title', 'status', 'priority', 'due_date', 'progress_percentage'])
+        return $this->scopeToProgramTasks(Task::query())
+            ->select(['id', 'parent_task_id', 'source_type', 'source_id', 'title', 'status', 'priority', 'due_date', 'created_by', 'kind', 'reportable_type', 'reportable_id'])
             ->with([
                 'taskAssignees.employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar',
                 'source' => fn (MorphTo $morphTo) => $morphTo->morphWith([Milestone::class => ['project:id']]),
             ])
-            ->where(fn (Builder $query) => $query
-                ->where(fn (Builder $query) => $query->where('source_type', 'program')->where('source_id', $this->programId))
-                ->orWhere(fn (Builder $query) => $query->where('source_type', 'project')->whereIn('source_id', $projectIds))
-                ->orWhere(fn (Builder $query) => $query->where('source_type', 'milestone')->whereIn('source_id', $milestoneIds)))
             ->orderByRaw('due_date is null, due_date')
             ->orderBy('id')
             ->get();
@@ -195,6 +190,18 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
     protected function quickTaskSource(): array
     {
         return ['type' => 'program', 'id' => $this->programId];
+    }
+
+    /**
+     * "Goes to" starts on the project being viewed on the Tasks tab, else the program itself.
+     */
+    protected function quickTaskTarget(): string
+    {
+        if ($this->taskGroupBy === 'project' && str_starts_with($this->taskBucket, 'project-')) {
+            return 'project:'.(int) substr($this->taskBucket, strlen('project-'));
+        }
+
+        return 'program';
     }
 
     protected function quickTaskCreated(): void
@@ -273,8 +280,11 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
                     </div>
                     <div>
                         <dt>{{ __('programs.direct_manager') }}</dt>
-                        <dd>
-                            {{ $program->manager?->name ?? __('common.not_assigned') }}
+                        <dd class="dk-prog-person">
+                            @if ($program->manager)
+                                <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($program->manager->id)" class="dk-av" aria-hidden="true" data-program-manager-photo />
+                            @endif
+                            <span>{{ $program->manager?->name ?? __('common.not_assigned') }}</span>
                             @if ($program->manager)
                                 <span class="sr-only" dir="auto" lang="{{ \App\Enums\Locale::current()->other()->value }}">{{ $program->manager->secondary_name }}</span>
                             @endif
@@ -284,35 +294,41 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
                         <dt>{{ __('programs.updated') }}</dt>
                         <dd>{{ $program->updated_at?->translatedFormat(__('formats.date')) ?? '—' }}</dd>
                     </div>
+                    {{-- The verdict: one word on a tint of its tone, and how much needs a hand. --}}
+                    <div class="dk-prog-meta-verdict">
+                        <dt>{{ __('programs.delivery_health') }}</dt>
+                        <dd>
+                            <p @class(['dk-verdict', 'dk-good' => $verdict === 'on_track', 'dk-warn' => $verdict === 'attention', 'dk-bad' => $verdict === 'at_risk', 'dk-mute' => $verdict === null]) data-program-verdict="{{ $verdict ?? 'none' }}">
+                                @if ($verdict === null)
+                                    <span>{{ __('programs.verdict_none') }}</span>
+                                @else
+                                    <strong>{{ match ($verdict) {
+                                        'on_track' => __('programs.verdict_on_track'),
+                                        'attention' => __('programs.verdict_attention'),
+                                        default => __('programs.verdict_at_risk'),
+                                    } }}</strong>
+                                    <span>
+                                        @if ($attention === [])
+                                            {{ __('programs.verdict_all_clear') }}
+                                        @else
+                                            {!! trans_choice('programs.verdict_alarms', $alarms, ['count' => '<bdi>'.$alarms.'</bdi>']) !!}
+                                            {!! trans_choice('programs.verdict_warnings', $warnings, ['count' => '<bdi>'.$warnings.'</bdi>']) !!}
+                                        @endif
+                                    </span>
+                                @endif
+                            </p>
+                        </dd>
+                    </div>
                 </dl>
             </div>
 
             @can('update', $program)
-                <x-ui.button tone="ghost" size="sm" icon="link" wire:click="openLinkModal" data-test="link-program-button">{{ __('programs.link_strategy_and_manager') }}</x-ui.button>
+                <div class="dk-prog-h-action">
+                    <x-ui.button tone="ghost" size="sm" icon="link" wire:click="openLinkModal" data-test="link-program-button">{{ __('programs.link_strategy_and_manager') }}</x-ui.button>
+                </div>
             @endcan
         </header>
     </div>
-
-    {{-- The verdict: one word on a tint of its tone, and how much needs a hand. --}}
-    <p @class(['dk-verdict', 'dk-good' => $verdict === 'on_track', 'dk-warn' => $verdict === 'attention', 'dk-bad' => $verdict === 'at_risk', 'dk-mute' => $verdict === null]) data-program-verdict="{{ $verdict ?? 'none' }}">
-        @if ($verdict === null)
-            <span>{{ __('programs.verdict_none') }}</span>
-        @else
-            <strong>{{ match ($verdict) {
-                'on_track' => __('programs.verdict_on_track'),
-                'attention' => __('programs.verdict_attention'),
-                default => __('programs.verdict_at_risk'),
-            } }}</strong>
-            <span>
-                @if ($attention === [])
-                    {{ __('programs.verdict_all_clear') }}
-                @else
-                    {!! trans_choice('programs.verdict_alarms', $alarms, ['count' => '<bdi>'.$alarms.'</bdi>']) !!}
-                    {!! trans_choice('programs.verdict_warnings', $warnings, ['count' => '<bdi>'.$warnings.'</bdi>']) !!}
-                @endif
-            </span>
-        @endif
-    </p>
 
     {{-- The stat cards: one card per figure, the number first; a card that leads somewhere is a button. --}}
     <div class="dk-prog-stats" role="group" aria-label="{{ __('programs.delivery_health') }}">
@@ -344,7 +360,7 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
         @endif
 
         @if ($this->lastMonthReports !== null)
-            <a href="{{ route('monthly-reports.index') }}" wire:navigate class="dk-prog-stat" data-program-reports>
+            <a href="{{ route('monthly-reports.index') }}" wire:navigate class="dk-prog-stat dk-prog-stat-wide" data-program-reports>
                 <span class="dk-prog-stat-k"><x-desk.icon name="file" />{{ __('programs.monthly_reports') }}</span>
                 <span class="dk-prog-stat-n dk-num">{{ $this->lastMonthReports['validated'] }}</span>
                 <span class="dk-prog-stat-s">{{ $this->lastMonthReports['total'] === 0 ? __('programs.card_month_no_reports', ['month' => $this->lastMonthReports['month']]) : __('programs.card_month_reports', ['month' => $this->lastMonthReports['month'], 'validated' => $this->lastMonthReports['validated'], 'total' => $this->lastMonthReports['total']]) }}</span>
@@ -352,15 +368,22 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
         @endif
 
         @if ($funding !== null)
-            <div class="dk-prog-stat" data-program-funding>
+            <div class="dk-prog-stat dk-prog-stat-wide" data-program-funding>
                 <span class="dk-prog-stat-k"><x-desk.icon name="coins" />{{ __('programs.figure_funding_received') }}</span>
-                @forelse ($funding as $row)
-                    <span class="dk-prog-stat-m" wire:key="program-funding-{{ $row['currency'] }}"><x-ui.money :amount="$row['received']" :currency="$row['currency']" /></span>
-                    <span class="dk-prog-stat-s">{{ __('programs.figure_of_committed', ['amount' => number_format($row['committed'], 2), 'currency' => $row['currency']]) }}</span>
-                @empty
+                @if ($funding === [])
                     <span class="dk-prog-stat-n dk-num dk-muted">—</span>
                     <span class="dk-prog-stat-s">{{ __('programs.figure_no_funding') }}</span>
-                @endforelse
+                @else
+                    <div class="dk-prog-fund">
+                        @foreach ($funding as $row)
+                            <div class="dk-prog-fund-row" wire:key="program-funding-{{ $row['currency'] }}">
+                                <span class="dk-prog-stat-m"><x-ui.money :amount="$row['received']" :currency="$row['currency']" /></span>
+                                <span class="dk-prog-bar" aria-hidden="true"><i style="width: {{ $row['committed'] > 0 ? min(100, round($row['received'] / $row['committed'] * 100, 1)) : 0 }}%"></i></span>
+                                <span class="dk-prog-stat-s">{{ __('programs.figure_of_committed', ['amount' => number_format($row['committed'], 2), 'currency' => $row['currency']]) }}</span>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         @endif
     </div>
@@ -406,7 +429,7 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
             <x-desk.icon name="chev" class="dk-prog-fold-i" />
         </button>
         <div id="program-activity-body" class="dk-prog-fold-b" x-show="open" x-collapse x-cloak>
-            <livewire:activity.timeline :subjects="['program' => [$program->id]]" :key="'program-activity-'.$program->id" />
+            <livewire:activity.timeline :subjects="['program' => [$program->id]]" :limit="3" :step="3" :key="'program-activity-'.$program->id" />
         </div>
     </section>
 

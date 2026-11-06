@@ -79,9 +79,9 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
             ->with('actor:id,hr_user_id,employee_id')
             ->when($this->module !== '', fn (Builder $query) => $query->where('module', $this->module))
             ->when(ctype_digit($this->actor), fn (Builder $query) => $query->where('actor_id', (int) $this->actor))
-            ->when($term !== '', fn (Builder $query) => $query->where(fn (Builder $query) => $query
-                ->where('event', 'like', Like::contains($term))
-                ->orWhere('properties', 'like', Like::contains($term))))
+            ->when($term !== '', fn (Builder $query) => $query->where(Like::everyWord($term, fn (Builder $query, string $word) => $query
+                ->where(Like::word('event', $word))
+                ->orWhere(Like::word('properties', $word)))))
             ->when($this->validDate($this->from), fn (Builder $query) => $query->where('created_at', '>=', CarbonImmutable::parse($this->from)->startOfDay()))
             ->when($this->validDate($this->to), fn (Builder $query) => $query->where('created_at', '<=', CarbonImmutable::parse($this->to)->endOfDay()))
             ->when($sortingByModule, fn (Builder $query) => $query->orderBy('module', $this->sortDirection))

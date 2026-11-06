@@ -19,10 +19,8 @@
     $ledger = $this->projectLedger;
     $attention = $this->attention;
     $showReports = auth()->user()?->can('reports.view') === true;
-    $showTargets = auth()->user()?->can('targets.view') === true;
-    $showMoney = $this->canViewProgramMoney();
-    $reportMonth = \Carbon\CarbonImmutable::today()->subMonthNoOverflow()->translatedFormat('F');
-    $attentionPreview = 4;
+    $reportMonth = \Carbon\CarbonImmutable::today()->subMonthNoOverflow()->translatedFormat('M');
+    $attentionPreview = 3;
 
     $paceLabel = fn (string $pace, \App\Models\Project $project): string => match ($pace) {
         'closed' => $project->status->label(),
@@ -41,16 +39,32 @@
         in_array($pace, ['on_track', 'complete'], true) => 'dk-good',
         default => 'dk-mute',
     };
-    [$flagged, $steady] = collect($ledger)->partition(fn (array $row): bool => $row['needsAttention']);
-    $groups = [
-        ['key' => 'attention', 'label' => __('programs.group_needs_attention'), 'rows' => $flagged->values()->all(), 'open' => true],
-        ['key' => 'steady', 'label' => __('programs.group_steady'), 'rows' => $steady->values()->all(), 'open' => $flagged->isEmpty()],
-    ];
+    $ledgerFilter = fn (array $row): string => match (true) {
+        $row['needsAttention'] => 'behind',
+        $row['pace'] === 'closed' => 'closed',
+        default => 'on_track',
+    };
+    $ledgerRows = collect($ledger)
+        ->sortBy(fn (array $row): int => ['behind' => 0, 'on_track' => 1, 'closed' => 2][$ledgerFilter($row)])
+        ->values()
+        ->all();
+    $filterCounts = collect($ledgerRows)->countBy(fn (array $row): string => $ledgerFilter($row));
+    $filters = array_values(array_filter([
+        ['key' => 'all', 'label' => __('programs.filter_all'), 'count' => count($ledgerRows)],
+        ['key' => 'behind', 'label' => __('programs.filter_behind'), 'count' => $filterCounts->get('behind', 0)],
+        ['key' => 'on_track', 'label' => __('programs.filter_on_track'), 'count' => $filterCounts->get('on_track', 0)],
+        $filterCounts->get('closed', 0) > 0 ? ['key' => 'closed', 'label' => __('programs.filter_closed'), 'count' => $filterCounts->get('closed')] : null,
+    ]));
+    $ledgerItems = array_map(fn (array $row): array => [
+        'id' => $row['project']->id,
+        'filter' => $ledgerFilter($row),
+        'name' => mb_strtolower($row['project']->name),
+    ], $ledgerRows);
 @endphp
 
 <div class="dk-prog-ov" x-data="{ query: '' }">
     {{-- 1. Needs your attention --}}
-    <section class="dk-prog-fold" x-data="{ open: $persist(true).as('program-attention-open'), all: false }" :class="{ 'dk-prog-fold-on': open }" data-test="program-attention">
+    <section class="dk-prog-fold" x-data="{ open: $persist(true).as('program-attention-open'), shown: {{ $attentionPreview }}, total: {{ count($attention) }}, step: {{ $attentionPreview }} }" :class="{ 'dk-prog-fold-on': open }" data-test="program-attention">
         <button type="button" class="dk-prog-fold-h" @click="open = ! open" :aria-expanded="open.toString()" aria-controls="program-attention-body">
             <h2 id="program-attention-heading">{{ __('programs.attention_heading') }}</h2>
             @if ($attention !== [])
@@ -66,7 +80,7 @@
                 <ul class="dk-prog-attn">
                     @foreach ($attention as $item)
                         <li wire:key="program-attention-{{ $loop->index }}" @class(['dk-prog-attn-i', 'dk-bad' => $item['tone'] === 'critical', 'dk-warn' => $item['tone'] !== 'critical']) data-attention="{{ $item['key'] }}"
-                            @if ($loop->index >= $attentionPreview) x-show="all" x-cloak @endif>
+                            @if ($loop->index >= $attentionPreview) x-show="shown > {{ $loop->index }}" x-cloak @endif>
                             <span class="dk-prog-attn-t">
                                 {{ $item['text'] }}
                                 @if ($item['mine'])
@@ -78,17 +92,36 @@
                     @endforeach
                 </ul>
                 @if (count($attention) > $attentionPreview)
-                    <button type="button" class="dk-prog-more" @click="all = ! all" :aria-expanded="all.toString()">
-                        <span x-show="! all">{{ trans_choice('programs.attention_show_more', count($attention) - $attentionPreview, ['count' => count($attention) - $attentionPreview]) }}</span>
-                        <span x-show="all" x-cloak>{{ __('programs.attention_show_less') }}</span>
-                    </button>
+                    <div class="dk-prog-more-row">
+                        <button type="button" class="dk-prog-more" x-show="shown < total" @click="shown = Math.min(total, shown + step)" data-test="program-attention-more">
+                            <span x-text="@js(__('programs.attention_load_more')).replace(':count', Math.min(step, total - shown))">{{ __('programs.attention_load_more', ['count' => min($attentionPreview, count($attention) - $attentionPreview)]) }}</span>
+                        </button>
+                        <button type="button" class="dk-prog-more" x-show="shown > step" x-cloak @click="shown = step">{{ __('programs.attention_show_less') }}</button>
+                    </div>
                 @endif
             @endif
         </div>
     </section>
 
-    {{-- 2. The projects --}}
-    <section class="dk-prog-projects" aria-labelledby="program-ledger-heading" data-test="program-ledger">
+    {{-- 2. The projects: one grid, filter chips, one row at a time; search covers every project. --}}
+    <section class="dk-prog-projects" aria-labelledby="program-ledger-heading" data-test="program-ledger"
+        x-data="{
+            filter: 'all',
+            rows: 1,
+            cols: 1,
+            items: @js($ledgerItems),
+            get searching() { return query.trim() !== '' },
+            get matches() {
+                const needle = query.trim().toLowerCase();
+                return this.items.filter((item) => this.searching ? item.name.includes(needle) : (this.filter === 'all' || item.filter === this.filter));
+            },
+            get limit() { return this.searching ? Infinity : this.rows * this.cols },
+            get remaining() { return Math.max(0, this.matches.length - this.limit) },
+            shows(id) { const index = this.matches.findIndex((item) => item.id === id); return index > -1 && index < this.limit },
+            measure() { if (this.$refs.grid) { this.cols = Math.max(1, getComputedStyle(this.$refs.grid).gridTemplateColumns.split(' ').filter(Boolean).length) } },
+            pick(key) { this.filter = key; this.rows = 1 },
+        }"
+        x-init="$nextTick(() => measure())" @resize.window.debounce.150ms="measure()">
         <div class="dk-prog-projects-h">
             <h2 id="program-ledger-heading">{{ __('programs.ledger_heading') }} <span class="dk-num">{{ count($ledger) }}</span></h2>
             @if (count($ledger) > 3)
@@ -102,60 +135,60 @@
 
         @if ($ledger === [])
             <p class="dk-prog-clear">{{ __('common.no_projects_yet') }}</p>
-        @endif
+        @else
+            <div class="dk-prog-chips" role="group" aria-label="{{ __('programs.filter_projects') }}" :class="{ 'dk-prog-chips-off': searching }">
+                @foreach ($filters as $chip)
+                    <button type="button" wire:key="program-filter-{{ $chip['key'] }}" @click="pick('{{ $chip['key'] }}')" :aria-pressed="(filter === '{{ $chip['key'] }}').toString()" aria-pressed="{{ $chip['key'] === 'all' ? 'true' : 'false' }}" data-ledger-filter="{{ $chip['key'] }}" @disabled($chip['count'] === 0 && $chip['key'] !== 'all')>
+                        @if ($chip['key'] !== 'all')
+                            <span @class(['dk-prog-group-dot', 'dk-warn' => $chip['key'] === 'behind', 'dk-good' => $chip['key'] === 'on_track'])></span>
+                        @endif
+                        <span>{{ $chip['label'] }}</span>
+                        <span class="dk-num">{{ $chip['count'] }}</span>
+                    </button>
+                @endforeach
+            </div>
 
-        @foreach ($groups as $group)
-            @continue($group['rows'] === [])
-            <div class="dk-prog-group" x-data="{ open: $persist({{ $group['open'] ? 'true' : 'false' }}).as('program-group-{{ $group['key'] }}') }" data-ledger-group="{{ $group['key'] }}" x-effect="if (query !== '') { open = true }">
-                <button type="button" class="dk-prog-group-h" @click="open = ! open" :aria-expanded="open.toString()">
-                    <span @class(['dk-prog-group-dot', 'dk-warn' => $group['key'] === 'attention', 'dk-good' => $group['key'] !== 'attention'])></span>
-                    <span>{{ $group['label'] }}</span>
-                    <span class="dk-num">{{ count($group['rows']) }}</span>
-                    <span class="dk-prog-chev" :class="{ 'dk-prog-rot': open }"><x-desk.icon name="chev" /></span>
-                </button>
-
-                <ul class="dk-prog-cards" x-show="open" x-collapse>
-                    @foreach ($group['rows'] as $row)
+            <ul class="dk-prog-cards" x-ref="grid">
+                @foreach ($ledgerRows as $row)
                         @php
                             $project = $row['project'];
                             $isActive = $project->status === ProjectStatus::Active;
                         @endphp
-                        <li class="dk-prog-card" wire:key="program-card-{{ $project->id }}" data-ledger-row
-                            x-data="{ details: false }"
-                            x-show="query === '' || {{ \Illuminate\Support\Js::from(mb_strtolower($project->name)) }}.includes(query.trim().toLowerCase())">
+                        <li class="dk-prog-card" wire:key="program-card-{{ $project->id }}" data-ledger-row data-ledger-filter-key="{{ $ledgerFilter($row) }}"
+                            x-show="shows({{ $project->id }})" @if ($loop->index >= 1) x-cloak @endif>
 
+                            {{-- 1. Name and city: the name always takes two lines so every card lines up. --}}
                             <div class="dk-prog-card-h">
-                                <div class="min-w-0">
-                                    <h3 class="dk-prog-card-t">{{ $project->name }}</h3>
-                                    <p class="dk-prog-card-o"><x-desk.icon name="users" />{{ $project->user?->name ?? __('common.not_assigned') }}</p>
-                                </div>
-                                <x-ui.button tone="ghost" size="sm" icon="eye" :href="route('projects.show', $project)" wire:navigate :aria-label="__('common.view_name', ['name' => $project->name])" />
+                                <h3 class="dk-prog-card-t">
+                                    <a href="{{ route('projects.show', $project) }}" wire:navigate class="dk-prog-card-link" title="{{ $project->name }}">{{ $project->name }}</a>
+                                </h3>
+                                <p class="dk-prog-card-o" data-ledger-city><x-desk.icon name="pin" />{{ $project->city?->name ?? '—' }}</p>
                             </div>
 
+                            {{-- 2. Pace and progress: the tick on the bar marks where it should be by today. --}}
                             <div class="dk-prog-card-pace">
                                 <div class="dk-prog-card-row">
-                                    @if ($row['pace'] !== 'closed')
+                                    @if ($row['pace'] === 'closed')
+                                        <x-ui.enum-badge :case="$project->status" />
+                                    @else
                                         <span class="dk-prog-pill {{ $paceTone($row['pace']) }}">{{ $paceLabel($row['pace'], $project) }}</span>
                                     @endif
-                                    <x-ui.enum-badge :case="$project->status" />
                                     <span class="dk-prog-card-pct dk-num">{{ $row['progress'] === null ? '—' : $row['progress'].'%' }}</span>
                                 </div>
-                                <span class="dk-prog-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="{{ __('programs.milestone_progress') }}" @if ($row['progress'] !== null) aria-valuenow="{{ $row['progress'] }}" @endif>
+                                <span class="dk-prog-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="{{ __('programs.milestone_progress') }}" @if ($row['progress'] !== null) aria-valuenow="{{ $row['progress'] }}" @endif
+                                    @if ($row['elapsed'] !== null && $isActive) title="{{ __('programs.pace_expected', ['percent' => (int) round($row['elapsed'])]) }}" @endif>
                                     <i style="width: {{ $row['progress'] ?? 0 }}%"></i>
                                     @if ($row['elapsed'] !== null && $isActive)
                                         <b style="inset-inline-start: {{ round($row['elapsed'], 1) }}%"></b>
                                     @endif
                                 </span>
-                                @if ($row['elapsed'] !== null && $row['progress'] !== null && $isActive)
-                                    <span class="dk-prog-note">{{ __('programs.pace_expected', ['percent' => (int) round($row['elapsed'])]) }}</span>
-                                @endif
                             </div>
 
-                            {{-- The three facts that most often need a hand --}}
-                            <dl class="dk-prog-facts">
+                            {{-- 3. The three facts that most often need a hand, always in the same cells. --}}
+                            <dl @class(['dk-prog-cells', 'dk-prog-cells-2' => ! $showReports])>
                                 <div @class(['dk-bad' => $row['lateMilestones'] > 0])>
                                     <dt><x-desk.icon name="flag" />{{ __('programs.ledger_milestones') }}</dt>
-                                    <dd>{{ $row['lateMilestones'] > 0 ? trans_choice('programs.ledger_late_milestones', $row['lateMilestones'], ['count' => $row['lateMilestones']]) : ($row['nextMilestone'] === null ? __('programs.ledger_no_next_milestone') : __('programs.ledger_next_on', ['date' => $row['nextMilestone']->translatedFormat(__('formats.date'))])) }}</dd>
+                                    <dd>{{ $row['lateMilestones'] > 0 ? trans_choice('programs.ledger_late_milestones', $row['lateMilestones'], ['count' => $row['lateMilestones']]) : ($row['nextMilestone'] === null ? '—' : $row['nextMilestone']->translatedFormat('M j')) }}</dd>
                                 </div>
                                 <div @class(['dk-bad' => $row['pastDueTasks'] > 0])>
                                     <dt><x-desk.icon name="check" />{{ __('common.tasks') }}</dt>
@@ -177,52 +210,26 @@
                                 @endif
                             </dl>
 
-                            {{-- Details: targets and money, folded --}}
-                            @if ($showTargets || $showMoney)
-                                <button type="button" class="dk-prog-details-t" @click="details = ! details" :aria-expanded="details.toString()">
-                                    <span x-text="details ? {{ \Illuminate\Support\Js::from(__('programs.details_hide')) }} : {{ \Illuminate\Support\Js::from(__('programs.details_show')) }}">{{ __('programs.details_show') }}</span>
-                                    <span class="dk-prog-chev" :class="{ 'dk-prog-rot': details }"><x-desk.icon name="chev" /></span>
-                                </button>
-                                <dl class="dk-prog-facts dk-prog-details" x-show="details" x-collapse x-cloak>
-                                    @if ($showTargets)
-                                        <div data-ledger-targets>
-                                            <dt><x-desk.icon name="chart" />{{ __('programs.ledger_targets') }}</dt>
-                                            <dd>
-                                                @if (($row['targets']['total'] ?? 0) === 0)
-                                                    <span class="dk-muted">{{ __('programs.ledger_no_targets') }}</span>
-                                                @else
-                                                    {{ __('programs.ledger_targets_reached', ['reached' => $row['targets']['reached'], 'total' => $row['targets']['total']]) }}
-                                                    @if ($row['targets']['percent'] !== null)
-                                                        <span class="dk-prog-note">· {{ __('programs.ledger_targets_average', ['percent' => number_format($row['targets']['percent'], 0)]) }}</span>
-                                                    @endif
-                                                @endif
-                                            </dd>
-                                        </div>
-                                    @endif
-                                    @if ($showMoney)
-                                        <div @class(['dk-bad' => $row['lateTransfers'] > 0]) data-ledger-funding>
-                                            <dt><x-desk.icon name="coins" />{{ __('programs.ledger_funding') }}</dt>
-                                            <dd>
-                                                @forelse ($row['funding'] ?? [] as $money)
-                                                    <span class="block"><x-ui.money :amount="$money['received']" :currency="$money['currency']" /> <span class="dk-prog-note">{{ __('programs.figure_of_committed', ['amount' => number_format($money['committed'], 2), 'currency' => $money['currency']]) }}</span></span>
-                                                @empty
-                                                    <span class="dk-muted">{{ __('projects.not_funded_yet') }}</span>
-                                                @endforelse
-                                                @if ($row['lateTransfers'] > 0)
-                                                    <span class="block">{{ trans_choice('programs.ledger_late_transfers', $row['lateTransfers'], ['count' => $row['lateTransfers']]) }}</span>
-                                                @endif
-                                            </dd>
-                                        </div>
-                                    @endif
-                                </dl>
-                            @endif
+                            {{-- 4. Who runs it, pinned to the bottom. --}}
+                            <div class="dk-prog-card-f">
+                                @if ($project->user)
+                                    <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($project->user_id)" class="dk-av dk-av-xs" aria-hidden="true" data-ledger-manager-photo />
+                                @endif
+                                <span>{{ $project->user?->name ?? __('common.not_assigned') }}</span>
+                            </div>
                         </li>
-                    @endforeach
-                </ul>
-            </div>
-        @endforeach
+                @endforeach
+            </ul>
 
-        <p class="dk-prog-clear" x-cloak x-show="query !== '' && ! [...$root.querySelectorAll('[data-ledger-row]')].some((row) => row.textContent.toLowerCase().includes(query.trim().toLowerCase()))">{{ __('programs.ledger_nothing_matches') }}</p>
+            <p class="dk-prog-clear" x-cloak x-show="matches.length === 0">{{ __('programs.ledger_nothing_matches') }}</p>
+
+            <div class="dk-prog-more-row" x-show="! searching" x-cloak>
+                <button type="button" class="dk-prog-more" x-show="remaining > 0" @click="rows++" data-test="program-ledger-more">
+                    <span x-text="Math.min(cols, remaining) === 1 ? @js(__('programs.ledger_load_one')) : @js(__('programs.ledger_load_row')).replace(':count', Math.min(cols, remaining))">{{ __('programs.ledger_load_one') }}</span>
+                </button>
+                <button type="button" class="dk-prog-more" x-show="rows > 1" @click="rows = 1">{{ __('programs.attention_show_less') }}</button>
+            </div>
+        @endif
     </section>
 
     {{-- 3. Program settings, folded --}}

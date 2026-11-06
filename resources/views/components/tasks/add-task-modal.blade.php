@@ -7,9 +7,13 @@
     The quick add-task form shared by the milestone, program, project and
     proposal pages. Each page's component owns the same properties
     (newTaskTitle, newTaskStatus, newTaskPriority, newTaskAssignedTo,
-    newTaskDueDate) and actions (addTask, closeAddTaskModal); `testPrefix`
-    keeps each page's data-test hooks distinct.
+    newTaskDueDate, newTaskTarget) and actions (addTask, closeAddTaskModal);
+    `testPrefix` keeps each page's data-test hooks distinct. "Goes to" shows
+    when the page's record sits in a program (AddsQuickTask::quickTaskPlaces).
 --}}
+@php
+    $places = $open ? $__env->shared('__livewire')?->quickTaskPlaces : null;
+@endphp
 <x-ui.modal
     wire:model="showAddTaskModal"
     size="md"
@@ -21,6 +25,18 @@
     @if ($open)
         <div class="grid grid-cols-2 gap-x-4 gap-y-4">
             <x-ui.form-input wire:model="newTaskTitle" :label="__('tasks.task_title')" maxlength="255" required autofocus class="col-span-2" :data-test="$testPrefix.'-title-input'" />
+
+            @if ($places !== null)
+                <x-ui.form-select wire:model="newTaskTarget" :label="__('tasks.goes_to')" :help="__('tasks.goes_to_help')" required searchable :search-label="__('tasks.move_search')" class="col-span-2" :data-test="$testPrefix.'-goes-to'">
+                    <option value="program">{{ $places['program']['name'] }} · {{ __('tasks.move_program_itself') }}</option>
+                    @foreach ($places['projects'] as $project)
+                        <option value="project:{{ $project['id'] }}">{{ $project['name'] }}</option>
+                        @foreach ($project['milestones'] as $milestone)
+                            <option value="milestone:{{ $milestone['id'] }}">{{ $project['name'] }} › {{ $milestone['name'] }}</option>
+                        @endforeach
+                    @endforeach
+                </x-ui.form-select>
+            @endif
 
             <x-ui.form-segmented
                 wire:model="newTaskStatus"

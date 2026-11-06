@@ -134,7 +134,7 @@ final class AskEngine
     /**
      * What the typed text asks.
      *
-     * @return array{normalized: string, words: list<string>, terms: list<string>, intents: list<string>, entity: string|null}
+     * @return array{normalized: string, words: list<string>, terms: list<string>, intents: list<string>, entity: string|null, entityGuessed: bool}
      */
     public function interpret(string $query): array
     {
@@ -142,26 +142,37 @@ final class AskEngine
         $words = $normalized === '' ? [] : array_values(array_filter(explode(' ', $normalized), fn (string $word): bool => $word !== ''));
         $intents = [];
         $entity = null;
+        $entityGuessed = false;
         $terms = [];
 
         foreach ($words as $word) {
             $matched = false;
+            $sure = false;
 
             foreach (self::Intents as $intent => $vocabulary) {
                 if (self::matchesAny($word, $vocabulary, strict: true)) {
                     $intents[$intent] = true;
                     $matched = true;
+                    $sure = true;
                 }
             }
 
             foreach (self::Entities as $module => $vocabulary) {
                 if (self::matchesAny($word, $vocabulary)) {
-                    $entity ??= $module;
+                    $exact = self::matchesAny($word, $vocabulary, typos: false);
+
+                    if ($entity === null) {
+                        $entity = $module;
+                        $entityGuessed = ! $exact;
+                    }
+
                     $matched = true;
+                    $sure = $sure || $exact;
                 }
             }
 
-            if (! $matched && ! self::isStopWord($word)) {
+            // A word that only reaches a module name by a typo («ابار» → «آثار») may be a name too: search it as one.
+            if ((! $matched || ! $sure) && ! self::isStopWord($word)) {
                 $terms[] = $word;
             }
         }
@@ -177,13 +188,14 @@ final class AskEngine
             'terms' => $terms,
             'intents' => array_keys($intents),
             'entity' => $entity,
+            'entityGuessed' => $entityGuessed,
         ];
     }
 
     /**
      * The pages the text points at, best first; none when nothing matches.
      *
-     * @param  array{normalized: string, words: list<string>, terms: list<string>, intents: list<string>, entity: string|null}  $interpretation
+     * @param  array{normalized: string, words: list<string>, terms: list<string>, intents: list<string>, entity: string|null, entityGuessed: bool}  $interpretation
      * @return list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null}>
      */
     public function pages(User $user, array $interpretation, int $limit = 6): array
@@ -233,7 +245,7 @@ final class AskEngine
      * word and no module, every action they may take; with a module and no
      * create word, that module's action as a suggestion.
      *
-     * @param  array{normalized: string, words: list<string>, terms: list<string>, intents: list<string>, entity: string|null}  $interpretation
+     * @param  array{normalized: string, words: list<string>, terms: list<string>, intents: list<string>, entity: string|null, entityGuessed: bool}  $interpretation
      * @return list<array{module: string, label: string, href: string}>
      */
     public function actions(User $user, array $interpretation): array
@@ -267,6 +279,26 @@ final class AskEngine
     }
 
     /**
+     * How many of the typed words are words the Ask bar knows exactly (a
+     * question word, a module name, a page label), with no typo or prefix
+     * allowance. Tells a real reading ("programs") from keys typed on the
+     * wrong layout that only reach something by a typo match.
+     */
+    public function knownWordCount(User $user, string $query): int
+    {
+        $known = array_merge(
+            array_merge(...array_values(self::Intents)),
+            array_merge(...array_values(self::Entities)),
+            array_merge(...array_values(self::PageWords)),
+            ...array_map(fn (array $page): array => explode(' ', $page['label']), $this->destinations->for($user)),
+        );
+        $known = array_flip(array_map(self::normalize(...), $known));
+        $words = array_filter(explode(' ', self::normalize($query)), fn (string $word): bool => $word !== '');
+
+        return count(array_filter($words, fn (string $word): bool => isset($known[$word])));
+    }
+
+    /**
      * Lower case, without Arabic diacritics, tatweel or letter variants
      * (أ إ آ → ا, ة → ه, ى → ي), the definite article "ال" dropped from long
      * words, punctuation turned to spaces.
@@ -289,11 +321,11 @@ final class AskEngine
      * Whether a typed word is one of the vocabulary words: exactly, as the
      * start of one while typing (3+ letters), or within a typo (one edit from
      * 4 letters, two from 7). Strict matching (intent words) skips prefixes,
-     * so "new" does not catch "news".
+     * so "new" does not catch "news"; without typos, only exact or prefix matches count.
      *
      * @param  list<string>  $vocabulary
      */
-    public static function matchesAny(string $word, array $vocabulary, bool $strict = false): bool
+    public static function matchesAny(string $word, array $vocabulary, bool $strict = false, bool $typos = true): bool
     {
         $length = mb_strlen($word);
 
@@ -310,7 +342,7 @@ final class AskEngine
 
             $allowed = $length >= 7 ? 2 : ($length >= 4 ? 1 : 0);
 
-            if ($allowed > 0 && abs(mb_strlen($candidate) - $length) <= $allowed && self::distance($word, $candidate) <= $allowed) {
+            if ($typos && $allowed > 0 && abs(mb_strlen($candidate) - $length) <= $allowed && self::distance($word, $candidate) <= $allowed) {
                 return true;
             }
         }

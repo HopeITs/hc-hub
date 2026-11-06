@@ -96,9 +96,9 @@ trait ListsLibraryEntries
             })
             ->filter(fn (LibraryIndicator $entry): bool => $this->english !== 'missing' || blank($entry->name_en))
             ->filter(fn (LibraryIndicator $entry): bool => $term === ''
-                || ArabicText::contains($entry->name_ar, $term)
-                || ArabicText::contains((string) $entry->name_en, $term)
-                || ArabicText::contains($entry->code, $term))
+                || ArabicText::containsTyped($entry->name_ar, $term)
+                || ArabicText::containsTyped((string) $entry->name_en, $term)
+                || ArabicText::containsTyped($entry->code, $term))
             ->values();
     }
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\PHPStan;
 
 use App\Livewire\Concerns\Programs\LinksProgram;
+use App\Livewire\Concerns\Programs\ManagesProgramTasks;
 use App\Livewire\Concerns\Programs\ReadsProgramDelivery;
 use App\Livewire\Concerns\Programs\TracksProgramHealth;
 use App\Livewire\Concerns\Results\FiltersResultsChain;
@@ -22,6 +23,7 @@ abstract class ProgramsShowPageHost extends Component
 {
     use FiltersResultsChain;
     use LinksProgram;
+    use ManagesProgramTasks;
     use ReadsProgramDelivery;
     use TracksProgramHealth;
 

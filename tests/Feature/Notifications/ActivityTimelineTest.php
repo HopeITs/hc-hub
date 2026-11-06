@@ -56,6 +56,24 @@ test('the timeline loads more on demand', function () {
         ->assertDontSeeHtml('data-timeline-more');
 });
 
+test('a timeline with a step of three shows three and loads three more at a time', function () {
+    $task = Activity::withoutRecording(fn () => Task::factory()->create());
+    foreach (range(1, 7) as $n) {
+        $task->update(['title' => "Title {$n}"]);
+    }
+
+    Livewire::actingAs(Activity::withoutRecording(fn () => User::factory()->create()))
+        ->test('activity.timeline', ['subjects' => ['task' => [$task->id]], 'limit' => 3, 'step' => 3])
+        ->assertSeeText('Load 3 more')
+        ->assertDontSeeText('Title 2')
+        ->call('loadMore')
+        ->assertSet('limit', 6)
+        ->assertSeeHtml('data-timeline-more')
+        ->call('loadMore')
+        ->assertSet('limit', 9)
+        ->assertDontSeeHtml('data-timeline-more');
+});
+
 test('each record page carries its activity', function (string $route, Closure $record) {
     $this->actingAs(userWithRole('Super Admin'))
         ->get(route($route, Activity::withoutRecording($record)))

@@ -19,6 +19,7 @@ return [
     'ask_money_body' => ':share% of :currency commitments.',
     'ask_group_answer' => 'Answer',
     'ask_group_go' => 'Go to',
+    'ask_corrected' => 'Showing results for “:query”',
     'ask_nothing_title' => 'Nothing found',
     'ask_nothing_body' => 'Try a name, a page, a question like “what is due today?” or an action like “new task”.',
     'key_esc' => 'Esc',

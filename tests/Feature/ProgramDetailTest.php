@@ -44,7 +44,17 @@ test('program detail shows the program its strategy and its manager', function (
         ->assertSeeText('Water Security')
         ->assertSeeText('Country Strategy')
         ->assertSeeText('Layla Haddad')
-        ->assertSeeText('ليلى حداد');
+        ->assertSeeText('ليلى حداد')
+        ->assertSee('data-program-manager-photo', false);
+});
+
+test('program detail shows no manager photo when no manager is assigned', function () {
+    $program = Program::factory()->create(['manager_id' => null]);
+
+    $this->actingAs(User::factory()->role('General Manager')->create())
+        ->get(route('programs.show', $program))
+        ->assertOk()
+        ->assertDontSee('data-program-manager-photo', false);
 });
 
 test('the program breadcrumb leads back through the strategies list and the program strategy', function () {
@@ -144,7 +154,7 @@ test('a task can be added from the program show page pre-filled with this progra
         ->and($task->taskAssignees->pluck('employee_id')->all())->toBe([$assignee]);
 });
 
-test('adding a task from the program show page requires a title and an assignee', function () {
+test('adding a task from the program show page requires a title but no assignee', function () {
     $user = User::factory()->role('General Manager')->create();
     $program = Program::factory()->create();
 
@@ -155,7 +165,8 @@ test('adding a task from the program show page requires a title and an assignee'
         ->set('newTaskTitle', '   ')
         ->set('newTaskAssignedTo', [])
         ->call('addTask')
-        ->assertHasErrors(['newTaskTitle', 'newTaskAssignedTo']);
+        ->assertHasErrors(['newTaskTitle'])
+        ->assertHasNoErrors(['newTaskAssignedTo']);
 });
 
 test('program detail renders the results logframe as a tree', function () {
@@ -374,6 +385,59 @@ test('the program overview ranks the viewer\'s own past-due tasks first and call
         ->and($page->instance()->healthFigures['pastDueTasks'])->toBe(2);
 });
 
+test('the projects grid lists each project once behind filter chips that count them', function () {
+    $program = Program::factory()->create();
+    $late = Project::factory()->create([
+        'program_id' => $program->id, 'name' => 'Late Wells', 'status' => ProjectStatus::Active,
+        'start_date' => now()->subYear(), 'end_date' => now()->subMonth(),
+    ]);
+    $fine = Project::factory()->create([
+        'program_id' => $program->id, 'name' => 'Fresh Start', 'status' => ProjectStatus::Active,
+        'start_date' => now()->addMonth(), 'end_date' => now()->addYear(),
+    ]);
+
+    $page = Livewire::actingAs(userWithRole('General Manager'))
+        ->test('pages::programs.show', ['program' => $program]);
+    $html = $page->html();
+
+    expect(substr_count($html, 'wire:key="program-card-'.$late->id.'"'))->toBe(1)
+        ->and(substr_count($html, 'wire:key="program-card-'.$fine->id.'"'))->toBe(1)
+        ->and($html)->toContain('data-ledger-filter="all"')
+        ->and($html)->toContain('data-ledger-filter="behind"')
+        ->and($html)->toContain('data-ledger-filter="on_track"')
+        ->and($html)->not->toContain('data-ledger-filter="closed"')
+        ->and($html)->not->toContain('data-ledger-group');
+
+    $page->assertSeeInOrder(['Late Wells', 'Fresh Start'])
+        ->assertSeeHtml('href="'.route('projects.show', $late).'"')
+        ->assertSeeHtml('data-ledger-city')
+        ->assertSeeHtml('data-ledger-manager-photo')
+        ->assertDontSee('Targets and funding')
+        ->assertSeeHtml('data-test="program-ledger-more"')
+        ->assertSee('Load 1 project');
+});
+
+test('the attention list shows three items first and loads more three at a time', function () {
+    $program = Program::factory()->create();
+    Project::factory()->count(5)->create([
+        'program_id' => $program->id,
+        'status' => ProjectStatus::Active,
+        'start_date' => now()->subYear(),
+        'end_date' => now()->subMonth(),
+    ]);
+
+    $page = Livewire::actingAs(userWithRole('General Manager'))
+        ->test('pages::programs.show', ['program' => $program]);
+    $total = count($page->instance()->attention);
+
+    expect($total)->toBeGreaterThan(3);
+    $page->assertSeeHtml("shown: 3, total: {$total}, step: 3")
+        ->assertDontSeeHtml('x-show="shown > 2"')
+        ->assertSeeHtml('x-show="shown > 3"')
+        ->assertSeeHtml('data-test="program-attention-more"')
+        ->assertSee('Load 3 more');
+});
+
 test('the program overview flags late milestones and a missing monthly report for its project', function () {
     $program = Program::factory()->create();
     $project = Project::factory()->create(['program_id' => $program->id, 'name' => 'Shelter Fix', 'status' => ProjectStatus::Active]);
@@ -405,12 +469,10 @@ test('the program overview shows money only to holders of both money permissions
 
     Livewire::actingAs(User::factory()->create())
         ->test('pages::programs.show', ['program' => $program])
-        ->assertDontSeeHtml('data-ledger-funding')
         ->assertDontSeeHtml('data-program-funding');
 
     Livewire::actingAs(User::factory()->role('Financial')->create())
         ->test('pages::programs.show', ['program' => $program])
-        ->assertSeeHtml('data-ledger-funding')
         ->assertSeeHtml('data-program-funding');
 });
 
@@ -466,19 +528,27 @@ test('a project needs attention only once its past-due tasks reach the threshold
     expect($needsAttention())->toBeTrue();
 });
 
-test('the tasks tab folds each project group under a header with its open and past-due counts', function () {
+test('the tasks tab lists each project beside the picked project tasks, the late ones first', function () {
     $program = Program::factory()->create();
-    $project = Project::factory()->create(['program_id' => $program->id, 'name' => 'Folded Project']);
-    Task::factory()->create(['source_type' => 'project', 'source_id' => $project->id, 'due_date' => now()->subDay()]);
-    Task::factory()->create(['source_type' => 'project', 'source_id' => $project->id, 'due_date' => now()->addWeek()]);
+    $project = Project::factory()->create(['program_id' => $program->id, 'name' => 'Late Project']);
+    $other = Project::factory()->create(['program_id' => $program->id, 'name' => 'Calm Project']);
+    Task::factory()->create(['source_type' => 'project', 'source_id' => $project->id, 'title' => 'Late one', 'due_date' => now()->subDay()]);
+    Task::factory()->create(['source_type' => 'project', 'source_id' => $project->id, 'title' => 'Soon one', 'due_date' => now()->addWeek()]);
+    Task::factory()->create(['source_type' => 'project', 'source_id' => $other->id, 'title' => 'Calm one', 'due_date' => now()->addWeek()]);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
         ->test('pages::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
-        ->assertSeeHtml('data-task-group')
-        ->assertSee('2 open')
-        ->assertSee('1 past due')
-        ->assertSeeHtml('data-test="expand-task-groups"');
+        ->assertSeeHtmlInOrder(['data-task-bucket="all"', 'data-task-bucket="project-'.$project->id.'"', 'data-task-bucket="project-'.$other->id.'"'])
+        ->assertSeeHtml('data-task-pane="all"')
+        ->assertSee(['Late one', 'Soon one', 'Calm one'])
+        ->call('pickTaskBucket', 'project-'.$other->id)
+        ->assertSet('taskBucket', 'project-'.$other->id)
+        ->assertSeeHtml('data-task-pane="project-'.$other->id.'"')
+        ->assertSee('Calm one')
+        ->assertDontSee('Late one')
+        ->call('pickTaskBucket', 'drop table')
+        ->assertSet('taskBucket', 'all');
 });
 
 test('a late transfer is listed for attention but does not flag the project card', function () {

@@ -3,6 +3,7 @@
 return [
     'title' => 'Activity',
     'empty' => 'Nothing has happened here yet.',
+    'load_count_more' => 'Load :count more',
     'load_more' => 'Show older activity',
     'changed_to' => 'changed to',
     'log_title' => 'Activity Log',

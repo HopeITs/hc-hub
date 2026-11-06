@@ -204,7 +204,7 @@ test('adding a subtask with a blank title is rejected', function () {
     expect(Task::query()->where('parent_task_id', $parent->id)->count())->toBe(0);
 });
 
-test('adding a subtask without an assignee is rejected', function () {
+test('a subtask added without an assignee is left unassigned', function () {
     $user = User::factory()->role('General Manager')->create();
     $parent = Task::factory()->create();
 
@@ -214,9 +214,11 @@ test('adding a subtask without an assignee is rejected', function () {
         ->set('newSubtaskTitle', 'Confirm the delivery window')
         ->set('newSubtaskAssignedTo', [])
         ->call('addSubtask')
-        ->assertHasErrors(['newSubtaskAssignedTo' => 'required']);
+        ->assertHasNoErrors();
 
-    expect(Task::query()->where('parent_task_id', $parent->id)->count())->toBe(0);
+    $subtask = Task::query()->where('parent_task_id', $parent->id)->sole();
+
+    expect($subtask->taskAssignees()->count())->toBe(0);
 });
 
 test('subtasks persist and remain visible after navigating back to the task', function () {
@@ -287,7 +289,7 @@ test('a task can be edited from its own detail page', function () {
         ->and($task->taskAssignees->pluck('employee_id')->all())->toBe([$newAssignee]);
 });
 
-test('editing a task without an assignee is rejected', function () {
+test('editing a task can remove every assignee', function () {
     $user = User::factory()->role('General Manager')->create();
     $task = Task::factory()->create();
 
@@ -295,7 +297,9 @@ test('editing a task without an assignee is rejected', function () {
         ->test('pages::tasks.show', ['task' => $task])
         ->set('assignedTo', [])
         ->call('updateTask')
-        ->assertHasErrors(['assignedTo' => 'required']);
+        ->assertHasNoErrors();
+
+    expect($task->taskAssignees()->count())->toBe(0);
 });
 
 test('a subtask is edited from its own detail page, not from the parent', function () {

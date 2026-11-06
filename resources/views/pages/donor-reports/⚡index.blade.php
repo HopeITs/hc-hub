@@ -74,7 +74,7 @@ new #[Layout('layouts::desk'), Title('titles.donor_reports')] class extends Comp
             ->with(['donorProposal:id,proposal_id,donor_id', 'donorProposal.proposal:id,name,slug', 'donorProposal.donor:id,name'])
             ->when($this->search !== '', fn (Builder $query) => $query->whereHas(
                 'donorProposal.proposal',
-                fn (Builder $proposals) => $proposals->where('name', 'like', Like::contains($this->search)),
+                fn (Builder $proposals) => $proposals->where(Like::matches('name', $this->search)),
             ))
             ->when($this->donor !== '', fn (Builder $query) => $query->whereHas('donorProposal', fn (Builder $agreements) => $agreements->where('donor_id', (int) $this->donor)))
             ->when($this->proposal !== '', fn (Builder $query) => $query->whereHas('donorProposal', fn (Builder $agreements) => $agreements->where('proposal_id', (int) $this->proposal)))

@@ -373,9 +373,9 @@ new class extends Component {
         $term = trim(Like::term($this->pickerSearch));
         $entries = $entries
             ->filter(fn (LibraryIndicator $entry): bool => $term === ''
-                || ArabicText::contains($entry->name_ar, $term)
-                || ArabicText::contains((string) $entry->name_en, $term)
-                || ArabicText::contains($entry->code, $term))
+                || ArabicText::containsTyped($entry->name_ar, $term)
+                || ArabicText::containsTyped((string) $entry->name_en, $term)
+                || ArabicText::containsTyped($entry->code, $term))
             ->each(fn (LibraryIndicator $entry) => $entry->setAttribute('usage', $usageOf($entry)));
 
         $groups = [];

@@ -109,7 +109,7 @@ new #[Layout('layouts::desk'), Title('titles.strategies')] class extends Compone
         $searchFiltered = Strategy::query()
             ->select(['id', 'slug', 'name', 'start_year', 'end_year'])
             ->withCount(['programs', 'pillars'])
-            ->when($search !== '', fn ($query) => $query->where('name', 'like', Like::contains($search)))
+            ->when($search !== '', fn ($query) => $query->where(Like::matches('name', $search)))
             ->orderBy('name')
             ->orderBy('id')
             ->get()

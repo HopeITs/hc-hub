@@ -66,7 +66,7 @@ trait SavesTaskForm
             'dueDate' => ['nullable', 'date', Rule::when($this->startDate !== '', ['after_or_equal:startDate'])],
             'completedDate' => ['nullable', 'date'],
             'progressPercentage' => ['required', 'integer', 'min:0', 'max:100'],
-            'assignedTo' => ['required', 'array', 'min:1'],
+            'assignedTo' => ['array'],
             'assignedTo.*' => ['integer', Rule::exists(HrEmployee::class, 'id')],
             'taskSourceType' => ['required', 'string', Rule::in(array_keys(self::TASK_SOURCE_MODELS))],
             'taskSourceId' => [
@@ -88,8 +88,6 @@ trait SavesTaskForm
     {
         return [
             'title.required' => __('tasks.enter_a_task_title'),
-            'assignedTo.required' => __('tasks.assign_this_task_to_someone'),
-            'assignedTo.min' => __('tasks.assign_this_task_to_someone'),
             'assignedTo.*.exists' => __('tasks.the_selected_assignee_is_no_longer_available'),
             'taskSourceType.required' => __('tasks.select_the_source_this_task_is_raised_against'),
             'taskSourceId.required' => __('tasks.select_the_source_this_task_is_raised_against'),

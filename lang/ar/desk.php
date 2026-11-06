@@ -19,6 +19,7 @@ return [
     'ask_money_body' => ':share% من الالتزامات بعملة :currency.',
     'ask_group_answer' => 'الجواب',
     'ask_group_go' => 'انتقل إلى',
+    'ask_corrected' => 'عرض نتائج «:query»',
     'ask_nothing_title' => 'لم يُعثر على شيء',
     'ask_nothing_body' => 'جرّب اسمًا، أو صفحة، أو سؤالًا مثل «ما المستحق اليوم؟» أو إجراءً مثل «مهمة جديدة».',
     'key_esc' => 'Esc',

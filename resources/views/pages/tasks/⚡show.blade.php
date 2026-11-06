@@ -6,6 +6,7 @@ use App\Enums\TaskStatus;
 use App\Livewire\Concerns\PreviewsFiles;
 use App\Livewire\Concerns\Tasks\ManagesSubtasks;
 use App\Livewire\Concerns\Tasks\ManagesTaskAttachments;
+use App\Livewire\Concerns\Tasks\MovesTask;
 use App\Models\HrEmployee;
 use App\Models\Milestone;
 use App\Models\Project;
@@ -30,6 +31,7 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
 {
     use ManagesSubtasks;
     use ManagesTaskAttachments;
+    use MovesTask;
     use PreviewsFiles;
     use WithFileUploads;
 
@@ -156,12 +158,10 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
             'dueDate' => ['nullable', 'date', Rule::when($this->startDate !== '', ['after_or_equal:startDate'])],
             'completedDate' => ['nullable', 'date'],
             'progressPercentage' => ['required', 'integer', 'min:0', 'max:100'],
-            'assignedTo' => ['required', 'array', 'min:1'],
+            'assignedTo' => ['array'],
             'assignedTo.*' => ['integer', Rule::exists(HrEmployee::class, 'id')],
         ], [
             'title.required' => __('tasks.enter_a_task_title'),
-            'assignedTo.required' => __('tasks.assign_this_task_to_someone'),
-            'assignedTo.min' => __('tasks.assign_this_task_to_someone'),
             'assignedTo.*.exists' => __('tasks.the_selected_assignee_is_no_longer_available'),
             'dueDate.after_or_equal' => __('tasks.the_due_date_cannot_fall_before_the_start_date'),
             'progressPercentage.min' => __('tasks.progress_cannot_be_negative'),
@@ -278,6 +278,9 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
             <div class="flex flex-wrap items-center gap-2">
                 <x-ui.enum-badge :case="$this->task->status" />
                 <x-ui.enum-badge :case="$this->task->priority" />
+                @if ($this->moveDestinations !== null && auth()->user()->can('update', $this->task))
+                    <x-ui.button tone="secondary" size="sm" icon="folder-arrow-down" wire:click="openMoveModal" data-test="task-move-button">{{ __('tasks.move_to') }}</x-ui.button>
+                @endif
             </div>
         </x-slot:actions>
     </x-ui.detail-header>
@@ -321,4 +324,8 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
     @endif
 
     @include('pages.tasks._show-modals')
+
+    @if ($this->moveDestinations !== null)
+        @include('pages.tasks._show-move-modal')
+    @endif
 </section>
