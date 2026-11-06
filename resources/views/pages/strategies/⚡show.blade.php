@@ -302,22 +302,34 @@ new #[Layout('layouts::desk'), Title('titles.strategy')] class extends Component
         </div>
     </div>
 
+    @php
+        $notSetUp = $this->allPrograms->isEmpty();
+    @endphp
+
     <section class="dk-strat-sum" aria-label="{{ __('strategies.strategy_summary') }}">
-        <x-strategies.year-line :start="$strategy->start_year" :end="$strategy->end_year" :current="$currentYear" :tone="$verdict['tone'] ?? null" />
+        @if ($notSetUp)
+            {{-- Nothing linked: one line instead of a year line, zeros and "Nothing needs your attention". --}}
+            <x-strategies.not-set-up :strategy-id="$strategy->id" :can-link="$this->canLinkPrograms" />
+        @else
+            <x-strategies.year-line :start="$strategy->start_year" :end="$strategy->end_year" :current="$currentYear" :tone="$verdict['tone'] ?? null" />
 
-        <x-strategies.verdict :results="$rollup['results']" />
+            <x-strategies.verdict :results="$rollup['results']" />
 
-        @include('pages.strategies._show-figures')
+            @include('pages.strategies._show-figures')
 
-        @if ($showsAttention)
-            <x-strategies.attention-list
-                :items="$this->attention"
-                :heading="$this->attention === [] ? __('strategies.needs_attention') : __('strategies.needs_attention_count', ['count' => count($this->attention)])"
-            />
+            @if ($showsAttention)
+                <x-strategies.attention-list
+                    :items="$this->attention"
+                    :heading="$this->attention === [] ? __('strategies.needs_attention') : __('strategies.needs_attention_count', ['count' => count($this->attention)])"
+                />
+            @endif
         @endif
     </section>
 
-    @include('pages.strategies._show-pillars')
+    {{-- An empty strategy with no pillars has nothing to build for a viewer; an editor still sees "Add pillar". --}}
+    @unless ($notSetUp && $this->pillarGroups['pillars'] === [] && ! auth()->user()->can('strategies.update'))
+        @include('pages.strategies._show-pillars')
+    @endunless
 
     @include('pages.strategies._strategy-form-modal')
     @include('pages.strategies._programs-modal')
