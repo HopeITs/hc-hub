@@ -22,7 +22,7 @@
                 <div class="grid gap-x-4 gap-y-3 @2xl/modal:grid-cols-2">
                     <x-ui.form-input wire:model="name" :label="__('common.indicator_name')" maxlength="255" required autofocus class="@2xl/modal:col-span-2" />
 
-                    <x-ui.form-select wire:model.live="indicatorResultId" :label="__('indicators.result')" :placeholder="__('indicators.select_a_result')" required>
+                    <x-ui.form-select wire:model.live="indicatorResultId" :label="__('indicators.result')" :placeholder="__('indicators.select_a_result')" class="@2xl/modal:col-span-2" required>
                         @foreach ($this->resultOptions as $resultOption)
                             <option value="{{ $resultOption->id }}">{{ $resultOption->program?->name ?? __('common.unassigned') }} · {{ $resultOption->type->label() }} · {{ Str::limit($resultOption->statement, 70) }}</option>
                         @endforeach
@@ -31,6 +31,7 @@
                     <x-ui.form-select
                         wire:model="indicatorProjectId"
                         :label="__('common.project')"
+                        class="@2xl/modal:col-span-2"
                         :help="$indicatorResultId !== '' ? __('indicators.only_projects_delivering_the_result_program_are_offered') : null"
                     >
                         <option value="">{{ __('common.organisation_wide') }}</option>
