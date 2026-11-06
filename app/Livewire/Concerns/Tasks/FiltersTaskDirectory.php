@@ -35,6 +35,7 @@ use Illuminate\Support\Collection;
  * @property string $dueFilter
  * @property string $sortField
  * @property string $sortDirection
+ * @property string $group
  */
 trait FiltersTaskDirectory
 {
@@ -235,6 +236,86 @@ trait FiltersTaskDirectory
             'created' => $query->orderBy('created_at', $direction),
             default => $query->orderByRaw('due_date is null, due_date '.$direction),
         };
+    }
+
+    /**
+     * When the list is grouped, orders rows by group before the chosen sort,
+     * so each group's rows sit together across pages instead of a group being
+     * split (or out of order) wherever the page boundary falls. The chosen
+     * sort then applies inside each group.
+     *
+     * @param  Builder<Task>  $query
+     * @return Builder<Task>
+     */
+    protected function applyGroupOrder(Builder $query): Builder
+    {
+        return match ($this->group) {
+            'status' => $this->orderByEnumSequence($query, 'status', ['todo', 'in progress', 'under review', 'done'], 'asc'),
+            'priority' => $this->orderByEnumSequence($query, 'priority', ['high', 'medium', 'low'], 'asc'),
+            'milestone' => $query
+                ->orderByRaw("(case when source_type = 'milestone' then source_id end) is null")
+                ->orderByRaw("(case when source_type = 'milestone' then source_id end)"),
+            'assignee' => $this->orderByAssigneeGroup($query),
+            default => $query,
+        };
+    }
+
+    /**
+     * Each filtered task's assignee-group key: its sorted employee ids joined
+     * by commas, or '' with no assignee — the same key the list view groups
+     * rows by. Assignees live on the separate HR connection's ids only here,
+     * so this is one extra lightweight query, no cross-database join.
+     *
+     * @param  Builder<Task>  $query
+     * @return Collection<int, string>
+     */
+    protected function assigneeGroupKeys(Builder $query): Collection
+    {
+        $taskIds = (clone $query)->pluck('id');
+
+        $employeeIdsByTask = TaskAssignee::query()
+            ->whereIn('task_id', $taskIds)
+            ->get(['task_id', 'employee_id'])
+            ->groupBy('task_id');
+
+        return $taskIds->mapWithKeys(fn ($taskId): array => [
+            (int) $taskId => $employeeIdsByTask->get($taskId)?->pluck('employee_id')->sort()->implode(',') ?? '',
+        ]);
+    }
+
+    /**
+     * Orders tasks so each assignee set forms one contiguous group, groups
+     * ordered by their assignees' names and unassigned tasks last.
+     *
+     * @param  Builder<Task>  $query
+     * @return Builder<Task>
+     */
+    protected function orderByAssigneeGroup(Builder $query): Builder
+    {
+        $keysByTask = $this->assigneeGroupKeys($query);
+
+        if ($keysByTask->isEmpty()) {
+            return $query;
+        }
+
+        $employeeNamesById = HrEmployee::query()
+            ->whereIn('id', $keysByTask->filter()->flatMap(fn (string $key): array => explode(',', $key))->unique()->values())
+            ->get()
+            ->pluck('name', 'id');
+
+        $rankByKey = $keysByTask->unique()
+            ->sortBy(fn (string $key): array => [
+                $key === '' ? 1 : 0,
+                mb_strtolower(collect(explode(',', $key))->map(fn (string $id): string => (string) $employeeNamesById->get((int) $id, ''))->sort()->implode(', ')),
+            ])
+            ->values()
+            ->flip();
+
+        $cases = $keysByTask
+            ->map(fn (string $key, int $taskId): string => 'when '.$taskId.' then '.(int) $rankByKey->get($key))
+            ->implode(' ');
+
+        return $query->orderByRaw("(case id {$cases} end)");
     }
 
     /**

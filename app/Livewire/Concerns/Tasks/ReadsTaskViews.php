@@ -26,6 +26,7 @@ use Livewire\Attributes\Computed;
  *
  * @property string $viewMode
  * @property ?string $listLayout
+ * @property string $group
  * @property-read EloquentCollection<int, Task> $boardTasks  #[Computed] boardTasks() below
  */
 trait ReadsTaskViews
@@ -50,9 +51,44 @@ trait ReadsTaskViews
     #[Computed]
     public function tasks(): LengthAwarePaginator
     {
-        return $this->applySort($this->filteredTasksQuery())
+        return $this->applySort($this->applyGroupOrder($this->filteredTasksQuery()))
             ->orderBy('id')
             ->paginate(20);
+    }
+
+    /**
+     * Every list group's full size across all pages, keyed exactly as the
+     * list view keys its groups — so a group header counts the whole group,
+     * not only the rows that happen to fall on the current page.
+     *
+     * @return array<string, int>
+     */
+    #[Computed]
+    public function taskGroupCounts(): array
+    {
+        return match ($this->group) {
+            'status' => $this->countFilteredTasksBy('status'),
+            'priority' => $this->countFilteredTasksBy('priority'),
+            'milestone' => $this->countFilteredTasksBy("coalesce(case when source_type = 'milestone' then cast(source_id as char) end, '')"),
+            'assignee' => $this->assigneeGroupKeys($this->filteredTasksQuery())->countBy()->all(),
+            default => [],
+        };
+    }
+
+    /**
+     * Filtered task counts per value of one fixed SQL expression.
+     *
+     * @param  literal-string  $expression
+     * @return array<string, int>
+     */
+    protected function countFilteredTasksBy(string $expression): array
+    {
+        return $this->filteredTasksQuery()->toBase()
+            ->select(DB::raw($expression.' as group_key, count(*) as aggregate'))
+            ->groupBy(DB::raw($expression))
+            ->pluck('aggregate', 'group_key')
+            ->mapWithKeys(fn ($count, $key): array => [(string) $key => (int) $count])
+            ->all();
     }
 
     /**

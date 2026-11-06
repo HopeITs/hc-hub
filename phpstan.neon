@@ -218,12 +218,12 @@ parameters:
         -
             # orderByEnumSequence() builds a CASE from the fixed value lists
             # applySort() passes (priority and status cases) and a direction it
-            # limits to asc/desc. orderByAssigneeName() builds one from task ids
-            # cast to int and list positions.
+            # limits to asc/desc. orderByAssigneeName() and orderByAssigneeGroup()
+            # each build one from task ids cast to int and list positions.
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
             path: app/Livewire/Concerns/Tasks/FiltersTaskDirectory.php
-            count: 3
+            count: 4
         -
             # taskStats() inlines two dates it formats itself (toDateString())
             # into one aggregate select; there is no user input in it.

@@ -685,6 +685,87 @@ test('the list view groups tasks by status with a colored collapsible header', f
         ->assertSee('data-test="task-quick-add-status-done"', false);
 });
 
+test('list view group headers count every task in the group, not just the current page', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->count(15)->create(['priority' => TaskPriority::Low]);
+    Task::factory()->count(10)->create(['priority' => TaskPriority::High]);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('group', 'priority');
+
+    expect($component->instance()->taskGroupCounts)->toEqual(['high' => 10, 'low' => 15])
+        ->and($component->instance()->tasks->getCollection()->map(fn (Task $task) => $task->priority->value)->all())
+        ->toBe([...array_fill(0, 10, 'high'), ...array_fill(0, 10, 'low')]);
+
+    $component->call('gotoPage', 2);
+
+    expect($component->instance()->tasks->getCollection()->map(fn (Task $task) => $task->priority->value)->all())
+        ->toBe(array_fill(0, 5, 'low'));
+});
+
+test('list view status groups follow the workflow order and stay together across pages', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->count(20)->create(['status' => TaskStatus::Done, 'due_date' => now()->subYear()]);
+    Task::factory()->count(2)->create(['status' => TaskStatus::UnderReview, 'due_date' => null]);
+    Task::factory()->create(['status' => TaskStatus::Todo, 'due_date' => null]);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('group', 'status');
+
+    expect($component->instance()->taskGroupCounts)->toEqual(['todo' => 1, 'under review' => 2, 'done' => 20])
+        ->and($component->instance()->tasks->getCollection()->map(fn (Task $task) => $task->status->value)->unique()->values()->all())
+        ->toBe(['todo', 'under review', 'done']);
+});
+
+test('list view milestone group counts are keyed like the milestone groups', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $milestone = Milestone::factory()->create();
+    Task::factory()->count(3)->create(['source_type' => 'milestone', 'source_id' => $milestone->id]);
+    Task::factory()->create(['source_type' => 'proposal', 'source_id' => Proposal::factory()->create()->id]);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('group', 'milestone');
+
+    expect($component->instance()->taskGroupCounts)->toEqual([(string) $milestone->id => 3, '' => 1]);
+});
+
+test('list view assignee groups keep each assignee set together and count across pages', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $alice = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
+    $bob = insertHrEmployee(firstNameEn: 'Bob', lastNameEn: 'Rahman');
+
+    $assign = function (int $count, ?int $employeeId): void {
+        Task::factory()->count($count)->create()->each(function (Task $task) use ($employeeId): void {
+            $task->taskAssignees()->delete();
+
+            if ($employeeId !== null) {
+                $task->taskAssignees()->create(['employee_id' => $employeeId]);
+            }
+        });
+    };
+    $assign(12, $bob);
+    $assign(12, $alice);
+    $assign(2, null);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('group', 'assignee');
+
+    expect($component->instance()->taskGroupCounts)->toEqual([(string) $alice => 12, (string) $bob => 12, '' => 2]);
+
+    $firstPageKeys = $component->instance()->tasks->getCollection()
+        ->map(fn (Task $task) => $task->taskAssignees->pluck('employee_id')->sort()->implode(','))->all();
+
+    expect($firstPageKeys)->toBe([...array_fill(0, 12, (string) $alice), ...array_fill(0, 8, (string) $bob)]);
+});
+
 test('quickCreateTask opens the drawer pre-filled with the title and the group context', function () {
     $user = User::factory()->role('General Manager')->create(['employee_id' => null]);
     $milestone = Milestone::factory()->create();
