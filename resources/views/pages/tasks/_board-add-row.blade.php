@@ -20,7 +20,7 @@
                     {{ __('tasks.add_task') }}
                 </button>
             @endunless
-            <div x-show="adding" x-cloak x-on:keydown.escape="adding = false" class="mx-3 flex flex-col gap-1.5 rounded-xl border border-dashed border-secondary-light bg-white/60 px-2.5 py-2 transition-colors focus-within:border-secondary-medium hover:border-secondary-medium dark:border-line dark:bg-surface-1" data-test="task-board-add-row-{{ $case->value }}">
+            <div x-show="adding" x-cloak x-on:keydown.escape="adding = false" data-quick-add-row class="mx-3 flex flex-col gap-1.5 rounded-xl border border-dashed border-secondary-light bg-white/60 px-2.5 py-2 transition-colors focus-within:border-secondary-medium hover:border-secondary-medium dark:border-line dark:bg-surface-1" data-test="task-board-add-row-{{ $case->value }}">
                 <label class="flex items-center gap-2">
                     {{ FluxMarkup::icon('plus', 'micro', 'size-4 shrink-0 text-primary dark:text-brand-text') }}
                     <span class="sr-only">{{ __('tasks.add_task') }}</span>
@@ -79,6 +79,7 @@
                     <button type="button" x-data aria-haspopup="menu" x-on:click="$store.taskMenu.openFor('priority', {{ Js::from('taskDrafts.'.$boardRowKey.'.priority') }}, '{{ $boardDraftPriority->value }}', $el.getBoundingClientRect(), '$set', [{{ Js::from('taskDrafts.'.$boardRowKey.'.priority') }}])" aria-label="{{ __('tasks.priority') }}: {{ $boardDraftPriority->label() }}" class="inline-flex size-6 cursor-pointer items-center justify-center rounded hover:bg-secondary-soft dark:hover:bg-surface-2" data-test="task-board-add-priority-trigger-{{ $case->value }}">
                                 {{ FluxMarkup::icon('flag', $boardDraftPriority === TaskPriority::Low ? 'outline' : 'solid', 'size-3.5 '.$priorityIconClasses($boardDraftPriority)) }}
                             </button>
+                    @include('pages.tasks._quick-add-extras', ['defaultStatus' => $case->value, 'milestoneId' => null, 'rowKey' => $boardRowKey, 'testKey' => 'board-'.$case->value])
                 </div>
             </div>
             @endcan

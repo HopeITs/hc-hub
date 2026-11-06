@@ -80,6 +80,7 @@ return [
     'milestone' => 'Milestone',
     'missed' => 'Missed',
     'missed_hint' => 'Not started, past its due date',
+    'more_fields' => 'More fields',
     'my_tasks' => 'Tasks Related to Me',
     'my_tasks_only' => 'My tasks only',
     'next_file' => 'Next file',

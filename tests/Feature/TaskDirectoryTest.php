@@ -847,6 +847,61 @@ test('quickCreateTask falls back to the drawer when neither a milestone nor an a
     expect(Task::query()->count())->toBe(0);
 });
 
+test('quickCreateTask files a task with no other context under the viewer\'s own department', function () {
+    $employeeId = insertHrEmployee();
+    $departmentId = insertHrDepartment('Monitoring & Evaluation');
+    insertHrContract($employeeId, insertHrPosition($departmentId));
+    $user = User::factory()->role('General Manager')->create(['employee_id' => $employeeId]);
+    Task::factory()->create(['status' => TaskStatus::Todo]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('group', 'status')
+        ->assertSee('Department: Monitoring & Evaluation')
+        ->call('quickCreateTask', 'Department task')
+        ->assertSet('showTaskDrawer', false);
+
+    $task = Task::query()->where('title', 'Department task')->sole();
+
+    expect($task->title)->toBe('Department task')
+        ->and($task->source_type)->toBe('department')
+        ->and($task->source_id)->toBe($departmentId)
+        ->and($task->taskAssignees->pluck('employee_id')->all())->toBe([$employeeId]);
+});
+
+test('the inline row\'s more fields button opens the drawer with the typed title and row draft', function () {
+    $user = User::factory()->role('General Manager')->create(['employee_id' => insertHrEmployee()]);
+    $assignee = insertHrEmployee();
+    Task::factory()->create(['status' => TaskStatus::Todo]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('group', 'status')
+        ->assertSeeHtml('data-test="task-quick-add-more-status-todo"')
+        ->set('taskDrafts.row-1', ['priority' => TaskPriority::High->value, 'due_date' => '2026-12-01', 'assignees' => [(string) $assignee]])
+        ->call('openQuickTaskInDrawer', '  Needs a description  ', TaskStatus::InProgress->value, null, 'row-1')
+        ->assertSet('showTaskDrawer', true)
+        ->assertSet('title', 'Needs a description')
+        ->assertSet('taskStatus', TaskStatus::InProgress->value)
+        ->assertSet('taskPriority', TaskPriority::High->value)
+        ->assertSet('dueDate', '2026-12-01')
+        ->assertSet('assignedTo', [(string) $assignee]);
+
+    expect(Task::query()->count())->toBe(1);
+});
+
+test('a user who cannot create tasks cannot open the inline row in the drawer', function () {
+    Role::create(['name' => 'Task Viewer', 'guard_name' => 'web'])->givePermissionTo('tasks.view');
+    $viewer = User::factory()->role('Task Viewer')->create();
+
+    Livewire::actingAs($viewer)
+        ->test('pages::tasks.index')
+        ->call('openQuickTaskInDrawer', 'Sneaky task')
+        ->assertForbidden();
+});
+
 test('quickCreateTask falls back to the drawer when the signed-in user has no linked HR employee', function () {
     $user = User::factory()->role('General Manager')->create(['employee_id' => null]);
     $milestone = Milestone::factory()->create();

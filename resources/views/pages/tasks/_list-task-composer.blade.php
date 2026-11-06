@@ -26,7 +26,7 @@
     $draftAssignees = collect($this->userOptions)->whereIn('id', collect($taskDraft['assignees'])->map(fn ($id) => (int) $id));
 @endphp
 
-<tr wire:key="task-add-row-{{ $rowKey }}" data-test="task-add-row-{{ $group }}-{{ $groupKeyString }}">
+<tr wire:key="task-add-row-{{ $rowKey }}" data-quick-add-row data-test="task-add-row-{{ $group }}-{{ $groupKeyString }}">
     <td class="ps-3">
         {{ FluxMarkup::icon('plus', 'micro', 'size-4 shrink-0 text-primary dark:text-brand-text') }}
     </td>
@@ -91,5 +91,9 @@
                 {{ FluxMarkup::statusPill($draftStatus) }}
             </button>
     </td>
-    <td></td>
+    <td class="px-2">
+        <div class="flex flex-wrap items-center justify-end gap-1">
+            @include('pages.tasks._quick-add-extras', ['defaultStatus' => $defaultStatus, 'milestoneId' => $milestoneId, 'rowKey' => $rowKey, 'testKey' => $group.'-'.$groupKeyString])
+        </div>
+    </td>
 </tr>
