@@ -1089,6 +1089,66 @@ test('dropping a task that no longer exists reports the failure instead of faili
         ->assertDispatched('toast-show');
 });
 
+test('each board column shows its task count and an empty column collapses to a slim strip', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->count(2)->create(['status' => TaskStatus::Todo]);
+    Task::factory()->create(['status' => TaskStatus::InProgress]);
+
+    $html = Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'board')
+        ->assertSeeHtml('data-test="task-board-count-todo">2</span>')
+        ->assertSeeHtml('data-test="task-board-count-in progress">1</span>')
+        ->assertSeeHtml('data-test="task-board-count-done">0</span>')
+        ->assertSeeHtml('data-test="task-board-strip-done"')
+        ->assertDontSeeHtml('data-test="task-board-strip-todo"')
+        ->assertDontSee('No tasks in this status')
+        ->html();
+
+    expect($html)
+        ->toMatch('/data-test="task-board-column-todo"\s+data-collapsed="false"/')
+        ->toMatch('/data-test="task-board-column-done"\s+data-collapsed="true"/');
+});
+
+test('every board column offers an add control that creates the task straight into that status', function () {
+    $employeeId = insertHrEmployee();
+    $user = User::factory()->role('General Manager')->create(['employee_id' => $employeeId]);
+    $milestone = Milestone::factory()->create();
+    Task::factory()->create(['status' => TaskStatus::Todo]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'board')
+        ->assertSeeHtml('data-test="task-board-header-add-done"')
+        ->assertSeeHtml('data-test="task-board-strip-add-done"')
+        ->assertSeeHtml('data-test="task-board-add-toggle-todo"')
+        ->assertDontSeeHtml('data-test="task-board-add-toggle-done"')
+        ->assertSeeHtml("quickCreateTask(\$event.target.value, 'done', null, 'board|done')")
+        ->call('quickCreateTask', 'Wrap up the report', TaskStatus::Done->value, (string) $milestone->id, 'board|done')
+        ->assertSet('showTaskDrawer', false)
+        ->assertSeeHtml('data-test="task-board-count-done">1</span>');
+
+    expect(Task::query()->where('title', 'Wrap up the report')->sole()->status)->toBe(TaskStatus::Done);
+});
+
+test('a view-only user sees the board counts but no add task control in any column', function () {
+    Role::create(['name' => 'Task Viewer', 'guard_name' => 'web'])->givePermissionTo('tasks.view');
+    $viewer = User::factory()->role('Task Viewer')->create();
+    Task::factory()->create(['status' => TaskStatus::Todo]);
+
+    $board = Livewire::actingAs($viewer)
+        ->test('pages::tasks.index')
+        ->set('view', 'board')
+        ->assertSeeHtml('data-test="task-board-count-todo">1</span>');
+
+    foreach (TaskStatus::cases() as $status) {
+        $board->assertDontSeeHtml('data-test="task-board-header-add-'.$status->value.'"')
+            ->assertDontSeeHtml('data-test="task-board-strip-add-'.$status->value.'"')
+            ->assertDontSeeHtml('data-test="task-board-add-toggle-'.$status->value.'"')
+            ->assertDontSeeHtml('data-test="task-board-quick-add-'.$status->value.'"');
+    }
+});
+
 test('the board view offers a keyboard accessible select as a non pointer alternative to dragging', function () {
     $user = User::factory()->role('General Manager')->create();
     $task = Task::factory()->create(['status' => TaskStatus::Todo]);

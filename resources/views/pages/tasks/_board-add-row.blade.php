@@ -8,12 +8,25 @@
                 $boardTaskDraftAssignees = collect($this->userOptions)->whereIn('id', collect($boardTaskDraft['assignees'])->map(fn ($id) => (int) $id));
                 $boardDraftPriority = TaskPriority::from($boardTaskDraft['priority']);
             @endphp
-            <div class="mx-3 flex flex-col gap-1.5 rounded-xl border border-dashed border-secondary-light bg-white/60 px-2.5 py-2 transition-colors focus-within:border-secondary-medium hover:border-secondary-medium dark:border-line dark:bg-surface-1" data-test="task-board-add-row-{{ $case->value }}">
+            @unless ($isColumnEmpty)
+                <button
+                    type="button"
+                    x-show="! adding"
+                    x-on:click="adding = true; $nextTick(() => $refs.boardQuickAdd?.focus())"
+                    class="mx-3 inline-flex items-center gap-1.5 self-start rounded-lg px-1.5 py-1 text-xs font-medium text-secondary-medium transition-colors hover:bg-secondary-soft hover:text-secondary-dark dark:text-ink-muted dark:hover:bg-surface-2 dark:hover:text-ink"
+                    data-test="task-board-add-toggle-{{ $case->value }}"
+                >
+                    {{ FluxMarkup::icon('plus', 'micro', 'size-3.5 shrink-0') }}
+                    {{ __('tasks.add_task') }}
+                </button>
+            @endunless
+            <div x-show="adding" x-cloak x-on:keydown.escape="adding = false" class="mx-3 flex flex-col gap-1.5 rounded-xl border border-dashed border-secondary-light bg-white/60 px-2.5 py-2 transition-colors focus-within:border-secondary-medium hover:border-secondary-medium dark:border-line dark:bg-surface-1" data-test="task-board-add-row-{{ $case->value }}">
                 <label class="flex items-center gap-2">
                     {{ FluxMarkup::icon('plus', 'micro', 'size-4 shrink-0 text-primary dark:text-brand-text') }}
                     <span class="sr-only">{{ __('tasks.add_task') }}</span>
                     <input
                         type="text"
+                        x-ref="boardQuickAdd"
                         placeholder="{{ __('tasks.add_task') }}"
                         class="w-full min-w-0 border-0 bg-transparent p-0 text-sm text-secondary-dark placeholder:text-secondary-light focus:ring-0 focus:outline-none dark:text-ink"
                         wire:keydown.enter="quickCreateTask($event.target.value, '{{ $case->value }}', null, {{ Js::from($boardRowKey) }}); $event.target.value = ''"

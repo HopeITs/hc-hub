@@ -2,7 +2,7 @@
 @use('App\Enums\TaskStatus')
 @use('App\Support\FluxMarkup')
 @use('Illuminate\Support\Js')
-                @forelse ($columnTasks as $task)
+                @foreach ($columnTasks as $task)
                     @php
                         $isDone = $task->status === TaskStatus::Done;
                         $isMissed = $task->isMissed();
@@ -293,6 +293,4 @@
                             @endif
                         </div>
                     </div>
-                @empty
-                    <p class="px-1 py-6 text-center text-xs text-secondary-light" data-test="task-board-empty-{{ $case->value }}">{{ __('tasks.no_tasks_in_this_status') }}</p>
-                @endforelse
+                @endforeach
