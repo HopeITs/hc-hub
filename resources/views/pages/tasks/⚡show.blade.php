@@ -17,8 +17,10 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -168,6 +170,13 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
             'progressPercentage.max' => __('tasks.progress_cannot_exceed_100_percent'),
         ]);
 
+        $dueDateKept = $canEdit && $task->created_by !== auth()->id() && $validated['dueDate'] !== ($task->due_date?->toDateString() ?? '');
+
+        if ($dueDateKept) {
+            $validated['dueDate'] = $task->due_date?->toDateString() ?? '';
+            $this->dueDate = $validated['dueDate'];
+        }
+
         $from = $task->status;
         $approved = TaskWorkflow::approves(auth()->user(), $task);
         $note = SendNudge::cleanNote($this->reviewNote);
@@ -210,7 +219,130 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
         $this->reviewNote = '';
         unset($this->task);
 
+        if ($dueDateKept) {
+            Flux::toast(variant: 'danger', text: __('tasks.only_the_task_creator_can_change_the_due_date'));
+        }
+
         Flux::toast(variant: 'success', text: __('tasks.task_updated'));
+    }
+
+    /**
+     * The properties column saves each field the moment it changes. A
+     * refused change puts the field back to its stored value and shows why.
+     */
+    public function updated(string $property): void
+    {
+        $field = Str::before($property, '.');
+
+        if (in_array($field, ['taskPriority', 'startDate', 'dueDate', 'completedDate', 'progressPercentage', 'assignedTo', 'evidenceRequired'], true)) {
+            $this->saveInPlace($field);
+        }
+    }
+
+    /**
+     * Move the task to another status from the properties column. An
+     * approver sending an Under review task back first writes a note, so
+     * that move waits for sendBack().
+     */
+    public function changeStatus(string $status): void
+    {
+        if (TaskStatus::tryFrom($status) === null) {
+            return;
+        }
+
+        $this->taskStatus = $status;
+
+        if ($this->reviewNoteNeeded()) {
+            return;
+        }
+
+        $this->saveInPlace('taskStatus');
+    }
+
+    /**
+     * Send an Under review task back with the approver's note.
+     */
+    public function sendBack(): void
+    {
+        $this->updateTask();
+    }
+
+    /**
+     * Drop a status move that is waiting for its send-back note.
+     */
+    public function cancelStatusChange(): void
+    {
+        $this->reviewNote = '';
+        $this->resetValidation(['taskStatus', 'reviewNote']);
+        $this->restoreProperty('taskStatus');
+    }
+
+    /**
+     * Whether the chosen status sends an Under review task back, which
+     * TaskWorkflow lets the approver do only with a note.
+     */
+    public function reviewNoteNeeded(): bool
+    {
+        return $this->task->status === TaskStatus::UnderReview
+            && in_array($this->taskStatus, [TaskStatus::Todo->value, TaskStatus::InProgress->value], true)
+            && TaskWorkflow::approves(auth()->user(), $this->task);
+    }
+
+    /**
+     * Save the title and description edited in place.
+     */
+    public function saveDetails(): void
+    {
+        $this->updateTask();
+        $this->dispatch('task-details-saved');
+    }
+
+    /**
+     * Throw away an unsaved title or description edit.
+     */
+    public function cancelDetails(): void
+    {
+        $this->resetValidation(['title', 'description']);
+        $this->restoreProperty('title');
+        $this->restoreProperty('description');
+    }
+
+    /**
+     * Save after one property changed; on refusal put it back and rethrow
+     * so the error shows beside the field.
+     */
+    protected function saveInPlace(string $field): void
+    {
+        try {
+            $this->updateTask();
+        } catch (ValidationException $exception) {
+            $this->restoreProperty($field);
+
+            throw $exception;
+        }
+    }
+
+    /**
+     * Reset one form property to the value stored on the task.
+     */
+    protected function restoreProperty(string $field): void
+    {
+        unset($this->task);
+        $storedTask = $this->task;
+
+        match ($field) {
+            'title' => $this->title = $storedTask->title,
+            'description' => $this->description = $storedTask->description ?? '',
+            'taskStatus' => $this->taskStatus = $storedTask->status->value,
+            'taskPriority' => $this->taskPriority = $storedTask->priority->value,
+            'startDate' => $this->startDate = $storedTask->start_date?->toDateString() ?? '',
+            'dueDate' => $this->dueDate = $storedTask->due_date?->toDateString() ?? '',
+            'completedDate' => $this->completedDate = $storedTask->completed_date?->toDateString() ?? '',
+            'progressPercentage' => $this->progressPercentage = (string) $storedTask->progress_percentage,
+            'assignedTo' => $this->assignedTo = $storedTask->taskAssignees->pluck('employee_id')->map(fn (int $id): string => (string) $id)->all(),
+            'evidenceRequired' => $this->evidenceRequired = $storedTask->evidence_required,
+            default => null,
+        };
     }
 
     /**
@@ -235,7 +367,12 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
 ?>
 
 <section class="@container/detail flex w-full flex-1 flex-col gap-4 text-secondary-dark dark:text-ink" aria-labelledby="task-detail-heading">
-    @php $assignees = $this->task->taskAssignees->pluck('employee')->filter(); @endphp
+    @php
+        $canEditTask = auth()->user()->can('update', $this->task);
+        $canUpdateTaskStatus = $canEditTask || auth()->user()->can('updateStatus', $this->task);
+        $canRescheduleTask = $canEditTask && $this->task->created_by === auth()->id();
+        $canEditAttachments = $canEditTask;
+    @endphp
 
     <x-ui.detail-header
         :back="\App\Support\BackUrl::for(route('tasks.index'))"
@@ -265,7 +402,6 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
                 <span class="basis-full text-xs text-secondary-medium dark:text-ink-muted" data-test="report-task-helper">{{ __('tasks.report_task_helper') }}</span>
             @endif
             <x-tasks.paused-chip :task="$this->task" :paused-ids="$this->pausedProjectIds" :full="true" />
-            <span>{{ __('tasks.assigned_to_name', ['name' => $assignees->isEmpty() ? __('common.not_assigned') : $assignees->map->name->implode(', ')]) }}</span>
             <span>{{ __('tasks.created_by_name', ['name' => $this->task->creator->name]) }}</span>
             @if ($this->task->parentTask !== null)
                 <a href="{{ route('tasks.show', $this->task->parentTask) }}" wire:navigate class="font-medium hover:underline">
@@ -273,48 +409,29 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
                 </a>
             @endif
         </x-slot:meta>
-
-        <x-slot:actions>
-            <div class="flex flex-wrap items-center gap-2">
-                <x-ui.enum-badge :case="$this->task->status" />
-                <x-ui.enum-badge :case="$this->task->priority" />
-            </div>
-        </x-slot:actions>
     </x-ui.detail-header>
 
-    <div class="grid gap-3 @2xl/detail:grid-cols-4">
-        <x-ui.stat-tile :label="__('tasks.progress')" :value="$this->task->progress_percentage.'%'" />
-        <x-ui.stat-tile :label="__('common.start')" :value="$this->task->start_date?->translatedFormat(__('formats.date')) ?? '—'" />
-        <x-ui.stat-tile :label="__('tasks.due')" :value="$this->task->due_date?->translatedFormat(__('formats.date')) ?? '—'" />
-        <x-ui.stat-tile :label="__('common.completed')" :value="$this->task->completed_date?->translatedFormat(__('formats.date')) ?? '—'" />
+    {{-- Content, then the properties on the inline-end side once the page is wide. On a phone the properties come first. --}}
+    <div class="grid items-start gap-4 @4xl/detail:grid-cols-[minmax(0,1fr)_20rem]">
+        <aside class="min-w-0 @4xl/detail:sticky @4xl/detail:top-4 @4xl/detail:col-start-2 @4xl/detail:row-start-1" aria-labelledby="task-properties-heading" data-test="task-properties">
+            @include('pages.tasks._show-properties')
+        </aside>
+
+        <div class="grid min-w-0 gap-4 @4xl/detail:col-start-1 @4xl/detail:row-start-1">
+            @include('pages.tasks._show-details')
+
+            @if ($this->task->parent_task_id === null)
+                @include('pages.tasks._show-subtasks')
+            @endif
+
+            @include('pages.tasks._show-attachments')
+
+            <section aria-labelledby="record-activity-heading" class="grid gap-3" data-record-activity>
+                <h2 id="record-activity-heading" class="text-base font-bold">{{ __('activity.title') }}</h2>
+                <livewire:activity.timeline :subjects="['task' => [$this->task->id]]" :key="'task-activity-'.$this->task->id" />
+            </section>
+        </div>
     </div>
-
-    @if ($this->task->description !== null)
-        <x-ui.panel :title="__('common.description')">
-            <p class="whitespace-pre-line p-3.5 text-sm text-secondary-medium dark:text-ink-muted">{{ $this->task->description }}</p>
-        </x-ui.panel>
-    @endif
-
-    @php
-        $canEditTask = auth()->user()->can('update', $this->task);
-        $canUpdateTaskStatus = $canEditTask || auth()->user()->can('updateStatus', $this->task);
-    @endphp
-
-    @if ($canUpdateTaskStatus)
-        @include('pages.tasks._show-status-panel')
-    @endif
-
-    @if ($this->task->parent_task_id === null)
-        @include('pages.tasks._show-subtasks')
-    @endif
-
-    @php $canEditAttachments = auth()->user()->can('update', $this->task); @endphp
-    @include('pages.tasks._show-attachments')
-
-    <section aria-labelledby="record-activity-heading" class="grid gap-3" data-record-activity>
-        <h2 id="record-activity-heading" class="text-base font-bold">{{ __('activity.title') }}</h2>
-        <livewire:activity.timeline :subjects="['task' => [$this->task->id]]" :key="'task-activity-'.$this->task->id" />
-    </section>
 
     @if ($this->task->parent_task_id === null)
         @include('pages.tasks._show-subtasks-modal')
