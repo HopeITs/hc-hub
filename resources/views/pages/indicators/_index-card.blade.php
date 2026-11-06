@@ -197,7 +197,7 @@
                                 @can('indicators.delete')<x-ui.button tone="ghost" size="sm" icon="trash" class="size-9!" wire:click="confirmDelete({{ $indicator->id }})" :aria-label="__('common.delete_name', ['name' => $indicator->name])" />@endcan
                             @else
                                 <flux:tooltip :content="__('indicators.indicators_carrying_targets_cannot_be_deleted')">
-                                    <span class="inline-flex size-9 cursor-not-allowed items-center justify-center text-secondary-light" aria-disabled="true">
+                                    <span class="inline-flex size-9 cursor-not-allowed items-center justify-center rounded-md text-secondary-medium focus-visible:outline-2 focus-visible:outline-secondary-medium" role="img" tabindex="0" aria-label="{{ __('indicators.indicators_carrying_targets_cannot_be_deleted') }}">
                                         <flux:icon.lock-closed class="size-4" />
                                     </span>
                                 </flux:tooltip>

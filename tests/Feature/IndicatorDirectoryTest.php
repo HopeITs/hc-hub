@@ -731,3 +731,17 @@ test('the filtered indicators download as a CSV without formula injection', func
 
     expect($csv)->toContain("'=HYPERLINK")->not->toContain('Left out');
 });
+
+test('the padlock on an indicator that cannot be deleted is focusable and named', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $indicator = Indicator::factory()->create();
+    PlanIndicator::factory()->create([
+        'indicator_id' => $indicator->id,
+        'source_type' => 'annual_plan',
+        'source_id' => AnnualPlan::factory()->create(['year' => 2026])->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->assertSeeHtml('role="img" tabindex="0" aria-label="'.e(__('indicators.indicators_carrying_targets_cannot_be_deleted')).'"');
+});
