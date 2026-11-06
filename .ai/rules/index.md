@@ -6,6 +6,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | --- | --- |
 | app/Actions/Fortify/AuthenticateWithHrAccount.php | .ai/rules/actions-fortify.md |
 | {resources/views/pages/transfers/**,resources/views/pages/funding-agreements/**,resources/views/pages/donors/**,resources/views/pages/proposals/**,resources/views/pages/admin/⚡accounts.blade.php} | .ai/rules/admin.md |
+| resources/views/pages/activity/** | .ai/rules/activity.md |
 | app/Notifications/Alerts/** | .ai/rules/alerts.md |
 | resources/views/pages/annual-plans/** | .ai/rules/annual-plans.md |
 | app/** | .ai/rules/app-2.md |
@@ -70,6 +71,8 @@ Before planning or editing, find the row whose globs match the file's path and r
 | resources/views/pages/strategies/⚡show.blade.php, resources/views/pages/strategies/⚡index.blade.php | .ai/rules/strategies.md |
 | {app/Support/AgreementMoney.php,app/Support/Tranches.php,app/Models/TransfersTracking.php} | .ai/rules/support-models.md |
 | resources/views/pages/tasks/**, resources/views/pages/tasks/_list-group.blade.php | .ai/rules/tasks.md |
+| {resources/views/pages/targets/**,app/Livewire/Concerns/Targets/**} | .ai/rules/targets.md |
+| resources/views/pages/programs/** | .ai/rules/programs.md |
 | tests/** | .ai/rules/tests.md |
 | resources/views/pages/transfers/** | .ai/rules/transfers.md |
 | resources/views/{components/ui/page-header.blade.php,pages/**}, resources/views/{components/ui/header-filter-select.blade.php,pages/**}, resources/views/components/ui/detail-header.blade.php | .ai/rules/ui.md |

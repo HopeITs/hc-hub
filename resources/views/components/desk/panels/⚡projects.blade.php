@@ -246,6 +246,9 @@ new class extends Component
                                     @endphp
                                     <div class="dk-pj-tl" title="{{ $project->start_date->translatedFormat(__('formats.date')) }} → {{ $project->end_date->translatedFormat(__('formats.date')) }}"><b style="width:{{ $at }}%"></b><i style="inset-inline-start:{{ $at }}%"></i></div>
                                     <span class="dk-pj-v dk-num">{{ $project->start_date->translatedFormat('M Y') }} → {{ $project->end_date->translatedFormat('M Y') }} · <span @class(['dk-bad' => $left < 0])>{{ $left < 0 ? trans_choice('desk.days_late', -$left, ['count' => -$left]) : trans_choice('desk.days_left', $left, ['count' => $left]) }}</span></span>
+                                @elseif ($stage >= 4 || $line['lead']?->status === \App\Enums\ProposalStatus::Approved)
+                                    {{-- The donor already approved: the dates are simply missing, so say so and point to where they are set. --}}
+                                    <a href="{{ route('projects.show', $project) }}" wire:navigate class="dk-small dk-bad" data-dates-not-set>{{ __('desk.dates_not_set') }}</a>
                                 @else
                                     <span class="dk-muted dk-small">{{ __('desk.no_dates_yet') }}</span>
                                 @endif

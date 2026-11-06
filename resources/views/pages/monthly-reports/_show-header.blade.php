@@ -30,13 +30,9 @@
     :subtitle="$headerProject->name"
     :unread="app(\App\Notifications\UnreadSubjects::class)->has(auth()->user(), 'monthly_report', $report->id)"
 >
+    {{-- The project is named by the subtitle and linked from the breadcrumb; the meta row used to name it a third time. --}}
     <x-slot:meta>
         <x-monthly-reports.state-chip :state="$headerState" />
-        @can('projects.view')
-            <a href="{{ route('projects.show', $headerProject) }}" wire:navigate class="hover:underline" dir="auto">{{ $headerProject->name }}</a>
-        @else
-            <span dir="auto">{{ $headerProject->name }}</span>
-        @endcan
         @if ($report->preparer !== null)
             <span>{{ __('monthly_reports.prepared_by', ['name' => $report->preparer->name]) }}</span>
         @endif
@@ -51,7 +47,7 @@
                 <flux:icon.eye variant="micro" class="size-3.5" aria-hidden="true" />
                 {{ __('monthly_reports.seen_on', ['date' => $formatMoment($report->seen_by_meal_at)]) }}
             </span>
-        @elseif ($report->status !== MonthlyReportStatus::Draft)
+        @elseif ($report->status === MonthlyReportStatus::Submitted)
             <span>{{ __('monthly_reports.not_seen_yet') }}</span>
         @endif
     </x-slot:meta>

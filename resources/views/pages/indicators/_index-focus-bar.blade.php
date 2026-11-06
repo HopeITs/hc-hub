@@ -1,45 +1,38 @@
 {{--
-    The attention chips and view toggle of indicators/index. Included by
-    ⚡index.blade.php, whose top PHP block defines $focusChips and
+    The three plain answers at the top of indicators/index: how many indicators
+    need attention, are waiting for a measurement, or are on track. Each is a
+    button that narrows the list to those; pressing it again shows everything.
+    Included by ⚡index.blade.php, whose top PHP block defines $focusCounts and
     $filtersAreActive.
 --}}
-    {{-- Attention chips on one side, the way of reading the page on the other. --}}
-    <div class="flex flex-wrap items-center gap-2">
-        @foreach ($focusChips as $chip)
-            <button
-                type="button"
-                wire:click="setFocus('{{ $chip['key'] }}')"
-                wire:key="focus-chip-{{ $chip['key'] }}"
-                aria-pressed="{{ $focus === $chip['key'] ? 'true' : 'false' }}"
-                data-test="focus-chip-{{ $chip['key'] }}"
-                @class([
-                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 type-meta font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium',
-                    'border-primary bg-primary dark:bg-ink dark:text-surface-0 dark:border-ink text-white' => $focus === $chip['key'],
-                    'border-secondary-soft bg-white text-secondary-medium hover:border-secondary-light hover:text-secondary-dark dark:border-line dark:bg-surface-1 dark:text-ink-muted dark:hover:text-ink' => $focus !== $chip['key'],
-                ])
-            >
-                <flux:icon :name="$chip['icon']" variant="micro" class="size-3.5" aria-hidden="true" />
-                {{ $chip['label'] }}
-                <span @class([
-                    'inline-flex min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold tabular-nums',
-                    'bg-white/20' => $focus === $chip['key'],
-                    'bg-secondary-soft text-secondary-dark dark:bg-surface-2 dark:text-ink' => $focus !== $chip['key'],
-                ])>{{ $chip['count'] }}</span>
-            </button>
-        @endforeach
+@php
+    $tabs = [
+        ['key' => 'attention', 'label' => __('indicators.tab_attention'), 'count' => $focusCounts['attention'], 'tone' => 'text-status-warn'],
+        ['key' => 'waiting', 'label' => __('indicators.tab_waiting'), 'count' => $focusCounts['waiting'], 'tone' => 'text-secondary-dark dark:text-ink'],
+        ['key' => 'ontrack', 'label' => __('indicators.tab_ontrack'), 'count' => $focusCounts['ontrack'], 'tone' => 'text-status-good'],
+    ];
+@endphp
 
-        @if ($filtersAreActive)
-            <flux:button size="sm" variant="ghost" class="text-secondary-medium! dark:text-ink-muted!" wire:click="clearFilters">{{ __('common.reset_filters') }}</flux:button>
-        @endif
+<div class="flex flex-wrap items-stretch gap-2" data-test="indicator-focus-tabs">
+    @foreach ($tabs as $tab)
+        <button
+            type="button"
+            wire:click="setFocus('{{ $tab['key'] }}')"
+            wire:key="focus-tab-{{ $tab['key'] }}"
+            aria-pressed="{{ $focus === $tab['key'] ? 'true' : 'false' }}"
+            data-test="focus-tab-{{ $tab['key'] }}"
+            @class([
+                'flex min-h-14 flex-1 basis-40 items-center gap-3 rounded-xl border px-4 py-2 text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium',
+                'border-secondary-dark bg-white shadow-card ring-1 ring-secondary-dark dark:border-ink dark:bg-surface-2 dark:ring-ink' => $focus === $tab['key'],
+                'border-secondary-soft bg-white hover:border-secondary-light dark:border-line dark:bg-surface-1' => $focus !== $tab['key'],
+            ])
+        >
+            <span class="text-2xl font-bold tabular-nums leading-none {{ $tab['tone'] }}">{{ $tab['count'] }}</span>
+            <span class="text-sm font-semibold text-secondary-dark dark:text-ink">{{ $tab['label'] }}</span>
+        </button>
+    @endforeach
 
-        <x-ui.view-toggle
-            class="ms-auto"
-            wire-model="view"
-            :active="$view"
-            :label="__('indicators.how_to_read_the_indicators')"
-            :options="[
-                ['key' => 'cards', 'label' => __('indicators.cards'), 'icon' => 'squares-2x2'],
-                ['key' => 'table', 'label' => __('indicators.table'), 'icon' => 'table-cells'],
-            ]"
-        />
-    </div>
+    @if ($filtersAreActive)
+        <flux:button size="sm" variant="ghost" class="self-center text-secondary-medium! dark:text-ink-muted!" wire:click="clearFilters">{{ __('common.reset_filters') }}</flux:button>
+    @endif
+</div>

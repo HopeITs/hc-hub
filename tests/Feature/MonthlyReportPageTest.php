@@ -156,6 +156,18 @@ test('the grid shows the code, both names, the frequency note, the target and th
         ->and($report->fresh()->prepared_by)->toBe($this->owner->id);
 });
 
+test('figures sent as one whole array save the line', function () {
+    $report = mrsReport(mrsProject());
+    $line = mrsLine($report);
+    $page = mrsPage($report);
+    $figures = $page->get('figures');
+    $figures[$line->id]['value'] = '7';
+
+    $page->set('figures', $figures)->assertHasNoErrors();
+
+    expect((float) $line->fresh()->value)->toBe(7.0);
+});
+
 test('a line id from another report shows an error and writes nothing', function () {
     $report = mrsReport(mrsProject());
     mrsLine($report);
@@ -387,6 +399,68 @@ test('MEAL marks a submitted report as seen and the page shows when', function (
     expect($report->fresh()->seen_by_meal_at)->not->toBeNull();
 });
 
+/*
+| Page review, 5 Nov 2026: a validator reading a locked report was told it was
+| "Saved" and that it "can still be submitted", and the header named the
+| project three times.
+*/
+
+test('a validator reading a submitted report with no lines sees no save state and no submit advice', function () {
+    $report = mrsReport(mrsProject(), status: MonthlyReportStatus::Submitted);
+
+    mrsPage($report, $this->officer)
+        ->assertSeeHtml('data-test="validate-button"')
+        ->assertSeeText(__('monthly_reports.nothing_this_month'))
+        ->assertDontSeeText(__('monthly_reports.nothing_this_month_submit'))
+        ->assertDontSeeHtml('data-save-state');
+});
+
+test('the preparer of a draft with no lines is still told it can be submitted, and sees the save state', function () {
+    $this->travelTo('2026-11-20 10:00:00');
+    $report = mrsReport(mrsProject(), '2026-11-01');
+
+    mrsPage($report)
+        ->assertSeeText(__('monthly_reports.nothing_this_month_submit'))
+        ->assertDontSeeText(__('monthly_reports.no_lines_body'))
+        ->assertSeeHtml('data-save-state');
+});
+
+test('the header links the project once and says "Not seen yet" only while the report waits for MEAL', function () {
+    $project = mrsProject();
+    $validated = mrsReport($project, '2026-09-01', MonthlyReportStatus::Validated);
+    $submitted = mrsReport($project, '2026-10-01', MonthlyReportStatus::Submitted);
+    $projectLink = 'href="'.route('projects.show', $project).'"';
+
+    $html = mrsPage($validated, $this->officer)->html();
+
+    expect(substr_count($html, $projectLink))->toBe(1);
+
+    mrsPage($validated, $this->officer)->assertDontSeeText(__('monthly_reports.not_seen_yet'));
+    mrsPage($submitted, $this->officer)->assertSeeText(__('monthly_reports.not_seen_yet'));
+});
+
+test('a month with nothing in it reads as one line, not three empty boxes', function () {
+    $report = mrsReport(mrsProject(), status: MonthlyReportStatus::Submitted);
+
+    mrsPage($report, $this->officer)
+        ->assertSeeHtml('data-empty-month')
+        ->assertSeeText(__('monthly_reports.nothing_this_month'))
+        ->assertDontSeeText(__('monthly_reports.no_activities'))
+        ->assertDontSeeText(__('monthly_reports.no_questions'))
+        ->assertDontSeeHtml('min-h-64');
+});
+
+test('an empty section next to filled ones is a single line', function () {
+    $report = mrsReport(mrsProject(), status: MonthlyReportStatus::Submitted);
+    mrsLine($report);
+
+    mrsPage($report, $this->officer)
+        ->assertDontSeeHtml('data-empty-month')
+        ->assertSeeHtml('data-empty-line="activities"')
+        ->assertSeeHtml('data-empty-line="answers"')
+        ->assertDontSeeHtml('min-h-64');
+});
+
 test('Refresh Lines adds the line of a target confirmed after the month opened', function () {
     $project = mrsProject();
     $report = mrsReport($project);
@@ -579,6 +653,20 @@ test('each status asks for its own inputs and saves the activity row', function 
     expect($entry->fresh()->status)->toBe(ActivityStatus::Started);
 });
 
+test('activity rows sent as one whole array save the row', function () {
+    $project = mrsProject();
+    $report = mrsReport($project);
+    $activity = mrsActivity($project);
+    mrsSchedule($activity, '2026-10-01');
+    $page = mrsPage($report);
+    $entries = $page->get('activityEntries');
+    $entries[$activity->id]['status'] = 'ongoing';
+
+    $page->set('activityEntries', $entries)->assertHasNoErrors();
+
+    expect(MonthlyReportActivityEntry::query()->where('monthly_report_id', $report->id)->sole()->status)->toBe(ActivityStatus::Ongoing);
+});
+
 test('planned weeks and the carry-over badges are shown', function () {
     $this->travelTo('2026-12-02 10:00:00');
     $project = mrsProject();
@@ -615,6 +703,19 @@ test('answers save with the question text, and quarter-end questions are labelle
     $answer = MonthlyReportAnswer::query()->sole();
     expect($answer->answer)->toBe('Three new groups started.')
         ->and($answer->question_text)->toBe('ما أبرز الإنجازات؟');
+});
+
+test('answers sent as one whole array save the answer', function () {
+    $project = mrsProject();
+    $template = Activity::withoutRecording(fn (): ReportTemplate => ReportTemplate::factory()->confirmed()->create(['project_id' => $project->id]));
+    $question = ReportTemplateQuestion::factory()->create(['report_template_id' => $template->id]);
+    $report = mrsReport($project);
+
+    mrsPage($report)
+        ->set('answers', [$question->id => 'Two groups started.'])
+        ->assertHasNoErrors();
+
+    expect(MonthlyReportAnswer::query()->sole()->answer)->toBe('Two groups started.');
 });
 
 test('evidence uploads to a line, downloads through its report only, lists missing required types and deletes', function () {

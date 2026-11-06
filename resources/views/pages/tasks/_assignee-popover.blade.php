@@ -16,7 +16,7 @@
         x-on:click.outside="$store.assigneePicker.close()"
         x-on:keydown.escape.window="$store.assigneePicker.close()"
         x-transition.opacity.duration.100ms
-        x-bind:style="`top: ${$store.assigneePicker.top}px; left: ${$store.assigneePicker.left}px;`"
+        x-bind:style="`top: ${$store.assigneePicker.top}px; ` + ($store.assigneePicker.right === null ? `left: ${$store.assigneePicker.left}px;` : `right: ${$store.assigneePicker.right}px;`)"
         role="listbox"
         aria-multiselectable="true"
         aria-label="{{ __('tasks.assignees') }}"

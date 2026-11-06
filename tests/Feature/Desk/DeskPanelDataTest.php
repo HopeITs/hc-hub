@@ -48,6 +48,71 @@ test('a project with a late monthly report is off track, one with a milestone du
     $panel->assertSeeInOrder(['Late Wells', 'Soon Clinic', 'Calm School']);
 });
 
+/*
+| Desk page review, 6 Nov 2026: DISC Homs read "129 days late" and
+| "On track" on the same row, and Project flow said "all on track" while
+| the projects register counted 6 overdue and two rows needed a look.
+*/
+
+test('an active project past its end date is off track on the panel and late in the flow', function () {
+    $ended = Project::factory()->status(ProjectStatus::Active)->create(['name' => 'Ended Clinic', 'start_date' => '2025-01-01', 'end_date' => '2026-06-30']);
+    $ended->proposals()->attach(Proposal::factory()->create(['status' => ProposalStatus::Approved]));
+    $running = Project::factory()->status(ProjectStatus::Active)->create(['name' => 'Running Clinic', 'start_date' => '2025-01-01', 'end_date' => '2027-06-30']);
+    $closed = Project::factory()->status(ProjectStatus::Closed)->create(['start_date' => '2025-01-01', 'end_date' => '2026-06-30']);
+    $viewer = User::factory()->role('General Manager')->create();
+
+    $lines = Livewire::actingAs($viewer)->test('desk.panels.projects', ['size' => 'XL'])->call('setScope', 'all')->instance()->lines;
+
+    expect($lines[$ended->id]['health'])->toBe('bad')
+        ->and($lines[$running->id]['health'])->toBe('good')
+        ->and($lines[$closed->id]['health'])->toBe('good');
+
+    Livewire::actingAs($viewer)->test('desk.panels.flow', ['size' => 'XL'])
+        ->assertSeeText(trans_choice('desk-cards.flow.late', 1, ['count' => 1]))
+        ->assertDontSeeText(__('desk-cards.flow.all_on_track'));
+});
+
+test('the flow headline counts projects that need a look instead of calling them on track', function () {
+    $soon = Project::factory()->status(ProjectStatus::Active)->create(['start_date' => '2025-01-01', 'end_date' => '2027-06-30']);
+    Milestone::factory()->create(['project_id' => $soon->id, 'status' => MilestoneStatus::Planned, 'planned_start_date' => '2026-09-01', 'planned_end_date' => '2026-09-18']);
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())->test('desk.panels.flow', ['size' => 'XL'])
+        ->assertSeeText(trans_choice('desk-cards.flow.watch', 1, ['count' => 1]))
+        ->assertDontSeeText(__('desk-cards.flow.all_on_track'));
+});
+
+test('an approved proposal is staged by how far its project got: acknowledgement, template, running, closing', function () {
+    $stageOf = function (ProjectStatus $status, ?string $endDate = null): Project {
+        $project = Project::factory()->status($status)->create(['start_date' => '2025-01-01', 'end_date' => $endDate]);
+        $project->proposals()->attach(Proposal::factory()->create(['status' => ProposalStatus::Approved]));
+
+        return $project;
+    };
+    $draft = $stageOf(ProjectStatus::Draft);
+    $approved = $stageOf(ProjectStatus::Approved, '2027-06-30');
+    $running = $stageOf(ProjectStatus::Active, '2027-06-30');
+    $ended = $stageOf(ProjectStatus::Active, '2026-06-30');
+
+    $lines = Livewire::actingAs(User::factory()->role('General Manager')->create())->test('desk.panels.projects', ['size' => 'XL'])->call('setScope', 'all')->instance()->lines;
+
+    expect($lines[$draft->id]['stage'])->toBe(3)
+        ->and($lines[$approved->id]['stage'])->toBe(4)
+        ->and($lines[$running->id]['stage'])->toBe(5)
+        ->and($lines[$ended->id]['stage'])->toBe(6);
+});
+
+test('a project the donor approved but with no dates says the dates are missing, not that it waits for a donor', function () {
+    $approved = Project::factory()->status(ProjectStatus::Active)->create(['name' => 'Undated Clinic']);
+    $approved->proposals()->attach(Proposal::factory()->create(['status' => ProposalStatus::Approved]));
+    $fundraising = Project::factory()->create(['name' => 'Early Clinic']);
+    $fundraising->proposals()->attach(Proposal::factory()->create(['status' => ProposalStatus::ProposalDraft]));
+
+    $html = Livewire::actingAs(User::factory()->role('General Manager')->create())->test('desk.panels.projects', ['size' => 'XL'])->call('setScope', 'all')->html();
+
+    expect(substr_count($html, 'data-dates-not-set'))->toBe(1)
+        ->and(substr_count($html, __('desk.no_dates_yet')))->toBe(1);
+});
+
 test('a project takes its stage from its leading proposal', function () {
     $project = Project::factory()->create();
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::ProposalReview]);

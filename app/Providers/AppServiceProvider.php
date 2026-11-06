@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\DisableTwoFactorAuthenticationUnlessRequired;
+use App\Enums\Locale;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Models\Account;
 use App\Models\AnnualPlan;
@@ -37,15 +38,18 @@ use App\Models\User;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Support\RouteSlugs;
 use App\Support\SupervisionMap;
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\DevCommands;
+use Illuminate\Foundation\Events\LocaleUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
@@ -144,6 +148,24 @@ class AppServiceProvider extends ServiceProvider
         $this->configureMorphMap();
         $this->configureLivewire();
         $this->configureRateLimiting();
+        $this->configureDateLocale();
+    }
+
+    /**
+     * Keep the Syrian month names whenever the app locale changes, not only
+     * when SetLocale runs: Livewire re-applies the locale while it renders
+     * components, and Carbon's own LocaleUpdated listener then resets dates
+     * to plain "ar" (نوفمبر instead of تشرين الثاني). This listener is
+     * registered after Carbon's, so it has the last word.
+     */
+    protected function configureDateLocale(): void
+    {
+        Event::listen(LocaleUpdated::class, function (LocaleUpdated $event): void {
+            $carbonLocale = (Locale::tryFrom($event->locale) ?? Locale::English)->carbonLocale();
+
+            Carbon::setLocale($carbonLocale);
+            CarbonImmutable::setLocale($carbonLocale);
+        });
     }
 
     /**

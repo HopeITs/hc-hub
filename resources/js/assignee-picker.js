@@ -34,6 +34,8 @@ document.addEventListener('alpine:init', () => {
         optionSearch: '',
         top: 0,
         left: 0,
+        // Right-to-left pages anchor the popover to the trigger's right edge.
+        right: null,
 
         openFor(taskId, assignedIds, rect, method = 'togglePickedAssignee', args = [taskId]) {
             if (this.open && this.taskId === taskId) {
@@ -51,6 +53,7 @@ document.addEventListener('alpine:init', () => {
             this.optionSearch = '';
             this.top = rect.bottom + 4;
             this.left = rect.left;
+            this.right = document.documentElement.dir === 'rtl' ? window.innerWidth - rect.right : null;
 
             if (!this.open) {
                 window.hcLockPageScroll?.();

@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Calendar;
 
+use App\Models\MonthlyReport;
+
 /**
- * The type filter on calendar/index: which of the seven item types are
+ * The type filter on calendar/index: which of the eight item types are
  * switched on, whether the viewer may see each one at all, and the one type
  * the calendar is focused on when only one is on.
  *
@@ -24,6 +26,8 @@ trait FiltersCalendarTypes
 
     public bool $showReports = true;
 
+    public bool $showMonthlyReports = true;
+
     public bool $showProposals = true;
 
     public bool $showTransfers = true;
@@ -36,7 +40,7 @@ trait FiltersCalendarTypes
 
     /**
      * Flips one type's visibility. The menu stays open across picks — the
-     * caller unchecking five of seven boxes to narrow to one type would
+     * caller unchecking five of eight boxes to narrow to one type would
      * otherwise have to reopen the menu after every click.
      */
     public function toggleType(string $type): void
@@ -69,6 +73,7 @@ trait FiltersCalendarTypes
         $this->showMilestones = $type === 'milestone';
         $this->showTasks = $type === 'task';
         $this->showReports = $type === 'report';
+        $this->showMonthlyReports = $type === 'monthly_report';
         $this->showProposals = $type === 'proposal';
         $this->showTransfers = $type === 'transfer';
         $this->showDonors = $type === 'donor';
@@ -83,6 +88,7 @@ trait FiltersCalendarTypes
         $this->showMilestones = true;
         $this->showTasks = true;
         $this->showReports = true;
+        $this->showMonthlyReports = true;
         $this->showProposals = true;
         $this->showTransfers = true;
         $this->showDonors = true;
@@ -111,6 +117,7 @@ trait FiltersCalendarTypes
             'proposal' => $this->canViewProposals(),
             'transfer' => $this->canViewTransfers(),
             'donor' => $this->canViewDonors() || $this->canViewAgreements(),
+            'monthly_report' => auth()->user()?->can('viewAny', MonthlyReport::class) ?? false,
             'milestone', 'task', 'report', 'project' => true,
             default => false,
         };
@@ -131,6 +138,7 @@ trait FiltersCalendarTypes
             'milestone' => 'showMilestones',
             'task' => 'showTasks',
             'report' => 'showReports',
+            'monthly_report' => 'showMonthlyReports',
             'proposal' => 'showProposals',
             'transfer' => 'showTransfers',
             'donor' => 'showDonors',
@@ -140,7 +148,7 @@ trait FiltersCalendarTypes
 
     /**
      * The single type key ('milestone', 'task', …) when exactly one of the
-     * seven show* toggles is on, otherwise null. Drives the "focused" banner,
+     * eight show* toggles is on, otherwise null. Drives the "focused" banner,
      * grid highlighting and related-dates panel — all three stay off while
      * more than one type (or none) is visible, since "filtered to one thing"
      * only means something when it is actually just one thing.
@@ -151,6 +159,7 @@ trait FiltersCalendarTypes
             'milestone' => $this->isTypeShown('milestone'),
             'task' => $this->isTypeShown('task'),
             'report' => $this->isTypeShown('report'),
+            'monthly_report' => $this->isTypeShown('monthly_report'),
             'proposal' => $this->isTypeShown('proposal'),
             'transfer' => $this->isTypeShown('transfer'),
             'donor' => $this->isTypeShown('donor'),

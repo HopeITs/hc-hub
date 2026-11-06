@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
 use function Livewire\invade;
 
@@ -684,6 +685,87 @@ test('the list view groups tasks by status with a colored collapsible header', f
         ->assertSee('data-test="task-quick-add-status-done"', false);
 });
 
+test('list view group headers count every task in the group, not just the current page', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->count(15)->create(['priority' => TaskPriority::Low]);
+    Task::factory()->count(10)->create(['priority' => TaskPriority::High]);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('group', 'priority');
+
+    expect($component->instance()->taskGroupCounts)->toEqual(['high' => 10, 'low' => 15])
+        ->and($component->instance()->tasks->getCollection()->map(fn (Task $task) => $task->priority->value)->all())
+        ->toBe([...array_fill(0, 10, 'high'), ...array_fill(0, 10, 'low')]);
+
+    $component->call('gotoPage', 2);
+
+    expect($component->instance()->tasks->getCollection()->map(fn (Task $task) => $task->priority->value)->all())
+        ->toBe(array_fill(0, 5, 'low'));
+});
+
+test('list view status groups follow the workflow order and stay together across pages', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->count(20)->create(['status' => TaskStatus::Done, 'due_date' => now()->subYear()]);
+    Task::factory()->count(2)->create(['status' => TaskStatus::UnderReview, 'due_date' => null]);
+    Task::factory()->create(['status' => TaskStatus::Todo, 'due_date' => null]);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('group', 'status');
+
+    expect($component->instance()->taskGroupCounts)->toEqual(['todo' => 1, 'under review' => 2, 'done' => 20])
+        ->and($component->instance()->tasks->getCollection()->map(fn (Task $task) => $task->status->value)->unique()->values()->all())
+        ->toBe(['todo', 'under review', 'done']);
+});
+
+test('list view milestone group counts are keyed like the milestone groups', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $milestone = Milestone::factory()->create();
+    Task::factory()->count(3)->create(['source_type' => 'milestone', 'source_id' => $milestone->id]);
+    Task::factory()->create(['source_type' => 'proposal', 'source_id' => Proposal::factory()->create()->id]);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('group', 'milestone');
+
+    expect($component->instance()->taskGroupCounts)->toEqual([(string) $milestone->id => 3, '' => 1]);
+});
+
+test('list view assignee groups keep each assignee set together and count across pages', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $alice = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
+    $bob = insertHrEmployee(firstNameEn: 'Bob', lastNameEn: 'Rahman');
+
+    $assign = function (int $count, ?int $employeeId): void {
+        Task::factory()->count($count)->create()->each(function (Task $task) use ($employeeId): void {
+            $task->taskAssignees()->delete();
+
+            if ($employeeId !== null) {
+                $task->taskAssignees()->create(['employee_id' => $employeeId]);
+            }
+        });
+    };
+    $assign(12, $bob);
+    $assign(12, $alice);
+    $assign(2, null);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('group', 'assignee');
+
+    expect($component->instance()->taskGroupCounts)->toEqual([(string) $alice => 12, (string) $bob => 12, '' => 2]);
+
+    $firstPageKeys = $component->instance()->tasks->getCollection()
+        ->map(fn (Task $task) => $task->taskAssignees->pluck('employee_id')->sort()->implode(','))->all();
+
+    expect($firstPageKeys)->toBe([...array_fill(0, 12, (string) $alice), ...array_fill(0, 8, (string) $bob)]);
+});
+
 test('quickCreateTask opens the drawer pre-filled with the title and the group context', function () {
     $user = User::factory()->role('General Manager')->create(['employee_id' => null]);
     $milestone = Milestone::factory()->create();
@@ -1319,6 +1401,121 @@ test('rescheduleTask refuses to change the due date for anyone but the task crea
     expect($task->refresh()->due_date?->toDateString())->toBe('2026-05-01');
 });
 
+test('a view-only user gets no calendar drag handles or drag hint, and a reschedule is refused with a message', function () {
+    Role::create(['name' => 'Task Viewer', 'guard_name' => 'web'])->givePermissionTo('tasks.view');
+    $viewer = User::factory()->role('Task Viewer')->create();
+    $task = Task::factory()->create(['title' => 'Someone else task', 'due_date' => null]);
+
+    Livewire::actingAs($viewer)
+        ->test('pages::tasks.index')
+        ->set('view', 'calendar')
+        ->assertSee('Someone else task')
+        ->assertDontSee('data-task-id="'.$task->id.'"', false)
+        ->assertDontSee('Drag one onto a day to schedule it.')
+        ->assertSee('Unscheduled tasks have no due date.')
+        ->call('rescheduleTask', $task->id, '2026-05-10')
+        ->assertDispatched('toast-show');
+
+    expect($task->refresh()->due_date)->toBeNull();
+});
+
+test('the task creator can drag their unscheduled tasks onto the calendar', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $task = Task::factory()->create(['due_date' => null, 'created_by' => $user->id]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'calendar')
+        ->assertSee('data-task-id="'.$task->id.'"', false)
+        ->assertSee('Drag one onto a day to schedule it.');
+});
+
+test('the default due-date sort lists unfinished tasks before done ones', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->create(['title' => 'Old finished task', 'status' => TaskStatus::Done, 'due_date' => now()->subYear()]);
+    Task::factory()->create(['title' => 'Undated open task', 'status' => TaskStatus::UnderReview, 'due_date' => null]);
+    Task::factory()->create(['title' => 'Dated open task', 'status' => TaskStatus::Todo, 'due_date' => now()->addWeek()]);
+
+    $component = Livewire::actingAs($user)->test('pages::tasks.index')->set('view', 'list');
+
+    expect($component->instance()->tasks->getCollection()->pluck('title')->all())
+        ->toBe(['Dated open task', 'Undated open task', 'Old finished task']);
+});
+
+test('a view-only user sees plain status and due date text on board cards and a view-only notice', function () {
+    Role::create(['name' => 'Task Viewer', 'guard_name' => 'web'])->givePermissionTo('tasks.view');
+    $viewer = User::factory()->role('Task Viewer')->create();
+    $task = Task::factory()->create(['status' => TaskStatus::Todo, 'due_date' => '2024-03-25']);
+
+    Livewire::actingAs($viewer)
+        ->test('pages::tasks.index')
+        ->set('view', 'board')
+        ->assertDontSee('data-test="task-board-due-date-'.$task->id.'"', false)
+        ->assertDontSee('data-test="task-quick-status-'.$task->id.'"', false)
+        ->assertSee('data-test="task-board-due-date-text-'.$task->id.'"', false)
+        ->assertSee('Mar 25, 2024')
+        ->assertSee('You can view these tasks. Only tasks you created or are assigned to can be changed.');
+});
+
+test('the task creator keeps the editable due date on their board card and sees no view-only notice', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $task = Task::factory()->create(['status' => TaskStatus::Todo, 'created_by' => $user->id]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'board')
+        ->assertSee('data-test="task-board-due-date-'.$task->id.'"', false)
+        ->assertDontSee('data-test="task-board-due-date-text-'.$task->id.'"', false)
+        ->assertDontSee('You can view these tasks.');
+});
+
+test('the task register explains overdue and missed, and labels the related-to filter', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->assertSee('Started, past its due date')
+        ->assertSee('Not started, past its due date')
+        ->assertSee('Anything')
+        ->assertSee('Nothing open is assigned to you.');
+});
+
+test('list cards show the year on a due date outside the current year', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $task = Task::factory()->create(['due_date' => '2024-03-25', 'created_by' => $user->id]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->assertSee('data-test="task-card-due-date-'.$task->id.'"', false)
+        ->assertSee('Mar 25, 2024');
+});
+
+test('stat chips are only coloured when their count is above zero', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->create(['status' => TaskStatus::Todo, 'due_date' => now()->addMonths(2)]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->assertDontSeeHtml('class="dk-bad"')
+        ->assertDontSeeHtml('class="dk-warn"');
+});
+
+test('list cards offer the subtask toggle only when a task has subtasks', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $parent = Task::factory()->create();
+    $loneTask = Task::factory()->create();
+    Task::factory()->subtaskOf($parent)->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('listLayout', 'narrow')
+        ->assertSeeHtml('data-test="task-subtasks-toggle-mobile-'.$parent->id.'"')
+        ->assertDontSeeHtml('data-test="task-subtasks-toggle-mobile-'.$loneTask->id.'"');
+});
+
 test('the task form is rendered only while its drawer is open', function () {
     $user = User::factory()->role('General Manager')->create();
 
@@ -1367,7 +1564,7 @@ test('the list renders only the layout the browser reported', function (?string 
         ->html();
 
     expect(str_contains($html, 'data-test="task-row-'.$task->id.'"'))->toBe($table)
-        ->and(str_contains($html, 'data-test="task-subtasks-toggle-mobile-'.$task->id.'"'))->toBe($cards);
+        ->and(str_contains($html, 'data-test="task-card-'.$task->id.'"'))->toBe($cards);
 })->with([
     'not reported yet renders both' => [null, true, true],
     'wide renders the table' => ['wide', true, false],

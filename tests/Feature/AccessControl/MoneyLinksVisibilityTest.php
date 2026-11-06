@@ -55,9 +55,9 @@ function hrefTo(string $url): string
 }
 
 test('MEAL sees a proposal-sourced target with its proposal and donor names but no budget and no links', function () {
-    ['donor' => $donor, 'proposal' => $proposal] = seedProposalSourcedWork();
+    ['donor' => $donor, 'proposal' => $proposal, 'target' => $target] = seedProposalSourcedWork();
 
-    $page = Livewire::actingAs(userWithRole('MEAL'))->test('pages::targets.index');
+    $page = Livewire::actingAs(userWithRole('MEAL'))->test('pages::targets.index')->call('toggleReports', $target->id);
 
     $page->assertOk()
         ->assertSee('Households connected')
@@ -71,9 +71,10 @@ test('MEAL sees a proposal-sourced target with its proposal and donor names but 
 });
 
 test('Financial sees the same target with the proposal link, the donor link and the budget', function () {
-    ['donor' => $donor, 'proposal' => $proposal] = seedProposalSourcedWork();
+    ['donor' => $donor, 'proposal' => $proposal, 'target' => $target] = seedProposalSourcedWork();
 
     Livewire::actingAs(userWithRole('Financial'))->test('pages::targets.index')
+        ->call('toggleReports', $target->id)
         ->assertOk()
         ->assertSee('Harbour Clean Water')
         ->assertSee('Aurora Foundation')
@@ -83,9 +84,10 @@ test('Financial sees the same target with the proposal link, the donor link and 
 });
 
 test('a fundraiser without agreements gets the proposal and donor links on targets but not the budget', function () {
-    ['donor' => $donor, 'proposal' => $proposal] = seedProposalSourcedWork();
+    ['donor' => $donor, 'proposal' => $proposal, 'target' => $target] = seedProposalSourcedWork();
 
     Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))->test('pages::targets.index')
+        ->call('toggleReports', $target->id)
         ->assertOk()
         ->assertSee('Aurora Foundation')
         ->assertDontSee('731,942')

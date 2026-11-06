@@ -64,7 +64,7 @@ trait SummarisesIndicators
             }
 
             if ($row['achieved'] !== null) {
-                $achievements[] = $row['achieved'];
+                $achievements[] = max(0.0, min(100.0, $row['achieved']));
             }
 
             if ($row['latestDate'] !== null && ($lastReading === null || $row['latestDate']->greaterThan($lastReading))) {
@@ -112,7 +112,7 @@ trait SummarisesIndicators
     {
         $counts = [];
 
-        foreach (['offtrack', 'stale', 'reporting', 'unmeasured', 'untargeted'] as $focus) {
+        foreach (['ontrack', 'attention', 'waiting', 'offtrack', 'stale', 'reporting', 'unmeasured', 'untargeted'] as $focus) {
             $counts[$focus] = collect($this->rows)
                 ->filter(fn (array $row): bool => $this->matchesFilters($row, $focus))
                 ->count();

@@ -68,6 +68,8 @@ trait ReadsTargets
             ->withCount('reports')
             // Keep a result's indicators together so the page reads as groups.
             ->orderBy(Indicator::query()->select('result_id')->whereColumn('indicators.id', 'plan_indicators.indicator_id'))
+            // Inside a result, what needs a hand comes first: nothing approved, then in progress, then achieved.
+            ->orderByRaw('case when '.PlanIndicator::achievementStatusSql('not_started').' then 0 when '.PlanIndicator::achievementStatusSql('in_progress').' then 1 else 2 end')
             ->orderBy('indicator_id')
             ->orderByDesc('id')
             ->get();

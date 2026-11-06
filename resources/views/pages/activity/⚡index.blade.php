@@ -69,21 +69,85 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
         $this->resetPage();
     }
 
-    #[Computed]
-    public function activities(): LengthAwarePaginator
+    /**
+     * The two headline numbers are buttons: "today" and "last 7 days" set the
+     * date range, pressing the active one again clears it.
+     */
+    public function showRange(string $range): void
+    {
+        if (! in_array($range, ['today', 'week'], true)) {
+            return;
+        }
+
+        if ($this->activeRange() === $range) {
+            $this->from = '';
+            $this->to = '';
+        } else {
+            $today = CarbonImmutable::today();
+            $this->from = ($range === 'today' ? $today : $today->subDays(6))->toDateString();
+            $this->to = $today->toDateString();
+        }
+
+        $this->resetPage();
+    }
+
+    public function resetFilters(): void
+    {
+        $this->reset('module', 'actor', 'search', 'from', 'to');
+        $this->resetPage();
+    }
+
+    public function activeRange(): ?string
+    {
+        $today = CarbonImmutable::today();
+
+        return match (true) {
+            $this->from === $today->toDateString() && $this->to === $today->toDateString() => 'today',
+            $this->from === $today->subDays(6)->toDateString() && $this->to === $today->toDateString() => 'week',
+            default => null,
+        };
+    }
+
+    public function hasFilters(): bool
+    {
+        return $this->module !== '' || $this->actor !== '' || trim($this->search) !== '' || $this->from !== '' || $this->to !== '';
+    }
+
+    public function rangeIsBackwards(): bool
+    {
+        $from = $this->parseDate($this->from);
+        $to = $this->parseDate($this->to);
+
+        return $from !== null && $to !== null && $from->greaterThan($to);
+    }
+
+    /**
+     * @return Builder<Activity>
+     */
+    private function filteredQuery(bool $withDates = true): Builder
     {
         $term = trim($this->search);
-        $sortingByModule = $this->sortField === 'module';
+        $from = $withDates ? $this->parseDate($this->from) : null;
+        $to = $withDates ? $this->parseDate($this->to) : null;
 
         return Activity::query()
-            ->with('actor:id,hr_user_id,employee_id')
             ->when($this->module !== '', fn (Builder $query) => $query->where('module', $this->module))
+            ->when($this->actor === 'system', fn (Builder $query) => $query->whereNull('actor_id'))
             ->when(ctype_digit($this->actor), fn (Builder $query) => $query->where('actor_id', (int) $this->actor))
             ->when($term !== '', fn (Builder $query) => $query->where(Like::everyWord($term, fn (Builder $query, string $word) => $query
                 ->where(Like::word('event', $word))
                 ->orWhere(Like::word('properties', $word)))))
-            ->when($this->validDate($this->from), fn (Builder $query) => $query->where('created_at', '>=', CarbonImmutable::parse($this->from)->startOfDay()))
-            ->when($this->validDate($this->to), fn (Builder $query) => $query->where('created_at', '<=', CarbonImmutable::parse($this->to)->endOfDay()))
+            ->when($from !== null, fn (Builder $query) => $query->where('created_at', '>=', $from->startOfDay()))
+            ->when($to !== null, fn (Builder $query) => $query->where('created_at', '<=', $to->endOfDay()));
+    }
+
+    #[Computed]
+    public function activities(): LengthAwarePaginator
+    {
+        $sortingByModule = $this->sortField === 'module';
+
+        return $this->filteredQuery()
+            ->with('actor:id,hr_user_id,employee_id')
             ->when($sortingByModule, fn (Builder $query) => $query->orderBy('module', $this->sortDirection))
             ->orderBy('created_at', $sortingByModule ? 'desc' : $this->sortDirection)
             ->orderBy('id', $sortingByModule ? 'desc' : $this->sortDirection)
@@ -91,48 +155,50 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
     }
 
     /**
-     * The statement summary, independent of the filters below: today's
-     * count, the last 7 days, and today's busiest module and person — read
-     * the way a reconciled ledger opens with its running totals.
+     * How many entries each shown day really has under the current filters,
+     * so a day split across two pages never reads as a smaller number.
      *
-     * @return array{today: int, week: int, module: array{label: string, count: int}|null, actor: array{name: string, count: int}|null}
+     * @return array<string, int>
+     */
+    #[Computed]
+    public function dayTotals(): array
+    {
+        $days = collect($this->activities->items())
+            ->map(fn (Activity $activity) => $activity->created_at?->toDateString())
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($days->isEmpty()) {
+            return [];
+        }
+
+        $first = CarbonImmutable::parse($days->min())->startOfDay();
+        $last = CarbonImmutable::parse($days->max())->endOfDay();
+
+        return $this->filteredQuery()
+            ->whereBetween('created_at', [$first, $last])
+            ->get(['created_at'])
+            ->countBy(fn (Activity $activity) => $activity->created_at?->toDateString())
+            ->only($days->all())
+            ->all();
+    }
+
+    /**
+     * Today and the last 7 days under the area, person and search filters,
+     * ignoring only the date range, so pressing a number shows exactly that
+     * many entries.
+     *
+     * @return array{today: int, week: int}
      */
     #[Computed]
     public function summary(): array
     {
         $todayStart = CarbonImmutable::today();
 
-        $today = Activity::query()->where('created_at', '>=', $todayStart)->count();
-        $week = Activity::query()->where('created_at', '>=', $todayStart->subDays(6))->count();
-
-        $busiestModule = Activity::query()
-            ->where('created_at', '>=', $todayStart)
-            ->selectRaw('module, count(*) as total')
-            ->groupBy('module')
-            ->orderByDesc('total')
-            ->first();
-
-        $busiestActor = Activity::query()
-            ->where('created_at', '>=', $todayStart)
-            ->whereNotNull('actor_id')
-            ->selectRaw('actor_id, count(*) as total')
-            ->groupBy('actor_id')
-            ->orderByDesc('total')
-            ->first();
-
-        $actorName = $busiestActor === null ? null : User::query()->find($busiestActor->actor_id)?->name;
-
         return [
-            'today' => $today,
-            'week' => $week,
-            'module' => $busiestModule === null ? null : [
-                'label' => app(NotificationPresenter::class)->moduleLabel($busiestModule->module),
-                'count' => (int) $busiestModule->total,
-            ],
-            'actor' => $actorName === null ? null : [
-                'name' => $actorName,
-                'count' => (int) $busiestActor->total,
-            ],
+            'today' => $this->filteredQuery(withDates: false)->where('created_at', '>=', $todayStart)->count(),
+            'week' => $this->filteredQuery(withDates: false)->where('created_at', '>=', $todayStart->subDays(6))->count(),
         ];
     }
 
@@ -202,9 +268,15 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
         };
     }
 
-    private function validDate(string $value): bool
+    private function parseDate(string $value): ?CarbonImmutable
     {
-        return preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1;
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) !== 1) {
+            return null;
+        }
+
+        $date = CarbonImmutable::createFromFormat('!Y-m-d', $value);
+
+        return $date !== false && $date->toDateString() === $value ? $date : null;
     }
 }; ?>
 
@@ -238,65 +310,59 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
                 @endforeach
             </x-ui.header-filter-select>
 
-            <x-ui.header-filter-select :label="__('activity.filters.actor')" wire:model.live="actor" :value="$actor" searchable>
-                <option value="">{{ __('activity.filters.all_actors') }}</option>
-                @foreach ($this->actorOptions as $person)
-                    <option value="{{ (string) $person->id }}">{{ $person->name }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
+            <div class="contents" x-data="{ open: @js($actor !== '' || $from !== '' || $to !== '') }">
+                <button type="button" class="dk-btn" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" data-test="more-filters-button">
+                    <flux:icon.adjustments-horizontal variant="micro" class="size-4" />
+                    {{ __('activity.filters.more') }}
+                </button>
 
-            <x-ui.input type="date" :label="__('activity.filters.from')" wire:model.live="from" />
-            <x-ui.input type="date" :label="__('activity.filters.to')" wire:model.live="to" />
+                <div class="contents" x-show="open" x-cloak>
+                    <x-ui.header-filter-select :label="__('activity.filters.actor')" wire:model.live="actor" :value="$actor" searchable>
+                        <option value="">{{ __('activity.filters.all_actors') }}</option>
+                        <option value="system">{{ __('activity.filters.system') }}</option>
+                        @foreach ($this->actorOptions as $person)
+                            <option value="{{ (string) $person->id }}">{{ $person->name }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+
+                    <x-ui.input type="date" :label="__('activity.filters.from')" wire:model.live="from" />
+                    <x-ui.input type="date" :label="__('activity.filters.to')" wire:model.live="to" />
+                </div>
+            </div>
         </x-slot:filters>
 
 
-    {{-- The statement summary: today's running totals, read calmly before the ledger itself,
-         independent of whatever the entries below are filtered to. --}}
     @php
         $summary = $this->summary;
+        $activeRange = $this->activeRange();
+        $headline = [
+            'today' => ['label' => __('activity.summary.today'), 'count' => $summary['today']],
+            'week' => ['label' => __('activity.summary.week'), 'count' => $summary['week']],
+        ];
     @endphp
-    <div
-        role="group"
-        aria-label="{{ __('activity.pulse.heading') }}"
-        class="grid grid-cols-2 divide-y divide-board-line rounded-xl border border-board-line bg-board @2xl/directory:grid-cols-4 @2xl/directory:divide-x @2xl/directory:divide-y-0 dark:shadow-raised dark:border-transparent"
-    >
-        <div class="p-3.5">
-            <p class="type-label text-secondary-medium dark:text-ink-muted">{{ __('activity.pulse.today') }}</p>
-            <p class="type-heading mt-1 tabular-nums">{{ $summary['today'] }}</p>
-        </div>
-
-        <div class="p-3.5">
-            <p class="type-label text-secondary-medium dark:text-ink-muted">{{ __('activity.pulse.week') }}</p>
-            <p class="type-heading mt-1 tabular-nums">{{ $summary['week'] }}</p>
-        </div>
-
-        <div class="p-3.5">
-            <p class="type-label text-secondary-medium dark:text-ink-muted">{{ __('activity.pulse.busiest_module') }}</p>
-            @if ($summary['module'] !== null)
-                <p class="type-heading mt-1 flex items-baseline gap-1.5">
-                    <span class="truncate">{{ $summary['module']['label'] }}</span>
-                    <span class="type-meta shrink-0 tabular-nums text-secondary-medium dark:text-ink-muted">({{ $summary['module']['count'] }})</span>
-                </p>
-            @else
-                <p class="type-heading mt-1 text-secondary-medium dark:text-ink-muted">{{ __('activity.pulse.quiet') }}</p>
-            @endif
-        </div>
-
-        <div class="p-3.5">
-            <p class="type-label text-secondary-medium dark:text-ink-muted">{{ __('activity.pulse.top_actor') }}</p>
-            @if ($summary['actor'] !== null)
-                <p class="type-heading mt-1 flex items-baseline gap-1.5">
-                    <span class="truncate">{{ $summary['actor']['name'] }}</span>
-                    <span class="type-meta shrink-0 tabular-nums text-secondary-medium dark:text-ink-muted">({{ $summary['actor']['count'] }})</span>
-                </p>
-            @else
-                <p class="type-heading mt-1 text-secondary-medium dark:text-ink-muted">{{ __('activity.pulse.quiet') }}</p>
-            @endif
-        </div>
+    <div role="group" aria-label="{{ __('activity.summary.heading') }}" class="grid grid-cols-2 gap-3">
+        @foreach ($headline as $range => $tile)
+            <button
+                type="button"
+                wire:click="showRange('{{ $range }}')"
+                aria-pressed="{{ $activeRange === $range ? 'true' : 'false' }}"
+                data-activity-range="{{ $range }}"
+                class="cursor-pointer rounded-xl border border-board-line bg-board p-3.5 text-start hover:bg-board-head focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-secondary-medium aria-pressed:border-secondary-medium dark:shadow-raised dark:border-transparent"
+            >
+                <span class="type-label block text-secondary-medium dark:text-ink-muted">{{ $tile['label'] }}</span>
+                <span class="type-heading mt-1 block tabular-nums">{{ $tile['count'] }}</span>
+            </button>
+        @endforeach
     </div>
 
     @if ($this->activities->isEmpty())
-        <x-ui.empty-state icon="document-text" :heading="__('activity.empty')" />
+        <x-ui.empty-state icon="document-text" :heading="$this->hasFilters() ? __('activity.empty_filtered') : __('activity.empty')" :body="$this->rangeIsBackwards() ? __('activity.range_backwards') : null">
+            @if ($this->hasFilters())
+                <x-slot:action>
+                    <x-ui.button tone="ghost" size="sm" wire:click="resetFilters" data-activity-reset>{{ __('common.reset_filters') }}</x-ui.button>
+                </x-slot:action>
+            @endif
+        </x-ui.empty-state>
     @else
         @php
             $groupedByDay = $sortField === 'created_at';
@@ -307,7 +373,7 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
             $yesterday = CarbonImmutable::yesterday()->toDateString();
         @endphp
 
-        <div class="flex flex-col gap-4" wire:loading.class="opacity-50" wire:target="module, actor, search, from, to, setSort, previousPage, nextPage, gotoPage">
+        <div class="flex flex-col gap-4" wire:loading.class="opacity-50" wire:target="module, actor, search, from, to, setSort, showRange, resetFilters, previousPage, nextPage, gotoPage">
             @foreach ($days as $day => $dayActivities)
                 @php
                     $dayLabel = match (true) {
@@ -340,7 +406,7 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
                                         <flux:icon.chevron-right variant="micro" class="size-3.5 shrink-0 text-secondary-medium rtl:-scale-x-100 dark:text-ink-muted" x-bind:class="open && 'rotate-90 rtl:rotate-90'" style="transition: transform 150ms" />
                                         <span class="type-label truncate text-secondary-dark dark:text-ink">{{ $dayLabel }}</span>
                                     </span>
-                                    <span class="type-meta shrink-0 tabular-nums text-secondary-medium dark:text-ink-muted">{{ trans_choice('activity.ledger.entry_count', $dayActivities->count(), ['count' => $dayActivities->count()]) }}</span>
+                                    <span class="type-meta shrink-0 tabular-nums text-secondary-medium dark:text-ink-muted">{{ trans_choice('activity.ledger.entry_count', $this->dayTotals[$day] ?? $dayActivities->count(), ['count' => $this->dayTotals[$day] ?? $dayActivities->count()]) }}</span>
                                 </button>
                             </td>
                         </tr>

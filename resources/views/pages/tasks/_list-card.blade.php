@@ -33,6 +33,8 @@
 <article
     @class(['flex flex-col gap-3 border-s-[3px] p-3.5', $priorityBorderClass, 'bg-secondary-soft/20 dark:bg-white/[0.03]' => $isSubtask])
     wire:key="task-card-{{ $task->id }}"
+    data-test="task-card-{{ $task->id }}"
+    title="{{ __('tasks.priority') }}: {{ $task->priority->label() }}"
     @if ($isSubtask)
         x-show="subtasksOpen[{{ $task->parent_task_id }}]" x-cloak
     @endif
@@ -53,17 +55,17 @@
                     <span class="size-2 shrink-0 rounded-full bg-primary dark:bg-ink" data-unread-dot="task-{{ $task->id }}" title="{{ __('notifications.has_unread') }}"><span class="sr-only">{{ __('notifications.has_unread') }}</span></span>
                 @endif
                 @if ($task->isReportTask())<x-ui.enum-badge :case="$task->kind" data-test="report-task-chip" />@endif
-                <a href="{{ $task->reportUrl() ?? route('tasks.show', $task) }}" wire:navigate title="{{ $task->title }}" @class(['min-w-0 line-clamp-2 text-sm font-semibold break-words hover:underline', 'text-secondary-light line-through' => $isDone])>{{ $task->title }}</a>
+                <a href="{{ $task->reportUrl() ?? route('tasks.show', $task) }}" wire:navigate dir="auto" title="{{ $task->title }}" @class(['min-w-0 text-start line-clamp-2 text-sm font-semibold break-words hover:underline', 'text-secondary-light line-through' => $isDone])>{{ $task->title }}</a>
             </div>
             @unless ($isSubtask)
-                <p class="truncate text-xs text-secondary-medium dark:text-ink-muted">{{ $task->sourceLabel() }}</p>
+                <p dir="auto" class="truncate text-start text-xs text-secondary-medium dark:text-ink-muted">{{ $task->sourceLabel() }}</p>
             @endunless
         </div>
     </div>
     <div class="flex flex-wrap items-center gap-2 ps-12">
         {{ FluxMarkup::statusPill($task->status) }}
         {{ FluxMarkup::priorityFlag($task->priority) }}
-        @if (! $isSubtask)
+        @if (! $isSubtask && $task->subtasks_count > 0)
             <button
                 type="button"
                 x-on:click="subtasksOpen[{{ $task->id }}] = !subtasksOpen[{{ $task->id }}]"
@@ -82,8 +84,8 @@
             <span class="inline-flex items-center rounded-full bg-status-critical-soft px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-primary uppercase dark:text-status-critical" data-test="task-overdue-mobile-{{ $task->id }}">{{ __('tasks.overdue') }}</span>
         @endif
         @if ($task->due_date !== null)
-            <span @class(['text-xs tabular-nums', 'font-semibold text-primary dark:text-brand-text' => $isOverdue || $isMissed, 'text-secondary-medium dark:text-ink-muted' => ! $isOverdue && ! $isMissed])>
-                {{ $task->due_date->translatedFormat(__('formats.date_short')) }}
+            <span @class(['text-xs tabular-nums', 'font-semibold text-primary dark:text-brand-text' => $isOverdue || $isMissed, 'text-secondary-medium dark:text-ink-muted' => ! $isOverdue && ! $isMissed]) data-test="task-card-due-date-{{ $task->id }}">
+                {{ $task->due_date->translatedFormat(__($task->due_date->isCurrentYear() ? 'formats.date_short' : 'formats.date')) }}
             </span>
         @endif
         @if ($cardAssignees->isEmpty())

@@ -556,7 +556,7 @@ final class SaveProposal
     private function nextNumber(string $plannedStart): string
     {
         $year = CarbonImmutable::parse($plannedStart)->year;
-        $prefix = sprintf('%02d-', $year % 100);
+        $prefix = sprintf('HC-%04d-', $year);
 
         DB::table('proposal_number_sequences')->insertOrIgnore(['year' => $year, 'last_number' => 0]);
         $sequence = DB::table('proposal_number_sequences')->where('year', $year)->lockForUpdate()->first();

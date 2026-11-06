@@ -279,14 +279,19 @@ test('a target shows the program behind its plan and the donors behind its propo
     Proposal::query()->whereKey($proposal->id)->update(['donor_id' => $donor->id]);
     $proposal->donors()->attach($donor, ['budget' => 125000, 'currency' => 'EUR']);
 
-    PlanIndicator::factory()->create(['source_type' => 'annual_plan', 'source_id' => $plan->id]);
-    PlanIndicator::factory()->create(['source_type' => 'proposal', 'source_id' => $proposal->id]);
+    $planTarget = PlanIndicator::factory()->create(['source_type' => 'annual_plan', 'source_id' => $plan->id]);
+    $proposalTarget = PlanIndicator::factory()->create(['source_type' => 'proposal', 'source_id' => $proposal->id]);
 
-    Livewire::actingAs($user)
-        ->test('pages::targets.index')
+    $component = Livewire::actingAs($user)->test('pages::targets.index');
+
+    // The row names where it was committed; the links and the money sit behind Details.
+    $component->assertSee('Winter Response Proposal')
+        ->assertDontSee(route('donors.show', $donor), false)
+        ->assertDontSee('125,000.00')
+        ->call('toggleReports', $planTarget->id)
         ->assertSee('Livelihoods Programme')
         ->assertSee(route('programs.show', $program), false)
-        ->assertSee('Winter Response Proposal')
+        ->call('toggleReports', $proposalTarget->id)
         ->assertSee('Northern Relief Fund')
         ->assertSee('125,000.00')
         ->assertSee(route('donors.show', $donor), false);
@@ -570,4 +575,77 @@ test('each target links to recording a report against it', function () {
     Livewire::actingAs($user)
         ->test('pages::targets.index')
         ->assertSeeHtml('href="'.e(route('reports.index', ['create' => 1, 'target' => $target->id])).'"');
+});
+
+test('each row says its status in one plain word and the headline buttons carry the same counts', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $plan = AnnualPlan::factory()->create();
+    $make = fn (string $name) => PlanIndicator::factory()->create([
+        'source_type' => 'annual_plan',
+        'source_id' => $plan->id,
+        'indicator_id' => Indicator::factory()->create(['name' => $name, 'measure' => 'numeric'])->id,
+        'target' => 10,
+    ]);
+    Report::factory()->for($make('Reached indicator'), 'planIndicator')->create(['value' => 12, 'status' => 'approved']);
+    $untouched = $make('Untouched indicator');
+
+    Livewire::actingAs($user)
+        ->test('pages::targets.index')
+        ->assertSee('Nothing approved yet')
+        ->assertSeeHtml('data-test="target-status-'.$untouched->id.'"')
+        ->assertDontSee('No approved actuals')
+        ->assertSeeText('targets have reached their committed value');
+});
+
+test('inside a result the target nobody has reported on comes before the one that is done', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $plan = AnnualPlan::factory()->create();
+    $result = Result::factory()->create();
+    $make = fn (string $name) => PlanIndicator::factory()->create([
+        'source_type' => 'annual_plan',
+        'source_id' => $plan->id,
+        'indicator_id' => Indicator::factory()->create(['name' => $name, 'result_id' => $result->id, 'measure' => 'numeric'])->id,
+        'target' => 10,
+    ]);
+    Report::factory()->for($make('Aaa finished indicator'), 'planIndicator')->create(['value' => 12, 'status' => 'approved']);
+    $make('Zzz untouched indicator');
+
+    Livewire::actingAs($user)
+        ->test('pages::targets.index')
+        ->assertSeeInOrder(['Zzz untouched indicator', 'Aaa finished indicator']);
+});
+
+test('the secondary filters sit behind More filters and the controls stay inside the component', function () {
+    $user = User::factory()->role('General Manager')->create();
+    PlanIndicator::factory()->create(['source_type' => 'annual_plan', 'source_id' => AnnualPlan::factory()->create()->id]);
+
+    $html = Livewire::actingAs($user)->test('pages::targets.index')->html();
+
+    expect($html)->toContain('data-test="more-filters-button"')->toContain('More filters');
+
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
+    $xpath = new DOMXPath($dom);
+    $root = '//section[@*[name()="wire:name"]="pages::targets.index"]';
+
+    foreach (['more-filters-button', 'status-filter-achieved', 'status-filter-not_started'] as $control) {
+        expect($xpath->query($root.'//*[@data-test="'.$control.'"]')->length)->toBeGreaterThan(0, "{$control} sits outside the component");
+    }
+});
+
+test('a filter with no match offers a way out and the delete dialog names the target', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $target = PlanIndicator::factory()->create([
+        'source_type' => 'annual_plan',
+        'source_id' => AnnualPlan::factory()->create()->id,
+        'indicator_id' => Indicator::factory()->create(['name' => 'Meals served'])->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test('pages::targets.index')
+        ->set('search', 'nothing matches this')
+        ->assertSeeHtml('data-test="empty-reset-filters"')
+        ->call('clearFilters')
+        ->call('confirmDelete', $target->id)
+        ->assertSee('Delete the target for “Meals served”?');
 });

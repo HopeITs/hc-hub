@@ -12,6 +12,7 @@ return [
     'all_cities' => 'كل المدن',
     'all_files' => 'كل الملفات',
     'all_owners' => 'كل المديرين',
+    'all_stages' => 'كل المراحل',
     'assignment_acknowledge' => 'تأكيد الاستلام',
     'assignment_acknowledge_done' => 'أكّدت استلام هذا المشروع.',
     'assignment_acknowledge_title' => 'تأكيد استلام المشروع',

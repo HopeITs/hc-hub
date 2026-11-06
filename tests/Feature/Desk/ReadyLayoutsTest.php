@@ -519,6 +519,30 @@ test('Red targets are red for MEAL only past half of those rated', function () {
     expect(readySignalsFor($meal)['impact'])->toMatchArray(['tone' => 'critical', 'count' => 3]);
 });
 
+/*
+| Desk page review, 6 Nov 2026: Results and MEAL said "All 39 targets on
+| pace." while 22 more indicators with a target had no figures at all.
+*/
+
+test('indicators with no figures yet are counted, never hidden behind "all on pace"', function () {
+    $meal = userWithRole('MEAL', insertHrEmployee());
+    readyTargets(red: 0, onPace: 2);
+    Indicator::factory()->create(['baseline' => 0, 'target' => 100]);
+
+    expect(readySignalsFor($meal)['impact'])->toMatchArray([
+        'text' => '2 of 3 targets on pace · 1 with no figures yet',
+        'tone' => 'warn',
+        'count' => 1,
+    ]);
+});
+
+test('targets are all on pace only when every one of them is rated on pace', function () {
+    $meal = userWithRole('MEAL', insertHrEmployee());
+    readyTargets(red: 0, onPace: 2);
+
+    expect(readySignalsFor($meal)['impact'])->toMatchArray(['text' => 'All 2 targets on pace.', 'tone' => 'good']);
+});
+
 test('a donor report is critical only for the person responsible for it', function () {
     $mine = userWithRole('General Manager', insertHrEmployee());
     $other = userWithRole('General Manager', insertHrEmployee());

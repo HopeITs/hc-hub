@@ -28,5 +28,10 @@ return [
     'time_period' => 'الفترة الزمنية',
     'transfer' => 'تحويل مالي',
     'week' => 'أسبوع',
+    'monthly_report_due' => 'موعد التقرير الشهري',
+    'items_short' => '{1} عنصر واحد|{2} عنصران|[3,10] :count عناصر|[11,*] :count عنصرًا',
+    'late' => 'متأخر',
+    'starts_name' => 'يبدأ: :name',
+    'ends_name' => 'ينتهي: :name',
     'review_meeting' => 'اجتماع مراجعة',
 ];

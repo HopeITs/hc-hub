@@ -22,6 +22,8 @@ document.addEventListener('alpine:init', () => {
         args: [],
         top: 0,
         left: 0,
+        // Right-to-left pages anchor the popover to the trigger's right edge.
+        right: null,
 
         openFor(kind, key, current, rect, method, args = []) {
             if (this.open && this.key === key) {
@@ -37,6 +39,7 @@ document.addEventListener('alpine:init', () => {
             this.args = [...args];
             this.top = rect.bottom + 4;
             this.left = rect.left;
+            this.right = document.documentElement.dir === 'rtl' ? window.innerWidth - rect.right : null;
 
             if (!this.open) {
                 window.hcLockPageScroll?.();

@@ -115,6 +115,7 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
                 'evidence_required',
                 'created_by',
                 'kind',
+                'department_id',
                 'reportable_type',
                 'reportable_id',
             ])

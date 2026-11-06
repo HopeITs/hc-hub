@@ -42,7 +42,7 @@
     };
 
     $groups = match ($group) {
-        'status' => $paginator->getCollection()->groupBy(fn ($task) => $task->status->value)->sortKeys(),
+        'status' => $paginator->getCollection()->groupBy(fn ($task) => $task->status->value),
         'priority' => $paginator->getCollection()->groupBy(fn ($task) => $task->priority->value),
         'assignee' => $paginator->getCollection()->groupBy(fn ($task) => $task->taskAssignees->pluck('employee_id')->sort()->implode(',')),
         'milestone' => $paginator->getCollection()->groupBy(fn ($task) => $task->source_type === 'milestone' ? (string) $task->source_id : ''),
@@ -81,7 +81,7 @@
                 @else
                     <x-ui.group-header
                         :label="$groupLabel($groupKeyString, $groupTasks)"
-                        :count="$groupTasks->count()"
+                        :count="$this->taskGroupCounts[$groupKeyString] ?? $groupTasks->count()"
                         :color-class="$groupColor($groupKeyString)"
                         :storage-key="'task-list-group-'.$group.'-'.$groupKeyString"
                         wire:key="task-group-{{ $group }}-{{ $groupKeyString }}"

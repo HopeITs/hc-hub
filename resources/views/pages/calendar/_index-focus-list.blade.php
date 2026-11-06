@@ -19,6 +19,9 @@
                                     @case('report')
                                         <flux:icon.document-text variant="micro" class="size-3.5 {{ $typeTextClasses[$focusedType] }}" />
                                         @break
+                                    @case('monthly_report')
+                                        <flux:icon.calendar-days variant="micro" class="size-3.5 {{ $typeTextClasses[$focusedType] }}" />
+                                        @break
                                     @case('proposal')
                                         <flux:icon.paper-airplane variant="micro" class="size-3.5 {{ $typeTextClasses[$focusedType] }}" />
                                         @break
