@@ -3,6 +3,7 @@
 return [
     'add_subtask' => 'Add subtask',
     'add_task' => 'Add task',
+    'add_task_to_status' => 'Add task to :status',
     'add_the_first_task_against_a_proposal' => 'Add the first task against a proposal.',
     'adding' => 'Adding…',
     'all_priorities' => 'All priorities',

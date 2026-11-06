@@ -3,6 +3,7 @@
 return [
     'add_subtask' => 'إضافة مهمة فرعية',
     'add_task' => 'إضافة مهمة',
+    'add_task_to_status' => 'إضافة مهمة إلى :status',
     'add_the_first_task_against_a_proposal' => 'أضف أول مهمة لمقترح.',
     'adding' => 'جارٍ الإضافة…',
     'all_priorities' => 'كل الأولويات',
