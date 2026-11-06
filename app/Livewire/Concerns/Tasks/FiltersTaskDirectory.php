@@ -234,7 +234,9 @@ trait FiltersTaskDirectory
             'status' => $this->orderByEnumSequence($query, 'status', ['todo', 'in progress', 'under review', 'done'], $direction),
             'assignee' => $this->orderByAssigneeName($query, $direction),
             'created' => $query->orderBy('created_at', $direction),
-            default => $query->orderByRaw('due_date is null, due_date '.$direction),
+            // Done tasks always sink below unfinished ones, so open work is
+            // never pushed off the first page by a backlog of finished tasks.
+            default => $query->orderByRaw("status = 'done'")->orderByRaw('due_date is null, due_date '.$direction),
         };
     }
 

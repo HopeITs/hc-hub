@@ -189,12 +189,18 @@
         @endif
     </div>
 
-    <x-ui.panel :title="__('tasks.unscheduled')" :count="$calendar['unscheduled']->count()" :subtitle="__('tasks.unscheduled_tasks_have_no_due_date_drag_one_onto_a_day_to_sch')">
+    {{-- Only a task's creator can move its due date (RescheduleTask), so only their cards get a drag handle and only they see the drag hint. --}}
+    @php $canRescheduleAnyUnscheduled = $calendar['unscheduled']->contains(fn ($task) => $task->created_by === auth()->id()); @endphp
+    <x-ui.panel :title="__('tasks.unscheduled')" :count="$calendar['unscheduled']->count()" :subtitle="$canRescheduleAnyUnscheduled ? __('tasks.unscheduled_tasks_have_no_due_date_drag_one_onto_a_day_to_sch') : __('tasks.unscheduled_tasks_have_no_due_date')">
         <div class="flex min-h-24 flex-col gap-2 p-2" x-data="taskDropList('task-calendar', (wire, id) => wire.rescheduleTask(id, ''))" data-test="task-calendar-unscheduled">
             @forelse ($calendar['unscheduled'] as $task)
+                @php $canReschedule = $task->created_by === auth()->id(); @endphp
                 <div
-                    class="flex cursor-grab flex-col gap-1.5 rounded-xl border border-secondary-soft bg-white p-2.5 shadow-hairline transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md active:cursor-grabbing dark:border-line dark:bg-surface-1"
-                    data-task-id="{{ $task->id }}"
+                    @class([
+                        'flex flex-col gap-1.5 rounded-xl border border-secondary-soft bg-white p-2.5 shadow-hairline transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md dark:border-line dark:bg-surface-1',
+                        'cursor-grab active:cursor-grabbing' => $canReschedule,
+                    ])
+                    @if ($canReschedule) data-task-id="{{ $task->id }}" @endif
                     wire:key="task-unscheduled-{{ $task->id }}"
                 >
                     <a href="{{ route('tasks.show', $task) }}" wire:navigate class="truncate text-xs font-semibold hover:text-primary hover:underline dark:hover:text-status-critical">{{ $task->title }}</a>

@@ -83,7 +83,7 @@
     <div class="dk-reg-sub">
         <span></span>
 
-        <div class="flex shrink-0 flex-wrap items-center gap-2">
+        <div class="flex min-w-0 flex-wrap items-center gap-2">
             @if ($view === 'list')
                 <x-ui.header-filter-select :label="__('tasks.group_by')" wire:model.live="group" :value="$group" class="w-40!">
                     <option value="none">{{ __('tasks.no_grouping') }}</option>

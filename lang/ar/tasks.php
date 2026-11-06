@@ -150,6 +150,7 @@ return [
     'title_description_or_assignee' => 'العنوان أو الوصف أو المكلّف',
     'total_tasks' => 'إجمالي المهام',
     'unscheduled' => 'غير مجدولة',
+    'unscheduled_tasks_have_no_due_date' => 'المهام غير المجدولة ليس لها تاريخ استحقاق.',
     'unscheduled_tasks_have_no_due_date_drag_one_onto_a_day_to_sch' => 'المهام غير المجدولة ليس لها تاريخ استحقاق. اسحب واحدة إلى يوم لجدولتها.',
     'update_task_status' => 'تحديث الحالة',
     'update_task_status_hint' => 'أنت مكلّف بهذه المهمة، لذا يمكنك تغيير حالتها. كل ما عدا ذلك للعرض فقط.',

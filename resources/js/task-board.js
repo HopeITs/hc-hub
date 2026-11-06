@@ -28,7 +28,14 @@ document.addEventListener('alpine:init', () => {
                 animation: 150,
                 ghostClass: 'opacity-40',
                 dragClass: 'shadow-lg',
-                filter: ':not([data-task-id])',
+                // Only cards carrying data-task-id drag (the page leaves it off
+                // tasks the viewer may not reschedule). Form controls never start
+                // a drag, and nothing is filtered with preventDefault: the old
+                // ':not([data-task-id])' filter matched a card's own title link
+                // and cancelled its pointerdown, so clicking the title did nothing.
+                draggable: '[data-task-id]',
+                filter: 'button, input, select, textarea',
+                preventOnFilter: false,
                 onAdd: (event) => {
                     const taskId = Number(event.item.dataset.taskId);
 

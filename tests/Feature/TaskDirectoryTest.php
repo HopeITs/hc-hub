@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 
 use function Livewire\invade;
 
@@ -1376,6 +1377,47 @@ test('rescheduleTask refuses to change the due date for anyone but the task crea
         ->assertDispatched('toast-show');
 
     expect($task->refresh()->due_date?->toDateString())->toBe('2026-05-01');
+});
+
+test('a view-only user gets no calendar drag handles or drag hint, and a reschedule is refused with a message', function () {
+    Role::create(['name' => 'Task Viewer', 'guard_name' => 'web'])->givePermissionTo('tasks.view');
+    $viewer = User::factory()->role('Task Viewer')->create();
+    $task = Task::factory()->create(['title' => 'Someone else task', 'due_date' => null]);
+
+    Livewire::actingAs($viewer)
+        ->test('pages::tasks.index')
+        ->set('view', 'calendar')
+        ->assertSee('Someone else task')
+        ->assertDontSee('data-task-id="'.$task->id.'"', false)
+        ->assertDontSee('Drag one onto a day to schedule it.')
+        ->assertSee('Unscheduled tasks have no due date.')
+        ->call('rescheduleTask', $task->id, '2026-05-10')
+        ->assertDispatched('toast-show');
+
+    expect($task->refresh()->due_date)->toBeNull();
+});
+
+test('the task creator can drag their unscheduled tasks onto the calendar', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $task = Task::factory()->create(['due_date' => null, 'created_by' => $user->id]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'calendar')
+        ->assertSee('data-task-id="'.$task->id.'"', false)
+        ->assertSee('Drag one onto a day to schedule it.');
+});
+
+test('the default due-date sort lists unfinished tasks before done ones', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->create(['title' => 'Old finished task', 'status' => TaskStatus::Done, 'due_date' => now()->subYear()]);
+    Task::factory()->create(['title' => 'Undated open task', 'status' => TaskStatus::UnderReview, 'due_date' => null]);
+    Task::factory()->create(['title' => 'Dated open task', 'status' => TaskStatus::Todo, 'due_date' => now()->addWeek()]);
+
+    $component = Livewire::actingAs($user)->test('pages::tasks.index')->set('view', 'list');
+
+    expect($component->instance()->tasks->getCollection()->pluck('title')->all())
+        ->toBe(['Dated open task', 'Undated open task', 'Old finished task']);
 });
 
 test('the task form is rendered only while its drawer is open', function () {
