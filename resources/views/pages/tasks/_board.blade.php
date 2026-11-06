@@ -36,7 +36,7 @@
     layout, a header-only bar when stacked) that stays a drop target. Opening
     the add control on a collapsed column widens it back for the composer.
 --}}
-<div class="flex flex-col gap-4 @2xl/directory:flex-row @2xl/directory:flex-wrap @6xl/directory:flex-nowrap" x-data="{ subtasksOpen: {} }">
+<div class="flex flex-col gap-4 @2xl/directory:flex-row @2xl/directory:flex-wrap @6xl/directory:flex-nowrap" x-data="taskSubtaskScope">
     @foreach (TaskStatus::cases() as $case)
         @php
             $columnTasks = $allTasks->where('status', $case)->values();

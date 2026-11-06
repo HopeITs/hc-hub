@@ -2,7 +2,7 @@
     /** @var \Illuminate\Support\Collection<int, \App\Models\Task> $groupTasks */
 @endphp
 
-<div class="@container" x-data="{ subtasksOpen: {} }">
+<div class="@container" x-data="taskSubtaskScope">
     @if ($this->listLayout !== 'narrow')
     <table class="hidden w-full table-fixed border-collapse text-start text-sm @3xl:table">
         <thead class="bg-secondary-soft/40 dark:bg-surface-2">

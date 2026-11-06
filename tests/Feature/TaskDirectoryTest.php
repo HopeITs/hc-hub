@@ -1646,6 +1646,24 @@ test('the assigned to me tab is empty for a user with no employee record', funct
     expect($component->instance()->tasks->total())->toBe(0);
 });
 
+test('the show all subtasks switch drives the list and board but not the calendar', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->create();
+
+    $page = Livewire::actingAs($user)->test('pages::tasks.index');
+
+    $page->set('view', 'list')
+        ->assertSeeHtml('data-test="task-subtasks-toggle-all"')
+        ->assertSeeHtml('x-data="taskSubtaskScope"');
+
+    $page->set('view', 'board')
+        ->assertSeeHtml('data-test="task-subtasks-toggle-all"')
+        ->assertSeeHtml('x-data="taskSubtaskScope"');
+
+    $page->set('view', 'calendar')
+        ->assertDontSeeHtml('data-test="task-subtasks-toggle-all"');
+});
+
 test('the task form is rendered only while its drawer is open', function () {
     $user = User::factory()->role('General Manager')->create();
 

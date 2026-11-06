@@ -2,6 +2,7 @@ import './flux-toast-duration';
 import './preloader';
 import './assignee-picker';
 import './task-menu';
+import './task-subtasks';
 import './list-layout';
 import './charts';
 import './count-up';

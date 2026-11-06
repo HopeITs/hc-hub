@@ -159,5 +159,21 @@
                 <flux:icon.user variant="micro" class="size-3.5" />
                 {{ __('tasks.my_tasks_only') }}
             </button>
+
+            @if ($view !== 'calendar')
+                {{-- Opens or closes every task's subtasks at once; remembered per browser (task-subtasks.js). --}}
+                <button
+                    type="button"
+                    x-data
+                    x-on:click="$store.taskSubtasks.toggleAll()"
+                    x-bind:aria-pressed="$store.taskSubtasks.allOpen ? 'true' : 'false'"
+                    x-bind:class="$store.taskSubtasks.allOpen ? 'border-primary bg-primary text-white dark:border-ink dark:bg-ink dark:text-surface-0' : 'border-secondary-light text-secondary-medium hover:bg-secondary-soft dark:text-ink-muted dark:hover:bg-surface-2'"
+                    class="inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-secondary-medium"
+                    data-test="task-subtasks-toggle-all"
+                >
+                    <flux:icon.rectangle-stack variant="micro" class="size-3.5" />
+                    <span x-text="$store.taskSubtasks.allOpen ? {{ Illuminate\Support\Js::from(__('tasks.hide_subtasks')) }} : {{ Illuminate\Support\Js::from(__('tasks.show_subtasks')) }}">{{ __('tasks.show_subtasks') }}</span>
+                </button>
+            @endif
         </div>
     </div>
