@@ -174,6 +174,11 @@
                         <x-ui.project-number :number="$storedNumber" kind="internal" class="mt-1.5 text-xs {{ $mutedText }}" />
                 </div>
                 @endif
+
+                {{-- The number is generated, so its only error is a save that lost the race for it. --}}
+                @error('internalProjectNumber')
+                    <p class="text-sm text-status-critical @2xl/modal:col-span-2" role="alert" data-test="internal-number-error">{{ $message }}</p>
+                @enderror
             </div>
         </x-ui.form-section>
 

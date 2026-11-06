@@ -27,12 +27,12 @@ test('proposal numbers follow the planned year and remain fixed after edits', fu
     $first = app(SaveProposal::class)->handle(null, $input, $user);
     $second = app(SaveProposal::class)->handle(null, $input, $user);
     $nextYear = app(SaveProposal::class)->handle(null, [...$input, 'plannedDateBegin' => '2027-01-01', 'plannedDateEnd' => '2027-01-01'], $user);
-    $edited = app(SaveProposal::class)->handle($first, [...$input, 'plannedDateBegin' => '2028-01-01', 'plannedDateEnd' => '2028-01-01', 'internalProjectNumber' => '99-999'], $user);
+    $edited = app(SaveProposal::class)->handle($first, [...$input, 'plannedDateBegin' => '2028-01-01', 'plannedDateEnd' => '2028-01-01', 'internalProjectNumber' => 'HC-2099-999'], $user);
 
-    expect($first->internal_project_number)->toBe('26-001')
-        ->and($second->internal_project_number)->toBe('26-002')
-        ->and($nextYear->internal_project_number)->toBe('27-001')
-        ->and($edited->internal_project_number)->toBe('26-001');
+    expect($first->internal_project_number)->toBe('HC-2026-001')
+        ->and($second->internal_project_number)->toBe('HC-2026-002')
+        ->and($nextYear->internal_project_number)->toBe('HC-2027-001')
+        ->and($edited->internal_project_number)->toBe('HC-2026-001');
 });
 
 test('a year with 999 assigned numbers rejects another proposal', function () {
@@ -50,12 +50,12 @@ test('a year with 999 assigned numbers rejects another proposal', function () {
 test('numbering continues after an existing number in the same year', function () {
     $user = userWithRole('Financial');
     $this->actingAs($user);
-    Proposal::factory()->create(['internal_project_number' => '26-041']);
+    Proposal::factory()->create(['internal_project_number' => 'HC-2026-041']);
     $project = Project::factory()->create();
 
     $proposal = app(SaveProposal::class)->handle(null, numberingInput($project, '2026-01-01'), $user);
 
-    expect($proposal->internal_project_number)->toBe('26-042');
+    expect($proposal->internal_project_number)->toBe('HC-2026-042');
 });
 
 test('a rolled back creation does not consume its number', function () {
@@ -72,5 +72,5 @@ test('a rolled back creation does not consume its number', function () {
 
     $proposal = app(SaveProposal::class)->handle(null, $input, $user);
 
-    expect($proposal->internal_project_number)->toBe('26-001');
+    expect($proposal->internal_project_number)->toBe('HC-2026-001');
 });

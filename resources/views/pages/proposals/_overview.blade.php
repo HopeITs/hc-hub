@@ -6,7 +6,6 @@
 --}}
 @php
     $lifecycle = \App\Enums\ProposalStatus::lifecycle();
-    $matchingCount = $this->filteredProposalIds->count();
     // The flow names every matching proposal but the list below shows one page
     // of them: a proposal on this page is scrolled to, any other one opened.
     $pageProposalIds = $this->proposals->getCollection()->modelKeys();

@@ -33,9 +33,11 @@ trait ChartsProposalPipeline
      *
      * Same definitions as the dashboard's funding position: received is net
      * money in its received currency, pending is the scheduled payment in its
-     * transfer currency. Currencies are never added together.
+     * transfer currency. Currencies are never added together. `proposals` is
+     * how many matching proposals hold an agreement in that currency, so each
+     * line counts its own proposals rather than every match.
      *
-     * @return Collection<int, array{currency: string, committed: float, received: float, pending: float, pendingCount: int, unscheduled: float|int}>
+     * @return Collection<int, array{currency: string, committed: float, proposals: int, received: float, pending: float, pendingCount: int, unscheduled: float|int}>
      */
     #[Computed]
     public function fundingPosition(): Collection
@@ -47,11 +49,13 @@ trait ChartsProposalPipeline
         $ids = $this->filteredProposalIds;
         $canTransfers = $this->canViewTransfers();
 
-        $committed = DonorProposal::query()
+        $agreements = DonorProposal::query()
             ->whereIn('proposal_id', $ids)
-            ->selectRaw('currency, sum(budget) as total')
+            ->selectRaw('currency, sum(budget) as total, count(distinct proposal_id) as proposals')
             ->groupBy('currency')
-            ->pluck('total', 'currency');
+            ->get()
+            ->keyBy(fn (DonorProposal $line): string => $line->currency->value);
+        $committed = $agreements->map(fn (DonorProposal $line): float => (float) $line->getAttribute('total'));
 
         $transfers = fn () => TransfersTracking::query()
             ->whereHas('donorProposal', fn (Builder $query) => $query->whereIn('proposal_id', $ids));
@@ -87,7 +91,7 @@ trait ChartsProposalPipeline
             ->unique()
             ->sort()
             ->values()
-            ->map(function (string $currency) use ($committed, $received, $pending, $scheduled): array {
+            ->map(function (string $currency) use ($agreements, $committed, $received, $pending, $scheduled): array {
                 $committedTotal = (float) ($committed[$currency] ?? 0);
                 $receivedTotal = (float) ($received[$currency] ?? 0);
                 $pendingTotal = (float) ($pending[$currency]->total ?? 0);
@@ -95,6 +99,7 @@ trait ChartsProposalPipeline
                 return [
                     'currency' => $currency,
                     'committed' => $committedTotal,
+                    'proposals' => (int) ($agreements->get($currency)?->getAttribute('proposals') ?? 0),
                     'received' => $receivedTotal,
                     'pending' => $pendingTotal,
                     'pendingCount' => (int) ($pending[$currency]->transfers ?? 0),
