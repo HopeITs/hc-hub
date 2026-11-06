@@ -69,7 +69,8 @@ trait ManagesFinalReportAcceptance
             return false;
         }
 
-        $milestoneReached = Milestone::query()
+        // A payroll proposal (W-32) has no final-report milestone: the filed report is enough.
+        $milestoneReached = $proposal->isPayroll() || Milestone::query()
             ->where('proposal_id', $proposal->id)
             ->where('is_final_report', true)
             ->where('status', MilestoneStatus::Reached)

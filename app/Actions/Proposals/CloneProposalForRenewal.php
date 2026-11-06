@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Proposals;
 
+use App\Enums\ProposalKind;
 use App\Enums\ProposalStatus;
 use App\Models\HrCenter;
 use App\Models\Indicator;
@@ -56,7 +57,7 @@ final class CloneProposalForRenewal
      * `plannedDateBegin`, `plannedDateEnd`, `name` and `notes` default to the
      * previous proposal's, the dates moved one year on.
      *
-     * @param  array{internalProjectNumber: string, name?: ?string, notes?: ?string, plannedDateBegin?: ?string, plannedDateEnd?: ?string}  $data
+     * @param  array{name?: ?string, notes?: ?string, plannedDateBegin?: ?string, plannedDateEnd?: ?string}  $data
      * @return CloneResult
      */
     public function handle(Proposal $previous, array $data, User $user): array
@@ -102,14 +103,17 @@ final class CloneProposalForRenewal
     }
 
     /**
-     * The newest concept-note renewal of a proposal: the one `$user` made in
-     * the last two minutes when a user is given, otherwise anyone's.
+     * The newest unstarted renewal of a proposal (a concept note, or a
+     * proposal draft for payroll, which starts there): the one `$user` made
+     * in the last two minutes when a user is given, otherwise anyone's.
      */
     public static function existingDraftFor(Proposal $previous, ?User $user = null): ?Proposal
     {
+        $unstarted = $previous->isPayroll() ? ProposalStatus::ProposalDraft : ProposalStatus::ConceptNote;
+
         return Proposal::query()
             ->where('previous_proposal_id', $previous->getKey())
-            ->where('status', 'concept note')
+            ->where('status', $unstarted)
             ->when($user !== null, fn ($query) => $query
                 ->where('created_at', '>=', now()->subMinutes(self::DoubleClickMinutes))
                 ->whereHas('statusNotes', fn ($notes) => $notes->where('changed_by', $user?->id)))
@@ -123,23 +127,20 @@ final class CloneProposalForRenewal
      */
     private function clone(Proposal $previous, array $data, User $user): array
     {
+        if ($previous->isPayroll()) {
+            return $this->result($this->clonePayroll($previous, $data, $user));
+        }
+
         $projects = $this->projects($previous);
 
         if ($projects['ids'] === []) {
             throw ValidationException::withMessages(['projectIds' => __('proposals.link_at_least_one_project')]);
         }
 
-        $begin = isset($data['plannedDateBegin']) && $data['plannedDateBegin'] !== ''
-            ? CarbonImmutable::parse((string) $data['plannedDateBegin'])
-            : $previous->planned_date_end->addDay();
-        $span = (int) $previous->planned_date_begin->diffInDays($previous->planned_date_end);
-        $end = isset($data['plannedDateEnd']) && $data['plannedDateEnd'] !== ''
-            ? CarbonImmutable::parse((string) $data['plannedDateEnd'])
-            : $begin->addDays($span);
+        ['begin' => $begin, 'end' => $end] = $this->plannedDates($previous, $data);
 
         $renewal = app(SaveProposal::class)->handle(null, [
             'name' => isset($data['name']) && $data['name'] !== '' ? (string) $data['name'] : $previous->name,
-            'internalProjectNumber' => (string) $data['internalProjectNumber'],
             'donorId' => $previous->donor_id,
             'projectIds' => $projects['ids'],
             'beneficiaries' => $projects['beneficiaries'],
@@ -171,6 +172,49 @@ final class CloneProposalForRenewal
         }
 
         return $this->result($renewal, $projects['skipped'], $projects['replaced'], $skippedIndicators, $skippedParts, $plan);
+    }
+
+    /**
+     * A payroll renewal (W-32) stays payroll: it carries the narrative, the
+     * donor, the notes and the planned duration, and never a project, a
+     * framework or a plan. SaveProposal starts it in `proposal draft`.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function clonePayroll(Proposal $previous, array $data, User $user): Proposal
+    {
+        ['begin' => $begin, 'end' => $end] = $this->plannedDates($previous, $data);
+
+        return app(SaveProposal::class)->handle(null, [
+            'kind' => ProposalKind::Payroll->value,
+            'name' => isset($data['name']) && $data['name'] !== '' ? (string) $data['name'] : $previous->name,
+            'donorId' => $previous->donor_id,
+            'narrative' => $previous->narrative,
+            'plannedDateBegin' => $begin->toDateString(),
+            'plannedDateEnd' => $end->toDateString(),
+            'notes' => array_key_exists('notes', $data) ? $data['notes'] : $previous->notes,
+            'previousProposalId' => $previous->id,
+        ], $user);
+    }
+
+    /**
+     * The renewal's planned dates: as given, else the day after the previous
+     * end and the previous duration.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array{begin: CarbonImmutable, end: CarbonImmutable}
+     */
+    private function plannedDates(Proposal $previous, array $data): array
+    {
+        $begin = isset($data['plannedDateBegin']) && $data['plannedDateBegin'] !== ''
+            ? CarbonImmutable::parse((string) $data['plannedDateBegin'])
+            : $previous->planned_date_end->addDay();
+        $span = (int) $previous->planned_date_begin->diffInDays($previous->planned_date_end);
+        $end = isset($data['plannedDateEnd']) && $data['plannedDateEnd'] !== ''
+            ? CarbonImmutable::parse((string) $data['plannedDateEnd'])
+            : $begin->addDays($span);
+
+        return ['begin' => $begin, 'end' => $end];
     }
 
     /**

@@ -78,10 +78,17 @@
                             <span class="me-1 inline-block size-2 rounded-full bg-primary align-middle dark:bg-ink" data-unread-dot="proposal-{{ $proposal->id }}" title="{{ __('notifications.has_unread') }}"><span class="sr-only">{{ __('notifications.has_unread') }}</span></span>
                         @endif
                         <span @class(['font-semibold', $mutedText => $isRepeat])>{{ $proposal->name }}</span>
+                        @if (! $isRepeat && $proposal->isPayroll())
+                            <x-ui.enum-badge :case="$proposal->kind" class="ms-1.5 align-middle" data-payroll-chip="{{ $proposal->id }}" />
+                        @endif
                     </td>
                     <td data-label="{{ __('common.status') }}">
                         @unless ($isRepeat)
-                            <x-ui.enum-badge :case="$proposal->status" />
+                            <x-ui.enum-badge
+                                :case="$proposal->status"
+                                :label="$proposal->statusLabel()"
+                                :tone="$proposal->isOnHold() ? \App\Enums\StatusTone::Warn : null"
+                            />
                         @endunless
                     </td>
                     {{-- phase is a read-only accessor over status->phase(), not a column. --}}

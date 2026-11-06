@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'internal_number_exhausted' => 'تم تعيين جميع أرقام المقترحات الداخلية الـ 999 لعام :year.',
     'accepted_file_types' => 'المقبول: :types، بحد أقصى 5 ميغابايت.',
     'achievement_counts_approved_reports_only' => 'يُحتسب الإنجاز من التقارير المعتمدة فقط.',
     'across_count_proposals' => '{0} لا توجد مقترحات|{1} في مقترح واحد|{2} في مقترحين|[3,10] في :count مقترحات|[11,*] في :count مقترحًا',
@@ -299,6 +300,22 @@ return [
     'hold_only_while_submitted' => 'لا يُعلَّق المقترح إلا بعد وصوله إلى المانح، لا وهو :status',
     'taken_off_hold_standard_note' => 'رُفع التعليق',
     'on_hold_status_retired' => 'التعليق صار إشارة لا حالة: عاد المقترح إلى الحالة التي عُلِّق منها',
+
+    /*
+     * W-06 (D-58): التعليق إشارة على الحالة، فله إجراءان خاصان به لا انتقال.
+     * الشريحة والعدّادات تقول «معلّق» وحدها، والعنوان الكامل من
+     * Proposal::statusLabel().
+     */
+    'put_on_hold' => 'تعليق المقترح',
+    'take_off_hold' => 'رفع التعليق',
+    'put_on_hold_consequence' => 'يبقى المقترح في حالته الحالية. تتوقف تنبيهات التعثّر والمواعيد، ونسأل عن الأخبار في تاريخ التذكير.',
+    'take_off_hold_consequence' => 'يبقى المقترح في حالته الحالية ويعود إلى التذكيرات المعتادة.',
+    'why_put_on_hold' => 'لماذا عُلِّق؟',
+    'off_hold_note' => 'ملاحظة (اختياري)',
+    'on_hold_chip' => 'معلّق',
+    'count_on_hold' => '{1} معلّق واحد|{2} معلّقان|[3,10] :count معلّقة|[11,*] :count معلّقًا',
+    'put_on_hold_done' => 'عُلِّق المقترح',
+    'taken_off_hold_done' => 'رُفع التعليق عن المقترح',
     'final_reports_status_retired' => 'أُلغيت حالة التقارير النهائية؛ نُقل إلى نشط',
     'record_final_report_acceptance' => 'تسجيل قبول التقرير الختامي',
     'final_report_acceptance_title' => 'تسجيل قبول التقرير الختامي',
@@ -353,7 +370,7 @@ return [
     'section_notes' => 'ملاحظات',
     /*
      * W-24 (D-62): المذكرة المفاهيمية نفسها — النص والملف المرفوع — في
-     * النموزج وفي تبويب الحالة.
+     * النموذج وفي تبويب الحالة.
      */
     'concept_note' => [
         'section' => 'المذكرة المفاهيمية',
@@ -394,7 +411,6 @@ return [
     'target_proposal_draft' => 'ابدأ أو تابع كتابة المقترح الكامل.',
     'target_proposal_review' => 'أرسل المقترح إلى المراجعة الداخلية.',
     'target_submitted' => 'سجّل أن المقترح أُرسل إلى المانح.',
-    'target_on_hold' => 'علّق المقترح بانتظار قرار المانح مع تاريخ تذكير.',
     'target_rejected' => 'سجّل أن المانح رفض المقترح.',
     'target_completed' => 'أغلق المقترح بعد قبول التقرير الختامي.',
     'reviewers' => 'المراجعون',
@@ -492,6 +508,21 @@ return [
     'approval_warning_no_agreement' => 'لا اتفاقية مسجلة بعد',
     'approval_warning_location_linked_existing' => 'يوجد مشروع مفتوح في أحد المواقع أصلًا، فجرى ربطه بدل إنشاء مشروع جديد.',
     'approval_proposal_note' => 'وافق المانح على المقترح',
+    'payroll_start_note' => 'مقترح رواتب: يبدأ مسودةَ مقترح',
+    'payroll_active_on_approval' => 'مقترح رواتب: نشط منذ موافقة المانح',
+    'payroll_has_no_projects' => 'مقترح الرواتب لا يُربط بمشاريع',
+    'narrative_required' => 'اكتب وصفًا لما تغطيه الرواتب في 50 حرفًا على الأقل',
+    'choose_the_proposal_kind' => 'اختر نوع المقترح: مشروع أو رواتب',
+    'proposal_kind' => 'نوع المقترح',
+    'the_kind_cannot_change' => 'يُحدَّد النوع عند إنشاء المقترح.',
+    'kind_project_help' => 'يُنفَّذ في مشاريع، مع إطار منطقي ومستهدفات وتقارير شهرية.',
+    'kind_payroll_help' => 'رواتب متطوعي المركز ومعداته: نص وصفي وميزانية وتقرير نهائي فقط.',
+    'a_new_payroll_proposal_starts_as_a_draft' => 'يبدأ مقترح الرواتب الجديد كمسودة مقترح.',
+    'section_narrative' => 'النص الوصفي',
+    'narrative_label' => 'ما تغطيه الرواتب',
+    'narrative_help' => '50 حرفًا على الأقل: المركز والمتطوعون والمعدات التي يغطيها.',
+    'payroll_attachment_hint' => 'أرفق ملف الرواتب في تبويب المستندات بعد حفظ المقترح.',
+    'payroll_kind_badge' => 'مقترح رواتب',
     'activated_with_report_template' => 'فُعِّل مع نموذج تقرير المشروع',
     'choose_previous' => 'اختر المقترح الذي يتجدد',
     'previous_cycle' => 'لا يجدد المقترح نفسه ولا أحد المقترحات التالية له',

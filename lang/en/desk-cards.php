@@ -9,15 +9,6 @@ return [
         'stage_link' => ':stage: :count projects, open the projects register',
         'empty' => 'No live projects yet.',
     ],
-    'notes' => [
-        'label' => 'My notes',
-        'placeholder' => 'Jot down anything: a call to return, an idea for next month…',
-        'saved' => 'Saved',
-        'saving' => 'Saving…',
-        'private' => 'only you can see this',
-        'count' => ':count / :max',
-        'too_long' => 'Notes can hold at most :max characters.',
-    ],
     'todo' => [
         'label' => 'Add a to-do',
         'placeholder' => 'Add a to-do and press Enter',
@@ -99,7 +90,6 @@ return [
     'tagline' => [
         'glance' => 'How this month is going, in six numbers.',
         'flow' => 'Where every project stands, start to finish.',
-        'notes' => 'Your private notes and reminders.',
         'todo' => 'Your own short list to tick off.',
         'overdue' => 'Your work that missed its date.',
         'needs' => 'Things waiting for your OK.',

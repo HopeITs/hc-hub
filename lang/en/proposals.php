@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'internal_number_exhausted' => 'All 999 internal proposal numbers for :year have been assigned.',
     'accepted_file_types' => 'Accepted: :types, up to 5 MB.',
     'achievement_counts_approved_reports_only' => 'Achievement counts approved reports only.',
     'across_count_proposals' => '{0} Across no proposals|{1} Across :count proposal|[2,*] Across :count proposals',
@@ -299,6 +300,22 @@ return [
     'hold_only_while_submitted' => 'A proposal can only be put on hold once it is with the donor, not while it is :status.',
     'taken_off_hold_standard_note' => 'Taken off hold.',
     'on_hold_status_retired' => 'On hold is a flag now, not a status: the proposal is back at the status it was held from.',
+
+    /*
+     * W-06 (D-58): a hold is a flag on the status, so it has its own two
+     * actions instead of a transition. The chip and the counts read "On hold"
+     * on their own; the full label comes from Proposal::statusLabel().
+     */
+    'put_on_hold' => 'Put on hold',
+    'take_off_hold' => 'Take off hold',
+    'put_on_hold_consequence' => 'The proposal keeps its status. Stalled and deadline alerts stop, and we ask for news on the reminder date.',
+    'take_off_hold_consequence' => 'The proposal keeps its status and goes back to the usual reminders.',
+    'why_put_on_hold' => 'Why is it on hold?',
+    'off_hold_note' => 'Note (optional)',
+    'on_hold_chip' => 'On hold',
+    'count_on_hold' => ':count on hold|:count on hold',
+    'put_on_hold_done' => 'Proposal put on hold.',
+    'taken_off_hold_done' => 'Proposal taken off hold.',
     'final_reports_status_retired' => 'Final reports status retired; moved to Active.',
     'record_final_report_acceptance' => 'Record final report acceptance',
     'final_report_acceptance_title' => 'Record final report acceptance',
@@ -394,7 +411,6 @@ return [
     'target_proposal_draft' => 'Start or resume drafting the full proposal.',
     'target_proposal_review' => 'Send the proposal for internal review.',
     'target_submitted' => 'Record that the proposal was sent to the donor.',
-    'target_on_hold' => 'Pause while the donor decides, with a reminder date.',
     'target_rejected' => 'Record that the donor declined.',
     'target_completed' => 'Close the proposal after the final report is accepted.',
     'reviewers' => 'Reviewers',
@@ -492,6 +508,21 @@ return [
     'approval_warning_no_agreement' => 'No agreement recorded yet.',
     'approval_warning_location_linked_existing' => 'An open project already ran at one of the locations and was linked instead of created.',
     'approval_proposal_note' => 'Donor approved the proposal.',
+    'payroll_start_note' => 'Payroll proposal: it starts as a proposal draft.',
+    'payroll_active_on_approval' => 'Payroll proposal: active from the donor\'s approval.',
+    'payroll_has_no_projects' => 'A payroll proposal is not linked to projects.',
+    'narrative_required' => 'Describe what the payroll covers in at least 50 characters.',
+    'choose_the_proposal_kind' => 'Choose whether this is a project or a payroll proposal.',
+    'proposal_kind' => 'Proposal kind',
+    'the_kind_cannot_change' => 'The kind is set when the proposal is created.',
+    'kind_project_help' => 'Runs in projects, with a logframe, targets and monthly reports.',
+    'kind_payroll_help' => 'A center\'s volunteer salaries and equipment: a narrative, a budget and a final report only.',
+    'a_new_payroll_proposal_starts_as_a_draft' => 'A new payroll proposal starts as a proposal draft.',
+    'section_narrative' => 'Narrative',
+    'narrative_label' => 'What the payroll covers',
+    'narrative_help' => 'At least 50 characters: the center, the volunteers and the equipment it pays for.',
+    'payroll_attachment_hint' => 'Attach the payroll file on the proposal\'s Documents tab once it is saved.',
+    'payroll_kind_badge' => 'Payroll proposal',
     'activated_with_report_template' => 'Activated with the project’s report template.',
     'choose_previous' => 'Choose the proposal being renewed.',
     'previous_cycle' => 'A proposal cannot renew itself or one of its successors.',

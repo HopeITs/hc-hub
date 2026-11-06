@@ -1,6 +1,8 @@
 {{--
     The lifecycle rail of proposals/show: nine stops, each with the date it
-    was reached. Included by ⚡show.blade.php, whose top PHP block defines
+    was reached. The nine are the merged line (W-25): `on hold` is not a stop,
+    it is a chip on the current one. This file holds no logic — every state,
+    label and flag is decided in ChartsProposalChronology::lifecycle(). Included by ⚡show.blade.php, whose top PHP block defines
     $mutedText, $inkText, $hairline, $amount, $term, $chronology and
     $arrivals.
 --}}
@@ -19,7 +21,8 @@
         })"
         data-lifecycle
     >
-        <ol class="grid min-w-[56rem] grid-cols-9 @3xl/detail:min-w-0">
+        {{-- Nine stops for a project proposal, five for payroll (W-32). --}}
+        <ol @class(['grid @3xl/detail:min-w-0', 'min-w-[56rem] grid-cols-9' => count($this->lifecycle) === 9, 'min-w-[32rem] grid-cols-5' => count($this->lifecycle) !== 9])>
             @foreach ($this->lifecycle as $index => $stop)
                 <li
                     class="relative flex min-w-0 flex-col items-center gap-1.5"
@@ -48,6 +51,10 @@
                         'font-medium '.$inkText => $stop['state'] === 'past',
                         'font-medium '.$mutedText => $stop['state'] === 'ahead',
                     ])>{{ $stop['label'] }}</span>
+
+                    @if ($stop['held'])
+                        <x-ui.hold-chip />
+                    @endif
 
                     <span class="min-h-4 text-center text-[10px] tabular-nums {{ $mutedText }}">
                         @if ($stop['date'] !== null)

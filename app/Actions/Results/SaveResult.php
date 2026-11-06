@@ -66,6 +66,11 @@ final class SaveResult
             $lockedProposal = $proposal === null
                 ? null
                 : Proposal::query()->whereKey($proposal->getKey())->lockForUpdate()->firstOrFail();
+
+            if ($lockedProposal?->isPayroll()) {
+                $this->refuse('proposal', 'results_framework.payroll_has_no_framework');
+            }
+
             $proposalId = $lockedProposal?->id;
 
             $result = $existing === null

@@ -6,9 +6,11 @@ namespace App\Support;
 
 use App\Enums\MilestoneStatus;
 use App\Enums\RagStatus;
+use App\Models\AnnualPlan;
 use App\Models\DonorProposal;
 use App\Models\Indicator;
 use App\Models\Milestone;
+use App\Models\Program;
 use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\Report;
@@ -34,7 +36,7 @@ use Illuminate\Support\Facades\DB;
  *
  * @phpstan-type FundingLine array{currency: string, requested: float, agreed: float, percent: int|null}
  * @phpstan-type Rollup array{
- *     results: array{on: int, total: int, tone: 'good'|'warn'|'critical'|null}|null,
+ *     results: array{on: int, total: int, tone: 'good'|'warn'|'critical'|null, by_program: array<int, array{on: int, total: int}>}|null,
  *     funding: array{lines: list<FundingLine>, percent: int|null, tone: 'good'|'warn'|'critical'|null}|null,
  *     risks: int|null,
  *     late: array{milestones: int|null, reports: int|null, total: int}|null
@@ -50,6 +52,12 @@ final class StrategyRollup
 
     /** Funding below this share of the request reads critical. */
     private const int FundedLow = 50;
+
+    /** On pace for at least this share of rated targets reads "On track". */
+    public const int OnTrackShare = 95;
+
+    /** On pace for at least this share (below OnTrackShare) reads "Mostly on track"; less is "Off track". */
+    public const int MostlyOnTrackShare = 80;
 
     /**
      * @param  list<int>  $strategyIds
@@ -79,7 +87,7 @@ final class StrategyRollup
             $lateReports = $reports === null ? null : (int) ($reports[$id] ?? 0);
 
             $rollups[$id] = [
-                'results' => $results === null ? null : ($results[$id] ?? ['on' => 0, 'total' => 0, 'tone' => null]),
+                'results' => $results === null ? null : ($results[$id] ?? ['on' => 0, 'total' => 0, 'tone' => null, 'by_program' => []]),
                 'funding' => $funding === null ? null : ($funding[$id] ?? ['lines' => [], 'percent' => null, 'tone' => null]),
                 'risks' => $risks === null ? null : (int) ($risks[$id] ?? 0),
                 'late' => $lateMilestones === null && $lateReports === null ? null : [
@@ -94,11 +102,88 @@ final class StrategyRollup
     }
 
     /**
+     * The headline verdict on a count of rated targets: 95% or more on pace is
+     * on track, 80% or more mostly on track, anything less off track. No rated
+     * targets, no verdict.
+     *
+     * @return array{key: 'on_track'|'mostly_on_track'|'off_track', tone: 'good'|'warn'|'critical', on: int, total: int, behind: int}|null
+     */
+    public static function verdict(int $on, int $total): ?array
+    {
+        if ($total === 0) {
+            return null;
+        }
+
+        [$key, $tone] = match (true) {
+            $on * 100 >= self::OnTrackShare * $total => ['on_track', 'good'],
+            $on * 100 >= self::MostlyOnTrackShare * $total => ['mostly_on_track', 'warn'],
+            default => ['off_track', 'critical'],
+        };
+
+        return ['key' => $key, 'tone' => $tone, 'on' => $on, 'total' => $total, 'behind' => $total - $on];
+    }
+
+    /**
+     * One program's pace from its `by_program` counts: behind below the
+     * "Mostly on track" share, otherwise on pace; null with nothing rated.
+     *
+     * @param  array{on: int, total: int}|null  $counts
+     * @return 'on_pace'|'behind'|null
+     */
+    public static function programPace(?array $counts): ?string
+    {
+        if ($counts === null || $counts['total'] === 0) {
+            return null;
+        }
+
+        return self::MostlyOnTrackShare * $counts['total'] > $counts['on'] * 100 ? 'behind' : 'on_pace';
+    }
+
+    /**
+     * How many of each strategy's programs have a plan for the strategy's
+     * year (an annual plan with at least one plan indicator), given
+     * [strategyId => year]. Null when the viewer may not see annual plans,
+     * and then nothing is queried.
+     *
+     * @param  array<int, int>  $yearByStrategy
+     * @return array<int, array{planned: int, programs: int, missing: int}>|null
+     */
+    public static function planReadiness(User $viewer, array $yearByStrategy): ?array
+    {
+        if (! $viewer->can('annual-plans.view')) {
+            return null;
+        }
+
+        $programsByStrategy = Program::query()
+            ->whereIn('strategy_id', array_keys($yearByStrategy))
+            ->get(['id', 'strategy_id'])
+            ->groupBy('strategy_id');
+
+        $plannedKeys = AnnualPlan::query()
+            ->whereIn('program_id', $programsByStrategy->flatten()->pluck('id'))
+            ->whereIn('year', array_values(array_unique($yearByStrategy)))
+            ->whereHas('planIndicators')
+            ->get(['program_id', 'year'])
+            ->mapWithKeys(fn (AnnualPlan $plan): array => [$plan->program_id.':'.$plan->year => true]);
+
+        $readiness = [];
+
+        foreach ($yearByStrategy as $strategyId => $year) {
+            $programIds = $programsByStrategy->get($strategyId, collect())->pluck('id');
+            $planned = $programIds->filter(fn (mixed $id): bool => $plannedKeys->has($id.':'.$year))->count();
+
+            $readiness[$strategyId] = ['planned' => $planned, 'programs' => $programIds->count(), 'missing' => $programIds->count() - $planned];
+        }
+
+        return $readiness;
+    }
+
+    /**
      * An indicator belongs to the strategy of its result's program, as the
      * indicators register groups it.
      *
      * @param  list<int>  $strategyIds
-     * @return array<int, array{on: int, total: int, tone: 'good'|'warn'|'critical'|null}>
+     * @return array<int, array{on: int, total: int, tone: 'good'|'warn'|'critical'|null, by_program: array<int, array{on: int, total: int}>}>
      */
     private static function results(array $strategyIds): array
     {
@@ -110,9 +195,10 @@ final class StrategyRollup
             ->whereIn('programs.strategy_id', $strategyIds)
             ->whereNotNull('indicators.target')
             ->with('progress:id,indicator_id,date,value')
-            ->get(['indicators.id', 'indicators.baseline', 'indicators.target', 'programs.strategy_id'])
+            ->get(['indicators.id', 'indicators.baseline', 'indicators.target', 'programs.strategy_id', 'programs.id as program_id'])
             ->map(fn (Indicator $indicator): array => [
                 'strategy' => (int) $indicator->getAttribute('strategy_id'),
+                'program' => (int) $indicator->getAttribute('program_id'),
                 'rag' => $indicator->ragStatus($today->startOfYear(), $today->endOfYear()),
             ])
             ->filter(fn (array $row): bool => $row['rag'] !== null)
@@ -125,7 +211,16 @@ final class StrategyRollup
             $on = $rows->where('rag', RagStatus::Green)->count();
             $red = $rows->where('rag', RagStatus::Red)->count();
 
-            $results[(int) $strategyId] = ['on' => $on, 'total' => $total, 'tone' => self::resultsTone($on, $red, $total)];
+            $byProgram = [];
+
+            foreach ($rows->groupBy('program') as $programId => $programRows) {
+                $byProgram[(int) $programId] = [
+                    'on' => $programRows->where('rag', RagStatus::Green)->count(),
+                    'total' => $programRows->count(),
+                ];
+            }
+
+            $results[(int) $strategyId] = ['on' => $on, 'total' => $total, 'tone' => self::resultsTone($on, $red, $total), 'by_program' => $byProgram];
         }
 
         return $results;

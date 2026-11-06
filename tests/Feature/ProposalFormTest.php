@@ -6,6 +6,7 @@ use App\Enums\AssignmentStatus;
 use App\Enums\Currency;
 use App\Enums\DonorApprovalStatus;
 use App\Enums\ProjectStatus;
+use App\Enums\ProposalKind;
 use App\Enums\ProposalStatus;
 use App\Models\Activity;
 use App\Models\Assignment;
@@ -133,7 +134,7 @@ test('creating a proposal stores its donor, projects, beneficiaries and first no
 
     expect(DB::table('proposals')->find($proposal->id))
         ->name->toBe('Winter Shelter Response')
-        ->internal_project_number->toBe('HC-2026-951')
+        ->internal_project_number->toBe('26-001')
         ->donor_id->toBe($data['donorId'])
         ->status->toBe('concept note')
         ->planned_date_begin->toBe('2026-11-01')
@@ -887,4 +888,88 @@ test('editing a proposal opens the form with its stored concept note', function 
     Livewire::actingAs(userWithRole('Financial'))->test('pages::proposals.index')
         ->call('openEditModal', $proposal->id)
         ->assertSet('conceptNote', 'Stored note.');
+});
+
+/*
+| W-32 slice 2: the kind switch. Payroll shows name, number, donor, narrative,
+| dates, budget and notes; locations, the starting stage and the renewal preset
+| are absent. The kind is chosen on create only.
+*/
+
+test('the form creates a payroll proposal in proposal draft with its narrative', function () {
+    fillProposalBasics(openProposalCreateForm(userWithRole('Financial')))
+        ->set('kind', 'payroll')
+        ->set('narrative', 'Volunteer salaries and equipment for the Micro Aleppo center during 2027.')
+        ->call('saveProposal')
+        ->assertHasNoErrors()
+        ->assertSet('showProposalModal', false);
+
+    $proposal = Proposal::query()->sole();
+
+    expect($proposal->kind)->toBe(ProposalKind::Payroll)
+        ->and($proposal->status)->toBe(ProposalStatus::ProposalDraft)
+        ->and($proposal->narrative)->toBe('Volunteer salaries and equipment for the Micro Aleppo center during 2027.')
+        ->and(DB::table('project_proposal')->count())->toBe(0);
+});
+
+test('a payroll proposal without a long enough narrative shows the message under the field', function () {
+    fillProposalBasics(openProposalCreateForm(userWithRole('Financial')))
+        ->set('kind', 'payroll')
+        ->set('narrative', 'Too short.')
+        ->call('saveProposal')
+        ->assertHasErrors(['narrative'])
+        ->assertSeeText(__('proposals.narrative_required'));
+
+    expect(DB::table('proposals')->count())->toBe(0);
+});
+
+test('the payroll form shows the narrative and leaves out locations and the starting stage', function () {
+    openProposalCreateForm(userWithRole('Financial'))
+        ->assertSeeHtml('data-test="proposal-kind-switch"')
+        ->assertSeeText(__('proposals.kind_project_help'))
+        ->assertSeeText(__('proposals.kind_payroll_help'))
+        ->assertDontSeeHtml('wire:model="narrative"')
+        ->set('kind', 'payroll')
+        ->assertSeeHtml('wire:model="narrative"')
+        ->assertDontSeeText(__('proposals.section_locations'))
+        ->assertDontSeeText(__('proposals.section_start'))
+        ->assertDontSeeHtml('data-test="proposal-project-picker"')
+        ->assertSeeInOrder([
+            __('proposals.section_identity'),
+            __('proposals.section_donor'),
+            __('proposals.section_narrative'),
+            __('proposals.section_planned_dates'),
+            __('proposals.section_budget'),
+            __('proposals.section_notes'),
+        ]);
+});
+
+test('switching to payroll drops the projects chosen for a project proposal', function () {
+    $project = Project::factory()->create();
+
+    openProposalCreateForm(userWithRole('Financial'))
+        ->set('projectIds', [(string) $project->id])
+        ->set("beneficiaries.{$project->id}", '50')
+        ->set('kind', 'payroll')
+        ->assertSet('projectIds', [])
+        ->assertSet('beneficiaries', []);
+});
+
+test('editing a payroll proposal shows its narrative and a locked kind, and a sent kind changes nothing', function () {
+    $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    Livewire::actingAs(userWithRole('Financial'))
+        ->test('pages::proposals.index')
+        ->call('openEditModal', $proposal->id)
+        ->assertSet('narrative', $proposal->narrative)
+        ->assertSeeHtml('data-test="proposal-kind-locked"')
+        ->assertDontSeeHtml('data-test="proposal-kind-switch"')
+        ->assertDontSeeText(__('proposals.section_locations'))
+        ->set('kind', 'project')
+        ->set('narrative', 'Volunteer salaries, equipment and running costs of the Micro Aleppo center.')
+        ->call('saveProposal')
+        ->assertHasNoErrors();
+
+    expect($proposal->fresh()->kind)->toBe(ProposalKind::Payroll)
+        ->and($proposal->fresh()->narrative)->toBe('Volunteer salaries, equipment and running costs of the Micro Aleppo center.');
 });

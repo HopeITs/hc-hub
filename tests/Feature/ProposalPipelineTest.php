@@ -519,3 +519,34 @@ test('the proposals search hint says it also matches the internal number', funct
         ->test('pages::proposals.index')
         ->assertSeeHtml('placeholder="Name, number or notes"');
 });
+
+test('the pipeline counts a held proposal in its own phase and shows the hold as a sub-count', function () {
+    $held = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
+    $held->forceFill(['on_hold_since' => today()])->save();
+    Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
+
+    $page = Livewire::actingAs(User::factory()->role('Financial')->create())->test('pages::proposals.index');
+    $planning = collect($page->instance()->pipeline)->firstWhere('phase', ProposalPhase::Planning);
+
+    // A hold keeps the status, so both proposals count in Planning (W-06, D-58).
+    expect($planning['count'])->toBe(2)
+        ->and($planning['held'])->toBe(1);
+
+    // The rail lives in the Overview view.
+    $page->set('view', 'overview')
+        ->assertSeeHtml('data-test="phase-held-planning"')
+        ->assertSeeText(trans_choice('proposals.count_on_hold', 1, ['count' => 1]));
+});
+
+test('the pipeline counts payroll proposals beside project ones, and the kind filter narrows it', function () {
+    $user = User::factory()->role('Financial')->create();
+    Proposal::factory()->create(['status' => ProposalStatus::ProposalDraft]);
+    Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    $planning = fn (array $query = []): int => collect(Livewire::actingAs($user)->withQueryParams($query)->test('pages::proposals.index')->instance()->pipeline)
+        ->firstWhere('phase', ProposalPhase::Planning)['count'];
+
+    expect($planning())->toBe(2)
+        ->and($planning(['kind' => 'payroll']))->toBe(1)
+        ->and($planning(['kind' => 'project']))->toBe(1);
+});

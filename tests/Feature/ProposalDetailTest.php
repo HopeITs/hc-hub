@@ -844,3 +844,141 @@ test('someone without proposals.view cannot open a proposal page at all', functi
         ->get(route('proposals.show', $proposal))
         ->assertForbidden();
 });
+
+/*
+ * W-25 (folded into W-06 slice 2, D-58): the lifecycle stepper draws the
+ * merged line — nine stops, with `on hold` as a chip on the current one.
+ */
+
+test('the lifecycle stepper draws the nine merged stops and marks the current one', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
+
+    $stops = Livewire::actingAs($user)
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->instance()
+        ->lifecycle;
+
+    expect(array_map(fn (array $stop): string => $stop['status']->value, $stops))->toBe([
+        'concept note',
+        'concept note review',
+        'concept note submitted',
+        'proposal draft',
+        'proposal review',
+        'submitted',
+        'approved',
+        'active',
+        'completed',
+    ]);
+
+    // `on hold` is not a stop any more, and the current stop is announced.
+    $current = array_values(array_filter($stops, fn (array $stop): bool => $stop['state'] === 'current'));
+
+    expect($current)->toHaveCount(1)
+        ->and($current[0]['status'])->toBe(ProposalStatus::Submitted)
+        ->and($current[0]['held'])->toBeFalse();
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertOk()
+        ->assertSeeHtml('aria-current="step"')
+        ->assertDontSeeHtml('data-test="on-hold-chip"');
+});
+
+test('a proposal on hold wears the chip on its current stop and reads Submitted (On hold)', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
+    $proposal->forceFill(['on_hold_since' => today()->subWeek(), 'status_remind_on' => today()->addWeek()])->save();
+
+    $stops = Livewire::actingAs($user)
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->instance()
+        ->lifecycle;
+
+    $held = array_values(array_filter($stops, fn (array $stop): bool => $stop['held']));
+
+    // Exactly one chip, on the stop the proposal sits at — never a stop of its own.
+    expect($held)->toHaveCount(1)
+        ->and($held[0]['status'])->toBe(ProposalStatus::Submitted)
+        ->and($held[0]['state'])->toBe('current')
+        ->and(array_map(fn (array $stop): string => $stop['status']->value, $stops))->not->toContain('on hold');
+
+    $this->actingAs($user)
+        ->get(route('proposals.show', $proposal))
+        ->assertOk()
+        ->assertSeeHtml('data-test="on-hold-chip"')
+        ->assertSeeText(__('proposals.on_hold_chip'))
+        ->assertSeeText($proposal->fresh()->statusLabel())
+        ->assertSeeHtml('data-tone="warn"');
+});
+
+test('a rejected proposal still draws its side exit and wears no chip', function () {
+    $user = User::factory()->role('Financial')->create();
+    $proposal = Proposal::factory()->create(['status' => ProposalStatus::Rejected]);
+    ProposalStatusNote::factory()->create(['proposal_id' => $proposal->id, 'status' => ProposalStatus::Submitted, 'date' => today()->subMonth()]);
+    ProposalStatusNote::factory()->create(['proposal_id' => $proposal->id, 'status' => ProposalStatus::Rejected, 'date' => today()]);
+
+    $stops = Livewire::actingAs($user)
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->instance()
+        ->lifecycle;
+
+    expect(array_filter($stops, fn (array $stop): bool => $stop['state'] === 'rejected'))->toHaveCount(1)
+        ->and(array_filter($stops, fn (array $stop): bool => $stop['held']))->toBeEmpty();
+});
+
+/*
+| W-32 slice 2: a payroll proposal's page offers Status, Documents and
+| Funding only, names its kind in the header and reads Money and Time.
+*/
+
+test('a payroll proposal offers only the status, documents and funding tabs', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    $component = Livewire::actingAs($user)->test('pages::proposals.show', ['proposal' => $proposal]);
+
+    expect(array_column($component->instance()->tabs, 'key'))->toBe(['status', 'funding', 'documents']);
+
+    expect(array_map(fn (array $stop): string => $stop['status']->value, $component->instance()->lifecycle))->toBe(['proposal draft', 'submitted', 'approved', 'active', 'completed']);
+
+    $component->assertSeeHtml('data-test="payroll-kind-chip"')
+        ->assertDontSeeHtml('data-proposal-reviewers')
+        ->assertDontSeeText(__('proposals.tab_logframe'))
+        ->assertDontSeeText(__('proposals.tab_targets'))
+        ->set('tab', 'logframe')
+        ->assertSet('tab', 'status')
+        ->set('tab', 'documents')
+        ->assertSet('tab', 'documents');
+});
+
+test('a stale bookmark to a project tab opens a payroll proposal on its status', function () {
+    $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->withQueryParams(['ptab' => 'targets'])
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->assertSet('tab', 'status');
+});
+
+test('a project proposal keeps every tab and shows no payroll chip', function () {
+    $proposal = Proposal::factory()->create();
+
+    $component = Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::proposals.show', ['proposal' => $proposal]);
+
+    expect(array_column($component->instance()->tabs, 'key'))->toContain('projects', 'logframe', 'targets', 'plan');
+    $component->assertDontSeeHtml('data-test="payroll-kind-chip"');
+});
+
+test('a payroll proposal reads money and time only, and time opens the status tab', function () {
+    $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
+
+    $vitals = Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->instance()
+        ->vitals;
+
+    expect(array_column($vitals, 'key'))->toBe(['money', 'time'])
+        ->and(collect($vitals)->firstWhere('key', 'time')['tab'])->toBe('status');
+});

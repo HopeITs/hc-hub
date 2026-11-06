@@ -179,6 +179,9 @@ return [
             'pace' => '«:subject» متأخر عن الوتيرة: أُنجز :achieved% مقابل :expected% متوقعة حتى الآن',
             'silent' => 'لم يُسجَّل أي تقدم للمؤشر «:subject» منذ :date',
         ],
+        'responsible_inactive' => [
+            'project' => 'المشروع «:subject» ما زال باسم :person وقد غادر — أعد تعيينه',
+        ],
         'data_gap' => [
             'no_milestones' => 'المشروع النشط «:subject» بلا مراحل',
             'no_indicators' => 'المشروع النشط «:subject» بلا مؤشرات',
@@ -312,6 +315,7 @@ return [
             'report_approve' => 'اعتماد',
             'transfer_mark_received' => 'تعليم كمستلمة',
             'agreement_record' => 'تسجيل الاتفاقية',
+            'project_reassign' => 'إعادة التعيين',
             'assignment_acknowledge' => 'تأكيد الاستلام',
             'assignment_reject' => 'رفض',
             'alert_snooze' => 'تأجيل التذكير',
@@ -630,6 +634,10 @@ return [
             'concept_note_updated' => [
                 'title' => 'تحديث المذكرة المفاهيمية',
                 'body' => 'حدّث :actor المذكرة المفاهيمية للمقترح «:subject»',
+            ],
+            'responsible_inactive' => [
+                'title' => 'المسؤول غادر',
+                'body' => 'ما زال «:subject» باسم شخص غادر',
             ],
             'targets_saved' => [
                 'title' => 'حفظ المستهدفات',

@@ -49,9 +49,10 @@ use Spatie\Permission\Traits\HasRoles;
  * @property int|null $employee_id
  * @property int|null $active_role_id
  * @property string|null $locale
+ * @property list<string>|null $nav_pins the sidebar pages this person pinned, as route names
+ * @property list<array{route: string, key: string, label: string, kind: string}>|null $nav_recent the records this person opened last, newest first
  * @property array<mixed>|null $desk_layout the saved Desk arrangement, list<array{panel: string, size: string}> as written; read through Panels::layoutFor(), which drops anything malformed
  * @property array<mixed>|null $page_panels the Panels popup's sets per route name, array<string, list<array{panel: string, size: string}>> as written; read through Panels::pageLayoutFor()
- * @property string|null $desk_notes the Desk's private My notes card, at most 5000 characters
  * @property bool $notification_popups
  * @property CarbonImmutable|null $tour_seen_at
  * @property CarbonImmutable|null $email_verified_at
@@ -82,7 +83,8 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
         'locale' => null,
         'desk_layout' => null,
         'page_panels' => null,
-        'desk_notes' => null,
+        'nav_pins' => null,
+        'nav_recent' => null,
         'notification_popups' => false,
         'tour_seen_at' => null,
         'email_two_factor_enabled' => false,
@@ -690,6 +692,8 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
             'tour_seen_at' => 'datetime',
             'desk_layout' => 'array',
             'page_panels' => 'array',
+            'nav_pins' => 'array',
+            'nav_recent' => 'array',
         ];
     }
 

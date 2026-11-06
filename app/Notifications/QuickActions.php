@@ -8,6 +8,8 @@ use App\Enums\ArStatus;
 use App\Enums\ReportStatus;
 use App\Enums\TaskStatus;
 use App\Models\Assignment;
+use App\Models\HrEmployee;
+use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\Report;
 use App\Models\Scopes\TaskVisibilityScope;
@@ -16,6 +18,7 @@ use App\Models\TransfersTracking;
 use App\Models\User;
 use App\Models\UserNotification;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -40,7 +43,10 @@ final class QuickActions
         $types = match ($subjectType) {
             'task' => $this->taskActions($subjectId, $user),
             'report' => $this->reportActions($subjectId, $user),
-            'project' => $this->assignmentActions($subjectType, $subjectId, $user),
+            'project' => [
+                ...$this->assignmentActions($subjectType, $subjectId, $user),
+                ...($this->ownerHasLeft($subjectId, $user) ? ['project.reassign'] : []),
+            ],
             'proposal' => $this->canRecordAgreementFor($subjectId, $user) ? ['agreement.record'] : [],
             'transfer' => $user->can('transfers.update') && TransfersTracking::query()->whereKey($subjectId)->toBase()->value('ar_status') === ArStatus::Pending->value
                 ? ['transfer.mark_received'] : [],
@@ -54,6 +60,57 @@ final class QuickActions
      * Acknowledge / reject, offered to the person an assignment on the record
      * is still waiting on.
      *
+     * @return list<string>
+     */
+    /**
+     * Opens the project so its owner can be changed. Nothing is reassigned
+     * here: D-62 asks a person to choose, it does not choose for them.
+     *
+     * @return array{ok: bool, message: string, redirect: string|null}
+     */
+    private function runReassign(User $user, int $projectId): array
+    {
+        if (! $this->ownerHasLeft($projectId, $user)) {
+            return $this->result(false, 'already_done');
+        }
+
+        $url = app(SubjectLinks::class)->routeFor('project', $projectId);
+
+        return $url === null
+            ? $this->result(false, 'missing')
+            : ['ok' => true, 'message' => 'notifications.quick.opening_record', 'redirect' => $url];
+    }
+
+    /**
+     * Whether a project is still named after somebody who has left HR, so
+     * the people who may change it are offered the way to reassign it
+     * (D-62, W-35). HR is only read; nothing about its status is stored.
+     */
+    private function ownerHasLeft(int $projectId, User $user): bool
+    {
+        // Either permission, as the prompt allows: the Public Relations
+        // Manager is who the alert tells and holds `proposals.update`, not
+        // `projects.update`, so requiring the latter would send them a
+        // notification they could not act on. The action only opens the
+        // page; the project form re-checks before anything is saved.
+        if (! $user->can('projects.update') && ! $user->can('proposals.update')) {
+            return false;
+        }
+
+        $ownerId = Project::query()->whereKey($projectId)->toBase()->value('user_id');
+
+        if ($ownerId === null) {
+            return false;
+        }
+
+        try {
+            return HrEmployee::query()->whereKey((int) $ownerId)->where('is_active', false)->exists();
+        } catch (QueryException) {
+            return false;
+        }
+    }
+
+    /**
      * @return list<string>
      */
     private function assignmentActions(string $subjectType, int $subjectId, User $user): array
@@ -125,6 +182,7 @@ final class QuickActions
                 : $this->result(false, 'forbidden'),
             'assignment.acknowledge', 'assignment.reject' => $this->runAssignment($user, $notification, $type),
             'agreement.record' => $this->runRecordAgreement($user, $id),
+            'project.reassign' => $this->runReassign($user, $id),
             'alert.snooze' => $this->snooze($user, $notification),
             default => $this->result(false, 'unavailable'),
         };

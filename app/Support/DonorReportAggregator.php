@@ -66,6 +66,12 @@ final class DonorReportAggregator
             throw ValidationException::withMessages(['proposalId' => __('donor_reports.self_funded')]);
         }
 
+        // A payroll proposal (W-32) has a final report only, never one built
+        // from monthly reports.
+        if ($proposal->isPayroll()) {
+            throw ValidationException::withMessages(['proposalId' => __('donor_reports.payroll_has_final_report_only')]);
+        }
+
         $start = $start->startOfMonth();
         $end = $end->startOfDay();
         $monthEnd = $end->endOfMonth()->startOfDay();

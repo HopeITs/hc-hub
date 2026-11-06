@@ -17,11 +17,11 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
 /**
- * The Pillars section of strategies/show (T32, D-35): one card per pillar
- * listing its programs, a "No pillar" group, and the dialogs to create, edit
- * and delete a pillar and to place a program under one. Every write goes
+ * "How the strategy is built" on strategies/show (T32, D-35): each pillar
+ * with its programs, a "Not under a pillar" group, and the dialogs to create,
+ * edit and delete a pillar and to place a program under one. Every write goes
  * through its action; the page only maps the action's error keys to its own
- * fields. Programs come from allPrograms(), never the paginated programs()
+ * fields. Programs come from the page's unpaginated allPrograms()
  * (.ai/rules/strategies.md).
  *
  * @property-read Collection<int, StrategicPillar> $pillars
@@ -250,6 +250,6 @@ trait ManagesStrategicPillars
 
     private function forgetPillars(): void
     {
-        unset($this->pillars, $this->pillarGroups, $this->allPrograms, $this->programs);
+        unset($this->pillars, $this->pillarGroups, $this->allPrograms);
     }
 }

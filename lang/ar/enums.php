@@ -169,6 +169,10 @@ return [
         'closure' => 'الإغلاق',
         'archived' => 'مؤرشف',
     ],
+    'proposal_kind' => [
+        'project' => 'مشروع',
+        'payroll' => 'رواتب',
+    ],
     'proposal_status' => [
         'concept_note' => 'مذكرة مفاهيمية',
         'concept_note_review' => 'مراجعة المذكرة المفاهيمية',

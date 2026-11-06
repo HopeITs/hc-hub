@@ -38,7 +38,7 @@ final class CorrectProposalStatus
                 throw ValidationException::withMessages(['status' => __('proposals.stale_status')]);
             }
 
-            if (! in_array($to, ProposalTransitions::correctionTargets($from), true)) {
+            if (! in_array($to, ProposalTransitions::correctionTargets($from, $locked->kind), true)) {
                 throw ValidationException::withMessages([
                     'status' => __('proposals.transition_not_allowed', ['from' => $from->label(), 'to' => $to->label()]),
                 ]);

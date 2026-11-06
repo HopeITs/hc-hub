@@ -43,9 +43,10 @@ final class ComposeDonorReport
 
     /**
      * The proposal a donor report may be built on, re-loaded from its id:
-     * donor-approved, visible to the actor and not self-funded.
+     * donor-approved, visible to the actor, not self-funded and not payroll
+     * (W-32: a payroll proposal has a final report only).
      *
-     * @throws ValidationException proposal_required, self_funded
+     * @throws ValidationException proposal_required, self_funded, payroll_has_final_report_only
      */
     public function eligibleProposal(int $proposalId, User $actor): Proposal
     {
@@ -57,6 +58,10 @@ final class ComposeDonorReport
 
         if ($proposal->donor->is_internal) {
             throw ValidationException::withMessages(['proposalId' => __('donor_reports.self_funded')]);
+        }
+
+        if ($proposal->isPayroll()) {
+            throw ValidationException::withMessages(['proposalId' => __('donor_reports.payroll_has_final_report_only')]);
         }
 
         return $proposal;

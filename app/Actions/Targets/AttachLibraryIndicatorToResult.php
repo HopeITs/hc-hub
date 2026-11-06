@@ -42,6 +42,10 @@ final class AttachLibraryIndicatorToResult
         return DB::transaction(function () use ($proposal, $libraryIndicatorId, $resultId): Indicator {
             $locked = Proposal::query()->whereKey($proposal->getKey())->lockForUpdate()->firstOrFail();
 
+            if ($locked->isPayroll()) {
+                $this->refuse('proposal', __('targets.payroll_has_no_targets'));
+            }
+
             if ($locked->status->isTerminal()) {
                 $this->refuse('proposal', __('targets.proposal_read_only'));
             }

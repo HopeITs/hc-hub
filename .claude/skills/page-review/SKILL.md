@@ -12,7 +12,7 @@ disable-model-invocation: true
 - **Page path:** $1
 - **Review as:** Both Project & Fundraising Manager and MEAL Manager. Do not ask which role to use. Test the page once, then deliver two separate reports, one for each role.
 
-If the page name or path is missing, ask for it once. Open the path at http://127.0.0.1:8000 unless it is already a full URL. Work out everything else from the live page. For anything else you don't know, state the smallest reasonable assumption under "Assumptions" and continue.
+If the page name or path is missing, ask for it once. Read `APP_URL` from the project's `.env` and open the path on that address (fall back to http://127.0.0.1:8000 if `APP_URL` is missing). If the path is already a full URL, use it as is. Work out everything else from the live page. For anything else you don't know, state the smallest reasonable assumption under "Assumptions" and continue.
 
 ## Your role
 You have two jobs, and they must stay separate:
@@ -28,7 +28,7 @@ HC Tracking is an NGO's internal daily operating system. It connects two sides t
 - **Delivery:** strategy → annual plans → programs → projects → milestones and tasks → results, indicators and targets → risks → reports
 - **Funding:** donors → proposals → funding agreements → transfers → donor reports
 
-**Interface:** there is a top bar with a "find, add or ask" box, and a customizable Desk of panels at /home. Lists open as registers (table, board or calendar). Each project has one Story page. Forms and details open in side sheets. Yes/no confirmations open in centered dialogs. Admin pages live under Settings.
+**Interface:** there is a top bar with a "find, add or ask" box, and a customizable Desk of panels at /home. Lists open as registers (table, board or calendar). Each project has one Story page. Every record opens as its own full page (never a modal or side sheet). Yes/no confirmations open in centered dialogs. Admin pages live under Settings.
 
 **Languages:** English and Arabic (right-to-left). Both are required.
 
@@ -63,7 +63,7 @@ HC Tracking is an NGO's internal daily operating system. It connects two sides t
 
 ## Safety
 - **Change no code, settings or project files.** This is a review only, and no fixes begin until the person running this review says so.
-- **Do not start a server.** The app should already be running at http://127.0.0.1:8000. If it isn't, stop and say so.
+- **Do not start a server.** The app should already be running at the `APP_URL` address. If it isn't, stop and say so.
 - **Do not type passwords or 2FA codes.** If you are not signed in, stop and ask the person running this review to sign in. Do not switch accounts. Review both roles from the signed-in account, name its role in both reports, and tag anything that account's access could not prove for a role as `Needs check`.
 - **Test changes only on records you create,** named `REVIEW-TEST …`. Remove them afterward and list any you could not remove.
 - **Never delete or change existing records.** Do not approve or submit them, or poke or notify real people. Open such actions up to the confirmation step, then cancel. List anything you could not test because of this rule.
@@ -120,8 +120,11 @@ For each of the two roles, identify the 1–3 jobs that role comes here to do, t
 - **P2, medium:** real friction with a workaround, unclear wording, or inconsistency.
 - **P3, polish:** small visual details that don't affect the job.
 
+### Pass 7: Trace to code (for the developer sections only)
+After the user-facing passes, find where each finding lives in the codebase: the page file, route, component, model or query involved, and the likely cause. Read the code; change nothing. Use this only in section 12 and in the Developer Work Plan.
+
 ## How to write
-- **Use plain language only in the report.** Do not mention code, frameworks, databases or how the site is built. Say "the amount shows 0 here but 12,000 on the Transfers page," not how the amount is calculated.
+- **Use plain language only in report sections 0–11.** Section 12 and the Developer Work Plan are for developers and may be technical. Do not mention code, frameworks, databases or how the site is built. Say "the amount shows 0 here but 12,000 on the Transfers page," not how the amount is calculated.
 - **Explain jargon:** if the page uses a term the role wouldn't know, flag it and suggest simpler words. Normal NGO terms such as logframe or tranche are fine for the right role.
 - **Be concrete:** every finding needs a specific fix, including replacement wording in English and Arabic when the issue is copy. "Make it cleaner" is not a fix.
 - **Prefer the simplest fix** that an untrained person would understand. If you suggest a design change, keep the HC Tracking brand (red and gray palette, Somar Sans font) and avoid walls of identical bordered boxes.
@@ -129,11 +132,17 @@ For each of the two roles, identify the 1–3 jobs that role comes here to do, t
 
 ## Output format (use exactly)
 
-Deliver two complete reports, one after the other, with sections 1–11 in each:
-- `# Report 1: MEAL Manager`
-- `# Report 2: Project & Fundraising Manager`
+Deliver everything in chat, in this order:
+- `# Report 1: MEAL Manager` (sections 0–12)
+- `# Report 2: Project & Fundraising Manager` (sections 0–12)
+- `# Developer Work Plan` (one plan covering both reports)
 
 Write each report from that role's point of view, so priorities, jobs, jargon and fixes can differ. Each report must stand alone: repeat a shared finding in both, with its priority for that role and why it hurts that role. If the page has little to do with a role, say so in that report and still complete it.
+
+### 0. Problems and changes needed
+A short, direct list, highest priority first. One line per finding, in this form:
+`[P#] Problem → Change needed` (for example: `[P0] Late-reports count shows 3, the list shows 5 → make the count match the list`).
+No tables, no extra explanation. This is what the reader sees first.
 
 ### 1. Start here
 The 3 fixes that would help most, one line each, then a one-sentence overall verdict.
@@ -175,6 +184,41 @@ Group finding numbers by P0, P1, P2 and P3. Within each group, list the quickest
 ### 11. Not tested, assumptions and cleanup
 What you couldn't test and why · assumptions made · test records created and removed · anything left behind
 
+### 12. Developer notes
+Technical section, kept apart from the plain-language report above.
+| # | File(s) | Route / component | Likely cause | Confidence (Confirmed in code / Suspected) |
+
+## Developer Work Plan
+After both reports, act as a senior software developer and propose a professional plan to fix, edit and redesign the page. Merge the findings from both reports, remove duplicates and follow `.ai/rules`. Propose only; do not start any work.
+
+### A. Summary
+2–3 sentences: the page's overall state, and whether it needs fixes only, targeted edits or a redesign, and why.
+
+### B. Phases (in this order)
+1. **Phase 1: Correctness.** Wrong data, broken actions, access leaks, crashes (P0).
+2. **Phase 2: Core job fixes.** Confusing flows, missing feedback, broken Arabic or phone views (P1).
+3. **Phase 3: Redesign or edits.** Layout, hierarchy and wording changes (P2). If you recommend a redesign, describe the new layout in a few lines, keeping the HC Tracking brand and the existing design rules.
+4. **Phase 4: Polish.** P3 items.
+
+Skip any phase with no items.
+
+### C. Work items
+| ID | Phase | Task | Findings covered | Files to touch | Approach | Tests to add or update | Size (S / M / L) | Depends on |
+
+- Each item is one reviewable change, small enough for a single commit.
+- Order items so each one builds on the previous ones.
+- Name the Pest feature test that proves each fix.
+
+### D. Decisions made
+Make every design, wording and technical choice yourself. Weigh the options and pick the one that best serves both roles, fits `.ai/rules` and the HC Tracking brand, and is simplest to build and maintain. Do not give the reader a menu of options.
+| Decision | Chosen option | Why it is best | Option rejected and why |
+
+### E. Needs owner approval (keep this to the minimum)
+List only choices you must not make alone: changing a settled rule in `.ai/rules`, who can see money or access data, deleting or migrating real data, or changes that affect other pages. For each one, give your recommended answer, so the owner only has to say yes or no. If nothing qualifies, write "None."
+
+### F. Done when
+Point to the "Definition of done" conditions (section 10) that each phase satisfies, plus: affected tests pass, Pint is clean, and the page is checked again in English, Arabic, dark mode and phone width.
+
 ## Final check before sending
 Correct the report if any answer is no:
 1. Is every inventory item in the Click-Through Map?
@@ -184,8 +228,11 @@ Correct the report if any answer is no:
 5. Did I compare the important figures with a second source?
 6. Did I test Arabic, dark mode, phone width and keyboard use?
 7. Does every finding have a specific fix?
-8. Is the report free of technical talk?
+8. Are sections 0–11 free of technical talk?
 9. Did I change only my own `REVIEW-TEST` records, and did I report the cleanup?
 10. Did I deliver two complete reports, one for each role, without asking which role to use?
+11. Does each report start with the section 0 list, and does every finding have a row in section 12?
+12. Does the Developer Work Plan cover every finding from both reports, in phase order, with files, tests and sizes?
+13. Did I make the decisions myself with reasons, and leave only true owner-approval items in E, each with a recommended answer?
 
 Begin with Pass 0.

@@ -18,6 +18,7 @@
         :skipping="$startingStage === ProposalStatus::ProposalDraft->value"
         :renewable="$this->renewableProposals"
         :renewal="$this->renewalPreview"
+        :kind="$kind"
         :stored-number="$editingProposalId !== null ? $internalProjectNumber : null"
     />
 

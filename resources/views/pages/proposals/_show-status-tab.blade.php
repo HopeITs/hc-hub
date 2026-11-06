@@ -4,10 +4,12 @@
     $mutedText, $inkText, $hairline, $amount, $term, $chronology and
     $arrivals.
 --}}
-            {{-- The concept note first (W-24): in the ideation phase it is what the proposal is. --}}
-            @include('pages.proposals._show-concept-note')
+            {{-- The concept note first (W-24): in the ideation phase it is what the proposal is. A payroll proposal (W-32) has no concept note or reviews. --}}
+            @unless ($this->proposal->isPayroll())
+                @include('pages.proposals._show-concept-note')
 
-            @include('pages.proposals._show-reviewers')
+                @include('pages.proposals._show-reviewers')
+            @endunless
 
             @if ($this->finalReportAcceptance !== null)
                 {{-- The donor accepted the final report (D-02c): the last requirement before the proposal closes. --}}

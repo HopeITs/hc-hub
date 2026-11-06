@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Concerns\Proposals;
 
 use App\Enums\ArStatus;
+use App\Enums\ProposalKind;
 use App\Enums\ProposalPhase;
 use App\Enums\ProposalStatus;
 use App\Enums\TaskStatus;
@@ -39,6 +40,7 @@ use Livewire\Attributes\Computed;
  * @property string $donor
  * @property string $currency
  * @property string $flag
+ * @property string $proposalKind
  */
 trait ReadsProposalRegister
 {
@@ -105,6 +107,7 @@ trait ReadsProposalRegister
                 });
             })
             ->when(ProposalStatus::tryFrom($this->status), fn (Builder $query, ProposalStatus $status) => $query->where('proposals.status', $status))
+            ->when(ProposalKind::tryFrom($this->proposalKind), fn (Builder $query, ProposalKind $kind) => $query->where('proposals.kind', $kind))
             // There is no phase column: a phase is a set of statuses, derived
             // from the same match that ProposalStatus::phase() uses.
             ->when(
@@ -114,6 +117,8 @@ trait ReadsProposalRegister
             ->when($donorId > 0, fn (Builder $query) => $query->whereHas('donorProposals', fn (Builder $query) => $query->where('donor_id', $donorId)))
             // A money filter only applies to a viewer who may see that money: otherwise it would leak it one row at a time.
             ->when($this->currency !== '' && $canAgreements, fn (Builder $query) => $query->whereHas('donorProposals', fn (Builder $query) => $query->where('currency', $this->currency)))
+            // A hold is a flag, not a status (W-06, D-58), so it filters here and not in the status picker. Not money: no permission gate.
+            ->when($this->flag === 'on_hold', fn (Builder $query) => $query->whereNotNull('proposals.on_hold_since'))
             ->when($this->flag === 'no_agreement' && $canAgreements, fn (Builder $query) => $query->doesntHave('donorProposals'))
             ->when($this->flag === 'report_overdue' && $canAgreements, fn (Builder $query) => $query->whereHas('donorProposals.reports', fn (Builder $query) => $query->whereNull('submitted_on')->whereDate('due_on', '<', $today)))
             ->when($this->flag === 'overdue' && $canTransfers, fn (Builder $query) => $query->whereHas('donorProposals.transfers', fn (Builder $query) => $query->inState('late')))
@@ -172,7 +177,7 @@ trait ReadsProposalRegister
         }
 
         return $this->filteredQuery()
-            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'status', 'updated_at'])
+            ->select(['id', 'name', 'internal_project_number', 'planned_date_begin', 'planned_date_end', 'actual_date_begin', 'actual_date_end', 'status', 'kind', 'on_hold_since', 'updated_at'])
             ->with($relations)
             // Task progress is organisation-wide: every viewer sees the same figures.
             ->withCount([
@@ -296,7 +301,7 @@ trait ReadsProposalRegister
     protected function selectLine(Builder $query): Builder
     {
         $query
-            ->select(['proposals.id', 'proposals.slug', 'proposals.name', 'proposals.planned_date_begin', 'proposals.planned_date_end', 'proposals.status'])
+            ->select(['proposals.id', 'proposals.slug', 'proposals.name', 'proposals.planned_date_begin', 'proposals.planned_date_end', 'proposals.status', 'proposals.kind', 'proposals.on_hold_since'])
             ->withCount(['projects', 'donorProposals']);
 
         if ($this->canViewAgreements()) {

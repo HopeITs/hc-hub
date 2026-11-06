@@ -15,13 +15,14 @@ test('program cards print their open and edit labels instead of handing PHP to A
         ->assertDontSeeHtml(':aria-label="__(');
 });
 
-test('the strategy coverage ring prints its label instead of handing PHP to Alpine', function () {
+test('the strategy page prints its menu and row labels instead of handing PHP to Alpine', function () {
     $strategy = Strategy::factory()->create();
-    Program::factory()->create(['strategy_id' => $strategy->id]);
+    $program = Program::factory()->create(['name' => 'Children University', 'strategy_id' => $strategy->id]);
 
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
         ->test('pages::strategies.show', ['strategy' => $strategy])
-        ->assertSeeHtml('role="img" aria-label="'.e(__('strategies.average_coverage')).': ')
+        ->assertSeeHtml('aria-label="'.e(__('strategies.more_actions')).'"')
+        ->assertSeeHtml('aria-label="'.e(__('strategies.choose_pillar_for', ['program' => $program->name])).'"')
         ->assertDontSeeHtml(':aria-label="__(');
 });
 
