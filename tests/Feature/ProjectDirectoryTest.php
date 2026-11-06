@@ -3,6 +3,7 @@
 use App\Enums\Currency;
 use App\Enums\MilestoneStatus;
 use App\Enums\ProjectStatus;
+use App\Enums\ProposalStatus;
 use App\Models\DonorProposal;
 use App\Models\Milestone;
 use App\Models\Program;
@@ -79,6 +80,33 @@ test('the status URL filter selects projects by lifecycle state', function () {
         ->assertOk()
         ->assertSeeText('Active Water Network')
         ->assertDontSeeText('Closed Shelter Project');
+});
+
+/*
+| Desk page review, 6 Nov 2026: each Project flow stage opened the whole
+| register, so "Running: 0" listed all 34 projects.
+*/
+
+test('the stage URL filter selects the projects the Desk puts on that stage, and the flow links to it', function () {
+    $this->travelTo('2026-11-06 09:00:00');
+    $user = User::factory()->role('General Manager')->create();
+    $running = Project::factory()->status(ProjectStatus::Active)->create(['name' => 'Running Water Network', 'end_date' => '2027-06-30']);
+    $running->proposals()->attach(Proposal::factory()->create(['status' => ProposalStatus::Approved]));
+    $fundraising = Project::factory()->create(['name' => 'Draft Shelter Project']);
+    $fundraising->proposals()->attach(Proposal::factory()->create(['status' => ProposalStatus::ProposalDraft]));
+
+    $this->actingAs($user)
+        ->get(route('projects.index', ['stage' => 5]))
+        ->assertOk()
+        ->assertSeeText('Running Water Network')
+        ->assertDontSeeText('Draft Shelter Project');
+
+    Livewire::actingAs($user)->test('pages::projects.index')
+        ->set('stage', 'not-a-stage')
+        ->assertSet('stage', '');
+
+    Livewire::actingAs($user)->test('desk.panels.flow', ['size' => 'XL'])
+        ->assertSeeHtml('href="'.route('projects.index', ['stage' => 5]).'"');
 });
 
 test('a project is created as a dateless draft with independent beneficiary targets', function () {

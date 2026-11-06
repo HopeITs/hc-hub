@@ -276,17 +276,22 @@ class ReadyLayoutSignals
         }
 
         $today = CarbonImmutable::today();
-        $rated = Indicator::query()->whereNotNull('target')->with('progress:id,indicator_id,date,value')->get(['id', 'baseline', 'target'])
-            ->map(fn (Indicator $indicator): ?RagStatus => $indicator->ragStatus($today->startOfYear(), $today->endOfYear()))
-            ->filter();
+        $ratings = Indicator::query()->whereNotNull('target')->with('progress:id,indicator_id,date,value')->get(['id', 'baseline', 'target'])
+            ->map(fn (Indicator $indicator): ?RagStatus => $indicator->ragStatus($today->startOfYear(), $today->endOfYear()));
+        $rated = $ratings->filter();
         $total = $rated->count();
+        // Indicators with no figures yet have no rating; they are counted out
+        // loud instead of dropped, so "all on pace" is never said over them.
+        $unrated = $ratings->count() - $total;
         $onPace = $rated->filter(fn (RagStatus $rag): bool => $rag === RagStatus::Green)->count();
         $red = $rated->filter(fn (RagStatus $rag): bool => $rag === RagStatus::Red)->count();
-        $text = __('desk.ready.signal.targets', ['on' => $onPace, 'total' => $total]);
+        $text = __('desk.ready.signal.targets', ['on' => $onPace, 'total' => $ratings->count()])
+            .($unrated > 0 ? ' · '.trans_choice('desk.ready.signal.targets_unrated', $unrated, ['count' => $unrated]) : '');
 
         return match (true) {
             $total === 0 => $this->signal(__('desk.ready.signal.targets_none'), 'neutral', 0),
-            $onPace === $total => $this->signal(trans_choice('desk.ready.signal.targets_all', $total, ['count' => $total]), 'good', 0),
+            $onPace === $total && $unrated === 0 => $this->signal(trans_choice('desk.ready.signal.targets_all', $total, ['count' => $total]), 'good', 0),
+            $onPace === $total => $this->signal($text, 'warn', $unrated),
             $red * 2 > $total => $this->signal($text, $this->lateTone('impact'), $red),
             default => $this->signal($text, 'warn', $total - $onPace),
         };

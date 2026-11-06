@@ -157,7 +157,7 @@ trait FiltersTaskDirectory
         $search = trim($this->search);
 
         return Task::query()
-            ->select(['id', 'slug', 'parent_task_id', 'source_type', 'source_id', 'title', 'description', 'status', 'priority', 'start_date', 'due_date', 'completed_date', 'progress_percentage', 'created_by', 'kind', 'reportable_type', 'reportable_id'])
+            ->select(['id', 'slug', 'parent_task_id', 'source_type', 'source_id', 'title', 'description', 'status', 'priority', 'start_date', 'due_date', 'completed_date', 'progress_percentage', 'created_by', 'kind', 'department_id', 'reportable_type', 'reportable_id'])
             // Subtasks are shown nested under their parent (each parent's own
             // `subtasks` eager load below), never as their own top-level row —
             // so the list/board/calendar and the stat tiles all count and
@@ -171,7 +171,7 @@ trait FiltersTaskDirectory
                 // a subtask panel in place (client-side, no extra round trip) instead
                 // of sending people to the parent task's own page to see them. Each
                 // subtask's own assignees are loaded the same way as the parent's.
-                'subtasks:id,parent_task_id,title,status,priority,due_date,created_by',
+                'subtasks:id,slug,parent_task_id,title,status,priority,due_date,created_by,kind,department_id,reportable_type,reportable_id',
                 'subtasks.taskAssignees.employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar',
             ])
             ->when($search !== '', function (Builder $query) use ($search): void {

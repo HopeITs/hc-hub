@@ -181,8 +181,15 @@
         -webkit-mask: linear-gradient(to right, transparent, #000 30%, #000 70%, transparent); mask: linear-gradient(to right, transparent, #000 30%, #000 70%, transparent);
     }
 
-    /* Bigger touch targets on coarse pointers. */
+    /* Bigger touch targets on coarse pointers. Page review 6 Nov 2026 measured
+       26px lens buttons, 20px flow stages, 19px agenda days and a 30px "Got
+       it" on a phone. The agenda's fourteen days cannot each be 44px wide in a
+       phone-width card, so the strip scrolls sideways inside the card instead. */
     @media (pointer: coarse) {
         .dk-panel .dk-iconbtn.dk-sm { min-width: 44px; min-height: 44px; }
+        .dk-panel .dk-seg button { height: auto; min-height: 44px; min-width: 44px; justify-content: center; }
+        .dk-panel .dk-flow-step > a { min-height: 44px; }
+        .dk-hint .dk-btn { min-height: 44px; }
+        .dk-panel .dk-load { grid-template-columns: repeat(14, 44px); overflow-x: auto; scrollbar-width: none; }
     }
 }

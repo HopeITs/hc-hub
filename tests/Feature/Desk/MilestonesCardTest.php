@@ -27,7 +27,7 @@ function cardMilestone(string $name, string $end, int $done, int $total, Milesto
     });
 }
 
-test('milestones show progress and health, late first then soonest due, open ones only', function () {
+test('milestones show progress and health, late first then soonest due, postponed ones last', function () {
     cardMilestone('Later and fine', '2026-10-30', 1, 4);
     cardMilestone('Due soon and behind', '2026-09-19', 1, 4);
     cardMilestone('Already late', '2026-09-10', 3, 4, MilestoneStatus::Ongoing);
@@ -39,10 +39,12 @@ test('milestones show progress and health, late first then soonest due, open one
         ['Already late', 75, 'bad'],
         ['Due soon and behind', 25, 'warn'],
         ['Later and fine', 25, 'good'],
+        ['Postponed one', 0, 'warn'],
     ]);
 
     $card->assertSee('75%')
-        ->assertDontSee('Postponed one')
+        ->assertSeeHtml('data-postponed')
+        ->assertSeeText(MilestoneStatus::Postponed->label())
         ->set('facets', ['health' => __('desk.health.warn')])
         ->assertSee('Due soon and behind')
         ->assertDontSee('Already late');

@@ -67,6 +67,10 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
     #[Url(except: '')]
     public string $lens = '';
 
+    /** A Desk stage (0-6) the Project flow panel links to; see ProjectStage. */
+    #[Url(except: '')]
+    public string $stage = '';
+
     /**
      * Records with unread notifications for me, for the row dots.
      *
@@ -195,7 +199,7 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
     /* The class block above already imports every symbol this view uses; a
        single-file page compiles both halves into one PHP file, so repeating
        the `use` statements here would be a redeclaration. */
-    $filtersAreActive = $search !== '' || $city !== '' || $program !== '' || $owner !== '' || $sector !== '' || $status !== '' || $lens !== '';
+    $filtersAreActive = $search !== '' || $city !== '' || $program !== '' || $owner !== '' || $sector !== '' || $status !== '' || $lens !== '' || $stage !== '';
     $today = CarbonImmutable::today();
 
     $statusCounts = $this->statusCounts;
@@ -204,7 +208,7 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
     $canViewMoney = $this->canViewMoney();
     $projects = $this->projects;
 
-    $loadingTargets = 'search, city, program, owner, sector, status, lens, sort, view, toggleStatus, toggleLens, clearFilters, gotoPage, nextPage, previousPage';
+    $loadingTargets = 'search, city, program, owner, sector, stage, status, lens, sort, view, toggleStatus, toggleLens, clearFilters, gotoPage, nextPage, previousPage';
 
     /* Two ways to read the portfolio: a scannable list, and the same projects on a calendar. */
     $viewOptions = [
@@ -218,12 +222,14 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
         'program' => $program !== '' ? $this->programOptions->firstWhere('id', (int) $program)?->name : null,
         'owner' => $owner !== '' ? (HrEmployee::find((int) $owner)?->name ?? '#'.$owner) : null,
         'sector' => $sector !== '' ? $this->sectorOptions->firstWhere('id', (int) $sector)?->localizedName() : null,
+        'stage' => $stage !== '' ? (__('desk.stages')[$stage] ?? null) : null,
     ], fn (?string $label): bool => $label !== null);
     $activeFilterLabels = [
         'city' => __('common.city'),
         'program' => __('common.program'),
         'owner' => __('projects.owner'),
         'sector' => __('sectors.sectors'),
+        'stage' => __('desk.lens.stage'),
     ];
 
     $sortOptions = [
@@ -342,6 +348,13 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
 
                 <x-ui.header-filter-select :label="__('projects.owner')" wire:model.live="owner" :value="$owner" employees>
                     <option value="">{{ __('projects.all_owners') }}</option>
+                </x-ui.header-filter-select>
+
+                <x-ui.header-filter-select :label="__('desk.lens.stage')" wire:model.live="stage" :value="$stage" data-test="project-stage-filter">
+                    <option value="">{{ __('projects.all_stages') }}</option>
+                    @foreach (__('desk.stages') as $stageValue => $stageLabel)
+                        <option value="{{ $stageValue }}">{{ $stageLabel }}</option>
+                    @endforeach
                 </x-ui.header-filter-select>
 
                 <x-ui.header-filter-select :label="__('sectors.sectors')" wire:model.live="sector" :value="$sector">

@@ -75,3 +75,13 @@ test('the top bar and the page column pad by the same edge so the breadcrumb, gr
 test('desk panels sit 20px apart on wide screens', function () {
     expect(deskStylesheets())->toContain(':root{ --row-unit:104px;--grid-gap:20px;');
 });
+
+test('on a touch screen the desk controls are at least 44px to tap', function () {
+    preg_match('/@media \(pointer: coarse\) \{\s*\.dk-panel \.dk-iconbtn\.dk-sm[^}]*\}(.*?)\n    \}/s', deskStylesheets(), $coarse);
+
+    expect($coarse[1] ?? '')
+        ->toContain('.dk-panel .dk-seg button { height: auto; min-height: 44px;')
+        ->toContain('.dk-panel .dk-flow-step > a { min-height: 44px; }')
+        ->toContain('.dk-hint .dk-btn { min-height: 44px; }')
+        ->toContain('.dk-panel .dk-load { grid-template-columns: repeat(14, 44px);');
+});
