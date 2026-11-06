@@ -121,9 +121,9 @@ new #[Layout('layouts::desk'), Title('titles.tasks')] class extends Component
 >
     <x-slot:figures>
         <span class="dk-good" data-test="task-stat-done"><b>{{ $this->taskStats['done'] }}</b>{{ TaskStatus::Done->label() }}</span>
-        <span class="dk-bad" data-test="task-stat-overdue"><b>{{ $this->taskStats['overdue'] }}</b>{{ __('tasks.overdue') }}</span>
-        <span class="dk-bad" data-test="task-stat-missed"><b>{{ $this->taskStats['missed'] }}</b>{{ __('tasks.missed') }}</span>
-        <span class="dk-warn" data-test="task-stat-due-soon"><b>{{ $this->taskStats['due_soon'] }}</b>{{ __('tasks.due_within_7_days') }}</span>
+        <span @class(['dk-bad' => $this->taskStats['overdue'] > 0]) title="{{ __('tasks.overdue_hint') }}" data-test="task-stat-overdue"><b>{{ $this->taskStats['overdue'] }}</b>{{ __('tasks.overdue') }}<span class="sr-only">: {{ __('tasks.overdue_hint') }}</span></span>
+        <span @class(['dk-bad' => $this->taskStats['missed'] > 0]) title="{{ __('tasks.missed_hint') }}" data-test="task-stat-missed"><b>{{ $this->taskStats['missed'] }}</b>{{ __('tasks.missed') }}<span class="sr-only">: {{ __('tasks.missed_hint') }}</span></span>
+        <span @class(['dk-warn' => $this->taskStats['due_soon'] > 0]) data-test="task-stat-due-soon"><b>{{ $this->taskStats['due_soon'] }}</b>{{ __('tasks.due_within_7_days') }}</span>
     </x-slot:figures>
     <x-slot:actions>
         @can('create', App\Models\Task::class)
@@ -164,14 +164,14 @@ new #[Layout('layouts::desk'), Title('titles.tasks')] class extends Component
             </x-ui.header-filter-select>
         @endif
         <x-ui.header-filter-select :label="__('tasks.source_type')" wire:model.live="sourceType" :value="$sourceType">
-            <option value="">{{ __('common.select') }}</option>
+            <option value="">{{ __('tasks.related_to_any') }}</option>
             @foreach ($this->sourceTypeOptions as $sourceTypeOption)
                 <option value="{{ $sourceTypeOption['value'] }}">{{ $sourceTypeOption['label'] }}</option>
             @endforeach
         </x-ui.header-filter-select>
         @if ($sourceType !== '')
             <x-ui.header-filter-select :label="__('tasks.source')" wire:model.live="sourceId" :value="$sourceId">
-                <option value="">{{ __('common.select') }}</option>
+                <option value="">{{ __('tasks.any_record') }}</option>
                 @foreach ($this->filterSourceOptions as $sourceOption)
                     <option value="{{ $sourceOption['id'] }}">{{ $sourceOption['name'] }}</option>
                 @endforeach

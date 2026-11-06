@@ -22,6 +22,9 @@
                 <span class="flex items-center gap-1.5"><span class="size-2 shrink-0 rounded-full {{ $typeDotClasses['milestone'] }}"></span>{{ __('tasks.milestone') }}</span>
                 <span class="flex items-center gap-1.5"><span class="size-2 shrink-0 rounded-full {{ $typeDotClasses['task'] }}"></span>{{ __('tasks.task') }}</span>
                 <span class="flex items-center gap-1.5"><span class="size-2 shrink-0 rounded-full {{ $typeDotClasses['report'] }}"></span>{{ __('calendar.report_deadline') }}</span>
+                @if ($this->canSeeType('monthly_report'))
+                    <span class="flex items-center gap-1.5"><span class="size-2 shrink-0 rounded-full {{ $typeDotClasses['monthly_report'] }}"></span>{{ __('calendar.monthly_report_due') }}</span>
+                @endif
                 @if ($this->canSeeType('proposal'))
                     <span class="flex items-center gap-1.5"><span class="size-2 shrink-0 rounded-full {{ $typeDotClasses['proposal'] }}"></span>{{ __('calendar.proposal_deadline') }}</span>
                 @endif

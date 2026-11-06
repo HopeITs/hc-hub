@@ -56,7 +56,7 @@
     x-on:keydown.up.prevent="$event.currentTarget.previousElementSibling?.focus()"
     x-on:keydown.enter="if (!$event.target.closest('button, a, input')) { window.location.href = {{ Js::from(route('tasks.show', $task)) }} }"
 >
-    <td class="border-s-[3px] ps-2.5 {{ $priorityBorderClass }}">
+    <td class="border-s-[3px] ps-2.5 {{ $priorityBorderClass }}" title="{{ __('tasks.priority') }}: {{ $task->priority->label() }}">
         <button
             type="button"
             wire:click="toggleComplete({{ $task->id }})"
@@ -167,15 +167,23 @@
             @elseif ($isOverdue)
                 <span class="inline-flex shrink-0 items-center rounded-full bg-status-critical-soft px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-primary uppercase dark:text-status-critical" data-test="task-overdue-{{ $task->id }}">{{ __('tasks.overdue') }}</span>
             @endif
-            <input
-                type="date"
-                value="{{ $task->due_date?->toDateString() }}"
-                wire:change="rescheduleTask({{ $task->id }}, $event.target.value)"
-                @disabled(! $canUpdate)
-                aria-label="{{ __('tasks.due_date_2') }}: {{ $task->title }}"
-                class="w-full min-w-0 rounded border-0 bg-transparent p-1 text-xs tabular-nums focus:ring-1 focus:ring-secondary-light focus:outline-none {{ $dueDateClasses }}"
-                data-test="task-due-date-{{ $task->id }}"
-            />
+            @if (! $canUpdate || $task->created_by !== auth()->id())
+                {{-- Only the creator reschedules (RescheduleTask): show text, not a dead date box. --}}
+                <span
+                    class="p-1 text-xs tabular-nums {{ $dueDateClasses }}"
+                    @if ($canUpdate) title="{{ __('tasks.only_the_task_creator_can_change_the_due_date') }}" @endif
+                    data-test="task-due-date-text-{{ $task->id }}"
+                >{{ $task->due_date?->translatedFormat(__($task->due_date->isCurrentYear() ? 'formats.date_short' : 'formats.date')) ?? '—' }}</span>
+            @else
+                <input
+                    type="date"
+                    value="{{ $task->due_date?->toDateString() }}"
+                    wire:change="rescheduleTask({{ $task->id }}, $event.target.value)"
+                    aria-label="{{ __('tasks.due_date_2') }}: {{ $task->title }}"
+                    class="w-full min-w-0 rounded border-0 bg-transparent p-1 text-xs tabular-nums focus:ring-1 focus:ring-secondary-light focus:outline-none {{ $dueDateClasses }}"
+                    data-test="task-due-date-{{ $task->id }}"
+                />
+            @endif
         </div>
     </td>
     <td class="px-2">

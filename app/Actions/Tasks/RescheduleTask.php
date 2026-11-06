@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Gate;
 class RescheduleTask
 {
     /**
-     * @return bool|null null when the date is malformed or the task is gone; false when the actor is not the creator
+     * @return bool|null null when the date is malformed or the task is gone; false when the actor is not the creator or may not edit it
      */
     public function handle(int $taskId, string $date): ?bool
     {
@@ -29,9 +29,9 @@ class RescheduleTask
             return null;
         }
 
-        Gate::authorize('update', $task);
-
-        if ($task->created_by !== auth()->id()) {
+        // Refused with false (a message), never a 403 page: a calendar drop is
+        // a casual gesture, and the card simply returns to its day on refusal.
+        if ($task->created_by !== auth()->id() || Gate::denies('update', $task)) {
             return false;
         }
 

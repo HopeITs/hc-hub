@@ -19,13 +19,20 @@
 
 <div class="flex min-h-4 flex-1 flex-col gap-1" x-data="taskDropList('task-calendar', (wire, id) => wire.rescheduleTask(id, '{{ $day->toDateString() }}'))">
     @foreach ($dayTasks as $task)
-        @php $chipLabel = $markerLabel($task); @endphp
+        @php
+            $chipLabel = $markerLabel($task);
+            $canReschedule = $task->created_by === auth()->id();
+        @endphp
         <div
             data-task-chip
-            data-task-id="{{ $task->id }}"
+            @if ($canReschedule) data-task-id="{{ $task->id }}" @endif
             wire:key="task-calendar-chip-{{ $day->toDateString() }}-{{ $task->id }}"
             title="{{ $chipLabel }}"
-            class="group flex cursor-grab items-center gap-1.5 rounded-md px-1.5 py-1 text-[10px] transition-transform hover:-translate-y-px {{ $markerTone($task) }}"
+            @class([
+                'group flex items-center gap-1.5 rounded-md px-1.5 py-1 text-[10px] transition-transform hover:-translate-y-px',
+                'cursor-grab' => $canReschedule,
+                $markerTone($task),
+            ])
         >
             <span class="size-1.5 shrink-0 rounded-full {{ $markerDot($task) }}"></span>
             <a href="{{ route('tasks.show', $task) }}" wire:navigate class="min-w-0 flex-1 truncate text-start font-semibold hover:underline" data-test="task-calendar-chip-{{ $task->id }}">
