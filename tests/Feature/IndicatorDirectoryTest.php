@@ -6,11 +6,14 @@ use App\Enums\RagStatus;
 use App\Enums\ReportStatus;
 use App\Enums\ResultType;
 use App\Models\AnnualPlan;
+use App\Models\Donor;
+use App\Models\DonorProposal;
 use App\Models\Indicator;
 use App\Models\IndicatorProgress;
 use App\Models\PlanIndicator;
 use App\Models\Program;
 use App\Models\Project;
+use App\Models\Proposal;
 use App\Models\Report;
 use App\Models\Result;
 use App\Models\User;
@@ -143,14 +146,14 @@ test('a reading can be logged against an indicator', function () {
         ->and($reading->recorded_by)->toBe($user->id);
 });
 
-test('an indicator with no target shows an em dash instead of percent achieved', function () {
+test('an indicator with no target shows no percent and reads as not measured yet', function () {
     $user = User::factory()->role('General Manager')->create();
     $indicator = Indicator::factory()->untargeted()->create(['name' => 'Untargeted indicator']);
 
     Livewire::actingAs($user)
         ->test('pages::indicators.index')
         ->assertSee('Untargeted indicator')
-        ->assertSee('—');
+        ->assertSee('Not measured yet');
 
     expect($indicator->percentAchieved())->toBeNull();
 });
@@ -306,17 +309,6 @@ test('the delete and reading dialogs are driven by a boolean the modal can bind 
         ->assertSet('showProgressModal', false);
 });
 
-test('the table view renders the same indicators as the cards', function () {
-    $user = User::factory()->role('General Manager')->create();
-    Indicator::factory()->create(['name' => 'Wells rehabilitated']);
-
-    Livewire::actingAs($user)
-        ->test('pages::indicators.index')
-        ->set('view', 'table')
-        ->assertSee('Wells rehabilitated')
-        ->assertSee('Baseline to target');
-});
-
 test('a new reading refreshes the figures in the same request', function () {
     $user = User::factory()->role('General Manager')->create();
     $indicator = Indicator::factory()->create(['baseline' => 0, 'target' => 200]);
@@ -396,7 +388,6 @@ test('the page shows what was achieved against what was committed, counting appr
         ->and($component->get('overview')['targetsAchieved'])->toBe(0);
 
     $component->call('openInspectModal', $indicator->id)
-        ->assertSee('0 of 1 targets achieved')
         ->assertSee('150 pending approval')
         ->assertSeeHtml('href="'.e(route('reports.index', ['create' => 1, 'target' => $target->id])).'"');
 });
@@ -647,4 +638,165 @@ test('an inspected target that does not fit its chain says why', function () {
         ->assertSee('1 target out of step')
         ->call('openInspectModal', $indicator->id)
         ->assertSee(__('targets.issue_plan_program_differs_from_result'));
+});
+
+test('the focus tabs and the indicator list render inside the Livewire component', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Indicator::factory()->create(['result_id' => Result::factory()->create()->id, 'name' => 'People reached']);
+
+    $html = $this->actingAs($user)->get(route('indicators.index'))->assertOk()->getContent();
+
+    $document = new DOMDocument;
+    @$document->loadHTML('<?xml encoding="utf-8"?>'.$html);
+    $xpath = new DOMXPath($document);
+    $root = '//section[@*[name()="wire:name"]="pages::indicators.index"]';
+
+    foreach (['//*[@data-test="focus-tab-attention"]', '//ul[@data-test="indicator-list"]//li'] as $inner) {
+        expect($xpath->query($root.$inner)->length)->toBeGreaterThan(0, "{$inner} sits outside the component");
+    }
+});
+
+test('a headline average caps each indicator at one hundred percent', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $result = Result::factory()->create();
+    $indicator = Indicator::factory()->create([
+        'result_id' => $result->id,
+        'measure' => IndicatorMeasure::Numeric,
+        'baseline' => 0,
+        'target' => 100,
+    ]);
+    IndicatorProgress::factory()->create(['indicator_id' => $indicator->id, 'value' => 1500, 'date' => now()->subDay()]);
+    Indicator::factory()->create(['result_id' => $result->id]);
+
+    $component = Livewire::actingAs($user)->test('pages::indicators.index');
+
+    expect($component->get('overview')['achieved'])->toBeLessThanOrEqual(100.0);
+});
+
+test('indicators can be filtered by the donor funding their targets', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $result = Result::factory()->create();
+    $funded = Indicator::factory()->create(['result_id' => $result->id, 'name' => 'Funded indicator']);
+    Indicator::factory()->create(['result_id' => $result->id, 'name' => 'Unfunded indicator']);
+
+    $donor = Donor::factory()->create(['name' => 'Caritas Test']);
+    $proposal = Proposal::factory()->create(['donor_id' => $donor->id]);
+    DonorProposal::factory()->create(['proposal_id' => $proposal->id, 'donor_id' => $donor->id]);
+    PlanIndicator::factory()->create([
+        'indicator_id' => $funded->id,
+        'source_type' => 'proposal',
+        'source_id' => $proposal->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->assertSee('Unfunded indicator')
+        ->set('donor', 'Caritas Test')
+        ->assertSee('Funded indicator')
+        ->assertDontSee('Unfunded indicator')
+        ->call('clearFilters')
+        ->assertSet('donor', '')
+        ->assertSee('Unfunded indicator');
+});
+
+test('the filtered indicators download as a CSV without formula injection', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $result = Result::factory()->create();
+    Indicator::factory()->create(['result_id' => $result->id, 'name' => '=HYPERLINK("x")']);
+    Indicator::factory()->create(['result_id' => $result->id, 'name' => 'Left out']);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->set('search', 'HYPERLINK')
+        ->call('exportIndicators')
+        ->assertFileDownloaded('indicators-'.now()->toDateString().'.csv');
+
+    ob_start();
+    $response = $component->instance()->exportIndicators();
+    $response->sendContent();
+    $csv = ob_get_clean();
+
+    expect($csv)->toContain("'=HYPERLINK")->not->toContain('Left out');
+});
+
+test('an indicator carrying targets offers a disabled delete that says why', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $indicator = Indicator::factory()->create();
+    PlanIndicator::factory()->create([
+        'indicator_id' => $indicator->id,
+        'source_type' => 'annual_plan',
+        'source_id' => AnnualPlan::factory()->create(['year' => 2026])->id,
+    ]);
+
+    Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->assertSee(__('indicators.indicators_carrying_targets_cannot_be_deleted'));
+});
+
+test('a reading far above the target shows a warning but can still be saved', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $indicator = Indicator::factory()->create(['measure' => IndicatorMeasure::Numeric, 'baseline' => 0, 'target' => 100]);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->call('openProgressModal', $indicator->id)
+        ->set('progressValue', '150');
+
+    expect($component->get('progressValueWarning'))->toBeNull();
+
+    $component->set('progressValue', '250');
+    expect($component->get('progressValueWarning'))->toContain('250%');
+
+    $component->call('saveProgress')->assertHasNoErrors();
+    expect($indicator->progress()->count())->toBe(1);
+});
+
+test('the result list names the program so similar results can be told apart', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $program = Program::factory()->create(['name' => 'Study Zone']);
+    Result::factory()->create(['program_id' => $program->id, 'statement' => 'Students supported.']);
+
+    Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->call('openCreateModal')
+        ->assertSee('Study Zone · ');
+});
+
+test('the delete dialog names the indicator', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $indicator = Indicator::factory()->create(['name' => 'Meals distributed']);
+
+    Livewire::actingAs($user)
+        ->test('pages::indicators.index')
+        ->call('confirmDelete', $indicator->id)
+        ->assertSet('showDeleteModal', true)
+        ->assertSee('“Meals distributed” will be deleted.')
+        ->assertDontSee('the money behind it');
+});
+
+test('each indicator shows one plain status and what needs a hand comes first', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $result = Result::factory()->create();
+    $fresh = Indicator::factory()->create(['result_id' => $result->id, 'name' => 'AAA on track', 'baseline' => 0, 'target' => 100, 'frequency' => Period::Annual]);
+    IndicatorProgress::factory()->create(['indicator_id' => $fresh->id, 'value' => 100, 'date' => now()->subDay()]);
+    $old = Indicator::factory()->create(['result_id' => $result->id, 'name' => 'BBB old reading', 'baseline' => 0, 'target' => 100, 'frequency' => Period::Monthly]);
+    IndicatorProgress::factory()->create(['indicator_id' => $old->id, 'value' => 100, 'date' => now()->subMonths(8)]);
+    Indicator::factory()->create(['result_id' => $result->id, 'name' => 'CCC never measured']);
+
+    $component = Livewire::actingAs($user)->test('pages::indicators.index');
+    $rows = $component->instance()->rows();
+
+    expect($rows[$fresh->id]['status'])->toBe('ontrack')
+        ->and($rows[$old->id]['status'])->toBe('stale');
+
+    $component
+        ->assertSeeInOrder(['BBB old reading', 'CCC never measured', 'AAA on track'])
+        ->assertSee('Reading is old')
+        ->assertSee('Waiting for a reading');
+
+    expect($component->get('focusCounts'))->toMatchArray(['ontrack' => 1, 'waiting' => 2, 'attention' => 0]);
+
+    $component->call('setFocus', 'waiting')
+        ->assertSee('BBB old reading')
+        ->assertDontSee('AAA on track');
 });

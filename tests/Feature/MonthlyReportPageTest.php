@@ -156,6 +156,18 @@ test('the grid shows the code, both names, the frequency note, the target and th
         ->and($report->fresh()->prepared_by)->toBe($this->owner->id);
 });
 
+test('figures sent as one whole array save the line', function () {
+    $report = mrsReport(mrsProject());
+    $line = mrsLine($report);
+    $page = mrsPage($report);
+    $figures = $page->get('figures');
+    $figures[$line->id]['value'] = '7';
+
+    $page->set('figures', $figures)->assertHasNoErrors();
+
+    expect((float) $line->fresh()->value)->toBe(7.0);
+});
+
 test('a line id from another report shows an error and writes nothing', function () {
     $report = mrsReport(mrsProject());
     mrsLine($report);
@@ -641,6 +653,20 @@ test('each status asks for its own inputs and saves the activity row', function 
     expect($entry->fresh()->status)->toBe(ActivityStatus::Started);
 });
 
+test('activity rows sent as one whole array save the row', function () {
+    $project = mrsProject();
+    $report = mrsReport($project);
+    $activity = mrsActivity($project);
+    mrsSchedule($activity, '2026-10-01');
+    $page = mrsPage($report);
+    $entries = $page->get('activityEntries');
+    $entries[$activity->id]['status'] = 'ongoing';
+
+    $page->set('activityEntries', $entries)->assertHasNoErrors();
+
+    expect(MonthlyReportActivityEntry::query()->where('monthly_report_id', $report->id)->sole()->status)->toBe(ActivityStatus::Ongoing);
+});
+
 test('planned weeks and the carry-over badges are shown', function () {
     $this->travelTo('2026-12-02 10:00:00');
     $project = mrsProject();
@@ -677,6 +703,19 @@ test('answers save with the question text, and quarter-end questions are labelle
     $answer = MonthlyReportAnswer::query()->sole();
     expect($answer->answer)->toBe('Three new groups started.')
         ->and($answer->question_text)->toBe('ما أبرز الإنجازات؟');
+});
+
+test('answers sent as one whole array save the answer', function () {
+    $project = mrsProject();
+    $template = Activity::withoutRecording(fn (): ReportTemplate => ReportTemplate::factory()->confirmed()->create(['project_id' => $project->id]));
+    $question = ReportTemplateQuestion::factory()->create(['report_template_id' => $template->id]);
+    $report = mrsReport($project);
+
+    mrsPage($report)
+        ->set('answers', [$question->id => 'Two groups started.'])
+        ->assertHasNoErrors();
+
+    expect(MonthlyReportAnswer::query()->sole()->answer)->toBe('Two groups started.');
 });
 
 test('evidence uploads to a line, downloads through its report only, lists missing required types and deletes', function () {

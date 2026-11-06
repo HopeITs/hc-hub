@@ -45,11 +45,21 @@ trait EditsMonthlyReportActivities
     public array $answers = [];
 
     /**
-     * Save the activity row whose field just changed.
+     * Save the activity row whose field just changed. Livewire sends the
+     * whole array (no key) when several fields changed in one request, so
+     * then every row is saved.
      */
-    public function updatedActivityEntries(mixed $value, string $key): void
+    public function updatedActivityEntries(mixed $value, ?string $key = null): void
     {
-        $resultId = (int) explode('.', $key)[0];
+        $resultIds = $key === null ? array_keys($this->activityEntries) : [explode('.', $key)[0]];
+
+        foreach ($resultIds as $resultId) {
+            $this->saveActivityEntry((int) $resultId);
+        }
+    }
+
+    protected function saveActivityEntry(int $resultId): void
+    {
         $this->forgetErrorsUnder('activityEntries.'.$resultId);
         $state = $this->activityEntries[$resultId] ?? [];
 
@@ -79,16 +89,26 @@ trait EditsMonthlyReportActivities
     }
 
     /**
-     * Save the answer that was just left.
+     * Save the answer that was just left. Livewire sends the whole array
+     * (no key) when several answers changed in one request, so then every
+     * answer is saved.
      */
-    public function updatedAnswers(mixed $value, string $key): void
+    public function updatedAnswers(mixed $value, ?string $key = null): void
     {
-        $questionId = (int) explode('.', $key)[0];
+        $questionIds = $key === null ? array_keys($this->answers) : [explode('.', $key)[0]];
+
+        foreach ($questionIds as $questionId) {
+            $this->saveAnswer((int) $questionId);
+        }
+    }
+
+    protected function saveAnswer(int $questionId): void
+    {
         $this->forgetErrorsUnder('answers.'.$questionId);
 
         try {
             app(SaveMonthlyReportAnswers::class)->handle($this->report, $this->renderedStatus(), [
-                ['question_id' => $questionId, 'answer' => self::filledText($value)],
+                ['question_id' => $questionId, 'answer' => self::filledText($this->answers[$questionId] ?? null)],
             ]);
         } catch (ValidationException $exception) {
             $this->showNarrativeErrors($exception->errors(), 'answers.0.answer', 'answers.'.$questionId);

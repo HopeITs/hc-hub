@@ -14,7 +14,7 @@
         @if ($showProgressModal)
             <div class="grid grid-cols-2 gap-x-4 gap-y-4">
                 <x-ui.form-input wire:model="progressDate" :label="__('indicators.date')" type="date" :max="now()->toDateString()" required autofocus />
-                <x-ui.form-input wire:model="progressValue" :label="__('indicators.value')" type="number" step="0.01" required />
+                <x-ui.form-input wire:model.live.debounce.400ms="progressValue" :label="__('indicators.value')" :help="$this->progressValueWarning" type="number" step="0.01" required />
                 <x-ui.form-input wire:model="progressSourceOfVerification" :label="__('indicators.source_of_verification')" maxlength="255" class="col-span-2" />
                 <x-ui.form-textarea wire:model="progressNotes" :label="__('common.notes')" class="col-span-2" />
             </div>

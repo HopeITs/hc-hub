@@ -63,7 +63,7 @@ trait ManagesIndicatorForm
     #[Computed]
     public function resultOptions(): Collection
     {
-        return Result::query()->select(['id', 'statement', 'type'])->orderBy('id')->get();
+        return Result::query()->select(['id', 'statement', 'type', 'program_id'])->with('program:id')->orderBy('id')->get();
     }
 
     /** @return Collection<int, Program> */
@@ -307,6 +307,17 @@ trait ManagesIndicatorForm
 
         $this->deletingIndicatorId = $indicatorId;
         $this->showDeleteModal = true;
+    }
+
+    /**
+     * The name of the indicator the open delete dialog is about.
+     */
+    #[Computed]
+    public function deletingIndicatorName(): ?string
+    {
+        return $this->deletingIndicatorId === null
+            ? null
+            : Indicator::query()->whereKey($this->deletingIndicatorId)->value('name');
     }
 
     public function cancelDelete(): void

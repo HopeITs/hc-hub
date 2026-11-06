@@ -3,6 +3,7 @@
 use App\Enums\IndicatorMeasure;
 use App\Livewire\Concerns\FiltersByStrategy;
 use App\Livewire\Concerns\Indicators\BuildsIndicatorRows;
+use App\Livewire\Concerns\Indicators\ExportsIndicators;
 use App\Livewire\Concerns\Indicators\InspectsIndicatorChain;
 use App\Livewire\Concerns\Indicators\ManagesIndicatorForm;
 use App\Livewire\Concerns\Indicators\ManagesIndicatorReadings;
@@ -20,6 +21,7 @@ use Livewire\WithPagination;
 
 new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Component {
     use BuildsIndicatorRows;
+    use ExportsIndicators;
     use FiltersByStrategy;
     use InspectsIndicatorChain;
     use ManagesIndicatorForm;
@@ -40,6 +42,10 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
     #[Url(except: '')]
     public string $program = '';
 
+    /** A donor's name, to keep only the indicators one of its proposals funds. */
+    #[Url(except: '')]
+    public string $donor = '';
+
     /** One of the RagStatus values, or '' for every rating including unrated. */
     #[Url(except: '')]
     public string $rag = '';
@@ -55,9 +61,6 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
     #[Url(except: '')]
     public string $focus = '';
 
-    /** 'cards' draws the trajectory cards, 'table' lists every figure in one grid. */
-    #[Url(except: 'cards')]
-    public string $view = 'cards';
 
     /**
      * Deep links from the rest of the chain.
@@ -113,12 +116,18 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
         $this->resetPage();
     }
 
+    public function updatedDonor(): void
+    {
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
         $this->search = '';
         $this->result = '';
         $this->measure = '';
         $this->program = '';
+        $this->donor = '';
         $this->rag = '';
         $this->focus = '';
         $this->clearStrategyFilter();
@@ -148,7 +157,7 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
      */
     protected function forgetIndicators(): void
     {
-        foreach (['allIndicators', 'rows', 'filteredRows', 'pagedRows', 'overview', 'focusCounts', 'inspected', 'inspectedReadings'] as $property) {
+        foreach (['allIndicators', 'rows', 'donorOptions', 'filteredRows', 'pagedRows', 'overview', 'focusCounts', 'inspected', 'inspectedReadings'] as $property) {
             unset($this->{$property});
         }
     }
@@ -158,7 +167,7 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
 @php
     use App\Enums\ResultType;
 
-    $filtersAreActive = $search !== '' || $result !== '' || $measure !== '' || $program !== '' || $rag !== '' || $focus !== '' || $this->strategyFilter !== null;
+    $filtersAreActive = $search !== '' || $result !== '' || $measure !== '' || $program !== '' || $donor !== '' || $rag !== '' || $focus !== '' || $this->strategyFilter !== null;
     $overview = $this->overview;
     $paged = $this->pagedRows;
     $focusCounts = $this->focusCounts;
@@ -172,65 +181,10 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
         ResultType::Activity->value => 'bg-transparent ring-secondary-medium dark:ring-ink-muted',
         ResultType::CrossCutting->value => 'bg-secondary-light ring-secondary-light dark:bg-ink-muted dark:ring-ink-muted',
     ];
-
-    $levelAccents = [
-        ResultType::Impact->value => 'bg-secondary-dark dark:bg-ink',
-        ResultType::Outcome->value => 'bg-primary',
-        ResultType::Output->value => 'bg-secondary-light',
-        ResultType::Activity->value => 'bg-secondary-soft ring-1 ring-inset ring-secondary-medium dark:bg-surface-2 dark:ring-ink-muted',
-        ResultType::CrossCutting->value => 'bg-secondary-medium dark:bg-ink-muted',
-    ];
-
-    $ragSegments = [
-        ['key' => App\Enums\RagStatus::Green->value, 'label' => App\Enums\RagStatus::Green->label(), 'count' => $overview['rag']['green'], 'fill' => 'bg-status-good', 'dot' => 'bg-status-good'],
-        ['key' => App\Enums\RagStatus::Amber->value, 'label' => App\Enums\RagStatus::Amber->label(), 'count' => $overview['rag']['amber'], 'fill' => 'bg-status-warn', 'dot' => 'bg-status-warn'],
-        ['key' => App\Enums\RagStatus::Red->value, 'label' => App\Enums\RagStatus::Red->label(), 'count' => $overview['rag']['red'], 'fill' => 'bg-primary dark:bg-status-critical', 'dot' => 'bg-primary dark:bg-status-critical'],
-        ['key' => 'unrated', 'label' => __('indicators.unrated'), 'count' => $overview['unrated'], 'fill' => 'bg-secondary-soft dark:bg-line-strong', 'dot' => 'bg-secondary-light'],
-    ];
-
-    $focusChips = [
-        ['key' => 'offtrack', 'label' => __('indicators.off_track'), 'icon' => 'arrow-trending-down', 'count' => $focusCounts['offtrack']],
-        ['key' => 'stale', 'label' => __('indicators.needs_a_reading'), 'icon' => 'clock', 'count' => $focusCounts['stale']],
-        ['key' => 'reporting', 'label' => __('indicators.reporting_overdue'), 'icon' => 'document-text', 'count' => $focusCounts['reporting']],
-        ['key' => 'unmeasured', 'label' => __('indicators.never_measured'), 'icon' => 'exclamation-triangle', 'count' => $focusCounts['unmeasured']],
-        ['key' => 'untargeted', 'label' => __('indicators.no_target'), 'icon' => 'flag', 'count' => $focusCounts['untargeted']],
-    ];
-
-    $onTrackShare = $overview['rated'] === 0 ? null : ($overview['rag']['green'] / $overview['rated']) * 100;
-
-    $achievementTone = match (true) {
-        $overview['achieved'] === null => 'neutral',
-        $overview['achieved'] >= $overview['elapsed'] * 0.9 => 'good',
-        $overview['achieved'] >= $overview['elapsed'] * 0.7 => 'warn',
-        default => 'critical',
-    };
-    $onTrackTone = match (true) {
-        $onTrackShare === null => 'neutral',
-        $onTrackShare >= 80 => 'good',
-        $onTrackShare >= 50 => 'warn',
-        default => 'critical',
-    };
-    $toneClass = fn (string $tone): string => match ($tone) {
-        'good' => 'text-status-good',
-        'warn' => 'text-status-warn',
-        'critical' => 'text-primary dark:text-brand-text',
-        default => '',
-    };
-    $headline = [
-        ['label' => __('common.indicators'), 'value' => number_format($overview['indicators']), 'tone' => 'neutral'],
-        ['label' => __('indicators.readings_logged'), 'value' => number_format($overview['readings']), 'tone' => 'neutral'],
-        ['label' => __('indicators.average_achievement'), 'value' => $overview['achieved'] === null ? '—' : number_format($overview['achieved'], 0).'%', 'tone' => $achievementTone],
-        ['label' => __('indicators.on_track'), 'value' => $onTrackShare === null ? '—' : number_format($onTrackShare, 0).'%', 'tone' => $onTrackTone],
-    ];
 @endphp
 
 <x-desk.register class="@container/directory" heading-id="indicator-directory-heading" :title="__('common.indicators')" :count="$overview['indicators']">
     
-        <x-slot:figures>
-            @foreach ($headline as $cell)
-                <span wire:key="indicator-headline-{{ $loop->index }}"><b class="dk-num {{ $toneClass($cell['tone']) }}">{{ $cell['value'] }}</b> {{ $cell['label'] }}</span>@unless ($loop->last) · @endunless
-            @endforeach
-        </x-slot:figures>
         <x-slot:search>
             <x-desk.register-search :label="__('indicators.search_indicators')" :placeholder="__('indicators.indicator_or_result_statement')" wire:model.live.debounce.300ms="search" />
         </x-slot:search>
@@ -245,29 +199,46 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
                 @endforeach
             </x-ui.header-filter-select>
 
-            <x-ui.header-filter-select :label="__('indicators.result')" wire:model.live="result" :value="$result">
-                <option value="">{{ __('indicators.all_results') }}</option>
-                @foreach ($this->resultOptions as $resultOption)
-                    <option value="{{ $resultOption->id }}">{{ Str::limit($resultOption->statement, 50) }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
+            <div class="contents" x-data="{ open: @js($donor !== '' || $result !== '' || $measure !== '') }">
+                <button type="button" class="dk-btn" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" data-test="more-filters-button">
+                    <flux:icon.adjustments-horizontal variant="micro" class="size-4" />
+                    {{ __('indicators.more_filters') }}
+                </button>
 
-            <x-ui.header-filter-select :label="__('indicators.measure')" wire:model.live="measure" :value="$measure">
-                <option value="">{{ __('indicators.all_measures') }}</option>
-                @foreach (IndicatorMeasure::cases() as $measureCase)
-                    <option value="{{ $measureCase->value }}">{{ $measureCase->label() }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
+                <div class="contents" x-show="open" x-cloak>
+                <x-ui.header-filter-select :label="__('common.donor')" wire:model.live="donor" :value="$donor">
+                    <option value="">{{ __('common.all_donors') }}</option>
+                    @foreach ($this->donorOptions as $donorOption)
+                        <option value="{{ $donorOption }}">{{ $donorOption }}</option>
+                    @endforeach
+                </x-ui.header-filter-select>
+
+                <x-ui.header-filter-select :label="__('indicators.result')" wire:model.live="result" :value="$result">
+                    <option value="">{{ __('indicators.all_results') }}</option>
+                    @foreach ($this->resultOptions as $resultOption)
+                        <option value="{{ $resultOption->id }}">{{ Str::limit($resultOption->statement, 50) }}</option>
+                    @endforeach
+                </x-ui.header-filter-select>
+
+                <x-ui.header-filter-select :label="__('indicators.measure')" wire:model.live="measure" :value="$measure">
+                    <option value="">{{ __('indicators.all_measures') }}</option>
+                    @foreach (IndicatorMeasure::cases() as $measureCase)
+                        <option value="{{ $measureCase->value }}">{{ $measureCase->label() }}</option>
+                    @endforeach
+                </x-ui.header-filter-select>
+                </div>
+            </div>
         </x-slot:filters>
 
         <x-slot:actions>
-            @can('indicators.create')<x-ui.button tone="primary" icon="plus" class="min-h-11 self-end touch-manipulation @sm/directory:min-h-10" wire:click="openCreateModal" data-test="create-indicator-button" data-quick-create>
+            <x-ui.button icon="arrow-down-tray" class="min-h-11 max-sm:h-11! self-end touch-manipulation @sm/directory:min-h-10" wire:click="exportIndicators" data-test="export-indicators-button">
+                {{ __('indicators.export_csv') }}
+            </x-ui.button>
+            @can('indicators.create')<x-ui.button tone="primary" icon="plus" class="min-h-11 max-sm:h-11! self-end touch-manipulation @sm/directory:min-h-10" wire:click="openCreateModal" data-test="create-indicator-button" data-quick-create>
                 {{ __('indicators.add_indicator') }}
             </x-ui.button>@endcan
         </x-slot:actions>
     
-    @include('pages.indicators._index-overview')
-
     @include('pages.indicators._index-focus-bar')
 
     @if ($paged->isEmpty())
@@ -284,10 +255,8 @@ new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Compone
                 </x-slot:action>
             </x-ui.empty-state>
         </x-ui.panel>
-    @elseif ($view === 'table')
-        @include('pages.indicators._index-table')
     @else
-        @include('pages.indicators._index-cards')
+        @include('pages.indicators._index-list')
     @endif
 
     @include('pages.indicators._index-inspect-modal')

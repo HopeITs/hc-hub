@@ -22,15 +22,16 @@
                 <div class="grid gap-x-4 gap-y-3 @2xl/modal:grid-cols-2">
                     <x-ui.form-input wire:model="name" :label="__('common.indicator_name')" maxlength="255" required autofocus class="@2xl/modal:col-span-2" />
 
-                    <x-ui.form-select wire:model.live="indicatorResultId" :label="__('indicators.result')" :placeholder="__('indicators.select_a_result')" required>
+                    <x-ui.form-select wire:model.live="indicatorResultId" :label="__('indicators.result')" :placeholder="__('indicators.select_a_result')" class="@2xl/modal:col-span-2" required>
                         @foreach ($this->resultOptions as $resultOption)
-                            <option value="{{ $resultOption->id }}">{{ $resultOption->type->label() }} · {{ Str::limit($resultOption->statement, 60) }}</option>
+                            <option value="{{ $resultOption->id }}">{{ $resultOption->program?->name ?? __('common.unassigned') }} · {{ $resultOption->type->label() }} · {{ Str::limit($resultOption->statement, 70) }}</option>
                         @endforeach
                     </x-ui.form-select>
 
                     <x-ui.form-select
                         wire:model="indicatorProjectId"
                         :label="__('common.project')"
+                        class="@2xl/modal:col-span-2"
                         :help="$indicatorResultId !== '' ? __('indicators.only_projects_delivering_the_result_program_are_offered') : null"
                     >
                         <option value="">{{ __('common.organisation_wide') }}</option>
@@ -46,6 +47,7 @@
                     <x-ui.form-segmented
                         wire:model.live="indicatorMeasure"
                         :label="__('indicators.measure')"
+                        class="@2xl/modal:col-span-2"
                         required
                         :options="collect(IndicatorMeasure::cases())->map(fn (IndicatorMeasure $measureCase): array => ['value' => $measureCase->value, 'label' => $measureCase->label()])->all()"
                     />
@@ -53,6 +55,7 @@
                     <x-ui.form-segmented
                         wire:model="frequency"
                         :label="__('indicators.frequency')"
+                        class="@2xl/modal:col-span-2"
                         required
                         :options="collect(Period::cases())->map(fn (Period $periodCase): array => ['value' => $periodCase->value, 'label' => $periodCase->label()])->all()"
                     />
@@ -79,7 +82,7 @@
         wire:model="showDeleteModal"
         close="cancelDelete"
         :title="__('indicators.delete_this_indicator')"
-        :message="__('indicators.only_an_indicator_carrying_no_targets_can_be_deleted')"
+        :message="$this->deletingIndicatorName !== null ? __('indicators.delete_named_indicator_message', ['name' => $this->deletingIndicatorName]) : __('indicators.only_an_indicator_carrying_no_targets_can_be_deleted')"
         confirm="deleteIndicator"
         :confirm-label="__('indicators.delete_indicator')"
         confirm-test="confirm-delete-indicator"
