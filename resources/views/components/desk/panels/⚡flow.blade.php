@@ -9,8 +9,8 @@ use Livewire\Component;
  * proportional thread (segment length = project count, hover lists the top
  * projects), each with how many live projects stand on it, how
  * many of those are off track and how many of those the viewer owns
- * (ReadsDeskFlow). Each stage opens the projects register, which has no
- * stage filter. Nothing to filter, so no funnel.
+ * (ReadsDeskFlow). Each stage opens the projects register filtered to
+ * that stage (?stage=). Nothing to filter, so no funnel.
  */
 new class extends Component {
     use IsDeskPanel;
@@ -30,8 +30,12 @@ new class extends Component {
             <strong>{{ trans_choice('desk-cards.flow.headline', $flow['total'], ['count' => $flow['total']]) }}</strong>
             @if ($flow['mine'] > 0)
                 <span class="dk-flow-you">{{ trans_choice('desk-cards.flow.need_you', $flow['mine'], ['count' => $flow['mine']]) }}</span>
-            @elseif ($flow['late'] > 0)
-                <span class="dk-flow-you">{{ trans_choice('desk-cards.flow.late', $flow['late'], ['count' => $flow['late']]) }}</span>
+            @elseif ($flow['late'] > 0 || $flow['watch'] > 0)
+                {{-- "All on track" only when nothing is late and nothing needs a look, so the headline never contradicts the Every project panel. --}}
+                <span class="dk-flow-you" data-flow-attention>{{ collect([
+                    $flow['late'] > 0 ? trans_choice('desk-cards.flow.late', $flow['late'], ['count' => $flow['late']]) : null,
+                    $flow['watch'] > 0 ? trans_choice('desk-cards.flow.watch', $flow['watch'], ['count' => $flow['watch']]) : null,
+                ])->filter()->implode(' · ') }}</span>
             @else
                 <span class="dk-flow-ok">{{ __('desk-cards.flow.all_on_track') }}</span>
             @endif
@@ -40,7 +44,7 @@ new class extends Component {
         <ol class="dk-flow">
             @foreach ($flow['stages'] as $i => $step)
                 <li wire:key="flow-{{ $step['stage'] }}" @class(['dk-flow-step', 'dk-flow-empty' => $step['count'] === 0, 'dk-flow-hot' => $step['late'] > 0, 'dk-flow-end' => $i >= $lastStage - 1]) style="--dk-flow-grow:{{ $step['count'] }}">
-                    <a href="{{ route('projects.index') }}" wire:navigate aria-label="{{ __('desk-cards.flow.stage_link', ['stage' => $words[$step['stage']], 'count' => $step['count']]) }}">
+                    <a href="{{ route('projects.index', ['stage' => $step['stage']]) }}" wire:navigate aria-label="{{ trans_choice('desk-cards.flow.stage_link', $step['count'], ['stage' => $words[$step['stage']], 'count' => $step['count']]) }}">
                         <b class="dk-flow-n dk-num" x-data="countUp({{ $step['count'] }})" x-text="display">{{ $step['count'] }}</b>
                         <span class="dk-flow-dot" aria-hidden="true"><i></i></span>
                         <span class="dk-flow-w" title="{{ $words[$step['stage']] }}">{{ $words[$step['stage']] }}</span>

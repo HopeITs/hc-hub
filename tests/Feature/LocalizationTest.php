@@ -6,6 +6,7 @@ use App\Enums\TaskStatus;
 use App\Models\HrCity;
 use App\Models\HrEmployee;
 use App\Models\User;
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
 
@@ -271,6 +272,34 @@ test('dates use syrian month names with western digits in arabic', function () {
     $this->actingAs($user)->get(route('dashboard'))->assertOk();
 
     expect(CarbonImmutable::parse('2026-09-14')->translatedFormat(__('formats.date')))->toBe('Sep 14, 2026');
+});
+
+/*
+| Desk page review, 6 Nov 2026: the Every project panel wrote «نوفمبر» while the
+| header wrote «تشرين الثاني». Livewire re-applies the app locale while it
+| renders components, and Carbon's own listener then reset dates to plain
+| "ar" (Egyptian month names).
+*/
+
+test('switching the app locale mid-request keeps syrian month names, as livewire does', function () {
+    app()->setLocale('ar');
+
+    expect(CarbonImmutable::parse('2026-11-06')->translatedFormat('M Y'))->toBe('تشرين الثاني 2026')
+        ->and(Carbon::parse('2026-11-06')->translatedFormat('M Y'))->toBe('تشرين الثاني 2026');
+
+    app()->setLocale('en');
+
+    expect(CarbonImmutable::parse('2026-11-06')->translatedFormat('M Y'))->toBe('Nov 2026');
+});
+
+test('the desk greets an arabic user by their arabic first name', function () {
+    $this->travelTo('2026-11-06 09:00:00');
+    $user = User::factory()->create(['locale' => 'ar', 'employee_id' => insertHrEmployee(firstNameEn: 'Rami', lastNameEn: 'Osman', firstNameAr: 'رامي', lastNameAr: 'عثمان')]);
+
+    $this->actingAs($user)->get(route('dashboard'))
+        ->assertOk()
+        ->assertSeeText(rtrim(__('dashboard.good_morning', ['name' => 'رامي'], 'ar'), '.!'))
+        ->assertDontSeeText('Rami');
 });
 
 test('blaze stays disabled so compiled views never bake in one language', function () {

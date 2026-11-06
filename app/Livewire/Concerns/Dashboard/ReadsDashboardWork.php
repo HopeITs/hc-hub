@@ -188,6 +188,12 @@ trait ReadsDashboardWork
             default => 'dashboard.good_evening',
         };
 
-        return __($key, ['name' => str(auth()->user()->name)->before(' ')->toString()]);
+        // The HR employee's name follows the interface language (رامي in
+        // Arabic, Rami in English); an account with no employee keeps its
+        // HR directory name.
+        $user = auth()->user()->loadMissing('employee');
+        $name = $user->employee?->name ?? $user->name;
+
+        return __($key, ['name' => str($name)->before(' ')->toString()]);
     }
 }

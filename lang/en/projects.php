@@ -12,6 +12,7 @@ return [
     'all_cities' => 'All cities',
     'all_files' => 'All files',
     'all_owners' => 'All managers',
+    'all_stages' => 'Every stage',
     'assignment_acknowledge' => 'Acknowledge',
     'assignment_acknowledge_done' => 'You acknowledged this project.',
     'assignment_acknowledge_title' => 'Acknowledge this project',
