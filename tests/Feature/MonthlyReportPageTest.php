@@ -398,8 +398,8 @@ test('a validator reading a submitted report with no lines sees no save state an
 
     mrsPage($report, $this->officer)
         ->assertSeeHtml('data-test="validate-button"')
-        ->assertSeeText(__('monthly_reports.no_lines'))
-        ->assertDontSeeText(__('monthly_reports.no_lines_body'))
+        ->assertSeeText(__('monthly_reports.nothing_this_month'))
+        ->assertDontSeeText(__('monthly_reports.nothing_this_month_submit'))
         ->assertDontSeeHtml('data-save-state');
 });
 
@@ -408,7 +408,8 @@ test('the preparer of a draft with no lines is still told it can be submitted, a
     $report = mrsReport(mrsProject(), '2026-11-01');
 
     mrsPage($report)
-        ->assertSeeText(__('monthly_reports.no_lines_body'))
+        ->assertSeeText(__('monthly_reports.nothing_this_month_submit'))
+        ->assertDontSeeText(__('monthly_reports.no_lines_body'))
         ->assertSeeHtml('data-save-state');
 });
 
@@ -424,6 +425,28 @@ test('the header links the project once and says "Not seen yet" only while the r
 
     mrsPage($validated, $this->officer)->assertDontSeeText(__('monthly_reports.not_seen_yet'));
     mrsPage($submitted, $this->officer)->assertSeeText(__('monthly_reports.not_seen_yet'));
+});
+
+test('a month with nothing in it reads as one line, not three empty boxes', function () {
+    $report = mrsReport(mrsProject(), status: MonthlyReportStatus::Submitted);
+
+    mrsPage($report, $this->officer)
+        ->assertSeeHtml('data-empty-month')
+        ->assertSeeText(__('monthly_reports.nothing_this_month'))
+        ->assertDontSeeText(__('monthly_reports.no_activities'))
+        ->assertDontSeeText(__('monthly_reports.no_questions'))
+        ->assertDontSeeHtml('min-h-64');
+});
+
+test('an empty section next to filled ones is a single line', function () {
+    $report = mrsReport(mrsProject(), status: MonthlyReportStatus::Submitted);
+    mrsLine($report);
+
+    mrsPage($report, $this->officer)
+        ->assertDontSeeHtml('data-empty-month')
+        ->assertSeeHtml('data-empty-line="activities"')
+        ->assertSeeHtml('data-empty-line="answers"')
+        ->assertDontSeeHtml('min-h-64');
 });
 
 test('Refresh Lines adds the line of a target confirmed after the month opened', function () {

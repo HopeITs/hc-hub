@@ -15,7 +15,7 @@
     </div>
 
     @if ($questions->isEmpty())
-        <x-ui.empty-state icon="chat-bubble-left-right" :heading="__('monthly_reports.no_questions')" :body="__('monthly_reports.no_questions_body')" />
+        @include('pages.monthly-reports._show-empty-line', ['key' => 'answers', 'icon' => 'chat-bubble-left-right', 'heading' => __('monthly_reports.no_questions'), 'body' => __('monthly_reports.no_questions_body')])
     @else
         <ol class="flex flex-col border-t border-secondary-soft dark:border-line" role="list">
             @foreach ($questions as $question)

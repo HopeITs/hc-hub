@@ -8,6 +8,7 @@ use App\Models\MonthlyReportLine;
 use App\Models\MonthlyReportReopenRequest;
 use App\Models\Project;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 
 /*
@@ -280,4 +281,197 @@ test('someone who cannot validate is not offered an empty "To validate" tab', fu
     Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
         ->test('pages::monthly-reports.index')
         ->assertSeeHtml('data-desk-register-view="validate"');
+});
+
+/*
+| Page redesign, 6 Nov 2026: a figures line over each tab, a "Needs you"
+| list at the top of "My reports", and how long each submitted report has
+| been waiting in the validation queue.
+*/
+
+/**
+ * The preparer's months of one project on 20 Nov 2026: September with MEAL,
+ * October returned (so overdue), November a draft, December not started.
+ *
+ * @return array{october: MonthlyReport, november: MonthlyReport}
+ */
+function mrpPreparerMonths(Project $project): array
+{
+    test()->travelTo('2026-11-20 10:00:00');
+    mrpMonth($project, '2026-08-01', MonthlyReportStatus::Validated);
+    mrpMonth($project, '2026-09-01', MonthlyReportStatus::Submitted);
+    $october = mrpMonth($project, '2026-10-01', attributes: ['returned_at' => '2026-11-05 09:00:00', 'returned_by' => User::factory(), 'return_reason' => 'Figures do not match the attendance sheets.']);
+    $november = mrpMonth($project, '2026-11-01');
+    mrpMonth($project, '2026-12-01');
+
+    return ['october' => $october, 'november' => $november];
+}
+
+test('"Needs you" lists the months the preparer can fill, overdue first, above the project threads', function () {
+    mrpPreparerMonths(mrpProject($this->aleppo));
+
+    $html = Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+        ->assertSeeText(__('monthly_reports.needs_you'))
+        ->html();
+
+    $october = strpos($html, 'data-needs-you-item="2026-10"');
+    $november = strpos($html, 'data-needs-you-item="2026-11"');
+
+    expect($october)->not->toBeFalse()
+        ->and($november)->not->toBeFalse()
+        ->and($october)->toBeLessThan($november)
+        ->and($html)->not->toContain('data-needs-you-item="2026-09"')
+        ->and($html)->not->toContain('data-needs-you-item="2026-12"')
+        ->and(strpos($html, 'data-needs-you'))->toBeLessThan(strpos($html, 'data-month="2026-08"'));
+});
+
+test('someone who reads the months but cannot fill them has no "Needs you" list', function () {
+    mrpPreparerMonths(mrpProject($this->aleppo));
+
+    Livewire::actingAs(userWithRole('Team Member', $this->ownerEmployee))->test('pages::monthly-reports.index')
+        ->assertSeeHtml('data-month="2026-11"')
+        ->assertDontSeeHtml('data-needs-you');
+});
+
+test('the figures line sums up "My reports"', function () {
+    mrpPreparerMonths(mrpProject($this->aleppo));
+
+    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+        ->assertSeeHtml('data-figure="to_fill" data-value="2"')
+        ->assertSeeHtml('data-figure="overdue" data-value="1"')
+        ->assertSeeHtml('data-figure="with_meal" data-value="1"')
+        ->assertSeeHtml('data-figure="validated" data-value="1"');
+});
+
+test('the figures line sums up the validation queue, whatever the filters', function () {
+    $this->travelTo('2026-11-20 10:00:00');
+    $project = mrpProject($this->aleppo);
+    mrpMonth($project, '2026-09-01', MonthlyReportStatus::Validated, ['seen_by_meal_at' => '2026-10-03 09:00:00']);
+    mrpMonth($project, '2026-10-01', MonthlyReportStatus::Submitted, ['seen_by_meal_at' => null]);
+    mrpMonth($project, '2026-11-01');
+
+    Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
+        ->test('pages::monthly-reports.index')
+        ->assertSeeHtml('data-figure="waiting" data-value="1"')
+        ->assertSeeHtml('data-figure="not_seen" data-value="1"')
+        ->assertSeeHtml('data-figure="validated" data-value="1"')
+        ->set('month', '2026-09')
+        ->assertSeeHtml('data-figure="waiting" data-value="1"');
+});
+
+test('a submitted report in the queue says how long it has waited', function () {
+    $this->travelTo('2026-11-20 10:00:00');
+    $project = mrpProject($this->aleppo);
+    $waiting = mrpMonth($project, '2026-10-01', MonthlyReportStatus::Submitted, ['submitted_at' => '2026-11-17 09:00:00']);
+    $validated = mrpMonth($project, '2026-09-01', MonthlyReportStatus::Validated);
+
+    Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
+        ->test('pages::monthly-reports.index')
+        ->set('status', 'all')
+        ->assertSeeHtml('data-waiting="'.$waiting->id.'"')
+        ->assertSeeText(trans_choice('monthly_reports.waiting_days', 3, ['count' => 3]))
+        ->assertDontSeeHtml('data-waiting="'.$validated->id.'"');
+});
+
+/*
+| Fill that did nothing, 6 Nov 2026: a project with no start or end date has
+| no period, so its months can never be opened. The button was offered
+| anyway and its refusal was written to an error nobody displayed.
+*/
+
+test('a month of a project with no start or end date offers no Fill and says why', function () {
+    $this->travelTo('2026-11-20 10:00:00');
+    $project = mrpProject($this->aleppo);
+    $november = mrpMonth($project, '2026-11-01');
+    DB::table('projects')->where('id', $project->id)->update(['start_date' => null, 'end_date' => null]);
+
+    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+        ->assertSeeHtml('data-month="2026-11"')
+        ->assertDontSeeHtml('data-fill="'.$november->id.'"')
+        ->assertSeeText(__('monthly_reports.project_has_no_period'))
+        ->assertDontSeeHtml('data-needs-you');
+});
+
+test('a Fill the server refuses says why instead of doing nothing', function () {
+    $this->travelTo('2026-11-20 10:00:00');
+    $project = mrpProject($this->aleppo);
+    $november = mrpMonth($project, '2026-11-01');
+    $page = Livewire::actingAs($this->owner)->test('pages::monthly-reports.index');
+    DB::table('projects')->where('id', $project->id)->update(['start_date' => null, 'end_date' => null]);
+
+    $page->call('fillMonth', $november->id)
+        ->assertNoRedirect()
+        ->assertDispatched('toast-show', fn (string $event, array $params): bool => ($params['slots']['text'] ?? null) === __('monthly_reports.project_has_no_period'));
+});
+
+/*
+| Layout redesign, 6 Nov 2026: big figures that filter the list, a month
+| strip per project with the validated months folded away, one notice per
+| project instead of a line under every month, and the queue grouped by
+| project.
+*/
+
+test('the big figures filter "My reports" to the months they count, and a second click clears it', function () {
+    mrpPreparerMonths(mrpProject($this->aleppo));
+
+    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+        ->call('showOnly', 'overdue')
+        ->assertSet('show', 'overdue')
+        ->assertSeeHtml('data-figure="overdue" data-value="1" aria-pressed="true"')
+        ->assertSeeHtml('data-month="2026-10"')
+        ->assertDontSeeHtml('data-month="2026-11"')
+        ->assertDontSeeHtml('data-month="2026-08"')
+        ->assertDontSeeHtml('data-needs-you')
+        ->call('showOnly', 'overdue')
+        ->assertSet('show', '')
+        ->assertSeeHtml('data-month="2026-11"');
+});
+
+test('a project shows its months as a strip and folds the validated ones away', function () {
+    $project = mrpProject($this->aleppo);
+    mrpPreparerMonths($project);
+
+    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+        ->assertSeeHtml('data-month-strip="'.$project->id.'"')
+        ->assertSeeHtml('data-strip-month="2026-08" data-strip-state="validated"')
+        ->assertSeeHtml('data-strip-month="2026-10" data-strip-state="overdue"')
+        ->assertSeeHtml('data-validated-fold="'.$project->id.'"')
+        ->call('showOnly', 'validated')
+        ->assertDontSeeHtml('data-validated-fold="'.$project->id.'"')
+        ->assertSeeHtml('data-month="2026-08"');
+});
+
+test('a project with no dates says so once, with a way to the project', function () {
+    $this->travelTo('2026-11-20 10:00:00');
+    $project = mrpProject($this->aleppo);
+    mrpMonth($project, '2026-10-01');
+    mrpMonth($project, '2026-11-01');
+    DB::table('projects')->where('id', $project->id)->update(['start_date' => null, 'end_date' => null]);
+
+    $html = Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+        ->assertSeeHtml('data-project-notice="'.$project->id.'"')
+        ->assertSeeHtml('href="'.route('projects.show', $project).'"')
+        ->html();
+
+    expect(substr_count($html, e(__('monthly_reports.project_has_no_period'))))->toBe(1);
+});
+
+test('the validation queue groups its rows by project, and its figures switch the status', function () {
+    $this->travelTo('2026-11-20 10:00:00');
+    $first = mrpProject($this->aleppo, name: 'Aleppo Center');
+    $second = mrpProject($this->aleppo, name: 'Micro Aleppo');
+    $firstReport = mrpMonth($first, '2026-10-01', MonthlyReportStatus::Submitted);
+    $secondReport = mrpMonth($second, '2026-10-01', MonthlyReportStatus::Submitted);
+    mrpMonth($first, '2026-09-01', MonthlyReportStatus::Validated);
+
+    $page = Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
+        ->test('pages::monthly-reports.index');
+    $html = $page->html();
+
+    expect(strpos($html, 'data-queue-project="'.$first->id.'"'))->toBeLessThan(strpos($html, 'data-validate-row="'.$firstReport->id.'"'))
+        ->and(strpos($html, 'data-validate-row="'.$firstReport->id.'"'))->toBeLessThan(strpos($html, 'data-queue-project="'.$second->id.'"'))
+        ->and(strpos($html, 'data-queue-project="'.$second->id.'"'))->toBeLessThan(strpos($html, 'data-validate-row="'.$secondReport->id.'"'));
+
+    $page->call('showOnly', 'validated')->assertSet('status', 'validated')
+        ->call('showOnly', 'waiting')->assertSet('status', 'submitted');
 });

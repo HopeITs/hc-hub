@@ -31,15 +31,10 @@ final class OpenMonthlyReport
         Gate::authorize('open', [MonthlyReport::class, $project]);
 
         $month = $month->startOfMonth();
+        $refusal = self::refusal($project, $month);
 
-        if ($month->greaterThan(CarbonImmutable::today()->startOfMonth())) {
-            throw ValidationException::withMessages(['month' => __('monthly_reports.future_month')]);
-        }
-
-        if ($project->start_date === null || $project->end_date === null
-            || $month->lessThan(CarbonImmutable::parse($project->start_date)->startOfMonth())
-            || $month->greaterThan(CarbonImmutable::parse($project->end_date)->startOfMonth())) {
-            throw ValidationException::withMessages(['month' => __('monthly_reports.outside_period')]);
+        if ($refusal !== null) {
+            throw ValidationException::withMessages(['month' => $refusal]);
         }
 
         $this->generator->generate($project, $month, $month);
@@ -48,5 +43,33 @@ final class OpenMonthlyReport
         $this->lines->build($report);
 
         return $report->refresh();
+    }
+
+    /**
+     * Why the month cannot be opened, or null when it can: a month not begun
+     * yet, a project with no start or end date (it has no period at all), or
+     * a month outside the project period.
+     *
+     * The one place this rule lives. The Monthly Reports list asks it before
+     * offering Fill, so it never shows a button this action would refuse.
+     */
+    public static function refusal(Project $project, CarbonImmutable $month): ?string
+    {
+        $month = $month->startOfMonth();
+
+        if ($month->greaterThan(CarbonImmutable::today()->startOfMonth())) {
+            return __('monthly_reports.future_month');
+        }
+
+        if ($project->start_date === null || $project->end_date === null) {
+            return __('monthly_reports.project_has_no_period');
+        }
+
+        if ($month->lessThan(CarbonImmutable::parse($project->start_date)->startOfMonth())
+            || $month->greaterThan(CarbonImmutable::parse($project->end_date)->startOfMonth())) {
+            return __('monthly_reports.outside_period');
+        }
+
+        return null;
     }
 }

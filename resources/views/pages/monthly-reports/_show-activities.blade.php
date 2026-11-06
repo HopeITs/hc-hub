@@ -21,7 +21,7 @@
     </div>
 
     @if ($activities === [])
-        <x-ui.empty-state icon="calendar-days" :heading="__('monthly_reports.no_activities')" :body="__('monthly_reports.no_activities_body')" />
+        @include('pages.monthly-reports._show-empty-line', ['key' => 'activities', 'icon' => 'calendar-days', 'heading' => __('monthly_reports.no_activities'), 'body' => __('monthly_reports.no_activities_body')])
     @else
         <ol class="flex flex-col border-t border-secondary-soft dark:border-line" role="list">
             @foreach ($activities as $activity)

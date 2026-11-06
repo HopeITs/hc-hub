@@ -15,6 +15,26 @@
     .dk-reg-figs .dk-warn b { color: var(--warn); }
     .dk-reg-figs .dk-good b { color: var(--good); }
 
+    /*
+     * Headline figures in large type that also filter the list (Monthly
+     * Reports). Still type on the page, not stat tiles: big numbers, small
+     * labels, an underline on the one picked.
+     */
+    .dk-figs-lg { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 28px; }
+    .dk-figs-lg button { display: inline-flex; align-items: baseline; gap: 6px; padding: 0 0 4px; border: 0; border-bottom: 2px solid transparent; background: none; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--ink-3); cursor: pointer; transition: color .15s, border-color .15s; }
+    .dk-figs-lg button b { font-size: 30px; line-height: 1; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .dk-figs-lg button:hover { color: var(--ink); }
+    .dk-figs-lg button[aria-pressed="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+    .dk-figs-lg button:focus-visible { outline: 2px solid var(--ink-3); outline-offset: 3px; border-radius: 4px; }
+    .dk-figs-lg .dk-bad b { color: var(--bad); }
+    .dk-figs-lg .dk-warn b { color: var(--warn); }
+    .dk-figs-lg .dk-good b { color: var(--good); }
+    @media (max-width: 560px) {
+        .dk-figs-lg { gap: 6px 20px; }
+        .dk-figs-lg button { min-height: 44px; }
+        .dk-figs-lg button b { font-size: 26px; }
+    }
+
     /* The page's own sub-bar (group/sort/my tasks) under the filter bar. */
     .dk-reg-sub { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 
