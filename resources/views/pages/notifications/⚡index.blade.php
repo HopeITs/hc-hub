@@ -72,7 +72,7 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
             ->when(in_array($this->priority, NotificationPriority::values(), true), fn (Builder $query) => $query->where('priority', $this->priority))
             ->when($this->state === 'unread', fn (Builder $query) => $query->whereNull('read_at'))
             ->when($this->state === 'read', fn (Builder $query) => $query->whereNotNull('read_at'))
-            ->when($term !== '', fn (Builder $query) => $query->where('search_text', 'like', Like::contains($term)));
+            ->when($term !== '', fn (Builder $query) => $query->where(Like::matches('search_text', $term)));
     }
 
     /**

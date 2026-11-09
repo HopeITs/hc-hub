@@ -12,12 +12,12 @@ beforeEach(function () {
 });
 
 test('a Team Member cannot edit a program; Managers can', function () {
-    Livewire::actingAs(userWithRole('Team Member'))->test('pages::programs.index')
-        ->call('openEditModal', $this->program->id)
+    Livewire::actingAs(userWithRole('Team Member'))->test('pages::programs.show', ['program' => $this->program])
+        ->call('openLinkModal')
         ->assertForbidden();
 
-    Livewire::actingAs(userWithRole('Managers'))->test('pages::programs.index')
-        ->call('openEditModal', $this->program->id)
+    Livewire::actingAs(userWithRole('Managers'))->test('pages::programs.show', ['program' => $this->program])
+        ->call('openLinkModal')
         ->assertOk();
 });
 

@@ -74,8 +74,9 @@ trait ReadsAccountRegister
             ->when(
                 $search !== '',
                 fn (Builder $query) => $query->where(fn (Builder $query) => $query
-                    ->where('accounts.account_name', 'like', Like::contains($search))
-                    ->orWhere('accounts.bank_name', 'like', Like::contains($search))
+                    ->where(Like::everyWord($search, fn (Builder $query, string $word) => $query
+                        ->where(Like::word('accounts.account_name', $word))
+                        ->orWhere(Like::word('accounts.bank_name', $word))))
                     ->orWhere('accounts.account_number_last4', Account::lastFour($search))
                     ->when($this->showsFullAccountNumbers, fn (Builder $query) => $query->orWhereIn('accounts.id', Account::idsMatchingAccountNumber($search)))),
             )

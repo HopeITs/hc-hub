@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Concerns\RemembersHrLookup;
+use App\Support\ArabicText;
 use Carbon\CarbonImmutable;
 
 /**
@@ -127,17 +128,18 @@ class HrProgram extends HrModel
     }
 
     /**
-     * The ids of the HR programs whose name contains the search.
+     * The ids of the HR programs whose name contains the search: Arabic
+     * letter variants folded, as typed or as read on the other keyboard layout.
      *
      * @return list<int>
      */
-    public static function idsMatchingName(string $search): array
+    public static function idsMatchingName(string $search, bool $acrossLayouts = true): array
     {
-        $search = mb_strtolower(trim($search));
+        $search = trim($search);
 
         return array_keys(array_filter(
             self::namesById(),
-            fn (string $name): bool => $search === '' || str_contains(mb_strtolower($name), $search),
+            fn (string $name): bool => $search === '' || ArabicText::containsTyped($name, $search, $acrossLayouts),
         ));
     }
 

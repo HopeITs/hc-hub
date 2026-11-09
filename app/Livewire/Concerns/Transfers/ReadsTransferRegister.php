@@ -86,14 +86,12 @@ trait ReadsTransferRegister
 
         return TransfersTracking::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->whereHas('donorProposal', function (Builder $query) use ($search): void {
-                    $query
-                        ->where('external_project_number', 'like', Like::contains($search))
-                        ->orWhereHas('donor', fn (Builder $query) => $query->where('name', 'like', Like::contains($search)))
-                        ->orWhereHas('proposal', fn (Builder $query) => $query->where(fn (Builder $query) => $query
-                            ->where('name', 'like', Like::contains($search))
-                            ->orWhere('internal_project_number', 'like', Like::contains($search))));
-                });
+                $query->whereHas('donorProposal', Like::everyWord($search, fn (Builder $query, string $word) => $query
+                    ->where(Like::word('external_project_number', $word))
+                    ->orWhereHas('donor', Like::word('name', $word))
+                    ->orWhereHas('proposal', fn (Builder $query) => $query
+                        ->where(Like::word('name', $word))
+                        ->orWhere(Like::word('internal_project_number', $word)))));
             })
             ->when($this->donor !== '', fn (Builder $query) => $query->whereHas('donorProposal', fn (Builder $query) => $query->where('donor_id', (int) $this->donor)))
             ->when($this->account !== '', fn (Builder $query) => $query->where('transfers_tracking.account_id', (int) $this->account))

@@ -22,7 +22,6 @@ dataset('module pages', [
     'annual plan' => [fn (): string => route('annual-plans.show', AnnualPlan::factory()->create())],
     'projects' => [fn (): string => route('projects.index')],
     'project' => [fn (): string => route('projects.show', Project::factory()->create())],
-    'timeline' => [fn (): string => route('timeline.index')],
     'risks' => [fn (): string => route('risks.index')],
     'milestones' => [fn (): string => route('milestones.index')],
     'milestone' => [fn (): string => route('milestones.show', Milestone::factory()->create())],

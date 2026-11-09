@@ -496,7 +496,7 @@
      * top bar's tools, and the highlighted row (mouse or arrows) shows the ↵ that opens it.
      */
     .dk-pal-scrim { backdrop-filter: blur(6px) saturate(1.2); -webkit-backdrop-filter: blur(6px) saturate(1.2); }
-    .dk-pal { width: min(640px, calc(100% - 32px)); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 30px 70px -24px rgb(16 24 40 / .45), 0 2px 6px rgb(16 24 40 / .06); animation: dk-pal-in .22s cubic-bezier(.2, .8, .2, 1); }
+    .dk-pal { width: min(640px, calc(100% - 32px)); height: min(600px, 72vh); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 30px 70px -24px rgb(16 24 40 / .45), 0 2px 6px rgb(16 24 40 / .06); animation: dk-pal-in .22s cubic-bezier(.2, .8, .2, 1); }
     .dark .dk-pal { box-shadow: 0 30px 70px -20px rgb(0 0 0 / .7); }
     @keyframes dk-pal-in { from { opacity: 0; transform: translate(-50%, -10px) scale(.98); } to { opacity: 1; transform: translateX(-50%); } }
 
@@ -511,7 +511,7 @@
     .dk-pal-in .dk-pal-esc:hover { background: var(--line); color: var(--ink); }
     .dk-pal-in .dk-pal-esc:focus-visible { outline: 2px solid var(--ink-3); outline-offset: 2px; }
 
-    .dk-pal-list { padding: 4px 8px 10px; scrollbar-width: thin; }
+    .dk-pal-list { flex: 1; min-height: 0; padding: 4px 8px 10px; scrollbar-width: thin; }
     .dk-pal-g { display: flex; align-items: center; gap: 10px; margin: 0; padding: 16px 10px 6px; font-size: 11px; }
     .dk-pal-g::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 

@@ -151,9 +151,9 @@ new #[Layout('layouts::desk'), Title('titles.city_directory')] class extends Com
 
         $query = HrCity::query()
             ->select(['id', 'name_en', 'name_ar', 'is_active'])
-            ->when($search !== '', fn ($query) => $query->where(fn ($query) => $query
-                ->where('name_en', 'like', Like::contains($search))
-                ->orWhere('name_ar', 'like', Like::contains($search))))
+            ->when($search !== '', fn ($query) => $query->where(Like::everyWord($search, fn ($query, string $word) => $query
+                ->where(Like::word('name_en', $word))
+                ->orWhere(Like::word('name_ar', $word)))))
             ->when($this->status !== '', fn ($query) => $query->where('is_active', $this->status === 'active'));
 
         if ($this->sort === 'name') {

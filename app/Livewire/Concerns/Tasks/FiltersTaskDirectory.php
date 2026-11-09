@@ -176,11 +176,10 @@ trait FiltersTaskDirectory
                 'subtasks.taskAssignees.employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar',
             ])
             ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $query) use ($search): void {
-                    $query->where('title', 'like', Like::contains($search))
-                        ->orWhere('description', 'like', Like::contains($search))
-                        ->orWhereHas('taskAssignees', fn (Builder $query) => $query->whereIn('employee_id', HrEmployee::idsMatchingName($search)));
-                });
+                $query->where(Like::everyWord($search, fn (Builder $query, string $word) => $query
+                    ->where(Like::word('title', $word))
+                    ->orWhere(Like::word('description', $word))
+                    ->orWhereHas('taskAssignees', fn (Builder $query) => $query->whereIn('employee_id', HrEmployee::idsMatchingName($word, acrossLayouts: false)))));
             })
             ->when($this->status !== '', fn (Builder $query) => $query->where('status', $this->status))
             ->when($this->priority !== '', fn (Builder $query) => $query->where('priority', $this->priority))

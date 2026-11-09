@@ -3,6 +3,9 @@
 use App\Livewire\Concerns\AnnualPlans\BuildsPlanMatrix;
 use App\Livewire\Concerns\AnnualPlans\FiltersPlanMatrix;
 use App\Livewire\Concerns\AnnualPlans\ManagesAnnualPlanForm;
+use App\Models\AnnualPlan;
+use App\Models\Program;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -41,6 +44,27 @@ new #[Layout('layouts::desk'), Title('titles.annual_plans')] class extends Compo
      */
     #[Url(except: '')]
     public string $focusYear = '';
+
+    /**
+     * `?create=1` (with `?program=` and `?year=`) opens the form already
+     * filled in — the "Write the plan" step from a program's Annual plans
+     * tab. The program's own manager is offered as the plan's manager.
+     */
+    public function mount(): void
+    {
+        if (! request()->boolean('create') || Gate::denies('create', AnnualPlan::class)) {
+            return;
+        }
+
+        $program = Program::query()->select(['id', 'manager_id'])->find(request()->integer('program'));
+        $year = request()->integer('year');
+
+        $this->openCreateModal($program?->id, $year > 0 ? $year : null);
+
+        if ($program?->manager_id !== null) {
+            $this->planManagerId = (string) $program->manager_id;
+        }
+    }
 };
 ?>
 

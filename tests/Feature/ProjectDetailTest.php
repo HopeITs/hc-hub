@@ -249,7 +249,7 @@ test('a task can be added from the project show page pre-filled with this projec
         ->and($task->taskAssignees->pluck('employee_id')->all())->toBe([$assignee]);
 });
 
-test('adding a task from the project show page requires a title and an assignee', function () {
+test('adding a task from the project show page requires a title but no assignee', function () {
     $user = User::factory()->role('General Manager')->create();
     $project = Project::factory()->create();
 
@@ -260,7 +260,8 @@ test('adding a task from the project show page requires a title and an assignee'
         ->set('newTaskTitle', '   ')
         ->set('newTaskAssignedTo', [])
         ->call('addTask')
-        ->assertHasErrors(['newTaskTitle', 'newTaskAssignedTo']);
+        ->assertHasErrors(['newTaskTitle'])
+        ->assertHasNoErrors(['newTaskAssignedTo']);
 });
 
 test('project detail shows targets naming this project', function () {

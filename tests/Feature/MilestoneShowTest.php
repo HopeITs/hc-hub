@@ -178,7 +178,7 @@ test('a task can be added from the milestone show page pre-filled with this mile
         ->and($task->taskAssignees->pluck('employee_id')->all())->toBe([$assignee]);
 });
 
-test('adding a task from the milestone show page requires a title and an assignee', function () {
+test('adding a task from the milestone show page requires a title but no assignee', function () {
     $user = User::factory()->role('General Manager')->create();
     $milestone = Milestone::factory()->create();
 
@@ -188,7 +188,8 @@ test('adding a task from the milestone show page requires a title and an assigne
         ->set('newTaskTitle', '   ')
         ->set('newTaskAssignedTo', [])
         ->call('addTask')
-        ->assertHasErrors(['newTaskTitle', 'newTaskAssignedTo']);
+        ->assertHasErrors(['newTaskTitle'])
+        ->assertHasNoErrors(['newTaskAssignedTo']);
 });
 
 test('tasks linked to this milestone appear in the related tasks panel', function () {

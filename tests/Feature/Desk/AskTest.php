@@ -108,3 +108,72 @@ test('names find programs, which open their own page', function () {
     expect(array_column($group['items'], 'label'))->toBe(['Aleppo Relief'])
         ->and($group['items'][0]['href'])->toBe(route('programs.show', $program));
 });
+
+test('English typed on the Arabic keyboard layout finds what it meant, and says so', function () {
+    $user = User::factory()->role('Super Admin')->create();
+
+    $results = askAs($user, 'حقخلقشةس');
+
+    expect($results['corrected'])->toBe('programs')
+        ->and(collect($results['groups'])->firstWhere('name', __('desk.ask_group_go'))['items'])->not->toBeEmpty();
+});
+
+test('Arabic typed on the English keyboard layout finds what it meant', function () {
+    Project::factory()->create(['name' => 'حلب']);
+
+    $results = askAs(User::factory()->role('Super Admin')->create(), 'pgf');
+
+    expect($results['corrected'])->toBe('حلب')
+        ->and(array_column(collect($results['groups'])->firstWhere('name', __('common.projects'))['items'], 'label'))->toBe(['حلب']);
+});
+
+test('a query that already finds something is never swapped to the other layout', function () {
+    Project::factory()->create(['name' => 'Aleppo Wells']);
+
+    expect(askAs(User::factory()->role('Super Admin')->create(), 'aleppo')['corrected'])->toBeNull();
+});
+
+test('mixed text typed partly on the wrong layout is read word by word', function () {
+    Project::factory()->create(['name' => 'Aleppo Wells']);
+
+    $results = askAs(User::factory()->role('Super Admin')->create(), 'شمثححخ wells');
+
+    expect($results['corrected'])->toBe('aleppo wells')
+        ->and(array_column(collect($results['groups'])->firstWhere('name', __('common.projects'))['items'], 'label'))->toBe(['Aleppo Wells']);
+});
+
+test('the other layout wins when the typed text only finds weaker matches', function () {
+    Task::factory()->create(['title' => 'حقخلقشةس draft']);
+
+    expect(askAs(User::factory()->role('Super Admin')->create(), 'حقخلقشةس')['corrected'])->toBe('programs');
+});
+
+test('Arabic names are found whatever form of alef, taa marbuta or yaa is typed', function (string $typed) {
+    Project::factory()->create(['name' => 'مدرسة الإغاثة في مستشفى']);
+
+    $labels = array_column(collect(askAs(User::factory()->role('Super Admin')->create(), $typed)['groups'])->firstWhere('name', __('common.projects'))['items'] ?? [], 'label');
+
+    expect($labels)->toBe(['مدرسة الإغاثة في مستشفى']);
+})->with(['مدرسة', 'مدرسه', 'اغاثه', 'إغاثة', 'مستشفي']);
+
+test('a word one typo from a module name is also searched as a name', function () {
+    Project::factory()->create(['name' => 'آبار حلب']);
+
+    $results = askAs(User::factory()->role('Super Admin')->create(), 'ابار');
+
+    expect(array_column(collect($results['groups'])->firstWhere('name', __('common.projects'))['items'] ?? [], 'label'))->toBe(['آبار حلب']);
+});
+
+test('names stored with tashkeel are found without it', function () {
+    Project::factory()->create(['name' => 'مَدْرَسَة الأمل']);
+
+    $results = askAs(User::factory()->role('Super Admin')->create(), 'مدرسة');
+
+    expect(array_column(collect($results['groups'])->firstWhere('name', __('common.projects'))['items'] ?? [], 'label'))->toBe(['مَدْرَسَة الأمل']);
+});
+
+test('a correct Arabic search that finds a record is never swapped for a page match', function () {
+    Project::factory()->create(['name' => 'حلب']);
+
+    expect(askAs(User::factory()->role('Super Admin')->create(), 'حلب')['corrected'])->toBeNull();
+});

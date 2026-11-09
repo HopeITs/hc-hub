@@ -260,9 +260,8 @@ trait ManagesTaskDrawer
     /**
      * Adds or removes one assignee from a task's list, for the inline
      * multi-select popover on the list row — the drawer's own checkbox list
-     * covers the same ground for a full edit, this is the quick path. A
-     * task must always keep at least one assignee, matching saveTask()'s
-     * own validation, so the last one can't be toggled off here either.
+     * covers the same ground for a full edit, this is the quick path.
+     * Removing the last assignee leaves the task unassigned.
      *
      * This one re-renders: the avatar "x" calls it directly and needs the row
      * to show the removal. The popover uses togglePickedAssignee() instead.
@@ -280,12 +279,6 @@ trait ManagesTaskDrawer
         $existing = $task->taskAssignees()->where('employee_id', $employeeId)->first();
 
         if ($existing !== null) {
-            if ($task->taskAssignees()->count() <= 1) {
-                Flux::toast(variant: 'danger', text: __('tasks.assign_this_task_to_someone'));
-
-                return;
-            }
-
             $existing->delete();
 
             $this->toastQuickSuccess(__('tasks.assignee_removed'));

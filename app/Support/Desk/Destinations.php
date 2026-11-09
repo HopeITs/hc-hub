@@ -177,7 +177,6 @@ final class Destinations
 
             $page('projects.index', 'common.projects', 'folder', 'folder-open', 'projects_delivery', $can('projects.view'), 'projects'),
             $page('milestones.index', 'common.milestones', 'flag', 'flag', 'projects_delivery', $can('milestones.view'), 'milestones'),
-            $page('timeline.index', 'titles.timeline', 'cal', 'bars-3-bottom-left', 'projects_delivery', $can('projects.view')),
 
             $page('results.index', 'common.results_framework', 'chart', 'trophy', 'monitoring_evaluation', $can('results.view'), 'results'),
             $page('indicator-library.index', 'navigation.indicator_library', 'chart', 'book-open', 'monitoring_evaluation', $can('indicator-library.view'), 'indicator-library'),

@@ -34,7 +34,8 @@ test('the employee picker options are sorted for the interface language and cach
         ->all();
 
     expect($order($english))->toBe([$amy, $zed])
-        ->and($order($arabic))->toBe([$zed, $amy]);
+        ->and($order($arabic))->toBe([$zed, $amy])
+        ->and(collect($english->json())->firstWhere('value', (string) $amy)['photo'])->toBe(HrEmployee::avatarUrl($amy));
 });
 
 test('an employees dropdown renders only the picked names on the server', function () {
@@ -152,6 +153,21 @@ test('the employee picker options carry each person\'s current position and flag
 
     expect($rows[(string) $placed])->toMatchArray(['detail' => 'Field Officer · Senior · Media · Hope Center Idlib', 'inactive' => false])
         ->and($rows[(string) $unplaced])->toMatchArray(['detail' => 'No active position', 'inactive' => true]);
+});
+
+test('an employee\'s position leaves out a job level that only repeats the title', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $levelId = insertHrJobLevel('Program Manager', 'مدير برنامج');
+    $employeeId = insertHrEmployee(firstNameEn: 'Rana', lastNameEn: 'Repeat');
+    insertHrContract($employeeId, insertHrPosition(insertHrDepartment('Management'), 'program manager ', jobLevelId: $levelId));
+
+    $rows = collect($this->actingAs($user)
+        ->withSession(['locale' => 'en'])
+        ->getJson(route('employees.picker-options', ['l' => 'en']))
+        ->assertOk()
+        ->json())->keyBy('value');
+
+    expect($rows[(string) $employeeId]['detail'])->toBe('program manager · Management');
 });
 
 test('an employee chip shows the person\'s current position', function () {
