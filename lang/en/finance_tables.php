@@ -66,6 +66,7 @@ return [
     'minimum' => 'Min',
     'needs_attention_first' => 'Needs attention first',
     'next_due' => 'Next due',
+    'nothing_matches_this_here' => 'Nothing here matches this',
     'next_report_due' => 'Next report due',
     'no_date' => 'No date',
     'not_scheduled' => 'Not scheduled',
