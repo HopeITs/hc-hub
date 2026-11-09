@@ -176,3 +176,60 @@ test('the sidebar links to the queue only for report-templates.manage holders', 
     $this->actingAs(userWithRole('MEAL'))->get(route('dashboard'))->assertOk()->assertSee($link, false);
     $this->actingAs(User::factory()->role('Team Member')->create())->get(route('dashboard'))->assertOk()->assertDontSee($link, false);
 });
+
+test('the two status buttons count what a click shows, and pressing one again clears it', function () {
+    $manager = mealManager();
+    rtqTemplate('Fresh Project');
+    rtqTemplate('Growing Project', confirmed: true, lineStatuses: [ReportTemplateLineStatus::Confirmed, ReportTemplateLineStatus::Pending]);
+    rtqTemplate('Growing Again', confirmed: true, lineStatuses: [ReportTemplateLineStatus::Pending]);
+
+    $page = Livewire::actingAs($manager)->test('pages::report-templates.index');
+
+    expect($page->instance()->focusCounts)->toBe(['pending' => 1, 'lines' => 2, 'total' => 3]);
+
+    $page->call('setFocus', 'lines')
+        ->assertSet('focus', 'lines')
+        ->assertSee('Growing Project')
+        ->assertSee('Growing Again')
+        ->assertDontSee('Fresh Project')
+        ->call('setFocus', 'lines')
+        ->assertSet('focus', '')
+        ->assertSee('Fresh Project')
+        ->call('setFocus', 'bogus')
+        ->assertSet('focus', '');
+});
+
+test('search narrows the counts and the list, and Reset filters is the way out of no results', function () {
+    $manager = mealManager();
+    rtqTemplate('Aleppo Literacy', proposalName: 'Winter WASH');
+    rtqTemplate('Homs Nutrition', confirmed: true, proposalName: 'Spring Hygiene');
+
+    $page = Livewire::actingAs($manager)->test('pages::report-templates.index')
+        ->set('search', 'hygiene')
+        ->assertSee('Homs Nutrition')
+        ->assertDontSee('Aleppo Literacy');
+
+    expect($page->instance()->focusCounts['total'])->toBe(1);
+
+    $page->set('search', 'zzz')
+        ->assertSeeHtml('data-test="reset-filters"')
+        ->call('clearFilters')
+        ->assertSet('search', '')
+        ->assertSee('Aleppo Literacy')
+        ->assertSee('Homs Nutrition');
+});
+
+test('the status buttons, search and review links sit inside the component root', function () {
+    $template = rtqTemplate('Aleppo Literacy');
+
+    $html = Livewire::actingAs(mealManager())->test('pages::report-templates.index')->html();
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
+    $xpath = new DOMXPath($dom);
+
+    foreach (['queue-tab-pending', 'queue-tab-lines', 'queue-search'] as $hook) {
+        expect($xpath->query('//*[@*[name()="wire:id"]]//*[@data-test="'.$hook.'"]')->length)->toBeGreaterThan(0, $hook);
+    }
+
+    expect($xpath->query('//*[@*[name()="wire:id"]]//a[@data-queue-open][contains(@href, "'.$template->project->slug.'")]')->length)->toBe(1);
+});

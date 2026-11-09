@@ -13,6 +13,10 @@ return [
     'evidence_types_invalid' => 'Choose active evidence types only.',
     'fixed_denominator_invalid' => 'Enter a whole number of at least 1.',
     'queue' => [
+        'new_templates' => 'New templates',
+        'search' => 'Search templates',
+        'search_placeholder' => 'Project, proposal or city',
+        'review' => 'Review',
         'all_cities' => 'All cities',
         'project' => 'Project',
         'template' => 'Template',
