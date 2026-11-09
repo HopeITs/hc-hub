@@ -22,6 +22,16 @@ test('muting and unmuting a module', function () {
     expect(NotificationMute::query()->count())->toBe(0);
 });
 
+test('each mute switch names its module', function () {
+    $user = userWithRole('Managers');
+    $label = __('notifications.modules.tasks');
+
+    Livewire::actingAs($user)->test('pages::notifications.settings')
+        ->assertSeeHtml('aria-label="'.e(__('notifications.mute_toggle', ['module' => $label])).'"')
+        ->call('toggleMute', 'tasks')
+        ->assertSet('muted', ['tasks']);
+});
+
 test('a module outside my permissions cannot be muted by a crafted call', function () {
     $user = userWithRole('Media Team');
 

@@ -23,6 +23,8 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
     public function updatedPopups(): void
     {
         auth()->user()->forceFill(['notification_popups' => $this->popups])->save();
+
+        Flux::toast(variant: 'success', text: $this->popups ? __('notifications.popups_on') : __('notifications.popups_off'));
     }
 
     /**
@@ -60,7 +62,9 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
 
         Flux::toast(
             variant: 'success',
-            text: $muting ? __('notifications.module_muted') : __('notifications.module_unmuted'),
+            text: __($muting ? 'notifications.module_muted' : 'notifications.module_unmuted', [
+                'module' => app(\App\Notifications\NotificationPresenter::class)->moduleLabel($module),
+            ]),
         );
     }
 
@@ -178,15 +182,17 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
             <p class="text-sm text-secondary-medium dark:text-ink-muted">{{ __('notifications.mutes_help') }}</p>
 
             <ul class="mt-2 divide-y divide-secondary-soft dark:divide-line">
-                @foreach ($this->mutableModules as $module)
+                @forelse ($this->mutableModules as $module)
                     <li class="flex items-center justify-between gap-3 py-2.5" wire:key="mute-{{ $module }}">
                         <span @class(['text-sm font-medium', 'text-secondary-light line-through' => in_array($module, $muted, true)])>{{ app(\App\Notifications\NotificationPresenter::class)->moduleLabel($module) }}</span>
                         <label class="inline-flex cursor-pointer items-center gap-2 text-sm text-secondary-medium dark:text-ink-muted">
-                            <input type="checkbox" wire:click="toggleMute('{{ $module }}')" @checked(in_array($module, $muted, true)) class="size-4 accent-primary" data-mute-toggle="{{ $module }}" />
+                            <input type="checkbox" wire:click="toggleMute('{{ $module }}')" @checked(in_array($module, $muted, true)) aria-label="{{ __('notifications.mute_toggle', ['module' => app(\App\Notifications\NotificationPresenter::class)->moduleLabel($module)]) }}" class="size-4 accent-primary" data-mute-toggle="{{ $module }}" />
                             {{ __('notifications.muted') }}
                         </label>
                     </li>
-                @endforeach
+                @empty
+                    <li class="py-2.5 text-sm text-secondary-medium dark:text-ink-muted" data-mutes-empty>{{ __('notifications.mutes_empty') }}</li>
+                @endforelse
             </ul>
         </section>
     </div>

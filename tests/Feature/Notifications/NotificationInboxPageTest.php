@@ -226,6 +226,38 @@ test('the critical shortcut and clear filters reset the view', function () {
         ->assertSeeText('Routine update');
 });
 
+test('each headline number filters the list and pressing it again clears it', function () {
+    $user = Activity::withoutRecording(fn () => User::factory()->create());
+    pageNotify($user, 'Burning issue', priority: NotificationPriority::Critical);
+    pageNotify($user, 'Routine update', module: 'risks');
+
+    Livewire::actingAs($user)->test('pages::notifications.index')
+        ->call('showCritical')
+        ->assertSet('priority', 'critical')
+        ->assertDontSeeText('Routine update')
+        ->call('showCritical')
+        ->assertSet('state', 'all')
+        ->assertSet('priority', '')
+        ->assertSeeText('Routine update')
+        ->call('toggleState', 'unread')
+        ->assertSet('state', 'unread')
+        ->call('toggleState', 'unread')
+        ->assertSet('state', 'all')
+        ->call('toggleState', 'bogus')
+        ->assertSet('state', 'all');
+});
+
+test('priority, type and module filters sit behind More filters, open only when one is active', function () {
+    $user = Activity::withoutRecording(fn () => User::factory()->create());
+    pageNotify($user, 'Routine update', module: 'risks');
+
+    Livewire::actingAs($user)->test('pages::notifications.index')
+        ->assertSee('More filters')
+        ->assertSeeHtml('more: false')
+        ->set('priority', 'info')
+        ->assertSeeHtml('more: true');
+});
+
 test('the rail counts unread notifications per priority and type', function () {
     $user = Activity::withoutRecording(fn () => User::factory()->create());
     pageNotify($user, 'A', priority: NotificationPriority::Critical);
