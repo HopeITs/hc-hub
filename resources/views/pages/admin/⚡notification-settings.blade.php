@@ -430,8 +430,7 @@ new #[Layout('layouts::desk'), Title('titles.notification_rules')] class extends
     }
 }; ?>
 
-<x-desk.register class="rules-page @container/rules" heading-id="notification-rules-heading" :title="__('notifications.admin.title')" x-data="notificationRules(@js($this->clientConfig()))"
->
+<x-desk.register class="rules-page @container/rules" heading-id="notification-rules-heading" :title="__('notifications.admin.title')" :x-data="'notificationRules('.\Illuminate\Support\Js::from($this->clientConfig())->toHtml().')'">
 
     <form x-on:submit.prevent="save()" class="flex flex-1 flex-col pt-8" novalidate>
         <div class="grid items-start gap-x-16 gap-y-12 @5xl/rules:grid-cols-2">
