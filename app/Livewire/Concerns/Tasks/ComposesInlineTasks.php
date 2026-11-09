@@ -187,7 +187,10 @@ trait ComposesInlineTasks
 
         if ($draft !== null) {
             $this->taskPriority = $draft['priority'];
-            $this->assignedTo = $draft['assignees'];
+
+            if ($draft['assignees'] !== []) {
+                $this->assignedTo = $draft['assignees'];
+            }
 
             if ($dueDate === null && $draft['due_date'] !== '') {
                 $this->dueDate = $draft['due_date'];

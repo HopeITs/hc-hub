@@ -1693,6 +1693,33 @@ test('the task form is rendered only while its drawer is open', function () {
         ->assertSeeHtml('wire:model="progressPercentage"');
 });
 
+test('opening the create drawer files the task under the viewer\'s department and assigns it to them', function () {
+    $employeeId = insertHrEmployee();
+    $departmentId = insertHrDepartment('Monitoring & Evaluation');
+    insertHrContract($employeeId, insertHrPosition($departmentId));
+    $user = User::factory()->role('General Manager')->create(['employee_id' => $employeeId]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->call('openCreateDrawer')
+        ->assertSet('showTaskDrawer', true)
+        ->assertSet('taskSourceType', 'department')
+        ->assertSet('taskSourceId', (string) $departmentId)
+        ->assertSet('assignedTo', [(string) $employeeId]);
+});
+
+test('the create dialog is one screen, not a step wizard', function () {
+    $user = User::factory()->role('General Manager')->create(['employee_id' => insertHrEmployee()]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->call('openCreateDrawer')
+        ->assertSeeHtml('data-test="task-drawer-composer"')
+        ->assertSeeHtml('data-test="task-drawer-title-input"')
+        ->assertSeeHtml('data-test="task-assignee-picker"')
+        ->assertDontSeeHtml('class="form-section');
+});
+
 test('the popover toggle actions skip the list re-render and still save', function () {
     $user = User::factory()->role('General Manager')->create();
     $alice = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');

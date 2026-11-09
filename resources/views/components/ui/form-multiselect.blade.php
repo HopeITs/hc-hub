@@ -10,6 +10,8 @@
     'searchLabel' => null,
     'value' => null,
     'employees' => false,
+    'chip' => false,
+    'chipIcon' => null,
 ])
 
 {{-- x-ui.form-select for several values: the menu stays open while picking, and the trigger names the picks. --}}
@@ -26,5 +28,7 @@
     :search-label="$searchLabel"
     :value="$value"
     :employees="$employees"
+    :chip="$chip"
+    :chip-icon="$chipIcon"
     :attributes="$attributes"
 >{{ $slot }}</x-ui.form-select>
