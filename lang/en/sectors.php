@@ -32,10 +32,10 @@ return [
     'deactivate_name' => 'Deactivate “:name”',
     'reactivate_name' => 'Reactivate “:name”',
 
-    'deactivate_title' => 'Deactivate this sector?',
+    'deactivate_title' => 'Deactivate “:name”?',
     'deactivate_message' => 'It stays on the projects that have it, but is no longer offered for new projects.',
     'deactivate' => 'Deactivate',
-    'delete_title' => 'Delete this sector?',
+    'delete_title' => 'Delete “:name”?',
     'delete_message' => 'No project uses it, so it is removed for good.',
     'delete' => 'Delete',
     'deactivate_instead' => 'Deactivate instead',
