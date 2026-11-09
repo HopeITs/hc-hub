@@ -64,19 +64,19 @@ trait ComposesInlineTasks
 
     /**
      * A group's inline "+ Add task" row only captures a title, but a task
-     * always needs a source and an assignee. Both are inferred from context
+     * always needs a source and usually an assignee. Both are inferred from context
      * so the row can create the task directly, with no drawer:
      *  - source: the row's own milestone (its own milestoneId, when the row
      *    is grouped or scheduled under one), falling back to the active
      *    source-type/source-id filter, then the viewer's own department —
      *    only a viewer with none of these is genuinely ambiguous.
      *  - assignee: whichever employees the row's own draft (see taskDraft())
-     *    has picked, falling back to the signed-in user's own HR employee
-     *    record when the row hasn't been touched.
+     *    has picked — none when they were all removed — falling back to the
+     *    signed-in user's own HR employee record when the row hasn't been
+     *    touched. Without either, the task is created unassigned.
      * Due date, priority and status also come from that same draft, same as
-     * addSubtaskQuick()'s own draft. When the source or every assignee can't
-     * be resolved, this falls back to the drawer exactly as before,
-     * pre-filled with the title and whatever the row's own context and
+     * addSubtaskQuick()'s own draft. When the source can't be resolved,
+     * this falls back to the drawer exactly as before, pre-filled with the title and whatever the row's own context and
      * draft already had, so nothing is ever silently dropped.
      */
     public function quickCreateTask(string $title, ?string $status = null, ?string $milestoneId = null, ?string $rowKey = null, ?string $dueDate = null): void
@@ -92,11 +92,12 @@ trait ComposesInlineTasks
         $draft = $rowKey !== null ? $this->taskDraft($rowKey, $status) : null;
 
         $source = $this->resolveInlineSource($milestoneId);
-        $employeeIds = $draft !== null && $draft['assignees'] !== []
+        $pickedAssignees = $rowKey !== null && isset($this->taskDrafts[$rowKey]['assignees']);
+        $employeeIds = $pickedAssignees
             ? HrEmployee::query()->whereIn('id', collect($draft['assignees'])->map(fn (string $id): int => (int) $id))->pluck('id')
             : collect(array_filter([$this->resolveInlineAssigneeId()]));
 
-        if ($source === null || $employeeIds->isEmpty()) {
+        if ($source === null) {
             $this->openDrawerFromInlineRow($title, $status, $milestoneId, $draft, $dueDate);
 
             return;
@@ -322,8 +323,8 @@ trait ComposesInlineTasks
      * inline row in its expanded panel — no drawer. Proposal and milestone
      * always match the parent (a subtask delivers the same thing its parent
      * does), while due date, priority, status and assignees come from the
-     * row's own draft fields, defaulting to the parent's own assignees when
-     * none were chosen. Mirrors the show page's own addSubtask(), kept
+     * row's own draft fields; the assignees start as the parent's own, and
+     * removing them all adds the subtask unassigned. Mirrors the show page's own addSubtask(), kept
      * separate because this is a different Livewire component instance.
      */
     public function addSubtaskQuick(int $parentTaskId, string $title): void
@@ -350,10 +351,6 @@ trait ComposesInlineTasks
         $employeeIds = HrEmployee::query()
             ->whereIn('id', collect($draft['assignees'])->map(fn (string $id): int => (int) $id))
             ->pluck('id');
-
-        if ($employeeIds->isEmpty()) {
-            $employeeIds = $parent->taskAssignees->pluck('employee_id');
-        }
 
         DB::transaction(function () use ($parent, $title, $status, $priority, $dueDate, $employeeIds): void {
             $subtask = Task::query()->create([

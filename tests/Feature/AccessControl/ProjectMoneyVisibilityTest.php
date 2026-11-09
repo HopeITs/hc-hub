@@ -9,7 +9,6 @@ use App\Models\Media;
 use App\Models\Project;
 use App\Models\Proposal;
 use App\Models\TransfersTracking;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
@@ -132,81 +131,6 @@ test('Public Relations Manager opens the proposal from the project page but sees
         ->assertDontSee('731,942')
         ->assertDontSee('123,457');
 });
-
-test('a Managers user sees no proposal rows and no pipeline lens on the timeline, and the pipeline value is ignored', function () {
-    ['project' => $project] = seedProjectMoneyFixture();
-    $manager = userWithRole('Managers');
-
-    $connected = Livewire::actingAs($manager)
-        ->test('pages::timeline.index')
-        ->set('view', 'connected')
-        ->set('program', (string) $project->program_id)
-        ->assertDontSee('Harbour Clean Water')
-        ->assertDontSee('Aurora Foundation')
-        ->assertDontSee('731,942')
-        ->assertDontSee('Fundraising pipeline');
-
-    $rows = collect($connected->instance()->payload['rows']);
-    expect($rows->pluck('kind')->all())->not->toContain('proposal', 'transfer', 'report')
-        ->and($connected->instance()->payload['relations'])->toBe([]);
-
-    $pipeline = Livewire::actingAs($manager)
-        ->test('pages::timeline.index')
-        ->set('view', 'pipeline')
-        ->assertSet('view', 'portfolio')
-        ->assertDontSee('Harbour Clean Water');
-
-    expect(collect($pipeline->instance()->payload['rows'])->pluck('kind')->all())->not->toContain('proposal');
-
-    Livewire::actingAs($manager)
-        ->withQueryParams(['view' => 'pipeline'])
-        ->test('pages::timeline.index')
-        ->assertSet('view', 'portfolio')
-        ->assertDontSee('Harbour Clean Water');
-});
-
-test('a fundraiser without agreements sees the proposals and donor names on the timeline but no amounts or obligations', function () {
-    ['project' => $project, 'proposal' => $proposal, 'transfer' => $transfer] = seedProjectMoneyFixture();
-
-    $connected = Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))
-        ->test('pages::timeline.index')
-        ->set('view', 'connected')
-        ->set('program', (string) $project->program_id);
-    $rows = collect($connected->instance()->payload['rows'])->keyBy('id');
-
-    expect($rows['proposal-'.$proposal->id])->toMatchArray(['owner' => 'Aurora Foundation', 'money' => null])
-        ->and($rows)->not->toHaveKey('transfer-'.$transfer->id);
-
-    $pipeline = Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))
-        ->test('pages::timeline.index')
-        ->set('view', 'pipeline')
-        ->assertSet('view', 'pipeline')
-        ->assertSee('Harbour Clean Water');
-
-    expect(collect($pipeline->instance()->payload['rows'])->firstWhere('id', 'proposal-'.$proposal->id)['money'])->toBeNull();
-});
-
-test('Financial and General Manager get the proposal rows, amounts, obligations and the pipeline lens on the timeline', function (string $role) {
-    ['project' => $project, 'proposal' => $proposal, 'transfer' => $transfer, 'report' => $report] = seedProjectMoneyFixture();
-
-    $connected = Livewire::actingAs(userWithRole($role))
-        ->test('pages::timeline.index')
-        ->set('view', 'connected')
-        ->set('program', (string) $project->program_id)
-        ->assertSee('Fundraising pipeline');
-    $rows = collect($connected->instance()->payload['rows'])->keyBy('id');
-
-    expect($rows['proposal-'.$proposal->id])->toMatchArray(['owner' => 'Aurora Foundation', 'money' => '731,942 USD'])
-        ->and($rows)->toHaveKeys(['transfer-'.$transfer->id, 'report-'.$report->id]);
-
-    $pipeline = Livewire::actingAs(userWithRole($role))
-        ->test('pages::timeline.index')
-        ->set('view', 'pipeline')
-        ->assertSet('view', 'pipeline')
-        ->assertSee('Harbour Clean Water');
-
-    expect(collect($pipeline->instance()->payload['rows'])->pluck('id'))->toContain('proposal-'.$proposal->id);
-})->with(['Financial', 'General Manager']);
 
 /**
  * A project holding an agreement, an MOU and a photo, all filed on it.
@@ -386,20 +310,3 @@ test('the project page loads no budget pivot for a viewer without funding agreem
         ->and($proposal->donorNames->pluck('name')->all())->toBe(['Aurora Foundation'])
         ->and($proposal->donorNames->first()->pivot->getAttributes())->not->toHaveKey('budget');
 });
-
-test('the timeline never reads a budget pivot for a viewer without funding agreements', function (string $role, bool $readsBudget) {
-    ['project' => $project] = seedProjectMoneyFixture();
-
-    DB::enableQueryLog();
-    Livewire::actingAs(userWithRole($role))
-        ->test('pages::timeline.index')
-        ->set('view', 'connected')
-        ->set('program', (string) $project->program_id);
-    $queries = collect(DB::getQueryLog())->pluck('query')->implode("\n");
-    DB::disableQueryLog();
-
-    expect(str_contains($queries, 'pivot_budget'))->toBe($readsBudget);
-})->with([
-    'a fundraiser without agreements' => [fn (): string => fundraiserWithoutAgreements(), false],
-    'Financial' => ['Financial', true],
-]);

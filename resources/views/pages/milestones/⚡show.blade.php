@@ -543,7 +543,7 @@ new #[Layout('layouts::desk'), Title('titles.milestone')] class extends Componen
                         <flux:menu class="filter-menu">
                             @if ($this->parentOptions->count() > 6)
                                 <div class="border-b border-secondary-soft p-1.5 dark:border-line">
-                                    <x-ui.input type="search" size="sm" icon="magnifying-glass" x-model="optionSearch" :aria-label="__('milestones.search_milestones')" :placeholder="__('milestones.search_milestones')" />
+                                    <x-ui.input type="search" class="hc-picker-search" size="sm" icon="magnifying-glass" x-model="optionSearch" :aria-label="__('milestones.search_milestones')" :placeholder="__('milestones.search_milestones')" />
                                 </div>
                             @endif
                             <flux:menu.item wire:click="$set('parentMilestoneId', '')">

@@ -100,11 +100,10 @@ trait ReadsProposalRegister
 
         return Proposal::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $query) use ($search): void {
-                    $query->where('proposals.name', 'like', Like::contains($search))
-                        ->orWhere('proposals.internal_project_number', 'like', Like::contains($search))
-                        ->orWhere('proposals.notes', 'like', Like::contains($search));
-                });
+                $query->where(Like::everyWord($search, fn (Builder $query, string $word) => $query
+                    ->where(Like::word('proposals.name', $word))
+                    ->orWhere(Like::word('proposals.internal_project_number', $word))
+                    ->orWhere(Like::word('proposals.notes', $word))));
             })
             ->when(ProposalStatus::tryFrom($this->status), fn (Builder $query, ProposalStatus $status) => $query->where('proposals.status', $status))
             ->when(ProposalKind::tryFrom($this->proposalKind), fn (Builder $query, ProposalKind $kind) => $query->where('proposals.kind', $kind))

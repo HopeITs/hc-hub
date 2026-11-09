@@ -151,15 +151,13 @@ trait FiltersTargets
         return PlanIndicator::query()
             // The indicator, the result it measures, or the proposal it was committed in.
             ->when($search !== '', function ($query) use ($search): void {
-                $like = Like::contains($search);
-
-                $query->where(fn ($query) => $query
+                $query->where(Like::everyWord($search, fn ($query, string $word) => $query
                     ->whereHas('indicator', fn ($query) => $query
-                        ->where('name', 'like', $like)
-                        ->orWhereHas('result', fn ($query) => $query->where('statement', 'like', $like)))
+                        ->where(Like::word('name', $word))
+                        ->orWhereHas('result', Like::word('statement', $word)))
                     ->orWhere(fn ($query) => $query
                         ->where('source_type', 'proposal')
-                        ->whereIn('source_id', Proposal::query()->select('id')->where('name', 'like', $like))));
+                        ->whereIn('source_id', Proposal::query()->select('id')->where(Like::word('name', $word))))));
             })
             ->when($this->indicator !== '', fn ($query) => $query->where('indicator_id', (int) $this->indicator))
             ->when($this->result !== '', fn ($query) => $query

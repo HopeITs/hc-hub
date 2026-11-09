@@ -847,6 +847,26 @@
     }
 }
 
+/* Phone: every control is at least 44px to tap. */
+@layer components {
+    @media (max-width: 639px) {
+        .rules-stepper-button {
+            width: 2.75rem;
+            height: 2.75rem;
+        }
+
+        .rules-switch,
+        .rules-event-roles,
+        .rules-default {
+            min-height: 2.75rem;
+        }
+
+        .rules-switch {
+            align-items: center;
+        }
+    }
+}
+
 @keyframes rules-shake {
     20%, 60% {
         transform: translateX(-6px);

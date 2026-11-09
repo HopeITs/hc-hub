@@ -216,17 +216,6 @@ test('department deliverables show the Media Team media work only and hide finan
         ->assertDontSee('Shoot the opening');
 });
 
-test('the dates lens opens the timeline as its full register', function () {
-    Project::factory()->create();
-
-    Livewire::actingAs(User::factory()->role('General Manager')->create())->test('desk.panels.projects', ['size' => 'XL'])
-        ->assertSeeHtml('href="'.route('timeline.index').'"')
-        ->call('setLens', 'stage')
-        ->assertSeeHtml('href="'.route('projects.index').'"')
-        ->call('setLens', 'dates')
-        ->assertSeeHtml('href="'.route('timeline.index').'"');
-});
-
 test('the projects panel opens on the dates lens and keeps start and end under the name in every lens', function () {
     Project::factory()->create(['name' => 'Aleppo Wells', 'start_date' => '2026-01-01', 'end_date' => '2026-12-31']);
     Project::factory()->create(['name' => 'Undated Clinic', 'start_date' => null, 'end_date' => null]);

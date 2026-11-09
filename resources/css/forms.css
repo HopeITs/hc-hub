@@ -1255,3 +1255,9 @@
         .filter-pill { transition: none; }
     }
 }
+
+/* The person's photo at the start of every employee dropdown row (hcEmployeeList in form-fields.js). */
+@layer components {
+    .hc-picker-photo { flex: none; width: 24px; height: 24px; margin-inline-end: 8px; border-radius: 9999px; object-fit: cover; background: var(--color-hr-avatar); }
+    .gap-2 > .hc-picker-photo { margin-inline-end: 0; }
+}

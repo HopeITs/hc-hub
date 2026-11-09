@@ -677,17 +677,7 @@ parameters:
             path: app/Livewire/Concerns/AnnualPlans/ReadsAnnualPlanSummary.php
             count: 1
         -
-            # deliveryWindow() reads `$project?->start_date ?? $project?->end_date`
-            # and the mirror `$project?->end_date ?? $project?->start_date`. The
-            # project can be missing (a milestone bound whose project is not in
-            # the program's list) and both dates are nullable, so the fallbacks
-            # are wanted; PHPStan flags only the last `?->` on the left of each
-            # `??`, which is redundant because `??` already covers null.
-            identifier: nullsafe.neverNull
-            path: app/Livewire/Concerns/Programs/ReadsProgramDelivery.php
-            count: 2
-        -
-            # planTimeline() tests `$strategy->start_year !== null` and
+            # planYears() tests `$strategy->start_year !== null` and
             # `$strategy->end_year !== null`, but strategies.start_year and
             # end_year are NOT NULL (create_strategies_table, never altered) and
             # Strategy documents both as `@property int`, so PHPStan takes each

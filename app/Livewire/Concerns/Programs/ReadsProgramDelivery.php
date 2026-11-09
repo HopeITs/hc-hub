@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Livewire\Concerns\Programs;
 
 use App\Enums\MilestoneStatus;
-use App\Enums\ProjectStatus;
 use App\Enums\ReportStatus;
 use App\Enums\ResultType;
 use App\Models\AnnualPlan;
@@ -15,17 +14,15 @@ use App\Models\Program;
 use App\Models\Project;
 use App\Models\Report;
 use App\Support\ResultsChain;
-use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 
 /**
- * The read-only figures on programs/show: the delivery window, annual plans and
- * their year timeline, the logframe roots and summary, milestone progress and
- * the project status segments.
+ * The read-only figures on programs/show: annual plans and their year
+ * slots, the logframe roots and summary, and milestone progress.
  *
  * Used by programs/show only. The page provides the locked $programId and the
- * program() computed (planTimeline() reads $this->program->strategy).
+ * program() computed (planYears() reads $this->program->strategy).
  *
  * @property int $programId
  * @property-read Program $program  #[Computed] program()
@@ -36,65 +33,6 @@ use Livewire\Attributes\Computed;
  */
 trait ReadsProgramDelivery
 {
-    /**
-     * The date range every project bar is plotted against: the program's
-     * project dates, today, and each project's milestone dates.
-     *
-     * A milestone only stretches the range when it falls within a year of its
-     * own project's dates, so one mistyped date cannot squash every bar. Such
-     * milestones are still drawn, pinned to the edge and flagged as outside
-     * the delivery window.
-     *
-     * @return array{start: CarbonImmutable, end: CarbonImmutable}|null
-     */
-    #[Computed]
-    public function deliveryWindow(): ?array
-    {
-        $projects = Project::query()
-            ->select(['id', 'start_date', 'end_date'])
-            ->where('program_id', $this->programId)
-            ->get()
-            ->keyBy('id');
-
-        $milestoneBounds = Milestone::query()
-            ->whereIn('project_id', $projects->keys())
-            ->where('status', '!=', MilestoneStatus::Cancelled->value)
-            ->groupBy('project_id')
-            ->selectRaw('project_id, min(planned_start_date) as first_planned, max(planned_start_date) as last_planned')
-            ->toBase()
-            ->get();
-
-        $dates = $projects
-            ->flatMap(fn (Project $project): array => [$project->start_date, $project->end_date])
-            ->filter()
-            ->map(fn ($date): CarbonImmutable => CarbonImmutable::parse($date));
-
-        foreach ($milestoneBounds as $bounds) {
-            $project = $projects->get($bounds->project_id);
-            $earliest = $project?->start_date ?? $project?->end_date;
-            $latest = $project?->end_date ?? $project?->start_date;
-
-            foreach ([$bounds->first_planned, $bounds->last_planned] as $planned) {
-                $plannedDate = CarbonImmutable::parse($planned);
-
-                if ($earliest === null || $plannedDate->betweenIncluded(CarbonImmutable::parse($earliest)->subYear(), CarbonImmutable::parse($latest)->addYear())) {
-                    $dates->push($plannedDate);
-                }
-            }
-        }
-
-        if ($dates->isEmpty()) {
-            return null;
-        }
-
-        $dates->push(CarbonImmutable::today());
-
-        return [
-            'start' => $dates->min()->startOfMonth(),
-            'end' => $dates->max()->endOfMonth(),
-        ];
-    }
-
     /** @return Collection<int, AnnualPlan> */
     #[Computed]
     public function annualPlans(): Collection
@@ -119,7 +57,7 @@ trait ReadsProgramDelivery
      * @return array<int, array{year: int, plan: AnnualPlan|null, targets: int, attributed: int, levels: array<string, int>, reports: int, approved: int}>
      */
     #[Computed]
-    public function planTimeline(): array
+    public function planYears(): array
     {
         $plans = $this->annualPlans->keyBy('year');
         $planIds = $this->annualPlans->pluck('id');
@@ -234,28 +172,5 @@ trait ReadsProgramDelivery
             'reached' => $reached,
             'total' => $total,
         ];
-    }
-
-    /** @return array<int, array{label: string, count: int, tone: string}> */
-    #[Computed]
-    public function projectStatusSegments(): array
-    {
-        $counts = Project::query()
-            ->where('program_id', $this->programId)
-            ->selectRaw('status, count(*) as total')
-            ->groupBy('status')
-            ->pluck('total', 'status');
-
-        return collect(ProjectStatus::live())
-            ->map(fn (ProjectStatus $status): array => [
-                'label' => $status->label(),
-                'count' => (int) ($counts[$status->value] ?? 0),
-                'tone' => match ($status) {
-                    ProjectStatus::Active => 'bg-status-good',
-                    ProjectStatus::Approved => 'bg-status-warn',
-                    default => 'bg-secondary-light',
-                },
-            ])
-            ->all();
     }
 }

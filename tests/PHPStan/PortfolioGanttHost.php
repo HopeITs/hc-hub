@@ -8,13 +8,13 @@ use App\Livewire\Concerns\BuildsPortfolioGantt;
 use Livewire\Component;
 
 /**
- * Stands in for timeline/index and funding-agreements/show, the read-only portfolio Gantt.
+ * Stands in for funding-agreements/show, the read-only portfolio Gantt.
  *
- * The real pages are single-file Livewire components inside Blade, which
+ * The real page is a single-file Livewire component inside Blade, which
  * PHPStan cannot read, so without this class the trait is never analysed.
  * Never instantiated.
  */
-abstract class PortfolioTimelineHost extends Component
+abstract class PortfolioGanttHost extends Component
 {
     use BuildsPortfolioGantt;
 }

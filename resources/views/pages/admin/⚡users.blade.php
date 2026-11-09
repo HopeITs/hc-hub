@@ -102,16 +102,22 @@ new #[Layout('layouts::desk'), Title('titles.user_directory')] class extends Com
     @endif
 
     <x-slot:actions>
-        <nav class="flex min-h-11 items-center gap-1 rounded-lg border border-secondary-soft bg-secondary-soft/40 p-1 dark:border-line dark:bg-surface-2" aria-label="{{ __('users.users') }}">
+        @if ($activeTab === 'users')
+            @can('create', App\Models\User::class)
+                <x-ui.button tone="primary" icon="plus" class="min-h-11 max-sm:h-11!" wire:click="openCreateModal" data-test="create-user-button" data-quick-create>{{ __('users.add_user') }}</x-ui.button>
+            @endcan
+        @endif
+
+        <navclass="flex min-h-11 items-center gap-1 rounded-lg border border-secondary-soft bg-secondary-soft/40 p-1 dark:border-line dark:bg-surface-2" aria-label="{{ __('users.users') }}">
             <button type="button" wire:click="showTab('users')" @class([
-                'min-h-9 rounded-md px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium',
+                'min-h-11 sm:min-h-9 rounded-md px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium',
                 'bg-white text-primary dark:text-brand-text shadow-sm dark:bg-surface-3 dark:shadow-raised' => $activeTab === 'users',
                 'text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink' => $activeTab !== 'users',
             ])>
                 {{ __('users.users') }}
             </button>
             <button type="button" wire:click="showTab('roles')" @class([
-                'min-h-9 rounded-md px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium',
+                'min-h-11 sm:min-h-9 rounded-md px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium',
                 'bg-white text-primary dark:text-brand-text shadow-sm dark:bg-surface-3 dark:shadow-raised' => $activeTab === 'roles',
                 'text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink' => $activeTab !== 'roles',
             ])>
@@ -119,7 +125,7 @@ new #[Layout('layouts::desk'), Title('titles.user_directory')] class extends Com
             </button>
             @can('manage', Supervision::class)
                 <button type="button" wire:click="showTab('supervision')" data-test="supervision-tab" @class([
-                    'min-h-9 rounded-md px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium',
+                    'min-h-11 sm:min-h-9 rounded-md px-4 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium',
                     'bg-white text-primary dark:text-brand-text shadow-sm dark:bg-surface-3 dark:shadow-raised' => $activeTab === 'supervision',
                     'text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink' => $activeTab !== 'supervision',
                 ])>

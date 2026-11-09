@@ -72,12 +72,11 @@ trait ReadsDonorRegister
 
         return Donor::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $query) use ($search): void {
-                    $query->where('donors.name', 'like', Like::contains($search))
-                        ->orWhere('donors.country', 'like', Like::contains($search))
-                        ->orWhere('donors.contact_person', 'like', Like::contains($search))
-                        ->orWhere('donors.email', 'like', Like::contains($search));
-                });
+                $query->where(Like::everyWord($search, fn (Builder $query, string $word) => $query
+                    ->where(Like::word('donors.name', $word))
+                    ->orWhere(Like::word('donors.country', $word))
+                    ->orWhere(Like::word('donors.contact_person', $word))
+                    ->orWhere(Like::word('donors.email', $word))));
             })
             ->when($this->relationship === 'funding', fn (Builder $query) => $query->has('donorProposals'))
             ->when($this->relationship === 'prospect', fn (Builder $query) => $query->doesntHave('donorProposals'))

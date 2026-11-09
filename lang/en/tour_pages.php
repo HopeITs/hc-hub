@@ -43,10 +43,6 @@ return [
             'table' => ['title' => 'Your reviews', 'body' => 'Press Review to open the proposal right on your note. Add a note if you like, then press Mark as reviewed.'],
         ],
         'projects_show' => ['intro' => ['title' => 'Project detail', 'body' => 'One project end to end: schedule, milestones, tasks, budget, team and how it links to the results it serves.']],
-        'timeline_index' => [
-            'intro' => ['title' => 'Timeline', 'body' => 'Every project on a shared time axis, so overlaps and gaps are obvious.'],
-            'board' => ['title' => 'The timeline', 'body' => 'Bars show when work starts and ends. Scroll sideways through time and use the view switch to change the zoom.'],
-        ],
         'risks_index' => ['intro' => ['title' => 'Risks', 'body' => 'What could go wrong, how likely and how serious it is, and who is handling it. Log a new risk as soon as you spot one.']],
         'milestones_index' => ['intro' => ['title' => 'Milestones', 'body' => 'Key delivery checkpoints across projects. Filter by project or status to see what is coming and what is late.']],
         'milestones_show' => ['intro' => ['title' => 'Milestone detail', 'body' => 'One checkpoint with its dates, progress and the tasks that lead up to it.']],

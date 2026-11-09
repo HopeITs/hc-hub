@@ -91,10 +91,6 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
         ->middleware('throttle:files')
         ->name('projects.files.download');
 
-    Route::livewire('timeline', 'pages::timeline.index')
-        ->can('projects.view')
-        ->name('timeline.index');
-
     Route::livewire('risks', 'pages::risks.index')
         ->can('risks.view')
         ->name('risks.index');

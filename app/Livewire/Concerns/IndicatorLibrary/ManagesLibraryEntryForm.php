@@ -65,6 +65,11 @@ trait ManagesLibraryEntryForm
 
     public bool $showDeactivateModal = false;
 
+    /** Named in the two confirmation dialogs. */
+    public string $deactivatingEntryName = '';
+
+    public string $deletingEntryName = '';
+
     /**
      * Programs offered in the form.
      *
@@ -153,8 +158,11 @@ trait ManagesLibraryEntryForm
 
     public function confirmDeactivate(int $libraryIndicatorId): void
     {
-        Gate::authorize('update', LibraryIndicator::query()->findOrFail($libraryIndicatorId));
+        $entry = LibraryIndicator::query()->findOrFail($libraryIndicatorId);
 
+        Gate::authorize('update', $entry);
+
+        $this->deactivatingEntryName = $entry->localizedName();
         $this->deactivatingEntryId = $libraryIndicatorId;
         $this->showDeactivateModal = true;
     }
@@ -175,6 +183,7 @@ trait ManagesLibraryEntryForm
     {
         $this->showDeactivateModal = false;
         $this->deactivatingEntryId = null;
+        $this->deactivatingEntryName = '';
     }
 
     /**
@@ -187,8 +196,11 @@ trait ManagesLibraryEntryForm
 
     public function confirmDelete(int $libraryIndicatorId): void
     {
-        Gate::authorize('delete', LibraryIndicator::query()->findOrFail($libraryIndicatorId));
+        $entry = LibraryIndicator::query()->findOrFail($libraryIndicatorId);
 
+        Gate::authorize('delete', $entry);
+
+        $this->deletingEntryName = $entry->localizedName();
         $this->deletingEntryId = $libraryIndicatorId;
         $this->showDeleteModal = true;
     }
@@ -209,6 +221,7 @@ trait ManagesLibraryEntryForm
     {
         $this->showDeleteModal = false;
         $this->deletingEntryId = null;
+        $this->deletingEntryName = '';
     }
 
     /**

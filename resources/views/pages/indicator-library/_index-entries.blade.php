@@ -32,15 +32,20 @@
                             default => $libraryEntry->name_ar,
                         };
                         $isExpanded = $expandedEntryId === $libraryEntry->id;
+                        $entryStatus = $this::statusOf($libraryEntry);
+                        [$statusTone, $statusDot] = match ($entryStatus) {
+                            'inuse' => ['text-status-good', 'bg-status-good'],
+                            'unused' => ['text-secondary-dark dark:text-ink', 'bg-secondary-medium dark:bg-ink-muted'],
+                            default => ['text-secondary-medium dark:text-ink-muted', 'bg-secondary-light dark:bg-line-strong'],
+                        };
                         $displayName = $libraryEntry->localizedName();
                         $measureText = $libraryEntry->unit !== null && $libraryEntry->measure !== IndicatorMeasure::Percentage
                             ? $libraryEntry->measure->label().' · '.$libraryEntry->unit
                             : $libraryEntry->measure->label();
                     @endphp
-                    <li wire:key="library-entry-{{ $libraryEntry->id }}" data-library-entry @class(['py-4', 'opacity-70' => ! $libraryEntry->is_active])>
+                    <li wire:key="library-entry-{{ $libraryEntry->id }}" data-library-entry data-status="{{ $entryStatus }}" @class(['py-4', 'opacity-70' => ! $libraryEntry->is_active])>
                         <div class="flex flex-col gap-2 @2xl/directory:flex-row @2xl/directory:items-start @2xl/directory:gap-5">
                             <div class="flex shrink-0 items-center gap-2 @2xl/directory:w-36 @2xl/directory:pt-0.5">
-                                <span aria-hidden="true" @class(['size-1.5 shrink-0 rounded-full', 'bg-primary dark:bg-brand' => $libraryEntry->is_active, 'bg-secondary-light dark:bg-line-strong' => ! $libraryEntry->is_active])></span>
                                 <bdi dir="ltr" class="font-mono text-xs font-semibold tracking-tight text-secondary-dark tabular-nums dark:text-ink">{{ $libraryEntry->code }}</bdi>
                             </div>
 
@@ -51,6 +56,10 @@
                                 @endif
 
                                 <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1.5 type-meta text-secondary-medium dark:text-ink-muted">
+                                    <span class="inline-flex items-center gap-1.5 font-semibold {{ $statusTone }}" data-test="library-entry-status">
+                                        <span aria-hidden="true" class="size-2 shrink-0 rounded-full {{ $statusDot }}"></span>{{ __('indicator_library.status_'.$entryStatus) }}
+                                    </span>
+                                    <span aria-hidden="true">·</span>
                                     <span>{{ $measureText }}</span>
                                     <span aria-hidden="true">·</span>
                                     <span>{{ $libraryEntry->frequency->label() }}</span>
@@ -59,11 +68,6 @@
                                     <span aria-hidden="true">·</span>
                                     <span class="tabular-nums">{{ trans_choice('indicator_library.used_by', $libraryEntry->indicators_count, ['count' => $libraryEntry->indicators_count]) }}</span>
 
-                                    @if (! $libraryEntry->is_active)
-                                        <span class="{{ $badgeClasses }} border-secondary-light text-secondary-dark dark:border-line-strong dark:text-ink">
-                                            <flux:icon.pause-circle variant="micro" class="size-3" aria-hidden="true" />{{ __('indicator_library.inactive') }}
-                                        </span>
-                                    @endif
                                     @if (blank($libraryEntry->name_en))
                                         <span class="{{ $badgeClasses }} border-status-warn/50 bg-status-warn-soft text-secondary-dark dark:text-ink" data-test="missing-english-badge">
                                             <flux:icon.language variant="micro" class="size-3" aria-hidden="true" />{{ __('indicator_library.missing_english') }}
@@ -77,22 +81,41 @@
 
                             <div class="flex shrink-0 items-center gap-1 self-end @2xl/directory:self-start">
                                 <x-ui.button
-                                    tone="ghost" size="sm" :icon="$isExpanded ? 'chevron-up' : 'chevron-down'" class="size-9!"
+                                    tone="ghost" size="sm" :icon="$isExpanded ? 'chevron-up' : 'chevron-down'" class="min-h-11 md:min-h-9"
                                     wire:click="toggleEntry({{ $libraryEntry->id }})"
                                     :aria-expanded="$isExpanded ? 'true' : 'false'"
                                     aria-controls="library-entry-details-{{ $libraryEntry->id }}"
                                     :aria-label="__($isExpanded ? 'indicator_library.hide_details' : 'indicator_library.show_details', ['name' => $displayName])"
-                                />
+                                    data-test="toggle-library-entry-{{ $libraryEntry->id }}"
+                                >
+                                    {{ __('indicator_library.details') }}
+                                </x-ui.button>
                                 @if ($canUpdate)
-                                    <x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-9!" wire:click="openEditModal({{ $libraryEntry->id }})" :aria-label="__('common.edit_name', ['name' => $displayName])" />
-                                    @if ($libraryEntry->is_active)
-                                        <x-ui.button tone="ghost" size="sm" icon="pause-circle" class="size-9!" wire:click="confirmDeactivate({{ $libraryEntry->id }})" :aria-label="__('indicator_library.deactivate_name', ['name' => $displayName])" />
-                                    @else
-                                        <x-ui.button tone="ghost" size="sm" icon="play-circle" class="size-9!" wire:click="reactivateEntry({{ $libraryEntry->id }})" :aria-label="__('indicator_library.reactivate_name', ['name' => $displayName])" />
-                                    @endif
+                                    <x-ui.button size="sm" icon="pencil-square" class="min-h-11 md:min-h-9" wire:click="openEditModal({{ $libraryEntry->id }})" :aria-label="__('common.edit_name', ['name' => $displayName])" data-test="edit-library-entry-{{ $libraryEntry->id }}">
+                                        {{ __('indicator_library.edit') }}
+                                    </x-ui.button>
                                 @endif
-                                @if ($canDelete && $libraryEntry->indicators_count === 0)
-                                    <x-ui.button tone="ghost" size="sm" icon="trash" class="size-9! text-status-critical!" wire:click="confirmDelete({{ $libraryEntry->id }})" :aria-label="__('common.delete_name', ['name' => $displayName])" />
+
+                                @if ($canUpdate || $canDelete)
+                                    <flux:dropdown align="end">
+                                        <flux:button size="sm" variant="ghost" icon="ellipsis-horizontal" class="min-h-11 md:min-h-9" :aria-label="__('indicator_library.more_actions_for_name', ['name' => $displayName])" />
+                                        <flux:menu>
+                                            @if ($canUpdate)
+                                                @if ($libraryEntry->is_active)
+                                                    <flux:menu.item icon="pause-circle" wire:click="confirmDeactivate({{ $libraryEntry->id }})">{{ __('indicator_library.deactivate') }}</flux:menu.item>
+                                                @else
+                                                    <flux:menu.item icon="play-circle" wire:click="reactivateEntry({{ $libraryEntry->id }})">{{ __('indicator_library.reactivate') }}</flux:menu.item>
+                                                @endif
+                                            @endif
+                                            @if ($canDelete)
+                                                @if ($libraryEntry->indicators_count === 0)
+                                                    <flux:menu.item icon="trash" variant="danger" wire:click="confirmDelete({{ $libraryEntry->id }})">{{ __('indicator_library.delete') }}</flux:menu.item>
+                                                @else
+                                                    <flux:menu.item icon="lock-closed" disabled>{{ __('indicator_library.cannot_delete_in_use') }}</flux:menu.item>
+                                                @endif
+                                            @endif
+                                        </flux:menu>
+                                    </flux:dropdown>
                                 @endif
                             </div>
                         </div>

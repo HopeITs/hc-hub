@@ -18,8 +18,8 @@
  *
  * The board cards and every "add task" / "add subtask" draft row open this
  * same popover too, passing the Livewire method to call and its leading
- * arguments (the employee id is appended). Only togglePickedAssignee() on a saved
- * task keeps at least one assignee; a draft may be emptied.
+ * arguments (the employee id is appended). Any of them may be emptied, which
+ * leaves the task (or draft) unassigned.
  */
 
 document.addEventListener('alpine:init', () => {
@@ -92,18 +92,29 @@ document.addEventListener('alpine:init', () => {
 
             if (index === -1) {
                 this.assignedIds.push(employeeId);
-            } else if (this.method !== 'togglePickedAssignee' || this.assignedIds.length > 1) {
-                this.assignedIds.splice(index, 1);
             } else {
-                // Mirrors toggleAssignee()'s own "keep at least one
-                // assignee" guard — refuse client-side too so the check
-                // mark doesn't flicker off before the server rejects it.
-                return;
+                this.assignedIds.splice(index, 1);
             }
 
             this.dirty = true;
             this.wire = $wire;
             $wire[this.method](...this.args, employeeId);
+        },
+
+        /**
+         * Untick everyone at once. Livewire bundles the calls into one request.
+         */
+        clear($wire) {
+            const removed = [...this.assignedIds];
+
+            if (removed.length === 0) {
+                return;
+            }
+
+            this.assignedIds = [];
+            this.dirty = true;
+            this.wire = $wire;
+            removed.forEach((employeeId) => $wire[this.method](...this.args, employeeId));
         },
     });
 });
@@ -118,12 +129,16 @@ document.addEventListener('alpine:init', () => {
         init() {
             const picker = window.Alpine.store('assigneePicker');
 
-            this.$watch(() => picker.open, (open) => open && this.paint());
+            this.$watch(() => picker.open, (open) => open && this.paint(true));
             this.$watch(() => picker.assignedIds.length + ':' + picker.assignedIds.join(','), () => this.paint());
             this.$watch(() => picker.optionSearch, () => this.paint());
         },
 
-        async paint() {
+        /**
+         * Draw or refresh the list. On open, the task's own people move to the
+         * top; clicking one of them there takes them off.
+         */
+        async paint(pinAssigned = false) {
             const list = this.$refs.employeeList;
             const picker = window.Alpine.store('assigneePicker');
             const employees = window.Alpine.store('employeeOptions');
@@ -132,6 +147,12 @@ document.addEventListener('alpine:init', () => {
 
             window.hcEmployeeList.render(list, employees.items);
             window.hcEmployeeList.mark(list, (value) => picker.isAssigned(Number(value)));
+
+            if (pinAssigned) {
+                window.hcEmployeeList.pinSelected(list, (value) => picker.isAssigned(Number(value)));
+                list.parentElement.scrollTop = 0;
+            }
+
             window.hcEmployeeList.filter(list, picker.optionSearch);
         },
 

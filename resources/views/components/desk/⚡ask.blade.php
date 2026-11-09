@@ -6,6 +6,7 @@ use App\Livewire\Concerns\Dashboard\ReadsDashboardAttention;
 use App\Livewire\Concerns\Dashboard\ReadsDashboardWork;
 use App\Models\AnnualPlan;
 use App\Models\Donor;
+use App\Models\HrProgram;
 use App\Models\Indicator;
 use App\Models\Milestone;
 use App\Models\Program;
@@ -15,7 +16,9 @@ use App\Models\Risk;
 use App\Models\Strategy;
 use App\Models\Task;
 use App\Models\TransfersTracking;
+use App\Support\ArabicText;
 use App\Support\Desk\AskEngine;
+use App\Support\KeyboardLayout;
 use App\Support\Like;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -57,15 +60,59 @@ new class extends Component {
 
     /**
      * Answers, then groups of rows, for what was typed; suggestions when it is empty.
+     * The text is also read as if typed on the other keyboard layout
+     * ("حقخلقشةس" for "programs", word by word for mixed text); when that
+     * reading finds more, its results win and `corrected` names it. A weak
+     * typo match on the scrambled text therefore never hides the real one.
      *
-     * @return array{answers: list<array{title: string, body: string}>, groups: list<array{name: string, items: list<array{icon: string, label: string, sub: string, href: string, action?: bool}>}>, suggestions: list<string>, ai: bool}
+     * @return array{answers: list<array{title: string, body: string}>, groups: list<array{name: string, items: list<array{icon: string, label: string, sub: string, href: string, action?: bool}>}>, suggestions: list<string>, ai: bool, corrected: string|null}
      */
     #[Computed]
     public function results(): array
     {
+        $best = [...$this->resultsFor($this->query), 'corrected' => null];
+        $bestScore = $this->strength($best, $this->query);
+
+        foreach (KeyboardLayout::candidates($this->query) as $candidate) {
+            $found = $this->resultsFor($candidate);
+            $score = $this->strength($found, $candidate);
+
+            if ($score > $bestScore) {
+                $best = [...$found, 'corrected' => $candidate];
+                $bestScore = $score;
+            }
+        }
+
+        return $best;
+    }
+
+    /**
+     * How much a reading found, and how real its words are. A word the Ask
+     * bar knows exactly and an answer weigh most; a record whose name holds
+     * the typed words is real evidence; a page or action reached by a typo
+     * match weighs least. The typed text wins ties.
+     *
+     * @param  array{answers: list<mixed>, groups: list<array{items: list<mixed>, records?: bool}>}  $found
+     */
+    private function strength(array $found, string $reading): int
+    {
+        if ($found['answers'] === [] && $found['groups'] === []) {
+            return 0;
+        }
+
+        return app(AskEngine::class)->knownWordCount(auth()->user(), $reading) * 5
+            + count($found['answers']) * 10
+            + array_sum(array_map(fn (array $group): int => count($group['items']) * (($group['records'] ?? false) ? 3 : 1), $found['groups']));
+    }
+
+    /**
+     * @return array{answers: list<array{title: string, body: string}>, groups: list<array{name: string, items: list<array{icon: string, label: string, sub: string, href: string, action?: bool}>}>, suggestions: list<string>, ai: bool}
+     */
+    private function resultsFor(string $query): array
+    {
         $user = auth()->user();
         $ask = app(AskEngine::class);
-        $meaning = $ask->interpret($this->query);
+        $meaning = $ask->interpret($query);
         $intents = $meaning['intents'];
         $entity = $meaning['entity'];
         $answers = [];
@@ -134,7 +181,7 @@ new class extends Component {
         $terms = implode(' ', $meaning['terms']);
 
         if (mb_strlen($terms) >= 2) {
-            foreach ($this->records($terms, $entity) as $group) {
+            foreach ($this->records($terms, $meaning['entityGuessed'] ? null : $entity) as $group) {
                 $groups[] = $group;
             }
         }
@@ -265,13 +312,14 @@ new class extends Component {
         $groups = [];
 
         if ($entity === null && $this->canView('programs')) {
-            $programs = Program::query()->select(['id']);
+            $words = preg_split('/\s+/u', $terms) ?: [];
+            $ids = array_keys(array_filter(
+                array_map(fn (string $name): string => AskEngine::normalize(ArabicText::fold($name)), HrProgram::namesById()),
+                fn (string $name): bool => array_all($words, fn (string $word): bool => str_contains($name, $word)),
+            ));
+            $programs = Program::query()->select(['id'])->whereIn('id', $ids);
 
-            foreach (preg_split('/\s+/u', $terms) ?: [] as $word) {
-                $programs->whereNameLike($word);
-            }
-
-            $groups[] = ['name' => __('common.programs'), 'items' => $programs->orderByName()->limit(self::GroupLimit)->get()
+            $groups[] = ['name' => __('common.programs'), 'records' => true, 'items' => $programs->orderByName()->limit(self::GroupLimit)->get()
                 ->map(fn (Program $program): array => ['icon' => 'grid', 'label' => $program->name, 'sub' => __('common.programs'), 'href' => route('programs.show', $program)])->all()];
         }
 
@@ -280,11 +328,12 @@ new class extends Component {
                 continue;
             }
 
+            // As typed only: results() tries the other keyboard layout itself, and says so.
             foreach (preg_split('/\s+/u', $terms) ?: [] as $word) {
-                $query->where($column, 'like', Like::contains(Like::term($word)));
+                $query->where(Like::matches($column, $word, acrossLayouts: false));
             }
 
-            $groups[] = ['name' => $name, 'items' => $query->orderBy($column)->limit(self::GroupLimit)->get()
+            $groups[] = ['name' => $name, 'records' => true, 'items' => $query->orderBy($column)->limit(self::GroupLimit)->get()
                 ->map(fn (Model $model): array => ['icon' => $icon, ...$row($model)])->all()];
         }
 
@@ -348,6 +397,10 @@ new class extends Component {
                 </div>
 
                 <div class="dk-pal-list" x-ref="list">
+                    @if ($results['corrected'] !== null)
+                        <p class="dk-pal-g dk-pal-fix" data-ask-corrected>{{ __('desk.ask_corrected', ['query' => $results['corrected']]) }}</p>
+                    @endif
+
                     @if ($results['suggestions'] !== [])
                         {{-- Example questions on the Desk's dot-thread; the highlighted one takes the brand ring. --}}
                         <div class="dk-pal-try" data-ask-suggestions>

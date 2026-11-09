@@ -1,6 +1,7 @@
 ---
 paths:
-  - resources/css/*.css
+  - 'resources/css/*.css'
+  - 'resources/css/desk*.css'
 ---
 
 # Css
@@ -22,3 +23,6 @@ Flux colours itself with its own `dark:` utilities, which a `@layer components` 
 
 ## Light mode may change for the Desk redesign (supersedes "pixel-identical")
 The "light mode must stay pixel-identical when restyling dark" notes in css.md and views.md predate the Tracking Desk redesign (branch tracking-desk-ux-update), which intentionally changes light mode to match the artifact. Desk styles live in resources/css/desk.css: every class is prefixed dk-, element selectors are scoped under .dk-scope, and artifact variables are aliases of tokens.css tokens so Graphite .dark works without a second block. Pages not yet redesigned keep their old light look until their stage replaces them.
+
+## Desk lists cannot take their own padding or margin
+desk.css resets `.dk-scope ul/ol { margin:0; padding:0 }` and `.dk-scope p { margin:0 }` UNLAYERED, so it beats any padding/margin a `@layer components` class sets on a ul, ol or p (computes to 0 silently). Put side padding on the `li` items, and space blocks with a parent `gap`, never with margin on the ul/p. Found on the program Results tab (2026-11-06).

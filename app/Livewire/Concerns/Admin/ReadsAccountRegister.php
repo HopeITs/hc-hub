@@ -74,8 +74,9 @@ trait ReadsAccountRegister
             ->when(
                 $search !== '',
                 fn (Builder $query) => $query->where(fn (Builder $query) => $query
-                    ->where('accounts.account_name', 'like', Like::contains($search))
-                    ->orWhere('accounts.bank_name', 'like', Like::contains($search))
+                    ->where(Like::everyWord($search, fn (Builder $query, string $word) => $query
+                        ->where(Like::word('accounts.account_name', $word))
+                        ->orWhere(Like::word('accounts.bank_name', $word))))
                     ->orWhere('accounts.account_number_last4', Account::lastFour($search))
                     ->when($this->showsFullAccountNumbers, fn (Builder $query) => $query->orWhereIn('accounts.id', Account::idsMatchingAccountNumber($search)))),
             )
@@ -193,7 +194,7 @@ trait ReadsAccountRegister
      * The table's totals, one line per account currency, for every account
      * the filters match.
      *
-     * @return Collection<int, array{currency: string, accounts: int, open_accounts: int, transfers: int, received: float, in_transit: float, upcoming: float, overdue: float, received_in_year: float}>
+     * @return Collection<int, array{currency: string, accounts: int, open_accounts: int, transfers: int, received: float, in_transit: float, upcoming: float, overdue: float, received_in_year: float, other_currency: int}>
      */
     #[Computed]
     public function totals(): Collection
@@ -215,6 +216,7 @@ trait ReadsAccountRegister
                 'upcoming' => (float) $row->upcoming,
                 'overdue' => (float) $row->overdue,
                 'received_in_year' => (float) $row->received_in_year,
+                'other_currency' => (int) $row->other_currency,
             ]);
     }
 

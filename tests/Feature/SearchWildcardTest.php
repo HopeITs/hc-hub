@@ -32,3 +32,46 @@ test('a bare wildcard typed in a search box is matched literally', function () {
         ->set('search', 'UNI')
         ->assertSee('UNICEF');
 });
+
+test('register search boxes fold Arabic letters and read the other keyboard layout', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+    $user = User::factory()->role('Financial')->create();
+    Donor::factory()->create(['name' => 'UNICEF', 'country' => null, 'contact_person' => null]);
+    Donor::factory()->create(['name' => 'مؤسسة الإغاثة', 'country' => null, 'contact_person' => null]);
+
+    Livewire::actingAs($user)
+        ->test('pages::donors.index')
+        ->set('search', 'ىهؤثب')
+        ->assertSee('UNICEF')
+        ->assertDontSee('مؤسسة الإغاثة')
+        ->set('search', 'موسسه الاغاثه')
+        ->assertSee('مؤسسة الإغاثة')
+        ->assertDontSee('UNICEF');
+});
+
+test('register search boxes match each word, with «ال» optional, and leave short searches as typed', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+    $user = User::factory()->role('Financial')->create();
+    Donor::factory()->create(['name' => 'مؤسسة الإغاثة', 'country' => null, 'contact_person' => null]);
+    Donor::factory()->create(['name' => 'Hd Partners', 'country' => null, 'contact_person' => null]);
+
+    Livewire::actingAs($user)
+        ->test('pages::donors.index')
+        ->set('search', 'موسسه اغاثه')
+        ->assertSee('مؤسسة الإغاثة')
+        ->set('search', 'في')
+        ->assertDontSee('Hd Partners');
+});
+
+test('register search boxes find each word in any field', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+    $user = User::factory()->role('Financial')->create();
+    Donor::factory()->create(['name' => 'UNICEF', 'country' => 'Syria', 'contact_person' => null]);
+
+    Livewire::actingAs($user)
+        ->test('pages::donors.index')
+        ->set('search', 'unicef syria')
+        ->assertSee('UNICEF')
+        ->set('search', 'unicef jordan')
+        ->assertDontSee('UNICEF');
+});

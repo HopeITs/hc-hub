@@ -251,3 +251,11 @@ test('saving the default reviewers without moving the MEAL Manager logs nothing'
 
     expect(Activity::query()->where('event', 'notification_settings.meal_manager_changed')->exists())->toBeFalse();
 });
+
+test('the page script is handed its real config, not an uncompiled directive', function () {
+    $html = Livewire::actingAs(userWithRole('Super Admin'))->test('pages::admin.notification-settings')->html();
+
+    expect($html)->toContain('x-data="notificationRules(')
+        ->not->toContain('@js(')
+        ->not->toContain('clientConfig()');
+});

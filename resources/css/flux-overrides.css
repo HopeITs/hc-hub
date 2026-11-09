@@ -805,3 +805,19 @@ ui-toast-group[position='center'] {
         --color-zinc-600: var(--color-line);
     }
 }
+
+/*
+ * The search box at the top of a dropdown (employee and option pickers) sits
+ * inside the open menu already, so it drops the thick shared focus outline
+ * and only darkens its own border while typing.
+ */
+@layer utilities {
+    :is(input.hc-picker-search, .hc-picker-search input):focus[data-flux-control] {
+        outline: none;
+        border-color: var(--color-secondary-medium) !important;
+    }
+
+    .dark :is(input.hc-picker-search, .hc-picker-search input):focus[data-flux-control] {
+        border-color: var(--color-ink-muted) !important;
+    }
+}

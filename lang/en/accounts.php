@@ -30,7 +30,7 @@ return [
     'funds_received' => 'Funds received',
     'funds_received_hint' => 'Net amounts landed, by currency — never combined',
     'iban' => 'IBAN',
-    'it_stops_accepting_new_transfers_existing_transfer_records_a' => 'It stops accepting new transfers. Existing transfer records are kept — an account money has passed through is never deleted.',
+    'close_account_message' => '“:name” will stop accepting new transfers. Existing transfer records are kept — an account money has passed through is never deleted.',
     'last_transfer_date' => 'Last transfer :date',
     'no_accounts_yet' => 'No accounts yet',
     'no_funds_received_yet' => 'No funds received yet.',

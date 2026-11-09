@@ -62,12 +62,10 @@ class HrUser extends HrModel
      */
     public static function idsMatching(string $search): array
     {
-        $employeeIds = HrEmployee::idsMatchingName($search);
-
         return array_values(static::query()
-            ->where(fn (Builder $query) => $query
-                ->where('email', 'like', Like::contains($search))
-                ->orWhereIn('employee_id', $employeeIds))
+            ->where(Like::everyWord($search, fn (Builder $query, string $word) => $query
+                ->where(Like::word('email', $word))
+                ->orWhereIn('employee_id', HrEmployee::idsMatchingName($word, acrossLayouts: false))))
             ->pluck('id')
             ->map(fn (mixed $id): int => (int) $id)
             ->all());

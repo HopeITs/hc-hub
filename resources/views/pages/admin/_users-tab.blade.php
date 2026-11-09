@@ -39,7 +39,11 @@
                             </span>
                         </button>
                     @empty
-                        <x-ui.empty-state icon="users" :heading="__('users.no_matching_users')" :body="__('users.change_the_search_or_role_filter_and_try_again')" />
+                        <x-ui.empty-state icon="users" :heading="__('users.no_matching_users')" :body="__('users.change_the_search_or_role_filter_and_try_again')">
+                            <x-slot:action>
+                                <x-ui.button tone="primary" icon="arrow-path" wire:click="clearFilters" data-test="reset-user-filters">{{ __('common.reset_filters') }}</x-ui.button>
+                            </x-slot:action>
+                        </x-ui.empty-state>
                     @endforelse
                 </div>
 
@@ -64,6 +68,9 @@
                                 <h2 class="truncate text-lg font-bold text-secondary-dark dark:text-ink">{{ $selectedUser->name }}</h2>
                                 <p class="truncate text-sm text-secondary-medium dark:text-ink-muted">{{ $selectedUser->email }}</p>
                             </div>
+                            @can('delete', $selectedUser)
+                                <x-ui.button type="button" tone="ghost" icon="trash" wire:click="confirmUserDeletion({{ $selectedUser->id }})" data-test="delete-user-button">{{ __('users.delete_user') }}</x-ui.button>
+                            @endcan
                         </div>
 
                         <div class="space-y-8 p-6">

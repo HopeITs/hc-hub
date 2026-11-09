@@ -6,7 +6,7 @@
     wire:model="showDeactivateModal"
     close="cancelDeactivate"
     tone="neutral"
-    :title="__('indicator_library.deactivate_title')"
+    :title="__('indicator_library.deactivate_title', ['name' => $deactivatingEntryName])"
     :message="__('indicator_library.deactivate_message')"
     confirm="deactivateEntry"
     :confirm-label="__('indicator_library.deactivate')"
@@ -16,7 +16,7 @@
 <x-ui.confirm-modal
     wire:model="showDeleteModal"
     close="cancelDelete"
-    :title="__('indicator_library.delete_title')"
+    :title="__('indicator_library.delete_title', ['name' => $deletingEntryName])"
     :message="__('indicator_library.delete_message')"
     confirm="deleteEntry"
     :confirm-label="__('indicator_library.delete')"

@@ -105,7 +105,6 @@ final class Panels
         'strategies' => [['glance', 'XL'], ['targets', 'L']],
         'annual-plans' => [['targets', 'L'], ['matrix', 'XL']],
         'milestones' => [['milestones', 'L'], ['coming', 'L'], ['tasks', 'L']],
-        'timeline' => [['milestones', 'L'], ['coming', 'L'], ['projects', 'XL']],
         'risks' => [['needs', 'L'], ['projects', 'XL']],
         'results' => [['targets', 'L'], ['validate', 'L'], ['matrix', 'XL']],
         'indicators' => [['targets', 'L'], ['validate', 'L'], ['matrix', 'XL']],

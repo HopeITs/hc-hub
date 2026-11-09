@@ -164,14 +164,10 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
 
         return Report::query()
             ->when($search !== '', function ($query) use ($search): void {
-                $like = Like::contains($search);
-
-                $query->where(function ($query) use ($like): void {
-                    $query
-                        ->where('narrative_report_notes', 'like', $like)
-                        ->orWhereHas('planIndicator.indicator', fn ($query) => $query->where('name', 'like', $like))
-                        ->orWhereHas('planIndicator.project', fn ($query) => $query->where('name', 'like', $like));
-                });
+                $query->where(Like::everyWord($search, fn ($query, string $word) => $query
+                    ->where(Like::word('narrative_report_notes', $word))
+                    ->orWhereHas('planIndicator.indicator', Like::word('name', $word))
+                    ->orWhereHas('planIndicator.project', Like::word('name', $word))));
             })
             ->when($this->author !== '', fn ($query) => $query->where('user_id', (int) $this->author))
             ->when($this->project === 'none', fn ($query) => $query->whereHas('planIndicator', fn ($query) => $query->whereNull('project_id')))

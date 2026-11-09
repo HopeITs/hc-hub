@@ -1,20 +1,20 @@
 {{--
-    The three plain answers at the top of programs/index: how many programs
-    need attention (late projects, live risks, projects without funding), are not
-    set up yet (no strategy, no manager or no projects), or are on track. Each is
-    a button that narrows the list; pressing it again shows everything. The three
-    counts are disjoint. Included by ⚡index.blade.php, which defines
+    The three plain answers at the top of indicator-library/index: how many
+    library indicators are in use, how many are on but nobody has picked yet,
+    and how many are switched off. Each is a button that narrows the list;
+    pressing it again shows everything. The counts are disjoint and read under
+    the search and filters. Included by ⚡index.blade.php, which defines
     $focusCounts and $filtersAreActive.
 --}}
 @php
     $tabs = [
-        ['key' => 'attention', 'label' => __('programs.tab_attention'), 'tone' => 'text-status-warn'],
-        ['key' => 'setup', 'label' => __('programs.tab_setup'), 'tone' => 'text-secondary-dark dark:text-ink'],
-        ['key' => 'ontrack', 'label' => __('programs.tab_ontrack'), 'tone' => 'text-status-good'],
+        ['key' => 'inuse', 'tone' => 'text-status-good'],
+        ['key' => 'unused', 'tone' => 'text-secondary-dark dark:text-ink'],
+        ['key' => 'off', 'tone' => 'text-secondary-medium dark:text-ink-muted'],
     ];
 @endphp
 
-<div class="flex flex-wrap items-stretch gap-2" data-test="program-focus-tabs">
+<div class="flex flex-wrap items-stretch gap-2" data-test="library-focus-tabs">
     @foreach ($tabs as $tab)
         <button
             type="button"
@@ -29,11 +29,11 @@
             ])
         >
             <span class="text-2xl font-bold leading-none tabular-nums {{ $tab['tone'] }}">{{ $focusCounts[$tab['key']] }}</span>
-            <span class="text-sm font-semibold text-secondary-dark dark:text-ink">{{ $tab['label'] }}</span>
+            <span class="text-sm font-semibold text-secondary-dark dark:text-ink">{{ __('indicator_library.status_'.$tab['key']) }}</span>
         </button>
     @endforeach
 
-    @if ($filtersAreActive && $visiblePrograms->isNotEmpty())
+    @if ($filtersAreActive)
         <flux:button size="sm" variant="ghost" class="self-center text-secondary-medium! dark:text-ink-muted!" wire:click="clearFilters" data-test="reset-filters">{{ __('common.reset_filters') }}</flux:button>
     @endif
 </div>

@@ -10,6 +10,8 @@
 
 const NUMBER_BOUNDS = {
     overdueRepeat: [1, 30],
+    departmentTaskDue: [1, 30],
+    monthlyReportDue: [1, 20],
     escalateManagerAfter: [1, 60],
     escalateTopAfter: [2, 90],
     escalationCatchUp: [1, 30],

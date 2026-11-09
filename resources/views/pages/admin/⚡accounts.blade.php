@@ -229,7 +229,7 @@ new #[Layout('layouts::desk'), Title('titles.accounts')] class extends Component
         close="cancelClose"
         tone="neutral"
         :title="__('accounts.close_this_account')"
-        :message="__('accounts.it_stops_accepting_new_transfers_existing_transfer_records_a')"
+        :message="__('accounts.close_account_message', ['name' => $this->closingAccountName])"
         confirm="closeAccount"
         :confirm-label="__('accounts.close_account')"
         confirm-test="confirm-close-account"

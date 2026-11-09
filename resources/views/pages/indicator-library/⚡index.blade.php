@@ -30,8 +30,9 @@ new #[Layout('layouts::desk'), Title('titles.indicator_library')] class extends 
     #[Url(except: '')]
     public string $collector = '';
 
+    /** inuse | unused | off: the three plain answers at the top of the page. */
     #[Url(except: '')]
-    public string $status = '';
+    public string $focus = '';
 
     #[Url(except: '')]
     public string $english = '';
@@ -61,7 +62,7 @@ new #[Layout('layouts::desk'), Title('titles.indicator_library')] class extends 
 
     public function updated(string $property): void
     {
-        if (in_array($property, ['search', 'program', 'level', 'measure', 'collector', 'status', 'english'], true)) {
+        if (in_array($property, ['search', 'program', 'level', 'measure', 'collector', 'focus', 'english'], true)) {
             $this->resetPage();
         }
     }
@@ -71,9 +72,15 @@ new #[Layout('layouts::desk'), Title('titles.indicator_library')] class extends 
         $this->expandedEntryId = $this->expandedEntryId === $libraryIndicatorId ? null : $libraryIndicatorId;
     }
 
+    public function setFocus(string $focus): void
+    {
+        $this->focus = $this->focus === $focus || ! in_array($focus, ['inuse', 'unused', 'off'], true) ? '' : $focus;
+        $this->resetPage();
+    }
+
     public function clearFilters(): void
     {
-        $this->reset('search', 'program', 'level', 'measure', 'collector', 'status', 'english');
+        $this->reset('search', 'program', 'level', 'measure', 'collector', 'focus', 'english');
         $this->resetPage();
     }
 };
@@ -83,66 +90,74 @@ new #[Layout('layouts::desk'), Title('titles.indicator_library')] class extends 
     use App\Enums\IndicatorCollector;
     use App\Enums\IndicatorMeasure;
 
-    $filtersAreActive = collect([$search, $program, $level, $measure, $collector, $status, $english])->contains(fn (string $value): bool => $value !== '');
+    $filtersAreActive = collect([$search, $program, $level, $measure, $collector, $focus, $english])->contains(fn (string $value): bool => $value !== '');
     $paged = $this->pagedEntries;
+    $focusCounts = $this->focusCounts;
 @endphp
 
-<x-desk.register class="@container/directory" heading-id="indicator-library-heading" :title="__('titles.indicator_library')" :count="$this->filteredEntries->count()"
-    >
-        <x-slot:filters>
-            <div class="contents" data-library-filters>
-                <x-ui.input type="search" icon="magnifying-glass" :label="__('indicator_library.search')" :placeholder="__('indicator_library.search_placeholder')" wire:model.live.debounce.300ms="search" maxlength="100" clearable />
+<x-desk.register class="@container/directory" heading-id="indicator-library-heading" :title="__('titles.indicator_library')" :count="$this->entries->count()">
+    @can('create', LibraryIndicator::class)
+        <x-slot:actions>
+            <x-ui.button tone="primary" icon="plus" class="min-h-11 self-end touch-manipulation @sm/directory:min-h-10" wire:click="openCreateModal" data-test="create-library-entry" data-quick-create>
+                {{ __('indicator_library.add_entry') }}
+            </x-ui.button>
+        </x-slot:actions>
+    @endcan
 
-                <x-ui.header-filter-select :label="__('common.program')" wire:model.live="program" :value="$program">
-                    <option value="">{{ __('common.all_programs') }}</option>
-                    <option value="institutional">{{ __('indicator_library.institutional') }}</option>
-                    @foreach ($this->programFilterOptions() as $programId => $programName)
-                        <option value="{{ $programId }}">{{ $programName }}</option>
-                    @endforeach
-                </x-ui.header-filter-select>
+    <x-slot:search>
+        <x-desk.register-search :label="__('indicator_library.search')" :placeholder="__('indicator_library.search_placeholder')" wire:model.live.debounce.300ms="search" />
+    </x-slot:search>
 
-                <x-ui.header-filter-select :label="__('indicator_library.level')" wire:model.live="level" :value="$level">
-                    <option value="">{{ __('indicator_library.all_levels') }}</option>
-                    @foreach (['G', 'CC', 'OC', 'OP', 'AC'] as $levelKind)
-                        <option value="{{ $levelKind }}">{{ __('indicator_library.level_kinds.'.$levelKind) }}</option>
-                    @endforeach
-                </x-ui.header-filter-select>
+    <x-slot:filters>
+        <div class="contents" data-library-filters>
+            <x-ui.header-filter-select :label="__('common.program')" wire:model.live="program" :value="$program">
+                <option value="">{{ __('common.all_programs') }}</option>
+                <option value="institutional">{{ __('indicator_library.institutional') }}</option>
+                @foreach ($this->programFilterOptions() as $programId => $programName)
+                    <option value="{{ $programId }}">{{ $programName }}</option>
+                @endforeach
+            </x-ui.header-filter-select>
 
-                <x-ui.header-filter-select :label="__('indicator_library.measure')" wire:model.live="measure" :value="$measure">
-                    <option value="">{{ __('indicator_library.all_measures') }}</option>
-                    @foreach (IndicatorMeasure::cases() as $measureCase)
-                        <option value="{{ $measureCase->value }}">{{ $measureCase->label() }}</option>
-                    @endforeach
-                </x-ui.header-filter-select>
+            <div class="contents" x-data="{ open: @js($level !== '' || $measure !== '' || $collector !== '' || $english !== '') }">
+                <button type="button" class="dk-btn" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" data-test="more-filters-button">
+                    <flux:icon.adjustments-horizontal variant="micro" class="size-4" />
+                    {{ __('indicator_library.more_filters') }}
+                </button>
 
-                <x-ui.header-filter-select :label="__('indicator_library.collected_by')" wire:model.live="collector" :value="$collector">
-                    <option value="">{{ __('indicator_library.all_collectors') }}</option>
-                    @foreach (IndicatorCollector::cases() as $collectorCase)
-                        <option value="{{ $collectorCase->value }}">{{ $collectorCase->label() }}</option>
-                    @endforeach
-                </x-ui.header-filter-select>
+                <div class="contents" x-show="open" x-cloak>
+                    <x-ui.header-filter-select :label="__('indicator_library.level')" wire:model.live="level" :value="$level">
+                        <option value="">{{ __('indicator_library.all_levels') }}</option>
+                        @foreach (['G', 'CC', 'OC', 'OP', 'AC'] as $levelKind)
+                            <option value="{{ $levelKind }}">{{ __('indicator_library.level_kinds.'.$levelKind) }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
 
-                <x-ui.header-filter-select :label="__('indicator_library.status')" wire:model.live="status" :value="$status">
-                    <option value="">{{ __('indicator_library.all_statuses') }}</option>
-                    <option value="active">{{ __('indicator_library.active') }}</option>
-                    <option value="inactive">{{ __('indicator_library.inactive') }}</option>
-                </x-ui.header-filter-select>
+                    <x-ui.header-filter-select :label="__('indicator_library.measure')" wire:model.live="measure" :value="$measure">
+                        <option value="">{{ __('indicator_library.all_measures') }}</option>
+                        @foreach (IndicatorMeasure::cases() as $measureCase)
+                            <option value="{{ $measureCase->value }}">{{ $measureCase->label() }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
 
-                <x-ui.header-filter-select :label="__('indicator_library.english_name')" wire:model.live="english" :value="$english">
-                    <option value="">{{ __('indicator_library.any_english_name') }}</option>
-                    <option value="missing">{{ __('indicator_library.missing_english') }}</option>
-                </x-ui.header-filter-select>
+                    <x-ui.header-filter-select :label="__('indicator_library.collected_by')" wire:model.live="collector" :value="$collector">
+                        <option value="">{{ __('indicator_library.all_collectors') }}</option>
+                        @foreach (IndicatorCollector::cases() as $collectorCase)
+                            <option value="{{ $collectorCase->value }}">{{ $collectorCase->label() }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+
+                    <x-ui.header-filter-select :label="__('indicator_library.english_name')" wire:model.live="english" :value="$english">
+                        <option value="">{{ __('indicator_library.any_english_name') }}</option>
+                        <option value="missing">{{ __('indicator_library.missing_english') }}</option>
+                    </x-ui.header-filter-select>
+                </div>
             </div>
-        </x-slot:filters>
+        </div>
+    </x-slot:filters>
 
-        @can('create', LibraryIndicator::class)
-            <x-slot:actions>
-                <x-ui.button tone="primary" icon="plus" class="min-h-11 self-end touch-manipulation @sm/directory:min-h-10" wire:click="openCreateModal" data-test="create-library-entry" data-quick-create>
-                    {{ __('indicator_library.add_entry') }}
-                </x-ui.button>
-            </x-slot:actions>
-        @endcan
-
+    @if ($this->entries->isNotEmpty())
+        @include('pages.indicator-library._index-focus-bar')
+    @endif
 
     @if ($paged->isEmpty())
         <x-ui.empty-state
