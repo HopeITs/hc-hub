@@ -1,6 +1,7 @@
 import './flux-toast-duration';
 import './preloader';
 import './assignee-picker';
+import './person-card';
 import './task-menu';
 import './task-subtasks';
 import './list-layout';

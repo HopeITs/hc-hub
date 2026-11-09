@@ -408,7 +408,8 @@ test('no tasks view renders the employee option list', function (string $view) {
 
     expect(substr_count($html, 'assignee-option-'))->toBe(0)
         ->and(substr_count($html, 'assignee-popover-option-'.$alice))->toBe(0)
-        ->and(substr_count($html, 'Alice Nadir'))->toBeLessThanOrEqual(10);
+        // A few mentions per task (row label, avatar hover title), never one per employee.
+        ->and(substr_count($html, 'Alice Nadir'))->toBeLessThanOrEqual(15);
 })->with(['list', 'board', 'calendar']);
 
 test('a task can be deleted and takes only its own attachments with it', function () {
@@ -1205,7 +1206,7 @@ test('a view-only user sees the board counts but no add task control in any colu
     }
 });
 
-test('the board view offers a keyboard accessible select as a non pointer alternative to dragging', function () {
+test('the board view offers a keyboard accessible status menu as a non pointer alternative to dragging', function () {
     $user = User::factory()->role('General Manager')->create();
     $task = Task::factory()->create(['status' => TaskStatus::Todo]);
 
@@ -1213,7 +1214,8 @@ test('the board view offers a keyboard accessible select as a non pointer altern
         ->test('pages::tasks.index')
         ->set('view', 'board')
         ->assertSee('data-test="task-quick-status-'.$task->id.'"', false)
-        ->assertSee('wire:change="quickSetStatus('.$task->id.', $event.target.value)"', false);
+        ->assertSee("\$store.taskMenu.openFor('status', 'board-status-".$task->id."'", false)
+        ->assertDontSee('wire:change="quickSetStatus(', false);
 });
 
 test('the board view marks a todo task missed once its due date passes', function () {
@@ -1664,6 +1666,23 @@ test('the show all subtasks switch drives the list and board but not the calenda
         ->assertDontSeeHtml('data-test="task-subtasks-toggle-all"');
 });
 
+test('assignee avatars on board cards and list rows name the person on hover', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $alice = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
+    $task = Task::factory()->create(['status' => TaskStatus::Todo]);
+    $task->taskAssignees()->delete();
+    $task->taskAssignees()->create(['employee_id' => $alice]);
+
+    $page = Livewire::actingAs($user)->test('pages::tasks.index');
+
+    // The board shows a person card on hover, filled from the avatar's data.
+    $page->set('view', 'board')
+        ->assertSeeHtml('data-person-name="Alice Nadir"')
+        ->assertSeeHtml('x-on:mouseenter="$store.personCard.show($el)"')
+        ->assertSeeHtml('data-test="person-card"');
+    $page->set('view', 'list')->set('listLayout', 'wide')->assertSeeHtml('title="Alice Nadir"');
+});
+
 test('the task form is rendered only while its drawer is open', function () {
     $user = User::factory()->role('General Manager')->create();
 
@@ -1762,7 +1781,7 @@ test('the board opens the shared menu for priority instead of a dropdown per car
     expect(substr_count($html, 'data-test="task-priority-option-high"'))->toBe(1);
 });
 
-test('quick actions stay silent on the board, except moving a card, and still toast in the list', function () {
+test('quick actions stay silent on the board, including moving a card, and still toast in the list', function () {
     $user = User::factory()->role('General Manager')->create();
     $alice = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
     $bob = insertHrEmployee(firstNameEn: 'Bob', lastNameEn: 'Rahman');
@@ -1770,15 +1789,15 @@ test('quick actions stay silent on the board, except moving a card, and still to
     $task->taskAssignees()->delete();
     $task->taskAssignees()->create(['employee_id' => $alice]);
 
-    // A toast per pick piles up when the board is worked in bursts.
+    // A toast per pick piles up when the board is worked in bursts, and a
+    // moved card already shows its new status by sitting in the new column.
     Livewire::actingAs($user)
         ->test('pages::tasks.index')
         ->set('view', 'board')
         ->call('quickSetPriority', $task->id, TaskPriority::High->value)
         ->call('toggleAssignee', $task->id, $bob)
-        ->assertNotDispatched('toast-show')
         ->call('quickSetStatus', $task->id, TaskStatus::InProgress->value)
-        ->assertDispatched('toast-show');
+        ->assertNotDispatched('toast-show');
 
     expect($task->refresh()->status)->toBe(TaskStatus::InProgress)
         ->and($task->priority)->toBe(TaskPriority::High)

@@ -216,6 +216,7 @@ new #[Layout('layouts::desk'), Title('titles.tasks')] class extends Component
 
         @include('pages.tasks._assignee-popover')
         @include('pages.tasks._task-option-menu')
+        @include('pages.tasks._person-card')
     @endif
 
     @include('pages.tasks._index-drawer')

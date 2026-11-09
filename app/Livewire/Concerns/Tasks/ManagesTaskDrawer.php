@@ -237,7 +237,8 @@ trait ManagesTaskDrawer
             return;
         }
 
-        Flux::toast(variant: 'success', text: __('tasks.task_status_changed', ['status' => $newStatus->label()]));
+        // On the board the card moving to its new column is the confirmation.
+        $this->toastQuickSuccess(__('tasks.task_status_changed', ['status' => $newStatus->label()]));
     }
 
     public function quickSetPriority(int $taskId, string $priority): void
