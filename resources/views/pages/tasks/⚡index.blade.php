@@ -121,6 +121,7 @@ new #[Layout('layouts::desk'), Title('titles.tasks')] class extends Component
         'list' => ['icon' => 'table', 'label' => __('desk.register.table'), 'test' => 'task-view-list'],
         'board' => ['icon' => 'board', 'label' => __('desk.register.board'), 'test' => 'task-view-board'],
         'calendar' => ['icon' => 'cal', 'label' => __('desk.register.calendar'), 'test' => 'task-view-calendar'],
+        'cards' => ['icon' => 'grid', 'label' => __('desk.register.cards'), 'test' => 'task-view-cards'],
     ]"
 >
     <x-slot:figures>
@@ -190,7 +191,7 @@ new #[Layout('layouts::desk'), Title('titles.tasks')] class extends Component
 
     @if ($this->taskStats['total'] === 0)
         <x-ui.panel>
-            <x-ui.empty-state icon="clipboard-document-check" :heading="$filtersAreActive ? __('tasks.no_matching_tasks') : __('common.no_tasks_yet')" :body="$filtersAreActive ? __('common.change_the_search_or_filters_and_try_again') : __('tasks.add_the_first_task_against_a_proposal')">
+            <x-ui.empty-state icon="clipboard-document-check" :heading="$filtersAreActive ? __('tasks.no_matching_tasks') : ($view === 'cards' ? __('tasks.nothing_open_for_you') : __('common.no_tasks_yet'))" :body="$filtersAreActive ? __('common.change_the_search_or_filters_and_try_again') : __('tasks.add_the_first_task_against_a_proposal')">
                 <x-slot:action>
                     @if ($filtersAreActive)
                         <x-ui.button size="sm" wire:click="clearFilters">{{ __('common.reset_filters') }}</x-ui.button>
@@ -208,6 +209,10 @@ new #[Layout('layouts::desk'), Title('titles.tasks')] class extends Component
 
             @case ('calendar')
                 @include('pages.tasks._calendar')
+                @break
+
+            @case ('cards')
+                @include('pages.tasks._cards')
                 @break
 
             @default

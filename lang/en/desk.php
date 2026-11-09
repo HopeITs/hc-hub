@@ -185,6 +185,7 @@ return [
         'table' => 'Table',
         'board' => 'Board',
         'calendar' => 'Calendar',
+        'cards' => 'Cards',
         'search_list' => 'Search this list',
         'clear' => 'Clear',
         'due' => 'Due',

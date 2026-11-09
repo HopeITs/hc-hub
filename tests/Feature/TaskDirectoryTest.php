@@ -409,7 +409,7 @@ test('no tasks view renders the employee option list', function (string $view) {
         ->and(substr_count($html, 'assignee-popover-option-'.$alice))->toBe(0)
         // A few mentions per task (row label, avatar hover title), never one per employee.
         ->and(substr_count($html, 'Alice Nadir'))->toBeLessThanOrEqual(15);
-})->with(['list', 'board', 'calendar']);
+})->with(['list', 'board', 'calendar', 'cards']);
 
 test('a task can be deleted and takes only its own attachments with it', function () {
     $user = User::factory()->role('General Manager')->create();
@@ -496,23 +496,42 @@ test('the task directory renders with no tasks', function () {
     Livewire::actingAs($user)->test('pages::tasks.index')->assertSee('No tasks yet');
 });
 
-test('the my tasks rail stays visible and shows an empty state when the viewer has no tasks', function () {
+test('the cards view says nothing is open for the viewer when none of the tasks are theirs', function () {
     $user = User::factory()->role('General Manager')->create();
+    Task::factory()->create();
 
     Livewire::actingAs($user)->test('pages::tasks.index')
-        ->assertSeeHtml('data-test="my-tasks-rail"')
-        ->assertSeeHtml('data-test="my-tasks-empty"')
-        ->assertSee('Tasks Related to Me');
+        ->set('view', 'cards')
+        ->assertSee('Nothing open is assigned to you.')
+        ->assertDontSeeHtml('data-test="task-cards-grid"');
 });
 
-test('the my tasks rail card title links to the task detail page', function () {
+test('a cards view card title links to the task detail page', function () {
     $user = User::factory()->role('General Manager')->create();
     $task = Task::factory()->create(['title' => 'Reconcile the ledger', 'created_by' => $user->id]);
 
     Livewire::actingAs($user)
         ->test('pages::tasks.index')
+        ->set('view', 'cards')
         ->assertSeeHtml('href="'.route('tasks.show', $task).'"')
-        ->assertSeeHtml('data-test="my-task-title-'.$task->id.'"');
+        ->assertSeeHtml('data-test="cards-task-title-'.$task->id.'"');
+});
+
+test('the cards view shows only the viewers own tasks that match the filters', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $myTask = Task::factory()->create(['status' => TaskStatus::Todo, 'created_by' => $user->id]);
+    $myFilteredOutTask = Task::factory()->create(['status' => TaskStatus::Done, 'created_by' => $user->id]);
+    $someoneElsesTask = Task::factory()->create(['status' => TaskStatus::Todo]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'cards')
+        ->set('status', TaskStatus::Todo->value)
+        ->assertSeeHtml('data-test="task-cards-grid"')
+        ->assertSeeHtml('data-test="cards-task-card-'.$myTask->id.'"')
+        ->assertDontSeeHtml('data-test="cards-task-card-'.$myFilteredOutTask->id.'"')
+        ->assertDontSeeHtml('data-test="cards-task-card-'.$someoneElsesTask->id.'"')
+        ->assertDontSeeHtml('data-test="my-tasks-rail"');
 });
 
 test('toggling completion marks a task done, and a completed task cannot be un-completed', function () {
@@ -644,14 +663,13 @@ test('the list view computes stat tiles with one aggregate query instead of load
     // paginate() itself issues a count query plus the page's select query;
     // the stat tiles add one aggregate select on top of that, the eager
     // load of each row's own subtasks (for the inline expand panel) adds a
-    // fourth, the "My Tasks" rail's own capped preview query a fifth, and
-    // the "To review" tab badge's count a sixth — six total, not a second
-    // full (board-sized) fetch of every task with its relations just to
-    // count a handful of numbers.
-    expect($taskTableQueries)->toHaveCount(6);
+    // fourth, and the "To review" tab badge's count a fifth — five total, not a second full
+    // (board-sized) fetch of every task with its relations just to count a
+    // handful of numbers.
+    expect($taskTableQueries)->toHaveCount(5);
 });
 
-test('the My Tasks rail visually distinguishes tasks assigned to the viewer from tasks the viewer only delegated', function () {
+test('cards view cards visually distinguish tasks assigned to the viewer from tasks the viewer only delegated', function () {
     $employeeId = insertHrEmployee();
     $user = User::factory()->role('General Manager')->create(['employee_id' => $employeeId]);
 
@@ -665,10 +683,11 @@ test('the My Tasks rail visually distinguishes tasks assigned to the viewer from
 
     Livewire::actingAs($user)
         ->test('pages::tasks.index')
-        ->assertSee('data-test="my-task-role-assigned-'.$assignedToMe->id.'"', false)
-        ->assertSee('data-test="my-task-role-delegated-'.$delegatedByMe->id.'"', false)
-        ->assertDontSee('data-test="my-task-role-delegated-'.$assignedToMe->id.'"', false)
-        ->assertDontSee('data-test="my-task-role-assigned-'.$delegatedByMe->id.'"', false)
+        ->set('view', 'cards')
+        ->assertSee('data-test="cards-task-role-assigned-'.$assignedToMe->id.'"', false)
+        ->assertSee('data-test="cards-task-role-delegated-'.$delegatedByMe->id.'"', false)
+        ->assertDontSee('data-test="cards-task-role-delegated-'.$assignedToMe->id.'"', false)
+        ->assertDontSee('data-test="cards-task-role-assigned-'.$delegatedByMe->id.'"', false)
         ->assertSee('Assigned to Someone Else');
 });
 
@@ -1596,8 +1615,7 @@ test('the task register explains overdue and missed, and labels the related-to f
         ->assertSee('Started, past its due date')
         ->assertSee('Not started, past its due date')
         ->assertSee('Anything')
-        ->assertSee('Any date')
-        ->assertSee('Nothing open is assigned to you.');
+        ->assertSee('Any date');
 });
 
 test('list cards show the year on a due date outside the current year', function () {

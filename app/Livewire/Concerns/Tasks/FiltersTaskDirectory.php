@@ -33,6 +33,7 @@ use Livewire\Attributes\Computed;
  * @property string $sourceId
  * @property string $departmentId
  * @property bool $myTasksOnly
+ * @property string $view
  * @property string $scope
  * @property string $dueFilter
  * @property string $sortField
@@ -176,7 +177,9 @@ trait FiltersTaskDirectory
 
     /**
      * The base filtered query, shared by every view so switching views never
-     * changes what's shown — just how.
+     * changes what's shown — just how. The one exception is the Cards view,
+     * which always shows only the viewer's own tasks (as if "my tasks only"
+     * were on), so its count and stat tiles match its cards.
      *
      * @return Builder<Task>
      */
@@ -241,7 +244,7 @@ trait FiltersTaskDirectory
             ->when($this->scope === 'review', fn (Builder $query) => $query
                 ->where('status', TaskStatus::UnderReview->value)
                 ->where('created_by', auth()->id()))
-            ->when($this->myTasksOnly, function (Builder $query): void {
+            ->when($this->myTasksOnly || $this->view === 'cards', function (Builder $query): void {
                 $user = auth()->user();
                 $employeeId = $user->employee_id;
 

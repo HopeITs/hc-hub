@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Tasks;
 
-use App\Enums\TaskStatus;
 use App\Models\Task;
 use App\Notifications\UnreadSubjects;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -17,8 +15,8 @@ use Livewire\Attributes\Computed;
 
 /**
  * What the tasks page reads to draw its views: the paginated list, the
- * capped board/calendar set, the stat-tile aggregate, the "My Tasks" rail
- * and the calendar grid.
+ * capped board/calendar/cards set, the stat-tile aggregate and the calendar
+ * grid.
  *
  * Used by tasks/index only. filteredTasksQuery() and applySort() come from
  * FiltersTaskDirectory; activeMonth() and periodDays() from
@@ -145,38 +143,6 @@ trait ReadsTaskViews
             'missed' => (int) ($row->missed ?? 0),
             'due_soon' => (int) ($row->due_soon ?? 0),
         ];
-    }
-
-    /**
-     * A capped preview of the viewer's own tasks (assigned to or created by
-     * them) for the "My Tasks" rail — independent of every other filter
-     * (status, priority, department, …) so it always reflects "what's mine"
-     * regardless of what the rest of the page is currently narrowed to.
-     * Bypasses the base filteredTasksQuery() entirely rather than layering
-     * myTasksOnly on top of it, for exactly that reason.
-     *
-     * @return EloquentCollection<int, Task>
-     */
-    #[Computed]
-    public function myTasksPreview(): EloquentCollection
-    {
-        $user = auth()->user();
-        $employeeId = $user->employee_id;
-
-        return Task::query()
-            ->select(['id', 'title', 'status', 'priority', 'due_date', 'created_by'])
-            ->whereNull('parent_task_id')
-            ->where(fn (Builder $query) => $query
-                ->when($employeeId !== null, fn (Builder $query) => $query->orWhereHas(
-                    'taskAssignees',
-                    fn (Builder $query) => $query->where('employee_id', $employeeId),
-                ))
-                ->orWhere('created_by', $user->id))
-            ->where('status', '!=', TaskStatus::Done->value)
-            ->with('taskAssignees.employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar')
-            ->orderByRaw('due_date is null, due_date asc')
-            ->limit(8)
-            ->get();
     }
 
     /**
