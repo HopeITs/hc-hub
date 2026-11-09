@@ -91,6 +91,12 @@ trait ManagesTaskDrawer
         return Task::query()->select(['id', 'title'])->find($this->deletingTaskId);
     }
 
+    /**
+     * Opens the create drawer. With no milestone context, "Related to" is
+     * prefilled the same way the inline row resolves it (active source
+     * filter, else the viewer's department) and the viewer is the default
+     * assignee, so a task can be saved after typing only a title.
+     */
     public function openCreateDrawer(?string $dueDate = null, ?string $status = null, ?string $milestoneId = null): void
     {
         Gate::authorize('create', Task::class);
@@ -108,6 +114,13 @@ trait ManagesTaskDrawer
         if ($milestoneId !== null && Milestone::query()->whereKey((int) $milestoneId)->exists()) {
             $this->taskSourceType = 'milestone';
             $this->taskSourceId = $milestoneId;
+        } elseif ($milestoneId === null && ($source = $this->resolveInlineSource(null)) !== null) {
+            $this->taskSourceType = $source['type'];
+            $this->taskSourceId = (string) $source['id'];
+        }
+
+        if (($assigneeId = $this->resolveInlineAssigneeId()) !== null) {
+            $this->assignedTo = [(string) $assigneeId];
         }
 
         $this->showTaskDrawer = true;
@@ -237,7 +250,8 @@ trait ManagesTaskDrawer
             return;
         }
 
-        Flux::toast(variant: 'success', text: __('tasks.task_status_changed', ['status' => $newStatus->label()]));
+        // On the board the card moving to its new column is the confirmation.
+        $this->toastQuickSuccess(__('tasks.task_status_changed', ['status' => $newStatus->label()]));
     }
 
     public function quickSetPriority(int $taskId, string $priority): void

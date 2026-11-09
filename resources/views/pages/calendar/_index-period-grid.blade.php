@@ -21,7 +21,7 @@
                         @php $isToday = $day->isSameDay($today); @endphp
                         <div class="border-b border-e border-secondary-soft p-2 text-center last:border-e-0 dark:border-line">
                             <div @class(['text-sm font-semibold', 'text-primary dark:text-brand-text' => $isToday, 'text-secondary-dark dark:text-ink' => ! $isToday])>{{ $day->translatedFormat('l') }}</div>
-                            <div @class(['text-xs', 'text-primary dark:text-brand-text' => $isToday, 'text-secondary-medium dark:text-ink-muted' => ! $isToday])>{{ $day->translatedFormat('j M') }}</div>
+                            <div @class(['text-xs', 'text-primary dark:text-brand-text' => $isToday, 'text-secondary-medium dark:text-ink-muted' => ! $isToday])>{{ $day->translatedFormat(__('formats.date_short')) }}</div>
                         </div>
                     @endforeach
 

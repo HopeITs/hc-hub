@@ -588,7 +588,7 @@
  */
 @layer components {
     .dk-scope :is(input, textarea, select):focus-visible { outline: none; border-color: var(--ink-3); box-shadow: 0 0 0 3px var(--sunk); }
-    .dk-scope :is(.form-box, .dk-reg-q, .dk-pf-search, .dk-psearch, .dk-pal-in, .dk-pm, .rules-stepper, .rules-event-search, .rules-chip-add) :is(input, textarea, select):focus-visible { border-color: transparent; box-shadow: none; }
+    .dk-scope :is(.form-box, .dk-reg-q, .dk-pf-search, .dk-psearch, .dk-pal-in, .dk-pm, .rules-stepper, .rules-event-search, .rules-chip-add, .task-composer-text, .form-chip) :is(input, textarea, select):focus-visible { border-color: transparent; box-shadow: none; }
     .dk-reg-q:focus-within, .dk-pf-search:focus-within, .dk-psearch:focus-within { border-color: var(--ink-3); box-shadow: 0 0 0 3px var(--sunk); }
 }
 :where(input, textarea, select, button, a):focus-visible { outline-color: var(--color-secondary-medium); }

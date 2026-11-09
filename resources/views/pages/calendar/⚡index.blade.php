@@ -39,6 +39,9 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     #[Url(except: 'month')]
     public string $viewMode = 'month';
 
+    #[Url(as: 'types', except: '')]
+    public string $shownTypes = '';
+
     /** @var array<int, string> */
     #[Url(as: 'responsible', except: [])]
     public array $filterEmployeeIds = [];
@@ -67,7 +70,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
             return 'bg-status-good-soft text-status-good';
         }
 
-        if ($proposal->planned_date_end->isBefore($today)) {
+        if ($proposal->calendarEndDate()->isBefore($today)) {
             return 'bg-status-critical-soft text-primary dark:text-brand-text';
         }
 
@@ -129,18 +132,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
 
     // Which per-day grouping(s) in $calendar back each type, so the grid can
     // tell whether a given day carries the focused type without re-querying.
-    // Donor and project are composite (two source columns each), same as
-    // focusedItems() above merges two queries for them.
-    $focusedGroupKeys = [
-        'milestone' => ['milestonesByDay'],
-        'task' => ['tasksByDay'],
-        'report' => ['reportsByDay'],
-        'monthly_report' => ['monthlyReportsByDay'],
-        'proposal' => ['proposalsByDay', 'reviewMeetingsByDay'],
-        'transfer' => ['transfersByDay'],
-        'donor' => ['donorFollowUpsByDay', 'donorReportsByDay'],
-        'project' => ['projectStartsByDay', 'projectEndsByDay'],
-    ];
+    $focusedGroupKeys = $this->typeDayGroups();
 
     // Every per-day grouping, regardless of type — used to tell whether a
     // day has anything on it at all, so its content area can open the
@@ -151,17 +143,21 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
 
     $selectedFilterCount = count($filterEmployeeIds);
 
+    // Dates name the year only when it is not this year.
+    $periodStart = $calendar['days'][0] ?? $calendar['month'];
+    $periodEnd = $calendar['days'] === null ? $calendar['month'] : end($calendar['days']);
+    $showsOtherYear = $periodStart->year !== $today->year || $periodEnd->year !== $today->year;
     $periodHeading = match ($viewMode) {
         'month' => $calendar['month']->translatedFormat(__('formats.month_year')),
-        'day' => $calendar['days'][0]->translatedFormat('l, F j'),
-        default => $calendar['days'][0]->translatedFormat('F j').' - '.end($calendar['days'])->translatedFormat('F j'),
+        'day' => $periodStart->translatedFormat(__($showsOtherYear ? 'formats.date_long' : 'formats.date_long_no_year')),
+        default => $periodStart->translatedFormat(__($showsOtherYear ? 'formats.date' : 'formats.date_short')).' – '.$periodEnd->translatedFormat(__($showsOtherYear ? 'formats.date' : 'formats.date_short')),
     };
 @endphp
 
 <x-desk.register
     class="admin-directory @container/directory"
     heading-id="calendar-heading"
-    :title="__('common.my_calendar')"
+    :title="$this->calendarTitle()"
 >
 
 

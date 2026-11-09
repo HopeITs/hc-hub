@@ -12,11 +12,12 @@
      */
     $rowKey = $group.'|'.$groupKeyString;
     $defaultStatus = $group === 'status' && $groupKeyString !== '' ? $groupKeyString : null;
+    $milestoneId = $group === 'milestone' && $groupKeyString !== '' ? $groupKeyString : null;
     $taskDraft = $this->taskDraft($rowKey, $defaultStatus);
     $draftAssignees = collect($this->userOptions)->whereIn('id', collect($taskDraft['assignees'])->map(fn ($id) => (int) $id));
 @endphp
 
-<div class="flex flex-col gap-1.5 p-3.5" data-test="task-add-row-mobile-{{ $group }}-{{ $groupKeyString }}">
+<div class="flex flex-col gap-1.5 p-3.5" data-quick-add-row data-test="task-add-row-mobile-{{ $group }}-{{ $groupKeyString }}">
     <label class="flex items-center gap-2">
         {{ FluxMarkup::icon('plus', 'micro', 'size-4 shrink-0 text-primary dark:text-brand-text') }}
         <span class="sr-only">{{ __('tasks.add_task') }}</span>
@@ -90,5 +91,6 @@
                 <option value="{{ $statusCase->value }}" @selected($taskDraft['status'] === $statusCase->value)>{{ $statusCase->label() }}</option>
             @endforeach
         </select>
+        @include('pages.tasks._quick-add-extras', ['defaultStatus' => $defaultStatus, 'milestoneId' => $milestoneId, 'rowKey' => $rowKey, 'testKey' => 'mobile-'.$group.'-'.$groupKeyString])
     </div>
 </div>

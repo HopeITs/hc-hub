@@ -2,7 +2,7 @@
 @use('App\Enums\TaskStatus')
 @use('App\Support\FluxMarkup')
 @use('Illuminate\Support\Js')
-                @forelse ($columnTasks as $task)
+                @foreach ($columnTasks as $task)
                     @php
                         $isDone = $task->status === TaskStatus::Done;
                         $isMissed = $task->isMissed();
@@ -18,7 +18,7 @@
                     @endphp
                     <div
                         @class([
-                            'group flex flex-col gap-2.5 rounded-xl border border-secondary-soft bg-white p-3 shadow-hairline transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md dark:border-line dark:bg-surface-1',
+                            'group relative flex flex-col gap-2 rounded-xl border border-secondary-soft bg-white p-3 shadow-hairline transition-shadow duration-150 hover:shadow-md dark:border-line dark:bg-surface-1',
                             'cursor-grab active:cursor-grabbing' => ! $isDone && $canMove,
                         ])
                         wire:key="task-board-card-{{ $task->id }}"
@@ -27,44 +27,108 @@
                         x-on:dragstart="$event.dataTransfer.setData('text/plain', JSON.stringify({ id: {{ $task->id }}, status: '{{ $case->value }}' })); $event.currentTarget.classList.add('opacity-40')"
                         x-on:dragend="$event.currentTarget.classList.remove('opacity-40')"
                     >
-                        <div class="flex items-start justify-between gap-2">
-                            <div class="flex min-w-0 items-center gap-1.5">
-                                @if (in_array($task->id, $this->unreadIds, true))
-                                    <span class="size-2 shrink-0 rounded-full bg-primary dark:bg-ink" data-unread-dot="task-{{ $task->id }}" title="{{ __('notifications.has_unread') }}"><span class="sr-only">{{ __('notifications.has_unread') }}</span></span>
+                        {{-- Actions float over the card's top corner on hover/focus, so the title keeps the full width. --}}
+                        @if (($canMove && ! $isDone) || $canCreate || $canUpdate || $canDelete)
+                            <div class="absolute -top-3 end-2 z-10 flex items-center gap-0.5 rounded-lg border border-secondary-soft bg-white p-0.5 opacity-0 shadow-sm transition-opacity focus-within:opacity-100 group-hover:opacity-100 dark:border-line dark:bg-surface-2">
+                                @if ($canMove && ! $isDone)
+                                    {{-- Keyboard alternative to dragging: the shared status menu (_task-option-menu). --}}
+                                    <button
+                                        type="button"
+                                        x-data
+                                        aria-haspopup="menu"
+                                        x-on:click="$store.taskMenu.openFor('status', 'board-status-{{ $task->id }}', '{{ $task->status->value }}', $el.getBoundingClientRect(), 'quickSetStatus', [{{ $task->id }}])"
+                                        aria-label="{{ __('tasks.change_status') }}: {{ $task->title }}"
+                                        title="{{ __('tasks.change_status') }}"
+                                        class="{{ FluxMarkup::GhostIconButton }} size-7!"
+                                        data-test="task-quick-status-{{ $task->id }}"
+                                    >
+                                        <flux:icon name="arrows-right-left" variant="mini" class="size-4" aria-hidden="true" />
+                                    </button>
                                 @endif
-                                @if ($task->isReportTask())
-                                    <x-ui.enum-badge :case="$task->kind" data-test="report-task-chip" />
-                                @endif
-                                <a href="{{ $task->reportUrl() ?? route('tasks.show', $task) }}" wire:navigate dir="auto" title="{{ $task->title }}" class="min-w-0 truncate text-sm font-semibold text-secondary-dark hover:text-primary hover:underline dark:text-ink dark:hover:text-status-critical" data-test="task-board-card-{{ $task->id }}">
-                                    {{ $task->title }}
-                                </a>
-                            </div>
-                            <div class="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
                                 @if ($canCreate)
-                                    {{ FluxMarkup::ghostIconButton('plus', __('tasks.add_subtask'), 'x-on:click="subtasksOpen['.$task->id.'] = true; $nextTick(() => $refs[\'subtaskAddInputBoard'.$task->id.'\']?.focus())" data-test="task-board-add-subtask-'.$task->id.'"', 'size-7!') }}
+                                    {{ FluxMarkup::ghostIconButton('plus', __('tasks.add_subtask'), 'title="'.e(__('tasks.add_subtask')).'" x-on:click="subtasksOpen['.$task->id.'] = true; $nextTick(() => $refs[\'subtaskAddInputBoard'.$task->id.'\']?.focus())" data-test="task-board-add-subtask-'.$task->id.'"', 'size-7!') }}
                                 @endif
                                 @if ($canUpdate)
-                                    {{ FluxMarkup::ghostIconButton('pencil-square', __('tasks.edit_title', ['title' => $task->title]), 'wire:click="openEditDrawer('.$task->id.')"', 'size-7!') }}
+                                    {{ FluxMarkup::ghostIconButton('pencil-square', __('tasks.edit_title', ['title' => $task->title]), 'title="'.e(__('tasks.edit_task')).'" wire:click="openEditDrawer('.$task->id.')"', 'size-7!') }}
                                 @endif
                                 @if ($canDelete)
-                                    {{ FluxMarkup::ghostIconButton('trash', __('tasks.delete_title', ['title' => $task->title]), 'wire:click="confirmDelete('.$task->id.')"', 'size-7!') }}
+                                    {{ FluxMarkup::ghostIconButton('trash', __('tasks.delete_title', ['title' => $task->title]), 'title="'.e(__('tasks.delete_task')).'" wire:click="confirmDelete('.$task->id.')"', 'size-7!') }}
                                 @endif
                             </div>
+                        @endif
+
+                        <div class="flex min-w-0 items-start gap-1.5">
+                            @if (in_array($task->id, $this->unreadIds, true))
+                                <span class="mt-1.5 size-2 shrink-0 rounded-full bg-primary dark:bg-ink" data-unread-dot="task-{{ $task->id }}" title="{{ __('notifications.has_unread') }}"><span class="sr-only">{{ __('notifications.has_unread') }}</span></span>
+                            @endif
+                            @if ($task->isReportTask())
+                                <x-ui.enum-badge :case="$task->kind" data-test="report-task-chip" />
+                            @endif
+                            <a href="{{ $task->reportUrl() ?? route('tasks.show', $task) }}" wire:navigate dir="auto" title="{{ $task->title }}" class="min-w-0 line-clamp-2 text-start text-sm font-semibold break-words text-secondary-dark hover:text-primary hover:underline dark:text-ink dark:hover:text-status-critical" data-test="task-board-card-{{ $task->id }}">
+                                {{ $task->title }}
+                            </a>
                         </div>
 
-                        <p dir="auto" class="-mt-1.5 truncate text-start text-xs text-secondary-medium dark:text-ink-muted" title="{{ $task->sourceLabel() }}">{{ $task->sourceLabel() }}</p>
+                        <p dir="auto" class="-mt-1 truncate text-start text-xs text-secondary-medium dark:text-ink-muted" title="{{ $task->sourceLabel() }}">{{ $task->sourceLabel() }}</p>
 
                         <div class="flex flex-wrap items-center gap-1.5 text-xs">
+                            {{-- Assignees: a click opens the shared picker (editors only); hovering a face shows who it is (_person-card). --}}
+                            <div
+                                x-data
+                                role="button"
+                                @if ($canUpdate)
+                                tabindex="0"
+                                x-on:click="$store.assigneePicker.openFor({{ $task->id }}, {{ Js::from($assignedIds) }}, $el.getBoundingClientRect())"
+                                x-on:keydown.enter="$store.assigneePicker.openFor({{ $task->id }}, {{ Js::from($assignedIds) }}, $el.getBoundingClientRect())"
+                                x-on:keydown.space.prevent="$store.assigneePicker.openFor({{ $task->id }}, {{ Js::from($assignedIds) }}, $el.getBoundingClientRect())"
+                                @endif
+                                aria-haspopup="listbox"
+                                x-bind:aria-expanded="$store.assigneePicker.open && $store.assigneePicker.taskId === {{ $task->id }} ? 'true' : 'false'"
+                                aria-label="{{ __('tasks.assignees') }}: {{ $boardAssignees->isEmpty() ? __('common.not_assigned') : $boardAssignees->map->name->implode(', ') }}"
+                                @class(['inline-flex items-center -space-x-1.5 rtl:space-x-reverse', 'cursor-pointer' => $canUpdate])
+                                data-test="task-board-assignee-trigger-{{ $task->id }}"
+                            >
+                                @if ($boardAssignees->isEmpty())
+                                    <span class="inline-flex size-6 items-center justify-center rounded-full border border-dashed border-secondary-light text-secondary-light">
+                                        {{ FluxMarkup::icon('user-plus', 'micro', 'size-3') }}
+                                    </span>
+                                @else
+                                    @foreach ($boardAssignees->take(3) as $employee)
+                                        @php $employeePhoto = App\Models\HrEmployee::avatarUrl($employee->id); @endphp
+                                        <img
+                                            src="{{ $employeePhoto }}"
+                                            alt=""
+                                            loading="lazy"
+                                            decoding="async"
+                                            onerror="this.onerror = null; this.src = '{{ asset(App\Models\HrEmployee::DefaultAvatar) }}'"
+                                            class="size-6 rounded-full !bg-hr-avatar object-cover ring-2 ring-white dark:ring-surface-1"
+                                            x-on:mouseenter="$store.personCard.show($el)"
+                                            x-on:mouseleave="$store.personCard.hide()"
+                                            data-person-name="{{ $employee->name }}"
+                                            data-person-alt-name="{{ $employee->secondary_name }}"
+                                            data-person-role="{{ App\Models\HrEmployee::positionSummary($employee->id) }}"
+                                            data-person-photo="{{ $employeePhoto }}"
+                                            data-test="task-board-assignee-{{ $task->id }}-{{ $employee->id }}"
+                                        />
+                                    @endforeach
+                                    @if ($boardAssignees->count() > 3)
+                                        <span title="{{ $boardAssignees->skip(3)->map->name->implode(', ') }}" class="inline-flex size-6 items-center justify-center rounded-full bg-secondary-soft text-[10px] font-semibold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">
+                                            +{{ $boardAssignees->count() - 3 }}
+                                        </span>
+                                    @endif
+                                @endif
+                            </div>
+
                             @if (! $canUpdate)
                                 <span class="inline-flex items-center gap-1 rounded-full px-2 py-1 font-semibold {{ $priorityChipClasses($task->priority) }}" data-test="task-board-priority-{{ $task->id }}">
                                     {{ FluxMarkup::icon('flag', $task->priority === TaskPriority::Low ? 'outline' : 'solid', 'size-3 shrink-0') }}
                                     {{ $task->priority->label() }}
                                 </span>
                             @else
-                            <button type="button" x-data aria-haspopup="menu" x-on:click="$store.taskMenu.openFor('priority', 'board-priority-{{ $task->id }}', '{{ $task->priority->value }}', $el.getBoundingClientRect(), 'quickSetPriority', [{{ $task->id }}])" aria-label="{{ __('tasks.priority') }}: {{ $task->priority->label() }}" class="inline-flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 font-semibold {{ $priorityChipClasses($task->priority) }}" data-test="task-board-priority-trigger-{{ $task->id }}">
-                                {{ FluxMarkup::icon('flag', $task->priority === TaskPriority::Low ? 'outline' : 'solid', 'size-3 shrink-0') }}
+                                <button type="button" x-data aria-haspopup="menu" x-on:click="$store.taskMenu.openFor('priority', 'board-priority-{{ $task->id }}', '{{ $task->priority->value }}', $el.getBoundingClientRect(), 'quickSetPriority', [{{ $task->id }}])" aria-label="{{ __('tasks.priority') }}: {{ $task->priority->label() }}" class="inline-flex cursor-pointer items-center gap-1 rounded-full px-2 py-1 font-semibold {{ $priorityChipClasses($task->priority) }}" data-test="task-board-priority-trigger-{{ $task->id }}">
+                                    {{ FluxMarkup::icon('flag', $task->priority === TaskPriority::Low ? 'outline' : 'solid', 'size-3 shrink-0') }}
                                     {{ $task->priority->label() }}
-                            </button>
+                                </button>
                             @endif
 
                             @if ($isMissed)
@@ -105,82 +169,10 @@
                                     data-test="task-board-subtasks-toggle-{{ $task->id }}"
                                 >
                                     {{ FluxMarkup::icon('rectangle-stack', 'micro', 'size-3 shrink-0') }}
-                                    {{ $task->subtasks_count }}
+                                    {{ trans_choice('tasks.subtask_count', $task->subtasks_count, ['count' => $task->subtasks_count]) }}
                                 </button>
                             @endif
                         </div>
-
-                        <div class="h-1.5 w-full overflow-hidden rounded-full bg-secondary-soft dark:bg-surface-2">
-                            <div @class(['h-full rounded-full transition-[width]', 'bg-status-good' => $task->status === TaskStatus::Done, 'bg-primary dark:bg-ink-muted' => $task->status !== TaskStatus::Done]) style="width: {{ $task->progress_percentage }}%"></div>
-                        </div>
-
-                        {{-- Trigger only: the option list lives once in _assignee-popover.blade.php. --}}
-                        <div
-                            x-data
-                            role="button"
-                            @if ($canUpdate)
-                            tabindex="0"
-                            x-on:click="$store.assigneePicker.openFor({{ $task->id }}, {{ Js::from($assignedIds) }}, $el.getBoundingClientRect())"
-                            x-on:keydown.enter="$store.assigneePicker.openFor({{ $task->id }}, {{ Js::from($assignedIds) }}, $el.getBoundingClientRect())"
-                            x-on:keydown.space.prevent="$store.assigneePicker.openFor({{ $task->id }}, {{ Js::from($assignedIds) }}, $el.getBoundingClientRect())"
-                            @endif
-                            aria-haspopup="listbox"
-                            x-bind:aria-expanded="$store.assigneePicker.open && $store.assigneePicker.taskId === {{ $task->id }} ? 'true' : 'false'"
-                            aria-label="{{ __('tasks.assignees') }}: {{ $boardAssignees->isEmpty() ? __('common.not_assigned') : $boardAssignees->map->name->implode(', ') }}"
-                            class="inline-flex cursor-pointer items-center -space-x-2 rtl:space-x-reverse"
-                            data-test="task-board-assignee-trigger-{{ $task->id }}"
-                        >
-                                @if ($boardAssignees->isEmpty())
-                                    <span class="inline-flex size-7 items-center justify-center rounded-full border border-dashed border-secondary-light text-secondary-light">
-                                        {{ FluxMarkup::icon('user-plus', 'micro', 'size-3.5') }}
-                                    </span>
-                                @else
-                                    @foreach ($boardAssignees->take(3) as $employee)
-                                        <div class="group/avatar relative">
-                                            <span class="inline-flex size-7 items-center justify-center rounded-full bg-secondary-dark text-[11px] font-semibold text-white ring-2 ring-white dark:bg-surface-3 dark:ring-surface-1">
-                                                {{ Illuminate\Support\Str::of($employee->name)->explode(' ')->map(fn ($part) => mb_substr($part, 0, 1))->take(2)->implode('') }}
-                                            </span>
-                                            @if ($canUpdate)
-                                            <button
-                                                type="button"
-                                                wire:click.stop="toggleAssignee({{ $task->id }}, {{ $employee->id }})"
-                                                class="absolute -top-1 -end-1 hidden size-4 cursor-pointer items-center justify-center rounded-full bg-secondary-dark text-white hover:bg-primary dark:hover:bg-status-critical dark:hover:text-surface-0 group-hover/avatar:flex dark:bg-ink dark:text-surface-0"
-                                                aria-label="{{ __('tasks.remove_assignee_name', ['name' => $employee->name]) }}"
-                                                data-test="task-board-assignee-remove-{{ $task->id }}-{{ $employee->id }}"
-                                            >
-                                                {{ FluxMarkup::icon('x-mark', 'micro', 'size-2.5') }}
-                                            </button>
-                                            @endif
-                                        </div>
-                                    @endforeach
-                                    @if ($boardAssignees->count() > 3)
-                                        <span class="inline-flex size-7 items-center justify-center rounded-full bg-secondary-soft text-[10px] font-semibold text-secondary-dark ring-2 ring-white dark:bg-surface-3 dark:text-ink dark:ring-surface-1">
-                                            +{{ $boardAssignees->count() - 3 }}
-                                        </span>
-                                    @endif
-                                @endif
-                        </div>
-
-                        {{-- Non-pointer alternative to the drag-and-drop status change above,
-                             matching the milestone board's established fallback pattern. Left
-                             out where the status can't change (done, or not the viewer's task):
-                             the column already says the status. --}}
-                        @if ($canMove && ! $isDone)
-                        <label class="block">
-                            <span class="sr-only">{{ __('tasks.change_status') }}</span>
-                            <select
-                                wire:change="quickSetStatus({{ $task->id }}, $event.target.value)"
-                                wire:loading.attr="disabled"
-                                wire:target="quickSetStatus"
-                                class="w-full rounded-lg border border-secondary-soft bg-white px-2 py-1.5 text-xs text-secondary-dark disabled:cursor-not-allowed disabled:opacity-60 dark:border-line dark:bg-surface-1 dark:text-ink"
-                                data-test="task-quick-status-{{ $task->id }}"
-                            >
-                                @foreach (TaskStatus::cases() as $statusOption)
-                                    <option value="{{ $statusOption->value }}" @selected($statusOption === $task->status)>{{ $statusOption->label() }}</option>
-                                @endforeach
-                            </select>
-                        </label>
-                        @endif
 
                         <div x-show="subtasksOpen[{{ $task->id }}]" x-cloak class="flex flex-col gap-1.5 rounded-lg bg-secondary-soft/30 p-2 dark:bg-white/[0.04]">
                             @foreach ($task->subtasks as $subtask)
@@ -293,6 +285,4 @@
                             @endif
                         </div>
                     </div>
-                @empty
-                    <p class="px-1 py-6 text-center text-xs text-secondary-light" data-test="task-board-empty-{{ $case->value }}">{{ __('tasks.no_tasks_in_this_status') }}</p>
-                @endforelse
+                @endforeach
