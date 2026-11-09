@@ -25,9 +25,12 @@ use Livewire\Component;
  * authorizes again under lock. Questions are ordered within their frequency.
  */
 new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extends Component {
-    /** The frequency filter: '' shows both groups; an unknown value reads as ''. */
     #[Url(except: '')]
-    public string $frequency = '';
+    public string $search = '';
+
+    /** monthly | quarter_end | off: the three plain answers at the top of the page. */
+    #[Url(except: '')]
+    public string $focus = '';
 
     public bool $showQuestionModal = false;
 
@@ -43,11 +46,15 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
 
     public ?int $deactivatingQuestionId = null;
 
+    public string $deactivatingQuestionName = '';
+
     public bool $showDeleteModal = false;
 
     public ?int $deletingQuestionId = null;
 
-    /** A used question cannot be deleted: the delete dialog offers to deactivate it instead. */
+    public string $deletingQuestionName = '';
+
+    /** A used question cannot be deleted: the delete dialog offers to switch it off instead. */
     public bool $deletingQuestionInUse = false;
 
     /** Read out by the polite live region after a move, so a keyboard user hears the new position. */
@@ -59,7 +66,7 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
     }
 
     /**
-     * The whole bank in one query; the frequency filter and the groups are
+     * The whole bank in one query; the search, the buttons and the groups are
      * applied in memory (a bank holds a handful of questions).
      *
      * @return Collection<int, NarrativeQuestion>
@@ -70,10 +77,39 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
         return NarrativeQuestion::query()->ordered()->get();
     }
 
+    /**
+     * The questions matching the search, each tagged with one status word:
+     * `off` (switched off) or the frequency it is asked at.
+     *
+     * @return Collection<int, NarrativeQuestion>
+     */
     #[Computed]
-    public function selectedFrequency(): ?NarrativeQuestionFrequency
+    public function searchedQuestions(): Collection
     {
-        return NarrativeQuestionFrequency::tryFrom($this->frequency);
+        $term = mb_strtolower(trim($this->search));
+
+        return $this->questions
+            ->each(fn (NarrativeQuestion $question) => $question->setAttribute('status', $question->is_active ? $question->frequency->value : 'off'))
+            ->when($term !== '', fn (Collection $questions) => $questions->filter(fn (NarrativeQuestion $question): bool => str_contains(mb_strtolower($question->text_ar.' '.$question->text_en), $term)));
+    }
+
+    /**
+     * How many questions sit under each button: disjoint, added up to the
+     * total, and read under the search, so a click shows exactly that many.
+     *
+     * @return array{monthly: int, quarter_end: int, off: int, total: int}
+     */
+    #[Computed]
+    public function focusCounts(): array
+    {
+        $byStatus = $this->searchedQuestions->countBy('status');
+
+        return [
+            'monthly' => (int) $byStatus->get('monthly', 0),
+            'quarter_end' => (int) $byStatus->get('quarter_end', 0),
+            'off' => (int) $byStatus->get('off', 0),
+            'total' => $this->searchedQuestions->count(),
+        ];
     }
 
     /**
@@ -84,20 +120,28 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
     #[Computed]
     public function groups(): array
     {
+        $visible = $this->focus === '' ? $this->searchedQuestions : $this->searchedQuestions->where('status', $this->focus);
         $groups = [];
 
         foreach (NarrativeQuestionFrequency::cases() as $case) {
-            if ($this->selectedFrequency !== null && $this->selectedFrequency !== $case) {
-                continue;
-            }
-
             $groups[$case->value] = [
                 'frequency' => $case,
-                'questions' => $this->questions->filter(fn (NarrativeQuestion $question): bool => $question->frequency === $case)->values(),
+                'questions' => $visible->filter(fn (NarrativeQuestion $question): bool => $question->frequency === $case)->values(),
             ];
         }
 
         return $groups;
+    }
+
+    public function setFocus(string $focus): void
+    {
+        $this->focus = $this->focus === $focus || ! in_array($focus, ['monthly', 'quarter_end', 'off'], true) ? '' : $focus;
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->focus = '';
     }
 
     public function openCreateModal(): void
@@ -105,7 +149,7 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
         Gate::authorize('create', NarrativeQuestion::class);
 
         $this->resetQuestionForm();
-        $this->questionFrequency = ($this->selectedFrequency ?? NarrativeQuestionFrequency::Monthly)->value;
+        $this->questionFrequency = (NarrativeQuestionFrequency::tryFrom($this->focus) ?? NarrativeQuestionFrequency::Monthly)->value;
         $this->showQuestionModal = true;
     }
 
@@ -144,7 +188,7 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
         $isCreate = $this->editingQuestionId === null;
 
         $this->closeQuestionModal();
-        unset($this->questions, $this->groups);
+        $this->forgetLists();
 
         Flux::toast(variant: 'success', text: __($isCreate ? 'narrative_questions.created' : 'narrative_questions.updated'));
     }
@@ -157,8 +201,11 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
 
     public function confirmDeactivate(int $questionId): void
     {
-        Gate::authorize('update', NarrativeQuestion::query()->findOrFail($questionId));
+        $question = NarrativeQuestion::query()->findOrFail($questionId);
 
+        Gate::authorize('update', $question);
+
+        $this->deactivatingQuestionName = Str::limit($question->localizedText(), 80);
         $this->deactivatingQuestionId = $questionId;
         $this->showDeactivateModal = true;
     }
@@ -179,6 +226,7 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
     {
         $this->showDeactivateModal = false;
         $this->deactivatingQuestionId = null;
+        $this->deactivatingQuestionName = '';
     }
 
     /**
@@ -196,6 +244,7 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
         Gate::authorize('delete', $question);
 
         $this->deletingQuestionId = $question->id;
+        $this->deletingQuestionName = Str::limit($question->localizedText(), 80);
         $this->deletingQuestionInUse = $question->isInUse();
         $this->showDeleteModal = true;
     }
@@ -213,7 +262,7 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
     }
 
     /**
-     * The delete dialog of a used question: deactivate it, as the message explains.
+     * The delete dialog of a used question: switch it off, as the message explains.
      */
     public function deactivateInsteadOfDelete(): void
     {
@@ -231,6 +280,7 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
     {
         $this->showDeleteModal = false;
         $this->deletingQuestionId = null;
+        $this->deletingQuestionName = '';
         $this->deletingQuestionInUse = false;
     }
 
@@ -242,14 +292,14 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
         try {
             $position = app(MoveNarrativeQuestion::class)->handle($questionId, towardsStart: $direction === 'up');
         } catch (ValidationException $exception) {
-            unset($this->questions, $this->groups);
+            $this->forgetLists();
 
             Flux::toast(variant: 'danger', text: (string) collect($exception->errors())->flatten()->first());
 
             return;
         }
 
-        unset($this->questions, $this->groups);
+        $this->forgetLists();
 
         $question = $this->questions->firstWhere('id', $questionId);
 
@@ -266,7 +316,7 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
     }
 
     /**
-     * Run a deactivate, reactivate or delete; a refusal (in use, stale)
+     * Run a switch off, switch on or delete; a refusal (in use, stale)
      * becomes a toast rather than a field error, since there is no form.
      */
     private function runQuestionAction(callable $action, string $successKey): void
@@ -274,16 +324,21 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
         try {
             $action();
         } catch (ValidationException $exception) {
-            unset($this->questions, $this->groups);
+            $this->forgetLists();
 
             Flux::toast(variant: 'danger', text: (string) collect($exception->errors())->flatten()->first());
 
             return;
         }
 
-        unset($this->questions, $this->groups);
+        $this->forgetLists();
 
         Flux::toast(variant: 'success', text: __($successKey));
+    }
+
+    private function forgetLists(): void
+    {
+        unset($this->questions, $this->searchedQuestions, $this->focusCounts, $this->groups);
     }
 
     private function resetQuestionForm(): void
@@ -298,28 +353,23 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
 ?>
 
 @php
+    $focusCounts = $this->focusCounts;
     $groups = $this->groups;
     $visibleCount = collect($groups)->sum(fn (array $group): int => $group['questions']->count());
     $bankIsEmpty = $this->questions->isEmpty();
+    $filtersAreActive = trim($search) !== '' || $focus !== '';
 @endphp
 
-<x-desk.register class="@container/directory" heading-id="narrative-questions-heading" :title="__('titles.narrative_questions')" :count="$visibleCount" data-tour="narrative-questions-page">
-    
-        <x-slot:filters>
-            <x-ui.header-filter-select :label="__('narrative_questions.filter_label')" wire:model.live="frequency" :value="$this->selectedFrequency?->value ?? ''">
-                <option value="">{{ __('narrative_questions.all_frequencies') }}</option>
-                @foreach (NarrativeQuestionFrequency::cases() as $case)
-                    <option value="{{ $case->value }}">{{ $case->label() }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
-        </x-slot:filters>
+<x-desk.register class="@container/directory" heading-id="narrative-questions-heading" :title="__('titles.narrative_questions')" :count="$this->questions->count()" data-tour="narrative-questions-page">
+    <x-slot:actions>
+        <x-ui.button tone="primary" icon="plus" class="min-h-11 self-end touch-manipulation @sm/directory:min-h-10" wire:click="openCreateModal" data-test="create-narrative-question" data-tour="narrative-questions-create">
+            {{ __('narrative_questions.add_question') }}
+        </x-ui.button>
+    </x-slot:actions>
+    <x-slot:search>
+        <x-desk.register-search :label="__('narrative_questions.search')" :placeholder="__('narrative_questions.search_placeholder')" wire:model.live.debounce.300ms="search" />
+    </x-slot:search>
 
-        <x-slot:actions>
-            <x-ui.button tone="primary" icon="plus" class="min-h-11 self-end touch-manipulation @sm/directory:min-h-10" wire:click="openCreateModal" data-test="create-narrative-question" data-tour="narrative-questions-create">
-                {{ __('narrative_questions.add_question') }}
-            </x-ui.button>
-        </x-slot:actions>
-    
     <p class="sr-only" aria-live="polite" aria-atomic="true">{{ $announcement }}</p>
 
     @if ($bankIsEmpty)
@@ -328,10 +378,18 @@ new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extend
                 <x-ui.button tone="primary" icon="plus" wire:click="openCreateModal" data-test="empty-create-narrative-question">{{ __('narrative_questions.add_question') }}</x-ui.button>
             </x-slot:action>
         </x-ui.empty-state>
-    @elseif ($visibleCount === 0)
-        <x-ui.empty-state icon="funnel" :heading="__('narrative_questions.empty_filtered_heading')" :body="__('narrative_questions.empty_filtered_body')" />
     @else
-        @include('pages.admin._narrative-questions-list')
+        @include('pages.admin._narrative-questions-focus-bar')
+
+        @if ($visibleCount === 0)
+            <x-ui.empty-state icon="funnel" :heading="__('narrative_questions.no_match')" :body="__('common.change_the_search_or_filters_and_try_again')">
+                <x-slot:action>
+                    <x-ui.button size="sm" wire:click="clearFilters" data-test="empty-reset-filters">{{ __('common.reset_filters') }}</x-ui.button>
+                </x-slot:action>
+            </x-ui.empty-state>
+        @else
+            @include('pages.admin._narrative-questions-list')
+        @endif
     @endif
 
     @include('pages.admin._narrative-questions-modal')

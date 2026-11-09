@@ -1,14 +1,14 @@
 {{--
     The deactivate and delete confirmations of admin/narrative-questions.
     Included by ⚡narrative-questions.blade.php. A used question's delete
-    dialog explains why it cannot be deleted and offers to deactivate it
+    dialog explains why it cannot be deleted and offers to switch it off it
     instead.
 --}}
 <x-ui.confirm-modal
     wire:model="showDeactivateModal"
     close="cancelDeactivate"
     tone="neutral"
-    :title="__('narrative_questions.deactivate_title')"
+    :title="__('narrative_questions.deactivate_title', ['name' => $deactivatingQuestionName])"
     :message="__('narrative_questions.deactivate_message')"
     confirm="deactivateQuestion"
     :confirm-label="__('narrative_questions.deactivate')"
@@ -20,7 +20,7 @@
     wire:model="showDeleteModal"
     close="cancelDelete"
     :tone="$deletingQuestionInUse ? 'neutral' : 'danger'"
-    :title="__('narrative_questions.delete_title')"
+    :title="__('narrative_questions.delete_title', ['name' => $deletingQuestionName])"
     :message="$deletingQuestionInUse ? __('narrative_questions.in_use') : __('narrative_questions.delete_message')"
     :confirm="$deletingQuestionInUse ? 'deactivateInsteadOfDelete' : 'deleteQuestion'"
     :confirm-label="$deletingQuestionInUse ? __('narrative_questions.deactivate_instead') : __('narrative_questions.delete')"
