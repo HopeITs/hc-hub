@@ -27,7 +27,7 @@ HC Tracking is a single shared place to plan and follow the organization's work.
 | Need | How HC Tracking supports it |
 |---|---|
 | **Plan** | Strategies, Programs and Annual Plans describe what the organization intends to achieve. |
-| **Deliver** | Projects, Milestones, Tasks, Risks and a Timeline show the work and who is doing it. |
+| **Deliver** | Projects, Milestones, Tasks and Risks show the work and who is doing it. |
 | **Measure** | A Results Framework, Indicators, Targets and Reports show whether the work is making a difference. |
 | **Fund** | Proposals, Donors, Funding Agreements and Transfers track the money behind the work. |
 | **Stay informed** | The Dashboard, Calendar and Notifications point you to what needs attention. |
@@ -82,7 +82,7 @@ The **sidebar** on the left is the main menu, grouped into sections. You only se
 |---|---|
 | **Overview** | Dashboard, My Calendar |
 | **Strategy** | Strategies, Programs, Annual Plans |
-| **Delivery** | Projects, Timeline, Milestones, Tasks, Risks |
+| **Delivery** | Projects, Milestones, Tasks, Risks |
 | **Results & Learning** | Results Framework, Indicators, Targets, Reports |
 | **Funding** | Proposals, Donors, Funding Agreements, Transfers |
 | **Administration** | Accounts, Cities, Notification rules and User directory, plus Activity log for those allowed |
@@ -98,7 +98,6 @@ The **sidebar** on the left is the main menu, grouped into sections. You only se
 ### 4.2 Delivery
 
 - **Projects:** a defined piece of work. The list shows each project as a card with its location, program, status, progress percentage, funding envelope and number of beneficiaries. Open a project to see its manager, dates, a **headline target**, a beneficiary breakdown and a **Funding envelope** (received against committed). Its tabs are **Milestones**, **Tasks**, **Plan** (a Gantt chart: a bar chart of work over time), **Risks**, **Targets**, **Proposals**, **Files** and **Activity**.
-- **Timeline:** all projects on one time-based view.
 - **Milestones:** important checkpoints with a weight and a planned and actual date.
 - **Tasks:** single actions with an assignee, priority and due date. You can view them as a **List**, a **Board** (columns by status) or a **Calendar**. Task pages let you attach files and preview them.
 - **Risks:** things that could go wrong. The Dashboard highlights risks that have *materialised* (actually happened).

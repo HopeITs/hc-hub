@@ -92,7 +92,6 @@ final class AskEngine
         'dashboard' => ['home', 'desk', 'start', 'main', 'الرئيسيه', 'مكتبي', 'المكتب'],
         'reviews.index' => ['review', 'reviews', 'approve', 'approvals', 'مراجعه', 'مراجعات'],
         'programs.index' => ['program', 'programs', 'programme', 'برنامج', 'برامج'],
-        'timeline.index' => ['timeline', 'gantt', 'schedule', 'roadmap', 'جدول', 'زمني'],
         'reports.monthly-matrix' => ['matrix', 'monthly', 'مصفوفه', 'شهري'],
         'monthly-reports.index' => ['monthly', 'شهريه', 'شهري'],
         'donor-reports.compose' => ['builder', 'compose', 'donor', 'منشئ'],
