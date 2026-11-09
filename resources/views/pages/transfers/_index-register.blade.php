@@ -31,10 +31,12 @@
 
         <x-funding.totals :lines="$totalLines" />
 
-        <x-funding.register size="xl" :caption="__('finance_tables.transfers_caption')">
+        {{-- Five columns fit in sm; xl (92rem) was the width thirteen needed, and it
+             forced a sideways scroll that put the edit button past the edge. --}}
+        <x-funding.register size="sm" :caption="__('finance_tables.transfers_caption')">
             <x-slot:head>
                 <x-funding.register.th sort="donor" :active="$sortKey" :dir="$sortDirection">{{ __('finance_tables.donor_agreement') }}</x-funding.register.th>
-                <x-funding.tranche-head sortable :active="$sortKey" :dir="$sortDirection" />
+                <x-funding.tranche-head compact sortable :active="$sortKey" :dir="$sortDirection" />
             </x-slot:head>
 
             @foreach ($this->rows as $transfer)
@@ -49,13 +51,14 @@
                         :group="$groupKey"
                         :lines="$this->groupTotals->get($groupKey, [])"
                         :lead="1"
+                        compact
                     />
                     @php
                         $previousGroup = $groupKey;
                     @endphp
                 @endif
 
-                <x-funding.tranche-row :transfer="$transfer">
+                <x-funding.tranche-row :transfer="$transfer" compact>
                     <x-slot:lead>
                         <td data-label="{{ __('finance_tables.donor_agreement') }}" data-wide>
                             @can('donors.view')

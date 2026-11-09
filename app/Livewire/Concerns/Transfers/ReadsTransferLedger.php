@@ -190,6 +190,29 @@ trait ReadsTransferLedger
     }
 
     /**
+     * The counts behind the three headline figures, each ignoring the headline
+     * filter itself so pressing one never empties the other two.
+     *
+     * @return array<string, int>
+     */
+    #[Computed]
+    public function focusCounts(): array
+    {
+        $focuses = $this->focusSql();
+
+        $counts = $this->filteredQuery(withStage: false, withFocus: false)
+            ->toBase()
+            ->selectRaw(collect($focuses)
+                ->map(fn (string $condition, string $focus): string => "coalesce(sum(case when {$condition} then 1 else 0 end), 0) as n_{$focus}")
+                ->implode(', '))
+            ->first();
+
+        return collect(array_keys($focuses))
+            ->mapWithKeys(fn (string $focus): array => [$focus => (int) ($counts->{'n_'.$focus} ?? 0)])
+            ->all();
+    }
+
+    /**
      * Each group's subtotals per currency, over every filtered tranche and not
      * only the visible page, so a group split across two pages shows its true
      * subtotal on both. Keyed by the group's key.

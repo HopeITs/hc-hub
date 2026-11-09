@@ -88,4 +88,12 @@ return [
     'arrival_date_hint' => 'متى وصل المبلغ إلى المصرف أو شركة التحويل.',
     'receive_date_hint' => 'متى دخل المبلغ حساب المنظمة.',
     'money_cannot_arrive_in_the_future' => 'لا يمكن أن يكون تاريخ الوصول في المستقبل.',
+    'focus_attention' => 'تحتاج متابعة',
+    'focus_travelling' => 'في الطريق',
+    'focus_landed' => 'وصلت',
+    'late_failed_or_unaccounted' => 'متأخرة أو فاشلة أو غير مفسّرة',
+    'scheduled_or_on_its_way' => 'مجدولة أو قيد التحويل',
+    'arrived_and_accounted_for' => 'وصلت ومفسّرة بالكامل',
+    'where_every_tranche_stands' => 'أين تقف كل دفعة',
+    'of_count_tranches' => '{1} من دفعة واحدة|{2} من دفعتين|[3,10] من :count دفعات|[11,*] من :count دفعة',
 ];

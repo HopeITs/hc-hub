@@ -88,4 +88,12 @@ return [
     'arrival_date_hint' => 'When the money reached the bank or transfer company.',
     'receive_date_hint' => 'When it landed in the organisation account.',
     'money_cannot_arrive_in_the_future' => 'The arrival date cannot be in the future.',
+    'focus_attention' => 'Needs attention',
+    'focus_travelling' => 'On its way',
+    'focus_landed' => 'Landed',
+    'late_failed_or_unaccounted' => 'Late, failed, or unaccounted for',
+    'scheduled_or_on_its_way' => 'Scheduled or in transit',
+    'arrived_and_accounted_for' => 'Arrived, fully accounted for',
+    'where_every_tranche_stands' => 'Where every tranche stands',
+    'of_count_tranches' => '{1} of :count tranche|[2,*] of :count tranches',
 ];
