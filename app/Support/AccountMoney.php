@@ -107,6 +107,7 @@ final class AccountMoney
             'coalesce(sum(money.a_upcoming), 0) as upcoming',
             'coalesce(sum(money.a_overdue), 0) as overdue',
             'coalesce(sum(money.a_received_in_year), 0) as received_in_year',
+            'coalesce(sum(money.a_other_currency), 0) as other_currency',
         ]);
     }
 }

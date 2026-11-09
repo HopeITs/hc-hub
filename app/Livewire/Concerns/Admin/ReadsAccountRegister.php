@@ -193,7 +193,7 @@ trait ReadsAccountRegister
      * The table's totals, one line per account currency, for every account
      * the filters match.
      *
-     * @return Collection<int, array{currency: string, accounts: int, open_accounts: int, transfers: int, received: float, in_transit: float, upcoming: float, overdue: float, received_in_year: float}>
+     * @return Collection<int, array{currency: string, accounts: int, open_accounts: int, transfers: int, received: float, in_transit: float, upcoming: float, overdue: float, received_in_year: float, other_currency: int}>
      */
     #[Computed]
     public function totals(): Collection
@@ -215,6 +215,7 @@ trait ReadsAccountRegister
                 'upcoming' => (float) $row->upcoming,
                 'overdue' => (float) $row->overdue,
                 'received_in_year' => (float) $row->received_in_year,
+                'other_currency' => (int) $row->other_currency,
             ]);
     }
 

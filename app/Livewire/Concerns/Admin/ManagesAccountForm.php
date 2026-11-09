@@ -9,6 +9,7 @@ use App\Models\Account;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rules\Enum;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 
 /**
@@ -176,6 +177,17 @@ trait ManagesAccountForm
 
         $this->closingAccountId = $accountId;
         $this->showCloseModal = true;
+    }
+
+    /**
+     * The name shown in the close dialog, so it says which account it closes.
+     */
+    #[Computed]
+    public function closingAccountName(): string
+    {
+        return $this->closingAccountId === null
+            ? ''
+            : (string) Account::query()->whereKey($this->closingAccountId)->value('account_name');
     }
 
     public function cancelClose(): void
