@@ -82,7 +82,7 @@ final class Destinations
                 continue;
             }
 
-            if (! $user->isAdministrator() && ! ($destination['allows'])($user)) {
+            if (! $this->opens($user, $destination)) {
                 continue;
             }
 
@@ -97,6 +97,78 @@ final class Destinations
         }
 
         return $destinations;
+    }
+
+    /**
+     * The destination behind a route, whoever may open it; null for a route
+     * that is not a destination.
+     *
+     * @return array{route: string, label: string, icon: string, hero: string, group: string, module: string|null}|null
+     */
+    public function find(string $route): ?array
+    {
+        foreach ($this->all() as $destination) {
+            if ($destination['route'] === $route) {
+                return [
+                    'route' => $destination['route'],
+                    'label' => __($destination['label']),
+                    'icon' => $destination['icon'],
+                    'hero' => $destination['hero'],
+                    'group' => $destination['group'],
+                    'module' => $destination['module'],
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Whether the user may open the destination behind a route: the one rule
+     * the sidebar, the Ask bar and the Desk's page cards and buttons all read.
+     */
+    public function allows(User $user, string $route): bool
+    {
+        foreach ($this->all() as $destination) {
+            if ($destination['route'] === $route) {
+                return $this->opens($user, $destination);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * An administrator opens every page, role-tied ones included, except a
+     * page whose own gate holds administrators to it too: the risk library
+     * belongs to the MEAL Manager slot holder alone (D-61), and its route
+     * answered an administrator 403 while the sidebar and Desk offered it.
+     *
+     * @param  array{allows: Closure(User): bool, bindsAdministrators: bool}  $destination
+     */
+    private function opens(User $user, array $destination): bool
+    {
+        return ($destination['allows'])($user) || ($user->isAdministrator() && ! $destination['bindsAdministrators']);
+    }
+
+    /**
+     * A route as a short, selector-safe slug for Desk item ids: dots become
+     * dashes and a register's ".index" is dropped (admin.evidence-types.index
+     * is "admin-evidence-types").
+     */
+    public static function slugOf(string $route): string
+    {
+        return str_replace('.', '-', str_ends_with($route, '.index') ? substr($route, 0, -strlen('.index')) : $route);
+    }
+
+    /**
+     * Every destination route, in display order, whoever may open it.
+     *
+     * @return list<string>
+     */
+    public function routes(): array
+    {
+        return array_column($this->all(), 'route');
     }
 
     /**
@@ -151,13 +223,26 @@ final class Destinations
     }
 
     /**
-     * @return list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null, allows: Closure(User): bool}>
+     * @return list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null, allows: Closure(User): bool, bindsAdministrators: bool}>
      */
     private function all(): array
     {
+        return $this->table ??= $this->table();
+    }
+
+    /**
+     * @var list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null, allows: Closure(User): bool, bindsAdministrators: bool}>|null
+     */
+    private ?array $table = null;
+
+    /**
+     * @return list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null, allows: Closure(User): bool, bindsAdministrators: bool}>
+     */
+    private function table(): array
+    {
         $can = fn (string $ability): Closure => fn (User $user): bool => $user->can($ability);
         $everyone = fn (): bool => true;
-        $page = fn (string $route, string $label, string $icon, string $hero, string $group, Closure $allows, ?string $module = null): array => [
+        $page = fn (string $route, string $label, string $icon, string $hero, string $group, Closure $allows, ?string $module = null, bool $bindsAdministrators = false): array => [
             'route' => $route,
             'label' => $label,
             'icon' => $icon,
@@ -165,6 +250,7 @@ final class Destinations
             'group' => $group,
             'module' => $module,
             'allows' => $allows,
+            'bindsAdministrators' => $bindsAdministrators,
         ];
 
         return [
@@ -206,7 +292,7 @@ final class Destinations
             $page('activity.index', 'navigation.activity_log', 'undo', 'clipboard-document-list', 'administration', $can('activity-log.view')),
             $page('admin.cities.index', 'common.cities', 'map', 'map-pin', 'administration', $can('cities.view')),
             $page('admin.sectors.index', 'navigation.sectors', 'grid', 'tag', 'administration', $can('sectors.view')),
-            $page('admin.risk-library.index', 'navigation.risk_library', 'info', 'shield-exclamation', 'administration', fn (User $user): bool => $user->can('viewAny', RiskLibrary::class)),
+            $page('admin.risk-library.index', 'navigation.risk_library', 'info', 'shield-exclamation', 'administration', fn (User $user): bool => $user->can('viewAny', RiskLibrary::class), bindsAdministrators: true),
             $page('admin.evidence-types.index', 'navigation.evidence_types', 'file', 'paper-clip', 'administration', $can('evidence-types.manage')),
             $page('admin.narrative-questions.index', 'navigation.narrative_questions', 'info', 'question-mark-circle', 'administration', $can('narrative-questions.manage')),
 
@@ -220,7 +306,8 @@ final class Destinations
      */
     private function hasReviews(User $user): bool
     {
+        /* Read once per person per request: the sidebar, Ask, cards and tabs all ask (it ran 18 times per Desk). */
         return $user->employee_id !== null
-            && ProposalReviewer::query()->forEmployee((int) $user->employee_id)->exists();
+            && once(fn (): bool => ProposalReviewer::query()->forEmployee((int) $user->employee_id)->exists());
     }
 }

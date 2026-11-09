@@ -144,7 +144,8 @@ document.addEventListener('alpine:init', () => {
             const list = body.querySelector('[data-fit]');
 
             // Not while the card is being resized (desk-grid.js): fitRows re-renders it at its saved size and the card would snap back mid-pull. It fits again once the new size is saved.
-            if (! list || this.fitBusy || 'resizing' in this.$root.dataset) {
+            // Nor while the list is not drawn (a card too short for rows hides it, desk-cards.css): there is nothing to measure.
+            if (! list || this.fitBusy || 'resizing' in this.$root.dataset || list.getClientRects().length === 0) {
                 return;
             }
 

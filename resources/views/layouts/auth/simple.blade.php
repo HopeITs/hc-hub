@@ -2,6 +2,8 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ \App\Enums\Locale::current()->direction() }}">
     <head>
         @include('partials.head')
+        {{-- A Desk tab whose session ran out lands here: sign in again on the whole window, not inside the tab. --}}
+        <script>try { if (window.top !== window.self && window.top.location.origin === window.location.origin) { window.top.location.replace(window.location.pathname); } } catch (e) {}</script>
     </head>
     <body class="min-h-screen bg-auth-ground antialiased dark:bg-surface-0">
         @persist('preloader')

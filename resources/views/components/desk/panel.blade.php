@@ -13,16 +13,19 @@
     'search' => null,
     'searchValue' => '',
     'health' => null,
+    'title' => null,
+    'tagline' => null,
 ])
 
 @php
-    $title = __("desk.panel.{$id}.title");
+    /* A page card (App\Support\Desk\PageCards) brings its page's own title and line; a hand-made panel reads its own keys. */
+    $title = $title ?? __("desk.panel.{$id}.title");
     $sizes = \App\Support\Desk\Panels::Sizes;
     $panels = app(\App\Support\Desk\Panels::class);
     /* The free cell grid: the entry's exact columns and row units, or the size's columns and the panel's own height for older layouts. */
     $span = (int) $cols > 0 ? max(\App\Support\Desk\Panels::MinCols, min(12, (int) $cols)) : $sizes[$size];
     $rows = (int) $height > 0 ? max(2, min(8, (int) $height)) : max(2, min(8, $panels->rowsOf($id)));
-    $tagline = __("desk-cards.tagline.{$id}");
+    $tagline = $tagline ?? __("desk-cards.tagline.{$id}");
     /* The panel state for its count colour and live dot: brand (decisions), critical, warn or good; none when neutral. */
     $health = in_array($health, ['brand', 'critical', 'warn', 'good'], true) ? $health : null;
     $filtered = $filtered || collect($facets)->contains(fn (array $choice): bool => $choice['value'] !== '');
@@ -33,8 +36,8 @@
 {{--
     One Desk panel (a "sheet"): hover grip, eyebrow title, the hover tools
     (search, filter, open in full, options) and the count as a figure at the end,
-    then optional tools, the body and an optional footer. The grip drags the
-    panel (resources/js/desk.js); the menu's actions call the Desk page
+    then optional tools, the body and an optional footer. The header drags the
+    panel (resources/js/desk-grid.js); the menu's actions call the Desk page
     (pages::desk.index) through $wire.$parent.
 --}}
 <section {{ $attributes->class('dk-panel') }} id="dk-panel-{{ $id }}" @if ($health !== null) data-health="{{ $health }}" @endif style="--span:{{ $span }};--rows:{{ $rows }};--i:{{ $index }}" data-cols="{{ $span }}" data-rows="{{ $rows }}" data-panel="{{ $id }}" data-idx="{{ $index }}" aria-labelledby="dk-ph-{{ $id }}" x-data="deskPanel(@js($id))" @if ($search !== null) x-init="searching = @js($searchValue !== '')" @endif x-on:keydown.escape="menu = false">
@@ -42,12 +45,13 @@
     <header class="dk-ph" data-drag="{{ $id }}" title="{{ __('desk.panel_drag') }}">
         <span class="dk-grip" aria-hidden="true"><x-desk.icon name="grip" class="dk-grip-dots" /></span>
         <div class="dk-ph-t">
-            <h2 id="dk-ph-{{ $id }}">{{ $title }}</h2>
-            @if ($tagline !== "desk-cards.tagline.{$id}")
+            <h2 id="dk-ph-{{ $id }}" title="{{ $title }}">{{ $title }}</h2>
+            @if (filled($tagline) && $tagline !== "desk-cards.tagline.{$id}")
                 <p class="dk-tagline">{{ $tagline }}</p>
             @endif
         </div>
-        <span class="dk-pspace"></span>
+        {{-- The tools sit together: in the header's line on a wide card, over its end on a narrow one (desk-grid.css .dk-ph-tools). --}}
+        <span class="dk-ph-tools" data-panel-tools-head>
         @if ($search !== null)
         <button type="button" @class(['dk-iconbtn dk-sm dk-psearch-btn', 'dk-on' => $searchValue !== '']) x-on:click="searching = ! searching; if (searching) { $nextTick(() => $refs.search?.focus()) }" x-bind:aria-expanded="searching.toString()" aria-label="{{ __('desk.panel_search', ['panel' => $title]) }}" title="{{ __('desk.search') }}" data-panel-search-toggle>
             <x-desk.icon name="search" />
@@ -79,6 +83,7 @@
                 @endif
                 <button type="button" role="menuitem" class="dk-danger" x-on:click="menu = false; $dispatch('dk-panel-removed', { panel: '{{ $id }}', title: @js($title), position: {{ $index }}, size: '{{ $size }}', cols: {{ $span }}, rows: {{ $rows }} }); $wire.$parent.removePanel('{{ $id }}')"><x-desk.icon name="x" />{{ __('desk.remove_panel') }}</button>
             </div>
+        </span>
         </span>
         @if ($count !== null && $count !== '')
             <span class="dk-pc dk-num" data-panel-count>{{ $count }}</span>

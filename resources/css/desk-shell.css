@@ -105,6 +105,8 @@
     .dk-side-pin:hover { background: var(--sunk); color: var(--ink); }
     .dk-side-pin.dk-pinned { color: var(--brand); }
     .dk-side-pin.dk-pinned svg { fill: currentColor; }
+    .dk-side-pin svg.dk-pin-ic { width: 14px; height: 14px; stroke-width: 2; }
+    .dk-side-pin.dk-pinned svg.dk-pin-ic { fill: color-mix(in srgb, currentColor 30%, transparent); }
 
     /* Personal zone: Pinned + Recent */
     .dk-side-me ul { display: grid; gap: 1px; }
@@ -713,6 +715,24 @@
         .dk-glance:is([data-figs="2"], [data-figs="4"]) > li:nth-child(2n + 1) { border-inline-start: 0; padding-inline-start: 0; }
         .dk-glance:is([data-figs="2"], [data-figs="4"]) > li:nth-child(2n) { border-inline-start: 1px solid var(--line); padding-inline-start: 16px; }
     }
+    /* Narrow (a 3- or 4-column card): two to a line left each label ~90px wide and cut most of them, so each figure
+       takes its own line with its words beside it. A 2-row card has no height for six lines and keeps the pairs. */
+    @container pb (max-width: 419px) {
+        .dk-panel:not([data-rows="2"]) .dk-pb > .dk-glance { grid-template-columns: minmax(0, 1fr); row-gap: 0; align-content: space-evenly; }
+        .dk-panel:not([data-rows="2"]) .dk-glance > li { padding-inline: 0; border-inline-start: 0; border-block-start: 1px solid var(--line); }
+        .dk-panel:not([data-rows="2"]) .dk-glance > li:first-child { border-block-start: 0; }
+        .dk-panel:not([data-rows="2"]) .dk-gl-a { display: grid; grid-template-columns: minmax(3.5rem, auto) minmax(0, 1fr); grid-template-areas: "n l" "n d"; align-items: center; align-content: center; column-gap: 12px; row-gap: 1px; padding-block: 5px; }
+        .dk-panel:not([data-rows="2"]) .dk-gl-a strong { grid-area: n; font-size: 24px; }
+        .dk-panel:not([data-rows="2"]) .dk-gl-l { grid-area: l; }
+        .dk-panel:not([data-rows="2"]) .dk-gl-d { grid-area: d; -webkit-line-clamp: 1; }
+        /* Three row units hold six lines only when each is tight. */
+        .dk-panel[data-rows="3"] .dk-gl-a { padding-block: 2px; }
+        .dk-panel[data-rows="3"] .dk-gl-a strong { font-size: 21px; }
+        .dk-panel[data-rows="3"] .dk-gl-l { font-size: 12px; line-height: 1.3; }
+    }
+    /* With height to spare, a long label ("October reports validated of those due") takes a third line instead of being cut. */
+    .dk-panel:not([data-rows="2"], [data-rows="3"]) .dk-gl-l { -webkit-line-clamp: 3; }
+    @container pb (min-width: 420px) { .dk-panel[data-rows="3"] .dk-gl-l { -webkit-line-clamp: 3; } }
     /* One row on wide cards. */
     @container pb (min-width: 860px) {
         .dk-pb > .dk-glance, .dk-pb > .dk-glance:is([data-figs]) { grid-template-columns: repeat(var(--figs), minmax(0, 1fr)); }

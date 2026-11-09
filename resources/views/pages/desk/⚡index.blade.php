@@ -6,6 +6,7 @@ use App\Livewire\Concerns\Dashboard\ReadsDeskDecisions;
 use App\Livewire\Concerns\Desk\ArrangesPanels;
 use App\Support\Desk\Panels;
 use App\Support\Desk\ReadyLayoutSignals;
+use App\Support\Desk\Shortcuts;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Computed;
@@ -18,6 +19,11 @@ use Livewire\Component;
  * The Desk: one sentence that says what needs the viewer today, then the
  * panels they arranged (or their role's default) on a twelve-column grid.
  * Every change to the arrangement is saved on users.desk_layout at once.
+ *
+ * The grid holds three kinds of item: hand-made panels (their own
+ * components), page cards (desk.panels.page) and buttons (x-desk.tile, drawn
+ * here without a component of their own). Pages opened from the Desk load in
+ * Desk tabs above the grid (pages.desk._tabs).
  */
 new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Component
 {
@@ -42,6 +48,40 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
     public function library(): array
     {
         return app(Panels::class)->availableTo(auth()->user());
+    }
+
+    /**
+     * The buttons the viewer may place, by item id, for drawing the ones on the Desk.
+     *
+     * @return array<string, array{id: string, key: string, kind: 'action'|'page', label: string, icon: string, route: string, href: string}>
+     */
+    #[Computed]
+    public function buttons(): array
+    {
+        return app(Shortcuts::class)->for(auth()->user());
+    }
+
+    /**
+     * What each sidebar page becomes when it is dragged onto the Desk
+     * (resources/js/desk-drop.js): route => the item, its title and the
+     * cell it starts at, and whether it is already on the Desk.
+     *
+     * @return array<string, array{item: string, title: string, kind: string, cols: int, rows: int, placed: bool}>
+     */
+    #[Computed]
+    public function dropItems(): array
+    {
+        $panels = app(Panels::class);
+        $library = $this->library;
+        $placed = array_flip(array_column($this->layout, 'panel'));
+        $items = [];
+
+        foreach ($panels->itemsForRoutes(auth()->user()) as $route => $id) {
+            $cell = $panels->sized($id, $library[$id]['size']);
+            $items[$route] = ['item' => $id, 'title' => (string) $library[$id]['title'], 'kind' => $library[$id]['kind'], 'cols' => $cell['cols'], 'rows' => $cell['rows'], 'placed' => isset($placed[$id])];
+        }
+
+        return $items;
     }
 
     /**
@@ -123,11 +163,16 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
     $needs = $this->needsCount;
     $n = $needs['total'];
     $placed = array_column($layout, 'panel');
-    $more = count(array_diff(array_keys($this->library), $placed));
+    /* "More to add" counts panels and page cards; every page and action can also be a button, which would only inflate it. */
+    $more = count(array_diff(array_keys(array_filter($this->library, fn (array $item): bool => in_array($item['kind'], ['panel', 'card'], true))), $placed));
+    $buttons = $this->buttons;
     $needsPlaced = in_array('needs', $placed, true);
 @endphp
 
-<div data-desk x-data="{ removed: null, applied: null, timer: null }" x-on:dk-panel-removed="removed = $event.detail; applied = null; clearTimeout(timer); timer = setTimeout(() => removed = null, 6000)" x-on:dk-layout-applied="applied = $event.detail; removed = null; clearTimeout(timer); timer = setTimeout(() => applied = null, 8000)">
+<div data-desk x-data="{ removed: null, applied: null, placed: null, timer: null }" x-on:dk-panel-removed="removed = $event.detail; applied = null; placed = null; clearTimeout(timer); timer = setTimeout(() => removed = null, 6000)" x-on:dk-layout-applied="applied = $event.detail; removed = null; placed = null; clearTimeout(timer); timer = setTimeout(() => applied = null, 8000)" x-on:dk-item-placed.window="placed = $event.detail; removed = null; applied = null; clearTimeout(timer); timer = setTimeout(() => placed = null, 5000); $nextTick(() => document.getElementById('dk-panel-' + $event.detail.panel)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }))" x-on:dk-desk-changed.window="$wire.$refresh()">
+    {{-- Pages opened from the Desk load as tabs here, the Desk itself staying the first tab. --}}
+    @include('pages.desk._tabs')
+
     <section class="dk-hello" data-desk-hello>
         <div class="dk-hello-main">
             <p class="dk-eyebrow">{{ now()->translatedFormat(__('formats.date_long')) }}</p>
@@ -160,9 +205,20 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
     @foreach (app(Panels::class)->narrowSpansOf($layout) as $panel => $span)
         <style>#dk-panel-{{ $panel }} { --span-r: {{ $span }}; }</style>
     @endforeach
-    <div class="dk-grid" id="dk-grid" data-desk-grid>
+    {{-- What each sidebar page becomes when dragged onto the Desk (desk-drop.js). --}}
+    <script type="application/json" data-desk-routes>@json($this->dropItems)</script>
+    <div class="dk-grid" id="dk-grid" data-desk-grid data-desk-drop data-drop-text="{{ __('desk-workspace.drop_here', ['item' => '__I__']) }}">
         @foreach ($layout as $i => $entry)
-            <livewire:is :component="'desk.panels.'.$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
+            @php
+                $kind = $this->library[$entry['panel']]['kind'] ?? 'panel';
+            @endphp
+            @if ($kind === 'card')
+                <livewire:desk.panels.page :card="$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols']" :grid-rows="$entry['rows']" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
+            @elseif (isset($buttons[$entry['panel']]))
+                <x-desk.tile :entry="$entry" :button="$buttons[$entry['panel']]" :index="$i" :total="count($layout)" wire:key="panel-{{ $entry['panel'] }}" />
+            @else
+                <livewire:is :component="'desk.panels.'.$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
+            @endif
         @endforeach
     </div>
 
@@ -171,7 +227,7 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
         <div class="dk-grid dk-grid-tail">
             <button type="button" class="dk-addtile" x-on:click="$dispatch('dk-customize-open')" data-desk-add>
                 <x-desk.icon name="plus" />
-                <span>{{ __('desk.add_panel') }}</span>
+                <span>{{ __('desk.add_item') }}</span>
                 <small>{{ trans_choice('desk.more_available', $more, ['count' => $more]) }}</small>
             </button>
         </div>
@@ -184,6 +240,13 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
         <span x-text="applied ? {{ \Illuminate\Support\Js::from(__('desk.ready.applied', ['layout' => '__L__'])) }}.replace('__L__', applied.title) : ''"></span>
         <button type="button" class="dk-btn dk-sm" x-on:click="$wire.saveLayout(applied.previous); applied = null" data-desk-layout-undo><x-desk.icon name="undo" />{{ __('desk.undo') }}</button>
         <button type="button" class="dk-iconbtn dk-sm" x-on:click="applied = null" aria-label="{{ __('common.close') }}"><x-desk.icon name="x" /></button>
+    </div>
+
+    {{-- Something was put on the Desk (dragged in from the sidebar, or added from the Ask bar or a page): say what, with Undo. --}}
+    <div class="dk-undo" role="status" aria-live="polite" x-show="placed" x-cloak x-transition.opacity data-desk-item-placed>
+        <span x-text="placed ? {{ \Illuminate\Support\Js::from(__('desk-workspace.placed', ['item' => '__I__'])) }}.replace('__I__', placed.title) : ''"></span>
+        <button type="button" class="dk-btn dk-sm" x-on:click="$wire.removePanel(placed.panel); placed = null"><x-desk.icon name="undo" />{{ __('desk.undo') }}</button>
+        <button type="button" class="dk-iconbtn dk-sm" x-on:click="placed = null" aria-label="{{ __('common.close') }}"><x-desk.icon name="x" /></button>
     </div>
 
     {{-- Undo for a removed panel, for ~6 seconds (undoRemove puts it back where it was). --}}
