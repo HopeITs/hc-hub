@@ -13,16 +13,19 @@
     'search' => null,
     'searchValue' => '',
     'health' => null,
+    'title' => null,
+    'tagline' => null,
 ])
 
 @php
-    $title = __("desk.panel.{$id}.title");
+    /* A page card (App\Support\Desk\PageCards) brings its page's own title and line; a hand-made panel reads its own keys. */
+    $title = $title ?? __("desk.panel.{$id}.title");
     $sizes = \App\Support\Desk\Panels::Sizes;
     $panels = app(\App\Support\Desk\Panels::class);
     /* The free cell grid: the entry's exact columns and row units, or the size's columns and the panel's own height for older layouts. */
     $span = (int) $cols > 0 ? max(\App\Support\Desk\Panels::MinCols, min(12, (int) $cols)) : $sizes[$size];
     $rows = (int) $height > 0 ? max(2, min(8, (int) $height)) : max(2, min(8, $panels->rowsOf($id)));
-    $tagline = __("desk-cards.tagline.{$id}");
+    $tagline = $tagline ?? __("desk-cards.tagline.{$id}");
     /* The panel state for its count colour and live dot: brand (decisions), critical, warn or good; none when neutral. */
     $health = in_array($health, ['brand', 'critical', 'warn', 'good'], true) ? $health : null;
     $filtered = $filtered || collect($facets)->contains(fn (array $choice): bool => $choice['value'] !== '');
@@ -43,7 +46,7 @@
         <span class="dk-grip" aria-hidden="true"><x-desk.icon name="grip" class="dk-grip-dots" /></span>
         <div class="dk-ph-t">
             <h2 id="dk-ph-{{ $id }}">{{ $title }}</h2>
-            @if ($tagline !== "desk-cards.tagline.{$id}")
+            @if (filled($tagline) && $tagline !== "desk-cards.tagline.{$id}")
                 <p class="dk-tagline">{{ $tagline }}</p>
             @endif
         </div>

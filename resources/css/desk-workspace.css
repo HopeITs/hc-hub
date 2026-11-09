@@ -1,0 +1,250 @@
+/* Desk workspace: page cards, buttons, Desk tabs, dragging pages in and "Add to desk".
+ * Page cards (components/desk/panels/⚡page) read their own size: width through
+ * the body's `pb` container, height through the panel's data-rows, so every
+ * card says the most it can in the cell it is given. Buttons (x-desk.tile) are
+ * a size container of their own. Tabs: resources/js/desk-tabs.js. Own classes
+ * only, dk- prefixed, tokens from desk.css :root, in @layer components. */
+
+@layer components {
+    :root { --tabs-h: 46px; }
+
+    /* ── Tones, shared by figures, splits and legends ─────────────── */
+    .dk-card [data-tone], .dk-tile { --tone: var(--ink-3); }
+    .dk-card [data-tone="good"] { --tone: var(--good); }
+    .dk-card [data-tone="warn"] { --tone: var(--warn); }
+    .dk-card [data-tone="critical"] { --tone: var(--bad); }
+    .dk-card [data-tone="active"] { --tone: var(--active); }
+    .dk-card [data-tone="neutral"] { --tone: var(--line-2); }
+
+    /* ── Page cards ───────────────────────────────────────────────── */
+    .dk-pagecard .dk-pb { padding-block-start: 2px; }
+    .dk-card { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+
+    .dk-card-figs { margin: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; }
+    .dk-card-fig { position: relative; min-width: 0; display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 2px; padding: 10px 12px 10px 14px; border-radius: 12px; background: var(--sunk); }
+    .dk-card-fig::before { content: ""; position: absolute; inset-block: 10px; inset-inline-start: 0; width: 3px; border-radius: 3px; background: var(--tone); }
+    .dk-card-fig[data-tone="neutral"]::before { display: none; }
+    .dk-card-fig dt { font-size: 12px; font-weight: 700; color: var(--ink-3); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dk-card-fig dd { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dk-card-fig:is([data-tone="critical"], [data-tone="warn"]) dd { color: var(--tone); }
+
+    .dk-card-split { display: grid; gap: 7px; }
+    .dk-card-bar { display: flex; gap: 2px; height: 8px; border-radius: 99px; overflow: hidden; background: var(--sunk); }
+    .dk-card-bar > span { flex-basis: 0; min-width: 6px; background: var(--tone); }
+    .dk-card-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12px; color: var(--ink-2); line-height: 1.4; }
+    .dk-card-legend li { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+    .dk-card-legend i { flex: none; width: 8px; height: 8px; border-radius: 2px; background: var(--tone); }
+    .dk-card-legend span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dk-card-legend b { font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+    .dk-card-rows { min-height: 0; display: grid; align-content: start; }
+    .dk-card > .dk-fit-fill { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+    .dk-card > .dk-fit-fill > li { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center; }
+    .dk-card-rows > li { border-top: 1px solid var(--line); }
+    .dk-card-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "t b" "m b"; column-gap: 10px; align-items: center; padding: 7px 6px; margin-inline: -6px; border-radius: 9px; color: inherit; text-decoration: none; transition: background .12s; }
+    .dk-card-row:hover { background: var(--sunk); }
+    .dk-card-row:focus-visible { outline: 2px solid var(--line-2); outline-offset: -2px; }
+    .dk-card-t { grid-area: t; min-width: 0; font-size: 14px; font-weight: 700; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dk-card-m { grid-area: m; min-width: 0; font-size: 12.5px; color: var(--ink-3); line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dk-card-b { grid-area: b; justify-self: end; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+    .dk-card-empty { flex: 1 1 auto; display: grid; place-items: center; padding: 8px; text-align: center; color: var(--ink-3); font-size: 13.5px; border: 1px dashed var(--line); border-radius: 12px; }
+    .dk-pagecard .dk-pf .dk-card-pager { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+    .dk-card-new { margin-inline-start: auto; }
+    .dk-card-new span { overflow: hidden; text-overflow: ellipsis; }
+
+    /* Narrow: two figures, then one; the meta line joins the title's line only when it fits */
+    @container pb (max-width: 319px) {
+        .dk-card-fig:nth-child(n + 3) { display: none; }
+        .dk-card-fig dd { font-size: 21px; }
+        .dk-card-b { max-width: 96px; }
+    }
+    @container pb (max-width: 219px) {
+        .dk-card-fig:nth-child(n + 2) { display: none; }
+        .dk-card-b { display: none; }
+    }
+    @container pb (min-width: 560px) {
+        .dk-card-row { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) auto; grid-template-areas: "t m b"; padding-block: 9px; }
+        .dk-card-m { text-align: start; }
+    }
+    /* Wide: the summary becomes a column beside the rows, so a wide card reads like a page, not a stretched list */
+    @container pb (min-width: 700px) {
+        .dk-card { display: grid; grid-template-columns: minmax(220px, 34%) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "figs rows" "split rows"; column-gap: 22px; row-gap: 14px; }
+        .dk-card-figs { grid-area: figs; grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .dk-card-fig:first-child:nth-last-child(odd) { grid-column: 1 / -1; }
+        .dk-card-split { grid-area: split; align-self: start; }
+        .dk-card > :is(.dk-card-rows, .dk-card-empty) { grid-area: rows; }
+        .dk-card > .dk-card-rows > li:first-child { border-top: 0; }
+    }
+
+    /* Short: two row units hold the figures (and, on a wide card, the first rows); three add the rows; four and more the split too */
+    .dk-pagecard:is([data-rows="2"], [data-rows="3"]) .dk-card-split { display: none; }
+    @container pb (max-width: 699px) {
+        .dk-pagecard[data-rows="2"] .dk-card > :is(.dk-card-rows, .dk-card-empty) { display: none; }
+        .dk-pagecard[data-rows="2"] .dk-card-fig dd { font-size: 26px; }
+    }
+
+    /* ── Buttons on the Desk ──────────────────────────────────────── */
+    .dk-tile { container: tile / size; padding: 0; overflow: visible; }
+    .dk-tile-a { position: relative; flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding-block: 0; padding-inline: 16px 44px; border-radius: inherit; color: inherit; text-decoration: none; cursor: pointer; -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; -webkit-user-drag: none; touch-action: pan-y; }
+    .dk-tile-a:focus-visible { outline: 2px solid var(--line-2); outline-offset: 2px; }
+    .dk-tile-ic { position: relative; flex: none; width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; background: var(--sunk); color: var(--ink-2); transition: background .15s, color .15s, transform .15s; }
+    .dk-tile-ic > svg { width: 21px; height: 21px; }
+    .dk-tile-plus { position: absolute; inset-block-end: -4px; inset-inline-end: -4px; width: 17px; height: 17px; border-radius: 50%; display: grid; place-items: center; background: var(--brand); color: var(--on-brand); box-shadow: 0 0 0 2px var(--paper); }
+    .dk-tile-plus svg.dk-i { width: 11px; height: 11px; stroke-width: 3; }
+    .dk-tile-action .dk-tile-ic { background: var(--brand-soft); color: var(--brand-ink); }
+    .dk-tile-t { min-width: 0; display: grid; gap: 1px; }
+    .dk-tile-t strong { font-size: 15px; font-weight: 800; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dk-tile-t small { font-size: 12.5px; color: var(--ink-3); line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dk-tile-go { color: var(--ink-3); display: grid; place-items: center; transition: transform .18s cubic-bezier(.2, .8, .2, 1), color .15s; }
+    .dk-tile-go svg.dk-i { width: 18px; height: 18px; }
+    .dk-tile:hover { box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 6%, transparent), 0 14px 30px -16px color-mix(in srgb, var(--ink) 30%, transparent); }
+    .dk-tile:hover .dk-tile-go { color: var(--ink); transform: translateX(3px); }
+    [dir="rtl"] .dk-tile:hover .dk-tile-go { transform: translateX(-3px); }
+    .dk-tile-action:hover .dk-tile-ic { background: var(--brand); color: var(--on-brand); }
+    .dk-tile-a:active .dk-tile-ic { transform: scale(.94); }
+    .dk-tile-menu { position: absolute; z-index: 2; inset-block-start: 50%; inset-inline-end: 8px; translate: 0 -50%; opacity: 0; transition: opacity .15s; }
+    .dk-tile:hover .dk-tile-menu, .dk-tile:focus-within .dk-tile-menu, .dk-tile-menu:has([aria-expanded="true"]) { opacity: 1; }
+    .dk-tile-menu .dk-pop { top: calc(100% + 4px); }
+    @media (hover: none) { .dk-tile-menu { opacity: 1; } }
+
+    /* A narrow button: the name alone beside its icon */
+    @container tile (max-width: 239px) {
+        .dk-tile-a { padding-inline: 12px 40px; gap: 10px; }
+        .dk-tile-t small, .dk-tile-go { display: none; }
+        .dk-tile-a { grid-template-columns: auto minmax(0, 1fr); }
+        .dk-tile-ic { width: 34px; height: 34px; }
+    }
+    /* A tall button stands up: icon at the top, the name and what it does under it, the arrow at the end */
+    @container tile (min-height: 150px) {
+        .dk-tile-a { grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: 1fr auto; grid-template-areas: "ic ic" "t go"; align-items: end; padding: 18px; gap: 10px; }
+        .dk-tile-ic { grid-area: ic; align-self: start; width: 48px; height: 48px; border-radius: 14px; }
+        .dk-tile-ic > svg { width: 25px; height: 25px; }
+        .dk-tile-t { grid-area: t; }
+        .dk-tile-t strong { font-size: 17px; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .dk-tile-t small { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .dk-tile-go { grid-area: go; display: grid; }
+        .dk-tile-menu { inset-block-start: 12px; translate: none; }
+    }
+    @container tile (min-height: 300px) and (min-width: 300px) {
+        .dk-tile-a { padding: 26px; }
+        .dk-tile-ic { width: 64px; height: 64px; border-radius: 18px; }
+        .dk-tile-ic > svg { width: 32px; height: 32px; }
+        .dk-tile-t strong { font-size: 22px; }
+        .dk-tile-t small { font-size: 14px; }
+    }
+
+    /* ── Desk tabs ────────────────────────────────────────────────── */
+    .dk-tabs { position: relative; }
+    .dk-tabs-bar { position: sticky; z-index: 26; top: var(--top-h); display: flex; align-items: flex-end; gap: 10px; height: var(--tabs-h); margin-block-end: 18px; padding-block-start: 8px; background: var(--ground); border-bottom: 1px solid var(--line); }
+    .dk-tabs-strip { flex: 1 1 auto; min-width: 0; display: flex; align-items: flex-end; gap: 2px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; }
+    .dk-tabs-strip::-webkit-scrollbar { display: none; }
+    .dk-tab { position: relative; flex: 0 1 220px; min-width: 116px; height: 38px; display: flex; align-items: center; border-radius: 10px 10px 0 0; color: var(--ink-2); transition: background .15s, color .15s, opacity .15s; }
+    .dk-tab-desk { flex: none; min-width: 0; }
+    .dk-tab:hover { background: color-mix(in srgb, var(--sunk) 75%, transparent); color: var(--ink); }
+    .dk-tab.dk-on { background: var(--paper); color: var(--ink); box-shadow: inset 0 1px 0 var(--line), inset 1px 0 0 var(--line), inset -1px 0 0 var(--line); }
+    .dk-tab.dk-on::before { content: ""; position: absolute; inset-inline: 12px; inset-block-start: 0; height: 2px; border-radius: 0 0 2px 2px; background: var(--brand); }
+    .dk-tab.dk-on::after { content: ""; position: absolute; inset-inline: 1px; inset-block-end: -1px; height: 1px; background: var(--paper); }
+    .dk-tab + .dk-tab:not(.dk-on):not(:hover)::after { content: ""; position: absolute; inset-inline-start: 0; inset-block: 11px; width: 1px; background: var(--line); }
+    .dk-tab-b { flex: 1 1 auto; min-width: 0; height: 100%; display: flex; align-items: center; gap: 8px; padding-inline: 12px 4px; border: 0; background: none; color: inherit; font: inherit; font-size: 13.5px; font-weight: 700; text-align: start; cursor: pointer; }
+    .dk-tab-desk .dk-tab-b { padding-inline: 12px 14px; }
+    .dk-tab-b:focus-visible { outline: 2px solid var(--line-2); outline-offset: -3px; border-radius: 9px; }
+    .dk-tab-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dk-tab-ic { flex: none; width: 16px; height: 16px; display: grid; place-items: center; color: var(--ink-3); }
+    .dk-tab.dk-on .dk-tab-ic { color: var(--brand-ink); }
+    .dk-tab-ic svg.dk-i, svg.dk-tab-ic { width: 16px; height: 16px; }
+    .dk-tab-spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line-2); border-top-color: var(--brand); }
+    @media (prefers-reduced-motion: no-preference) { .dk-tab-spin { animation: dk-tab-spin .7s linear infinite; } }
+    @keyframes dk-tab-spin { to { rotate: 360deg; } }
+    .dk-tab-x { flex: none; width: 24px; height: 24px; margin-inline-end: 7px; border: 0; border-radius: 7px; background: none; color: var(--ink-3); display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .12s, background .12s; }
+    .dk-tab-x svg.dk-i { width: 13px; height: 13px; }
+    .dk-tab:hover .dk-tab-x, .dk-tab.dk-on .dk-tab-x, .dk-tab-x:focus-visible { opacity: 1; }
+    .dk-tab-x:hover { background: var(--sunk); color: var(--ink); }
+    .dk-tab.dk-asleep .dk-tab-t { opacity: .72; }
+    .dk-tab.dk-dragging { opacity: .55; cursor: grabbing; }
+    .dk-tab:not(.dk-tab-desk) { animation: dk-tab-in .18s cubic-bezier(.2, .8, .2, 1); }
+    @keyframes dk-tab-in { from { opacity: 0; translate: 0 6px; } }
+    @media (prefers-reduced-motion: reduce) { .dk-tab:not(.dk-tab-desk) { animation: none; } }
+    .dk-tabs-tools { flex: none; display: flex; align-items: center; gap: 2px; align-self: center; padding-block-end: 2px; }
+    .dk-tab-menu { position: fixed; z-index: 90; top: auto; inset-inline-end: auto; width: 260px; }
+    .dk-tabs-droppable .dk-tabs-bar { box-shadow: inset 0 -2px 0 var(--brand); }
+
+    /* The tab in front: the real page in its frame, filling the main column under the strip */
+    .dk-tabframes { position: fixed; z-index: 20; inset-block: calc(var(--top-h) + var(--tabs-h)) 0; inset-inline-start: var(--side-w); inset-inline-end: 0; background: var(--ground); }
+    @media (max-width: 899px) { .dk-tabframes { inset-inline-start: 0; } }
+    .dk-tabframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; display: block; visibility: hidden; background: transparent; color-scheme: normal; }
+    .dk-tabframe.dk-on.dk-ready { visibility: visible; }
+    @media (prefers-reduced-motion: no-preference) { .dk-tabframe.dk-on.dk-ready { animation: dk-frame-in .16s ease-out; } }
+    @keyframes dk-frame-in { from { opacity: .4; } }
+    .dk-tabframe-warm { visibility: hidden !important; pointer-events: none; }
+    /* While the page in front draws for the first time: a quiet outline of a page, never a white flash */
+    .dk-tabframes::before { content: ""; position: absolute; inset: 28px var(--page-gutter) auto; height: 220px; border-radius: 18px; opacity: 0; transition: opacity .2s .12s; background:
+        linear-gradient(var(--sunk), var(--sunk)) 0 0 / 38% 26px no-repeat,
+        linear-gradient(var(--sunk), var(--sunk)) 0 54px / 22% 14px no-repeat,
+        linear-gradient(var(--sunk), var(--sunk)) 0 100px / 100% 110px no-repeat; }
+    .dk-tabframes.dk-loading::before { opacity: 1; }
+
+    /* While a tab is in front, the Desk under it rests: hidden, never re-rendered or re-scrolled */
+    html.dk-tab-active { overflow: hidden; }
+    html.dk-tab-active [data-desk] > :not(.dk-tabs), html.dk-tab-active .dk-foot { display: none !important; }
+
+    /* ── A page inside a tab: its own frame is gone (DeskTab, desk-tab-child.js) ── */
+    html.dk-in-tab :is(.dk-side, .dk-side-scrim, .dk-top, .dk-foot, [data-desk-ask-palette], #preloader) { display: none !important; }
+    html.dk-in-tab .dk-app { grid-template-columns: minmax(0, 1fr); }
+    html.dk-in-tab .dk-wrap { padding-block-start: 6px; }
+
+    /* ── Dragging a page in from the sidebar ──────────────────────── */
+    .dk-grid > .dk-drop-slot { display: grid; place-items: center; border: 2px dashed color-mix(in srgb, var(--brand) 55%, transparent); background: color-mix(in srgb, var(--brand) 5%, var(--paper)); box-shadow: none; animation: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+    .dk-drop-slot-t { padding: 8px 14px; text-align: center; font-size: 14px; font-weight: 800; color: var(--brand-ink); overflow-wrap: anywhere; }
+    @media (prefers-reduced-motion: no-preference) { .dk-drop-slot.dk-drop-landing { animation: dk-landing 1s ease-in-out infinite alternate; } }
+    @keyframes dk-landing { to { background: color-mix(in srgb, var(--brand) 12%, var(--paper)); } }
+    .dk-grid > .dk-panel.dk-drop-ring { box-shadow: 0 0 0 3px var(--brand); }
+    @media (prefers-reduced-motion: no-preference) { .dk-grid > .dk-panel.dk-drop-found { animation: dk-found 1.2s ease; } }
+    @keyframes dk-found { 20%, 60% { box-shadow: 0 0 0 4px var(--brand); } }
+    html.dk-dropping .dk-grid { outline: 2px dashed color-mix(in srgb, var(--brand) 22%, transparent); outline-offset: 10px; border-radius: 24px; }
+    .dk-drag-chip { position: fixed; inset-block-start: -400px; inset-inline-start: -400px; padding: 9px 14px; border-radius: 11px; background: var(--ink); color: var(--paper); font-family: var(--font); font-size: 13.5px; font-weight: 800; white-space: nowrap; box-shadow: var(--dk-shadow); }
+
+    /* The sidebar's "+" on My desk, beside the pin star */
+    .dk-side-ondesk .dk-side-li > .dk-side-a { padding-inline-end: 60px; }
+    .dk-side-ondesk .dk-side-flat .dk-side-li > .dk-side-a { padding-inline-end: 34px; }
+    .dk-side-add { position: absolute; top: 50%; inset-inline-end: 32px; transform: translateY(-50%); width: 24px; height: 24px; border: 0; border-radius: 6px; background: none; color: var(--faint); display: grid; place-items: center; cursor: pointer; opacity: 0; }
+    .dk-side-add:last-child { inset-inline-end: 6px; }
+    .dk-side-li:hover .dk-side-add, .dk-side-add:focus-visible { opacity: 1; }
+    .dk-side-add:hover { background: var(--brand-soft); color: var(--brand-ink); }
+    .dk-side-ondesk [data-desk-route] { -webkit-user-drag: element; }
+    .dk-side-ondesk .dk-side-fly .dk-side-a { padding-inline-end: 60px !important; }
+    @media (min-width: 900px) {
+        html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-add { display: none !important; }
+    }
+
+    /* ── "Add to desk" in a page's header ─────────────────────────── */
+    .dk-addesk { position: relative; display: inline-flex; align-items: stretch; }
+    .dk-addesk-main svg.dk-i { width: 16px; height: 16px; }
+    .dk-addesk-main.dk-on { background: var(--sunk); border-color: var(--line); }
+    .dk-addesk-main.dk-on svg.dk-i { color: var(--brand-ink); fill: color-mix(in srgb, var(--brand) 18%, transparent); }
+    .dk-addesk-main:has(+ .dk-addesk-more) { border-start-end-radius: 0; border-end-end-radius: 0; }
+    .dk-addesk-more { padding-inline: 8px; margin-inline-start: -1px; border-start-start-radius: 0; border-end-start-radius: 0; }
+    .dk-addesk-pop { width: 310px; }
+    .dk-addesk-pop [role="menuitemcheckbox"] { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 8px 10px; border: 0; border-radius: 10px; background: none; color: var(--ink); font: inherit; text-align: start; cursor: pointer; }
+    .dk-addesk-pop [role="menuitemcheckbox"]:hover, .dk-addesk-pop [role="menuitemcheckbox"]:focus-visible { background: var(--sunk); outline: none; }
+    .dk-addesk-check { flex: none; width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--line-2); display: grid; place-items: center; color: transparent; }
+    .dk-addesk-check svg.dk-i { width: 12px; height: 12px; stroke-width: 3; }
+    [aria-checked="true"] > .dk-addesk-check { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+    /* The avatar menu's "Open pages in desk tabs" switch */
+    .dk-menu .dk-menu-switch { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 8px 10px; border: 0; border-radius: 10px; background: none; color: var(--ink); font: inherit; text-align: start; cursor: pointer; }
+    .dk-menu .dk-menu-switch:hover, .dk-menu .dk-menu-switch:focus-visible { background: var(--sunk); outline: none; }
+    .dk-switch { flex: none; position: relative; width: 34px; height: 20px; border-radius: 99px; background: var(--line-2); transition: background .15s; }
+    .dk-switch i { position: absolute; inset-block-start: 2px; inset-inline-start: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--paper); box-shadow: 0 1px 2px rgb(16 24 40 / .2); transition: inset-inline-start .15s; }
+    [aria-checked="true"] > .dk-switch { background: var(--ink); }
+    [aria-checked="true"] > .dk-switch i { inset-inline-start: 16px; }
+
+    /* ── The Ask bar's instant rows (resources/js/ask-index.js) ───── */
+    .dk-pal-kind { flex: none; height: 22px; padding-inline: 8px; border-radius: 6px; display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 800; background: var(--sunk); color: var(--ink-3); }
+    .dk-pal-kind:is([data-kind="add"], [data-kind="action"]) { background: var(--brand-soft); color: var(--brand-ink); }
+    .dk-pal-kind[data-kind="remove"] { background: var(--bad-soft); color: var(--bad); }
+    .dk-pal-done .dk-pal-kind { background: var(--good-soft); color: var(--good); }
+    .dk-pal-i mark { background: none; color: inherit; font-weight: 800; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--brand) 55%, transparent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .dk-pal-instant { display: grid; gap: 2px; }
+    .dk-pal-flash { margin: 0 10px 8px; padding: 9px 12px; border-radius: 10px; background: var(--ink); color: var(--paper); font-size: 13.5px; font-weight: 700; }
+    @media (max-width: 640px) { .dk-pal-foot-more { display: none; } }
+}

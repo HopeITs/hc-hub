@@ -30,7 +30,8 @@
     $moveEarlier = \Illuminate\Support\Js::from(__('desk.customize_sheet.move_panel_earlier', ['panel' => '__P__']));
     $moveLater = \Illuminate\Support\Js::from(__('desk.customize_sheet.move_panel_later', ['panel' => '__P__']));
     $removePanel = \Illuminate\Support\Js::from(__('desk.customize_sheet.remove_panel', ['panel' => '__P__']));
-    $addGroups = collect(['money', 'work', 'results', 'people'])->mapWithKeys(fn (string $kind): array => [
+    /* Hand-made panels by what they hold, then every page as a card, then every page and action as a button. */
+    $addGroups = collect(['money', 'work', 'results', 'people', 'pages', 'buttons'])->mapWithKeys(fn (string $kind): array => [
         $kind => collect($library)->filter(fn (array $panel, string $id): bool => $deskPanels->readyKindOf($id) === $kind),
     ])->filter->isNotEmpty();
 @endphp
@@ -45,7 +46,7 @@
     way drops it. Colours: the site's red and neutrals only, guarded by a test on
     this file and desk-customize.css.
 --}}
-<div x-data="deskCustomize(@js($starting), @js($readyChoices), @js($favourite), @js($panelChoices), @js($sheetTexts))" data-layout="{{ json_encode($layout) }}" data-layout-saved="{{ is_array(auth()->user()->desk_layout) ? 'true' : 'false' }}" x-on:dk-customize-open.window="openSheet($event.detail?.pane)" x-on:keydown.escape.window="if (open) { discard() }" data-desk-customize>
+<div x-data="deskCustomize(@js($starting), @js($readyChoices), @js($favourite), @js($panelChoices), @js($sheetTexts))" data-layout="{{ json_encode($layout) }}" data-layout-saved="{{ is_array(auth()->user()->desk_layout) ? 'true' : 'false' }}" x-on:dk-customize-open.window="openSheet($event.detail?.pane, $event.detail?.layout)" x-on:keydown.escape.window="if (open) { discard() }" data-desk-customize>
     <template x-teleport="body">
         <div x-show="open" x-cloak class="dk-scope">
             <div class="dk-sh-scrim" x-on:click="discard()"></div>

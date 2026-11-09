@@ -100,6 +100,65 @@ final class Destinations
     }
 
     /**
+     * The destination behind a route, whoever may open it; null for a route
+     * that is not a destination.
+     *
+     * @return array{route: string, label: string, icon: string, hero: string, group: string, module: string|null}|null
+     */
+    public function find(string $route): ?array
+    {
+        foreach ($this->all() as $destination) {
+            if ($destination['route'] === $route) {
+                return [
+                    'route' => $destination['route'],
+                    'label' => __($destination['label']),
+                    'icon' => $destination['icon'],
+                    'hero' => $destination['hero'],
+                    'group' => $destination['group'],
+                    'module' => $destination['module'],
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Whether the user may open the destination behind a route: the one rule
+     * the sidebar, the Ask bar and the Desk's page cards and buttons all read.
+     */
+    public function allows(User $user, string $route): bool
+    {
+        foreach ($this->all() as $destination) {
+            if ($destination['route'] === $route) {
+                return $user->isAdministrator() || ($destination['allows'])($user);
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * A route as a short, selector-safe slug for Desk item ids: dots become
+     * dashes and a register's ".index" is dropped (admin.evidence-types.index
+     * is "admin-evidence-types").
+     */
+    public static function slugOf(string $route): string
+    {
+        return str_replace('.', '-', str_ends_with($route, '.index') ? substr($route, 0, -strlen('.index')) : $route);
+    }
+
+    /**
+     * Every destination route, in display order, whoever may open it.
+     *
+     * @return list<string>
+     */
+    public function routes(): array
+    {
+        return array_column($this->all(), 'route');
+    }
+
+    /**
      * The sidebar: the user's destinations grouped, empty groups left out.
      *
      * @return list<array{group: string, label: string, icon: string, items: list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null}>}>

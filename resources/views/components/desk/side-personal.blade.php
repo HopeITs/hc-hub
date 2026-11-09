@@ -2,7 +2,7 @@
 <ul class="dk-side-pins" data-side-pins>
     <template x-for="route in pins" :key="route">
         <li class="dk-side-li">
-            <a x-bind:href="pages[route]?.href" wire:navigate class="dk-side-a dk-side-sub" x-bind:data-label="pages[route]?.label" x-bind:data-side-pinned="route">
+            <a x-bind:href="pages[route]?.href" wire:navigate class="dk-side-a dk-side-sub" x-bind:data-label="pages[route]?.label" x-bind:data-side-pinned="route" x-bind:data-desk-route="route">
                 <span class="dk-side-l" x-text="pages[route]?.label"></span>
                 <span class="dk-side-badge dk-num" x-show="pages[route]?.count > 0" x-text="pages[route]?.count > 99 ? '99+' : pages[route]?.count"></span>
             </a>

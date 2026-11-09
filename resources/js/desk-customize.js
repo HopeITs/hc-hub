@@ -39,14 +39,16 @@ document.addEventListener('alpine:init', () => {
         suggested: favourite,
         suggestionReason: null,
 
-        openSheet(requestedPane = 'desk') {
+        openSheet(requestedPane = 'desk', layout = null) {
             this.saved = JSON.parse(this.$root.dataset.layout || '[]');
             this.draft = this.saved.map((entry) => ({ ...entry }));
             this.resetting = false;
             this.selected = null;
             this.search = '';
             this.browsed = false;
-            this.viewing = this.suggested ?? ready[0]?.key ?? null;
+            // The Ask bar can ask for one layout ("layout money"): it opens looked at, one click from use.
+            this.viewing = ready.some((entry) => entry.key === layout) ? layout : this.suggested ?? ready[0]?.key ?? null;
+            this.browsed = this.viewing === layout;
             this.pane = requestedPane === 'layouts' && ready.length > 0 ? 'layouts' : 'desk';
             this.open = true;
             window.hcLockPageScroll?.();

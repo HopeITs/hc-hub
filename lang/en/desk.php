@@ -604,6 +604,8 @@ return [
             'people' => 'People',
             'work' => 'Work',
             'results' => 'Results',
+            'pages' => 'Page cards',
+            'buttons' => 'Buttons',
         ],
         'layouts' => [
             'today' => ['title' => 'My day', 'purpose' => 'What waits for you, what is coming and what slipped'],

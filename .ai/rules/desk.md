@@ -1,6 +1,10 @@
 ---
 paths:
   - 'resources/views/components/desk/**'
+  - 'resources/views/pages/desk/**'
+  - 'app/Support/Desk/**'
+  - 'resources/js/desk-*.js'
+  - 'resources/js/ask-index.js'
 ---
 
 # Desk
@@ -22,3 +26,13 @@ Every panel is one fixed height (desk.css --panel-h) and its body never spills (
 
 ## Programs show is a full page, not a record sheet (user decision 2026-10-28)
 `pages/programs/⚡show.blade.php` is not wrapped in `x-desk.record-sheet`: opening a program (the eye on programs.index, or any `programs.show` link) renders it as its own page in the Desk layout, styled like the project Story (`.dk-story`: `dk-back` to programs.index, `dk-crumb`, `dk-story-h` with the delivery-health card as `dk-next`, `dk-facts`). No `bg-white` page frame or full-width header borders: those were the pre-Desk look and render as a box inside the Desk ground. Do not wrap it again over the projects register. Every record page is now a full page the same way, and `x-desk.record-sheet` was removed (2026-11-04).
+
+## Every page and action can be on the Desk (user decision 2026-11-09)
+A Desk item is one of: a hand-made panel (`App\Support\Desk\Panels::definitions`, own component), a page card `p-<slug>` (`App\Support\Desk\PageCards`, one renderer `desk.panels.page`, data from `App\Support\Desk\Cards\*`), or a button `a-<action>` / `g-<slug>` (`App\Support\Desk\Shortcuts`, drawn by `x-desk.tile` in the Desk page itself, no component of its own). `<slug>` is `Destinations::slugOf($route)` (dots to dashes, `.index` dropped), so ids stay selector-safe. Cards and buttons are offered exactly when `Destinations::allows()` allows their page: never add a second permission rule for them. `Panels::itemForRoute()` decides what a page becomes (its panel, else its card, else a page button); the sidebar drag-and-drop, the sidebar "+", every register's "Add to desk" (`x-desk.add-to-desk`, inside `x-desk.register`) and the Ask bar all go through it. Buttons may be one row unit tall (`Panels::MinTileRows`, `desk-rows.js minRowsOf`, both keyed on the `a-`/`g-` prefix); everything else stays at least `MinRows`, and a row is never shorter than its tallest minimum. A card reads its rows with the page's own rules (e.g. DonorReportsCard repeats DonorReportPolicy::view) and eager-loads every relation it prints: `Model::shouldBeStrict` is on in tests.
+
+## Desk tabs: pages opened from My desk load in tabs, never replace it (user decision 2026-11-09)
+On `dashboard` only, `resources/js/desk-tabs.js` turns every same-origin page link (panels, buttons, sidebar, notifications, Ask rows) into a tab: an iframe of the real page with `?_tab=1`. `App\Support\Desk\DeskTab::current()` (that param, or `Sec-Fetch-Dest: iframe`) makes `layouts/app/sidebar` drop the side-nav, top bar, Ask, tour, preloader and notification toasts, and leave out `data-user-id`, so a tab never opens a second Echo subscription (see js.md). `desk-tab-child.js` keeps `_tab=1` on in-tab navigation, sends links to the Desk back to the Desk tab, and reports title/URL to the parent by postMessage (same origin only). Links are taken on `mousedown` (capture) before Livewire's own `wire:navigate` press handler, so no page is prefetched and thrown away; `livewire:navigate` is the fallback. A link that must leave the Desk carries `data-desk-native`; downloads, exports, prints and previews are never tabbed (`NotForTabs`). The tab host is `wire:ignore`: the Desk re-renders often and must never reload a frame. Tabs live in localStorage per user; the "Open pages in desk tabs" switch in the avatar menu turns the feature off per browser.
+
+## The Ask bar answers in two layers (2026-11-09)
+`App\Support\Desk\AskCommands` builds a permission-filtered index (pages, "New …" actions, what stands for each page on the Desk, ready layouts, verbs) from `AskEngine`'s own vocabulary; `resources/js/ask-index.js` searches it on every key (normalisation, typo allowance and wrong-keyboard-layout reading mirror `AskEngine` / `KeyboardLayout`). The index is rendered once per page by `x-desk.ask-index` in the layout, outside the Livewire `desk.ask` component: inside it, every debounced search round trip would send it again. The server still answers questions and finds records; while instant rows show, its "Go to" and "Do" groups stay in the markup (tests read them) but are hidden, so nothing shows twice. One highlight runs across both layers and is drawn by `desk-ask.js` (`sync()`), not by `x-bind` on server rows.
+

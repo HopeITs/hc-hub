@@ -241,6 +241,13 @@ class AppServiceProvider extends ServiceProvider
             (string) ($request->user()->id ?? $request->ip()),
         ));
 
+        // POST /desk/items: "Add to desk" from a page, a Desk tab or the Ask
+        // bar. Someone arranging their Desk adds a few things in a row, so it
+        // allows more than the locale switch while still stopping a script.
+        RateLimiter::for('desk', fn (Request $request) => Limit::perMinute(60)->by(
+            (string) ($request->user()->id ?? $request->ip()),
+        ));
+
         // POST /broadcasting/auth: a page authorizes its one private channel
         // once per load (and on a reconnect), so 30 a minute is far above
         // real use while stopping a script from hammering it.
