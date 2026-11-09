@@ -21,3 +21,12 @@ The row is **agreement · status word · budget+currency · landed+share · next
 Search and the donor picker live in the register bar (`x-slot:search` / `x-slot:filters`) and filter live; everything else stays in the Filters dialog, which keeps its draft-then-apply behaviour (shared with transfers/donors/proposals/accounts — do not make it live for one page). A stage or flag choice that would return nothing renders greyed with `aria-disabled` and no handler: still a tab stop, still says why (`finance_tables.nothing_matches_this_here`), but it cannot cost an empty page. `x-funding.pills` takes an optional `disabled` key for this.
 
 Not a bug, checked 2026-11-09: the Overview's lanes are paginated at 15 with a working pager, and each lane's detail panel is collapsed behind its own toggle — text extraction shows the hidden panels, which reads as a wall of repeated "no tranches scheduled yet".
+
+## One word per idea across the Funding pages (2026-11-09)
+The same net figure was printed as "Landed (net)" in the agreements ledger and "Received (net)" on the transfers register, so a person moving between the two pages met two names for one number. **Received** is now the noun everywhere: `funding_agreements.landed` → "Received", `landed_net` → "Received (net)" (identical to `finance_tables.received_net`), `percent_received` → ":percent% received", `received_gross_from_donors` → "Gross received" (identical to `finance_tables.gross_received`). `not_scheduled_yet` now matches `finance_tables.not_scheduled`, and `no_tranches_scheduled_yet` matches `no_tranches_scheduled`. FundingVocabularyTest pins each of these pairs in both locales.
+
+**"Landed" survives as a verb, never as a label.** "has not landed yet", "landed in another currency", "nothing landed yet", "Landed in 5 days" stay: in a sentence it means *arrived*, which is the distinction the money model rests on (gross sent vs net arrived). Only the figure captions were unified.
+
+Arabic fixes in the same pass: `stage_unscheduled` was «غير مجدولة بالكامل», which reads as "not scheduled at all" while the filter means *partly* scheduled — now «لم تُجدول بالكامل». `health_moving` was «تسير كما هو مخطط», too long for a table cell — now «على المسار».
+
+A row prints its external project number only when it has one; "No external project number" on most rows is not information. The other pages that still print the placeholder (transfers, donors/show, proposals/show, the tranche table) were left alone.

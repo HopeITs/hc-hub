@@ -61,7 +61,11 @@
                                 @endcan
                                 · {{ $agreement->proposal->status->label() }}
                             </span>
-                            <span class="sub">{{ $agreement->external_project_number ?? __('common.no_external_project_number') }}</span>
+                            {{-- An agreement with no external number says nothing about it: a whole
+                             line of "no external project number" on most rows is not information. --}}
+                        @if (filled($agreement->external_project_number))
+                            <span class="sub">{{ $agreement->external_project_number }}</span>
+                        @endif
                         </td>
 
                         @php

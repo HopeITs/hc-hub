@@ -159,7 +159,7 @@ test('the cash-flow calendar pads an empty schedule around today', function () {
     $calendar = Livewire::actingAs($user)
         ->test('pages::funding-agreements.index')
         ->set('view', 'overview')
-        ->assertSeeText('No tranches scheduled yet')
+        ->assertSeeText('No tranches scheduled')
         ->instance()
         ->calendar;
 
