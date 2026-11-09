@@ -92,7 +92,8 @@
             </div>
 
             @unless ($isColumnEmpty)
-                <div class="flex flex-col gap-2 px-3">
+                {{-- Side by side, a long column scrolls on its own (thin scrollbar) so the header and "+ Add task" stay in view; stacked on a phone it grows with the page. --}}
+                <div class="flex flex-col gap-2 px-3 @2xl/directory:max-h-[calc(100dvh-18rem)] @2xl/directory:min-h-0 @2xl/directory:overflow-y-auto @2xl/directory:overscroll-contain [scrollbar-width:thin] [scrollbar-color:var(--color-secondary-light)_transparent] dark:[scrollbar-color:var(--color-line-strong)_transparent]" data-test="task-board-cards-{{ $case->value }}">
 @include('pages.tasks._board-card')
                 </div>
             @endunless
