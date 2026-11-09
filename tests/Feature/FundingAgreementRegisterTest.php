@@ -439,3 +439,14 @@ test('a currency line prints three figures while nothing is wrong, and its alarm
         ->assertSeeHtml('data-total="overdue"')
         ->assertSeeHtml('data-total="failed"');
 });
+
+test('the register is sized for the columns it actually has, so it does not scroll sideways', function () {
+    registerMixedAgreement();
+
+    // register-2xl forces min-width:104rem — the width fourteen money columns
+    // needed. Six columns fit in register-sm (56rem), which also lets the
+    // heading row stick: sticky cannot work inside an overflow box.
+    agreementRegister()
+        ->assertSeeHtml('register-sm')
+        ->assertDontSeeHtml('register-2xl');
+});

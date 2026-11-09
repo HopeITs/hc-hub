@@ -34,7 +34,10 @@
 
         <x-funding.totals :lines="$totalLines" />
 
-        <x-funding.register size="2xl" :caption="__('finance_tables.agreements_caption')">
+        {{-- 2xl (104rem) was the min-width fourteen money columns needed. Six fit in
+             sm (56rem), so the table stops forcing a sideways scroll and its heading
+             row sticks again; the agreement name takes whatever slack is left. --}}
+        <x-funding.register size="sm" :caption="__('finance_tables.agreements_caption')">
             <x-slot:head>
                 <x-funding.register.th sort="agreement" :active="$sortKey" :dir="$sortDirection">{{ __('finance_tables.agreement') }}</x-funding.register.th>
                 <x-funding.register.th>{{ __('common.status') }}</x-funding.register.th>
