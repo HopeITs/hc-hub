@@ -66,6 +66,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | {app/Models/PlanIndicator.php,resources/views/pages/{results,indicators,targets,reports}/**} | .ai/rules/resultsindicatorstargetsreports.md |
 | resources/views/pages/reviews/** | .ai/rules/reviews.md |
 | resources/views/pages/risks/** | .ai/rules/risks.md |
+| resources/views/pages/admin/*risk-library* | .ai/rules/risk-library.md |
 | routes/web.php | .ai/rules/routes.md |
 | {database/factories/**,database/seeders/**,tests/Pest.php} | .ai/rules/seeders.md |
 | resources/views/pages/strategies/⚡show.blade.php, resources/views/pages/strategies/⚡index.blade.php | .ai/rules/strategies.md |
