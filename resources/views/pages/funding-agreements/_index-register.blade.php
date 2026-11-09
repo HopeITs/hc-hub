@@ -70,7 +70,8 @@
                         <td data-label="{{ __('common.status') }}" data-cell="health" data-health="{{ $health }}">
                             <span @class([
                                 'inline-flex items-center gap-1.5 font-semibold whitespace-nowrap',
-                                'text-status-critical' => $health === AgreementHealth::ATTENTION,
+                                {{-- The text token, not the surface one: this is 14px type. --}}
+                                'text-status-critical-text' => $health === AgreementHealth::ATTENTION,
                                 'text-funding' => $health === AgreementHealth::MOVING,
                                 'text-secondary-medium dark:text-ink-muted' => $health === AgreementHealth::NOT_STARTED,
                             ])>

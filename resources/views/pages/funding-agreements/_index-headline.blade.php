@@ -16,7 +16,7 @@
             'key' => AgreementHealth::ATTENTION,
             'label' => __('funding_agreements.health_attention'),
             'note' => __('funding_agreements.late_failed_or_an_overdue_report'),
-            'tone' => 'text-status-critical',
+            'tone' => 'text-status-critical-text',
             'dot' => 'bg-primary dark:bg-status-critical',
         ],
         [
