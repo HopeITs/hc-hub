@@ -15,7 +15,9 @@
             'key' => 'attention',
             'label' => __('transfers.focus_attention'),
             'note' => __('transfers.late_failed_or_unaccounted'),
-            'tone' => 'text-status-critical-text',
+            // 30px at weight 800 is large text, so status-critical's 3.75:1 on
+            // the dark ground clears the 3:1 it needs.
+            'tone' => 'text-status-critical',
             'dot' => 'bg-primary dark:bg-status-critical',
         ],
         [
