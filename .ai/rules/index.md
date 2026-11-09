@@ -40,6 +40,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | resources/views/pages/funding-agreements/** | .ai/rules/funding-agreements.md |
 | {app/Livewire/Concerns/**,resources/views/components/funding/**} | .ai/rules/funding.md |
 | resources/views/pages/indicators/** | .ai/rules/indicators.md |
+| {resources/views/pages/indicator-library/**,app/Livewire/Concerns/IndicatorLibrary/**} | .ai/rules/indicator-library.md |
 | resources/js/** | .ai/rules/js.md |
 | {resources/views/components/ui/gantt.blade.php,resources/js/gantt/**,app/Livewire/Concerns/*Gantt.php} | .ai/rules/livewire-concerns.md |
 | {app/Models/User.php,app/Console/Commands/**,app/Http/Middleware/**,app/Actions/Fortify/**} | .ai/rules/middleware-actions-fortify.md |
@@ -67,6 +68,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | resources/views/pages/reviews/** | .ai/rules/reviews.md |
 | resources/views/pages/risks/** | .ai/rules/risks.md |
 | resources/views/pages/admin/*risk-library* | .ai/rules/risk-library.md |
+| resources/views/pages/admin/*narrative-questions* | .ai/rules/narrative-questions.md |
 | routes/web.php | .ai/rules/routes.md |
 | {database/factories/**,database/seeders/**,tests/Pest.php} | .ai/rules/seeders.md |
 | resources/views/pages/strategies/⚡show.blade.php, resources/views/pages/strategies/⚡index.blade.php | .ai/rules/strategies.md |
