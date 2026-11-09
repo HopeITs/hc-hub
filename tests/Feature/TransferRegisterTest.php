@@ -580,3 +580,27 @@ test('every tranche falls into exactly one of the three headline states', functi
     // A state typed into the address bar that is not one of the three is dropped.
     transferRegister(['focus' => 'whatever'])->assertSet('focus', '')->assertOk();
 });
+
+test('the net figure is called the same thing everywhere on the transfers page, in both languages', function (string $locale) {
+    // The ledger's figure and the totals row above it print the same number.
+    expect((string) trans('transfers.landed', [], $locale))
+        ->toBe((string) trans('finance_tables.received', [], $locale));
+
+    // The cell and the status that select the same tranches say the same thing.
+    expect((string) trans('transfers.not_recorded_yet', [], $locale))
+        ->toBe((string) trans('finance_tables.flag_unrecorded', [], $locale));
+
+    // "Fully received" is the headline state; "Received" is the raw status.
+    // They select different tranches, so they must not share a word.
+    expect((string) trans('transfers.focus_landed', [], $locale))
+        ->not->toBe((string) trans('finance_tables.state_received', [], $locale));
+})->with(['en', 'ar']);
+
+test('every row names the tranche its edit button edits', function () {
+    $donor = Donor::factory()->create(['name' => 'Alpha Fund']);
+    $agreement = DonorProposal::factory()->create(['donor_id' => $donor->id, 'currency' => Currency::Usd]);
+    registerPendingTranche(['donor_proposal_id' => $agreement->id, 'scheduled_date' => '2026-02-01']);
+
+    // Six identical "Edit transfer" buttons are six identical announcements.
+    transferRegister()->assertSeeHtml('aria-label="Edit Alpha Fund · Feb 1, 2026"');
+});

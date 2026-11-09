@@ -87,7 +87,10 @@
                             @can('transfers.update')
                                 {{-- Deleting a tranche happens inside its edit form. --}}
                                 <span class="flex items-center justify-end">
-                                    <x-ui.button tone="ghost" size="sm" icon="pencil-square" icon:variant="outline" class="size-8!" wire:click="openEditModal({{ $transfer->id }})" :aria-label="__('transfers.edit_transfer')" data-test="edit-transfer-{{ $transfer->id }}" />
+                                    {{-- The row's only action: a 44px target on a phone. --}}
+                                    <x-ui.button tone="ghost" size="sm" icon="pencil-square" icon:variant="outline" class="size-8! max-sm:size-11! touch-manipulation" wire:click="openEditModal({{ $transfer->id }})" {{-- Every row said just "Edit transfer", so a screen reader heard the same
+                                         button six times over. Name the tranche it edits. --}}
+                                    :aria-label="__('common.edit_name', ['name' => $rowAgreement->donor->name.' · '.$transfer->scheduled_date?->translatedFormat(__('formats.date'))])" data-test="edit-transfer-{{ $transfer->id }}" />
                                 </span>
                             @endcan
                         </td>
