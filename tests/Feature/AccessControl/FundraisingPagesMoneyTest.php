@@ -131,13 +131,15 @@ test('the proposal directory ignores the donor filter for someone who cannot see
 });
 
 test('a fundraiser without agreements sees the proposal page without a funding tab or any money', function () {
-    ['proposal' => $proposal] = seedMoneyPagesFixture();
+    ['proposal' => $proposal, 'donor' => $donor] = seedMoneyPagesFixture();
     $page = fn (string $role) => Livewire::actingAs(userWithRole($role))->test('pages::proposals.show', ['proposal' => $proposal]);
 
+    // The concept note card names the proposal's own donor, as the board does for
+    // everyone who sees proposals; what stays hidden is the agreement's donor link.
     $fundraiser = $page(fundraiserWithoutAgreements());
     $fundraiser->assertOk()
         ->assertSee('Harbour Clean Water')
-        ->assertDontSee('Aurora Foundation')
+        ->assertDontSeeHtml(route('donors.show', $donor))
         ->assertDontSee('731,942')
         ->assertDontSee('123,457')
         ->assertDontSeeHtml('data-vital="money"')

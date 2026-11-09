@@ -34,4 +34,9 @@ return [
     'starts_name' => 'يبدأ: :name',
     'ends_name' => 'ينتهي: :name',
     'review_meeting' => 'اجتماع مراجعة',
+    'moved_to_nearest' => 'انتقلنا إلى أقرب تاريخ، :date',
+    'more_items' => '{1} +عنصر آخر|{2} +عنصران آخران|[3,10] +:count عناصر أخرى|[11,*] +:count عنصرًا آخر',
+    'add_on_day' => 'إضافة في :date',
+    'calendar_of' => 'تقويم: :name',
+    'calendar_of_people' => '{1} تقويم: شخص واحد|{2} تقويم: شخصان|[3,10] تقويم: :count أشخاص|[11,*] تقويم: :count شخصًا',
 ];

@@ -642,7 +642,7 @@ test('toggling off the new type filters hides their chips without affecting the 
         ->assertSee('data-test="calendar-proposal-'.$proposal->id.'"', false);
 });
 
-test('narrowing the type filter to exactly one type shows the focused banner, and resetting restores the legend and the responsible filter', function () {
+test('narrowing the type filter to exactly one type shows the focused banner, and clearing it restores the types but keeps the people picked', function () {
     $employeeId = insertHrEmployee();
     $otherEmployeeId = insertHrEmployee(firstNameEn: 'Rana', lastNameEn: 'Nassar');
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
@@ -670,7 +670,7 @@ test('narrowing the type filter to exactly one type shows the focused banner, an
         ->assertDontSee('data-test="calendar-focused-banner"', false)
         ->assertSet('showTasks', true)
         ->assertSet('showProjects', true)
-        ->assertSet('filterEmployeeIds', []);
+        ->assertSet('filterEmployeeIds', [(string) $otherEmployeeId]);
 });
 
 test('focusOnlyType isolates one type in a single call, closes the menu and jumps to its nearest occurrence', function () {
@@ -695,7 +695,8 @@ test('focusOnlyType isolates one type in a single call, closes the menu and jump
         ->assertSet('showDonors', false)
         ->assertSet('showProjects', false)
         ->assertSet('showTypeFilterMenu', false)
-        ->assertSet('month', $targetDate->format('Y-m'));
+        ->assertSet('month', $targetDate->format('Y-m'))
+        ->assertDispatched('toast-show');
 });
 
 test('toggling a type keeps the menu open, so unchecking several types in a row needs no reopening', function () {
@@ -1053,4 +1054,123 @@ test('a busy day shows its item count for phone screens', function () {
         ->set('month', '2026-12')
         ->assertSee('data-test="calendar-day-count-2026-12-31"', false)
         ->assertSeeText(trans_choice('calendar.items_short', 3, ['count' => 3]));
+});
+
+test('the type filter is kept in the address, so a reload shows the same types', function () {
+    $employeeId = insertHrEmployee();
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
+
+    Livewire::actingAs($user)
+        ->test('pages::calendar.index')
+        ->call('toggleType', 'task')
+        ->assertSet('shownTypes', 'milestone,report,monthly_report,proposal,transfer,donor,project')
+        ->call('resetFilters')
+        ->assertSet('shownTypes', '');
+
+    Livewire::withQueryParams(['types' => 'milestone,not-a-type'])
+        ->actingAs($user)
+        ->test('pages::calendar.index')
+        ->assertSet('showMilestones', true)
+        ->assertSet('showTasks', false)
+        ->assertSet('showProjects', false)
+        ->assertSee('data-test="calendar-focused-banner"', false);
+});
+
+test('"Only" keeps the month on screen when it already has that type', function () {
+    $this->travelTo(Carbon::create(2026, 6, 10, 9));
+    $employeeId = insertHrEmployee();
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
+    Milestone::factory()->create(['responsible_user_id' => $employeeId, 'planned_start_date' => Carbon::create(2026, 6, 2)]);
+    Milestone::factory()->create(['responsible_user_id' => $employeeId, 'planned_start_date' => Carbon::create(2026, 8, 1)]);
+
+    Livewire::actingAs($user)
+        ->test('pages::calendar.index')
+        ->call('focusOnlyType', 'milestone')
+        ->assertSet('month', '')
+        ->assertNotDispatched('toast-show');
+});
+
+test('a busy day shows three chips and a "+N more" button to the rest', function () {
+    $employeeId = insertHrEmployee();
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
+    Project::factory()->count(5)->create(['user_id' => $employeeId, 'start_date' => Carbon::create(2025, 1, 1), 'end_date' => Carbon::create(2026, 12, 30)]);
+    Project::factory()->count(2)->create(['user_id' => $employeeId, 'start_date' => Carbon::create(2025, 1, 1), 'end_date' => Carbon::create(2026, 12, 29)]);
+
+    Livewire::actingAs($user)
+        ->test('pages::calendar.index')
+        ->set('month', '2026-12')
+        ->assertSee('data-test="calendar-day-more-2026-12-30"', false)
+        ->assertSeeText(trans_choice('calendar.more_items', 2, ['count' => 2]))
+        ->assertDontSee('data-test="calendar-day-more-2026-12-29"', false)
+        ->call('openDayDetail', '2026-12-30')
+        ->assertSeeHtml('data-test="calendar-daydetail-list"');
+});
+
+test('the heading names whose calendar is on screen', function () {
+    $employeeId = insertHrEmployee();
+    $ranaId = insertHrEmployee(firstNameEn: 'Rana', lastNameEn: 'Nassar');
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
+
+    Livewire::actingAs($user)
+        ->test('pages::calendar.index')
+        ->assertSeeText(__('common.my_calendar'))
+        ->set('filterEmployeeIds', [(string) $ranaId])
+        ->assertSeeText(__('calendar.calendar_of', ['name' => 'Rana Nassar']))
+        ->set('filterEmployeeIds', [(string) $ranaId, (string) $employeeId])
+        ->assertSeeText(trans_choice('calendar.calendar_of_people', 2, ['count' => 2]));
+});
+
+test('dates use the language patterns, with the year only when it is not this year, and Arabic keeps one set of month names', function () {
+    $this->travelTo(Carbon::create(2026, 11, 6, 9));
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), insertHrEmployee());
+
+    Livewire::actingAs($user)
+        ->test('pages::calendar.index')
+        ->set('viewMode', 'day')
+        ->set('anchorDate', '2026-11-04')
+        ->assertSeeText('Wednesday, November 4')
+        ->set('anchorDate', '2025-11-05')
+        ->assertSeeText('Wednesday, November 5, 2025');
+
+    app()->setLocale('ar');
+
+    expect(CarbonImmutable::getLocale())->toBe('ar_SY');
+
+    Livewire::actingAs($user)
+        ->test('pages::calendar.index')
+        ->assertSeeText('الأربعاء')
+        ->assertSeeText('تشرين الثاني 2026');
+});
+
+test('people who may add can open the add menu from the keyboard on the day number', function () {
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), insertHrEmployee());
+    $viewer = linkUserToEmployee(User::factory()->role('Team Member')->create(), insertHrEmployee());
+    $today = now()->toDateString();
+
+    Livewire::actingAs($user)->test('pages::calendar.index')
+        ->assertSee('data-test="calendar-day-add-'.$today.'"', false);
+
+    Livewire::actingAs($viewer)->test('pages::calendar.index')
+        ->assertDontSee('data-test="calendar-day-add-'.$today.'"', false);
+});
+
+test('rejected and completed proposals leave the calendar, and an extended proposal is not shown as overdue after its planned end', function () {
+    $this->travelTo(Carbon::create(2026, 7, 1, 9));
+    $employeeId = insertHrEmployee();
+    $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
+    $project = Project::factory()->create(['user_id' => $employeeId]);
+
+    $rejected = Proposal::factory()->create(['status' => 'rejected', 'planned_date_end' => Carbon::create(2026, 8, 5)]);
+    $completed = Proposal::factory()->create(['status' => 'completed', 'planned_date_end' => Carbon::create(2026, 8, 6)]);
+    $extended = Proposal::factory()->create(['status' => 'active', 'planned_date_end' => Carbon::create(2026, 6, 15), 'extended_date_end' => Carbon::create(2026, 8, 20)]);
+    foreach ([$rejected, $completed, $extended] as $proposal) {
+        $proposal->projects()->attach($project);
+    }
+
+    $html = Livewire::actingAs($user)->test('pages::calendar.index')->set('month', '2026-08')
+        ->assertDontSee('data-test="calendar-proposal-'.$rejected->id.'"', false)
+        ->assertDontSee('data-test="calendar-proposal-'.$completed->id.'"', false)
+        ->html();
+
+    expect($html)->toMatch('/class="[^"]*bg-status-active-soft[^"]*"\s+data-test="calendar-proposal-'.$extended->id.'"/');
 });

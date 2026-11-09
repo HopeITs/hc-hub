@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\MonthlyReports\ValidateMonthlyReport;
 use App\Actions\Reports\DeleteReportFile;
 use App\Actions\Reports\SaveReportFile;
 use App\Enums\MonthlyReportStatus;
@@ -296,4 +297,18 @@ test('with nobody responsible any MEAL role holder sees the project in the queue
     $meal = userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal'));
 
     expect(MonthlyReport::query()->validatableBy($meal)->pluck('id')->all())->toBe([$report->id]);
+});
+
+test('the Public Relations Manager cannot validate or return a submitted report', function () {
+    governorateOfficer($this->aleppo);
+    $prManager = userWithRole('Public Relations Manager');
+    $submitted = monthlyReportIn($this->project, MonthlyReportStatus::Submitted, $this->owner);
+
+    expect($prManager->can('validate', $submitted))->toBeFalse()
+        ->and($prManager->can('return', $submitted))->toBeFalse();
+
+    test()->actingAs($prManager);
+
+    expect(fn () => app(ValidateMonthlyReport::class)->handle($submitted, MonthlyReportStatus::Submitted))->toThrow(AuthorizationException::class)
+        ->and($submitted->fresh()->status)->toBe(MonthlyReportStatus::Submitted);
 });

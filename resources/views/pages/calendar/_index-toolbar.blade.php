@@ -12,10 +12,9 @@
                 <x-ui.button size="sm" icon:trailing="chevron-down" data-test="calendar-view-mode-button">{{ __('calendar.'.$viewMode) }}</x-ui.button>
                 <flux:menu class="filter-menu">
                     <div class="px-2 pb-1 pt-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-secondary-medium dark:text-ink-muted">{{ __('calendar.time_period') }}</div>
-                    @foreach ([['day', 'D'], ['four_days', '4'], ['week', 'W'], ['month', 'M']] as [$periodKey, $shortcut])
+                    @foreach (['day', 'four_days', 'week', 'month'] as $periodKey)
                         <flux:menu.item wire:click="setViewMode('{{ $periodKey }}')" data-test="calendar-view-mode-{{ $periodKey }}">
                             <span class="min-w-0 flex-1 truncate">{{ __('calendar.'.$periodKey) }}</span>
-                            <kbd class="me-1 rounded border border-secondary-soft px-1.5 py-0.5 text-[10px] font-semibold dark:border-line">{{ $shortcut }}</kbd>
                             @if ($viewMode === $periodKey)<flux:icon.check class="size-4 shrink-0 text-primary dark:text-brand-text" />@endif
                         </flux:menu.item>
                     @endforeach

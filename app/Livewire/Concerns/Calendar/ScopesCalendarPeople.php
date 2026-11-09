@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Calendar;
 
+use App\Models\HrEmployee;
+
 /**
  * Whose items the calendar shows: the employees checked in the responsible
  * filter, or the signed-in user's own HR employee record when none are, and
@@ -57,5 +59,29 @@ trait ScopesCalendarPeople
         }
 
         return $this->employeeId();
+    }
+
+    /**
+     * The page heading, naming whose calendar is on screen: "My Calendar"
+     * for the viewer's own, the person's name for one other person, and a
+     * head count for several.
+     */
+    protected function calendarTitle(): string
+    {
+        $picked = array_map('intval', $this->filterEmployeeIds);
+
+        if ($picked === [] || $picked === [$this->employeeId()]) {
+            return __('common.my_calendar');
+        }
+
+        if (count($picked) === 1) {
+            $name = HrEmployee::pickerOptions()->firstWhere('id', $picked[0])?->name;
+
+            if ($name !== null && $name !== '') {
+                return __('calendar.calendar_of', ['name' => $name]);
+            }
+        }
+
+        return trans_choice('calendar.calendar_of_people', count($picked), ['count' => count($picked)]);
     }
 }

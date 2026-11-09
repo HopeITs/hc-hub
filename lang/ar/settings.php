@@ -81,4 +81,12 @@ return [
     'state_always_on' => 'مفعّل دائمًا',
     'state_required' => 'مطلوب',
     'your_devices' => 'أجهزتك',
+    'confirm_email_off_title' => 'إيقاف رموز البريد الإلكتروني؟',
+    'confirm_email_off_body' => 'سيطلب تسجيل الدخول كلمة المرور فقط، ما لم تستخدم تطبيق المصادقة.',
+    'confirm_app_off_title' => 'تعطيل تطبيق المصادقة؟',
+    'confirm_app_off_body' => 'لن يطلب تسجيل الدخول رمزًا من تطبيقك بعد الآن.',
+    'confirm_sign_out_others_title' => 'تسجيل الخروج من الأجهزة الأخرى؟',
+    'confirm_sign_out_others_body' => 'سيتم تسجيل خروج كل متصفح عدا هذا المتصفح، وسيحتاج إلى تسجيل الدخول من جديد.',
+    'confirm_forget_trusted_title' => 'إلغاء الثقة بكل الأجهزة؟',
+    'confirm_forget_trusted_body' => 'سيطلب كل متصفح، بما فيه هذا، رمز الدخول من جديد.',
 ];

@@ -6,13 +6,16 @@ namespace App\Livewire\Concerns\Tasks;
 
 use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
+use App\Models\HrDepartment;
 use App\Models\HrEmployee;
 use App\Models\Milestone;
 use App\Models\Task;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
 
 /**
@@ -30,6 +33,9 @@ use Livewire\Attributes\Renderless;
  * @property string $taskPriority
  * @property string $dueDate
  * @property array<int, string> $assignedTo
+ * @property string $taskSourceType
+ * @property string $taskSourceId
+ * @property Collection<int, array{id: int, name: string}> $filterSourceOptions
  */
 trait ComposesInlineTasks
 {
@@ -62,8 +68,8 @@ trait ComposesInlineTasks
      * so the row can create the task directly, with no drawer:
      *  - source: the row's own milestone (its own milestoneId, when the row
      *    is grouped or scheduled under one), falling back to the active
-     *    source-type/source-id filter — no milestone context and no active
-     *    single-record filter is genuinely ambiguous.
+     *    source-type/source-id filter, then the viewer's own department —
+     *    only a viewer with none of these is genuinely ambiguous.
      *  - assignee: whichever employees the row's own draft (see taskDraft())
      *    has picked — none when they were all removed — falling back to the
      *    signed-in user's own HR employee record when the row hasn't been
@@ -92,17 +98,7 @@ trait ComposesInlineTasks
             : collect(array_filter([$this->resolveInlineAssigneeId()]));
 
         if ($source === null) {
-            $this->openCreateDrawer(dueDate: $dueDate, status: $draft !== null ? $draft['status'] : $status, milestoneId: $milestoneId);
-            $this->title = $title;
-
-            if ($draft !== null) {
-                $this->taskPriority = $draft['priority'];
-                $this->assignedTo = $draft['assignees'];
-
-                if ($dueDate === null && $draft['due_date'] !== '') {
-                    $this->dueDate = $draft['due_date'];
-                }
-            }
+            $this->openDrawerFromInlineRow($title, $status, $milestoneId, $draft, $dueDate);
 
             return;
         }
@@ -141,6 +137,66 @@ trait ComposesInlineTasks
         $this->resetPage();
 
         $this->toastQuickSuccess(__('tasks.task_created'));
+    }
+
+    /**
+     * The inline row's "More fields" button: the full drawer, pre-filled with
+     * whatever the row already has (title, status, milestone, draft), for
+     * anything the row itself doesn't offer — a description, start date or
+     * another "Related to".
+     */
+    public function openQuickTaskInDrawer(string $title, ?string $status = null, ?string $milestoneId = null, ?string $rowKey = null): void
+    {
+        Gate::authorize('create', Task::class);
+
+        $this->openDrawerFromInlineRow(trim($title), $status, $milestoneId, $rowKey !== null ? $this->taskDraft($rowKey, $status) : null, null);
+    }
+
+    /**
+     * What an inline row with no milestone of its own files a new task
+     * under, for its "Related to" chip: the filter bar's single record, else
+     * the viewer's department, else null (the row then opens the drawer).
+     */
+    #[Computed]
+    public function inlineDefaultSourceLabel(): ?string
+    {
+        $source = $this->resolveInlineSource(null);
+
+        if ($source === null) {
+            return null;
+        }
+
+        $name = $source['type'] === 'department'
+            ? HrDepartment::nameOf($source['id'])
+            : $this->filterSourceOptions->firstWhere('id', $source['id'])['name'] ?? null;
+
+        return $name === null ? null : __('tasks.source_type_'.$source['type']).': '.$name;
+    }
+
+    /**
+     * @param  array{status: string, priority: string, due_date: string, assignees: array<int, string>}|null  $draft
+     */
+    protected function openDrawerFromInlineRow(string $title, ?string $status, ?string $milestoneId, ?array $draft, ?string $dueDate): void
+    {
+        $this->openCreateDrawer(dueDate: $dueDate, status: $draft !== null ? $draft['status'] : $status, milestoneId: $milestoneId);
+        $this->title = $title;
+
+        if ($milestoneId === null && ($source = $this->resolveInlineSource(null)) !== null) {
+            $this->taskSourceType = $source['type'];
+            $this->taskSourceId = (string) $source['id'];
+        }
+
+        if ($draft !== null) {
+            $this->taskPriority = $draft['priority'];
+
+            if ($draft['assignees'] !== []) {
+                $this->assignedTo = $draft['assignees'];
+            }
+
+            if ($dueDate === null && $draft['due_date'] !== '') {
+                $this->dueDate = $draft['due_date'];
+            }
+        }
     }
 
     /**
@@ -202,7 +258,11 @@ trait ComposesInlineTasks
             return ['type' => $this->sourceType, 'id' => (int) $this->sourceId];
         }
 
-        return null;
+        /** @var User $user */
+        $user = auth()->user();
+        $departmentId = $user->departmentId();
+
+        return $departmentId === null ? null : ['type' => 'department', 'id' => $departmentId];
     }
 
     /** The signed-in user's own HR employee id, when their account is linked to one. */

@@ -11,6 +11,9 @@
     'value' => null,
     'multiple' => false,
     'employees' => false,
+    'chip' => false,
+    'chipIcon' => null,
+    'chipTones' => [],
 ])
 
 @php
@@ -28,6 +31,11 @@
      * unless the caller writes wire:model.live. The server renders the same
      * label and check mark first, reading the current value from the Livewire
      * component unless `value` is passed.
+     *
+     * `chip` draws the trigger as a compact pill (a property chip in a
+     * composer row) instead of a full-width field: the label is read by
+     * screen readers only, `chipIcon` is the leading icon (a dot when null)
+     * and `chipTones` maps a value to the classes that colour it.
      */
     /* Livewire's wire() macro answers false, not null, when there is no binding. */
     $model = (string) $attributes->wire('model')->value();
@@ -101,6 +109,7 @@
     :required="$required"
     :help="$helpText"
     :error="$error"
+    :compact="$chip"
     :class="$attributes->get('class')"
     data-form-select="{{ $model }}"
 >
@@ -119,6 +128,40 @@
         x-on:keydown.capture="onKeydown($event)"
     >
         <flux:dropdown position="bottom" align="start" class="filter-picker block! w-full!">
+            @if ($chip)
+                <button
+                    type="button"
+                    id="{{ $id }}"
+                    class="form-chip"
+                    @disabled($disabled)
+                    @if ($error !== '') data-invalid aria-invalid="true" @endif
+                    aria-labelledby="{{ $id }}-label {{ $id }}"
+                    title="{{ $label }}{{ $helpText !== null ? ' · '.$helpText : '' }}{{ $error !== '' ? ' · '.$error : '' }}"
+                    @if ($attributes->has('data-test')) data-test="{{ $attributes->get('data-test') }}" @endif
+                    x-ref="trigger"
+                    x-on:click="prepareMenu()"
+                    x-on:keydown.down="prepareMenu()"
+                >
+                    @if ($chipIcon !== null)
+                        <span class="inline-flex shrink-0" x-bind:class="{{ Illuminate\Support\Js::from($chipTones) }}[value] ?? ''" aria-hidden="true">
+                            <flux:icon :name="$chipIcon" variant="micro" class="size-3.5" />
+                        </span>
+                    @else
+                        <span class="form-chip-dot" x-bind:class="{{ Illuminate\Support\Js::from($chipTones) }}[value] ?? ''" aria-hidden="true"></span>
+                    @endif
+
+                    @if ($locked)
+                        <flux:icon.lock-closed variant="micro" class="size-3 shrink-0 opacity-70" />
+                    @endif
+
+                    <span
+                        class="{{ $selectedLabel === null ? 'form-chip-placeholder ' : '' }}truncate"
+                        data-trigger-label
+                        x-bind:class="{ 'form-chip-placeholder': triggerLabel === null }"
+                        x-text="triggerLabel ?? placeholder"
+                    >{{ $selectedLabel ?? $placeholder }}</span>
+                </button>
+            @else
             <flux:button
                 :id="$id"
                 variant="outline"
@@ -146,8 +189,9 @@
                     >{{ $selectedLabel ?? $placeholder }}</span>
                 </span>
             </flux:button>
+            @endif
 
-            <flux:menu class="filter-menu" :keep-open="$multiple" x-ref="menu" x-on:focus="focusSearch()">
+            <flux:menu @class(['filter-menu', 'form-chip-menu' => $chip]) :keep-open="$multiple" x-ref="menu" x-on:focus="focusSearch()">
                 @if ($searchable)
                     <div class="border-b border-secondary-soft p-1.5 dark:border-line">
                         <x-ui.input

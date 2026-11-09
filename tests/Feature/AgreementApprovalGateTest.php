@@ -286,3 +286,20 @@ test('a proposal moved away from approved after its agreement was recorded warns
     Livewire::actingAs($user)->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
         ->assertSee(__('funding_agreements.proposal_status_inconsistent_with_agreement'));
 });
+
+test('the Public Relations Manager is refused a second agreement and an agreement on a proposal no donor approved', function () {
+    $prManager = userWithRole('Public Relations Manager');
+    $approved = donorApprovedProposal();
+    DonorProposal::factory()->create(['proposal_id' => $approved->id]);
+    $unapproved = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
+
+    recordAgreementOn($prManager, $approved)
+        ->assertHasErrors(['agreementProposalId'])
+        ->assertSee(__('funding_agreements.agreement_exists'));
+
+    recordAgreementOn($prManager, $unapproved)
+        ->assertHasErrors(['agreementProposalId'])
+        ->assertSee(__('funding_agreements.proposal_not_donor_approved'));
+
+    expect(DonorProposal::query()->count())->toBe(1);
+});

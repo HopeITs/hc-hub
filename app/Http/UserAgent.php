@@ -73,6 +73,10 @@ final readonly class UserAgent
      */
     public function label(): string
     {
+        if ($this->browser === self::Unknown && $this->platform === self::Unknown) {
+            return __('Unknown device');
+        }
+
         return __(':browser on :platform', ['browser' => $this->browser, 'platform' => $this->platform]);
     }
 

@@ -32,10 +32,10 @@ return [
     'deactivate_name' => 'إيقاف «:name»',
     'reactivate_name' => 'إعادة تفعيل «:name»',
 
-    'deactivate_title' => 'إيقاف هذا القطاع؟',
+    'deactivate_title' => 'إيقاف «:name»؟',
     'deactivate_message' => 'يبقى على المشاريع التي تحمله، لكنه لا يُعرض للمشاريع الجديدة.',
     'deactivate' => 'إيقاف',
-    'delete_title' => 'حذف هذا القطاع؟',
+    'delete_title' => 'حذف «:name»؟',
     'delete_message' => 'لا يستعمله أي مشروع، لذلك يُحذف نهائيًا.',
     'delete' => 'حذف',
     'deactivate_instead' => 'إيقافه بدل ذلك',

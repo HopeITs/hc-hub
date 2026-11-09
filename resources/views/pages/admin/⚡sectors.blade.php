@@ -34,9 +34,13 @@ new #[Layout('layouts::desk'), Title('titles.sectors')] class extends Component 
 
     public ?int $deactivatingSectorId = null;
 
+    public string $deactivatingSectorName = '';
+
     public bool $showDeleteModal = false;
 
     public ?int $deletingSectorId = null;
+
+    public string $deletingSectorName = '';
 
     /** A used sector cannot be deleted: the delete dialog offers to deactivate it instead. */
     public bool $deletingSectorInUse = false;
@@ -106,9 +110,12 @@ new #[Layout('layouts::desk'), Title('titles.sectors')] class extends Component 
 
     public function confirmDeactivate(int $sectorId): void
     {
-        Gate::authorize('update', Sector::query()->findOrFail($sectorId));
+        $sector = Sector::query()->findOrFail($sectorId);
+
+        Gate::authorize('update', $sector);
 
         $this->deactivatingSectorId = $sectorId;
+        $this->deactivatingSectorName = $sector->localizedName();
         $this->showDeactivateModal = true;
     }
 
@@ -128,6 +135,7 @@ new #[Layout('layouts::desk'), Title('titles.sectors')] class extends Component 
     {
         $this->showDeactivateModal = false;
         $this->deactivatingSectorId = null;
+        $this->deactivatingSectorName = '';
     }
 
     /**
@@ -145,6 +153,7 @@ new #[Layout('layouts::desk'), Title('titles.sectors')] class extends Component 
         Gate::authorize('delete', $sector);
 
         $this->deletingSectorId = $sector->id;
+        $this->deletingSectorName = $sector->localizedName();
         $this->deletingSectorInUse = $sector->projects()->exists();
         $this->showDeleteModal = true;
     }
@@ -180,6 +189,7 @@ new #[Layout('layouts::desk'), Title('titles.sectors')] class extends Component 
     {
         $this->showDeleteModal = false;
         $this->deletingSectorId = null;
+        $this->deletingSectorName = '';
         $this->deletingSectorInUse = false;
     }
 

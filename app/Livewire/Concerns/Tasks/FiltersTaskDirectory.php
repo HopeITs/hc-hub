@@ -12,6 +12,7 @@ use App\Support\Like;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\Computed;
 
 /**
  * The task directory's filters: the reset hooks, the stat-tile and toggle
@@ -32,6 +33,7 @@ use Illuminate\Support\Collection;
  * @property string $sourceId
  * @property string $departmentId
  * @property bool $myTasksOnly
+ * @property string $scope
  * @property string $dueFilter
  * @property string $sortField
  * @property string $sortDirection
@@ -67,6 +69,31 @@ trait FiltersTaskDirectory
     public function updatedMyTasksOnly(): void
     {
         $this->resetPage();
+    }
+
+    /**
+     * The tabs above the views: whose tasks to show. '' is everyone's;
+     * 'mine' is assigned to the viewer, 'assigned' was created by them, and
+     * 'review' is their tasks sent back to them for review.
+     */
+    public function setScope(string $scope): void
+    {
+        $this->scope = in_array($scope, ['mine', 'assigned', 'review'], true) ? $scope : '';
+        $this->resetPage();
+    }
+
+    /**
+     * How many tasks wait for the viewer to review them, for the tab badge.
+     * Counted apart from the other filters, so the badge never hides work.
+     */
+    #[Computed]
+    public function tasksAwaitingMyReview(): int
+    {
+        return Task::query()
+            ->whereNull('parent_task_id')
+            ->where('status', TaskStatus::UnderReview->value)
+            ->where('created_by', auth()->id())
+            ->count();
     }
 
     public function toggleMyTasksOnly(): void
@@ -202,6 +229,18 @@ trait FiltersTaskDirectory
                 $this->departmentId !== '' && auth()->user()->canViewAllTaskDepartments(),
                 fn (Builder $query) => $this->scopeTasksToDepartment($query, (int) $this->departmentId),
             )
+            ->when($this->scope === 'mine', function (Builder $query): void {
+                $employeeId = auth()->user()->employee_id;
+
+                $employeeId === null
+                    ? $query->whereRaw('1 = 0')
+                    : $query->whereHas('taskAssignees', fn (Builder $query) => $query->where('employee_id', $employeeId));
+            })
+            ->when($this->scope === 'assigned', fn (Builder $query) => $query->where('created_by', auth()->id()))
+            // The creator approves their own tasks (TaskWorkflow::approves).
+            ->when($this->scope === 'review', fn (Builder $query) => $query
+                ->where('status', TaskStatus::UnderReview->value)
+                ->where('created_by', auth()->id()))
             ->when($this->myTasksOnly, function (Builder $query): void {
                 $user = auth()->user();
                 $employeeId = $user->employee_id;

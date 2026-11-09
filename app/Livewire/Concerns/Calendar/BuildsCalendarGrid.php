@@ -181,6 +181,8 @@ trait BuildsCalendarGrid
             : Proposal::query()
                 ->select(['id', 'slug', 'name', 'status', 'planned_date_end', 'actual_date_end', 'extended_date_end'])
                 ->whereHas('projects', fn (Builder $query) => $query->whereIn('projects.id', $ownedProjectIds))
+                // A rejected or completed proposal has no deadline left to watch.
+                ->whereNotIn('status', [ProposalStatus::Rejected, ProposalStatus::Completed])
                 ->whereRaw('(case when status = ? and extended_date_end is not null then extended_date_end else planned_date_end end) between ? and ?', [ProposalStatus::Active->value, $gridStart->toDateString(), $gridEnd->toDateString()])
                 ->orderByRaw('(case when status = ? and extended_date_end is not null then extended_date_end else planned_date_end end)', [ProposalStatus::Active->value])
                 ->get()
