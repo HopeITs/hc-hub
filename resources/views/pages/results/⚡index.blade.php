@@ -45,6 +45,10 @@ new #[Layout('layouts::desk'), Title('titles.results_framework')] class extends 
     #[Url(except: '')]
     public string $focus = '';
 
+    /** 'list' draws the framework, 'chart' counts the same statements by status. */
+    #[Url(except: 'list')]
+    public string $view = 'list';
+
     /**
      * `?program=<id>&create=1` (the logframe-missing alert, T14) opens the
      * create form for that program's framework, starting at impact. Read once
@@ -102,21 +106,13 @@ new #[Layout('layouts::desk'), Title('titles.results_framework')] class extends 
 @php
     $filtersAreActive = $search !== '' || $proposal !== '' || $program !== '' || $type !== '' || $focus !== '';
     $overview = $this->overview;
-
-
 @endphp
 
-<x-desk.register class="@container/directory" heading-id="results-framework-heading" :title="__('common.results_framework')" :count="$overview['statements']">
+<x-desk.register class="@container/directory" heading-id="results-framework-heading" :title="__('common.results_framework')" :count="$overview['statements']" :views="['list' => ['icon' => 'table', 'label' => __('results_framework.view_as_list'), 'test' => 'results-view-list'], 'chart' => ['icon' => 'chart', 'label' => __('results_framework.view_as_chart'), 'test' => 'results-view-chart']]" :view="$view">
+        <x-slot:search>
+            <x-desk.register-search :label="__('results_framework.search_the_framework')" :placeholder="__('results_framework.statement_or_indicator_name')" wire:model.live.debounce.300ms="search" />
+        </x-slot:search>
         <x-slot:filters>
-            <x-ui.input
-                type="search"
-                icon="magnifying-glass"
-                :label="__('results_framework.search_the_framework')"
-                :placeholder="__('results_framework.statement_or_indicator_name')"
-                wire:model.live.debounce.300ms="search"
-                clearable
-            />
-
             <x-ui.header-filter-select :label="__('common.program')" wire:model.live="program" :value="$program">
                 <option value="">{{ __('common.all_programs') }}</option>
                 <option value="none">{{ __('common.unassigned') }}</option>
@@ -125,20 +121,29 @@ new #[Layout('layouts::desk'), Title('titles.results_framework')] class extends 
                 @endforeach
             </x-ui.header-filter-select>
 
-            <x-ui.header-filter-select :label="__('results_framework.framework')" wire:model.live="proposal" :value="$proposal">
-                <option value="">{{ __('results_framework.all_frameworks') }}</option>
-                <option value="none">{{ __('results_framework.program_framework_only') }}</option>
-                @foreach ($this->proposalOptions as $proposalOption)
-                    <option value="{{ $proposalOption->id }}">{{ $proposalOption->name }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
+            <div class="contents" x-data="{ open: @js($proposal !== '' || $type !== '') }">
+                <button type="button" class="dk-btn" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" data-test="more-filters-button">
+                    <flux:icon.adjustments-horizontal variant="micro" class="size-4" />
+                    {{ __('results_framework.more_filters') }}
+                </button>
 
-            <x-ui.header-filter-select :label="__('common.type')" wire:model.live="type" :value="$type">
-                <option value="">{{ __('results_framework.all_types') }}</option>
-                @foreach (ResultType::cases() as $typeCase)
-                    <option value="{{ $typeCase->value }}">{{ $typeCase->label() }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
+                <div class="contents" x-show="open" x-cloak>
+                    <x-ui.header-filter-select :label="__('results_framework.framework')" wire:model.live="proposal" :value="$proposal">
+                        <option value="">{{ __('results_framework.all_frameworks') }}</option>
+                        <option value="none">{{ __('results_framework.program_framework_only') }}</option>
+                        @foreach ($this->proposalOptions as $proposalOption)
+                            <option value="{{ $proposalOption->id }}">{{ $proposalOption->name }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+
+                    <x-ui.header-filter-select :label="__('common.type')" wire:model.live="type" :value="$type">
+                        <option value="">{{ __('results_framework.all_types') }}</option>
+                        @foreach (ResultType::cases() as $typeCase)
+                            <option value="{{ $typeCase->value }}">{{ $typeCase->label() }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+                </div>
+            </div>
         </x-slot:filters>
 
         <x-slot:actions>
@@ -171,6 +176,8 @@ new #[Layout('layouts::desk'), Title('titles.results_framework')] class extends 
                 </x-slot:action>
             </x-ui.empty-state>
         </x-ui.panel>
+    @elseif ($view === 'chart')
+        @include('pages.results._index-chart')
     @else
         @include('pages.results._index-cascade')
     @endif

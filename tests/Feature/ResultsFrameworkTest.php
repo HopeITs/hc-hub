@@ -726,3 +726,46 @@ test('the three headline buttons render inside the livewire root so they work', 
         expect($xpath->query('//*[@*[name()="wire:id"]]//button[@data-test="focus-chip-'.$key.'"]')->length)->toBe(1);
     }
 });
+
+test('framework and type filters sit behind more filters, open when one is active', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Result::factory()->create();
+
+    Livewire::actingAs($user)->test('pages::results.index')
+        ->assertSeeHtml('data-test="more-filters-button"')
+        ->assertSeeHtml('x-data="{ open: false }"')
+        ->set('type', ResultType::Output->value)
+        ->assertSeeHtml('x-data="{ open: true }"');
+});
+
+test('the chart view is a program by level grid showing each cell worst status, and filters narrow it', function () {
+    $this->travelTo(CarbonImmutable::parse('2026-06-30 12:00:00'));
+
+    $user = User::factory()->role('General Manager')->create();
+    $program = Program::factory()->create();
+
+    $behind = Result::factory()->create(['program_id' => $program->id, 'type' => ResultType::Outcome]);
+    Result::factory()->create(['program_id' => $program->id, 'type' => ResultType::Output]);
+
+    $indicator = Indicator::factory()->create(['result_id' => $behind->id, 'baseline' => 0, 'target' => 100, 'frequency' => Period::Quarterly]);
+    IndicatorProgress::factory()->create(['indicator_id' => $indicator->id, 'value' => 2, 'date' => '2026-06-20']);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::results.index')
+        ->assertDontSeeHtml('data-test="results-chart"')
+        ->set('view', 'chart')
+        ->assertSeeHtml('data-test="results-chart"');
+
+    $grid = $component->instance()->statusGrid();
+
+    expect(array_column($grid['levels'], 'value'))->toBe(['outcome', 'output'])
+        ->and($grid['rows'])->toHaveCount(1)
+        ->and($grid['rows'][0]['label'])->toBe($program->name)
+        ->and($grid['rows'][0]['cells']['outcome']['worst'])->toBe('behind')
+        ->and($grid['rows'][0]['cells']['output']['worst'])->toBe('none')
+        ->and($grid['totals'])->toMatchArray(['behind' => 1, 'none' => 1, 'ontrack' => 0]);
+
+    $component->set('focus', 'unmeasured');
+
+    expect($component->instance()->statusGrid()['totals']['behind'])->toBe(0);
+});
