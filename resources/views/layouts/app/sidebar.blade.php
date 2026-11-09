@@ -39,9 +39,11 @@
             </div>
         </div>
 
+        {{-- The Desk icon set as symbols, once per page: every x-desk.icon on the page points at it, so the page carries each drawing once. --}}
+        <x-desk.icon-sprite />
+
         @if ($showsInbox && ! $inTab)
-            {{-- The Desk icon set as symbols (tab strip, Ask rows) and the Ask bar's instant index, once per page. --}}
-            <x-desk.icon-sprite />
+            {{-- The Ask bar's instant index, once per page. --}}
             <x-desk.ask-index />
             <livewire:desk.ask />
             @if (request()->routeIs('dashboard'))

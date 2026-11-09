@@ -377,6 +377,7 @@ final class Panels
     {
         return match (true) {
             PageCards::isCard($panel) => 'pages',
+            str_starts_with($panel, Shortcuts::ActionPrefix) => 'actions',
             Shortcuts::isShortcut($panel) => 'buttons',
             default => self::ReadyKinds[$panel] ?? 'work',
         };
@@ -390,6 +391,33 @@ final class Panels
      * @return array<string, array{id: string, title: string, description: string, icon: string, size: string, register: string|null, kind: 'panel'|'card'|'action'|'page'}>
      */
     public function availableTo(User $user): array
+    {
+        return $this->available[$this->memoKey($user)] ??= $this->buildAvailable($user);
+    }
+
+    /**
+     * @var array<string, array<string, array{id: string, title: string, description: string, icon: string, size: string, register: string|null, kind: 'panel'|'card'|'action'|'page'}>>
+     */
+    private array $available = [];
+
+    /**
+     * @var array<string, array<string, string>>
+     */
+    private array $routeItems = [];
+
+    /**
+     * Who is asking, as their access stands now: a role given or taken a permission in the
+     * same request reads afresh.
+     */
+    private function memoKey(User $user): string
+    {
+        return $user->id.':'.md5($user->getAllPermissions()->pluck('name')->sort()->implode(',').'|'.$user->getRoleNames()->implode(','));
+    }
+
+    /**
+     * @return array<string, array{id: string, title: string, description: string, icon: string, size: string, register: string|null, kind: 'panel'|'card'|'action'|'page'}>
+     */
+    private function buildAvailable(User $user): array
     {
         $panels = [];
 
@@ -465,6 +493,14 @@ final class Panels
      * @return array<string, string>
      */
     public function itemsForRoutes(User $user): array
+    {
+        return $this->routeItems[$this->memoKey($user)] ??= $this->buildItemsForRoutes($user);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function buildItemsForRoutes(User $user): array
     {
         $available = $this->availableTo($user);
         $items = [];

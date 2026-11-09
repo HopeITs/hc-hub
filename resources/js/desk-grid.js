@@ -389,6 +389,11 @@ document.addEventListener('pointerdown', (event) => {
 });
 
 document.addEventListener('pointermove', (event) => {
+    // The button was let go where no pointerup reached the page (outside the window): the card is put down, not left stuck to the pointer.
+    if (move && event.pointerType === 'mouse' && event.buttons === 0) {
+        endMove(false);
+    }
+
     if (move) {
         move.x = event.clientX;
         move.y = event.clientY;
@@ -439,7 +444,7 @@ let resize = null;
  * that round trip would re-render it at its saved size mid-pull. Lift it once
  * the new size is saved (or dropped) and let the panel fit again.
  */
-function fitAgain(panel) {
+export function fitAgain(panel) {
     delete panel.dataset.resizing;
     panel.dispatchEvent(new CustomEvent('dk-panel-resized'));
 }
@@ -714,6 +719,12 @@ document.addEventListener('pointerup', () => {
 });
 
 document.addEventListener('pointercancel', () => {
+    endResize(false);
+    endMove(false);
+});
+
+// Another window or app took over mid-drag: nothing is left carried or half-pulled.
+window.addEventListener('blur', () => {
     endResize(false);
     endMove(false);
 });

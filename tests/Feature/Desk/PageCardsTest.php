@@ -49,12 +49,57 @@ test('every page card renders for a super admin, with its figures and rows', fun
     DonorReport::factory()->create();
     DonorProposal::factory()->create();
 
-    Livewire::actingAs(User::factory()->role('Super Admin')->create())
+    /* The risk library is its MEAL Manager slot holder's alone, a Super Admin's too (D-61). */
+    $viewer = $route === 'admin.risk-library.index' ? mealManager() : User::factory()->role('Super Admin')->create();
+
+    Livewire::actingAs($viewer)
         ->test('desk.panels.page', ['card' => PageCards::idFor($route), 'size' => 'L', 'gridCols' => 8, 'gridRows' => 5])
         ->assertOk()
         ->assertSeeHtml('data-card="'.$route.'"')
         ->assertSeeHtml('data-card-figures');
 })->with(DeskPageCardRoutes);
+
+test('each card draws its records in the shape of what they are', function () {
+    Strategy::factory()->create(['start_year' => 2026, 'end_year' => 2030]);
+    EvidenceType::factory()->create(['name_en' => 'Attendance sheet']);
+    $admin = User::factory()->role('Super Admin')->create();
+    $render = fn (string $route) => Livewire::actingAs($admin)
+        ->test('desk.panels.page', ['card' => PageCards::idFor($route), 'size' => 'L', 'gridCols' => 6, 'gridRows' => 5]);
+
+    $layouts = collect(DeskPageCardRoutes)->reject(fn (string $route): bool => $route === 'admin.risk-library.index')
+        ->map(fn (string $route): string => app(PageCards::class)->for($route)->layout());
+
+    expect($layouts->unique()->count())->toBeGreaterThanOrEqual(10);
+
+    $render('strategies.index')
+        ->assertSeeHtml('data-layout="timeline"')
+        ->assertSeeHtml('class="dk-card-r" data-tone="good"')
+        ->assertSeeHtml('--now: ');
+
+    // A record nobody uses yet shows an empty track, not a sliver that reads as "a little".
+    $render('admin.evidence-types.index')
+        ->assertSeeHtml('data-layout="meter"')
+        ->assertSeeHtml('style="--from: 0%; --to: 0%;"')
+        ->assertDontSeeHtml('<i></i>');
+});
+
+test('every card has a picture of its own, and no two cards share one', function () {
+    $admin = User::factory()->role('Super Admin')->create();
+    Strategy::factory()->create(['start_year' => 2026, 'end_year' => 2030]);
+
+    $kinds = collect(DeskPageCardRoutes)
+        ->map(fn (string $route): ?string => app(PageCards::class)->for($route)->hero($admin)['kind'] ?? null);
+
+    expect($kinds->filter()->count())->toBe(count(DeskPageCardRoutes))
+        ->and($kinds->unique()->count())->toBe(count(DeskPageCardRoutes));
+
+    Livewire::actingAs($admin)
+        ->test('desk.panels.page', ['card' => PageCards::idFor('strategies.index'), 'size' => 'L', 'gridCols' => 6, 'gridRows' => 5])
+        ->assertSeeHtml('data-hero="ruler"')
+        ->assertSeeHtml('2026–2030')
+        // The figures stay for screen readers when the picture shows.
+        ->assertSeeHtml('class="dk-card-figs sr-only" data-card-figures');
+});
 
 test('a card lists its page\'s records, opening them, and its search narrows them in either language', function () {
     EvidenceType::factory()->create(['name_en' => 'Attendance sheet', 'name_ar' => 'كشف الحضور']);
@@ -67,12 +112,13 @@ test('a card lists its page\'s records, opening them, and its search narrows the
         ->assertSee('Distribution photo')
         ->assertSeeHtml('href="'.route('admin.evidence-types.index').'"')
         ->assertSeeHtml('data-card-create')
+        // The search narrows the rows; the card's picture above them still counts every type.
         ->set('search', 'attendance')
-        ->assertSee('Attendance sheet')
-        ->assertDontSee('Distribution photo')
+        ->assertSeeHtml('class="dk-card-row" title="Attendance sheet"')
+        ->assertDontSeeHtml('class="dk-card-row" title="Distribution photo"')
         ->set('search', 'التوزيع')
-        ->assertSee('Distribution photo')
-        ->assertDontSee('Attendance sheet');
+        ->assertSeeHtml('class="dk-card-row" title="Distribution photo"')
+        ->assertDontSeeHtml('class="dk-card-row" title="Attendance sheet"');
 });
 
 test('a card shows nothing of a page its viewer may not open', function () {

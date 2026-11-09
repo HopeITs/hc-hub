@@ -28,10 +28,12 @@ test('every page lands on the desk as its own panel, else its page card, else a 
 test('page cards and buttons are offered exactly when their page is', function () {
     $panels = app(Panels::class);
     $teamMember = $panels->availableTo(User::factory()->role('Team Member')->create());
+    $mediaTeam = $panels->availableTo(User::factory()->role('Media Team')->create());
     $meal = $panels->availableTo(User::factory()->role('MEAL')->create());
 
-    expect($teamMember)->not->toHaveKeys(['p-admin-evidence-types', 'a-evidence-type', 'g-admin-evidence-types', 'p-admin-accounts', 'a-transfer'])
-        ->and($teamMember)->toHaveKeys(['a-task', 'g-security-edit'])
+    expect($mediaTeam)->not->toHaveKeys(['p-admin-evidence-types', 'a-evidence-type', 'g-admin-evidence-types', 'p-admin-accounts', 'a-transfer'])
+        ->and($mediaTeam)->toHaveKeys(['a-task', 'g-security-edit'])
+        ->and($teamMember)->not->toHaveKey('a-task')
         ->and($meal)->toHaveKeys(['p-admin-evidence-types', 'a-evidence-type', 'g-admin-evidence-types'])
         ->and($meal['p-admin-evidence-types']['kind'])->toBe('card')
         ->and($meal['a-evidence-type']['kind'])->toBe('action')
@@ -52,8 +54,21 @@ test('a button may be one row unit tall, anything else at least two, and a row t
         ->and(array_column($panels->flush([$panels->sized('a-task', 'S', 6, 1), $panels->sized('tasks', 'L', 6, 4)]), 'rows'))->toBe([4, 4]);
 });
 
+test('quick actions have their own group, first in the Customize sheet', function () {
+    $panels = app(Panels::class);
+
+    expect($panels->readyKindOf('a-transfer'))->toBe('actions')
+        ->and($panels->readyKindOf('g-security-edit'))->toBe('buttons')
+        ->and($panels->readyKindOf('p-programs'))->toBe('pages');
+
+    $html = $this->actingAs(User::factory()->role('Financial')->create())->get(route('dashboard'))->assertOk()->getContent();
+
+    expect(strpos($html, 'data-customize-group="actions"'))->toBeLessThan(strpos($html, 'data-customize-group="money"'))
+        ->and($html)->toContain('data-customize-add="a-transfer"');
+});
+
 test('a saved layout keeps cards and buttons the viewer may use and drops the others', function () {
-    $user = User::factory()->role('Team Member')->create(['desk_layout' => [
+    $user = User::factory()->role('Media Team')->create(['desk_layout' => [
         ['panel' => 'a-task', 'size' => 'S', 'cols' => 3, 'rows' => 1],
         ['panel' => 'p-admin-accounts', 'size' => 'L'],
         ['panel' => 'g-security-edit', 'size' => 'S', 'cols' => 3, 'rows' => 1],

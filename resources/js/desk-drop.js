@@ -7,7 +7,12 @@
  * own size opens where it would land: beside the card under the pointer (the
  * half of the card it is over says which side), or last below the cards.
  * The other cards make room exactly as the drop will save them (desk-rows.js
- * placedNew mirrors Panels::flush), so the preview is the result. Dropping
+ * placedNew mirrors Panels::flush), so the preview is the result. The browser
+ * sends dragover many times a second whether the pointer moves or not, so the
+ * pointer is only noted there and the Desk is touched once per frame at most;
+ * and once the cards have made room they hold still until the pointer has
+ * clearly moved on, so a card gliding under a resting pointer never sets off
+ * another move (the slot would flick between two places). Dropping
  * asks the Desk to keep that arrangement ($wire.dropItem); Esc or leaving
  * the Desk puts everything back. A page already on the Desk is ringed
  * instead, and dropping shows it. Dropped on the tab strip, the page opens as
@@ -17,10 +22,13 @@
  * (x-desk.side-add) and every page's "Add to desk" do the same by tap or key.
  */
 
-import { flip, hostOf, lay, layoutOf, panelsIn } from './desk-grid';
+import { fitAgain, flip, hostOf, lay, layoutOf, panelsIn } from './desk-grid';
 import { placedNew } from './desk-rows';
 
 const type = 'application/x-hc-desk-route';
+/* How long the cards take to glide (desk-grid.js glide), and how far the pointer must travel from where it last moved them before it can move them again. */
+const settleMs = 260;
+const settleTravel = 14;
 let drag = null;
 
 function itemsOnDesk() {
@@ -62,8 +70,8 @@ function cleanUp(restore) {
 
     const { grid, layout, slot, existing } = drag;
 
+    cancelAnimationFrame(drag.frame);
     existing?.classList.remove('dk-drop-ring');
-    panelsIn(grid).forEach((card) => delete card.dataset.resizing);
     document.documentElement.classList.remove('dk-dropping');
     document.querySelector('[data-desk-tabs]')?.classList.remove('dk-tabs-droppable');
 
@@ -74,7 +82,72 @@ function cleanUp(restore) {
         }, null);
     }
 
+    // A drop keeps the cards from fitting their rows until the Desk has saved it (below); anything else lets them fit again now.
+    if (restore) {
+        panelsIn(grid).forEach(fitAgain);
+    }
+
     drag = null;
+}
+
+/**
+ * One frame of carrying a page over the Desk: where the pointer last was
+ * decides the card it lands beside, and the slot opens there.
+ */
+function preview() {
+    if (! drag) {
+        return;
+    }
+
+    drag.frame = 0;
+
+    const { grid, over } = drag;
+
+    // Over the slot itself the drop stays where the slot is.
+    if (! over || ! over.target.isConnected || over.target.closest('.dk-drop-slot')) {
+        return;
+    }
+
+    if (drag.slot && (performance.now() - drag.movedAt < settleMs || Math.hypot(over.x - drag.movedX, over.y - drag.movedY) < settleTravel)) {
+        return;
+    }
+
+    const card = over.target.closest('[data-desk-grid] > .dk-panel');
+    let target = null;
+    let place = 'after';
+
+    if (card) {
+        const box = card.getBoundingClientRect();
+        const along = drag.rtl ? box.right - over.x : over.x - box.left;
+
+        target = card.dataset.panel;
+        place = along < box.width / 2 ? 'before' : 'after';
+    } else if (drag.slot && over.target.closest('[data-desk-grid]')) {
+        // In the gap between two cards: the slot stays where it is rather than jumping to the end and back.
+        return;
+    }
+
+    if (drag.slot && target === drag.target && place === drag.place) {
+        return;
+    }
+
+    drag.target = target;
+    drag.place = place;
+    drag.movedAt = performance.now();
+    drag.movedX = over.x;
+    drag.movedY = over.y;
+    drag.placed = placedNew(drag.layout, { panel: drag.item.item, cols: drag.item.cols, rows: drag.item.rows }, target, place);
+
+    const { placed } = drag;
+
+    flip(grid, () => {
+        if (! drag.slot) {
+            drag.slot = slotFor(drag.item, drag.text);
+            grid.append(drag.slot);
+        }
+
+        lay(grid, placed);
+    }, null);
 }
 
 document.addEventListener('dragstart', (event) => {
@@ -117,6 +190,12 @@ document.addEventListener('dragstart', (event) => {
         slot: null,
         existing: item.placed ? grid.querySelector(`:scope > [data-panel="${CSS.escape(item.item)}"]`) : null,
         text: grid.dataset.dropText ?? '__I__',
+        rtl: getComputedStyle(grid).direction === 'rtl',
+        over: null,
+        frame: 0,
+        movedAt: 0,
+        movedX: 0,
+        movedY: 0,
     };
 
     // The cards change cells while the slot moves: they fit their rows again once the drop is saved, not on every step.
@@ -152,41 +231,8 @@ document.addEventListener('dragover', (event) => {
         return;
     }
 
-    // Over the slot itself the drop stays where the slot is.
-    if (event.target.closest('.dk-drop-slot')) {
-        return;
-    }
-
-    const card = event.target.closest('[data-desk-grid] > .dk-panel');
-    let target = null;
-    let place = 'after';
-
-    if (card) {
-        const box = card.getBoundingClientRect();
-        const along = getComputedStyle(drag.grid).direction === 'rtl' ? box.right - event.clientX : event.clientX - box.left;
-
-        target = card.dataset.panel;
-        place = along < box.width / 2 ? 'before' : 'after';
-    }
-
-    if (target === drag.target && place === drag.place) {
-        return;
-    }
-
-    drag.target = target;
-    drag.place = place;
-    drag.placed = placedNew(drag.layout, { panel: drag.item.item, cols: drag.item.cols, rows: drag.item.rows }, target, place);
-
-    const { grid, placed } = drag;
-
-    flip(grid, () => {
-        if (! drag.slot) {
-            drag.slot = slotFor(drag.item, drag.text);
-            grid.append(drag.slot);
-        }
-
-        lay(grid, placed);
-    }, null);
+    drag.over = { target: event.target, x: event.clientX, y: event.clientY };
+    drag.frame ||= requestAnimationFrame(preview);
 });
 
 document.addEventListener('drop', (event) => {
@@ -214,7 +260,7 @@ document.addEventListener('drop', (event) => {
         existing.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         existing.classList.add('dk-drop-found');
         setTimeout(() => existing.classList.remove('dk-drop-found'), 1200);
-        cleanUp(false);
+        cleanUp(true);
 
         return;
     }
@@ -223,11 +269,13 @@ document.addEventListener('drop', (event) => {
     const host = hostOf(slot ?? grid.querySelector(':scope > .dk-panel') ?? grid);
 
     slot?.classList.add('dk-drop-landing');
-    drag.dropped = true;
     cleanUp(false);
 
-    // The slot holds the place until the Desk draws the real card there.
-    Promise.resolve(host?.dropItem(item.item, placed.map(({ panel, cols, rows }) => ({ panel, cols, rows })))).finally(() => slot?.remove());
+    // The slot holds the place until the Desk draws the real card there; only then do the cards that changed cells fit their rows again, in one go.
+    Promise.resolve(host?.dropItem(item.item, placed.map(({ panel, cols, rows }) => ({ panel, cols, rows })))).finally(() => {
+        slot?.remove();
+        panelsIn(grid).forEach(fitAgain);
+    });
 });
 
 document.addEventListener('dragend', () => cleanUp(true));

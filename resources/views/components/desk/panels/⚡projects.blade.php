@@ -193,7 +193,7 @@ new class extends Component
     <x-slot:tools>
         <div class="dk-seg" role="group">
             @foreach ($lenses as $key)
-                <button type="button" wire:click="setLens('{{ $key }}')" aria-pressed="{{ $shownLens === $key ? 'true' : 'false' }}">{{ __('desk.lens.'.$key) }}</button>
+                <button type="button" wire:click="setLens('{{ $key }}')" aria-pressed="{{ $shownLens === $key ? 'true' : 'false' }}" title="{{ __('desk.lens.'.$key) }}">{{ __('desk.lens.'.$key) }}</button>
             @endforeach
         </div>
     </x-slot:tools>

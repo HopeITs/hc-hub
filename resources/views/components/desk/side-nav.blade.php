@@ -195,7 +195,7 @@
                 @if ($group['group'] === 'overview')
                     <section class="dk-side-g dk-side-me" data-side-personal>
                         <button type="button" class="dk-side-a dk-side-gb dk-side-star" data-fly="personal" x-on:click="toggle()" data-label="{{ __('navigation.pinned_and_recent') }}" aria-label="{{ __('navigation.pinned_and_recent') }}">
-                            <span class="dk-side-icw"><flux:icon.star variant="outline" class="dk-side-ic" /></span>
+                            <span class="dk-side-icw"><x-desk.icon name="pushpin" class="dk-side-ic" /></span>
                         </button>
                         <div class="dk-side-me-list">
                             <p class="dk-side-gh">{{ __('navigation.pinned') }}</p>

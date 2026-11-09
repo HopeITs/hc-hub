@@ -3,6 +3,7 @@
 use App\Models\DonorReport;
 use App\Models\User;
 use App\Support\Desk\Destinations;
+use App\Support\Desk\PageCards;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -167,6 +168,16 @@ test('the risk register is no longer in the sidebar, and the risk library is onl
     expect(deskPageRoutes($general))->not->toContain('risks.index')
         ->and(deskPageRoutes($general))->not->toContain('admin.risk-library.index')
         ->and(deskPageRoutes(mealManager()))->toContain('admin.risk-library.index');
+});
+
+test('a super admin outside the MEAL Manager slot is not offered the risk library its route refuses', function () {
+    $admin = User::factory()->role('Super Admin')->create();
+
+    $this->actingAs($admin)->get(route('admin.risk-library.index'))->assertForbidden();
+
+    expect(deskPageRoutes($admin))->not->toContain('admin.risk-library.index')
+        ->and(app(PageCards::class)->allows($admin, 'admin.risk-library.index'))->toBeFalse()
+        ->and(deskPageRoutes($admin))->toContain('admin.users.index');
 });
 
 test('the sidebar folds each group into one row and opens the group of the current page', function () {

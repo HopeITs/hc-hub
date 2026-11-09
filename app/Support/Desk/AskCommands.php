@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Desk;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -86,6 +87,31 @@ final class AskCommands
      */
     public function for(User $user): array
     {
+        /*
+         * The index is the same on every page a person opens and took ~150ms to build, so it is kept
+         * for ten minutes under a key made of exactly what it depends on: the pages they may open,
+         * their roles and permissions, and the language. Any change of access gives a new key.
+         * What is on their Desk changes with every drop, so it is always read fresh.
+         */
+        $fingerprint = md5(json_encode([
+            array_column($this->destinations->for($user), 'route'),
+            $user->getRoleNames()->sort()->values()->all(),
+            $user->getAllPermissions()->pluck('name')->sort()->values()->all(),
+            $user->employee_id,
+        ]) ?: '');
+        $key = 'desk-ask-index:'.$user->id.':'.app()->getLocale().':'.$fingerprint;
+
+        return [
+            ...Cache::remember($key, now()->addMinutes(10), fn (): array => $this->build($user)),
+            'placed' => array_column($this->panels->layoutFor($user), 'panel'),
+        ];
+    }
+
+    /**
+     * @return array{pages: list<array<string, mixed>>, actions: list<array<string, mixed>>, layouts: list<array<string, string>>, verbs: array<string, list<string>>, commands: array<string, string>, stop: list<string>}
+     */
+    private function build(User $user): array
+    {
         $library = $this->panels->availableTo($user);
         $items = $this->panels->itemsForRoutes($user);
         $groups = collect($this->destinations->sidebarFor($user))->pluck('label', 'group')->all();
@@ -139,7 +165,6 @@ final class AskCommands
             'pages' => $pages,
             'actions' => $actions,
             'layouts' => $layouts,
-            'placed' => array_column($this->panels->layoutFor($user), 'panel'),
             'verbs' => [...array_map(AskEngine::normalizedWords(...), self::Verbs), 'create' => $creating],
             'commands' => array_map(fn (array $words): string => implode(' ', AskEngine::normalizedWords($words)), self::Commands),
             'stop' => array_values(array_unique([...$this->engine->stopWords(), ...AskEngine::normalizedWords(self::ExtraStopWords)])),

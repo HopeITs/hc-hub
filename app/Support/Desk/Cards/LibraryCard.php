@@ -42,15 +42,41 @@ final class LibraryCard extends PageCard
         ], IndicatorMeasure::cases()));
     }
 
+    public function hero(User $user): ?array
+    {
+        $counts = LibraryIndicator::query()->active()->toBase()->selectRaw('measure, count(*) as total')->groupBy('measure')->pluck('total', 'measure');
+
+        return [
+            'kind' => 'tally',
+            'big' => $this->number((int) $counts->sum()),
+            'caption' => (string) __('desk-workspace.card.figure.in_library'),
+            'tone' => 'good',
+            'items' => array_map(fn (IndicatorMeasure $measure): array => [
+                'label' => (string) $measure->label(),
+                'value' => $this->number((int) ($counts[$measure->value] ?? 0)),
+                'tone' => self::Tones[$measure->value] ?? 'neutral',
+            ], IndicatorMeasure::cases()),
+        ];
+    }
+
+    public function layout(): string
+    {
+        return 'coded';
+    }
+
     protected function records(User $user, string $search): Collection
     {
         return LibraryIndicator::query()->active()->orderBy('code')->limit(self::RowLimit)->get()
-            ->map(fn (LibraryIndicator $indicator): array => $this->row(
-                'li-'.$indicator->id,
-                $indicator->code.' · '.$indicator->localizedName(),
-                collect([$indicator->measure->label(), $indicator->frequency->label()])->filter()->implode(' · '),
-                null,
-                route('indicator-library.index'),
+            ->map(fn (LibraryIndicator $indicator): array => $this->shaped(
+                $this->row(
+                    'li-'.$indicator->id,
+                    $indicator->localizedName(),
+                    collect([$indicator->measure->label(), $indicator->frequency->label()])->filter()->implode(' · '),
+                    null,
+                    route('indicator-library.index'),
+                    $indicator->code.' '.$indicator->name_en.' '.$indicator->name_ar,
+                ),
+                lead: ['kind' => 'code', 'big' => (string) $indicator->code],
             ));
     }
 }

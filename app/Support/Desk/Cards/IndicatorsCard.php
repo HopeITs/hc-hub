@@ -42,6 +42,30 @@ final class IndicatorsCard extends PageCard
         ], IndicatorMeasure::cases()));
     }
 
+    public function hero(User $user): ?array
+    {
+        $all = Indicator::query()->count();
+        $withTarget = Indicator::query()->whereNotNull('target')->where('target', '!=', '')->count();
+        $share = $all > 0 ? round($withTarget / $all * 100) : 0;
+
+        return [
+            'kind' => 'gauge',
+            'big' => $share.'%',
+            'caption' => (string) __('desk-workspace.card.figure.with_target'),
+            'share' => (float) $share,
+            'tone' => $share >= 80 ? 'good' : ($share >= 50 ? 'warn' : 'critical'),
+            'items' => [
+                ['label' => (string) __('desk-workspace.card.figure.indicators'), 'value' => $this->number($all), 'tone' => 'active'],
+                ['label' => (string) __('desk-workspace.card.figure.with_target'), 'value' => $this->number($withTarget), 'tone' => 'good'],
+            ],
+        ];
+    }
+
+    public function layout(): string
+    {
+        return 'tagged';
+    }
+
     protected function records(User $user, string $search): Collection
     {
         return Indicator::query()->with(['result:id,statement', 'project:id,name'])->latest('id')->limit(self::RowLimit)->get()

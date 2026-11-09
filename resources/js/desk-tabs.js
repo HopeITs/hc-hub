@@ -7,9 +7,11 @@
  * as on the page itself. resources/js/desk-tab-child.js is the frame's side.
  *
  * Speed:
- *  - a link is warmed while the pointer rests on it (or the moment it is
- *    pressed): its frame starts loading hidden, and the click adopts it, so a
- *    tab usually opens already drawn;
+ *  - a link is warmed the moment it is pressed: its frame starts loading
+ *    hidden and the click, a tenth of a second later, adopts it. Nothing is
+ *    loaded on hover: a pointer crossing the sidebar or a list of rows asked
+ *    the server for a whole page per link it passed, and those pages stood
+ *    in line ahead of the one the person then opened;
  *  - a tab, once loaded, stays alive: switching is instant and keeps the
  *    page's scroll, filters and half-typed forms;
  *  - only MaxLive frames stay alive; the least recently used sleeps (its
@@ -30,8 +32,7 @@
 
 const MaxLive = 6;
 const MaxTabs = 24;
-const WarmDelay = 80;
-const WarmTtl = 12000;
+const WarmTtl = 4000;
 const OffKey = 'hc-desk-tabs-off';
 const NotForTabs = /\/(download|export|print|preview|avatar|logout)(\/|$)|^\/(livewire|broadcasting|storage)\//;
 
@@ -65,10 +66,6 @@ function isTyping(target) {
     return target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
 }
 
-function reducedData() {
-    return Boolean(navigator.connection?.saveData) || /(^|-)2g$/.test(navigator.connection?.effectiveType ?? '');
-}
-
 document.addEventListener('alpine:init', () => {
     window.Alpine.data('hcDeskTabs', (config) => ({
         tabs: [],
@@ -81,7 +78,7 @@ document.addEventListener('alpine:init', () => {
         frames: new Map(),
         warm: null,
         lastShown: new Map(),
-        leftDeskAt: 0,
+        deskStale: false,
         seq: 0,
         listeners: [],
 
@@ -103,8 +100,8 @@ document.addEventListener('alpine:init', () => {
             this.listen(document, 'mousedown', (event) => this.onPress(event), true);
             this.listen(document, 'click', (event) => this.onClick(event), true);
             this.listen(document, 'auxclick', (event) => this.onAuxClick(event), true);
-            this.listen(document, 'pointerover', (event) => this.onHover(event), true);
-            this.listen(document, 'pointerout', (event) => this.onLeave(event), true);
+            // A press that turned into dragging the link (onto the Desk, desk-drop.js) is not an open.
+            this.listen(document, 'dragstart', () => this.dropWarm(), true);
             this.listen(document, 'livewire:navigate', (event) => this.onNavigate(event));
             this.listen(document, 'keydown', (event) => this.onKey(event));
             this.listen(window, 'message', (event) => this.onMessage(event));
@@ -238,7 +235,8 @@ document.addEventListener('alpine:init', () => {
 
             event.stopPropagation();
 
-            if (! event.ctrlKey && ! event.metaKey && ! this.isDesk(found.url)) {
+            // A button tile's press may be the start of carrying it (desk-grid.js): it loads on the click instead.
+            if (! event.ctrlKey && ! event.metaKey && ! this.isDesk(found.url) && ! found.link.hasAttribute('data-drag-through')) {
                 this.warmUp(found.url);
             }
         },
@@ -304,32 +302,10 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        onHover(event) {
-            if (event.pointerType !== 'mouse' || reducedData()) {
-                return;
-            }
-
-            const found = this.tabLink(event);
-
-            if (! found || this.isDesk(found.url) || found.link === this.hovered) {
-                return;
-            }
-
-            clearTimeout(this.hoverTimer);
-            this.hovered = found.link;
-            this.hoverTimer = setTimeout(() => this.warmUp(found.url), WarmDelay);
-        },
-
-        onLeave(event) {
-            if (this.hovered && event.target instanceof Element && this.hovered.contains(event.target) && ! this.hovered.contains(event.relatedTarget)) {
-                clearTimeout(this.hoverTimer);
-                this.hovered = null;
-            }
-        },
-
         /**
-         * Start loading a page in a hidden frame, so the click that follows
-         * finds it drawn. One at a time; dropped when unused for WarmTtl.
+         * Start loading a page in a hidden frame on the press, so the click
+         * that follows finds it on its way. One at a time; a press that never
+         * became a click (a drag, a release elsewhere) drops it after WarmTtl.
          */
         warmUp(href) {
             const key = this.keyOf(href);
@@ -584,12 +560,10 @@ document.addEventListener('alpine:init', () => {
             this.menu = null;
             this.frames.forEach((frame, tabId) => frame.classList.toggle('dk-on', tabId === id));
 
-            if (was === 'desk' && id !== 'desk') {
-                this.leftDeskAt = Date.now();
-            }
-
-            // Back on the Desk after a while in tabs: its panels read again in one round trip (IsDeskPanel).
-            if (id === 'desk' && was !== 'desk' && Date.now() - this.leftDeskAt > 15000) {
+            // Back on the Desk after something was done in a tab: its panels read again, in one round trip (IsDeskPanel).
+            // A tab that was only read leaves the Desk as it is, so coming back costs nothing.
+            if (id === 'desk' && was !== 'desk' && this.deskStale) {
+                this.deskStale = false;
                 window.Livewire?.dispatch('dk-desk-refresh');
             }
 
@@ -722,12 +696,103 @@ document.addEventListener('alpine:init', () => {
         /** The page under the tabs: hidden while a tab is in front, so its scroll and panels stay as they were. */
         syncDocument() {
             document.documentElement.classList.toggle('dk-tab-active', this.active !== 'desk');
+            this.syncChrome();
+        },
+
+        /**
+         * The sidebar and the top bar's "where am I" follow the tab in front: its page lights up
+         * (and its group in the icon rail), and the crumb reads "Your desk › page". Back on the
+         * Desk, both return to what the server drew. Only classes and text move: nothing reloads.
+         */
+        syncChrome() {
+            const tab = this.active === 'desk' ? null : this.tabs.find((each) => each.id === this.active);
+            const side = document.querySelector('.dk-side');
+
+            side?.querySelectorAll('[data-tab-lit]').forEach((el) => {
+                el.classList.remove(el.dataset.tabLit);
+                el.removeAttribute('data-tab-lit');
+            });
+            side?.querySelectorAll('[data-tab-dimmed]').forEach((el) => {
+                el.classList.add(el.dataset.tabDimmed);
+                el.removeAttribute('data-tab-dimmed');
+            });
+
+            const where = document.querySelector('[data-top-where]');
+            const group = where?.querySelector('.dk-where-g span');
+            const page = where?.querySelector('.dk-where-p a');
+
+            if (group && page && where.dataset.deskGroup === undefined) {
+                where.dataset.deskGroup = group.textContent;
+                where.dataset.deskPage = page.textContent;
+            }
+
+            if (! tab) {
+                if (group && page && where.dataset.deskGroup !== undefined) {
+                    group.textContent = where.dataset.deskGroup;
+                    page.textContent = where.dataset.deskPage;
+                    page.setAttribute('aria-current', 'page');
+                }
+
+                return;
+            }
+
+            if (group && page) {
+                group.textContent = where.dataset.deskPage;
+                page.textContent = tab.title;
+            }
+
+            if (! side) {
+                return;
+            }
+
+            const path = tab.url.split('?')[0].replace(/\/$/, '');
+            let best = '';
+            const links = [...side.querySelectorAll('a.dk-side-a[href]')].map((link) => {
+                let linkPath = '';
+
+                try {
+                    linkPath = new URL(link.href).pathname.replace(/\/$/, '');
+                } catch {
+                    // Not a page link.
+                }
+
+                if (linkPath !== '' && ! this.isDesk(linkPath) && (path === linkPath || path.startsWith(linkPath + '/')) && linkPath.length > best.length) {
+                    best = linkPath;
+                }
+
+                return [link, linkPath];
+            });
+
+            if (best === '') {
+                return;
+            }
+
+            side.querySelectorAll('.dk-side-a.dk-on, .dk-side-gb.dk-has-on').forEach((el) => {
+                const cls = el.classList.contains('dk-on') ? 'dk-on' : 'dk-has-on';
+
+                el.classList.remove(cls);
+                el.dataset.tabDimmed = cls;
+            });
+
+            links.filter(([, linkPath]) => linkPath === best).forEach(([link]) => {
+                link.classList.add('dk-on');
+                link.dataset.tabLit = 'dk-on';
+
+                const groupButton = link.closest('.dk-side-g')?.querySelector('.dk-side-gb');
+
+                if (groupButton && groupButton !== link && ! groupButton.classList.contains('dk-has-on')) {
+                    groupButton.classList.add('dk-has-on');
+                    groupButton.dataset.tabLit = 'dk-has-on';
+                }
+            });
         },
 
         /* ── Storage ──────────────────────────────────────────────── */
 
         save(now = false) {
             clearTimeout(this.saveTimer);
+            // A tab that moved to another page or got its title: the sidebar and crumb follow it.
+            this.syncChrome();
 
             const write = () => {
                 try {
@@ -798,6 +863,9 @@ document.addEventListener('alpine:init', () => {
                     if (tab) {
                         tab.loading = true;
                     }
+                    break;
+                case 'changed':
+                    this.deskStale = true;
                     break;
                 case 'open':
                     if (typeof data.url === 'string' && new URL(data.url, window.location.href).origin === window.location.origin) {

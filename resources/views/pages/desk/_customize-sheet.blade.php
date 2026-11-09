@@ -31,7 +31,7 @@
     $moveLater = \Illuminate\Support\Js::from(__('desk.customize_sheet.move_panel_later', ['panel' => '__P__']));
     $removePanel = \Illuminate\Support\Js::from(__('desk.customize_sheet.remove_panel', ['panel' => '__P__']));
     /* Hand-made panels by what they hold, then every page as a card, then every page and action as a button. */
-    $addGroups = collect(['money', 'work', 'results', 'people', 'pages', 'buttons'])->mapWithKeys(fn (string $kind): array => [
+    $addGroups = collect(['actions', 'money', 'work', 'results', 'people', 'pages', 'buttons'])->mapWithKeys(fn (string $kind): array => [
         $kind => collect($library)->filter(fn (array $panel, string $id): bool => $deskPanels->readyKindOf($id) === $kind),
     ])->filter->isNotEmpty();
 @endphp

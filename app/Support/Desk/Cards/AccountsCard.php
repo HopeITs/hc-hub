@@ -28,16 +28,38 @@ final class AccountsCard extends PageCard
         ];
     }
 
+    public function hero(User $user): ?array
+    {
+        $byCurrency = Account::query()->active()->toBase()->selectRaw('currency, count(*) as total')->groupBy('currency')->orderByDesc('total')->pluck('total', 'currency');
+
+        return [
+            'kind' => 'coins',
+            'big' => $this->number((int) $byCurrency->sum()),
+            'caption' => (string) __('desk-workspace.card.figure.open_accounts'),
+            'tone' => 'good',
+            'items' => $byCurrency->map(fn (int|string $count, string $currency): array => ['label' => $currency, 'value' => $this->number((int) $count), 'tone' => 'active'])->values()->all(),
+        ];
+    }
+
+    public function layout(): string
+    {
+        return 'bank';
+    }
+
     protected function records(User $user, string $search): Collection
     {
         return Account::query()->orderByDesc('is_active')->orderBy('account_name')->limit(self::RowLimit)
             ->get(['id', 'account_name', 'bank_name', 'currency', 'account_number_last4', 'is_active'])
-            ->map(fn (Account $account): array => $this->row(
-                'acc-'.$account->id,
-                $account->account_name,
-                collect([$account->bank_name, filled($account->account_number_last4) ? '•••• '.$account->account_number_last4 : null])->filter()->implode(' · '),
-                ['label' => $account->currency->value, 'tone' => $account->is_active ? 'active' : 'neutral'],
-                route($this->route()),
+            ->map(fn (Account $account): array => $this->shaped(
+                $this->row(
+                    'acc-'.$account->id,
+                    $account->account_name,
+                    (string) ($account->bank_name ?? ''),
+                    $account->is_active ? null : $this->activeBadge(false),
+                    route($this->route()),
+                ),
+                lead: ['kind' => 'coin', 'big' => $account->currency->value, 'tone' => $account->is_active ? 'active' : 'neutral'],
+                end: filled($account->account_number_last4) ? ['big' => '•••• '.$account->account_number_last4] : null,
             ));
     }
 }

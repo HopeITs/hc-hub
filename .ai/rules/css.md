@@ -26,3 +26,6 @@ The "light mode must stay pixel-identical when restyling dark" notes in css.md a
 
 ## Desk lists cannot take their own padding or margin
 desk.css resets `.dk-scope ul/ol { margin:0; padding:0 }` and `.dk-scope p { margin:0 }` UNLAYERED, so it beats any padding/margin a `@layer components` class sets on a ul, ol or p (computes to 0 silently). Put side padding on the `li` items, and space blocks with a parent `gap`, never with margin on the ul/p. Found on the program Results tab (2026-11-06).
+
+## Dark Desk has no glow; tabs look like page tabs; pins are pushpins
+User decisions 2026-11-10: dark mode has no ambient red/green glow behind the Desk (`.dark [data-desk]::before { content: none }`). Desk tabs match the project page's tabs (.dk-pjtabs): words with icon on the page ground, one hairline, the tab in front marked by full ink and a brand underline; no boxed track. The tab row is transparent at rest and takes the ground once the page scrolls (scroll-driven animation). Sidebar pinning uses the `pushpin` Desk icon, never a star.

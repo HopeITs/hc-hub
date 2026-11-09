@@ -44,6 +44,30 @@ final class ResultsCard extends PageCard
         ], ResultType::cases()));
     }
 
+    public function hero(User $user): ?array
+    {
+        $counts = $this->counts();
+        $most = max(1, (int) max($counts ?: [0]));
+
+        return [
+            'kind' => 'pyramid',
+            'big' => $this->number(array_sum($counts)),
+            'caption' => (string) __('desk-workspace.card.figure.results'),
+            'tone' => 'active',
+            'items' => array_map(fn (ResultType $type): array => [
+                'label' => (string) $type->label(),
+                'value' => $this->number((int) ($counts[$type->value] ?? 0)),
+                'share' => max(46.0, $this->share((int) ($counts[$type->value] ?? 0), $most)),
+                'tone' => self::Tones[$type->value] ?? 'neutral',
+            ], ResultType::cases()),
+        ];
+    }
+
+    public function layout(): string
+    {
+        return 'tagged';
+    }
+
     protected function records(User $user, string $search): Collection
     {
         return Result::query()->programFramework()->with('program')->latest('id')->limit(self::RowLimit)->get()

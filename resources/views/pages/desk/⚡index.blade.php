@@ -227,7 +227,7 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
         <div class="dk-grid dk-grid-tail">
             <button type="button" class="dk-addtile" x-on:click="$dispatch('dk-customize-open')" data-desk-add>
                 <x-desk.icon name="plus" />
-                <span>{{ __('desk.add_panel') }}</span>
+                <span>{{ __('desk.add_item') }}</span>
                 <small>{{ trans_choice('desk.more_available', $more, ['count' => $more]) }}</small>
             </button>
         </div>

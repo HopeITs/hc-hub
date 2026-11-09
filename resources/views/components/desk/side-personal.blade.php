@@ -7,7 +7,7 @@
                 <span class="dk-side-badge dk-num" x-show="pages[route]?.count > 0" x-text="pages[route]?.count > 99 ? '99+' : pages[route]?.count"></span>
             </a>
             <button type="button" class="dk-side-pin dk-pinned" x-on:click.prevent.stop="pin(route)" x-bind:aria-label="@js(__('navigation.unpin_page', ['page' => ':page'])).replace(':page', pages[route]?.label ?? '')">
-                <flux:icon.star variant="micro" class="size-3.5" />
+                <x-desk.icon name="pushpin" class="dk-pin-ic" />
             </button>
         </li>
     </template>

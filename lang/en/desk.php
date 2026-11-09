@@ -43,6 +43,7 @@ return [
     'lede_none_late' => 'Nothing is late. Start at the top.',
     'customize' => 'Customize desk',
     'add_panel' => 'Add a panel',
+    'add_item' => 'Add a panel, page or quick action',
     'more_available' => '{0} Every panel is on your desk|{1} 1 more available|[2,*] :count more available',
     'customize_title' => 'Customize your desk',
     'customize_lede' => 'Nothing changes until you confirm.',
@@ -605,7 +606,8 @@ return [
             'work' => 'Work',
             'results' => 'Results',
             'pages' => 'Page cards',
-            'buttons' => 'Buttons',
+            'actions' => 'Quick actions',
+            'buttons' => 'Page buttons',
         ],
         'layouts' => [
             'today' => ['title' => 'My day', 'purpose' => 'What waits for you, what is coming and what slipped'],

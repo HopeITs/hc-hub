@@ -40,16 +40,46 @@ final class ReportsCard extends PageCard
         ], ReportStatus::cases()));
     }
 
+    public function hero(User $user): ?array
+    {
+        $counts = Report::query()->toBase()->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status');
+        $late = Report::query()->overdue()->count();
+
+        return [
+            'kind' => 'flow',
+            'big' => $this->number($late),
+            'caption' => (string) __('desk-workspace.card.figure.late'),
+            'tone' => $late > 0 ? 'critical' : 'good',
+            'items' => array_map(fn (ReportStatus $status): array => [
+                'label' => (string) $status->label(),
+                'value' => $this->number((int) ($counts[$status->value] ?? 0)),
+                'tone' => $status->tone()->value,
+            ], ReportStatus::cases()),
+        ];
+    }
+
+    public function layout(): string
+    {
+        return 'agenda';
+    }
+
     protected function records(User $user, string $search): Collection
     {
         return Report::query()->with(['planIndicator.indicator:id,name', 'planIndicator.project:id,name'])
             ->latest('planned_date')->latest('id')->limit(self::RowLimit)->get()
-            ->map(fn (Report $report): array => $this->row(
-                'rp-'.$report->id,
-                (string) ($report->planIndicator?->indicator?->name ?? '—'),
-                collect([$report->planIndicator?->project?->name, $report->planned_date->translatedFormat(__('formats.date'))])->filter()->implode(' · '),
-                $this->badgeOf($report->status),
-                route('reports.show', $report),
-            ));
+            ->map(function (Report $report): array {
+                $badge = $this->badgeOf($report->status);
+
+                return $this->shaped(
+                    $this->row(
+                        'rp-'.$report->id,
+                        (string) ($report->planIndicator?->indicator?->name ?? '—'),
+                        (string) ($report->planIndicator?->project?->name ?? ''),
+                        $badge,
+                        route('reports.show', $report),
+                    ),
+                    lead: ['kind' => 'date', 'big' => $report->planned_date->translatedFormat('j'), 'small' => $report->planned_date->translatedFormat('M y'), 'tone' => $badge['tone']],
+                );
+            });
     }
 }

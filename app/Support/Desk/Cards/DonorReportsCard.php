@@ -48,19 +48,50 @@ final class DonorReportsCard extends PageCard
         ]);
     }
 
+    public function hero(User $user): ?array
+    {
+        $today = CarbonImmutable::today();
+        $overdue = $this->visible($user)->whereNull('submitted_on')->whereDate('due_on', '<', $today)->count();
+        $due = $this->visible($user)->whereNull('submitted_on')->whereBetween('due_on', [$today, $today->addWeeks(8)])->pluck('due_on');
+        $weeks = [];
+
+        for ($week = 0; $week < 8; $week++) {
+            $start = $today->addWeeks($week);
+            $count = $due->filter(fn ($date): bool => $date >= $start && $date < $start->addWeek())->count();
+            $weeks[] = ['label' => $start->translatedFormat('j/n'), 'value' => (string) $count, 'count' => $count, 'tone' => $week < 2 && $count > 0 ? 'warn' : 'active'];
+        }
+
+        return [
+            'kind' => 'weeks',
+            'big' => $this->number($overdue),
+            'caption' => (string) DonorReportState::Overdue->label(),
+            'tone' => $overdue > 0 ? 'critical' : 'good',
+            'items' => $weeks,
+        ];
+    }
+
+    public function layout(): string
+    {
+        return 'agenda';
+    }
+
     protected function records(User $user, string $search): Collection
     {
         return $this->visible($user)->with('donorProposal.donor:id,name')
             ->orderByRaw('submitted_on is not null')->orderBy('due_on')->limit(self::RowLimit)->get()
             ->map(function (DonorReport $report): array {
                 $state = $report->isSubmitted() ? DonorReportState::Submitted : ($report->isOverdue() ? DonorReportState::Overdue : DonorReportState::Due);
+                $badge = $this->badgeOf($state);
 
-                return $this->row(
-                    'dr-'.$report->id,
-                    $report->title,
-                    collect([$report->donorProposal?->donor?->name, __('desk-workspace.card.due_on', ['date' => $report->due_on->translatedFormat(__('formats.date'))])])->filter()->implode(' · '),
-                    $this->badgeOf($state),
-                    route('donor-reports.show', $report),
+                return $this->shaped(
+                    $this->row(
+                        'dr-'.$report->id,
+                        $report->title,
+                        (string) ($report->donorProposal?->donor?->name ?? ''),
+                        $badge,
+                        route('donor-reports.show', $report),
+                    ),
+                    lead: ['kind' => 'date', 'big' => $report->due_on->translatedFormat('j'), 'small' => $report->due_on->translatedFormat('M y'), 'tone' => $badge['tone']],
                 );
             });
     }

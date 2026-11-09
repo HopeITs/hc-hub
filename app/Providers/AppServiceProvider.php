@@ -36,6 +36,10 @@ use App\Models\Task;
 use App\Models\TransfersTracking;
 use App\Models\User;
 use App\Notifications\Alerts\NotificationSettings;
+use App\Support\Desk\Destinations;
+use App\Support\Desk\PageCards;
+use App\Support\Desk\Panels;
+use App\Support\Desk\Shortcuts;
 use App\Support\RouteSlugs;
 use App\Support\SupervisionMap;
 use Carbon\Carbon;
@@ -73,6 +77,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(NotificationSettings::class);
         $this->app->scoped(RouteSlugs::class);
         $this->app->scoped(SupervisionMap::class);
+        // The Desk's catalogues are asked many times per page (sidebar, Ask, cards, tabs, drops): built once per request.
+        $this->app->scoped(Destinations::class);
+        $this->app->scoped(Panels::class);
+        $this->app->scoped(Shortcuts::class);
+        $this->app->scoped(PageCards::class);
 
         $this->registerDevCommands();
 

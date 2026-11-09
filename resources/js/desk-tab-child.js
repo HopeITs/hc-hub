@@ -17,6 +17,8 @@
  */
 
 const param = '_tab';
+/* Livewire calls that only change what the page shows (paging, sorting, a re-render), never a record. */
+const ReadOnlyCalls = new Set(['$refresh', '$commit', '$set', '$sync', 'gotoPage', 'nextPage', 'previousPage', 'setPage', 'resetPage', 'sortBy', 'sort', 'applyFilters', 'clearFilters', 'setFilter', 'fitRows']);
 
 function deskParent() {
     try {
@@ -86,6 +88,17 @@ if (deskParent()) {
             marked.searchParams.set(param, '1');
             window.Livewire?.navigate(marked.toString());
         }
+    });
+
+    // Something was done on this page (a Livewire action, not a mere read of it): the Desk reads itself again when it is next shown.
+    document.addEventListener('livewire:init', () => {
+        window.Livewire.hook('commit', ({ commit, succeed }) => {
+            succeed(() => {
+                if ((commit?.calls ?? []).some((call) => ! ReadOnlyCalls.has(call.method))) {
+                    tell({ hcTab: 'changed' });
+                }
+            });
+        });
     });
 
     document.addEventListener('livewire:navigating', () => tell({ hcTab: 'loading' }));

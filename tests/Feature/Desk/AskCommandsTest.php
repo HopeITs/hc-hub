@@ -9,13 +9,15 @@ test('the instant index holds only the pages and actions the viewer may use', fu
     $actions = fn (array $index): array => array_column($index['actions'], 'item');
 
     $financial = $index(User::factory()->role('Financial')->create());
+    $mediaTeam = $index(User::factory()->role('Media Team')->create());
     $teamMember = $index(User::factory()->role('Team Member')->create());
 
     expect($routes($financial))->toContain('transfers.index', 'admin.accounts.index')
         ->and($actions($financial))->toContain('a-transfer')
-        ->and($routes($teamMember))->not->toContain('transfers.index', 'admin.accounts.index')
-        ->and($actions($teamMember))->not->toContain('a-transfer')
-        ->and($actions($teamMember))->toContain('a-task');
+        ->and($routes($mediaTeam))->not->toContain('transfers.index', 'admin.accounts.index')
+        ->and($actions($mediaTeam))->not->toContain('a-transfer')
+        ->and($actions($mediaTeam))->toContain('a-task')
+        ->and($actions($teamMember))->not->toContain('a-task');
 });
 
 test('each page carries what stands for it on the desk, and whether it is there', function () {
