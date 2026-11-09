@@ -16,6 +16,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
+use Livewire\Livewire;
 
 /**
  * A proposal at the given status that meets every §2 requirement: one linked
@@ -304,4 +305,21 @@ test('the project table is the default and the payroll kind leaves it untouched 
             fn (ProposalStatus $to): bool => $to !== ProposalStatus::Completed && $to !== ProposalStatus::Approved,
         )))
         ->and(ProposalTransitions::map(ProposalKind::Payroll))->not->toHaveKeys(['concept note review', 'concept note submitted', 'proposal review']);
+});
+
+test('a concept note returned with a reason shows that reason to the proposal editor, who can send it back to review', function () {
+    $prManager = userWithRole('Public Relations Manager');
+    $fundraiser = userWithRole('Financial');
+    $proposal = transitionableProposal(ProposalStatus::ConceptNoteReview);
+
+    transition($prManager, $proposal, ProposalStatus::ConceptNote, ['reason' => 'Rework the problem statement.']);
+
+    Livewire::actingAs($fundraiser)
+        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->assertOk()
+        ->assertSee('Rework the problem statement.');
+
+    transition($fundraiser, $proposal->fresh(), ProposalStatus::ConceptNoteReview);
+
+    expect($proposal->fresh()->status)->toBe(ProposalStatus::ConceptNoteReview);
 });

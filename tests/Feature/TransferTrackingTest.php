@@ -235,6 +235,27 @@ test('a user without transfer permissions cannot schedule a tranche', function (
     expect(TransfersTracking::query()->count())->toBe(0);
 });
 
+test('the Public Relations Manager cannot schedule, edit or delete a tranche even when given the ledger view', function () {
+    $prManager = User::factory()->role('Public Relations Manager')->create()->givePermissionTo('transfers.view');
+    $agreement = DonorProposal::factory()->create(['currency' => Currency::Usd]);
+    $tranche = TransfersTracking::factory()->create(['donor_proposal_id' => $agreement->id, 'payment_amount' => '500.00']);
+
+    $fresh = fn () => Livewire::actingAs($prManager)->test('pages::transfers.index');
+
+    $fresh()->assertDontSeeHtml('data-test="create-transfer-button"');
+    $fresh()->call('openCreateModal')->assertForbidden();
+    $fresh()->call('openTransferEdit', $tranche->id)->assertForbidden();
+    $fresh()->set('transferAgreementId', (string) $agreement->id)
+        ->set('paymentAmount', '100.00')
+        ->set('transferredCurrency', Currency::Usd->value)
+        ->set('transferArStatus', ArStatus::Pending->value)
+        ->call('saveTransfer')->assertForbidden();
+    $fresh()->call('deleteTransfer')->assertForbidden();
+
+    expect(TransfersTracking::query()->count())->toBe(1)
+        ->and($tranche->fresh()->payment_amount)->toBe('500.00');
+});
+
 test('the ledger counts shortfall only on money that finished its journey', function () {
     $user = User::factory()->role('Financial')->create();
 
