@@ -56,6 +56,7 @@ return [
     'sent_on' => 'تاريخ الإرسال',
     'settled_money_landed_in_full' => 'وصلت المبالغ المكتملة بالكامل',
     'shortfall' => 'العجز',
+    'shortfall_parts' => 'رسوم :fees · غير مفسّر :gap',
     'show_the_arithmetic' => 'إظهار التفاصيل الحسابية',
     'shrink_line_label' => 'أين انتهى كل مبلغ مُرسل بعملة :currency',
     'sort_amount' => 'الأكبر مبلغًا',

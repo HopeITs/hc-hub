@@ -56,6 +56,7 @@ return [
     'sent_on' => 'Sent on',
     'settled_money_landed_in_full' => 'Settled money landed in full',
     'shortfall' => 'Shortfall',
+    'shortfall_parts' => 'fees :fees · unexplained :gap',
     'show_the_arithmetic' => 'Show the arithmetic',
     'shrink_line_label' => 'Where every :currency sent has ended up',
     'sort_amount' => 'Largest amount',

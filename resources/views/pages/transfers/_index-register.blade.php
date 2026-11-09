@@ -6,8 +6,14 @@
                     ['key' => 'expected', 'label' => __('transfers.expected'), 'value' => $line['expected']],
                     ['key' => 'sent', 'label' => __('transfers.sent'), 'value' => $line['sent']],
                     ['key' => 'received', 'label' => __('finance_tables.received_net'), 'value' => $line['landed'], 'tone' => 'good'],
-                    ['key' => 'fees', 'label' => __('transfers.fees'), 'value' => $line['recordedFees']],
-                    ['key' => 'shortfall', 'label' => __('transfers.shortfall'), 'value' => $line['shrink'], 'prefix' => $line['shrink'] > 0 ? '−' : '', 'tone' => $line['shrink'] > 0 ? 'critical' : null],
+                    /*
+                     * One figure, not two. Fees and shortfall were printed side
+                     * by side at the same size, so a reader added them: 13,202
+                     * of fees and 13,202 "lost" reads as 26,404 gone, when the
+                     * fees ARE the shortfall. The note names the parts instead,
+                     * and they sum to the figure exactly.
+                     */
+                    $line['shrink'] > 0 ? ['key' => 'shortfall', 'label' => __('transfers.shortfall'), 'value' => $line['shrink'], 'prefix' => '−', 'tone' => $line['exchangeGap'] > 0 ? 'critical' : null, 'note' => __('transfers.shortfall_parts', ['fees' => number_format($line['fees'], 2), 'gap' => number_format($line['exchangeGap'], 2)])] : null,
                     $line['overage'] > 0 ? ['key' => 'overage', 'label' => __('transfers.arrived_over'), 'value' => $line['overage'], 'prefix' => '+', 'tone' => 'good'] : null,
                     ['key' => 'outstanding', 'label' => __('finance_tables.outstanding'), 'value' => $line['inFlight']],
                 ])),

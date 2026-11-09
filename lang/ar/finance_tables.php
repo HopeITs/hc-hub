@@ -48,7 +48,7 @@ return [
     'flag_on_hold' => 'معلّق',
     'flag_other_currency' => 'دفعة بعملة أخرى',
     'flag_report_overdue' => 'تقرير مانح متأخر',
-    'flag_short' => 'وصلت ناقصة',
+    'flag_short' => 'خسرت أكثر من رسومها',
     'flag_unrecorded' => 'الصافي غير مسجّل',
     'flags' => 'مؤشرات',
     'from' => 'من',

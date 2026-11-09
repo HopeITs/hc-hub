@@ -256,15 +256,21 @@ new #[Layout('layouts::desk'), Title('titles.transfers')] class extends Componen
         $stagePill('transit', __('finance_tables.state_transit'), 'warn'),
         $stagePill('received', __('finance_tables.state_received')),
         $stagePill('failed', __('finance_tables.state_failed'), 'critical'),
+        /*
+         * These two are states a received tranche can be in, and they write
+         * the same `stage` property as the five above. Sitting in the Flags
+         * row they looked like a second, combinable dimension, so choosing one
+         * silently cleared whatever status was picked. They belong here.
+         */
+        $stagePill('short', __('finance_tables.flag_short'), 'critical'),
+        $stagePill('unrecorded', __('finance_tables.flag_unrecorded'), 'warn'),
     ];
     $currencyPills = [
         ['default' => true, 'label' => __('finance_tables.all'), 'model' => 'currency', 'value' => '', 'active' => $chosen['currency'] === ''],
         ...array_map(fn (Currency $case): array => $setPill('currency', $case->value, $case->value), Currency::cases()),
     ];
-    /* Landed short and net-not-recorded are stages of a received tranche, so they share the status property. */
+    /* Only real flags here now: they write `flag`, so they combine with any status. */
     $flagPills = [
-        $stagePill('short', __('finance_tables.flag_short'), 'critical'),
-        $stagePill('unrecorded', __('finance_tables.flag_unrecorded'), 'warn'),
         ['label' => __('finance_tables.flag_converted'), 'model' => 'flag', 'value' => 'converted', 'toggle' => true, 'active' => $chosen['flag'] === 'converted', 'test' => 'flag-converted'],
         ['label' => __('finance_tables.flag_no_account'), 'model' => 'flag', 'value' => 'no_account', 'toggle' => true, 'active' => $chosen['flag'] === 'no_account', 'test' => 'flag-no-account'],
     ];

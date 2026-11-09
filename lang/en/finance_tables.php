@@ -48,7 +48,7 @@ return [
     'flag_on_hold' => 'On hold',
     'flag_other_currency' => 'Tranche in another currency',
     'flag_report_overdue' => 'Donor report overdue',
-    'flag_short' => 'Landed short',
+    'flag_short' => 'Lost more than its fees',
     'flag_unrecorded' => 'Net not recorded',
     'flags' => 'Flags',
     'from' => 'From',

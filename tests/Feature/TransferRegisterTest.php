@@ -475,3 +475,49 @@ test('the tranche form is rendered only while its modal is open', function () {
         ->call('openTransferCreate')
         ->assertSeeHtml('wire:model="paymentAmount"');
 });
+
+test('the shortfall names its parts instead of printing the fees twice', function () {
+    // 1,000 sent, 985 net: 15 lost, 10 of it recorded fees, 5 unexplained.
+    registerSettledTranche();
+
+    $line = transferRegister()->instance()->totals->sole();
+
+    expect($line['shrink'])->toBe(15.0)
+        ->and($line['fees'])->toBe(10.0)
+        ->and($line['exchangeGap'])->toBe(5.0);
+
+    // One figure for what was lost; fees are no longer a sibling of it, so a
+    // reader cannot add the two and conclude 25 is gone.
+    transferRegister()
+        ->assertSeeHtml('data-total="shortfall"')
+        ->assertDontSeeHtml('data-total="fees"')
+        ->assertSeeText('fees 10.00 · unexplained 5.00');
+});
+
+test('a tranche whose whole loss is its recorded fees is not counted as short', function () {
+    // 1,000 sent, 990 net, 10 of fees: nothing unexplained.
+    registerSettledTranche(['net_amount_received' => '990.00', 'amount_received' => '1000.00']);
+
+    $page = transferRegister();
+
+    expect($page->instance()->totals->sole()['exchangeGap'])->toBe(0.0)
+        ->and($page->instance()->stageCounts['short'])->toBe(0);
+
+    // And the status that selects them finds none.
+    expect($page->call('toggleStage', 'short')->instance()->rows->total())->toBe(0);
+});
+
+test('landed short and net not recorded sit with the statuses they belong to', function () {
+    registerSettledTranche();
+
+    // They write the stage property, so choosing one replaces the status
+    // rather than combining with it: they are statuses, and are shown as such.
+    $page = transferRegister()->call('toggleStage', 'received');
+
+    expect($page->instance()->stage)->toBe('received');
+
+    $page->call('toggleStage', 'short');
+
+    expect($page->instance()->stage)->toBe('short')
+        ->and($page->instance()->flag)->toBe('');
+});
