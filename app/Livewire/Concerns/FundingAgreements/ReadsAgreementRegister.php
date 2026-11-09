@@ -68,14 +68,12 @@ trait ReadsAgreementRegister
 
         return $this->whereProposalInStrategy(DonorProposal::query(), 'donor_proposal.proposal_id')
             ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(function (Builder $query) use ($search): void {
-                    $query
-                        ->where('external_project_number', 'like', Like::contains($search))
-                        ->orWhereHas('donor', fn (Builder $query) => $query->where('name', 'like', Like::contains($search)))
-                        ->orWhereHas('proposal', fn (Builder $query) => $query->where(fn (Builder $query) => $query
-                            ->where('name', 'like', Like::contains($search))
-                            ->orWhere('internal_project_number', 'like', Like::contains($search))));
-                });
+                $query->where(Like::everyWord($search, fn (Builder $query, string $word) => $query
+                    ->where(Like::word('external_project_number', $word))
+                    ->orWhereHas('donor', Like::word('name', $word))
+                    ->orWhereHas('proposal', fn (Builder $query) => $query
+                        ->where(Like::word('name', $word))
+                        ->orWhere(Like::word('internal_project_number', $word)))));
             })
             ->when($this->donor !== '', fn (Builder $query) => $query->where('donor_proposal.donor_id', (int) $this->donor))
             ->when(Currency::tryFrom($this->currency), fn (Builder $query, Currency $currency) => $query->where('currency', $currency))

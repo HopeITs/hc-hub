@@ -134,9 +134,9 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
             ->when($this->module !== '', fn (Builder $query) => $query->where('module', $this->module))
             ->when($this->actor === 'system', fn (Builder $query) => $query->whereNull('actor_id'))
             ->when(ctype_digit($this->actor), fn (Builder $query) => $query->where('actor_id', (int) $this->actor))
-            ->when($term !== '', fn (Builder $query) => $query->where(fn (Builder $query) => $query
-                ->where('event', 'like', Like::contains($term))
-                ->orWhere('properties', 'like', Like::contains($term))))
+            ->when($term !== '', fn (Builder $query) => $query->where(Like::everyWord($term, fn (Builder $query, string $word) => $query
+                ->where(Like::word('event', $word))
+                ->orWhere(Like::word('properties', $word)))))
             ->when($from !== null, fn (Builder $query) => $query->where('created_at', '>=', $from->startOfDay()))
             ->when($to !== null, fn (Builder $query) => $query->where('created_at', '<=', $to->endOfDay()));
     }

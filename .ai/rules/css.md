@@ -1,6 +1,7 @@
 ---
 paths:
-  - resources/css/*.css
+  - 'resources/css/*.css'
+  - 'resources/css/desk*.css'
 ---
 
 # Css
@@ -29,3 +30,5 @@ The "light mode must stay pixel-identical when restyling dark" notes in css.md a
 So `--color-status-critical-text` (light `var(--color-primary)` 6.2:1 on white, dark #ff5a60 5.9:1 on the page ground) is the token for critical **type**; `--color-status-critical` stays the token for dots, bars, rings and other non-text marks. Added 2026-11-09 for the funding-agreements register's status word and headline figure.
 
 Not yet applied elsewhere: every other `text-status-critical` at body size in dark has the same 3.75:1 — the detail page's attention list, the overdue and failed lines in the calendar lanes, the overdue amounts in the register cells. Switching those is a one-token change per site, worth doing as its own pass.
+## Desk lists cannot take their own padding or margin
+desk.css resets `.dk-scope ul/ol { margin:0; padding:0 }` and `.dk-scope p { margin:0 }` UNLAYERED, so it beats any padding/margin a `@layer components` class sets on a ul, ol or p (computes to 0 silently). Put side padding on the `li` items, and space blocks with a parent `gap`, never with margin on the ul/p. Found on the program Results tab (2026-11-06).

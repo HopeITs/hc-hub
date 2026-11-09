@@ -28,10 +28,12 @@ use Livewire\Attributes\Computed;
  * @property string $level #[Url] '' | G | CC | OC | OP | AC
  * @property string $measure #[Url] filter on the page
  * @property string $collector #[Url] filter on the page
- * @property string $status #[Url] '' | 'active' | 'inactive'
+ * @property string $focus #[Url] '' | 'inuse' | 'unused' | 'off'
  * @property string $english #[Url] '' | 'missing'
  * @property-read Collection<int, LibraryIndicator> $entries #[Computed] entries()
+ * @property-read Collection<int, LibraryIndicator> $matchingEntries #[Computed] matchingEntries()
  * @property-read Collection<int, LibraryIndicator> $filteredEntries #[Computed] filteredEntries()
+ * @property-read array{inuse: int, unused: int, off: int} $focusCounts #[Computed] focusCounts()
  * @property-read LengthAwarePaginator<int, LibraryIndicator> $pagedEntries #[Computed] pagedEntries()
  */
 trait ListsLibraryEntries
@@ -72,10 +74,13 @@ trait ListsLibraryEntries
     }
 
     /**
+     * The entries matching the search and every filter except the status
+     * buttons, so the three counts read under exactly what the list shows.
+     *
      * @return Collection<int, LibraryIndicator>
      */
     #[Computed]
-    public function filteredEntries(): Collection
+    public function matchingEntries(): Collection
     {
         // Trimmed again: the cap can leave a cut term ending in spaces.
         $term = trim(Like::term($this->search));
@@ -89,17 +94,54 @@ trait ListsLibraryEntries
             ->filter(fn (LibraryIndicator $entry): bool => $this->level === '' || self::levelKindOf($entry->level_ref) === $this->level)
             ->filter(fn (LibraryIndicator $entry): bool => $this->measure === '' || $entry->measure->value === $this->measure)
             ->filter(fn (LibraryIndicator $entry): bool => $this->collector === '' || $entry->collected_by->value === $this->collector)
-            ->filter(fn (LibraryIndicator $entry): bool => match ($this->status) {
-                'active' => $entry->is_active,
-                'inactive' => ! $entry->is_active,
-                default => true,
-            })
             ->filter(fn (LibraryIndicator $entry): bool => $this->english !== 'missing' || blank($entry->name_en))
             ->filter(fn (LibraryIndicator $entry): bool => $term === ''
-                || ArabicText::contains($entry->name_ar, $term)
-                || ArabicText::contains((string) $entry->name_en, $term)
-                || ArabicText::contains($entry->code, $term))
+                || ArabicText::containsTyped($entry->name_ar, $term)
+                || ArabicText::containsTyped((string) $entry->name_en, $term)
+                || ArabicText::containsTyped($entry->code, $term))
             ->values();
+    }
+
+    /**
+     * @return Collection<int, LibraryIndicator>
+     */
+    #[Computed]
+    public function filteredEntries(): Collection
+    {
+        return $this->focus === ''
+            ? $this->matchingEntries
+            : $this->matchingEntries->filter(fn (LibraryIndicator $entry): bool => self::statusOf($entry) === $this->focus)->values();
+    }
+
+    /**
+     * How many matching entries sit under each button: disjoint and added up
+     * to the matching total, so a click shows exactly that many.
+     *
+     * @return array{inuse: int, unused: int, off: int}
+     */
+    #[Computed]
+    public function focusCounts(): array
+    {
+        $byStatus = $this->matchingEntries->countBy(fn (LibraryIndicator $entry): string => self::statusOf($entry));
+
+        return [
+            'inuse' => (int) $byStatus->get('inuse', 0),
+            'unused' => (int) $byStatus->get('unused', 0),
+            'off' => (int) $byStatus->get('off', 0),
+        ];
+    }
+
+    /**
+     * The entry's one status word: `off` (switched off), `inuse` (at least
+     * one indicator uses it) or `unused`.
+     */
+    public static function statusOf(LibraryIndicator $entry): string
+    {
+        return match (true) {
+            ! $entry->is_active => 'off',
+            $entry->indicators_count > 0 => 'inuse',
+            default => 'unused',
+        };
     }
 
     /**
@@ -169,7 +211,7 @@ trait ListsLibraryEntries
      */
     protected function forgetLibrary(): void
     {
-        foreach (['entries', 'filteredEntries', 'pagedEntries'] as $property) {
+        foreach (['entries', 'matchingEntries', 'filteredEntries', 'focusCounts', 'pagedEntries'] as $property) {
             unset($this->{$property});
         }
     }

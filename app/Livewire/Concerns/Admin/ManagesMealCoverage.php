@@ -134,7 +134,7 @@ trait ManagesMealCoverage
 
         return Project::query()
             ->select(['id', 'name', 'city_id', 'center_id'])
-            ->when($search !== '', fn ($query) => $query->where('name', 'like', Like::contains($search)))
+            ->when($search !== '', fn ($query) => $query->where(Like::matches('name', $search)))
             ->orderBy('name')
             ->orderBy('id')
             ->limit(self::ProjectOfficerLimit)

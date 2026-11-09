@@ -13,6 +13,10 @@ return [
     'evidence_types_invalid' => 'اختر أنواع أدلة فعّالة فقط',
     'fixed_denominator_invalid' => 'أدخل عددًا صحيحًا لا يقل عن 1',
     'queue' => [
+        'new_templates' => 'قوالب جديدة',
+        'search' => 'ابحث في القوالب',
+        'search_placeholder' => 'المشروع أو المقترح أو المدينة',
+        'review' => 'راجع',
         'all_cities' => 'كل المدن',
         'project' => 'المشروع',
         'template' => 'القالب',

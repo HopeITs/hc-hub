@@ -39,14 +39,10 @@ return [
         'projects_index' => ['intro' => ['title' => 'Projects', 'body' => 'All projects with their progress, budget and team. Filter down to a program, status or lead, then open one to manage it.']],
         'reviews_index' => [
             'intro' => ['title' => 'My reviews', 'body' => 'The concept notes and proposals waiting for your review, oldest first. A wait over a week turns red.'],
-            'filters' => ['title' => 'What to show', 'body' => 'Waiting on me lists what still needs you; All my reviews adds the ones you finished; Asked by me shows who still owes you a review.'],
+            'filters' => ['title' => 'What to show', 'body' => 'Waiting on me lists what still needs you; Finished holds the ones you are done with; Asked by me shows who still owes you a review. Search by proposal or project name.'],
             'table' => ['title' => 'Your reviews', 'body' => 'Press Review to open the proposal right on your note. Add a note if you like, then press Mark as reviewed.'],
         ],
         'projects_show' => ['intro' => ['title' => 'Project detail', 'body' => 'One project end to end: schedule, milestones, tasks, budget, team and how it links to the results it serves.']],
-        'timeline_index' => [
-            'intro' => ['title' => 'Timeline', 'body' => 'Every project on a shared time axis, so overlaps and gaps are obvious.'],
-            'board' => ['title' => 'The timeline', 'body' => 'Bars show when work starts and ends. Scroll sideways through time and use the view switch to change the zoom.'],
-        ],
         'risks_index' => ['intro' => ['title' => 'Risks', 'body' => 'What could go wrong, how likely and how serious it is, and who is handling it. Log a new risk as soon as you spot one.']],
         'milestones_index' => ['intro' => ['title' => 'Milestones', 'body' => 'Key delivery checkpoints across projects. Filter by project or status to see what is coming and what is late.']],
         'milestones_show' => ['intro' => ['title' => 'Milestone detail', 'body' => 'One checkpoint with its dates, progress and the tasks that lead up to it.']],

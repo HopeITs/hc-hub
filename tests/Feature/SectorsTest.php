@@ -122,6 +122,23 @@ describe('the page', function () {
         expect($sector->fresh()->is_active)->toBeFalse();
     });
 
+    it('names the sector in the deactivate and delete dialogs', function () {
+        $sector = Sector::factory()->create(['name_ar' => 'الصحة', 'name_en' => 'Health']);
+
+        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.sectors')
+            ->call('confirmDeactivate', $sector->id)
+            ->assertSet('showDeactivateModal', true)
+            ->assertSet('deactivatingSectorName', 'Health')
+            ->assertSee(__('sectors.deactivate_title', ['name' => 'Health']))
+            ->call('cancelDeactivate')
+            ->assertSet('deactivatingSectorName', '')
+            ->call('confirmDelete', $sector->id)
+            ->assertSet('showDeleteModal', true)
+            ->assertSee(__('sectors.delete_title', ['name' => 'Health']))
+            ->call('cancelDelete')
+            ->assertSet('deletingSectorName', '');
+    });
+
     it('moves a sector with the keyboard-reachable buttons and announces its new position', function () {
         [$first, $second] = [Sector::factory()->create(['name_en' => 'First', 'sort_order' => 1]), Sector::factory()->create(['name_en' => 'Second', 'sort_order' => 2])];
 

@@ -187,8 +187,8 @@ describe('deleting and deactivating', function () {
 
         Livewire::actingAs(userWithRole('Team Member'))->test('pages::indicator-library.index')
             ->assertSee('Withdrawn')
-            ->assertSee(__('indicator_library.inactive'))
-            ->set('status', 'active')
+            ->assertSee(__('indicator_library.status_off'))
+            ->call('setFocus', 'unused')
             ->assertSee('Still offered')
             ->assertDontSee('Withdrawn');
 
@@ -250,6 +250,67 @@ describe('search and filters', function () {
         Livewire::actingAs(userWithRole('Team Member'))->test('pages::indicator-library.index')
             ->set('search', 'Households'.str_repeat(' ', 200).'x')
             ->assertSee('Households reached');
+    });
+});
+
+describe('status buttons', function () {
+    it('counts in use, not used yet and switched off as disjoint buttons that match a click', function () {
+        libraryEntryInUse(attributes: ['name_en' => 'Used entry']);
+        LibraryIndicator::factory()->create(['name_en' => 'Fresh entry']);
+        LibraryIndicator::factory()->inactive()->create(['name_en' => 'Old entry']);
+
+        $page = Livewire::actingAs(userWithRole('MEAL'))->test('pages::indicator-library.index');
+
+        expect($page->instance()->focusCounts)->toBe(['inuse' => 1, 'unused' => 1, 'off' => 1]);
+
+        $page->call('setFocus', 'unused')
+            ->assertSee('Fresh entry')
+            ->assertDontSee('Used entry')
+            ->assertDontSee('Old entry')
+            ->call('setFocus', 'unused')
+            ->assertSet('focus', '')
+            ->assertSee('Old entry')
+            ->call('setFocus', 'nonsense')
+            ->assertSet('focus', '');
+    });
+
+    it('counts under the search, so a click shows as many entries as its button says', function () {
+        libraryEntryInUse(attributes: ['name_en' => 'Wells built']);
+        LibraryIndicator::factory()->create(['name_en' => 'Wells planned']);
+        LibraryIndicator::factory()->create(['name_en' => 'Schools opened']);
+
+        $page = Livewire::actingAs(userWithRole('MEAL'))->test('pages::indicator-library.index')
+            ->set('search', 'Wells');
+
+        expect($page->instance()->focusCounts)->toBe(['inuse' => 1, 'unused' => 1, 'off' => 0]);
+    });
+
+    it('names the entry in the switch off and delete dialogs', function () {
+        $entry = LibraryIndicator::factory()->create(['name_en' => 'Households reached']);
+
+        Livewire::actingAs(userWithRole('MEAL'))->test('pages::indicator-library.index')
+            ->call('confirmDeactivate', $entry->id)
+            ->assertSee('Switch off “Households reached”?')
+            ->call('cancelDeactivate')
+            ->call('confirmDelete', $entry->id)
+            ->assertSee('Delete “Households reached”?');
+    });
+
+    it('keeps the buttons and rows inside the component and disables deleting an entry in use with its reason', function () {
+        libraryEntryInUse(attributes: ['name_en' => 'Used entry']);
+
+        $html = Livewire::actingAs(userWithRole('MEAL'))->test('pages::indicator-library.index')->html();
+
+        $dom = new DOMDocument;
+        @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
+        $xpath = new DOMXPath($dom);
+        $root = '//*[@*[name()="wire:name"]="pages::indicator-library.index"]';
+
+        foreach (['focus-tab-inuse', 'focus-tab-unused', 'focus-tab-off', 'more-filters-button'] as $control) {
+            expect($xpath->query($root.'//*[@data-test="'.$control.'"]')->length)->toBeGreaterThan(0, "{$control} sits outside the component");
+        }
+        expect($xpath->query($root.'//li[@data-library-entry]')->length)->toBe(1)
+            ->and($html)->toContain(__('indicator_library.cannot_delete_in_use'));
     });
 });
 

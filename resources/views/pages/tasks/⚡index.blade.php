@@ -67,6 +67,10 @@ new #[Layout('layouts::desk'), Title('titles.tasks')] class extends Component
     #[Url(except: false)]
     public bool $myTasksOnly = false;
 
+    /** The tab above the views (FiltersTaskDirectory::setScope). */
+    #[Url(except: '')]
+    public string $scope = '';
+
     /**
      * Set by clicking the "Overdue" or "Due soon" stat tile — a quick filter
      * alongside status/priority/assignee rather than a fifth dropdown.
@@ -212,6 +216,7 @@ new #[Layout('layouts::desk'), Title('titles.tasks')] class extends Component
 
         @include('pages.tasks._assignee-popover')
         @include('pages.tasks._task-option-menu')
+        @include('pages.tasks._person-card')
     @endif
 
     @include('pages.tasks._index-drawer')

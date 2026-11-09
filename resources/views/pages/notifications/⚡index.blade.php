@@ -72,7 +72,7 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
             ->when(in_array($this->priority, NotificationPriority::values(), true), fn (Builder $query) => $query->where('priority', $this->priority))
             ->when($this->state === 'unread', fn (Builder $query) => $query->whereNull('read_at'))
             ->when($this->state === 'read', fn (Builder $query) => $query->whereNotNull('read_at'))
-            ->when($term !== '', fn (Builder $query) => $query->where('search_text', 'like', Like::contains($term)));
+            ->when($term !== '', fn (Builder $query) => $query->where(Like::matches('search_text', $term)));
     }
 
     /**
@@ -217,9 +217,31 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
     public function showCritical(): void
     {
         $this->reset('module', 'kind', 'search', 'selected');
+        $this->perPage = self::PageSize;
+
+        if ($this->state === 'unread' && $this->priority === NotificationPriority::Critical->value) {
+            $this->state = 'all';
+            $this->priority = '';
+
+            return;
+        }
+
         $this->state = 'unread';
         $this->priority = NotificationPriority::Critical->value;
+    }
+
+    /**
+     * Press a headline number to show that list; press it again to clear it.
+     */
+    public function toggleState(string $state): void
+    {
+        if (! in_array($state, ['unread', 'snoozed'], true)) {
+            return;
+        }
+
+        $this->reset('module', 'kind', 'priority', 'search', 'selected');
         $this->perPage = self::PageSize;
+        $this->state = $this->state === $state ? 'all' : $state;
     }
 
     public function markSelectedRead(): void
@@ -262,7 +284,8 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
         'important' => 'bg-status-warn',
         'info' => 'bg-secondary-soft dark:bg-line-strong',
     ];
-    $railHeading = 'type-label mb-2 px-2 text-secondary-medium dark:text-ink-muted';
+    $moreOpen = $priority !== '' || $kind !== '' || $module !== '';
+    $railHeading ='type-label mb-2 px-2 text-secondary-medium dark:text-ink-muted';
     $railItem = 'group/item relative flex min-h-9 w-full cursor-pointer items-center gap-3 rounded-lg px-2 text-start text-sm transition-colors focus-visible:outline-2 focus-visible:outline-secondary-medium';
     $railActive = 'font-bold text-secondary-dark dark:text-ink';
     $railIdle = 'text-secondary-medium hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink';
@@ -293,14 +316,14 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
 
     <div class="grid gap-8 @4xl/directory:grid-cols-[15rem_minmax(0,1fr)] @6xl/directory:grid-cols-[16.5rem_minmax(0,1fr)] @6xl/directory:gap-14">
         {{-- Rail: the brief, then every filter as one click. --}}
-        <aside x-data="{ filtersOpen: false }" class="min-w-0 @4xl/directory:sticky @4xl/directory:top-6 @4xl/directory:self-start" aria-label="{{ __('notifications.rail.label') }}">
+        <aside x-data="{ filtersOpen: false, more: @js($moreOpen) }" class="min-w-0 @4xl/directory:sticky @4xl/directory:top-6 @4xl/directory:self-start" aria-label="{{ __('notifications.rail.label') }}">
             <div class="flex items-end justify-between gap-4 @4xl/directory:block">
                 <div data-inbox-brief>
                     @if ($counts['total'] > 0)
-                        <p class="flex items-baseline gap-3">
+                        <button type="button" wire:click="toggleState('unread')" aria-pressed="{{ $state === 'unread' && $priority === '' ? 'true' : 'false' }}" class="group/brief flex cursor-pointer items-baseline gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-secondary-medium" data-brief-unread>
                             <span wire:key="brief-{{ $counts['total'] }}" x-data="countUp({{ $counts['total'] }})" x-text="display" class="text-6xl leading-none font-extrabold tracking-[-0.04em] tabular-nums">{{ $counts['total'] }}</span>
-                            <span class="text-sm font-semibold text-secondary-medium dark:text-ink-muted">{{ __('notifications.brief.unread') }}</span>
-                        </p>
+                            <span @class(['text-sm font-semibold text-secondary-medium group-hover/brief:underline group-hover/brief:underline-offset-4 dark:text-ink-muted', 'underline underline-offset-4' => $state === 'unread' && $priority === ''])>{{ __('notifications.brief.unread') }}</span>
+                        </button>
                     @else
                         <p class="flex items-center gap-2.5 text-xl font-bold">
                             <span class="flex size-8 items-center justify-center rounded-full bg-status-good-soft text-status-good"><flux:icon.check variant="mini" class="size-4" /></span>
@@ -313,20 +336,9 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
                             <div>
                                 <dt class="sr-only">{{ __('notifications.brief.critical') }}</dt>
                                 <dd>
-                                    <button type="button" wire:click="showCritical" class="group/brief inline-flex cursor-pointer items-baseline gap-1.5 rounded-md text-status-critical focus-visible:outline-2 focus-visible:outline-secondary-medium" data-brief-critical>
+                                    <button type="button" wire:click="showCritical" aria-pressed="{{ $state === 'unread' && $priority === 'critical' ? 'true' : 'false' }}" class="group/brief inline-flex cursor-pointer items-baseline gap-1.5 rounded-md text-status-critical focus-visible:outline-2 focus-visible:outline-secondary-medium" data-brief-critical>
                                         <span class="text-lg font-extrabold tabular-nums">{{ $counts['critical'] }}</span>
                                         <span class="font-semibold group-hover/brief:underline group-hover/brief:underline-offset-4">{{ __('notifications.brief.critical') }}</span>
-                                    </button>
-                                </dd>
-                            </div>
-                        @endif
-                        @if (($counts['kinds']['alert'] ?? 0) > 0)
-                            <div>
-                                <dt class="sr-only">{{ __('notifications.brief.alerts') }}</dt>
-                                <dd>
-                                    <button type="button" wire:click="$set('kind', 'alert')" class="group/brief inline-flex cursor-pointer items-baseline gap-1.5 rounded-md focus-visible:outline-2 focus-visible:outline-secondary-medium">
-                                        <span class="text-lg font-extrabold tabular-nums">{{ $counts['kinds']['alert'] }}</span>
-                                        <span class="font-semibold text-secondary-medium group-hover/brief:underline group-hover/brief:underline-offset-4 dark:text-ink-muted">{{ __('notifications.brief.alerts') }}</span>
                                     </button>
                                 </dd>
                             </div>
@@ -335,7 +347,7 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
                             <div>
                                 <dt class="sr-only">{{ __('notifications.brief.snoozed') }}</dt>
                                 <dd>
-                                    <button type="button" wire:click="$set('state', 'snoozed')" class="group/brief inline-flex cursor-pointer items-baseline gap-1.5 rounded-md focus-visible:outline-2 focus-visible:outline-secondary-medium">
+                                    <button type="button" wire:click="toggleState('snoozed')" aria-pressed="{{ $state === 'snoozed' ? 'true' : 'false' }}" data-brief-snoozed class="group/brief inline-flex cursor-pointer items-baseline gap-1.5 rounded-md focus-visible:outline-2 focus-visible:outline-secondary-medium">
                                         <span class="text-lg font-extrabold tabular-nums">{{ $counts['snoozed'] }}</span>
                                         <span class="font-semibold text-secondary-medium group-hover/brief:underline group-hover/brief:underline-offset-4 dark:text-ink-muted">{{ __('notifications.brief.snoozed') }}</span>
                                     </button>
@@ -383,6 +395,13 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
                     </ul>
                 </div>
 
+                <button type="button" x-on:click="more = ! more" x-bind:aria-expanded="more.toString()" class="{{ $railItem }} {{ $railIdle }} font-semibold" data-more-filters>
+                    <flux:icon.funnel variant="micro" class="size-4 shrink-0" />
+                    <span class="min-w-0 flex-1 truncate">{{ __('notifications.more_filters') }}</span>
+                    <flux:icon.chevron-down variant="micro" class="size-3.5 transition-transform" x-bind:class="more ? 'rotate-180' : ''" />
+                </button>
+
+                <div x-show="more" @unless ($moreOpen) x-cloak @endunless class="contents">
                 <div>
                     <p class="{{ $railHeading }}">{{ __('notifications.rail.priority') }}</p>
                     <ul class="{{ $threadList }}">
@@ -453,6 +472,7 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
                         </ul>
                     </div>
                 @endif
+                </div>
 
                 <button type="button" x-on:click="help = true" class="hidden cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold text-secondary-medium hover:text-secondary-dark lg:inline-flex dark:text-ink-muted dark:hover:text-ink">
                     <kbd class="inline-flex size-5 items-center justify-center rounded border border-secondary-soft font-sans text-[0.6875rem] dark:border-line">?</kbd>

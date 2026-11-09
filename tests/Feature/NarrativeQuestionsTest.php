@@ -82,21 +82,86 @@ describe('the page', function () {
         expect(NarrativeQuestion::query()->count())->toBe(0);
     });
 
-    it('filters the bank by frequency', function () {
+    it('counts monthly, quarter end and switched off as three disjoint buttons that match a click', function () {
         NarrativeQuestion::factory()->monthly()->create(['text_en' => 'Asked every month']);
         NarrativeQuestion::factory()->quarterEnd()->create(['text_en' => 'Asked at quarter end']);
+        NarrativeQuestion::factory()->monthly()->inactive()->create(['text_en' => 'Old monthly question']);
+
+        $page = Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions');
+
+        expect($page->instance()->focusCounts)->toMatchArray(['monthly' => 1, 'quarter_end' => 1, 'off' => 1, 'total' => 3]);
+
+        $page->call('setFocus', 'quarter_end')
+            ->assertSee('Asked at quarter end')
+            ->assertDontSee('Asked every month')
+            ->assertDontSee('Old monthly question')
+            ->call('setFocus', 'quarter_end')
+            ->assertSet('focus', '')
+            ->assertSee('Asked every month')
+            ->call('setFocus', 'off')
+            ->assertSee('Old monthly question')
+            ->assertDontSee('Asked every month')
+            ->call('setFocus', 'nonsense')
+            ->assertSet('focus', '');
+    });
+
+    it('searches both languages, keeps each place in its frequency and offers a way out', function () {
+        NarrativeQuestion::factory()->monthly()->create(['text_ar' => 'سؤال أول', 'text_en' => 'First one', 'sort_order' => 1]);
+        NarrativeQuestion::factory()->monthly()->create(['text_ar' => 'سؤال ثان', 'text_en' => 'Second one', 'sort_order' => 2]);
+
+        $page = Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')
+            ->set('search', 'second')
+            ->assertSee('Second one')
+            ->assertDontSee('First one')
+            ->assertSeeHtml('aria-label="Position 2"');
+
+        // While a search narrows the list, a move would be a move in the whole frequency, so the arrows are off.
+        $dom = new DOMDocument;
+        @$dom->loadHTML('<?xml encoding="utf-8"?>'.$page->html());
+        $arrows = (new DOMXPath($dom))->query('//*[@data-test="move-narrative-question-up" or @data-test="move-narrative-question-down"]');
+        expect($arrows->length)->toBe(2);
+        foreach ($arrows as $arrow) {
+            expect($arrow->hasAttribute('disabled'))->toBeTrue();
+        }
+
+        $page->set('search', 'ثان')->assertSee('Second one')
+            ->set('search', 'zzz-no-match')
+            ->assertSee(__('narrative_questions.no_match'))
+            ->assertSeeHtml('data-test="empty-reset-filters"')
+            ->call('clearFilters')
+            ->assertSet('search', '')
+            ->assertSee('First one');
+    });
+
+    it('names the question in the switch off and delete dialogs', function () {
+        $question = NarrativeQuestion::factory()->create(['text_en' => 'Main achievements?']);
 
         Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')
-            ->assertSee('Asked every month')
-            ->assertSee('Asked at quarter end')
-            ->set('frequency', 'quarter_end')
-            ->assertDontSee('Asked every month')
-            ->assertSee('Asked at quarter end')
-            ->assertSeeHtml('<span class="truncate">'.__('enums.narrative_question_frequency.quarter_end').'</span>');
+            ->call('confirmDeactivate', $question->id)
+            ->assertSet('showDeactivateModal', true)
+            ->assertSee('Switch off “Main achievements?”?')
+            ->call('cancelDeactivate')
+            ->call('confirmDelete', $question->id)
+            ->assertSee('Delete “Main achievements?”?');
+    });
 
-        Livewire::withQueryParams(['frequency' => 'monthly'])->actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')
-            ->assertSee('Asked every month')
-            ->assertDontSee('Asked at quarter end');
+    it('keeps the buttons and rows inside the component and moves switching and deleting into the menu', function () {
+        $question = NarrativeQuestion::factory()->create();
+        NarrativeQuestion::factory()->inactive()->create();
+
+        $html = Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')->html();
+
+        $dom = new DOMDocument;
+        @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
+        $xpath = new DOMXPath($dom);
+        $root = '//section[@*[name()="wire:name"]="pages::admin.narrative-questions"]';
+
+        foreach (['focus-tab-monthly', 'focus-tab-quarter_end', 'focus-tab-off', 'edit-narrative-question'] as $control) {
+            expect($xpath->query($root.'//*[@data-test="'.$control.'"]')->length)->toBeGreaterThan(0, "{$control} sits outside the component");
+        }
+        expect($xpath->query($root.'//li[@data-narrative-question]')->length)->toBe(2)
+            ->and($xpath->query($root.'//*[@data-test="narrative-question-menu-'.$question->id.'"]')->length)->toBe(1)
+            ->and($html)->toContain('Switch on');
     });
 
     it('labels each question with its frequency in words', function () {
@@ -149,7 +214,7 @@ describe('the page', function () {
             ->assertSet('showDeactivateModal', true)
             ->call('deactivateQuestion')
             ->assertSet('showDeactivateModal', false)
-            ->assertSee(__('narrative_questions.inactive'));
+            ->assertSee(__('narrative_questions.status_off'));
 
         expect($question->fresh()->is_active)->toBeFalse();
 

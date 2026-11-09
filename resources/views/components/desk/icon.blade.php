@@ -37,8 +37,11 @@
         'users' => '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.4.3 4.2 2 4.8 5"/>',
         'lock' => '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
         'flag' => '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+        'pin' => '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
         'chart' => '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
         'edit' => '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+        'milestone' => '<path d="M12 3.5 20.5 12 12 20.5 3.5 12Z"/>',
+        'subtask' => '<circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M6 7v5a7 7 0 0 0 7 7h3"/>',
     ];
 @endphp
 

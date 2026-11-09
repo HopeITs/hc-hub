@@ -39,14 +39,15 @@ new #[Layout('layouts::desk'), Title('titles.results_framework')] class extends 
      * Narrows the framework to the statements that need attention.
      *
      * '' shows everything, 'unmeasured' only statements carrying no indicator,
-     * 'offtrack' only statements whose indicators are rating amber or red.
+     * 'offtrack' only statements behind target, 'waiting' only statements whose
+     * figures are old or never read. The three are disjoint (measurements()['status']).
      */
     #[Url(except: '')]
     public string $focus = '';
 
-    /** 'cascade' draws the chain, 'matrix' lists every statement in one grid. */
-    #[Url(except: 'cascade')]
-    public string $view = 'cascade';
+    /** 'list' draws the framework, 'chart' counts the same statements by status. */
+    #[Url(except: 'list')]
+    public string $view = 'list';
 
     /**
      * `?program=<id>&create=1` (the logframe-missing alert, T14) opens the
@@ -99,68 +100,19 @@ new #[Layout('layouts::desk'), Title('titles.results_framework')] class extends 
     {
         $this->focus = $this->focus === $focus ? '' : $focus;
     }
-
-    /**
-     * Toggle the level filter from a chain card; clicking the active one clears it.
-     */
-    public function setType(string $type): void
-    {
-        $this->type = $this->type === $type ? '' : $type;
-    }
 };
 ?>
 
 @php
     $filtersAreActive = $search !== '' || $proposal !== '' || $program !== '' || $type !== '' || $focus !== '';
     $overview = $this->overview;
-    $programCount = $this->groupedRoots->count();
-
-    $levelMarks = [
-        ResultType::Impact->value => 'bg-secondary-dark ring-secondary-dark dark:bg-ink dark:ring-ink',
-        ResultType::Outcome->value => 'bg-primary ring-primary',
-        ResultType::Output->value => 'bg-board ring-secondary-light',
-        ResultType::Activity->value => 'bg-transparent ring-secondary-medium dark:ring-ink-muted',
-        ResultType::CrossCutting->value => 'bg-secondary-light ring-secondary-light dark:bg-ink-muted dark:ring-ink-muted',
-    ];
-
-    $coverageTone = match (true) {
-        $overview['coverage'] === null => 'neutral',
-        $overview['coverage'] >= 80 => 'good',
-        $overview['coverage'] >= 50 => 'warn',
-        default => 'critical',
-    };
-
-    $onTrackShare = $overview['rated'] === 0 ? null : ($overview['rag']['green'] / $overview['rated']) * 100;
-
-    $focusCounts = $this->focusCounts;
-
-    $focusChips = [
-        [
-            'key' => 'unmeasured',
-            'label' => __('results_framework.needs_indicators'),
-            'icon' => 'exclamation-triangle',
-            'count' => $focusCounts['unmeasured'],
-        ],
-        [
-            'key' => 'offtrack',
-            'label' => __('results_framework.off_track'),
-            'icon' => 'arrow-trending-down',
-            'count' => $focusCounts['offtrack'],
-        ],
-    ];
 @endphp
 
-<x-desk.register class="@container/directory" heading-id="results-framework-heading" :title="__('common.results_framework')" :count="$overview['statements']">
+<x-desk.register class="@container/directory" heading-id="results-framework-heading" :title="__('common.results_framework')" :count="$overview['statements']" :views="['list' => ['icon' => 'table', 'label' => __('results_framework.view_as_list'), 'test' => 'results-view-list'], 'chart' => ['icon' => 'chart', 'label' => __('results_framework.view_as_chart'), 'test' => 'results-view-chart']]" :view="$view">
+        <x-slot:search>
+            <x-desk.register-search :label="__('results_framework.search_the_framework')" :placeholder="__('results_framework.statement_or_indicator_name')" wire:model.live.debounce.300ms="search" />
+        </x-slot:search>
         <x-slot:filters>
-            <x-ui.input
-                type="search"
-                icon="magnifying-glass"
-                :label="__('results_framework.search_the_framework')"
-                :placeholder="__('results_framework.statement_or_indicator_name')"
-                wire:model.live.debounce.300ms="search"
-                clearable
-            />
-
             <x-ui.header-filter-select :label="__('common.program')" wire:model.live="program" :value="$program">
                 <option value="">{{ __('common.all_programs') }}</option>
                 <option value="none">{{ __('common.unassigned') }}</option>
@@ -169,20 +121,29 @@ new #[Layout('layouts::desk'), Title('titles.results_framework')] class extends 
                 @endforeach
             </x-ui.header-filter-select>
 
-            <x-ui.header-filter-select :label="__('results_framework.framework')" wire:model.live="proposal" :value="$proposal">
-                <option value="">{{ __('results_framework.all_frameworks') }}</option>
-                <option value="none">{{ __('results_framework.program_framework_only') }}</option>
-                @foreach ($this->proposalOptions as $proposalOption)
-                    <option value="{{ $proposalOption->id }}">{{ $proposalOption->name }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
+            <div class="contents" x-data="{ open: @js($proposal !== '' || $type !== '') }">
+                <button type="button" class="dk-btn" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" data-test="more-filters-button">
+                    <flux:icon.adjustments-horizontal variant="micro" class="size-4" />
+                    {{ __('results_framework.more_filters') }}
+                </button>
 
-            <x-ui.header-filter-select :label="__('common.type')" wire:model.live="type" :value="$type">
-                <option value="">{{ __('results_framework.all_types') }}</option>
-                @foreach (ResultType::cases() as $typeCase)
-                    <option value="{{ $typeCase->value }}">{{ $typeCase->label() }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
+                <div class="contents" x-show="open" x-cloak>
+                    <x-ui.header-filter-select :label="__('results_framework.framework')" wire:model.live="proposal" :value="$proposal">
+                        <option value="">{{ __('results_framework.all_frameworks') }}</option>
+                        <option value="none">{{ __('results_framework.program_framework_only') }}</option>
+                        @foreach ($this->proposalOptions as $proposalOption)
+                            <option value="{{ $proposalOption->id }}">{{ $proposalOption->name }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+
+                    <x-ui.header-filter-select :label="__('common.type')" wire:model.live="type" :value="$type">
+                        <option value="">{{ __('results_framework.all_types') }}</option>
+                        @foreach (ResultType::cases() as $typeCase)
+                            <option value="{{ $typeCase->value }}">{{ $typeCase->label() }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+                </div>
+            </div>
         </x-slot:filters>
 
         <x-slot:actions>
@@ -192,48 +153,14 @@ new #[Layout('layouts::desk'), Title('titles.results_framework')] class extends 
         </x-slot:actions>
 
 
-    {{-- The framework at a glance: four figures, then the chain they describe. --}}
+    {{-- Three numbers that say what needs a hand, each one a filter. --}}
     @include('pages.results._index-overview')
 
-    {{-- Attention chips on one side, the way of reading the framework on the other. --}}
-    <div class="flex flex-wrap items-center gap-2">
-        @foreach ($focusChips as $chip)
-            <button
-                type="button"
-                wire:click="setFocus('{{ $chip['key'] }}')"
-                aria-pressed="{{ $focus === $chip['key'] ? 'true' : 'false' }}"
-                data-test="focus-chip-{{ $chip['key'] }}"
-                @class([
-                    'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 type-meta font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium',
-                    'border-primary bg-primary dark:bg-ink dark:text-surface-0 dark:border-ink text-white' => $focus === $chip['key'],
-                    'border-secondary-soft bg-white text-secondary-medium hover:border-secondary-light hover:text-secondary-dark dark:border-line dark:bg-surface-1 dark:text-ink-muted dark:hover:text-ink' => $focus !== $chip['key'],
-                ])
-            >
-                <flux:icon :name="$chip['icon']" variant="micro" class="size-3.5" aria-hidden="true" />
-                {{ $chip['label'] }}
-                <span @class([
-                    'inline-flex min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold tabular-nums',
-                    'bg-white/20' => $focus === $chip['key'],
-                    'bg-secondary-soft text-secondary-dark dark:bg-surface-2 dark:text-ink' => $focus !== $chip['key'],
-                ])>{{ $chip['count'] }}</span>
-            </button>
-        @endforeach
-
-        @if ($filtersAreActive)
+    @if ($filtersAreActive)
+        <div>
             <flux:button size="sm" variant="ghost" class="text-secondary-medium! dark:text-ink-muted!" wire:click="clearFilters">{{ __('common.reset_filters') }}</flux:button>
-        @endif
-
-        <x-ui.view-toggle
-            class="ms-auto"
-            wire-model="view"
-            :active="$view"
-            :label="__('results_framework.how_to_read_the_framework')"
-            :options="[
-                ['key' => 'cascade', 'label' => __('results_framework.cascade'), 'icon' => 'share'],
-                ['key' => 'matrix', 'label' => __('results_framework.matrix'), 'icon' => 'table-cells'],
-            ]"
-        />
-    </div>
+        </div>
+    @endif
 
     @if ($this->groupedRoots->isEmpty())
         <x-ui.panel>
@@ -249,8 +176,8 @@ new #[Layout('layouts::desk'), Title('titles.results_framework')] class extends 
                 </x-slot:action>
             </x-ui.empty-state>
         </x-ui.panel>
-    @elseif ($view === 'matrix')
-        @include('pages.results._index-matrix')
+    @elseif ($view === 'chart')
+        @include('pages.results._index-chart')
     @else
         @include('pages.results._index-cascade')
     @endif

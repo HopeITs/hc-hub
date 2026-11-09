@@ -206,7 +206,7 @@ trait ManagesProposalForm
         $search = trim($this->projectSearch);
 
         $matches = $this->linkableProjectQuery()
-            ->when($search !== '', fn (Builder $query) => $query->where('name', 'like', Like::contains($search)))
+            ->when($search !== '', fn (Builder $query) => $query->where(Like::matches('name', $search)))
             ->limit(self::ProjectPickerLimit)
             ->get();
 

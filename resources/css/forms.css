@@ -806,6 +806,292 @@
         background-color: rgb(255 255 255 / 0.06);
         color: var(--color-ink);
     }
+
+    /*
+     * Task composer (x-tasks.composer): one screen instead of a wizard. "Related
+     * to" on top, the task's name and description as borderless text, then
+     * every property as a chip (.form-chip, also x-ui.form-select's `chip`
+     * trigger). The dialog keeps its content height; nothing here fixes it.
+     */
+    .task-composer {
+        display: flex;
+        flex-direction: column;
+        gap: 0.875rem;
+    }
+
+    .task-composer-related {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .task-composer-caption {
+        margin-inline-end: 0.25rem;
+        color: var(--color-secondary-medium);
+        font-size: 0.75rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .task-composer-text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    /* desk.css resets every .dk-scope input/button to font: inherit; color: inherit at (0,1,1), so the composer's own text rules sit one class deeper. */
+    .task-composer .task-composer-title,
+    .task-composer .task-composer-description {
+        width: 100%;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: var(--color-secondary-dark);
+        caret-color: currentColor;
+        outline: none;
+        box-shadow: none;
+    }
+
+    .task-composer .task-composer-title {
+        font-size: 1.375rem;
+        font-weight: 700;
+        line-height: 1.3;
+    }
+
+    .task-composer .task-composer-description {
+        min-height: calc(2lh + 0.5rem);
+        max-height: 10rem;
+        padding-block: 0.25rem;
+        overflow-y: auto;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        resize: none;
+        field-sizing: content;
+    }
+
+    .task-composer-title::placeholder,
+    .task-composer-description::placeholder {
+        color: var(--color-secondary-light);
+        opacity: 1;
+    }
+
+    /* No ring on borderless text; the caret marks focus. Invalid still shows, as an underline. */
+    .task-composer-title:focus,
+    .task-composer-title:focus-visible,
+    .task-composer-description:focus,
+    .task-composer-description:focus-visible {
+        outline: none;
+        box-shadow: none;
+    }
+
+    .task-composer-title[aria-invalid='true'] {
+        text-decoration: underline wavy var(--color-status-critical) 1px;
+        text-underline-offset: 6px;
+    }
+
+    .task-composer-chips {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .form-chip {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        max-width: 16rem;
+        height: 2rem;
+        padding-inline: 10px;
+        border: 1px solid var(--color-secondary-soft);
+        border-radius: 999px;
+        background-color: transparent;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: border-color 150ms ease, background-color 150ms ease;
+    }
+
+    :is(.task-composer, .filter-picker) .form-chip {
+        color: var(--color-secondary-dark);
+        font-size: 0.8125rem;
+        font-weight: 600;
+        line-height: 1;
+    }
+
+    .form-chip:hover {
+        border-color: var(--color-secondary-light);
+        background-color: color-mix(in srgb, var(--color-secondary-soft) 40%, transparent);
+    }
+
+    .form-chip:focus-visible,
+    .form-chip:has(input:focus-visible) {
+        outline: 2px solid var(--color-secondary-medium);
+        outline-offset: 2px;
+    }
+
+    .form-chip[data-invalid] {
+        border-color: var(--color-status-critical);
+    }
+
+    .form-chip:disabled,
+    .form-chip[data-disabled] {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .form-chip:disabled:hover,
+    .form-chip[data-disabled]:hover {
+        border-color: var(--color-secondary-soft);
+        background-color: transparent;
+    }
+
+    :is(.task-composer, .filter-picker) .form-chip-ghost {
+        border-style: dashed;
+        color: var(--color-secondary-medium);
+    }
+
+    .form-chip-dot {
+        flex-shrink: 0;
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background-color: var(--color-secondary-light);
+    }
+
+    /* A tone that is only a border (To do) draws a hollow dot. */
+    .form-chip-dot[class*='border'] {
+        background-color: transparent;
+    }
+
+    .form-chip-placeholder {
+        color: var(--color-secondary-medium);
+        font-weight: 500;
+    }
+
+    .form-chip-date input {
+        min-width: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        outline: none;
+        box-shadow: none;
+        cursor: pointer;
+    }
+
+    .form-chip-date input:disabled {
+        cursor: not-allowed;
+    }
+
+    .form-chip-date input::-webkit-calendar-picker-indicator {
+        display: none;
+    }
+
+    /* Empty: the input covers the whole chip, invisible, so a click anywhere opens the picker. */
+    .form-chip-date input[data-empty] {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+    }
+
+    .form-chip .form-chip-number {
+        width: 2.25rem;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        font-variant-numeric: tabular-nums;
+        text-align: end;
+        outline: none;
+        box-shadow: none;
+        appearance: textfield;
+        -moz-appearance: textfield;
+    }
+
+    .form-chip-number::-webkit-outer-spin-button,
+    .form-chip-number::-webkit-inner-spin-button {
+        margin: 0;
+        -webkit-appearance: none;
+    }
+
+    .dark .task-composer-caption {
+        color: var(--color-ink-muted);
+    }
+
+    .dark .task-composer .task-composer-title,
+    .dark .task-composer .task-composer-description {
+        color: var(--color-ink);
+    }
+
+    .dark .task-composer-title::placeholder,
+    .dark .task-composer-description::placeholder,
+    .dark .form-chip-placeholder {
+        color: var(--color-ink-faint);
+    }
+
+    .dark .task-composer-title[aria-invalid='true'] {
+        text-decoration-color: var(--color-brand-text);
+    }
+
+    .dark .form-chip,
+    .dark :is(.task-composer, .filter-picker) .form-chip {
+        border-color: var(--color-line-strong);
+        color: var(--color-ink);
+    }
+
+    .dark .form-chip:hover {
+        border-color: var(--color-ink-faint);
+        background-color: var(--color-surface-2);
+    }
+
+    .dark .form-chip:disabled:hover,
+    .dark .form-chip[data-disabled]:hover {
+        border-color: var(--color-line-strong);
+        background-color: transparent;
+    }
+
+    .dark .form-chip:focus-visible,
+    .dark .form-chip:has(input:focus-visible) {
+        outline-color: var(--color-ink-muted);
+    }
+
+    .dark .form-chip[data-invalid] {
+        border-color: var(--color-brand-text);
+    }
+
+    .dark :is(.task-composer, .filter-picker) .form-chip-ghost {
+        color: var(--color-ink-muted);
+    }
+
+    .dark .form-chip-dot {
+        background-color: var(--color-ink-faint);
+    }
+
+    .dark .form-chip-dot[class*='border'] {
+        background-color: transparent;
+    }
+
+    .dark .form-chip-date input,
+    .dark .form-chip-number {
+        color-scheme: dark;
+    }
+}
+
+/*
+ * A chip's menu is narrower than a field's. .filter-picker [data-flux-menu] sets the
+ * menu width in @layer utilities (flux-overrides.css), so this sits there too; the
+ * picker script still sets an inline min-width equal to the trigger.
+ */
+@layer utilities {
+    .filter-picker [data-flux-menu].form-chip-menu {
+        width: min(16rem, calc(100vw - 2rem));
+    }
 }
 
 /*
@@ -968,4 +1254,10 @@
         .filter-section-label::before,
         .filter-pill { transition: none; }
     }
+}
+
+/* The person's photo at the start of every employee dropdown row (hcEmployeeList in form-fields.js). */
+@layer components {
+    .hc-picker-photo { flex: none; width: 24px; height: 24px; margin-inline-end: 8px; border-radius: 9999px; object-fit: cover; background: var(--color-hr-avatar); }
+    .gap-2 > .hc-picker-photo { margin-inline-end: 0; }
 }

@@ -83,7 +83,6 @@
                             <div class="min-w-0">
                                 <p id="event-{{ $index }}-title" class="rules-row-label">{{ $row['title'] }}</p>
                                 <p class="rules-row-hint flex flex-wrap items-center gap-x-2 gap-y-1">
-                                    <span dir="ltr" class="font-mono text-xs">{{ $row['key'] }}</span>
                                     @if ($row['critical'])
                                         <span class="rules-event-badge">
                                             <flux:icon.shield-exclamation variant="micro" class="size-3.5" />

@@ -68,6 +68,54 @@ new #[Layout('layouts::desk'), Title('titles.security_settings')] class extends 
 
     public bool $showDeleteModal = false;
 
+    public bool $showConfirmModal = false;
+
+    /**
+     * Which one-click action the confirmation dialog is asking about.
+     */
+    #[Locked]
+    public string $confirmingAction = '';
+
+    /**
+     * Ask before an action that weakens sign-in protection or signs devices out.
+     */
+    public function askToConfirm(string $action): void
+    {
+        if (! in_array($action, ['email-off', 'app-off', 'sign-out-others', 'forget-trusted'], true)) {
+            return;
+        }
+
+        $this->confirmingAction = $action;
+        $this->showConfirmModal = true;
+    }
+
+    /**
+     * Run the action the dialog asked about, then close it.
+     */
+    public function runConfirmedAction(): void
+    {
+        $action = $this->confirmingAction;
+
+        $this->closeConfirmModal();
+
+        match ($action) {
+            'email-off' => $this->setEmailTwoFactor(false),
+            'app-off' => $this->disable(app(DisableTwoFactorAuthentication::class)),
+            'sign-out-others' => $this->signOutOtherDevices(),
+            'forget-trusted' => $this->forgetTrustedDevices(),
+            default => null,
+        };
+    }
+
+    /**
+     * Close the confirmation dialog without acting.
+     */
+    public function closeConfirmModal(): void
+    {
+        $this->showConfirmModal = false;
+        $this->confirmingAction = '';
+    }
+
     #[Locked]
     public ?int $deletingPasskeyId = null;
 
@@ -440,7 +488,7 @@ new #[Layout('layouts::desk'), Title('titles.security_settings')] class extends 
                     @unless ($emailTwoFactorRequired)
                         <x-slot:actions>
                             @if ($emailTwoFactorEnabled)
-                                <x-ui.button size="sm" wire:click="setEmailTwoFactor(false)" data-test="email-2fa-disable" class="border">
+                                <x-ui.button size="sm" wire:click="askToConfirm('email-off')" data-test="email-2fa-disable" class="border">
                                     {{ __('settings.email_2fa_disable') }}
                                 </x-ui.button>
                             @else
@@ -477,7 +525,7 @@ new #[Layout('layouts::desk'), Title('titles.security_settings')] class extends 
                         @if (! $twoFactorEnabled || ! $twoFactorRequired)
                             <x-slot:actions>
                                 @if ($twoFactorEnabled)
-                                    <x-ui.button size="sm" wire:click="disable" class="border">
+                                    <x-ui.button size="sm" wire:click="askToConfirm('app-off')" data-test="app-2fa-disable" class="border">
                                         {{ __('settings.disable_2fa') }}
                                     </x-ui.button>
                                 @else
@@ -584,7 +632,7 @@ new #[Layout('layouts::desk'), Title('titles.security_settings')] class extends 
                         </div>
 
                         @if (collect($signedInDevices)->contains('current', false))
-                            <x-ui.button size="sm" icon="arrow-right-start-on-rectangle" wire:click="signOutOtherDevices" class="border">
+                            <x-ui.button size="sm" icon="arrow-right-start-on-rectangle" wire:click="askToConfirm('sign-out-others')" data-test="sign-out-other-devices" class="border">
                                 {{ __('settings.sign_out_other_devices') }}
                             </x-ui.button>
                         @endif
@@ -635,7 +683,7 @@ new #[Layout('layouts::desk'), Title('titles.security_settings')] class extends 
                     </div>
 
                     @if ($trustedDevices !== [])
-                        <x-ui.button size="sm" icon="shield-exclamation" wire:click="forgetTrustedDevices" data-test="forget-trusted-devices" class="border">
+                        <x-ui.button size="sm" icon="shield-exclamation" wire:click="askToConfirm('forget-trusted')" data-test="forget-trusted-devices" class="border">
                             {{ __('settings.forget_trusted_devices') }}
                         </x-ui.button>
                     @endif
@@ -668,6 +716,40 @@ new #[Layout('layouts::desk'), Title('titles.security_settings')] class extends 
             </div>
         </section>
     </div>
+
+    <flux:modal
+        name="confirm-security-action-modal"
+        class="max-w-md md:min-w-md"
+        @close="closeConfirmModal"
+        wire:model="showConfirmModal"
+    >
+        @if ($showConfirmModal)
+            @php
+                $confirmKey = match ($confirmingAction) {
+                    'email-off' => 'email_off',
+                    'app-off' => 'app_off',
+                    'sign-out-others' => 'sign_out_others',
+                    default => 'forget_trusted',
+                };
+            @endphp
+
+            <div class="space-y-6" data-test="confirm-security-action">
+                <div class="space-y-2">
+                    <flux:heading size="lg">{{ __('settings.confirm_'.$confirmKey.'_title') }}</flux:heading>
+                    <flux:text>{{ __('settings.confirm_'.$confirmKey.'_body') }}</flux:text>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <x-ui.button wire:click="closeConfirmModal" class="border">
+                        {{ __('common.cancel') }}
+                    </x-ui.button>
+                    <flux:button variant="danger" wire:click="runConfirmedAction" data-test="confirm-security-action-yes">
+                        {{ __('common.confirm') }}
+                    </flux:button>
+                </div>
+            </div>
+        @endif
+    </flux:modal>
 
     <flux:modal
         name="delete-passkey-modal"

@@ -81,4 +81,12 @@ return [
     'state_always_on' => 'Always on',
     'state_required' => 'Required',
     'your_devices' => 'Your devices',
+    'confirm_email_off_title' => 'Turn off email codes?',
+    'confirm_email_off_body' => 'Sign-in will ask for your password only, unless you use an authenticator app.',
+    'confirm_app_off_title' => 'Disable the authenticator app?',
+    'confirm_app_off_body' => 'Sign-in will stop asking for a code from your app.',
+    'confirm_sign_out_others_title' => 'Sign out other devices?',
+    'confirm_sign_out_others_body' => 'Every browser except this one will be signed out and must sign in again.',
+    'confirm_forget_trusted_title' => 'Forget all trusted devices?',
+    'confirm_forget_trusted_body' => 'Every browser, this one included, will ask for a sign-in code again.',
 ];

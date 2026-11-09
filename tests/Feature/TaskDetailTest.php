@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\FileType;
+use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use App\Models\Milestone;
 use App\Models\Project;
@@ -51,9 +52,7 @@ test('task detail shows the task milestone project assignees and creator', funct
         ->assertSeeText('Winter Support')
         ->assertSeeText('Alice Nadir')
         ->assertSeeText('Bob Rahman')
-        ->assertSeeText('35%')
-        ->assertSeeText('Sep 1, 2026')
-        ->assertSeeText('Sep 30, 2026');
+        ->assertSeeText('35%');
 });
 
 test('task detail shows the task proposal as its source when it is not raised against a milestone', function () {
@@ -204,7 +203,7 @@ test('adding a subtask with a blank title is rejected', function () {
     expect(Task::query()->where('parent_task_id', $parent->id)->count())->toBe(0);
 });
 
-test('adding a subtask without an assignee is rejected', function () {
+test('a subtask added without an assignee is left unassigned', function () {
     $user = User::factory()->role('General Manager')->create();
     $parent = Task::factory()->create();
 
@@ -214,9 +213,11 @@ test('adding a subtask without an assignee is rejected', function () {
         ->set('newSubtaskTitle', 'Confirm the delivery window')
         ->set('newSubtaskAssignedTo', [])
         ->call('addSubtask')
-        ->assertHasErrors(['newSubtaskAssignedTo' => 'required']);
+        ->assertHasNoErrors();
 
-    expect(Task::query()->where('parent_task_id', $parent->id)->count())->toBe(0);
+    $subtask = Task::query()->where('parent_task_id', $parent->id)->sole();
+
+    expect($subtask->taskAssignees()->count())->toBe(0);
 });
 
 test('subtasks persist and remain visible after navigating back to the task', function () {
@@ -287,7 +288,7 @@ test('a task can be edited from its own detail page', function () {
         ->and($task->taskAssignees->pluck('employee_id')->all())->toBe([$newAssignee]);
 });
 
-test('editing a task without an assignee is rejected', function () {
+test('editing a task can remove every assignee', function () {
     $user = User::factory()->role('General Manager')->create();
     $task = Task::factory()->create();
 
@@ -295,7 +296,9 @@ test('editing a task without an assignee is rejected', function () {
         ->test('pages::tasks.show', ['task' => $task])
         ->set('assignedTo', [])
         ->call('updateTask')
-        ->assertHasErrors(['assignedTo' => 'required']);
+        ->assertHasNoErrors();
+
+    expect($task->taskAssignees()->count())->toBe(0);
 });
 
 test('a subtask is edited from its own detail page, not from the parent', function () {
@@ -351,4 +354,139 @@ test('the milestone breadcrumb links only for viewers who may open the milestone
         ->assertOk()
         ->assertSeeText('Distribution ready')
         ->assertDontSee($milestoneLink, false);
+});
+
+test('the properties column saves a priority change in place', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $task = Task::factory()->create(['priority' => TaskPriority::Low]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.show', ['task' => $task])
+        ->assertSeeHtml('data-test="task-properties"')
+        ->set('taskPriority', TaskPriority::High->value)
+        ->assertHasNoErrors();
+
+    expect($task->fresh()->priority)->toBe(TaskPriority::High);
+});
+
+test('a refused in-place date change puts the field back and keeps the stored date', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $task = Task::factory()->create(['created_by' => $user->id, 'start_date' => '2026-09-10', 'due_date' => '2026-09-30']);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.show', ['task' => $task])
+        ->set('dueDate', '2026-09-01')
+        ->assertHasErrors(['dueDate'])
+        ->assertSet('dueDate', '2026-09-30');
+
+    expect($task->fresh()->due_date->toDateString())->toBe('2026-09-30');
+});
+
+test('only the task creator moves the due date in place', function () {
+    $creator = User::factory()->role('General Manager')->create();
+    $editor = User::factory()->role('General Manager')->create();
+    $task = Task::factory()->create(['created_by' => $creator->id, 'due_date' => '2026-09-30']);
+
+    Livewire::actingAs($editor)
+        ->test('pages::tasks.show', ['task' => $task])
+        ->assertDontSeeHtml('data-test="task-edit-due-date-input"')
+        ->assertSeeHtml('data-test="task-edit-start-date-input"')
+        ->set('dueDate', '2026-10-15')
+        ->assertSet('dueDate', '2026-09-30');
+
+    expect($task->fresh()->due_date->toDateString())->toBe('2026-09-30');
+
+    Livewire::actingAs($creator)
+        ->test('pages::tasks.show', ['task' => $task])
+        ->assertSeeHtml('data-test="task-edit-due-date-input"')
+        ->set('dueDate', '2026-10-15')
+        ->assertHasNoErrors();
+
+    expect($task->fresh()->due_date->toDateString())->toBe('2026-10-15');
+});
+
+test('a status picked in the properties column is saved at once', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $task = Task::factory()->create(['status' => TaskStatus::Todo]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.show', ['task' => $task])
+        ->call('changeStatus', TaskStatus::InProgress->value)
+        ->assertHasNoErrors();
+
+    expect($task->fresh()->status)->toBe(TaskStatus::InProgress);
+});
+
+test('sending an Under review task back waits for the approver note', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $task = Task::factory()->create(['created_by' => $user->id, 'status' => TaskStatus::UnderReview]);
+
+    $page = Livewire::actingAs($user)
+        ->test('pages::tasks.show', ['task' => $task])
+        ->call('changeStatus', TaskStatus::InProgress->value)
+        ->assertSeeHtml('data-test="task-send-back-form"');
+
+    expect($task->fresh()->status)->toBe(TaskStatus::UnderReview);
+
+    $page->call('sendBack')->assertHasErrors(['taskStatus']);
+
+    expect($task->fresh()->status)->toBe(TaskStatus::UnderReview);
+
+    $page->call('cancelStatusChange')
+        ->assertSet('taskStatus', TaskStatus::UnderReview->value)
+        ->assertDontSeeHtml('data-test="task-send-back-form"')
+        ->call('changeStatus', TaskStatus::InProgress->value)
+        ->set('reviewNote', 'Attach the signed list')
+        ->call('sendBack')
+        ->assertHasNoErrors();
+
+    expect($task->fresh()->status)->toBe(TaskStatus::InProgress);
+});
+
+test('the title and description are edited in place from the description panel', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $task = Task::factory()->create(['title' => 'Draft plan', 'description' => null]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.show', ['task' => $task])
+        ->assertSeeHtml('data-test="task-no-description"')
+        ->set('title', 'Final plan')
+        ->set('description', 'Cover every district.')
+        ->call('saveDetails')
+        ->assertHasNoErrors()
+        ->assertDispatched('task-details-saved')
+        ->assertSee('Cover every district.');
+
+    expect($task->fresh())
+        ->title->toBe('Final plan')
+        ->description->toBe('Cover every district.');
+});
+
+test('someone who may only view a task reads every property as text', function () {
+    Role::create(['name' => 'Task Viewer', 'guard_name' => 'web'])->givePermissionTo('tasks.view');
+    $viewer = User::factory()->role('Task Viewer')->create();
+    $assignee = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
+    $task = Task::factory()->create([
+        'status' => TaskStatus::InProgress,
+        'start_date' => '2026-09-01',
+        'due_date' => '2026-09-30',
+        'progress_percentage' => 35,
+    ]);
+    $task->taskAssignees()->delete();
+    $task->taskAssignees()->create(['employee_id' => $assignee]);
+
+    Livewire::actingAs($viewer)
+        ->test('pages::tasks.show', ['task' => $task])
+        ->assertSeeText('Sep 1, 2026')
+        ->assertSeeText('Sep 30, 2026')
+        ->assertSeeText('35%')
+        ->assertSeeHtml('data-test="task-assignee-names"')
+        ->assertSeeText('Alice Nadir')
+        ->assertSeeHtml('data-test="task-related-to"')
+        ->assertDontSeeHtml('data-test="task-edit-form"')
+        ->assertDontSeeHtml('data-test="task-edit-status-done"')
+        ->assertDontSeeHtml('data-test="task-edit-priority-high"')
+        ->assertDontSeeHtml('data-test="task-edit-assignee-picker"')
+        ->assertDontSeeHtml('data-test="task-edit-start-date-input"')
+        ->assertDontSeeHtml('data-test="task-details-form"');
 });

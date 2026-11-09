@@ -20,6 +20,12 @@ new class extends Component {
     public int $limit = 20;
 
     /**
+     * How many more entries each "load more" click reveals.
+     */
+    #[Locked]
+    public int $step = 20;
+
+    /**
      * Plain Desk history list (the project Story side) instead of the boxed timeline.
      */
     #[Locked]
@@ -53,7 +59,7 @@ new class extends Component {
 
     public function loadMore(): void
     {
-        $this->limit += 20;
+        $this->limit += $this->step;
     }
 }; ?>
 
@@ -77,7 +83,7 @@ new class extends Component {
             </ol>
 
             @if ($this->entries->count() > $limit)
-                <button type="button" wire:click="loadMore" class="dk-btn dk-ghost dk-sm" data-timeline-more>{{ __('activity.load_more') }}</button>
+                <button type="button" wire:click="loadMore" class="dk-btn dk-ghost dk-sm" data-timeline-more>{{ $step === 20 ? __('activity.load_more') : __('activity.load_count_more', ['count' => $step]) }}</button>
             @endif
         @endif
     </div>
@@ -118,7 +124,7 @@ new class extends Component {
         </ol>
 
         @if ($this->entries->count() > $limit)
-            <button type="button" wire:click="loadMore" class="mt-3 text-sm font-semibold text-status-critical hover:underline" data-timeline-more>{{ __('activity.load_more') }}</button>
+            <button type="button" wire:click="loadMore" class="mt-3 text-sm font-semibold text-status-critical hover:underline" data-timeline-more>{{ $step === 20 ? __('activity.load_more') : __('activity.load_count_more', ['count' => $step]) }}</button>
         @endif
     @endif
 </div>

@@ -118,12 +118,10 @@ new #[Layout('layouts::desk'), Title('titles.risks')] class extends Component {
 
         return $this->whereInStrategy(Risk::query(), 'risks.project_id')
             ->when($search !== '', function ($query) use ($search): void {
-                $query->where(function ($query) use ($search): void {
-                    $query
-                        ->where('name', 'like', Like::contains($search))
-                        ->orWhere('impact', 'like', Like::contains($search))
-                        ->orWhereHas('project', fn ($query) => $query->where('name', 'like', Like::contains($search)));
-                });
+                $query->where(Like::everyWord($search, fn ($query, string $word) => $query
+                    ->where(Like::word('name', $word))
+                    ->orWhere(Like::word('impact', $word))
+                    ->orWhereHas('project', Like::word('name', $word))));
             })
             ->when($includeProject && $this->project !== '', fn ($query) => $query->where('project_id', (int) $this->project))
             ->when($this->high, fn ($query) => $query->whereRaw('likelihood * severity >= ?', [StrategyRollup::HighRiskScore]))

@@ -117,6 +117,25 @@ test('money that landed in another currency is named, never added to the account
     $page->assertSeeHtml('data-other-currency')->assertDontSee('1,625.00');
 });
 
+test('the totals strip says when money landed in another currency instead of showing a bare zero', function () {
+    $account = Account::factory()->create(['account_name' => 'Reserve EUR', 'currency' => Currency::Eur]);
+    accountTranche($account, ['payment_amount' => '700.00', 'net_amount_received' => '640.00', 'amount_received_currency' => Currency::Usd, 'ar_status' => ArStatus::Received, 'scheduled_date' => '2025-11-01', 'receive_date' => '2025-11-10']);
+
+    $page = accountRegister();
+
+    expect($page->instance()->totals->sole()['other_currency'])->toBe(1);
+    $page->assertSee('1 tranche landed in another currency');
+});
+
+test('the close dialog names the account it will close', function () {
+    $account = Account::factory()->create(['account_name' => 'Reserve EUR']);
+
+    accountRegister()
+        ->call('confirmClose', $account->id)
+        ->assertSet('showCloseModal', true)
+        ->assertSee('“Reserve EUR” will stop accepting new transfers');
+});
+
 test('country, currency and the flags narrow the rows', function () {
     $busy = registerBusyAccount();
     $idle = Account::factory()->create(['account_name' => 'Reserve EUR', 'currency' => Currency::Eur, 'country' => 'Syria']);

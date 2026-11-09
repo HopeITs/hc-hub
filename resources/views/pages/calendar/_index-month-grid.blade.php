@@ -7,7 +7,7 @@
 --}}
                 <div class="grid grid-cols-7 border-b border-secondary-soft bg-secondary-soft/40 text-center text-xs font-semibold uppercase tracking-wide text-secondary-medium dark:border-line dark:bg-surface-2 dark:text-ink-muted">
                     @foreach ($calendar['weeks'][0] as $weekdayHeader)
-                        <div class="py-2">{{ $weekdayHeader->translatedFormat('D') }}</div>
+                        <div class="py-2">{{ $weekdayHeader->translatedFormat(__('formats.weekday_short')) }}</div>
                     @endforeach
                 </div>
 
@@ -35,13 +35,25 @@
                                 ])
                                 data-test="calendar-day-{{ $day->toDateString() }}"
                             >
-                                <span @class([
-                                    'inline-flex size-6 items-center justify-center rounded-full text-xs font-semibold tabular-nums',
-                                    'bg-primary dark:bg-ink dark:text-surface-0 text-white' => $isToday,
-                                    'text-secondary-dark dark:text-ink' => ! $isToday,
-                                ])>
-                                    {{ $day->day }}
-                                </span>
+                                @php
+                                    $dayNumberClasses = [
+                                        'inline-flex size-6 items-center justify-center rounded-full text-xs font-semibold tabular-nums',
+                                        'bg-primary dark:bg-ink dark:text-surface-0 text-white' => $isToday,
+                                        'text-secondary-dark dark:text-ink' => ! $isToday,
+                                    ];
+                                @endphp
+                                @if ($canAdd)
+                                    {{-- The day number opens the add menu from the keyboard too; a mouse click anywhere in the cell still does. --}}
+                                    <button
+                                        type="button"
+                                        x-on:click.stop="const box = $el.getBoundingClientRect(); menuOpen = true; menuX = box.left; menuY = box.bottom; menuDate = '{{ $day->toDateString() }}'"
+                                        aria-label="{{ __('calendar.add_on_day', ['date' => $day->translatedFormat(__('formats.date'))]) }}"
+                                        @class(array_merge($dayNumberClasses, ['cursor-pointer focus-visible:outline-2 focus-visible:outline-primary']))
+                                        data-test="calendar-day-add-{{ $day->toDateString() }}"
+                                    >{{ $day->day }}</button>
+                                @else
+                                    <span @class($dayNumberClasses)>{{ $day->day }}</span>
+                                @endif
 
                                 @if ($dayItemCount > 0)
                                     {{-- Phone cells are too narrow for chip names: a count opens the day list instead. --}}
@@ -51,7 +63,7 @@
                                 @endif
 
                                 <div
-                                    class="flex min-h-4 flex-1 flex-col gap-1 max-sm:[&>*]:hidden"
+                                    class="flex min-h-4 flex-1 flex-col gap-1 max-sm:[&>*]:hidden sm:[&>*:nth-child(n+4)]:hidden"
                                     x-data="taskDropList('my-calendar', (wire, id) => wire.rescheduleTask(id, '{{ $day->toDateString() }}'))"
                                     @if ($dayItemCount > 0)
                                         wire:click.stop="openDayDetail('{{ $day->toDateString() }}')"
@@ -62,6 +74,13 @@
                                 >
                                     @include('pages.calendar._item-chips', ['day' => $day, 'calendar' => $calendar, 'markerTone' => $this->markerTone(...), 'taskTone' => $this->taskTone(...), 'reportTone' => $this->reportTone(...), 'monthlyReportTone' => $this->monthlyReportTone(...), 'isMonthlyReportLate' => $this->isMonthlyReportLate(...), 'proposalTone' => $proposalTone, 'transferTone' => $this->transferTone(...), 'donorFollowUpTone' => $this->donorFollowUpTone(...), 'donorReportTone' => $this->donorReportTone(...), 'projectTone' => $projectTone, 'projectEndTone' => $this->projectEndTone(...), 'isLate' => $this->isLate(...), 'typeDotClasses' => $typeDotClasses])
                                 </div>
+
+                                @if ($dayItemCount > 3)
+                                    {{-- A busy day shows its first three chips; the rest are one click away in the day list. --}}
+                                    <button type="button" wire:click.stop="openDayDetail('{{ $day->toDateString() }}')" class="hidden w-fit cursor-pointer rounded px-1 text-[10px] font-semibold text-secondary-medium hover:bg-secondary-soft sm:block dark:text-ink-muted dark:hover:bg-surface-2" data-test="calendar-day-more-{{ $day->toDateString() }}">
+                                        {{ trans_choice('calendar.more_items', $dayItemCount - 3, ['count' => $dayItemCount - 3]) }}
+                                    </button>
+                                @endif
                             </div>
                         @endforeach
                     @endforeach

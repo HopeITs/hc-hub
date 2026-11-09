@@ -3,6 +3,7 @@
 use App\Models\HrEmployee;
 use App\Models\ProposalReviewer;
 use App\Support\Desk\DeskWork;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -17,48 +18,94 @@ new #[Layout('layouts::desk'), Title('titles.my_reviews')] class extends Compone
      */
     public const int LongWaitDays = 7;
 
-    /** awaiting (waiting on me), all (every review asked of me) or asked (reviews I wait on). */
+    /** awaiting (waiting on me), done (mine that no longer wait) or asked (reviews I wait on). */
     #[Url(except: 'awaiting')]
     public string $state = 'awaiting';
 
+    #[Url(except: '')]
+    public string $search = '';
+
     /**
-     * The filter in force; an unknown value from a stale link reads as awaiting.
+     * The button pressed; an unknown value from a stale link (the old "all")
+     * reads as awaiting.
      */
     #[Computed]
     public function mode(): string
     {
-        return in_array($this->state, ['all', 'asked'], true) ? $this->state : 'awaiting';
+        return in_array($this->state, ['done', 'asked'], true) ? $this->state : 'awaiting';
+    }
+
+    public function setState(string $state): void
+    {
+        $this->state = in_array($state, ['done', 'asked'], true) ? $state : 'awaiting';
+    }
+
+    public function clearSearch(): void
+    {
+        $this->search = '';
     }
 
     /**
-     * The rows of the chosen filter, the ones still waiting first, then the
-     * oldest ask first (as on the Desk). Mine: the viewer's own reviewer rows.
-     * Asked: other people's unreviewed rows on proposals of the viewer's
-     * projects, exactly the reviews the Desk's Waiting on others panel lists
-     * (DeskWork::waitingReviews). Anyone may open the page: it never reaches
-     * beyond those rows, and each proposal opens through ProposalPolicy.
+     * Every review asked of the viewer that matches the search. Waiting and
+     * done split it with no overlap.
+     *
+     * @return Collection<int, ProposalReviewer>
+     */
+    #[Computed]
+    public function mine(): Collection
+    {
+        $employeeId = auth()->user()?->employee_id;
+
+        return $employeeId === null
+            ? new Collection
+            : $this->searched(ProposalReviewer::query()->forEmployee((int) $employeeId));
+    }
+
+    /**
+     * Other people's unreviewed rows on proposals of the viewer's projects,
+     * exactly the reviews the Desk's Waiting on others panel lists
+     * (DeskWork::waitingReviews), matching the search.
+     *
+     * @return Collection<int, ProposalReviewer>
+     */
+    #[Computed]
+    public function asked(): Collection
+    {
+        $user = auth()->user();
+
+        return $user?->employee_id === null ? new Collection : $this->searched(DeskWork::waitingReviews($user));
+    }
+
+    /**
+     * How many sit behind each button. They follow the search but not the
+     * pressed button, so a click shows exactly that many.
+     *
+     * @return array{awaiting: int, done: int, asked: int}
+     */
+    #[Computed]
+    public function counts(): array
+    {
+        $awaiting = $this->mine->filter(fn (ProposalReviewer $review): bool => $review->isAwaitingReview($review->proposal))->count();
+
+        return ['awaiting' => $awaiting, 'done' => $this->mine->count() - $awaiting, 'asked' => $this->asked->count()];
+    }
+
+    /**
+     * The rows of the pressed button, oldest ask first (as on the Desk).
+     * Anyone may open the page: it never reaches beyond the viewer's own
+     * rows, and each proposal opens through ProposalPolicy.
      *
      * @return Collection<int, ProposalReviewer>
      */
     #[Computed]
     public function reviews(): Collection
     {
-        $user = auth()->user();
-
-        if ($user?->employee_id === null) {
-            return new Collection;
+        if ($this->mode === 'asked') {
+            return $this->asked;
         }
 
-        $query = $this->mode === 'asked'
-            ? DeskWork::waitingReviews($user)
-            :ProposalReviewer::query()->forEmployee((int) $user->employee_id)->when($this->mode === 'awaiting', fn ($query) => $query->awaitingReview());
-
-        return $query
-            ->with(['proposal:id,slug,name,status', 'proposal.projects:projects.id,projects.slug,projects.name'])
-            ->oldest('created_at')
-            ->oldest('id')
-            ->get()
-            ->sortBy(fn (ProposalReviewer $review): int => $review->isAwaitingReview($review->proposal) ? 0 : 1)
+        return $this->mine
+            ->filter(fn (ProposalReviewer $review): bool => $review->isAwaitingReview($review->proposal) === ($this->mode === 'awaiting'))
             ->values();
     }
 
@@ -79,6 +126,29 @@ new #[Layout('layouts::desk'), Title('titles.my_reviews')] class extends Compone
             ->get(HrEmployee::NameColumns)
             ->mapWithKeys(fn (HrEmployee $employee): array => [$employee->id => $employee->name]);
     }
+
+    /**
+     * Load a query oldest ask first with its proposal and projects, then keep
+     * the rows whose proposal or project name holds the search words.
+     *
+     * @param  Builder<ProposalReviewer>  $query
+     * @return Collection<int, ProposalReviewer>
+     */
+    private function searched(Builder $query): Collection
+    {
+        $term = trim($this->search);
+
+        return $query
+            ->with(['proposal:id,slug,name,status', 'proposal.projects:projects.id,projects.slug,projects.name'])
+            ->oldest('created_at')
+            ->oldest('id')
+            ->get()
+            ->when($term !== '', fn (Collection $reviews) => $reviews->filter(fn (ProposalReviewer $review): bool => $review->proposal->projects
+                ->pluck('name')
+                ->prepend($review->proposal->name)
+                ->contains(fn (string $name): bool => mb_stripos($name, $term) !== false)))
+            ->values();
+    }
 };
 ?>
 
@@ -87,6 +157,12 @@ new #[Layout('layouts::desk'), Title('titles.my_reviews')] class extends Compone
     $asked = $mode === 'asked';
     $viewer = auth()->user();
     $today = \Carbon\CarbonImmutable::today();
+    $counts = $this->counts;
+    $tabs = [
+        ['key' => 'awaiting', 'label' => __('proposals.my_reviews_awaiting'), 'tone' => 'text-status-critical'],
+        ['key' => 'done', 'label' => __('proposals.my_reviews_done'), 'tone' => 'text-status-good'],
+        ['key' => 'asked', 'label' => __('proposals.my_reviews_asked'), 'tone' => 'text-secondary-dark dark:text-ink'],
+    ];
 @endphp
 
 <x-desk.register
@@ -96,21 +172,44 @@ new #[Layout('layouts::desk'), Title('titles.my_reviews')] class extends Compone
     :count="$this->reviews->count()"
     data-my-reviews
 >
-    <x-slot:filters>
-            <x-ui.header-filter-select :label="__('proposals.my_reviews_show')" wire:model.live="state" :value="$mode">
-                <option value="awaiting">{{ __('proposals.my_reviews_awaiting') }}</option>
-                <option value="all">{{ __('proposals.my_reviews_all') }}</option>
-                <option value="asked">{{ __('proposals.my_reviews_asked') }}</option>
-            </x-ui.header-filter-select>
-        </x-slot:filters>
+    <x-slot:search>
+        <x-desk.register-search :label="__('proposals.my_reviews_search')" :placeholder="__('proposals.my_reviews_search_placeholder')" wire:model.live.debounce.300ms="search" data-test="review-search" />
+    </x-slot:search>
 
+    <div class="mb-4 flex flex-wrap items-stretch gap-2" data-test="review-tabs">
+        @foreach ($tabs as $tab)
+            <button
+                type="button"
+                wire:click="setState('{{ $tab['key'] }}')"
+                wire:key="review-tab-{{ $tab['key'] }}"
+                aria-pressed="{{ $mode === $tab['key'] ? 'true' : 'false' }}"
+                data-test="review-tab-{{ $tab['key'] }}"
+                @class([
+                    'flex min-h-14 flex-1 basis-40 cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium',
+                    'border-secondary-dark bg-white shadow-card ring-1 ring-secondary-dark dark:border-ink dark:bg-surface-2 dark:ring-ink' => $mode === $tab['key'],
+                    'border-secondary-soft bg-white hover:border-secondary-light dark:border-line dark:bg-surface-1' => $mode !== $tab['key'],
+                ])
+            >
+                <span class="text-2xl font-bold leading-none tabular-nums {{ $tab['tone'] }}">{{ $counts[$tab['key']] }}</span>
+                <span class="text-sm font-semibold text-secondary-dark dark:text-ink">{{ $tab['label'] }}</span>
+            </button>
+        @endforeach
+    </div>
 
     @if ($this->reviews->isEmpty())
-        <x-ui.empty-state
-            icon="check-circle"
-            :heading="match ($mode) { 'all' => __('proposals.my_reviews_none'), 'asked' => __('proposals.my_reviews_none_asked'), default => __('proposals.my_reviews_none_awaiting') }"
-            :body="$asked ? __('proposals.my_reviews_asked_empty_body') : __('proposals.my_reviews_empty_body')"
-        />
+        @if (trim($search) !== '')
+            <x-ui.empty-state icon="magnifying-glass" :heading="__('desk.register.nothing_matches')" :body="__('proposals.my_reviews_search_empty_body')">
+                <x-slot:action>
+                    <x-ui.button tone="ghost" size="sm" wire:click="clearSearch" data-test="reset-filters">{{ __('common.reset_filters') }}</x-ui.button>
+                </x-slot:action>
+            </x-ui.empty-state>
+        @else
+            <x-ui.empty-state
+                icon="check-circle"
+                :heading="match ($mode) { 'done' => __('proposals.my_reviews_none_done'), 'asked' => __('proposals.my_reviews_none_asked'), default => __('proposals.my_reviews_none_awaiting') }"
+                :body="$asked ? __('proposals.my_reviews_asked_empty_body') : __('proposals.my_reviews_empty_body')"
+            />
+        @endif
     @else
         <x-ui.data-table :caption="__('titles.my_reviews')">
             <x-slot:head>
@@ -151,7 +250,7 @@ new #[Layout('layouts::desk'), Title('titles.my_reviews')] class extends Compone
 
                     <x-ui.data-table.cell :label="$asked ? __('proposals.my_reviews_reviewer') : __('proposals.my_reviews_your_review')">
                         @if ($asked)
-                            <span class="block font-medium">{{ $this->reviewerNames->get($review->employee_id, '—') }}</span>
+                            <span class="block font-medium" dir="auto"><bdi>{{ $this->reviewerNames->get($review->employee_id, '—') }}</bdi></span>
                             <span class="block text-xs text-secondary-medium dark:text-ink-muted">{{ $isAwaiting ? __('proposals.reviewer_not_seen') : __('proposals.my_reviews_closed') }}</span>
                         @elseif ($isAwaiting)
                             {{-- Dark red text on the dark ground reads under 3:1, so a long wait fills the pill in dark mode. --}}

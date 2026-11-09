@@ -169,10 +169,12 @@ test('a payroll proposal goes from draft to completed with the final report only
 
     // 2. Finance has entered the budget: it goes to the donor, then the donor approves.
     app(TransitionProposal::class)->handle($proposal->fresh(), ProposalStatus::Submitted, ProposalStatus::ProposalDraft, ['effective_date' => $today]);
+    $this->actingAs(userWithRole('Public Relations Manager'));
     $result = app(ApproveProposal::class)->handle($proposal->fresh(), ProposalStatus::Submitted, [
         'decision_date' => $today,
         'approval_note' => 'The donor confirmed the payroll grant by email on 13 October.',
     ]);
+    $this->actingAs($finance);
 
     expect($result->approvedProjectIds)->toBe([])
         ->and($proposal->fresh()->status)->toBe(ProposalStatus::Active)

@@ -24,7 +24,7 @@
     >
         <div class="border-b border-secondary-soft p-1.5 dark:border-line">
             <x-ui.input
-                type="search"
+                type="search" class="hc-picker-search"
                 size="sm"
                 icon="magnifying-glass"
                 x-model="$store.assigneePicker.optionSearch"
@@ -33,6 +33,16 @@
                 :placeholder="__('tasks.assignees')"
             />
         </div>
+        <button
+            type="button"
+            x-show="$store.assigneePicker.assignedIds.length > 0"
+            x-on:click="$store.assigneePicker.clear($wire)"
+            class="mt-1 flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-start text-sm text-status-critical hover:bg-status-critical-soft"
+            data-test="assignee-remove-all"
+        >
+            {{ \App\Support\FluxMarkup::icon('x-mark', 'micro', 'size-4 shrink-0') }}
+            {{ __('tasks.remove_all_assignees') }}
+        </button>
         <div class="max-h-56 overflow-y-auto overscroll-contain">
             <div
                 wire:ignore

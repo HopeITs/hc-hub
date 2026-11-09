@@ -85,3 +85,10 @@ test('on a touch screen the desk controls are at least 44px to tap', function ()
         ->toContain('.dk-hint .dk-btn { min-height: 44px; }')
         ->toContain('.dk-panel .dk-load { grid-template-columns: repeat(14, 44px);');
 });
+
+test('on a touch screen the strategies tabs, buttons and figure links are at least 44px to tap', function () {
+    expect(deskStylesheets())
+        ->toContain('.dk-stabs button { height: auto; min-height: 44px; }')
+        ->toContain('.dk-strategies .dk-btn, .dk-snotset .dk-btn, .dk-slist .dk-slink { min-height: 44px; }')
+        ->toContain('.dk-sfigs dd a { display: inline-block; min-width: 44px; min-height: 44px; }');
+});

@@ -98,12 +98,10 @@ trait ManagesSubtasks
             'newSubtaskStatus' => ['required', new Enum(TaskStatus::class)],
             'newSubtaskPriority' => ['required', new Enum(TaskPriority::class)],
             'newSubtaskDueDate' => ['nullable', 'date'],
-            'newSubtaskAssignedTo' => ['required', 'array', 'min:1'],
+            'newSubtaskAssignedTo' => ['array'],
             'newSubtaskAssignedTo.*' => ['integer', Rule::exists(HrEmployee::class, 'id')],
         ], [
             'newSubtaskTitle.required' => __('tasks.enter_a_task_title'),
-            'newSubtaskAssignedTo.required' => __('tasks.assign_this_task_to_someone'),
-            'newSubtaskAssignedTo.min' => __('tasks.assign_this_task_to_someone'),
             'newSubtaskAssignedTo.*.exists' => __('tasks.the_selected_assignee_is_no_longer_available'),
         ]);
 

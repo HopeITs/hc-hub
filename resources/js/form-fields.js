@@ -49,11 +49,13 @@ window.hcEmployeeList = {
         const role = container.dataset.role ? ` role="${this.escape(container.dataset.role)}"` : '';
 
         container.innerHTML = items
-            .map((item) => {
+            .map((item, index) => {
                 const detail = item.detail ? `<span class="block truncate text-xs text-secondary-medium dark:text-ink-muted">${this.escape(item.detail)}</span>` : '';
                 const inactive = item.inactive ? ' data-inactive' : '';
 
-                return `<button type="button"${role} class="${this.escape(container.dataset.itemClass)}" data-flux-menu-item data-option-value="${this.escape(item.value)}" data-option-label="${this.escape(item.label)}"${inactive}><span class="min-w-0 flex-1"><span class="block truncate${item.inactive ? ' opacity-60' : ''}">${this.escape(item.label)}</span>${detail}</span>${check}</button>`;
+                const photo = item.photo ? `<img src="${this.escape(item.photo)}" alt="" loading="lazy" decoding="async" class="hc-picker-photo${item.inactive ? ' opacity-60' : ''}" onerror="this.style.visibility='hidden'">` : '';
+
+                return `<button type="button"${role} data-order="${index}" class="${this.escape(container.dataset.itemClass)}" data-flux-menu-item data-option-value="${this.escape(item.value)}" data-option-label="${this.escape(item.label)}"${inactive}>${photo}<span class="min-w-0 flex-1"><span class="block truncate${item.inactive ? ' opacity-60' : ''}">${this.escape(item.label)}</span>${detail}</span>${check}</button>`;
             })
             .join('');
         container.dataset.count = String(items.length);
@@ -67,6 +69,20 @@ window.hcEmployeeList = {
             button.lastElementChild.style.display = selected ? '' : 'none';
             button.setAttribute('aria-selected', selected ? 'true' : 'false');
         }
+    },
+
+    /**
+     * Put the selected items at the top, the rest back in their drawn order.
+     * Called when a picker opens, not on every pick, so the list holds still
+     * while someone is ticking and unticking.
+     */
+    pinSelected(container, isSelected) {
+        const buttons = [...container.children];
+        const rank = (button) => (isSelected(button.dataset.optionValue) ? 0 : 1);
+
+        buttons
+            .sort((a, b) => rank(a) - rank(b) || Number(a.dataset.order) - Number(b.dataset.order))
+            .forEach((button) => container.appendChild(button));
     },
 
     /** Hide (and disable, so arrow keys skip them) the items the search does not match. */

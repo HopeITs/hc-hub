@@ -24,7 +24,7 @@ $groups = [
     'risks' => ['view', 'create', 'update', 'delete'],
     'targets' => ['view', 'create', 'update', 'delete'],
     'donors' => ['view', 'create', 'update', 'delete', 'approve'],
-    'proposals' => ['view', 'create', 'update', 'delete', 'manage-reviewers', 'correct-status'],
+    'proposals' => ['view', 'create', 'update', 'delete', 'manage-reviewers', 'correct-status', 'approve'],
     'funding-agreements' => ['view', 'create', 'update', 'delete'],
     'transfers' => ['view', 'create', 'update', 'delete'],
     'strategies' => ['view', 'create', 'update', 'delete'],
@@ -171,11 +171,20 @@ return [
     'role_baselines' => [
         'Team Member' => $viewEverything,
         'Media Team' => [...$viewEverything, ...$taskWriter, ...$reportWriter],
-        'Public Relations' => [...$viewEverything, ...$taskWriter, ...$reportWriter, ...$aiDrafter],
+        // The fundraising officer works the proposals (user story §1). The donor list
+        // is read-only for them: only the PR Manager records a donor, and the
+        // General Manager approves it.
+        'Public Relations' => [
+            ...$viewEverything, ...$fundraisingViews, ...$taskWriter, ...$reportWriter,
+            'proposals.create', 'proposals.update',
+            ...$aiDrafter,
+        ],
         'Public Relations Manager' => [
             ...$viewEverything, ...$fundraisingViews, ...$taskWriter, ...$reportWriter,
             'donors.create', 'donors.update',
             'proposals.create', 'proposals.update', 'proposals.manage-reviewers', 'proposals.correct-status',
+            // D-70: recording the donor's approval belongs to this role only.
+            'proposals.approve',
             'projects.create',
             'funding-agreements.view', 'funding-agreements.create', 'funding-agreements.update',
             'reports.reopen', 'reports.aggregate',
@@ -219,6 +228,7 @@ return [
             'reports.mark-seen',
             'notification-settings.manage',
             'reports.reopen',
+            'proposals.approve',
             ...$mealOnly,
             ...$targetWriter,
             ...$aiDrafter,

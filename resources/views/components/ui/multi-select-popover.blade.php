@@ -101,7 +101,7 @@
         >
             @if ($searchable)
                 <div class="border-b border-secondary-soft p-1.5 dark:border-line">
-                    <x-ui.input type="search" size="sm" icon="magnifying-glass" x-ref="search" x-model="optionSearch" x-on:keydown.enter.prevent :aria-label="$label" :placeholder="$label" />
+                    <x-ui.input type="search" class="hc-picker-search" size="sm" icon="magnifying-glass" x-ref="search" x-model="optionSearch" x-on:keydown.enter.prevent :aria-label="$label" :placeholder="$label" />
                 </div>
             @endif
             <div class="max-h-56 overflow-y-auto overscroll-contain">
@@ -122,7 +122,7 @@
             >
                 @if ($searchable)
                     <div class="border-b border-secondary-soft p-1.5 dark:border-line">
-                        <x-ui.input type="search" size="sm" icon="magnifying-glass" x-ref="search" x-model="optionSearch" :aria-label="$label" :placeholder="$label" />
+                        <x-ui.input type="search" class="hc-picker-search" size="sm" icon="magnifying-glass" x-ref="search" x-model="optionSearch" :aria-label="$label" :placeholder="$label" />
                     </div>
                 @endif
                 <div class="max-h-56 overflow-y-auto overscroll-contain">

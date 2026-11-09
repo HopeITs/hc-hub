@@ -91,6 +91,12 @@ trait ManagesTaskDrawer
         return Task::query()->select(['id', 'title'])->find($this->deletingTaskId);
     }
 
+    /**
+     * Opens the create drawer. With no milestone context, "Related to" is
+     * prefilled the same way the inline row resolves it (active source
+     * filter, else the viewer's department) and the viewer is the default
+     * assignee, so a task can be saved after typing only a title.
+     */
     public function openCreateDrawer(?string $dueDate = null, ?string $status = null, ?string $milestoneId = null): void
     {
         Gate::authorize('create', Task::class);
@@ -108,6 +114,13 @@ trait ManagesTaskDrawer
         if ($milestoneId !== null && Milestone::query()->whereKey((int) $milestoneId)->exists()) {
             $this->taskSourceType = 'milestone';
             $this->taskSourceId = $milestoneId;
+        } elseif ($milestoneId === null && ($source = $this->resolveInlineSource(null)) !== null) {
+            $this->taskSourceType = $source['type'];
+            $this->taskSourceId = (string) $source['id'];
+        }
+
+        if (($assigneeId = $this->resolveInlineAssigneeId()) !== null) {
+            $this->assignedTo = [(string) $assigneeId];
         }
 
         $this->showTaskDrawer = true;
@@ -237,7 +250,8 @@ trait ManagesTaskDrawer
             return;
         }
 
-        Flux::toast(variant: 'success', text: __('tasks.task_status_changed', ['status' => $newStatus->label()]));
+        // On the board the card moving to its new column is the confirmation.
+        $this->toastQuickSuccess(__('tasks.task_status_changed', ['status' => $newStatus->label()]));
     }
 
     public function quickSetPriority(int $taskId, string $priority): void
@@ -260,9 +274,8 @@ trait ManagesTaskDrawer
     /**
      * Adds or removes one assignee from a task's list, for the inline
      * multi-select popover on the list row — the drawer's own checkbox list
-     * covers the same ground for a full edit, this is the quick path. A
-     * task must always keep at least one assignee, matching saveTask()'s
-     * own validation, so the last one can't be toggled off here either.
+     * covers the same ground for a full edit, this is the quick path.
+     * Removing the last assignee leaves the task unassigned.
      *
      * This one re-renders: the avatar "x" calls it directly and needs the row
      * to show the removal. The popover uses togglePickedAssignee() instead.
@@ -280,12 +293,6 @@ trait ManagesTaskDrawer
         $existing = $task->taskAssignees()->where('employee_id', $employeeId)->first();
 
         if ($existing !== null) {
-            if ($task->taskAssignees()->count() <= 1) {
-                Flux::toast(variant: 'danger', text: __('tasks.assign_this_task_to_someone'));
-
-                return;
-            }
-
             $existing->delete();
 
             $this->toastQuickSuccess(__('tasks.assignee_removed'));

@@ -37,7 +37,7 @@ use Livewire\Attributes\Computed;
  * @property string $sort
  * @property string $lens
  * @property string $stage
- * @property-read array{cities: array<int>, owners: list<int>} $searchMatches  #[Computed] searchMatches() below
+ * @property-read array{cities: array<string, list<int>>, owners: array<string, list<int>>} $searchMatches  #[Computed] searchMatches() below
  */
 trait FiltersProjectDirectory
 {
@@ -214,9 +214,11 @@ trait FiltersProjectDirectory
      * Cities and employees live in the HR database, so a name search resolves
      * to ids here instead of a whereHas() across connections. Memoising them
      * keeps `applyFilters()` free to run for the list, the rail and the
-     * triage strip without paying for the same two reads each time.
+     * triage strip without paying for the same two reads each time. Keyed by
+     * each folded search word (every keyboard-layout reading), since each
+     * word may be found in a different field.
      *
-     * @return array{cities: array<int>, owners: list<int>}
+     * @return array{cities: array<string, list<int>>, owners: array<string, list<int>>}
      */
     #[Computed]
     public function searchMatches(): array
@@ -227,14 +229,19 @@ trait FiltersProjectDirectory
             return ['cities' => [], 'owners' => []];
         }
 
-        return [
-            'cities' => HrCity::query()
-                ->where('name_en', 'like', Like::contains($search))
-                ->orWhere('name_ar', 'like', Like::contains($search))
+        $cities = [];
+        $owners = [];
+
+        foreach (Like::searchWords($search) as $word) {
+            $cities[$word] = HrCity::query()
+                ->where(fn (Builder $query) => $query->where(Like::word('name_en', $word))->orWhere(Like::word('name_ar', $word)))
                 ->pluck('id')
-                ->all(),
-            'owners' => HrEmployee::idsMatchingName($search),
-        ];
+                ->map(fn (mixed $id): int => (int) $id)
+                ->all();
+            $owners[$word] = HrEmployee::idsMatchingName($word, acrossLayouts: false);
+        }
+
+        return ['cities' => $cities, 'owners' => $owners];
     }
 
     /**
@@ -254,13 +261,11 @@ trait FiltersProjectDirectory
 
         return $query
             ->when($search !== '', function (Builder $query) use ($search, $matches): void {
-                $query->where(function (Builder $query) use ($search, $matches): void {
-                    $query
-                        ->where('name', 'like', Like::contains($search))
-                        ->orWhereIn('city_id', $matches['cities'])
-                        ->orWhereIn('program_id', HrProgram::idsMatchingName($search))
-                        ->orWhereIn('user_id', $matches['owners']);
-                });
+                $query->where(Like::everyWord($search, fn (Builder $query, string $word) => $query
+                    ->where(Like::word('name', $word))
+                    ->orWhereIn('city_id', $matches['cities'][$word] ?? [])
+                    ->orWhereIn('program_id', HrProgram::idsMatchingName($word, acrossLayouts: false))
+                    ->orWhereIn('user_id', $matches['owners'][$word] ?? [])));
             })
             ->when($this->city !== '', fn (Builder $query) => $query->where('city_id', (int) $this->city))
             ->when($this->program !== '', fn (Builder $query) => $query->where('program_id', (int) $this->program))

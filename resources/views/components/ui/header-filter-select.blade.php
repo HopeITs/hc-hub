@@ -81,7 +81,7 @@
             @if ($searchable)
                 <div class="border-b border-secondary-soft p-1.5 dark:border-line">
                     <x-ui.input
-                        type="search"
+                        type="search" class="hc-picker-search"
                         size="sm"
                         icon="magnifying-glass"
                         x-model="optionSearch"

@@ -34,4 +34,9 @@ return [
     'starts_name' => 'Starts: :name',
     'ends_name' => 'Ends: :name',
     'review_meeting' => 'Review meeting',
+    'moved_to_nearest' => 'Moved to the nearest date, :date',
+    'more_items' => '{1} +:count more|[2,*] +:count more',
+    'add_on_day' => 'Add on :date',
+    'calendar_of' => 'Calendar: :name',
+    'calendar_of_people' => '{1} Calendar: :count person|[2,*] Calendar: :count people',
 ];

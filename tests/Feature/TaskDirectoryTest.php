@@ -203,7 +203,7 @@ test('creating a task rejects an unrecognized source type', function () {
     expect(Task::query()->count())->toBe(0);
 });
 
-test('creating a task with no assignee at all is rejected', function () {
+test('a task can be created with no assignee at all', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
@@ -214,9 +214,9 @@ test('creating a task with no assignee at all is rejected', function () {
         ->set('taskSourceId', (string) Proposal::factory()->create()->id)
         ->set('assignedTo', [])
         ->call('saveTask')
-        ->assertHasErrors(['assignedTo']);
+        ->assertHasNoErrors();
 
-    expect(Task::query()->count())->toBe(0);
+    expect(Task::query()->sole()->taskAssignees()->count())->toBe(0);
 });
 
 test('creating a task rejects invalid workflow values and progress', function (string $property, string $value) {
@@ -347,7 +347,7 @@ test('toggleAssignee adds and removes an assignee directly from the list row', f
     expect($task->refresh()->taskAssignees->pluck('employee_id')->all())->toBe([$alice]);
 });
 
-test('toggleAssignee refuses to remove the last remaining assignee', function () {
+test('toggleAssignee removes the last assignee and leaves the task unassigned', function () {
     $user = User::factory()->role('General Manager')->create();
     $alice = insertHrEmployee();
     $task = Task::factory()->create();
@@ -356,10 +356,9 @@ test('toggleAssignee refuses to remove the last remaining assignee', function ()
 
     Livewire::actingAs($user)
         ->test('pages::tasks.index')
-        ->call('toggleAssignee', $task->id, $alice)
-        ->assertDispatched('toast-show');
+        ->call('toggleAssignee', $task->id, $alice);
 
-    expect($task->refresh()->taskAssignees->pluck('employee_id')->all())->toBe([$alice]);
+    expect($task->refresh()->taskAssignees)->toBeEmpty();
 });
 
 test('the list row assignee trigger opens a shared popover fed by the employee list', function () {
@@ -408,7 +407,8 @@ test('no tasks view renders the employee option list', function (string $view) {
 
     expect(substr_count($html, 'assignee-option-'))->toBe(0)
         ->and(substr_count($html, 'assignee-popover-option-'.$alice))->toBe(0)
-        ->and(substr_count($html, 'Alice Nadir'))->toBeLessThanOrEqual(10);
+        // A few mentions per task (row label, avatar hover title), never one per employee.
+        ->and(substr_count($html, 'Alice Nadir'))->toBeLessThanOrEqual(15);
 })->with(['list', 'board', 'calendar']);
 
 test('a task can be deleted and takes only its own attachments with it', function () {
@@ -644,10 +644,11 @@ test('the list view computes stat tiles with one aggregate query instead of load
     // paginate() itself issues a count query plus the page's select query;
     // the stat tiles add one aggregate select on top of that, the eager
     // load of each row's own subtasks (for the inline expand panel) adds a
-    // fourth, and the "My Tasks" rail's own capped preview query a fifth —
-    // five total, not a second full (board-sized) fetch of every task with
-    // its relations just to count a handful of numbers.
-    expect($taskTableQueries)->toHaveCount(5);
+    // fourth, the "My Tasks" rail's own capped preview query a fifth, and
+    // the "To review" tab badge's count a sixth — six total, not a second
+    // full (board-sized) fetch of every task with its relations just to
+    // count a handful of numbers.
+    expect($taskTableQueries)->toHaveCount(6);
 });
 
 test('the My Tasks rail visually distinguishes tasks assigned to the viewer from tasks the viewer only delegated', function () {
@@ -781,11 +782,10 @@ test('quickCreateTask opens the drawer pre-filled with the title and the group c
     Livewire::actingAs($user)
         ->test('pages::tasks.index')
         ->call('quickCreateTask', 'Another task', null, (string) $milestone->id)
-        ->assertSet('showTaskDrawer', true)
-        ->assertSet('taskSourceType', 'milestone')
-        ->assertSet('taskSourceId', (string) $milestone->id);
+        ->assertSet('showTaskDrawer', false);
 
-    expect(Task::query()->count())->toBe(0);
+    expect(Task::query()->sole()->only(['title', 'source_type', 'source_id']))
+        ->toBe(['title' => 'Another task', 'source_type' => 'milestone', 'source_id' => $milestone->id]);
 });
 
 test('quickCreateTask does nothing for a blank title', function () {
@@ -846,16 +846,95 @@ test('quickCreateTask falls back to the drawer when neither a milestone nor an a
     expect(Task::query()->count())->toBe(0);
 });
 
-test('quickCreateTask falls back to the drawer when the signed-in user has no linked HR employee', function () {
+test('quickCreateTask files a task with no other context under the viewer\'s own department', function () {
+    $employeeId = insertHrEmployee();
+    $departmentId = insertHrDepartment('Monitoring & Evaluation');
+    insertHrContract($employeeId, insertHrPosition($departmentId));
+    $user = User::factory()->role('General Manager')->create(['employee_id' => $employeeId]);
+    Task::factory()->create(['status' => TaskStatus::Todo]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('group', 'status')
+        ->assertSee('Department: Monitoring & Evaluation')
+        ->call('quickCreateTask', 'Department task')
+        ->assertSet('showTaskDrawer', false);
+
+    $task = Task::query()->where('title', 'Department task')->sole();
+
+    expect($task->title)->toBe('Department task')
+        ->and($task->source_type)->toBe('department')
+        ->and($task->source_id)->toBe($departmentId)
+        ->and($task->taskAssignees->pluck('employee_id')->all())->toBe([$employeeId]);
+});
+
+test('the inline row\'s more fields button opens the drawer with the typed title and row draft', function () {
+    $user = User::factory()->role('General Manager')->create(['employee_id' => insertHrEmployee()]);
+    $assignee = insertHrEmployee();
+    Task::factory()->create(['status' => TaskStatus::Todo]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('group', 'status')
+        ->assertSeeHtml('data-test="task-quick-add-more-status-todo"')
+        ->set('taskDrafts.row-1', ['priority' => TaskPriority::High->value, 'due_date' => '2026-12-01', 'assignees' => [(string) $assignee]])
+        ->call('openQuickTaskInDrawer', '  Needs a description  ', TaskStatus::InProgress->value, null, 'row-1')
+        ->assertSet('showTaskDrawer', true)
+        ->assertSet('title', 'Needs a description')
+        ->assertSet('taskStatus', TaskStatus::InProgress->value)
+        ->assertSet('taskPriority', TaskPriority::High->value)
+        ->assertSet('dueDate', '2026-12-01')
+        ->assertSet('assignedTo', [(string) $assignee]);
+
+    expect(Task::query()->count())->toBe(1);
+});
+
+test('a user who cannot create tasks cannot open the inline row in the drawer', function () {
+    Role::create(['name' => 'Task Viewer', 'guard_name' => 'web'])->givePermissionTo('tasks.view');
+    $viewer = User::factory()->role('Task Viewer')->create();
+
+    Livewire::actingAs($viewer)
+        ->test('pages::tasks.index')
+        ->call('openQuickTaskInDrawer', 'Sneaky task')
+        ->assertForbidden();
+});
+
+test('quickCreateTask creates the task unassigned when the signed-in user has no linked HR employee', function () {
     $user = User::factory()->role('General Manager')->create(['employee_id' => null]);
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
         ->test('pages::tasks.index')
-        ->call('quickCreateTask', 'Unassignable task', null, (string) $milestone->id)
-        ->assertSet('showTaskDrawer', true);
+        ->call('quickCreateTask', 'Unassigned task', null, (string) $milestone->id)
+        ->assertSet('showTaskDrawer', false);
 
-    expect(Task::query()->count())->toBe(0);
+    expect(Task::query()->sole()->taskAssignees()->count())->toBe(0);
+});
+
+test('an inline add row whose assignees were all removed creates the task unassigned', function () {
+    $employeeId = insertHrEmployee();
+    $user = User::factory()->role('General Manager')->create(['employee_id' => $employeeId]);
+    $milestone = Milestone::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->call('toggleTaskDraftAssignee', 'row-1', $employeeId)
+        ->call('toggleTaskDraftAssignee', 'row-1', $employeeId)
+        ->call('quickCreateTask', 'Nobody yet', null, (string) $milestone->id, 'row-1');
+
+    expect(Task::query()->sole()->taskAssignees()->count())->toBe(0);
+});
+
+test('the shared assignee popover offers to remove every assignee', function () {
+    Task::factory()->create();
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->assertSeeHtml('data-test="assignee-remove-all"')
+        ->assertSee('Remove all assignees');
 });
 
 test('the list view inline add task row honours its own due date priority status and assignees', function () {
@@ -1044,7 +1123,7 @@ test('toggleSubtaskDraftAssignee removes an employee already in the draft', func
     expect(invade($component->instance())->subtaskDraft($parent->fresh(['taskAssignees']))['assignees'])->toBe([]);
 });
 
-test('addSubtaskQuick falls back to the parents own assignees when the draft has none', function () {
+test('addSubtaskQuick adds the subtask unassigned when the draft removed every assignee', function () {
     $user = User::factory()->role('General Manager')->create();
     $alice = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
     $parent = Task::factory()->create();
@@ -1058,7 +1137,7 @@ test('addSubtaskQuick falls back to the parents own assignees when the draft has
 
     $subtask = Task::query()->where('title', 'Untouched assignees')->sole();
 
-    expect($subtask->taskAssignees->pluck('employee_id')->all())->toBe([$alice]);
+    expect($subtask->taskAssignees)->toBeEmpty();
 });
 
 test('dropping a task into a different board column persists the status change', function () {
@@ -1089,7 +1168,67 @@ test('dropping a task that no longer exists reports the failure instead of faili
         ->assertDispatched('toast-show');
 });
 
-test('the board view offers a keyboard accessible select as a non pointer alternative to dragging', function () {
+test('each board column shows its task count and an empty column collapses to a slim strip', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->count(2)->create(['status' => TaskStatus::Todo]);
+    Task::factory()->create(['status' => TaskStatus::InProgress]);
+
+    $html = Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'board')
+        ->assertSeeHtml('data-test="task-board-count-todo">2</span>')
+        ->assertSeeHtml('data-test="task-board-count-in progress">1</span>')
+        ->assertSeeHtml('data-test="task-board-count-done">0</span>')
+        ->assertSeeHtml('data-test="task-board-strip-done"')
+        ->assertDontSeeHtml('data-test="task-board-strip-todo"')
+        ->assertDontSee('No tasks in this status')
+        ->html();
+
+    expect($html)
+        ->toMatch('/data-test="task-board-column-todo"\s+data-collapsed="false"/')
+        ->toMatch('/data-test="task-board-column-done"\s+data-collapsed="true"/');
+});
+
+test('every board column offers an add control that creates the task straight into that status', function () {
+    $employeeId = insertHrEmployee();
+    $user = User::factory()->role('General Manager')->create(['employee_id' => $employeeId]);
+    $milestone = Milestone::factory()->create();
+    Task::factory()->create(['status' => TaskStatus::Todo]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'board')
+        ->assertSeeHtml('data-test="task-board-header-add-done"')
+        ->assertSeeHtml('data-test="task-board-strip-add-done"')
+        ->assertSeeHtml('data-test="task-board-add-toggle-todo"')
+        ->assertDontSeeHtml('data-test="task-board-add-toggle-done"')
+        ->assertSeeHtml("quickCreateTask(\$event.target.value, 'done', null, 'board|done')")
+        ->call('quickCreateTask', 'Wrap up the report', TaskStatus::Done->value, (string) $milestone->id, 'board|done')
+        ->assertSet('showTaskDrawer', false)
+        ->assertSeeHtml('data-test="task-board-count-done">1</span>');
+
+    expect(Task::query()->where('title', 'Wrap up the report')->sole()->status)->toBe(TaskStatus::Done);
+});
+
+test('a view-only user sees the board counts but no add task control in any column', function () {
+    Role::create(['name' => 'Task Viewer', 'guard_name' => 'web'])->givePermissionTo('tasks.view');
+    $viewer = User::factory()->role('Task Viewer')->create();
+    Task::factory()->create(['status' => TaskStatus::Todo]);
+
+    $board = Livewire::actingAs($viewer)
+        ->test('pages::tasks.index')
+        ->set('view', 'board')
+        ->assertSeeHtml('data-test="task-board-count-todo">1</span>');
+
+    foreach (TaskStatus::cases() as $status) {
+        $board->assertDontSeeHtml('data-test="task-board-header-add-'.$status->value.'"')
+            ->assertDontSeeHtml('data-test="task-board-strip-add-'.$status->value.'"')
+            ->assertDontSeeHtml('data-test="task-board-add-toggle-'.$status->value.'"')
+            ->assertDontSeeHtml('data-test="task-board-quick-add-'.$status->value.'"');
+    }
+});
+
+test('the board view offers a keyboard accessible status menu as a non pointer alternative to dragging', function () {
     $user = User::factory()->role('General Manager')->create();
     $task = Task::factory()->create(['status' => TaskStatus::Todo]);
 
@@ -1097,7 +1236,8 @@ test('the board view offers a keyboard accessible select as a non pointer altern
         ->test('pages::tasks.index')
         ->set('view', 'board')
         ->assertSee('data-test="task-quick-status-'.$task->id.'"', false)
-        ->assertSee('wire:change="quickSetStatus('.$task->id.', $event.target.value)"', false);
+        ->assertSee("\$store.taskMenu.openFor('status', 'board-status-".$task->id."'", false)
+        ->assertDontSee('wire:change="quickSetStatus(', false);
 });
 
 test('the board view marks a todo task missed once its due date passes', function () {
@@ -1456,6 +1596,7 @@ test('the task register explains overdue and missed, and labels the related-to f
         ->assertSee('Started, past its due date')
         ->assertSee('Not started, past its due date')
         ->assertSee('Anything')
+        ->assertSee('Any date')
         ->assertSee('Nothing open is assigned to you.');
 });
 
@@ -1494,6 +1635,76 @@ test('list cards offer the subtask toggle only when a task has subtasks', functi
         ->assertDontSeeHtml('data-test="task-subtasks-toggle-mobile-'.$loneTask->id.'"');
 });
 
+test('the scope tabs show my tasks, tasks I assigned and tasks waiting for my review', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $me = insertHrEmployee(firstNameEn: 'Signed', lastNameEn: 'InUser');
+    $user->forceFill(['employee_id' => $me])->save();
+
+    $assignedToMe = Task::factory()->create(['title' => 'Assigned to me task']);
+    $assignedToMe->taskAssignees()->delete();
+    $assignedToMe->taskAssignees()->create(['employee_id' => $me]);
+    Task::factory()->create(['title' => 'I assigned this task', 'created_by' => $user->id, 'status' => TaskStatus::Todo]);
+    Task::factory()->create(['title' => 'Waiting for my review task', 'created_by' => $user->id, 'status' => TaskStatus::UnderReview]);
+    Task::factory()->create(['title' => 'Somebody else review task', 'status' => TaskStatus::UnderReview]);
+
+    $titles = fn ($component) => $component->instance()->tasks->getCollection()->pluck('title')->sort()->values()->all();
+
+    $component = Livewire::actingAs($user)->test('pages::tasks.index')->set('view', 'list')
+        ->assertSeeHtml('data-test="task-scope-tabs"')
+        ->assertSeeHtml('data-test="task-scope-review-count"');
+
+    expect($titles($component->call('setScope', 'mine')))->toBe(['Assigned to me task'])
+        ->and($titles($component->call('setScope', 'assigned')))->toBe(['I assigned this task', 'Waiting for my review task'])
+        ->and($titles($component->call('setScope', 'review')))->toBe(['Waiting for my review task'])
+        ->and($component->instance()->tasksAwaitingMyReview)->toBe(1)
+        ->and($titles($component->call('setScope', 'anything-else')))->toHaveCount(4)
+        ->and($component->get('scope'))->toBe('');
+});
+
+test('the assigned to me tab is empty for a user with no employee record', function () {
+    $user = User::factory()->role('General Manager')->create(['employee_id' => null]);
+    Task::factory()->create();
+
+    $component = Livewire::actingAs($user)->test('pages::tasks.index')->set('view', 'list')->call('setScope', 'mine');
+
+    expect($component->instance()->tasks->total())->toBe(0);
+});
+
+test('the show all subtasks switch drives the list and board but not the calendar', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->create();
+
+    $page = Livewire::actingAs($user)->test('pages::tasks.index');
+
+    $page->set('view', 'list')
+        ->assertSeeHtml('data-test="task-subtasks-toggle-all"')
+        ->assertSeeHtml('x-data="taskSubtaskScope"');
+
+    $page->set('view', 'board')
+        ->assertSeeHtml('data-test="task-subtasks-toggle-all"')
+        ->assertSeeHtml('x-data="taskSubtaskScope"');
+
+    $page->set('view', 'calendar')
+        ->assertDontSeeHtml('data-test="task-subtasks-toggle-all"');
+});
+
+test('assignee avatars on board cards and list rows name the person on hover', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $alice = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
+    $task = Task::factory()->create(['status' => TaskStatus::Todo]);
+    $task->taskAssignees()->delete();
+    $task->taskAssignees()->create(['employee_id' => $alice]);
+
+    $page = Livewire::actingAs($user)->test('pages::tasks.index');
+
+    // The board shows a person card on hover, filled from the avatar's data.
+    $page->set('view', 'board')
+        ->assertSeeHtml('data-person-name="Alice Nadir"')
+        ->assertSeeHtml('x-on:mouseenter="$store.personCard.show($el)"')
+        ->assertSeeHtml('data-test="person-card"');
+    $page->set('view', 'list')->set('listLayout', 'wide')->assertSeeHtml('title="Alice Nadir"');
+});
+
 test('the task form is rendered only while its drawer is open', function () {
     $user = User::factory()->role('General Manager')->create();
 
@@ -1502,6 +1713,33 @@ test('the task form is rendered only while its drawer is open', function () {
         ->assertDontSeeHtml('wire:model="progressPercentage"')
         ->call('openCreateDrawer')
         ->assertSeeHtml('wire:model="progressPercentage"');
+});
+
+test('opening the create drawer files the task under the viewer\'s department and assigns it to them', function () {
+    $employeeId = insertHrEmployee();
+    $departmentId = insertHrDepartment('Monitoring & Evaluation');
+    insertHrContract($employeeId, insertHrPosition($departmentId));
+    $user = User::factory()->role('General Manager')->create(['employee_id' => $employeeId]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->call('openCreateDrawer')
+        ->assertSet('showTaskDrawer', true)
+        ->assertSet('taskSourceType', 'department')
+        ->assertSet('taskSourceId', (string) $departmentId)
+        ->assertSet('assignedTo', [(string) $employeeId]);
+});
+
+test('the create dialog is one screen, not a step wizard', function () {
+    $user = User::factory()->role('General Manager')->create(['employee_id' => insertHrEmployee()]);
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->call('openCreateDrawer')
+        ->assertSeeHtml('data-test="task-drawer-composer"')
+        ->assertSeeHtml('data-test="task-drawer-title-input"')
+        ->assertSeeHtml('data-test="task-assignee-picker"')
+        ->assertDontSeeHtml('class="form-section');
 });
 
 test('the popover toggle actions skip the list re-render and still save', function () {
@@ -1592,7 +1830,7 @@ test('the board opens the shared menu for priority instead of a dropdown per car
     expect(substr_count($html, 'data-test="task-priority-option-high"'))->toBe(1);
 });
 
-test('quick actions stay silent on the board, except moving a card, and still toast in the list', function () {
+test('quick actions stay silent on the board, including moving a card, and still toast in the list', function () {
     $user = User::factory()->role('General Manager')->create();
     $alice = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
     $bob = insertHrEmployee(firstNameEn: 'Bob', lastNameEn: 'Rahman');
@@ -1600,15 +1838,15 @@ test('quick actions stay silent on the board, except moving a card, and still to
     $task->taskAssignees()->delete();
     $task->taskAssignees()->create(['employee_id' => $alice]);
 
-    // A toast per pick piles up when the board is worked in bursts.
+    // A toast per pick piles up when the board is worked in bursts, and a
+    // moved card already shows its new status by sitting in the new column.
     Livewire::actingAs($user)
         ->test('pages::tasks.index')
         ->set('view', 'board')
         ->call('quickSetPriority', $task->id, TaskPriority::High->value)
         ->call('toggleAssignee', $task->id, $bob)
-        ->assertNotDispatched('toast-show')
         ->call('quickSetStatus', $task->id, TaskStatus::InProgress->value)
-        ->assertDispatched('toast-show');
+        ->assertNotDispatched('toast-show');
 
     expect($task->refresh()->status)->toBe(TaskStatus::InProgress)
         ->and($task->priority)->toBe(TaskPriority::High)
@@ -1623,16 +1861,11 @@ test('quick actions stay silent on the board, except moving a card, and still to
 
 test('a refused quick action still explains itself on the board', function () {
     $user = User::factory()->role('General Manager')->create();
-    $alice = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
-    $task = Task::factory()->create();
-    $task->taskAssignees()->delete();
-    $task->taskAssignees()->create(['employee_id' => $alice]);
+    $task = Task::factory()->completed()->create();
 
     Livewire::actingAs($user)
         ->test('pages::tasks.index')
         ->set('view', 'board')
-        ->call('toggleAssignee', $task->id, $alice)
+        ->call('toggleComplete', $task->id)
         ->assertDispatched('toast-show');
-
-    expect($task->taskAssignees()->count())->toBe(1);
 });

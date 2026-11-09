@@ -11,3 +11,13 @@ results/⚡index.blade.php reads the whole chain up front — statements, indica
 `deletable` on a node comes from `childCounts` (built from the UNFILTERED set), not from the visible children, so hiding a subtree can never unlock a delete that would cascade.
 
 Achievement is rated against the calendar year (`now()->startOfYear()`/`endOfYear()`), the same window `indicators/⚡index.blade.php` uses, so a percentage means the same thing on both pages. Any write must call `forgetFramework()`, which unsets every cached computed — clearing only `groupedRoots` re-renders stale figures in the same request.
+
+## Three headline buttons, one honest status per statement (scenario review 2026-11-09)
+The four figure tiles, the five level cards, the coverage ring and the chip row were replaced by three buttons in `_index-overview`: Needs an indicator / Behind / Waiting for a measurement. Each sets `focus` (`unmeasured` / `offtrack` / `waiting`); pressing the active one clears it. Each says its denominator ("17 of 63 statements") and `focusCounts()` counts them under the other active filters.
+
+`measurements()[id]['status']` is `none` (no indicator), `behind` (any amber/red), `waiting` (any indicator never read or not read within its own cadence, `Period::freshnessDays()`, shared with the indicators page), `ontrack`, or `notarget`. A green rating counts as on track only while fresh, so the three counts are disjoint and never call an old figure "on track". The average achievement caps each indicator at 100%.
+
+User decision 2026-11-09: the Cascade/Matrix switch (the `view` property and `_index-matrix`) was removed; the page is the one cascade list, one panel per program or proposal framework. The statement card says "Review: Quarterly" instead of "Quarterly check-out". Per-target percentages on the card (e.g. 326% of a commitment) are real approved-report figures and stay uncapped; only averages are capped.
+
+## List and chart views, filters behind More filters (user decision 2026-11-09)
+Supersedes the "one cascade list, switch removed" note above: the owner asked for a chart, so the register has a "View as list" / "View as chart" switch (`view` property, `list` default, `chart`). The chart view (`_index-chart`) is a program-by-level grid from `statusGrid()`: each cell is its worst status (behind, waiting, needs an indicator, on track) with the word and an icon, never colour alone. It reads the same filtered `visibleNodes` as the list and the three headline buttons. The owner rejected stacked bars; do not bring them back. Search is in the register's `search` slot (`x-desk.register-search`), Program stays visible and Framework and Type sit behind More filters, open when one is active, like the Indicators page.

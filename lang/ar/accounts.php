@@ -30,7 +30,7 @@ return [
     'funds_received' => 'الأموال المستلمة',
     'funds_received_hint' => 'المبالغ الصافية الواردة، حسب العملة — لا تُجمع أبدًا',
     'iban' => 'رقم الآيبان (IBAN)',
-    'it_stops_accepting_new_transfers_existing_transfer_records_a' => 'سيتوقف عن قبول تحويلات جديدة. تبقى سجلات التحويلات الحالية، فالحساب الذي مرت عبره أموال لا يُحذف أبدًا.',
+    'close_account_message' => 'سيتوقف «:name» عن قبول تحويلات جديدة. تبقى سجلات التحويلات الحالية، فالحساب الذي مرت عبره أموال لا يُحذف أبدًا.',
     'last_transfer_date' => 'آخر تحويل :date',
     'no_accounts_yet' => 'لا توجد حسابات بعد',
     'no_funds_received_yet' => 'لم تُستلم أي أموال بعد.',

@@ -109,7 +109,7 @@ new #[Layout('layouts::desk'), Title('titles.strategies')] class extends Compone
         $searchFiltered = Strategy::query()
             ->select(['id', 'slug', 'name', 'start_year', 'end_year'])
             ->withCount(['programs', 'pillars'])
-            ->when($search !== '', fn ($query) => $query->where('name', 'like', Like::contains($search)))
+            ->when($search !== '', fn ($query) => $query->where(Like::matches('name', $search)))
             ->orderBy('name')
             ->orderBy('id')
             ->get()
@@ -176,8 +176,10 @@ new #[Layout('layouts::desk'), Title('titles.strategies')] class extends Compone
         'all' => ['status' => '', 'label' => __('strategies.tab_all')],
         'active' => ['status' => 'active', 'label' => __('strategies.status_active')],
         'upcoming' => ['status' => 'upcoming', 'label' => __('strategies.upcoming')],
-        'completed' => ['status' => 'completed', 'label' => __('strategies.status_completed')],
+        'completed' => ['status' => 'completed', 'label' => __('strategies.tab_past')],
     ];
+    // A tab with nothing in it is not a failed search: say what is missing, with no "reset filters".
+    $emptyTab = $searchTerm === '' && $status !== '';
 @endphp
 
 <x-desk.register class="admin-directory @container/directory" heading-id="strategies-heading" :title="__('common.strategies')">
@@ -212,10 +214,19 @@ new #[Layout('layouts::desk'), Title('titles.strategies')] class extends Compone
     @if ($portfolio['total_count'] === 0 || $nothingToShow)
         <x-ui.empty-state
             icon="flag"
-            :heading="$portfolio['filters_active'] ? __('strategies.no_matching_strategic_periods') : __('strategies.no_strategic_periods_yet')"
-            :body="$portfolio['filters_active'] ? __('common.change_the_search_or_filters_and_try_again') : __('strategies.strategy_records_will_appear_here_once_planning_cycles_are_d')"
+            :heading="match (true) {
+                $emptyTab => __('strategies.empty_tab.'.$status),
+                $portfolio['filters_active'] => __('strategies.no_matching_strategic_periods'),
+                default => __('strategies.no_strategic_periods_yet'),
+            }"
+            :body="match (true) {
+                $emptyTab => null,
+                $portfolio['filters_active'] => __('common.change_the_search_or_filters_and_try_again'),
+                default => __('strategies.strategy_records_will_appear_here_once_planning_cycles_are_d'),
+            }"
+            data-test="strategies-empty"
         >
-            @if ($portfolio['filters_active'])
+            @if ($portfolio['filters_active'] && ! $emptyTab)
                 <x-slot:action>
                     <flux:button size="sm" wire:click="resetFilters">{{ __('common.reset_filters') }}</flux:button>
                 </x-slot:action>

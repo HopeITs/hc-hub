@@ -215,6 +215,7 @@ test('the verdict sentence on the strategy page takes the tone of the share on p
 
 test('the key figures are big typographic numbers, not stat tiles', function () {
     $strategy = Strategy::factory()->create();
+    Program::factory()->create(['strategy_id' => $strategy->id]);
 
     $this->actingAs(User::factory()->role('General Manager')->create())
         ->get(route('strategies.show', $strategy))
@@ -283,6 +284,7 @@ test('the programs and projects figures add up every program of the strategy', f
 
 test('the programs and projects figures link to their own registers narrowed to the strategy', function () {
     $strategy = Strategy::factory()->create();
+    Program::factory()->create(['strategy_id' => $strategy->id]);
 
     $this->actingAs(User::factory()->role('General Manager')->create())
         ->get(route('strategies.show', $strategy))
@@ -382,4 +384,22 @@ test('a viewer sees no edit button and no actions menu', function () {
         ->get(route('strategies.show', $strategy))
         ->assertDontSee('data-test="edit-strategy-button"', false)
         ->assertDontSee('data-test="strategy-more-actions"', false);
+});
+
+test('an empty strategy page shows one not-set-up line, and hides the empty build section from a viewer', function () {
+    $strategy = Strategy::factory()->create(['name' => 'Empty Strategy', 'start_year' => 2026, 'end_year' => 2030]);
+
+    $this->actingAs(User::factory()->role('Team Member')->create())
+        ->get(route('strategies.show', $strategy))
+        ->assertOk()
+        ->assertSeeText(__('strategies.not_set_up'))
+        ->assertSeeText(__('strategies.not_set_up_viewer'))
+        ->assertDontSeeText(__('strategies.nothing_needs_attention'))
+        ->assertDontSeeText(__('strategies.verdict_none'))
+        ->assertDontSee('data-test="strategy-pillars"', false);
+
+    $this->actingAs(User::factory()->role('General Manager')->create())
+        ->get(route('strategies.show', $strategy))
+        ->assertSee('data-test="strategy-pillars"', false)
+        ->assertSee('data-test="create-pillar"', false);
 });

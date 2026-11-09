@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Calendar;
 
+use App\Enums\ProposalStatus;
 use App\Models\Donor;
 use App\Models\DonorReport;
 use App\Models\Milestone;
@@ -16,6 +17,7 @@ use App\Models\TransfersTracking;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
+use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -38,13 +40,39 @@ use Livewire\Attributes\Computed;
 trait FindsFocusedTypeDates
 {
     /**
-     * Moves the grid to the month (or period anchor) containing the nearest
-     * occurrence of $type: the next upcoming one if there is one, otherwise
-     * the most recent past one, so focusing a type with only historical
-     * records still lands somewhere with data instead of today's empty month.
+     * Which per-day groupings of the calendar grid hold each type. Donor and
+     * project are composite (two source columns each), the same two queries
+     * focusedItems() merges for them.
+     *
+     * @return array<string, array<int, string>>
+     */
+    protected function typeDayGroups(): array
+    {
+        return [
+            'milestone' => ['milestonesByDay'],
+            'task' => ['tasksByDay'],
+            'report' => ['reportsByDay'],
+            'monthly_report' => ['monthlyReportsByDay'],
+            'proposal' => ['proposalsByDay', 'reviewMeetingsByDay'],
+            'transfer' => ['transfersByDay'],
+            'donor' => ['donorFollowUpsByDay', 'donorReportsByDay'],
+            'project' => ['projectStartsByDay', 'projectEndsByDay'],
+        ];
+    }
+
+    /**
+     * Keeps the grid where it is when the period on screen already holds
+     * $type. Otherwise moves it to the month (or period anchor) of the
+     * nearest occurrence: the next upcoming one if there is one, otherwise
+     * the most recent past one, and says so in a toast, so the jump is never
+     * a surprise.
      */
     protected function jumpToNearest(string $type): void
     {
+        if ($this->visiblePeriodHas($type)) {
+            return;
+        }
+
         $nearest = $this->nearestDateFor($type);
 
         if ($nearest === null) {
@@ -56,6 +84,37 @@ trait FindsFocusedTypeDates
         } else {
             $this->anchorDate = $nearest->toDateString();
         }
+
+        unset($this->calendar);
+
+        Flux::toast(text: __('calendar.moved_to_nearest', ['date' => $nearest->translatedFormat(__('formats.date'))]));
+    }
+
+    /**
+     * Whether the period on screen holds at least one $type item. In month
+     * view only the month's own days count, not the padding days of the
+     * months either side.
+     */
+    protected function visiblePeriodHas(string $type): bool
+    {
+        $calendar = $this->calendar;
+        $month = $calendar['month'];
+
+        foreach ($this->typeDayGroups()[$type] ?? [] as $group) {
+            $byDay = $calendar[$group];
+
+            if (! $byDay instanceof \Illuminate\Support\Collection) {
+                continue;
+            }
+
+            foreach ($byDay->keys() as $date) {
+                if ($this->viewMode !== 'month' || CarbonImmutable::parse((string) $date)->isSameMonth($month)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     protected function nearestDateFor(string $type): ?CarbonImmutable
@@ -83,7 +142,7 @@ trait FindsFocusedTypeDates
                 ? $this->upcomingOrRecentRows(fn (bool $upcoming): \Illuminate\Support\Collection => $this->monthlyReportRows($employeeIds, $upcoming), 1)->first()['date'] ?? null
                 : null,
             'proposal' => ! $this->canViewProposals() ? null : $this->nearestOrLatestDate(
-                Proposal::query()->whereHas('projects', fn (Builder $query) => $query->whereIn('projects.user_id', $employeeIds)),
+                Proposal::query()->whereHas('projects', fn (Builder $query) => $query->whereIn('projects.user_id', $employeeIds))->whereNotIn('status', [ProposalStatus::Rejected, ProposalStatus::Completed]),
                 'planned_date_end'
             ),
             'transfer' => ! $this->canViewTransfers() ? null : $this->nearestOrLatestDate(
@@ -330,7 +389,7 @@ trait FindsFocusedTypeDates
                 ? $this->upcomingOrRecentRows(fn (bool $upcoming): \Illuminate\Support\Collection => $this->monthlyReportRows($employeeIds, $upcoming))
                 : new \Illuminate\Support\Collection,
             'proposal' => ($this->canViewProposals() ? $this->upcomingOrRecent(
-                Proposal::query()->whereHas('projects', fn (Builder $query) => $query->whereIn('projects.user_id', $employeeIds)),
+                Proposal::query()->whereHas('projects', fn (Builder $query) => $query->whereIn('projects.user_id', $employeeIds))->whereNotIn('status', [ProposalStatus::Rejected, ProposalStatus::Completed]),
                 'planned_date_end'
             ) : new Collection)->map(fn (Proposal $proposal): array => [
                 'kind' => 'link',

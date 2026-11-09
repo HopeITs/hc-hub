@@ -85,25 +85,21 @@ class HrEmployee extends HrModel
      *
      * @return list<int>
      */
-    public static function idsMatchingName(string $search): array
+    public static function idsMatchingName(string $search, bool $acrossLayouts = true): array
     {
-        $words = preg_split('/\s+/u', Like::term($search), -1, PREG_SPLIT_NO_EMPTY);
-
-        if ($words === false || $words === []) {
+        if (trim(Like::term($search)) === '') {
             return [];
         }
 
-        $query = static::query();
-
-        foreach ($words as $word) {
-            $query->where(fn ($query) => $query
-                ->where('first_name_en', 'like', Like::contains($word))
-                ->orWhere('last_name_en', 'like', Like::contains($word))
-                ->orWhere('first_name_ar', 'like', Like::contains($word))
-                ->orWhere('last_name_ar', 'like', Like::contains($word)));
-        }
-
-        return array_values($query->pluck('id')->map(fn (mixed $id): int => (int) $id)->all());
+        return array_values(static::query()
+            ->where(Like::everyWord($search, fn ($query, string $word) => $query
+                ->where(Like::word('first_name_en', $word))
+                ->orWhere(Like::word('last_name_en', $word))
+                ->orWhere(Like::word('first_name_ar', $word))
+                ->orWhere(Like::word('last_name_ar', $word)), $acrossLayouts))
+            ->pluck('id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all());
     }
 
     /**
@@ -210,24 +206,26 @@ class HrEmployee extends HrModel
     }
 
     /**
-     * The picker list as plain `{value, label, detail, inactive}` rows, label
-     * being the main and secondary name together and detail the person's
-     * current position, in the order pickerOptions() sorts them. Someone with
-     * no active contract (or inactive in HR) is flagged inactive.
+     * The picker list as plain `{value, label, detail, photo, inactive}` rows,
+     * label being the main and secondary name together, detail the person's
+     * current position and photo their picture (HR's default without one), in
+     * the order pickerOptions() sorts them. Someone with no active contract
+     * (or inactive in HR) is flagged inactive.
      *
-     * @return SupportCollection<int, array{value: string, label: string, detail: string, inactive: bool}>
+     * @return SupportCollection<int, array{value: string, label: string, detail: string, photo: string, inactive: bool}>
      */
     public static function pickerLabels(): SupportCollection
     {
         $suffix = Locale::current() === Locale::Arabic ? 'ar' : 'en';
 
         return collect(Cache::memo()->remember(
-            self::PickerCacheKeyPrefix.'labels.'.$suffix,
+            self::PickerCacheKeyPrefix.'labels-with-photo.'.$suffix,
             self::PickerCacheSeconds,
             fn (): array => static::pickerOptions()->map(fn (self $employee): array => [
                 'value' => (string) $employee->id,
                 'label' => $employee->name.' · '.$employee->secondary_name,
                 'detail' => static::positionSummary($employee->id) ?? (string) __('common.no_active_position'),
+                'photo' => static::avatarUrl($employee->id),
                 'inactive' => ! (EmployeeProfile::for($employee->id)['is_active'] ?? false),
             ])->all(),
         ));
@@ -236,7 +234,8 @@ class HrEmployee extends HrModel
     /**
      * Where an employee sits now, for chips and pickers: «position · job level ·
      * department · center» in the interface language, null without an active
-     * contract. Reads EmployeeProfile and the in-memory HR lookups only.
+     * contract. The job level is left out when it only repeats the position
+     * title. Reads EmployeeProfile and the in-memory HR lookups only.
      */
     public static function positionSummary(int $employeeId): ?string
     {
@@ -250,9 +249,15 @@ class HrEmployee extends HrModel
             ? $profile['position_title_ar']
             : $profile['position_title_en'];
 
+        $jobLevel = $profile['job_level'];
+
+        if (mb_strtolower(trim((string) $jobLevel)) === mb_strtolower(trim((string) $title))) {
+            $jobLevel = null;
+        }
+
         return collect([
             $title,
-            $profile['job_level'],
+            $jobLevel,
             $profile['department_id'] === null ? null : HrDepartment::nameOf($profile['department_id']),
             $profile['center_id'] === null ? null : HrCenter::remembered($profile['center_id'])?->name,
         ])->map(fn (?string $part): string => trim((string) $part))->filter()->implode(' · ');
@@ -265,7 +270,7 @@ class HrEmployee extends HrModel
     {
         foreach (['en', 'ar'] as $suffix) {
             Cache::memo()->forget(self::PickerCacheKeyPrefix.$suffix);
-            Cache::memo()->forget(self::PickerCacheKeyPrefix.'labels.'.$suffix);
+            Cache::memo()->forget(self::PickerCacheKeyPrefix.'labels-with-photo.'.$suffix);
         }
     }
 

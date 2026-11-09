@@ -11,15 +11,27 @@ use App\Models\MonthlyReport;
  * switched on, whether the viewer may see each one at all, and the one type
  * the calendar is focused on when only one is on.
  *
- * Used by calendar/index only. The page provides the #[Url]
- * filterEmployeeIds property; jumpToNearest() comes from
+ * The switched-on types travel in the #[Url] shownTypes property (a comma
+ * list, '' for all, 'none' for none), so a reload or a shared link keeps the
+ * filter. The show* toggles stay the working state; mount reads the URL into
+ * them and every response writes them back.
+ *
+ * Used by calendar/index only. The page provides the #[Url] shownTypes
+ * property; jumpToNearest() comes from
  * FindsFocusedTypeDates, canViewProposals(), canViewTransfers() and
  * canViewAgreements() from ChecksFinanceVisibility.
  *
- * @property array<int, string> $filterEmployeeIds
+ * @property string $shownTypes
  */
 trait FiltersCalendarTypes
 {
+    /**
+     * Every calendar type, in the order the filter menu lists them.
+     *
+     * @var array<int, string>
+     */
+    protected const array CALENDAR_TYPES = ['milestone', 'task', 'report', 'monthly_report', 'proposal', 'transfer', 'donor', 'project'];
+
     public bool $showMilestones = true;
 
     public bool $showTasks = true;
@@ -37,6 +49,38 @@ trait FiltersCalendarTypes
     public bool $showProjects = true;
 
     public bool $showTypeFilterMenu = false;
+
+    /**
+     * Applies the types named in the URL. Unknown names are ignored, so a
+     * hand-edited link cannot switch anything else.
+     */
+    public function mountFiltersCalendarTypes(): void
+    {
+        if ($this->shownTypes === '') {
+            return;
+        }
+
+        $named = explode(',', $this->shownTypes);
+
+        foreach (self::CALENDAR_TYPES as $type) {
+            $this->{$this->typeProperty($type)} = in_array($type, $named, true);
+        }
+    }
+
+    /**
+     * Writes the switched-on types back to the URL property before every
+     * response, whichever action changed them.
+     */
+    public function dehydrateFiltersCalendarTypes(): void
+    {
+        $shown = array_values(array_filter(self::CALENDAR_TYPES, fn (string $type): bool => $this->{$this->typeProperty($type)}));
+
+        $this->shownTypes = match (count($shown)) {
+            count(self::CALENDAR_TYPES) => '',
+            0 => 'none',
+            default => implode(',', $shown),
+        };
+    }
 
     /**
      * Flips one type's visibility. The menu stays open across picks — the
@@ -70,30 +114,25 @@ trait FiltersCalendarTypes
             return;
         }
 
-        $this->showMilestones = $type === 'milestone';
-        $this->showTasks = $type === 'task';
-        $this->showReports = $type === 'report';
-        $this->showMonthlyReports = $type === 'monthly_report';
-        $this->showProposals = $type === 'proposal';
-        $this->showTransfers = $type === 'transfer';
-        $this->showDonors = $type === 'donor';
-        $this->showProjects = $type === 'project';
+        foreach (self::CALENDAR_TYPES as $calendarType) {
+            $this->{$this->typeProperty($calendarType)} = $calendarType === $type;
+        }
+
         $this->showTypeFilterMenu = false;
 
         $this->jumpToNearest($type);
     }
 
+    /**
+     * "Clear filter" switches every type back on. The people picked in the
+     * responsible filter stay: the button sits on the type banner and clears
+     * only what it names.
+     */
     public function resetFilters(): void
     {
-        $this->showMilestones = true;
-        $this->showTasks = true;
-        $this->showReports = true;
-        $this->showMonthlyReports = true;
-        $this->showProposals = true;
-        $this->showTransfers = true;
-        $this->showDonors = true;
-        $this->showProjects = true;
-        $this->filterEmployeeIds = [];
+        foreach (self::CALENDAR_TYPES as $type) {
+            $this->{$this->typeProperty($type)} = true;
+        }
     }
 
     /**
@@ -155,17 +194,8 @@ trait FiltersCalendarTypes
      */
     protected function focusedType(): ?string
     {
-        $active = array_filter([
-            'milestone' => $this->isTypeShown('milestone'),
-            'task' => $this->isTypeShown('task'),
-            'report' => $this->isTypeShown('report'),
-            'monthly_report' => $this->isTypeShown('monthly_report'),
-            'proposal' => $this->isTypeShown('proposal'),
-            'transfer' => $this->isTypeShown('transfer'),
-            'donor' => $this->isTypeShown('donor'),
-            'project' => $this->isTypeShown('project'),
-        ]);
+        $active = array_values(array_filter(self::CALENDAR_TYPES, fn (string $type): bool => $this->isTypeShown($type)));
 
-        return count($active) === 1 ? array_key_first($active) : null;
+        return count($active) === 1 ? $active[0] : null;
     }
 }

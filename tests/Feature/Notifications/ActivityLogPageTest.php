@@ -66,3 +66,65 @@ test('the sidebar links the log only for those who may open it', function () {
     $this->actingAs(userWithRole('General Manager'))->get(route('dashboard'))->assertSee(route('activity.index'));
     $this->actingAs(userWithRole('Managers'))->get(route('dashboard'))->assertDontSee(route('activity.index'));
 });
+
+test('an impossible date in the address is ignored instead of crashing the log', function () {
+    $this->actingAs(userWithRole('Managers'));
+    Task::factory()->create(['title' => 'Water trucking']);
+
+    $this->actingAs(userWithRole('Super Admin'))
+        ->get(route('activity.index', ['from' => '2026-13-45']))
+        ->assertOk()
+        ->assertSeeText('Water trucking');
+});
+
+test('the today and last 7 days numbers filter the list and clear on a second press', function () {
+    $this->actingAs(userWithRole('Managers'));
+    $this->travel(-10)->days();
+    Risk::factory()->create(['name' => 'Old risk']);
+    $this->travelBack();
+    Task::factory()->create(['title' => 'Fresh task']);
+
+    $page = Livewire::actingAs(userWithRole('Super Admin'))->test('pages::activity.index')
+        ->assertSeeText('Old risk')
+        ->call('showRange', 'today')
+        ->assertSet('from', now()->toDateString())
+        ->assertSeeText('Fresh task')
+        ->assertDontSeeText('Old risk')
+        ->assertSeeHtml('aria-pressed="true"')
+        ->call('showRange', 'today')
+        ->assertSet('from', '')
+        ->assertSeeText('Old risk');
+
+    $page->call('showRange', 'week')->assertDontSeeText('Old risk');
+});
+
+test('a day split across pages shows its real total and an empty result offers a reset', function () {
+    $this->actingAs(userWithRole('Managers'));
+    Task::factory()->count(55)->create();
+
+    $page = Livewire::actingAs(userWithRole('Super Admin'))->test('pages::activity.index');
+
+    expect(Activity::count())->toBeGreaterThan(50)
+        ->and($page->instance()->dayTotals)->toBe([now()->toDateString() => Activity::count()]);
+
+    $page->set('search', 'zzz-no-match')
+        ->assertSeeText(__('activity.empty_filtered'))
+        ->assertSeeHtml('data-activity-reset')
+        ->call('resetFilters')
+        ->assertSet('search', '')
+        ->assertDontSeeText(__('activity.empty_filtered'));
+});
+
+test('the system actor filter keeps only entries with no person', function () {
+    $this->actingAs(userWithRole('Managers'));
+    Risk::factory()->create(['name' => 'By a person']);
+    $system = Activity::query()->first()->replicate();
+    $system->actor_id = null;
+    $system->properties = [...$system->properties, 'label' => 'By the system'];
+    $system->save();
+
+    Livewire::actingAs(userWithRole('Super Admin'))->test('pages::activity.index')
+        ->set('actor', 'system')
+        ->assertSeeText('By the system')
+        ->assertDontSeeText('By a person');
+});

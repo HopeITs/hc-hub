@@ -40,9 +40,6 @@ return [
         'programs.show' => [
             ['id' => 'loose_tasks', 'targets' => ['[data-loose-tasks]']],
         ],
-        'timeline.index' => [
-            ['id' => 'board', 'targets' => ['[data-timeline-board]']],
-        ],
         'donors.index' => [
             ['id' => 'overview', 'targets' => ['[data-donor-overview]']],
             ['id' => 'wallet', 'targets' => ['[data-wallet]']],

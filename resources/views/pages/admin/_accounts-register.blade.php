@@ -18,6 +18,10 @@
                     ['key' => 'upcoming', 'label' => __('finance_tables.upcoming'), 'value' => $line['upcoming']],
                     ['key' => 'overdue', 'label' => __('finance_tables.overdue'), 'value' => $line['overdue'], 'tone' => $line['overdue'] > 0 ? 'critical' : null],
                 ])),
+                // Money that landed in another currency is counted, never converted, so say so beside the zeros.
+                'notes' => $line['other_currency'] > 0
+                    ? [trans_choice('finance_tables.count_landed_in_another_currency', $line['other_currency'], ['count' => $line['other_currency']])]
+                    : [],
             ])->all();
 
             $showsYearColumn = $selectedYear !== null && $chosen['figures'] === 'lifetime';
@@ -54,7 +58,7 @@
                     $otherCurrency = (int) $account->money_other_currency;
                 @endphp
                 <tr wire:key="account-{{ $account->id }}" data-account-row="{{ $account->id }}">
-                    <td data-label="{{ __('accounts.account_name') }}" data-wide><span class="font-semibold">{{ $account->account_name }}</span></td>
+                    <td data-label="{{ __('accounts.account_name') }}" data-wide><span class="font-semibold"><bdi>{{ $account->account_name }}</bdi></span></td>
                     <td data-label="{{ __('accounts.bank_name') }}">{{ $account->bank_name }}</td>
                     <td data-label="{{ __('donors.country') }}">{{ $account->country }}</td>
                     <td data-label="{{ __('common.currency') }}">{{ $account->currency->value }}</td>

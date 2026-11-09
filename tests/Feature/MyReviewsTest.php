@@ -76,7 +76,7 @@ test('someone never asked to review sees no My reviews link', function () {
     expect(array_column(app(Destinations::class)->for($user), 'route'))->not->toContain('reviews.index');
 });
 
-test('the page lists only the viewer\'s reviews still waiting on them, and every one of theirs on All', function () {
+test('the page lists only the reviews still waiting on the viewer, and the finished ones on Finished', function () {
     [$employeeId, $user] = reviewerLogin();
     myReview($employeeId, 'Water Access', ProposalStatus::ConceptNoteReview);
     myReview($employeeId, 'Already Read', ProposalStatus::ConceptNoteReview, seen: true);
@@ -93,13 +93,63 @@ test('the page lists only the viewer\'s reviews still waiting on them, and every
         ->assertDontSee('Moved On')
         ->assertDontSee('Not Sent Yet')
         ->assertDontSee('Someone Else')
-        ->set('state', 'all')
-        ->assertSeeInOrder(['Water Access', 'Not Sent Yet'])
+        ->call('setState', 'done')
+        ->assertDontSee('Water Access')
         ->assertSee('Already Read')
         ->assertSee(__('proposals.reviewer_seen_on', ['date' => now()->translatedFormat(__('formats.date'))]))
         ->assertSee('Moved On')
+        ->assertSee('Not Sent Yet')
         ->assertSee(__('proposals.my_reviews_closed'))
         ->assertDontSee('Someone Else');
+});
+
+test('the three buttons show disjoint counts that match what each click lists, and the search narrows them', function () {
+    [$employeeId, $user] = reviewerLogin();
+    myReview($employeeId, 'Water Access', ProposalStatus::ConceptNoteReview);
+    myReview($employeeId, 'School Meals', ProposalStatus::ConceptNoteReview);
+    myReview($employeeId, 'Already Read', ProposalStatus::ConceptNoteReview, seen: true);
+
+    $page = Livewire::actingAs($user)->test('pages::reviews.index');
+
+    expect($page->instance()->counts)->toBe(['awaiting' => 2, 'done' => 1, 'asked' => 0]);
+    $page->assertSeeHtml('data-test="review-tab-awaiting"')
+        ->assertSeeHtml('aria-pressed="true"')
+        ->set('search', 'water');
+
+    expect($page->instance()->counts)->toBe(['awaiting' => 1, 'done' => 0, 'asked' => 0]);
+    $page->assertSee('Water Access')
+        ->assertDontSee('School Meals')
+        ->set('search', 'zzz')
+        ->assertSee(__('desk.register.nothing_matches'))
+        ->call('clearSearch')
+        ->assertSee('School Meals')
+        ->call('setState', 'asked');
+
+    expect($page->instance()->mode)->toBe('asked');
+});
+
+test('a stale link with the old All value opens on Waiting on me', function () {
+    [$employeeId, $user] = reviewerLogin();
+    myReview($employeeId, 'Water Access', ProposalStatus::ConceptNoteReview);
+
+    $page = Livewire::actingAs($user)->test('pages::reviews.index')->set('state', 'all');
+
+    expect($page->instance()->mode)->toBe('awaiting');
+    $page->assertSee('Water Access');
+});
+
+test('the buttons and search sit inside the page root', function () {
+    [, $user] = reviewerLogin();
+
+    $html = Livewire::actingAs($user)->test('pages::reviews.index')->html();
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
+    $xpath = new DOMXPath($dom);
+
+    expect($xpath->query('//*[@data-my-reviews]//*[@data-test="review-tab-awaiting"]')->length)->toBe(1)
+        ->and($xpath->query('//*[@data-my-reviews]//*[@data-test="review-tab-done"]')->length)->toBe(1)
+        ->and($xpath->query('//*[@data-my-reviews]//*[@data-test="review-tab-asked"]')->length)->toBe(1)
+        ->and($xpath->query('//*[@data-my-reviews]//*[@data-test="review-search"]')->length)->toBe(1);
 });
 
 test('the page lists the oldest ask first with its wait, and turns red only after a week', function () {
@@ -256,7 +306,7 @@ test('a finished review on All opens the proposal, not the review box', function
     $done->proposal->projects()->attach($project->id);
 
     Livewire::actingAs($user)->test('pages::reviews.index')
-        ->set('state', 'all')
+        ->set('state', 'done')
         ->assertSee(route('projects.show', ['project' => $project, 'proposal' => $done->proposal_id, 'ptab' => 'status']).'#proposal')
         ->assertDontSee('#my-review');
 });

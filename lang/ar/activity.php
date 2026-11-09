@@ -3,6 +3,7 @@
 return [
     'title' => 'النشاط',
     'empty' => 'لم يحدث شيء هنا بعد.',
+    'load_count_more' => 'تحميل :count أخرى',
     'load_more' => 'عرض النشاط الأقدم',
     'changed_to' => 'تغيّر إلى',
     'log_title' => 'سجل النشاط',
