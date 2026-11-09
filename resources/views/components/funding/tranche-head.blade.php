@@ -1,4 +1,4 @@
-@props(['sortable' => false, 'active' => '', 'dir' => 'asc', 'actions' => true, 'compact' => false])
+@props(['sortable' => false, 'active' => '', 'dir' => 'asc', 'actions' => true, 'compact' => false, 'conversions' => false])
 
 @php
     /**
@@ -20,8 +20,8 @@
         $compact ? null : ['sort' => null, 'label' => __('common.currency'), 'numeric' => false],
         ['sort' => 'amount', 'label' => __('finance_tables.amount_sent'), 'numeric' => true],
         $compact ? null : ['sort' => 'fees', 'label' => __('transfers.fees'), 'numeric' => true],
-        $compact ? null : ['sort' => 'rate', 'label' => __('transfers.exchange_rate'), 'numeric' => true],
-        $compact ? null : ['sort' => 'gross', 'label' => __('finance_tables.gross_received'), 'numeric' => true],
+        $compact && ! $conversions ? null : ['sort' => 'rate', 'label' => __('transfers.exchange_rate'), 'numeric' => true],
+        $compact && ! $conversions ? null : ['sort' => 'gross', 'label' => __('finance_tables.gross_received'), 'numeric' => true],
         ['sort' => 'net', 'label' => __('common.net_received'), 'numeric' => true],
         ['sort' => 'difference', 'label' => __('finance_tables.difference'), 'numeric' => true],
     ]));

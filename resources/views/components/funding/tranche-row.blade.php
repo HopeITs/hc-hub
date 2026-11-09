@@ -1,4 +1,4 @@
-@props(['transfer', 'compact' => false])
+@props(['transfer', 'compact' => false, 'conversions' => false])
 
 @php
     /** @var \App\Models\TransfersTracking $transfer */
@@ -62,14 +62,14 @@
     </td>
     @endunless
 
-    @unless ($compact)
+    @unless ($compact && ! $conversions)
     <td class="num" data-label="{{ __('transfers.exchange_rate') }}" data-cell="rate">
         <span class="fig">{{ $rate }}</span>
     </td>
     @endunless
 
     {{-- A pending tranche may carry amounts filled in ahead of time. They have not landed, so they are not shown. --}}
-    @unless ($compact)
+    @unless ($compact && ! $conversions)
     <td class="num" data-label="{{ __('finance_tables.gross_received') }}" data-cell="gross">
         @if ($isReceived && $transfer->amount_received !== null)
             <span class="fig">{{ $money($transfer->amount_received) }}</span>

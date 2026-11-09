@@ -92,19 +92,47 @@ test('the overview view shows the ledger and the ladder instead of the table', f
 });
 
 test('a table row shows what was sent, what landed and the gap, and leaves the journey to the Overview', function () {
-    registerSettledTranche(['exchange_rate' => '0.925000']);
+    // Everything in one currency at a rate of 1: nothing to explain.
+    registerSettledTranche();
 
     transferRegister()
         ->assertSee('1,000.00')
         ->assertSee('985.00')
         ->assertSee('−15.00')
-        // Fees, the exchange rate, the gross amount, the account and the sent
-        // and received dates moved to the Overview ladder and the edit form:
-        // thirteen columns forced a sideways scroll that hid the edit button.
+        // Fees, the account and the sent and received dates moved to the
+        // Overview ladder and the edit form: thirteen columns forced a
+        // sideways scroll that hid the edit button.
         ->assertDontSeeHtml('data-cell="fees"')
         ->assertDontSeeHtml('data-cell="rate"')
         ->assertDontSeeHtml('data-cell="gross"')
         ->assertDontSeeHtml('aria-controls="transfer-detail-');
+});
+
+test('the exchange rate and the gross amount come back as soon as a tranche crosses currencies', function () {
+    registerSettledTranche();
+
+    // A rate of 1 on every row explains nothing, so the two columns stay out.
+    expect(transferRegister()->instance()->hasConversions)->toBeFalse();
+
+    // One tranche at another rate, and they are the columns that explain the
+    // figures — so the register shows them again rather than losing them.
+    registerSettledTranche(['exchange_rate' => '0.925000']);
+
+    $page = transferRegister();
+
+    expect($page->instance()->hasConversions)->toBeTrue();
+
+    $page->assertSeeHtml('data-cell="rate"')
+        ->assertSeeHtml('data-cell="gross"')
+        ->assertSee('0.925')
+        // Fees and the dates stay out: they are not what a conversion needs.
+        ->assertDontSeeHtml('data-cell="fees"');
+});
+
+test('a tranche that landed in another currency also brings the columns back', function () {
+    registerSettledTranche(['amount_received_currency' => Currency::Eur]);
+
+    expect(transferRegister()->instance()->hasConversions)->toBeTrue();
 });
 
 test('the full tranche table keeps every column, so the agreement page is unchanged', function () {

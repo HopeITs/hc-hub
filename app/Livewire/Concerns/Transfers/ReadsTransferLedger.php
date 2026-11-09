@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Livewire\Concerns\Transfers;
 
 use App\Models\TransfersTracking;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 
@@ -187,6 +188,25 @@ trait ReadsTransferLedger
         return collect(['all', ...array_keys($stages)])
             ->mapWithKeys(fn (string $stage): array => [$stage => (int) ($counts->{'n_'.$stage} ?? 0)])
             ->all();
+    }
+
+    /**
+     * Whether any tranche in the filtered set crossed currencies.
+     *
+     * The exchange rate and the gross amount only mean something when it did:
+     * a rate of 1 on every row is a dead column. Rather than drop them for
+     * good — the day this organisation starts receiving in another currency
+     * they become the two columns that explain the figures — the register
+     * brings them back exactly when there is a conversion to explain.
+     */
+    #[Computed]
+    public function hasConversions(): bool
+    {
+        return $this->filteredQuery()
+            ->where(fn (Builder $query) => $query
+                ->whereColumn('transfers_tracking.amount_received_currency', '<>', 'transfers_tracking.amount_transfered_currency')
+                ->orWhere('transfers_tracking.exchange_rate', '<>', 1))
+            ->exists();
     }
 
     /**

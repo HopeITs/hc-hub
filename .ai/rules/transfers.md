@@ -28,3 +28,10 @@ The ledger captioned the net figure "Landed" while the totals row directly above
 "Landed" survives as a verb only — "has not landed yet", "Landed in 5 days", "Landed in full" — where it means *arrived*, the distinction between gross sent and net arrived.
 
 Polish in the same pass: the row's edit button is a 44px target under `sm` and is named for the tranche it edits (`common.edit_name` with donor · date) instead of six identical "Edit transfer" announcements. The Overview ladder prints the year on any date outside the current one — `formats.date_short` drops it, and a ledger spanning 2025–2027 showed "30 December" next to 2027 rows.
+
+## The rate column earns its place, and a row action is one CSS class
+Added 2026-11-09. The exchange rate and gross amount were dropped from the compact register because every row read `1` — a dead column. They come back automatically when the filtered set holds a conversion (`hasConversions`: any tranche whose received currency differs from its sent one, or whose rate is not 1), passed as `conversions` to `x-funding.tranche-head`, `-row` and `-group`. Dropping them for good would have cost the two columns that explain the figures the day this organisation starts receiving in another currency.
+
+Measured 2026-11-09 on 96 tranches, 25 to a page: the component rendered 242KB in 226ms while its SQL was 9.5ms across 14 queries with no N+1 — the cost was Blade, not the database. The row's edit button alone carried ~1,100 bytes of Flux utility classes and a component render per row. A plain `<button class="register-action">` (data-viz.css, 44px under 40rem) took the component to **197KB in 201ms** and the row from 5,477 to 3,387 bytes. Prefer a CSS hook over `x-ui.button` for any control repeated once per row.
+
+Still outstanding, and not a register concern: the app sidebar is ~116KB of every page's HTML and the finance filter dialog ~52KB. Both are shared, so changing them is a decision for every page at once.

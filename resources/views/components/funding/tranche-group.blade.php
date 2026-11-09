@@ -1,4 +1,4 @@
-@props(['label', 'lines' => [], 'lead' => 0, 'actions' => true, 'group' => '', 'compact' => false])
+@props(['label', 'lines' => [], 'lead' => 0, 'actions' => true, 'group' => '', 'compact' => false, 'conversions' => false])
 
 @php
     /**
@@ -35,6 +35,8 @@
                 <span class="fig block">{{ $money($line['fees']) }}</span>
             @endforeach
         </td>
+    @endunless
+    @unless ($compact && ! $conversions)
         <td></td>
         <td class="num" data-label="{{ __('finance_tables.gross_received') }}">
             @foreach ($lines as $line)
