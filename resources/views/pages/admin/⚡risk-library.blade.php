@@ -13,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /*
@@ -23,6 +24,13 @@ use Livewire\Component;
  * App\Actions\RiskLibrary action, which authorizes again under lock.
  */
 new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Component {
+    #[Url(except: '')]
+    public string $search = '';
+
+    /** inuse | unused | off: the three plain answers at the top of the page. */
+    #[Url(except: '')]
+    public string $focus = '';
+
     public bool $showEntryModal = false;
 
     public ?int $editingEntryId = null;
@@ -41,9 +49,13 @@ new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Compo
 
     public ?int $deactivatingEntryId = null;
 
+    public string $deactivatingEntryName = '';
+
     public bool $showDeleteModal = false;
 
     public ?int $deletingEntryId = null;
+
+    public string $deletingEntryName = '';
 
     /** A used entry cannot be deleted: the delete dialog offers to deactivate it instead. */
     public bool $deletingEntryInUse = false;
@@ -61,6 +73,64 @@ new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Compo
     public function entries(): Collection
     {
         return RiskLibrary::query()->ordered()->withCount('risks')->get();
+    }
+
+    /**
+     * The entries matching the search, each tagged with one status word:
+     * `off` (switched off), `inuse` (picked on at least one proposal risk) or
+     * `unused`. Read from the full ordered list, so positions never change.
+     *
+     * @return Collection<int, RiskLibrary>
+     */
+    #[Computed]
+    public function searchedEntries(): Collection
+    {
+        $term = mb_strtolower(trim($this->search));
+
+        return $this->entries
+            ->each(fn (RiskLibrary $entry) => $entry->setAttribute('status', match (true) {
+                ! $entry->is_active => 'off',
+                $entry->risks_count > 0 => 'inuse',
+                default => 'unused',
+            }))
+            ->when($term !== '', fn (Collection $entries) => $entries->filter(fn (RiskLibrary $entry): bool => str_contains(mb_strtolower($entry->title_en.' '.$entry->title_ar.' '.$entry->category), $term)));
+    }
+
+    /**
+     * How many entries sit under each button: disjoint, added up to the total,
+     * and read under the search, so a click shows exactly that many.
+     *
+     * @return array{inuse: int, unused: int, off: int, total: int}
+     */
+    #[Computed]
+    public function focusCounts(): array
+    {
+        $byStatus = $this->searchedEntries->countBy('status');
+
+        return [
+            'inuse' => (int) $byStatus->get('inuse', 0),
+            'unused' => (int) $byStatus->get('unused', 0),
+            'off' => (int) $byStatus->get('off', 0),
+            'total' => $this->searchedEntries->count(),
+        ];
+    }
+
+    /** @return Collection<int, RiskLibrary> */
+    #[Computed]
+    public function visibleEntries(): Collection
+    {
+        return $this->focus === '' ? $this->searchedEntries : $this->searchedEntries->where('status', $this->focus);
+    }
+
+    public function setFocus(string $focus): void
+    {
+        $this->focus = $this->focus === $focus || ! in_array($focus, ['inuse', 'unused', 'off'], true) ? '' : $focus;
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->focus = '';
     }
 
     public function openCreateModal(): void
@@ -112,7 +182,7 @@ new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Compo
         $isCreate = $this->editingEntryId === null;
 
         $this->closeEntryModal();
-        unset($this->entries);
+        unset($this->entries, $this->searchedEntries, $this->focusCounts, $this->visibleEntries);
 
         Flux::toast(variant: 'success', text: __($isCreate ? 'risk_library.created' : 'risk_library.updated', ['name' => $saved->localizedTitle()]));
     }
@@ -125,8 +195,11 @@ new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Compo
 
     public function confirmDeactivate(int $entryId): void
     {
-        Gate::authorize('update', RiskLibrary::query()->findOrFail($entryId));
+        $entry = RiskLibrary::query()->findOrFail($entryId);
 
+        Gate::authorize('update', $entry);
+
+        $this->deactivatingEntryName = $entry->localizedTitle();
         $this->deactivatingEntryId = $entryId;
         $this->showDeactivateModal = true;
     }
@@ -147,6 +220,7 @@ new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Compo
     {
         $this->showDeactivateModal = false;
         $this->deactivatingEntryId = null;
+        $this->deactivatingEntryName = '';
     }
 
     /**
@@ -164,6 +238,7 @@ new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Compo
         Gate::authorize('delete', $entry);
 
         $this->deletingEntryId = $entry->id;
+        $this->deletingEntryName = $entry->localizedTitle();
         $this->deletingEntryInUse = $entry->risks()->exists();
         $this->showDeleteModal = true;
     }
@@ -199,6 +274,7 @@ new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Compo
     {
         $this->showDeleteModal = false;
         $this->deletingEntryId = null;
+        $this->deletingEntryName = '';
         $this->deletingEntryInUse = false;
     }
 
@@ -209,7 +285,7 @@ new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Compo
     {
         $position = app(MoveRiskLibraryEntry::class)->handle($entryId, towardsStart: $direction === 'up');
 
-        unset($this->entries);
+        unset($this->entries, $this->searchedEntries, $this->focusCounts, $this->visibleEntries);
 
         $entry = $this->entries->firstWhere('id', $entryId);
 
@@ -233,14 +309,14 @@ new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Compo
         try {
             $action();
         } catch (ValidationException $exception) {
-            unset($this->entries);
+            unset($this->entries, $this->searchedEntries, $this->focusCounts, $this->visibleEntries);
 
             Flux::toast(variant: 'danger', text: (string) collect($exception->errors())->flatten()->first());
 
             return;
         }
 
-        unset($this->entries);
+        unset($this->entries, $this->searchedEntries, $this->focusCounts, $this->visibleEntries);
 
         Flux::toast(variant: 'success', text: __($successKey));
     }
@@ -260,6 +336,9 @@ new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Compo
 
 @php
     $entries = $this->entries;
+    $focusCounts = $this->focusCounts;
+    $visibleEntries = $this->visibleEntries;
+    $filtersAreActive = trim($search) !== '' || $focus !== '';
 @endphp
 
 <x-desk.register class="@container/directory" heading-id="risk-library-heading" :title="__('titles.risk_library')" :count="$entries->count()" data-tour="risk-library-page">
@@ -268,6 +347,9 @@ new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Compo
             {{ __('risk_library.add_entry') }}
         </x-ui.button>
     </x-slot:actions>
+    <x-slot:search>
+        <x-desk.register-search :label="__('risk_library.search')" :placeholder="__('risk_library.search_placeholder')" wire:model.live.debounce.300ms="search" />
+    </x-slot:search>
 
     <p class="sr-only" aria-live="polite" aria-atomic="true">{{ $announcement }}</p>
 
@@ -278,7 +360,17 @@ new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Compo
             </x-slot:action>
         </x-ui.empty-state>
     @else
-        @include('pages.admin._risk-library-list')
+        @include('pages.admin._risk-library-focus-bar')
+
+        @if ($visibleEntries->isEmpty())
+            <x-ui.empty-state icon="shield-exclamation" :heading="__('risk_library.no_match')" :body="__('common.change_the_search_or_filters_and_try_again')">
+                <x-slot:action>
+                    <x-ui.button size="sm" wire:click="clearFilters" data-test="empty-reset-filters">{{ __('common.reset_filters') }}</x-ui.button>
+                </x-slot:action>
+            </x-ui.empty-state>
+        @else
+            @include('pages.admin._risk-library-list')
+        @endif
     @endif
 
     @include('pages.admin._risk-library-modal')

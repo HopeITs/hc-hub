@@ -70,7 +70,8 @@ test('authenticated users see active upcoming and completed strategies in planni
 
 test('the current year on the year line is marked "Now" in words, not by colour alone', function () {
     $user = User::factory()->role('General Manager')->create();
-    Strategy::factory()->create(['start_year' => 2026, 'end_year' => 2030]);
+    $strategy = Strategy::factory()->create(['start_year' => 2026, 'end_year' => 2030]);
+    Program::factory()->create(['strategy_id' => $strategy->id]);
 
     $response = Date::withTestNow(
         '2026-06-15',
@@ -184,7 +185,7 @@ test('the past strategies list paginates at 15 rows', function () {
     $this->actingAs($user)
         ->get(route('strategies.index'))
         ->assertOk()
-        ->assertSee(__('strategies.status_completed').' <span class="dk-num">17</span>', false)
+        ->assertSee(__('strategies.tab_past').' <span class="dk-num">17</span>', false)
         ->assertSeeText('Strategy 17')
         ->assertDontSeeText('Strategy 01')
         ->assertSeeText('Showing 1 to 15 of 17 results');
@@ -211,7 +212,7 @@ test('a current strategy links to its page and to its programs, with their count
         ->assertOk()
         ->assertSee(route('strategies.show', $strategy), false)
         ->assertSeeText(__('strategies.open_strategy'))
-        ->assertSee('href="'.e(route('programs.index', ['strategy' => $strategy->id])).'" wire:navigate data-test="strategy-programs-link">2</a>', false);
+        ->assertSee('href="'.e(route('programs.index', ['strategy' => $strategy->id])).'" wire:navigate aria-label="'.trans_choice('strategies.programs_link_label', 2, ['count' => 2]).'" data-test="strategy-programs-link">2</a>', false);
 });
 
 test('several active strategies each get their own block with their year', function () {
@@ -278,7 +279,7 @@ test('a strategy remains active through its ending year', function () {
         ->assertDontSeeText(__('strategies.no_active_strategy'));
 });
 
-test('an upcoming strategy says how soon it starts and how many programs are ready', function () {
+test('an upcoming strategy says when it starts and how many programs are ready', function () {
     $user = User::factory()->role('General Manager')->create();
     $strategy = Strategy::factory()->create(['name' => 'Next Strategy', 'start_year' => 2027, 'end_year' => 2031]);
     Strategy::factory()->create(['name' => 'Empty Strategy', 'start_year' => 2028, 'end_year' => 2032]);
@@ -291,8 +292,8 @@ test('an upcoming strategy says how soon it starts and how many programs are rea
 
     $response
         ->assertOk()
-        ->assertSeeText(trans_choice('strategies.starts_in_months', 6, ['count' => 6]).' · '.trans_choice('strategies.programs_ready', 2, ['planned' => 0, 'total' => 2]))
-        ->assertSeeText(trans_choice('strategies.starts_in_months', 18, ['count' => 18]).' · '.__('strategies.no_programs_linked_yet'));
+        ->assertSeeText(__('strategies.starts_on', ['date' => 'Jan 2027']).' · '.trans_choice('strategies.programs_ready', 2, ['planned' => 0, 'total' => 2]))
+        ->assertSeeText(__('strategies.starts_on', ['date' => 'Jan 2028']).' · '.__('strategies.no_programs_linked_yet'));
 });
 
 test('the strategy portfolio has a clear empty state', function () {
@@ -316,4 +317,56 @@ test('strategy names are escaped in the portfolio', function () {
         ->assertOk()
         ->assertSee($unsafeName)
         ->assertDontSee($unsafeName, false);
+});
+
+/*
+| Page review, 6 Nov 2026: Country Strategy 2026-2030 had no programs and no
+| pillars, yet showed a five-year line, three zeros, "No targets have progress
+| reported yet" and "Nothing needs your attention right now".
+*/
+
+test('a current strategy with no programs says it is not set up instead of showing zeros and "nothing needs attention"', function () {
+    $strategy = Strategy::factory()->create(['name' => 'Empty Strategy', 'start_year' => 2026, 'end_year' => 2030]);
+
+    Date::withTestNow('2026-06-15', function () use ($strategy) {
+        $viewer = Livewire::actingAs(User::factory()->role('Team Member')->create())->test('pages::strategies.index')->html();
+        $block = str($viewer)->after('data-test="current-strategy-'.$strategy->id.'"')->before('</article>')->toString();
+
+        expect($block)
+            ->toContain('data-test="strategy-not-set-up"')
+            ->toContain(__('strategies.not_set_up'))
+            ->toContain(__('strategies.not_set_up_viewer'))
+            ->not->toContain(__('strategies.nothing_needs_attention'))
+            ->not->toContain(__('strategies.verdict_none'))
+            ->not->toContain('aria-current="step"')
+            ->not->toContain('data-test="strategy-programs-link"')
+            ->not->toContain('openProgramsModal');
+
+        $editor = Livewire::actingAs(User::factory()->role('General Manager')->create())->test('pages::strategies.index')->html();
+
+        expect(str($editor)->after('data-test="current-strategy-'.$strategy->id.'"')->before('</article>')->toString())
+            ->toContain('wire:click="openProgramsModal('.$strategy->id.')" data-test="strategy-empty-link-programs"')
+            ->not->toContain(__('strategies.not_set_up_viewer'));
+    });
+});
+
+test('an empty tab says what is missing, without blaming a search or offering to reset filters', function () {
+    Strategy::factory()->create(['start_year' => 2021, 'end_year' => 2025]);
+
+    Date::withTestNow('2026-06-15', fn () => $this->actingAs(User::factory()->role('General Manager')->create())
+        ->get(route('strategies.index', ['status' => 'upcoming']))
+        ->assertOk()
+        ->assertSeeText(__('strategies.empty_tab.upcoming'))
+        ->assertDontSeeText(__('strategies.no_matching_strategic_periods'))
+        ->assertDontSeeText(__('common.reset_filters')));
+});
+
+test('a single page of past strategies shows no pager', function () {
+    Strategy::factory()->create(['name' => 'Old Strategy', 'start_year' => 2021, 'end_year' => 2025]);
+
+    Date::withTestNow('2026-06-15', fn () => $this->actingAs(User::factory()->role('General Manager')->create())
+        ->get(route('strategies.index'))
+        ->assertOk()
+        ->assertSeeText('Old Strategy')
+        ->assertDontSeeText('Showing 1 to 1 of 1 results'));
 });

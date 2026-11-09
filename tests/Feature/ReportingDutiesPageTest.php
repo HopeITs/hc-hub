@@ -35,21 +35,58 @@ beforeEach(function () {
     });
 });
 
-test('the page lists only my reports, open ones by default', function () {
-    $late = Activity::withoutRecording(fn () => DonorReport::factory()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Late financial', 'type' => 'financial', 'due_on' => '2026-11-01', 'responsible_employee_id' => $this->employeeId]));
-    $sent = Activity::withoutRecording(fn () => DonorReport::factory()->submitted()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Sent last year', 'due_on' => '2025-12-01', 'responsible_employee_id' => $this->employeeId]));
+test('the page lists only my reports, late first and submitted last', function () {
+    Activity::withoutRecording(fn () => DonorReport::factory()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Late financial', 'type' => 'financial', 'due_on' => '2026-11-01', 'responsible_employee_id' => $this->employeeId]));
+    Activity::withoutRecording(fn () => DonorReport::factory()->submitted()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Sent last year', 'due_on' => '2025-12-01', 'responsible_employee_id' => $this->employeeId]));
 
-    $page = Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index')
-        ->assertSeeText('Q1 narrative')
-        ->assertSeeText('Late financial')
+    Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index')
+        ->assertSeeInOrder(['Late financial', 'Q1 narrative', 'Sent last year'])
         ->assertSeeHtml('data-duty-overdue')
         ->assertSeeHtml('data-duty-due')
-        ->assertDontSeeText('Someone else report')
-        ->assertDontSeeText('Sent last year');
+        ->assertDontSeeText('Someone else report');
+});
 
-    $page->set('state', 'all')->assertSeeText('Sent last year')->assertDontSeeText('Someone else report');
+test('three disjoint buttons count and filter my reports, and pressing one again clears it', function () {
+    Activity::withoutRecording(fn () => DonorReport::factory()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Late financial', 'due_on' => '2026-11-01', 'responsible_employee_id' => $this->employeeId]));
+    Activity::withoutRecording(fn () => DonorReport::factory()->submitted()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Sent last year', 'due_on' => '2025-12-01', 'responsible_employee_id' => $this->employeeId]));
 
-    expect($late->id)->toBeInt()->and($sent->id)->toBeInt();
+    $page = Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index');
+
+    expect($page->instance()->focusCounts)->toBe(['late' => 1, 'open' => 1, 'submitted' => 1, 'total' => 3]);
+
+    $page->call('setFocus', 'late')
+        ->assertSeeText('Late financial')->assertDontSeeText('Q1 narrative')->assertDontSeeText('Sent last year')
+        ->call('setFocus', 'late')
+        ->assertSet('focus', '')->assertSeeText('Q1 narrative')
+        ->call('setFocus', 'submitted')
+        ->assertSeeText('Sent last year')->assertDontSeeText('Late financial')
+        ->call('setFocus', 'bogus')
+        ->assertSet('focus', '');
+});
+
+test('search narrows by title, donor or proposal and an empty result offers a reset', function () {
+    $page = Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index')
+        ->set('search', 'Safe Schools')->assertSeeText('Q1 narrative')
+        ->set('search', 'nothing like this')->assertDontSeeText('Q1 narrative')
+        ->assertSeeHtml('data-test="reset-filters"');
+
+    expect($page->instance()->focusCounts['total'])->toBe(0);
+
+    $page->call('clearFilters')->assertSet('search', '')->assertSeeText('Q1 narrative');
+});
+
+test('the status buttons, search and rows sit inside the Livewire root', function () {
+    $html = Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index')->html();
+    $dom = new DOMDocument;
+    @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
+    $xpath = new DOMXPath($dom);
+    $root = '//*[@*[name()="wire:id"]]';
+
+    foreach (['duty-tab-late', 'duty-tab-open', 'duty-tab-submitted', 'duty-search'] as $hook) {
+        expect($xpath->query($root.'//*[@data-test="'.$hook.'"]')->length)->toBe(1, $hook);
+    }
+
+    expect($xpath->query($root.'//tr[@data-duty]')->length)->toBe(1);
 });
 
 test('without funding-agreements.view there is no amount, currency or link to a money page', function () {
@@ -82,7 +119,7 @@ test('the responsible person submits from the page', function () {
         ->set('submissionFile', validUpload('q1.pdf'))
         ->call('submitReport')
         ->assertHasNoErrors()
-        ->assertDontSeeText('Q1 narrative');
+        ->assertSeeText('Submitted');
 
     expect($this->mine->fresh()->isSubmitted())->toBeTrue();
 });
@@ -100,7 +137,7 @@ test('a user without an employee record has no duties', function () {
 
     $this->actingAs($noEmployee)->get(route('reporting-duties.index'))
         ->assertOk()
-        ->assertSee(__('reporting_duties.none_open'))
+        ->assertSee(__('reporting_duties.none'))
         ->assertDontSee('Q1 narrative');
 });
 
@@ -120,7 +157,6 @@ test('the board splits my duties into late, to submit and submitted, and the cal
     $sent = Activity::withoutRecording(fn () => DonorReport::factory()->submitted()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Sent report', 'due_on' => '2026-11-10', 'responsible_employee_id' => $this->employeeId]));
 
     $page = Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index')
-        ->set('state', 'all')
         ->set('view', 'board')
         ->assertSeeHtml('data-test="duty-board-card-'.$this->mine->id.'"')
         ->assertDontSee('Someone else report');

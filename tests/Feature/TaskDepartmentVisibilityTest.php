@@ -96,3 +96,34 @@ test('the named team roles were granted tasks permissions', function () {
             ->and($user->can('tasks.update'))->toBeTrue();
     }
 });
+
+/*
+| Desk page review, 6 Nov 2026: /tasks returned a 500 for a scoped viewer.
+| The policy reads tasks.department_id once the viewer is not the assignee,
+| and the task queries did not select it.
+*/
+
+test('a scoped viewer opens the board, the list, the drawer and the page of a colleague\'s task', function () {
+    $colleagueEmployeeId = insertHrEmployee(firstNameEn: 'Media', lastNameEn: 'Colleague');
+    insertHrContract($colleagueEmployeeId, $this->mediaPositionId);
+
+    $task = Task::factory()->create(['title' => 'Colleague task']);
+    $task->taskAssignees()->delete();
+    $task->taskAssignees()->create(['employee_id' => $colleagueEmployeeId]);
+    $subtask = Task::factory()->create(['title' => 'Colleague subtask', 'parent_task_id' => $task->id]);
+    $subtask->taskAssignees()->delete();
+    $subtask->taskAssignees()->create(['employee_id' => $colleagueEmployeeId]);
+
+    Livewire::actingAs($this->mediaUser)
+        ->test('pages::tasks.index')
+        ->assertSee('Colleague task')
+        ->set('view', 'list')
+        ->assertSee('Colleague task')
+        ->call('openEditDrawer', $task->id)
+        ->assertSet('editingTaskId', $task->id);
+
+    $this->actingAs($this->mediaUser)
+        ->get(route('tasks.show', $task))
+        ->assertOk()
+        ->assertSee('Colleague subtask');
+});

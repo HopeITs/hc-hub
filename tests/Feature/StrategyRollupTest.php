@@ -88,6 +88,30 @@ test('each current strategy adds up its targets on pace, high risks and late wor
         ->toContain(e(route('milestones.index', ['strategy' => $this->strategy->id, 'status' => 'missed', 'view' => 'list'])));
 });
 
+/*
+| Page review, 6 Nov 2026: "On track · 39 of 39 targets are on pace" in green
+| while 22 more targets of the strategy had no figures at all.
+*/
+
+test('targets with no figures yet are counted in the sentence and keep the verdict from green', function () {
+    strategyIndicator($this->program, 100);
+    strategyIndicator($this->program, 100);
+    Indicator::factory()->create([
+        'result_id' => Result::factory()->create(['program_id' => $this->program->id])->id,
+        'baseline' => 0,
+        'target' => 100,
+    ]);
+
+    $block = currentStrategyBlock(Livewire::actingAs(User::factory()->role('Team Member')->create())->test('pages::strategies.index')->html(), $this->strategy);
+
+    expect($block)
+        ->toContain('class="dk-verdict dk-warn"')
+        ->toContain('data-verdict="incomplete"')
+        ->toContain('<strong>'.__('strategies.verdict_incomplete').'</strong>')
+        ->toContain('<bdi>2</bdi> of <bdi>3</bdi> targets are on pace.')
+        ->toContain(trans_choice('strategies.verdict_unrated', 1, ['count' => '<bdi>1</bdi>']));
+});
+
 test('the verdict sentence names the verdict in its tone', function (array $readings, string $key, string $tone, string $sentence) {
     foreach ($readings as $reading) {
         strategyIndicator($this->program, $reading);

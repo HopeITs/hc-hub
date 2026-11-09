@@ -129,7 +129,7 @@ trait ManagesTaskDrawer
     public function openEditDrawer(int $taskId): void
     {
         $task = Task::query()
-            ->select(['id', 'parent_task_id', 'source_type', 'source_id', 'title', 'description', 'status', 'priority', 'start_date', 'due_date', 'completed_date', 'progress_percentage', 'created_by'])
+            ->select(['id', 'parent_task_id', 'source_type', 'source_id', 'title', 'description', 'status', 'priority', 'start_date', 'due_date', 'completed_date', 'progress_percentage', 'created_by', 'department_id'])
             ->with('taskAssignees:id,task_id,employee_id')
             ->findOrFail($taskId);
 

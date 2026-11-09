@@ -26,7 +26,12 @@ new class extends Component {
     private const int WatchBelowPercent = 70;
 
     /**
-     * @return Collection<int, array{milestone: Milestone, done: int, tasks: int, percent: int, health: string, daysLeft: int|null}>
+     * Open checkpoints: planned and ongoing ones, plus postponed ones, which
+     * are still to happen (page review 6 Nov 2026: six postponed milestones
+     * left the panel saying "No open milestones"). A postponed one needs a
+     * look, never reads as overdue on its old date, and says it is postponed.
+     *
+     * @return Collection<int, array{milestone: Milestone, done: int, tasks: int, percent: int, health: string, daysLeft: int|null, postponed: bool}>
      */
     #[Computed]
     public function rows(): Collection
@@ -37,13 +42,14 @@ new class extends Component {
             ->select(['id', 'slug', 'name', 'project_id', 'proposal_id', 'is_final_report', 'planned_start_date', 'planned_end_date', 'status'])
             ->with(['project:id,name', 'proposal:id,name'])
             ->withCount(['tasks', 'tasks as done_tasks_count' => fn (Builder $query) => $query->where('status', TaskStatus::Done)])
-            ->whereIn('status', [MilestoneStatus::Planned, MilestoneStatus::Ongoing])
+            ->whereIn('status', [MilestoneStatus::Planned, MilestoneStatus::Ongoing, MilestoneStatus::Postponed])
             ->get()
             ->map(function (Milestone $milestone) use ($today): array {
                 $tasks = (int) $milestone->tasks_count;
                 $done = (int) $milestone->done_tasks_count;
                 $percent = $tasks === 0 ? 0 : (int) floor($done * 100 / $tasks);
                 $daysLeft = $milestone->planned_end_date === null ? null : (int) $today->diffInDays($milestone->planned_end_date->startOfDay(), false);
+                $postponed = $milestone->status === MilestoneStatus::Postponed;
 
                 return [
                     'milestone' => $milestone,
@@ -51,15 +57,18 @@ new class extends Component {
                     'tasks' => $tasks,
                     'percent' => $percent,
                     'health' => match (true) {
+                        $postponed => 'warn',
                         $daysLeft !== null && $daysLeft < 0 => 'bad',
                         $daysLeft !== null && $daysLeft <= 7 && $percent < self::WatchBelowPercent => 'warn',
                         default => 'good',
                     },
                     'daysLeft' => $daysLeft,
+                    'postponed' => $postponed,
                 ];
             })
             ->sortBy([
                 fn (array $a, array $b): int => ($b['health'] === 'bad') <=> ($a['health'] === 'bad'),
+                fn (array $a, array $b): int => $a['postponed'] <=> $b['postponed'],
                 fn (array $a, array $b): int => ($a['daysLeft'] ?? PHP_INT_MAX) <=> ($b['daysLeft'] ?? PHP_INT_MAX),
             ])
             ->values();
@@ -72,7 +81,7 @@ new class extends Component {
     {
         return [
             'project' => $row['milestone']->ownerName(),
-            'health' => __('desk.health.'.$row['health']),
+            'health' => $row['postponed'] ? MilestoneStatus::Postponed->label() : __('desk.health.'.$row['health']),
         ];
     }
 };
@@ -91,9 +100,9 @@ new class extends Component {
                     $milestone = $row['milestone'];
                     $tone = 'dk-'.$row['health'];
                 @endphp
-                <li wire:key="m-{{ $milestone->id }}" data-health="{{ $row['health'] }}">
+                <li wire:key="m-{{ $milestone->id }}" data-health="{{ $row['health'] }}" @if ($row['postponed']) data-postponed @endif>
                     <a href="{{ route('milestones.show', $milestone) }}" wire:navigate class="dk-ms-n" title="{{ $milestone->name }}">@if ($milestone->is_final_report)<span class="dk-ms">{{ __('desk.final_report') }}</span>@endif{{ $milestone->name }}</a>
-                    <span class="dk-pill {{ $tone }} dk-ms-h">{{ __('desk.health.'.$row['health']) }}</span>
+                    <span class="dk-pill {{ $tone }} dk-ms-h">{{ $row['postponed'] ? $milestone->status->label() : __('desk.health.'.$row['health']) }}</span>
                     <span class="dk-ms-meta dk-is"><span class="dk-ms-p" title="{{ $milestone->ownerName() }}">{{ $milestone->ownerName() }}</span><span @class(['dk-bad' => $row['health'] === 'bad'])> · {{ $row['daysLeft'] === null ? __('desk.no_end_date') : \App\Support\Desk\RelativeDay::for($milestone->planned_end_date) }}</span></span>
                     <span class="dk-ms-bar" title="{{ __('desk.milestone_progress', ['done' => $row['done'], 'tasks' => $row['tasks']]) }}">
                         <span class="dk-meter"><b style="width:{{ $row['percent'] }}%"></b></span>

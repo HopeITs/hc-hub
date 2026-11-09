@@ -24,7 +24,7 @@
     </a>
     <span class="dk-sprow-state {{ $stateTone }}" data-program-state="{{ $state ?? 'none' }}">{{ $stateText }}</span>
     <span class="dk-sprow-count dk-num">{{ trans_choice('common.count_project', $program->projects_count, ['count' => $program->projects_count]) }}</span>
-    <x-ui.employee-chip :employee="$program->manager" compact class="dk-sprow-who" />
+    <x-ui.employee-chip :employee="$program->manager" compact :empty="__('strategies.no_manager')" class="dk-sprow-who" />
     <span class="dk-sprow-act">
         @can('strategies.update')
             @php

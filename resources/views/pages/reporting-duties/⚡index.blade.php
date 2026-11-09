@@ -24,8 +24,12 @@ new #[Layout('layouts::desk'), Title('titles.reporting_duties')] class extends C
     use SubmitsDonorReport;
     use WithFileUploads;
 
-    #[Url(except: 'open')]
-    public string $state = 'open';
+    /** The status button pressed: late, open or submitted. Empty shows everything. */
+    #[Url(except: '')]
+    public string $focus = '';
+
+    #[Url(except: '')]
+    public string $search = '';
 
     /** The register view: table, Board (late, to submit, submitted) or Calendar (due dates). */
     #[Url(except: 'table')]
@@ -71,28 +75,72 @@ new #[Layout('layouts::desk'), Title('titles.reporting_duties')] class extends C
             ->all();
     }
 
+    /** Press a status button to narrow the list; press it again to show everything. */
+    public function setFocus(string $focus): void
+    {
+        $this->focus = $this->focus === $focus || ! in_array($focus, ['late', 'open', 'submitted'], true) ? '' : $focus;
+    }
+
+    public function clearFilters(): void
+    {
+        $this->focus = '';
+        $this->search = '';
+    }
+
+    /**
+     * How many of my reports are late, still to submit (not late yet) or
+     * submitted. Disjoint, they add up to the total, and they follow the
+     * search but not the pressed button, so a click shows exactly that many.
+     *
+     * @return array{late: int, open: int, submitted: int, total: int}
+     */
+    #[Computed]
+    public function focusCounts(): array
+    {
+        $counts = ['late' => 0, 'open' => 0, 'submitted' => 0, 'total' => 0];
+
+        if (auth()->user()->employee_id === null) {
+            return $counts;
+        }
+
+        $today = CarbonImmutable::today()->toDateString();
+        $row = $this->searchable($this->mine())
+            ->toBase()
+            ->selectRaw('sum(donor_reports.submitted_on is null and donor_reports.due_on < ?) as late', [$today])
+            ->selectRaw('sum(donor_reports.submitted_on is null and donor_reports.due_on >= ?) as open', [$today])
+            ->selectRaw('sum(donor_reports.submitted_on is not null) as submitted')
+            ->first();
+
+        $counts['late'] = (int) $row->late;
+        $counts['open'] = (int) $row->open;
+        $counts['submitted'] = (int) $row->submitted;
+        $counts['total'] = $counts['late'] + $counts['open'] + $counts['submitted'];
+
+        return $counts;
+    }
+
     /**
      * My reports: title, type, audience, period, version, dates and the
-     * donor and proposal names. Open ones first, soonest due first.
+     * donor and proposal names. Late first, then soonest due, then submitted.
      *
      * @return EloquentCollection<int, DonorReport>
      */
     #[Computed]
     public function duties(): EloquentCollection
     {
-        $employeeId = auth()->user()->employee_id;
-
-        if ($employeeId === null) {
+        if (auth()->user()->employee_id === null) {
             return new EloquentCollection;
         }
 
-        return $this->mine()
-            ->join('donor_proposal', 'donor_proposal.id', '=', 'donor_reports.donor_proposal_id')
-            ->join('proposals', 'proposals.id', '=', 'donor_proposal.proposal_id')
-            ->join('donors', 'donors.id', '=', 'donor_proposal.donor_id')
-            ->when($this->state !== 'all', fn (Builder $query) => $query->whereNull('donor_reports.submitted_on'))
+        $today = CarbonImmutable::today()->toDateString();
+
+        return $this->searchable($this->mine())
+            ->when($this->focus === 'late', fn (Builder $query) => $query->whereNull('donor_reports.submitted_on')->where('donor_reports.due_on', '<', $today))
+            ->when($this->focus === 'open', fn (Builder $query) => $query->whereNull('donor_reports.submitted_on')->where('donor_reports.due_on', '>=', $today))
+            ->when($this->focus === 'submitted', fn (Builder $query) => $query->whereNotNull('donor_reports.submitted_on'))
             ->orderByRaw('donor_reports.submitted_on is not null')
-            ->orderBy('donor_reports.due_on')
+            ->orderByRaw('case when donor_reports.submitted_on is null then donor_reports.due_on end')
+            ->orderByDesc('donor_reports.due_on')
             ->orderBy('donor_reports.id')
             ->get([
                 'donor_reports.id', 'donor_reports.title', 'donor_reports.type', 'donor_reports.audience', 'donor_reports.period_type',
@@ -110,6 +158,26 @@ new #[Layout('layouts::desk'), Title('titles.reporting_duties')] class extends C
     protected function donorReportSubmitted(): void
     {
         unset($this->duties);
+    }
+
+    /**
+     * Join the donor and proposal names and apply the search box to them.
+     *
+     * @param  Builder<DonorReport>  $query
+     * @return Builder<DonorReport>
+     */
+    private function searchable(Builder $query): Builder
+    {
+        $term = trim($this->search);
+
+        return $query
+            ->join('donor_proposal', 'donor_proposal.id', '=', 'donor_reports.donor_proposal_id')
+            ->join('proposals', 'proposals.id', '=', 'donor_proposal.proposal_id')
+            ->join('donors', 'donors.id', '=', 'donor_proposal.donor_id')
+            ->when($term !== '', fn (Builder $query) => $query->where(fn (Builder $query) => $query
+                ->where('donor_reports.title', 'like', "%{$term}%")
+                ->orWhere('donors.name', 'like', "%{$term}%")
+                ->orWhere('proposals.name', 'like', "%{$term}%")));
     }
 
     /**
@@ -131,7 +199,7 @@ new #[Layout('layouts::desk'), Title('titles.reporting_duties')] class extends C
     class="@container"
     heading-id="reporting-duties-heading"
     :title="__('titles.reporting_duties')"
-    :count="$this->duties->count()"
+    :count="$this->focusCounts['total']"
     data-reporting-duties
     :view="in_array($view, ['board', 'calendar'], true) ? $view : 'table'"
     :views="[
@@ -140,20 +208,49 @@ new #[Layout('layouts::desk'), Title('titles.reporting_duties')] class extends C
         'calendar' => ['icon' => 'cal', 'label' => __('desk.register.calendar')],
     ]"
 >
-    <x-slot:filters>
-            <x-ui.header-filter-select :label="__('common.state')" wire:model.live="state" :value="$state === 'all' ? 'all' : 'open'">
-                <option value="open">{{ __('reporting_duties.state_open') }}</option>
-                <option value="all">{{ __('reporting_duties.state_all') }}</option>
-            </x-ui.header-filter-select>
-        </x-slot:filters>
+    <x-slot:search>
+        <x-desk.register-search :label="__('reporting_duties.search')" :placeholder="__('reporting_duties.search_placeholder')" wire:model.live.debounce.300ms="search" data-test="duty-search" />
+    </x-slot:search>
 
+    @php
+        $focusCounts = $this->focusCounts;
+        $tabs = [
+            ['key' => 'late', 'label' => __('desk.register.late'), 'tone' => 'text-status-critical'],
+            ['key' => 'open', 'label' => __('reporting_duties.state_open'), 'tone' => 'text-secondary-dark dark:text-ink'],
+            ['key' => 'submitted', 'label' => __('desk.register.submitted'), 'tone' => 'text-status-good'],
+        ];
+    @endphp
+
+    <div class="mb-4 flex flex-wrap items-stretch gap-2" data-test="duty-focus-tabs">
+        @foreach ($tabs as $tab)
+            <button
+                type="button"
+                wire:click="setFocus('{{ $tab['key'] }}')"
+                wire:key="duty-tab-{{ $tab['key'] }}"
+                aria-pressed="{{ $focus === $tab['key'] ? 'true' : 'false' }}"
+                data-test="duty-tab-{{ $tab['key'] }}"
+                @class([
+                    'flex min-h-14 flex-1 basis-40 cursor-pointer items-center gap-3 rounded-xl border px-4 py-2 text-start transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium',
+                    'border-secondary-dark bg-white shadow-card ring-1 ring-secondary-dark dark:border-ink dark:bg-surface-2 dark:ring-ink' => $focus === $tab['key'],
+                    'border-secondary-soft bg-white hover:border-secondary-light dark:border-line dark:bg-surface-1' => $focus !== $tab['key'],
+                ])
+            >
+                <span class="text-2xl font-bold leading-none tabular-nums {{ $tab['tone'] }}">{{ $focusCounts[$tab['key']] }}</span>
+                <span class="text-sm font-semibold text-secondary-dark dark:text-ink">{{ $tab['label'] }}</span>
+            </button>
+        @endforeach
+    </div>
 
     @if ($this->duties->isEmpty())
-        <x-ui.empty-state
-            icon="document-check"
-            :heading="$state === 'all' ? __('reporting_duties.none') : __('reporting_duties.none_open')"
-            :body="__('reporting_duties.empty_body')"
-        />
+        @if ($focus !== '' || trim($search) !== '')
+            <x-ui.empty-state icon="document-check" :heading="__('desk.register.nothing_matches')" :body="__('reporting_duties.empty_body')">
+                <x-slot:action>
+                    <x-ui.button tone="ghost" size="sm" wire:click="clearFilters" data-test="reset-filters">{{ __('common.reset_filters') }}</x-ui.button>
+                </x-slot:action>
+            </x-ui.empty-state>
+        @else
+            <x-ui.empty-state icon="document-check" :heading="__('reporting_duties.none')" :body="__('reporting_duties.empty_body')" />
+        @endif
     @elseif ($view === 'board')
         <x-desk.board data-test="duty-board">
             @foreach ($this->boardColumns as $column)

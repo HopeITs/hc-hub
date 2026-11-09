@@ -152,21 +152,19 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Keeps Carbon on the app's own locale for each language (ar_SY for
-     * Arabic) whenever the app locale changes. SetLocale does this for page
-     * requests, but Livewire update requests restore the locale with a plain
-     * setLocale('ar'), after which Carbon would print other month names
-     * ("نوفمبر" instead of "تشرين الثاني") on the same page.
+     * Keep the Syrian month names whenever the app locale changes, not only
+     * when SetLocale runs: Livewire re-applies the locale while it renders
+     * components, and Carbon's own LocaleUpdated listener then resets dates
+     * to plain "ar" (نوفمبر instead of تشرين الثاني). This listener is
+     * registered after Carbon's, so it has the last word.
      */
     protected function configureDateLocale(): void
     {
         Event::listen(LocaleUpdated::class, function (LocaleUpdated $event): void {
-            $locale = Locale::tryFrom($event->locale);
+            $carbonLocale = (Locale::tryFrom($event->locale) ?? Locale::English)->carbonLocale();
 
-            if ($locale !== null) {
-                Carbon::setLocale($locale->carbonLocale());
-                CarbonImmutable::setLocale($locale->carbonLocale());
-            }
+            Carbon::setLocale($carbonLocale);
+            CarbonImmutable::setLocale($carbonLocale);
         });
     }
 

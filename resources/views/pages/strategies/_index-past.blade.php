@@ -40,5 +40,7 @@
         @endforeach
     </ul>
 
-    <flux:pagination :paginator="$portfolio['past']" class="text-secondary-medium! dark:text-ink-muted!" />
+    @if ($portfolio['past']->hasPages())
+        <flux:pagination :paginator="$portfolio['past']" class="text-secondary-medium! dark:text-ink-muted!" />
+    @endif
 </section>

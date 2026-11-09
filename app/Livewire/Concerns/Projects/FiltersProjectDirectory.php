@@ -11,6 +11,7 @@ use App\Models\HrEmployee;
 use App\Models\HrProgram;
 use App\Models\Project;
 use App\Models\Sector;
+use App\Support\Desk\ProjectStage;
 use App\Support\Like;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -35,6 +36,7 @@ use Livewire\Attributes\Computed;
  * @property string $view
  * @property string $sort
  * @property string $lens
+ * @property string $stage
  * @property-read array{cities: array<int>, owners: list<int>} $searchMatches  #[Computed] searchMatches() below
  */
 trait FiltersProjectDirectory
@@ -104,6 +106,30 @@ trait FiltersProjectDirectory
     public function updatedStatus(): void
     {
         $this->resetPage();
+    }
+
+    /**
+     * Only the Desk's seven stages (0-6) filter; anything else clears it.
+     */
+    public function updatedStage(): void
+    {
+        if (! in_array($this->stage, array_map('strval', range(0, 6)), true)) {
+            $this->stage = '';
+        }
+
+        $this->resetPage();
+    }
+
+    /**
+     * The projects on the selected stage (App\Support\Desk\ProjectStage),
+     * read once per request however many queries filter by it.
+     *
+     * @return list<int>
+     */
+    #[Computed]
+    public function stageProjectIds(): array
+    {
+        return $this->stage === '' ? [] : ProjectStage::projectIdsAt((int) $this->stage);
     }
 
     /**
@@ -178,6 +204,7 @@ trait FiltersProjectDirectory
         $this->sector = '';
         $this->status = '';
         $this->lens = '';
+        $this->stage = '';
         $this->resetPage();
     }
 
@@ -240,6 +267,7 @@ trait FiltersProjectDirectory
             ->when($this->strategy !== '', fn (Builder $query) => $query->whereHas('program', fn ($query) => $query->where('strategy_id', (int) $this->strategy)))
             ->when($this->owner !== '', fn (Builder $query) => $query->where('user_id', (int) $this->owner))
             ->when($this->sector !== '', fn (Builder $query) => $query->whereHas('sectors', fn (Builder $query) => $query->whereKey((int) $this->sector)))
+            ->when($this->stage !== '', fn (Builder $query) => $query->whereIn('id', $this->stageProjectIds))
             ->when($includeStatus && $this->status !== '', fn (Builder $query) => $query->where('status', $this->status))
             ->when($includeLens && $this->lens !== '', fn (Builder $query) => $this->applyLens($query));
     }

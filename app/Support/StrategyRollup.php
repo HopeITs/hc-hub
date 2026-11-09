@@ -36,7 +36,7 @@ use Illuminate\Support\Facades\DB;
  *
  * @phpstan-type FundingLine array{currency: string, requested: float, agreed: float, percent: int|null}
  * @phpstan-type Rollup array{
- *     results: array{on: int, total: int, tone: 'good'|'warn'|'critical'|null, by_program: array<int, array{on: int, total: int}>}|null,
+ *     results: array{on: int, total: int, unrated: int, tone: 'good'|'warn'|'critical'|null, by_program: array<int, array{on: int, total: int}>}|null,
  *     funding: array{lines: list<FundingLine>, percent: int|null, tone: 'good'|'warn'|'critical'|null}|null,
  *     risks: int|null,
  *     late: array{milestones: int|null, reports: int|null, total: int}|null
@@ -87,7 +87,7 @@ final class StrategyRollup
             $lateReports = $reports === null ? null : (int) ($reports[$id] ?? 0);
 
             $rollups[$id] = [
-                'results' => $results === null ? null : ($results[$id] ?? ['on' => 0, 'total' => 0, 'tone' => null, 'by_program' => []]),
+                'results' => $results === null ? null : ($results[$id] ?? ['on' => 0, 'total' => 0, 'unrated' => 0, 'tone' => null, 'by_program' => []]),
                 'funding' => $funding === null ? null : ($funding[$id] ?? ['lines' => [], 'percent' => null, 'tone' => null]),
                 'risks' => $risks === null ? null : (int) ($risks[$id] ?? 0),
                 'late' => $lateMilestones === null && $lateReports === null ? null : [
@@ -104,23 +104,27 @@ final class StrategyRollup
     /**
      * The headline verdict on a count of rated targets: 95% or more on pace is
      * on track, 80% or more mostly on track, anything less off track. No rated
-     * targets, no verdict.
+     * targets, no verdict. Targets with no figures yet ($unrated) never earn a
+     * green "On track": while any is unmeasured the best verdict is
+     * "Not fully measured" (page review, 6 Nov 2026: "39 of 39 on pace" was
+     * shown in green while 22 more targets had no figures at all). `all`
+     * counts every target, rated or not, for the sentence.
      *
-     * @return array{key: 'on_track'|'mostly_on_track'|'off_track', tone: 'good'|'warn'|'critical', on: int, total: int, behind: int}|null
+     * @return array{key: 'on_track'|'incomplete'|'mostly_on_track'|'off_track', tone: 'good'|'warn'|'critical', on: int, total: int, behind: int, unrated: int, all: int}|null
      */
-    public static function verdict(int $on, int $total): ?array
+    public static function verdict(int $on, int $total, int $unrated = 0): ?array
     {
         if ($total === 0) {
             return null;
         }
 
         [$key, $tone] = match (true) {
-            $on * 100 >= self::OnTrackShare * $total => ['on_track', 'good'],
+            $on * 100 >= self::OnTrackShare * $total => $unrated > 0 ? ['incomplete', 'warn'] : ['on_track', 'good'],
             $on * 100 >= self::MostlyOnTrackShare * $total => ['mostly_on_track', 'warn'],
             default => ['off_track', 'critical'],
         };
 
-        return ['key' => $key, 'tone' => $tone, 'on' => $on, 'total' => $total, 'behind' => $total - $on];
+        return ['key' => $key, 'tone' => $tone, 'on' => $on, 'total' => $total, 'behind' => $total - $on, 'unrated' => $unrated, 'all' => $total + $unrated];
     }
 
     /**
@@ -183,13 +187,13 @@ final class StrategyRollup
      * indicators register groups it.
      *
      * @param  list<int>  $strategyIds
-     * @return array<int, array{on: int, total: int, tone: 'good'|'warn'|'critical'|null, by_program: array<int, array{on: int, total: int}>}>
+     * @return array<int, array{on: int, total: int, unrated: int, tone: 'good'|'warn'|'critical'|null, by_program: array<int, array{on: int, total: int}>}>
      */
     private static function results(array $strategyIds): array
     {
         $today = CarbonImmutable::today();
 
-        $rated = Indicator::query()
+        $targets = Indicator::query()
             ->join('results', 'results.id', '=', 'indicators.result_id')
             ->join('programs', 'programs.id', '=', 'results.program_id')
             ->whereIn('programs.strategy_id', $strategyIds)
@@ -201,12 +205,13 @@ final class StrategyRollup
                 'program' => (int) $indicator->getAttribute('program_id'),
                 'rag' => $indicator->ragStatus($today->startOfYear(), $today->endOfYear()),
             ])
-            ->filter(fn (array $row): bool => $row['rag'] !== null)
             ->groupBy('strategy');
 
         $results = [];
 
-        foreach ($rated as $strategyId => $rows) {
+        foreach ($targets as $strategyId => $all) {
+            $rows = $all->filter(fn (array $row): bool => $row['rag'] !== null);
+            $unrated = $all->count() - $rows->count();
             $total = $rows->count();
             $on = $rows->where('rag', RagStatus::Green)->count();
             $red = $rows->where('rag', RagStatus::Red)->count();
@@ -220,7 +225,7 @@ final class StrategyRollup
                 ];
             }
 
-            $results[(int) $strategyId] = ['on' => $on, 'total' => $total, 'tone' => self::resultsTone($on, $red, $total), 'by_program' => $byProgram];
+            $results[(int) $strategyId] = ['on' => $on, 'total' => $total, 'unrated' => $unrated, 'tone' => self::resultsTone($on, $red, $total), 'by_program' => $byProgram];
         }
 
         return $results;
