@@ -6,7 +6,7 @@
     <x-ui.modal
         wire:model="showDayDetailModal"
         size="sm"
-        :title="$dayDetailDate !== '' ? \Carbon\CarbonImmutable::parse($dayDetailDate)->translatedFormat('l, j F Y') : ''"
+        :title="$dayDetailDate !== '' ? \Carbon\CarbonImmutable::parse($dayDetailDate)->translatedFormat(__('formats.date_long')) : ''"
         close="closeDayDetail"
         :cancel-label="__('common.close')"
     >

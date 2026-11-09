@@ -28,7 +28,7 @@
         @if ($isLate($milestone))<span class="shrink-0 rounded border border-current px-1 text-[9px] font-semibold" data-test="calendar-late-milestone-{{ $milestone->id }}">{{ __('calendar.late') }}</span>@endif
         @if ($milestone->children_count === 0 && $milestone->tasks_count === 0)
             @can('milestones.delete')
-            <button type="button" wire:click.stop="confirmDelete({{ $milestone->id }})" class="hidden shrink-0 cursor-pointer group-hover:block" aria-label="{{ __('common.delete_name', ['name' => $milestone->name]) }}">
+            <button type="button" wire:click.stop="confirmDelete({{ $milestone->id }})" class="hidden shrink-0 cursor-pointer group-focus-within:block group-hover:block" aria-label="{{ __('common.delete_name', ['name' => $milestone->name]) }}">
                 <flux:icon.x-mark variant="micro" class="size-3" />
             </button>
             @endcan
@@ -45,7 +45,7 @@
         </button>
         @if ($isLate($task))<span class="shrink-0 rounded border border-current px-1 text-[9px] font-semibold" data-test="calendar-late-task-{{ $task->id }}">{{ __('calendar.late') }}</span>@endif
         @can('delete', $task)
-            <button type="button" wire:click.stop="confirmDeleteTask({{ $task->id }})" class="hidden shrink-0 cursor-pointer group-hover:block" aria-label="{{ __('common.delete_name', ['name' => $task->title]) }}">
+            <button type="button" wire:click.stop="confirmDeleteTask({{ $task->id }})" class="hidden shrink-0 cursor-pointer group-focus-within:block group-hover:block" aria-label="{{ __('common.delete_name', ['name' => $task->title]) }}">
                 <flux:icon.x-mark variant="micro" class="size-3" />
             </button>
         @endcan

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\DisableTwoFactorAuthenticationUnlessRequired;
+use App\Enums\Locale;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Models\Account;
 use App\Models\AnnualPlan;
@@ -37,15 +38,18 @@ use App\Models\User;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Support\RouteSlugs;
 use App\Support\SupervisionMap;
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\DevCommands;
+use Illuminate\Foundation\Events\LocaleUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
@@ -144,6 +148,26 @@ class AppServiceProvider extends ServiceProvider
         $this->configureMorphMap();
         $this->configureLivewire();
         $this->configureRateLimiting();
+        $this->configureDateLocale();
+    }
+
+    /**
+     * Keeps Carbon on the app's own locale for each language (ar_SY for
+     * Arabic) whenever the app locale changes. SetLocale does this for page
+     * requests, but Livewire update requests restore the locale with a plain
+     * setLocale('ar'), after which Carbon would print other month names
+     * ("نوفمبر" instead of "تشرين الثاني") on the same page.
+     */
+    protected function configureDateLocale(): void
+    {
+        Event::listen(LocaleUpdated::class, function (LocaleUpdated $event): void {
+            $locale = Locale::tryFrom($event->locale);
+
+            if ($locale !== null) {
+                Carbon::setLocale($locale->carbonLocale());
+                CarbonImmutable::setLocale($locale->carbonLocale());
+            }
+        });
     }
 
     /**
