@@ -371,3 +371,53 @@ test('the headline says what a new sign-in asks for after the password', functio
     'email code only' => ['email', 'email', 'settings.protection_email'],
     'password only' => ['nothing', 'password', 'settings.protection_password'],
 ]);
+
+test('the one-click security actions ask first and only act once confirmed', function (string $action, string $title) {
+    config(['session.driver' => 'database', 'access-control.two_factor' => ['enforced' => false, 'required_roles' => []]]);
+
+    $user = User::factory()->withTwoFactor()->create();
+    $user->forceFill(['email_two_factor_enabled' => true])->save();
+
+    $this->actingAs($user)->withSession(['auth.password_confirmed_at' => time()]);
+
+    storeSessionRow('laptop-session', $user->id, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/140.0.0.0 Safari/537.36', '10.0.0.2', now()->getTimestamp());
+
+    Livewire::test('pages::settings.security')
+        ->call('askToConfirm', $action)
+        ->assertSet('showConfirmModal', true)
+        ->assertSee(__($title))
+        ->assertSet('twoFactorEnabled', true)
+        ->assertSet('emailTwoFactorEnabled', true)
+        ->call('closeConfirmModal')
+        ->assertSet('showConfirmModal', false);
+
+    expect($user->fresh()->hasEnabledTwoFactorAuthentication())->toBeTrue()
+        ->and($user->fresh()->email_two_factor_enabled)->toBeTrue()
+        ->and(DB::table('sessions')->where('id', 'laptop-session')->exists())->toBeTrue();
+
+    Livewire::test('pages::settings.security')
+        ->call('askToConfirm', $action)
+        ->call('runConfirmedAction')
+        ->assertSet('showConfirmModal', false);
+
+    match ($action) {
+        'email-off' => expect($user->fresh()->email_two_factor_enabled)->toBeFalse(),
+        'app-off' => expect($user->fresh()->hasEnabledTwoFactorAuthentication())->toBeFalse(),
+        'sign-out-others' => expect(DB::table('sessions')->where('id', 'laptop-session')->exists())->toBeFalse(),
+        'forget-trusted' => expect($user->trustedDevices()->count())->toBe(0),
+    };
+})->with([
+    'email off' => ['email-off', 'settings.confirm_email_off_title'],
+    'app off' => ['app-off', 'settings.confirm_app_off_title'],
+    'sign out others' => ['sign-out-others', 'settings.confirm_sign_out_others_title'],
+    'forget trusted' => ['forget-trusted', 'settings.confirm_forget_trusted_title'],
+]);
+
+test('an unknown action never opens the security confirmation dialog', function () {
+    $this->actingAs(User::factory()->create());
+
+    Livewire::test('pages::settings.security')
+        ->call('askToConfirm', 'delete-everything')
+        ->assertSet('showConfirmModal', false)
+        ->assertSet('confirmingAction', '');
+});

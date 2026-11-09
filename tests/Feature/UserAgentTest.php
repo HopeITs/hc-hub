@@ -46,6 +46,14 @@ test('the label names the browser and platform in the current language', functio
     expect($agent->label())->toBe('Chrome على Windows');
 });
 
+test('a device nothing is known about is labelled as an unknown device', function () {
+    app()->setLocale('en');
+    expect(UserAgent::parse(null)->label())->toBe('Unknown device');
+
+    app()->setLocale('ar');
+    expect(UserAgent::parse('curl/8.7.1')->label())->toBe('جهاز غير معروف');
+});
+
 test('the description stays english in every language', function () {
     $agent = UserAgent::parse('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
 
