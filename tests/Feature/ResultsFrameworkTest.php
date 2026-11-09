@@ -769,3 +769,12 @@ test('the chart view is a program by level grid showing each cell worst status, 
 
     expect($component->instance()->statusGrid()['totals']['behind'])->toBe(0);
 });
+
+test('the headline buttons say what each count means, and below target is named plainly', function () {
+    $user = User::factory()->role('General Manager')->create();
+
+    Livewire::actingAs($user)->test('pages::results.index')
+        ->assertSee('Below target')
+        ->assertDontSee('Behind')
+        ->assertSee('smaller share of its target than the share of the year that has passed');
+});

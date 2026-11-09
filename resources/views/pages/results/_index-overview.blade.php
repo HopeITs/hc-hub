@@ -3,15 +3,16 @@
     $focusCounts = $this->focusCounts;
 
     $headline = [
-        ['key' => 'unmeasured', 'label' => __('results_framework.needs_an_indicator'), 'icon' => 'exclamation-triangle', 'count' => $focusCounts['unmeasured']],
-        ['key' => 'offtrack', 'label' => __('results_framework.behind'), 'icon' => 'arrow-trending-down', 'count' => $focusCounts['offtrack']],
-        ['key' => 'waiting', 'label' => __('results_framework.waiting_for_a_measurement'), 'icon' => 'clock', 'count' => $focusCounts['waiting']],
+        ['key' => 'unmeasured', 'hint' => __('results_framework.hint_unmeasured'), 'label' => __('results_framework.needs_an_indicator'), 'icon' => 'exclamation-triangle', 'count' => $focusCounts['unmeasured']],
+        ['key' => 'offtrack', 'hint' => __('results_framework.hint_offtrack'), 'label' => __('results_framework.behind'), 'icon' => 'arrow-trending-down', 'count' => $focusCounts['offtrack']],
+        ['key' => 'waiting', 'hint' => __('results_framework.hint_waiting'), 'label' => __('results_framework.waiting_for_a_measurement'), 'icon' => 'clock', 'count' => $focusCounts['waiting']],
     ];
 @endphp
 
 <div class="space-y-2" data-test="framework-overview">
     <div class="grid gap-3 @xl/directory:grid-cols-3">
         @foreach ($headline as $cell)
+            <flux:tooltip :content="$cell['hint']">
             <button
                 type="button"
                 wire:click="setFocus('{{ $cell['key'] }}')"
@@ -33,8 +34,10 @@
                     ])>{{ number_format($cell['count']) }}</span>
                     <span class="mt-0.5 block type-meta text-secondary-medium dark:text-ink-muted">{{ __('results_framework.count_of_total_statements', ['count' => $cell['count'], 'total' => $overview['statements']]) }}</span>
                 </span>
+                <span class="sr-only">{{ $cell['hint'] }}</span>
                 <flux:icon :name="$cell['icon']" class="size-5 shrink-0 text-secondary-medium dark:text-ink-muted" aria-hidden="true" />
             </button>
+            </flux:tooltip>
         @endforeach
     </div>
 
