@@ -509,6 +509,28 @@ test('a user the database refuses to delete keeps their roles', function () {
     expect($user->refresh()->roles->pluck('name')->all())->toBe(['Managers']);
 });
 
+test('the users tab offers add user, delete user and reset filters', function () {
+    $admin = accessAdmin();
+    $other = User::factory()->create(['name' => 'Deletable Person']);
+
+    Livewire::actingAs($admin)
+        ->test('pages::admin.users')
+        ->assertSeeHtml('data-test="create-user-button"')
+        ->call('selectUser', $other->id)
+        ->assertSeeHtml('data-test="delete-user-button"')
+        ->call('selectUser', $admin->id)
+        ->assertDontSeeHtml('data-test="delete-user-button"')
+        ->set('search', 'nobody-matches-this')
+        ->assertSeeHtml('data-test="reset-user-filters"')
+        ->call('clearFilters')
+        ->assertSet('search', '');
+
+    Livewire::actingAs($admin)
+        ->test('pages::admin.users')
+        ->call('showTab', 'roles')
+        ->assertDontSeeHtml('data-test="create-user-button"');
+});
+
 test('the add-user form is rendered only while its modal is open', function () {
     Livewire::actingAs(accessAdmin())
         ->test('pages::admin.users')
