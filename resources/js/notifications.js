@@ -152,7 +152,7 @@ window.addEventListener('notification-counts', (event) => setAppBadge(event.deta
 document.addEventListener('livewire:navigated', () => {
     const counter = document.querySelector('[data-unread-count]');
 
-    setAppBadge(counter ? Number.parseInt(counter.textContent, 10) || 0 : 0);
+    setAppBadge(counter ? Number.parseInt(counter.dataset.unreadCount, 10) || 0 : 0);
 });
 
 /* ------------------------------------------------------------------ */

@@ -262,7 +262,8 @@
     /* Every tool is a flex box, so no button sits on a text baseline (the help menu's wrapper was a block and dropped its button). */
     .dk-tools > .dk-pmenu { display: flex; }
     /* The unread count rides the bell's top corner, cut out of the dock by a paper ring. */
-    .dk-tools [data-unread-count] { top: -3px !important; inset-inline-end: -5px !important; min-width: 17px !important; height: 17px !important; padding-inline: 4px !important; font-size: 10px !important; font-weight: 700 !important; line-height: 17px !important; letter-spacing: -.01em; box-shadow: 0 0 0 2px var(--paper) !important; --tw-ring-shadow: 0 0 #0000 !important; pointer-events: none; }
+    /* The bell's unread mark is a small red dot on the icon's top corner, like the sidebar rail's; the number is inside the panel. */
+    .dk-tools [data-unread-count] { top: 6px !important; inset-inline-end: 6px !important; width: 8px; height: 8px; box-shadow: 0 0 0 2px var(--paper) !important; --tw-ring-shadow: 0 0 #0000 !important; pointer-events: none; }
     .dk-top .dk-tools .dk-iconbtn:active, .dk-tools [data-notification-bell] > button:active { transform: scale(.92); }
 
     /* The Help button's "new" dot: a still dot on the button's top corner, clear of the question mark's ring. */

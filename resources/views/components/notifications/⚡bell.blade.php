@@ -123,16 +123,15 @@ new class extends Component {
             <flux:icon.bell variant="outline" class="size-4.5!" />
         </span>
 
+        {{-- Only a red dot on the bell, like the sidebar rail (user decision 2026-11-10); the exact number is
+             in the button's label and inside the panel. data-unread-count carries it for the app badge. --}}
         @if ($total > 0)
             <span
-                @class([
-                    'absolute -end-0.5 -top-0.5 inline-flex min-w-[1.125rem] items-center justify-center rounded-full px-1 text-[10px] font-bold leading-[1.125rem] tabular-nums text-white ring-2 ring-white dark:ring-surface-1',
-                    'bg-primary dark:bg-status-critical dark:text-surface-0' => $critical > 0,
-                    'bg-secondary-dark dark:bg-ink dark:text-surface-0' => $critical === 0,
-                ])
-                data-unread-count
+                class="absolute size-2 rounded-full bg-primary ring-2 ring-white dark:bg-status-critical dark:ring-surface-1"
+                aria-hidden="true"
+                data-unread-count="{{ $total }}"
                 @if ($critical > 0) data-critical-unread @endif
-            >{{ $total > 99 ? '99+' : $total }}</span>
+            ></span>
         @endif
     </button>
 

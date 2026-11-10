@@ -28,11 +28,14 @@ test('the bell shows the unread count and the sentences', function () {
     bellNotify($user, subject: 'Water trucking');
     bellNotify($user, subject: 'Hygiene kits');
 
-    Livewire::actingAs($user)->test('notifications.bell')
+    $bell = Livewire::actingAs($user)->test('notifications.bell')
         ->call('loadPanel')
-        ->assertSeeHtml('data-unread-count')
+        ->assertSeeHtml('aria-label="'.trans_choice('notifications.bell_label', 2, ['count' => 2]).'"')
         ->assertSeeText('Sami created the task “Water trucking”')
         ->assertSeeText('Hygiene kits');
+
+    // The bell itself shows only a dot; the number rides along as data for the app badge.
+    expect($bell->html())->toMatch('/data-unread-count="2"\s*><\/span>/');
 });
 
 test('the panel reads no rows until it is opened', function () {
