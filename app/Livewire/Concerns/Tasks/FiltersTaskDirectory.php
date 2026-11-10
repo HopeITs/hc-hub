@@ -73,6 +73,21 @@ trait FiltersTaskDirectory
     }
 
     /**
+     * The Due picker in the filter bar writes dueFilter directly (the
+     * headline figures go through toggleDueFilter()), so a change there
+     * must also return to page one or a short result reads as empty.
+     */
+    public function updatedDueFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedGroup(): void
+    {
+        $this->resetPage();
+    }
+
+    /**
      * The tabs above the views: whose tasks to show. '' is everyone's;
      * 'mine' is assigned to the viewer, 'assigned' was created by them, and
      * 'review' is their tasks sent back to them for review.
@@ -181,11 +196,15 @@ trait FiltersTaskDirectory
      * which always shows only the viewer's own tasks (as if "my tasks only"
      * were on), so its count and stat tiles match its cards.
      *
+     * $applyDueFilter false leaves the Due filter out, for the headline
+     * figures: pressing "Overdue" must not turn the other figures into 0.
+     *
      * @return Builder<Task>
      */
-    protected function filteredTasksQuery(): Builder
+    protected function filteredTasksQuery(bool $applyDueFilter = true): Builder
     {
         $search = trim($this->search);
+        $dueFilter = $applyDueFilter ? $this->dueFilter : '';
 
         return Task::query()
             ->select(['id', 'slug', 'parent_task_id', 'source_type', 'source_id', 'title', 'description', 'status', 'priority', 'start_date', 'due_date', 'completed_date', 'progress_percentage', 'created_by', 'kind', 'department_id', 'reportable_type', 'reportable_id'])
@@ -216,15 +235,15 @@ trait FiltersTaskDirectory
             ->when($this->assignee !== '', fn (Builder $query) => $query->whereHas('taskAssignees', fn (Builder $query) => $query->where('employee_id', (int) $this->assignee)))
             ->when($this->sourceType !== '', fn (Builder $query) => $query->where('source_type', $this->sourceType))
             ->when($this->sourceType !== '' && $this->sourceId !== '', fn (Builder $query) => $query->where('source_id', (int) $this->sourceId))
-            ->when($this->dueFilter === 'overdue', fn (Builder $query) => $query
+            ->when($dueFilter === 'overdue', fn (Builder $query) => $query
                 ->whereNotIn('status', [TaskStatus::Todo->value, TaskStatus::Done->value])
                 ->whereNotNull('due_date')
                 ->where('due_date', '<', CarbonImmutable::today()))
-            ->when($this->dueFilter === 'missed', fn (Builder $query) => $query
+            ->when($dueFilter === 'missed', fn (Builder $query) => $query
                 ->where('status', TaskStatus::Todo->value)
                 ->whereNotNull('due_date')
                 ->where('due_date', '<', CarbonImmutable::today()))
-            ->when($this->dueFilter === 'due_soon', fn (Builder $query) => $query
+            ->when($dueFilter === 'due_soon', fn (Builder $query) => $query
                 ->where('status', '!=', TaskStatus::Done->value)
                 ->whereNotNull('due_date')
                 ->whereBetween('due_date', [CarbonImmutable::today(), CarbonImmutable::today()->addDays(7)]))

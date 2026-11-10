@@ -109,6 +109,35 @@ new #[Layout('layouts::desk'), Title('titles.tasks')] class extends Component
 @php
     $filtersAreActive = $search !== '' || $status !== '' || $priority !== '' || $assignee !== '' || $sourceType !== '' || $departmentId !== '' || $dueFilter !== '' || $myTasksOnly;
     $canPickDepartment = auth()->user()->canViewAllTaskDepartments();
+
+    /*
+     * The filters kept behind the Filters button, shown as removable chips
+     * under the bar while set. Status and Due stay visible in the bar, so
+     * they need no chip.
+     */
+    $hiddenFilterChips = array_filter([
+        'priority' => $priority !== '' ? TaskPriority::tryFrom($priority)?->label() : null,
+        'assignee' => $assignee !== '' ? (App\Models\HrEmployee::find((int) $assignee)?->name ?? '#'.$assignee) : null,
+        'departmentId' => $departmentId !== '' && $canPickDepartment ? collect($this->departmentOptions)->firstWhere('id', (int) $departmentId)['name'] ?? '#'.$departmentId : null,
+        'sourceType' => $sourceType !== '' ? collect($this->sourceTypeOptions)->firstWhere('value', $sourceType)['label'] ?? $sourceType : null,
+        'sourceId' => $sourceType !== '' && $sourceId !== '' ? collect($this->filterSourceOptions)->firstWhere('id', (int) $sourceId)['name'] ?? '#'.$sourceId : null,
+        'myTasksOnly' => $myTasksOnly && $view !== 'cards' ? __('tasks.my_tasks_only_hint') : null,
+    ], fn (?string $label): bool => $label !== null);
+    $hiddenFilterLabels = [
+        'priority' => __('tasks.priority'),
+        'assignee' => __('tasks.assignee'),
+        'departmentId' => __('tasks.department'),
+        'sourceType' => __('tasks.source_type'),
+        'sourceId' => __('tasks.source'),
+        'myTasksOnly' => __('tasks.my_tasks_only'),
+    ];
+
+    /** Headline figures: each one filters the list, and a second press clears it. */
+    $dueFigures = [
+        'overdue' => ['label' => __('tasks.overdue'), 'hint' => __('tasks.overdue_hint'), 'tone' => 'dk-bad'],
+        'missed' => ['label' => __('tasks.missed'), 'hint' => __('tasks.missed_hint'), 'tone' => 'dk-bad'],
+        'due_soon' => ['label' => __('tasks.due_within_7_days'), 'hint' => null, 'tone' => 'dk-warn'],
+    ];
 @endphp
 
 <x-desk.register
@@ -125,10 +154,19 @@ new #[Layout('layouts::desk'), Title('titles.tasks')] class extends Component
     ]"
 >
     <x-slot:figures>
-        <span class="dk-good" data-test="task-stat-done"><b>{{ $this->taskStats['done'] }}</b>{{ TaskStatus::Done->label() }}</span>
-        <span @class(['dk-bad' => $this->taskStats['overdue'] > 0]) title="{{ __('tasks.overdue_hint') }}" data-test="task-stat-overdue"><b>{{ $this->taskStats['overdue'] }}</b>{{ __('tasks.overdue') }}<span class="sr-only">: {{ __('tasks.overdue_hint') }}</span></span>
-        <span @class(['dk-bad' => $this->taskStats['missed'] > 0]) title="{{ __('tasks.missed_hint') }}" data-test="task-stat-missed"><b>{{ $this->taskStats['missed'] }}</b>{{ __('tasks.missed') }}<span class="sr-only">: {{ __('tasks.missed_hint') }}</span></span>
-        <span @class(['dk-warn' => $this->taskStats['due_soon'] > 0]) data-test="task-stat-due-soon"><b>{{ $this->taskStats['due_soon'] }}</b>{{ __('tasks.due_within_7_days') }}</span>
+        {{-- Done is said against its denominator; the three "needs a hand" figures each filter the list. --}}
+        <span class="dk-good" data-test="task-stat-done"><b>{{ $this->taskStats['done'] }}</b>{{ __('tasks.done_of_total', ['total' => $this->taskStats['all']]) }}</span>
+        @foreach ($dueFigures as $figureKey => $figure)
+            <button
+                type="button"
+                wire:click="toggleDueFilter('{{ $figureKey }}')"
+                aria-pressed="{{ $dueFilter === $figureKey ? 'true' : 'false' }}"
+                aria-label="{{ __('tasks.filter_by_figure', ['label' => $figure['label']]) }}: {{ $this->taskStats[$figureKey] }}"
+                @if ($figure['hint']) title="{{ $figure['hint'] }}" @endif
+                @class(['dk-fig-btn', $figure['tone'] => $this->taskStats[$figureKey] > 0])
+                data-test="task-stat-{{ str_replace('_', '-', $figureKey) }}"
+            ><b>{{ $this->taskStats[$figureKey] }}</b>{{ $figure['label'] }}</button>
+        @endforeach
     </x-slot:figures>
     <x-slot:actions>
         @can('create', App\Models\Task::class)
@@ -151,37 +189,59 @@ new #[Layout('layouts::desk'), Title('titles.tasks')] class extends Component
             <option value="missed">{{ __('tasks.missed') }}</option>
             <option value="due_soon">{{ __('tasks.due_within_7_days') }}</option>
         </x-ui.header-filter-select>
-        <x-ui.header-filter-select :label="__('tasks.priority')" wire:model.live="priority" :value="$priority">
-            <option value="">{{ __('tasks.all_priorities') }}</option>
-            @foreach (TaskPriority::cases() as $priorityCase)
-                <option value="{{ $priorityCase->value }}">{{ $priorityCase->label() }}</option>
-            @endforeach
-        </x-ui.header-filter-select>
-        <x-ui.header-filter-select :label="__('tasks.assignee')" wire:model.live="assignee" :value="$assignee" employees>
-            <option value="">{{ __('common.anyone') }}</option>
-        </x-ui.header-filter-select>
-        @if ($canPickDepartment)
-            <x-ui.header-filter-select :label="__('tasks.department')" wire:model.live="departmentId" :value="$departmentId" data-test="task-department-filter">
-                <option value="">{{ __('tasks.every_department') }}</option>
-                @foreach ($this->departmentOptions as $departmentOption)
-                    <option value="{{ $departmentOption['id'] }}">{{ $departmentOption['name'] }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
-        @endif
-        <x-ui.header-filter-select :label="__('tasks.source_type')" wire:model.live="sourceType" :value="$sourceType">
-            <option value="">{{ __('tasks.related_to_any') }}</option>
-            @foreach ($this->sourceTypeOptions as $sourceTypeOption)
-                <option value="{{ $sourceTypeOption['value'] }}">{{ $sourceTypeOption['label'] }}</option>
-            @endforeach
-        </x-ui.header-filter-select>
-        @if ($sourceType !== '')
-            <x-ui.header-filter-select :label="__('tasks.source')" wire:model.live="sourceId" :value="$sourceId">
-                <option value="">{{ __('tasks.any_record') }}</option>
-                @foreach ($this->filterSourceOptions as $sourceOption)
-                    <option value="{{ $sourceOption['id'] }}">{{ $sourceOption['name'] }}</option>
-                @endforeach
-            </x-ui.header-filter-select>
-        @endif
+        {{-- Less frequent filters sit behind one button (Projects register pattern); what is set shows as chips under the bar. --}}
+        <div class="dk-pmenu dk-tkf" x-data="{ open: false }" x-on:click.outside="open = false" x-on:keydown.escape.window="open = false">
+            <button type="button" class="dk-btn" x-on:click="open = ! open" x-bind:aria-expanded="open" aria-haspopup="dialog" data-test="task-filters-button">
+                <flux:icon.adjustments-horizontal variant="micro" class="size-4" aria-hidden="true" />{{ __('tasks.filters') }}
+                @if ($hiddenFilterChips !== [])
+                    <span class="dk-pc dk-num" data-test="task-filters-count">{{ count($hiddenFilterChips) }}</span>
+                @endif
+            </button>
+
+            <div class="dk-tkf-scrim" x-show="open" x-cloak x-on:click="open = false" aria-hidden="true"></div>
+            <div class="dk-pop dk-pjf-pop dk-tkf-pop" role="dialog" aria-label="{{ __('tasks.filters') }}" x-show="open" x-cloak x-transition.opacity.duration.120ms>
+                <x-ui.header-filter-select :label="__('tasks.priority')" wire:model.live="priority" :value="$priority">
+                    <option value="">{{ __('tasks.all_priorities') }}</option>
+                    @foreach (TaskPriority::cases() as $priorityCase)
+                        <option value="{{ $priorityCase->value }}">{{ $priorityCase->label() }}</option>
+                    @endforeach
+                </x-ui.header-filter-select>
+                <x-ui.header-filter-select :label="__('tasks.assignee')" wire:model.live="assignee" :value="$assignee" employees>
+                    <option value="">{{ __('common.anyone') }}</option>
+                </x-ui.header-filter-select>
+                @if ($canPickDepartment)
+                    <x-ui.header-filter-select :label="__('tasks.department')" wire:model.live="departmentId" :value="$departmentId" data-test="task-department-filter">
+                        <option value="">{{ __('tasks.every_department') }}</option>
+                        @foreach ($this->departmentOptions as $departmentOption)
+                            <option value="{{ $departmentOption['id'] }}">{{ $departmentOption['name'] }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+                @endif
+                <x-ui.header-filter-select :label="__('tasks.source_type')" wire:model.live="sourceType" :value="$sourceType">
+                    <option value="">{{ __('tasks.related_to_any') }}</option>
+                    @foreach ($this->sourceTypeOptions as $sourceTypeOption)
+                        <option value="{{ $sourceTypeOption['value'] }}">{{ $sourceTypeOption['label'] }}</option>
+                    @endforeach
+                </x-ui.header-filter-select>
+                @if ($sourceType !== '')
+                    <x-ui.header-filter-select :label="__('tasks.source')" wire:model.live="sourceId" :value="$sourceId">
+                        <option value="">{{ __('tasks.any_record') }}</option>
+                        @foreach ($this->filterSourceOptions as $sourceOption)
+                            <option value="{{ $sourceOption['id'] }}">{{ $sourceOption['name'] }}</option>
+                        @endforeach
+                    </x-ui.header-filter-select>
+                @endif
+                @if ($view !== 'cards')
+                    {{-- Cards always shows only the viewer's own tasks, so the switch would do nothing there. --}}
+                    <label class="dk-tkf-check">
+                        <input type="checkbox" wire:click="toggleMyTasksOnly" @checked($myTasksOnly) data-test="task-filter-my-tasks-only" />
+                        <span><b>{{ __('tasks.my_tasks_only') }}</b><small>{{ __('tasks.my_tasks_only_hint') }}</small></span>
+                    </label>
+                @endif
+                {{-- Wrapped: desk.css styles every direct `.dk-pop > button` as a menu row. Phones only (the bottom sheet). --}}
+                <div class="dk-tkf-done"><button type="button" class="dk-btn" x-on:click="open = false">{{ __('desk.filter_done') }}</button></div>
+            </div>
+        </div>
         @if ($filtersAreActive)
             <button type="button" class="dk-btn dk-ghost dk-sm" wire:click="clearFilters" data-test="task-clear-filters"><x-desk.icon name="x" />{{ __('desk.register.clear') }}</button>
         @endif
