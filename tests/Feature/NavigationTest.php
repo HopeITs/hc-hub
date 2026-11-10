@@ -4,6 +4,7 @@ use App\Models\DonorReport;
 use App\Models\User;
 use App\Support\Desk\Destinations;
 use App\Support\Desk\PageCards;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -190,4 +191,12 @@ test('the sidebar folds each group into one row and opens the group of the curre
         ->assertSee('x-data="{ open: false ||', false)
         ->assertSee('data-side-link="projects.index"', false)
         ->assertSee('data-side-fly="projects_delivery"', false);
+});
+
+test('every wire:navigate link prefetches on hover unless it already names a modifier', function () {
+    $html = Blade::render('<a href="/a" wire:navigate>A</a><a href="/b" wire:navigate.preserve-scroll>B</a>');
+
+    expect($html)->toContain('href="/a" wire:navigate.hover>')
+        ->toContain('href="/b" wire:navigate.preserve-scroll>')
+        ->not->toContain('wire:navigate.preserve-scroll.hover');
 });

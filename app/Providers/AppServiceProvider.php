@@ -50,6 +50,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\DevCommands;
 use Illuminate\Foundation\Events\LocaleUpdated;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -205,6 +206,23 @@ class AppServiceProvider extends ServiceProvider
         // per-install endpoint path rather than hardcoding it.
         Livewire::setUpdateRoute(fn ($handle, $path) => Route::post($path, $handle)
             ->middleware(['throttle:livewire']));
+
+        $this->prefetchNavigateLinksOnHover();
+    }
+
+    /**
+     * Every `wire:navigate` link in a Blade view compiles as
+     * `wire:navigate.hover`: Livewire starts fetching the page once the
+     * pointer rests on the link (or it takes focus) for 60 ms, so the page
+     * is usually there by the time the click lands (user decision
+     * 2026-11-10, "every click like thunder"). Done once here instead of
+     * in hundreds of views; a link that already names a modifier is left
+     * alone. On My desk, desk-tabs.js stops Livewire's hover fetch for
+     * links that open as Desk tabs and warms the tab's frame instead.
+     */
+    protected function prefetchNavigateLinksOnHover(): void
+    {
+        Blade::precompiler(fn (string $template): string => preg_replace('/(\swire:navigate)(?![\w.:-])/', '$1.hover', $template) ?? $template);
     }
 
     /**

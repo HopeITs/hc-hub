@@ -33,6 +33,10 @@
 const MaxLive = 6;
 const MaxTabs = 24;
 const WarmTtl = 4000;
+/* How long the pointer rests on a link before its tab frame starts loading. */
+const HoverIntentMs = 120;
+/* Links that react to hover or focus themselves keep those events. */
+const HoverListeners = ['x-on:mouseenter', '@mouseenter', 'x-on:focus', '@focus'];
 const NotForTabs = /\/(download|export|print|preview|avatar|logout)(\/|$)|^\/(livewire|broadcasting|storage)\//;
 
 let firstLoad = true;
@@ -62,6 +66,7 @@ document.addEventListener('alpine:init', () => {
         texts: config.texts,
         frames: new Map(),
         warm: null,
+        hoverTimer: null,
         lastShown: new Map(),
         deskStale: false,
         seq: 0,
@@ -81,6 +86,10 @@ document.addEventListener('alpine:init', () => {
                 activeTab: () => this.tabs.find((tab) => tab.id === this.active) ?? null,
             };
 
+            this.listen(document, 'mouseenter', (event) => this.onHover(event), true);
+            this.listen(document, 'focus', (event) => this.onHover(event), true);
+            this.listen(document, 'mouseleave', (event) => this.onUnhover(event), true);
+            this.listen(document, 'blur', (event) => this.onUnhover(event), true);
             this.listen(document, 'mousedown', (event) => this.onPress(event), true);
             this.listen(document, 'click', (event) => this.onClick(event), true);
             this.listen(document, 'auxclick', (event) => this.onAuxClick(event), true);
@@ -96,6 +105,7 @@ document.addEventListener('alpine:init', () => {
 
         destroy() {
             this.listeners.forEach(([target, type, handler, capture]) => target.removeEventListener(type, handler, capture));
+            clearTimeout(this.hoverTimer);
             this.dropWarm();
             this.frames.forEach((frame) => frame.remove());
             this.frames.clear();
@@ -199,6 +209,38 @@ document.addEventListener('alpine:init', () => {
         },
 
         /* ── Opening links ────────────────────────────────────────── */
+
+        /*
+         * Resting on a link that opens as a tab warms its frame after HoverIntentMs, so the click
+         * usually finds the page loaded. Every wire:navigate link also carries .hover (see
+         * AppServiceProvider::prefetchNavigateLinksOnHover), whose fetch would replace the Desk and is
+         * thrown away here: it is stopped before it reaches the link, unless the link listens to
+         * hover or focus itself.
+         */
+        onHover(event) {
+            const found = this.tabLink(event);
+
+            if (! found || found.link !== event.target) {
+                return;
+            }
+
+            if (! HoverListeners.some((name) => found.link.hasAttribute(name))) {
+                event.stopPropagation();
+            }
+
+            if (this.isDesk(found.url) || found.link.hasAttribute('data-drag-through')) {
+                return;
+            }
+
+            clearTimeout(this.hoverTimer);
+            this.hoverTimer = setTimeout(() => this.warmUp(found.url), HoverIntentMs);
+        },
+
+        onUnhover(event) {
+            if (event.target instanceof Element && event.target.matches('a[href]')) {
+                clearTimeout(this.hoverTimer);
+            }
+        },
 
         /* The press, before Livewire's own (which would fetch the page to replace the Desk): stop it, and warm the frame. */
         onPress(event) {
