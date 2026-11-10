@@ -290,6 +290,7 @@ return [
         'none' => 'بلا رقابة',
     ],
     'matrix_cell_state' => [
+        'outside_period' => 'خارج فترة التقرير',
         'approved' => 'مُتحقَّق منه',
         'pending' => 'بانتظار التحقق',
         'not_submitted' => 'غير مُرسَل',

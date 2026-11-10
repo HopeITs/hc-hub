@@ -234,3 +234,26 @@ test('the saved report page runs a fixed number of queries however many centers 
 
     expect($count(10))->toBe($count(2));
 });
+
+test('MEAL can compose from an assigned duty without receiving finance access', function () {
+    $meal = mealManager();
+    $unassigned = donorReportProposal(['name' => 'Unassigned grant']);
+    $duty = DonorReport::factory()->create([
+        'donor_proposal_id' => $this->proposal->donorProposals()->value('id'),
+        'responsible_employee_id' => $meal->employee_id,
+        'type' => 'narrative',
+        'submitted_on' => null,
+    ]);
+
+    $this->actingAs($meal)->get(route('donor-reports.show', $duty))
+        ->assertOk()->assertSee('data-test="compose-assigned-donor-report"', false);
+    $this->get(route('donor-reports.compose', ['proposal' => $this->proposal->id]))
+        ->assertOk()->assertSeeText($this->proposal->name)->assertDontSeeText($unassigned->name);
+
+    drpBuilder($meal)->assertDontSeeHtml('data-snapshot-finance')
+        ->set('dueOn', '2026-12-01')->call('save')->assertHasNoErrors();
+
+    expect((int) DonorReport::query()->latest('id')->firstOrFail()->responsible_employee_id)->toBe((int) $meal->employee_id);
+
+    drpBuilder($meal)->set('dueOn', '2026-12-01')->set('type', 'financial')->call('save')->assertForbidden();
+});
