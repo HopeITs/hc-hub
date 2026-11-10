@@ -176,6 +176,57 @@ trait FiltersTaskDirectory
         $this->resetPage();
     }
 
+    /**
+     * How many of the filters kept behind the Filters popover are set, for
+     * the button's badge. Department counts only for a viewer who can pick
+     * one, a record only once its type is chosen, and "my tasks only" not on
+     * the Cards view, which is always the viewer's own tasks anyway — each
+     * exactly when filteredTasksQuery() applies it.
+     */
+    public function activeAdvancedFilterCount(): int
+    {
+        return count(array_filter([
+            $this->priority !== '',
+            $this->assignee !== '',
+            $this->departmentId !== '' && auth()->user()->canViewAllTaskDepartments(),
+            $this->sourceType !== '',
+            $this->sourceType !== '' && $this->sourceId !== '',
+            $this->myTasksOnly && $this->view !== 'cards',
+        ]));
+    }
+
+    /**
+     * Whether any filter narrows the tasks shown. The scope tab is not one:
+     * it is navigation, and clearFilters() leaves it alone.
+     */
+    public function hasActiveFilters(): bool
+    {
+        return trim($this->search) !== ''
+            || $this->status !== ''
+            || $this->dueFilter !== ''
+            || $this->activeAdvancedFilterCount() > 0;
+    }
+
+    /**
+     * The Filters popover's own Clear: resets only what sits behind that
+     * button, so search, Status and Due stay as the viewer set them.
+     */
+    public function clearAdvancedFilters(): void
+    {
+        $this->priority = '';
+        $this->assignee = '';
+        $this->departmentId = '';
+        $this->sourceType = '';
+        $this->sourceId = '';
+        $this->myTasksOnly = false;
+        $this->resetPage();
+    }
+
+    /**
+     * Clears every filter, but keeps the scope tab, the view, the sort, the
+     * grouping and the calendar period: those say where the viewer is, not
+     * what is filtered out.
+     */
     public function clearFilters(): void
     {
         $this->search = '';
@@ -243,6 +294,9 @@ trait FiltersTaskDirectory
                 ->where('status', TaskStatus::Todo->value)
                 ->whereNotNull('due_date')
                 ->where('due_date', '<', CarbonImmutable::today()))
+            ->when($dueFilter === 'due_today', fn (Builder $query) => $query
+                ->where('status', '!=', TaskStatus::Done->value)
+                ->where('due_date', CarbonImmutable::today()->toDateString()))
             ->when($dueFilter === 'due_soon', fn (Builder $query) => $query
                 ->where('status', '!=', TaskStatus::Done->value)
                 ->whereNotNull('due_date')

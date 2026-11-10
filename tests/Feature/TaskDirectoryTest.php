@@ -2025,3 +2025,128 @@ test('a refused quick action still explains itself on the board', function () {
         ->call('toggleComplete', $task->id)
         ->assertDispatched('toast-show');
 });
+
+test('the due today filter lists only unfinished tasks due today', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->create(['title' => 'Due today open', 'status' => TaskStatus::InProgress, 'due_date' => now()->toDateString()]);
+    Task::factory()->create(['title' => 'Due today finished', 'status' => TaskStatus::Done, 'due_date' => now()->toDateString()]);
+    Task::factory()->create(['title' => 'Due tomorrow', 'status' => TaskStatus::Todo, 'due_date' => now()->addDay()->toDateString()]);
+
+    $titles = fn ($component) => $component->instance()->tasks->getCollection()->pluck('title')->all();
+
+    $component = Livewire::actingAs($user)->test('pages::tasks.index')->set('view', 'list')->set('dueFilter', 'due_today');
+
+    expect($titles($component))->toBe(['Due today open'])
+        ->and($component->get('taskStats'))->toMatchArray(['total' => 1, 'all' => 3]);
+
+    expect($titles($component->set('dueFilter', 'not-a-filter')))->toHaveCount(3);
+});
+
+test('search status due filter and scope narrow the list together', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $overdue = ['status' => TaskStatus::InProgress, 'due_date' => now()->subDay()->toDateString()];
+
+    Task::factory()->create(['title' => 'Budget review mine', 'created_by' => $user->id, ...$overdue]);
+    Task::factory()->create(['title' => 'Budget review other', ...$overdue]);
+    Task::factory()->create(['title' => 'Budget review on time', 'created_by' => $user->id, 'status' => TaskStatus::InProgress, 'due_date' => now()->addDays(3)->toDateString()]);
+    Task::factory()->create(['title' => 'Budget review todo', 'created_by' => $user->id, 'status' => TaskStatus::Todo, 'due_date' => now()->subDay()->toDateString()]);
+    Task::factory()->create(['title' => 'Venue booking mine', 'created_by' => $user->id, ...$overdue]);
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'list')
+        ->set('search', '  budget  ')
+        ->set('status', TaskStatus::InProgress->value)
+        ->set('dueFilter', 'overdue')
+        ->call('setScope', 'assigned');
+
+    expect($component->instance()->tasks->getCollection()->pluck('title')->all())->toBe(['Budget review mine']);
+});
+
+test('the Filters badge counts only the popover filters that apply', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $milestone = Milestone::factory()->create();
+
+    $component = Livewire::actingAs($user)->test('pages::tasks.index');
+    $count = fn () => $component->instance()->activeAdvancedFilterCount();
+
+    expect($count())->toBe(0);
+
+    $component->set('priority', TaskPriority::High->value)
+        ->set('assignee', '7')
+        ->set('departmentId', '3')
+        ->set('sourceType', 'milestone')
+        ->set('sourceId', (string) $milestone->id)
+        ->set('myTasksOnly', true);
+
+    expect($count())->toBe(6);
+
+    $component->set('view', 'cards');
+
+    expect($count())->toBe(5);
+
+    $scopedUser = User::factory()->role('Team Member')->create();
+    $scoped = Livewire::actingAs($scopedUser)->test('pages::tasks.index')->set('departmentId', '3');
+
+    expect($scoped->instance()->activeAdvancedFilterCount())->toBe(0);
+});
+
+test('the scope tab and a blank search are not active filters', function () {
+    $user = User::factory()->role('General Manager')->create();
+
+    $component = Livewire::actingAs($user)->test('pages::tasks.index')->call('setScope', 'mine')->set('search', '   ');
+
+    expect($component->instance()->hasActiveFilters())->toBeFalse();
+
+    $component->set('dueFilter', 'due_today');
+
+    expect($component->instance()->hasActiveFilters())->toBeTrue();
+});
+
+test('clearing the filters keeps the scope tab and the calendar period', function () {
+    $user = User::factory()->role('General Manager')->create();
+
+    $component = Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('view', 'calendar')
+        ->call('setScope', 'assigned')
+        ->set('viewMode', 'week')
+        ->set('anchorDate', '2026-03-04')
+        ->set('priority', TaskPriority::High->value)
+        ->set('dueFilter', 'overdue')
+        ->call('clearFilters')
+        ->assertSet('priority', '')
+        ->assertSet('dueFilter', '')
+        ->assertSet('scope', 'assigned')
+        ->assertSet('view', 'calendar')
+        ->assertSet('viewMode', 'week')
+        ->assertSet('anchorDate', '2026-03-04');
+
+    expect($component->instance()->hasActiveFilters())->toBeFalse();
+});
+
+test('the popover Clear resets only the Filters popover filters', function () {
+    $user = User::factory()->role('General Manager')->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->set('search', 'report')
+        ->set('dueFilter', 'overdue')
+        ->set('priority', TaskPriority::High->value)
+        ->call('toggleMyTasksOnly')
+        ->call('clearAdvancedFilters')
+        ->assertSet('priority', '')
+        ->assertSet('myTasksOnly', false)
+        ->assertSet('search', 'report')
+        ->assertSet('dueFilter', 'overdue');
+});
+
+test('an empty scope tab offers to show all tasks instead of adding the first one', function () {
+    $user = User::factory()->role('General Manager')->create();
+
+    Livewire::actingAs($user)
+        ->test('pages::tasks.index')
+        ->call('setScope', 'review')
+        ->assertSee(__('tasks.empty_scope_heading'))
+        ->assertSeeHtml('data-test="task-empty-show-all"');
+});
