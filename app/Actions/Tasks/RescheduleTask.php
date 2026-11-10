@@ -29,11 +29,13 @@ class RescheduleTask
             return null;
         }
 
-        // Refused with false (a message), never a 403 page: a calendar drop is
-        // a casual gesture, and the card simply returns to its day on refusal.
-        if ($task->created_by !== auth()->id() || Gate::denies('update', $task)) {
+        // Someone else's task is refused with false (a message): a calendar drop
+        // is a casual gesture, and the card simply returns to its day.
+        if ($task->created_by !== auth()->id()) {
             return false;
         }
+
+        Gate::authorize('update', $task);
 
         $task->due_date = $date === '' ? null : CarbonImmutable::parse($date);
         $task->save();
