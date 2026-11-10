@@ -5,6 +5,7 @@ use App\Livewire\Concerns\Dashboard\ReadsDashboardWork;
 use App\Livewire\Concerns\Dashboard\ReadsDeskDecisions;
 use App\Livewire\Concerns\Desk\ArrangesPanels;
 use App\Support\Desk\Panels;
+use App\Support\Desk\QuickAccess;
 use App\Support\Desk\ReadyLayoutSignals;
 use App\Support\Desk\Shortcuts;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,17 +21,41 @@ use Livewire\Component;
  * panels they arranged (or their role's default) on a twelve-column grid.
  * Every change to the arrangement is saved on users.desk_layout at once.
  *
- * The grid holds three kinds of item: hand-made panels (their own
- * components), page cards (desk.panels.page) and buttons (x-desk.tile, drawn
- * here without a component of their own). Pages opened from the Desk load in
- * Desk tabs above the grid (pages.desk._tabs).
+ * The grid holds two kinds of item: hand-made panels (their own components)
+ * and page cards (desk.panels.page). Buttons ("New …" actions and page
+ * buttons, Shortcuts) never land on it: however one is put on the Desk, it is
+ * kept in Quick access instead (storeLayout). Pages opened from the Desk load
+ * in Desk tabs above the grid (pages.desk._tabs).
  */
 new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Component
 {
-    use ArrangesPanels;
+    use ArrangesPanels {
+        addItem as protected placeOnDesk;
+        dropItem as protected dropOnDesk;
+    }
     use ReadsDashboardAttention;
     use ReadsDashboardWork;
     use ReadsDeskDecisions;
+
+    /**
+     * A Desk saved while buttons could sit on it hands them to Quick access
+     * once, and is saved again without them.
+     */
+    public function mount(): void
+    {
+        $user = auth()->user();
+        $buttons = is_array($user->desk_layout) ? app(Panels::class)->buttonsIn($user->desk_layout) : [];
+
+        if ($buttons === []) {
+            return;
+        }
+
+        foreach ($buttons as $button) {
+            app(QuickAccess::class)->addItem($user, $button);
+        }
+
+        $this->storeLayout($this->layout);
+    }
 
     /**
      * @return list<array{panel: string, size: string, cols: int, rows: int}>
@@ -51,20 +76,10 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
     }
 
     /**
-     * The buttons the viewer may place, by item id, for drawing the ones on the Desk.
-     *
-     * @return array<string, array{id: string, key: string, kind: 'action'|'page', label: string, icon: string, route: string, href: string}>
-     */
-    #[Computed]
-    public function buttons(): array
-    {
-        return app(Shortcuts::class)->for(auth()->user());
-    }
-
-    /**
      * What each sidebar page becomes when it is dragged onto the Desk
      * (resources/js/desk-drop.js): route => the item, its title and the
-     * cell it starts at, and whether it is already on the Desk.
+     * cell it starts at, and whether it is already on the Desk (a button:
+     * already in Quick access).
      *
      * @return array<string, array{item: string, title: string, kind: string, cols: int, rows: int, placed: bool}>
      */
@@ -73,7 +88,7 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
     {
         $panels = app(Panels::class);
         $library = $this->library;
-        $placed = array_flip(array_column($this->layout, 'panel'));
+        $placed = array_flip([...array_column($this->layout, 'panel'), ...app(QuickAccess::class)->itemIds(auth()->user())]);
         $items = [];
 
         foreach ($panels->itemsForRoutes(auth()->user()) as $route => $id) {
@@ -125,14 +140,189 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
     }
 
     /**
+     * The pages and actions behind the Quick access button, in the viewer's order.
+     *
+     * @return list<array{key: string, kind: 'page'|'action', label: string, icon: string, href: string}>
+     */
+    #[Computed]
+    public function quickAccess(): array
+    {
+        return app(QuickAccess::class)->for(auth()->user());
+    }
+
+    /** A page or action dropped on Quick access from the Ask bar (resources/js/desk-drop.js). */
+    public function addQuickAccess(string $key): void
+    {
+        app(QuickAccess::class)->add(auth()->user(), $key);
+        unset($this->quickAccess);
+    }
+
+    /**
+     * Put a button (an `a-…` action or a `g-…` page, Shortcuts) in Quick
+     * access: the Customize sheet's Buttons tab, a page dragged in from the
+     * sidebar, the Ask bar. True when it is there afterwards.
+     */
+    public function addQuickItem(string $id): bool
+    {
+        $quick = app(QuickAccess::class);
+        $wasThere = in_array($id, $quick->itemIds(auth()->user()), true);
+        $added = $quick->addItem(auth()->user(), $id);
+        unset($this->quickAccess);
+
+        if ($added && ! $wasThere) {
+            $this->dispatch('dk-item-placed', panel: $id, title: (string) ($this->library[$id]['title'] ?? ''), quick: true);
+        }
+
+        return $added;
+    }
+
+    /** The Undo of a button put in Quick access. */
+    public function removeQuickItem(string $id): void
+    {
+        app(QuickAccess::class)->removeItem(auth()->user(), $id);
+        unset($this->quickAccess);
+    }
+
+    /**
+     * One item onto the Desk (ArrangesPanels::addItem), except a button,
+     * which goes to Quick access.
+     */
+    public function addItem(string $panel, ?int $position = null): bool
+    {
+        return Shortcuts::isShortcut($panel) ? $this->addQuickItem($panel) : $this->placeOnDesk($panel, $position);
+    }
+
+    /**
+     * A sidebar page dropped on the grid (ArrangesPanels::dropItem); a page
+     * whose Desk item is a button goes to Quick access instead.
+     *
+     * @param  array<mixed>  $entries
+     */
+    public function dropItem(string $panel, array $entries): void
+    {
+        if (Shortcuts::isShortcut($panel)) {
+            $this->addQuickItem($panel);
+
+            return;
+        }
+
+        $this->dropOnDesk($panel, $entries);
+    }
+
+    public function removeQuickAccess(string $key): void
+    {
+        app(QuickAccess::class)->remove(auth()->user(), $key);
+        unset($this->quickAccess);
+    }
+
+    /**
+     * @param  array<mixed>  $keys
+     */
+    public function sortQuickAccess(array $keys): void
+    {
+        app(QuickAccess::class)->reorder(auth()->user(), $keys);
+        unset($this->quickAccess);
+    }
+
+    /**
+     * Every change to the Desk is saved here, so this is the one gate that
+     * keeps buttons off it: any button in the new arrangement (a saved
+     * Customize draft, an Undo, a drop) is put in Quick access and the rest
+     * close up (Panels::flush).
+     *
      * @param  list<array{panel: string, size: string, cols: int, rows: int}>|null  $layout
      */
     protected function storeLayout(?array $layout): void
     {
         $user = auth()->user();
-        $user->desk_layout = $layout === null ? null : array_values($layout);
+        $panels = app(Panels::class);
+        $buttons = $layout === null ? [] : $panels->buttonsIn($layout);
+
+        if ($buttons !== []) {
+            foreach ($buttons as $button) {
+                app(QuickAccess::class)->addItem($user, $button);
+            }
+
+            unset($this->quickAccess);
+            $layout = $panels->flush(array_values(array_filter($layout, fn (array $entry): bool => ! Shortcuts::isShortcut($entry['panel']))));
+        }
+
+        if ($layout === null) {
+            // Back to the role's layout: nothing is pinned or folded any more.
+            $user->desk_layout = null;
+            $user->desk_panel_flags = null;
+        } else {
+            $flags = $panels->flagsFor($user);
+            $placed = array_column($layout, 'panel');
+            $pinned = array_values(array_intersect($flags['pinned'], $placed));
+            $folded = array_values(array_intersect($flags['folded'], $placed));
+
+            $user->desk_layout = $panels->pinnedFirst(array_values($layout), $pinned);
+            $user->desk_panel_flags = $pinned === [] && $folded === [] ? null : ['pinned' => $pinned, 'folded' => $folded];
+        }
+
         $user->save();
-        unset($this->layout);
+        unset($this->layout, $this->panelFlags);
+    }
+
+    /**
+     * The panels on the Desk that are pinned to the top (in pin order) and
+     * folded into tiles, for the panels' menus and desk-fold.js.
+     *
+     * @return array{pinned: list<string>, folded: list<string>}
+     */
+    #[Computed]
+    public function panelFlags(): array
+    {
+        $flags = app(Panels::class)->flagsFor(auth()->user());
+        $placed = array_column($this->layout, 'panel');
+
+        return [
+            'pinned' => array_values(array_intersect($flags['pinned'], $placed)),
+            'folded' => array_values(array_intersect($flags['folded'], $placed)),
+        ];
+    }
+
+    /**
+     * A panel menu's Pin to top / Unpin: a pinned panel goes after the ones
+     * pinned before it, ahead of everything else; unpinning lets it fall back
+     * behind the pinned ones. Pinning a collapsed panel opens it too, so it
+     * sits at the top as a full panel.
+     */
+    public function pinPanel(string $panel, bool $pinned = true): void
+    {
+        if ($pinned) {
+            $user = auth()->user();
+            $flags = app(Panels::class)->flagsFor($user);
+            $user->desk_panel_flags = [...$flags, 'folded' => array_values(array_diff($flags['folded'], [$panel]))];
+        }
+
+        $this->storeFlag('pinned', $panel, $pinned);
+    }
+
+    /** A panel menu's Collapse / Expand: a folded panel shows as a small tile at the end of the Desk. */
+    public function foldPanel(string $panel, bool $folded = true): void
+    {
+        $this->storeFlag('folded', $panel, $folded);
+    }
+
+    /**
+     * @param  'pinned'|'folded'  $flag
+     */
+    private function storeFlag(string $flag, string $panel, bool $on): void
+    {
+        if (! in_array($panel, array_column($this->layout, 'panel'), true)) {
+            return;
+        }
+
+        $user = auth()->user();
+        $flags = app(Panels::class)->flagsFor($user);
+        $flags[$flag] = $on
+            ? array_values(array_unique([...$flags[$flag], $panel]))
+            : array_values(array_diff($flags[$flag], [$panel]));
+        $user->desk_panel_flags = $flags;
+
+        $this->storeLayout($this->layout);
     }
 
     /**
@@ -163,9 +353,8 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
     $needs = $this->needsCount;
     $n = $needs['total'];
     $placed = array_column($layout, 'panel');
-    /* "More to add" counts panels and page cards; every page and action can also be a button, which would only inflate it. */
+    /* "More to add" counts panels and page cards: buttons go to Quick access, never onto the Desk. */
     $more = count(array_diff(array_keys(array_filter($this->library, fn (array $item): bool => in_array($item['kind'], ['panel', 'card'], true))), $placed));
-    $buttons = $this->buttons;
     $needsPlaced = in_array('needs', $placed, true);
 @endphp
 
@@ -179,18 +368,21 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
             <h1 class="page-title">{{ rtrim($this->greeting(), '.!') }}</h1>
         </div>
 
-        {{-- The day in two figures, across from the greeting; they lead down to the Needs you panel when that is on the desk. --}}
-        @if ($n === 0)
-            <p class="dk-hello-clear">{{ __('desk.hello_none') }}</p>
-        @else
-            <{{ $needsPlaced ? 'a href=#dk-panel-needs' : 'div' }} class="dk-hello-figs" @if ($needsPlaced) title="{{ __('desk-cards.hero.needs_link') }}" @endif data-desk-hello-figures>
-                <span class="dk-hello-fig"><b class="dk-num page-title">{{ $n }}</b><span>{{ trans_choice('desk.hero_needs', $n) }}</span></span>
-                @if ($needs['late'] > 0)
-                    <span class="dk-hello-fig dk-late"><b class="dk-num page-title text-brand-ink!">{{ $needs['late'] }}</b><span>{{ trans_choice('desk.hero_late', $needs['late']) }}</span></span>
-                @endif
-            </{{ $needsPlaced ? 'a' : 'div' }}>
-        @endif
+        <div class="dk-hello-end">
+            {{-- The day in two figures, across from the greeting; they lead down to the Needs you panel when that is on the desk. --}}
+            @if ($n === 0)
+                <p class="dk-hello-clear">{{ __('desk.hello_none') }}</p>
+            @else
+                <{{ $needsPlaced ? 'a href=#dk-panel-needs' : 'div' }} class="dk-hello-figs" @if ($needsPlaced) title="{{ __('desk-cards.hero.needs_link') }}" @endif data-desk-hello-figures>
+                    <span class="dk-hello-fig"><b class="dk-num page-title">{{ $n }}</b><span>{{ trans_choice('desk.hero_needs', $n) }}</span></span>
+                    @if ($needs['late'] > 0)
+                        <span class="dk-hello-fig dk-late"><b class="dk-num page-title text-brand-ink!">{{ $needs['late'] }}</b><span>{{ trans_choice('desk.hero_late', $needs['late']) }}</span></span>
+                    @endif
+                </{{ $needsPlaced ? 'a' : 'div' }}>
+            @endif
 
+            @include('pages.desk._quick-access', ['quick' => $this->quickAccess])
+        </div>
     </section>
 
     {{-- First visit: one gentle hint, dismissed for good (kept in this browser). --}}
@@ -207,6 +399,8 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
     @endforeach
     {{-- What each sidebar page becomes when dragged onto the Desk (desk-drop.js). --}}
     <script type="application/json" data-desk-routes>@json($this->dropItems)</script>
+    {{-- Panels pinned to the top and folded into tiles (resources/js/desk-fold.js). --}}
+    <script type="application/json" data-desk-flags>@json($this->panelFlags)</script>
     <div class="dk-grid" id="dk-grid" data-desk-grid data-desk-drop data-drop-text="{{ __('desk-workspace.drop_here', ['item' => '__I__']) }}">
         @foreach ($layout as $i => $entry)
             @php
@@ -214,8 +408,6 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
             @endphp
             @if ($kind === 'card')
                 <livewire:desk.panels.page :card="$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols']" :grid-rows="$entry['rows']" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
-            @elseif (isset($buttons[$entry['panel']]))
-                <x-desk.tile :entry="$entry" :button="$buttons[$entry['panel']]" :index="$i" :total="count($layout)" wire:key="panel-{{ $entry['panel'] }}" />
             @else
                 <livewire:is :component="'desk.panels.'.$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
             @endif
@@ -242,10 +434,10 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
         <button type="button" class="dk-iconbtn dk-sm" x-on:click="applied = null" aria-label="{{ __('common.close') }}"><x-desk.icon name="x" /></button>
     </div>
 
-    {{-- Something was put on the Desk (dragged in from the sidebar, or added from the Ask bar or a page): say what, with Undo. --}}
+    {{-- Something was put on the Desk (dragged in from the sidebar, or added from the Ask bar or a page), or a button into Quick access: say what, with Undo. --}}
     <div class="dk-undo" role="status" aria-live="polite" x-show="placed" x-cloak x-transition.opacity data-desk-item-placed>
-        <span x-text="placed ? {{ \Illuminate\Support\Js::from(__('desk-workspace.placed', ['item' => '__I__'])) }}.replace('__I__', placed.title) : ''"></span>
-        <button type="button" class="dk-btn dk-sm" x-on:click="$wire.removePanel(placed.panel); placed = null"><x-desk.icon name="undo" />{{ __('desk.undo') }}</button>
+        <span x-text="placed ? (placed.quick ? {{ \Illuminate\Support\Js::from(__('desk-workspace.quick.placed', ['item' => '__I__'])) }} : {{ \Illuminate\Support\Js::from(__('desk-workspace.placed', ['item' => '__I__'])) }}).replace('__I__', placed.title) : ''"></span>
+        <button type="button" class="dk-btn dk-sm" x-on:click="placed.quick ? $wire.removeQuickItem(placed.panel) : $wire.removePanel(placed.panel); placed = null"><x-desk.icon name="undo" />{{ __('desk.undo') }}</button>
         <button type="button" class="dk-iconbtn dk-sm" x-on:click="placed = null" aria-label="{{ __('common.close') }}"><x-desk.icon name="x" /></button>
     </div>
 

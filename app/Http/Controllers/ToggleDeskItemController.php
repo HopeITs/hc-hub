@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Support\Desk\Panels;
+use App\Support\Desk\QuickAccess;
+use App\Support\Desk\Shortcuts;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -20,8 +23,10 @@ class ToggleDeskItemController extends Controller
      * page's route, or by a page's address (a Desk tab's), which resolve to
      * whatever stands for that page (Panels::itemForRoute); a record's page
      * stands in for its register. Only an item the person may see is accepted.
+     * A button (Shortcuts) never sits on the Desk: it goes in or out of Quick
+     * access instead, and the answer says so ("quick": true).
      */
-    public function __invoke(Request $request, Panels $panels): JsonResponse
+    public function __invoke(Request $request, Panels $panels, QuickAccess $quickAccess): JsonResponse
     {
         $user = $request->user();
         $validated = $request->validate([
@@ -38,6 +43,10 @@ class ToggleDeskItemController extends Controller
             : ($route === null ? null : ($panels->itemForRoute($user, $route) ?? $panels->itemForRoute($user, Str::beforeLast($route, '.').'.index')));
 
         abort_unless(is_string($item) && isset($available[$item]), 422);
+
+        if (Shortcuts::isShortcut($item)) {
+            return $this->toggleQuickAccess($quickAccess, $user, $item, (string) $available[$item]['title'], $validated);
+        }
 
         $layout = $panels->layoutFor($user);
         $isPlaced = in_array($item, array_column($layout, 'panel'), true);
@@ -56,6 +65,31 @@ class ToggleDeskItemController extends Controller
             'item' => $item,
             'title' => $available[$item]['title'],
             'placed' => $wanted,
+        ]);
+    }
+
+    /**
+     * A button in or out of Quick access, by the same rules as the Desk:
+     * "placed" asks for a state, without it the button flips.
+     *
+     * @param  array<string, mixed>  $validated
+     */
+    private function toggleQuickAccess(QuickAccess $quickAccess, User $user, string $item, string $title, array $validated): JsonResponse
+    {
+        $isKept = in_array($item, $quickAccess->itemIds($user), true);
+        $wanted = array_key_exists('placed', $validated) ? (bool) $validated['placed'] : ! $isKept;
+
+        if ($wanted && ! $isKept) {
+            $wanted = $quickAccess->addItem($user, $item);
+        } elseif (! $wanted && $isKept) {
+            $quickAccess->removeItem($user, $item);
+        }
+
+        return response()->json([
+            'item' => $item,
+            'title' => $title,
+            'placed' => $wanted,
+            'quick' => true,
         ]);
     }
 

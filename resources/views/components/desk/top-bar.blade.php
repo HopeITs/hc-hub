@@ -126,12 +126,6 @@
                             <flux:icon.lock-closed variant="outline" class="dk-menu-ic" />
                             <span class="dk-menu-t"><strong>{{ __('common.security') }}</strong></span>
                         </a>
-                        {{-- Desk tabs on or off, for this browser (resources/js/desk-tabs.js). --}}
-                        <button type="button" role="menuitemcheckbox" class="dk-menu-switch" x-data="{ on: window.hcDeskTabsSetting?.enabled() ?? true }" x-bind:aria-checked="on.toString()" x-on:click="on = ! on; window.hcDeskTabsSetting?.set(on)" data-desk-tabs-setting>
-                            <flux:icon.window variant="outline" class="dk-menu-ic" />
-                            <span class="dk-menu-t"><strong>{{ __('desk-workspace.tabs.setting') }}</strong><small>{{ __('desk-workspace.tabs.setting_hint') }}</small></span>
-                            <span class="dk-switch" aria-hidden="true"><i></i></span>
-                        </button>
                         {{-- Below 560px the language and theme pair leaves the bar and sits here. --}}
                         <div class="dk-narrow-tools">
                             <form method="POST" action="{{ route('locale.update') }}" class="contents">

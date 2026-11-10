@@ -114,8 +114,10 @@
     .dk-side-star { display: none; }
     .dk-side-empty { margin: 0; padding: 6px 10px; font-size: 12.5px; color: var(--faint); }
     .dk-side-rec { height: 42px; }
-    .dk-side-rec .dk-side-l { display: grid; line-height: 1.2; }
-    .dk-side-rec small { font-size: 11px; font-weight: 600; color: var(--faint); overflow: hidden; text-overflow: ellipsis; }
+    .dk-side-rec .dk-side-l { display: grid; min-width: 0; line-height: 1.2; }
+    /* A long record name ends in an ellipsis inside the list (and the rail's fly-out), never past its edge. */
+    .dk-side-rec :is(.dk-side-rt, small) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dk-side-rec small { font-size: 11px; font-weight: 600; color: var(--faint); }
 
     /* Project context mode */
     .dk-side-ctx { display: flex; flex-direction: column; gap: 2px; }
@@ -159,8 +161,8 @@
         html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-a.dk-on::before,
         html:not(.dk-nav-open) .dk-side-gb.dk-has-on::before,
         html:not(.dk-nav-open) .dk-side-ctx .dk-side-a.dk-on::before { content: ""; display: block; position: absolute; inset-block: 9px; inset-inline-start: -14px; width: 3px; border-radius: 3px; background: var(--brand); }
-        /* On the rail a count is a small numbered tag tucked into the icon's top corner, inside its circle */
-        html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-badge { position: absolute; top: -3px; inset-inline-end: -3px; width: auto; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 999px; font-size: 10px; font-weight: 800; line-height: 16px; background: var(--brand); color: var(--on-brand); box-shadow: 0 0 0 2px var(--paper); }
+        /* On the rail a count is a small numbered tag on the icon's top corner, mostly outside it, so the icon stays readable */
+        html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-badge { position: absolute; top: -7px; inset-inline-end: -10px; width: auto; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 999px; font-size: 9.5px; font-weight: 800; line-height: 15px; letter-spacing: -.02em; background: var(--brand); color: var(--on-brand); box-shadow: 0 0 0 2px var(--paper); }
         html:not(.dk-nav-open) .dk-side-ctx { align-items: center; }
         html:not(.dk-nav-open) .dk-side-back { width: 34px; height: 34px; padding: 0; justify-content: center; }
     }
@@ -169,7 +171,7 @@
     .dk-side-fly .dk-side-a { width: 100% !important; height: 38px !important; gap: 10px !important; padding-inline: 10px 34px !important; justify-content: flex-start !important; margin: 0 !important; border-radius: 9px !important; }
     .dk-side-fly .dk-side-rec { height: 42px !important; }
     .dk-side-fly .dk-side-l { display: block !important; }
-    .dk-side-fly .dk-side-rec .dk-side-l { display: grid !important; }
+    .dk-side-fly .dk-side-rec .dk-side-l { display: grid !important; flex: 1 1 auto !important; min-width: 0 !important; }
     .dk-side-fly .dk-side-a.dk-on::before { display: none !important; }
     /* In the fly-out a count reads as a quiet numbered pill right after the label, never a blank blob */
     .dk-side-fly .dk-side-l { flex: 0 1 auto !important; }
@@ -262,8 +264,8 @@
     .dk-tools [data-unread-count] { top: -3px !important; inset-inline-end: -5px !important; min-width: 17px !important; height: 17px !important; padding-inline: 4px !important; font-size: 10px !important; font-weight: 700 !important; line-height: 17px !important; letter-spacing: -.01em; box-shadow: 0 0 0 2px var(--paper) !important; --tw-ring-shadow: 0 0 #0000 !important; pointer-events: none; }
     .dk-top .dk-tools .dk-iconbtn:active, .dk-tools [data-notification-bell] > button:active { transform: scale(.92); }
 
-    .dk-fresh { position: absolute; top: 8px; inset-inline-end: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 2px var(--paper); animation: dk-fresh 2.4s ease-out infinite; }
-    @keyframes dk-fresh { 0% { box-shadow: 0 0 0 2px var(--paper), 0 0 0 2px var(--brand); } 70%, 100% { box-shadow: 0 0 0 2px var(--paper), 0 0 0 9px transparent; } }
+    /* The Help button's "new" dot: a still dot on the button's top corner, clear of the question mark's ring. */
+    .dk-fresh { position: absolute; top: 3px; inset-inline-end: 3px; width: 9px; height: 9px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 2px var(--paper); pointer-events: none; }
 
     .dk-seg { display: contents; }
     .dk-seg-lang { font-size: 15px !important; font-weight: 600 !important; line-height: 1 !important; }
@@ -362,7 +364,7 @@
 
     @media (prefers-reduced-motion: reduce) {
         .dk-side { transition: none; }
-        .dk-where, .dk-where-p::before, .dk-seg-theme svg, .dk-fresh { animation: none; }
+        .dk-where, .dk-where-p::before, .dk-seg-theme svg { animation: none; }
         .dk-menu-in, .dk-menu-out { transition: opacity .1s linear; }
         .dk-menu-from { transform: none; }
         .dk-top :active { transform: none !important; }
@@ -549,8 +551,7 @@
 
     /* Answers: the figure is the headline, with a live brand dot (they are read from the same data as the panels). */
     .dk-answer { display: flex; align-items: flex-start; gap: 14px; margin: 10px 2px 2px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(135deg, var(--sunk), var(--paper) 70%); font-size: 13.5px; color: var(--ink-3); }
-    .dk-answer > i { flex: none; width: 10px; height: 10px; margin-top: 9px; border-radius: 50%; background: var(--brand); animation: dk-pal-live 2.2s ease-out infinite; }
-    @keyframes dk-pal-live { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 45%, transparent); } 70%, 100% { box-shadow: 0 0 0 9px transparent; } }
+    .dk-answer > i { flex: none; width: 10px; height: 10px; margin-top: 9px; border-radius: 50%; background: var(--brand); }
     .dk-answer > div { display: grid; gap: 3px; min-width: 0; }
     .dk-answer strong { display: block; margin: 0; font-size: 20px; font-weight: 800; line-height: 1.25; letter-spacing: -.015em; color: var(--ink); }
 

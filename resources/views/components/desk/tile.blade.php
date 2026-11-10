@@ -40,20 +40,18 @@
         <span class="dk-tile-go" aria-hidden="true"><x-desk.icon name="arrow" class="dk-flip" /></span>
     </a>
 
+    <x-desk.icon name="pushpin" class="dk-pin-mark dk-tile-pin" x-cloak x-show="pinned()" />
+
     <span class="dk-pmenu dk-tile-menu" x-on:click.outside="menu = false" data-panel-menu>
         <button type="button" class="dk-iconbtn dk-sm" x-on:click="menu = ! menu" x-bind:aria-expanded="menu" aria-label="{{ __('desk-workspace.tile.options', ['button' => $button['label']]) }}">
             <x-desk.icon name="more" />
         </button>
-        <div class="dk-pop" role="menu" x-show="menu" x-cloak>
-            @if ($index > 1)
-                <button type="button" role="menuitem" x-on:click="menu = false; $wire.movePanel('{{ $id }}', 0)"><x-desk.icon name="arrow" class="dk-up" />{{ __('desk.move_to_top') }}</button>
-            @endif
-            @if ($index > 0)
-                <button type="button" role="menuitem" x-on:click="menu = false; $wire.movePanel('{{ $id }}', {{ $index - 1 }})"><x-desk.icon name="back" class="dk-flip" />{{ __('desk.move_earlier') }}</button>
-            @endif
-            @if ($index < $total - 1)
-                <button type="button" role="menuitem" x-on:click="menu = false; $wire.movePanel('{{ $id }}', {{ $index + 1 }})"><x-desk.icon name="chev" class="dk-flip" />{{ __('desk.move_later') }}</button>
-            @endif
+        <div class="dk-pop dk-pmenu-pop" role="menu" aria-label="{{ __('desk-workspace.tile.options', ['button' => $button['label']]) }}" x-show="menu" x-cloak x-transition.opacity.duration.100ms>
+            <p class="dk-pop-h">{{ $button['label'] }}</p>
+            <button type="button" role="menuitem" x-on:click="menu = false; pin(! pinned())" data-panel-pin>
+                <x-desk.icon name="pushpin" />
+                <span x-text="pinned() ? @js(__('desk.unpin_panel')) : @js(__('desk.pin_panel'))"></span>
+            </button>
             <button type="button" role="menuitem" class="dk-danger" x-on:click="menu = false; $dispatch('dk-panel-removed', { panel: '{{ $id }}', title: @js($button['label']), position: {{ $index }}, size: '{{ $entry['size'] }}', cols: {{ $span }}, rows: {{ $rows }} }); $wire.removePanel('{{ $id }}')"><x-desk.icon name="x" />{{ __('desk-workspace.tile.remove') }}</button>
         </div>
     </span>

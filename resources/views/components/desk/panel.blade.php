@@ -15,6 +15,7 @@
     'health' => null,
     'title' => null,
     'tagline' => null,
+    'empty' => false,
 ])
 
 @php
@@ -31,6 +32,10 @@
     $filtered = $filtered || collect($facets)->contains(fn (array $choice): bool => $choice['value'] !== '');
     /* No funnel when the popup would only say there is nothing to filter. */
     $filterable = $filterable && ($facets !== [] || isset($filters));
+    /* Nothing to show at all (not just a filter or a search that found nothing): on My desk it folds into a small tile (desk-fold.js). */
+    $empty = $empty && ! $filtered && $searchValue === '';
+    /* The icon a folded tile shows: the panel's own in the library, else a neutral one. */
+    $foldIcon = auth()->check() ? (app(\App\Support\Desk\Panels::class)->availableTo(auth()->user())[$id]['icon'] ?? 'grid') : 'grid';
 @endphp
 
 {{--
@@ -40,12 +45,13 @@
     panel (resources/js/desk-grid.js); the menu's actions call the Desk page
     (pages::desk.index) through $wire.$parent.
 --}}
-<section {{ $attributes->class('dk-panel') }} id="dk-panel-{{ $id }}" @if ($health !== null) data-health="{{ $health }}" @endif style="--span:{{ $span }};--rows:{{ $rows }};--i:{{ $index }}" data-cols="{{ $span }}" data-rows="{{ $rows }}" data-panel="{{ $id }}" data-idx="{{ $index }}" aria-labelledby="dk-ph-{{ $id }}" x-data="deskPanel(@js($id))" @if ($search !== null) x-init="searching = @js($searchValue !== '')" @endif x-on:keydown.escape="menu = false">
+<section {{ $attributes->class('dk-panel') }} id="dk-panel-{{ $id }}" @if ($health !== null) data-health="{{ $health }}" @endif style="--span:{{ $span }};--rows:{{ $rows }};--i:{{ $index }}" data-cols="{{ $span }}" data-rows="{{ $rows }}" data-panel="{{ $id }}" data-idx="{{ $index }}" @if ($empty) data-empty @endif aria-labelledby="dk-ph-{{ $id }}" x-data="deskPanel(@js($id))" @if ($search !== null) x-init="searching = @js($searchValue !== '')" @endif x-on:keydown.escape="menu = false">
     {{-- The whole header is the drag handle (desk-grid.js): press and move with a mouse, press and hold on touch. --}}
-    <header class="dk-ph" data-drag="{{ $id }}" title="{{ __('desk.panel_drag') }}">
+    <header class="dk-ph" data-drag="{{ $id }}" title="{{ __('desk.panel_drag') }}" x-on:click="if ($event.target.closest('[data-panel-menu]')) { return } if ($root.dataset.folded === 'user') { fold(false) } else if ($root.dataset.folded === 'empty') { peek() }">
+        <span class="dk-fold-ic" aria-hidden="true"><x-desk.icon :name="$foldIcon" /></span>
         <span class="dk-grip" aria-hidden="true"><x-desk.icon name="grip" class="dk-grip-dots" /></span>
         <div class="dk-ph-t">
-            <h2 id="dk-ph-{{ $id }}" title="{{ $title }}">{{ $title }}</h2>
+            <h2 id="dk-ph-{{ $id }}" title="{{ $title }}"><x-desk.icon name="pushpin" class="dk-pin-mark" x-cloak x-show="pinned()" />{{ $title }}</h2>
             @if (filled($tagline) && $tagline !== "desk-cards.tagline.{$id}")
                 <p class="dk-tagline">{{ $tagline }}</p>
             @endif
@@ -71,16 +77,22 @@
             <button type="button" class="dk-iconbtn dk-sm" x-on:click="menu = ! menu" x-bind:aria-expanded="menu" aria-label="{{ __('desk.panel_options') }}">
                 <x-desk.icon name="more" />
             </button>
-            <div class="dk-pop" role="menu" x-show="menu" x-cloak>
-                @if ($index > 1)
-                    <button type="button" role="menuitem" x-on:click="menu = false; $wire.$parent.movePanel('{{ $id }}', 0)"><x-desk.icon name="arrow" class="dk-up" />{{ __('desk.move_to_top') }}</button>
-                @endif
-                @if ($index > 0)
-                    <button type="button" role="menuitem" x-on:click="menu = false; $wire.$parent.movePanel('{{ $id }}', {{ $index - 1 }})"><x-desk.icon name="back" class="dk-flip" />{{ __('desk.move_earlier') }}</button>
-                @endif
-                @if ($index < $total - 1)
-                    <button type="button" role="menuitem" x-on:click="menu = false; $wire.$parent.movePanel('{{ $id }}', {{ $index + 1 }})"><x-desk.icon name="chev" class="dk-flip" />{{ __('desk.move_later') }}</button>
-                @endif
+            {{-- On My desk: pin to top and collapse (pages::desk.index); everywhere: remove. --}}
+            <div class="dk-pop dk-pmenu-pop" role="menu" aria-label="{{ __('desk.panel_options_for', ['panel' => $title]) }}" x-show="menu" x-cloak x-transition.opacity.duration.100ms>
+                <p class="dk-pop-h">{{ $title }}</p>
+                <template x-if="onDesk()">
+                    <div class="dk-pmenu-group">
+                        <button type="button" role="menuitem" x-on:click="menu = false; pin(! pinned())" data-panel-pin>
+                            <x-desk.icon name="pushpin" />
+                            <span x-text="pinned() ? @js(__('desk.unpin_panel')) : @js(__('desk.pin_panel'))"></span>
+                        </button>
+                        <button type="button" role="menuitem" x-show="! foldsItself()" x-on:click="menu = false; fold(! folded())" data-panel-fold>
+                            <x-desk.icon name="fold" x-show="! folded()" />
+                            <x-desk.icon name="unfold" x-show="folded()" x-cloak />
+                            <span x-text="folded() ? @js(__('desk.expand_panel')) : @js(__('desk.collapse_panel'))"></span>
+                        </button>
+                    </div>
+                </template>
                 <button type="button" role="menuitem" class="dk-danger" x-on:click="menu = false; $dispatch('dk-panel-removed', { panel: '{{ $id }}', title: @js($title), position: {{ $index }}, size: '{{ $size }}', cols: {{ $span }}, rows: {{ $rows }} }); $wire.$parent.removePanel('{{ $id }}')"><x-desk.icon name="x" />{{ __('desk.remove_panel') }}</button>
             </div>
         </span>
@@ -88,6 +100,11 @@
         @if ($count !== null && $count !== '')
             <span class="dk-pc dk-num" data-panel-count>{{ $count }}</span>
         @endif
+        {{-- Folded into a tile (desk-fold.js): an empty panel says so; one the person folded opens again from here. --}}
+        <p class="dk-fold-note" aria-hidden="true">{{ __('desk.panel_nothing_to_show') }}</p>
+        <button type="button" class="dk-unfold" x-on:click.stop="fold(false)" x-on:pointerdown.stop aria-label="{{ __('desk.expand_panel_named', ['panel' => $title]) }}" title="{{ __('desk.expand_panel') }}" data-panel-unfold>
+            <x-desk.icon name="expand" />
+        </button>
     </header>
 
     @if ($search !== null)

@@ -14,17 +14,21 @@
         $pageButton => ['label' => __('desk-workspace.add.as_button'), 'hint' => __('desk-workspace.add.as_button_hint')],
         $action['id'] ?? null => ['label' => __('desk-workspace.add.as_action', ['action' => $action['label'] ?? '']), 'hint' => __('desk-workspace.add.as_action_hint')],
     ])->filter(fn (array $choice, string $id): bool => $id !== '' && isset($library[$id]))->all();
-    $placed = $choices === [] ? [] : array_values(array_intersect(array_keys($choices), array_column($deskPanels->layoutFor($deskUser), 'panel')));
+    /* Buttons are kept in Quick access, never on the Desk itself: either counts as "on". */
+    $placed = $choices === [] ? [] : array_values(array_intersect(array_keys($choices), [...array_column($deskPanels->layoutFor($deskUser), 'panel'), ...app(\App\Support\Desk\QuickAccess::class)->itemIds($deskUser)]));
     $texts = [
         'added' => __('desk-workspace.add.added', ['item' => '__I__']),
         'removed' => __('desk-workspace.add.removed', ['item' => '__I__']),
+        'quick_added' => __('desk-workspace.add.quick_added', ['item' => '__I__']),
+        'quick_removed' => __('desk-workspace.add.quick_removed', ['item' => '__I__']),
         'failed' => __('desk-workspace.add.failed'),
     ];
 @endphp
 
 {{--
     "Add to desk" in a page's header: puts what stands for this page on My desk (its panel or
-    page card), and from the menu a button that opens the page, or the page's "New …" button.
+    page card), and from the menu a button that opens the page, or the page's "New …" button,
+    both kept in Quick access.
     Pressed again it takes it off. Works the same inside a Desk tab, where the Desk updates at once
     (resources/js/desk-items.js). Only what the viewer may see is offered.
 --}}

@@ -64,7 +64,7 @@ new class extends Component {
     $today = \Carbon\CarbonImmutable::today();
 @endphp
 
-<x-desk.panel :facets="$pg['facets']" id="needs" class="dk-needs" :size="$size" :cols="$gridCols" :height="$gridRows" :index="$index" :total="$total" :count="$all->count()" :health="$all->isNotEmpty() ? 'brand' : null">
+<x-desk.panel :empty="$all->isEmpty()" :facets="$pg['facets']" id="needs" class="dk-needs" :size="$size" :cols="$gridCols" :height="$gridRows" :index="$index" :total="$total" :count="$all->count()" :health="$all->isNotEmpty() ? 'brand' : null">
     <x-slot:tools>
         <div class="dk-seg" role="group">
             @foreach (['week' => __('desk.filter_week'), 'late' => __('desk.filter_late'), 'all' => __('desk.filter_all')] as $key => $label)

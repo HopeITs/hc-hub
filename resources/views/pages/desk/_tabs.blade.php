@@ -51,6 +51,12 @@
                     </button>
                 </div>
             </template>
+
+            {{-- While a page is carried from the sidebar or the Ask bar: where it lands as a new tab (desk-drop.js). --}}
+            <div class="dk-tab-drop" aria-hidden="true" data-tab-drop>
+                <x-desk.icon name="plus" class="dk-tab-ic" />
+                <span class="dk-tab-t">{{ __('desk-workspace.tabs.drop_here') }}</span>
+            </div>
         </div>
 
         <div class="dk-tabs-tools" role="group" aria-label="{{ __('desk-workspace.tabs.tools') }}">
@@ -66,7 +72,6 @@
         <button type="button" role="menuitem" x-on:click="duplicate(menu); menu = null"><x-desk.icon name="plus" class="dk-menu-ic" /><span class="dk-menu-t"><strong>{{ __('desk-workspace.tabs.duplicate') }}</strong></span></button>
         <button type="button" role="menuitem" x-on:click="addToDesk(menu); menu = null" data-tab-add-to-desk><x-desk.icon name="pin" class="dk-menu-ic" /><span class="dk-menu-t"><strong>{{ __('desk-workspace.add.to_desk') }}</strong><small>{{ __('desk-workspace.tabs.add_hint') }}</small></span></button>
         <button type="button" role="menuitem" x-on:click="popOut(menu); menu = null"><x-desk.icon name="popout" class="dk-menu-ic" /><span class="dk-menu-t"><strong>{{ __('desk-workspace.tabs.pop_out') }}</strong></span></button>
-        <button type="button" role="menuitem" x-on:click="openInBrowser(menu); menu = null"><x-desk.icon name="expand" class="dk-menu-ic" /><span class="dk-menu-t"><strong>{{ __('desk-workspace.tabs.browser_tab') }}</strong></span></button>
         <button type="button" role="menuitem" x-on:click="closeOthers(menu); menu = null"><x-desk.icon name="x" class="dk-menu-ic" /><span class="dk-menu-t"><strong>{{ __('desk-workspace.tabs.close_others') }}</strong></span></button>
         <button type="button" role="menuitem" class="dk-danger" x-on:click="close(menu); menu = null"><x-desk.icon name="x" class="dk-menu-ic" /><span class="dk-menu-t"><strong>{{ __('desk-workspace.tabs.close_tab') }}</strong></span></button>
     </div>

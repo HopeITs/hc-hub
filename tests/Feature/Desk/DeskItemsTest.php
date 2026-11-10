@@ -54,7 +54,7 @@ test('a button may be one row unit tall, anything else at least two, and a row t
         ->and(array_column($panels->flush([$panels->sized('a-task', 'S', 6, 1), $panels->sized('tasks', 'L', 6, 4)]), 'rows'))->toBe([4, 4]);
 });
 
-test('quick actions have their own group, first in the Customize sheet', function () {
+test('quick actions have their own group, first under the Buttons tab of the Customize sheet', function () {
     $panels = app(Panels::class);
 
     expect($panels->readyKindOf('a-transfer'))->toBe('actions')
@@ -63,11 +63,11 @@ test('quick actions have their own group, first in the Customize sheet', functio
 
     $html = $this->actingAs(User::factory()->role('Financial')->create())->get(route('dashboard'))->assertOk()->getContent();
 
-    expect(strpos($html, 'data-customize-group="actions"'))->toBeLessThan(strpos($html, 'data-customize-group="money"'))
-        ->and($html)->toContain('data-customize-add="a-transfer"');
+    expect($html)->toMatch('/data-customize-tab="panels".*?data-customize-tab="cards".*?data-customize-tab="buttons"/s')
+        ->and($html)->toMatch('/data-customize-group="money".*?data-customize-group="actions".*?data-customize-add="a-transfer".*?data-customize-group="buttons-/s');
 });
 
-test('a saved layout keeps cards and buttons the viewer may use and drops the others', function () {
+test('a saved layout keeps the panels and cards the viewer may use, and never a button', function () {
     $user = User::factory()->role('Media Team')->create(['desk_layout' => [
         ['panel' => 'a-task', 'size' => 'S', 'cols' => 3, 'rows' => 1],
         ['panel' => 'p-admin-accounts', 'size' => 'L'],
@@ -75,7 +75,7 @@ test('a saved layout keeps cards and buttons the viewer may use and drops the ot
         ['panel' => 'needs', 'size' => 'L'],
     ]]);
 
-    expect(placedItems($user))->toBe(['a-task', 'g-security-edit', 'needs']);
+    expect(placedItems($user))->toBe(['needs']);
 });
 
 test('a sidebar page dropped on the desk is saved where the drop showed it', function () {
@@ -108,18 +108,19 @@ test('a drop is ignored unless it adds exactly one new item the viewer may use',
     expect(placedItems($user))->toBe(['needs']);
 });
 
-test('adding by route puts what stands for the page on the desk once', function () {
+test('adding by route puts what stands for the page on the desk once, and a button in quick access', function () {
     $user = User::factory()->role('Super Admin')->create(['desk_layout' => [['panel' => 'needs', 'size' => 'XL', 'cols' => 12, 'rows' => 4]]]);
     $desk = Livewire::actingAs($user)->test('pages::desk.index');
 
     $desk->call('addRoute', 'admin.sectors.index')->assertReturned('p-admin-sectors');
     $desk->call('addRoute', 'admin.sectors.index')->assertReturned(null);
-    $desk->call('addItem', 'a-task', 0)->assertReturned(true);
+    $desk->call('addItem', 'a-task', 0)->assertReturned(true)->assertDispatched('dk-item-placed', panel: 'a-task', quick: true);
 
-    expect(placedItems($user))->toBe(['a-task', 'needs', 'p-admin-sectors']);
+    expect(placedItems($user))->toBe(['needs', 'p-admin-sectors'])
+        ->and($user->fresh()->desk_quick_access)->toBe(['new:task']);
 });
 
-test('the desk draws page cards and buttons beside its panels', function () {
+test('the desk draws page cards beside its panels, and its buttons only in quick access', function () {
     $user = User::factory()->role('Super Admin')->create(['desk_layout' => [
         ['panel' => 'a-task', 'size' => 'S', 'cols' => 6, 'rows' => 1],
         ['panel' => 'g-security-edit', 'size' => 'S', 'cols' => 6, 'rows' => 1],
@@ -129,10 +130,10 @@ test('the desk draws page cards and buttons beside its panels', function () {
 
     $this->actingAs($user)->get(route('dashboard'))
         ->assertOk()
-        ->assertSee('data-panel="a-task"', false)
-        ->assertSee('data-tile="action"', false)
+        ->assertDontSee('data-panel="a-task"', false)
+        ->assertDontSee('data-tile=', false)
+        ->assertSee('data-quick-key="new:task"', false)
         ->assertSee(route('tasks.index', ['quick' => 'create']), false)
-        ->assertSee('data-tile="page"', false)
         ->assertSee('data-panel="p-admin-evidence-types"', false)
         ->assertSee('data-card="admin.evidence-types.index"', false)
         ->assertSee('class="dk-tabs"', false)

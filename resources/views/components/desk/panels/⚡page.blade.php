@@ -107,7 +107,7 @@ new class extends Component {
     $tones = ['good' => 'dk-good', 'warn' => 'dk-warn', 'critical' => 'dk-bad', 'active' => 'dk-act', 'neutral' => 'dk-mute'];
 @endphp
 
-<x-desk.panel
+<x-desk.panel :empty="$source === null || $rows->isEmpty()"
     :id="$card"
     :title="$page['label'] ?? __('desk-workspace.card.unavailable')"
     :tagline="$about"

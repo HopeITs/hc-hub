@@ -207,10 +207,15 @@ export function highlight(label, terms) {
     return out + escape(plain.slice(from));
 }
 
+/** A Desk button ("New …" action a-…, page button g-…): it is kept in Quick access, never on the Desk itself. */
+function isButton(item) {
+    return /^[ag]-/.test(item ?? '');
+}
+
 /**
  * Every row the instant layer offers for what was typed, best first.
  *
- * context: { index, texts, recent, tabs: [{ id, title, url, active }], onDesk, canCustomize, dark, otherLanguage, tabsOn }
+ * context: { index, texts, recent, tabs: [{ id, title, url, active }], onDesk, canCustomize, dark, otherLanguage }
  * A row: { key, kind, label, html, sub, icon, badge, score, ...what running it needs }.
  */
 export function search(query, context, limit = 8) {
@@ -290,7 +295,7 @@ function rowsFor(typed, context, commandsOnly) {
                 const score = entryScore(terms, entry);
 
                 if (score > 0) {
-                    push({ key: `remove:${entry.item}`, kind: 'remove', item: entry.item, label: texts.remove.replace('__P__', entry.label), sub: entry.group ?? '', icon: 'x', badge: texts.badge_remove, score: score + 10 });
+                    push({ key: `remove:${entry.item}`, kind: 'remove', item: entry.item, quick: isButton(entry.item), label: (isButton(entry.item) ? texts.remove_quick : texts.remove).replace('__P__', entry.label), sub: entry.group ?? '', icon: 'x', badge: texts.badge_remove, score: score + 10 });
                 }
             }
         });
@@ -307,7 +312,7 @@ function rowsFor(typed, context, commandsOnly) {
         }
 
         if (wantsPin) {
-            push({ key: `add:${action.item}`, kind: 'add', item: action.item, route: action.route, label: texts.add_button.replace('__P__', action.label), sub: '', icon: 'plus', badge: placed.has(action.item) ? texts.badge_there : texts.badge_add, score: score + (saysNew ? 10 : 7), there: placed.has(action.item) });
+            push({ key: `add:${action.item}`, kind: 'add', item: action.item, route: action.route, quick: true, label: texts.add_quick.replace('__P__', action.label), sub: '', icon: 'plus', badge: placed.has(action.item) ? texts.badge_quick : texts.badge_add, score: score + (saysNew ? 10 : 7), there: placed.has(action.item) });
         }
 
         push({ key: `new:${action.key}`, kind: 'action', href: action.href, route: action.route, item: action.item, label: action.label, sub: texts.opens_form, icon: 'plus', badge: texts.badge_new, score: score + (wantsCreate || (wantsAdd && ! wantsDesk) ? 9 : 0) });
@@ -325,7 +330,9 @@ function rowsFor(typed, context, commandsOnly) {
         const item = wantsButton ? `g-${page.route.replace(/\.index$/, '').replace(/\./g, '-')}` : page.item;
 
         if (offerAdd && item) {
-            push({ key: `add:${item}`, kind: 'add', item, route: page.route, label: (wantsButton ? texts.add_button : texts.add).replace('__P__', page.label), sub: page.group, icon: 'pin', badge: placed.has(item) ? texts.badge_there : texts.badge_add, score: score + 8, there: placed.has(item) });
+            const quick = isButton(item);
+
+            push({ key: `add:${item}`, kind: 'add', item, route: page.route, quick, label: (quick ? texts.add_quick : texts.add).replace('__P__', page.label), sub: page.group, icon: 'pin', badge: placed.has(item) ? (quick ? texts.badge_quick : texts.badge_there) : texts.badge_add, score: score + 8, there: placed.has(item) });
         }
 
         push({ key: `go:${page.route}`, kind: 'page', href: page.href, route: page.route, item: page.item, label: page.label, sub: page.group, icon: page.icon, badge: texts.badge_open, score: score + (wantsCreate || wantsAdd ? 0 : 1) });
@@ -367,12 +374,6 @@ function commandRows(tokens, context, terms = tokens) {
 
     if (language > 0 && context.otherLanguage) {
         add('cmd:language', texts.language.replace('__L__', context.otherLanguage), 'map', language + 4, { command: 'language' });
-    }
-
-    const tabs = commandScore('tabs_setting');
-
-    if (tabs > 0 && tokens.length) {
-        add('cmd:tabs', context.tabsOn ? texts.tabs_off : texts.tabs_on, 'grid', tabs + 1, { command: 'tabs' });
     }
 
     if (context.canCustomize) {

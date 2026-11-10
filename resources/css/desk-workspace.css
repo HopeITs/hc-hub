@@ -6,7 +6,7 @@
  * only, dk- prefixed, tokens from desk.css :root, in @layer components. */
 
 @layer components {
-    :root { --tabs-h: 50px; }
+    :root { --tabs-h: 60px; }
 
     /* ── Tones, shared by figures, splits and legends ─────────────── */
     .dk-card [data-tone], .dk-tile { --tone: var(--ink-3); }
@@ -406,29 +406,29 @@
     }
 
     /* ── Desk tabs ────────────────────────────────────────────────── */
-    /* The Desk's tabs read like the site's own page tabs (the project page's .dk-pjtabs): words with their
-       icon on the page's own ground, one hairline under the row, and the tab in front marked by full ink and
-       the brand underline. No box around them, so they belong to the page in light and dark alike. */
+    /* A pill track (user decision 2026-11-10): the open tabs sit in one soft rounded rail and the tab in
+       front is a raised paper pill with its icon in the brand colour. The row is pulled up over main's 28px
+       top padding (desk-shell.css `.dk-scope main`) so it always sits flush under the top bar, on the Desk
+       and over a tab alike, and the frames below start exactly where it ends: nothing slides under it. */
     .dk-tabs { position: relative; }
-    .dk-tabs-bar { position: sticky; z-index: 26; top: var(--top-h); display: flex; align-items: stretch; gap: 8px; height: var(--tabs-h); margin-block-end: 20px; background: var(--ground); box-shadow: inset 0 -1px 0 var(--line-2); }
-    /* At rest the row is the page itself (no slab over the page's faint tint); once the Desk scrolls under it, it takes the ground. */
+    .dk-tabs.dk-tabs-on { margin-block-start: -28px; }
+    .dk-tabs-bar { position: sticky; z-index: 26; top: var(--top-h); display: flex; align-items: center; gap: 12px; height: var(--tabs-h); margin-block-end: 8px; background: var(--ground); }
+    /* Once the Desk scrolls under the row, a hairline separates them. */
     @supports (animation-timeline: scroll()) {
-        .dk-tabs-bar { animation: dk-tabs-ground linear both; animation-timeline: scroll(root block); animation-range: 0 48px; }
-        @keyframes dk-tabs-ground { from { background: transparent; } to { background: var(--ground); } }
+        .dk-tabs-bar { animation: dk-tabs-edge linear both; animation-timeline: scroll(root block); animation-range: 0 24px; }
+        @keyframes dk-tabs-edge { from { box-shadow: 0 1px 0 transparent; } to { box-shadow: 0 1px 0 var(--line); } }
     }
-    .dk-tabs-strip { flex: 1 1 auto; min-width: 0; display: flex; align-items: stretch; gap: 2px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; }
+    .dk-tabs-strip { flex: 0 1 auto; min-width: 0; display: flex; align-items: center; gap: 2px; padding: 4px; border-radius: 13px; background: var(--sunk); overflow-x: auto; overflow-y: hidden; scrollbar-width: none; overscroll-behavior-x: contain; }
     .dk-tabs-strip::-webkit-scrollbar { display: none; }
-    .dk-tab { position: relative; flex: 0 1 220px; min-width: 112px; display: flex; align-items: center; color: var(--ink-3); transition: color .15s, background .15s; }
+    .dk-tab { position: relative; flex: 0 1 210px; min-width: 112px; height: 38px; display: flex; align-items: center; border-radius: 9px; color: var(--ink-3); transition: color .15s, background-color .15s, box-shadow .15s; }
     .dk-tab-desk { flex: none; min-width: 0; }
-    .dk-tab::before { content: ""; position: absolute; inset-inline: 6px; inset-block: 7px; border-radius: 9px; background: transparent; transition: background .15s; pointer-events: none; }
-    .dk-tab:hover { color: var(--ink); }
-    .dk-tab:hover::before { background: var(--sunk); }
-    .dk-tab.dk-on { color: var(--ink); }
-    .dk-tab.dk-on::before { background: transparent; }
-    .dk-tab.dk-on::after { content: ""; position: absolute; inset-inline: 10px; inset-block-end: 0; height: 3px; border-radius: 3px 3px 0 0; background: var(--brand); }
-    .dk-tab-b { position: relative; flex: 1 1 auto; min-width: 0; height: 100%; display: flex; align-items: center; gap: 8px; padding-inline: 16px 4px; border: 0; background: none; color: inherit; font: inherit; font-size: 14px; font-weight: 700; text-align: start; cursor: pointer; }
-    .dk-tab-desk .dk-tab-b { padding-inline: 16px; }
-    .dk-tab-b:focus-visible { outline: 2px solid var(--brand); outline-offset: -8px; border-radius: 12px; }
+    .dk-tab:hover { color: var(--ink); background: color-mix(in srgb, var(--paper) 55%, transparent); }
+    .dk-tab.dk-on { color: var(--ink); background: var(--paper); box-shadow: 0 1px 2px rgb(0 0 0 / .08), 0 0 0 1px var(--line); }
+    .dark .dk-tab.dk-on { box-shadow: 0 1px 2px rgb(0 0 0 / .4), 0 0 0 1px var(--line); }
+    .dk-tab-b { position: relative; flex: 1 1 auto; min-width: 0; height: 100%; display: flex; align-items: center; gap: 8px; padding-inline: 13px 4px; border: 0; border-radius: inherit; background: none; color: inherit; font: inherit; font-size: 14px; font-weight: 600; text-align: start; cursor: pointer; }
+    .dk-tab.dk-on .dk-tab-b { font-weight: 700; }
+    .dk-tab-desk .dk-tab-b { padding-inline: 13px; }
+    .dk-tab-b:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
     .dk-tab-t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dk-tab-ic { flex: none; width: 16px; height: 16px; display: grid; place-items: center; color: inherit; opacity: .8; }
     .dk-tab.dk-on .dk-tab-ic { color: var(--brand-ink); opacity: 1; }
@@ -436,27 +436,102 @@
     .dk-tab-spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line-2); border-top-color: var(--brand); }
     @media (prefers-reduced-motion: no-preference) { .dk-tab-spin { animation: dk-tab-spin .7s linear infinite; } }
     @keyframes dk-tab-spin { to { rotate: 360deg; } }
-    .dk-tab-x { position: relative; flex: none; width: 24px; height: 24px; margin-inline-end: 10px; border: 0; border-radius: 7px; background: none; color: var(--ink-3); display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .12s, background .12s, color .12s; }
+    .dk-tab-x { position: relative; flex: none; width: 24px; height: 24px; margin-inline-end: 7px; border: 0; border-radius: 7px; background: none; color: var(--ink-3); display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .12s, background-color .12s, color .12s; }
     .dk-tab-x svg.dk-i { width: 13px; height: 13px; }
     .dk-tab:hover .dk-tab-x, .dk-tab.dk-on .dk-tab-x, .dk-tab-x:focus-visible { opacity: 1; }
-    .dk-tab-x:hover { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
+    .dk-tab-x:hover { background: var(--sunk); color: var(--brand); }
     .dk-tab.dk-asleep .dk-tab-t { opacity: .75; }
     .dk-tab.dk-dragging { opacity: .55; cursor: grabbing; }
     .dk-tab:not(.dk-tab-desk) { animation: dk-tab-in .18s cubic-bezier(.2, .8, .2, 1); }
     @keyframes dk-tab-in { from { opacity: 0; } }
     @media (prefers-reduced-motion: reduce) { .dk-tab:not(.dk-tab-desk) { animation: none; } }
     /* Reload, open on its own and close all: quiet icons at the row's end. */
-    .dk-tabs-tools { flex: none; display: flex; align-items: center; gap: 2px; padding-inline-start: 8px; }
-    .dk-tabs-tools .dk-iconbtn { width: 34px; height: 34px; border-radius: 9px; color: var(--ink-3); }
+    .dk-tabs-tools { flex: none; display: flex; align-items: center; gap: 2px; margin-inline-start: auto; }
+    .dk-tabs-tools .dk-iconbtn { width: 36px; height: 36px; border-radius: 10px; color: var(--ink-3); }
     .dk-tabs-tools .dk-iconbtn:hover { background: var(--sunk); color: var(--ink); }
     /* A narrow window: tabs keep their icon and as much title as fits. */
     @media (max-width: 640px) {
+        .dk-tabs-bar { gap: 6px; }
         .dk-tab { min-width: 84px; }
         .dk-tab-desk .dk-tab-t { display: none; }
         .dk-tab-desk .dk-tab-b { padding-inline: 12px; }
+        .dk-tabs-tools .dk-iconbtn { width: 32px; height: 32px; }
     }
     .dk-tab-menu { position: fixed; z-index: 90; top: auto; inset-inline-end: auto; width: 260px; }
-    .dk-tabs-droppable .dk-tabs-bar { box-shadow: inset 0 -2px 0 var(--brand); }
+
+    /* Carrying a page from the sidebar or the Ask bar (desk-drop.js): the tab bar shows even with no tab
+       open, ending in a dashed "drop here" pill. With no tab open it floats over the top of the Desk rather
+       than pushing it down mid-drag; its sides follow the page column (desk-shell.css --page-edge). */
+    .dk-tab-drop { display: none; }
+    .dk-tabs-droppable .dk-tabs-bar { display: flex !important; }
+    .dk-tabs-droppable:not(.dk-tabs-on) .dk-tabs-bar { position: fixed; inset-inline: var(--side-w) 0; top: var(--top-h); padding-inline: max(var(--page-gutter), calc((100vw - var(--side-w) - var(--page-w)) / 2)); box-shadow: 0 1px 0 var(--line); animation: none; }
+    @media (max-width: 899px) { .dk-tabs-droppable:not(.dk-tabs-on) .dk-tabs-bar { inset-inline-start: 0; } }
+    .dk-tabs-droppable .dk-tab-drop { flex: none; display: flex; align-items: center; gap: 8px; height: 38px; padding-inline: 14px; border: 1.5px dashed var(--brand); border-radius: 9px; color: var(--brand-ink); font-size: 13.5px; font-weight: 700; white-space: nowrap; transition: background-color .12s; }
+    .dk-tabs-droppable:not(.dk-tabs-on) :is(.dk-tab-desk, .dk-tabs-tools) { display: none; }
+    .dk-tabs-over .dk-tab-drop { border-style: solid; background: var(--sunk); }
+    /* The page in front is a frame: while something is carried it lets the drag through to the Desk around it. */
+    html.dk-carrying .dk-tabframe { pointer-events: none; }
+    /* Carried out of the Ask bar: the palette steps aside so the tab bar and Quick access can be seen. */
+    html.dk-carry-ask :is(.dk-pal-scrim, .dk-pal) { opacity: 0; pointer-events: none; transition: opacity .15s; }
+
+    /* ── Quick access (pages/desk/_quick-access, desk-quick.js) ───────
+     * A quiet paper button and, under it, a card of the same width that fades in as it drops 4px
+     * (140ms; reduced motion: it just appears). Two shared lines hold it together:
+     *  - start: the bolt tile and every row's icon tile are one 30px grey square 7px in from the edge
+     *    (button: border 1 + padding 6; list: border 1 + padding 4 + row 2), so the names line up;
+     *  - end: the button's count and every row's number are one 24px badge 7px in from the edge
+     *    (button: border 1 + padding 6; list: border 1 + padding 4 + 2), so the numbers line up.
+     * A row's × takes its number's place on hover. Colours: the site red and greys only. */
+    .dk-quick { --qa-w: 216px; --qa-r: 12px; position: relative; z-index: 30; flex: none; width: var(--qa-w); }
+    .dk-quick-none { display: none; }
+    html:is(.dk-carry-ask, .dk-carry-quick) .dk-quick-none { display: block; }
+
+    .dk-quick-b { display: flex; align-items: center; gap: 10px; width: 100%; height: 42px; padding-inline: 6px; border: 1px solid var(--line-2); border-radius: var(--qa-r); background: var(--paper); color: var(--ink); font: inherit; text-align: start; cursor: pointer; box-shadow: 0 1px 2px rgb(16 24 40 / .05); transition: background-color .15s; }
+    .dk-quick-b:hover, .dk-quick-open .dk-quick-b { background: var(--tint); }
+    .dk-quick-b:focus { outline: none; }
+    .dk-quick-b:focus-visible { background: var(--sunk); }
+    .dk-quick-ic, .dk-quick-rI { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 9px; background: var(--sunk); }
+    .dk-quick-ic { color: var(--brand); }
+    .dk-quick-ic svg.dk-i { width: 16px; height: 16px; fill: currentColor; stroke-width: 1.5; }
+    .dk-quick-l, .dk-quick-rT { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 700; }
+    .dk-quick-n, .dk-quick-key { flex: none; width: 24px; height: 22px; display: grid; place-items: center; border-radius: 7px; font-family: inherit; font-size: 12px; font-weight: 800; }
+    .dk-quick-n { background: var(--ink); color: var(--paper); }
+
+    /* The list: its own card 6px under the button, the button's width. */
+    .dk-quick-pop { position: absolute; inset-inline: 0; inset-block-start: calc(100% + 6px); padding: 4px; border: 1px solid var(--line-2); border-radius: var(--qa-r); background: var(--paper); box-shadow: 0 16px 32px -16px rgb(16 24 40 / .3), 0 2px 6px rgb(16 24 40 / .05); visibility: hidden; opacity: 0; transform: translateY(-4px); transition: opacity .14s ease, transform .14s ease, visibility 0s .14s; }
+    .dk-quick-open .dk-quick-pop { visibility: visible; opacity: 1; transform: none; transition: opacity .14s ease, transform .14s ease; }
+    .dark .dk-quick-pop { box-shadow: 0 16px 32px -14px rgb(0 0 0 / .7); }
+    @media (prefers-reduced-motion: reduce) { .dk-quick-pop, .dk-quick-open .dk-quick-pop { transform: none; transition: none; } }
+
+    .dk-quick-list { display: grid; gap: 2px; list-style: none; }
+    .dk-quick-row { position: relative; display: flex; align-items: center; gap: 0; border-radius: 9px; transition: background-color .12s; }
+    .dk-quick-row:hover, .dk-quick-row:focus-within { background: var(--sunk); }
+    .dk-quick-row > a { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 10px; height: 40px; padding-inline: 2px 8px; border-radius: 9px; color: var(--ink); text-decoration: none; outline: none; }
+    .dk-quick-row > a:focus-visible { box-shadow: inset 0 0 0 2px var(--ink-2); }
+    .dk-quick-rI { color: var(--ink-2); transition: background-color .12s, color .12s; }
+    .dk-quick-rI svg.dk-i { width: 14px; height: 14px; }
+    .dk-quick-row:is(:hover, :focus-within) .dk-quick-rI { background: var(--paper); color: var(--ink); }
+
+    /* The number at rest; on hover or focus the × takes its place in a badge of the same shape (always on touch).
+       A row is dragged by itself to reorder (no grip outside the card); the link inside keeps the pointer. */
+    .dk-quick-key { margin-inline-end: 2px; border: 1px solid var(--line-2); background: var(--paper); color: var(--ink-3); }
+    .dk-quick-x { flex: none; width: 24px; height: 22px; margin-inline-end: 2px; padding: 0; border: 1px solid var(--line-2); border-radius: 7px; background: var(--paper); color: var(--ink-3); display: none; place-items: center; cursor: pointer; transition: color .12s, border-color .12s; }
+    .dk-quick-x svg.dk-i { width: 10px; height: 10px; stroke-width: 2.4; }
+    .dk-quick-row:is(:hover, :focus-within) .dk-quick-key { display: none; }
+    .dk-quick-row:is(:hover, :focus-within) .dk-quick-x { display: grid; }
+    .dk-quick-x:hover, .dk-quick-x:focus-visible { border-color: var(--brand); color: var(--brand); outline: none; }
+    .dk-quick-row { cursor: grab; }
+    .dk-quick-row:active { cursor: grabbing; }
+    @media (hover: none) { .dk-quick-key { display: none; } .dk-quick-x { display: grid; } }
+    .dk-quick-row.dk-quick-moving { opacity: .4; }
+
+    /* Carrying a row from the Ask bar, or a sidebar page that is only a button (dk-carry-quick): a dashed target of the button's own size stands in for it. */
+    .dk-quick-drop { display: none; }
+    html:is(.dk-carry-ask, .dk-carry-quick) .dk-quick-b { display: none; }
+    html:is(.dk-carry-ask, .dk-carry-quick) .dk-quick-drop { display: flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding-inline: 12px; border: 1.5px dashed var(--brand); border-radius: var(--qa-r); background: var(--paper); color: var(--brand-ink); font-size: 12.5px; font-weight: 700; white-space: nowrap; transition: background-color .12s; }
+    .dk-quick-drop svg.dk-i { width: 17px; height: 17px; pointer-events: none; }
+    .dk-quick-drop span { pointer-events: none; overflow: hidden; text-overflow: ellipsis; }
+    .dk-quick-over .dk-quick-drop { border-style: solid; background: var(--sunk); }
 
     /* The tab in front: the real page in its frame, filling the main column under the strip */
     .dk-tabframes { position: fixed; z-index: 20; inset-block: calc(var(--top-h) + var(--tabs-h)) 0; inset-inline-start: var(--side-w); inset-inline-end: 0; background: var(--ground); }
@@ -489,14 +564,14 @@
     html.dk-in-tab .dk-story-side { top: 76px; }
 
     /* ── Dragging a page in from the sidebar ──────────────────────── */
-    .dk-grid > .dk-drop-slot { display: grid; place-items: center; border: 2px dashed color-mix(in srgb, var(--brand) 55%, transparent); background: color-mix(in srgb, var(--brand) 5%, var(--paper)); box-shadow: none; animation: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+    .dk-grid > .dk-drop-slot { display: grid; place-items: center; border: 2px dashed var(--brand); background: var(--paper); box-shadow: none; animation: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
     .dk-drop-slot-t { padding: 8px 14px; text-align: center; font-size: 14px; font-weight: 800; color: var(--brand-ink); overflow-wrap: anywhere; }
     @media (prefers-reduced-motion: no-preference) { .dk-drop-slot.dk-drop-landing { animation: dk-landing 1s ease-in-out infinite alternate; } }
-    @keyframes dk-landing { to { background: color-mix(in srgb, var(--brand) 12%, var(--paper)); } }
+    @keyframes dk-landing { to { background: var(--sunk); } }
     .dk-grid > .dk-panel.dk-drop-ring { box-shadow: 0 0 0 3px var(--brand); }
     @media (prefers-reduced-motion: no-preference) { .dk-grid > .dk-panel.dk-drop-found { animation: dk-found 1.2s ease; } }
     @keyframes dk-found { 20%, 60% { box-shadow: 0 0 0 4px var(--brand); } }
-    html.dk-dropping .dk-grid { outline: 2px dashed color-mix(in srgb, var(--brand) 22%, transparent); outline-offset: 10px; border-radius: 24px; }
+    html.dk-dropping .dk-grid { outline: 2px dashed var(--line-2); outline-offset: 10px; border-radius: 24px; }
     .dk-drag-chip { position: fixed; inset-block-start: -400px; inset-inline-start: -400px; padding: 9px 14px; border-radius: 11px; background: var(--ink); color: var(--paper); font-family: var(--font); font-size: 13.5px; font-weight: 800; white-space: nowrap; box-shadow: var(--dk-shadow); }
 
     /* The sidebar's "+" on My desk, beside the pin star */
@@ -520,7 +595,7 @@
     .dk-addesk { position: relative; display: inline-flex; align-items: stretch; }
     .dk-addesk-main svg.dk-i { width: 16px; height: 16px; }
     .dk-addesk-main.dk-on { background: var(--sunk); border-color: var(--line); }
-    .dk-addesk-main.dk-on svg.dk-i { color: var(--brand-ink); fill: color-mix(in srgb, var(--brand) 18%, transparent); }
+    .dk-addesk-main.dk-on svg.dk-i { color: var(--brand-ink); fill: none; }
     .dk-addesk-main:has(+ .dk-addesk-more) { border-start-end-radius: 0; border-end-end-radius: 0; }
     .dk-addesk-more { padding-inline: 8px; margin-inline-start: -1px; border-start-start-radius: 0; border-end-start-radius: 0; }
     .dk-addesk-pop { width: 310px; }
@@ -530,20 +605,12 @@
     .dk-addesk-check svg.dk-i { width: 12px; height: 12px; stroke-width: 3; }
     [aria-checked="true"] > .dk-addesk-check { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
-    /* The avatar menu's "Open pages in desk tabs" switch */
-    .dk-menu .dk-menu-switch { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 8px 10px; border: 0; border-radius: 10px; background: none; color: var(--ink); font: inherit; text-align: start; cursor: pointer; }
-    .dk-menu .dk-menu-switch:hover, .dk-menu .dk-menu-switch:focus-visible { background: var(--sunk); outline: none; }
-    .dk-switch { flex: none; position: relative; width: 34px; height: 20px; border-radius: 99px; background: var(--line-2); transition: background .15s; }
-    .dk-switch i { position: absolute; inset-block-start: 2px; inset-inline-start: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--paper); box-shadow: 0 1px 2px rgb(16 24 40 / .2); transition: inset-inline-start .15s; }
-    [aria-checked="true"] > .dk-switch { background: var(--ink); }
-    [aria-checked="true"] > .dk-switch i { inset-inline-start: 16px; }
-
     /* ── The Ask bar's instant rows (resources/js/ask-index.js) ───── */
     .dk-pal-kind { flex: none; height: 22px; padding-inline: 8px; border-radius: 6px; display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 800; background: var(--sunk); color: var(--ink-3); }
     .dk-pal-kind:is([data-kind="add"], [data-kind="action"]) { background: var(--brand-soft); color: var(--brand-ink); }
     .dk-pal-kind[data-kind="remove"] { background: var(--bad-soft); color: var(--bad); }
     .dk-pal-done .dk-pal-kind { background: var(--good-soft); color: var(--good); }
-    .dk-pal-i mark { background: none; color: inherit; font-weight: 800; text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--brand) 55%, transparent); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    .dk-pal-i mark { background: none; color: inherit; font-weight: 800; text-decoration: underline; text-decoration-color: var(--brand); text-decoration-thickness: 2px; text-underline-offset: 3px; }
     .dk-pal-instant { display: grid; gap: 2px; }
     .dk-pal-flash { margin: 0 10px 8px; padding: 9px 12px; border-radius: 10px; background: var(--ink); color: var(--paper); font-size: 13.5px; font-weight: 700; }
     @media (max-width: 640px) { .dk-pal-foot-more { display: none; } }

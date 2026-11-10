@@ -29,3 +29,6 @@ desk.css resets `.dk-scope ul/ol { margin:0; padding:0 }` and `.dk-scope p { mar
 
 ## Dark Desk has no glow; tabs look like page tabs; pins are pushpins
 User decisions 2026-11-10: dark mode has no ambient red/green glow behind the Desk (`.dark [data-desk]::before { content: none }`). Desk tabs match the project page's tabs (.dk-pjtabs): words with icon on the page ground, one hairline, the tab in front marked by full ink and a brand underline; no boxed track. The tab row is transparent at rest and takes the ground once the page scrolls (scroll-driven animation). Sidebar pinning uses the `pushpin` Desk icon, never a star.
+
+## Plain Desk ground and pill-track tabs (supersedes "Dark Desk has no glow; tabs look like page tabs")
+User decisions 2026-11-10, replacing the earlier glow and tab notes: the Desk has no ambient glow in light or dark (no [data-desk]::before mesh). Desk tabs are a pill track: open tabs sit in one rounded var(--sunk) rail, and the tab in front is a raised var(--paper) pill with its icon in --brand-ink. Do not return to underline tabs. The tab row is pulled up over main's 28px top padding so it sits flush under the top bar, and the frames start at --top-h + --tabs-h, so no page slides under it. Pins stay pushpins.

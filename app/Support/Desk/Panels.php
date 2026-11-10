@@ -172,54 +172,55 @@ final class Panels
      * The ready layouts of the Customize sheet: each names the panel without
      * which it is not offered (core) and its rows, every row an ordered list
      * of [panel, cols, rows] that totals twelve columns and shares one height.
+     * Only panels and page cards: buttons live in Quick access, never on the Desk.
      *
      * @var array<string, array{core: string, rows: list<list<array{0: string, 1: int, 2: int}>>}>
      */
     private const array ReadyLayouts = [
         'today' => ['core' => 'needs', 'rows' => [
             [['needs', 7, 4], ['coming', 5, 4]],
-            [['overdue', 6, 4], ['tasks', 6, 4]],
-            [['waiting', 12, 3]],
+            [['tasks', 8, 4], ['milestones', 4, 4]],
+            [['overdue', 6, 3], ['waiting', 6, 3]],
         ]],
         'money' => ['core' => 'money', 'rows' => [
             [['money', 8, 5], ['transfers', 4, 5]],
-            [['overdue', 5, 4], ['duties', 7, 4]],
-            [['pipeline', 12, 4]],
+            [['p-funding-agreements', 6, 4], ['duties', 6, 4]],
+            [['p-admin-accounts', 6, 3], ['overdue', 6, 3]],
         ]],
         'donors' => ['core' => 'donors', 'rows' => [
-            [['donors', 7, 5], ['pipeline', 5, 5]],
-            [['duties', 6, 4], ['money', 6, 4]],
-            [['coming', 12, 3]],
+            [['donors', 7, 5], ['duties', 5, 5]],
+            [['pipeline', 8, 4], ['coming', 4, 4]],
+            [['p-donor-reports', 6, 3], ['p-funding-agreements', 6, 3]],
         ]],
         'tasks' => ['core' => 'tasks', 'rows' => [
-            [['tasks', 8, 6], ['waiting', 4, 6]],
-            [['deliverables', 4, 4], ['overdue', 4, 4], ['coming', 4, 4]],
-            [['myteam', 12, 4]],
+            [['tasks', 8, 6], ['coming', 4, 6]],
+            [['deliverables', 6, 4], ['waiting', 6, 4]],
         ]],
         'delivery' => ['core' => 'projects', 'rows' => [
             [['flow', 12, 2]],
             [['projects', 8, 5], ['milestones', 4, 5]],
-            [['targets', 6, 4], ['tasks', 6, 4]],
+            [['tasks', 6, 4], ['targets', 6, 4]],
+            [['p-annual-plans', 6, 3], ['p-programs', 6, 3]],
         ]],
         'impact' => ['core' => 'targets', 'rows' => [
             [['targets', 7, 5], ['validate', 5, 5]],
             [['matrix', 12, 4]],
-            [['templates', 6, 3], ['duties', 6, 3]],
+            [['templates', 4, 3], ['p-indicators', 4, 3], ['p-results', 4, 3]],
         ]],
         'fundraising' => ['core' => 'pipeline', 'rows' => [
             [['pipeline', 8, 5], ['reviews', 4, 5]],
-            [['donors', 6, 4], ['coming', 6, 4]],
+            [['donors', 6, 4], ['needs', 6, 4]],
         ]],
         'team' => ['core' => 'myteam', 'rows' => [
             [['myteam', 7, 5], ['waiting', 5, 5]],
             [['tasks', 8, 4], ['needs', 4, 4]],
-            [['milestones', 12, 3]],
+            [['milestones', 6, 3], ['deliverables', 6, 3]],
         ]],
         'overview' => ['core' => 'glance', 'rows' => [
             [['glance', 12, 2]],
-            [['flow', 12, 2]],
-            [['needs', 6, 4], ['money', 6, 4]],
-            [['matrix', 12, 4]],
+            [['needs', 4, 4], ['flow', 8, 4]],
+            [['money', 6, 4], ['projects', 6, 4]],
+            [['matrix', 8, 4], ['targets', 4, 4]],
         ]],
     ];
 
@@ -581,13 +582,46 @@ final class Panels
 
     /**
      * The user's Desk: their own arrangement, or their role's default, with
-     * every panel they may not see (and every unknown entry) left out.
+     * every panel they may not see (and every unknown entry) left out. Buttons
+     * are never on it: they live in Quick access (QuickAccess::addItem).
      *
      * @return list<array{panel: string, size: string, cols: int, rows: int}>
      */
     public function layoutFor(User $user): array
     {
-        return is_array($user->desk_layout) ? $this->clean($user->desk_layout, $user) : $this->startingLayoutFor($user);
+        return is_array($user->desk_layout) ? $this->clean($this->withoutButtons($user->desk_layout), $user) : $this->startingLayoutFor($user);
+    }
+
+    /**
+     * The button ids (Shortcuts, `a-…` / `g-…`) a stored Desk layout still
+     * holds, in its order. The Desk keeps only panels and page cards; buttons
+     * live in Quick access, and a Desk saved before that moves them there.
+     *
+     * @param  array<mixed>  $stored
+     * @return list<string>
+     */
+    public function buttonsIn(array $stored): array
+    {
+        $buttons = [];
+
+        foreach ($stored as $entry) {
+            $panel = is_array($entry) ? ($entry['panel'] ?? null) : null;
+
+            if (is_string($panel) && Shortcuts::isShortcut($panel) && ! in_array($panel, $buttons, true)) {
+                $buttons[] = $panel;
+            }
+        }
+
+        return $buttons;
+    }
+
+    /**
+     * @param  array<mixed>  $stored
+     * @return array<mixed>
+     */
+    private function withoutButtons(array $stored): array
+    {
+        return array_values(array_filter($stored, fn (mixed $entry): bool => ! (is_array($entry) && is_string($entry['panel'] ?? null) && Shortcuts::isShortcut($entry['panel']))));
     }
 
     /**
@@ -703,6 +737,45 @@ final class Panels
         }
 
         return $flushed;
+    }
+
+    /**
+     * Which Desk panels the person pinned to the top (in the order they
+     * pinned them) and which they folded into a small tile, as saved on
+     * users.desk_panel_flags. Anything malformed is dropped; panels no
+     * longer on the Desk are left for the caller to filter.
+     *
+     * @return array{pinned: list<string>, folded: list<string>}
+     */
+    public function flagsFor(User $user): array
+    {
+        $stored = is_array($user->desk_panel_flags) ? $user->desk_panel_flags : [];
+        $list = fn (string $key): array => array_values(array_unique(array_filter(is_array($stored[$key] ?? null) ? $stored[$key] : [], is_string(...))));
+
+        return ['pinned' => $list('pinned'), 'folded' => $list('folded')];
+    }
+
+    /**
+     * The layout with its pinned panels first, in the order they were
+     * pinned, and every other panel after them in its own order. The cards
+     * trade places, never shapes (as Move did): every slot keeps its size,
+     * so pinning can never open a hole in the Desk.
+     *
+     * @param  list<array{panel: string, size: string, cols: int, rows: int}>  $layout
+     * @param  list<string>  $pinned
+     * @return list<array{panel: string, size: string, cols: int, rows: int}>
+     */
+    public function pinnedFirst(array $layout, array $pinned): array
+    {
+        $order = array_column($layout, 'panel');
+        $first = array_values(array_intersect($pinned, $order));
+        $wanted = [...$first, ...array_values(array_diff($order, $first))];
+
+        if ($wanted === $order) {
+            return $layout;
+        }
+
+        return array_map(fn (array $slot, string $panel): array => $this->sized($panel, $slot['size'], $slot['cols'], $slot['rows']), $layout, $wanted);
     }
 
     /**

@@ -361,7 +361,8 @@ document.addEventListener('pointerdown', (event) => {
 
     const blocker = event.target.closest(interactive);
 
-    if (! panel || event.button !== 0 || move || resize || (blocker && ! blocker.hasAttribute('data-drag-through'))) {
+    // A folded tile (desk-fold.js) sits outside the rows, so it is not carried; it opens from its own button.
+    if (! panel || panel.hasAttribute('data-folded') || event.button !== 0 || move || resize || (blocker && ! blocker.hasAttribute('data-drag-through'))) {
         return;
     }
 
@@ -488,7 +489,7 @@ document.addEventListener('pointerdown', (event) => {
     const handle = event.target instanceof Element ? event.target.closest('[data-resize]') : null;
     const panel = handle ? panelOf(handle) : null;
 
-    if (! panel || event.button !== 0 || isPhone()) {
+    if (! panel || panel.hasAttribute('data-folded') || event.button !== 0 || isPhone()) {
         return;
     }
 

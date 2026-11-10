@@ -413,7 +413,7 @@ new class extends Component {
                                 <p class="dk-pal-g" x-text="instantRecent ? texts.recent : texts.instant"></p>
                                 <p class="dk-pal-g dk-pal-fix" x-show="instantCorrected" x-text="texts.corrected.replace('__Q__', instantCorrected)"></p>
                                 <template x-for="row in instant" x-bind:key="row.key">
-                                    <a x-bind:href="row.href ?? '#'" class="dk-pal-i" x-bind:class="{ 'dk-pal-act': row.kind === 'action' || row.kind === 'add', 'dk-pal-done': row.done }" data-pi data-desk-native x-on:click="runRow(row, $event)" x-bind:data-ask-row="row.key">
+                                    <a x-bind:href="row.href ?? '#'" class="dk-pal-i" x-bind:class="{ 'dk-pal-act': row.kind === 'action' || row.kind === 'add', 'dk-pal-done': row.done }" data-pi data-desk-native x-on:click="runRow(row, $event)" x-bind:data-ask-row="row.key" x-bind:draggable="carry(row) ? 'true' : 'false'" x-bind:data-ask-carry="carry(row)">
                                         <span class="dk-ic"><svg class="dk-i"><use x-bind:href="'#dk-sym-' + row.icon"></use></svg></span>
                                         <span class="dk-pal-t"><span x-html="row.html"></span><small x-show="row.sub" x-text="row.sub"></small></span>
                                         <span class="dk-pal-kind" x-bind:data-kind="row.kind" x-text="row.done ? texts.badge_done : row.badge"></span>

@@ -1,7 +1,7 @@
 /**
- * "Add to desk" (App\Http\Controllers\ToggleDeskItemController): put a page,
- * a page card, a button or a "New …" action on My desk from wherever the
- * person is, or take it off. window.hcDeskItems is the one way in:
+ * "Add to desk" (App\Http\Controllers\ToggleDeskItemController): put a page
+ * or a page card on My desk from wherever the person is, or take it off; a
+ * button or a "New …" action goes in or out of Quick access instead. window.hcDeskItems is the one way in:
  *  - toggle({ item | route | url, placed? }) asks the server, then tells the
  *    Desk to read itself again (on My desk directly; from a Desk tab through
  *    the Desk around it, resources/js/desk-tabs.js);
@@ -102,7 +102,9 @@ document.addEventListener('alpine:init', () => {
                 const result = await send({ item: id, placed: on });
 
                 this.placed = result.placed ? [...new Set([...this.placed, result.item])] : this.placed.filter((each) => each !== result.item);
-                this.said = (result.placed ? config.texts.added : config.texts.removed).replace('__I__', result.title);
+                const said = result.quick ? [config.texts.quick_added, config.texts.quick_removed] : [config.texts.added, config.texts.removed];
+
+                this.said = (result.placed ? said[0] : said[1]).replace('__I__', result.title);
             } catch {
                 this.failed = true;
                 this.said = config.texts.failed;

@@ -1,7 +1,10 @@
 /**
  * Drag a page from the sidebar onto My desk (pages/desk/⚡index). The page
  * lands as whatever stands for it on the Desk (Panels::itemForRoute): its
- * hand-made panel, its page card, or a button for it.
+ * hand-made panel or its page card. A page that only has a button opens no
+ * slot on the grid: buttons live in Quick access, so while it is carried the
+ * Quick access drop target shows, as for an Ask row, and keeps it
+ * ($wire.addQuickItem).
  *
  * While the link is carried over the Desk a "drop here" slot of the item's
  * own size opens where it would land: beside the card under the pointer (the
@@ -15,8 +18,15 @@
  * another move (the slot would flick between two places). Dropping
  * asks the Desk to keep that arrangement ($wire.dropItem); Esc or leaving
  * the Desk puts everything back. A page already on the Desk is ringed
- * instead, and dropping shows it. Dropped on the tab strip, the page opens as
- * a tab (desk-tabs.js).
+ * instead, and dropping shows it. Dropped on the tab bar (shown while
+ * carrying, even with no tab open) or on the page in front, the page opens
+ * as a tab (desk-tabs.js); a sidebar page with nothing to stand for it on the
+ * Desk can still be dropped there.
+ *
+ * A page or "New ..." action carried out of the Ask bar (data-ask-carry)
+ * drops the same way on the tab bar, or on Quick access beside the greeting
+ * (data-quick-access), which keeps it ($wire.addQuickAccess). While it is
+ * carried the palette steps aside so both can be seen.
  *
  * HTML drag and drop has no touch support: the "+" beside each sidebar link
  * (x-desk.side-add) and every page's "Add to desk" do the same by tap or key.
@@ -72,8 +82,18 @@ function cleanUp(restore) {
 
     cancelAnimationFrame(drag.frame);
     existing?.classList.remove('dk-drop-ring');
-    document.documentElement.classList.remove('dk-dropping');
-    document.querySelector('[data-desk-tabs]')?.classList.remove('dk-tabs-droppable');
+    document.documentElement.classList.remove('dk-dropping', 'dk-carrying', 'dk-carry-quick');
+    // A frame later: a drop closes the palette first, so it never flashes back in between.
+    requestAnimationFrame(() => document.documentElement.classList.remove('dk-carry-ask'));
+    document.querySelector('[data-desk-tabs]')?.classList.remove('dk-tabs-droppable', 'dk-tabs-over');
+    document.querySelector('[data-quick-access]')?.classList.remove('dk-quick-over');
+
+    // Only a page that stands for something on the Desk moved its cards.
+    if (! drag.item) {
+        drag = null;
+
+        return;
+    }
 
     if (slot && restore) {
         flip(grid, () => {
@@ -150,45 +170,86 @@ function preview() {
     }, null);
 }
 
+/** The tab bar, or the page in front under it: dropping there opens a tab. */
+function overTabs(target) {
+    return target.closest('.dk-tabs-bar, [data-desk-tabframes]');
+}
+
+/** Something carried out of the Ask bar: { key, kind, href, label, icon }. */
+function askCarry(event) {
+    const row = event.target instanceof Element ? event.target.closest('[data-ask-carry]') : null;
+
+    try {
+        return row ? JSON.parse(row.dataset.askCarry) : null;
+    } catch {
+        return null;
+    }
+}
+
+/** A chip with the item's name rides under the pointer instead of the link's own picture. */
+function chipFor(event, title) {
+    const chip = document.createElement('div');
+
+    chip.className = 'dk-drag-chip dk-scope';
+    chip.textContent = title;
+    document.body.append(chip);
+    event.dataTransfer.setDragImage(chip, 18, 18);
+    setTimeout(() => chip.remove(), 0);
+}
+
 document.addEventListener('dragstart', (event) => {
-    const link = event.target instanceof Element ? event.target.closest('[data-desk-route]') : null;
+    const tabs = document.querySelector('[data-desk-tabs]');
+
+    if (! tabs || ! event.dataTransfer || ! (event.target instanceof Element)) {
+        return;
+    }
+
+    const carried = askCarry(event);
+
+    if (carried) {
+        event.dataTransfer.effectAllowed = 'copyLink';
+        event.dataTransfer.setData('text/uri-list', carried.href);
+        event.dataTransfer.setData('text/plain', carried.href);
+        chipFor(event, carried.label);
+        drag = { source: 'ask', href: carried.href, carried, item: null, frame: 0 };
+        tabs.classList.add('dk-tabs-droppable');
+        // A moment later, so the browser has taken its drag picture before the palette steps aside.
+        setTimeout(() => drag && document.documentElement.classList.add('dk-carrying', 'dk-carry-ask'), 0);
+
+        return;
+    }
+
+    const link = event.target.closest('[data-desk-route]');
     const grid = deskGrid();
 
-    if (! link || ! grid || ! event.dataTransfer) {
+    if (! link || ! grid) {
         return;
     }
 
-    const item = itemsOnDesk()[link.dataset.deskRoute];
-
-    if (! item) {
-        return;
-    }
+    // A page with nothing to stand for it on the Desk can still be opened as a tab.
+    const item = itemsOnDesk()[link.dataset.deskRoute] ?? null;
+    // A page that is only a button goes to Quick access, never onto the grid.
+    const quick = Boolean(item && /^[ag]-/.test(item.item));
 
     event.dataTransfer.effectAllowed = 'copyLink';
     event.dataTransfer.setData(type, link.dataset.deskRoute);
     event.dataTransfer.setData('text/uri-list', link.href);
     event.dataTransfer.setData('text/plain', link.href);
-
-    // A chip with the item's name rides under the pointer instead of the link's own picture.
-    const chip = document.createElement('div');
-
-    chip.className = 'dk-drag-chip dk-scope';
-    chip.textContent = item.title;
-    document.body.append(chip);
-    event.dataTransfer.setDragImage(chip, 18, 18);
-    setTimeout(() => chip.remove(), 0);
+    chipFor(event, item?.title ?? link.textContent.trim());
 
     drag = {
+        source: 'side',
         route: link.dataset.deskRoute,
         href: link.href,
         item,
+        quick,
         grid,
         layout: layoutOf(grid),
         placed: null,
         target: undefined,
         place: null,
         slot: null,
-        existing: item.placed ? grid.querySelector(`:scope > [data-panel="${CSS.escape(item.item)}"]`) : null,
+        existing: item?.placed && ! quick ? grid.querySelector(`:scope > [data-panel="${CSS.escape(item.item)}"]`) : null,
         text: grid.dataset.dropText ?? '__I__',
         rtl: getComputedStyle(grid).direction === 'rtl',
         over: null,
@@ -199,9 +260,17 @@ document.addEventListener('dragstart', (event) => {
     };
 
     // The cards change cells while the slot moves: they fit their rows again once the drop is saved, not on every step.
-    panelsIn(grid).forEach((card) => (card.dataset.resizing = ''));
-    document.documentElement.classList.add('dk-dropping');
-    document.querySelector('[data-desk-tabs]')?.classList.add('dk-tabs-droppable');
+    if (item && ! quick) {
+        panelsIn(grid).forEach((card) => (card.dataset.resizing = ''));
+        document.documentElement.classList.add('dk-dropping');
+    }
+
+    document.documentElement.classList.add('dk-carrying');
+
+    if (quick) {
+        document.documentElement.classList.add('dk-carry-quick');
+    }
+    tabs.classList.add('dk-tabs-droppable');
 });
 
 document.addEventListener('dragover', (event) => {
@@ -209,16 +278,36 @@ document.addEventListener('dragover', (event) => {
         return;
     }
 
-    if (event.target.closest('.dk-tabs-bar, [data-desk-tabframes]')) {
+    const tabs = document.querySelector('[data-desk-tabs]');
+    const quick = document.querySelector('[data-quick-access]');
+
+    if (overTabs(event.target)) {
         event.preventDefault();
         event.dataTransfer.dropEffect = 'link';
+        tabs?.classList.add('dk-tabs-over');
+        quick?.classList.remove('dk-quick-over');
+
+        return;
+    }
+
+    tabs?.classList.remove('dk-tabs-over');
+
+    if (drag.source === 'ask' || drag.quick) {
+        const onQuick = Boolean(event.target.closest('[data-quick-access]'));
+
+        quick?.classList.toggle('dk-quick-over', onQuick);
+
+        if (onQuick) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'copy';
+        }
 
         return;
     }
 
     const desk = event.target.closest('[data-desk]');
 
-    if (! desk || document.documentElement.classList.contains('dk-tab-active')) {
+    if (! drag.item || ! desk || document.documentElement.classList.contains('dk-tab-active')) {
         return;
     }
 
@@ -240,15 +329,41 @@ document.addEventListener('drop', (event) => {
         return;
     }
 
-    if (event.target.closest('.dk-tabs-bar, [data-desk-tabframes]')) {
+    if (overTabs(event.target)) {
         event.preventDefault();
         window.hcDeskTabs?.open(drag.href);
+
+        if (drag.source === 'ask') {
+            window.dispatchEvent(new CustomEvent('dk-ask-close'));
+        }
+
         cleanUp(true);
 
         return;
     }
 
-    if (! event.target.closest('[data-desk]')) {
+    if (drag.source === 'ask' || drag.quick) {
+        const quick = event.target.closest('[data-quick-access]');
+        const host = quick?.closest('[wire\\:id]');
+        const desk = host ? window.Livewire?.find(host.getAttribute('wire:id')) : null;
+
+        if (quick && desk) {
+            event.preventDefault();
+
+            if (drag.source === 'ask') {
+                desk.addQuickAccess(drag.carried.key);
+                window.dispatchEvent(new CustomEvent('dk-ask-close'));
+            } else {
+                desk.addQuickItem(drag.item.item);
+            }
+        }
+
+        cleanUp(true);
+
+        return;
+    }
+
+    if (! drag.item || ! event.target.closest('[data-desk]')) {
         return;
     }
 

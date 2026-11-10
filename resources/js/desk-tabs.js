@@ -33,7 +33,6 @@
 const MaxLive = 6;
 const MaxTabs = 24;
 const WarmTtl = 4000;
-const OffKey = 'hc-desk-tabs-off';
 const NotForTabs = /\/(download|export|print|preview|avatar|logout)(\/|$)|^\/(livewire|broadcasting|storage)\//;
 
 let firstLoad = true;
@@ -41,26 +40,12 @@ document.addEventListener('livewire:navigating', () => {
     firstLoad = false;
 });
 
-/** Whether Desk tabs are on in this browser (the user can turn them off; a page then opens as before). */
-export function deskTabsEnabled() {
-    try {
-        return window.localStorage.getItem(OffKey) !== '1';
-    } catch {
-        return true;
-    }
+/* Desk tabs are always on (user decision 2026-11-10): a browser that once turned them off forgets it. */
+try {
+    window.localStorage.removeItem('hc-desk-tabs-off');
+} catch {
+    // Storage blocked: nothing was kept.
 }
-
-export function setDeskTabsEnabled(on) {
-    try {
-        on ? window.localStorage.removeItem(OffKey) : window.localStorage.setItem(OffKey, '1');
-    } catch {
-        // Storage blocked: the choice lasts for this page only.
-    }
-
-    window.dispatchEvent(new CustomEvent('hc-desk-tabs-setting', { detail: on }));
-}
-
-window.hcDeskTabsSetting = { enabled: deskTabsEnabled, set: setDeskTabsEnabled };
 
 function isTyping(target) {
     return target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
@@ -94,7 +79,6 @@ document.addEventListener('alpine:init', () => {
                 list: () => this.tabs.map(({ id, title, url }) => ({ id, title, url, active: this.active === id })),
                 activate: (id) => this.activate(id),
                 activeTab: () => this.tabs.find((tab) => tab.id === this.active) ?? null,
-                enabled: () => deskTabsEnabled(),
             };
 
             this.listen(document, 'mousedown', (event) => this.onPress(event), true);
@@ -105,11 +89,6 @@ document.addEventListener('alpine:init', () => {
             this.listen(document, 'livewire:navigate', (event) => this.onNavigate(event));
             this.listen(document, 'keydown', (event) => this.onKey(event));
             this.listen(window, 'message', (event) => this.onMessage(event));
-            this.listen(window, 'hc-desk-tabs-setting', (event) => {
-                if (! event.detail) {
-                    this.closeAll();
-                }
-            });
 
             this.$watch('active', () => this.syncDocument());
             this.syncDocument();
@@ -167,7 +146,7 @@ document.addEventListener('alpine:init', () => {
 
         /** Whether a link opens as a tab: same site, a page (not a file), no target, not marked native. */
         tabLink(event) {
-            if (! deskTabsEnabled() || ! (event.target instanceof Element)) {
+            if (! (event.target instanceof Element)) {
                 return null;
             }
 
@@ -289,7 +268,7 @@ document.addEventListener('alpine:init', () => {
         onNavigate(event) {
             const url = event.detail?.url;
 
-            if (! deskTabsEnabled() || ! url || event.detail?.history || url.origin !== window.location.origin || NotForTabs.test(url.pathname)) {
+            if (! url || event.detail?.history || url.origin !== window.location.origin || NotForTabs.test(url.pathname)) {
                 return;
             }
 
@@ -646,7 +625,7 @@ document.addEventListener('alpine:init', () => {
             this.activate(copy.id);
         },
 
-        /** The page leaves the tab and takes the whole window, as it would without the Desk. */
+        /** The page moves out of the Desk into a browser tab of its own, as a full page; the Desk stays where it is. */
         popOut(id) {
             const tab = this.tabs.find((each) => each.id === id);
 
@@ -654,17 +633,8 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
+            window.open(tab.url, '_blank', 'noopener');
             this.close(id);
-            this.save(true);
-            window.location.assign(tab.url);
-        },
-
-        openInBrowser(id) {
-            const tab = this.tabs.find((each) => each.id === id);
-
-            if (tab) {
-                window.open(tab.url, '_blank', 'noopener');
-            }
         },
 
         async addToDesk(id) {
@@ -817,7 +787,7 @@ document.addEventListener('alpine:init', () => {
                 stored = null;
             }
 
-            if (! deskTabsEnabled() || ! Array.isArray(stored?.tabs)) {
+            if (! Array.isArray(stored?.tabs)) {
                 return;
             }
 

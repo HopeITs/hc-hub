@@ -48,7 +48,7 @@ final class AskCommands
         'close' => ['close', 'shut', 'اغلق', 'سكر'],
         'all' => ['all', 'every', 'everything', 'كل', 'جميع', 'الكل'],
         'card' => ['card', 'panel', 'widget', 'بطاقه', 'لوحه'],
-        'button' => ['button', 'shortcut', 'link', 'زر', 'اختصار', 'رابط'],
+        'button' => ['button', 'shortcut', 'link', 'quick', 'زر', 'اختصار', 'رابط', 'سريع', 'السريع'],
     ];
 
     /**
@@ -59,7 +59,6 @@ final class AskCommands
     private const array Commands = [
         'theme' => ['dark', 'light', 'theme', 'mode', 'night', 'day', 'appearance', 'colors', 'داكن', 'فاتح', 'وضع', 'مظهر', 'ليلي', 'نهاري', 'الوان'],
         'language' => ['arabic', 'english', 'language', 'lang', 'عربي', 'عربيه', 'انجليزي', 'انكليزي', 'لغه'],
-        'tabs_setting' => ['tabs', 'tab', 'setting', 'browser', 'تبويبات', 'اعداد'],
         'close_tabs' => ['close', 'tabs', 'all', 'اغلق', 'تبويبات', 'كل'],
         'customize' => ['customize', 'customise', 'arrange', 'edit', 'organize', 'layout', 'panels', 'تخصيص', 'ترتيب', 'تعديل', 'تنظيم', 'لوحات'],
         'tour' => ['tour', 'help', 'guide', 'learn', 'how', 'جوله', 'مساعده', 'شرح', 'تعلم'],
@@ -91,7 +90,8 @@ final class AskCommands
          * The index is the same on every page a person opens and took ~150ms to build, so it is kept
          * for ten minutes under a key made of exactly what it depends on: the pages they may open,
          * their roles and permissions, and the language. Any change of access gives a new key.
-         * What is on their Desk changes with every drop, so it is always read fresh.
+         * What is on their Desk changes with every drop, so it is always read fresh. It also lists the
+         * buttons kept in Quick access (where the Desk's buttons live), so the Ask bar says they are there.
          */
         $fingerprint = md5(json_encode([
             array_column($this->destinations->for($user), 'route'),
@@ -103,7 +103,7 @@ final class AskCommands
 
         return [
             ...Cache::remember($key, now()->addMinutes(10), fn (): array => $this->build($user)),
-            'placed' => array_column($this->panels->layoutFor($user), 'panel'),
+            'placed' => [...array_column($this->panels->layoutFor($user), 'panel'), ...app(QuickAccess::class)->itemIds($user)],
         ];
     }
 

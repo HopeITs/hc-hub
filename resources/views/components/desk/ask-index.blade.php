@@ -5,7 +5,8 @@
     $askTexts = collect([
         'instant', 'recent', 'corrected', 'badge_open', 'badge_new', 'badge_add', 'badge_there', 'badge_remove', 'badge_switch', 'badge_run', 'badge_done',
         'opens_form', 'open_tab', 'add', 'add_button', 'remove', 'switch_tab', 'close_tab', 'close_all_tabs', 'theme_dark', 'theme_light', 'language',
-        'tabs_on', 'tabs_off', 'customize', 'layout', 'tour', 'desk', 'placed', 'unplaced', 'already', 'failed',
+        'customize', 'layout', 'tour', 'desk', 'placed', 'unplaced', 'already', 'failed',
+        'add_quick', 'remove_quick', 'badge_quick', 'quick_placed', 'quick_unplaced', 'quick_already',
     ])->mapWithKeys(fn (string $key): array => [$key => __('desk-workspace.ask.'.$key, ['page' => '__P__', 'tab' => '__T__', 'layout' => '__L__', 'language' => '__L__', 'query' => '__Q__'])])->all();
     $askPayload = [
         'user' => (int) $askUser->id,

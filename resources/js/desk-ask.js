@@ -107,6 +107,18 @@ document.addEventListener('alpine:init', () => {
             document.querySelector('[data-desk-ask]')?.focus();
         },
 
+        /**
+         * A page or "New …" action row can be carried out of the palette on My desk: onto the tab bar to
+         * open it as a tab, or onto Quick access to keep it there (resources/js/desk-drop.js reads this).
+         */
+        carry(row) {
+            if (! row.href || (row.kind !== 'page' && row.kind !== 'action') || ! document.querySelector('[data-desk-tabs]')) {
+                return null;
+            }
+
+            return JSON.stringify({ key: row.key, kind: row.kind, href: row.href, label: row.label, icon: row.icon });
+        },
+
         /** The instant rows for what is in the box, on every key. */
         type(value) {
             this.typed = value;
@@ -127,7 +139,6 @@ document.addEventListener('alpine:init', () => {
                 canCustomize: Boolean(document.querySelector('[data-desk-customize]')),
                 dark: document.documentElement.classList.contains('dark'),
                 otherLanguage: this.config.otherLanguage,
-                tabsOn: window.hcDeskTabsSetting?.enabled() ?? true,
             });
 
             this.instant = rows;
@@ -285,12 +296,13 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
-        /** Put a page, card or button on My desk; on the Desk itself it lands with its Undo. */
+        /** Put a page or card on My desk, or a button in Quick access; on the Desk itself it lands with its Undo. */
         async place(row) {
             const name = row.label.replace(/^.*?“(.*)”.*$/, '$1');
+            const quick = /^[ag]-/.test(row.item ?? '');
 
             if (this.config.index.placed.includes(row.item)) {
-                this.say(this.texts.already.replace('__P__', name));
+                this.say((quick ? this.texts.quick_already : this.texts.already).replace('__P__', name));
                 window.hcDeskTabs?.desk();
                 document.getElementById(`dk-panel-${row.item}`)?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 
@@ -303,7 +315,7 @@ document.addEventListener('alpine:init', () => {
                 row.done = true;
                 this.instant = [...this.instant];
                 window.hcDeskTabs?.desk();
-                this.say(this.texts.placed.replace('__P__', name), true);
+                this.say((quick ? this.texts.quick_placed : this.texts.placed).replace('__P__', name), true);
             } catch {
                 this.say(this.texts.failed);
             }
@@ -311,13 +323,14 @@ document.addEventListener('alpine:init', () => {
 
         async unplace(row) {
             const name = row.label.replace(/^.*?“(.*)”.*$/, '$1');
+            const quick = /^[ag]-/.test(row.item ?? '');
 
             try {
                 await window.hcDeskItems.toggle({ item: row.item, placed: false });
                 this.config.index.placed = this.config.index.placed.filter((item) => item !== row.item);
                 row.done = true;
                 this.instant = [...this.instant];
-                this.say(this.texts.unplaced.replace('__P__', name), true);
+                this.say((quick ? this.texts.quick_unplaced : this.texts.unplaced).replace('__P__', name), true);
             } catch {
                 this.say(this.texts.failed);
             }
@@ -332,9 +345,6 @@ document.addEventListener('alpine:init', () => {
                     break;
                 case 'language':
                     document.querySelector('[data-locale-toggle] button[name="locale"]')?.click();
-                    break;
-                case 'tabs':
-                    window.hcDeskTabsSetting?.set(! window.hcDeskTabsSetting.enabled());
                     break;
                 case 'customize':
                     window.hcDeskTabs?.desk();
