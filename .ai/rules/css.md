@@ -24,6 +24,12 @@ Flux colours itself with its own `dark:` utilities, which a `@layer components` 
 ## Light mode may change for the Desk redesign (supersedes "pixel-identical")
 The "light mode must stay pixel-identical when restyling dark" notes in css.md and views.md predate the Tracking Desk redesign (branch tracking-desk-ux-update), which intentionally changes light mode to match the artifact. Desk styles live in resources/css/desk.css: every class is prefixed dk-, element selectors are scoped under .dk-scope, and artifact variables are aliases of tokens.css tokens so Graphite .dark works without a second block. Pages not yet redesigned keep their old light look until their stage replaces them.
 
+## Critical as small text needs its own token in dark
+`--color-status-critical` was lightened for dark everywhere except critical: `good` went #1d7a4c → #5cc690, `warn` → #e3ad52, `funding` → #79bccb, but `critical` stayed at the brand red #d4343a. On the dark page ground (#151618) that is **3.75:1** — fine for a dot or a bar (non-text, 3:1) and for large type, but it fails the 4.5:1 normal-text threshold at the 14px/600 a status word is set in.
+
+So `--color-status-critical-text` (light `var(--color-primary)` 6.2:1 on white, dark #ff5a60 5.9:1 on the page ground) is the token for critical **type**; `--color-status-critical` stays the token for dots, bars, rings and other non-text marks. Added 2026-11-09 for the funding-agreements register's status word and headline figure.
+
+Not yet applied elsewhere: every other `text-status-critical` at body size in dark has the same 3.75:1 — the detail page's attention list, the overdue and failed lines in the calendar lanes, the overdue amounts in the register cells. Switching those is a one-token change per site, worth doing as its own pass.
 ## Desk lists cannot take their own padding or margin
 desk.css resets `.dk-scope ul/ol { margin:0; padding:0 }` and `.dk-scope p { margin:0 }` UNLAYERED, so it beats any padding/margin a `@layer components` class sets on a ul, ol or p (computes to 0 silently). Put side padding on the `li` items, and space blocks with a parent `gap`, never with margin on the ul/p. Found on the program Results tab (2026-11-06).
 
