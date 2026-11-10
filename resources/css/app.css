@@ -9,7 +9,6 @@
 @import './tokens.css';
 @import './base.css';
 @import './typography.css';
-@import './preloader.css';
 @import './flux-overrides.css';
 @import './forms.css';
 @import './gantt.css';

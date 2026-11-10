@@ -17,12 +17,6 @@
         @include('partials.head')
     </head>
     <body class="dk-body min-h-screen" @if ($showsInbox && ! $inTab) data-user-id="{{ auth()->id() }}" data-notification-popups="{{ auth()->user()->notification_popups ? 'on' : 'off' }}" data-session-lifetime="{{ (int) config('session.lifetime') }}" @endif @if ($inTab) data-desk-tab-page @endif>
-        @unless ($inTab)
-            @persist('preloader')
-                <x-preloader />
-            @endpersist
-        @endunless
-
         <div class="dk-app" data-app-shell>
             @auth
                 @unless ($inTab)

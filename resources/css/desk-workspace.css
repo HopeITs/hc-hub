@@ -553,7 +553,7 @@
     html.dk-tab-active [data-desk] > :not(.dk-tabs), html.dk-tab-active .dk-foot { display: none !important; }
 
     /* ── A page inside a tab: its own frame is gone (DeskTab, desk-tab-child.js) ── */
-    html.dk-in-tab :is(.dk-side, .dk-side-scrim, .dk-top, .dk-foot, [data-desk-ask-palette], #preloader) { display: none !important; }
+    html.dk-in-tab :is(.dk-side, .dk-side-scrim, .dk-top, .dk-foot, [data-desk-ask-palette]) { display: none !important; }
     html.dk-in-tab .dk-app { grid-template-columns: minmax(0, 1fr); }
     html.dk-in-tab .dk-wrap { padding-block-start: 6px; }
     /* No top bar above a page in a tab: whatever sticks under it sticks to the top of the tab instead. */
