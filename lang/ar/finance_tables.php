@@ -66,6 +66,7 @@ return [
     'minimum' => 'الحد الأدنى',
     'needs_attention_first' => 'ما يحتاج متابعة أولاً',
     'next_due' => 'الاستحقاق التالي',
+    'nothing_matches_this_here' => 'لا شيء هنا يطابق هذا',
     'next_report_due' => 'موعد التقرير التالي',
     'no_date' => 'بلا تاريخ',
     'not_scheduled' => 'غير مجدول',
