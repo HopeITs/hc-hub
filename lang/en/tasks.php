@@ -207,4 +207,5 @@ return [
     'paused_center_inactive' => 'Paused: the project\'s center is inactive. Report tasks continue.',
     'open_report' => 'Open the report',
     'report_task_helper' => 'Marking this task done does not submit the report. Submit the report itself and this task closes.',
+    'show_more_cards' => '{1} Show 1 more task|[2,*] Show :count more tasks',
 ];

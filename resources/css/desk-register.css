@@ -168,7 +168,8 @@
         --color-board-head: var(--tint);
         border: 1px solid var(--line);
         border-radius: 12px;
-        overflow: hidden;
+        /* clip, never hidden: a hidden box is a scroll container, so the heading row stuck 4rem down inside the table (over its first rows) instead of under the app bar. */
+        overflow: clip;
     }
     [data-desk-register] .register-scroll { border-block: 0; }
     [data-desk-register] .register thead th {
