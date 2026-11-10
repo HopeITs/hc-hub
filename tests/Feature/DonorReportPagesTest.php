@@ -68,6 +68,32 @@ test('a builder user without funding-agreements.view sees the figures but no amo
         ->assertDontSeeText('98,752.93');
 });
 
+test('monthly and half-yearly reports save only validated figures in their selected period', function (string $period, string $end, float $expected) {
+    $otherCenter = donorReportCenter($this->proposal);
+    $otherTarget = donorReportTarget($this->proposal, $otherCenter, $this->library);
+    donorReportFigures($otherCenter, '2026-01', $this->library, [$otherTarget->id => ['value' => 99]], MonthlyReportStatus::Submitted);
+    donorReportFigures($this->center, '2026-02', $this->library, [$this->target->id => ['value' => 40]]);
+
+    Livewire::actingAs($this->aggregatorOnly)->test('pages::donor-reports.compose')
+        ->assertSee('Monthly')
+        ->set('proposalId', (string) $this->proposal->id)
+        ->set('periodType', $period)
+        ->call('compose')
+        ->assertHasNoErrors()
+        ->set('dueOn', '2026-12-01')
+        ->call('save')
+        ->assertHasNoErrors();
+
+    $report = DonorReport::query()->sole();
+    expect($report->period_type->value)->toBe($period)
+        ->and($report->period_start->toDateString())->toBe('2026-01-01')
+        ->and($report->period_end->toDateString())->toBe($end)
+        ->and(collect($report->snapshot['indicators'])->sole()['period']['value'])->toEqual($expected);
+})->with([
+    'monthly' => ['monthly', '2026-01-31', 17.0],
+    'half-yearly' => ['semi-annual', '2026-06-30', 57.0],
+]);
+
 test('a money holder sees received, fees and net per currency in a separate block', function () {
     drpBuilder($this->moneyHolder)
         ->assertSeeHtml('data-snapshot-finance')

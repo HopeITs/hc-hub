@@ -85,6 +85,7 @@ return [
         'report_submission' => 'التقرير المُسلَّم',
     ],
     'reporting_period' => [
+        'monthly' => 'شهري',
         'quarterly' => 'ربع سنوي',
         'semi_annual' => 'نصف سنوي',
         'annual' => 'سنوي',

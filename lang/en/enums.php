@@ -85,6 +85,7 @@ return [
         'report_submission' => 'Delivered report',
     ],
     'reporting_period' => [
+        'monthly' => 'Monthly',
         'quarterly' => 'Quarterly',
         'semi_annual' => 'Semi-annual',
         'annual' => 'Annual',
