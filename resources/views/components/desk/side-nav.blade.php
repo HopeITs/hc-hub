@@ -23,8 +23,9 @@
     ])->all();
     $pins = collect($user->nav_pins ?? [])->filter(fn (mixed $pin): bool => is_string($pin) && $pages->has($pin))->values()->all();
 
-    $recent = collect($user->nav_recent ?? [])
-        ->filter(fn (mixed $entry): bool => is_array($entry) && isset($entry['route'], $entry['key'], $entry['label'], $entry['kind']) && Route::has($entry['route']))
+    /* The records this person works in most, by use (RemembersRecentRecord::mostUsed). */
+    $recent = collect(\App\Http\Middleware\RemembersRecentRecord::mostUsed($user->nav_recent))
+        ->filter(fn (array $entry): bool => Route::has($entry['route']))
         ->map(fn (array $entry): array => [
             'href' => route($entry['route'], $entry['key']),
             'label' => $entry['label'],
@@ -39,12 +40,12 @@
     if ($project !== null) {
         $tab = (string) request()->query('tab', '');
         $sections = collect([
-            ['tab' => '', 'label' => __('navigation.section_story'), 'icon' => 'book-open'],
-            ['tab' => 'tasks', 'label' => __('navigation.section_tasks'), 'icon' => 'check-circle'],
-            ['tab' => 'risks', 'label' => __('navigation.section_risks'), 'icon' => 'exclamation-triangle'],
-            ['tab' => 'targets', 'label' => __('navigation.section_targets'), 'icon' => 'viewfinder-circle'],
-            ['tab' => 'proposals', 'label' => __('navigation.section_funding'), 'icon' => 'banknotes'],
-            ['tab' => 'files', 'label' => __('navigation.section_files'), 'icon' => 'paper-clip'],
+            ['tab' => '', 'label' => __('navigation.section_story'), 'icon' => 'nav-book-open'],
+            ['tab' => 'tasks', 'label' => __('navigation.section_tasks'), 'icon' => 'nav-square-check-big'],
+            ['tab' => 'risks', 'label' => __('navigation.section_risks'), 'icon' => 'nav-siren'],
+            ['tab' => 'targets', 'label' => __('navigation.section_targets'), 'icon' => 'nav-crosshair'],
+            ['tab' => 'proposals', 'label' => __('navigation.section_funding'), 'icon' => 'nav-wallet'],
+            ['tab' => 'files', 'label' => __('navigation.section_files'), 'icon' => 'nav-paperclip'],
         ])->map(fn (array $section): array => $section + [
             'href' => route('projects.show', $section['tab'] === '' ? [$project] : [$project, 'tab' => $section['tab']]),
             'current' => $section['tab'] === $tab || ($section['tab'] === '' && in_array($tab, ['', 'milestones'], true)),
@@ -195,7 +196,7 @@
                 @if ($group['group'] === 'overview')
                     <section class="dk-side-g dk-side-me" data-side-personal>
                         <button type="button" class="dk-side-a dk-side-gb dk-side-star" data-fly="personal" x-on:click="toggle()" data-label="{{ __('navigation.pinned_and_recent') }}" aria-label="{{ __('navigation.pinned_and_recent') }}">
-                            <span class="dk-side-icw"><x-desk.icon name="pushpin" class="dk-side-ic" /></span>
+                            <span class="dk-side-icw"><flux:icon name="nav-pin" variant="outline" class="dk-side-ic" /></span>
                         </button>
                         <div class="dk-side-me-list">
                             <p class="dk-side-gh">{{ __('navigation.pinned') }}</p>
