@@ -1,4 +1,5 @@
 import './flux-toast-duration';
+import './instant-clicks';
 import './assignee-picker';
 import './person-card';
 import './task-menu';
