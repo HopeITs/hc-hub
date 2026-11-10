@@ -161,8 +161,9 @@
         html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-a.dk-on::before,
         html:not(.dk-nav-open) .dk-side-gb.dk-has-on::before,
         html:not(.dk-nav-open) .dk-side-ctx .dk-side-a.dk-on::before { content: ""; display: block; position: absolute; inset-block: 9px; inset-inline-start: -14px; width: 3px; border-radius: 3px; background: var(--brand); }
-        /* On the rail a count is a small numbered tag on the icon's top corner, mostly outside it, so the icon stays readable */
-        html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-badge { position: absolute; top: -7px; inset-inline-end: -10px; width: auto; min-width: 15px; height: 15px; padding: 0 3px; border-radius: 999px; font-size: 9.5px; font-weight: 800; line-height: 15px; letter-spacing: -.02em; background: var(--brand); color: var(--on-brand); box-shadow: 0 0 0 2px var(--paper); }
+        /* On the rail a count is only a small red dot hugging the icon's top corner (user decision 2026-11-10); the
+           number stays in the markup for screen readers, and the fly-out on hover still shows each page's count */
+        html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-badge { position: absolute; top: 4px; inset-inline-end: 4px; width: 8px; min-width: 8px; height: 8px; padding: 0; overflow: hidden; border-radius: 999px; font-size: 0; line-height: 0; color: transparent; background: var(--brand); box-shadow: 0 0 0 2px var(--paper); pointer-events: none; }
         html:not(.dk-nav-open) .dk-side-ctx { align-items: center; }
         html:not(.dk-nav-open) .dk-side-back { width: 34px; height: 34px; padding: 0; justify-content: center; }
     }
