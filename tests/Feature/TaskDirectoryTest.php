@@ -1869,3 +1869,19 @@ test('a refused quick action still explains itself on the board', function () {
         ->call('toggleComplete', $task->id)
         ->assertDispatched('toast-show');
 });
+
+test('a long board column draws its first cards and the rest on request', function () {
+    $user = User::factory()->role('General Manager')->create();
+    Task::factory()->count(27)->create(['status' => TaskStatus::Todo]);
+
+    $board = Livewire::actingAs($user)->test('pages::tasks.index');
+
+    expect(substr_count($board->html(), 'wire:key="task-board-card-'))->toBe(25);
+    $board->assertSeeHtml('data-test="task-board-more-todo"')
+        ->assertSeeHtml('data-test="task-board-count-todo">27<');
+
+    $board->call('showMoreBoard', 'todo')
+        ->assertDontSeeHtml('data-test="task-board-more-todo"');
+
+    expect(substr_count($board->html(), 'wire:key="task-board-card-'))->toBe(27);
+});

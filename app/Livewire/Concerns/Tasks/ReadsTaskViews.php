@@ -31,6 +31,32 @@ use Livewire\Attributes\Computed;
  */
 trait ReadsTaskViews
 {
+    /** Cards a board column draws before "Show more": the board stays light however long a column is. */
+    public const int BoardCardsPerStep = 25;
+
+    /**
+     * How many cards each board column draws, keyed by status value; a
+     * column missing here draws BoardCardsPerStep.
+     *
+     * @var array<string, int>
+     */
+    public array $boardShown = [];
+
+    public function boardCardLimit(TaskStatus $status): int
+    {
+        return max(self::BoardCardsPerStep, (int) ($this->boardShown[$status->value] ?? 0));
+    }
+
+    /** Draw the next step of one column's cards (scrolling to its end, or its "Show more"). */
+    public function showMoreBoard(string $status): void
+    {
+        $case = TaskStatus::tryFrom($status);
+
+        if ($case !== null) {
+            $this->boardShown[$case->value] = $this->boardCardLimit($case) + self::BoardCardsPerStep;
+        }
+    }
+
     public function setListLayout(string $layout): void
     {
         $this->listLayout = in_array($layout, ['wide', 'narrow'], true) ? $layout : null;
