@@ -11,14 +11,20 @@ use App\Notifications\NotificationPresenter;
 use App\Support\FileKeyring;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RolesAndPermissionsSeeder;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Features\SupportTesting\Testable;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Department;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\JobLevel;
+use Modules\Hr\Models\Position;
 use Modules\Tracking\Enums\Currency;
 use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Enums\MonthlyReportStatus;
@@ -58,7 +64,6 @@ use Tests\TestCase;
 pest()->extend(TestCase::class)
     ->use(RefreshDatabase::class)
     ->beforeEach(function (): void {
-        createHrSchema();
         useFileKey(newFileKey());
     })
     ->in('Feature');
@@ -380,153 +385,31 @@ function insertIndicatorProgress(int $indicatorId, int $recordedBy, string $date
 }
 
 /**
- * Build the slice of the HR schema hc-tracking reads, on the `hr` test connection.
- *
- * phpunit.xml points `hr` at an in-memory SQLite database, so tests never touch
- * the real hr_db. Columns mirror the hchr_ tables for what the app reads.
- */
-function createHrSchema(): void
-{
-    $schema = Schema::connection('hr');
-
-    $schema->create('cities', function (Blueprint $table): void {
-        $table->id();
-        $table->string('name_en');
-        $table->string('name_ar');
-        $table->string('slug')->unique();
-        $table->string('code')->unique();
-        $table->boolean('is_active')->default(true);
-        $table->timestamps();
-    });
-
-    $schema->create('programs', function (Blueprint $table): void {
-        $table->id();
-        $table->text('name');
-        $table->text('description_en')->nullable();
-        $table->text('description_ar')->nullable();
-        $table->string('code');
-        $table->string('slug')->unique();
-        $table->dateTime('start_date')->nullable();
-        $table->dateTime('end_date')->nullable();
-        $table->boolean('is_active')->default(true);
-        $table->timestamps();
-    });
-
-    $schema->create('departments', function (Blueprint $table): void {
-        $table->id();
-        $table->string('name');
-        $table->string('code');
-        $table->text('description_en')->nullable();
-        $table->text('description_ar')->nullable();
-        $table->string('email')->nullable();
-        $table->timestamps();
-    });
-
-    $schema->create('employees', function (Blueprint $table): void {
-        $table->id();
-        $table->unsignedBigInteger('city_id')->nullable();
-        $table->string('first_name_en');
-        $table->string('first_name_ar');
-        $table->string('last_name_en');
-        $table->string('last_name_ar');
-        $table->string('username')->unique();
-        $table->boolean('is_active')->default(true);
-        $table->boolean('is_board_member')->default(false);
-        $table->timestamps();
-    });
-
-    $schema->create('users', function (Blueprint $table): void {
-        $table->id();
-        $table->unsignedBigInteger('employee_id')->nullable();
-        $table->string('email')->unique();
-        $table->timestamp('email_verified_at')->nullable();
-        $table->string('password');
-        $table->rememberToken();
-        $table->timestamps();
-    });
-
-    $schema->create('centers', function (Blueprint $table): void {
-        $table->id();
-        $table->string('name_en');
-        $table->string('name_ar');
-        $table->unsignedBigInteger('city_id');
-        $table->boolean('is_active')->default(true);
-        $table->timestamps();
-    });
-
-    $schema->create('job_levels', function (Blueprint $table): void {
-        $table->id();
-        $table->string('name_en');
-        $table->string('name_ar');
-        $table->integer('grade')->nullable();
-        $table->timestamps();
-    });
-
-    $schema->create('positions', function (Blueprint $table): void {
-        $table->id();
-        $table->unsignedBigInteger('department_id');
-        $table->unsignedBigInteger('program_id')->nullable();
-        $table->unsignedBigInteger('center_id')->nullable();
-        $table->unsignedBigInteger('city_id')->nullable();
-        $table->unsignedBigInteger('job_level_id')->nullable();
-        $table->unsignedBigInteger('direct_manager_id')->nullable();
-        $table->unsignedBigInteger('tech_manager_id')->nullable();
-        $table->string('title_en');
-        $table->string('title_ar');
-        $table->boolean('is_active')->default(true);
-        $table->timestamps();
-    });
-
-    $schema->create('contracts', function (Blueprint $table): void {
-        $table->id();
-        $table->unsignedBigInteger('employee_id');
-        $table->unsignedBigInteger('position_id');
-        $table->dateTime('start_date')->nullable();
-        $table->text('salary')->nullable();
-        $table->unsignedTinyInteger('currency')->nullable();
-        $table->boolean('is_active')->default(true);
-        $table->timestamps();
-    });
-
-    $schema->create('media', function (Blueprint $table): void {
-        $table->id();
-        $table->string('model_type');
-        $table->unsignedBigInteger('model_id');
-        $table->string('collection_name');
-        $table->string('file_name');
-        $table->string('mime_type')->nullable();
-        $table->string('disk');
-        $table->timestamps();
-    });
-}
-
-/**
  * Insert an HR city and return its id.
  *
- * HR models are read-only, so HR fixtures go through the query builder on the
- * `hr` test connection instead of a factory.
+ * The insertHr*() helpers keep their name from when HR was a second
+ * database. Its tables are ordinary hub tables now, so each one builds its
+ * row through the model factory on the default connection.
  */
 function insertHrCity(string $nameEn = 'Aleppo', string $nameAr = 'حلب', bool $isActive = true): int
 {
-    return DB::connection('hr')->table('cities')->insertGetId([
+    return City::factory()->create([
         'name_en' => $nameEn,
         'name_ar' => $nameAr,
-        'slug' => fake()->unique()->slug(),
-        'code' => fake()->unique()->bothify('??####'),
         'is_active' => $isActive,
-    ]);
+    ])->id;
 }
 
 /**
- * Fill the empty test HR database with the programs and cities the real-data
- * seeders point at by id (programs 1-14, cities 1-17), with the first four programs
- * managed by an HR Program Manager, so a full database
- * seed has the HR records production already has.
+ * Fill the empty test database with the programs and cities the real-data
+ * seeders point at by id (programs 1-14, cities 1-17), with the first four
+ * programs managed by a Program Manager, so a full database seed has the
+ * records `hub:import-hr` gives production.
  */
 function insertHrSeedReferenceData(): void
 {
     foreach (range(1, 14) as $id) {
-        DB::connection('hr')->table('programs')->insert([
+        Program::factory()->unassigned()->create([
             'id' => $id,
             'name' => 'Program '.$id,
             'code' => 'P'.$id,
@@ -551,12 +434,11 @@ function insertHrSeedReferenceData(): void
  */
 function insertHrProgram(string $name = 'Hope Center', bool $isActive = true, ?string $code = null): int
 {
-    return DB::connection('hr')->table('programs')->insertGetId([
+    return Program::factory()->unassigned()->create([
         'name' => $name,
-        'code' => $code ?? fake()->bothify('??####'),
-        'slug' => fake()->unique()->slug(),
+        ...($code === null ? [] : ['code' => $code]),
         'is_active' => $isActive,
-    ]);
+    ])->id;
 }
 
 /**
@@ -564,10 +446,7 @@ function insertHrProgram(string $name = 'Hope Center', bool $isActive = true, ?s
  */
 function insertHrDepartment(string $name = 'Water, Sanitation & Hygiene'): int
 {
-    return DB::connection('hr')->table('departments')->insertGetId([
-        'name' => $name,
-        'code' => fake()->unique()->bothify('??####'),
-    ]);
+    return Department::factory()->create(['name' => $name])->id;
 }
 
 /**
@@ -586,12 +465,12 @@ function newProjectSectorIds(): array
  */
 function insertHrCenter(int $cityId, string $nameEn = 'Hope Center Aleppo', string $nameAr = 'مركز الأمل حلب', bool $isActive = true): int
 {
-    return DB::connection('hr')->table('centers')->insertGetId([
+    return Center::factory()->create([
         'name_en' => $nameEn,
         'name_ar' => $nameAr,
         'city_id' => $cityId,
         'is_active' => $isActive,
-    ]);
+    ])->id;
 }
 
 /**
@@ -599,11 +478,11 @@ function insertHrCenter(int $cityId, string $nameEn = 'Hope Center Aleppo', stri
  */
 function insertHrJobLevel(string $nameEn = 'Senior', string $nameAr = 'أول', ?int $grade = 3): int
 {
-    return DB::connection('hr')->table('job_levels')->insertGetId([
+    return JobLevel::factory()->create([
         'name_en' => $nameEn,
         'name_ar' => $nameAr,
         'grade' => $grade,
-    ]);
+    ])->id;
 }
 
 /**
@@ -611,7 +490,7 @@ function insertHrJobLevel(string $nameEn = 'Senior', string $nameAr = 'أول', 
  */
 function insertHrEmployee(?int $cityId = null, string $firstNameEn = 'Sami', string $lastNameEn = 'Haddad', string $firstNameAr = 'سامي', string $lastNameAr = 'حداد', bool $isActive = true): int
 {
-    return DB::connection('hr')->table('employees')->insertGetId([
+    return Employee::factory()->create([
         'city_id' => $cityId,
         'first_name_en' => $firstNameEn,
         'first_name_ar' => $firstNameAr,
@@ -619,54 +498,67 @@ function insertHrEmployee(?int $cityId = null, string $firstNameEn = 'Sami', str
         'last_name_ar' => $lastNameAr,
         'username' => fake()->unique()->userName(),
         'is_active' => $isActive,
-    ]);
+    ])->id;
 }
 
 /**
- * Insert an HR employee photo row (Spatie media, avatar collection) and return its id.
+ * Insert an employee photo row (HR's old media-library table, kept as
+ * `hr_media`; avatar collection) and return its id. The table has no model
+ * or factory, so this one helper stays on the query builder.
  */
 function insertHrAvatar(int $employeeId, string $fileName = 'photo.png', string $disk = 'public', string $mimeType = 'image/png'): int
 {
-    return DB::connection('hr')->table('media')->insertGetId([
+    return DB::table('hr_media')->insertGetId([
         'model_type' => 'App\Models\Employee',
         'model_id' => $employeeId,
         'collection_name' => 'avatar',
+        'name' => pathinfo($fileName, PATHINFO_FILENAME),
         'file_name' => $fileName,
         'mime_type' => $mimeType,
         'disk' => $disk,
+        'size' => 1024,
+        'manipulations' => '[]',
+        'custom_properties' => '[]',
+        'generated_conversions' => '[]',
+        'responsive_images' => '[]',
         'created_at' => now(),
         'updated_at' => now(),
     ]);
 }
 
 /**
- * Insert an HR login account and return its id.
+ * Insert a login account and return its id. Accounts are the hub's own
+ * `users` rows: there is no separate HR account any more.
  */
 function insertHrUser(?int $employeeId, string $email, string $password = 'password'): int
 {
-    return DB::connection('hr')->table('users')->insertGetId([
+    return Activity::withoutRecording(fn (): int => User::factory()->create([
         'employee_id' => $employeeId,
         'email' => $email,
-        'password' => bcrypt($password),
-    ]);
+        'password' => Hash::make($password),
+    ])->id);
 }
 
 /**
  * Insert an HR position (within a department) and return its id.
+ *
+ * positions.program_id, city_id and job_level_id are NOT NULL: a null
+ * argument leaves the factory to create an unassigned program, a city or a
+ * job level for the position.
  */
 function insertHrPosition(int $departmentId, string $titleEn = 'Officer', ?int $programId = null, bool $isActive = true, ?int $directManagerId = null, ?int $centerId = null, ?int $cityId = null, ?int $jobLevelId = null): int
 {
-    return DB::connection('hr')->table('positions')->insertGetId([
+    return Position::factory()->create([
         'department_id' => $departmentId,
-        'program_id' => $programId,
+        ...($programId === null ? [] : ['program_id' => $programId]),
         'center_id' => $centerId,
-        'city_id' => $cityId,
-        'job_level_id' => $jobLevelId,
+        ...($cityId === null ? [] : ['city_id' => $cityId]),
+        ...($jobLevelId === null ? [] : ['job_level_id' => $jobLevelId]),
         'direct_manager_id' => $directManagerId,
         'title_en' => $titleEn,
         'title_ar' => $titleEn,
         'is_active' => $isActive,
-    ]);
+    ])->id;
 }
 
 /**
@@ -674,12 +566,13 @@ function insertHrPosition(int $departmentId, string $titleEn = 'Officer', ?int $
  */
 function insertHrContract(int $employeeId, int $positionId, bool $isActive = true, ?string $startDate = null): int
 {
-    return DB::connection('hr')->table('contracts')->insertGetId([
+    return Contract::factory()->create([
         'employee_id' => $employeeId,
         'position_id' => $positionId,
         'start_date' => $startDate ?? now()->toDateTimeString(),
+        'end_date' => null,
         'is_active' => $isActive,
-    ]);
+    ])->id;
 }
 
 /**
