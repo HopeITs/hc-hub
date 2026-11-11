@@ -30,5 +30,6 @@ test('the desk page renders every panel of the role layout', function (string $r
     $this->actingAs(User::factory()->role($role)->create())
         ->get(route('dashboard'))
         ->assertOk()
-        ->assertSee('data-panel="needs"', false);
+        ->assertSee('data-panel="needs"', false)
+        ->assertDontSee('<livewire:', false);
 })->with(['Super Admin', 'General Manager', 'MEAL', 'Financial', 'Team Member']);

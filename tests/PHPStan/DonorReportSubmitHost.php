@@ -9,7 +9,7 @@ use Modules\Tracking\Livewire\Concerns\DonorReports\SubmitsDonorReport;
 use Modules\Tracking\Models\DonorReport;
 
 /**
- * Stands in for donor-reports/show and reporting-duties/index, which use the
+ * Stands in for donor-reports/show, which uses the
  * shared submit dialog (funding-agreements/show reaches it through
  * ManagesDonorReports).
  *

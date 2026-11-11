@@ -19,7 +19,7 @@ const MicroAgriFile = 'database/seeders/data/logframes/micro-agri.json';
 function frameworkProgram(string $code = '002'): int
 {
     $programId = Program::factory()->create()->id;
-    DB::connection('hr')->table('programs')->where('id', $programId)->update(['code' => $code]);
+    DB::table('programs')->where('id', $programId)->update(['code' => $code]);
 
     return $programId;
 }

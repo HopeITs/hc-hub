@@ -19,7 +19,7 @@ test('mirroring hr programs records no activity', function () {
 
     expect(Program::query()->count())->toBe(1)
         ->and(Activity::query()->count())->toBe(0);
-});
+})->skip('Obsolete since one database (A2): Program::syncFromHr and User::syncFromHrAccounts/pruneInactiveHrAccounts are gone.');
 
 test('bulk creating and pruning users from hr accounts records no activity', function () {
     $hrUserId = insertHrUser(insertHrEmployee(), 'someone@example.org');
@@ -29,4 +29,4 @@ test('bulk creating and pruning users from hr accounts records no activity', fun
 
     expect(User::query()->where('hr_user_id', $hrUserId)->exists())->toBeTrue()
         ->and(Activity::query()->count())->toBe(0);
-});
+})->skip('Obsolete since one database (A2): Program::syncFromHr and User::syncFromHrAccounts/pruneInactiveHrAccounts are gone.');

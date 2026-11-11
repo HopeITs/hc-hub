@@ -98,15 +98,13 @@ test('supervisorsOf costs the same number of queries for one or ten people', fun
     $queriesFor = function (array $ids): int {
         SupervisionMap::flush();
         DB::flushQueryLog();
-        DB::connection('hr')->flushQueryLog();
 
         SupervisionMap::supervisorsOf($ids);
 
-        return count(DB::getQueryLog()) + count(DB::connection('hr')->getQueryLog());
+        return count(DB::getQueryLog());
     };
 
     DB::enableQueryLog();
-    DB::connection('hr')->enableQueryLog();
 
     $cold = $queriesFor([$officers[0]]);
     $one = $queriesFor([$officers[0]]);
@@ -121,10 +119,10 @@ test('the map writes nothing to HR and never reads contract pay columns', functi
     managedBy($manager, [$officer]);
     localSupervision(insertHrEmployee(), $officer);
 
-    DB::connection('hr')->enableQueryLog();
+    DB::enableQueryLog();
     SupervisionMap::supervisorsOf([$officer]);
     SupervisionMap::superviseesOf($manager);
-    $queries = collect(DB::connection('hr')->getQueryLog())->pluck('query');
+    $queries = collect(DB::getQueryLog())->pluck('query');
 
     expect($queries)->not->toBeEmpty();
 

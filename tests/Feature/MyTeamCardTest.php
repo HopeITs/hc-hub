@@ -185,15 +185,12 @@ test('the card costs the same queries for one or ten supervisees', function () {
         unset($component->myTeam);
 
         DB::enableQueryLog();
-        DB::connection('hr')->enableQueryLog();
         DB::flushQueryLog();
-        DB::connection('hr')->flushQueryLog();
 
         expect($component->myTeam)->toHaveCount($superviseeCount);
 
-        $count = count(DB::getQueryLog()) + count(DB::connection('hr')->getQueryLog());
+        $count = count(DB::getQueryLog());
         DB::disableQueryLog();
-        DB::connection('hr')->disableQueryLog();
 
         return $count;
     };

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee as HrEmployee;
 use App\Models\Media;
 use Database\Seeders\CoreDataSeeder;
 use Illuminate\Support\Facades\DB;
@@ -69,7 +69,6 @@ test('the seeders populate every table in the schema', function () {
         ProposalStatusNote::class,
         ProposalReviewer::class,
         ProposalLocation::class,
-        ProgramRequest::class,
         Account::class,
         TransfersTracking::class,
         MealCoverageAssignment::class,
@@ -92,15 +91,13 @@ test('seeded projects are placed in existing hr cities and seeding writes no cit
     $this->seed();
 
     expect(Project::query()->pluck('city_id')->unique()->diff(range(1, 17)))->toBeEmpty()
-        ->and(DB::connection('hr')->table('cities')->count())->toBe(17);
+        ->and(DB::table('cities')->count())->toBe(17);
 });
 
-test('staff are the hr accounts and assigned programmes have hr employee managers', function () {
+test('staff accounts carry the default role and assigned programmes have hr employee managers', function () {
     $this->seed();
 
-    expect(User::query()->pluck('hr_user_id')->sort()->values()->all())
-        ->toBe(DB::connection('hr')->table('users')->pluck('id')->sort()->values()->all())
-        ->and(User::query()->with('roles')->get()->map(fn (User $user): array => $user->roles->pluck('name')->all())->unique()->values()->all())
+    expect(User::query()->with('roles')->get()->map(fn (User $user): array => $user->roles->pluck('name')->all())->unique()->values()->all())
         ->toBe([[config('access-control.default_role')]]);
 
     foreach (Program::query()->whereNotNull('manager_id')->with('manager', 'projects', 'annualPlans')->get() as $program) {
@@ -196,13 +193,12 @@ test('every seeded transfer reconciles', function () {
 test('seeding uses active hr employees only', function () {
     $inactiveId = insertHrEmployee(isActive: false);
     insertHrEmployee();
-    $goneId = insertHrUser($inactiveId, 'gone@example.org');
+    insertHrUser($inactiveId, 'gone@example.org');
     insertHrUser(insertHrEmployee(), 'rana@example.org');
 
     $this->seed();
 
-    expect(User::query()->where('hr_user_id', $goneId)->exists())->toBeFalse()
-        ->and(TaskAssignee::query()->where('employee_id', $inactiveId)->exists())->toBeFalse()
+    expect(TaskAssignee::query()->where('employee_id', $inactiveId)->exists())->toBeFalse()
         ->and(Program::query()->where('manager_id', $inactiveId)->exists())->toBeFalse()
         ->and(Project::query()->where('user_id', $inactiveId)->exists())->toBeFalse()
         ->and(MealCoverageAssignment::query()->where('employee_id', $inactiveId)->exists())->toBeFalse();

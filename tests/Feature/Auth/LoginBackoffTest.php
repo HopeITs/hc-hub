@@ -19,7 +19,7 @@ beforeEach(function () {
 });
 
 test('each lockout of an email lasts twice as long as the last', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     ($this->burst)($user->email, '10.1.0');
     ($this->attemptLogin)($user->email, 'password', '10.1.0.99')
@@ -36,7 +36,7 @@ test('each lockout of an email lasts twice as long as the last', function () {
 });
 
 test('a right password after a lockout resets the backoff', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     ($this->burst)($user->email, '10.2.0');
     $this->travel(901)->seconds();
@@ -49,8 +49,8 @@ test('a right password after a lockout resets the backoff', function () {
 });
 
 test('one email locked out does not lock out a colleague', function () {
-    $user = User::factory()->withHrAccount()->create();
-    $colleague = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
+    $colleague = User::factory()->create();
 
     ($this->burst)($user->email, '10.3.0');
     $this->travel(901)->seconds();
@@ -70,7 +70,7 @@ test('the backoff delay doubles up to the cap', function () {
 });
 
 test('failed password confirmations back off too', function () {
-    $user = User::factory()->withHrAccount('hr-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('hr-secret')])->create();
     $this->actingAs($user);
 
     foreach ([1, 2] as $burst) {

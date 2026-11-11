@@ -31,7 +31,7 @@ const PillarHrPrograms = [
 function insertPillarHrPrograms(): void
 {
     foreach (PillarHrPrograms as $id => $name) {
-        DB::connection('hr')->table('programs')->insert([
+        DB::table('programs')->insert([
             'id' => $id,
             'name' => $name,
             'code' => sprintf('%03d', $id),

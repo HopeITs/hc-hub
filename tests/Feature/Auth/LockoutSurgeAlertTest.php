@@ -74,7 +74,7 @@ test('a new surge after the window alerts again', function () {
 test('an administrator without an email is alerted in the inbox only', function () {
     Notification::fake();
     $administrator = userWithRole('Super Admin');
-    $administrator->forceFill(['hr_user_id' => 999_999])->save();
+    $administrator->forceFill(['email' => ''])->save();
 
     refuseSignIns(AlertOnLockoutSurge::Threshold);
 

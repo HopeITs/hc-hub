@@ -210,7 +210,7 @@ test('a row whose program request is still pending blocks the approval and write
         ->and($proposal->statusNotes()->count())->toBe(0);
 
     Event::assertNotDispatched(ProposalStatusChanged::class);
-});
+})->skip('Obsolete since A2: the program-request bridge (ProgramRequest, program_requests) was removed; a new program is created straight from the proposal.');
 
 test('a new row without a center cannot become a project and blocks the approval', function () {
     $proposal = proposalWithRows([newRow(['center_ids' => []])]);

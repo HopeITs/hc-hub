@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee as HrEmployee;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\AnnualPlan;

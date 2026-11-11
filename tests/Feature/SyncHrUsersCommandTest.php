@@ -9,7 +9,7 @@ test('every hr account gets a Team Member tracking user, listed admins as super 
     config(['auth.hr_admin_emails' => ['admin@example.org']]);
     $ranaId = insertHrUser(insertHrEmployee(firstNameEn: 'Rana', lastNameEn: 'Darwish'), 'rana@example.org');
     $adminId = insertHrUser(insertHrEmployee(), 'admin@example.org');
-    $before = DB::connection('hr')->table('users')->get()->toArray();
+    $before = DB::table('users')->get()->toArray();
 
     $this->artisan('hr:sync-users')->assertSuccessful();
 
@@ -18,8 +18,8 @@ test('every hr account gets a Team Member tracking user, listed admins as super 
         ->name->toBe('Rana Darwish')
         ->email->toBe('rana@example.org')
         ->and(User::query()->where('hr_user_id', $adminId)->sole()->roles->first()?->name)->toBe('Super Admin')
-        ->and(DB::connection('hr')->table('users')->get()->toArray())->toEqual($before);
-});
+        ->and(DB::table('users')->get()->toArray())->toEqual($before);
+})->skip('Obsolete since one database, one login (A2): hr:sync-users and users.hr_user_id are gone; accounts are users rows (hub:import-hr loads them).');
 
 test('syncing again leaves existing users and their roles alone', function () {
     $user = User::factory()->role('Managers')->create(['email' => 'rana@example.org']);
@@ -29,7 +29,7 @@ test('syncing again leaves existing users and their roles alone', function () {
 
     expect(User::query()->count())->toBe(1)
         ->and($user->refresh()->roles->first()?->name)->toBe('Managers');
-});
+})->skip('Obsolete since one database, one login (A2): hr:sync-users and users.hr_user_id are gone; accounts are users rows (hub:import-hr loads them).');
 
 test('inactive hr employees get no tracking user', function () {
     insertHrUser(insertHrEmployee(isActive: false), 'gone@example.org');
@@ -38,13 +38,13 @@ test('inactive hr employees get no tracking user', function () {
     $this->artisan('hr:sync-users')->assertSuccessful();
 
     expect(User::query()->pluck('hr_user_id')->all())->toBe([$systemId]);
-});
+})->skip('Obsolete since one database, one login (A2): hr:sync-users and users.hr_user_id are gone; accounts are users rows (hub:import-hr loads them).');
 
 test('users of inactive hr employees are deleted unless records reference them', function () {
     $gone = User::factory()->create(['email' => 'gone@example.org']);
     $busy = User::factory()->create(['email' => 'busy@example.org']);
     $rana = User::factory()->create(['email' => 'rana@example.org']);
-    DB::connection('hr')->table('employees')->whereIn('id', [$gone->employee_id, $busy->employee_id])->update(['is_active' => false]);
+    DB::table('employees')->whereIn('id', [$gone->employee_id, $busy->employee_id])->update(['is_active' => false]);
     Report::factory()->create(['user_id' => $busy->id]);
 
     $this->artisan('hr:sync-users')
@@ -52,26 +52,26 @@ test('users of inactive hr employees are deleted unless records reference them',
         ->assertSuccessful();
 
     expect(User::query()->orderBy('id')->pluck('id')->all())->toBe([$busy->id, $rana->id]);
-});
+})->skip('Obsolete since one database, one login (A2): hr:sync-users and users.hr_user_id are gone; accounts are users rows (hub:import-hr loads them).');
 
 test('syncing refreshes the hr employee an account belongs to', function () {
     $user = Activity::withoutRecording(fn (): User => User::factory()->create());
     $employeeId = insertHrEmployee(firstNameEn: 'Rana', lastNameEn: 'Darwish');
-    DB::connection('hr')->table('users')->where('id', $user->hr_user_id)->update(['employee_id' => $employeeId]);
+    DB::table('users')->where('id', $user->hr_user_id)->update(['employee_id' => $employeeId]);
 
     $this->artisan('hr:sync-users')->expectsOutputToContain('Updated 1 user(s)')->assertSuccessful();
 
     expect($user->fresh())
         ->employee_id->toBe($employeeId)
         ->name->toBe('Rana Darwish');
-});
+})->skip('Obsolete since one database, one login (A2): hr:sync-users and users.hr_user_id are gone; accounts are users rows (hub:import-hr loads them).');
 
 test('a user kept because records reference them keeps their roles', function () {
     $busy = User::factory()->role('Managers')->create();
-    DB::connection('hr')->table('employees')->where('id', $busy->employee_id)->update(['is_active' => false]);
+    DB::table('employees')->where('id', $busy->employee_id)->update(['is_active' => false]);
     Report::factory()->create(['user_id' => $busy->id]);
 
     $this->artisan('hr:sync-users')->assertSuccessful();
 
     expect($busy->refresh()->roles->pluck('name')->all())->toBe(['Managers']);
-});
+})->skip('Obsolete since one database, one login (A2): hr:sync-users and users.hr_user_id are gone; accounts are users rows (hub:import-hr loads them).');

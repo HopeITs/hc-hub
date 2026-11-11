@@ -28,7 +28,7 @@ function guessEmailCode(): int
 }
 
 test('the sixteenth code within an hour is refused even when the minute limit allows it', function () {
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
     reachEmailCodeChallenge($user);
 
     foreach (range(1, 3) as $batch) {
@@ -43,8 +43,8 @@ test('the sixteenth code within an hour is refused even when the minute limit al
 });
 
 test('one user hitting the hourly cap does not throttle another user\'s challenge', function () {
-    $attacked = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
-    $other = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $attacked = User::factory()->create(['email_two_factor_enabled' => true]);
+    $other = User::factory()->create(['email_two_factor_enabled' => true]);
     reachEmailCodeChallenge($attacked);
 
     foreach (range(1, 3) as $batch) {

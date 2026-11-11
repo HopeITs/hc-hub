@@ -76,10 +76,10 @@ test('creating a user with a privileged starting role needs a super admin', func
 
     ($this->page)($this->generalManager)
         ->call('openCreateModal')
-        ->set('hrUserId', (string) $hrUserId)
+        ->set('accountId', (string) $hrUserId)
         ->set('initialRoleId', (string) Role::findByName('Super Admin', 'web')->id)
         ->call('createUser')
         ->assertForbidden();
 
-    expect(User::query()->where('hr_user_id', $hrUserId)->exists())->toBeFalse();
+    expect(User::query()->findOrFail($hrUserId)->roles)->toBeEmpty();
 });

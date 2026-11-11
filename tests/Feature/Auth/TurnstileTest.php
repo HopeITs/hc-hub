@@ -1,6 +1,6 @@
 <?php
 
-use App\Actions\Fortify\AuthenticateWithHrAccount;
+use App\Actions\Fortify\AuthenticateUser;
 use App\Support\Turnstile;
 use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Support\Facades\Http;
@@ -45,7 +45,7 @@ test('the login form has no human check until both keys are set', function (?str
 
 test('users sign in without a token while the human check is off', function () {
     Http::preventStrayRequests();
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])
         ->assertSessionHasNoErrors();
@@ -79,7 +79,7 @@ test('only the login page may load the widget', function () {
 
 test('a login with a token cloudflare vouches for signs in, verifying the token once', function () {
     turnstileAnswers(['success' => true]);
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.9'])
         ->post(route('login.store'), [
@@ -103,7 +103,7 @@ test('a login with a token cloudflare vouches for signs in, verifying the token 
 
 test('a login without a usable token is refused before cloudflare or the password is asked', function (array $extraInput) {
     turnstileAnswers(['success' => true]);
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password', ...$extraInput])
         ->assertSessionHasErrors([Turnstile::ResponseField => __('authentication.human_check_failed')]);
@@ -119,7 +119,7 @@ test('a login without a usable token is refused before cloudflare or the passwor
 
 test('a login with a token cloudflare rejects is refused, even with the right password', function () {
     turnstileAnswers(['success' => false, 'error-codes' => ['invalid-input-response']]);
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $this->post(route('login.store'), [
         'email' => $user->email,
@@ -132,10 +132,10 @@ test('a login with a token cloudflare rejects is refused, even with the right pa
 
 test('failed human checks count against the ip and never lock the email out', function () {
     turnstileAnswers(['success' => true]);
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     // One address each, as a botnet would: the route's own limit is per email and IP.
-    foreach (range(1, AuthenticateWithHrAccount::MaxFailedLoginsPerEmail + 1) as $attempt) {
+    foreach (range(1, AuthenticateUser::MaxFailedLoginsPerEmail + 1) as $attempt) {
         $this->withServerVariables(['REMOTE_ADDR' => "203.0.113.{$attempt}"])
             ->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])
             ->assertSessionHasErrors(Turnstile::ResponseField);
@@ -156,7 +156,7 @@ test('failed human checks count against the ip and never lock the email out', fu
 
 test('the login is let through when cloudflare gives no usable answer', function (?array $answer, int $status) {
     turnstileAnswers($answer, $status);
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $this->post(route('login.store'), [
         'email' => $user->email,
@@ -175,7 +175,7 @@ test('the login is let through when cloudflare gives no usable answer', function
 
 test('a wrong password is still refused when cloudflare gives no usable answer', function () {
     turnstileAnswers([], 503);
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $this->post(route('login.store'), [
         'email' => $user->email,

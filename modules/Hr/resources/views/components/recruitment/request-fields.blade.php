@@ -181,7 +181,7 @@
                 @endif
 
                 <div @class([$askedRing => $asked('needed_by_date')])>
-                    <x-ui.form-input wire:model.blur="data.needed_by_date" :label="__('hr_recruitment.needed_by_date')" type="date" :min="$tomorrow" required :help="__('hr_recruitment.form_ui.needed_by_help')" :disabled="$locked('needed_by_date')" />
+                    <x-ui.form-input wire:model.live.blur="data.needed_by_date" :label="__('hr_recruitment.needed_by_date')" type="date" :min="$tomorrow" required :help="__('hr_recruitment.form_ui.needed_by_help')" :disabled="$locked('needed_by_date')" />
                 </div>
 
                 @if ($type === $Type::IncreaseHeadcount->value)
@@ -210,7 +210,7 @@
                     <x-ui.form-input wire:model="data.weekly_hours" :label="__('hr_recruitment.weekly_hours')" type="number" min="1" max="168" step="1" inputmode="numeric" required :disabled="$locked('weekly_hours')" />
                 </div>
                 <div @class([$askedRing => $asked('volunteer_period_start_date')])>
-                    <x-ui.form-input wire:model.blur="data.volunteer_period_start_date" :label="__('hr_recruitment.volunteer_period_start_date')" type="date" :min="$startMin" required :help="__('hr_recruitment.form_ui.period_start_help')" :disabled="$locked('volunteer_period_start_date')" />
+                    <x-ui.form-input wire:model.live.blur="data.volunteer_period_start_date" :label="__('hr_recruitment.volunteer_period_start_date')" type="date" :min="$startMin" required :help="__('hr_recruitment.form_ui.period_start_help')" :disabled="$locked('volunteer_period_start_date')" />
                 </div>
                 <div @class([$askedRing => $asked('volunteer_period_end_date')])>
                     <x-ui.form-input wire:model="data.volunteer_period_end_date" :label="__('hr_recruitment.volunteer_period_end_date')" type="date" :min="$endMin" required :help="__('hr_recruitment.form_ui.period_end_help')" :disabled="$locked('volunteer_period_end_date')" />

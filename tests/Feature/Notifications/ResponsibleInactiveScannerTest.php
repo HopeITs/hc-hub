@@ -130,13 +130,13 @@ test('HR is read once however many projects match', function () {
         projectOwnedBy(insertHrEmployee(isActive: false));
     }
 
-    DB::connection('hr')->flushQueryLog();
-    DB::connection('hr')->enableQueryLog();
+    DB::flushQueryLog();
+    DB::enableQueryLog();
     scanResponsible();
-    $employeeReads = collect(DB::connection('hr')->getQueryLog())
+    $employeeReads = collect(DB::getQueryLog())
         ->filter(fn (array $q): bool => str_contains($q['query'], 'employees'))
         ->count();
-    DB::connection('hr')->disableQueryLog();
+    DB::disableQueryLog();
 
     expect($employeeReads)->toBeLessThanOrEqual(2);
 });

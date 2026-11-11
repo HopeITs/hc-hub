@@ -17,7 +17,7 @@ beforeEach(function () {
 
 test('30 failed logins from one ip lock that ip out, whatever the email', function () {
     Event::fake([Lockout::class]);
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     foreach (range(1, 30) as $attempt) {
         ($this->attemptLogin)("nobody{$attempt}@example.org", 'wrong-password', '10.0.0.1');
@@ -33,8 +33,8 @@ test('30 failed logins from one ip lock that ip out, whatever the email', functi
 });
 
 test('10 failed logins on one email from different ips lock that email', function () {
-    $user = User::factory()->withHrAccount()->create();
-    $colleague = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
+    $colleague = User::factory()->create();
 
     foreach (range(1, 10) as $attempt) {
         $email = $attempt % 2 === 0 ? $user->email : Str::upper($user->email);
@@ -51,7 +51,7 @@ test('10 failed logins on one email from different ips lock that email', functio
 });
 
 test('a successful login clears the failed logins counted against that email', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     foreach (range(1, 9) as $attempt) {
         ($this->attemptLogin)($user->email, 'wrong-password', "10.0.2.{$attempt}");
@@ -70,7 +70,7 @@ test('a successful login clears the failed logins counted against that email', f
 
 test('a wrong password reports a failed login without the password', function () {
     Event::fake([Failed::class]);
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     ($this->attemptLogin)($user->email, 'wrong-password', '10.0.4.1')->assertSessionHasErrors('password');
 

@@ -1,16 +1,16 @@
 <?php
 
-use App\Models\HrCity;
-use App\Models\HrEmployee;
-use App\Models\HrProgram;
-use App\Models\HrUser;
+use Modules\Core\Models\City as HrCity;
+use Modules\Hr\Models\Employee as HrEmployee;
+use Modules\Core\Models\Program as HrProgram;
+use Modules\Core\Models\User as HrUser;
 
 test('hr models read hchr_ tables through the hr connection', function (string $model, string $table) {
     $instance = new $model;
 
     expect($instance->getConnectionName())->toBe('hr')
         ->and($instance->getConnection()->getTablePrefix().$instance->getTable())->toBe($table);
-})->with([
+})->skip('Obsolete since one database (A2): there is no hr connection or hchr_ table prefix.')->with([
     [HrCity::class, 'hchr_cities'],
     [HrProgram::class, 'hchr_programs'],
     [HrEmployee::class, 'hchr_employees'],
@@ -51,7 +51,7 @@ test('hr records cannot be created', function () {
 
     expect(fn () => $city->save())->toThrow(LogicException::class, 'read-only')
         ->and(HrCity::count())->toBe(0);
-});
+})->skip('Obsolete since one database (A2): HR models are writable Core/Hr models, no longer read-only.');
 
 test('hr records cannot be updated', function () {
     $program = HrProgram::find(insertHrProgram());
@@ -59,7 +59,7 @@ test('hr records cannot be updated', function () {
 
     expect(fn () => $program->save())->toThrow(LogicException::class, 'read-only')
         ->and(HrProgram::find($program->id)->name)->toBe('Hope Center');
-});
+})->skip('Obsolete since one database (A2): HR models are writable Core/Hr models, no longer read-only.');
 
 test('hr records cannot be deleted', function () {
     $employeeId = insertHrEmployee();
@@ -67,7 +67,7 @@ test('hr records cannot be deleted', function () {
     expect(fn () => HrEmployee::find($employeeId)->delete())->toThrow(LogicException::class, 'read-only')
         ->and(fn () => HrEmployee::destroy($employeeId))->toThrow(LogicException::class, 'read-only')
         ->and(HrEmployee::find($employeeId))->not->toBeNull();
-});
+})->skip('Obsolete since one database (A2): HR models are writable Core/Hr models, no longer read-only.');
 
 test('sensitive hr fields are hidden from serialization', function () {
     $hidden = HrEmployee::find(insertHrEmployee())->getHidden();

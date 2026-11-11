@@ -3,10 +3,10 @@
 use App\Models\Role;
 use Modules\Core\Models\User;
 
-test('the command gives an hr account access with the given role', function () {
+test('the command gives an existing account the given role', function () {
     Role::findOrCreate('MEAL', 'web');
     $employeeId = insertHrEmployee(firstNameEn: 'Amina', lastNameEn: 'Haddad');
-    $hrUserId = insertHrUser($employeeId, 'amina@example.org');
+    $userId = insertHrUser($employeeId, 'amina@example.org');
 
     $this->artisan('user:create', [
         '--email' => 'amina@example.org',
@@ -14,16 +14,14 @@ test('the command gives an hr account access with the given role', function () {
         '--no-interaction' => true,
     ])->assertSuccessful();
 
-    $user = User::query()->where('hr_user_id', $hrUserId)->sole();
+    $user = User::query()->findOrFail($userId);
 
-    expect($user->name)->toBe('Amina Haddad')
-        ->and($user->roles->first()?->name)->toBe('MEAL')
-        ->and($user->hr_user_id)->toBe($hrUserId)
+    expect($user->roles->pluck('name')->all())->toBe(['MEAL'])
         ->and($user->employee_id)->toBe($employeeId)
-        ->and($user->email_verified_at)->not->toBeNull();
+        ->and(User::query()->count())->toBe(1);
 });
 
-test('a user gets the default Team Member role when none is given', function () {
+test('an account gets the default Team Member role when none is given', function () {
     insertHrUser(insertHrEmployee(), 'dana@example.org');
 
     $this->artisan('user:create', [
@@ -34,11 +32,25 @@ test('a user gets the default Team Member role when none is given', function () 
     expect(User::query()->sole()->roles->pluck('name')->all())->toBe(['Team Member']);
 });
 
-test('the unverified flag leaves the address unverified', function () {
-    insertHrUser(insertHrEmployee(), 'dana@example.org');
-
+test('an email no account uses becomes a new account with the given password and no employee', function () {
     $this->artisan('user:create', [
-        '--email' => 'dana@example.org',
+        '--email' => 'new@example.org',
+        '--password' => 'Str0ng-Passw0rd-for-tests',
+        '--no-interaction' => true,
+    ])->assertSuccessful();
+
+    $user = User::query()->sole();
+
+    expect($user->email)->toBe('new@example.org')
+        ->and($user->employee_id)->toBeNull()
+        ->and($user->email_verified_at)->not->toBeNull()
+        ->and($user->roles->pluck('name')->all())->toBe(['Team Member']);
+});
+
+test('the unverified flag leaves a new account\'s address unverified', function () {
+    $this->artisan('user:create', [
+        '--email' => 'new@example.org',
+        '--password' => 'Str0ng-Passw0rd-for-tests',
         '--unverified' => true,
         '--no-interaction' => true,
     ])->assertSuccessful();
@@ -46,7 +58,7 @@ test('the unverified flag leaves the address unverified', function () {
     expect(User::query()->sole()->email_verified_at)->toBeNull();
 });
 
-test('an email with no hr account is rejected', function () {
+test('a new account needs a password', function () {
     $this->artisan('user:create', [
         '--email' => 'nobody@example.org',
         '--no-interaction' => true,
@@ -56,7 +68,7 @@ test('an email with no hr account is rejected', function () {
 });
 
 test('an unknown role is rejected', function () {
-    insertHrUser(insertHrEmployee(), 'dana@example.org');
+    $userId = insertHrUser(insertHrEmployee(), 'dana@example.org');
 
     $this->artisan('user:create', [
         '--email' => 'dana@example.org',
@@ -64,18 +76,18 @@ test('an unknown role is rejected', function () {
         '--no-interaction' => true,
     ])->assertFailed();
 
-    $this->assertDatabaseCount('users', 0);
+    expect(User::query()->findOrFail($userId)->roles)->toBeEmpty();
 });
 
-test('a duplicate email is rejected', function () {
-    User::factory()->create(['email' => 'taken@example.org']);
+test('an account that already has access is rejected', function () {
+    User::factory()->role('MEAL')->create(['email' => 'taken@example.org']);
 
     $this->artisan('user:create', [
         '--email' => 'taken@example.org',
         '--no-interaction' => true,
     ])->assertFailed();
 
-    $this->assertDatabaseCount('users', 1);
+    expect(User::query()->sole()->roles->pluck('name')->all())->toBe(['MEAL']);
 });
 
 test('a missing email is rejected', function () {

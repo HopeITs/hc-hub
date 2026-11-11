@@ -207,7 +207,7 @@ test('a person in two slots gets one row with the higher slot, and an inactive r
     $proposal = reviewableProposal();
     $people = projectPeople($proposal->projects()->sole());
     holdReviewSlot(ReviewerSlot::Ceo, $people['owner']);
-    DB::connection('hr')->table('employees')->where('id', $people['programManager'])->update(['is_active' => false]);
+    DB::table('employees')->where('id', $people['programManager'])->update(['is_active' => false]);
     $inactiveUser = userWithRole('Team Member', $people['programManager']);
 
     moveProposal(userWithRole('Financial'), $proposal, ProposalStatus::ConceptNoteReview);

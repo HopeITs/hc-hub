@@ -359,7 +359,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer_convert')]
                                     <option value="{{ $value }}">{{ $label }}</option>
                                 @endforeach
                             </x-ui.form-select>
-                            <x-ui.form-input wire:model.blur="employee.nationalNumber" :label="__('hr_employees.fields.national_number')" inputmode="numeric" dir="ltr" required />
+                            <x-ui.form-input wire:model.live.blur="employee.nationalNumber" :label="__('hr_employees.fields.national_number')" inputmode="numeric" dir="ltr" required />
                             <x-ui.form-select wire:model="employee.gender" :label="__('hr_employees.fields.gender')" :placeholder="__('hr_recruitment.choose')" required>
                                 @foreach (EnumLabel::options(Gender::class) as $value => $label)
                                     <option value="{{ $value }}">{{ $label }}</option>

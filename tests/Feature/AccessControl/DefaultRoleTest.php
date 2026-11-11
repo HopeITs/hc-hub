@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\HrUser;
+use Modules\Core\Models\User as HrUser;
 use Modules\Core\Models\User;
 
 test('a first HR login creates a Team Member account', function () {

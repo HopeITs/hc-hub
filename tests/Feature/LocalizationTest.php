@@ -1,8 +1,8 @@
 <?php
 
 use App\Enums\Locale;
-use App\Models\HrCity;
-use App\Models\HrEmployee;
+use Modules\Core\Models\City as HrCity;
+use Modules\Hr\Models\Employee as HrEmployee;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;

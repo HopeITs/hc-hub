@@ -17,7 +17,7 @@ use Modules\Tracking\Models\LibraryIndicator;
 function programWithHrCode(string $code): int
 {
     $programId = Program::factory()->create()->id;
-    DB::connection('hr')->table('programs')->where('id', $programId)->update(['code' => $code]);
+    DB::table('programs')->where('id', $programId)->update(['code' => $code]);
 
     return $programId;
 }

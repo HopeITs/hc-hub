@@ -25,7 +25,7 @@ function failSecondStep(User $user, int $times): void
 }
 
 test('two failed codes send nothing', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     failSecondStep($user, 2);
 
@@ -33,7 +33,7 @@ test('two failed codes send nothing', function () {
 });
 
 test('the third wrong email code alerts the user once, with the device and ip', function () {
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
 
     $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.9'])
         ->withHeaders(['User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0'])
@@ -64,7 +64,7 @@ test('the third wrong email code alerts the user once, with the device and ip', 
 });
 
 test('further failures in the same window send nothing more', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     failSecondStep($user, 5);
 
@@ -72,7 +72,7 @@ test('further failures in the same window send nothing more', function () {
 });
 
 test('a new batch of failures after the window alerts again', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     failSecondStep($user, 3);
     $this->travel(16)->minutes();
@@ -86,7 +86,7 @@ test('a new batch of failures after the window alerts again', function () {
 });
 
 test('a user without an email is not alerted', function () {
-    $user = User::factory()->create(['hr_user_id' => 999_999]);
+    $user = User::factory()->create(['email' => '']);
 
     failSecondStep($user, 3);
 

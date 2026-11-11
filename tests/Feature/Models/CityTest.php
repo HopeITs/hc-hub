@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\HrCity;
+use Modules\Core\Models\City as HrCity;
 use Modules\Tracking\Models\Project;
 
 test('projects delivered in an hr city can be found by its id', function () {

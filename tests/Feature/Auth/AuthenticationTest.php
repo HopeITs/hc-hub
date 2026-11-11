@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Middleware\EnsureHrAccountIsActive;
+use App\Http\Middleware\EnsureAccountIsActive;
 use App\Models\Activity;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Cache\Store;
@@ -20,7 +20,7 @@ test('login screen can be rendered', function () {
 });
 
 test('users can authenticate with their hr password', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $response = $this->post(route('login.store'), [
         'email' => $user->email,
@@ -35,7 +35,7 @@ test('users can authenticate with their hr password', function () {
 });
 
 test('login always lands on the dashboard, never on the page visited before logging out', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     // Hitting a protected route while a guest stashes it as the "intended" URL.
     $this->get(route('tasks.index'));
@@ -48,8 +48,8 @@ test('login always lands on the dashboard, never on the page visited before logg
     $response->assertRedirect(route('dashboard', absolute: false));
 });
 
-test('inactive hr employees cannot log in', function () {
-    $hrUserId = insertHrUser(insertHrEmployee(isActive: false), 'gone@example.org');
+test('accounts of inactive employees cannot log in', function () {
+    insertHrUser(insertHrEmployee(isActive: false), 'gone@example.org');
 
     $this->post(route('login.store'), [
         'email' => 'gone@example.org',
@@ -57,7 +57,6 @@ test('inactive hr employees cannot log in', function () {
     ])->assertSessionHasErrors('email');
 
     $this->assertGuest();
-    expect(User::query()->where('hr_user_id', $hrUserId)->exists())->toBeFalse();
 });
 
 test('logging in links the user to their hr account and refreshes their name', function () {
@@ -75,10 +74,10 @@ test('logging in links the user to their hr account and refreshes their name', f
         ->employee_id->toBe($employeeId)
         ->name->toBe('Rana Darwish')
         ->and($user->employee->name_ar)->toBe('سامي حداد');
-});
+})->skip('Obsolete since one database, one login (A2): logging in no longer links or refreshes a user from HR\'s separate account.');
 
 test('remember me issues a remember cookie that lasts 30 days', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $response = $this->post(route('login.store'), [
         'email' => $user->email,
@@ -101,7 +100,7 @@ test('remember me issues a remember cookie that lasts 30 days', function () {
 });
 
 test('without remember me no remember cookie is issued', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $response = $this->post(route('login.store'), [
         'email' => $user->email,
@@ -122,7 +121,7 @@ test('the session cookie itself expires when the browser closes, remember me or 
     // user skip the login page next time even though this session cookie
     // is gone; without it, closing the browser must require signing in
     // again rather than silently staying logged in for SESSION_LIFETIME.
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $withoutRemember = $this->post(route('login.store'), [
         'email' => $user->email,
@@ -150,16 +149,16 @@ test('the session cookie itself expires when the browser closes, remember me or 
 });
 
 test('logging in never writes to hr', function () {
-    $user = User::factory()->withHrAccount()->create();
-    $before = DB::connection('hr')->table('users')->get()->toArray();
+    $user = User::factory()->create();
+    $before = DB::table('users')->get()->toArray();
 
     $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password']);
 
-    expect(DB::connection('hr')->table('users')->get()->toArray())->toEqual($before);
+    expect(DB::table('users')->get()->toArray())->toEqual($before);
 });
 
 test('users can not authenticate with a wrong hr password', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $response = $this->post(route('login.store'), [
         'email' => $user->email,
@@ -172,7 +171,7 @@ test('users can not authenticate with a wrong hr password', function () {
 });
 
 test('a wrong password for a known account shows the error under the password field', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $this->post(route('login.store'), [
         'email' => $user->email,
@@ -211,19 +210,18 @@ test('an unknown email shows the error under the email field', function () {
     expect($emailFieldMarkup)->toContain(__('auth.failed'));
 });
 
-test('tracking keeps no copy of hr names, emails or passwords', function () {
+test('users keep no copy of the employee\'s name, but hold their own email and password', function () {
     expect(Schema::hasColumns('users', ['name']))->toBeFalse()
-        ->and(Schema::hasColumns('users', ['email']))->toBeFalse()
-        ->and(Schema::hasColumns('users', ['password']))->toBeFalse();
+        ->and(Schema::hasColumns('users', ['email', 'password']))->toBeTrue();
 });
 
-test('a user shows the name and email hr holds', function () {
-    $user = Activity::withoutRecording(fn (): User => User::factory()->create(['name' => 'Rana Darwish', 'email' => 'rana@example.org']));
-    DB::connection('hr')->table('users')->where('id', $user->hr_user_id)->update(['email' => 'rana.d@example.org']);
+test('a user shows the name of their employee and their own email', function () {
+    $employeeId = insertHrEmployee(firstNameEn: 'Rana', lastNameEn: 'Darwish');
+    $user = Activity::withoutRecording(fn (): User => User::factory()->create(['employee_id' => $employeeId, 'email' => 'rana@example.org']));
 
     expect($user->fresh())
         ->name->toBe('Rana Darwish')
-        ->email->toBe('rana.d@example.org');
+        ->email->toBe('rana@example.org');
 });
 
 test('an hr account logging in for the first time gets a Team Member tracking user', function () {
@@ -241,7 +239,7 @@ test('an hr account logging in for the first time gets a Team Member tracking us
     expect($user->roles->pluck('name')->all())->toBe(['Team Member'])
         ->and($user->name)->toBe('Mai Nasser')
         ->and($user->employee_id)->toBe($employeeId);
-});
+})->skip('Obsolete since one database, one login (A2): there is no first-login provisioning from HR accounts any more; accounts are users rows.');
 
 test('listed hr admin emails start as super admins on first login', function () {
     config(['auth.hr_admin_emails' => ['boss@example.org']]);
@@ -253,11 +251,11 @@ test('listed hr admin emails start as super admins on first login', function () 
     ])->assertSessionHasNoErrors();
 
     expect(User::query()->sole()->roles->first()?->name)->toBe('Super Admin');
-});
+})->skip('Obsolete since one database, one login (A2): there is no first-login provisioning from HR accounts any more; accounts are users rows.');
 
 test('an existing role is kept when that user logs in again', function () {
     config(['auth.hr_admin_emails' => ['boss@example.org']]);
-    $user = User::factory()->role('Managers')->withHrAccount()->create(['email' => 'boss@example.org']);
+    $user = User::factory()->role('Managers')->create(['email' => 'boss@example.org']);
 
     $this->post(route('login.store'), ['email' => 'boss@example.org', 'password' => 'password']);
 
@@ -274,11 +272,11 @@ test('a wrong hr password creates no tracking user', function () {
 
     $this->assertGuest();
     expect(User::query()->count())->toBe(0);
-});
+})->skip('Obsolete since one database, one login (A2): there is no first-login provisioning from HR accounts any more; accounts are users rows.');
 
 test('a tracking user whose hr account was removed is refused', function () {
     $user = User::factory()->create(['email' => 'orphan@example.org']);
-    DB::connection('hr')->table('users')->where('id', $user->hr_user_id)->delete();
+    DB::table('users')->where('id', $user->hr_user_id)->delete();
 
     $this->post(route('login.store'), [
         'email' => 'orphan@example.org',
@@ -286,7 +284,7 @@ test('a tracking user whose hr account was removed is refused', function () {
     ])->assertSessionHasErrorsIn('email');
 
     $this->assertGuest();
-});
+})->skip('Obsolete since one database, one login (A2): there is no separate HR account that could be removed, change email or be unreachable.');
 
 test('users with two factor enabled are redirected to two factor challenge', function () {
     $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
@@ -296,7 +294,7 @@ test('users with two factor enabled are redirected to two factor challenge', fun
         'confirmPassword' => true,
     ]);
 
-    $user = User::factory()->withTwoFactor()->withHrAccount()->create();
+    $user = User::factory()->withTwoFactor()->create();
 
     $response = $this->post(route('login.store'), [
         'email' => $user->email,
@@ -324,8 +322,8 @@ test('password reset is not offered because passwords live in hr', function () {
 });
 
 test('an email changed in hr still logs in as the same user', function () {
-    $user = Activity::withoutRecording(fn (): User => User::factory()->withHrAccount('hr-secret')->create(['email' => 'old@example.org']));
-    DB::connection('hr')->table('users')->where('id', $user->hr_user_id)->update(['email' => 'new@example.org']);
+    $user = Activity::withoutRecording(fn (): User => User::factory()->state(['password' => bcrypt('hr-secret')])->create(['email' => 'old@example.org']));
+    DB::table('users')->where('id', $user->hr_user_id)->update(['email' => 'new@example.org']);
 
     $this->post(route('login.store'), [
         'email' => 'new@example.org',
@@ -335,25 +333,24 @@ test('an email changed in hr still logs in as the same user', function () {
     $this->assertAuthenticatedAs($user);
     expect(User::query()->count())->toBe(1)
         ->and($user->refresh()->email)->toBe('new@example.org');
-});
+})->skip('Obsolete since one database, one login (A2): there is no separate HR account that could be removed, change email or be unreachable.');
 
 test('a signed-in user is signed out once hr deactivates them', function () {
     $employeeId = insertHrEmployee();
-    $hrUserId = insertHrUser($employeeId, 'rana@example.org');
-    $user = User::factory()->create(['email' => 'rana@example.org']);
+    $user = User::factory()->create(['employee_id' => $employeeId, 'email' => 'rana@example.org']);
 
     $this->actingAs($user)->get(route('dashboard'))->assertOk();
 
-    DB::connection('hr')->table('employees')->where('id', $employeeId)->update(['is_active' => false]);
+    DB::table('employees')->where('id', $employeeId)->update(['is_active' => false]);
     $this->travel(61)->seconds();
 
     $this->get(route('dashboard'))->assertRedirect(route('login'));
     $this->assertGuest();
 });
 
-test('a signed-in user whose hr account was removed is signed out', function () {
+test('a signed-in user whose account was removed is signed out', function () {
     $user = User::factory()->create();
-    DB::connection('hr')->table('users')->where('id', $user->hr_user_id)->delete();
+    DB::table('users')->where('id', $user->id)->delete();
 
     $this->actingAs($user)->get(route('dashboard'))->assertRedirect(route('login'));
     $this->assertGuest();
@@ -369,11 +366,11 @@ test('an unreachable hr database does not sign anyone out', function () {
     $request->setUserResolver(fn (): User => $user);
     $request->setLaravelSession(app('session.store'));
 
-    $response = (new EnsureHrAccountIsActive)->handle($request, fn (): Response => new Response('ok'));
+    $response = (new EnsureAccountIsActive)->handle($request, fn (): Response => new Response('ok'));
 
     expect($response->getContent())->toBe('ok');
     $this->assertAuthenticatedAs($user);
-});
+})->skip('Obsolete since one database, one login (A2): there is no separate HR account that could be removed, change email or be unreachable.');
 
 /**
  * Points the default cache store at one that throws on every call, the way an
@@ -445,8 +442,7 @@ function breakCacheStore(): void
 
 test('a broken cache store does not keep a deactivated hr user signed in', function () {
     $employeeId = insertHrEmployee(isActive: false);
-    insertHrUser($employeeId, 'rana@example.org');
-    $user = User::factory()->create(['email' => 'rana@example.org']);
+    $user = User::factory()->create(['employee_id' => $employeeId, 'email' => 'rana@example.org']);
     $this->actingAs($user);
     breakCacheStore();
 
@@ -454,7 +450,7 @@ test('a broken cache store does not keep a deactivated hr user signed in', funct
     $request->setUserResolver(fn (): User => $user);
     $request->setLaravelSession(app('session.store'));
 
-    expect(fn () => (new EnsureHrAccountIsActive)->handle($request, fn (): Response => new Response('ok')))
+    expect(fn () => (new EnsureAccountIsActive)->handle($request, fn (): Response => new Response('ok')))
         ->toThrow(AuthenticationException::class);
     $this->assertGuest();
 });
@@ -468,7 +464,7 @@ test('a broken cache store does not lock out an active hr user', function () {
     $request->setUserResolver(fn (): User => $user);
     $request->setLaravelSession(app('session.store'));
 
-    $response = (new EnsureHrAccountIsActive)->handle($request, fn (): Response => new Response('ok'));
+    $response = (new EnsureAccountIsActive)->handle($request, fn (): Response => new Response('ok'));
 
     expect($response->getContent())->toBe('ok');
     $this->assertAuthenticatedAs($user);
@@ -476,16 +472,15 @@ test('a broken cache store does not lock out an active hr user', function () {
 
 test('a cached hr answer in an unknown shape does not keep a deactivated hr user signed in', function () {
     $employeeId = insertHrEmployee(isActive: false);
-    insertHrUser($employeeId, 'rana@example.org');
-    $user = User::factory()->create(['email' => 'rana@example.org']);
+    $user = User::factory()->create(['employee_id' => $employeeId, 'email' => 'rana@example.org']);
     $this->actingAs($user);
-    Cache::put(EnsureHrAccountIsActive::cacheKey($user), ['lost_access' => false], 60);
+    Cache::put(EnsureAccountIsActive::cacheKey($user), ['lost_access' => false], 60);
 
     $request = Request::create('/');
     $request->setUserResolver(fn (): User => $user);
     $request->setLaravelSession(app('session.store'));
 
-    expect(fn () => (new EnsureHrAccountIsActive)->handle($request, fn (): Response => new Response('ok')))
+    expect(fn () => (new EnsureAccountIsActive)->handle($request, fn (): Response => new Response('ok')))
         ->toThrow(AuthenticationException::class);
     $this->assertGuest();
 });

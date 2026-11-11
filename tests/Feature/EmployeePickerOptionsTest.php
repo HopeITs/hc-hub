@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee as HrEmployee;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
@@ -191,4 +191,4 @@ test('an employee chip still renders, with the HR id, when HR positions cannot b
     $this->blade('<x-ui.employee-chip :employee="$employee" />', ['employee' => $employee])
         ->assertSee('Pia Placed')
         ->assertSee('#'.$employee->id.' · Could not load HR data');
-});
+})->skip('Obsolete since one database (A2): HR positions live in the same database, so there is no unreadable HR connection to degrade on.');

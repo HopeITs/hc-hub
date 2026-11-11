@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee as HrEmployee;
 use Illuminate\Support\Facades\Storage;
 use Modules\Core\Models\User;
 

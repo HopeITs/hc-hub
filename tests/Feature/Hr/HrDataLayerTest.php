@@ -17,7 +17,7 @@ test('the HR migrations create every HR-owned table without the hchr_ prefix', f
     }
 
     expect(Schema::hasTable('hchr_employees'))->toBeFalse()
-        ->and(Schema::hasColumns('users', ['email', 'password', 'last_seen_at', 'hr_user_id', 'employee_id']))->toBeTrue()
+        ->and(Schema::hasColumns('users', ['email', 'password', 'last_seen_at', 'employee_id']))->toBeTrue()
         ->and(Schema::hasColumns('programs', ['name', 'code', 'slug', 'start_date', 'end_date', 'is_active']))->toBeTrue();
 });
 

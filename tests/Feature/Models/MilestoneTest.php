@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee as HrEmployee;
 use Carbon\CarbonImmutable;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Models\Milestone;

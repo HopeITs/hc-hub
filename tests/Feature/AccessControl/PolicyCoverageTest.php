@@ -2,15 +2,15 @@
 
 use App\Models\Activity;
 use App\Models\AiRequest;
-use App\Models\HrCenter;
-use App\Models\HrCity;
-use App\Models\HrContract;
-use App\Models\HrDepartment;
-use App\Models\HrEmployee;
-use App\Models\HrJobLevel;
-use App\Models\HrPosition;
-use App\Models\HrProgram;
-use App\Models\HrUser;
+use Modules\Core\Models\Center as HrCenter;
+use Modules\Core\Models\City as HrCity;
+use Modules\Hr\Models\Contract as HrContract;
+use Modules\Hr\Models\Department as HrDepartment;
+use Modules\Hr\Models\Employee as HrEmployee;
+use Modules\Hr\Models\JobLevel as HrJobLevel;
+use Modules\Hr\Models\Position as HrPosition;
+use Modules\Core\Models\Program as HrProgram;
+use Modules\Core\Models\User as HrUser;
 use App\Models\KnownDevice;
 use App\Models\Media;
 use App\Models\NotificationMute;

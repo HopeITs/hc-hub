@@ -12,7 +12,7 @@ use Modules\Core\Models\User;
  */
 function changeHrPassword(User $user, string $password): void
 {
-    DB::connection('hr')->table('users')->where('id', $user->hr_user_id)->update([
+    DB::table('users')->where('id', $user->id)->update([
         'password' => Hash::make($password),
     ]);
 }
@@ -27,7 +27,7 @@ function makeHrUnreachable(): void
 }
 
 test('changing the hr password signs an open session out', function () {
-    $user = User::factory()->withHrAccount('old-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('old-secret')])->create();
 
     $this->post(route('login.store'), [
         'email' => $user->email,
@@ -48,14 +48,14 @@ test('changing the hr password signs an open session out', function () {
 });
 
 test('a session signed in before fingerprints were checked is given one and stays signed in', function () {
-    $user = User::factory()->withHrAccount('old-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('old-secret')])->create();
 
     $this->post(route('login.store'), ['email' => $user->email, 'password' => 'old-secret']);
     session()->forget('password_hash_web');
 
     $this->get(route('dashboard'))->assertOk();
 
-    $hrPasswordHash = DB::connection('hr')->table('users')->where('id', $user->hr_user_id)->value('password');
+    $hrPasswordHash = DB::table('users')->where('id', $user->id)->value('password');
     expect(session('password_hash_web'))->toBe(Auth::guard('web')->hashPasswordForCookie($hrPasswordHash));
 
     $this->travel(61)->seconds();
@@ -71,7 +71,7 @@ test('a session signed in before fingerprints were checked is given one and stay
 });
 
 test('logging in with a new hr password is not undone by the check cached before the change', function () {
-    $user = User::factory()->withHrAccount('old-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('old-secret')])->create();
 
     $this->post(route('login.store'), ['email' => $user->email, 'password' => 'old-secret']);
     $this->get(route('dashboard'))->assertOk();
@@ -89,7 +89,7 @@ test('logging in with a new hr password is not undone by the check cached before
 });
 
 test('a remember cookie issued before an hr password change no longer signs in', function () {
-    $user = User::factory()->withHrAccount('old-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('old-secret')])->create();
     $recallerName = Auth::guard('web')->getRecallerName();
 
     $rememberCookie = $this->post(route('login.store'), [
@@ -116,7 +116,7 @@ test('a remember cookie issued before an hr password change no longer signs in',
 
 test('while hr is unreachable a remember cookie signs nobody in and the login page still loads', function () {
     Exceptions::fake();
-    $user = User::factory()->withHrAccount('hr-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('hr-secret')])->create();
     $recallerName = Auth::guard('web')->getRecallerName();
 
     $rememberCookie = $this->post(route('login.store'), [
@@ -140,7 +140,7 @@ test('while hr is unreachable a remember cookie signs nobody in and the login pa
     }
 
     Exceptions::assertReported(QueryException::class);
-});
+})->skip('Obsolete since one database, one login (A2): there is no separate HR database that can be unreachable.');
 
 test('a user hr had taken access from is still signed out once hr becomes unreachable', function () {
     $employeeId = insertHrEmployee();
@@ -149,7 +149,7 @@ test('a user hr had taken access from is still signed out once hr becomes unreac
 
     $this->actingAs($user)->get(route('dashboard'))->assertOk();
 
-    DB::connection('hr')->table('employees')->where('id', $employeeId)->update(['is_active' => false]);
+    DB::table('employees')->where('id', $employeeId)->update(['is_active' => false]);
     $this->travel(61)->seconds();
     $this->get(route('dashboard'))->assertRedirect(route('login'));
 
@@ -158,4 +158,4 @@ test('a user hr had taken access from is still signed out once hr becomes unreac
 
     $this->actingAs($user)->get(route('dashboard'))->assertRedirect(route('login'));
     $this->assertGuest();
-});
+})->skip('Obsolete since one database, one login (A2): there is no separate HR database that can be unreachable.');

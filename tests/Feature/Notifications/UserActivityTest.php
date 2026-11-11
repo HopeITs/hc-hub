@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\HrUser;
+use Modules\Core\Models\User as HrUser;
 use App\Models\Role;
 use App\Models\UserNotification;
 use Livewire\Livewire;

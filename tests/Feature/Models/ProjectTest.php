@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\HrCity;
-use App\Models\HrEmployee;
+use Modules\Core\Models\City as HrCity;
+use Modules\Hr\Models\Employee as HrEmployee;
 use Modules\Core\Models\Program;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\PlanIndicator;

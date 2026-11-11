@@ -40,7 +40,7 @@ beforeEach(function () {
 });
 
 test('a trusted browser signs in with the password alone', function () {
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
 
     $token = signInWithEmailCode($user, trustDevice: true);
 
@@ -59,14 +59,14 @@ test('a trusted browser signs in with the password alone', function () {
 });
 
 test('without the box ticked the browser is not trusted', function () {
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
 
     expect(signInWithEmailCode($user, trustDevice: false))->toBeNull()
         ->and($user->trustedDevices()->exists())->toBeFalse();
 });
 
 test('a trusted browser still needs the right password', function () {
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
     $token = signInWithEmailCode($user, trustDevice: true);
     auth()->logout();
 
@@ -78,8 +78,8 @@ test('a trusted browser still needs the right password', function () {
 });
 
 test('an expired, unknown or other user\'s cookie still asks for a code', function () {
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
-    $other = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
+    $other = User::factory()->create(['email_two_factor_enabled' => true]);
     $otherToken = signInWithEmailCode($other, trustDevice: true);
     auth()->logout();
 
@@ -97,7 +97,7 @@ test('an expired, unknown or other user\'s cookie still asks for a code', functi
 test('ticking the box on the authenticator app challenge trusts the browser too', function () {
     $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
 
-    $user = User::factory()->withTwoFactor()->withHrAccount()->create();
+    $user = User::factory()->withTwoFactor()->create();
 
     $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])
         ->assertRedirect(route('two-factor.login'));

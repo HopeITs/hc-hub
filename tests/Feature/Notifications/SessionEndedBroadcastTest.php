@@ -29,13 +29,13 @@ test('signing out tells the user open tabs to re-check their session', function 
 });
 
 test('the hr sign-out after a password change tells the user open tabs to re-check their session', function () {
-    $user = User::factory()->withHrAccount('old-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('old-secret')])->create();
 
     $this->post(route('login.store'), ['email' => $user->email, 'password' => 'old-secret'])->assertSessionHasNoErrors();
 
     Event::fake([SessionEnded::class]);
 
-    DB::connection('hr')->table('users')->where('id', $user->hr_user_id)->update(['password' => Hash::make('new-secret')]);
+    DB::table('users')->where('id', $user->id)->update(['password' => Hash::make('new-secret')]);
     $this->travel(61)->seconds();
 
     $this->get(route('dashboard'))->assertRedirect(route('login'));

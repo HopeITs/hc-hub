@@ -44,7 +44,7 @@ function signInFrom(User $user, string $userAgent, string $ip = '10.0.0.1'): voi
 
 test('the first sign-in records the device as a baseline without an email', function () {
     Notification::fake();
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     signInFrom($user, deviceUserAgent('chrome-windows'));
 
@@ -57,7 +57,7 @@ test('the first sign-in records the device as a baseline without an email', func
 
 test('the stored label is english whatever language the sign-in happens in', function () {
     Notification::fake();
-    $user = User::factory()->withHrAccount()->create(['locale' => 'ar']);
+    $user = User::factory()->create(['locale' => 'ar']);
 
     $this->withSession(['locale' => 'ar']);
     signInFrom($user, deviceUserAgent('chrome-windows'));
@@ -67,7 +67,7 @@ test('the stored label is english whatever language the sign-in happens in', fun
 
 test('signing in again from a known device only refreshes when and where it was last seen', function () {
     Notification::fake();
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     signInFrom($user, deviceUserAgent('chrome-windows'), '10.0.0.1');
     $this->travel(2)->hours();
@@ -81,7 +81,7 @@ test('signing in again from a known device only refreshes when and where it was 
 
 test('signing in from a new browser emails the user the device and ip', function () {
     Notification::fake();
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     signInFrom($user, deviceUserAgent('chrome-windows'));
     signInFrom($user, deviceUserAgent('firefox-linux'), '203.0.113.9');
@@ -122,7 +122,7 @@ test('a half-recognised device names the part that is known', function () {
 
 test('the new sign-in email is written in the user\'s language, right to left for arabic', function () {
     Notification::fake();
-    $user = User::factory()->withHrAccount()->create(['locale' => 'ar']);
+    $user = User::factory()->create(['locale' => 'ar']);
     KnownDevice::factory()->for($user)->forUserAgent(deviceUserAgent('chrome-windows'))->create();
 
     signInFrom($user, deviceUserAgent('firefox-linux'));
@@ -157,7 +157,7 @@ test('the english email stays left to right', function () {
 
 test('a user without an email is not mailed about a new device', function () {
     Notification::fake();
-    $user = User::factory()->create(['hr_user_id' => 999_999]);
+    $user = User::factory()->create(['email' => '']);
     KnownDevice::factory()->for($user)->forUserAgent(deviceUserAgent('chrome-windows'))->create();
     $this->app['request']->headers->set('User-Agent', deviceUserAgent('firefox-linux'));
 
@@ -170,7 +170,7 @@ test('a user without an email is not mailed about a new device', function () {
 
 test('a failing new sign-in email is reported and does not stop the sign-in', function () {
     Exceptions::fake();
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
     KnownDevice::factory()->for($user)->forUserAgent(deviceUserAgent('chrome-windows'))->create();
     Notification::shouldReceive('send')->andThrow(new RuntimeException('Mail server is down'));
 

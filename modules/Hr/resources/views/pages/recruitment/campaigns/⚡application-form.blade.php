@@ -412,10 +412,10 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.application_form
                                         </div>
                                     </div>
                                     <div class="mt-2 grid gap-3 sm:grid-cols-2">
-                                        <x-ui.form-input wire:model.blur="fields.{{ $index }}.label.en" :label="__('hr_recruitment.application_form.label_en')" dir="ltr" required />
-                                        <x-ui.form-input wire:model.blur="fields.{{ $index }}.label.ar" :label="__('hr_recruitment.application_form.label_ar')" dir="rtl" required />
-                                        <x-ui.form-input wire:model.blur="fields.{{ $index }}.help.en" :label="__('hr_recruitment.application_form.help_en')" dir="ltr" />
-                                        <x-ui.form-input wire:model.blur="fields.{{ $index }}.help.ar" :label="__('hr_recruitment.application_form.help_ar')" dir="rtl" />
+                                        <x-ui.form-input wire:model="fields.{{ $index }}.label.en" :label="__('hr_recruitment.application_form.label_en')" dir="ltr" required />
+                                        <x-ui.form-input wire:model="fields.{{ $index }}.label.ar" :label="__('hr_recruitment.application_form.label_ar')" dir="rtl" required />
+                                        <x-ui.form-input wire:model="fields.{{ $index }}.help.en" :label="__('hr_recruitment.application_form.help_en')" dir="ltr" />
+                                        <x-ui.form-input wire:model="fields.{{ $index }}.help.ar" :label="__('hr_recruitment.application_form.help_ar')" dir="rtl" />
                                     </div>
                                     @unless ($locked)
                                         <div class="mt-2"><flux:checkbox wire:model.live="fields.{{ $index }}.required" :label="__('hr_recruitment.application_form.required')" /></div>
@@ -425,8 +425,8 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.application_form
                                             <p class="text-xs font-semibold">{{ __('hr_recruitment.application_form.options') }}</p>
                                             @foreach ($field['options'] ?? [] as $optionIndex => $option)
                                                 <div class="flex items-end gap-2" wire:key="option-{{ $field['key'] }}-{{ $optionIndex }}">
-                                                    <x-ui.form-input class="flex-1" wire:model.blur="fields.{{ $index }}.options.{{ $optionIndex }}.label.en" :label="__('hr_recruitment.application_form.option_en')" dir="ltr" />
-                                                    <x-ui.form-input class="flex-1" wire:model.blur="fields.{{ $index }}.options.{{ $optionIndex }}.label.ar" :label="__('hr_recruitment.application_form.option_ar')" dir="rtl" />
+                                                    <x-ui.form-input class="flex-1" wire:model="fields.{{ $index }}.options.{{ $optionIndex }}.label.en" :label="__('hr_recruitment.application_form.option_en')" dir="ltr" />
+                                                    <x-ui.form-input class="flex-1" wire:model="fields.{{ $index }}.options.{{ $optionIndex }}.label.ar" :label="__('hr_recruitment.application_form.option_ar')" dir="rtl" />
                                                     <x-ui.button size="sm" tone="ghost" icon="x-mark" wire:click="removeOption({{ $index }}, {{ $optionIndex }})" :aria-label="__('hr_recruitment.application_form.remove')" />
                                                 </div>
                                             @endforeach

@@ -97,7 +97,7 @@ test('an hr program can be linked to a strategy and manager without changing its
         ->name->toBe('Hope Center')
         ->strategy_id->toBe($strategy->id)
         ->manager_id->toBe($manager)
-        ->and(DB::connection('hr')->table('programs')->where('id', $program->id)->value('name'))->toBe('Hope Center');
+        ->and(DB::table('programs')->where('id', $program->id)->value('name'))->toBe('Hope Center');
 });
 
 test('a program assignment can be cleared back to not assigned', function () {

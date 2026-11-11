@@ -34,7 +34,7 @@ beforeEach(function () {
 });
 
 test('a recognised browser still signs in while strangers have its email locked', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
     $recognition = ($this->recognitionAfterSigningIn)($user, '10.9.0.1');
 
     ($this->lockEmail)($user->email, '10.9.1');
@@ -50,7 +50,7 @@ test('a recognised browser still signs in while strangers have its email locked'
 });
 
 test('a recognised browser is locked out by its own 10 failed logins', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
     $recognition = ($this->recognitionAfterSigningIn)($user, '10.9.3.1');
 
     $this->withCookie(RecognisedBrowsers::CookieName, $recognition);
@@ -62,8 +62,8 @@ test('a recognised browser is locked out by its own 10 failed logins', function 
 });
 
 test('a browser recognised for one email is still locked out of another', function () {
-    $user = User::factory()->withHrAccount()->create();
-    $colleague = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
+    $colleague = User::factory()->create();
     $recognition = ($this->recognitionAfterSigningIn)($colleague, '10.9.6.1');
 
     ($this->lockEmail)($user->email, '10.9.7');
@@ -75,7 +75,7 @@ test('a browser recognised for one email is still locked out of another', functi
 });
 
 test('recognition lapses 180 days after the last sign-in', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
     $recognition = ($this->recognitionAfterSigningIn)($user, '10.9.9.1');
 
     $this->travel(181)->days();
@@ -88,7 +88,7 @@ test('recognition lapses 180 days after the last sign-in', function () {
 });
 
 test('a made-up recognition cookie is ignored', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
     $forged = json_encode([
         'id' => 'forged-browser',
         'emails' => [RecognisedBrowsers::emailFingerprint($user->email) => now()->addYear()->getTimestamp()],
@@ -104,7 +104,7 @@ test('a made-up recognition cookie is ignored', function () {
 
 test('the right password alone does not recognise a browser that still owes the second step', function () {
     Notification::fake([EmailLoginCode::class]);
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
 
     ($this->attemptLogin)($user->email, 'password', '10.9.14.1')
         ->assertRedirect(route('email-two-factor.login'))

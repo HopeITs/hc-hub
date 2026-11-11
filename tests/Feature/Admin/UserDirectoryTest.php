@@ -123,17 +123,16 @@ test('administrators can give an hr account access with an initial role', functi
         ->test('pages::admin.users')
         ->call('openCreateModal')
         ->assertSee('amina@example.org')
-        ->set('hrUserId', (string) $hrUserId)
+        ->set('accountId', (string) $hrUserId)
         ->set('initialRoleId', (string) $meal->id)
         ->call('createUser')
         ->assertHasNoErrors();
 
-    $user = User::query()->where('hr_user_id', $hrUserId)->sole();
+    $user = User::query()->findOrFail($hrUserId);
 
     expect($user->name)->toBe('Amina Haddad')
         ->and($user->roles->pluck('name')->all())->toBe(['MEAL'])
         ->and($user->active_role_id)->toBe($meal->id)
-        ->and($user->hr_user_id)->toBe($hrUserId)
         ->and($user->employee_id)->toBe($employeeId)
         ->and($user->email_verified_at)->not->toBeNull();
 });
@@ -145,11 +144,11 @@ test('an hr account given access with no role chosen starts as Team Member', fun
     Livewire::actingAs($admin)
         ->test('pages::admin.users')
         ->call('openCreateModal')
-        ->set('hrUserId', (string) $hrUserId)
+        ->set('accountId', (string) $hrUserId)
         ->call('createUser')
         ->assertHasNoErrors();
 
-    $user = User::query()->where('hr_user_id', $hrUserId)->sole();
+    $user = User::query()->findOrFail($hrUserId);
 
     expect($user->roles->pluck('name')->all())->toBe(['Team Member'])
         ->and($user->activeRole?->name)->toBe('Team Member');
@@ -157,14 +156,14 @@ test('an hr account given access with no role chosen starts as Team Member', fun
 
 test('hr accounts that already have access are not offered again', function () {
     $admin = accessAdmin();
-    User::factory()->create(['email' => 'taken@example.org']);
+    User::factory()->role('MEAL')->create(['email' => 'taken@example.org']);
     insertHrUser(insertHrEmployee(), 'free@example.org');
 
     $component = Livewire::actingAs($admin)
         ->test('pages::admin.users')
         ->call('openCreateModal');
 
-    expect($component->instance()->hrAccountOptions->pluck('email')->all())->toBe(['free@example.org']);
+    expect($component->instance()->accountOptions->pluck('email')->all())->toBe(['free@example.org']);
 });
 
 test('a new user must name an available hr account', function () {
@@ -173,25 +172,25 @@ test('a new user must name an available hr account', function () {
     Livewire::actingAs($admin)
         ->test('pages::admin.users')
         ->call('openCreateModal')
-        ->set('hrUserId', '999999')
+        ->set('accountId', '999999')
         ->call('createUser')
-        ->assertHasErrors(['hrUserId' => 'exists']);
+        ->assertHasErrors(['accountId' => 'exists']);
 
     expect(User::query()->count())->toBe(1);
 });
 
 test('an hr account that already has access cannot be added twice', function () {
     $admin = accessAdmin();
-    $hrUserId = User::factory()->create(['email' => 'taken@example.org'])->hr_user_id;
+    $hrUserId = User::factory()->role('MEAL')->create(['email' => 'taken@example.org'])->id;
 
     Livewire::actingAs($admin)
         ->test('pages::admin.users')
         ->call('openCreateModal')
-        ->set('hrUserId', (string) $hrUserId)
+        ->set('accountId', (string) $hrUserId)
         ->call('createUser')
-        ->assertHasErrors(['hrUserId']);
+        ->assertHasErrors(['accountId']);
 
-    expect(User::query()->where('hr_user_id', $hrUserId)->count())->toBe(1);
+    expect(User::query()->findOrFail($hrUserId)->roles->pluck('name')->all())->toBe(['MEAL']);
 });
 
 test('selecting a user loads their assigned roles, active role, and direct permissions', function () {
@@ -465,7 +464,7 @@ test('administrators can filter the directory by hr account status', function ()
     $admin = accessAdmin();
     User::factory()->create(['name' => 'Active Person']);
     $inactive = User::factory()->create(['name' => 'Departed Person']);
-    DB::connection('hr')->table('employees')->where('id', $inactive->employee_id)->update(['is_active' => false]);
+    DB::table('employees')->where('id', $inactive->employee_id)->update(['is_active' => false]);
 
     Livewire::actingAs($admin)
         ->test('pages::admin.users')
@@ -486,14 +485,14 @@ test('hr accounts of inactive employees are neither offered nor accepted', funct
         ->test('pages::admin.users')
         ->call('openCreateModal');
 
-    expect($component->instance()->hrAccountOptions->pluck('email')->all())->toBe(['free@example.org']);
+    expect($component->instance()->accountOptions->pluck('email')->all())->toBe(['free@example.org']);
 
     $component
-        ->set('hrUserId', (string) $goneId)
+        ->set('accountId', (string) $goneId)
         ->call('createUser')
-        ->assertHasErrors(['hrUserId']);
+        ->assertHasErrors(['accountId']);
 
-    expect(User::query()->where('hr_user_id', $goneId)->exists())->toBeFalse();
+    expect(User::query()->findOrFail($goneId)->roles)->toBeEmpty();
 });
 
 test('a user the database refuses to delete keeps their roles', function () {

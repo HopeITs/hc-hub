@@ -44,7 +44,7 @@ test('the profile carries level, grade, department, program, center, city and di
     insertHrContract($managerId, $managerPositionId);
 
     $positionId = insertHrPosition($departmentId, 'Field Officer', $programId, directManagerId: $managerPositionId, centerId: $centerId, jobLevelId: $levelId);
-    DB::connection('hr')->table('positions')->where('id', $positionId)->update(['title_ar' => 'موظف ميداني']);
+    DB::table('positions')->where('id', $positionId)->update(['title_ar' => 'موظف ميداني']);
     $employeeId = insertHrEmployee();
     insertHrContract($employeeId, $positionId);
 
@@ -113,10 +113,10 @@ test('an employee hired after the profile was loaded is found', function () {
 test('asking about many employees without a contract costs no more HR queries than one', function () {
     $unplaced = array_map(fn (int $i): int => insertHrEmployee(firstNameEn: 'Unplaced '.$i), range(1, 5));
 
-    DB::connection('hr')->enableQueryLog();
+    DB::enableQueryLog();
     array_map(EmployeeProfile::for(...), $unplaced);
 
-    expect(DB::connection('hr')->getQueryLog())->toHaveCount(2);
+    expect(DB::getQueryLog())->toHaveCount(2);
 });
 
 test('employeeIdsAtCenter lists the active holders of positions at that center', function () {
@@ -181,11 +181,11 @@ test('the HR queries never read contract pay or every contract column', function
     $employeeId = insertHrEmployee();
     insertHrContract($employeeId, insertHrPosition(insertHrDepartment()));
 
-    DB::connection('hr')->enableQueryLog();
+    DB::enableQueryLog();
     EmployeeProfile::for($employeeId);
     EmployeeProfile::managerOf($employeeId);
     EmployeeProfile::employeeIdsAtCenter(1);
-    $queries = collect(DB::connection('hr')->getQueryLog())->pluck('query');
+    $queries = collect(DB::getQueryLog())->pluck('query');
 
     expect($queries)->not->toBeEmpty()
         ->and($queries->count())->toBeLessThanOrEqual(2);

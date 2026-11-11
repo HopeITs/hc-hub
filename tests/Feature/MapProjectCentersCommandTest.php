@@ -128,7 +128,7 @@ test('inactive centers are never proposed', function () {
 test('the report lists duplicated program codes and the pillar programs HR must add', function () {
     foreach (['003' => ['Micro', 'Relief'], '010' => ['Wells']] as $code => $names) {
         foreach ($names as $name) {
-            DB::connection('hr')->table('programs')->insert(['name' => $name, 'code' => $code, 'slug' => fake()->unique()->slug(), 'is_active' => true]);
+            DB::table('programs')->insert(['name' => $name, 'code' => $code, 'slug' => fake()->unique()->slug(), 'is_active' => true]);
         }
     }
 

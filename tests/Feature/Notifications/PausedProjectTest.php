@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\HrCenter;
+use Modules\Core\Models\Center as HrCenter;
 use App\Notifications\Alerts\DeadlineCatalog;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -83,7 +83,7 @@ test('a project is paused only when its own center is inactive', function () {
 test('a center HR reactivates brings the project back', function () {
     expect($this->paused->isPaused())->toBeTrue();
 
-    DB::connection('hr')->table('centers')->where('id', $this->closedCenter)->update(['is_active' => true]);
+    DB::table('centers')->where('id', $this->closedCenter)->update(['is_active' => true]);
     HrCenter::forgetRememberedLookup();
 
     expect($this->paused->fresh()->isPaused())->toBeFalse();

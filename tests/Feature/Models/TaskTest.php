@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee as HrEmployee;
 use Carbon\CarbonImmutable;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\TaskStatus;

@@ -2,7 +2,7 @@
 
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\HrContract;
+use Modules\Hr\Models\Contract as HrContract;
 use App\Models\UserNotification;
 use App\Notifications\QuickActions;
 use Livewire\Livewire;

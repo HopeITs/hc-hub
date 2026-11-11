@@ -1,6 +1,6 @@
 <?php
 
-use App\Actions\Fortify\AuthenticateWithHrAccount;
+use App\Actions\Fortify\AuthenticateUser;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Event;
@@ -22,7 +22,7 @@ test('a passkey confirmation without a redirect falls back to the dashboard rout
 });
 
 test('the hr password confirms the session', function () {
-    $user = User::factory()->withHrAccount('hr-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('hr-secret')])->create();
 
     $this->actingAs($user)
         ->post(route('password.confirm.store'), ['password' => 'hr-secret'])
@@ -32,7 +32,7 @@ test('the hr password confirms the session', function () {
 });
 
 test('a wrong or local password does not confirm the session', function (string $password) {
-    $user = User::factory()->withHrAccount('hr-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('hr-secret')])->create();
 
     $this->actingAs($user)
         ->post(route('password.confirm.store'), ['password' => $password])
@@ -46,7 +46,7 @@ test('a wrong or local password does not confirm the session', function (string 
 
 test('the sixth confirmation attempt within a minute is refused even with the right password', function () {
     $this->freezeTime();
-    $user = User::factory()->withHrAccount('hr-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('hr-secret')])->create();
     $this->actingAs($user);
 
     foreach (range(1, 5) as $attempt) {
@@ -61,7 +61,7 @@ test('the sixth confirmation attempt within a minute is refused even with the ri
 });
 
 test('a right password before the limit clears the failed confirmations', function () {
-    $user = User::factory()->withHrAccount('hr-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('hr-secret')])->create();
     $this->actingAs($user);
 
     foreach ([4, 4, 4] as $failedAttempts) {
@@ -77,8 +77,8 @@ test('a right password before the limit clears the failed confirmations', functi
 });
 
 test('the confirmation limit is per user', function () {
-    $lockedOut = User::factory()->withHrAccount('hr-secret')->create();
-    $colleague = User::factory()->withHrAccount('colleague-secret')->create();
+    $lockedOut = User::factory()->state(['password' => bcrypt('hr-secret')])->create();
+    $colleague = User::factory()->state(['password' => bcrypt('colleague-secret')])->create();
 
     foreach (range(1, 5) as $attempt) {
         $this->actingAs($lockedOut)->post(route('password.confirm.store'), ['password' => 'wrong-password']);
@@ -93,7 +93,7 @@ test('the confirmation limit is per user', function () {
 
 test('ten failed confirmations from any ips lock the user out of confirming for fifteen minutes', function () {
     $this->freezeTime();
-    $user = User::factory()->withHrAccount('hr-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('hr-secret')])->create();
     $this->actingAs($user);
 
     foreach (range(1, 10) as $attempt) {
@@ -110,7 +110,7 @@ test('ten failed confirmations from any ips lock the user out of confirming for 
 
 test('a wrong confirmation password is reported as a failed attempt without the password', function () {
     Event::fake([Failed::class]);
-    $user = User::factory()->withHrAccount('hr-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('hr-secret')])->create();
 
     $this->actingAs($user)->post(route('password.confirm.store'), ['password' => 'wrong-password']);
 
@@ -120,7 +120,7 @@ test('a wrong confirmation password is reported as a failed attempt without the 
 });
 
 test('a password login counts as a fresh password confirmation', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])->assertSessionHasNoErrors();
 
@@ -128,7 +128,7 @@ test('a password login counts as a fresh password confirmation', function () {
 });
 
 test('a failed login confirms nothing', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $this->post(route('login.store'), ['email' => $user->email, 'password' => 'wrong-password']);
 
@@ -139,11 +139,11 @@ test('a failed login confirms nothing', function () {
 test('a failing password check keeps the password out of the stack trace', function () {
     $previousIgnoreArgs = ini_set('zend.exception_ignore_args', '0');
     $previousMaxLength = ini_set('zend.exception_string_param_max_len', '100');
-    $user = User::factory()->withHrAccount('hr-secret')->create();
+    $user = User::factory()->state(['password' => bcrypt('hr-secret')])->create();
     Schema::connection('hr')->drop('users');
 
     try {
-        AuthenticateWithHrAccount::confirmsPassword($user, 'typed-hr-secret');
+        AuthenticateUser::confirmsPassword($user, 'typed-hr-secret');
         $this->fail('The HR lookup should have thrown.');
     } catch (QueryException $exception) {
         $stringArguments = collect($exception->getTrace())
@@ -159,4 +159,4 @@ test('a failing password check keeps the password out of the stack trace', funct
         ini_set('zend.exception_ignore_args', (string) $previousIgnoreArgs);
         ini_set('zend.exception_string_param_max_len', (string) $previousMaxLength);
     }
-});
+})->skip('Obsolete since one database, one login (A2): the password is checked on users, not against a separate HR users table that could fail to read.');

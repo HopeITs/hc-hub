@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\HrDepartment;
+use Modules\Hr\Models\Department as HrDepartment;
 use App\Models\Role;
 use Illuminate\Database\ClassMorphViolationException;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -67,7 +67,6 @@ test('the morph map registers exactly the target sources, task sources, media ow
         'monthly_report' => MonthlyReport::class,
         'report_template' => ReportTemplate::class,
         'proposal_location' => ProposalLocation::class,
-        'program_request' => ProgramRequest::class,
         'city' => City::class,
         'center' => Center::class,
     ]);

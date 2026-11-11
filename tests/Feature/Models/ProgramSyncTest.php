@@ -2,7 +2,7 @@
 
 use App\Http\Middleware\SyncProgramsFromHr;
 use App\Models\Activity;
-use App\Models\HrProgram;
+use Modules\Core\Models\Program as HrProgram;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +20,7 @@ test('syncing mirrors every hr program under its hr id, inactive ones included',
         $hopeId => 'Hope Center',
         $cygId => 'CYG',
     ])->and(Program::query()->whereNotNull('strategy_id')->orWhereNotNull('manager_id')->count())->toBe(0);
-});
+})->skip('Obsolete since one database (A2): Program::syncFromHr and the SyncProgramsFromHr middleware are gone; programs are Core rows loaded by hub:import-hr.');
 
 test('syncing mirrors the hr program manager, including a change of holder or a vacated seat', function () {
     $department = insertHrDepartment();
@@ -43,13 +43,13 @@ test('syncing mirrors the hr program manager, including a change of holder or a 
         $vacatedId => null,
         $untouchedId => $local,
     ]);
-});
+})->skip('Obsolete since one database (A2): Program::syncFromHr and the SyncProgramsFromHr middleware are gone; programs are Core rows loaded by hub:import-hr.');
 
 test('syncing refreshes a renamed program but keeps its strategy and manager', function () {
     $program = Activity::withoutRecording(fn (): Program => Program::factory()->create(['name' => 'Hope Center']));
     $strategyId = $program->strategy_id;
     $managerId = $program->manager_id;
-    DB::connection('hr')->table('programs')->where('id', $program->id)->update(['name' => 'Hope Centre']);
+    DB::table('programs')->where('id', $program->id)->update(['name' => 'Hope Centre']);
 
     Program::syncFromHr();
 
@@ -57,34 +57,34 @@ test('syncing refreshes a renamed program but keeps its strategy and manager', f
         ->name->toBe('Hope Centre')
         ->strategy_id->toBe($strategyId)
         ->manager_id->toBe($managerId);
-});
+})->skip('Obsolete since one database (A2): Program::syncFromHr and the SyncProgramsFromHr middleware are gone; programs are Core rows loaded by hub:import-hr.');
 
 test('a program removed from hr keeps its mirror and the delivery under it', function () {
     $program = Program::factory()->create();
     Project::factory()->create(['program_id' => $program->id]);
-    DB::connection('hr')->table('programs')->where('id', $program->id)->delete();
+    DB::table('programs')->where('id', $program->id)->delete();
 
     Program::syncFromHr();
 
     expect(Program::query()->find($program->id))->not->toBeNull()
         ->and(Project::query()->where('program_id', $program->id)->count())->toBe(1);
-});
+})->skip('Obsolete since one database (A2): Program::syncFromHr and the SyncProgramsFromHr middleware are gone; programs are Core rows loaded by hub:import-hr.');
 
 test('syncing never writes to hr', function () {
     insertHrProgram('Study Zone');
-    $before = DB::connection('hr')->table('programs')->get()->toArray();
+    $before = DB::table('programs')->get()->toArray();
 
     Program::syncFromHr();
 
-    expect(DB::connection('hr')->table('programs')->get()->toArray())->toEqual($before);
-});
+    expect(DB::table('programs')->get()->toArray())->toEqual($before);
+})->skip('Obsolete since one database (A2): Program::syncFromHr and the SyncProgramsFromHr middleware are gone; programs are Core rows loaded by hub:import-hr.');
 
 test('a program points at the hr program it mirrors', function () {
     $program = Program::factory()->create(['name' => 'Sha8er']);
 
     expect($program->hrProgram)->toBeInstanceOf(HrProgram::class)
         ->and($program->hrProgram->name)->toBe('Sha8er');
-});
+})->skip('Obsolete since one database (A2): Program::syncFromHr and the SyncProgramsFromHr middleware are gone; programs are Core rows loaded by hub:import-hr.');
 
 test('an unassigned program has no strategy or manager', function () {
     $program = Program::factory()->unassigned()->create();
@@ -109,7 +109,7 @@ test('the sync middleware runs at most once a minute', function () {
     $middleware->handle(Request::create('/'), $next);
 
     expect(Program::query()->count())->toBe(2);
-});
+})->skip('Obsolete since one database (A2): Program::syncFromHr and the SyncProgramsFromHr middleware are gone; programs are Core rows loaded by hub:import-hr.');
 
 test('an unreachable hr database does not break the request and retries next time', function () {
     Cache::forget(SyncProgramsFromHr::CacheKey);
@@ -120,4 +120,4 @@ test('an unreachable hr database does not break the request and retries next tim
 
     expect($response->getContent())->toBe('ok')
         ->and(Cache::has(SyncProgramsFromHr::CacheKey))->toBeFalse();
-});
+})->skip('Obsolete since one database (A2): Program::syncFromHr and the SyncProgramsFromHr middleware are gone; programs are Core rows loaded by hub:import-hr.');

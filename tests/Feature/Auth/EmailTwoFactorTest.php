@@ -37,7 +37,7 @@ beforeEach(function () {
 });
 
 test('new users start with email codes off and sign in with the password only', function () {
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     expect($user->fresh()->email_two_factor_enabled)->toBeFalse();
 
@@ -51,7 +51,7 @@ test('new users start with email codes off and sign in with the password only', 
 });
 
 test('with email codes on, the right code finishes signing in', function () {
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
 
     $code = passwordStepEmailsCode($user);
 
@@ -65,7 +65,7 @@ test('with email codes on, the right code finishes signing in', function () {
 });
 
 test('a wrong code is refused and a used code cannot be replayed', function () {
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
 
     $code = passwordStepEmailsCode($user);
     $wrongCode = $code === '000000' ? '111111' : '000000';
@@ -85,7 +85,7 @@ test('a wrong code is refused and a used code cannot be replayed', function () {
 });
 
 test('the code stops working after too many wrong guesses', function () {
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
 
     $code = passwordStepEmailsCode($user);
     $wrongCode = $code === '000000' ? '111111' : '000000';
@@ -102,7 +102,7 @@ test('the code stops working after too many wrong guesses', function () {
 
 test('resending the code is limited per login attempt, whatever the ip', function () {
     $this->freezeTime();
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
     passwordStepEmailsCode($user);
 
     $this->withServerVariables(['REMOTE_ADDR' => '10.0.5.1'])->post(route('email-two-factor.resend'));
@@ -120,7 +120,7 @@ test('resending the code is also limited per ip, across different logins', funct
         ->post(route('email-two-factor.resend'));
 
     foreach (range(1, 6) as $attempt) {
-        $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+        $user = User::factory()->create(['email_two_factor_enabled' => true]);
         passwordStepEmailsCode($user);
 
         $response = ($attemptsFromOneIp)($user);
@@ -142,7 +142,7 @@ test('the challenge page needs a password step first', function () {
 });
 
 test('an authenticator app takes priority over email codes', function () {
-    $user = User::factory()->withTwoFactor()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->withTwoFactor()->create(['email_two_factor_enabled' => true]);
 
     $this->post(route('login.store'), [
         'email' => $user->email,
@@ -187,7 +187,7 @@ test('roles that must use two factor always get an email code, even with their s
     config(['access-control.two_factor' => ['enforced' => true, 'required_roles' => ['Super Admin', 'General Manager', 'Managers', 'Financial']]]);
     $this->seed(RolesAndPermissionsSeeder::class);
 
-    $user = User::factory()->role($role)->withHrAccount()->create();
+    $user = User::factory()->role($role)->create();
 
     expect($user->email_two_factor_enabled)->toBeFalse();
 
@@ -201,7 +201,7 @@ test('other roles are not asked for an email code while enforcement is on', func
     config(['access-control.two_factor' => ['enforced' => true, 'required_roles' => ['Super Admin', 'General Manager', 'Managers', 'Financial']]]);
     $this->seed(RolesAndPermissionsSeeder::class);
 
-    $user = User::factory()->role('Team Member')->withHrAccount()->create();
+    $user = User::factory()->role('Team Member')->create();
 
     $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])
         ->assertRedirect(route('dashboard'));
@@ -232,7 +232,7 @@ test('a role that requires two factor can use the authenticator app instead of e
     config(['access-control.two_factor' => ['enforced' => true, 'required_roles' => ['Super Admin', 'General Manager', 'Managers', 'Financial']]]);
     $this->seed(RolesAndPermissionsSeeder::class);
 
-    $superAdmin = User::factory()->role('Super Admin')->withTwoFactor()->withHrAccount()->create();
+    $superAdmin = User::factory()->role('Super Admin')->withTwoFactor()->create();
 
     $this->post(route('login.store'), ['email' => $superAdmin->email, 'password' => 'password'])
         ->assertRedirect(route('two-factor.login'));
@@ -241,7 +241,7 @@ test('a role that requires two factor can use the authenticator app instead of e
 });
 
 test('when the code email cannot be sent, sign-in stops with a clear message', function () {
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
 
     Notification::shouldReceive('sendNow')->andThrow(new RuntimeException('SMTP down'));
 
@@ -257,7 +257,7 @@ test('when the code email cannot be sent, sign-in stops with a clear message', f
 
 test('a code check that cannot get its turn is refused without using up the code', function () {
     Sleep::fake(syncWithCarbon: true);
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
 
     $code = passwordStepEmailsCode($user);
 
@@ -273,7 +273,7 @@ test('a code check that cannot get its turn is refused without using up the code
 
 test('resending the code is capped per hour, however slowly it is asked for', function () {
     $this->freezeTime();
-    $user = User::factory()->withHrAccount()->create(['email_two_factor_enabled' => true]);
+    $user = User::factory()->create(['email_two_factor_enabled' => true]);
     passwordStepEmailsCode($user);
 
     foreach (range(1, 10) as $attempt) {

@@ -68,7 +68,7 @@ test('an unreachable remote collector does not block a sign-in or the local auth
         'logging.channels.auth' => ['driver' => 'stack', 'channels' => ['auth_local', 'auth_remote'], 'ignore_exceptions' => false],
         'logging.channels.auth_remote.handler_with.connectionString' => 'tls://127.0.0.1:9',
     ]);
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $this->post(route('login.store'), ['email' => $user->email, 'password' => 'password'])
         ->assertSessionHasNoErrors();
@@ -80,7 +80,7 @@ test('an unreachable remote collector does not block a sign-in or the local auth
 
 test('a sign-in is logged with the user, ip, user agent and guard', function () {
     $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
-    $user = User::factory()->withHrAccount()->create();
+    $user = User::factory()->create();
 
     $this->withHeaders(['User-Agent' => $userAgent])
         ->withServerVariables(['REMOTE_ADDR' => '10.1.2.3'])

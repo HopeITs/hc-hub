@@ -1,13 +1,13 @@
 <?php
 
-use App\Models\HrDepartment;
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Department as HrDepartment;
+use Modules\Hr\Models\Employee as HrEmployee;
 use Illuminate\Support\Facades\DB;
 
 test('is_board_member is cast to boolean', function () {
     $employeeId = insertHrEmployee(firstNameEn: 'Board', lastNameEn: 'Member');
 
-    DB::connection('hr')->table('employees')->where('id', $employeeId)->update(['is_board_member' => 1]);
+    DB::table('employees')->where('id', $employeeId)->update(['is_board_member' => 1]);
 
     expect(HrEmployee::query()->find($employeeId)->is_board_member)->toBeTrue();
 });
@@ -60,7 +60,7 @@ test('pickerOptions serves the cached list until it is forgotten', function () {
     expect(HrEmployee::pickerOptions()->pluck('id')->all())->toBe([$firstId]);
 
     $secondId = insertHrEmployee(firstNameEn: 'Basel', lastNameEn: 'Omar');
-    DB::connection('hr')->table('employees')->where('id', $secondId)->update(['first_name_en' => 'Basel']);
+    DB::table('employees')->where('id', $secondId)->update(['first_name_en' => 'Basel']);
 
     expect(HrEmployee::pickerOptions()->pluck('id')->all())->toBe([$firstId]);
 
