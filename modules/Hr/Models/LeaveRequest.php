@@ -15,7 +15,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Modules\Core\Models\User;
 use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Support\Settings\HrAccess;
 
 /**
  * @property int $id
@@ -162,6 +164,60 @@ class LeaveRequest extends Model
         if ($cityIds !== null) {
             $query->whereHas('leaveBalance.contract.employee', fn (Builder $employee) => $employee->whereIn('city_id', (array) $cityIds));
         }
+    }
+
+    /**
+     * The requests $user may see and manage (the old scopeManageableBy):
+     * national HR all of them; regional HR its governorates' plus its own
+     * direct reports'; anyone else only the requests of the people whose
+     * position reports to a position they hold today.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function manageableBy(Builder $query, User $user): void
+    {
+        $access = HrAccess::for($user);
+
+        if ($access->isNational()) {
+            return;
+        }
+
+        $managerPositionIds = $user->employee_id === null
+            ? []
+            : Contract::query()->activeNow()->where('employee_id', $user->employee_id)->pluck('position_id')->all();
+
+        $directReports = fn (Builder $q) => $q->whereHas(
+            'leaveBalance.contract.position',
+            fn (Builder $position) => $position->whereIn('direct_manager_id', $managerPositionIds),
+        );
+
+        if ($access->isRegionalHr()) {
+            $query->where(fn (Builder $scoped) => $scoped
+                ->whereHas('leaveBalance.contract.employee', fn (Builder $employee) => $employee->whereIn('city_id', $access->cityIds() ?? []))
+                ->when($managerPositionIds !== [], fn (Builder $q) => $q->orWhere($directReports)));
+
+            return;
+        }
+
+        if ($managerPositionIds === []) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        $directReports($query);
+    }
+
+    /**
+     * Requests filed on one employee's contracts.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function ofEmployee(Builder $query, int $employeeId): void
+    {
+        $query->whereHas('leaveBalance.contract', fn (Builder $contract) => $contract->where('employee_id', $employeeId));
     }
 
     /**

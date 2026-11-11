@@ -25,9 +25,9 @@ class LeaveType
     {
 
         $val = match ($status) {
-            self::GENDER_MALE => ['key' => 'leaves.gender.male', 'color' => 'secondary-medium'],
-            self::GENDER_FEMALE => ['key' => 'leaves.gender.female', 'color' => 'secondary-medium'],
-            default => ['key' => 'leaves.gender.any', 'color' => 'secondary-dark'],
+            self::GENDER_MALE => ['key' => 'hr_leave.gender.male', 'color' => 'secondary-medium'],
+            self::GENDER_FEMALE => ['key' => 'hr_leave.gender.female', 'color' => 'secondary-medium'],
+            default => ['key' => 'hr_leave.gender.any', 'color' => 'secondary-dark'],
         };
         $result = [
             'value' => __($val['key']),
@@ -45,9 +45,9 @@ class LeaveType
     {
 
         $val = match ($status) {
-            self::MARITAL_STATUS_SINGLE => ['key' => 'leaves.marital.single', 'color' => 'secondary-medium'],
-            self::MARITAL_STATUS_MARRIED => ['key' => 'leaves.marital.married', 'color' => 'secondary-light'],
-            default => ['key' => 'leaves.marital.any', 'color' => 'secondary-dark'],
+            self::MARITAL_STATUS_SINGLE => ['key' => 'hr_leave.marital.single', 'color' => 'secondary-medium'],
+            self::MARITAL_STATUS_MARRIED => ['key' => 'hr_leave.marital.married', 'color' => 'secondary-light'],
+            default => ['key' => 'hr_leave.marital.any', 'color' => 'secondary-dark'],
         };
         $result = [
             'value' => __($val['key']),
