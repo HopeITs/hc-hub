@@ -9,7 +9,7 @@
 ])
 
 @php
-    use App\Models\HrEmployee;
+    use Modules\Hr\Models\Employee;
 
     /* Flux's menu type-ahead listens on the whole menu; single-character keys stop at the search box so typing filters instead of jumping. */
     $model = $attributes->wire('model')->value();
@@ -38,7 +38,7 @@
     }
 
     /* `employees` filters list every employee from the shared employeeOptions store (form-fields.js) instead of server-rendered options. */
-    $employeeLabels = $employees ? HrEmployee::pickerLabels()->pluck('label', 'value') : collect();
+    $employeeLabels = $employees ? Employee::pickerLabels()->pluck('label', 'value') : collect();
     $selectedValue = (string) $value;
     $selectedLabel = collect($options)->firstWhere('value', $selectedValue)['label']
         ?? $employeeLabels->get($selectedValue)

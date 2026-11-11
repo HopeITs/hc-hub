@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Support;
 
-use App\Models\HrCity;
 use App\Support\Slots;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\City;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ReportTemplateLineStatus;
@@ -99,7 +99,7 @@ final class ReportTemplateQueue
         }
 
         $knownCityIds = array_values(array_unique(array_filter($cityIds, fn (?int $id): bool => $id !== null)));
-        $cities = $knownCityIds === [] ? collect() : HrCity::query()->whereKey($knownCityIds)->get(['id', 'name_en', 'name_ar'])->keyBy('id');
+        $cities = $knownCityIds === [] ? collect() : City::query()->whereKey($knownCityIds)->get(['id', 'name_en', 'name_ar'])->keyBy('id');
 
         $rows = [];
 

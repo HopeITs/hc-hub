@@ -6,7 +6,7 @@ use Modules\Tracking\Enums\TaskStatus;
 use App\Livewire\Concerns\Dashboard\ReadsDashboardAttention;
 use App\Livewire\Concerns\Dashboard\ReadsDashboardWork;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TaskAssignee;
@@ -56,7 +56,7 @@ new class extends Component {
         }
 
         $ids = array_column($team, 'employeeId');
-        $users = User::query()->whereIn('employee_id', $ids)->get(['id', 'employee_id', 'hr_user_id'])->keyBy('employee_id');
+        $users = User::query()->whereIn('employee_id', $ids)->get(['id', 'employee_id', 'email'])->keyBy('employee_id');
         $lateReports = $this->canView('reports') ? MonthlyReport::query()
             ->whereIn('prepared_by', $users->pluck('id')->all())
             ->where('status', MonthlyReportStatus::Draft)
@@ -79,7 +79,7 @@ new class extends Component {
                 ...$person,
                 'open' => $openTasks,
                 'load' => TeamScope::load($openTasks, $person['overdue']),
-                'title' => (string) (HrEmployee::positionSummary($person['employeeId']) ?? ''),
+                'title' => (string) (Employee::positionSummary($person['employeeId']) ?? ''),
                 'lateReports' => $user === null ? 0 : (int) ($lateReports[$user->id] ?? 0),
                 'userId' => $user?->id,
             ];
@@ -162,7 +162,7 @@ new class extends Component {
                     $behind = $person['overdue'] + $person['lateReports'];
                 @endphp
                 <li wire:key="pp-{{ $person['employeeId'] }}">
-                    <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($person['employeeId'])" class="dk-av" aria-hidden="true" />
+                    <x-ui.avatar :src="\Modules\Hr\Models\Employee::avatarUrl($person['employeeId'])" class="dk-av" aria-hidden="true" />
                     <span class="dk-tm-who">
                         <strong title="{{ $person['name'] }}">{{ $person['name'] }}</strong>
                         <span class="dk-is" title="{{ $person['title'] }}">{{ __('desk.relation.'.$person['relation']) }}@if ($person['title'] !== '') · {{ $person['title'] }}@endif</span>

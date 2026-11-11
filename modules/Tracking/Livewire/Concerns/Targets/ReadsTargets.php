@@ -89,7 +89,7 @@ trait ReadsTargets
 
         return Report::query()
             ->select(['id', 'plan_indicator_id', 'user_id', 'status', 'period_start', 'period_end', 'planned_date', 'value', 'is_seen_by_meal'])
-            ->with('user:id,hr_user_id')
+            ->with('user:id,email')
             ->withCount('files')
             ->where('plan_indicator_id', $this->expandedTargetId)
             ->orderByDesc('period_end')

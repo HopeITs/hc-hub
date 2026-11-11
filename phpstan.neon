@@ -27,14 +27,7 @@ parameters:
     # that stops matching fails the run, so a stale one cannot linger.
     ignoreErrors:
         -
-            # User::delete() runs SQL; a row still referenced by a restricting
-            # foreign key throws QueryException. Model::delete()'s @throws lists
-            # only LogicException, so PHPStan calls the catch dead.
-            identifier: catch.neverThrown
-            path: modules/Core/Models/User.php
-            count: 1
-        -
-            # $user->email reads the HR database, which can fail; a log line must
+            # $user->email may query the account directory, which can fail; a log line must
             # never break the sign-in it describes. Accessors declare no @throws.
             identifier: catch.neverThrown
             path: app/Listeners/LogAuthenticationEvent.php
@@ -244,12 +237,12 @@ parameters:
         -
             # orderByEnumSequence() builds a CASE from the fixed value lists
             # applySort() passes (priority and status cases) and a direction it
-            # limits to asc/desc. orderByAssigneeName() and orderByAssigneeGroup()
-            # each build one from task ids cast to int and list positions.
+            # limits to asc/desc. orderByAssigneeGroup() builds one from task ids
+            # cast to int and list positions.
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
             path: modules/Tracking/Livewire/Concerns/Tasks/FiltersTaskDirectory.php
-            count: 4
+            count: 2
         -
             # taskStats() inlines two dates it formats itself (toDateString())
             # into one aggregate select; there is no user input in it.

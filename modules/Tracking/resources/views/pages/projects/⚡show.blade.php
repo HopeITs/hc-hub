@@ -15,7 +15,7 @@ use Modules\Tracking\Livewire\Concerns\Projects\ReadsProjectDelivery;
 use Modules\Tracking\Livewire\Concerns\Projects\ReadsProjectFunding;
 use Modules\Tracking\Livewire\Concerns\Projects\ReadsProjectStory;
 use Modules\Tracking\Enums\AssignmentStatus;
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 use Modules\Core\Models\Program;
 use Modules\Tracking\Models\Project;
 use Flux\Flux;
@@ -148,12 +148,12 @@ new #[Layout('layouts::desk'), Title('titles.project')] class extends Component 
     /**
      * The project form's owner picker (ManagesProjectForm reads it).
      *
-     * @return Collection<int, HrEmployee>
+     * @return Collection<int, Employee>
      */
     #[Computed]
     public function userOptions(): Collection
     {
-        return HrEmployee::pickerOptions();
+        return Employee::pickerOptions();
     }
 
     /**
@@ -218,7 +218,7 @@ new #[Layout('layouts::desk'), Title('titles.project')] class extends Component 
                 'media' => fn ($query) => $query
                     ->select(['id', 'mediable_type', 'mediable_id', 'collection', 'original_name', 'type', 'size', 'uploaded_at', 'uploaded_by'])
                     ->whereNotIn('collection', $hiddenCollections)
-                    ->with('uploader:id,hr_user_id,employee_id')
+                    ->with('uploader:id,email,employee_id')
                     ->orderByDesc('uploaded_at')
                     ->orderByDesc('id'),
             ])

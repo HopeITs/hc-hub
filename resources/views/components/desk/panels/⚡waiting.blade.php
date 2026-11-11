@@ -2,7 +2,7 @@
 
 use App\Actions\Desk\SendNudge;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalReviewer;
@@ -67,8 +67,8 @@ new class extends Component {
         $reviews = DeskWork::waitingReviews($user)
             ->with('proposal')
             ->get();
-        $reviewerNames = HrEmployee::query()->whereKey($reviews->pluck('employee_id')->unique()->values()->all())->get(HrEmployee::NameColumns)
-            ->mapWithKeys(fn (HrEmployee $employee): array => [$employee->id => $employee->name]);
+        $reviewerNames = Employee::query()->whereKey($reviews->pluck('employee_id')->unique()->values()->all())->get(Employee::NameColumns)
+            ->mapWithKeys(fn (Employee $employee): array => [$employee->id => $employee->name]);
         $reviews = $reviews->map(fn (ProposalReviewer $review): array => [
                 'key' => 'review-'.$review->id,
                 'text' => __('desk.waiting_review', ['person' => $reviewerNames->get($review->employee_id, '—'), 'proposal' => $review->proposal?->name ?? '—']),

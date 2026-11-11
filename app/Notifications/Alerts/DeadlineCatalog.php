@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Notifications\Alerts;
 
-use App\Models\HrCenter;
-use App\Models\HrDepartment;
 use App\Notifications\EmployeeRecipients;
 use App\Notifications\Recipients\OversightRecipients;
 use App\Notifications\TracksActivity;
@@ -14,6 +12,8 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\Center;
+use Modules\Hr\Models\Department;
 use Modules\Tracking\Enums\ArStatus;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
@@ -127,7 +127,7 @@ final class DeadlineCatalog
 
         return array_values($tasks->map(function (Task $task) use ($proposalIds, $owners, $users, &$departments, $stages): DeadlineItem {
             $departmentId = (int) $task->department_id;
-            $departments[$departmentId] ??= HrDepartment::nameOf($departmentId) === ''
+            $departments[$departmentId] ??= Department::nameOf($departmentId) === ''
                 ? null
                 : $this->oversight->departmentUserIds($departmentId);
             $proposalId = $proposalIds[$task->id] ?? null;
@@ -192,7 +192,7 @@ final class DeadlineCatalog
     {
         $milestones = Milestone::query()
             ->leftJoin('projects', 'projects.id', '=', 'milestones.project_id')
-            ->where(fn ($query) => $query->whereNull('projects.center_id')->orWhereNotIn('projects.center_id', HrCenter::inactiveIds()))
+            ->where(fn ($query) => $query->whereNull('projects.center_id')->orWhereNotIn('projects.center_id', Center::inactiveIds()))
             ->whereNotNull('milestones.planned_end_date')
             ->whereDate('milestones.planned_end_date', '<=', $limit)
             ->whereNotIn('milestones.status', [MilestoneStatus::Reached->value, MilestoneStatus::Cancelled->value])

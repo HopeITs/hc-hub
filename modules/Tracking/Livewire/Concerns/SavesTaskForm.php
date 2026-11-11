@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns;
 
-use App\Models\HrDepartment;
-use App\Models\HrEmployee;
 use Closure;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Modules\Core\Models\Program;
+use Modules\Hr\Models\Department;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Tasks\RescheduleTask;
 use Modules\Tracking\Actions\Tasks\SaveTask;
 use Modules\Tracking\Enums\TaskPriority;
@@ -51,7 +51,7 @@ trait SavesTaskForm
         'proposal' => Proposal::class,
         'project' => Project::class,
         'program' => Program::class,
-        'department' => HrDepartment::class,
+        'department' => Department::class,
     ];
 
     /** @return array<string, array<int, mixed>> */
@@ -67,7 +67,7 @@ trait SavesTaskForm
             'completedDate' => ['nullable', 'date'],
             'progressPercentage' => ['required', 'integer', 'min:0', 'max:100'],
             'assignedTo' => ['array'],
-            'assignedTo.*' => ['integer', Rule::exists(HrEmployee::class, 'id')],
+            'assignedTo.*' => ['integer', Rule::exists(Employee::class, 'id')],
             'taskSourceType' => ['required', 'string', Rule::in(array_keys(self::TASK_SOURCE_MODELS))],
             'taskSourceId' => [
                 'required',

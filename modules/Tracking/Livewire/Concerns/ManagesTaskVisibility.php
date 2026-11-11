@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns;
 
-use App\Models\HrDepartment;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Department;
 use Modules\Tracking\Models\Task;
 
 /**
@@ -30,7 +30,7 @@ trait ManagesTaskVisibility
      */
     protected function scopeTasksToDepartment(Builder $query, int $departmentId): Builder
     {
-        $employeeIds = HrDepartment::employeeIdsInDepartment($departmentId);
+        $employeeIds = Department::employeeIdsInDepartment($departmentId);
         $creatorIds = User::query()->whereIn('employee_id', $employeeIds)->pluck('id');
 
         return $query->where(fn (Builder $query) => $query

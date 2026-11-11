@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Models;
 
-use App\Models\HrCenter;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Models\Center;
 
 /**
  * One HR center of a proposal location row (contracts.md §7, W-34a). The
@@ -46,8 +46,8 @@ class ProposalLocationCenter extends Model
     /**
      * The center itself, from the in-memory HR lookup (active or not).
      */
-    public function center(): ?HrCenter
+    public function center(): ?Center
     {
-        return HrCenter::remembered($this->center_id);
+        return Center::remembered($this->center_id);
     }
 }

@@ -18,9 +18,9 @@
         data-test="person-card"
     >
         <img
-            x-bind:src="$store.personCard.photo || {{ Illuminate\Support\Js::from(asset(\App\Models\HrEmployee::DefaultAvatar)) }}"
+            x-bind:src="$store.personCard.photo || {{ Illuminate\Support\Js::from(asset(\Modules\Hr\Models\Employee::DefaultAvatar)) }}"
             alt=""
-            onerror="this.onerror = null; this.src = '{{ asset(\App\Models\HrEmployee::DefaultAvatar) }}'"
+            onerror="this.onerror = null; this.src = '{{ asset(\Modules\Hr\Models\Employee::DefaultAvatar) }}'"
             class="size-14 shrink-0 rounded-full !bg-hr-avatar object-cover"
         />
         <div class="min-w-0">

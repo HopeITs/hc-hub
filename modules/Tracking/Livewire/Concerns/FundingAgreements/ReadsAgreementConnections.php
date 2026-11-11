@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Modules\Tracking\Livewire\Concerns\FundingAgreements;
 
 use App\Enums\MediaCollection;
-use App\Models\HrEmployee;
 use App\Models\Media;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ArStatus;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Models\DonorProposal;
@@ -152,7 +152,7 @@ trait ReadsAgreementConnections
     /**
      * The people responsible for those reports, read from HR once.
      *
-     * @return array<int, array{employee: HrEmployee|null, user_id: int|null, reachable: bool}>
+     * @return array<int, array{employee: Employee|null, user_id: int|null, reachable: bool}>
      */
     #[Computed]
     public function reportResponsibles(): array

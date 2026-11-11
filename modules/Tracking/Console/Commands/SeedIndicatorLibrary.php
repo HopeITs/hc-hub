@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Modules\Tracking\Console\Commands;
 
 use App\Models\Activity;
-use App\Models\HrProgram;
 use App\Support\ArabicText;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use LogicException;
+use Modules\Core\Models\Program;
 use Modules\Tracking\Actions\IndicatorLibrary\SaveLibraryIndicator;
 use Modules\Tracking\Enums\CollectionFrequency;
 use Modules\Tracking\Enums\IndicatorCollector;
@@ -321,8 +321,8 @@ class SeedIndicatorLibrary extends Command
             return [];
         }
 
-        $hrPrograms = HrProgram::query()->get(['id', 'code', 'name']);
-        $programsByCode = $hrPrograms->groupBy(fn (HrProgram $program): string => trim((string) $program->code));
+        $hrPrograms = Program::query()->get(['id', 'code', 'name']);
+        $programsByCode = $hrPrograms->groupBy(fn (Program $program): string => trim((string) $program->code));
         $problems = [];
 
         foreach ($needed as $programId) {
@@ -337,7 +337,7 @@ class SeedIndicatorLibrary extends Command
             $sharing = $programsByCode->get($code);
 
             if ($sharing !== null && $sharing->count() > 1) {
-                $names = $sharing->map(fn (HrProgram $program): string => "{$program->id} ".trim($program->name))->implode(', ');
+                $names = $sharing->map(fn (Program $program): string => "{$program->id} ".trim($program->name))->implode(', ');
                 $problems[$programId] = "HR program code {$code} is used by more than one program: {$names}.";
             }
         }
@@ -361,7 +361,7 @@ class SeedIndicatorLibrary extends Command
             $serials[($row->program_id ?? 'none').'|'.$row->level_ref] = (int) $row->top_serial;
         }
 
-        $hrCodes = HrProgram::query()
+        $hrCodes = Program::query()
             ->whereIn('id', array_filter(array_column($groups, 'programId')))
             ->pluck('code', 'id')
             ->map(fn (mixed $code): string => trim((string) $code))

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Tasks;
 
-use App\Models\HrDepartment;
-use App\Models\HrEmployee;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +11,8 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Department;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\TaskPriority;
 use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\Milestone;
@@ -94,7 +94,7 @@ trait ComposesInlineTasks
         $source = $this->resolveInlineSource($milestoneId);
         $pickedAssignees = $rowKey !== null && isset($this->taskDrafts[$rowKey]['assignees']);
         $employeeIds = $pickedAssignees
-            ? HrEmployee::query()->whereIn('id', collect($draft['assignees'])->map(fn (string $id): int => (int) $id))->pluck('id')
+            ? Employee::query()->whereIn('id', collect($draft['assignees'])->map(fn (string $id): int => (int) $id))->pluck('id')
             : collect(array_filter([$this->resolveInlineAssigneeId()]));
 
         if ($source === null) {
@@ -167,7 +167,7 @@ trait ComposesInlineTasks
         }
 
         $name = $source['type'] === 'department'
-            ? HrDepartment::nameOf($source['id'])
+            ? Department::nameOf($source['id'])
             : $this->filterSourceOptions->firstWhere('id', $source['id'])['name'] ?? null;
 
         return $name === null ? null : __('tasks.source_type_'.$source['type']).': '.$name;
@@ -348,7 +348,7 @@ trait ComposesInlineTasks
         $priority = TaskPriority::tryFrom($draft['priority']) ?? TaskPriority::Medium;
         $dueDate = preg_match('/^\d{4}-\d{2}-\d{2}$/', $draft['due_date']) === 1 ? $draft['due_date'] : null;
 
-        $employeeIds = HrEmployee::query()
+        $employeeIds = Employee::query()
             ->whereIn('id', collect($draft['assignees'])->map(fn (string $id): int => (int) $id))
             ->pluck('id');
 

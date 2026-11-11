@@ -3,7 +3,7 @@
 use Modules\Tracking\Actions\Supervisions\AddSupervision;
 use Modules\Tracking\Actions\Supervisions\RemoveSupervision;
 use App\Enums\Locale;
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\Supervision;
 use App\Notifications\EmployeeRecipients;
 use App\Support\EmployeeProfile;
@@ -47,7 +47,7 @@ new class extends Component {
     #[Computed]
     public function groups(): array
     {
-        $active = array_fill_keys(array_map(intval(...), HrEmployee::query()->toBase()->where('is_active', true)->pluck('id')->all()), true);
+        $active = array_fill_keys(array_map(intval(...), Employee::query()->toBase()->where('is_active', true)->pluck('id')->all()), true);
 
         /** @var list<array{supervisor: int, supervisee: int, supervisionId: int|null}> $pairs */
         $pairs = [];

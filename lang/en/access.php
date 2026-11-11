@@ -37,6 +37,7 @@ return [
         'tasks' => 'Tasks',
         'calendar' => 'Calendar',
         'accounts' => 'Accounts',
+        'centers' => 'Centers',
         'cities' => 'Cities',
         'activity-log' => 'Activity log',
         'notification-settings' => 'Notification settings',

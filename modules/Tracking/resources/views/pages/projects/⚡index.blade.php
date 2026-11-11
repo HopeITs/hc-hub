@@ -9,7 +9,7 @@ use Modules\Tracking\Livewire\Concerns\Projects\ManagesProjectForm;
 use Modules\Tracking\Livewire\Concerns\Projects\PresentsProjectDirectory;
 use Modules\Tracking\Livewire\Concerns\Projects\SummarisesProjectFunding;
 use Modules\Tracking\Livewire\Concerns\Projects\UnblocksProjects;
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 use Modules\Core\Models\Program;
 use Modules\Tracking\Models\Project;
 use App\Notifications\UnreadSubjects;
@@ -149,11 +149,11 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
         return Program::options();
     }
 
-    /** @return Collection<int, HrEmployee> */
+    /** @return Collection<int, Employee> */
     #[Computed]
     public function userOptions(): Collection
     {
-        return HrEmployee::pickerOptions();
+        return Employee::pickerOptions();
     }
 
     /** Whether the list behind the "projects without a center" warning is open. */
@@ -220,7 +220,7 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
     $activeFilterChips = array_filter([
         'city' => $city !== '' ? $this->cityOptions->firstWhere('id', (int) $city)?->name : null,
         'program' => $program !== '' ? $this->programOptions->firstWhere('id', (int) $program)?->name : null,
-        'owner' => $owner !== '' ? (HrEmployee::find((int) $owner)?->name ?? '#'.$owner) : null,
+        'owner' => $owner !== '' ? (Employee::find((int) $owner)?->name ?? '#'.$owner) : null,
         'sector' => $sector !== '' ? $this->sectorOptions->firstWhere('id', (int) $sector)?->localizedName() : null,
         'stage' => $stage !== '' ? (__('desk.stages')[$stage] ?? null) : null,
     ], fn (?string $label): bool => $label !== null);

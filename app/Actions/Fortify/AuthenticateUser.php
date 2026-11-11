@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Actions\Fortify;
 
-use App\Models\HrUser;
 use App\Support\BackoffThrottle;
 use App\Support\Turnstile;
 use Illuminate\Auth\Events\Failed;
@@ -20,12 +19,9 @@ use Laravel\Fortify\LoginRateLimiter;
 use Modules\Core\Models\User;
 
 /**
- * Logs people in with their HR account.
- *
- * The password is checked against hr_db.hchr_users, never the tracking users
- * table. Every HR account may log in: its tracking user, which holds the role,
- * two-factor settings and passkeys, is created on the first login when it does
- * not exist yet (see User::forHrAccount()).
+ * Logs people in with users.email and users.password, the hub's one account
+ * table. An account whose linked employee is inactive cannot sign in
+ * (User::hasLostAccess()); two-factor and passkeys follow as before.
  *
  * On top of Fortify's own limit (a few attempts a minute per email and IP),
  * failed logins are limited per IP across all emails (password spraying) and
@@ -35,13 +31,13 @@ use Modules\Core\Models\User;
  * instead of the per-email one (see RecognisedBrowsers), so that limit cannot
  * be used to lock a colleague out.
  */
-class AuthenticateWithHrAccount
+class AuthenticateUser
 {
     /**
-     * The session key holding which user's HR password a login just checked,
+     * The session key holding which user's password a login just checked,
      * and when, until the login completes.
      */
-    private const PasswordCheckedSessionKey = 'auth.hr_password_checked';
+    private const PasswordCheckedSessionKey = 'auth.password_checked';
 
     /**
      * Failed logins one IP may make, across all emails, per decay window.
@@ -97,7 +93,7 @@ class AuthenticateWithHrAccount
     public const BackoffCapSeconds = 21600;
 
     /**
-     * Resolve the tracking user for valid HR credentials.
+     * Resolve the user for valid credentials.
      *
      * An unknown email fails onto the email field (Fortify's default
      * behaviour); a known email with the wrong password fails onto the
@@ -137,15 +133,15 @@ class AuthenticateWithHrAccount
             ]);
         }
 
-        $hrUser = self::findHrUserByEmail($email);
+        $user = self::findUserByEmail($email);
 
-        if ($hrUser === null || ! $hrUser->isActive()) {
+        if ($user === null || $user->hasLostAccess()) {
             self::recordFailures($limits, $backoffKey, self::MaxFailedLoginsPerEmail);
 
             return null;
         }
 
-        if (! Hash::check($password, $hrUser->password)) {
+        if (! Hash::check($password, $user->password)) {
             self::recordFailures($limits, $backoffKey, self::MaxFailedLoginsPerEmail);
 
             app(LoginRateLimiter::class)->increment($request);
@@ -162,10 +158,6 @@ class AuthenticateWithHrAccount
         RateLimiter::clear($backoffKey);
         BackoffThrottle::clear($backoffKey);
 
-        $user = User::forHrAccount($hrUser);
-
-        $user->linkToHrAccount($hrUser);
-
         $request->session()->put(self::PasswordCheckedSessionKey, [
             'user_id' => $user->id,
             'checked_at' => Date::now()->unix(),
@@ -175,7 +167,7 @@ class AuthenticateWithHrAccount
     }
 
     /**
-     * Count the HR password typed at login as a password confirmation, so the
+     * Count the password typed at login as a password confirmation, so the
      * person is not asked for it again straight away (e.g. to turn on
      * two-factor authentication). Listens for the guard's Login event.
      *
@@ -200,10 +192,10 @@ class AuthenticateWithHrAccount
     }
 
     /**
-     * The HR account behind this user, when the password is its HR password.
+     * Whether the password is this user's password.
      *
      * Every failed check counts towards a limit per user and IP and one per
-     * user across all IPs, so this cannot be used to guess the HR password:
+     * user across all IPs, so this cannot be used to guess the password:
      * once too many checks failed, the next one is refused (even with the
      * right password) until the limit lapses. A failed check is reported as a
      * Failed auth event (without the password), so the auth log sees it.
@@ -222,7 +214,7 @@ class AuthenticateWithHrAccount
 
         self::ensureIsNotThrottled($request, $limits, 'password', 'auth.confirm_throttle', $backoffKey);
 
-        if (self::hrAccountFor($user->email, (string) $password) === null) {
+        if (self::accountFor($user->email, (string) $password) === null) {
             self::recordFailures($limits, $backoffKey, self::MaxFailedConfirmationsPerUser);
 
             event(new Failed('web', $user, [Fortify::username() => $user->email]));
@@ -307,21 +299,21 @@ class AuthenticateWithHrAccount
     }
 
     /**
-     * The HR account with this email, when the password matches it.
+     * The active account with this email, when the password matches it.
      */
-    private static function hrAccountFor(string $email, #[\SensitiveParameter] string $password): ?HrUser
+    private static function accountFor(string $email, #[\SensitiveParameter] string $password): ?User
     {
         if ($email === '' || $password === '') {
             return null;
         }
 
-        $hrUser = self::findHrUserByEmail($email);
+        $user = self::findUserByEmail($email);
 
-        return $hrUser !== null && $hrUser->isActive() && Hash::check($password, $hrUser->password) ? $hrUser : null;
+        return $user !== null && ! $user->hasLostAccess() && Hash::check($password, $user->password) ? $user : null;
     }
 
-    private static function findHrUserByEmail(string $email): ?HrUser
+    private static function findUserByEmail(string $email): ?User
     {
-        return HrUser::query()->with('employee')->where('email', $email)->first();
+        return User::query()->where('email', $email)->first();
     }
 }

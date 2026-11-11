@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Support;
 
-use App\Models\HrEmployee;
 use App\Support\EmployeeProfile;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\Supervision;
 
 /**
@@ -140,7 +140,7 @@ final class SupervisionMap
     private function activeEmployees(): array
     {
         if ($this->activeEmployees === null) {
-            $ids = HrEmployee::query()->toBase()->where('is_active', true)->pluck('id')->all();
+            $ids = Employee::query()->toBase()->where('is_active', true)->pluck('id')->all();
             $this->activeEmployees = array_fill_keys(array_map(intval(...), $ids), true);
         }
 

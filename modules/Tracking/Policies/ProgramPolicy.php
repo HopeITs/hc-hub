@@ -8,8 +8,9 @@ use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 
 /**
- * Programs mirror HR and are never created or deleted here; tracking only
- * assigns a program's strategy and manager, which stays with programs.update.
+ * Programs are Core rows. Tracking creates one only when a proposal location
+ * opens a new program (programs.create); it is never deleted here, and its
+ * strategy and manager stay with programs.update.
  */
 class ProgramPolicy
 {
@@ -42,7 +43,7 @@ class ProgramPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('programs.create');
     }
 
     /**

@@ -130,7 +130,7 @@
                     <span class="dk-ptk-who-photos">
                         @foreach ($assignees->take(3) as $employee)
                             <span class="dk-ptk-who-p" wire:key="task-{{ $rowKey }}-assignee-{{ $employee->id }}">
-                                <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($employee->id)" class="dk-av dk-av-xs" :title="$employee->name" />
+                                <x-ui.avatar :src="\Modules\Hr\Models\Employee::avatarUrl($employee->id)" class="dk-av dk-av-xs" :title="$employee->name" />
                                 @if ($canUpdate)
                                     <button type="button" class="dk-ptk-who-x" x-on:click.stop="$wire.removeProgramTaskAssignee({{ $task->id }}, {{ $employee->id }})" x-on:keydown.enter.stop x-on:keydown.space.stop
                                         aria-label="{{ __('tasks.remove_assignee_name', ['name' => $employee->name]) }}" data-tip="{{ __('tasks.remove_assignee') }}" data-test="task-assignee-remove-{{ $task->id }}-{{ $employee->id }}"><x-desk.icon name="x" /></button>

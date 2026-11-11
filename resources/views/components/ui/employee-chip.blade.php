@@ -13,14 +13,14 @@
 
         if (! $compact) {
             try {
-                $positionSummary = \App\Models\HrEmployee::positionSummary($employee->id) ?? __('common.no_active_position');
+                $positionSummary = \Modules\Hr\Models\Employee::positionSummary($employee->id) ?? __('common.no_active_position');
             } catch (\Illuminate\Database\QueryException) {
                 $positionSummary = '#'.$employee->id.' · '.__('common.hr_unavailable');
             }
         }
     @endphp
     <div {{ $attributes->class('flex min-w-0 items-center gap-2.5') }}>
-        <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($employee->id)" @class(['shrink-0 rounded-full', 'size-6' => $compact, 'size-8' => ! $compact]) aria-hidden="true" />
+        <x-ui.avatar :src="\Modules\Hr\Models\Employee::avatarUrl($employee->id)" @class(['shrink-0 rounded-full', 'size-6' => $compact, 'size-8' => ! $compact]) aria-hidden="true" />
         <div class="min-w-0">
             <p class="truncate text-sm font-medium text-secondary-dark dark:text-ink">{{ $employee->name }}</p>
             @unless ($compact)

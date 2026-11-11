@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace App\Support;
 
 use App\Enums\Locale;
-use App\Models\Concerns\RemembersHrLookup;
-use App\Models\HrContract;
-use App\Models\HrEmployee;
+use App\Support\Concerns\RemembersTableLookup;
 use Illuminate\Support\Facades\Log;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Employee;
 
 /**
  * The one read-only view of where an employee sits in HR: their current
  * position (from the active contract), job level, department, program,
  * center, city and direct manager.
  *
- * Nothing here is copied into tracking tables. Every active contract is read
- * in one HR query (plus one for the employees' active flags) and kept for the
+ * Nothing here is copied into other tables. Every active contract is read
+ * in one query (plus one for the employees' active flags) and kept for the
  * running application, reloaded after a minute or when an unknown employee id
- * is asked for (see RemembersHrLookup). The queries name their columns, so a
+ * is asked for (see RemembersTableLookup). The queries name their columns, so a
  * contract's salary, currency and type are never read.
  *
  * Current position = the active contract; with several active contracts the
@@ -26,7 +26,7 @@ use Illuminate\Support\Facades\Log;
  */
 final class EmployeeProfile
 {
-    use RemembersHrLookup;
+    use RemembersTableLookup;
 
     /**
      * The employee's current place in HR, or null when they hold no active contract.
@@ -37,7 +37,7 @@ final class EmployeeProfile
     public static function for(int $employeeId): ?array
     {
         /** @var array<string, mixed>|false|null $entry */
-        $entry = self::rememberedHrLookupEntry($employeeId, fn (): array => self::load());
+        $entry = self::rememberedLookupEntry($employeeId, fn (): array => self::load());
 
         if (! is_array($entry)) {
             return null;
@@ -108,7 +108,7 @@ final class EmployeeProfile
     public static function isDepartmentManager(int $employeeId): bool
     {
         /** @var array<string, mixed>|false|null $entry */
-        $entry = self::rememberedHrLookupEntry($employeeId, fn (): array => self::load());
+        $entry = self::rememberedLookupEntry($employeeId, fn (): array => self::load());
 
         if (! is_array($entry) || $entry['is_active'] !== true) {
             return false;
@@ -150,7 +150,7 @@ final class EmployeeProfile
         $holder = null;
         $holderStart = '';
 
-        foreach (self::rememberedHrLookup(fn (): array => self::load()) as $employeeId => $entry) {
+        foreach (self::rememberedLookup(fn (): array => self::load()) as $employeeId => $entry) {
             if (is_array($entry) && $entry['position_id'] === $positionId && ($holder === null || [$entry['start_date'], $employeeId] > [$holderStart, $holder])) {
                 $holder = $employeeId;
                 $holderStart = $entry['start_date'];
@@ -167,7 +167,7 @@ final class EmployeeProfile
     {
         $ids = [];
 
-        foreach (self::rememberedHrLookup(fn (): array => self::load()) as $employeeId => $entry) {
+        foreach (self::rememberedLookup(fn (): array => self::load()) as $employeeId => $entry) {
             if (is_array($entry) && $entry[$key] === $value) {
                 $ids[] = $employeeId;
             }
@@ -186,7 +186,7 @@ final class EmployeeProfile
      */
     private static function load(): array
     {
-        $rows = HrContract::query()
+        $rows = Contract::query()
             ->toBase()
             ->join('positions', 'positions.id', '=', 'contracts.position_id')
             ->leftJoin('job_levels', 'job_levels.id', '=', 'positions.job_level_id')
@@ -211,7 +211,7 @@ final class EmployeeProfile
                 'job_levels.grade',
             ]);
 
-        $activeEmployees = HrEmployee::query()->toBase()->pluck('is_active', 'id');
+        $activeEmployees = Employee::query()->toBase()->pluck('is_active', 'id');
 
         $entries = array_fill_keys(array_map(intval(...), $activeEmployees->keys()->all()), false);
 

@@ -213,7 +213,7 @@
                             {{-- 4. Who runs it, pinned to the bottom. --}}
                             <div class="dk-prog-card-f">
                                 @if ($project->user)
-                                    <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($project->user_id)" class="dk-av dk-av-xs" aria-hidden="true" data-ledger-manager-photo />
+                                    <x-ui.avatar :src="\Modules\Hr\Models\Employee::avatarUrl($project->user_id)" class="dk-av dk-av-xs" aria-hidden="true" data-ledger-manager-photo />
                                 @endif
                                 <span>{{ $project->user?->name ?? __('common.not_assigned') }}</span>
                             </div>

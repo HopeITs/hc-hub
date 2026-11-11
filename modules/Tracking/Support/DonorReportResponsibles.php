@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Support;
 
-use App\Models\HrEmployee;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\DonorReportType;
 
 /**
@@ -21,7 +21,7 @@ final class DonorReportResponsibles
 {
     /**
      * @param  list<int>  $employeeIds
-     * @return array<int, array{employee: HrEmployee|null, user_id: int|null, reachable: bool}> employee id => state
+     * @return array<int, array{employee: Employee|null, user_id: int|null, reachable: bool}> employee id => state
      */
     public static function resolve(array $employeeIds): array
     {
@@ -31,7 +31,7 @@ final class DonorReportResponsibles
             return [];
         }
 
-        $employees = HrEmployee::query()->whereKey($employeeIds)->get()->keyBy('id');
+        $employees = Employee::query()->whereKey($employeeIds)->get()->keyBy('id');
         $users = User::query()->whereIn('employee_id', $employeeIds)->pluck('id', 'employee_id');
         $states = [];
 

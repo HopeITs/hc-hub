@@ -6,7 +6,6 @@ namespace App\Console\Commands;
 
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
-use App\Models\HrUser;
 use App\Notifications\AppNotification;
 use App\Notifications\NotificationPayload;
 use Illuminate\Console\Command;
@@ -34,8 +33,7 @@ class SendTestNotification extends Command
 
     public function handle(): int
     {
-        $hrUserId = HrUser::query()->where('email', $this->argument('email'))->value('id');
-        $user = $hrUserId === null ? null : User::query()->where('hr_user_id', $hrUserId)->first();
+        $user = User::query()->where('email', (string) $this->argument('email'))->first();
         $priority = NotificationPriority::tryFrom((string) $this->option('priority'));
 
         if ($user === null || $priority === null) {

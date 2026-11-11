@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Proposals;
 
-use App\Models\HrEmployee;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Proposals\CorrectProposalStatus;
 use Modules\Tracking\Actions\Proposals\TransitionProposal;
 use Modules\Tracking\Enums\ProposalKind;
@@ -170,8 +170,8 @@ trait ManagesProposalStatus
             return [];
         }
 
-        return array_values(HrEmployee::query()->whereKey($employeeIds)->get(HrEmployee::NameColumns)
-            ->map(fn (HrEmployee $employee): string => $employee->name)
+        return array_values(Employee::query()->whereKey($employeeIds)->get(Employee::NameColumns)
+            ->map(fn (Employee $employee): string => $employee->name)
             ->sort()
             ->all());
     }

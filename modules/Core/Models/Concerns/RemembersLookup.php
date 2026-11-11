@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  * options...) in memory, so pickers and labels cost one query per app
  * instance instead of one per row or per request component.
  *
- * Same contract as App\Models\Concerns\RemembersHrLookup: the lookup belongs
+ * Same contract as App\Support\Concerns\RemembersTableLookup: the lookup belongs
  * to the running application instance and is reloaded after a minute, so a
  * long-lived worker never serves old data for long. Saving or deleting a row
  * through its model forgets it at once.

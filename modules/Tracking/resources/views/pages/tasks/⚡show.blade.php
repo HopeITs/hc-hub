@@ -7,7 +7,7 @@ use App\Livewire\Concerns\PreviewsFiles;
 use Modules\Tracking\Livewire\Concerns\Tasks\ManagesSubtasks;
 use Modules\Tracking\Livewire\Concerns\Tasks\ManagesTaskAttachments;
 use Modules\Tracking\Livewire\Concerns\Tasks\MovesTask;
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Task;
@@ -129,7 +129,7 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
                 // to load.
                 'source' => fn (MorphTo $morphTo) => $morphTo->morphWith([Milestone::class => ['project:id,name', 'proposal:id,name']]),
                 'taskAssignees.employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar',
-                'creator:id,hr_user_id',
+                'creator:id,email',
                 'parentTask:id,title',
             ])
             ->findOrFail($this->taskId);
@@ -162,7 +162,7 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
             'completedDate' => ['nullable', 'date'],
             'progressPercentage' => ['required', 'integer', 'min:0', 'max:100'],
             'assignedTo' => ['array'],
-            'assignedTo.*' => ['integer', Rule::exists(HrEmployee::class, 'id')],
+            'assignedTo.*' => ['integer', Rule::exists(Employee::class, 'id')],
         ], [
             'title.required' => __('tasks.enter_a_task_title'),
             'assignedTo.*.exists' => __('tasks.the_selected_assignee_is_no_longer_available'),

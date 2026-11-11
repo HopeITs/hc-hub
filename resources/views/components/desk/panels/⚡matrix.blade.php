@@ -5,7 +5,7 @@ use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ReopenRequestStatus;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Support\MealCoverage;
@@ -95,8 +95,8 @@ new class extends Component {
     public function officers(): array
     {
         $byProject = $this->rows->mapWithKeys(fn (Project $project): array => [$project->id => MealCoverage::responsibleFor($project)]);
-        $names = HrEmployee::query()->whereKey($byProject->filter()->unique()->values()->all())->get(HrEmployee::NameColumns)
-            ->mapWithKeys(fn (HrEmployee $employee): array => [$employee->id => $employee->name]);
+        $names = Employee::query()->whereKey($byProject->filter()->unique()->values()->all())->get(Employee::NameColumns)
+            ->mapWithKeys(fn (Employee $employee): array => [$employee->id => $employee->name]);
 
         return $byProject->map(fn (?int $employeeId): string => $employeeId === null ? '' : (string) $names->get($employeeId, ''))->all();
     }

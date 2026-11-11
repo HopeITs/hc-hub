@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Tasks;
 
-use App\Models\HrEmployee;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Renderless;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Tasks\ChangeTaskStatus;
 use Modules\Tracking\Actions\Tasks\CompleteTask;
 use Modules\Tracking\Actions\Tasks\DeleteTask;
@@ -284,7 +284,7 @@ trait ManagesTaskDrawer
     {
         $task = Task::query()->find($taskId);
 
-        if ($task === null || ! HrEmployee::query()->whereKey($employeeId)->exists()) {
+        if ($task === null || ! Employee::query()->whereKey($employeeId)->exists()) {
             return;
         }
 

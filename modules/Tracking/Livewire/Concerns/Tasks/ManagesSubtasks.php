@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Tasks;
 
-use App\Models\HrEmployee;
 use Carbon\CarbonImmutable;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,6 +12,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Attributes\Computed;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\TaskPriority;
 use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\Task;
@@ -99,7 +99,7 @@ trait ManagesSubtasks
             'newSubtaskPriority' => ['required', new Enum(TaskPriority::class)],
             'newSubtaskDueDate' => ['nullable', 'date'],
             'newSubtaskAssignedTo' => ['array'],
-            'newSubtaskAssignedTo.*' => ['integer', Rule::exists(HrEmployee::class, 'id')],
+            'newSubtaskAssignedTo.*' => ['integer', Rule::exists(Employee::class, 'id')],
         ], [
             'newSubtaskTitle.required' => __('tasks.enter_a_task_title'),
             'newSubtaskAssignedTo.*.exists' => __('tasks.the_selected_assignee_is_no_longer_available'),

@@ -127,7 +127,7 @@ new #[Layout('layouts::desk'), Title('titles.donor_reports')] class extends Comp
     /**
      * The responsible people of this page's reports, read from HR once.
      *
-     * @return array<int, array{employee: \App\Models\HrEmployee|null, user_id: int|null, reachable: bool}>
+     * @return array<int, array{employee: \Modules\Hr\Models\Employee|null, user_id: int|null, reachable: bool}>
      */
     #[Computed]
     public function responsibles(): array

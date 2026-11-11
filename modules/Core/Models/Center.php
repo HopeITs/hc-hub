@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,6 +30,7 @@ use Modules\Hr\Models\Position;
  * @property string $name_en
  * @property string $name_ar
  * @property-read string $name
+ * @property-read string $secondary_name
  * @property string|null $weekends
  * @property string|null $open_at
  * @property string|null $close_at
@@ -110,6 +112,59 @@ class Center extends Model
             ->all());
     }
 
+    /**
+     * Every center (lookup columns only), keyed by id, remembered.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private static function lookupRows(): array
+    {
+        return static::rememberLookup('rows', fn (): array => static::query()
+            ->toBase()
+            ->get(['id', 'name_en', 'name_ar', 'city_id', 'is_active'])
+            ->mapWithKeys(fn (object $row): array => [(int) $row->id => (array) $row])
+            ->all());
+    }
+
+    /**
+     * One center from the remembered lookup, active or not, or null for an
+     * unknown id. Only id, names, city_id and is_active are loaded.
+     */
+    public static function remembered(int $id): ?self
+    {
+        $row = self::lookupRows()[$id] ?? null;
+
+        return $row === null ? null : static::hydrate([$row])->first();
+    }
+
+    /**
+     * Active centers as models for a picker (lookup columns only), by name
+     * in the interface language.
+     *
+     * @return Collection<int, self>
+     */
+    public static function activeModels(): Collection
+    {
+        return static::hydrate(array_values(self::lookupRows()))
+            ->filter(fn (self $center): bool => $center->is_active)
+            ->sortBy([fn (self $a, self $b): int => [mb_strtolower($a->name), $a->id] <=> [mb_strtolower($b->name), $b->id]])
+            ->values();
+    }
+
+    /**
+     * The ids of the deactivated centers: the list a SQL filter needs to
+     * pause the projects standing on them (D-66).
+     *
+     * @return list<int>
+     */
+    public static function inactiveIds(): array
+    {
+        return array_values(array_map(
+            fn (array $row): int => (int) $row['id'],
+            array_filter(self::lookupRows(), fn (array $row): bool => ! (bool) $row['is_active']),
+        ));
+    }
+
     public static function nameColumn(): string
     {
         return Locale::current() === Locale::Arabic ? 'name_ar' : 'name_en';
@@ -125,6 +180,16 @@ class Center extends Model
         return Attribute::get(fn (): string => Locale::current() === Locale::Arabic && trim($this->name_ar) !== ''
             ? trim($this->name_ar)
             : trim($this->name_en));
+    }
+
+    /**
+     * The name in the other language, shown beside the main name.
+     *
+     * @return Attribute<string, never>
+     */
+    protected function secondaryName(): Attribute
+    {
+        return Attribute::get(fn (): string => trim(Locale::current() === Locale::Arabic ? $this->name_en : $this->name_ar));
     }
 
     /**

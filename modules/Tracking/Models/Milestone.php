@@ -7,7 +7,6 @@ namespace Modules\Tracking\Models;
 use App\Concerns\HasSlug;
 use App\Concerns\HasTree;
 use App\Concerns\RecordsActivity;
-use App\Models\HrEmployee;
 use App\Models\Media;
 use App\Notifications\TracksActivity;
 use App\Observers\MediaOwnerObserver;
@@ -21,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\DB;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ResultType;
 use Modules\Tracking\Observers\MilestoneObserver;
@@ -328,11 +328,11 @@ class Milestone extends Model implements TracksActivity
      * The column keeps its original name, `responsible_user_id`, but holds an HR
      * employee id.
      *
-     * @return BelongsTo<HrEmployee, $this>
+     * @return BelongsTo<Employee, $this>
      */
     public function responsibleUser(): BelongsTo
     {
-        return $this->belongsTo(HrEmployee::class, 'responsible_user_id');
+        return $this->belongsTo(Employee::class, 'responsible_user_id');
     }
 
     /**

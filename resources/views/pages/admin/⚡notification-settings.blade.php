@@ -4,7 +4,7 @@ use Modules\Tracking\Actions\Proposals\SaveDefaultReviewerSlots;
 use App\Enums\EventImportance;
 use App\Enums\OversightMode;
 use Modules\Tracking\Enums\ReviewerSlot;
-use App\Models\HrPosition;
+use Modules\Hr\Models\Position;
 use App\Models\Role;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Notifications\EventCatalog;
@@ -132,7 +132,7 @@ new #[Layout('layouts::desk'), Title('titles.notification_rules')] class extends
      */
     protected function positionOptions(): array
     {
-        return HrPosition::pickerOptions();
+        return Position::pickerOptions();
     }
 
     private function fillReviewerPositions(): void

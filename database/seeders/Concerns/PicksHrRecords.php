@@ -2,10 +2,10 @@
 
 namespace Database\Seeders\Concerns;
 
-use App\Models\HrCity;
-use App\Models\HrEmployee;
 use Database\Factories\Concerns\CreatesHrRecords;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\City;
+use Modules\Hr\Models\Employee;
 
 /**
  * Hands seeders the ids of real HR cities and employees to build demo data on.
@@ -25,7 +25,7 @@ trait PicksHrRecords
      */
     protected function hrCityIds(): Collection
     {
-        $ids = HrCity::query()->pluck('id');
+        $ids = City::query()->pluck('id');
 
         return $ids->isNotEmpty() ? $ids : collect(range(1, 3))->map(fn (): int => $this->createHrCity());
     }
@@ -37,7 +37,7 @@ trait PicksHrRecords
      */
     protected function hrEmployeeIds(): Collection
     {
-        $ids = HrEmployee::query()->where('is_active', true)->pluck('id');
+        $ids = Employee::query()->where('is_active', true)->pluck('id');
 
         return $ids->isNotEmpty() ? $ids : collect(range(1, 6))->map(fn (): int => $this->createHrEmployee());
     }

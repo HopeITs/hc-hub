@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Actions\Proposals;
 
-use App\Models\HrCenter;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Database\Eloquent\Collection;
@@ -12,6 +11,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\Center;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\ProposalKind;
 use Modules\Tracking\Enums\ProposalStatus;
@@ -232,7 +232,7 @@ final class CloneProposalForRenewal
             ->get();
 
         $linkable = Project::query()->linkableToProposals()->whereKey($linked->modelKeys())->pluck('id')->all();
-        $centers = HrCenter::query()->whereIn('id', $linked->pluck('center_id')->filter()->unique()->all())->pluck('is_active', 'id');
+        $centers = Center::query()->whereIn('id', $linked->pluck('center_id')->filter()->unique()->all())->pluck('is_active', 'id');
 
         $ids = [];
         $beneficiaries = [];

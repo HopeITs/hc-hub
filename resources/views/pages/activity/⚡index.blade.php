@@ -147,7 +147,7 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
         $sortingByModule = $this->sortField === 'module';
 
         return $this->filteredQuery()
-            ->with('actor:id,hr_user_id,employee_id')
+            ->with('actor:id,email,employee_id')
             ->when($sortingByModule, fn (Builder $query) => $query->orderBy('module', $this->sortDirection))
             ->orderBy('created_at', $sortingByModule ? 'desc' : $this->sortDirection)
             ->orderBy('id', $sortingByModule ? 'desc' : $this->sortDirection)
@@ -251,7 +251,7 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
         return User::query()
             ->whereIn('id', Activity::query()->select('actor_id')->whereNotNull('actor_id')->distinct())
             ->orderByName()
-            ->get(['id', 'hr_user_id']);
+            ->get(['id', 'email']);
     }
 
     /**

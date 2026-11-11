@@ -6,7 +6,7 @@ use Modules\Tracking\Actions\Tasks\ReturnDepartmentTask;
 use Modules\Tracking\Enums\DeliveryState;
 use Modules\Tracking\Enums\TaskKind;
 use Modules\Tracking\Enums\TaskStatus;
-use App\Models\HrDepartment;
+use Modules\Hr\Models\Department;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
@@ -150,7 +150,7 @@ new #[Layout('layouts::desk'), Title('titles.department_tasks')] class extends C
             ->whereNotNull('department_id')
             ->distinct()
             ->pluck('department_id')
-            ->mapWithKeys(fn ($id): array => [(int) $id => HrDepartment::nameOf((int) $id) ?: __('department_tasks.department_unavailable')])
+            ->mapWithKeys(fn ($id): array => [(int) $id => Department::nameOf((int) $id) ?: __('department_tasks.department_unavailable')])
             ->sort()
             ->all();
     }

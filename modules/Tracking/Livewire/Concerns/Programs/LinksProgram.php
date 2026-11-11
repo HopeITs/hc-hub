@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Programs;
 
-use App\Models\HrEmployee;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -12,6 +11,7 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Modules\Core\Models\Program;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\Strategy;
 
 /**
@@ -56,7 +56,7 @@ trait LinksProgram
 
         $validated = $this->validate([
             'strategyId' => ['nullable', 'integer', Rule::exists(Strategy::class, 'id')],
-            'managerId' => ['nullable', 'integer', Rule::exists(HrEmployee::class, 'id')],
+            'managerId' => ['nullable', 'integer', Rule::exists(Employee::class, 'id')],
         ], [
             'strategyId.exists' => __('programs.the_selected_strategy_is_no_longer_available'),
             'managerId.exists' => __('programs.the_selected_manager_is_no_longer_available'),

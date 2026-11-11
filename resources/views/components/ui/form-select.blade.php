@@ -18,7 +18,7 @@
 ])
 
 @php
-    use App\Models\HrEmployee;
+    use Modules\Hr\Models\Employee;
 
     /*
      * A form dropdown that is the header filter picker by construction: the
@@ -62,7 +62,7 @@
      * employee here. Only the picked employees' labels are rendered, so the
      * trigger reads right before the store has loaded.
      */
-    $employeeLabels = $employees ? HrEmployee::pickerLabels()->pluck('label', 'value') : collect();
+    $employeeLabels = $employees ? Employee::pickerLabels()->pluck('label', 'value') : collect();
 
     foreach ($document->getElementsByTagName('option') as $option) {
         $options[] = [

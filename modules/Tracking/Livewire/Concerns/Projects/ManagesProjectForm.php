@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Projects;
 
-use App\Models\HrCenter;
-use App\Models\HrCity;
-use App\Models\HrEmployee;
-use App\Models\HrProgram;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -16,7 +12,10 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Projects\RestoreProject;
 use Modules\Tracking\Actions\Projects\SaveProject;
 use Modules\Tracking\Enums\ProjectStatus;
@@ -37,9 +36,9 @@ use Modules\Tracking\Support\SimilarProjects;
  * (`programOptions()`, `userOptions()`), which `ownerOptions()` reads, and
  * WithPagination's resetPage().
  *
- * @property-read Collection<int, HrEmployee> $ownerOptions  #[Computed] ownerOptions() below
+ * @property-read Collection<int, Employee> $ownerOptions  #[Computed] ownerOptions() below
  * @property-read Collection<int, Program> $programOptions  #[Computed] programOptions() on the page
- * @property-read Collection<int, HrEmployee> $userOptions  #[Computed] userOptions() on the page
+ * @property-read Collection<int, Employee> $userOptions  #[Computed] userOptions() on the page
  * @property-read list<array{id: int, name: string, center: string, program: string, status: string}> $similarProjects  #[Computed] similarProjects() below
  * @property-read array{id: int, name: string, slug: string, state: string, canRestore: bool}|null $existingPairProject  #[Computed] existingPairProject() below
  */
@@ -124,7 +123,7 @@ trait ManagesProjectForm
      * edited project's own center when HR has since deactivated it. Empty
      * until a city is chosen; the dialog then disables the select and says why.
      *
-     * @return Collection<int, HrCenter>
+     * @return Collection<int, Center>
      */
     #[Computed]
     public function centerOptions(): Collection
@@ -135,8 +134,8 @@ trait ManagesProjectForm
             return new Collection;
         }
 
-        $centers = HrCenter::options()->filter(fn (HrCenter $center): bool => $center->city_id === $cityId)->values();
-        $savedCenter = $this->savedCenterId === null ? null : HrCenter::remembered($this->savedCenterId);
+        $centers = Center::activeModels()->filter(fn (Center $center): bool => $center->city_id === $cityId)->values();
+        $savedCenter = $this->savedCenterId === null ? null : Center::remembered($this->savedCenterId);
 
         if ($savedCenter !== null && ! $savedCenter->is_active && $savedCenter->city_id === $cityId) {
             $centers->push($savedCenter);
@@ -149,26 +148,26 @@ trait ManagesProjectForm
      * The centers that can follow up a project with no center of its own
      * (D-55): every active center outside the chosen city.
      *
-     * @return Collection<int, HrCenter>
+     * @return Collection<int, Center>
      */
     #[Computed]
     public function hostCenterOptions(): Collection
     {
         $cityId = $this->chosenCityId();
 
-        return HrCenter::options()->filter(fn (HrCenter $center): bool => $center->city_id !== $cityId)->values();
+        return Center::activeModels()->filter(fn (Center $center): bool => $center->city_id !== $cityId)->values();
     }
 
     /**
      * Active HR cities for the dialog's city picker, in the interface
      * language. Named apart from the directory's cityOptions() filter.
      *
-     * @return Collection<int, HrCity>
+     * @return Collection<int, City>
      */
     #[Computed]
     public function placementCityOptions(): Collection
     {
-        return HrCity::query()->where('is_active', true)->select(['id', 'name_en', 'name_ar'])->orderBy(HrCity::nameColumn())->orderBy('id')->get();
+        return City::query()->where('is_active', true)->select(['id', 'name_en', 'name_ar'])->orderBy(City::nameColumn())->orderBy('id')->get();
     }
 
     /**
@@ -184,8 +183,8 @@ trait ManagesProjectForm
     {
         return [
             'programs' => $this->programOptions->mapWithKeys(fn (Program $program): array => [$program->id => $program->name])->all(),
-            'centers' => HrCenter::options()->mapWithKeys(fn (HrCenter $center): array => [$center->id => $center->name])->all(),
-            'cities' => $this->placementCityOptions->mapWithKeys(fn (HrCity $city): array => [$city->id => $city->name])->all(),
+            'centers' => Center::activeModels()->mapWithKeys(fn (Center $center): array => [$center->id => $center->name])->all(),
+            'cities' => $this->placementCityOptions->mapWithKeys(fn (City $city): array => [$city->id => $city->name])->all(),
         ];
     }
 
@@ -194,7 +193,7 @@ trait ManagesProjectForm
      * programs.manager_id), plus, when editing, the project's present owner so
      * the form still shows them.
      *
-     * @return Collection<int, HrEmployee>
+     * @return Collection<int, Employee>
      */
     #[Computed]
     public function ownerOptions(): Collection
@@ -255,11 +254,11 @@ trait ManagesProjectForm
         $this->confirmNewProject = false;
         $cityId = $this->chosenCityId();
 
-        if (ctype_digit($this->centerId) && HrCenter::remembered((int) $this->centerId)?->city_id !== $cityId) {
+        if (ctype_digit($this->centerId) && Center::remembered((int) $this->centerId)?->city_id !== $cityId) {
             $this->centerId = '';
         }
 
-        if (ctype_digit($this->hostCenterId) && HrCenter::remembered((int) $this->hostCenterId)?->city_id === $cityId) {
+        if (ctype_digit($this->hostCenterId) && Center::remembered((int) $this->hostCenterId)?->city_id === $cityId) {
             $this->hostCenterId = '';
         }
     }
@@ -292,7 +291,7 @@ trait ManagesProjectForm
             'id' => $project->id,
             'name' => $project->name,
             'center' => $project->center_id === null && $project->host_center_id === null ? __('proposals.no_center') : $project->locationLabel(),
-            'program' => $this->hrProgramName($project->program_id),
+            'program' => $this->programName($project->program_id),
             'status' => $project->status->label(),
         ])->all());
     }
@@ -374,7 +373,7 @@ trait ManagesProjectForm
     private function chosenPlacement(): ?array
     {
         if (ctype_digit($this->centerId)) {
-            $center = HrCenter::remembered((int) $this->centerId);
+            $center = Center::remembered((int) $this->centerId);
 
             return $center === null ? null : ['centerId' => $center->id, 'cityId' => $center->city_id];
         }
@@ -386,10 +385,10 @@ trait ManagesProjectForm
         return null;
     }
 
-    private function hrProgramName(int $programId): string
+    private function programName(int $programId): string
     {
         try {
-            $name = HrProgram::nameOf($programId);
+            $name = Program::nameOf($programId);
         } catch (QueryException) {
             $name = '';
         }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support\Desk\Cards;
 
-use App\Models\HrCity;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\City;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\Project;
 
@@ -24,7 +24,7 @@ final class CitiesCard extends PageCard
         $projects = $this->projectsByCity();
 
         return [
-            $this->figure(__('desk-workspace.card.figure.active_cities'), HrCity::query()->where('is_active', true)->count(), 'good'),
+            $this->figure(__('desk-workspace.card.figure.active_cities'), City::query()->where('is_active', true)->count(), 'good'),
             $this->figure(__('desk-workspace.card.figure.cities_with_work'), $projects->filter()->count()),
             $this->figure(__('desk-workspace.card.figure.projects'), $projects->sum()),
         ];
@@ -34,7 +34,7 @@ final class CitiesCard extends PageCard
     {
         $projects = $this->projectsByCity();
         $top = collect($projects)->filter()->sortDesc()->take(3);
-        $names = HrCity::query()->whereIn('id', $top->keys())->get(['id', 'name_en', 'name_ar'])->keyBy('id');
+        $names = City::query()->whereIn('id', $top->keys())->get(['id', 'name_en', 'name_ar'])->keyBy('id');
         $most = max(1, (int) $top->max());
 
         return [
@@ -62,9 +62,9 @@ final class CitiesCard extends PageCard
         $most = (int) (collect($projects)->max() ?? 0);
         $place = 0;
 
-        return HrCity::query()->select(['id', 'name_en', 'name_ar', 'is_active'])->orderBy(HrCity::nameColumn())->get()
-            ->sortByDesc(fn (HrCity $city): int => (int) ($projects[$city->id] ?? 0))
-            ->map(function (HrCity $city) use ($projects, $most, &$place): array {
+        return City::query()->select(['id', 'name_en', 'name_ar', 'is_active'])->orderBy(City::nameColumn())->get()
+            ->sortByDesc(fn (City $city): int => (int) ($projects[$city->id] ?? 0))
+            ->map(function (City $city) use ($projects, $most, &$place): array {
                 $count = (int) ($projects[$city->id] ?? 0);
                 $place++;
 

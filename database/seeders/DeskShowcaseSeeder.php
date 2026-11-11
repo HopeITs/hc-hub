@@ -3,13 +3,13 @@
 namespace Database\Seeders;
 
 use App\Models\Activity;
-use App\Models\HrDepartment;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Department;
 use Modules\Tracking\Enums\ArStatus;
 use Modules\Tracking\Enums\DeliveryState;
 use Modules\Tracking\Enums\MealCoverageScope;
@@ -232,7 +232,7 @@ class DeskShowcaseSeeder extends Seeder
 
                 $project = $owned->values()->get($i % max(1, $owned->count())) ?? $projects->first();
                 $milestone = Milestone::query()->where('project_id', $project->id)->value('id');
-                $department = $kind === null ? null : HrDepartment::query()->where('name', $kind === TaskKind::Financial ? 'Finance' : 'Communication')->value('id');
+                $department = $kind === null ? null : Department::query()->where('name', $kind === TaskKind::Financial ? 'Finance' : 'Communication')->value('id');
 
                 $task = Task::query()->create([
                     'title' => $title,

@@ -104,7 +104,7 @@ trait ManagesProposalFiles
             ->where('mediable_type', 'proposal')
             ->where('mediable_id', $this->proposalId)
             ->whereNotIn('collection', $this->hiddenCollections())
-            ->with('uploader:id,hr_user_id,employee_id')
+            ->with('uploader:id,email,employee_id')
             ->orderByDesc('uploaded_at')
             ->orderByDesc('id')
             ->get();
@@ -151,7 +151,7 @@ trait ManagesProposalFiles
             ->where('mediable_type', 'project')
             ->whereIn('mediable_id', $projectIds)
             ->whereIn('collection', array_map(fn (MediaCollection $collection): string => $collection->value, $this->visibleGrantPaper()))
-            ->with('uploader:id,hr_user_id,employee_id')
+            ->with('uploader:id,email,employee_id')
             ->orderByDesc('uploaded_at')
             ->orderByDesc('id')
             ->get()

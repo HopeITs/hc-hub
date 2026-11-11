@@ -21,8 +21,7 @@ use Modules\Tracking\Models\Project;
  * or with every other real seeder, in dependency order, via RealDataSeeder.
  *
  * `city_id` and `program_id` are real HR ids, not demo ones — see the HR
- * note in .ai/rules/models.md. `Program::syncFromHr()` mirrors the programs
- * table first so the local FK on `program_id` is satisfiable. `user_id` has
+ * note in .ai/rules/models.md; programs come from hub:import-hr. `user_id` has
  * no source data (the list has no owner per project) and the column is
  * NOT NULL, so every row is assigned the first active HR employee.
  *
@@ -35,8 +34,6 @@ class RealProjectsSeeder extends Seeder
 
     public function run(): void
     {
-        Program::syncFromHr();
-
         $ownerId = $this->hrEmployeeIds()->first();
 
         foreach ($this->projects() as $project) {

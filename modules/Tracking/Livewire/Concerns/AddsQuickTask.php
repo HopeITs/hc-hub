@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns;
 
-use App\Models\HrEmployee;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Attributes\Computed;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Tasks\CreateTask;
 use Modules\Tracking\Actions\Tasks\MoveTask;
 use Modules\Tracking\Enums\TaskPriority;
@@ -138,7 +138,7 @@ trait AddsQuickTask
             'newTaskPriority' => ['required', new Enum(TaskPriority::class)],
             'newTaskDueDate' => ['nullable', 'date'],
             'newTaskAssignedTo' => ['array'],
-            'newTaskAssignedTo.*' => ['integer', Rule::exists(HrEmployee::class, 'id')],
+            'newTaskAssignedTo.*' => ['integer', Rule::exists(Employee::class, 'id')],
         ], [
             'newTaskTitle.required' => __('tasks.enter_a_task_title'),
             'newTaskAssignedTo.*.exists' => __('tasks.the_selected_assignee_is_no_longer_available'),

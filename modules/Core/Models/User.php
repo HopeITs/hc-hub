@@ -7,10 +7,6 @@ namespace Modules\Core\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Concerns\RecordsActivity;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
-use App\Models\Activity;
-use App\Models\HrDepartment;
-use App\Models\HrEmployee;
-use App\Models\HrUser;
 use App\Models\Media;
 use App\Models\Role;
 use App\Models\TrustedDevice;
@@ -19,6 +15,7 @@ use App\Models\UserTodo;
 use App\Notifications\ActivityRecorder;
 use App\Notifications\TracksActivity;
 use App\Support\EmployeeProfile;
+use App\Support\Like;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -30,36 +27,37 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
-use Illuminate\Database\QueryException;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Modules\Core\Models\Concerns\RemembersLookup;
+use Modules\Hr\Models\Department;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\IndicatorProgress;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Task;
-use PDOException;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
- * A person who can use hc-tracking.
+ * One account of the hub, shared by every module (Core).
  *
- * They log in with their HR account (see AuthenticateWithHrAccount), linked by
- * hr_user_id. This row holds only what HR does not: two-factor settings,
- * passkeys, the interface language and (via Spatie\Permission\Traits\HasRoles)
- * role/permission assignments. Name, email and password live in HR only;
- * `name` and `email` are read from there (see HrUser::directory()), never
- * copied. `employee_id` is the HR employee id, refreshed at each login.
+ * People log in with users.email and users.password (AuthenticateUser);
+ * ids are HR's user ids (hub:import-hr). `employee_id` links the HR
+ * employee, whose is_active decides whether the account may still sign in
+ * (EnsureAccountIsActive). `name` is the employee's English name, or the
+ * email for an account with no employee, read from a remembered lookup so a
+ * relation loaded as `user:id` still shows it.
  *
  * @property int $id
  * @property-read string $name
- * @property-read string $email
- * @property int $hr_user_id
+ * @property string $email
+ * @property string $password
  * @property int|null $employee_id
  * @property int|null $active_role_id
  * @property string|null $locale
@@ -80,11 +78,11 @@ use Spatie\Permission\Traits\HasRoles;
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
-#[Hidden(['two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
+#[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements HasLocalePreference, PasskeyUser, TracksActivity
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable, RecordsActivity, TwoFactorAuthenticatable;
+    use HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable, RecordsActivity, RemembersLookup, TwoFactorAuthenticatable;
 
     /**
      * Mirror the columns' DB defaults so a user that has not been round-tripped
@@ -217,121 +215,15 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     }
 
     /**
-     * The tracking user for an HR account, created on first use.
-     *
-     * Only active HR accounts (see HrUser::isActive()) may use tracking; the
-     * caller checks that first. A new user starts with the default role
-     * (config('access-control.default_role'), Team Member), except an email
-     * listed in auth.hr_admin_emails, which starts as Super Admin.
+     * Give this account access with a starting role (also made its active
+     * role). Accounts themselves come from HR (hub:import-hr) or user:create.
      */
-    public static function forHrAccount(HrUser $hrUser): self
+    public function grantAccess(string $roleName): void
     {
-        $user = static::query()->where('hr_user_id', $hrUser->id)->first();
-
-        if ($user !== null) {
-            return $user;
-        }
-
-        $role = in_array(mb_strtolower($hrUser->email), config('auth.hr_admin_emails', []), true)
-            ? 'Super Admin'
-            : (string) config('access-control.default_role');
-
-        return static::createFromHrAccount($hrUser, $role);
-    }
-
-    /**
-     * Give every active HR account its tracking user, and refresh the HR
-     * employee link of existing ones.
-     *
-     * Roles are never touched. Name and email need no refreshing: they are
-     * read from HR, not copied. The HR mirror is not somebody's action, so it
-     * records no activity.
-     *
-     * @return array{created: int, updated: int}
-     */
-    public static function syncFromHrAccounts(): array
-    {
-        return Activity::withoutRecording(function (): array {
-            $usersByHrUserId = static::query()->get(['id', 'hr_user_id', 'employee_id'])->keyBy('hr_user_id');
-            $created = 0;
-            $updated = 0;
-
-            HrUser::query()->active()->orderBy('id')->each(function (HrUser $hrUser) use ($usersByHrUserId, &$created, &$updated): void {
-                $user = $usersByHrUserId->get($hrUser->id);
-
-                if ($user === null) {
-                    static::forHrAccount($hrUser);
-                    $created++;
-
-                    return;
-                }
-
-                if ($user->linkToHrAccount($hrUser)) {
-                    $updated++;
-                }
-            });
-
-            return ['created' => $created, 'updated' => $updated];
-        });
-    }
-
-    /**
-     * Delete the tracking users whose HR account is gone or no longer active.
-     *
-     * A user still referenced by records that restrict deletion (reports,
-     * indicator readings, uploads, created tasks) is kept, roles included.
-     * Part of the HR mirror, so it records no activity.
-     *
-     * @return array{deleted: int, kept: list<string>}
-     */
-    public static function pruneInactiveHrAccounts(): array
-    {
-        return Activity::withoutRecording(function (): array {
-            $activeIds = HrUser::query()->active()->pluck('id')->flip();
-            $deleted = 0;
-            $kept = [];
-
-            static::query()->orderBy('id')->each(function (User $user) use ($activeIds, &$deleted, &$kept): void {
-                if ($activeIds->has($user->hr_user_id)) {
-                    return;
-                }
-
-                try {
-                    $user->delete();
-                    $deleted++;
-                } catch (QueryException) {
-                    $kept[] = $user->email !== '' ? $user->email : "#{$user->id}";
-                }
-            });
-
-            return ['deleted' => $deleted, 'kept' => $kept];
-        });
-    }
-
-    /**
-     * Give an HR account access to hc-tracking, optionally with a role.
-     *
-     * Only the link to HR is stored: name, email and password stay in HR, and
-     * people always log in with their HR password.
-     */
-    public static function createFromHrAccount(HrUser $hrUser, ?string $roleName, bool $verified = true): self
-    {
-        $user = new self;
-
-        $user->forceFill([
-            'hr_user_id' => $hrUser->id,
-            'employee_id' => $hrUser->employee_id,
-            'email_verified_at' => $verified ? now() : null,
-        ])->save();
-
-        if ($roleName !== null) {
-            $role = Role::findOrCreate($roleName);
-            $user->assignRole($role);
-            $user->setActiveRole($role->id);
-            $user->recordRoleChange([], [$role->name]);
-        }
-
-        return $user;
+        $role = Role::findOrCreate($roleName);
+        $this->assignRole($role);
+        $this->setActiveRole($role->id);
+        $this->recordRoleChange([], [$role->name]);
     }
 
     /**
@@ -364,27 +256,6 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     }
 
     /**
-     * Refresh the HR employee this user's account belongs to.
-     *
-     * Only tracking columns are written; the HR account is read, never changed.
-     *
-     * @return bool Whether anything changed.
-     */
-    public function linkToHrAccount(HrUser $hrUser): bool
-    {
-        $this->forceFill([
-            'hr_user_id' => $hrUser->id,
-            'employee_id' => $hrUser->employee_id,
-        ]);
-
-        if (! $this->isDirty()) {
-            return false;
-        }
-
-        return $this->save();
-    }
-
-    /**
      * Whether each password sign-in must be followed by an emailed code: the
      * user turned it on, or their role requires two-factor authentication.
      */
@@ -395,156 +266,143 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     }
 
     /**
-     * Whether HR has deactivated or removed the account this user logs in with.
+     * Whether this account may no longer sign in: its linked employee is
+     * inactive or gone. An account with no employee (a system account) stays
+     * active.
      */
-    public function hasLostHrAccess(): bool
+    public function hasLostAccess(): bool
     {
-        $hrUser = HrUser::query()->with('employee')->find($this->hr_user_id);
+        $employeeId = $this->getAttribute('employee_id');
 
-        return $hrUser === null || ! $hrUser->isActive();
+        if ($employeeId === null) {
+            return false;
+        }
+
+        return ! Employee::query()->whereKey($employeeId)->where('is_active', true)->exists();
     }
 
     /**
-     * The user's name, read from their HR employee record (English), or the
-     * HR email for an account with no employee.
+     * Every account's display name and email by id (remembered): the
+     * employee's English name, or the email without an employee.
+     *
+     * @return array<int, array{name: string, email: string}>
+     */
+    public static function directory(): array
+    {
+        return static::rememberLookup('directory', fn (): array => static::query()
+            ->toBase()
+            ->leftJoin('employees', 'employees.id', '=', 'users.employee_id')
+            ->get(['users.id', 'users.email', 'employees.first_name_en', 'employees.last_name_en'])
+            ->mapWithKeys(fn (object $row): array => [(int) $row->id => [
+                'name' => trim($row->first_name_en.' '.$row->last_name_en) ?: (string) $row->email,
+                'email' => (string) $row->email,
+            ]])
+            ->all());
+    }
+
+    /**
+     * The user's name: their employee's English name, or the email.
      *
      * @return Attribute<string, never>
      */
     protected function name(): Attribute
     {
-        return Attribute::get(fn (): string => $this->hrDirectoryEntry()['name'] ?? '');
+        return Attribute::get(fn (): string => $this->directoryEntry()['name'] ?? (string) ($this->attributes['email'] ?? ''));
     }
 
     /**
-     * The user's email, read from their HR account.
+     * The login email: the column when it was selected, else the remembered
+     * directory (a relation loaded as `user:id` still has it).
      *
-     * @return Attribute<string, never>
+     * @return Attribute<string, string>
      */
     protected function email(): Attribute
     {
-        return Attribute::get(fn (): string => $this->hrDirectoryEntry()['email'] ?? '');
+        return Attribute::get(fn (mixed $value): string => array_key_exists('email', $this->attributes)
+            ? (string) $value
+            : ($this->directoryEntry()['email'] ?? ''));
     }
 
     /**
-     * This user's HR directory entry, or null when HR no longer has the account.
-     *
-     * The column is NOT NULL, but a user built in memory and not saved yet
-     * (createFromHrAccount() before forceFill, factory make()) has no
-     * hr_user_id, so the attribute is read raw rather than through the
-     * `int` property type (and may arrive as a numeric string, depending on
-     * the database driver).
-     *
-     * @return array{email: string, name: string}|null
+     * @return array{name: string, email: string}|null
      */
-    private function hrDirectoryEntry(): ?array
+    private function directoryEntry(): ?array
     {
-        $hrUserId = $this->getAttribute('hr_user_id');
+        $id = $this->getKey();
 
-        return is_numeric($hrUserId) ? HrUser::directoryEntry((int) $hrUserId) : null;
-    }
-
-    /**
-     * The HR password hash, or an empty string when HR has no account for
-     * this user. No password is stored here: people log in with their HR
-     * password.
-     *
-     * The session guard fingerprints this into the session at login and into
-     * the remember-me cookie, so once HR changes the password a remember
-     * cookie issued before stops working and EnsureHrAccountIsActive signs
-     * open sessions out. Read from HR once per user instance (one query), so a
-     * login that also queues a remember cookie asks HR only once; the guard
-     * loads a new instance on every request, so the hash is never stale.
-     *
-     * When HR cannot be reached the failure is reported and a random value is
-     * returned that no session or cookie can match: a remember cookie then
-     * signs nobody in (the visitor sees the login page instead of an error),
-     * and a cookie from before sessions followed the HR password is never
-     * accepted again.
-     */
-    public function getAuthPassword(): string
-    {
-        try {
-            return once(fn (): string => (string) HrUser::query()->whereKey($this->hr_user_id)->value('password'));
-        } catch (QueryException|PDOException $exception) {
-            report($exception);
-
-            return Str::random(64);
+        if (! is_numeric($id)) {
+            return null;
         }
+
+        $directory = static::directory();
+
+        if (! array_key_exists((int) $id, $directory)) {
+            static::forgetLookups();
+            $directory = static::directory();
+        }
+
+        return $directory[(int) $id] ?? null;
     }
 
     /**
-     * Users whose HR account may still use tracking (see HrUser::isActive()).
-     *
-     * HR lives on another connection, so the active account ids are read from
-     * HR first instead of a whereHas() across databases.
-     *
-     * @param  Builder<self>  $query
-     */
-    #[Scope]
-    protected function withActiveHrAccount(Builder $query): void
-    {
-        $query->whereIn('hr_user_id', HrUser::query()->active()->pluck('id'));
-    }
-
-    /**
-     * Users whose HR account is gone or inactive, the complement of
-     * withActiveHrAccount().
+     * Accounts that may still sign in: no employee, or an active one.
      *
      * @param  Builder<self>  $query
      */
     #[Scope]
-    protected function withoutActiveHrAccount(Builder $query): void
+    protected function withActiveAccount(Builder $query): void
     {
-        $query->whereNotIn('hr_user_id', HrUser::query()->active()->pluck('id'));
+        $query->where(fn (Builder $query) => $query
+            ->whereNull($query->qualifyColumn('employee_id'))
+            ->orWhereHas('employee', fn (Builder $employee) => $employee->where('is_active', true)));
     }
 
     /**
-     * Users whose HR email or employee name contains the search.
+     * Accounts whose employee is inactive or gone, the complement of
+     * withActiveAccount().
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function withoutActiveAccount(Builder $query): void
+    {
+        $query->whereNotNull($query->qualifyColumn('employee_id'))
+            ->whereDoesntHave('employee', fn (Builder $employee) => $employee->where('is_active', true));
+    }
+
+    /**
+     * Users whose email or employee name (English or Arabic) contains the search.
      *
      * @param  Builder<self>  $query
      */
     #[Scope]
     protected function whereNameOrEmailLike(Builder $query, string $search): void
     {
-        $query->whereIn('hr_user_id', HrUser::idsMatching($search));
+        $query->where(Like::everyWord($search, fn (Builder|QueryBuilder $query, string $word) => $query
+            ->where(Like::word('users.email', $word))
+            ->orWhereIn('users.employee_id', Employee::query()->select('employees.id')->whereNameLike($word, false))));
     }
 
     /**
-     * Order users by the name read from HR, then id.
+     * Order users by their display name (employee English name, else email), then id.
      *
      * @param  Builder<self>  $query
      */
     #[Scope]
     protected function orderByName(Builder $query): void
     {
-        $ids = HrUser::idsOrderedByName();
-
-        if ($ids !== []) {
-            $placeholders = implode(', ', array_fill(0, count($ids), '?'));
-            $query->orderByRaw('FIELD(users.hr_user_id, '.$placeholders.')', $ids);
-        }
-
-        $query->orderBy($query->qualifyColumn('id'));
-    }
-
-    /**
-     * The HR login account this user authenticates with.
-     *
-     * @return BelongsTo<HrUser, $this>
-     */
-    public function hrUser(): BelongsTo
-    {
-        return $this->belongsTo(HrUser::class, 'hr_user_id');
+        $query->orderByRaw("COALESCE((SELECT NULLIF(TRIM(CONCAT(employees.first_name_en, ' ', employees.last_name_en)), '') FROM employees WHERE employees.id = users.employee_id), users.email)")
+            ->orderBy($query->qualifyColumn('id'));
     }
 
     /**
      * The HR employee record of this user.
      *
-     * @return BelongsTo<HrEmployee, $this>
+     * @return BelongsTo<Employee, $this>
      */
     public function employee(): BelongsTo
     {
-        return $this->belongsTo(HrEmployee::class, 'employee_id');
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
 
     /**
@@ -571,7 +429,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
 
             return $departmentId === null
                 ? []
-                : array_map('intval', HrDepartment::employeeIdsInDepartment($departmentId));
+                : Department::employeeIdsInDepartment($departmentId);
         });
     }
 
@@ -684,7 +542,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
      */
     public function avatarUrl(): string
     {
-        return HrEmployee::avatarUrl($this->employee_id);
+        return Employee::avatarUrl($this->employee_id);
     }
 
     /**
@@ -692,7 +550,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
      */
     public function photoUrl(): ?string
     {
-        return HrEmployee::photoUrl($this->employee_id);
+        return Employee::photoUrl($this->employee_id);
     }
 
     /**
@@ -704,6 +562,8 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     {
         return [
             'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'last_seen_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
             'email_two_factor_enabled' => 'boolean',
             'notification_popups' => 'boolean',
@@ -750,7 +610,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     }
 
     /**
-     * Logins refresh the HR employee link on every sign-in; that is not news.
+     * Account housekeeping (last seen, preferences, 2FA) is not news.
      */
     protected function activityRecordsUpdates(): bool
     {

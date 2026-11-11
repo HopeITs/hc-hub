@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Policies;
 
-use App\Models\HrContract;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Contract;
 use Modules\Tracking\Enums\AssignmentStatus;
 use Modules\Tracking\Models\Assignment;
 
@@ -42,6 +42,6 @@ class AssignmentPolicy
     {
         return $assignment->status === AssignmentStatus::Rejected
             && $user->employee_id !== null
-            && in_array((int) $user->employee_id, HrContract::topLevelEmployeeIds(), true);
+            && in_array((int) $user->employee_id, Contract::topLevelEmployeeIds(), true);
     }
 }

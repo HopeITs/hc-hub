@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Support\Desk;
 
 use App\Livewire\Concerns\Desk\ReadsDeskFlow;
-use App\Models\HrEmployee;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ArStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\RagStatus;
@@ -341,7 +341,7 @@ class ReadyLayoutSignals
      */
     private function team(): ?array
     {
-        $ids = HrEmployee::query()->whereKey(array_keys(TeamScope::for($this->viewer)))->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
+        $ids = Employee::query()->whereKey(array_keys(TeamScope::for($this->viewer)))->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
 
         if ($ids === []) {
             return null;

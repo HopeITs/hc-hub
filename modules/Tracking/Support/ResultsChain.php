@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Support;
 
-use App\Models\HrDepartment;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Modules\Hr\Models\Department;
 use Modules\Tracking\Enums\ActivityStatus;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ResultType;
@@ -636,7 +636,7 @@ final class ResultsChain
 
         return array_map(fn (Task $task): array => [
             'task' => $task,
-            'department' => HrDepartment::nameOf((int) $task->department_id) ?: __('department_tasks.department_unavailable'),
+            'department' => Department::nameOf((int) $task->department_id) ?: __('department_tasks.department_unavailable'),
         ], $tasks);
     }
 

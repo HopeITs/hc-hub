@@ -6,7 +6,6 @@ namespace Modules\Tracking\Livewire\Concerns\Projects;
 
 use App\Actions\Desk\SendNudge;
 use App\Enums\MediaCollection;
-use App\Models\HrEmployee;
 use App\Models\Media;
 use App\Support\Desk\Money;
 use App\Support\Desk\ProjectStage;
@@ -15,6 +14,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\Currency;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
@@ -400,7 +400,7 @@ trait ReadsProjectStory
             ->get();
         $employees = $rows->isEmpty()
             ? collect()
-            : HrEmployee::query()->whereKey($rows->pluck('employee_id')->unique()->values()->all())->get(HrEmployee::NameColumns)->keyBy('id');
+            : Employee::query()->whereKey($rows->pluck('employee_id')->unique()->values()->all())->get(Employee::NameColumns)->keyBy('id');
 
         return [
             'indicators' => $targets->pluck('indicator_id')->unique()->count(),

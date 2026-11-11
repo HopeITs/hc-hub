@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Tasks;
 
-use App\Models\HrDepartment;
-use App\Models\HrEmployee;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Modules\Core\Models\Program;
+use Modules\Hr\Models\Department;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
@@ -39,8 +39,8 @@ trait ProvidesTaskOptions
             return [];
         }
 
-        return HrDepartment::options()
-            ->map(fn (HrDepartment $department): array => ['id' => $department->id, 'name' => $department->name])
+        return Department::options()
+            ->map(fn (Department $department): array => ['id' => $department->id, 'name' => $department->name])
             ->all();
     }
 
@@ -66,8 +66,8 @@ trait ProvidesTaskOptions
     #[Computed(persist: true, seconds: 300)]
     public function userOptions(): array
     {
-        return HrEmployee::pickerOptions()
-            ->map(fn (HrEmployee $employee): array => [
+        return Employee::pickerOptions()
+            ->map(fn (Employee $employee): array => [
                 'id' => $employee->id,
                 'name' => $employee->name,
                 'secondary_name' => $employee->secondary_name,
@@ -147,8 +147,8 @@ trait ProvidesTaskOptions
                 ->map(fn (Project $project): array => ['id' => $project->id, 'name' => $project->name]),
             'program' => Program::options()
                 ->map(fn (Program $program): array => ['id' => $program->id, 'name' => $program->name]),
-            'department' => HrDepartment::query()->select(['id', 'name'])->orderBy('name')->get()
-                ->map(fn (HrDepartment $department): array => ['id' => $department->id, 'name' => $department->name]),
+            'department' => Department::query()->select(['id', 'name'])->orderBy('name')->get()
+                ->map(fn (Department $department): array => ['id' => $department->id, 'name' => $department->name]),
             default => collect(),
         };
     }

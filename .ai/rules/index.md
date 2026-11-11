@@ -4,7 +4,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 
 | Applies to | Rule file |
 | --- | --- |
-| app/Actions/Fortify/AuthenticateWithHrAccount.php | .ai/rules/actions-fortify.md |
+| app/Actions/Fortify/AuthenticateUser.php | .ai/rules/actions-fortify.md |
 | resources/views/pages/activity/** | .ai/rules/activity.md |
 | {modules/Tracking/resources/views/pages/transfers/**,modules/Tracking/resources/views/pages/funding-agreements/**,modules/Tracking/resources/views/pages/donors/**,modules/Tracking/resources/views/pages/proposals/**,modules/Tracking/resources/views/pages/admin/⚡accounts.blade.php} | .ai/rules/admin.md |
 | app/Notifications/Alerts/**, modules/Tracking/Notifications/Alerts/** | .ai/rules/alerts.md |
@@ -20,7 +20,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | {public/sw.js,public/manifest.webmanifest,resources/js/notifications.js,resources/views/components/notifications/toasts.blade.php} | .ai/rules/components-notifications.md |
 | resources/views/components/ui/**, resources/views/components/ui/{logframe-node.blade.php,logframe.blade.php,target-lineage.blade.php}, resources/views/components/ui/framework-node.blade.php, resources/views/components/ui/multi-select-popover.blade.php | .ai/rules/components-ui.md |
 | resources/views/components/app-logo.blade.php, resources/views/layouts/auth/simple.blade.php | .ai/rules/components.md |
-| {modules/Core/Models/User.php,modules/Core/Models/Program.php,app/Models/Hr*.php,app/Models/Concerns/RemembersHrLookup.php,database/factories/{UserFactory,ProgramFactory}.php} | .ai/rules/concerns-factories.md |
+| {modules/Core/Models/User.php,modules/Core/Models/Program.php,database/factories/{UserFactory,ProgramFactory}.php} | .ai/rules/concerns-factories.md |
 | app/Concerns/HasTree.php | .ai/rules/concerns.md |
 | config/session.php | .ai/rules/config-2.md |
 | {config/database.php,.env.example} | .ai/rules/config.md |
@@ -47,8 +47,8 @@ Before planning or editing, find the row whose globs match the file's path and r
 | {config/database.php,.env.example,database/migrations/**} | .ai/rules/migrations.md |
 | modules/Tracking/resources/views/pages/milestones/** | .ai/rules/milestones.md |
 | modules/Tracking/resources/views/pages/{milestones,tasks}/** | .ai/rules/milestonestasks.md |
-| {app/Models/Hr*.php,app/Support/EmployeeProfile.php,app/Models/Concerns/RemembersHrLookup.php} | .ai/rules/models-concerns.md |
-| app/Models/**, modules/*/Models/**, modules/Tracking/Models/Account.php, app/Models/Hr*.php, modules/Core/Models/Program.php, modules/Core/Models/User.php, modules/Tracking/Models/Task.php | .ai/rules/models.md |
+| {modules/Hr/Models/Concerns/PresentsEmployee.php,app/Support/EmployeeProfile.php,app/Support/Concerns/RemembersTableLookup.php} | .ai/rules/models-concerns.md |
+| app/Models/**, modules/*/Models/**, modules/Tracking/Models/Account.php, modules/Core/Models/Program.php, modules/Core/Models/User.php, modules/Tracking/Models/Task.php | .ai/rules/models.md |
 | modules/Tracking/resources/views/pages/admin/*narrative-questions* | .ai/rules/narrative-questions.md |
 | {app/Http/Middleware/SetLocale.php,app/Http/Controllers/SwitchLocaleController.php,resources/views/components/navigation/sidebar.blade.php,resources/css/*.css} | .ai/rules/navigation-css.md |
 | resources/views/components/{navigation/sidebar.blade.php,ui/panel.blade.php,ui/stat-tile.blade.php,ui/data-table.blade.php} | .ai/rules/navigation.md |

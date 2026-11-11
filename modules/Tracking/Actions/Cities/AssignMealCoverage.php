@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Actions\Cities;
 
-use App\Models\HrCity;
-use App\Models\HrEmployee;
 use Closure;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\City;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\MealCoverageScope;
 use Modules\Tracking\Models\MealCoverageAssignment;
 use Modules\Tracking\Models\Project;
@@ -33,7 +33,7 @@ class AssignMealCoverage
 
         Validator::make(['mealEmployeeId' => $employeeId], [
             'mealEmployeeId' => [function (string $attribute, mixed $value, Closure $fail): void {
-                if (! HrEmployee::query()->whereKey($value)->where('is_active', true)->exists()) {
+                if (! Employee::query()->whereKey($value)->where('is_active', true)->exists()) {
                     $fail(__('cities.choose_an_active_employee'));
                 }
             }],
@@ -78,7 +78,7 @@ class AssignMealCoverage
     private function ensureTargetExists(MealCoverageScope $scope, int $targetId): void
     {
         if ($scope === MealCoverageScope::City) {
-            if (! HrCity::query()->whereKey($targetId)->exists()) {
+            if (! City::query()->whereKey($targetId)->exists()) {
                 throw ValidationException::withMessages(['mealTargetId' => __('cities.city_not_found')]);
             }
 

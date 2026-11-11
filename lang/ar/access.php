@@ -37,6 +37,7 @@ return [
         'tasks' => 'المهام',
         'calendar' => 'التقويم',
         'accounts' => 'الحسابات',
+        'centers' => 'المراكز',
         'cities' => 'المدن',
         'activity-log' => 'سجل النشاط',
         'notification-settings' => 'إعدادات الإشعارات',

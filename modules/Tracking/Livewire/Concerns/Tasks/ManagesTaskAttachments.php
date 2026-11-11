@@ -55,7 +55,7 @@ trait ManagesTaskAttachments
     {
         return TaskAttachment::query()
             ->select(['id', 'task_id', 'path', 'disk', 'original_name', 'size', 'date', 'type', 'uploaded_by'])
-            ->with('uploader:id,hr_user_id,employee_id')
+            ->with('uploader:id,email,employee_id')
             ->where('task_id', $this->taskId)
             ->orderByDesc('date')
             ->orderByDesc('id')

@@ -6,7 +6,7 @@ use Modules\Tracking\Actions\DonorReports\SaveDonorReportFile;
 use App\Enums\FileType;
 use Modules\Tracking\Livewire\Concerns\DonorReports\SubmitsDonorReport;
 use Modules\Tracking\Models\DonorReport;
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 use App\Models\Media;
 use Modules\Core\Models\User;
 use App\Rules\SecureUpload;
@@ -91,7 +91,7 @@ new #[Layout('layouts::desk'), Title('titles.donor_report')] class extends Compo
     }
 
     /**
-     * @return array{employee: HrEmployee|null, user_id: int|null, reachable: bool}|null
+     * @return array{employee: Employee|null, user_id: int|null, reachable: bool}|null
      */
     #[Computed]
     public function responsible(): ?array

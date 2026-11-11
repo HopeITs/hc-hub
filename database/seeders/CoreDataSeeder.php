@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\HrUser;
 use Database\Seeders\Concerns\PicksHrRecords;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Modules\Core\Models\User;
@@ -18,8 +16,8 @@ use Modules\Tracking\Models\Proposal;
  * Master data every other seeder builds on: staff, donors, and a
  * handful of real, program-independent proposals.
  *
- * Staff are the HR accounts: every active one gets a tracking user (no role,
- * or Super Admin for auth.hr_admin_emails). Cities come from the HR database too.
+ * Staff are the accounts hub:import-hr brings in; an empty database gets a
+ * few with the default role. Cities come from hub:import-hr too.
  */
 class CoreDataSeeder extends Seeder
 {
@@ -30,11 +28,9 @@ class CoreDataSeeder extends Seeder
      */
     public function run(): void
     {
-        if (HrUser::query()->doesntExist()) {
-            $this->createHrAccounts();
+        if (User::query()->doesntExist()) {
+            $this->createAccounts();
         }
-
-        User::syncFromHrAccounts();
 
         // Real classifications, so the donor type filter has something on more
         // than one side of it. GIZ and SIDA are bilateral agencies; UNICEF and
@@ -175,19 +171,20 @@ class CoreDataSeeder extends Seeder
     }
 
     /**
-     * Give an empty HR database a few login accounts.
-     *
-     * Only the test suite's in-memory HR database is ever empty; the real `hr`
-     * connection is READ ONLY and would reject these inserts.
+     * Give an empty database a few login accounts (accounts normally come
+     * from hub:import-hr).
      */
-    protected function createHrAccounts(): void
+    protected function createAccounts(): void
     {
         foreach ($this->hrEmployeeIds()->take(6) as $employeeId) {
-            DB::connection('hr')->table('users')->insert([
+            $user = new User;
+            $user->forceFill([
                 'employee_id' => $employeeId,
                 'email' => fake()->unique()->safeEmail(),
                 'password' => Hash::make('password'),
-            ]);
+                'email_verified_at' => now(),
+            ])->save();
+            $user->grantAccess((string) config('access-control.default_role'));
         }
     }
 }

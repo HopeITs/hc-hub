@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Actions\Proposals;
 
-use App\Models\HrCenter;
-use App\Models\HrCity;
-use App\Models\HrEmployee;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -15,8 +12,11 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator as ValidatorInstance;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\Currency;
 use Modules\Tracking\Enums\ProposalKind;
 use Modules\Tracking\Enums\ProposalStatus;
@@ -40,8 +40,8 @@ use Modules\Tracking\Support\ProposalLocationRows;
  *
  * Location rows (contracts.md §7, W-34a, D-62) come in `locations`: the set
  * is validated as a whole, then replaced under the proposal lock through
- * ProposalLocationRows, a new row without a program opens its program
- * request, and ProposalLocationsChanged fires after commit with the counts.
+ * ProposalLocationRows (a new program or center a row names is created there,
+ * gated by programs.create / centers.create), and ProposalLocationsChanged fires after commit with the counts.
  * On create, each `projectIds` entry still becomes a row with `project_id`
  * through LinkProposalProject, so a form without rows keeps working until
  * the picker goes (W-34a slice 3).
@@ -64,7 +64,7 @@ final class SaveProposal
      * are ignored entirely for a user who may not see money. `locations`, when
      * sent, replaces the rows; an edit that omits it leaves them alone.
      *
-     * @param  array{kind?: ?string, name: string, donorId: int|string|null, narrative?: ?string, projectIds?: list<int|string>, locations?: list<array{city_id: int|string|null, program_id?: int|string|null, responsible_employee_id?: int|string|null, center_ids?: list<int|string>, is_new?: bool|int|string|null, new_program_name_en?: ?string, new_program_name_ar?: ?string}>, beneficiaries?: array<int|string, int|string|null>, beneficiariesReason?: ?string, requestedBudget?: string|int|float|null, requestedCurrency?: ?string, plannedDateBegin: ?string, plannedDateEnd: ?string, notes?: ?string, conceptNote?: ?string, startingStage?: string, skipReason?: ?string, previousProposalId?: int|null}  $data
+     * @param  array{kind?: ?string, name: string, donorId: int|string|null, narrative?: ?string, projectIds?: list<int|string>, locations?: list<array{city_id: int|string|null, program_id?: int|string|null, responsible_employee_id?: int|string|null, center_ids?: list<int|string>, is_new?: bool|int|string|null, new_program_name_en?: ?string, new_program_name_ar?: ?string, new_center_name_en?: ?string, new_center_name_ar?: ?string}>, beneficiaries?: array<int|string, int|string|null>, beneficiariesReason?: ?string, requestedBudget?: string|int|float|null, requestedCurrency?: ?string, plannedDateBegin: ?string, plannedDateEnd: ?string, notes?: ?string, conceptNote?: ?string, startingStage?: string, skipReason?: ?string, previousProposalId?: int|null}  $data
      */
     public function handle(?Proposal $existing, array $data, User $actor): Proposal
     {
@@ -293,7 +293,7 @@ final class SaveProposal
             }
 
             $this->checkDonorApproved($validator, $input, $proposal);
-            $this->checkLocations($validator, $input);
+            $this->checkLocations($validator, $input, $actor);
         });
 
         $validator->validate();
@@ -310,7 +310,7 @@ final class SaveProposal
      *
      * @param  array<string, mixed>  $input
      */
-    private function checkLocations(ValidatorInstance $validator, array $input): void
+    private function checkLocations(ValidatorInstance $validator, array $input, User $actor): void
     {
         $rows = $this->locationRows($input);
 
@@ -322,9 +322,9 @@ final class SaveProposal
         $programIds = array_values(array_unique(array_filter(array_column($rows, 'program_id'))));
         $employeeIds = array_values(array_unique(array_filter(array_column($rows, 'responsible_employee_id'))));
 
-        $activeCities = $cityIds === [] ? [] : HrCity::query()->whereKey($cityIds)->where('is_active', true)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
+        $activeCities = $cityIds === [] ? [] : City::query()->whereKey($cityIds)->where('is_active', true)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
         $programs = $programIds === [] ? [] : Program::query()->whereKey($programIds)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
-        $activeEmployees = $employeeIds === [] ? [] : HrEmployee::query()->whereKey($employeeIds)->where('is_active', true)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
+        $activeEmployees = $employeeIds === [] ? [] : Employee::query()->whereKey($employeeIds)->where('is_active', true)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
         $seen = [];
 
         foreach ($rows as $index => $row) {
@@ -348,7 +348,7 @@ final class SaveProposal
 
             if ($cityOk) {
                 foreach ($row['center_ids'] as $centerId) {
-                    if (HrCenter::remembered($centerId)?->city_id !== $row['city_id']) {
+                    if (Center::remembered($centerId)?->city_id !== $row['city_id']) {
                         $validator->errors()->add("locations.{$index}.center_ids", __('proposals.location_center_not_in_city'));
 
                         break;
@@ -366,6 +366,18 @@ final class SaveProposal
                         $validator->errors()->add("locations.{$index}.{$field}", __('proposals.location_program_name_required'));
                     }
                 }
+
+                if (! $actor->can('programs.create')) {
+                    $validator->errors()->add("locations.{$index}.new_program_name_en", __('proposals.location_program_create_denied'));
+                }
+            }
+
+            if (($row['new_center_name_en'] !== '') !== ($row['new_center_name_ar'] !== '')) {
+                $validator->errors()->add("locations.{$index}.new_center_name_en", __('proposals.location_center_name_required'));
+            }
+
+            if ($row['new_center_name_en'] !== '' && ! $actor->can('centers.create')) {
+                $validator->errors()->add("locations.{$index}.new_center_name_en", __('proposals.location_center_create_denied'));
             }
         }
     }
@@ -376,7 +388,7 @@ final class SaveProposal
      * form sent no `locations` key at all.
      *
      * @param  array<string, mixed>  $input
-     * @return list<array{city_id: int|null, program_id: int|null, responsible_employee_id: int|null, center_ids: list<int>, is_new: bool, new_program_name_en: string, new_program_name_ar: string}>|null
+     * @return list<array{city_id: int|null, program_id: int|null, responsible_employee_id: int|null, center_ids: list<int>, is_new: bool, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string}>|null
      */
     private function locationRows(array $input): ?array
     {
@@ -400,6 +412,8 @@ final class SaveProposal
                 'is_new' => filter_var($row['is_new'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'new_program_name_en' => is_string($row['new_program_name_en'] ?? null) ? trim($row['new_program_name_en']) : '',
                 'new_program_name_ar' => is_string($row['new_program_name_ar'] ?? null) ? trim($row['new_program_name_ar']) : '',
+                'new_center_name_en' => is_string($row['new_center_name_en'] ?? null) ? trim($row['new_center_name_en']) : '',
+                'new_center_name_ar' => is_string($row['new_center_name_ar'] ?? null) ? trim($row['new_center_name_ar']) : '',
             ];
         }
 

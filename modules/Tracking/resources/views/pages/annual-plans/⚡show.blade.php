@@ -3,7 +3,7 @@
 use Modules\Tracking\Livewire\Concerns\AnnualPlans\ReadsAnnualPlanSummary;
 use Modules\Tracking\Livewire\Concerns\Results\FiltersResultsChain;
 use Modules\Tracking\Models\AnnualPlan;
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 use Flux\Flux;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -112,7 +112,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plan')] class extends Compon
         Gate::authorize('update', $plan);
 
         $validated = $this->validate([
-            'planManagerId' => ['required', 'integer', Rule::exists(HrEmployee::class, 'id')],
+            'planManagerId' => ['required', 'integer', Rule::exists(Employee::class, 'id')],
             'planYear' => [
                 'required',
                 'integer',

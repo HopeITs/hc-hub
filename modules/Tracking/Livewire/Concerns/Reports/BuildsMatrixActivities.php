@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Reports;
 
-use App\Models\HrCenter;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
+use Modules\Core\Models\Center;
 use Modules\Tracking\Enums\ActivityKind;
 use Modules\Tracking\Enums\ActivityStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
@@ -64,7 +64,7 @@ trait BuildsMatrixActivities
 
         $centers = [];
         foreach ($links->pluck('center_id')->filter()->unique() as $centerId) {
-            $centers[(int) $centerId] = HrCenter::remembered((int) $centerId);
+            $centers[(int) $centerId] = Center::remembered((int) $centerId);
         }
 
         $linksByProposal = $links->groupBy('proposal_id');

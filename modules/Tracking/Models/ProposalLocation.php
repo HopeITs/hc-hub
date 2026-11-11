@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Tracking\Models;
 
 use App\Concerns\RecordsParentActivity;
-use App\Models\HrCity;
 use App\Notifications\TracksActivity;
 use Carbon\CarbonImmutable;
 use Database\Factories\ProposalLocationFactory;
@@ -14,7 +13,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 
 /**
@@ -108,23 +107,13 @@ class ProposalLocation extends Model
     }
 
     /**
-     * The request opened when this row names a program HR does not have.
+     * The Core city of the row.
      *
-     * @return HasOne<ProgramRequest, $this>
-     */
-    public function programRequest(): HasOne
-    {
-        return $this->hasOne(ProgramRequest::class);
-    }
-
-    /**
-     * The HR city of the row, from the HR connection.
-     *
-     * @return BelongsTo<HrCity, $this>
+     * @return BelongsTo<City, $this>
      */
     public function city(): BelongsTo
     {
-        return $this->belongsTo(HrCity::class, 'city_id');
+        return $this->belongsTo(City::class, 'city_id');
     }
 
     /**

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Dashboard;
 
-use App\Models\HrEmployee;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\DeliveryState;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\TaskKind;
@@ -57,7 +57,7 @@ trait ReadsDeskDecisions
         $reviews = ProposalReviewer::query()
             ->when($user->employee_id === null, fn (Builder $query) => $query->whereRaw('1 = 0'), fn (Builder $query) => $query->forEmployee((int) $user->employee_id))
             ->awaitingReview()
-            ->with(['proposal:id,slug,name,status', 'proposal.projects:projects.id,projects.slug', 'addedBy:id,employee_id,hr_user_id'])
+            ->with(['proposal:id,slug,name,status', 'proposal.projects:projects.id,projects.slug', 'addedBy:id,employee_id,email'])
             ->oldest('id')
             ->get()
             ->unique('proposal_id')
@@ -75,7 +75,7 @@ trait ReadsDeskDecisions
         $reports = $this->visible(MonthlyReport::query(), 'reports')
             ->validatableBy($user)
             ->where('status', MonthlyReportStatus::Submitted)
-            ->with(['project:id,name', 'preparer:id,employee_id,hr_user_id'])
+            ->with(['project:id,name', 'preparer:id,employee_id,email'])
             ->orderBy('submitted_at')
             ->get()
             ->map(fn (MonthlyReport $report): array => $this->decision(
@@ -98,9 +98,9 @@ trait ReadsDeskDecisions
                 ->orWhere(fn (Builder $query) => $query->where('kind', TaskKind::MediaDeliverable)->where('delivery_state', DeliveryState::Delivered)))
             ->get();
 
-        $names = HrEmployee::query()->whereKey($tasks->pluck('taskAssignees')->flatten()->pluck('employee_id')->unique()->all())
-            ->get(HrEmployee::NameColumns)
-            ->mapWithKeys(fn (HrEmployee $employee): array => [$employee->id => $employee->name]);
+        $names = Employee::query()->whereKey($tasks->pluck('taskAssignees')->flatten()->pluck('employee_id')->unique()->all())
+            ->get(Employee::NameColumns)
+            ->mapWithKeys(fn (Employee $employee): array => [$employee->id => $employee->name]);
 
         $tasks = $tasks
             ->reject(fn (Task $task): bool => $task->taskAssignees->pluck('employee_id')->all() === [$user->employee_id])

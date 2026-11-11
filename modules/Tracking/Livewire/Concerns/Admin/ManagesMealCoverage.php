@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Admin;
 
-use App\Models\HrCity;
-use App\Models\HrEmployee;
 use App\Support\Like;
 use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
+use Modules\Core\Models\City;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Cities\AssignMealCoverage;
 use Modules\Tracking\Enums\MealCoverageScope;
 use Modules\Tracking\Models\MealCoverageAssignment;
@@ -26,11 +26,11 @@ use Modules\Tracking\Support\MealCoverage;
  *
  * Used by admin/cities only. The page provides allCities() and mapCities().
  *
- * @property-read Collection<int, HrCity> $allCities  #[Computed] allCities()
+ * @property-read Collection<int, City> $allCities  #[Computed] allCities()
  * @property-read array<int, array<string, mixed>> $mapCities  #[Computed] mapCities()
  * @property-read bool $canManageMealCoverage  #[Computed] canManageMealCoverage()
  * @property-read Collection<int, MealCoverageAssignment> $mealCoverages  #[Computed] mealCoverages()
- * @property-read Collection<int, HrEmployee> $mealOfficers  #[Computed] mealOfficers()
+ * @property-read Collection<int, Employee> $mealOfficers  #[Computed] mealOfficers()
  * @property-read array<int, array{name: string, inactive: bool}> $cityOfficers  #[Computed] cityOfficers()
  * @property-read Collection<int, array{id: int, name: string, city: string|null, officer: array{name: string, inactive: bool}|null, inherited: bool}> $projectOfficers  #[Computed] projectOfficers()
  * @property-read array{name: string, inactiveCity: bool}|null $mealTarget  #[Computed] mealTarget()
@@ -83,15 +83,15 @@ trait ManagesMealCoverage
     /**
      * The officers named on those rows, in one HR query, keyed by employee id.
      *
-     * @return Collection<int, HrEmployee>
+     * @return Collection<int, Employee>
      */
     #[Computed]
     public function mealOfficers(): Collection
     {
         $employeeIds = $this->mealCoverages->pluck('employee_id')->unique()->values()->all();
 
-        return $employeeIds === [] ? collect() : HrEmployee::query()
-            ->select([...HrEmployee::NameColumns, 'is_active'])
+        return $employeeIds === [] ? collect() : Employee::query()
+            ->select([...Employee::NameColumns, 'is_active'])
             ->whereKey($employeeIds)
             ->get()
             ->keyBy('id');
@@ -172,7 +172,7 @@ trait ManagesMealCoverage
             return $name === null ? null : ['name' => (string) $name, 'inactiveCity' => false];
         }
 
-        $city = HrCity::query()->select(['id', 'name_en', 'name_ar', 'is_active'])->find($this->mealTargetId);
+        $city = City::query()->select(['id', 'name_en', 'name_ar', 'is_active'])->find($this->mealTargetId);
 
         return $city === null ? null : ['name' => $city->name, 'inactiveCity' => ! $city->is_active];
     }

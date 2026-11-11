@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Models;
 
+use App\Support\Like;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\EmployeeFactory;
@@ -17,13 +18,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Str;
 use Modules\Core\Models\City;
+use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Hr\Enums\ContractType as ContractTypeEnum;
 use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Models\Concerns\HasTranslation;
+use Modules\Hr\Models\Concerns\PresentsEmployee;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAssignee;
 
 /**
  * @property int $id
@@ -79,7 +89,7 @@ use Modules\Hr\Models\Concerns\HasTranslation;
 class Employee extends Model
 {
     /** @use HasFactory<EmployeeFactory> */
-    use HasFactory, HasTranslation;
+    use HasFactory, HasTranslation, PresentsEmployee;
 
     /**
      * @return array<string, string>
@@ -247,6 +257,72 @@ class Employee extends Model
             ->orWhereLike($query->qualifyColumn('last_name_ar'), "%{$term}%")
             ->orWhereLike($query->qualifyColumn('username'), "%{$term}%")
             ->orWhereLike($query->qualifyColumn('national_number'), "%{$term}%"));
+    }
+
+    /**
+     * Employees whose English or Arabic name matches the search: every word
+     * must appear in one of the four name columns.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function whereNameLike(Builder $query, string $search, bool $acrossLayouts = true): void
+    {
+        $query->where(Like::everyWord($search, fn (Builder|QueryBuilder $query, string $word) => $query
+            ->where(Like::word('employees.first_name_en', $word))
+            ->orWhere(Like::word('employees.last_name_en', $word))
+            ->orWhere(Like::word('employees.first_name_ar', $word))
+            ->orWhere(Like::word('employees.last_name_ar', $word)), $acrossLayouts));
+    }
+
+    /**
+     * The programs this employee manages (Tracking).
+     *
+     * @return HasMany<Program, $this>
+     */
+    public function managedPrograms(): HasMany
+    {
+        return $this->hasMany(Program::class, 'manager_id');
+    }
+
+    /**
+     * The annual plans this employee manages (Tracking).
+     *
+     * @return HasMany<AnnualPlan, $this>
+     */
+    public function managedAnnualPlans(): HasMany
+    {
+        return $this->hasMany(AnnualPlan::class, 'manager_id');
+    }
+
+    /**
+     * The projects this employee is responsible for (projects.user_id).
+     *
+     * @return HasMany<Project, $this>
+     */
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class, 'user_id');
+    }
+
+    /**
+     * The milestones this employee is accountable for.
+     *
+     * @return HasMany<Milestone, $this>
+     */
+    public function responsibleMilestones(): HasMany
+    {
+        return $this->hasMany(Milestone::class, 'responsible_user_id');
+    }
+
+    /**
+     * The tasks assigned to this employee (a task may have several assignees).
+     *
+     * @return HasManyThrough<Task, TaskAssignee, $this>
+     */
+    public function assignedTasks(): HasManyThrough
+    {
+        return $this->hasManyThrough(Task::class, TaskAssignee::class, 'employee_id', 'id', 'id', 'task_id');
     }
 
     /**
@@ -671,7 +747,11 @@ class Employee extends Model
      */
     protected function name(): Attribute
     {
-        return Attribute::get(fn (): string => trim("{$this->first_name} {$this->last_name}"));
+        return Attribute::get(function (): string {
+            $name = trim("{$this->first_name} {$this->last_name}");
+
+            return $name !== '' ? $name : $this->name_en;
+        });
     }
 
     /**

@@ -23,7 +23,7 @@ new class extends Component {
         return $this->visible(MonthlyReport::query(), 'reports')
             ->validatableBy(auth()->user())
             ->where('status', MonthlyReportStatus::Submitted)
-            ->with(['project:id,name', 'preparer:id,hr_user_id'])
+            ->with(['project:id,name', 'preparer:id,email'])
             ->orderBy('submitted_at')
             ->orderBy('id')
             ->get();

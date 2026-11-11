@@ -57,7 +57,7 @@ new class extends Component {
             ->forUser(auth()->user())
             ->visible()
             ->when($this->tab === 'unread', fn ($query) => $query->whereNull('read_at'))
-            ->with('actor:id,hr_user_id,employee_id')
+            ->with('actor:id,email,employee_id')
             ->orderByRaw('case when read_at is null and priority = ? then 0 else 1 end', [NotificationPriority::Critical->value])
             ->latest()
             ->limit(30)

@@ -118,7 +118,7 @@ new #[Layout('layouts::desk'), Title('titles.tasks')] class extends Component
      */
     $hiddenFilterChips = array_filter([
         'priority' => $priority !== '' ? TaskPriority::tryFrom($priority)?->label() : null,
-        'assignee' => $assignee !== '' ? (App\Models\HrEmployee::find((int) $assignee)?->name ?? '#'.$assignee) : null,
+        'assignee' => $assignee !== '' ? (Modules\Hr\Models\Employee::find((int) $assignee)?->name ?? '#'.$assignee) : null,
         'departmentId' => $departmentId !== '' && $canPickDepartment ? collect($this->departmentOptions)->firstWhere('id', (int) $departmentId)['name'] ?? '#'.$departmentId : null,
         'sourceType' => $sourceType !== '' ? collect($this->sourceTypeOptions)->firstWhere('value', $sourceType)['label'] ?? $sourceType : null,
         'sourceId' => $sourceType !== '' && $sourceId !== '' ? collect($this->filterSourceOptions)->firstWhere('id', (int) $sourceId)['name'] ?? '#'.$sourceId : null,

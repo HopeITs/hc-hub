@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Modules\Tracking\Models;
 
 use App\Concerns\RecordsParentActivity;
-use App\Models\HrEmployee;
 use App\Notifications\EmployeeRecipients;
 use Database\Factories\TaskAssigneeFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Hr\Models\Employee;
 
 /**
  * One HR employee assigned to one task. A task can carry several of these.
@@ -65,10 +65,10 @@ class TaskAssignee extends Model
      * plain lookup query rather than a SQL join, same as Task::assignee()
      * did before multi-assignee.
      *
-     * @return BelongsTo<HrEmployee, $this>
+     * @return BelongsTo<Employee, $this>
      */
     public function employee(): BelongsTo
     {
-        return $this->belongsTo(HrEmployee::class, 'employee_id');
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
 }

@@ -15,10 +15,13 @@ use Modules\Core\Models\Program;
 class ProgrammeSeeder extends Seeder
 {
     /**
-     * Mirror the HR programs.
+     * Programs are Core rows imported by hub:import-hr (or created from a
+     * proposal); seed a few only into an empty database.
      */
     public function run(): void
     {
-        Program::syncFromHr();
+        if (Program::query()->doesntExist()) {
+            Program::factory()->unassigned()->count(4)->create();
+        }
     }
 }

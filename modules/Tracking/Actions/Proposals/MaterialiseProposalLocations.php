@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Actions\Proposals;
 
-use App\Models\HrCity;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Actions\Projects\SaveProject;
@@ -177,7 +177,7 @@ final class MaterialiseProposalLocations
         }
 
         throw ValidationException::withMessages([
-            'locations_complete' => __('proposals.location_owner_required', ['city' => HrCity::query()->find($row->city_id)?->name ?? '#'.$row->city_id]),
+            'locations_complete' => __('proposals.location_owner_required', ['city' => City::query()->find($row->city_id)?->name ?? '#'.$row->city_id]),
         ]);
     }
 }

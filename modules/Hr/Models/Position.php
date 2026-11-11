@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Models;
 
+use App\Enums\Locale;
 use Carbon\CarbonImmutable;
 use Database\Factories\PositionFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -41,6 +42,29 @@ class Position extends Model
 {
     /** @use HasFactory<PositionFactory> */
     use HasFactory, HasTranslation;
+
+    /**
+     * Active positions for a picker, labelled «title · department» in the
+     * interface language and sorted by that label.
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    public static function pickerOptions(): array
+    {
+        $titleColumn = Locale::current() === Locale::Arabic ? 'title_ar' : 'title_en';
+
+        return array_values(static::query()
+            ->where('is_active', true)
+            ->get(['id', 'department_id', 'title_en', 'title_ar'])
+            ->map(function (self $position) use ($titleColumn): array {
+                $title = trim((string) $position->{$titleColumn}) !== '' ? $position->{$titleColumn} : $position->title_en;
+                $department = Department::nameOf((int) $position->department_id);
+
+                return ['value' => (string) $position->id, 'label' => $department === '' ? $title : $title.' · '.$department];
+            })
+            ->sortBy('label', SORT_NATURAL | SORT_FLAG_CASE)
+            ->all());
+    }
 
     /**
      * @return array<string, string>

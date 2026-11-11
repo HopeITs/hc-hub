@@ -116,20 +116,4 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 900),
 
-    /*
-    |--------------------------------------------------------------------------
-    | HR Administrators
-    |--------------------------------------------------------------------------
-    |
-    | Every HR account gets a tracking user as an Officer. HR accounts with
-    | these emails (comma separated) start as Admin instead. This only applies
-    | when the tracking user is first created; roles changed later are kept.
-    |
-    */
-
-    'hr_admin_emails' => array_values(array_filter(array_map(
-        fn (string $email): string => mb_strtolower(trim($email)),
-        explode(',', (string) env('HR_ADMIN_EMAILS', '')),
-    ))),
-
 ];

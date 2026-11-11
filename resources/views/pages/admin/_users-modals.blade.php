@@ -14,8 +14,8 @@
     >
         @if ($showCreateUserModal)
         <div class="grid gap-y-4">
-            <x-ui.form-select wire:model="hrUserId" :label="__('users.hr_account')" :placeholder="__('users.select_an_hr_account')" required autofocus>
-                @foreach ($this->hrAccountOptions as $hrAccountOption)
+            <x-ui.form-select wire:model="accountId" :label="__('users.hr_account')" :placeholder="__('users.select_an_hr_account')" required autofocus>
+                @foreach ($this->accountOptions as $hrAccountOption)
                     <option value="{{ $hrAccountOption->id }}">{{ $hrAccountOption->email }}@if ($hrAccountOption->employee) · {{ $hrAccountOption->employee->name }} · {{ $hrAccountOption->employee->secondary_name }}@endif</option>
                 @endforeach
             </x-ui.form-select>

@@ -562,5 +562,8 @@ return [
     'location_center_not_in_city' => 'Every center must stand in the row’s city.',
     'location_responsible_inactive' => 'Choose an active employee.',
     'location_program_name_required' => 'Name the new program in both languages.',
+    'location_program_create_denied' => 'Only someone who may create programs can open a new program here.',
+    'location_center_name_required' => 'Name the new center in both languages.',
+    'location_center_create_denied' => 'Only someone who may create centers can add a new center here.',
     'location_owner_required' => 'The :city row has nobody to own its project: its responsible manages no program and the program has no manager.',
 ];

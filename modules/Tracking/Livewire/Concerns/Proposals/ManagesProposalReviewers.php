@@ -6,7 +6,6 @@ namespace Modules\Tracking\Livewire\Concerns\Proposals;
 
 use App\Enums\FileType;
 use App\Enums\MediaCollection;
-use App\Models\HrEmployee;
 use App\Models\Media;
 use App\Rules\SecureUpload;
 use App\Support\Slots;
@@ -18,6 +17,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Proposals\AddProposalReviewer;
 use Modules\Tracking\Actions\Proposals\MarkProposalReviewed;
 use Modules\Tracking\Actions\Proposals\RemoveProposalReviewer;
@@ -41,7 +41,7 @@ use Modules\Tracking\Support\MealCoverage;
  * @property int $proposalId
  * @property-read Proposal $proposal  #[Computed] proposal()
  * @property-read Collection<int, Media> $proposalFiles  #[Computed] proposalFiles()
- * @property-read list<array{stage: ReviewStage, isOpen: bool, rows: list<array{id: int, employee: HrEmployee|null, employeeId: int, slot: ReviewerSlot, seenAt: CarbonImmutable|null, note: string|null, noteAt: CarbonImmutable|null, isActive: bool, isMine: bool, isRemovable: bool}>, vacant: list<array{slot: ReviewerSlot, isSet: bool}>}> $reviewStages  #[Computed] reviewStages()
+ * @property-read list<array{stage: ReviewStage, isOpen: bool, rows: list<array{id: int, employee: Employee|null, employeeId: int, slot: ReviewerSlot, seenAt: CarbonImmutable|null, note: string|null, noteAt: CarbonImmutable|null, isActive: bool, isMine: bool, isRemovable: bool}>, vacant: list<array{slot: ReviewerSlot, isSet: bool}>}> $reviewStages  #[Computed] reviewStages()
  */
 trait ManagesProposalReviewers
 {
@@ -73,7 +73,7 @@ trait ManagesProposalReviewers
      * position is set for it (else nobody holds that position in HR). One HR
      * query for names, one for active flags.
      *
-     * @return list<array{stage: ReviewStage, isOpen: bool, rows: list<array{id: int, employee: HrEmployee|null, employeeId: int, slot: ReviewerSlot, seenAt: CarbonImmutable|null, note: string|null, noteAt: CarbonImmutable|null, isActive: bool, isMine: bool, isRemovable: bool}>, vacant: list<array{slot: ReviewerSlot, isSet: bool}>}>
+     * @return list<array{stage: ReviewStage, isOpen: bool, rows: list<array{id: int, employee: Employee|null, employeeId: int, slot: ReviewerSlot, seenAt: CarbonImmutable|null, note: string|null, noteAt: CarbonImmutable|null, isActive: bool, isMine: bool, isRemovable: bool}>, vacant: list<array{slot: ReviewerSlot, isSet: bool}>}>
      */
     #[Computed]
     public function reviewStages(): array
@@ -89,7 +89,7 @@ trait ManagesProposalReviewers
         $employees = [];
 
         if ($employeeIds !== []) {
-            foreach (HrEmployee::query()->whereKey($employeeIds)->get(HrEmployee::NameColumns) as $employee) {
+            foreach (Employee::query()->whereKey($employeeIds)->get(Employee::NameColumns) as $employee) {
                 $employees[$employee->id] = $employee;
             }
         }
@@ -163,7 +163,7 @@ trait ManagesProposalReviewers
         Gate::authorize('manageReviewers', $this->proposal);
 
         $this->validate([
-            'reviewerEmployeeId' => ['required', 'integer', Rule::exists(HrEmployee::class, 'id')],
+            'reviewerEmployeeId' => ['required', 'integer', Rule::exists(Employee::class, 'id')],
         ], [
             'reviewerEmployeeId.required' => __('proposals.choose_a_reviewer'),
             'reviewerEmployeeId.integer' => __('proposals.choose_a_reviewer'),

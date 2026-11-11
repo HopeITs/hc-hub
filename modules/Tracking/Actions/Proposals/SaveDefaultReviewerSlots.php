@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Actions\Proposals;
 
-use App\Models\HrPosition;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Support\Slots;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Position;
 use Modules\Tracking\Enums\ReviewerSlot;
 
 /**
@@ -40,7 +40,7 @@ final class SaveDefaultReviewerSlots
         }
 
         $chosen = array_values(array_filter($values, fn (?int $id): bool => $id !== null));
-        $known = $chosen === [] ? [] : HrPosition::query()->whereKey($chosen)->pluck('id')->map(fn (int|string $id): int => (int) $id)->all();
+        $known = $chosen === [] ? [] : Position::query()->whereKey($chosen)->pluck('id')->map(fn (int|string $id): int => (int) $id)->all();
         $unknown = array_filter($values, fn (?int $id): bool => $id !== null && ! in_array($id, $known, true));
 
         if ($unknown !== []) {

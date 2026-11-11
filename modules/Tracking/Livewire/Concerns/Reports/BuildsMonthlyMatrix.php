@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Reports;
 
-use App\Models\HrCenter;
-use App\Models\HrCity;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Query\Builder;
@@ -14,6 +12,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Computed;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Tracking\Enums\DenominatorBasis;
 use Modules\Tracking\Enums\DonorAttribution;
@@ -288,12 +288,12 @@ trait BuildsMonthlyMatrix
     /**
      * Every active HR city, by name.
      *
-     * @return Collection<int, HrCity>
+     * @return Collection<int, City>
      */
     #[Computed]
     public function cityOptions(): Collection
     {
-        return HrCity::query()->where('is_active', true)->orderBy(HrCity::nameColumn())->orderBy('id')->get(['id', 'name_en', 'name_ar']);
+        return City::query()->where('is_active', true)->orderBy(City::nameColumn())->orderBy('id')->get(['id', 'name_en', 'name_ar']);
     }
 
     /**
@@ -355,11 +355,11 @@ trait BuildsMonthlyMatrix
 
         $centers = [];
         foreach ($targets->pluck('center_id')->filter()->unique() as $centerId) {
-            $centers[(int) $centerId] = HrCenter::remembered((int) $centerId);
+            $centers[(int) $centerId] = Center::remembered((int) $centerId);
         }
 
         $cityIds = $targets->map(fn (object $row): ?int => $this->cityIdOf($row, $centers))->filter()->unique()->values()->all();
-        $cities = $cityIds === [] ? collect() : HrCity::query()->whereIn('id', $cityIds)->get(['id', 'name_en', 'name_ar'])->keyBy('id');
+        $cities = $cityIds === [] ? collect() : City::query()->whereIn('id', $cityIds)->get(['id', 'name_en', 'name_ar'])->keyBy('id');
 
         $grouped = $targets->groupBy(fn (object $row): string => $isDonorView ? 'p'.$row->plan_id : $row->project_id.'|'.$row->library_id);
 
@@ -427,7 +427,7 @@ trait BuildsMonthlyMatrix
      * The city a row's center sits in: the center's city, else the
      * project's own.
      *
-     * @param  array<int, ?HrCenter>  $centers
+     * @param  array<int, ?Center>  $centers
      */
     protected function cityIdOf(object $row, array $centers): ?int
     {

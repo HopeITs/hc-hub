@@ -2,7 +2,7 @@
 
 use Modules\Tracking\Livewire\Concerns\Admin\ManagesMealCoverage;
 use App\Support\Like;
-use App\Models\HrCity;
+use Modules\Core\Models\City;
 use Modules\Tracking\Models\Project;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -25,7 +25,7 @@ new #[Layout('layouts::desk'), Title('titles.city_directory')] class extends Com
      * (see {@see self::MapOutlinePath}), in that map's own 670.92×590.26
      * coordinate space — computed from the governorate boundary data itself
      * (area centroid of each region's largest ring), not eyeballed. Keyed by
-     * the untranslated `name_en` column, since {@see HrCity::name} switches
+     * the untranslated `name_en` column, since {@see City::name} switches
      * to Arabic under the Arabic locale. "Syria" (nationwide, tied to no
      * single governorate) is deliberately absent; any HR city with no entry
      * here — that one included — falls back to the map's "not shown" tray
@@ -92,7 +92,7 @@ new #[Layout('layouts::desk'), Title('titles.city_directory')] class extends Com
     public string $search = '';
 
     /**
-     * '' (all), 'active' or 'inactive' — filters on HrCity::is_active.
+     * '' (all), 'active' or 'inactive' — filters on City::is_active.
      */
     #[Url(except: '')]
     public string $status = '';
@@ -131,25 +131,22 @@ new #[Layout('layouts::desk'), Title('titles.city_directory')] class extends Com
     }
 
     /**
-     * Cities come from the HR database and are read-only here; every city is
-     * listed, active or not, exactly as HR holds it.
+     * Cities are Core rows kept by HR and read-only here; every city is
+     * listed, active or not.
      *
      * Sorting by name stays a plain database query. Sorting by delivery
-     * signal (project count, active-first) needs {@see self::projectStatsByCity()}
-     * for every matching city up front — cities live in a different database
-     * connection from projects, so that can never be a single ordered query —
-     * which means those two modes fetch every matching city once and paginate
-     * the sorted collection in PHP instead of in SQL. HR city lists are small
-     * reference tables (dozens, not thousands), so this stays cheap.
+     * signal (project count, active-first) uses {@see self::projectStatsByCity()}
+     * for every matching city and paginates the sorted collection in PHP.
+     * Cities are a small reference table (dozens), so this stays cheap.
      *
-     * @return LengthAwarePaginator<int, HrCity>
+     * @return LengthAwarePaginator<int, City>
      */
     #[Computed]
     public function cities(): LengthAwarePaginator
     {
         $search = trim($this->search);
 
-        $query = HrCity::query()
+        $query = City::query()
             ->select(['id', 'name_en', 'name_ar', 'is_active'])
             ->when($search !== '', fn ($query) => $query->where(Like::everyWord($search, fn ($query, string $word) => $query
                 ->where(Like::word('name_en', $word))
@@ -158,7 +155,7 @@ new #[Layout('layouts::desk'), Title('titles.city_directory')] class extends Com
 
         if ($this->sort === 'name') {
             return $query
-                ->orderBy(HrCity::nameColumn())
+                ->orderBy(City::nameColumn())
                 ->orderBy('id')
                 ->paginate(self::PerPage);
         }
@@ -167,7 +164,7 @@ new #[Layout('layouts::desk'), Title('titles.city_directory')] class extends Com
         $page = (int) $this->getPage();
 
         $sorted = $query->get()
-            ->sort(fn (HrCity $a, HrCity $b): int => match ($this->sort) {
+            ->sort(fn (City $a, City $b): int => match ($this->sort) {
                 'projects' => ($stats->get($b->id)['total'] ?? 0) <=> ($stats->get($a->id)['total'] ?? 0),
                 'active' => (int) $b->is_active <=> (int) $a->is_active,
                 default => 0,
@@ -226,8 +223,8 @@ new #[Layout('layouts::desk'), Title('titles.city_directory')] class extends Com
         $stats = $this->projectStatsByCity;
 
         return [
-            'totalCities' => HrCity::count(),
-            'activeCities' => HrCity::where('is_active', true)->count(),
+            'totalCities' => City::count(),
+            'activeCities' => City::where('is_active', true)->count(),
             'coveredCities' => $stats->count(),
             'openProjects' => (int) $stats->sum('open'),
             'beneficiaries' => (int) $stats->sum('beneficiaries'),
@@ -239,14 +236,14 @@ new #[Layout('layouts::desk'), Title('titles.city_directory')] class extends Com
      * portfolio at once rather than one page of results, since removing
      * cities from view when the list scrolls would break the geography.
      *
-     * @return Collection<int, HrCity>
+     * @return Collection<int, City>
      */
     #[Computed]
     public function allCities(): Collection
     {
-        return HrCity::query()
+        return City::query()
             ->select(['id', 'name_en', 'name_ar', 'is_active'])
-            ->orderBy(HrCity::nameColumn())
+            ->orderBy(City::nameColumn())
             ->orderBy('id')
             ->get();
     }
@@ -270,7 +267,7 @@ new #[Layout('layouts::desk'), Title('titles.city_directory')] class extends Com
         $search = mb_strtolower(trim($this->search));
 
         return $this->allCities
-            ->map(function (HrCity $city) use ($stats, $search): array {
+            ->map(function (City $city) use ($stats, $search): array {
                 $name = trim($city->name_en);
                 $position = self::MapPositions[$name] ?? null;
                 $cityStats = $stats->get($city->id, ['total' => 0, 'open' => 0, 'closed' => 0, 'programs' => 0, 'beneficiaries' => 0]);

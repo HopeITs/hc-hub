@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Tracking\Console\Commands;
 
 use App\Models\Activity;
-use App\Models\HrProgram;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -159,11 +158,7 @@ class ImportStrategyPillars extends Command
     private function import(array $pillars, Strategy $strategy): void
     {
         $hrIds = array_filter(array_column(array_merge(...array_column($pillars, 'programs')), 'hr_program_id'));
-        $hrNames = HrProgram::query()->whereKey($hrIds)->pluck('name', 'id')->map(fn (mixed $name): string => trim((string) $name))->all();
-
-        if (Program::query()->whereKey(array_keys($hrNames))->count() < count($hrNames)) {
-            Program::syncFromHr();
-        }
+        $hrNames = Program::query()->whereKey($hrIds)->pluck('name', 'id')->map(fn (mixed $name): string => trim((string) $name))->all();
 
         $programs = Program::query()->whereKey(array_keys($hrNames))->lockForUpdate()->orderBy('id')->get()->keyBy('id');
 

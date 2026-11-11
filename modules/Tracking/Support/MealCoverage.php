@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Support;
 
-use App\Models\HrEmployee;
 use App\Support\Slots;
 use Illuminate\Support\Collection;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\MealCoverageScope;
 use Modules\Tracking\Models\MealCoverageAssignment;
 use Modules\Tracking\Models\Project;
@@ -132,7 +132,7 @@ final class MealCoverage
             return [];
         }
 
-        return array_values(HrEmployee::query()
+        return array_values(Employee::query()
             ->whereKey(array_values(array_unique($employeeIds)))
             ->where('is_active', true)
             ->pluck('id')

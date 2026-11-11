@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Calendar;
 
-use App\Models\HrDepartment;
 use Carbon\CarbonImmutable;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
@@ -12,6 +11,7 @@ use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Modules\Core\Models\Program;
+use Modules\Hr\Models\Department;
 use Modules\Tracking\Actions\Tasks\DeleteTask;
 use Modules\Tracking\Enums\TaskPriority;
 use Modules\Tracking\Enums\TaskStatus;
@@ -97,7 +97,7 @@ trait ManagesCalendarTasks
     /**
      * The pickable sources for the currently selected source type.
      *
-     * @return Collection<int, Milestone>|Collection<int, Proposal>|Collection<int, Project>|Collection<int, Program>|Collection<int, HrDepartment>
+     * @return Collection<int, Milestone>|Collection<int, Proposal>|Collection<int, Project>|Collection<int, Program>|Collection<int, Department>
      */
     #[Computed]
     public function sourceOptions(): Collection
@@ -111,7 +111,7 @@ trait ManagesCalendarTasks
                 ->get(),
             'project' => Project::query()->select(['id', 'name'])->orderBy('name')->orderBy('id')->get(),
             'program' => Program::options(),
-            'department' => HrDepartment::query()->select(['id', 'name'])->orderBy('name')->orderBy('id')->get(),
+            'department' => Department::query()->select(['id', 'name'])->orderBy('name')->orderBy('id')->get(),
             default => Proposal::query()->select(['id', 'name'])->orderBy('name')->orderBy('id')->get(),
         };
     }

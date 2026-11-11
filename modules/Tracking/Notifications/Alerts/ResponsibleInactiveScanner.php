@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Modules\Tracking\Notifications\Alerts;
 
 use App\Enums\NotificationPriority;
-use App\Models\HrEmployee;
 use App\Notifications\Alerts\AlertDispatcher;
 use App\Notifications\Alerts\Scanner;
 use App\Notifications\RecipientResolver;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Collection;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Models\Project;
 
@@ -58,7 +58,7 @@ final class ResponsibleInactiveScanner implements Scanner
     /**
      * Open projects whose owner has left, one notification each.
      *
-     * @param  Collection<int, HrEmployee>  $inactive  keyed by employee id
+     * @param  Collection<int, Employee>  $inactive  keyed by employee id
      */
     private function projects(Collection $inactive): int
     {
@@ -105,12 +105,12 @@ final class ResponsibleInactiveScanner implements Scanner
      * Everyone HR has marked inactive, read once, keyed by id. An HR that
      * cannot be reached leaves the scan silent rather than noisy.
      *
-     * @return Collection<int, HrEmployee>
+     * @return Collection<int, Employee>
      */
     private function inactiveEmployees(): Collection
     {
         try {
-            return HrEmployee::query()
+            return Employee::query()
                 ->where('is_active', false)
                 ->get(['id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar'])
                 ->keyBy('id');

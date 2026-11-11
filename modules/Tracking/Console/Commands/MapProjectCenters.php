@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Console\Commands;
 
-use App\Models\HrCenter;
-use App\Models\HrCity;
-use App\Models\HrPosition;
-use App\Models\HrProgram;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
+use Modules\Core\Models\Program;
+use Modules\Hr\Models\Position;
 use Modules\Tracking\Models\Project;
 use stdClass;
 
@@ -60,10 +60,10 @@ class MapProjectCenters extends Command
 
         $this->components->info($apply ? 'Applying center mapping'.($force ? ' (overwriting existing centers)' : '').'.' : 'Dry run: nothing will be written.');
 
-        $centers = HrCenter::query()->toBase()->get(['id', 'name_en', 'city_id', 'is_active'])->keyBy('id');
+        $centers = Center::query()->toBase()->get(['id', 'name_en', 'city_id', 'is_active'])->keyBy('id');
         $centerIdsByCityAndProgram = $this->centerIdsByCityAndProgram($centers);
-        $cityNames = HrCity::query()->toBase()->pluck('name_en', 'id');
-        $programNames = HrProgram::namesById();
+        $cityNames = City::query()->toBase()->pluck('name_en', 'id');
+        $programNames = Program::namesById();
 
         $projects = Project::query()->orderBy('id')->get(['id', 'name', 'status', 'city_id', 'center_id', 'host_center_id', 'program_id']);
 
@@ -161,7 +161,7 @@ class MapProjectCenters extends Command
      */
     private function centerIdsByCityAndProgram(Collection $centers): array
     {
-        $pairs = HrPosition::query()
+        $pairs = Position::query()
             ->toBase()
             ->where('is_active', true)
             ->whereNotNull('center_id')
@@ -263,7 +263,7 @@ class MapProjectCenters extends Command
      */
     private function reportPrograms(): void
     {
-        $programs = HrProgram::query()->toBase()->orderBy('code')->orderBy('id')->get(['id', 'name', 'code']);
+        $programs = Program::query()->toBase()->orderBy('code')->orderBy('id')->get(['id', 'name', 'code']);
 
         $duplicates = $programs->groupBy('code')->filter(fn (Collection $group): bool => $group->count() > 1);
 

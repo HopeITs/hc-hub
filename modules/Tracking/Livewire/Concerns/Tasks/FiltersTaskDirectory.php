@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Tasks;
 
-use App\Models\HrEmployee;
+use App\Enums\Locale;
 use App\Support\Like;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TaskAssignee;
@@ -276,10 +278,10 @@ trait FiltersTaskDirectory
                 'subtasks.taskAssignees.employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar',
             ])
             ->when($search !== '', function (Builder $query) use ($search): void {
-                $query->where(Like::everyWord($search, fn (Builder $query, string $word) => $query
+                $query->where(Like::everyWord($search, fn (Builder|QueryBuilder $query, string $word) => $query
                     ->where(Like::word('title', $word))
                     ->orWhere(Like::word('description', $word))
-                    ->orWhereHas('taskAssignees', fn (Builder $query) => $query->whereIn('employee_id', HrEmployee::idsMatchingName($word, acrossLayouts: false)))));
+                    ->orWhereIn('tasks.id', TaskAssignee::query()->select('task_assignees.task_id')->whereIn('task_assignees.employee_id', Employee::query()->select('employees.id')->whereNameLike($word, false)))));
             })
             ->when($this->status !== '', fn (Builder $query) => $query->where('status', $this->status))
             ->when($this->priority !== '', fn (Builder $query) => $query->where('priority', $this->priority))
@@ -379,8 +381,7 @@ trait FiltersTaskDirectory
     /**
      * Each filtered task's assignee-group key: its sorted employee ids joined
      * by commas, or '' with no assignee — the same key the list view groups
-     * rows by. Assignees live on the separate HR connection's ids only here,
-     * so this is one extra lightweight query, no cross-database join.
+     * rows by: one extra lightweight query over task_assignees.
      *
      * @param  Builder<Task>  $query
      * @return Collection<int, string>
@@ -414,7 +415,7 @@ trait FiltersTaskDirectory
             return $query;
         }
 
-        $employeeNamesById = HrEmployee::query()
+        $employeeNamesById = Employee::query()
             ->whereIn('id', $keysByTask->filter()->flatMap(fn (string $key): array => explode(',', $key))->unique()->values())
             ->get()
             ->pluck('name', 'id');
@@ -454,13 +455,8 @@ trait FiltersTaskDirectory
 
     /**
      * A task can have several assignees now, so "sort by assignee" orders by
-     * each task's alphabetically-first assignee name — a deterministic,
-     * if necessarily simplified, choice once there's more than one name to
-     * pick from. Assignees live in the read-only HR database (a separate
-     * connection), so names can't be joined in SQL: resolve the small set of
-     * (task, employee) pairs in the current filter, compute one representative
-     * name per task in PHP, then order the query by that task-id sequence —
-     * one extra lightweight query instead of a cross-database join. Tasks
+     * each task's alphabetically-first assignee name (in the current
+     * language), a subquery over task_assignees joined to employees. Tasks
      * with no assignee always sort last.
      *
      * @param  Builder<Task>  $query
@@ -468,48 +464,15 @@ trait FiltersTaskDirectory
      */
     protected function orderByAssigneeName(Builder $query, string $direction): Builder
     {
-        $taskIds = (clone $query)->pluck('id');
+        $suffix = Locale::current() === Locale::Arabic ? 'ar' : 'en';
 
-        if ($taskIds->isEmpty()) {
-            return $query;
-        }
-
-        $pairs = TaskAssignee::query()
-            ->whereIn('task_id', $taskIds)
-            ->get(['task_id', 'employee_id']);
-
-        if ($pairs->isEmpty()) {
-            return $query;
-        }
-
-        $employeeNamesById = HrEmployee::query()
-            ->whereIn('id', $pairs->pluck('employee_id')->unique())
-            ->get()
-            ->pluck('name', 'id');
-
-        $orderedTaskIds = $pairs
-            ->groupBy('task_id')
-            ->map(fn (Collection $assignees): ?string => $assignees
-                ->map(fn (TaskAssignee $assignee): ?string => $employeeNamesById->get($assignee->employee_id))
-                ->filter()
-                ->sort()
-                ->first())
-            ->filter()
-            ->sort()
-            ->when($direction === 'desc', fn (Collection $names) => $names->reverse())
-            ->keys();
-
-        if ($orderedTaskIds->isEmpty()) {
-            return $query;
-        }
-
-        $cases = $orderedTaskIds
-            ->values()
-            ->map(fn ($id, int $index): string => 'when '.(int) $id." then {$index}")
-            ->implode(' ');
+        $firstName = TaskAssignee::query()
+            ->join('employees', 'employees.id', '=', 'task_assignees.employee_id')
+            ->whereColumn('task_assignees.task_id', 'tasks.id')
+            ->selectRaw("MIN(TRIM(CONCAT(COALESCE(employees.first_name_{$suffix}, ''), ' ', COALESCE(employees.last_name_{$suffix}, ''))))");
 
         return $query
-            ->orderByRaw('id not in ('.$orderedTaskIds->map(fn ($id): string => (string) (int) $id)->implode(',').')')
-            ->orderByRaw("(case id {$cases} end)");
+            ->orderByRaw('NOT EXISTS (SELECT 1 FROM task_assignees WHERE task_assignees.task_id = tasks.id)')
+            ->orderBy($firstName, $direction === 'desc' ? 'desc' : 'asc');
     }
 }

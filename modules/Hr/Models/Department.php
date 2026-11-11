@@ -10,9 +10,11 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Core\Models\Concerns\RemembersLookup;
 use Modules\Hr\Models\Concerns\HasTranslation;
 
 /**
@@ -29,7 +31,47 @@ use Modules\Hr\Models\Concerns\HasTranslation;
 class Department extends Model
 {
     /** @use HasFactory<DepartmentFactory> */
-    use HasFactory, HasTranslation;
+    use HasFactory, HasTranslation, RemembersLookup;
+
+    /**
+     * The name of one department, empty for an unknown id (remembered).
+     */
+    public static function nameOf(int $id): string
+    {
+        return static::rememberLookup('names', fn (): array => static::query()
+            ->toBase()
+            ->pluck('name', 'id')
+            ->map(fn (mixed $name): string => trim((string) $name))
+            ->all())[$id] ?? '';
+    }
+
+    /**
+     * Departments ordered for a picker, id and name only.
+     *
+     * @return Collection<int, static>
+     */
+    public static function options(): Collection
+    {
+        return static::query()->select(['id', 'name'])->orderBy('name')->orderBy('id')->get();
+    }
+
+    /**
+     * The ids of every employee currently holding a position in this
+     * department through an active contract: one join, no lookup.
+     *
+     * @return list<int>
+     */
+    public static function employeeIdsInDepartment(int $departmentId): array
+    {
+        return array_values(Contract::query()
+            ->join('positions', 'positions.id', '=', 'contracts.position_id')
+            ->where('contracts.is_active', true)
+            ->where('positions.department_id', $departmentId)
+            ->distinct()
+            ->pluck('contracts.employee_id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all());
+    }
 
     /**
      * @return HasMany<Position, $this>

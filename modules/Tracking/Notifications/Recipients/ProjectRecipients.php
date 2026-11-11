@@ -6,9 +6,9 @@ namespace Modules\Tracking\Notifications\Recipients;
 
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\HrContract;
 use App\Notifications\Recipients\ModuleRecipients;
 use Modules\Core\Models\Program;
+use Modules\Hr\Models\Contract;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Support\MealCoverage;
 
@@ -88,7 +88,7 @@ final class ProjectRecipients extends ModuleRecipients
             return [];
         }
 
-        return HrContract::topLevelEmployeeIds();
+        return Contract::topLevelEmployeeIds();
     }
 
     /**

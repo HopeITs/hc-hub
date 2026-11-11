@@ -18,7 +18,8 @@ use stdClass;
  * checks off (HR has foreign keys that point both ways), checked for orphans
  * before it commits:
  *
- * 1. Tracking users are renumbered to their HR ids once (UserIdRemap).
+ * 1. Tracking users were renumbered to their HR ids once (UserIdRemap; a
+ *    no-op now that users.hr_user_id is gone).
  * 2. Core tables are upserted by HR id: cities (plus governorate 17
  *    "Al-Wadi", which tracking uses and HR lacks), centers, programs (HR
  *    columns only; tracking's own columns are kept) and users (HR wins the
@@ -202,7 +203,6 @@ final class HrImporter
             if ($current === null) {
                 $this->db->table('users')->insert([
                     'id' => $id,
-                    'hr_user_id' => $id,
                     'employee_id' => $row['employee_id'] ?? null,
                     'email' => $row['email'],
                     'password' => $row['password'],

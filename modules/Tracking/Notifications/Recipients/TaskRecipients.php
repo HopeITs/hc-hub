@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Modules\Tracking\Notifications\Recipients;
 
 use App\Models\Activity;
-use App\Models\HrDepartment;
 use App\Notifications\Recipients\ModuleRecipients;
 use App\Support\EmployeeProfile;
+use Modules\Hr\Models\Department;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Task;
@@ -67,7 +67,7 @@ final class TaskRecipients extends ModuleRecipients
             return [];
         }
 
-        if (HrDepartment::nameOf((int) $task->department_id) !== '') {
+        if (Department::nameOf((int) $task->department_id) !== '') {
             return EmployeeProfile::employeeIdsInDepartment((int) $task->department_id);
         }
 

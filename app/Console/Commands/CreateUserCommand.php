@@ -4,22 +4,23 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Models\HrUser;
 use App\Models\Role;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 use Modules\Core\Models\User;
 
+use function Laravel\Prompts\password;
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;
 
 /**
- * Gives an HR account access to hc-tracking.
+ * Gives an account access to the hub with a role.
  *
- * Self-registration is disabled and passwords live in the HR system, so an
- * account is an existing HR login plus an optional application role. Name
- * and email are taken from HR; the person logs in with their HR password.
+ * Self-registration is disabled. An account HR already created (hub:import-hr)
+ * only gets its role; an email no account uses yet becomes a new account with
+ * the given password and no linked employee (a system or local account).
  */
 class CreateUserCommand extends Command
 {
@@ -27,14 +28,15 @@ class CreateUserCommand extends Command
      * @var string
      */
     protected $signature = 'user:create
-        {--email= : The email of an existing HR system account}
+        {--email= : The account email}
+        {--password= : The password, only for a new account}
         {--role= : An existing role name; omit for the default role}
-        {--unverified : Leave the email address unverified}';
+        {--unverified : Leave a new account\'s email address unverified}';
 
     /**
      * @var string
      */
-    protected $description = 'Give an HR system account access, optionally with a role';
+    protected $description = 'Give an account access with a role, creating the account when needed';
 
     /**
      * Collect the details, validate them, and store the user.
@@ -43,7 +45,7 @@ class CreateUserCommand extends Command
     {
         $interactive = $this->input->isInteractive();
 
-        $email = $this->option('email') ?? ($interactive ? text('HR account email', required: true) : null);
+        $email = $this->option('email') ?? ($interactive ? text('Email', required: true) : null);
 
         $roleNames = Role::query()->orderBy('name')->pluck('name')->all();
 
@@ -55,7 +57,7 @@ class CreateUserCommand extends Command
             'email' => $email,
             'role' => $role,
         ], [
-            'email' => ['required', 'string', 'email'],
+            'email' => ['required', 'string', 'email', 'max:255'],
             'role' => ['required', 'string', Rule::in($roleNames)],
         ]);
 
@@ -67,29 +69,49 @@ class CreateUserCommand extends Command
             return self::FAILURE;
         }
 
+        /** @var array{email: string, role: string} $validated */
         $validated = $validator->validated();
 
-        $hrUser = HrUser::query()->with('employee')->where('email', $email)->first();
+        $user = User::query()->with('roles:id,name')->where('email', $validated['email'])->first();
 
-        if ($hrUser === null) {
-            $this->components->error("No HR system account uses {$email}.");
+        if ($user !== null) {
+            if ($user->hasLostAccess()) {
+                $this->components->error("The employee behind {$validated['email']} is not active.");
+
+                return self::FAILURE;
+            }
+
+            if ($user->roles->isNotEmpty()) {
+                $this->components->error("{$validated['email']} already has access.");
+
+                return self::FAILURE;
+            }
+
+            $user->grantAccess($validated['role']);
+            $this->components->info("Gave {$user->email} the {$validated['role']} role.");
+
+            return self::SUCCESS;
+        }
+
+        $secret = $this->option('password') ?? ($interactive ? password('Password', required: true) : null);
+        $passwordCheck = Validator::make(['password' => $secret], ['password' => ['required', 'string', Password::defaults()]]);
+
+        if ($passwordCheck->fails()) {
+            foreach ($passwordCheck->errors()->all() as $message) {
+                $this->components->error($message);
+            }
 
             return self::FAILURE;
         }
 
-        if (! $hrUser->isActive()) {
-            $this->components->error("The HR employee behind {$email} is not active.");
+        $user = new User;
+        $user->forceFill([
+            'email' => $validated['email'],
+            'password' => (string) $secret,
+            'email_verified_at' => $this->option('unverified') ? null : now(),
+        ])->save();
 
-            return self::FAILURE;
-        }
-
-        if (User::query()->where('hr_user_id', $hrUser->id)->exists()) {
-            $this->components->error("The HR account behind {$email} already has access.");
-
-            return self::FAILURE;
-        }
-
-        $user = User::createFromHrAccount($hrUser, $validated['role'], verified: ! $this->option('unverified'));
+        $user->grantAccess($validated['role']);
 
         $this->components->info("Created {$user->email} as {$validated['role']}.");
 

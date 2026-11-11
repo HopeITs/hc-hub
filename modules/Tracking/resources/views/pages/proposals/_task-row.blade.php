@@ -17,7 +17,7 @@
     // Progress and status are entered separately, so a finished task can still sit in an earlier column.
     $statusLags = $progress >= 100 && in_array($task->status, [\Modules\Tracking\Enums\TaskStatus::Todo, \Modules\Tracking\Enums\TaskStatus::InProgress], true);
     $isDepartmentTask = $task->department_id !== null;
-    $departmentName = $isDepartmentTask ? \App\Models\HrDepartment::nameOf((int) $task->department_id) : '';
+    $departmentName = $isDepartmentTask ? \Modules\Hr\Models\Department::nameOf((int) $task->department_id) : '';
     $daysLeft = ! $isDone && $task->due_date !== null && ! $isOverdue ? (int) today()->diffInDays($task->due_date) : null;
     $planActions ??= false;
 @endphp
@@ -91,7 +91,7 @@
             @else
                 <span class="flex shrink-0 -space-x-1.5 rtl:space-x-reverse" aria-hidden="true">
                     @foreach ($assignees->take(2) as $employee)
-                        <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($employee->id)" class="size-6 rounded-full ring-2 ring-white dark:ring-surface-1" />
+                        <x-ui.avatar :src="\Modules\Hr\Models\Employee::avatarUrl($employee->id)" class="size-6 rounded-full ring-2 ring-white dark:ring-surface-1" />
                     @endforeach
                 </span>
                 <span class="truncate font-medium {{ $inkText }}" title="{{ $assignees->map->name->implode(', ') }}">

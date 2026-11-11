@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Actions\Supervisions;
 
-use App\Models\HrEmployee;
 use App\Support\EmployeeProfile;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\Supervision;
 use Modules\Tracking\Support\SupervisionMap;
 
@@ -67,7 +67,7 @@ class AddSupervision
 
     private function ensureBothActive(int $supervisorEmployeeId, int $superviseeEmployeeId): void
     {
-        $active = HrEmployee::query()
+        $active = Employee::query()
             ->whereKey([$supervisorEmployeeId, $superviseeEmployeeId])
             ->where('is_active', true)
             ->pluck('id')

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Models;
 
-use App\Models\HrEmployee;
 use App\Models\UserNotification;
 use App\Notifications\EmployeeRecipients;
 use App\Notifications\TracksActivity;
@@ -19,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\AssignmentStatus;
 
 /**
@@ -71,11 +71,11 @@ class Assignment extends Model
     /**
      * The HR employee who was assigned.
      *
-     * @return BelongsTo<HrEmployee, $this>
+     * @return BelongsTo<Employee, $this>
      */
     public function employee(): BelongsTo
     {
-        return $this->belongsTo(HrEmployee::class, 'employee_id');
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
 
     /**

@@ -2,7 +2,7 @@
 
 use App\Livewire\Concerns\Desk\IsDeskPanel;
 use Modules\Tracking\Models\DonorReport;
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 use App\Support\Desk\DeskWork;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -48,8 +48,8 @@ new class extends Component {
     {
         $ids = $this->rows->pluck('responsible_employee_id')->filter()->unique()->values()->all();
 
-        return HrEmployee::query()->whereKey($ids)->get(HrEmployee::NameColumns)
-            ->mapWithKeys(fn (HrEmployee $employee): array => [$employee->id => $employee->name])
+        return Employee::query()->whereKey($ids)->get(Employee::NameColumns)
+            ->mapWithKeys(fn (Employee $employee): array => [$employee->id => $employee->name])
             ->all();
     }
 

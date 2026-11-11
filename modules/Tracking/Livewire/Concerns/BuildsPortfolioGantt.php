@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns;
 
-use App\Models\HrEmployee;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ProposalPhase;
 use Modules\Tracking\Enums\ProposalStatus;
@@ -365,7 +365,7 @@ trait BuildsPortfolioGantt
             statusLabel: $project->status->label(),
             tone: $this->projectTone($project),
             owner: $project->user?->name,
-            ownerAvatar: $project->user === null ? null : HrEmployee::avatarUrl($project->user->id),
+            ownerAvatar: $project->user === null ? null : Employee::avatarUrl($project->user->id),
             url: route('projects.show', $project),
         ) + [
             'planUrl' => route('projects.show', $project),

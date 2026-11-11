@@ -5,11 +5,8 @@ declare(strict_types=1);
 namespace Modules\Core\Models;
 
 use App\Concerns\RecordsActivity;
-use App\Models\Activity;
-use App\Models\HrEmployee;
-use App\Models\HrPosition;
-use App\Models\HrProgram;
 use App\Notifications\TracksActivity;
+use App\Support\Like;
 use Carbon\CarbonImmutable;
 use Database\Factories\ProgramFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -23,6 +20,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Concerns\RemembersLookup;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\Project;
@@ -32,18 +31,19 @@ use Modules\Tracking\Models\Strategy;
 use Modules\Tracking\Observers\ProgramObserver;
 
 /**
- * A delivery program: the tracking side of one HR program, under the same id.
- *
- * The row exists only so local foreign keys (projects, annual plans, results)
- * and the tracking-owned links can hang off the HR program. Everything HR
- * holds, the name included, is read from HR (see HrProgram::namesById()) and
- * never copied here. Tracking owns only the strategy and manager links; the manager follows
- * HR's Program Manager position where there is one, the strategy stays
- * empty until someone assigns it.
+ * A delivery program, shared by every module (Core). HR reads it; Tracking
+ * owns the strategy, pillar, manager and donor attribution, and creates a
+ * program when a proposal location opens a new one (CreateLocationProgram).
  *
  * @property int $id
- * @property-read string $name
- * @property-read string $slug
+ * @property string $name
+ * @property string|null $description_en
+ * @property string|null $description_ar
+ * @property string|null $code
+ * @property string $slug
+ * @property CarbonImmutable|null $start_date
+ * @property CarbonImmutable|null $end_date
+ * @property bool $is_active
  * @property int|null $strategy_id
  * @property int|null $strategic_pillar_id
  * @property int|null $manager_id
@@ -51,18 +51,19 @@ use Modules\Tracking\Observers\ProgramObserver;
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
-#[Fillable(['strategy_id', 'strategic_pillar_id', 'manager_id', 'donor_attribution'])]
+#[Fillable(['name', 'description_en', 'description_ar', 'code', 'slug', 'start_date', 'end_date', 'is_active', 'strategy_id', 'strategic_pillar_id', 'manager_id', 'donor_attribution'])]
 #[ObservedBy(ProgramObserver::class)]
 class Program extends Model implements TracksActivity
 {
     /** @use HasFactory<ProgramFactory> */
-    use HasFactory, RecordsActivity;
+    use HasFactory, RecordsActivity, RemembersLookup;
 
     /**
      * @var array<string, mixed>
      */
     protected $attributes = [
         'donor_attribution' => 'shared',
+        'is_active' => true,
     ];
 
     /**
@@ -72,6 +73,9 @@ class Program extends Model implements TracksActivity
     {
         return [
             'donor_attribution' => DonorAttribution::class,
+            'start_date' => 'datetime',
+            'end_date' => 'datetime',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -88,82 +92,79 @@ class Program extends Model implements TracksActivity
     }
 
     /**
-     * Give every HR program its tracking row and keep its manager in step with HR.
-     *
-     * New HR programs get a row carrying the id. A program that has an active
-     * "Program Manager" position in HR takes its manager from HR on every sync:
-     * a change of holder, or a vacated seat (null), is mirrored here. A program
-     * with no such position keeps whatever manager was assigned in tracking.
-     * Programs that have disappeared from HR are kept so the projects and plans
-     * under them survive. The HR mirror is not somebody's action, so it records
-     * no activity and sends nothing: a caller that should alert (the request
-     * middleware) acts on the returned ids.
-     *
-     * @return list<int> ids of the programs this sync newly inserted
-     */
-    public static function syncFromHr(): array
-    {
-        return Activity::withoutRecording(function (): array {
-            $now = now();
-            $managers = HrPosition::programManagerEmployeeIds();
-            $hrIds = HrProgram::query()->pluck('id')->map(fn (mixed $id): int => (int) $id);
-            $known = static::query()->whereKey($hrIds->all())->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
-
-            $rows = $hrIds
-                ->map(fn (int $id): array => [
-                    'id' => $id,
-                    'manager_id' => $managers[$id] ?? null,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ])
-                ->all();
-
-            if ($rows !== []) {
-                static::query()->toBase()->insertOrIgnore($rows);
-            }
-
-            foreach ($managers as $programId => $employeeId) {
-                static::query()->toBase()
-                    ->where('id', $programId)
-                    ->where(fn ($query) => $employeeId === null
-                        ? $query->whereNotNull('manager_id')
-                        : $query->whereNull('manager_id')->orWhere('manager_id', '!=', $employeeId))
-                    ->update(['manager_id' => $employeeId, 'updated_at' => $now]);
-            }
-
-            return array_values(array_diff($hrIds->all(), $known));
-        });
-    }
-
-    /**
-     * Programs ordered for a picker by their HR name.
+     * Programs ordered for a picker by name.
      *
      * @return Collection<int, static>
      */
     public static function options(): Collection
     {
-        return static::query()->select(['id', 'manager_id'])->orderByName()->get();
+        return static::query()->select(['id', 'name', 'slug', 'manager_id'])->orderByName()->get();
     }
 
     /**
-     * The program name, read from HR.
+     * Every program's name by id (remembered), for labels that hold only an id.
      *
-     * @return Attribute<string, never>
+     * @return array<int, string>
+     */
+    public static function namesById(): array
+    {
+        return static::rememberLookup('names', fn (): array => static::query()
+            ->orderBy('name')
+            ->orderBy('id')
+            ->pluck('name', 'id')
+            ->map(fn (mixed $name): string => trim((string) $name))
+            ->all());
+    }
+
+    /**
+     * One program's name, empty for an unknown id.
+     */
+    public static function nameOf(?int $id): string
+    {
+        return $id === null ? '' : (static::namesById()[$id] ?? '');
+    }
+
+    /**
+     * Every program's slug by id (remembered).
+     *
+     * @return array<int, string>
+     */
+    private static function slugsById(): array
+    {
+        return static::rememberLookup('slugs', fn (): array => static::query()
+            ->pluck('slug', 'id')
+            ->map(fn (mixed $slug): string => trim((string) $slug))
+            ->all());
+    }
+
+    /**
+     * The program name. Read from the row when it was selected, otherwise
+     * from the remembered lookup, so a relation loaded as `program:id` still
+     * shows its name without a query per row.
+     *
+     * @return Attribute<string, string|null>
      */
     protected function name(): Attribute
     {
-        return Attribute::get(fn (): string => HrProgram::nameOf($this->id));
+        return Attribute::make(
+            get: fn (mixed $value): string => array_key_exists('name', $this->attributes)
+                ? trim((string) $value)
+                : static::nameOf($this->getKey() === null ? null : (int) $this->getKey()),
+        );
     }
 
     /**
-     * The program slug, read from HR — used as the route key so
-     * `programs/{program}` shows a readable slug instead of the id.
+     * The program slug, the route key (`programs/{program}`). Read like the name.
      *
-     * @return Attribute<string, never>
+     * @return Attribute<string, string|null>
      */
     protected function slug(): Attribute
     {
-        return Attribute::get(fn (): string => HrProgram::slugOf($this->id));
+        return Attribute::make(
+            get: fn (mixed $value): string => array_key_exists('slug', $this->attributes)
+                ? trim((string) $value)
+                : (self::slugsById()[(int) $this->getKey()] ?? ''),
+        );
     }
 
     public function getRouteKeyName(): string
@@ -172,55 +173,28 @@ class Program extends Model implements TracksActivity
     }
 
     /**
-     * Resolve `{program}` from its HR slug instead of the local id column,
-     * which the `slug` accessor above is not backed by.
-     */
-    public function resolveRouteBinding($value, $field = null): ?self
-    {
-        $id = HrProgram::idBySlug((string) $value);
-
-        return $id === null ? null : static::query()->find($id);
-    }
-
-    /**
-     * Programs whose HR name contains the search.
-     *
-     * The name lives in HR, so the matching ids are read from HR first.
+     * Programs whose name contains the search (Arabic letters folded, also
+     * read on the other keyboard layout).
      *
      * @param  Builder<self>  $query
      */
     #[Scope]
-    protected function whereNameLike(Builder $query, string $search): void
+    protected function whereNameLike(Builder $query, string $search, bool $acrossLayouts = true): void
     {
-        $query->whereIn($query->qualifyColumn('id'), HrProgram::idsMatchingName($search));
+        $query->where(Like::matches($query->qualifyColumn('name'), $search, $acrossLayouts));
     }
 
     /**
-     * Order programs by their HR name, then id.
+     * Order programs by name, then id.
      *
      * @param  Builder<self>  $query
      */
     #[Scope]
     protected function orderByName(Builder $query, string $direction = 'asc'): void
     {
-        $ids = HrProgram::idsOrderedByName();
+        $direction = $direction === 'desc' ? 'desc' : 'asc';
 
-        if ($ids !== []) {
-            $placeholders = implode(', ', array_fill(0, count($ids), '?'));
-            $query->orderByRaw('FIELD(programs.id, '.$placeholders.') '.($direction === 'desc' ? 'desc' : 'asc'), $ids);
-        }
-
-        $query->orderBy($query->qualifyColumn('id'), $direction === 'desc' ? 'desc' : 'asc');
-    }
-
-    /**
-     * The HR program this row mirrors.
-     *
-     * @return BelongsTo<HrProgram, $this>
-     */
-    public function hrProgram(): BelongsTo
-    {
-        return $this->belongsTo(HrProgram::class, 'id');
+        $query->orderBy($query->qualifyColumn('name'), $direction)->orderBy($query->qualifyColumn('id'), $direction);
     }
 
     /**
@@ -245,13 +219,13 @@ class Program extends Model implements TracksActivity
     }
 
     /**
-     * The HR employee accountable for this program.
+     * The employee accountable for this program.
      *
-     * @return BelongsTo<HrEmployee, $this>
+     * @return BelongsTo<Employee, $this>
      */
     public function manager(): BelongsTo
     {
-        return $this->belongsTo(HrEmployee::class, 'manager_id');
+        return $this->belongsTo(Employee::class, 'manager_id');
     }
 
     /**

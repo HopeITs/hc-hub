@@ -5,7 +5,7 @@ use Modules\Tracking\Actions\Milestones\SaveProposalMilestone;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Livewire\Concerns\AddsQuickTask;
 use Modules\Tracking\Livewire\Concerns\Milestones\PicksMilestoneActivity;
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Result;
@@ -198,7 +198,7 @@ new #[Layout('layouts::desk'), Title('titles.milestone')] class extends Componen
             'plannedEndDate' => ['nullable', 'date', 'after_or_equal:plannedStartDate'],
             'milestoneStatus' => ['required', new Enum(MilestoneStatus::class)],
             'weightPercentage' => ['required', 'numeric', 'min:0', 'max:100'],
-            'responsibleUserId' => ['required', 'integer', Rule::exists(HrEmployee::class, 'id')],
+            'responsibleUserId' => ['required', 'integer', Rule::exists(Employee::class, 'id')],
             'parentMilestoneId' => [
                 'nullable',
                 'integer',
@@ -343,7 +343,7 @@ new #[Layout('layouts::desk'), Title('titles.milestone')] class extends Componen
             'relatedPlannedEndDate' => ['nullable', 'date', 'after_or_equal:relatedPlannedStartDate'],
             'relatedStatus' => ['required', new Enum(MilestoneStatus::class)],
             'relatedWeightPercentage' => ['required', 'numeric', 'min:0', 'max:100'],
-            'relatedResponsibleUserId' => ['required', 'integer', Rule::exists(HrEmployee::class, 'id')],
+            'relatedResponsibleUserId' => ['required', 'integer', Rule::exists(Employee::class, 'id')],
             'relatedParentMilestoneId' => [
                 'nullable',
                 'integer',

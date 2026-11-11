@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Actions\Proposals;
 
-use App\Models\HrEmployee;
 use App\Notifications\EmployeeRecipients;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ReviewerSlot;
 use Modules\Tracking\Enums\ReviewStage;
 use Modules\Tracking\Models\Proposal;
@@ -41,7 +41,7 @@ final class AddProposalReviewer
                     throw ValidationException::withMessages(['reviewerEmployeeId' => __('proposals.reviewers_closed_for_status')]);
                 }
 
-                if (! HrEmployee::query()->whereKey($employeeId)->exists()) {
+                if (! Employee::query()->whereKey($employeeId)->exists()) {
                     throw ValidationException::withMessages(['reviewerEmployeeId' => __('proposals.choose_a_reviewer')]);
                 }
 

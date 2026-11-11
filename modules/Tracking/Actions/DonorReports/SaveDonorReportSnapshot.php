@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Actions\DonorReports;
 
-use App\Models\HrEmployee;
 use App\Support\Slots;
 use Closure;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -14,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Tasks\SyncReportTask;
 use Modules\Tracking\Enums\DonorReportType;
 use Modules\Tracking\Enums\ReportAudience;
@@ -161,7 +161,7 @@ final class SaveDonorReportSnapshot
             'type' => ['required', Rule::enum(DonorReportType::class)],
             'audience' => ['required', Rule::enum(ReportAudience::class)],
             'dueOn' => ['required', 'date'],
-            'responsibleEmployeeId' => ['nullable', 'integer', Rule::exists(HrEmployee::class, 'id')->where('is_active', true)],
+            'responsibleEmployeeId' => ['nullable', 'integer', Rule::exists(Employee::class, 'id')->where('is_active', true)],
             'notes' => ['nullable', 'string', 'max:2000'],
             'title' => ['nullable', 'string', 'max:255'],
         ], [

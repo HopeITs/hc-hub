@@ -56,7 +56,7 @@ trait ManagesReportFiles
     {
         return ReportFile::query()
             ->select(['id', 'report_id', 'path', 'disk', 'original_name', 'size', 'date', 'type', 'uploaded_by'])
-            ->with('uploader:id,hr_user_id,employee_id')
+            ->with('uploader:id,email,employee_id')
             ->where('report_id', $this->reportId)
             ->orderByDesc('date')
             ->orderByDesc('id')

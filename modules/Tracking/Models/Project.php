@@ -6,9 +6,6 @@ namespace Modules\Tracking\Models;
 
 use App\Concerns\HasSlug;
 use App\Concerns\RecordsActivity;
-use App\Models\HrCenter;
-use App\Models\HrCity;
-use App\Models\HrEmployee;
 use App\Models\Media;
 use App\Notifications\TracksActivity;
 use App\Observers\MediaOwnerObserver;
@@ -28,7 +25,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Database\QueryException;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Projects\ApproveProjectFromProposal;
 use Modules\Tracking\Concerns\HasAssignments;
 use Modules\Tracking\Enums\AssignmentStatus;
@@ -113,11 +113,11 @@ class Project extends Model implements TracksActivity
     /**
      * The HR city this project is delivered in.
      *
-     * @return BelongsTo<HrCity, $this>
+     * @return BelongsTo<City, $this>
      */
     public function city(): BelongsTo
     {
-        return $this->belongsTo(HrCity::class, 'city_id');
+        return $this->belongsTo(City::class, 'city_id');
     }
 
     /**
@@ -125,11 +125,11 @@ class Project extends Model implements TracksActivity
      * HR lookup rather than a relation, since centers live on another
      * connection. Null while the project is not mapped to a center.
      */
-    public function center(): ?HrCenter
+    public function center(): ?Center
     {
         $centerId = $this->activityAttribute('center_id');
 
-        return $centerId === null ? null : HrCenter::remembered((int) $centerId);
+        return $centerId === null ? null : Center::remembered((int) $centerId);
     }
 
     /**
@@ -137,11 +137,11 @@ class Project extends Model implements TracksActivity
      * city (D-55, W-01), read from the same in-memory lookup as center().
      * Null for a project that runs from its own center.
      */
-    public function hostCenter(): ?HrCenter
+    public function hostCenter(): ?Center
     {
         $hostCenterId = $this->activityAttribute('host_center_id');
 
-        return $hostCenterId === null ? null : HrCenter::remembered((int) $hostCenterId);
+        return $hostCenterId === null ? null : Center::remembered((int) $hostCenterId);
     }
 
     /**
@@ -159,7 +159,7 @@ class Project extends Model implements TracksActivity
         }
 
         try {
-            return HrCenter::remembered((int) $centerId)?->is_active === false;
+            return Center::remembered((int) $centerId)?->is_active === false;
         } catch (QueryException) {
             return false;
         }
@@ -325,11 +325,11 @@ class Project extends Model implements TracksActivity
      *
      * The column keeps its original name, `user_id`, but holds an HR employee id.
      *
-     * @return BelongsTo<HrEmployee, $this>
+     * @return BelongsTo<Employee, $this>
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(HrEmployee::class, 'user_id');
+        return $this->belongsTo(Employee::class, 'user_id');
     }
 
     /**
@@ -514,7 +514,7 @@ class Project extends Model implements TracksActivity
     #[Scope]
     protected function paused(Builder $query): void
     {
-        $query->whereIn('projects.center_id', HrCenter::inactiveIds());
+        $query->whereIn('projects.center_id', Center::inactiveIds());
     }
 
     /**
@@ -526,7 +526,7 @@ class Project extends Model implements TracksActivity
     #[Scope]
     protected function notPaused(Builder $query): void
     {
-        $query->where(fn (Builder $inner) => $inner->whereNull('projects.center_id')->orWhereNotIn('projects.center_id', HrCenter::inactiveIds()));
+        $query->where(fn (Builder $inner) => $inner->whereNull('projects.center_id')->orWhereNotIn('projects.center_id', Center::inactiveIds()));
     }
 
     /**

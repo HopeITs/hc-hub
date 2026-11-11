@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Programs;
 
-use App\Models\HrEmployee;
 use App\Notifications\UnreadSubjects;
 use Carbon\CarbonImmutable;
 use Flux\Flux;
@@ -15,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Url;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Tasks\ChangeTaskStatus;
 use Modules\Tracking\Actions\Tasks\CreateTask;
 use Modules\Tracking\Actions\Tasks\DeleteTask;
@@ -226,7 +226,7 @@ trait ManagesProgramTasks
     {
         $task = $this->programTask($taskId);
 
-        if ($task === null || ! HrEmployee::query()->whereKey($employeeId)->exists()) {
+        if ($task === null || ! Employee::query()->whereKey($employeeId)->exists()) {
             return;
         }
 

@@ -70,6 +70,28 @@ class Contract extends Model
     use HasFactory;
 
     /**
+     * The person at the top of the organisation: the holder of the active
+     * position titled notifications.top_level_position_title that has no
+     * direct manager (the deputy has none either; the title singles the top
+     * out). They sit above the program managers in the notification chain.
+     *
+     * @return list<int>
+     */
+    public static function topLevelEmployeeIds(): array
+    {
+        return array_values(static::query()
+            ->join('positions', 'positions.id', '=', 'contracts.position_id')
+            ->where('contracts.is_active', true)
+            ->where('positions.is_active', true)
+            ->whereNull('positions.direct_manager_id')
+            ->where('positions.title_en', (string) config('notifications.top_level_position_title'))
+            ->distinct()
+            ->pluck('contracts.employee_id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all());
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

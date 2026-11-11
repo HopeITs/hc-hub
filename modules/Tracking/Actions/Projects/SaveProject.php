@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Actions\Projects;
 
-use App\Models\HrCenter;
-use App\Models\HrCity;
-use App\Models\HrEmployee;
 use Closure;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Jobs\CheckProgramLogframe;
 use Modules\Tracking\Models\Project;
@@ -77,7 +77,7 @@ final class SaveProject
             $mayReassign = ! $project->exists || Gate::forUser($actor)->allows('reassign', $project);
             $validated = $this->validate($input, $project, $mayReassign);
 
-            $center = $validated['centerId'] === null ? null : HrCenter::remembered((int) $validated['centerId']);
+            $center = $validated['centerId'] === null ? null : Center::remembered((int) $validated['centerId']);
             $hostCenterId = $center === null ? $this->positiveInteger($validated['hostCenterId']) : null;
             $cityId = $this->positiveInteger($validated['cityId']);
 
@@ -178,7 +178,7 @@ final class SaveProject
                 'nullable',
                 'integer',
                 function (string $attribute, mixed $value, Closure $fail) use ($savedCenterId): void {
-                    $center = HrCenter::remembered((int) $value);
+                    $center = Center::remembered((int) $value);
 
                     if ($center === null || (! $center->is_active && $center->id !== $savedCenterId)) {
                         $fail(__('projects.choose_the_center'));
@@ -195,7 +195,7 @@ final class SaveProject
                         return;
                     }
 
-                    $host = HrCenter::remembered((int) $value);
+                    $host = Center::remembered((int) $value);
 
                     if ($host === null || ! $host->is_active) {
                         $fail(__('projects.choose_the_center'));
@@ -205,13 +205,13 @@ final class SaveProject
             'cityId' => [
                 Rule::when($isHosted, ['required'], ['nullable']),
                 'integer',
-                Rule::exists(HrCity::class, 'id'),
+                Rule::exists(City::class, 'id'),
             ],
             'programId' => $mayReassign
                 ? ['required', 'integer', Rule::exists(Program::class, 'id')]
                 : ['nullable'],
             'userId' => $mayReassign
-                ? ['required', 'integer', Rule::exists(HrEmployee::class, 'id'), Rule::in($this->ownerCandidates($project))]
+                ? ['required', 'integer', Rule::exists(Employee::class, 'id'), Rule::in($this->ownerCandidates($project))]
                 : ['nullable'],
             // Reported with the other fields; SyncProjectSectors checks it again
             // (and which sectors are usable) under the project lock.
@@ -278,7 +278,7 @@ final class SaveProject
         }
 
         $program = Program::query()->find($programId, ['id']);
-        $center = HrCenter::remembered($centerId);
+        $center = Center::remembered($centerId);
 
         return $program === null || $center === null ? null : $program->name.' — '.$center->name;
     }

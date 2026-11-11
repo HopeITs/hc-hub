@@ -1,14 +1,13 @@
 <?php
 
 use App\Http\DeniedAccessRecorder;
-use App\Http\Middleware\EnsureHrAccountIsActive;
+use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureRequestCameThroughTrustedProxy;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Http\Middleware\RedirectToHttps;
 use App\Http\Middleware\RemembersRecentRecord;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
-use App\Http\Middleware\SyncProgramsFromHr;
 use App\Http\Middleware\ThrottleRequestsWithoutSession;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -47,8 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             'throttle:guest',
             SetLocale::class,
-            SyncProgramsFromHr::class,
-            EnsureHrAccountIsActive::class,
+            EnsureAccountIsActive::class,
             RemembersRecentRecord::class,
         ]);
     })

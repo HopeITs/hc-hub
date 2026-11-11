@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\HrEmployee;
 use Illuminate\Support\Facades\Storage;
+use Modules\Hr\Models\Employee;
 use Symfony\Component\HttpFoundation\Response;
 
 class EmployeeAvatarController extends Controller
@@ -20,12 +20,12 @@ class EmployeeAvatarController extends Controller
      */
     public function __invoke(int $employee): Response
     {
-        $avatar = HrEmployee::avatarOf($employee);
+        $avatar = Employee::avatarOf($employee);
         $disk = Storage::disk('hr');
 
         if ($avatar === null || ! $disk->exists($avatar['path'])) {
             return response()
-                ->file(public_path(HrEmployee::DefaultAvatar), ['Cache-Control' => 'private, max-age=300']);
+                ->file(public_path(Employee::DefaultAvatar), ['Cache-Control' => 'private, max-age=300']);
         }
 
         return $disk->response($avatar['path'], null, [

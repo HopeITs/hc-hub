@@ -269,7 +269,7 @@ new class extends Component {
                     </div>
                     <span class="dk-tk-av" title="{{ $people->implode(', ') }}">
                         @foreach ($assignees->take(3) as $employee)
-                            <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($employee->id)" class="dk-av dk-av-xs" />
+                            <x-ui.avatar :src="\Modules\Hr\Models\Employee::avatarUrl($employee->id)" class="dk-av dk-av-xs" />
                         @endforeach
                         @if ($people->count() > 3)<span class="dk-av dk-av-xs dk-num">+{{ $people->count() - 3 }}</span>@endif
                     </span>

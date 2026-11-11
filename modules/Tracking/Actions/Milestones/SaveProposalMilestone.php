@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Actions\Milestones;
 
-use App\Models\HrDepartment;
-use App\Models\HrEmployee;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,6 +12,8 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator as ValidatorInstance;
+use Modules\Hr\Models\Department;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\TaskKind;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Proposal;
@@ -125,7 +125,7 @@ final class SaveProposalMilestone
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             ...$this->dateRules(),
-            'responsible_employee_id' => ['required', 'integer', Rule::exists(HrEmployee::class, 'id')],
+            'responsible_employee_id' => ['required', 'integer', Rule::exists(Employee::class, 'id')],
             'project_id' => ['nullable', 'integer', Rule::in($linkedProjectIds)],
             'parent_milestone_id' => ['nullable', 'integer', Rule::in($proposalMilestoneIds)],
         ], [
@@ -157,8 +157,8 @@ final class SaveProposalMilestone
     {
         $validator = Validator::make($input, [
             ...$this->dateRules(),
-            'responsible_employee_id' => ['required', 'integer', Rule::exists(HrEmployee::class, 'id')],
-            'department_id' => ['required', 'integer', Rule::exists(HrDepartment::class, 'id')],
+            'responsible_employee_id' => ['required', 'integer', Rule::exists(Employee::class, 'id')],
+            'department_id' => ['required', 'integer', Rule::exists(Department::class, 'id')],
             'due_date' => ['nullable', 'date_format:Y-m-d'],
         ], [
             ...$this->dateMessages(),

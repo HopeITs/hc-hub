@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Dashboard;
 
-use App\Models\HrEmployee;
 use App\Support\Desk\TeamScope;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -12,6 +11,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Computed;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ArStatus;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ReportStatus;
@@ -55,8 +55,8 @@ trait ReadsDashboardWork
             return [];
         }
 
-        $names = HrEmployee::query()->whereKey($superviseeIds)->get(HrEmployee::NameColumns)
-            ->mapWithKeys(fn (HrEmployee $employee): array => [$employee->id => $employee->name]);
+        $names = Employee::query()->whereKey($superviseeIds)->get(Employee::NameColumns)
+            ->mapWithKeys(fn (Employee $employee): array => [$employee->id => $employee->name]);
 
         $overdue = TaskAssignee::query()
             ->whereIn('employee_id', $superviseeIds)
@@ -192,7 +192,7 @@ trait ReadsDashboardWork
         // Arabic, Rami in English); an account with no employee keeps its
         // HR directory name.
         $user = auth()->user()->loadMissing('employee');
-        $name = $user->employee?->name ?? $user->name;
+        $name = $user->employee->name ?? $user->name;
 
         return __($key, ['name' => str($name)->before(' ')->toString()]);
     }

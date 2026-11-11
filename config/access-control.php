@@ -15,7 +15,7 @@ declare(strict_types=1);
 */
 $groups = [
     'access-management' => ['manage-users', 'manage-roles', 'manage-permissions'],
-    'programs' => ['view', 'update'],
+    'programs' => ['view', 'create', 'update'],
     'projects' => ['view', 'create', 'update', 'delete'],
     'milestones' => ['view', 'create', 'update', 'delete'],
     'indicators' => ['view', 'create', 'update', 'delete'],
@@ -41,6 +41,7 @@ $groups = [
     'calendar' => ['view'],
     'accounts' => ['view', 'create', 'update', 'delete'],
     'cities' => ['view'],
+    'centers' => ['create'],
     'activity-log' => ['view'],
     'notification-settings' => ['manage'],
     'ai' => ['draft', 'view-usage'],
@@ -102,8 +103,8 @@ return [
     | Default role
     |--------------------------------------------------------------------------
     |
-    | The role every new account starts with: User::forHrAccount(), the
-    | Admin > Users create form and `user:create` when no role is chosen.
+    | The role an account is given by the Admin > Users form and
+    | `user:create` when no role is chosen.
     */
     'default_role' => 'Team Member',
 
@@ -218,7 +219,8 @@ return [
         'Managers' => [
             ...$viewEverything, ...$taskWriter, 'tasks.delete', ...$reportWriter,
             'strategies.create', 'strategies.update', 'strategies.delete',
-            'programs.update',
+            // A proposal location may open a new program or center (A2, 2026-11-11).
+            'programs.create', 'programs.update', 'centers.create',
             'annual-plans.create', 'annual-plans.update', 'annual-plans.delete',
             'projects.update', 'projects.delete',
             'milestones.create', 'milestones.update', 'milestones.delete',

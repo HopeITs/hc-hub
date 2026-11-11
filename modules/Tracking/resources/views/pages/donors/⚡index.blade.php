@@ -178,7 +178,7 @@ new #[Layout('layouts::desk'), Title('titles.donors')] class extends Component {
         return Donor::query()
             ->pending()
             ->select(['id', 'name', 'requested_by', 'created_at'])
-            ->with('requester:id,hr_user_id')
+            ->with('requester:id,email')
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();

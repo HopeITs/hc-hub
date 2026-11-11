@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Modules\Tracking\Livewire\Concerns\AnnualPlans;
 
 use App\Enums\Locale;
-use App\Models\HrEmployee;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\AnnualPlan;
 
 /**
@@ -214,16 +214,14 @@ trait FiltersPlanMatrix
      * Users without a plan are left out, so the filter cannot be set to a value
      * that empties the grid.
      *
-     * @return Collection<int, HrEmployee>
+     * @return Collection<int, Employee>
      */
     #[Computed]
     public function managerOptions(): Collection
     {
-        // Employees live in the HR database, so "has a plan" is resolved to
-        // ids first instead of a whereHas() across connections.
-        return HrEmployee::query()
-            ->select(HrEmployee::NameColumns)
-            ->whereIn('id', AnnualPlan::query()->distinct()->pluck('manager_id'))
+        return Employee::query()
+            ->select(Employee::NameColumns)
+            ->whereHas('managedAnnualPlans')
             ->orderBy(Locale::current() === Locale::Arabic ? 'first_name_ar' : 'first_name_en')
             ->orderBy(Locale::current() === Locale::Arabic ? 'last_name_ar' : 'last_name_en')
             ->orderBy('id')

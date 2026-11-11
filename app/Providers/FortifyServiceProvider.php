@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Actions\Fortify\AuthenticateWithHrAccount;
+use App\Actions\Fortify\AuthenticateUser;
 use App\Actions\Fortify\RedirectIfTwoFactorRequired;
 use App\Http\Responses\LoginResponse;
 use App\Http\Responses\TwoFactorLoginResponse;
@@ -49,17 +49,17 @@ class FortifyServiceProvider extends ServiceProvider
         // After the password: the authenticator app challenge, or an emailed code.
         Fortify::redirectUserForTwoFactorAuthenticationUsing(RedirectIfTwoFactorRequired::class);
 
-        // Passwords live in the HR system: log in and confirm against HR.
-        Fortify::authenticateUsing(new AuthenticateWithHrAccount);
+        // Log in and confirm against users.email / users.password, with our own limits.
+        Fortify::authenticateUsing(new AuthenticateUser);
         Fortify::confirmPasswordsUsing(
-            fn (User $user, ?string $password): bool => AuthenticateWithHrAccount::confirmsPassword($user, $password),
+            fn (User $user, ?string $password): bool => AuthenticateUser::confirmsPassword($user, $password),
         );
 
-        // The HR password typed at login also counts as a password confirmation.
-        Event::listen(fn (Login $event) => AuthenticateWithHrAccount::confirmPasswordCheckedAtLogin($event));
+        // The password typed at login also counts as a password confirmation.
+        Event::listen(fn (Login $event) => AuthenticateUser::confirmPasswordCheckedAtLogin($event));
 
-        // A passkey skips the HR password check, so ask HR whether the account is still active.
-        Passkeys::authorizeLoginUsing(fn (Request $request, PasskeyUser $user): bool => $user instanceof User && ! $user->hasLostHrAccess());
+        // A passkey skips the password check, so check the account may still sign in.
+        Passkeys::authorizeLoginUsing(fn (Request $request, PasskeyUser $user): bool => $user instanceof User && ! $user->hasLostAccess());
     }
 
     /**
@@ -78,7 +78,7 @@ class FortifyServiceProvider extends ServiceProvider
      * The `two-factor` limiter guards both second steps: Fortify's POST
      * /two-factor-challenge (authenticator or recovery code) and the app's
      * POST email-two-factor-challenge. Whoever reaches either already knows
-     * the account's HR password, so a per-minute limit alone still allowed
+     * the account's password, so a per-minute limit alone still allowed
      * about 7,200 guesses a day; the hourly and daily caps bring that down
      * to 30. Each limit needs its own `by` key: ThrottleRequests keys a
      * limit by limiter name plus `by` value, not by its decay, so limits

@@ -51,9 +51,10 @@ return [
             'driver' => null,
         ],
 
-        // The HR application's storage/app folder, read only, for employee
-        // photos. Nothing here is ever served directly: EmployeeAvatarController
-        // streams a photo to signed-in users only, as HR itself does.
+        // The old HR application's storage/app folder, read only: the files of
+        // the imported hr_media rows (employee photos, attachments) until they
+        // move into the hub's media. Nothing here is served directly:
+        // EmployeeAvatarController streams a photo to signed-in users only.
         'hr' => [
             'driver' => 'local',
             'root' => env('HR_STORAGE_PATH') ?: base_path('../hc-hr/storage/app'),

@@ -67,7 +67,7 @@ final class ActivityCard extends PageCard
         $modules = app(NotificationPresenter::class);
         $links = app(SubjectLinks::class);
 
-        return Activity::query()->with('actor:id,hr_user_id,employee_id')->latest('created_at')->latest('id')->limit(self::RowLimit)->get()
+        return Activity::query()->with('actor:id,email,employee_id')->latest('created_at')->latest('id')->limit(self::RowLimit)->get()
             ->map(fn (Activity $activity): array => $this->shaped(
                 $this->row(
                     'ac-'.$activity->id,

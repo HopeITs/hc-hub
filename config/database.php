@@ -64,37 +64,16 @@ return [
             ]) : [],
         ],
 
-        'hr' => [
-            'driver' => env('HR_DB_DRIVER', 'mysql'),
-            'host' => env('HR_DB_HOST', '127.0.0.1'),
-            'port' => env('HR_DB_PORT', '3306'),
-            'database' => env('HR_DB_DATABASE', 'hr_db'),
-            'username' => env('HR_DB_USERNAME', 'root'),
-            'password' => env('HR_DB_PASSWORD', ''),
-            'unix_socket' => env('HR_DB_SOCKET', ''),
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => 'hchr_',
-            'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
-            'options' => extension_loaded('pdo_mysql') && env('HR_DB_DRIVER', 'mysql') === 'mysql' ? array_filter([
-                Mysql::ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
-                Mysql::ATTR_INIT_COMMAND => 'SET SESSION TRANSACTION READ ONLY',
-            ]) : [],
-        ],
-
-        // The HR app's database, read by `php artisan hub:import-hr` only. It
-        // outlives the `hr` connection above (removed once tracking reads
-        // Core tables) and defaults to the same server and schema.
+        // The old HR app's database, read by `php artisan hub:import-hr` only.
+        // Nothing else connects to it: every module reads the hub database.
         'hr_import' => [
             'driver' => 'mysql',
-            'host' => env('HR_IMPORT_DB_HOST', env('HR_DB_HOST', '127.0.0.1')),
-            'port' => env('HR_IMPORT_DB_PORT', env('HR_DB_PORT', '3306')),
-            'database' => env('HR_IMPORT_DB_DATABASE', env('HR_DB_DATABASE', 'hr_db')),
-            'username' => env('HR_IMPORT_DB_USERNAME', env('HR_DB_USERNAME', 'root')),
-            'password' => env('HR_IMPORT_DB_PASSWORD', env('HR_DB_PASSWORD', '')),
-            'unix_socket' => env('HR_DB_SOCKET', ''),
+            'host' => env('HR_IMPORT_DB_HOST', '127.0.0.1'),
+            'port' => env('HR_IMPORT_DB_PORT', '3306'),
+            'database' => env('HR_IMPORT_DB_DATABASE', 'hr_db'),
+            'username' => env('HR_IMPORT_DB_USERNAME', 'root'),
+            'password' => env('HR_IMPORT_DB_PASSWORD', ''),
+            'unix_socket' => env('HR_IMPORT_DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => env('HR_IMPORT_DB_PREFIX', 'hchr_'),

@@ -286,7 +286,7 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
                         <dt>{{ __('programs.direct_manager') }}</dt>
                         <dd class="dk-prog-person">
                             @if ($program->manager)
-                                <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($program->manager->id)" class="dk-av" aria-hidden="true" data-program-manager-photo />
+                                <x-ui.avatar :src="\Modules\Hr\Models\Employee::avatarUrl($program->manager->id)" class="dk-av" aria-hidden="true" data-program-manager-photo />
                             @endif
                             <span>{{ $program->manager?->name ?? __('common.not_assigned') }}</span>
                             @if ($program->manager)

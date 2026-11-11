@@ -1,6 +1,6 @@
 {{--
     The coverage map: Syria's real governorate boundaries (see
-    HrCity::MapOutlinePath), with every city plotted at its governorate's real
+    City::MapOutlinePath), with every city plotted at its governorate's real
     geometric centroid, sized and coloured by delivery signal, and a
     click-to-select detail panel beside it. Every city's detail panel is
     fully server-rendered — with a real "View projects" link — and Alpine
@@ -31,7 +31,7 @@
     <x-ui.panel :title="__('cities.coverage_map')" :subtitle="__('cities.tap_a_city_hint')">
         <div class="bg-board-head p-4 pt-16">
             <div class="relative mx-auto w-full max-w-xl" style="aspect-ratio: 670.92236 / 590.26318;">
-                {{-- Syria's real governorate boundaries — see HrCity::MapOutlinePath for source and licence. Each governorate strokes with the wrapper's own background colour, so borders read as a gap rather than a drawn line. --}}
+                {{-- Syria's real governorate boundaries — see City::MapOutlinePath for source and licence. Each governorate strokes with the wrapper's own background colour, so borders read as a gap rather than a drawn line. --}}
                 <svg viewBox="0 0 670.92236 590.26318" class="absolute inset-0 h-full w-full text-secondary-soft [&_path]:stroke-[var(--color-board-head)] dark:text-line-strong" aria-hidden="true" preserveAspectRatio="xMidYMid meet" fill="currentColor" stroke-width="1.3">
                     {!! $mapOutlinePath !!}
 

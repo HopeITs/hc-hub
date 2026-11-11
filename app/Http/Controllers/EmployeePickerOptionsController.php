@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\HrEmployee;
 use Illuminate\Http\JsonResponse;
+use Modules\Hr\Models\Employee;
 
 class EmployeePickerOptionsController extends Controller
 {
@@ -21,7 +21,7 @@ class EmployeePickerOptionsController extends Controller
     public function __invoke(): JsonResponse
     {
         return response()
-            ->json(HrEmployee::pickerLabels()->values())
+            ->json(Employee::pickerLabels()->values())
             ->header('Cache-Control', 'private, max-age=300');
     }
 }

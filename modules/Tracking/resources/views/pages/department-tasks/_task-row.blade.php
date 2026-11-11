@@ -7,7 +7,7 @@
     $assignees = $task->taskAssignees->pluck('employee')->filter()->values();
     $isDone = $task->status === \Modules\Tracking\Enums\TaskStatus::Done;
     $isOverdue = ! $isDone && $task->due_date !== null && $task->due_date->lt(today());
-    $departmentName = \App\Models\HrDepartment::nameOf((int) $task->department_id);
+    $departmentName = \Modules\Hr\Models\Department::nameOf((int) $task->department_id);
     $isDeliverable = $task->kind === \Modules\Tracking\Enums\TaskKind::MediaDeliverable;
     $state = $task->delivery_state;
     $canDeliver = $isDeliverable && in_array($state, [\Modules\Tracking\Enums\DeliveryState::Requested, \Modules\Tracking\Enums\DeliveryState::Returned], true) && auth()->user()->can('deliver', $task);

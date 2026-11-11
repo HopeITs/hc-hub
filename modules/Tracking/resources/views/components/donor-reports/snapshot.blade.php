@@ -35,7 +35,7 @@
             return '#'.$projectId;
         }
 
-        $hrCenter = $center['center_id'] === null ? null : \App\Models\HrCenter::remembered((int) $center['center_id']);
+        $hrCenter = $center['center_id'] === null ? null : \Modules\Core\Models\Center::remembered((int) $center['center_id']);
 
         return $hrCenter === null ? (string) $center['name'] : $hrCenter->name.' · '.$center['name'];
     };

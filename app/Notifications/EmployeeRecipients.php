@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Models\HrEmployee;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee;
 
 /**
  * Maps HR employees (who are assigned, responsible, owners, managers) to the
@@ -47,10 +47,10 @@ final class EmployeeRecipients
             return [];
         }
 
-        return HrEmployee::query()
+        return Employee::query()
             ->whereIn('id', $employeeIds)
-            ->get(HrEmployee::NameColumns)
-            ->mapWithKeys(fn (HrEmployee $employee): array => [$employee->id => ['en' => $employee->name_en, 'ar' => $employee->name_ar]])
+            ->get(Employee::NameColumns)
+            ->mapWithKeys(fn (Employee $employee): array => [$employee->id => ['en' => $employee->name_en, 'ar' => $employee->name_ar]])
             ->all();
     }
 }

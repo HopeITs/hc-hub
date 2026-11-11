@@ -6,9 +6,8 @@ use Modules\Tracking\Actions\Targets\SaveProposalTargetsGrid;
 use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Enums\IndicatorMeasure;
 use Modules\Tracking\Livewire\Concerns\IndicatorLibrary\ManagesLibraryEntryForm;
-use App\Models\HrCenter;
-use App\Models\HrCity;
-use App\Models\HrProgram;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
 use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\LibraryIndicator;
 use Modules\Tracking\Models\PlanIndicator;
@@ -215,10 +214,10 @@ new class extends Component {
     {
         $projects = $this->proposal->projects;
         $centers = $projects->mapWithKeys(fn (Project $project): array => [$project->id => $project->center()]);
-        $cityIds = $centers->filter()->map(fn (HrCenter $center): int => $center->city_id)
+        $cityIds = $centers->filter()->map(fn (Center $center): int => $center->city_id)
             ->merge($projects->pluck('city_id'))
             ->filter()->unique()->values()->all();
-        $cities = HrCity::query()->select(['id', 'name_en', 'name_ar'])->whereIn('id', $cityIds)->get()->keyBy('id');
+        $cities = City::query()->select(['id', 'name_en', 'name_ar'])->whereIn('id', $cityIds)->get()->keyBy('id');
 
         return $projects
             ->map(function (Project $project) use ($centers, $cities): array {
@@ -386,7 +385,7 @@ new class extends Component {
             $groups[] = [
                 'key' => $programId === null ? 'institutional' : (string) $programId,
                 'programId' => $programId,
-                'label' => $programId === null ? __('targets.institutional_indicators') : HrProgram::nameOf($programId),
+                'label' => $programId === null ? __('targets.institutional_indicators') : Program::nameOf($programId),
                 'levels' => collect(['G', 'CC', 'OC', 'OP', 'AC'])
                     ->map(fn (string $kind): array => [
                         'kind' => $kind,

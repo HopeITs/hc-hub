@@ -42,7 +42,7 @@ final class ActivityParameters
     {
         $actorName = $activity->relationLoaded('actor')
             ? $activity->getRelation('actor')?->name
-            : ($activity->actor_id === null ? null : $activity->actor()->first(['id', 'hr_user_id'])?->name);
+            : ($activity->actor_id === null ? null : $activity->actor()->first(['id', 'email'])?->name);
 
         $params = [
             'actor' => $actorName ?? ['trans' => 'notifications.system'],

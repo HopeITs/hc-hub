@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Admin;
 
-use App\Models\HrUser;
 use App\Models\Permission;
 use App\Models\Role;
 use Flux\Flux;
@@ -19,8 +18,8 @@ use Modules\Core\Models\User;
 
 /**
  * The Users tab of admin/users: the directory query and its lookups, picking a
- * user, saving that user's roles, active role and direct permissions, adding a
- * user from an HR account, and deleting one. Every action authorizes itself
+ * user, saving that user's roles, active role and direct permissions, giving an
+ * account without a role access, and deleting one. Every action authorizes itself
  * through UserPolicy (viewAny, create, update, delete, assignRole,
  * grantPermission) before it touches data.
  *
@@ -35,7 +34,7 @@ use Modules\Core\Models\User;
  * @property-read Collection<int, Role> $roleOptions  #[Computed] roleOptions()
  * @property-read User|null $selectedUser  #[Computed] selectedUser()
  * @property-read array<int, array{label: string, permissions: Collection<int, Permission>}> $permissionGroups  #[Computed] permissionGroups()
- * @property-read Collection<int, HrUser> $hrAccountOptions  #[Computed] hrAccountOptions()
+ * @property-read Collection<int, User> $accountOptions  #[Computed] accountOptions()
  */
 trait ManagesUserAccess
 {
@@ -54,7 +53,7 @@ trait ManagesUserAccess
 
     public bool $showDeleteModal = false;
 
-    public string $hrUserId = '';
+    public string $accountId = '';
 
     public string $initialRoleId = '';
 
@@ -77,8 +76,8 @@ trait ManagesUserAccess
             ->with(['roles', 'employee'])
             ->when($this->search !== '', fn ($query) => $query->whereNameOrEmailLike($this->search))
             ->when($this->role !== '', fn ($query) => $query->whereHas('roles', fn ($q) => $q->where('name', $this->role)))
-            ->when($this->status === 'active', fn ($query) => $query->withActiveHrAccount())
-            ->when($this->status === 'inactive', fn ($query) => $query->withoutActiveHrAccount())
+            ->when($this->status === 'active', fn ($query) => $query->withActiveAccount())
+            ->when($this->status === 'inactive', fn ($query) => $query->withoutActiveAccount())
             ->orderByName()
             ->paginate($this->selectedUserId ? 24 : 12);
     }
@@ -131,25 +130,23 @@ trait ManagesUserAccess
     }
 
     /**
-     * Active HR login accounts that do not have a tracking user yet.
+     * Active accounts that hold no role yet (no access to the hub).
      *
-     * @return Collection<int, HrUser>
+     * @return Collection<int, User>
      */
     #[Computed]
-    public function hrAccountOptions(): Collection
+    public function accountOptions(): Collection
     {
         Gate::authorize('create', User::class);
 
-        $linkedHrUserIds = User::query()->pluck('hr_user_id')->flip();
-
-        return HrUser::query()
-            ->active()
+        return User::query()
+            ->withActiveAccount()
+            ->whereDoesntHave('roles')
             ->select(['id', 'employee_id', 'email'])
             ->with('employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar')
             ->orderBy('email')
             ->get()
-            ->reject(fn (HrUser $hrUser): bool => $linkedHrUserIds->has($hrUser->id))
-            ->values();
+            ->toBase();
     }
 
     public function selectUser(int $userId): void
@@ -248,31 +245,32 @@ trait ManagesUserAccess
     }
 
     /**
-     * Give an HR account access to hc-tracking, with an optional starting role.
+     * Give an account without a role access to the hub, with an optional
+     * starting role.
      */
     public function createUser(): void
     {
         Gate::authorize('create', User::class);
 
-        /** @var array{hrUserId: string, initialRoleId: string|null} $validated */
+        /** @var array{accountId: string, initialRoleId: string|null} $validated */
         $validated = $this->validate([
-            'hrUserId' => ['required', 'integer', Rule::exists(HrUser::class, 'id')],
+            'accountId' => ['required', 'integer', Rule::exists('users', 'id')],
             'initialRoleId' => ['nullable', 'integer', Rule::exists('roles', 'id')],
         ], [
-            'hrUserId.required' => __('users.select_an_hr_account_2'),
-            'hrUserId.exists' => __('users.the_selected_hr_account_is_no_longer_available'),
+            'accountId.required' => __('users.select_an_hr_account_2'),
+            'accountId.exists' => __('users.the_selected_hr_account_is_no_longer_available'),
         ]);
 
-        $hrUser = HrUser::query()->with('employee')->findOrFail((int) $validated['hrUserId']);
+        $account = User::query()->findOrFail((int) $validated['accountId']);
 
-        if (! $hrUser->isActive()) {
-            $this->addError('hrUserId', __('users.the_selected_hr_account_is_no_longer_available'));
+        if ($account->hasLostAccess()) {
+            $this->addError('accountId', __('users.the_selected_hr_account_is_no_longer_available'));
 
             return;
         }
 
-        if (User::query()->where('hr_user_id', $hrUser->id)->exists()) {
-            $this->addError('hrUserId', __('users.this_hr_account_already_has_access'));
+        if ($account->roles()->exists()) {
+            $this->addError('accountId', __('users.this_hr_account_already_has_access'));
 
             return;
         }
@@ -287,7 +285,9 @@ trait ManagesUserAccess
             Gate::authorize('assignRole', [User::class, $startingRole]);
         }
 
-        User::createFromHrAccount($hrUser, $roleName);
+        if ($roleName !== null) {
+            $account->grantAccess($roleName);
+        }
 
         $this->closeCreateModal();
 
@@ -347,7 +347,7 @@ trait ManagesUserAccess
     protected function resetCreateUserForm(): void
     {
         $this->resetValidation();
-        $this->hrUserId = '';
+        $this->accountId = '';
         $this->initialRoleId = '';
     }
 }

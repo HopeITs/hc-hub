@@ -6,8 +6,6 @@ namespace Modules\Tracking\Livewire\Concerns\Proposals;
 
 use App\Enums\FileType;
 use App\Enums\MediaCollection;
-use App\Models\HrCenter;
-use App\Models\HrProgram;
 use App\Rules\SecureUpload;
 use App\Support\Like;
 use Flux\Flux;
@@ -21,6 +19,8 @@ use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Actions\Proposals\CloneProposalForRenewal;
 use Modules\Tracking\Actions\Proposals\SaveProposal;
@@ -784,7 +784,7 @@ trait ManagesProposalForm
         }
 
         try {
-            return HrCenter::remembered($centerId)->name ?? '#'.$centerId;
+            return Center::remembered($centerId)->name ?? '#'.$centerId;
         } catch (QueryException) {
             return '#'.$centerId;
         }
@@ -793,7 +793,7 @@ trait ManagesProposalForm
     private function programName(int $programId): string
     {
         try {
-            $name = HrProgram::nameOf($programId);
+            $name = Program::nameOf($programId);
         } catch (QueryException) {
             $name = '';
         }

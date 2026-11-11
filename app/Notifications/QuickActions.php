@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Models\HrEmployee;
 use App\Models\UserNotification;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Gate;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ArStatus;
 use Modules\Tracking\Enums\ReportStatus;
 use Modules\Tracking\Enums\TaskStatus;
@@ -104,7 +104,7 @@ final class QuickActions
         }
 
         try {
-            return HrEmployee::query()->whereKey((int) $ownerId)->where('is_active', false)->exists();
+            return Employee::query()->whereKey((int) $ownerId)->where('is_active', false)->exists();
         } catch (QueryException) {
             return false;
         }

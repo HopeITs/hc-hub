@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Calendar;
 
-use App\Models\HrEmployee;
 use Carbon\CarbonImmutable;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,6 +14,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Milestones\DeleteMilestone;
 use Modules\Tracking\Actions\Milestones\SaveMilestone;
 use Modules\Tracking\Enums\MilestoneStatus;
@@ -195,7 +195,7 @@ trait ManagesCalendarMilestones
             'milestoneStatus' => ['required', new Enum(MilestoneStatus::class)],
             'sequence' => ['required', 'integer', 'min:0'],
             'weightPercentage' => ['required', 'numeric', 'min:0', 'max:100'],
-            'responsibleUserId' => ['required', 'integer', Rule::exists(HrEmployee::class, 'id')],
+            'responsibleUserId' => ['required', 'integer', Rule::exists(Employee::class, 'id')],
             'milestoneProjectId' => [
                 'required',
                 'integer',

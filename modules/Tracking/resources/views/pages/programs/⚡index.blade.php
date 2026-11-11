@@ -2,8 +2,7 @@
 
 use Modules\Tracking\Enums\ProjectStatus;
 use App\Support\Like;
-use App\Models\HrEmployee;
-use App\Models\HrProgram;
+use Modules\Hr\Models\Employee;
 use Modules\Core\Models\Program;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Strategy;
@@ -135,9 +134,9 @@ new #[Layout('layouts::desk'), Title('titles.programs')] class extends Component
         return Program::query()
             ->when($search !== '', function (Builder $query) use ($search): void {
                 $query->where(Like::everyWord($search, fn (Builder $query, string $word) => $query
-                    ->whereIn('programs.id', HrProgram::idsMatchingName($word, acrossLayouts: false))
+                    ->where(Like::word('programs.name', $word))
                     ->orWhereHas('strategy', Like::word('name', $word))
-                    ->orWhereIn('manager_id', HrEmployee::idsMatchingName($word, acrossLayouts: false))));
+                    ->orWhereHas('manager', fn (Builder $manager) => $manager->whereNameLike($word, false))));
             })
             ->when($this->strategy === self::Unassigned, fn (Builder $query) => $query->whereNull('strategy_id'))
             ->when($this->strategy !== '' && $this->strategy !== self::Unassigned, fn (Builder $query) => $query->where('strategy_id', (int) $this->strategy))
@@ -193,10 +192,10 @@ new #[Layout('layouts::desk'), Title('titles.programs')] class extends Component
             $counts->put((int) $this->manager, 0);
         }
 
-        $names = HrEmployee::query()
+        $names = Employee::query()
             ->whereIn('id', $counts->keys())
             ->get(['id', 'first_name_en', 'last_name_en', 'first_name_ar', 'last_name_ar'])
-            ->mapWithKeys(fn (HrEmployee $employee): array => [$employee->id => $employee->name]);
+            ->mapWithKeys(fn (Employee $employee): array => [$employee->id => $employee->name]);
 
         return $counts
             ->map(fn (int|string $total, int|string $id): array => [
@@ -267,7 +266,7 @@ new #[Layout('layouts::desk'), Title('titles.programs')] class extends Component
 
         $validated = $this->validate([
             'strategyId' => ['nullable', 'integer', Rule::exists(Strategy::class, 'id')],
-            'managerId' => ['nullable', 'integer', Rule::exists(HrEmployee::class, 'id')],
+            'managerId' => ['nullable', 'integer', Rule::exists(Employee::class, 'id')],
         ], [
             'strategyId.exists' => __('programs.the_selected_strategy_is_no_longer_available'),
             'managerId.exists' => __('programs.the_selected_manager_is_no_longer_available'),

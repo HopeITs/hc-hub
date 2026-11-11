@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\ProposalReviewer;
 use App\Support\Desk\DeskWork;
 use Illuminate\Database\Eloquent\Builder;
@@ -121,10 +121,10 @@ new #[Layout('layouts::desk'), Title('titles.my_reviews')] class extends Compone
             return new Collection;
         }
 
-        return HrEmployee::query()
+        return Employee::query()
             ->whereKey($this->reviews->pluck('employee_id')->unique()->values()->all())
-            ->get(HrEmployee::NameColumns)
-            ->mapWithKeys(fn (HrEmployee $employee): array => [$employee->id => $employee->name]);
+            ->get(Employee::NameColumns)
+            ->mapWithKeys(fn (Employee $employee): array => [$employee->id => $employee->name]);
     }
 
     /**

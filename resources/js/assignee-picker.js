@@ -2,7 +2,7 @@
  * Shared state for the task list's assignee popover.
  *
  * The list used to render one full x-ui.multi-select-popover per row, each
- * looping every HrEmployee (200+ in this org) — with 20 rows on a page that
+ * looping every Employee (200+ in this org) — with 20 rows on a page that
  * put 4000+ option buttons in the Livewire-rendered HTML, all of it
  * recomputed and diffed on *every* Livewire round trip on the page (not just
  * assignee clicks), which is why picking an assignee felt so much slower

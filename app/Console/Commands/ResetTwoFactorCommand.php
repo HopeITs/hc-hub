@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Actions\Fortify\TrustedDevices;
-use App\Models\HrUser;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -27,9 +26,6 @@ use function Laravel\Prompts\text;
  * container, because the bound DisableTwoFactorAuthenticationUnlessRequired
  * refuses for required roles without an email, and an admin reset must
  * always work. Emailed sign-in codes and passkeys are left as they are.
- *
- * The email is the HR account's (tracking users hold only hr_user_id), so the
- * user is found through HR, as user:create does.
  */
 class ResetTwoFactorCommand extends Command
 {
@@ -59,9 +55,7 @@ class ResetTwoFactorCommand extends Command
             return self::FAILURE;
         }
 
-        $hrUserId = HrUser::query()->where('email', $email)->value('id');
-
-        $user = $hrUserId === null ? null : User::query()->where('hr_user_id', $hrUserId)->first();
+        $user = User::query()->where('email', $email)->first();
 
         if ($user === null) {
             $this->components->error("No user signs in with {$email}.");

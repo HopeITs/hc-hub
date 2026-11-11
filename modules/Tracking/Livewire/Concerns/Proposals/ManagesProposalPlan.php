@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Proposals;
 
-use App\Models\HrDepartment;
-use App\Models\HrEmployee;
 use App\Support\EmployeeProfile;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
@@ -16,6 +14,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Modules\Hr\Models\Department;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Milestones\SaveProposalMilestone;
 use Modules\Tracking\Actions\Tasks\SaveDepartmentTask;
 use Modules\Tracking\Enums\DeliverableKind;
@@ -170,12 +170,12 @@ trait ManagesProposalPlan
     }
 
     /**
-     * @return SupportCollection<int, HrDepartment>
+     * @return SupportCollection<int, Department>
      */
     #[Computed(persist: true, seconds: 300)]
     public function departmentOptions(): SupportCollection
     {
-        return HrDepartment::options()->toBase();
+        return Department::options()->toBase();
     }
 
     /**
@@ -213,7 +213,7 @@ trait ManagesProposalPlan
 
         $ids = array_map('strval', EmployeeProfile::employeeIdsInDepartment($departmentId));
 
-        return array_values(HrEmployee::pickerLabels()
+        return array_values(Employee::pickerLabels()
             ->filter(fn (array $option): bool => in_array($option['value'], $ids, true) && ! $option['inactive'])
             ->map(fn (array $option): array => ['value' => $option['value'], 'label' => $option['label']])
             ->all());

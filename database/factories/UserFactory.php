@@ -4,12 +4,10 @@ namespace Database\Factories;
 
 use App\Models\Role;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Modules\Core\Models\User;
-use stdClass;
+use Modules\Hr\Models\Employee;
 
 /**
  * @extends Factory<User>
@@ -22,18 +20,16 @@ class UserFactory extends Factory
     protected static ?string $password;
 
     /**
-     * Define the model's default state.
-     *
-     * `name` and `email` are not tracking columns: they describe the HR
-     * account the user is linked to (see newModel()).
+     * Define the model's default state: an account with its own employee.
      *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'password' => static::$password ??= Hash::make('password'),
+            'employee_id' => Employee::factory(),
             'email_verified_at' => now(),
             'remember_token' => Str::random(10),
             'two_factor_secret' => null,
@@ -43,75 +39,11 @@ class UserFactory extends Factory
     }
 
     /**
-     * Build the user linked to an HR account carrying the given name and email.
-     *
-     * Name and email live in HR only, so they are taken out of the tracking
-     * attributes and written to HR instead: an existing HR account with that
-     * email is reused, otherwise an HR employee and account are created. Only
-     * works against the test suite's in-memory HR database; the real `hr`
-     * connection is READ ONLY.
-     *
-     * A bare instance (no attributes, e.g. the collection holder of count())
-     * is not a real user and gets no HR account.
-     *
-     * @param  array<string, mixed>  $attributes
+     * An account with no linked employee (a system account).
      */
-    public function newModel(array $attributes = []): User
+    public function withoutEmployee(): static
     {
-        if ($attributes === []) {
-            return parent::newModel();
-        }
-
-        $name = (string) Arr::pull($attributes, 'name', fake()->name());
-        $email = (string) Arr::pull($attributes, 'email', fake()->unique()->safeEmail());
-
-        if (! isset($attributes['hr_user_id'])) {
-            $account = DB::connection('hr')->table('users')->where('email', $email)->first(['id', 'employee_id']);
-            $account = $account instanceof stdClass ? $account : $this->createHrAccount($name, $email);
-
-            $attributes['hr_user_id'] = $account->id;
-            if (! array_key_exists('employee_id', $attributes)) {
-                $attributes['employee_id'] = $account->employee_id;
-            }
-        }
-
-        return parent::newModel($attributes);
-    }
-
-    /**
-     * Set the password of the user's HR account, which is what login checks.
-     */
-    public function withHrAccount(string $password = 'password'): static
-    {
-        return $this->afterCreating(function (User $user) use ($password): void {
-            DB::connection('hr')->table('users')->where('id', $user->hr_user_id)->update([
-                'password' => Hash::make($password),
-            ]);
-        });
-    }
-
-    /**
-     * Insert an HR employee and its login account, and return the account.
-     */
-    protected function createHrAccount(string $name, string $email): stdClass
-    {
-        [$firstName, $lastName] = array_pad(explode(' ', trim($name), 2), 2, '');
-
-        $employeeId = DB::connection('hr')->table('employees')->insertGetId([
-            'first_name_en' => $firstName,
-            'last_name_en' => $lastName,
-            'first_name_ar' => $firstName,
-            'last_name_ar' => $lastName,
-            'username' => fake()->unique()->userName(),
-        ]);
-
-        $id = DB::connection('hr')->table('users')->insertGetId([
-            'employee_id' => $employeeId,
-            'email' => $email,
-            'password' => static::$password ??= Hash::make('password'),
-        ]);
-
-        return (object) ['id' => $id, 'employee_id' => $employeeId];
+        return $this->state(['employee_id' => null]);
     }
 
     /**

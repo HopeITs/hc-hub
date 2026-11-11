@@ -99,7 +99,7 @@
                     <p class="dk-ppl-bar-k">{{ __('programs.plans_manager') }}</p>
                     <p class="dk-ppl-bar-who">
                         @if ($plan->manager !== null)
-                            <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($plan->manager_id)" class="dk-av dk-av-xs" aria-hidden="true" />
+                            <x-ui.avatar :src="\Modules\Hr\Models\Employee::avatarUrl($plan->manager_id)" class="dk-av dk-av-xs" aria-hidden="true" />
                         @endif
                         <span>{{ $plan->manager?->name ?? __('common.not_assigned') }}</span>
                     </p>

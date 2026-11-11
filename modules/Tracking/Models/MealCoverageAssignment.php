@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Tracking\Models;
 
 use App\Concerns\RecordsActivity;
-use App\Models\HrCity;
 use App\Notifications\EmployeeRecipients;
 use App\Notifications\TracksActivity;
 use Carbon\CarbonImmutable;
@@ -14,6 +13,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Models\City;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\MealCoverageScope;
 use Modules\Tracking\Support\MealCoverage;
@@ -87,7 +87,7 @@ class MealCoverageAssignment extends Model implements TracksActivity
             return (string) Project::query()->whereKey($this->activityAttribute('project_id'))->value('name');
         }
 
-        return trim((string) HrCity::query()->whereKey($this->activityAttribute('city_id'))->value('name_en'));
+        return trim((string) City::query()->whereKey($this->activityAttribute('city_id'))->value('name_en'));
     }
 
     public function activityProgramId(): ?int

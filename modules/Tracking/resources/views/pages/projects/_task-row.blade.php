@@ -63,7 +63,7 @@
             @else
                 <span class="flex shrink-0 -space-x-1.5 rtl:space-x-reverse" aria-hidden="true">
                     @foreach ($assignees->take(2) as $employee)
-                        <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($employee->id)" class="size-6 rounded-full ring-2 ring-white dark:ring-surface-1" />
+                        <x-ui.avatar :src="\Modules\Hr\Models\Employee::avatarUrl($employee->id)" class="size-6 rounded-full ring-2 ring-white dark:ring-surface-1" />
                     @endforeach
                 </span>
                 <span class="truncate font-medium {{ $inkText }}" title="{{ $assignees->map->name->implode(', ') }}">

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\IndicatorLibrary;
 
-use App\Models\HrProgram;
 use App\Support\ArabicText;
 use App\Support\Like;
 use Illuminate\Database\Eloquent\Builder;
@@ -12,6 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection as BaseCollection;
 use Livewire\Attributes\Computed;
+use Modules\Core\Models\Program;
 use Modules\Tracking\Models\LibraryIndicator;
 
 /**
@@ -63,7 +63,7 @@ trait ListsLibraryEntries
     #[Computed]
     public function entries(): Collection
     {
-        $programOrder = array_flip(HrProgram::idsOrderedByName());
+        $programOrder = array_flip(array_keys(Program::namesById()));
 
         return LibraryIndicator::query()
             ->withCount('indicators')
@@ -169,7 +169,7 @@ trait ListsLibraryEntries
      */
     public function pagedGroups(): BaseCollection
     {
-        $names = HrProgram::namesById();
+        $names = Program::namesById();
 
         return collect($this->pagedEntries->items())
             ->groupBy(fn (LibraryIndicator $entry): string => $entry->program_id === null ? 'institutional' : (string) $entry->program_id)
@@ -189,9 +189,9 @@ trait ListsLibraryEntries
     public function programFilterOptions(): array
     {
         $used = $this->entries->pluck('program_id')->filter()->unique()->flip();
-        $names = HrProgram::namesById();
+        $names = Program::namesById();
 
-        return collect(HrProgram::idsOrderedByName())
+        return collect(array_keys(Program::namesById()))
             ->filter(fn (int $id): bool => $used->has($id))
             ->mapWithKeys(fn (int $id): array => [$id => $names[$id]])
             ->all();

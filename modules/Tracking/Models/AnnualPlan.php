@@ -6,7 +6,6 @@ namespace Modules\Tracking\Models;
 
 use App\Concerns\HasSlug;
 use App\Concerns\RecordsActivity;
-use App\Models\HrEmployee;
 use App\Notifications\TracksActivity;
 use Carbon\CarbonImmutable;
 use Database\Factories\AnnualPlanFactory;
@@ -20,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Program;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Observers\PlanIndicatorSourceObserver;
 
 /**
@@ -72,11 +72,11 @@ class AnnualPlan extends Model implements TracksActivity
     /**
      * The HR employee accountable for this plan.
      *
-     * @return BelongsTo<HrEmployee, $this>
+     * @return BelongsTo<Employee, $this>
      */
     public function manager(): BelongsTo
     {
-        return $this->belongsTo(HrEmployee::class, 'manager_id');
+        return $this->belongsTo(Employee::class, 'manager_id');
     }
 
     /**

@@ -31,6 +31,7 @@ use Modules\Hr\Models\Position;
  * @property string $name_en
  * @property string $name_ar
  * @property-read string $name
+ * @property-read string $secondary_name
  * @property string $slug
  * @property string $code
  * @property string|null $hr_hotline
@@ -166,6 +167,16 @@ class City extends Model
         return Attribute::get(fn (): string => Locale::current() === Locale::Arabic && trim($this->name_ar) !== ''
             ? trim($this->name_ar)
             : trim($this->name_en));
+    }
+
+    /**
+     * The name in the other language, shown beside the main name.
+     *
+     * @return Attribute<string, never>
+     */
+    protected function secondaryName(): Attribute
+    {
+        return Attribute::get(fn (): string => trim(Locale::current() === Locale::Arabic ? $this->name_en : $this->name_ar));
     }
 
     /**

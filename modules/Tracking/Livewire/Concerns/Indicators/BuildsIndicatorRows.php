@@ -85,7 +85,7 @@ trait BuildsIndicatorRows
                 'project:id,name',
                 'progress' => fn ($query) => $query
                     ->select(['id', 'indicator_id', 'date', 'value', 'notes', 'source_of_verification', 'recorded_by'])
-                    ->with('recorder:id,hr_user_id'),
+                    ->with('recorder:id,email'),
                 'planIndicators' => fn ($query) => $query
                     ->select(['id', 'indicator_id', 'source_type', 'source_id', 'target', 'project_id', 'period'])
                     ->with([

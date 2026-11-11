@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Actions\Tasks;
 
-use App\Models\HrDepartment;
 use App\Support\EmployeeProfile;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Validator as ValidatorInstance;
+use Modules\Hr\Models\Department;
 use Modules\Tracking\Enums\Currency;
 use Modules\Tracking\Enums\DeliverableKind;
 use Modules\Tracking\Enums\DeliveryState;
@@ -127,7 +127,7 @@ final class SaveDepartmentTask
         $validator = Validator::make($input, [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'department_id' => ['required', 'integer', Rule::exists(HrDepartment::class, 'id')],
+            'department_id' => ['required', 'integer', Rule::exists(Department::class, 'id')],
             'kind' => ['required', Rule::in(TaskKind::departmentValues())],
             'media_kinds' => ['nullable', 'array', 'required_if:kind,'.TaskKind::MediaDeliverable->value],
             'media_kinds.*' => ['string', Rule::in(DeliverableKind::values())],

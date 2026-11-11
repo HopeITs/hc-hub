@@ -186,7 +186,7 @@
                         <li wire:key="task-bucket-{{ $this->taskGroupBy }}-{{ $bucket['key'] }}" @if ($bucket['key'] !== 'all') x-show="find === '' || {{ \Illuminate\Support\Js::from(mb_strtolower($bucket['label'])) }}.includes(find.trim().toLowerCase())" @endif>
                             <button type="button" wire:click="pickTaskBucket('{{ $bucket['key'] }}')" @class(['dk-ptk-rail-i', 'dk-ptk-rail-all' => $bucket['key'] === 'all']) aria-current="{{ $bucket['key'] === $selected['key'] ? 'true' : 'false' }}" data-task-bucket="{{ $bucket['key'] }}">
                                 @if ($bucket['photo'] !== null)
-                                    <x-ui.avatar :src="\App\Models\HrEmployee::avatarUrl($bucket['photo'])" class="dk-av dk-av-xs" aria-hidden="true" />
+                                    <x-ui.avatar :src="\Modules\Hr\Models\Employee::avatarUrl($bucket['photo'])" class="dk-av dk-av-xs" aria-hidden="true" />
                                 @endif
                                 <span class="dk-ptk-rail-name" title="{{ $bucket['label'] }}">{{ $bucket['short'] ?? $bucket['label'] }}</span>
                                 {{-- One number: the tasks in this line; red when some of them are past due. --}}

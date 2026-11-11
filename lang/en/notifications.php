@@ -541,16 +541,6 @@ return [
             'updated' => ':actor updated the donor “:subject”',
             'deleted' => ':actor deleted the donor “:subject”',
         ],
-        'program_request' => [
-            'opened' => [
-                'title' => 'Program needed in HR',
-                'body' => '“:subject” needs the program “:name” created in HR',
-            ],
-            'linked' => [
-                'title' => 'Program linked',
-                'body' => ':actor linked the HR program “:name” requested by “:subject”',
-            ],
-        ],
         'proposal' => [
             'created' => [
                 'title' => 'Proposal created',

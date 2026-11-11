@@ -29,9 +29,10 @@ use Modules\Hr\Support\HrTables;
  * is therefore moved in two steps: first to new_id + OFFSET (free values),
  * then back down by OFFSET.
  *
- * It is done when no user has id != hr_user_id. Running it again then does
- * nothing; a user tracking creates later (with an auto-increment id) is
- * picked up by the next run. MySQL only, and it must run with foreign key
+ * It is done when no user has id != hr_user_id. The renumbering has run on
+ * the live data and users.hr_user_id has since been dropped (users is now
+ * the one account table), so without that column there is nothing left to
+ * do and the remap is a no-op. MySQL only, and it must run with foreign key
  * checks off inside the caller's transaction.
  */
 final class UserIdRemap
@@ -68,6 +69,10 @@ final class UserIdRemap
      */
     public function pending(): int
     {
+        if (! $this->db->getSchemaBuilder()->hasColumn('users', 'hr_user_id')) {
+            return 0;
+        }
+
         return $this->db->table('users')->whereColumn('id', '!=', 'hr_user_id')->count();
     }
 

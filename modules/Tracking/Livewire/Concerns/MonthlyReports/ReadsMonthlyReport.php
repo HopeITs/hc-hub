@@ -87,12 +87,12 @@ trait ReadsMonthlyReport
                 'answers',
                 'activityEntries',
                 'reopenRequests' => fn (Relation $query) => $query->latest('id'),
-                'reopenRequests.requester:id,hr_user_id',
-                'reopenRequests.decider:id,hr_user_id',
-                'preparer:id,hr_user_id',
-                'submitter:id,hr_user_id',
-                'validator:id,hr_user_id',
-                'returner:id,hr_user_id',
+                'reopenRequests.requester:id,email',
+                'reopenRequests.decider:id,email',
+                'preparer:id,email',
+                'submitter:id,email',
+                'validator:id,email',
+                'returner:id,email',
             ])
             ->findOrFail($this->monthlyReportId);
 

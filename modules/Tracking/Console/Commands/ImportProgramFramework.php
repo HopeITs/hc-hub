@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Modules\Tracking\Console\Commands;
 
 use App\Models\Activity;
-use App\Models\HrProgram;
 use App\Support\ArabicText;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
@@ -327,7 +326,7 @@ class ImportProgramFramework extends Command
      */
     private function programCodeMatches(string $fileCode): bool
     {
-        $code = trim((string) HrProgram::query()->whereKey($this->programId)->value('code'));
+        $code = trim((string) Program::query()->whereKey($this->programId)->value('code'));
 
         if ($code === '') {
             $this->error("Program {$this->programId} is not in HR or has no code there.");
@@ -341,7 +340,7 @@ class ImportProgramFramework extends Command
             return false;
         }
 
-        if (HrProgram::query()->where('code', $code)->count() > 1) {
+        if (Program::query()->where('code', $code)->count() > 1) {
             $this->error("HR program code {$code} is used by more than one program. Ask the HR team to fix it, then run this again.");
 
             return false;
@@ -359,10 +358,6 @@ class ImportProgramFramework extends Command
      */
     private function import(array $nodes): array
     {
-        if (! Program::query()->whereKey($this->programId)->exists()) {
-            Program::syncFromHr();
-        }
-
         $existingIds = Result::query()->programFramework()->where('program_id', $this->programId)->orderBy('id')->pluck('id')->all();
 
         foreach (LibraryIndicator::query()->where('program_id', $this->programId)->orderBy('id')->get() as $entry) {

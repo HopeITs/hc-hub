@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Projects;
 
-use App\Models\HrCity;
-use App\Models\HrEmployee;
-use App\Models\HrProgram;
 use App\Support\Desk\ProjectStage;
 use App\Support\Like;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Livewire\Attributes\Computed;
+use Modules\Core\Models\City;
+use Modules\Core\Models\Program;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Models\Project;
@@ -37,7 +38,6 @@ use Modules\Tracking\Models\Sector;
  * @property string $sort
  * @property string $lens
  * @property string $stage
- * @property-read array{cities: array<string, list<int>>, owners: array<string, list<int>>} $searchMatches  #[Computed] searchMatches() below
  */
 trait FiltersProjectDirectory
 {
@@ -53,12 +53,12 @@ trait FiltersProjectDirectory
     /**
      * The cities the directory can be filtered by.
      *
-     * @return Collection<int, HrCity>
+     * @return Collection<int, City>
      */
     #[Computed]
     public function cityOptions(): Collection
     {
-        return HrCity::query()->select(['id', 'name_en', 'name_ar'])->orderBy(HrCity::nameColumn())->orderBy('id')->get();
+        return City::query()->select(['id', 'name_en', 'name_ar'])->orderBy(City::nameColumn())->orderBy('id')->get();
     }
 
     /**
@@ -209,42 +209,6 @@ trait FiltersProjectDirectory
     }
 
     /**
-     * The HR ids a name search resolves to, read once per request.
-     *
-     * Cities and employees live in the HR database, so a name search resolves
-     * to ids here instead of a whereHas() across connections. Memoising them
-     * keeps `applyFilters()` free to run for the list, the rail and the
-     * triage strip without paying for the same two reads each time. Keyed by
-     * each folded search word (every keyboard-layout reading), since each
-     * word may be found in a different field.
-     *
-     * @return array{cities: array<string, list<int>>, owners: array<string, list<int>>}
-     */
-    #[Computed]
-    public function searchMatches(): array
-    {
-        $search = trim($this->search);
-
-        if ($search === '') {
-            return ['cities' => [], 'owners' => []];
-        }
-
-        $cities = [];
-        $owners = [];
-
-        foreach (Like::searchWords($search) as $word) {
-            $cities[$word] = HrCity::query()
-                ->where(fn (Builder $query) => $query->where(Like::word('name_en', $word))->orWhere(Like::word('name_ar', $word)))
-                ->pluck('id')
-                ->map(fn (mixed $id): int => (int) $id)
-                ->all();
-            $owners[$word] = HrEmployee::idsMatchingName($word, acrossLayouts: false);
-        }
-
-        return ['cities' => $cities, 'owners' => $owners];
-    }
-
-    /**
      * The one place the portfolio is narrowed down.
      *
      * The list, the lifecycle rail and the triage tiles all read through this
@@ -257,15 +221,14 @@ trait FiltersProjectDirectory
     protected function applyFilters(Builder $query, bool $includeStatus = true, bool $includeLens = true): Builder
     {
         $search = trim($this->search);
-        $matches = $this->searchMatches;
 
         return $query
-            ->when($search !== '', function (Builder $query) use ($search, $matches): void {
-                $query->where(Like::everyWord($search, fn (Builder $query, string $word) => $query
-                    ->where(Like::word('name', $word))
-                    ->orWhereIn('city_id', $matches['cities'][$word] ?? [])
-                    ->orWhereIn('program_id', HrProgram::idsMatchingName($word, acrossLayouts: false))
-                    ->orWhereIn('user_id', $matches['owners'][$word] ?? [])));
+            ->when($search !== '', function (Builder $query) use ($search): void {
+                $query->where(Like::everyWord($search, fn (Builder|QueryBuilder $query, string $word) => $query
+                    ->where(Like::word('projects.name', $word))
+                    ->orWhereIn('projects.city_id', City::query()->select('cities.id')->where(fn (Builder $names) => $names->where(Like::word('cities.name_en', $word))->orWhere(Like::word('cities.name_ar', $word))))
+                    ->orWhereIn('projects.program_id', Program::query()->select('programs.id')->whereNameLike($word, false))
+                    ->orWhereIn('projects.user_id', Employee::query()->select('employees.id')->whereNameLike($word, false))));
             })
             ->when($this->city !== '', fn (Builder $query) => $query->where('city_id', (int) $this->city))
             ->when($this->program !== '', fn (Builder $query) => $query->where('program_id', (int) $this->program))

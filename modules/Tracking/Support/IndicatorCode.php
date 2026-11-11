@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Support;
 
-use App\Models\HrProgram;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use LogicException;
+use Modules\Core\Models\Program;
 use Modules\Tracking\Models\LibraryIndicator;
 
 /**
@@ -67,13 +67,13 @@ final class IndicatorCode
      */
     private static function programCode(int $programId): string
     {
-        $code = trim((string) HrProgram::query()->whereKey($programId)->value('code'));
+        $code = trim((string) Program::query()->whereKey($programId)->value('code'));
 
         if ($code === '') {
             throw ValidationException::withMessages(['program_id' => __('indicator_library.program_required')]);
         }
 
-        if (HrProgram::query()->where('code', $code)->count() > 1) {
+        if (Program::query()->where('code', $code)->count() > 1) {
             throw ValidationException::withMessages(['program_id' => __('indicator_library.program_code_duplicated')]);
         }
 

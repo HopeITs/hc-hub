@@ -3,7 +3,7 @@
 use Modules\Tracking\Actions\MonthlyReports\OpenMonthlyReport;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\ReopenRequestStatus;
-use App\Models\HrCity;
+use Modules\Core\Models\City;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Support\MonthlyReportPeriods;
@@ -367,7 +367,7 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
         return MonthlyReport::query()
             ->validatableBy(auth()->user())
             ->where('status', '!=', MonthlyReportStatus::Draft)
-            ->with(['project:id,slug,name,city_id', 'submitter:id,hr_user_id'])
+            ->with(['project:id,slug,name,city_id', 'submitter:id,email'])
             ->orderBy('period')
             ->orderBy('id')
             ->get(['id', 'slug', 'project_id', 'period', 'status', 'submitted_at', 'submitted_by', 'seen_by_meal_at']);
@@ -425,7 +425,7 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
             return [];
         }
 
-        return HrCity::query()->whereIn('id', $ids)->get()->mapWithKeys(fn (HrCity $city): array => [(int) $city->id => (string) $city->name])->sort()->all();
+        return City::query()->whereIn('id', $ids)->get()->mapWithKeys(fn (City $city): array => [(int) $city->id => (string) $city->name])->sort()->all();
     }
 
     /**

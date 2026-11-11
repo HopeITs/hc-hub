@@ -260,7 +260,7 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
     {
         return $this->visibleReports()
             ->select(['id', 'plan_indicator_id', 'user_id', 'status', 'planned_date', 'value', 'submit_date', 'is_seen_by_meal', 'monthly_report_id'])
-            ->with([...$this->targetRelations(), 'user:id,hr_user_id,employee_id', 'monthlyReport:id,slug'])
+            ->with([...$this->targetRelations(), 'user:id,email,employee_id', 'monthlyReport:id,slug'])
             ->withCount('files')
             // Late drafts, then reports waiting for approval, then other drafts, then approved.
             ->orderByRaw("case when status = 'draft' and date(planned_date) < ? then 0 when status = 'reviewed' then 1 when status = 'draft' then 2 else 3 end", [today()->toDateString()])
@@ -318,7 +318,7 @@ new #[Layout('layouts::desk'), Title('titles.reports')] class extends Component 
     #[Computed]
     public function authorOptions(): Collection
     {
-        return User::query()->select(['id', 'hr_user_id'])->orderByName()->get();
+        return User::query()->select(['id', 'email'])->orderByName()->get();
     }
 
     /** @return Collection<int, Project> */

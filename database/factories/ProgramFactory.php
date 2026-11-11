@@ -4,8 +4,6 @@ namespace Database\Factories;
 
 use Database\Factories\Concerns\CreatesHrRecords;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Program;
 use Modules\Tracking\Models\Strategy;
 
@@ -19,41 +17,21 @@ class ProgramFactory extends Factory
     /**
      * Define the model's default state.
      *
-     * A program is the tracking side of an HR program under the same id, so
-     * the factory writes the HR row first. `name` is not a tracking column: it
-     * only names that HR row (see newModel()). That only works against the test
-     * suite's in-memory HR database: the real `hr` connection is READ ONLY and
-     * rejects the insert, which is why seeders use real HR programs through
-     * Program::syncFromHr().
-     *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
             'name' => fake()->randomElement(['WASH', 'Shelter', 'Protection', 'Livelihoods', 'Health']),
-            'id' => fn (array $attributes): int => DB::connection('hr')->table('programs')->insertGetId([
-                'name' => $attributes['name'],
-                'code' => fake()->bothify('??####'),
-                'slug' => fake()->unique()->slug(),
-            ]),
+            'code' => fake()->bothify('??####'),
+            'slug' => fake()->unique()->slug(),
             'strategy_id' => Strategy::factory(),
             'manager_id' => fn (): int => $this->createHrEmployee(),
         ];
     }
 
     /**
-     * Build the program without `name`, which lives in HR only.
-     *
-     * @param  array<string, mixed>  $attributes
-     */
-    public function newModel(array $attributes = []): Program
-    {
-        return parent::newModel(Arr::except($attributes, 'name'));
-    }
-
-    /**
-     * Indicate a program mirrored from HR that nobody has linked yet.
+     * Indicate a program nobody has linked to a strategy or manager yet.
      */
     public function unassigned(): static
     {

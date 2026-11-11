@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns;
 
-use App\Models\HrEmployee;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ResultType;
 use Modules\Tracking\Enums\TaskStatus;
@@ -466,7 +466,7 @@ trait BuildsProjectGantt
                 statusLabel: $milestone->status->label(),
                 tone: $this->milestoneTone($milestone),
                 owner: $milestone->responsibleUser?->name,
-                ownerAvatar: $milestone->responsibleUser === null ? null : HrEmployee::avatarUrl($milestone->responsibleUser->id),
+                ownerAvatar: $milestone->responsibleUser === null ? null : Employee::avatarUrl($milestone->responsibleUser->id),
                 summary: $hasChildren,
                 diamond: ! $hasChildren && ($milestone->planned_end_date === null || $milestone->planned_end_date->equalTo($milestone->planned_start_date)),
                 url: route('milestones.show', $milestone),

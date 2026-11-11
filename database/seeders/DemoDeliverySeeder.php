@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\HrProgram;
 use Database\Seeders\Concerns\PicksHrRecords;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
@@ -93,7 +92,7 @@ class DemoDeliverySeeder extends Seeder
      */
     protected function programsToAssign(): Collection
     {
-        if (HrProgram::query()->doesntExist()) {
+        if (Program::query()->doesntExist()) {
             return Program::factory()->unassigned()->count(4)->sequence(
                 ['name' => 'WASH'],
                 ['name' => 'Shelter'],

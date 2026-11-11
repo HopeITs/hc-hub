@@ -5,13 +5,13 @@ namespace Database\Seeders;
 use App\Enums\FileType;
 use App\Enums\MediaCollection;
 use App\Models\Activity;
-use App\Models\HrDepartment;
 use App\Models\Media;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Department;
 use Modules\Tracking\Enums\ArStatus;
 use Modules\Tracking\Enums\DeliverableKind;
 use Modules\Tracking\Enums\DeliveryState;
@@ -427,7 +427,7 @@ class AlWadiShowcaseSeeder extends Seeder
      */
     private function seedTasks(string $sourceType, int $sourceId, array $tasks): void
     {
-        $departmentId = HrDepartment::query()->value('id');
+        $departmentId = Department::query()->value('id');
 
         foreach ($tasks as $index => [$title, $kind, $status, $priority, $dueIn]) {
             if (Task::query()->where('source_type', $sourceType)->where('source_id', $sourceId)->where('title', $title)->exists()) {

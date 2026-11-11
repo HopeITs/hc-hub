@@ -94,19 +94,19 @@
                                     </span>
                                 @else
                                     @foreach ($boardAssignees->take(3) as $employee)
-                                        @php $employeePhoto = App\Models\HrEmployee::avatarUrl($employee->id); @endphp
+                                        @php $employeePhoto = Modules\Hr\Models\Employee::avatarUrl($employee->id); @endphp
                                         <img
                                             src="{{ $employeePhoto }}"
                                             alt=""
                                             loading="lazy"
                                             decoding="async"
-                                            onerror="this.onerror = null; this.src = '{{ asset(App\Models\HrEmployee::DefaultAvatar) }}'"
+                                            onerror="this.onerror = null; this.src = '{{ asset(Modules\Hr\Models\Employee::DefaultAvatar) }}'"
                                             class="size-6 rounded-full !bg-hr-avatar object-cover ring-2 ring-white dark:ring-surface-1"
                                             x-on:mouseenter="$store.personCard.show($el)"
                                             x-on:mouseleave="$store.personCard.hide()"
                                             data-person-name="{{ $employee->name }}"
                                             data-person-alt-name="{{ $employee->secondary_name }}"
-                                            data-person-role="{{ App\Models\HrEmployee::positionSummary($employee->id) }}"
+                                            data-person-role="{{ Modules\Hr\Models\Employee::positionSummary($employee->id) }}"
                                             data-person-photo="{{ $employeePhoto }}"
                                             data-test="task-board-assignee-{{ $task->id }}-{{ $employee->id }}"
                                         />

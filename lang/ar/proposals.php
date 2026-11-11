@@ -562,5 +562,8 @@ return [
     'location_center_not_in_city' => 'يجب أن يقع كل مركز في مدينة الصفّ.',
     'location_responsible_inactive' => 'اختر موظفًا فعّالًا.',
     'location_program_name_required' => 'اكتب اسم البرنامج الجديد باللغتين.',
+    'location_program_create_denied' => 'فتح برنامج جديد هنا يحتاج صلاحية إنشاء البرامج.',
+    'location_center_name_required' => 'اكتب اسم المركز الجديد باللغتين.',
+    'location_center_create_denied' => 'إضافة مركز جديد هنا تحتاج صلاحية إنشاء المراكز.',
     'location_owner_required' => 'لا يوجد من يملك مشروع صفّ :city: المسؤول لا يدير أي برنامج، والبرنامج بلا مدير.',
 ];

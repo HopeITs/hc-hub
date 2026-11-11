@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Milestones;
 
-use App\Models\HrEmployee;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +12,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Milestones\DeleteMilestone;
 use Modules\Tracking\Actions\Milestones\SaveMilestone;
 use Modules\Tracking\Enums\MilestoneStatus;
@@ -170,7 +170,7 @@ trait ManagesMilestoneDirectoryForm
             'plannedEndDate' => ['nullable', 'date', 'after_or_equal:plannedStartDate'],
             'milestoneStatus' => ['required', new Enum(MilestoneStatus::class)],
             'weightPercentage' => ['required', 'numeric', 'min:0', 'max:100'],
-            'responsibleUserId' => ['required', 'integer', Rule::exists(HrEmployee::class, 'id')],
+            'responsibleUserId' => ['required', 'integer', Rule::exists(Employee::class, 'id')],
             'milestoneProjectId' => ['required', 'integer', Rule::exists(Project::class, 'id')],
             'parentMilestoneId' => [
                 'nullable',

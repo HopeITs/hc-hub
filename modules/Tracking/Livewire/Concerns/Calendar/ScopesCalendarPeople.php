@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Calendar;
 
-use App\Models\HrEmployee;
+use Modules\Hr\Models\Employee;
 
 /**
  * Whose items the calendar shows: the employees checked in the responsible
@@ -75,7 +75,7 @@ trait ScopesCalendarPeople
         }
 
         if (count($picked) === 1) {
-            $name = HrEmployee::pickerOptions()->firstWhere('id', $picked[0])?->name;
+            $name = Employee::pickerOptions()->firstWhere('id', $picked[0])?->name;
 
             if ($name !== null && $name !== '') {
                 return __('calendar.calendar_of', ['name' => $name]);

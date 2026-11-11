@@ -123,7 +123,7 @@
     </td>
     <td class="px-2">
         {{--
-            Trigger only — the option list (every HrEmployee) lives once in
+            Trigger only — the option list (every Employee) lives once in
             _assignee-popover.blade.php via the assigneePicker Alpine store,
             instead of being re-rendered here per row. See assignee-picker.js
             for why that used to make this dropdown slow.

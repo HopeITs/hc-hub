@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\AnnualPlans;
 
-use App\Models\HrEmployee;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Gate;
@@ -12,6 +11,7 @@ use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Modules\Core\Models\Program;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Models\AnnualPlan;
 
 /**
@@ -27,7 +27,7 @@ use Modules\Tracking\Models\AnnualPlan;
  * @property-read array<int, int> $yearColumns
  * @property-read int|null $activeYear
  * @property-read array<string, mixed>|null $yearRange
- * @property-read Collection<int, HrEmployee> $managerOptions
+ * @property-read Collection<int, Employee> $managerOptions
  * @property-read mixed $programRows
  * @property-read array<string, AnnualPlan> $planCells
  * @property-read array<int, array<string, int>> $planDelivery
@@ -183,7 +183,7 @@ trait ManagesAnnualPlanForm
 
         $validated = $this->validate([
             'planProgramId' => ['required', 'integer', Rule::exists(Program::class, 'id')],
-            'planManagerId' => ['required', 'integer', Rule::exists(HrEmployee::class, 'id')],
+            'planManagerId' => ['required', 'integer', Rule::exists(Employee::class, 'id')],
             'planYear' => [
                 'required',
                 'integer',
