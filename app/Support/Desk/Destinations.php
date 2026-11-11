@@ -288,7 +288,7 @@ final class Destinations
             $page('admin.accounts.index', 'common.accounts', 'coins', 'nav-landmark', 'funding_finance', $can('accounts.view'), 'accounts'),
 
             /* The HR module's pages (HrDestinations): only the ones whose route exists, each behind its own HR permission. */
-            ...array_map(fn (array $hr): array => $page($hr['route'], $hr['label'], $hr['icon'], $hr['hero'], 'hr', $hr['allows']), app(HrDestinations::class)->pages()),
+            ...array_map(fn (array $hr): array => $page($hr['route'], $hr['label'], $hr['icon'], $hr['hero'], 'hr', $hr['allows'], bindsAdministrators: $hr['bindsAdministrators']), app(HrDestinations::class)->pages()),
 
             $page('tasks.index', 'common.tasks', 'check', 'nav-square-check-big', 'workspace', $can('tasks.view'), 'tasks'),
             $page('department-tasks.index', 'titles.department_tasks', 'board', 'nav-building', 'workspace', fn (User $user): bool => $user->can('viewDepartmentQueue', Task::class)),

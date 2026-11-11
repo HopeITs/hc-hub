@@ -11,6 +11,8 @@ use Modules\Hr\Actions\Recruitment\RecruitmentApproverEligibility;
 use Modules\Hr\Models\InAppFeedback;
 use Modules\Hr\Support\Assistant\HrAssistant;
 use Modules\Hr\Support\Inbox\WorkInbox;
+use Modules\Hr\Support\Recruitment\Access;
+use Modules\Hr\Support\Recruitment\RecruitmentConfig;
 
 /**
  * The HR section of the sidebar: every HR page with the permission that
@@ -25,7 +27,7 @@ use Modules\Hr\Support\Inbox\WorkInbox;
 final class HrDestinations
 {
     /**
-     * @return list<array{route: string, label: string, icon: string, hero: string, allows: Closure(User): bool}>
+     * @return list<array{route: string, label: string, icon: string, hero: string, allows: Closure(User): bool, bindsAdministrators: bool}>
      */
     public function pages(): array
     {
@@ -39,20 +41,20 @@ final class HrDestinations
             ['hr.positions.index', 'positions', 'grid', 'nav-network', $can('positions.view')],
             ['hr.positions.team', 'team_staffing', 'users', 'nav-network', $can('positions.view')],
             ['hr.badges.index', 'badges', 'check', 'nav-list-checks', $can('badges.view')],
-            ['hr.archives.mine', 'my_folders', 'file', 'nav-file-text', fn (User $user): bool => $staff($user) && $user->can('archives.view')],
-            ['hr.employees.me', 'my_profile', 'users', 'nav-users', $staff],
-            ['hr.leave.index', 'leave_requests', 'cal', 'nav-calendar-check', fn (User $user): bool => $staff($user) && $user->can('leaves.view-own')],
+            ['hr.archives.mine', 'my_folders', 'file', 'nav-file-text', fn (User $user): bool => $staff($user) && $user->can('archives.view'), true],
+            ['hr.employees.me', 'my_profile', 'users', 'nav-users', $staff, true],
+            ['hr.leave.index', 'leave_requests', 'cal', 'nav-calendar-check', fn (User $user): bool => $staff($user) && $user->can('leaves.view-own'), true],
             ['hr.leave.team', 'team_leaves', 'cal', 'nav-calendar-check', $can('leaves.view-all')],
             ['hr.leave.balances', 'leave_balances', 'grid', 'nav-calendar-check', $can('leaves.view-all')],
             ['hr.leave.team-calendar', 'team', 'users', 'nav-calendar-range', $can('leaves.view-own', 'leaves.view-all')],
             ['hr.leave.holidays', 'holidays', 'cal', 'nav-calendar', $can('project-basics.view')],
             ['hr.recruitment.requests.index', 'recruitment_requests', 'file', 'nav-file-plus', $can('recruitment-requests.view')],
-            ['hr.recruitment.approvals.pending', 'recruitment_approvals', 'check', 'nav-list-checks', fn (User $user): bool => app(RecruitmentApproverEligibility::class)->mayReceiveApprovals($user)],
+            ['hr.recruitment.approvals.pending', 'recruitment_approvals', 'check', 'nav-list-checks', fn (User $user): bool => Access::hasActivePermission($user, 'recruitment-requests.approve') && self::mayReceiveApprovals($user), true],
             ['hr.recruitment.campaigns.index', 'vacancies', 'search', 'nav-clipboard-list', $can('recruitment-vacancies.view')],
             ['hr.checklists.index', 'checklists', 'check', 'nav-list-checks', $can('checklists.view-own', 'checklists.view-all', 'checklists.manage')],
             ['hr.news.index', 'news', 'bell', 'nav-book-open', $can('news.view')],
             ['hr.statistics.index', 'statistics', 'chart', 'nav-chart-line', $can('statistics.view')],
-            ['hr.assistant', 'assistant', 'info', 'nav-lightbulb', fn (User $user): bool => $staff($user) && app(HrAssistant::class)->isAvailable()],
+            ['hr.assistant', 'assistant', 'info', 'nav-lightbulb', fn (User $user): bool => $staff($user) && app(HrAssistant::class)->isAvailable(), true],
             ['hr.activity.index', 'activity', 'undo', 'nav-file-clock', $can('activity-log.view')],
             ['hr.feedback.index', 'feedback', 'info', 'nav-message-circle-question-mark', fn (User $user): bool => $staff($user) || $user->can('viewAny', InAppFeedback::class)],
             ['hr.settings.index', 'settings', 'grid', 'nav-settings', $can('project-basics.view')],
@@ -60,12 +62,27 @@ final class HrDestinations
 
         $offered = [];
 
-        foreach ($pages as [$route, $label, $icon, $hero, $allows]) {
+        // A sixth `true` marks a page about the viewer themself (their leaves, folders, approvals):
+        // it binds administrators too, who would otherwise see every link even without an employee record.
+        foreach ($pages as $page) {
+            [$route, $label, $icon, $hero, $allows] = $page;
+
             if (Route::has($route)) {
-                $offered[] = ['route' => $route, 'label' => 'hr_nav.'.$label, 'icon' => $icon, 'hero' => $hero, 'allows' => $allows];
+                $offered[] = ['route' => $route, 'label' => 'hr_nav.'.$label, 'icon' => $icon, 'hero' => $hero, 'allows' => $allows, 'bindsAdministrators' => $page[5] ?? false];
             }
         }
 
         return $offered;
+    }
+
+    /**
+     * The approvals page's own gate: eligibility reads the recruitment
+     * config, which must be loaded first or the answer differs from the page's.
+     */
+    private static function mayReceiveApprovals(User $user): bool
+    {
+        RecruitmentConfig::load();
+
+        return app(RecruitmentApproverEligibility::class)->mayReceiveApprovals($user);
     }
 }
