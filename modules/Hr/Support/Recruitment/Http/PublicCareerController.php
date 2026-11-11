@@ -29,7 +29,7 @@ class PublicCareerController extends Controller
             return $this->unavailable();
         }
 
-        return response()->view('hr_recruitment.careers.show', [
+        return response()->view('hr::pages.recruitment.careers.show', [
             ...$page,
             'locale' => $locale,
             'internal' => $this->internalState($request, $token, $service, $locale),
@@ -99,16 +99,16 @@ class PublicCareerController extends Controller
         $email = Str::lower(trim((string) $request->input('invitee_email')));
 
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            $error = __('hr_recruitment.careers.invitation.invalid_email');
+            $error = __('hr::pages.recruitment.careers.invitation.invalid_email');
         } elseif (! $invites->hasActiveInvite($campaign, $email)) {
-            $error = __('hr_recruitment.careers.invitation.not_listed');
+            $error = __('hr::pages.recruitment.careers.invitation.not_listed');
         } else {
             $request->session()->put($this->invitationSessionKey($token), $email);
 
             return redirect()->route('hr.careers.show', ['token' => $token, 'lang' => $locale], 303);
         }
 
-        return response()->view('hr_recruitment.careers.show', [
+        return response()->view('hr::pages.recruitment.careers.show', [
             ...$page,
             'locale' => $locale,
             'internal' => null,
@@ -123,7 +123,7 @@ class PublicCareerController extends Controller
     {
         $locale = $this->setLocale($request);
 
-        return response()->view('hr_recruitment.careers.submitted', [
+        return response()->view('hr::pages.recruitment.careers.submitted', [
             'locale' => $locale,
         ]);
     }
@@ -154,13 +154,13 @@ class PublicCareerController extends Controller
             try {
                 $page = $links->publicPage($token);
             } catch (PublicRecruitmentUnavailableException) {
-                return response()->view('hr_recruitment.careers.submission-error', [
+                return response()->view('hr::pages.recruitment.careers.submission-error', [
                     'locale' => $locale,
                     'submissionError' => $message,
                 ], 422);
             }
 
-            return response()->view('hr_recruitment.careers.show', [
+            return response()->view('hr::pages.recruitment.careers.show', [
                 ...$page,
                 'locale' => $locale,
                 'internal' => $this->internalState($request, $token, $links, $locale),
@@ -244,7 +244,7 @@ class PublicCareerController extends Controller
     /** Hashed, so the token never sits in the session store as it is in the URL. */
     private function invitationSessionKey(string $token): string
     {
-        return 'hr_recruitment.careers.invitee.'.hash('sha256', $token);
+        return 'hr::pages.recruitment.careers.invitee.'.hash('sha256', $token);
     }
 
     private function setLocale(Request $request): string
@@ -258,6 +258,6 @@ class PublicCareerController extends Controller
 
     private function unavailable(): Response
     {
-        return response()->view('hr_recruitment.careers.unavailable', status: 404);
+        return response()->view('hr::pages.recruitment.careers.unavailable', status: 404);
     }
 }
