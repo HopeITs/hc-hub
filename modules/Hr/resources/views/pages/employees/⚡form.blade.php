@@ -156,7 +156,6 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.form')] class extends 
 @use('Modules\Hr\Enums\Gender')
 @use('Modules\Hr\Enums\MaritalStatus')
 @use('Modules\Hr\Enums\Nationality')
-@use('Modules\Hr\Models\Employee')
 @use('Modules\Hr\Support\Employees\EnumLabel')
 
 @php
