@@ -85,11 +85,14 @@ final class HrDestinations
     /**
      * The approvals page's own gate: eligibility reads the recruitment
      * config, which must be loaded first or the answer differs from the page's.
+     * Memoized per request: the desk asks it several times per page (3 queries each).
      */
     private static function mayReceiveApprovals(User $user): bool
     {
-        RecruitmentConfig::load();
+        return once(static function () use ($user): bool {
+            RecruitmentConfig::load();
 
-        return app(RecruitmentApproverEligibility::class)->mayReceiveApprovals($user);
+            return app(RecruitmentApproverEligibility::class)->mayReceiveApprovals($user);
+        });
     }
 }

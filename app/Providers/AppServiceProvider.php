@@ -8,6 +8,7 @@ use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Models\Role;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Policies\UserPolicy;
+use App\Support\Blaze\NonFoldingBlazeManager;
 use App\Support\Desk\Destinations;
 use App\Support\Desk\PageCards;
 use App\Support\Desk\Panels;
@@ -35,6 +36,8 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
+use Livewire\Blaze\Blaze;
+use Livewire\Blaze\BlazeManager;
 use Livewire\Component;
 use Livewire\Livewire;
 use LogicException;
@@ -90,6 +93,9 @@ class AppServiceProvider extends ServiceProvider
         $this->registerDevCommands();
 
         $this->configureFortifyActions();
+
+        // Blaze compiles components into plain functions but never folds them (see NonFoldingFolder).
+        $this->app->singleton(BlazeManager::class, NonFoldingBlazeManager::class);
     }
 
     /**
@@ -164,7 +170,53 @@ class AppServiceProvider extends ServiceProvider
         $this->configureLivewire();
         $this->configureRateLimiting();
         $this->configureDateLocale();
+        $this->configureBlaze();
     }
+
+    /**
+     * The shared shell renders hundreds of small anonymous components per page
+     * (sidebar items, pins, icons, table cells, buttons). Blaze compiles them
+     * into plain PHP functions; folding stays off (NonFoldingBlazeManager).
+     */
+    protected function configureBlaze(): void
+    {
+        $optimize = Blaze::optimize()
+            ->in(resource_path('views/components'))
+            ->in(base_path('modules/Tracking/resources/views/components'))
+            ->in(base_path('modules/Hr/resources/views/components'));
+
+        // Compiled components do not receive View::share() variables (the $errors bag), and a compiled
+        // file only defines a function, so an @include of it prints nothing: those stay plain Blade.
+        foreach (self::BladeOnlyComponents as $file) {
+            $optimize->in(base_path($file), compile: false);
+        }
+    }
+
+    /**
+     * Component files Blaze must not compile: they read the shared `$errors`
+     * or are pulled in with @include instead of an <x-...> tag. A new
+     * component file that does either belongs here too.
+     *
+     * @var list<string>
+     */
+    private const array BladeOnlyComponents = [
+        'resources/views/components/desk/side-personal.blade.php',
+        'modules/Tracking/resources/views/components/proposals/_logframe-copy-modal.blade.php',
+        'resources/views/components/ui/form-file.blade.php',
+        'resources/views/components/ui/form-input.blade.php',
+        'resources/views/components/ui/form-section.blade.php',
+        'resources/views/components/ui/form-segmented.blade.php',
+        'resources/views/components/ui/form-select.blade.php',
+        'resources/views/components/ui/form-textarea.blade.php',
+        'modules/Tracking/resources/views/components/funding/agreement-modal.blade.php',
+        'modules/Tracking/resources/views/components/monthly-reports/line-entry.blade.php',
+        'modules/Tracking/resources/views/components/monthly-reports/line-row.blade.php',
+        'modules/Tracking/resources/views/components/projects/sector-picker.blade.php',
+        'modules/Tracking/resources/views/components/proposals/form-modal.blade.php',
+        'modules/Tracking/resources/views/components/proposals/_logframe-risks-drawer.blade.php',
+        'modules/Tracking/resources/views/components/tasks/add-task-modal.blade.php',
+        'modules/Tracking/resources/views/components/tasks/composer.blade.php',
+    ];
 
     /**
      * Keep the Syrian month names whenever the app locale changes, not only

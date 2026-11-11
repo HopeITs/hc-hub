@@ -35,7 +35,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | {.env.example,.gitignore,.htaccess,.gitleaks.toml,.gitleaksignore} | .ai/rules/env-example-gitignore-htaccess-gitleaks-toml-gitleaksignore-gitlab-ci-yml.md |
 | database/factories/** | .ai/rules/factories.md |
 | {database/migrations/**,tests/Feature/DatabaseEncodingTest.php} | .ai/rules/feature.md |
-| {config/blaze.php,resources/views/flux/**} | .ai/rules/flux.md |
+| {config/blaze.php,resources/views/flux/**,app/Support/Blaze/**,app/Providers/AppServiceProvider.php,resources/views/components/**,modules/*/resources/views/components/**} | .ai/rules/flux.md |
 | {app/Providers/FortifyServiceProvider.php,app/Actions/Fortify/**,config/fortify.php} | .ai/rules/fortify.md |
 | modules/Tracking/resources/views/pages/funding-agreements/** | .ai/rules/funding-agreements.md |
 | {app/Livewire/Concerns/**,modules/Tracking/Livewire/Concerns/**,modules/Tracking/resources/views/components/funding/**} | .ai/rules/funding.md |

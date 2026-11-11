@@ -12,14 +12,16 @@ return [
     | processing. This is useful for debugging or disabling Blaze in
     | specific environments.
     |
-    | Disabled by default in hc-tracking: Blaze folds Flux components at
-    | compile time, which bakes translated labels (e.g. "Toggle sidebar")
-    | into the cached view in whichever language rendered first, so English
-    | pages could show Arabic labels and the other way round.
+    | On by default, with folding switched off for every component
+    | (App\Support\Blaze\NonFoldingBlazeManager): folding baked translated
+    | labels into the cached view in whichever language rendered first. The
+    | compile step alone roughly halves page render time (931 component renders
+    | per page → plain function calls), and AppServiceProvider::configureBlaze()
+    | lists the component files that must stay plain Blade.
     |
     */
 
-    'enabled' => env('BLAZE_ENABLED', false),
+    'enabled' => env('BLAZE_ENABLED', true),
 
     /*
     |--------------------------------------------------------------------------
