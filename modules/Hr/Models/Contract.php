@@ -16,9 +16,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Modules\Core\Models\User;
 use Modules\Hr\Casts\EncryptedSalary;
 use Modules\Hr\Enums\ContractAmendmentStatus;
 use Modules\Hr\Enums\ContractType as ContractTypeEnum;
+use Modules\Hr\Support\Employees\HrAccess;
 
 /**
  * @property int $id
@@ -301,6 +303,36 @@ class Contract extends Model
     }
 
     /**
+     * The contracts a user may see: a manager sees the people who report to
+     * the positions they hold, a regional HR role sees its cities, everyone
+     * else who holds contracts.view sees all.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        if (HrAccess::is($user, 'manager')) {
+            $managedPositionIds = $user->employee_id
+                ? static::query()->activeNow()->where('employee_id', $user->employee_id)->pluck('position_id')->all()
+                : [];
+
+            if ($managedPositionIds === []) {
+                return $query->whereRaw('1 = 0');
+            }
+
+            return $query->whereHas('position', fn (Builder $position): Builder => $position->whereIn('direct_manager_id', $managedPositionIds));
+        }
+
+        $cityIds = HrAccess::cityIds($user);
+
+        return $query->when(
+            $cityIds !== null,
+            fn (Builder $q): Builder => $q->whereHas('employee', fn (Builder $e): Builder => $e->whereIn('city_id', $cityIds)),
+        );
+    }
+
+    /**
      * @return BelongsTo<ContractType, $this>
      */
     public function contractType(): BelongsTo
@@ -482,7 +514,7 @@ class Contract extends Model
      */
     public static function isTrialType(?int $contractTypeId): bool
     {
-        return (config('contracts.map_by_id')[$contractTypeId] ?? null) === 'trial';
+        return (config('contracts.map_by_id', ContractType::CATEGORY_BY_ID)[$contractTypeId] ?? null) === 'trial';
     }
 
     public function isTrial(): bool
@@ -495,7 +527,7 @@ class Contract extends Model
      */
     public function isServiceAgreement(): bool
     {
-        return (config('contracts.map_by_id')[$this->contract_type_id] ?? null) === 'service';
+        return (config('contracts.map_by_id', ContractType::CATEGORY_BY_ID)[$this->contract_type_id] ?? null) === 'service';
     }
 
     /**

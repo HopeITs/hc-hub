@@ -6,8 +6,11 @@ namespace Modules\Hr\Models;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Models\User;
+use Modules\Hr\Support\Employees\HrAccess;
 
 /**
  * @property int $id
@@ -55,5 +58,45 @@ class Badge extends Model
     public function evaluation(): BelongsTo
     {
         return $this->belongsTo(Evaluation::class);
+    }
+
+    /**
+     * The badges a user may see: HR within its cities, the general manager
+     * and super admin everywhere, a manager for their direct reports.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        if (! $user->can('badges.view')) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        return $query->whereHas('employee', fn (Builder $employee) => static::constrainEmployees($employee, $user));
+    }
+
+    public static function coversEmployee(User $user, Employee $employee): bool
+    {
+        return static::constrainEmployees(Employee::query()->whereKey($employee->getKey()), $user)->exists();
+    }
+
+    /**
+     * @param  Builder<Employee>  $employees
+     * @return Builder<Employee>
+     */
+    public static function constrainEmployees(Builder $employees, User $user): Builder
+    {
+        if (HrAccess::is($user, 'HR', 'general-manager', 'super-admin')) {
+            $cityIds = HrAccess::cityIds($user);
+
+            return $employees->when($cityIds !== null, fn (Builder $query) => $query->whereIn('city_id', $cityIds));
+        }
+
+        if (HrAccess::is($user, 'manager')) {
+            return $employees->whereHas('allContracts', fn (Builder $contract) => $contract->visibleTo($user));
+        }
+
+        return $employees->whereRaw('1 = 0');
     }
 }
