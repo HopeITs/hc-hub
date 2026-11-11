@@ -153,7 +153,26 @@ final class Destinations
      */
     private function opens(User $user, array $destination): bool
     {
-        return ($destination['allows'])($user) || ($user->isAdministrator() && ! $destination['bindsAdministrators']);
+        return $this->opened[$this->memoKey($user)][$destination['route']] ??= ($destination['allows'])($user) || ($user->isAdministrator() && ! $destination['bindsAdministrators']);
+    }
+
+    /**
+     * Each destination's answer per viewer, kept for the request: the sidebar,
+     * the Desk and its page cards ask the same question many times, and some
+     * rules read the database (the HR recruitment pages ask whether the viewer
+     * takes part in any application, interview or offer).
+     *
+     * @var array<string, array<string, bool>>
+     */
+    private array $opened = [];
+
+    /**
+     * Who is asking, as their access stands now: a role given or taken a
+     * permission in the same request reads afresh (as Panels::memoKey).
+     */
+    private function memoKey(User $user): string
+    {
+        return $user->id.':'.md5($user->getAllPermissions()->pluck('name')->sort()->implode(',').'|'.$user->getRoleNames()->implode(','));
     }
 
     /**

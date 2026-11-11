@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Dashboard;
 
+use App\Support\Desk\FundingTotals;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
-use Modules\Tracking\Enums\ArStatus;
-use Modules\Tracking\Models\DonorProposal;
-use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * The funding position: money committed against money received, per
@@ -34,23 +32,7 @@ trait ChartsDashboard
             return new Collection;
         }
 
-        $committed = DonorProposal::query()
-            ->selectRaw('currency, sum(budget) as total')
-            ->groupBy('currency')
-            ->pluck('total', 'currency');
-
-        $received = TransfersTracking::query()
-            ->where('ar_status', ArStatus::Received)
-            ->selectRaw('amount_received_currency as currency, sum(net_amount_received) as total')
-            ->groupBy('amount_received_currency')
-            ->pluck('total', 'currency');
-
-        $pending = TransfersTracking::query()
-            ->where('ar_status', ArStatus::Pending)
-            ->selectRaw('amount_transfered_currency as currency, sum(payment_amount) as total, count(*) as transfers')
-            ->groupBy('amount_transfered_currency')
-            ->get()
-            ->keyBy('currency');
+        ['committed' => $committed, 'received' => $received, 'pending' => $pending] = FundingTotals::read();
 
         return $committed->keys()
             ->concat($received->keys())

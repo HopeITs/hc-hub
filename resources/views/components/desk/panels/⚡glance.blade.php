@@ -63,8 +63,9 @@ new class extends Component {
             $lastMonth = $monthStart->subMonth();
             $validated = fn (CarbonImmutable $month): int => MonthlyReport::query()->whereDate('period', $month)->where('status', MonthlyReportStatus::Validated)->count();
             $total = MonthlyReport::query()->whereDate('period', $lastMonth)->count();
+            $validatedLastMonth = $validated($lastMonth);
             $figures[] = [
-                ...$this->figure('reports', $validated($lastMonth).'/'.$total, $validated($lastMonth) - $validated($lastMonth->subMonth()), upIsGood: true, href: 'reports.monthly-matrix'),
+                ...$this->figure('reports', $validatedLastMonth.'/'.$total, $validatedLastMonth - $validated($lastMonth->subMonth()), upIsGood: true, href: 'reports.monthly-matrix'),
                 'label' => __('desk.glance.reports', ['month' => $lastMonth->translatedFormat('F')]),
             ];
         }
