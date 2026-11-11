@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Modules\Core\Models\City;
 use Modules\Core\Models\User;
+use Modules\Hr\Actions\Recruitment\RecruitmentScopeResolver;
 use Modules\Hr\Enums\RecruitmentRequestStatus;
 use Modules\Hr\Enums\RecruitmentRequestType;
 
@@ -192,5 +193,10 @@ class RecruitmentRequest extends Model
             'submitted_at' => 'datetime',
             'applied_at' => 'datetime',
         ];
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return app(RecruitmentScopeResolver::class)->scopeRequests($query, $user);
     }
 }

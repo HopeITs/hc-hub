@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use LogicException;
 use Modules\Core\Models\User;
 use Modules\Hr\Enums\RecruitmentJobOfferStatus;
+use Modules\Hr\Support\Recruitment\Access;
+use Modules\Hr\Support\Recruitment\Media\HasHrMedia;
+use Modules\Hr\Support\Recruitment\PositionRequester;
 
 /**
  * The job offer for one selected application (Phase 2 Task 9). One per
@@ -49,6 +52,8 @@ use Modules\Hr\Enums\RecruitmentJobOfferStatus;
 #[Hidden(['response_note', 'cancellation_note'])]
 class RecruitmentJobOffer extends Model
 {
+    use HasHrMedia;
+
     public const CANCEL_APPLICATION_CLOSED = 'application_closed';
 
     public const RESPONSE_EVIDENCE = 'response_evidence';
@@ -173,5 +178,27 @@ class RecruitmentJobOffer extends Model
             'expired_at' => 'datetime',
             'cancelled_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Offers visible to a user: HR who can read offers, for applications in
+     * their recruitment scope; and the manager who requested the position,
+     * read-only. The recruitment scope alone is not enough — for a manager it
+     * also covers his direct reports' requests.
+     */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        $readsOffers = Access::hasActivePermission($user, 'recruitment-applicants.view-offers')
+            && Access::hasActivePermission($user, 'recruitment-applicants.view');
+
+        return $query->where(fn (Builder $visible): Builder => $visible
+            ->when($readsOffers, fn (Builder $hr): Builder => $hr->whereHas('application', fn (Builder $applications): Builder => $applications->visibleTo($user)))
+            ->orWhere(fn (Builder $requested): Builder => $requested->requestedBy($user)));
+    }
+
+    /** Offers of a position this user requested (PositionRequester). */
+    public function scopeRequestedBy(Builder $query, User $user): Builder
+    {
+        return $query->whereHas('vacancy.createdFromRequest', fn (Builder $requests): Builder => PositionRequester::constrain($requests, $user));
     }
 }

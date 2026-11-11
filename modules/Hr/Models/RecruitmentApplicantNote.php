@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use LogicException;
 use Modules\Core\Models\User;
+use Modules\Hr\Actions\Recruitment\RecruitmentScopeResolver;
 
 /**
  * An internal HR note on an applicant, or on one of their applications.
@@ -123,5 +124,10 @@ class RecruitmentApplicantNote extends Model
             'created_at' => 'datetime',
             'deleted_at' => 'datetime',
         ];
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return app(RecruitmentScopeResolver::class)->scopeApplicantNotes($query, $user);
     }
 }

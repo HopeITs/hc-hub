@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use LogicException;
+use Modules\Core\Models\User;
+use Modules\Hr\Actions\Recruitment\RecruitmentScopeResolver;
 
 /**
  * @property int $id
@@ -259,5 +261,20 @@ class RecruitmentApplication extends Model
             'privacy_accepted_at' => 'datetime',
             'submitted_at' => 'datetime',
         ];
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return app(RecruitmentScopeResolver::class)->scopeApplications($query, $user);
+    }
+
+    /** Applicant-profile access: normal recruitment scope or a named assignment. */
+    public function scopeProfileVisibleTo(Builder $query, User $user): Builder
+    {
+        return $query->where(function (Builder $visible) use ($user): void {
+            $visible->where(fn (Builder $scoped): Builder => app(RecruitmentScopeResolver::class)->scopeApplications($scoped, $user))
+                ->orWhereHas('applicant.currentReviewParticipants', fn (Builder $participants): Builder => $participants
+                    ->where('user_id', $user->getKey()));
+        });
     }
 }

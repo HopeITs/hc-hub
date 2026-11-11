@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Core\Models\City;
+use Modules\Core\Models\User;
+use Modules\Hr\Actions\Recruitment\RecruitmentScopeResolver;
 
 /**
  * @property int $id
@@ -151,5 +153,23 @@ class RecruitmentApplicant extends Model
             'privacy_accepted_at' => 'datetime',
             'erasure_requested_at' => 'datetime',
         ];
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        $scopes = app(RecruitmentScopeResolver::class);
+
+        // An organization-wide scope adds no SQL constraint. Returning here
+        // prevents the empty nested group below from narrowing the result to
+        // explicitly assigned participants only.
+        if ($scopes->isOrganizationWide($user)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $visible) use ($user): void {
+            app(RecruitmentScopeResolver::class)->scopeApplicants($visible, $user);
+            $visible->orWhereHas('currentReviewParticipants', fn (Builder $participants): Builder => $participants
+                ->where('user_id', $user->getKey()));
+        });
     }
 }
