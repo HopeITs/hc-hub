@@ -84,7 +84,7 @@ trait IsDeskPanel
         $panels = app(Panels::class);
         $user = auth()->user();
 
-        return view('components.desk.panel-placeholder', [
+        return view('pages.desk._panel-placeholder', [
             'id' => $id,
             'title' => $user !== null ? ($panels->availableTo($user)[$id]['title'] ?? '') : '',
             'index' => (int) ($params['index'] ?? 0),

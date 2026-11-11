@@ -1,5 +1,6 @@
 <?php
 
+use Livewire\Livewire;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\AnnualPlan;
@@ -112,6 +113,7 @@ test('a Team Member opens a task they created', function () {
 
 test('the dashboard shows no module data to an account with no role', function () {
     $manager = userWithRole('Managers');
+    Livewire::withoutLazyLoading();
     Task::factory()->create(['title' => 'Overdue dashboard task', 'due_date' => now()->subDays(3), 'created_by' => $manager->id]);
 
     $this->actingAs(User::factory()->create())->get(route('dashboard'))->assertOk()->assertDontSee('Overdue dashboard task');

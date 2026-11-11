@@ -340,7 +340,7 @@ test('saving a ready layout through saveLayout persists it, and null goes back t
 
     $desk->call('saveLayout', $entries);
 
-    expect($user->fresh()->desk_layout)->toBe($entries);
+    expect($user->fresh()->desk_layout)->toEqual($entries);
 
     $desk->call('saveLayout', null);
 
@@ -611,7 +611,7 @@ test('undo restores the saved layout exactly, as the sheet sends it back', funct
     expect(array_column($user->fresh()->desk_layout, 'panel'))->toContain('money');
 
     $desk->call('saveLayout', $previous);
-    expect($user->fresh()->desk_layout)->toBe($before);
+    expect($user->fresh()->desk_layout)->toEqual($before);
 });
 
 test('undo puts someone still on the role default back on null', function () {

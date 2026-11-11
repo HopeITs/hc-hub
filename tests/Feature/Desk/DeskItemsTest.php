@@ -128,6 +128,8 @@ test('the desk draws page cards beside its panels, and its buttons only in quick
         ['panel' => 'needs', 'size' => 'L', 'cols' => 6, 'rows' => 4],
     ]]);
 
+    Livewire::withoutLazyLoading();
+
     $this->actingAs($user)->get(route('dashboard'))
         ->assertOk()
         ->assertDontSee('data-panel="a-task"', false)

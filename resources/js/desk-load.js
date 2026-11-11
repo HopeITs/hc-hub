@@ -1,6 +1,6 @@
 /**
  * Desk panels that fail to load (pages/desk/⚡index mounts every panel with
- * `defer`; components/desk/panel-placeholder draws it until it arrives).
+ * `defer`; pages/desk/_panel-placeholder draws it until it arrives).
  *
  * A panel's first load is its own request, so a panel whose data cannot be read
  * fails alone: Livewire's error dialog is held back, the placeholder says the
