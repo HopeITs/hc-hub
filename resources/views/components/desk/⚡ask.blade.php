@@ -382,7 +382,7 @@ new class extends Component {
     data-desk-ask-palette
 >
     <template x-teleport="body">
-        <div x-show="open" x-cloak class="dk-scope">
+        <div x-show="open" x-cloak x-transition:leave="dk-sheet-out" x-transition:leave-end="dk-sheet-gone" class="dk-scope">
             <div class="dk-pal-scrim" x-on:click="hide()"></div>
             <div class="dk-pal" role="dialog" aria-modal="true" aria-label="{{ __('desk.ask_placeholder') }}" x-on:keydown.escape.stop="hide()">
                 <div class="dk-pal-in">

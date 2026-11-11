@@ -97,7 +97,7 @@
             @if ($canCloseProject || ($canArchiveProject && ! $isArchived))
                 <span class="dk-pmenu" x-data="{ open: false }" x-on:click.outside="open = false" x-on:keydown.escape="open = false">
                     <button type="button" class="dk-iconbtn dk-sm" x-on:click="open = ! open" x-bind:aria-expanded="open" aria-haspopup="menu" aria-label="{{ __('projects.more_actions_for', ['name' => $project->name]) }}"><x-desk.icon name="more" /></button>
-                    <span class="dk-pop dk-pjl-menu" role="menu" x-show="open" x-cloak x-on:click="open = false">
+                    <span class="dk-pop dk-pjl-menu" role="menu" x-show="open" x-cloak x-transition:enter="transition ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0 -translate-y-1 scale-[.97]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100 motion-reduce:transition-none" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" x-on:click="open = false">
                         @if ($canCloseProject)
                             <button type="button" role="menuitem" wire:click="confirmClose" data-test="close-project">
                                 <flux:icon.check-circle variant="micro" class="size-4" aria-hidden="true" />{{ __('projects.close_project') }}

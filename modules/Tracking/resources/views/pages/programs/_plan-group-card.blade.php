@@ -17,7 +17,7 @@
     $modalName = 'plan-targets-'.$group['key'];
 @endphp
 <article wire:key="{{ $cardKey }}"
-    x-show="{{ $cardIndex }} < limit" @if ($cardIndex >= 1 && ! $board['searching']) x-cloak @endif
+    x-show="{{ $cardIndex }} < limit" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @if ($cardIndex >= 1 && ! $board['searching']) x-cloak @endif
     class="dk-prog-card dk-ppl-gc" data-plan-group="{{ $group['key'] }}">
 
     {{-- 1. Name, and the city (projects) or how many projects it spans. --}}

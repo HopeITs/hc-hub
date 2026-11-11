@@ -19,7 +19,7 @@
         x-cloak
         x-on:click.outside="$store.taskMenu.close()"
         x-on:keydown.escape.window="$store.taskMenu.close()"
-        x-transition.opacity.duration.100ms
+        x-transition:enter="transition ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0 -translate-y-1 scale-[.97]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100 motion-reduce:transition-none" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
         x-bind:style="`top: ${$store.taskMenu.top}px; ` + ($store.taskMenu.right === null ? `left: ${$store.taskMenu.left}px;` : `right: ${$store.taskMenu.right}px;`)"
         role="menu"
         class="fixed z-50 min-w-44 rounded-lg border border-secondary-soft bg-white p-1 shadow-lg dark:border-line dark:bg-surface-3 dark:shadow-raised"

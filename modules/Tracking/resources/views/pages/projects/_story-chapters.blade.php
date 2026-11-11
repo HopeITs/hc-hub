@@ -64,7 +64,7 @@
     </div>
 
     {{-- Overview --}}
-    <section class="dk-pjsec @container/detail" id="dk-section-overview" role="tabpanel" aria-labelledby="dk-tab-overview" x-show="section === 'overview'" @if ($openSection !== 'overview') style="display: none" @endif data-section="overview">
+    <section class="dk-pjsec @container/detail" id="dk-section-overview" role="tabpanel" aria-labelledby="dk-tab-overview" x-show="section === 'overview'" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @if ($openSection !== 'overview') style="display: none" @endif data-section="overview">
         @include('tracking::pages.projects._show-risk-awareness')
         <div class="dk-pjgrid">
             <div class="dk-card dk-span-7" data-test="story-about">
@@ -112,6 +112,7 @@
                             data-chapter="{{ $i }}" data-state="{{ $state }}"
                             wire:key="story-chapter-{{ $i }}"
                             x-show="stage === {{ $i }}"
+                            x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                             @if ($i !== $story['stage']) style="display: none" @endif
                         >
                             <div class="dk-ch-top">
@@ -191,7 +192,7 @@
     </section>
 
     {{-- Work --}}
-    <section class="dk-pjsec @container/detail" id="dk-section-work" role="tabpanel" aria-labelledby="dk-tab-work" x-show="section === 'work'" @if ($openSection !== 'work') style="display: none" @endif data-section="work">
+    <section class="dk-pjsec @container/detail" id="dk-section-work" role="tabpanel" aria-labelledby="dk-tab-work" x-show="section === 'work'" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @if ($openSection !== 'work') style="display: none" @endif data-section="work">
         <div data-test="story-delivery">
             <div class="dk-pjwork-h">
                 <x-ui.relation-tabs :tabs="$this->tabs" :active="$this->deliveryTab" wire-target="tab" class="dk-subtabs" />
@@ -222,12 +223,12 @@
     </section>
 
     {{-- Funding --}}
-    <section class="dk-pjsec @container/detail" id="dk-section-funding" role="tabpanel" aria-labelledby="dk-tab-funding" x-show="section === 'funding'" @if ($openSection !== 'funding') style="display: none" @endif data-section="funding">
+    <section class="dk-pjsec @container/detail" id="dk-section-funding" role="tabpanel" aria-labelledby="dk-tab-funding" x-show="section === 'funding'" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @if ($openSection !== 'funding') style="display: none" @endif data-section="funding">
         @include('tracking::pages.projects._show-funding')
     </section>
 
     {{-- Files & activity --}}
-    <section class="dk-pjsec @container/detail" id="dk-section-files" role="tabpanel" aria-labelledby="dk-tab-files" x-show="section === 'files'" @if ($openSection !== 'files') style="display: none" @endif data-section="files">
+    <section class="dk-pjsec @container/detail" id="dk-section-files" role="tabpanel" aria-labelledby="dk-tab-files" x-show="section === 'files'" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @if ($openSection !== 'files') style="display: none" @endif data-section="files">
         <div class="dk-pjgrid">
             <div class="dk-card dk-span-7" data-test="story-side-files">
                 <div class="dk-card-h"><h3>{{ __('story.side.files') }}</h3><span class="dk-meta dk-num">{{ $project->media_count }}</span></div>

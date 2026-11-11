@@ -182,10 +182,10 @@
             @endif
 
             @can('proposals.update')
-                <div class="dk-card-f" x-show="! linking">
+                <div class="dk-card-f" x-show="! linking" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
                     <button type="button" class="dk-btn dk-sm" @click="linking = true"><x-desk.icon name="plus" />{{ __('projects.link_a_proposal') }}</button>
                 </div>
-                <div class="dk-card-f dk-story-link" data-test="story-link-proposal" x-show="linking" x-cloak>
+                <div class="dk-card-f dk-story-link" data-test="story-link-proposal" x-show="linking" x-cloak x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
                     <x-ui.select :label="__('projects.link_a_proposal')" wire:model="proposalToAttach">
                         <flux:select.option value="">{{ __('common.select_a_proposal') }}</flux:select.option>
                         @foreach ($this->attachableProposals as $proposalOption)

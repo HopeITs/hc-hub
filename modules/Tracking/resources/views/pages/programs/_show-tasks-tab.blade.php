@@ -260,7 +260,7 @@
          moving a task to another project or milestone is not offered here).
          Teleported to <body>, so it carries dk-scope itself or the Desk icons lose their line style. --}}
     <template x-teleport="body">
-        <div class="dk-scope dk-ptk-menu" x-show="more.open" x-cloak x-transition.opacity.duration.100ms
+        <div class="dk-scope dk-ptk-menu" x-show="more.open" x-cloak x-transition:enter="transition ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0 -translate-y-1 scale-[.97]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100 motion-reduce:transition-none" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
             @click.outside="closeMore()" @keydown.escape.window="closeMore()"
             :style="`top: ${more.top}px; left: ${more.left}px;`" role="menu" data-test="task-more-menu">
             <div x-show="more.view === 'menu'">

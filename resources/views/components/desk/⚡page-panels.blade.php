@@ -83,7 +83,7 @@ new class extends Component {
 >
     @unless ($isDesk)
         <template x-teleport="body">
-            <div x-show="open" x-cloak class="dk-scope">
+            <div x-show="open" x-cloak x-transition:leave="dk-sheet-out" x-transition:leave-end="dk-sheet-gone" class="dk-scope">
                 <div class="dk-sh-scrim" x-on:click="open = false; window.hcUnlockPageScroll?.()"></div>
                 <div class="dk-sheet dk-xwide dk-pp" role="dialog" aria-modal="true" aria-labelledby="dk-pp-title" data-page-panels-dialog>
                     <div class="dk-sh-h">
@@ -97,7 +97,7 @@ new class extends Component {
                                 <button type="button" class="dk-btn" x-on:click="adding = ! adding" x-bind:aria-expanded="adding.toString()" aria-haspopup="menu" data-page-panels-add>
                                     <x-desk.icon name="plus" />{{ __('desk.add_panel') }}
                                 </button>
-                                <div class="dk-pop dk-pp-add" role="menu" x-show="adding" x-cloak>
+                                <div class="dk-pop dk-pp-add" role="menu" x-show="adding" x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from">
                                     @forelse ($addable as $panel)
                                         <button type="button" role="menuitem" wire:click="addPanel('{{ $panel['id'] }}')" x-on:click="adding = false" wire:key="pp-add-{{ $panel['id'] }}" data-page-panels-option="{{ $panel['id'] }}">
                                             <span class="dk-li-ic"><x-desk.icon :name="$panel['icon']" /></span>

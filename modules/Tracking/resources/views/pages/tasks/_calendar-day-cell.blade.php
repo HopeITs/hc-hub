@@ -64,7 +64,7 @@
             id="task-calendar-more-{{ $dayKey }}"
             x-show="moreOpen === {{ Js::from($dayKey) }}"
             x-cloak
-            x-transition.opacity.duration.100ms
+            x-transition:enter="transition ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0 -translate-y-1 scale-[.97]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100 motion-reduce:transition-none" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
             x-on:click.outside="moreOpen = null"
             role="dialog"
             aria-label="{{ __('tasks.calendar_tasks_on_day', ['date' => $day->translatedFormat('l, j F')]) }}"
@@ -105,7 +105,7 @@
     {{ __('tasks.add_task') }}
 </button>
 
-<div x-show="addOpen[{{ Js::from($dayKey) }}]" x-cloak class="dk-tc-add-row" data-test="task-calendar-add-row-{{ $day->toDateString() }}">
+<div x-show="addOpen[{{ Js::from($dayKey) }}]" x-cloak x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="dk-tc-add-row" data-test="task-calendar-add-row-{{ $day->toDateString() }}">
     <input
         type="text"
         x-ref="calendarAddInput{{ $day->toDateString() }}"

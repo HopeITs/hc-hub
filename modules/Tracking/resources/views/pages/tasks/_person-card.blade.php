@@ -9,7 +9,7 @@
         x-data
         x-show="$store.personCard.open"
         x-cloak
-        x-transition.opacity.duration.100ms
+        x-transition:enter="transition ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0 -translate-y-1 scale-[.97]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100 motion-reduce:transition-none" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
         x-on:mouseenter="$store.personCard.keep()"
         x-on:mouseleave="$store.personCard.hide()"
         x-bind:style="`top: ${$store.personCard.top}px; ` + ($store.personCard.right === null ? `left: ${$store.personCard.left}px;` : `right: ${$store.personCard.right}px;`)"

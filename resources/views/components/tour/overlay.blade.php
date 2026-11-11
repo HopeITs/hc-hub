@@ -92,7 +92,7 @@
     data-tour-root
 >
     <template x-if="open">
-        <div class="fixed inset-0 z-[100]" role="presentation">
+        <div class="fixed inset-0 z-[100] dk-appear" role="presentation">
             {{-- Blocks the page and dims it; the spotlight below takes over the dimming around its target. --}}
             <div
                 class="absolute inset-0 bg-secondary-dark/65 transition-opacity duration-200 motion-reduce:transition-none"

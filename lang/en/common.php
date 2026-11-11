@@ -145,4 +145,5 @@ return [
     'discard_changes_question' => 'Discard your changes?',
     'discard' => 'Discard',
     'keep_editing' => 'Keep editing',
+    'unsaved_leave_text' => 'What you changed on this page has not been saved. If you leave now it is lost.',
 ];

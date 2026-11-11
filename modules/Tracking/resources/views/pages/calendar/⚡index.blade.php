@@ -185,6 +185,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
 
             <div
                 x-show="menuOpen"
+                x-transition:enter="transition ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0 -translate-y-1 scale-[.97]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100 motion-reduce:transition-none" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
                 style="display: none"
                 x-cloak
                 :style="{ top: menuY + 'px', left: menuX + 'px' }"

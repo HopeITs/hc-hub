@@ -419,7 +419,7 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
                             $url = $exists ? $links->routeFor($activity->subject_type, $activity->subject_id) : null;
                             $programName = $activity->program_id !== null ? ($this->programs[$activity->program_id] ?? null) : null;
                         @endphp
-                        <tr wire:key="log-{{ $activity->id }}" @if ($dayLabel !== null) x-show="open" @endif>
+                        <tr wire:key="log-{{ $activity->id }}" @if ($dayLabel !== null) x-show="open" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @endif>
                             <x-ui.data-table.cell :label="__('activity.ledger.time')" numeric>
                                 @if ($groupedByDay)
                                     <time datetime="{{ $activity->created_at?->toIso8601String() }}">{{ $activity->created_at?->format('H:i') }}</time>

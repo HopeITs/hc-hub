@@ -669,7 +669,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.indicator_rules'
                                   :placeholder="testMode === 'request' ? @js($t('tester_placeholder.request')) : @js($t('tester_placeholder.cv'))"
                                   class="mt-3 w-full rounded-control border-neutral-300 text-body shadow-e1 placeholder:text-secondary-light focus:border-primary focus:ring-2 focus:ring-neutral-200"></textarea>
 
-                        <div x-cloak x-show="testText.trim() !== ''" class="mt-3 space-y-2">
+                        <div x-cloak x-show="testText.trim() !== ''" x-collapse class="mt-3 space-y-2">
                             <p dir="auto" class="rounded-control border border-neutral-100 bg-neutral-50 px-3 py-2 text-body leading-relaxed text-neutral-800 whitespace-pre-wrap"><template x-for="(part, i) in testSegments" :key="i"><span :class="part.chosen ? 'rounded-inset bg-neutral-800 px-0.5 text-white' : (part.hit ? 'rounded-inset bg-selection px-0.5 underline decoration-neutral-400 underline-offset-2' : '')" x-text="part.text"></span></template></p>
                             <ul class="space-y-1.5 text-body" aria-live="polite">
                                 <template x-for="line in testLines" :key="line.who">

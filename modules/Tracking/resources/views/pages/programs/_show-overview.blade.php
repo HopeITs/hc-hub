@@ -80,7 +80,7 @@
                 <ul class="dk-prog-attn">
                     @foreach ($attention as $item)
                         <li wire:key="program-attention-{{ $loop->index }}" @class(['dk-prog-attn-i', 'dk-bad' => $item['tone'] === 'critical', 'dk-warn' => $item['tone'] !== 'critical']) data-attention="{{ $item['key'] }}"
-                            @if ($loop->index >= $attentionPreview) x-show="shown > {{ $loop->index }}" x-cloak @endif>
+                            @if ($loop->index >= $attentionPreview) x-show="shown > {{ $loop->index }}" x-cloak x-collapse @endif>
                             <span class="dk-prog-attn-t">
                                 {{ $item['text'] }}
                                 @if ($item['mine'])

@@ -599,10 +599,27 @@ document.addEventListener('alpine:init', () => {
             this.save();
         },
 
-        close(id) {
+        // The tab's page says so itself (unsaved.js runs inside the frame, same origin).
+        hasUnsavedWork(id) {
+            try {
+                return Boolean(this.frames.get(id)?.contentWindow?.hcUnsaved?.anythingUnsaved());
+            } catch {
+                return false;
+            }
+        },
+
+        // `force` skips the question: the page inside has already left, or the person has answered.
+        close(id, force = false) {
             const at = this.tabs.findIndex((tab) => tab.id === id);
 
             if (at < 0) {
+                return;
+            }
+
+            if (! force && this.hasUnsavedWork(id)) {
+                this.activate(id);
+                window.hcUnsaved.ask().then((discard) => discard && this.close(id, true));
+
                 return;
             }
 
@@ -628,7 +645,11 @@ document.addEventListener('alpine:init', () => {
 
         closeAll() {
             [...this.tabs].forEach((tab) => this.close(tab.id));
-            this.activate('desk');
+
+            // A tab with unsaved work stays open and in front, with its question.
+            if (this.tabs.length === 0) {
+                this.activate('desk');
+            }
         },
 
         reload(id) {
@@ -865,7 +886,7 @@ document.addEventListener('alpine:init', () => {
                         entry[1].title = tab.title;
 
                         if (typeof data.url === 'string') {
-                            this.isDesk(data.url) ? this.close(tab.id) : this.moveTab(tab, data.url);
+                            this.isDesk(data.url) ? this.close(tab.id, true) : this.moveTab(tab, data.url);
                         }
 
                         this.save();

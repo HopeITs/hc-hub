@@ -13,7 +13,7 @@
                     <li
                         wire:key="warning-{{ $warning['key'] }}"
                         data-warning="{{ $warning['key'] }}"
-                        @if ($loop->index >= 3) x-show="expanded" x-cloak @endif
+                        @if ($loop->index >= 3) x-show="expanded" x-cloak x-collapse @endif
                     >
                         <button type="button" wire:click="$set('tab', '{{ $warning['tab'] }}')" aria-controls="tab-panel" class="group flex min-h-8 w-full touch-manipulation items-start gap-2.5 text-start text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium">
                             <span @class(['mt-1.5 size-2 shrink-0 rounded-full', 'bg-primary dark:bg-status-critical' => $warning['critical'], 'border-2 border-status-warn' => ! $warning['critical']]) aria-hidden="true"></span>

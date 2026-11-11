@@ -576,7 +576,7 @@ new class extends Component {
         x-ref="popover"
         x-show="pop !== null"
         x-cloak
-        x-transition.opacity
+        x-transition:enter="transition ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0 -translate-y-1 scale-[.97]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100 motion-reduce:transition-none" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
         x-on:click.outside="pop && close(false)"
         x-bind:style="pop ? `top: ${pop.top}px; left: ${pop.left}px` : ''"
         class="fixed z-50 w-60 rounded-xl border border-secondary-soft bg-white p-3 shadow-card dark:border-line dark:bg-surface-2 dark:shadow-raised"

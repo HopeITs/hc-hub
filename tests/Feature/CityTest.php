@@ -15,4 +15,4 @@ test('a project whose hr city no longer exists has no city rather than failing',
     $project = Project::factory()->create(['city_id' => 999999]);
 
     expect($project->fresh()->city)->toBeNull();
-});
+})->skip('Obsolete since one database (A2): projects.city_id has a real foreign key to cities, so a dangling city id cannot exist.');

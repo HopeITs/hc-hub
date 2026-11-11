@@ -36,6 +36,7 @@ import './theme-color';
 import './theme-transition';
 import './top-bar';
 import './tour';
+import './unsaved';
 
 /**
  * Echo exposes an expressive API for subscribing to channels and listening

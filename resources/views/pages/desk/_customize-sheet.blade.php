@@ -70,7 +70,7 @@
 --}}
 <div x-data="deskCustomize(@js($starting), @js($readyChoices), @js($favourite), @js($panelChoices), @js($sheetTexts))" data-layout="{{ json_encode($layout) }}" data-layout-saved="{{ is_array(auth()->user()->desk_layout) ? 'true' : 'false' }}" data-quick-items="{{ json_encode(app(\App\Support\Desk\QuickAccess::class)->itemIds(auth()->user())) }}" x-on:dk-customize-open.window="openSheet($event.detail?.pane, $event.detail?.layout)" x-on:keydown.escape.window="if (open) { discard() }" data-desk-customize>
     <template x-teleport="body">
-        <div x-show="open" x-cloak class="dk-scope">
+        <div x-show="open" x-cloak x-transition:leave="dk-sheet-out" x-transition:leave-end="dk-sheet-gone" class="dk-scope">
             <div class="dk-sh-scrim" x-on:click="discard()"></div>
             <div class="dk-sheet dk-xwide dk-cz" role="dialog" aria-modal="true" aria-labelledby="dk-customize-title" tabindex="-1" x-trap="open" x-bind:data-pane="pane">
                 <div class="dk-sh-h">

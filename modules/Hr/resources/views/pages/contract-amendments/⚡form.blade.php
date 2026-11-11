@@ -180,6 +180,8 @@ new #[Layout('layouts::desk'), Title('hr_contract_amendments.titles.form')] clas
     </div>
 
     <form wire:submit="save" novalidate class="flex flex-col gap-5">
+        <x-ui.unsaved-guard :watch="['form', 'tiers', 'effective_from', 'reason']" />
+
         <x-ui.panel :title="__('hr_contract_amendments.titles.form')">
             <div class="flex flex-col gap-3 p-4">
                 <p class="text-sm text-secondary-medium dark:text-ink-muted">{{ __('hr_contract_amendments.hints.draft') }}</p>

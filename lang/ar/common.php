@@ -145,4 +145,5 @@ return [
     'discard_changes_question' => 'تجاهل تغييراتك؟',
     'discard' => 'تجاهل',
     'keep_editing' => 'متابعة التعديل',
+    'unsaved_leave_text' => 'ما غيّرته في هذه الصفحة لم يُحفظ بعد. إذا غادرت الآن فسيضيع.',
 ];

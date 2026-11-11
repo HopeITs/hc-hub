@@ -15,7 +15,7 @@ test('a project is stored against its city, program and user', function () {
         'name' => 'Water Network Rehabilitation',
         'city_id' => $cityId,
         'program_id' => $programId,
-        'user_id' => $user->id,
+        'user_id' => $user->employee_id,
     ]);
 });
 

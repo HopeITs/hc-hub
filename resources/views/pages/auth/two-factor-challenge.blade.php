@@ -29,14 +29,14 @@
                 },
             }"
         >
-            <div x-show="!showRecoveryInput">
+            <div x-show="!showRecoveryInput" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
                 <x-auth-header
                     :title="__('authentication.authentication_code')"
                     :description="__('authentication.enter_the_authentication_code_provided_by_your_authenticator')"
                 />
             </div>
 
-            <div x-show="showRecoveryInput">
+            <div x-show="showRecoveryInput" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
                 <x-auth-header
                     :title="__('authentication.recovery_code')"
                     :description="__('authentication.please_confirm_access_to_your_account_by_entering_one_of_you')"
@@ -47,7 +47,7 @@
                 @csrf
 
                 <div class="space-y-5 text-center">
-                    <div x-show="!showRecoveryInput">
+                    <div x-show="!showRecoveryInput" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
                         <div class="flex items-center justify-center my-5" x-ref="otp">
                             <flux:otp
                                 x-model="code"
@@ -60,7 +60,7 @@
                         </div>
                     </div>
 
-                    <div x-show="showRecoveryInput">
+                    <div x-show="showRecoveryInput" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
                         <div class="my-5">
                             <flux:input
                                 type="text"

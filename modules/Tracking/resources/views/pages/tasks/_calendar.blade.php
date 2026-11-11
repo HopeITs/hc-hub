@@ -175,7 +175,7 @@
                     <div class="dk-tc-agenda-list" aria-live="polite">
                         @foreach ($daysWithTasks as $day)
                             @php $dayKey = $day->toDateString(); @endphp
-                            <section x-show="selected === {{ Js::from($dayKey) }}" @if ($dayKey !== $agendaDefault) x-cloak @endif wire:key="task-calendar-agenda-{{ $dayKey }}">
+                            <section x-show="selected === {{ Js::from($dayKey) }}" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @if ($dayKey !== $agendaDefault) x-cloak @endif wire:key="task-calendar-agenda-{{ $dayKey }}">
                                 <h4 class="dk-tc-agenda-day">{{ $day->translatedFormat('l, j F') }}</h4>
                                 <ul class="dk-tc-agenda-items">
                                     @foreach ($calendar['tasksByDay']->get($dayKey) as $task)
@@ -195,7 +195,7 @@
                             </section>
                         @endforeach
 
-                        <div class="dk-tc-agenda-empty" x-show="! {{ Js::from($daysWithTasks->map->toDateString()->values()) }}.includes(selected)" @if ($daysWithTasks->contains(fn ($day) => $day->toDateString() === $agendaDefault)) x-cloak @endif>
+                        <div class="dk-tc-agenda-empty" x-show="! {{ Js::from($daysWithTasks->map->toDateString()->values()) }}.includes(selected)" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @if ($daysWithTasks->contains(fn ($day) => $day->toDateString() === $agendaDefault)) x-cloak @endif>
                             <p>{{ __('tasks.calendar_no_tasks_on_day') }}</p>
                             @can('create', Modules\Tracking\Models\Task::class)
                                 <button type="button" class="dk-tc-btn" x-on:click="$wire.openCreateDrawer(selected)" data-test="task-calendar-agenda-add">

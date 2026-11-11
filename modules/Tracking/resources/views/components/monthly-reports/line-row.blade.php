@@ -78,12 +78,12 @@
                 @endif
                 <span x-show="! open" @if ($open) style="display: none" @endif>{{ __('monthly_reports.details') }}</span>
                 <span x-show="open" @if (! $open) style="display: none" @endif>{{ __('monthly_reports.hide_details') }}</span>
-                <flux:icon.chevron-down variant="micro" class="size-3.5 transition-transform" x-bind:class="open && 'rotate-180'" aria-hidden="true" />
+                <flux:icon.chevron-down variant="micro" class="size-3.5 transition-transform duration-200 motion-reduce:transition-none" x-bind:class="open && 'rotate-180'" aria-hidden="true" />
             </button>
         </div>
     </div>
 
-    <div id="{{ $detailsId }}" x-show="open" @if (! $open) style="display: none" @endif class="mt-3 flex flex-col gap-4 rounded-lg bg-board/50 p-3 dark:bg-surface-2/40">
+    <div id="{{ $detailsId }}" x-show="open" x-collapse @if (! $open) style="display: none" @endif class="mt-3 flex flex-col gap-4 rounded-lg bg-board/50 p-3 dark:bg-surface-2/40">
         @if ($row['secondary_name'] !== null || filled($row['frequency_note']))
             <div class="text-xs {{ $mutedText }}">
                 @if ($row['secondary_name'] !== null)

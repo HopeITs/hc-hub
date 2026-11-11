@@ -20,7 +20,7 @@
                     {{ __('tasks.add_task') }}
                 </button>
             @endunless
-            <div x-show="adding" x-cloak x-on:keydown.escape="adding = false" data-quick-add-row class="mx-3 flex flex-col gap-1.5 rounded-xl border border-dashed border-secondary-light bg-white/60 px-2.5 py-2 transition-colors focus-within:border-secondary-medium hover:border-secondary-medium dark:border-line dark:bg-surface-1" data-test="task-board-add-row-{{ $case->value }}">
+            <div x-show="adding" x-cloak x-transition:enter="transition-opacity! ease-out duration-150 motion-reduce:transition-none!" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-on:keydown.escape="adding = false" data-quick-add-row class="mx-3 flex flex-col gap-1.5 rounded-xl border border-dashed border-secondary-light bg-white/60 px-2.5 py-2 transition-colors focus-within:border-secondary-medium hover:border-secondary-medium dark:border-line dark:bg-surface-1" data-test="task-board-add-row-{{ $case->value }}">
                 <label class="flex items-center gap-2">
                     {{ FluxMarkup::icon('plus', 'micro', 'size-4 shrink-0 text-primary dark:text-brand-text') }}
                     <span class="sr-only">{{ __('tasks.add_task') }}</span>

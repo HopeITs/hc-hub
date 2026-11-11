@@ -46,7 +46,7 @@
         <button type="button" class="dk-iconbtn dk-sm" x-on:click="menu = ! menu" x-bind:aria-expanded="menu" aria-label="{{ __('desk-workspace.tile.options', ['button' => $button['label']]) }}">
             <x-desk.icon name="more" />
         </button>
-        <div class="dk-pop dk-pmenu-pop" role="menu" aria-label="{{ __('desk-workspace.tile.options', ['button' => $button['label']]) }}" x-show="menu" x-cloak x-transition.opacity.duration.100ms>
+        <div class="dk-pop dk-pmenu-pop" role="menu" aria-label="{{ __('desk-workspace.tile.options', ['button' => $button['label']]) }}" x-show="menu" x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from">
             <p class="dk-pop-h">{{ $button['label'] }}</p>
             <button type="button" role="menuitem" x-on:click="menu = false; pin(! pinned())" data-panel-pin>
                 <x-desk.icon name="pushpin" />

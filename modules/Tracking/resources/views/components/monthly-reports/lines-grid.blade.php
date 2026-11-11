@@ -72,9 +72,9 @@
             >
                 <flux:icon.lock-closed variant="micro" class="size-3.5" aria-hidden="true" />
                 {{ trans_choice('monthly_reports.meal_lines_group', count($mealRows), ['count' => count($mealRows)]) }}
-                <flux:icon.chevron-down variant="micro" class="size-3.5 transition-transform" x-bind:class="open && 'rotate-180'" aria-hidden="true" />
+                <flux:icon.chevron-down variant="micro" class="size-3.5 transition-transform duration-200 motion-reduce:transition-none" x-bind:class="open && 'rotate-180'" aria-hidden="true" />
             </button>
-            <div x-show="open" style="display: none" class="mt-2">
+            <div x-show="open" x-collapse style="display: none" class="mt-2">
                 @foreach ($mealRows as $row)
                     <x-tracking::monthly-reports.line-row :row="$row" :state="$figures[$row['id']] ?? []" />
                 @endforeach

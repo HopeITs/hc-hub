@@ -131,6 +131,7 @@
             <div
                 x-show="selected === {{ $city['id'] }}"
                 x-cloak
+                x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                 wire:key="detail-{{ $city['id'] }}"
                 class="flex min-h-64 flex-col gap-4 rounded-xl border border-secondary-soft bg-white p-4 dark:border-line dark:bg-surface-1"
             >

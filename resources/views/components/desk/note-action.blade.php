@@ -23,7 +23,7 @@
     x-on:keydown.escape.window="open = false">
     <button type="button" class="{{ $class }}" x-ref="btn" x-on:click="open ? open = false : show()" x-bind:aria-expanded="open" aria-haspopup="dialog" {{ $attributes }}>{{ $label }}</button>
     <template x-teleport="body">
-        <div class="dk-scope dk-poke-pop" role="dialog" aria-label="{{ $heading }}" x-show="open" x-cloak x-transition.opacity x-on:click.outside="open = false" x-bind:style="`top:${top}px;left:${left}px`">
+        <div class="dk-scope dk-poke-pop" role="dialog" aria-label="{{ $heading }}" x-show="open" x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from" x-on:click.outside="open = false" x-bind:style="`top:${top}px;left:${left}px`">
             <p class="dk-poke-h">{{ $heading }}</p>
             <textarea x-ref="note" x-model="note" maxlength="{{ $limit }}" rows="3" placeholder="{{ $placeholder }}" aria-label="{{ $placeholder }}"></textarea>
             <div class="dk-poke-f">

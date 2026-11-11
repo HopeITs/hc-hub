@@ -93,6 +93,8 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.form')] class extends 
     />
 
     <form wire:submit="save" novalidate class="flex flex-col gap-5">
+        <x-ui.unsaved-guard :watch="['form', 'tiers']" />
+
         <x-ui.panel :title="__('hr_contracts.form.identity')">
             <div class="p-4 {{ $grid }}">
                 <x-ui.form-select wire:model.live="form.employee_id" :label="__('hr_contracts.fields.employee_id')" :placeholder="__('common.select')" employees required :disabled="$contractId !== null || $renewalSourceId !== null" />

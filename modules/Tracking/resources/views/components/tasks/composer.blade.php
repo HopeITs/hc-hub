@@ -253,7 +253,7 @@
                 </button>
             </div>
 
-            <div id="{{ $testPrefix }}-more" class="task-composer-chips" x-show="more" x-cloak @unless ($showMore) style="display: none" @endunless>
+            <div id="{{ $testPrefix }}-more" class="task-composer-chips" x-show="more" x-cloak x-collapse @unless ($showMore) style="display: none" @endunless>
                 @foreach ([['startDate', $startDate, __('common.start_date'), 'play'], ['completedDate', $completedDate, __('tasks.completed_date'), 'check-circle']] as [$dateField, $dateValue, $dateLabel, $dateIcon])
                     <label
                         class="form-chip form-chip-date"

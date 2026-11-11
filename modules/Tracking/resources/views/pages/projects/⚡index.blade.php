@@ -331,7 +331,7 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
                 @endif
             </button>
 
-            <div class="dk-pop dk-pjf-pop" role="dialog" aria-label="{{ __('projects.filters') }}" x-show="open" x-cloak x-transition.opacity.duration.120ms>
+            <div class="dk-pop dk-pjf-pop" role="dialog" aria-label="{{ __('projects.filters') }}" x-show="open" x-cloak x-transition:enter="transition ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0 -translate-y-1 scale-[.97]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100 motion-reduce:transition-none" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
                 <x-ui.header-filter-select :label="__('common.city')" wire:model.live="city" :value="$city">
                     <option value="">{{ __('projects.all_cities') }}</option>
                     @foreach ($this->cityOptions as $cityOption)

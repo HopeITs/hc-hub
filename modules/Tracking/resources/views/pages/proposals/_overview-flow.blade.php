@@ -21,7 +21,7 @@
                         $flowHeight = max(16, $rows * 5.25);
                         $flowKey = 'flow-'.$graph['currency'].'-'.md5(json_encode($graph['graph']).$donor);
                     @endphp
-                    <div x-show="currency === @js($graph['currency'])" wire:key="{{ $flowKey }}">
+                    <div x-show="currency === @js($graph['currency'])" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" wire:key="{{ $flowKey }}">
                         {{-- Wide screens: the drawn flow. --}}
                         <div class="relative mt-6 hidden @3xl/directory:block" x-data="fundingFlow(@js($graph['graph']))">
                             <svg class="pointer-events-none absolute inset-0 size-full overflow-visible" aria-hidden="true" wire:ignore>

@@ -56,6 +56,9 @@
         @endpersist
 
         @auth
+            {{-- In a Desk tab too: the tab's own page is the one being left. --}}
+            <x-ui.unsaved-prompt />
+
             @unless ($inTab)
                 @persist('notification-toasts')
                     <x-notifications.toasts />

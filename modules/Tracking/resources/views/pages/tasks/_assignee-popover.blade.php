@@ -15,7 +15,7 @@
         x-cloak
         x-on:click.outside="$store.assigneePicker.close()"
         x-on:keydown.escape.window="$store.assigneePicker.close()"
-        x-transition.opacity.duration.100ms
+        x-transition:enter="transition ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0 -translate-y-1 scale-[.97]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100 motion-reduce:transition-none" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
         x-bind:style="`top: ${$store.assigneePicker.top}px; ` + ($store.assigneePicker.right === null ? `left: ${$store.assigneePicker.left}px;` : `right: ${$store.assigneePicker.right}px;`)"
         role="listbox"
         aria-multiselectable="true"

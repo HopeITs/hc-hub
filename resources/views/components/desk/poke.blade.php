@@ -28,7 +28,7 @@
     @else
         <button type="button" class="{{ $class }}" x-ref="btn" x-on:click="open ? open = false : show()" x-bind:aria-expanded="open" aria-haspopup="dialog" aria-label="{{ __('desk.nudge_named', ['name' => $name]) }}" title="{{ __('desk.nudge_named', ['name' => $name]) }}" {{ $attributes }}><x-desk.icon name="bell" />@if ($labelled){{ __('desk.nudge') }}@endif</button>
         <template x-teleport="body">
-            <div class="dk-scope dk-poke-pop" role="dialog" aria-label="{{ __('desk.nudge_named', ['name' => $name]) }}" x-show="open" x-cloak x-transition.opacity x-on:click.outside="open = false" x-bind:style="`top:${top}px;left:${left}px`">
+            <div class="dk-scope dk-poke-pop" role="dialog" aria-label="{{ __('desk.nudge_named', ['name' => $name]) }}" x-show="open" x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from" x-on:click.outside="open = false" x-bind:style="`top:${top}px;left:${left}px`">
                 <p class="dk-poke-h">{{ __('desk.nudge_named', ['name' => $name]) }}</p>
                 <div class="dk-poke-chips">
                     @foreach (__('desk.poke_chips') as $chip)

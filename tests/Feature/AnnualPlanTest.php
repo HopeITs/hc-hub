@@ -22,7 +22,7 @@ test('a annual plan is stored against its program and manager', function () {
     $manager = User::factory()->create();
     $programId = insertProgram(insertStrategy(), $manager->employee_id);
 
-    insertAnnualPlan($programId, $manager->id, 2026);
+    insertAnnualPlan($programId, $manager->employee_id, 2026);
 
     $this->assertDatabaseHas('annual_plans', [
         'program_id' => $programId,
@@ -34,7 +34,7 @@ test('a annual plan is stored against its program and manager', function () {
 test('deleting a program deletes the annual plans beneath it', function () {
     $manager = User::factory()->create();
     $programId = insertProgram(insertStrategy(), $manager->employee_id);
-    insertAnnualPlan($programId, $manager->id);
+    insertAnnualPlan($programId, $manager->employee_id);
 
     DB::table('programs')->where('id', $programId)->delete();
 
@@ -50,9 +50,9 @@ test('a annual plan stores its manager hr employee id with a foreign key to empl
 test('a program cannot hold two plans for the same year', function () {
     $manager = User::factory()->create();
     $programId = insertProgram(insertStrategy(), $manager->employee_id);
-    insertAnnualPlan($programId, $manager->id, 2026);
+    insertAnnualPlan($programId, $manager->employee_id, 2026);
 
-    expect(fn () => insertAnnualPlan($programId, $manager->id, 2026))
+    expect(fn () => insertAnnualPlan($programId, $manager->employee_id, 2026))
         ->toThrow(QueryException::class);
 
     $this->assertDatabaseCount('annual_plans', 1);
@@ -64,8 +64,8 @@ test('two programs may each hold a plan for the same year', function () {
     $wash = insertProgram($strategyId, $manager->employee_id, 'WASH');
     $health = insertProgram($strategyId, $manager->employee_id, 'Health');
 
-    insertAnnualPlan($wash, $manager->id, 2026);
-    insertAnnualPlan($health, $manager->id, 2026);
+    insertAnnualPlan($wash, $manager->employee_id, 2026);
+    insertAnnualPlan($health, $manager->employee_id, 2026);
 
     $this->assertDatabaseCount('annual_plans', 2);
 });

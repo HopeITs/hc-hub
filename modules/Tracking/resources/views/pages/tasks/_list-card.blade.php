@@ -36,7 +36,7 @@
     wire:key="task-card-{{ $task->id }}"
     data-test="task-card-{{ $task->id }}"
     @if ($isSubtask)
-        x-show="subtasksOpen[{{ $task->parent_task_id }}]" x-cloak
+        x-show="subtasksOpen[{{ $task->parent_task_id }}]" x-cloak x-collapse
     @endif
 >
     <div @class(['flex flex-col gap-2.5', 'ms-4 border-s-2 border-secondary-soft ps-3 dark:border-line' => $isSubtask])>

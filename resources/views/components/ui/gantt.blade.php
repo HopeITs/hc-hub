@@ -176,7 +176,7 @@
     $chipOn = 'border-secondary-dark bg-secondary-dark text-white dark:border-ink dark:bg-ink dark:text-surface-0';
     $chipOff = 'border-secondary-soft text-secondary-medium hover:border-secondary-light hover:text-secondary-dark dark:border-white/15 dark:text-ink-muted dark:hover:text-ink';
     $control = 'rounded-lg border border-secondary-soft bg-white px-2.5 py-1.5 text-xs text-secondary-dark dark:border-field-line dark:bg-surface-2 dark:text-ink';
-    $menu = 'absolute end-0 top-full z-40 mt-1.5 rounded-xl border border-secondary-soft bg-white p-1.5 shadow-[0_8px_24px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.06)] dark:border-white/15 dark:bg-surface-3 dark:shadow-raised';
+    $menu = 'absolute end-0 top-full z-40 mt-1.5 origin-top-right rtl:origin-top-left rounded-xl border border-secondary-soft bg-white p-1.5 shadow-[0_8px_24px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.06)] dark:border-white/15 dark:bg-surface-3 dark:shadow-raised';
     $menuItem = 'flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-xs text-secondary-dark hover:bg-board-head dark:text-ink dark:hover:bg-white/10';
     $menuHeading = 'px-2.5 pt-2 pb-1 type-label text-secondary-light dark:text-ink-muted';
     $inspectorLabel = 'type-label text-secondary-light dark:text-ink-muted';
@@ -431,7 +431,7 @@
                 <button type="button" x-on:click="open = ! open" class="{{ $toolButton }}" x-bind:aria-expanded="open" aria-label="{{ __('gantt.display') }}" title="{{ __('gantt.display') }}">
                     <flux:icon.adjustments-horizontal variant="micro" />
                 </button>
-                <div x-show="open" x-cloak x-transition.origin.top.right class="{{ $menu }} w-72" role="dialog" aria-label="{{ __('gantt.display') }}">
+                <div x-show="open" x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from" class="{{ $menu }} w-72" role="dialog" aria-label="{{ __('gantt.display') }}">
                     <p class="{{ $menuHeading }}">{{ __('gantt.display_show') }}</p>
                     @foreach (array_filter([
                         'showLinks' => __('gantt.links'),
@@ -493,7 +493,7 @@
                 <button type="button" x-on:click="open = ! open" class="inline-flex h-8 items-center gap-1.5 {{ $control }} font-semibold hover:border-secondary-light" x-bind:aria-expanded="open">
                     <flux:icon.arrow-down-tray variant="micro" class="size-3.5" />{{ __('gantt.export') }}
                 </button>
-                <div x-show="open" x-cloak x-transition.origin.top.right class="{{ $menu }} w-48">
+                <div x-show="open" x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from" class="{{ $menu }} w-48">
                     <button type="button" x-on:click="open = false; exportCsv()" class="{{ $menuItem }}">{{ __('gantt.export_csv') }}</button>
                     <button type="button" x-on:click="open = false; printChart()" class="{{ $menuItem }}">{{ __('gantt.export_pdf') }}</button>
                 </div>
@@ -504,7 +504,7 @@
                 <button type="button" x-on:click="shortcutsOpen = ! shortcutsOpen" class="{{ $toolButton }}" x-bind:aria-expanded="shortcutsOpen" aria-label="{{ __('gantt.shortcuts.heading') }}" title="{{ __('gantt.shortcuts.heading') }} (?)">
                     <flux:icon.question-mark-circle variant="micro" />
                 </button>
-                <div x-show="shortcutsOpen" x-cloak x-transition.origin.top.right class="{{ $menu }} w-72" role="dialog" aria-label="{{ __('gantt.shortcuts.heading') }}">
+                <div x-show="shortcutsOpen" x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from" class="{{ $menu }} w-72" role="dialog" aria-label="{{ __('gantt.shortcuts.heading') }}">
                     <p class="{{ $menuHeading }}">{{ __('gantt.shortcuts.heading') }}</p>
                     <dl class="grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-1.5 px-2.5 pb-2 text-xs">
                         @foreach ($shortcuts as $keys => $shortcutLabel)
@@ -1146,7 +1146,7 @@
         <template x-teleport="body">
             <div
                 x-show="linkMenu !== null"
-                x-cloak
+                x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from"
                 x-on:click.stop
                 x-on:keydown.escape.window="linkMenu = null"
                 class="fixed z-[70] w-64 rounded-xl border border-secondary-soft bg-white p-3 text-xs shadow-xl dark:border-white/15 dark:bg-surface-3 dark:shadow-raised"

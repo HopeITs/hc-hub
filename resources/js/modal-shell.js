@@ -67,9 +67,18 @@ document.addEventListener('alpine:init', () => {
                     this.discardAsked = true;
                 }
             });
+
+            // A guarded dialog counts as unsaved work for reload, tab close and Back (unsaved.js).
+            window.hcUnsaved?.register(`dialog:${titleId}`, {
+                kind: 'dialog',
+                isOpen: () => Boolean(this.dialog()?.open) && this.$root.dataset.discardGuard !== undefined,
+                dirty: () => this.isDirty(),
+                close: () => this.close(),
+            });
         },
 
         destroy() {
+            window.hcUnsaved?.unregister(`dialog:${titleId}`);
             this.stopWatchingSubmit?.();
             this.observer?.disconnect();
         },

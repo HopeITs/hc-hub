@@ -89,7 +89,7 @@
         <div
             x-show="open"
             x-cloak
-            x-transition.opacity.duration.100ms
+            x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from"
             data-flux-menu
             role="listbox"
             aria-multiselectable="true"

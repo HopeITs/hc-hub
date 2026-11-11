@@ -175,7 +175,7 @@ new class extends Component {
                 <span class="dk-mday dk-mday-off" aria-hidden="true"><span class="dk-num">{{ $i }}</span></span>
             @endfor
             <template x-teleport="body">
-                <div class="dk-scope dk-daypop" role="dialog" x-show="open !== ''" x-cloak x-transition.opacity x-on:click.outside="if (! $event.target.closest('.dk-mday')) open = ''" x-bind:style="`top:${top}px;left:${left}px`">
+                <div class="dk-scope dk-daypop" role="dialog" x-show="open !== ''" x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from" x-on:click.outside="if (! $event.target.closest('.dk-mday')) open = ''" x-bind:style="`top:${top}px;left:${left}px`">
                     @foreach ($byDay as $date => $items)
                         <div x-show="open === '{{ $date }}'">
                             <p class="dk-poke-h">{{ CarbonImmutable::parse($date)->translatedFormat(__('formats.date')) }}</p>

@@ -7,7 +7,7 @@
             </x-slot:toolbar>
         @endif
 
-        <div x-show="! editing">
+        <div x-show="! editing" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
             @if ($this->task->description !== null)
                 <p class="whitespace-pre-line p-4 text-sm text-secondary-medium dark:text-ink-muted">{{ $this->task->description }}</p>
             @else
@@ -16,7 +16,7 @@
         </div>
 
         @if ($canEditTask)
-            <form wire:submit="saveDetails" x-show="editing" style="display: none" class="grid gap-4 p-4" data-test="task-details-form">
+            <form wire:submit="saveDetails" x-show="editing" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" style="display: none" class="grid gap-4 p-4" data-test="task-details-form">
                 <x-ui.input wire:model="title" :label="__('tasks.task_title')" type="text" maxlength="255" required data-test="task-edit-title-input" />
 
                 <flux:textarea wire:model="description" :label="__('common.description')" rows="5" class="border-secondary-light! bg-white! text-secondary-dark! dark:border-field-line! dark:bg-surface-2! dark:text-ink!" />

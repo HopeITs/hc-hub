@@ -105,7 +105,7 @@
                                     <span aria-hidden="true" class="block size-3 rotate-45 rounded-[2px] border-2 shadow-sm ring-2 ring-board {{ $markerTone($milestone) }}"></span>
                                     <span
                                         x-show="open"
-                                        style="display: none"
+                                        style="display: none" x-transition:enter="dk-menu-in" x-transition:enter-start="dk-fade-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-fade-from"
                                         role="tooltip"
                                         class="pointer-events-none absolute bottom-full start-1/2 z-30 mb-1.5 w-max max-w-56 -translate-x-1/2 rounded-md bg-secondary-dark px-2.5 py-1.5 text-start text-xs leading-snug text-white shadow-lg rtl:translate-x-1/2 dark:bg-surface-3 dark:shadow-raised dark:text-ink"
                                     >

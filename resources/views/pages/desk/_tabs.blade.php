@@ -67,7 +67,7 @@
     </div>
 
     {{-- A tab's own menu (right click): the browser's tab menu, for the Desk's tabs. --}}
-    <div class="dk-pop dk-menu dk-tab-menu" role="menu" x-show="menu" x-cloak x-bind:style="menuStyle" x-on:click.outside="menu = null" x-on:keydown.escape.window="menu = null" data-tab-menu>
+    <div class="dk-pop dk-menu dk-tab-menu" role="menu" x-show="menu" x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from" x-bind:style="menuStyle" x-on:click.outside="menu = null" x-on:keydown.escape.window="menu = null" data-tab-menu>
         <button type="button" role="menuitem" x-on:click="reload(menu); menu = null"><x-desk.icon name="reload" class="dk-menu-ic" /><span class="dk-menu-t"><strong>{{ __('desk-workspace.tabs.reload') }}</strong></span></button>
         <button type="button" role="menuitem" x-on:click="duplicate(menu); menu = null"><x-desk.icon name="plus" class="dk-menu-ic" /><span class="dk-menu-t"><strong>{{ __('desk-workspace.tabs.duplicate') }}</strong></span></button>
         <button type="button" role="menuitem" x-on:click="addToDesk(menu); menu = null" data-tab-add-to-desk><x-desk.icon name="pin" class="dk-menu-ic" /><span class="dk-menu-t"><strong>{{ __('desk-workspace.add.to_desk') }}</strong><small>{{ __('desk-workspace.tabs.add_hint') }}</small></span></button>

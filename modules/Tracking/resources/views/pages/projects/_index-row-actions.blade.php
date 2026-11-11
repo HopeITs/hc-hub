@@ -22,7 +22,7 @@
                 <x-desk.icon name="more" />
             </button>
 
-            <span class="dk-pop dk-pjl-menu" role="menu" x-show="open" x-cloak x-on:click="open = false">
+            <span class="dk-pop dk-pjl-menu" role="menu" x-show="open" x-cloak x-transition:enter="transition ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0 -translate-y-1 scale-[.97]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100 motion-reduce:transition-none" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" x-on:click="open = false">
                 @if ($canEditProject)
                     <button type="button" role="menuitem" wire:click="openEditModal({{ $project->id }})" aria-label="{{ __('common.edit_name', ['name' => $project->name]) }}">
                         <flux:icon.pencil-square variant="micro" class="size-4" aria-hidden="true" />{{ __('projects.edit') }}

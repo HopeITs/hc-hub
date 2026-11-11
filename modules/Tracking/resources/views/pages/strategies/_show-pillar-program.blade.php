@@ -17,7 +17,7 @@
     };
 @endphp
 
-<li class="dk-sprow" wire:key="pillar-program-{{ $program->id }}" data-test="strategy-program-{{ $program->id }}" @if ($folded) x-show="more" x-cloak @endif>
+<li class="dk-sprow" wire:key="pillar-program-{{ $program->id }}" data-test="strategy-program-{{ $program->id }}" @if ($folded) x-show="more" x-cloak x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @endif>
     <a href="{{ route('programs.show', $program) }}" wire:navigate class="dk-sprow-name">
         <span class="dk-pdot {{ $stateTone }}" aria-hidden="true"></span>
         <span dir="auto">{{ $program->name }}</span>

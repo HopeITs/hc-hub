@@ -1360,3 +1360,35 @@ button.dk-step.dk-go:hover,button.dk-step.dk-go:focus-visible{ background:var(--
 @container pb (max-width: 479px){ .dk-panel .dk-pb .dk-tk>li{ row-gap:2px;padding-block:7px } }
 @container pb (max-width: 479px){ .dk-panel .dk-pb .dk-dn>li{ padding-block:6px;row-gap:2px } }
 @container pb (max-width: 379px){ .dk-panel .dk-pb .dk-mx-list>li{ padding-block:6px } }
+
+/* ---------- Open and close motion: one system ----------
+ * Everything that opens over the page moves the same way. A menu or popover puts the house
+ * classes on its x-show (dk-menu-in / dk-menu-out / dk-menu-from, desk-shell.css): fade, 4px
+ * slide and a slight scale out of its button, ~150ms in and 90ms out. dk-fade-from is the same
+ * timing with opacity alone, for tooltips and in-flow rows. A centred sheet or the Ask palette
+ * animates in by keyframes; dk-sheet-out / dk-sheet-gone on its x-show wrapper fade it out.
+ * The wrapper itself never fades: an opacity below 1 would make it a stacking context and
+ * drop its fixed children under the top bar for the length of the fade.
+ */
+@layer components {
+    .dk-pop { transform-origin: top right; }
+    [dir="rtl"] .dk-pop { transform-origin: top left; }
+    /* Opens at the pointer, which is its top left corner in both directions. */
+    .dk-pop.dk-tab-menu, [dir="rtl"] .dk-pop.dk-tab-menu { transform-origin: top left; }
+
+    .dk-fade-from { opacity: 0; }
+
+    /* The wrapper's own transition changes nothing; it is how Alpine learns how long to wait. */
+    .dk-sheet-out { transition: opacity .12s ease-in; }
+    .dk-sheet-gone > * { opacity: 0; transition: opacity .12s ease-in, scale .12s ease-in; }
+    .dk-sheet-gone > :is(.dk-sheet, .dk-pal) { scale: .985; }
+
+    /* An overlay mounted by x-if (the tour): it can only fade in. */
+    .dk-appear { animation: dk-fade .2s ease; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dk-sheet-out { transition-duration: 0s; }
+        .dk-sheet-gone > * { transition: none; scale: none; }
+        .dk-appear { animation: none; }
+    }
+}

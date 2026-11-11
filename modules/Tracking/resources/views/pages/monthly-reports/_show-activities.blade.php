@@ -71,7 +71,7 @@
                                     </label>
                                 @endforeach
                                 @foreach ($more as $status)
-                                    <label class="{{ $chip }}" x-show="more" @unless ($chosenInMore) style="display: none" @endunless>
+                                    <label class="{{ $chip }}" x-show="more" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @unless ($chosenInMore) style="display: none" @endunless>
                                         <input type="radio" class="sr-only" wire:model.live="{{ $key }}.status" value="{{ $status->value }}" @checked($chosen === $status->value) data-activity-option="{{ $activity['id'] }}-{{ $status->value }}">
                                         {{ $status->label() }}
                                     </label>
@@ -119,7 +119,7 @@
                                 <flux:icon.plus variant="micro" class="size-3.5" aria-hidden="true" />
                                 {{ __('monthly_reports.add_note') }}
                             </button>
-                            <label x-show="note" @unless ($noteOpen) style="display: none" @endunless class="flex w-full max-w-2xl flex-col gap-1 text-xs font-semibold">
+                            <label x-show="note" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @unless ($noteOpen) style="display: none" @endunless class="flex w-full max-w-2xl flex-col gap-1 text-xs font-semibold">
                                 {{ __('monthly_reports.activity_note') }}
                                 <textarea x-ref="note" rows="2" dir="auto" wire:model.live.blur="{{ $key }}.note" class="{{ $field }}"></textarea>
                             </label>

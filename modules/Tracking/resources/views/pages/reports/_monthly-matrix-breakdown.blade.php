@@ -21,7 +21,7 @@
 @endphp
 
 @foreach ($subRows as $sub)
-    <tr x-show="open" x-cloak data-matrix-breakdown="{{ $sub['key'] }}">
+    <tr x-show="open" x-cloak x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" data-matrix-breakdown="{{ $sub['key'] }}">
         <td class="{{ $bodyCell }} {{ $stickyCode }} bg-white dark:bg-surface-1"></td>
         <td class="{{ $bodyCell }} {{ $stickyName }} bg-white dark:bg-surface-1">
             <span @class(['block text-xs', 'ps-4 text-secondary-medium dark:text-ink-muted' => $sub['pwd'], 'ps-2 font-medium' => ! $sub['pwd']])>{{ $sub['label'] }}</span>

@@ -16,7 +16,7 @@
     $draftPicker = "\$store.assigneePicker.openFor('list-subtask-mobile-{$task->id}', ".Illuminate\Support\Js::from($draftAssigneeIds).", \$el.getBoundingClientRect(), 'toggleSubtaskDraftAssignee', [{$task->id}])";
 @endphp
 
-<div x-show="subtasksOpen[{{ $task->id }}]" x-cloak class="flex flex-col gap-1.5 p-3.5 pt-0 ps-[4.5rem]" data-test="task-subtask-add-row-mobile-{{ $task->id }}">
+<div x-show="subtasksOpen[{{ $task->id }}]" x-cloak x-collapse class="flex flex-col gap-1.5 p-3.5 pt-0 ps-[4.5rem]" data-test="task-subtask-add-row-mobile-{{ $task->id }}">
     <label class="flex items-center gap-2">
         {{ FluxMarkup::icon('plus', 'micro', 'size-3.5 shrink-0 text-primary dark:text-brand-text') }}
         <span class="sr-only">{{ __('tasks.add_subtask') }}</span>

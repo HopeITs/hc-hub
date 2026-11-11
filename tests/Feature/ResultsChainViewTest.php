@@ -224,7 +224,7 @@ test('the chain reads a flat number of queries for 3 or 30 nodes', function (str
                 $target = chainTarget(chainIndicator($outcome), $source, $this->centerA, 10);
                 Report::factory()->approved()->create(['plan_indicator_id' => $target->id, 'value' => 4]);
                 $milestone = chainMilestone($this->centerA, $activity);
-                Task::factory()->create(['source_type' => 'milestone', 'source_id' => $milestone->id, 'department_id' => 1, 'kind' => TaskKind::General]);
+                Task::factory()->create(['source_type' => 'milestone', 'source_id' => $milestone->id, 'department_id' => insertHrDepartment(), 'kind' => TaskKind::General]);
                 ProjectActivityStatus::factory()->create(['project_id' => $this->centerA->id, 'result_id' => $activity->id, 'monthly_report_id' => $report->id]);
                 ActivitySchedule::factory()->create(['result_id' => $activity->id, 'month' => '2026-03-01']);
             }

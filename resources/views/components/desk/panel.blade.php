@@ -75,7 +75,7 @@
                 <x-desk.icon name="more" />
             </button>
             {{-- On My desk: pin to top and collapse (pages::desk.index); everywhere: remove. --}}
-            <div class="dk-pop dk-pmenu-pop" role="menu" aria-label="{{ __('desk.panel_options_for', ['panel' => $title]) }}" x-show="menu" x-cloak x-transition.opacity.duration.100ms>
+            <div class="dk-pop dk-pmenu-pop" role="menu" aria-label="{{ __('desk.panel_options_for', ['panel' => $title]) }}" x-show="menu" x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from">
                 <p class="dk-pop-h">{{ $title }}</p>
                 <template x-if="onDesk()">
                     <div class="dk-pmenu-group">
@@ -106,7 +106,7 @@
 
     @if ($search !== null)
         {{-- Search narrows the list as you type (it is a search, not a filter, so it needs no Done). --}}
-        <div class="dk-psearch" x-show="searching" x-cloak data-panel-search>
+        <div class="dk-psearch" x-show="searching" x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" data-panel-search>
             <x-desk.icon name="search" />
             <input type="search" x-ref="search" wire:model.live.debounce.300ms="{{ $search }}" placeholder="{{ __('desk.search_placeholder', ['panel' => $title]) }}" aria-label="{{ __('desk.panel_search', ['panel' => $title]) }}" x-on:keydown.escape.stop="if ($el.value === '') { searching = false } else { $el.value = ''; $wire.$set('{{ $search }}', '') }">
         </div>
@@ -130,7 +130,7 @@
     {{-- The panel's filters as a small centered popup of dropdowns: choices read from its rows, plus the panel's own (filters slot). They are a draft until Done (resources/js/desk-filters.js). --}}
     @if ($filterable)
     <template x-teleport="body">
-        <div x-show="filtering" x-cloak class="dk-scope" x-on:keydown.escape.window.stop="discardFilters()">
+        <div x-show="filtering" x-cloak x-transition:leave="dk-sheet-out" x-transition:leave-end="dk-sheet-gone" class="dk-scope" x-on:keydown.escape.window.stop="discardFilters()">
             <div class="dk-sh-scrim dk-pf-scrim" x-on:click="discardFilters()"></div>
             <div class="dk-sheet dk-pf-pop" role="dialog" aria-modal="true" aria-labelledby="dk-pf-t-{{ $id }}" data-panel-filter-dialog="{{ $id }}">
                 <div class="dk-sh-h">

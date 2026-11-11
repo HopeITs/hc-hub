@@ -42,11 +42,11 @@ function insertPillarHrPrograms(): void
 }
 
 /**
- * The tracking row of an HR program, created without a strategy.
+ * Give a program (one table now) its strategy and pillar.
  */
 function trackedProgram(int $id, ?int $strategyId = null, ?int $pillarId = null): void
 {
-    DB::table('programs')->insert(['id' => $id, 'strategy_id' => $strategyId, 'strategic_pillar_id' => $pillarId, 'created_at' => now(), 'updated_at' => now()]);
+    DB::table('programs')->where('id', $id)->update(['strategy_id' => $strategyId, 'strategic_pillar_id' => $pillarId, 'updated_at' => now()]);
 }
 
 /**
@@ -137,7 +137,7 @@ test('a dry run writes nothing', function () {
         ->assertSuccessful();
 
     expect(DB::table('strategic_pillars')->count())->toBe(0)
-        ->and(DB::table('programs')->count())->toBe(0);
+        ->and(DB::table('programs')->whereNotNull('strategic_pillar_id')->count())->toBe(0);
 });
 
 test('an unknown strategy stops the run', function () {

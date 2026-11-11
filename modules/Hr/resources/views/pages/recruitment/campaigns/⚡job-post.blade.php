@@ -331,10 +331,10 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.job_post')] clas
 
         <x-ui.panel :title="__('hr_recruitment.job_post.preview')" :subtitle="__('hr_recruitment.job_post.exact_template')">
             <div class="flex min-h-[32rem] items-center justify-center bg-secondary-soft/40 p-4 dark:bg-surface-2">
-                <div x-show="format === 'story'" class="flex w-full justify-center">
+                <div x-show="format === 'story'" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="flex w-full justify-center">
                     <x-hr::recruitment.job-post-svg id="hc-story-svg" format="story" :city="$city" :program="$program" :job-title="$jobTitle" class="block max-h-[72vh] w-auto max-w-full shadow-raised" />
                 </div>
-                <div x-show="format === 'post'" x-cloak class="flex w-full justify-center">
+                <div x-show="format === 'post'" x-cloak x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="flex w-full justify-center">
                     <x-hr::recruitment.job-post-svg id="hc-post-svg" format="post" :city="$city" :program="$program" :job-title="$jobTitle" class="block max-h-[72vh] w-auto max-w-full shadow-raised" />
                 </div>
             </div>

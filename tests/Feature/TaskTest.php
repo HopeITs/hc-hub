@@ -56,7 +56,7 @@ test('a task assignment stores its hr employee id with a foreign key to employee
 test('a user is not deletable while a task they created still exists', function () {
     $author = User::factory()->create();
     $assignee = User::factory()->create();
-    insertTask(insertProposal(), $assignee->id, $author->id);
+    insertTask(insertProposal(), $assignee->employee_id, $author->id);
 
     expect(fn () => DB::table('users')->where('id', $author->id)->delete())
         ->toThrow(QueryException::class);

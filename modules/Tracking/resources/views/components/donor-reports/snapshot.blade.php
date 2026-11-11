@@ -209,7 +209,7 @@
                                     <td class="{{ $td }} text-end font-semibold tabular-nums" dir="ltr">{{ $row['is_tracking_only'] ? '—' : $percent($row['achievement']) }}</td>
                                 </tr>
                                 @foreach ($row['centers'] as $center)
-                                    <tr class="bg-secondary-soft/30 text-xs dark:bg-surface-2/50" @unless ($print) x-show="open" x-cloak @endunless data-center-row="{{ $center['project_id'] }}">
+                                    <tr class="bg-secondary-soft/30 text-xs dark:bg-surface-2/50" @unless ($print) x-show="open" x-cloak x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @endunless data-center-row="{{ $center['project_id'] }}">
                                         <th scope="row" class="{{ $td }} sticky start-0 z-10 max-sm:w-44 max-sm:max-w-44 bg-secondary-soft/30 ps-9 text-start font-normal dark:bg-surface-2/50" dir="auto">
                                             {{ $centerName((int) $center['project_id']) }}
                                             @if ($center['beneficiaries'] !== null && $row['basis'] === 'fixed')

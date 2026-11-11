@@ -49,8 +49,8 @@
             @endif
         </button>
 
-        <div class="dk-tkf-scrim" x-show="open" x-cloak x-on:click="open = false" aria-hidden="true"></div>
-        <div class="dk-pop dk-pjf-pop dk-tkf-pop" role="dialog" aria-label="{{ __('tasks.filters') }}" x-show="open" x-cloak x-transition.opacity.duration.120ms>
+        <div class="dk-tkf-scrim" x-show="open" x-cloak x-transition.opacity.duration.150ms x-on:click="open = false" aria-hidden="true"></div>
+        <div class="dk-pop dk-pjf-pop dk-tkf-pop" role="dialog" aria-label="{{ __('tasks.filters') }}" x-show="open" x-cloak x-transition:enter="transition ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0 -translate-y-1 scale-[.97]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100 motion-reduce:transition-none" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
             <div class="dk-tkf-sec" role="group" aria-labelledby="task-filters-work">
                 <p class="dk-tkf-h" id="task-filters-work">{{ __('tasks.filters_work') }}</p>
                 <x-ui.header-filter-select :label="__('tasks.priority')" wire:model.live="priority" :value="$priority">
@@ -121,8 +121,8 @@
                         <flux:icon.bars-3-bottom-left variant="micro" class="size-4" aria-hidden="true" /><span class="dk-tk-btn-text">{{ __('tasks.display_options') }}</span>
                     </button>
 
-                    <div class="dk-tkf-scrim" x-show="open" x-cloak x-on:click="open = false" aria-hidden="true"></div>
-                    <div class="dk-pop dk-pjf-pop dk-tkf-pop" role="dialog" aria-label="{{ __('tasks.display_options') }}" x-show="open" x-cloak x-transition.opacity.duration.120ms>
+                    <div class="dk-tkf-scrim" x-show="open" x-cloak x-transition.opacity.duration.150ms x-on:click="open = false" aria-hidden="true"></div>
+                    <div class="dk-pop dk-pjf-pop dk-tkf-pop" role="dialog" aria-label="{{ __('tasks.display_options') }}" x-show="open" x-cloak x-transition:enter="transition ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0 -translate-y-1 scale-[.97]" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-100 motion-reduce:transition-none" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
                         <div class="dk-tkf-sec" role="group" aria-label="{{ __('tasks.task_toolbar') }}">
                             <x-ui.header-filter-select :label="__('tasks.group_by')" wire:model.live="group" :value="$group" data-test="task-group-select">
                                 <option value="none">{{ __('tasks.no_grouping') }}</option>

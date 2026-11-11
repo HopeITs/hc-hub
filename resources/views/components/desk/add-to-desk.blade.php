@@ -43,7 +43,7 @@
             <button type="button" class="dk-btn dk-addesk-more" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" aria-haspopup="menu" aria-label="{{ __('desk-workspace.add.more') }}" data-add-to-desk-more>
                 <flux:icon.chevron-down variant="micro" class="size-4" />
             </button>
-            <div class="dk-pop dk-menu dk-addesk-pop" role="menu" x-show="open" x-cloak>
+            <div class="dk-pop dk-menu dk-addesk-pop" role="menu" x-show="open" x-cloak x-transition:enter="dk-menu-in" x-transition:enter-start="dk-menu-from" x-transition:leave="dk-menu-out" x-transition:leave-end="dk-menu-from">
                 <p class="dk-pop-h">{{ __('desk-workspace.add.menu_title') }}</p>
                 @foreach ($choices as $id => $choice)
                     <button type="button" role="menuitemcheckbox" x-bind:aria-checked="isOn(@js($id)).toString()" x-on:click="set(@js($id))" data-add-to-desk-choice="{{ $id }}">

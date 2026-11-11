@@ -50,6 +50,7 @@
     ])
     @if ($isSubtask)
         x-show="subtasksOpen[{{ $task->parent_task_id }}]" x-cloak
+        x-transition:enter="transition-opacity! ease-out duration-150 motion-reduce:transition-none!" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
     @endif
     x-on:keydown.down.prevent="$event.currentTarget.nextElementSibling?.focus()"
     x-on:keydown.up.prevent="$event.currentTarget.previousElementSibling?.focus()"

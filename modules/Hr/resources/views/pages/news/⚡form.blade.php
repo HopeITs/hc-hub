@@ -85,6 +85,8 @@ new #[Layout('layouts::desk'), Title('hr_news.titles.form')] class extends Compo
     </x-slot:actions>
 
     <form wire:submit="save('publish')" class="grid max-w-4xl gap-8" novalidate>
+        <x-ui.unsaved-guard :watch="['type', 'titleAr', 'titleEn', 'descriptionAr', 'descriptionEn', 'tagLine', 'audienceType', 'audienceIds', 'publishMode', 'publishAt', 'eventStartsAt', 'eventEndsAt', 'displayUntil', 'photo']" />
+
         <x-ui.form-section :title="__('hr_news.form.sections.what')" :fields="['type', 'titleAr', 'titleEn', 'descriptionAr', 'descriptionEn', 'tagLine']">
             <x-ui.form-segmented
                 :label="__('hr_news.form.fields.type')"
