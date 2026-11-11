@@ -1,0 +1,63 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Hr\Support\Contracts;
+
+use Illuminate\Validation\ValidationException;
+use Modules\Hr\Enums\ContractType as ContractTypeEnum;
+use Modules\Hr\Models\Position;
+
+/**
+ * positions.exist_emp counts each position's active, non-draft contracts.
+ * HR's ContractObserver kept it in step; the hub has no observer, so the
+ * contract Actions call this around every write that can move a seat.
+ * Call inside the write's transaction.
+ */
+final class PositionSeats
+{
+    public static function holdsSeat(mixed $type, mixed $isActive): bool
+    {
+        return (int) $type !== ContractTypeEnum::Draft->value && (bool) $isActive;
+    }
+
+    /**
+     * Refuse a write that would put one more person on a full position.
+     *
+     * @throws ValidationException
+     */
+    public static function assertRoom(?int $positionId, string $errorKey = 'form.position_id'): void
+    {
+        $position = Position::query()->select(['id', 'max_emp', 'exist_emp'])->whereKey($positionId)->lockForUpdate()->first();
+
+        if ($position === null) {
+            throw ValidationException::withMessages([$errorKey => __('validation.exists', ['attribute' => __('hr_employees.fields.position')])]);
+        }
+
+        if (! $position->canAssign()) {
+            throw ValidationException::withMessages([$errorKey => __('hr_contracts.errors.position_full')]);
+        }
+    }
+
+    /**
+     * Move the counters from the seat held before a write to the seat held after it.
+     */
+    public static function move(?int $releaseId, ?int $claimId): void
+    {
+        if ($releaseId === $claimId) {
+            return;
+        }
+
+        $ids = array_values(array_filter([$releaseId, $claimId]));
+
+        $positions = Position::query()->whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get(['id', 'exist_emp', 'max_emp'])->keyBy('id');
+
+        if ($releaseId !== null) {
+            $positions->get($releaseId)?->dec();
+        }
+
+        if ($claimId !== null) {
+            $positions->get($claimId)?->inc();
+        }
+    }
+}

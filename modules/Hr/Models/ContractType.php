@@ -28,6 +28,12 @@ class ContractType extends Model
     use HasFactory, HasTranslation;
 
     /**
+     * What each contract type is (annual, trial or service), by id. HR's
+     * config/contracts.php overrides it when the hub has one.
+     */
+    public const CATEGORY_BY_ID = [1 => 'annual', 3 => 'trial', 5 => 'service'];
+
+    /**
      * @return HasMany<Contract, $this>
      */
     public function contracts(): HasMany
@@ -37,7 +43,7 @@ class ContractType extends Model
 
     public function getCategoryAttribute(): string
     {
-        $map = config('contracts.map_by_id');
+        $map = config('contracts.map_by_id', self::CATEGORY_BY_ID);
 
         return $map[$this->id] ?? 'annual';
     }

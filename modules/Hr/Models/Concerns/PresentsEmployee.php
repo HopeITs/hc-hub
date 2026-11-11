@@ -233,6 +233,15 @@ trait PresentsEmployee
     }
 
     /**
+     * Drop the cached photo list after a photo is uploaded or removed.
+     */
+    public static function forgetAvatars(): void
+    {
+        Cache::memo()->forget(self::AvatarCacheKey);
+        static::forgetPickerOptions();
+    }
+
+    /**
      * The employee's name in the other language, shown beside the main name.
      *
      * @return Attribute<string, never>
