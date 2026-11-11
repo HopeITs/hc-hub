@@ -45,7 +45,7 @@ test('sent emails embed the logo instead of loading it from the web', function (
 
         expect($email->getHtmlBody())
             ->toMatch('/<img src="cid:[^"]+"[^>]*class="logo"/')
-            ->not->toContain(asset('logo-tracking-mail.png'))
+            ->not->toContain(asset('logo-hub-mail.png'))
             ->and($email->getAttachments())->toHaveCount(1)
             ->and($email->getAttachments()[0]->getDisposition())->toBe('inline');
     }

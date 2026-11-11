@@ -64,7 +64,7 @@ class RenderNotificationBanners extends Command
                         'subtitle' => __("notifications.banner.{$priority}_subtitle", [], $locale),
                         'title' => $presenter->moduleLabel((string) $module, $locale),
                         'iconSvg' => $iconSvg,
-                        'wordmark' => $this->fileUrl(public_path('logo-tracking-white.svg')),
+                        'wordmark' => $this->fileUrl(public_path('logo-hub-white.png')),
                         'watermark' => $watermark,
                     ])->render();
 

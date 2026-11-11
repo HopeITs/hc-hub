@@ -10,7 +10,7 @@
 <tr>
 <td class="header">
 <a href="{{ $url }}" target="_blank" rel="noopener" style="display: inline-block;">
-<img src="{{ $logo }}" class="logo" width="160" height="37" alt="{{ trim(strip_tags($slot)) }}">
+<img src="{{ $logo }}" class="logo" width="160" height="43" alt="{{ trim(strip_tags($slot)) }}">
 </a>
 </td>
 </tr>

@@ -34,8 +34,8 @@
 
             <div class="relative flex w-full max-w-lg flex-col items-center gap-8 text-center">
                 <a href="{{ route('home') }}" class="flex flex-col items-center">
-                    <img src="{{ asset('logo-tracking.svg') }}" alt="" class="h-11 w-auto dark:hidden" data-no-dim />
-                    <img src="{{ asset('logo-tracking-white.svg') }}" alt="" class="hidden h-11 w-auto dark:block" data-no-dim />
+                    <img src="{{ asset('logo-hub.png') }}" alt="" class="h-11 w-auto dark:hidden" data-no-dim />
+                    <img src="{{ asset('logo-hub-white.png') }}" alt="" class="hidden h-11 w-auto dark:block" data-no-dim />
                     <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
                 </a>
 

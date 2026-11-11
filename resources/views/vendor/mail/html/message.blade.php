@@ -12,10 +12,10 @@
     'preheader' => null,
 ])
 @php
-    $logoPath = public_path('logo-tracking-mail.png');
+    $logoPath = public_path('logo-hub-mail.png');
     $logo = $message instanceof \Illuminate\Mail\Message
         ? $message->embed($logoPath)
-        : asset('logo-tracking-mail.png');
+        : asset('logo-hub-mail.png');
 @endphp
 <x-mail::layout :preheader="$preheader">
 {{-- Header --}}

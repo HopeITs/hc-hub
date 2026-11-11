@@ -70,8 +70,8 @@
     <div class="dk-side-h">
         <a class="dk-side-logo" href="{{ route('dashboard') }}" wire:navigate aria-label="{{ __('desk.logo_label') }}" data-desk-logo>
             <img class="dk-side-mark" src="{{ asset('logo-tracking-icon.svg') }}" alt="" data-no-dim />
-            <img class="dk-side-word dk-side-word-light" src="{{ asset('logo-tracking.svg') }}" alt="{{ config('app.name') }}" data-no-dim />
-            <img class="dk-side-word dk-side-word-dark" src="{{ asset('logo-tracking-white.svg') }}" alt="{{ config('app.name') }}" data-no-dim />
+            <img class="dk-side-word dk-side-word-light" src="{{ asset('logo-hub.png') }}" alt="{{ config('app.name') }}" data-no-dim />
+            <img class="dk-side-word dk-side-word-dark" src="{{ asset('logo-hub-white.png') }}" alt="{{ config('app.name') }}" data-no-dim />
         </a>
     </div>
 

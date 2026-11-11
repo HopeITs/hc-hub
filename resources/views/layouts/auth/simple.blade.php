@@ -10,8 +10,8 @@
         <div class="flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
             <div class="flex w-full max-w-sm flex-col items-center gap-6">
                 <a href="{{ route('home') }}" class="flex flex-col items-center" wire:navigate>
-                    <img src="{{ asset('logo-tracking.svg') }}" alt="" class="h-16 w-auto dark:hidden" data-no-dim />
-                    <img src="{{ asset('logo-tracking-white.svg') }}" alt="" class="hidden h-16 w-auto dark:block" data-no-dim />
+                    <img src="{{ asset('logo-hub.png') }}" alt="" class="h-16 w-auto dark:hidden" data-no-dim />
+                    <img src="{{ asset('logo-hub-white.png') }}" alt="" class="hidden h-16 w-auto dark:block" data-no-dim />
                     <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
                 </a>
 
