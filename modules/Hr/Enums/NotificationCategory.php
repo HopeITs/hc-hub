@@ -79,8 +79,8 @@ enum NotificationCategory: string
     }
 
     /**
-     * Urgent notifications may pass quiet hours (when the person allows it:
-     * notification_preferences.urgent_bypass) and reach "urgent only" devices.
+     * Urgent notifications may pass quiet hours (when the person allows it)
+     * and reach "urgent only" devices.
      */
     public function urgent(): bool
     {

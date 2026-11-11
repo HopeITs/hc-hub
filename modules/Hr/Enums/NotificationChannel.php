@@ -6,9 +6,8 @@ namespace Modules\Hr\Enums;
 
 /**
  * Where a notification can reach someone. Desktop and Mobile are both Web
- * Push underneath: the split is by the device a subscription belongs to
- * (PushSubscription::channel()), so a person can keep their phone quiet and
- * their laptop loud.
+ * Push underneath: the split is by the device a subscription belongs to,
+ * so a person can keep their phone quiet and their laptop loud.
  */
 enum NotificationChannel: string
 {

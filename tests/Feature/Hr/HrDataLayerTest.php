@@ -21,6 +21,21 @@ test('the HR migrations create every HR-owned table without the hchr_ prefix', f
         ->and(Schema::hasColumns('programs', ['name', 'code', 'slug', 'start_date', 'end_date', 'is_active']))->toBeTrue();
 });
 
+test('the HR tables nothing reads are dropped and left out of the import', function () {
+    foreach (['push_subscriptions', 'notification_outbox', 'task_attempts'] as $table) {
+        expect(Schema::hasTable($table))->toBeFalse("{$table} still exists")
+            ->and(HrTables::OWNED)->not->toHaveKey($table);
+    }
+});
+
+test('the unread HR preference tables are parked under zz_drop_ and left out of the import', function () {
+    foreach (['assistant_conversations', 'dashboard_layouts', 'navigation_preferences', 'notification_preferences', 'saved_table_views'] as $table) {
+        expect(Schema::hasTable($table))->toBeFalse("{$table} still exists")
+            ->and(Schema::hasTable("zz_drop_{$table}"))->toBeTrue("zz_drop_{$table} is missing")
+            ->and(HrTables::OWNED)->not->toHaveKey($table);
+    }
+});
+
 test('the columns HR lists filter and sort by are indexed', function () {
     $leading = fn (string $table): array => collect(Schema::getIndexes($table))
         ->map(fn (array $index): string => $index['columns'][0])

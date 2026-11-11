@@ -18,7 +18,13 @@ namespace Modules\Hr\Support;
  *
  * Not listed: users, programs, cities and centers (Core), the Spatie
  * permission tables (shared with the hub), the framework tables (cache,
- * jobs, sessions, migrations...) and HR's two *_bak_20261019 backups.
+ * jobs, sessions, migrations...), HR's two *_bak_20261019 backups, and
+ * push_subscriptions, notification_outbox and task_attempts, which nothing
+ * in the hub reads (dropped by the drop_unused_hr_tables migration). Also
+ * not listed: dashboard_layouts, navigation_preferences, saved_table_views,
+ * assistant_conversations and notification_preferences, unread too and
+ * parked as zz_drop_* by retire_unused_hr_preference_tables until their
+ * final drop is confirmed.
  */
 final class HrTables
 {
@@ -68,16 +74,8 @@ final class HrTables
         'news_audience_targets' => 'news_audience_targets',
         'news_tags' => 'news_tags',
         'news_external_publications' => 'news_external_publications',
-        'dashboard_layouts' => 'dashboard_layouts',
-        'navigation_preferences' => 'navigation_preferences',
-        'saved_table_views' => 'saved_table_views',
-        'assistant_conversations' => 'assistant_conversations',
         'in_app_feedback' => 'in_app_feedback',
-        'push_subscriptions' => 'push_subscriptions',
-        'notification_preferences' => 'notification_preferences',
-        'notification_outbox' => 'notification_outbox',
         'notification_deliveries' => 'notification_deliveries',
-        'task_attempts' => 'task_attempts',
         'recruitment_requests' => 'recruitment_requests',
         'vacancies' => 'vacancies',
         'hiring_campaigns' => 'hiring_campaigns',
