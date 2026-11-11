@@ -13,9 +13,12 @@ use Modules\Hr\Actions\Recruitment\RecruitmentIndicatorRules;
 use Modules\Hr\Actions\Recruitment\Scanning\ClamdScanner;
 use Modules\Hr\Actions\Recruitment\Scanning\DisabledScanner;
 use Modules\Hr\Actions\Recruitment\Scanning\RecruitmentFileScanner;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\RecruitmentApplicant;
 use Modules\Hr\Models\RecruitmentApplication;
 use Modules\Hr\Models\RecruitmentCampaignInvite;
+use Modules\Hr\Support\Leave\LeaveBalanceService;
 use Modules\Hr\Support\Recruitment\Observers\RecruitmentApplicantObserver;
 use Modules\Hr\Support\Recruitment\Observers\RecruitmentApplicationObserver;
 use Modules\Hr\Support\Recruitment\Observers\RecruitmentCampaignInviteObserver;
@@ -47,6 +50,16 @@ final class RecruitmentBootstrap
             ? new ClamdScanner
             : new DisabledScanner);
         $app->singleton(RecruitmentIndicatorRules::class);
+
+        // HiringHandoff: what a hire's new contract needs from other HR areas.
+        // Leave balances come from the leave area's service (as the contract
+        // form does); the journey start is ours until journeys have a service.
+        if (! $app->bound('hr.recruitment.leave-balances')) {
+            $app->bind('hr.recruitment.leave-balances', fn () => fn (Contract $contract) => app(LeaveBalanceService::class)->create($contract));
+        }
+        if (! $app->bound('hr.recruitment.onboarding')) {
+            $app->bind('hr.recruitment.onboarding', fn () => fn (Employee $employee, Contract $contract) => app(OnboardingStarter::class)($employee, $contract));
+        }
 
         RecruitmentApplicant::observe(RecruitmentApplicantObserver::class);
         RecruitmentApplication::observe(RecruitmentApplicationObserver::class);

@@ -69,13 +69,13 @@ class RecruitmentApplicantExporter
         }
 
         $limiter = "recruitment-export:{$user->getKey()}";
-        if (RateLimiter::tooManyAttempts($limiter, (int) RecruitmentConfig::get('recruitment.privacy_ui.export.max_per_hour'))) {
+        if (RateLimiter::tooManyAttempts($limiter, (int) RecruitmentConfig::get('recruitment-privacy.export.max_per_hour'))) {
             $this->refuse($user, $filters, 'rate_limited', Response::HTTP_TOO_MANY_REQUESTS, __('hr_recruitment.privacy_ui.export.rate_limited'));
         }
 
         $query = $this->filters->query($user, $filters);
         $total = (clone $query)->count();
-        $max = (int) RecruitmentConfig::get('recruitment.privacy_ui.export.max_rows');
+        $max = (int) RecruitmentConfig::get('recruitment-privacy.export.max_rows');
 
         if ($total === 0) {
             throw new RecruitmentExportRefusedException('empty', Response::HTTP_UNPROCESSABLE_ENTITY, __('hr_recruitment.privacy_ui.export.empty'));
@@ -95,7 +95,7 @@ class RecruitmentApplicantExporter
         $this->audit->record(RecruitmentPrivacyAudit::ACTION_EXPORT, RecruitmentPrivacyAudit::OUTCOME_SUCCESS, $user, $filters, count($ids));
         RateLimiter::hit($limiter, 3600);
 
-        if (count($ids) >= (int) RecruitmentConfig::get('recruitment.privacy_ui.export.alert_rows')) {
+        if (count($ids) >= (int) RecruitmentConfig::get('recruitment-privacy.export.alert_rows')) {
             $this->monitor->record(SecurityMonitor::EXPORT_LARGE, ['records' => count($ids), 'filtered' => $filters !== []]);
         }
 
@@ -112,7 +112,7 @@ class RecruitmentApplicantExporter
         fwrite($out, "\xEF\xBB\xBF");
         $this->putRow($out, self::COLUMNS);
 
-        foreach (array_chunk($export->ids, max(1, (int) RecruitmentConfig::get('recruitment.privacy_ui.export.chunk'))) as $chunk) {
+        foreach (array_chunk($export->ids, max(1, (int) RecruitmentConfig::get('recruitment-privacy.export.chunk'))) as $chunk) {
             RecruitmentApplication::query()
                 ->visibleTo($user)
                 ->whereIn('id', $chunk)

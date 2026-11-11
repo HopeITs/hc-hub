@@ -137,6 +137,12 @@ class RecruitmentJobOffer extends Model
         return in_array($this->status, RecruitmentJobOfferStatus::editable(), true);
     }
 
+    /** Whether this user requested the offer's position (PositionRequester). */
+    public function isRequestedBy(User $user): bool
+    {
+        return static::query()->whereKey($this->getKey())->requestedBy($user)->exists();
+    }
+
     /**
      * A query-level delete skips model events, so the builder refuses it too.
      */

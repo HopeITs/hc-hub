@@ -102,6 +102,6 @@ class RecruitmentTag extends Model
 
     public function kindLabel(): string
     {
-        return __('recruitment-applicant.tags.kinds.'.($this->kind ?: self::KIND_NEUTRAL));
+        return __('hr_recruitment.applicant_ui.tags.kinds.'.($this->kind ?: self::KIND_NEUTRAL));
     }
 }

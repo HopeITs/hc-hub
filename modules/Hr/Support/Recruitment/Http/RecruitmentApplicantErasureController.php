@@ -54,7 +54,7 @@ class RecruitmentApplicantErasureController extends Controller
         }
 
         $validated = $request->validate([
-            'channel' => ['required', 'string', Rule::in(RecruitmentConfig::get('recruitment.privacy_ui.erasure.channels'))],
+            'channel' => ['required', 'string', Rule::in(RecruitmentConfig::get('recruitment-privacy.erasure.channels'))],
             'confirm' => ['accepted'],
         ]);
 
