@@ -9,6 +9,7 @@ use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\EmployeeFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -29,6 +30,7 @@ use Modules\Hr\Enums\ContractType as ContractTypeEnum;
 use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Models\Concerns\HasTranslation;
 use Modules\Hr\Models\Concerns\PresentsEmployee;
+use Modules\Hr\Observers\HrStatisticsObserver;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
@@ -85,6 +87,7 @@ use Modules\Tracking\Models\TaskAssignee;
  * @property string $record_status
  * @property int|null $last_saved_by
  */
+#[ObservedBy(HrStatisticsObserver::class)]
 #[Fillable(['city_id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar', 'father_name_en', 'father_name_ar', 'mother_name_en', 'mother_name_ar', 'username', 'national_number', 'actual_dob', 'dob', 'pob_en', 'pob_ar', 'civil_registry_office', 'civil_registry_number', 'gender', 'nationality', 'marital_status', 'children', 'work_phone', 'personal_phone', 'personal_email', 'whatsapp_work', 'telegram_work', 'facebook', 'instagram', 'linkedin', 'address_en', 'address_ar', 'skills', 'interests', 'is_active', 'is_board_member', 'board_member_started_at', 'board_member_end_at', 'joined_at'])]
 class Employee extends Model
 {

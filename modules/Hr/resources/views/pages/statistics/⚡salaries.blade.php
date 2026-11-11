@@ -6,7 +6,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Modules\Hr\Livewire\Concerns\Statistics\ReadsStatisticsScope;
-use Modules\Hr\Support\Statistics\HrFigures;
+use Modules\Hr\Support\Desk\HrStatistics;
 
 /**
  * Salary statistics (the old "employees per salary type" card): how many
@@ -49,7 +49,7 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.salaries')] class ext
         }
 
         $cities = $this->citiesFor($this->city);
-        $figures = app(HrFigures::class);
+        $figures = app(HrStatistics::class);
 
         return [
             'periods' => $figures->salaryPeriods($cities),
@@ -70,7 +70,7 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.salaries')] class ext
 
 @php
     $figures = $this->figures;
-    $periods = HrFigures::SalaryPeriods;
+    $periods = HrStatistics::SalaryPeriods;
     $labels = array_map(fn (SalaryPer $per): string => EnumLabel::of(SalaryPer::class, $per->value), $periods);
     $counts = array_map(fn (SalaryPer $per): int => $figures['periods'][$per->value] ?? 0, $periods);
     $total = array_sum($counts);

@@ -9,6 +9,7 @@ use Carbon\CarbonImmutable;
 use Closure;
 use Database\Factories\ContractFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -20,6 +21,7 @@ use Modules\Core\Models\User;
 use Modules\Hr\Casts\EncryptedSalary;
 use Modules\Hr\Enums\ContractAmendmentStatus;
 use Modules\Hr\Enums\ContractType as ContractTypeEnum;
+use Modules\Hr\Observers\HrStatisticsObserver;
 use Modules\Hr\Support\Employees\HrAccess;
 
 /**
@@ -65,6 +67,7 @@ use Modules\Hr\Support\Employees\HrAccess;
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
+#[ObservedBy(HrStatisticsObserver::class)]
 #[Fillable(['employee_id', 'position_id', 'contract_type_id', 'type', 'place', 'start_date', 'end_date', 'termination_reason_id', 'terminated_at', 'reason_of_termination', 'salary', 'currency', 'salary_per', 'work_hours_from', 'work_hours_to', 'work_hours_2_from', 'work_hours_2_to', 'work_days_en', 'work_days_ar', 'weekly_hours', 'schedule_mode', 'work_day_from', 'work_day_to', 'show_days_per_week', 'show_hours_per_week', 'show_hours_per_day', 'show_day_range', 'flex_days_per_week', 'flex_hours_per_week', 'flex_hours_per_month', 'flex_varies_by_requirements', 'flex_coordinated_with_manager', 'flex_custom_en', 'flex_custom_ar', 'pay_mode', 'session_duration', 'is_active', 'auto_renew'])]
 class Contract extends Model
 {

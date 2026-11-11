@@ -7,14 +7,14 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Modules\Core\Models\Program;
 use Modules\Hr\Livewire\Concerns\Statistics\ReadsStatisticsScope;
-use Modules\Hr\Support\Statistics\HrFigures;
+use Modules\Hr\Support\Desk\HrStatistics;
 
 /**
  * Contract statistics (the old Contract statistics page): one card per
  * program, or per center once a program is picked, with its employees and
  * running contracts split into annual, service and trial. Positions count
  * in a city through their own city or their center's. Figures are grouped
- * queries remembered ten minutes (HrFigures::contractCards).
+ * queries remembered ten minutes (HrStatistics::contractCards).
  */
 new #[Layout('layouts::desk'), Title('hr_statistics.titles.contracts')] class extends Component {
     use ReadsStatisticsScope;
@@ -53,7 +53,7 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.contracts')] class ex
     #[Computed]
     public function cards(): array
     {
-        return app(HrFigures::class)->contractCards($this->citiesFor($this->city), $this->program === '' ? null : (int) $this->program);
+        return app(HrStatistics::class)->contractCards($this->citiesFor($this->city), $this->program === '' ? null : (int) $this->program);
     }
 
     protected function normaliseFilters(): void

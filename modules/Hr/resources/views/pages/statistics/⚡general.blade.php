@@ -7,14 +7,13 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 use Modules\Hr\Livewire\Concerns\Statistics\ReadsStatisticsScope;
 use Modules\Hr\Support\Desk\HrStatistics;
-use Modules\Hr\Support\Statistics\HrFigures;
 
 /**
  * General HR statistics (the old Statistics page): head counts, employees
  * by department and job level, running contracts by type, personnel traffic
  * over time, the salary-period split (pay readers only) and who never asked
  * for annual leave. Figures are grouped queries remembered ten minutes
- * (HrStatistics, HrFigures).
+ * (HrStatistics).
  */
 new #[Layout('layouts::desk'), Title('hr_statistics.titles.general')] class extends Component {
     use ReadsStatisticsScope;
@@ -44,7 +43,6 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.general')] class exte
     {
         $cities = $this->citiesFor($this->city);
         $stats = app(HrStatistics::class);
-        $figures = app(HrFigures::class);
 
         return [
             'totals' => $stats->totals($cities),
@@ -52,8 +50,8 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.general')] class exte
             'levels' => $stats->byJobLevel($cities),
             'types' => $stats->byContractType($cities),
             'none' => $stats->withoutLeaves($cities),
-            'traffic' => $figures->personnelTraffic($cities, $this->traffic),
-            'salary' => $this->canViewSalary() ? $figures->salaryPeriods($cities) : null,
+            'traffic' => $stats->personnelTraffic($cities, $this->traffic),
+            'salary' => $this->canViewSalary() ? $stats->salaryPeriods($cities) : null,
         ];
     }
 
@@ -63,7 +61,7 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.general')] class exte
             $this->city = '';
         }
 
-        if (! in_array($this->traffic, HrFigures::TrafficModes, true)) {
+        if (! in_array($this->traffic, HrStatistics::TrafficModes, true)) {
             $this->traffic = 'monthly';
         }
     }
@@ -96,7 +94,7 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.general')] class exte
         @endif
 
         <x-ui.header-filter-select id="hr-stats-traffic" :label="__('hr_statistics.traffic.period')" wire:model.live="traffic" :value="$traffic">
-            @foreach (HrFigures::TrafficModes as $mode)
+            @foreach (HrStatistics::TrafficModes as $mode)
                 <option value="{{ $mode }}">{{ __('hr_statistics.traffic.modes.'.$mode) }}</option>
             @endforeach
         </x-ui.header-filter-select>
@@ -185,8 +183,8 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.general')] class exte
                         <x-ui.chart
                             type="donut"
                             :label="__('hr_statistics.salaries.by_period')"
-                            :series="array_map(fn (SalaryPer $per): int => $figures['salary'][$per->value] ?? 0, HrFigures::SalaryPeriods)"
-                            :categories="array_map(fn (SalaryPer $per): string => EnumLabel::of(SalaryPer::class, $per->value), HrFigures::SalaryPeriods)"
+                            :series="array_map(fn (SalaryPer $per): int => $figures['salary'][$per->value] ?? 0, HrStatistics::SalaryPeriods)"
+                            :categories="array_map(fn (SalaryPer $per): string => EnumLabel::of(SalaryPer::class, $per->value), HrStatistics::SalaryPeriods)"
                             :total-label="__('hr_statistics.salaries.people')"
                             :height="220"
                             :empty="__('hr_statistics.empty')"
