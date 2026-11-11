@@ -80,7 +80,7 @@
     data-export-height="{{ $exportHeight }}"
     data-export-format="{{ $format }}"
     role="img"
-    aria-label="{{ __('recruitment.job_post.preview_aria', ['format' => $format]) }}"
+    aria-label="{{ __('hr_recruitment.job_post.preview_aria', ['format' => $format]) }}"
     style="direction:ltr"
 >
     <rect width="100%" height="100%" fill="#be1f24" />
