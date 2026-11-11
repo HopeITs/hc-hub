@@ -135,7 +135,11 @@ new class extends Component {
                         @else
                             <div class="dk-grid" data-desk-grid>
                                 @foreach ($layout as $i => $entry)
-                                    <livewire:is :component="'desk.panels.'.$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'pp-panel-'.$routeName.'-'.$entry['panel']" />
+                                    @if (\Modules\Hr\Support\Desk\HrPanels::isHrPanel($entry['panel']))
+                                        <livewire:is :component="\Modules\Hr\Support\Desk\HrPanels::componentFor($entry['panel'])" :card="$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'pp-panel-'.$routeName.'-'.$entry['panel']" />
+                                        @continue
+                                    @endif
+                                    <livewire:is :component="'desk.panels.'.$entry['panel']":size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'pp-panel-'.$routeName.'-'.$entry['panel']" />
                                 @endforeach
                             </div>
                         @endif

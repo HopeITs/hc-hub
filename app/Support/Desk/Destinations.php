@@ -7,6 +7,7 @@ namespace App\Support\Desk;
 use Closure;
 use Illuminate\Support\Str;
 use Modules\Core\Models\User;
+use Modules\Hr\Support\Desk\HrDestinations;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\ProposalReviewer;
 use Modules\Tracking\Models\RiskLibrary;
@@ -27,7 +28,7 @@ final class Destinations
      *
      * @var list<string>
      */
-    public const array Groups = ['overview', 'strategy_planning', 'projects_delivery', 'monitoring_evaluation', 'funding_finance', 'workspace', 'administration', 'you'];
+    public const array Groups = ['overview', 'strategy_planning', 'projects_delivery', 'monitoring_evaluation', 'funding_finance', 'hr', 'workspace', 'administration', 'you'];
 
     /**
      * Pages reached from the top bar instead of the sidebar: the inbox,
@@ -49,6 +50,7 @@ final class Destinations
         'projects_delivery' => 'navigation.group_projects_delivery',
         'monitoring_evaluation' => 'navigation.group_monitoring_evaluation',
         'funding_finance' => 'navigation.group_funding_finance',
+        'hr' => 'hr_nav.group',
         'workspace' => 'navigation.group_workspace',
         'administration' => 'navigation.group_administration',
         'you' => 'navigation.group_you',
@@ -65,6 +67,7 @@ final class Destinations
         'projects_delivery' => 'nav-folder-kanban',
         'monitoring_evaluation' => 'nav-chart-line',
         'funding_finance' => 'nav-wallet',
+        'hr' => 'nav-users',
         'workspace' => 'nav-list-checks',
         'administration' => 'nav-settings',
         'you' => 'nav-circle-user',
@@ -283,6 +286,9 @@ final class Destinations
             $page('funding-agreements.index', 'common.funding_agreements', 'coins', 'nav-handshake', 'funding_finance', $can('funding-agreements.view'), 'funding-agreements'),
             $page('transfers.index', 'common.transfers', 'coins', 'nav-arrow-left-right', 'funding_finance', $can('transfers.view'), 'transfers'),
             $page('admin.accounts.index', 'common.accounts', 'coins', 'nav-landmark', 'funding_finance', $can('accounts.view'), 'accounts'),
+
+            /* The HR module's pages (HrDestinations): only the ones whose route exists, each behind its own HR permission. */
+            ...array_map(fn (array $hr): array => $page($hr['route'], $hr['label'], $hr['icon'], $hr['hero'], 'hr', $hr['allows']), app(HrDestinations::class)->pages()),
 
             $page('tasks.index', 'common.tasks', 'check', 'nav-square-check-big', 'workspace', $can('tasks.view'), 'tasks'),
             $page('department-tasks.index', 'titles.department_tasks', 'board', 'nav-building', 'workspace', fn (User $user): bool => $user->can('viewDepartmentQueue', Task::class)),

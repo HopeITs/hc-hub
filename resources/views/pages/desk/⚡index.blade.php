@@ -408,8 +408,11 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
             @endphp
             @if ($kind === 'card')
                 <livewire:desk.panels.page :card="$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols']" :grid-rows="$entry['rows']" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
+            @elseif (\Modules\Hr\Support\Desk\HrPanels::isHrPanel($entry['panel']))
+                {{-- An HR card ("hr-…"): drawn by the HR module's own component from its HrCard class. --}}
+                <livewire:is :component="\Modules\Hr\Support\Desk\HrPanels::componentFor($entry['panel'])" :card="$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
             @else
-                <livewire:is :component="'desk.panels.'.$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
+                <livewire:is :component="'desk.panels.'.$entry['panel']":size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
             @endif
         @endforeach
     </div>

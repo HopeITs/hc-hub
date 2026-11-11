@@ -1,0 +1,127 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'titles' => [
+        'index' => 'News and events',
+        'create' => 'New news item',
+        'edit' => 'Edit news item',
+        'form' => 'News item',
+        'show' => 'News',
+    ],
+
+    'states' => [
+        'draft' => 'Draft',
+        'scheduled' => 'Scheduled',
+        'published' => 'Published',
+        'expired' => 'Expired',
+        'archived' => 'Archived',
+    ],
+
+    'types' => [
+        'news' => 'News',
+        'announcement' => 'Announcement',
+        'event' => 'Event',
+    ],
+
+    'audience' => [
+        'all' => 'Everyone',
+        'cities' => 'Governorates',
+        'centers' => 'Centers',
+        'programs' => 'Programs',
+        'departments' => 'Departments',
+        'employees' => 'Employees',
+    ],
+
+    'list' => [
+        'create' => 'New item',
+        'search' => 'Search titles',
+        'all_states' => 'All states',
+        'all_types' => 'All types',
+        'all_tags' => 'All tags',
+        'empty' => 'No news or events yet.',
+        'empty_filtered' => 'Nothing matches these filters.',
+        'open' => 'Open',
+        'preview' => 'Preview',
+        'publish_now' => 'Publish now',
+        'unpublish' => 'Back to draft',
+        'restore' => 'Restore',
+        'archive' => 'Archive',
+        'delete_title' => 'Delete this item?',
+        'delete_body' => 'The item, its audience, tags and cover are removed. This cannot be undone.',
+        'deleted' => 'Item deleted.',
+        'published_now' => 'Published.',
+        'unpublished' => 'Moved back to draft.',
+        'archived' => 'Archived.',
+        'restored' => 'Restored.',
+        'not_allowed_now' => 'That change does not apply to this item now.',
+        'columns' => [
+            'title' => 'Title',
+            'type' => 'Type',
+            'audience' => 'Audience',
+            'publish_at' => 'Goes out',
+            'event_date' => 'Event date',
+            'status' => 'State',
+            'author' => 'Written by',
+            'actions' => 'Actions',
+            'tags' => 'Tag',
+        ],
+    ],
+
+    'form' => [
+        'sections' => [
+            'what' => 'What',
+            'who' => 'Who sees it',
+            'when' => 'When',
+            'cover' => 'Cover picture',
+        ],
+        'fields' => [
+            'type' => 'Type',
+            'title_ar' => 'Title (Arabic)',
+            'title_en' => 'Title (English)',
+            'description_ar' => 'Text (Arabic)',
+            'description_en' => 'Text (English)',
+            'tags' => 'Tags',
+            'audience_type' => 'Audience',
+            'audience_ids' => 'Choose who',
+            'publish_mode' => 'Goes out',
+            'publish_at' => 'Publish on',
+            'event_starts_at' => 'Event starts',
+            'event_ends_at' => 'Event ends',
+            'display_until' => 'Show until',
+            'photo' => 'Picture',
+        ],
+        'tags_help' => 'Separate tags with commas, up to :max.',
+        'display_until_help' => 'Leave empty to keep it showing.',
+        'publish_now' => 'Now',
+        'publish_later' => 'At a set time',
+        'save_draft' => 'Save draft',
+        'publish' => 'Publish',
+        'schedule' => 'Schedule',
+        'saved_draft' => 'Draft saved.',
+        'published' => 'Saved and sent out.',
+        'errors' => [
+            'audience_required' => 'Choose at least one.',
+            'audience_offered' => 'Choose from the list offered.',
+            'publish_at_required' => 'Choose when it goes out.',
+            'publish_at_future' => 'The publish time must be in the future.',
+            'event_start_required' => 'An event needs a start time.',
+            'event_end_after_start' => 'The event cannot end before it starts.',
+            'display_until_after_publish' => 'It must keep showing after it goes out.',
+            'display_until_after_event' => 'It must keep showing until the event starts.',
+        ],
+    ],
+
+    'show' => [
+        'all_items' => 'All items',
+        'preview_note' => 'Readers do not see this yet.',
+        'event_when' => 'When',
+        'more' => 'More news',
+        'timing' => [
+            'upcoming' => 'Coming up',
+            'today' => 'Today',
+            'past' => 'Already took place',
+        ],
+    ],
+];

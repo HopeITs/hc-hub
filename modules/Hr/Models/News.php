@@ -18,6 +18,7 @@ use Modules\Hr\Enums\News\AudienceType;
 use Modules\Hr\Enums\News\NewsState;
 use Modules\Hr\Enums\News\NewsStatus;
 use Modules\Hr\Enums\News\NewsType;
+use Modules\Hr\Support\News\NewsCover;
 
 /**
  * A piece of News & Events content. Six concepts, kept apart:
@@ -553,5 +554,42 @@ class News extends Model
         }
 
         $this->unsetRelation('audienceTargets');
+    }
+
+    /**
+     * News a reader may see: addressed to everyone, or to one of the things
+     * the reader is (NewsViewer::targetsOf: their own record, governorate,
+     * centre, program or department).
+     *
+     * @param  Builder<self>  $query
+     * @param  array<string, list<int>>  $targets  audience type => ids
+     * @return Builder<self>
+     */
+    public function scopeVisibleTo(Builder $query, array $targets): Builder
+    {
+        return $query->where(function (Builder $q) use ($targets): void {
+            $q->where('news.audience_type', AudienceType::All->value);
+
+            foreach ($targets as $type => $ids) {
+                if ($ids === []) {
+                    continue;
+                }
+
+                $q->orWhere(fn (Builder $one) => $one
+                    ->where('news.audience_type', $type)
+                    ->whereExists(fn ($sub) => $sub->selectRaw('1')
+                        ->from('news_audience_targets')
+                        ->whereColumn('news_audience_targets.news_id', 'news.id')
+                        ->whereIn('news_audience_targets.target_id', $ids)));
+            }
+        });
+    }
+
+    /**
+     * The cover picture's address (streamed to signed-in readers), or null without one.
+     */
+    public function coverUrl(): ?string
+    {
+        return NewsCover::urlFor((int) $this->getKey());
     }
 }

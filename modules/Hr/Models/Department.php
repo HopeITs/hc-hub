@@ -46,6 +46,20 @@ class Department extends Model
     }
 
     /**
+     * The code of one department ('IT', ...), null for an unknown id or none (remembered).
+     */
+    public static function codeOf(int $id): ?string
+    {
+        $code = static::rememberLookup('codes', fn (): array => static::query()
+            ->toBase()
+            ->pluck('code', 'id')
+            ->map(fn (mixed $code): string => trim((string) $code))
+            ->all())[$id] ?? '';
+
+        return $code === '' ? null : $code;
+    }
+
+    /**
      * Departments ordered for a picker, id and name only.
      *
      * @return Collection<int, static>
