@@ -33,7 +33,7 @@ Cleanup lives in application code: `PlanIndicatorSourceObserver` on AnnualPlan a
 
 This covers Eloquent deletes only. A raw query-builder delete still orphans targets and no foreign key can stop it — `tests/Feature/PlanIndicatorTest.php` has a test named "a target outlives a source deleted through the query builder" documenting that remaining route, and `tests/Feature/Models/PlanIndicatorCleanupTest.php` covers the paths that are handled.
 
-`source_type` is VARCHAR(50), so a `Relation::enforceMorphMap()` with short keys ('annual_plan', not 'App\\Models\\AnnualPlan') is required rather than optional.
+`source_type` is VARCHAR(50), so a `Relation::enforceMorphMap()` with short keys ('annual_plan', not 'Modules\\Tracking\\Models\\AnnualPlan') is required rather than optional.
 
 ## Two reports columns are deliberately renamed from the ERD
 The ERD draws `reports.plan_indicators_id` (plural) and `reports.is_seen_by_MEAL` (mixed case). The migration uses `plan_indicator_id` and `is_seen_by_meal` instead.

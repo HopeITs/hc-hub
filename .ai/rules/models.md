@@ -21,7 +21,7 @@ paths:
         'proposal' => Proposal::class,
     ]);
 
-Put this in a service provider's boot(). Storing 'App\\Models\\AnnualPlan' would work today but leaves no headroom in the column and couples stored data to the namespace.
+Put this in a service provider's boot(). Storing 'Modules\\Tracking\\Models\\AnnualPlan' would work today but leaves no headroom in the column and couples stored data to the namespace.
 
 No foreign key backs source_id — see the migrations rule about orphans for the cleanup obligation.
 
@@ -59,7 +59,7 @@ Three changes landed together on 2026-09-18/21, all by user request:
 
 Every place that used to read/write `assigned_to` needed updating: `tasks/⚡index.blade.php`'s drawer (checkbox multi-select, not a `<select>`), `tasks/⚡show.blade.php` (subtask assignee inheritance copies ALL of the parent's `taskAssignees` rows), `calendar/⚡index.blade.php` (its own separate task create/edit form — same checkbox multi-select), the dashboard's "my work" query in `app/Livewire/Concerns/Dashboard/ReadsDashboardWork.php` (`whereHas('taskAssignees', ...)` instead of `where('assigned_to', ...)`), `proposals/⚡show.blade.php`'s related-tasks panel. `TaskFactory` no longer sets `assigned_to`; instead its `configure()`'s `afterCreating` hook auto-creates one `TaskAssignee` row if none exists yet, so `Task::factory()->create()` still yields a task with exactly one assignee by default (tests relying on a single deterministic assignee call `$task->taskAssignees()->delete()` first, then add their own).
 
-Sort-by-assignee (`orderByAssigneeName` in `app/Livewire/Concerns/Tasks/FiltersTaskDirectory.php`, used by `tasks/⚡index.blade.php`) now orders by each task's alphabetically-first assignee name, computed at the TASK level (not employee level) since a task can map to several employees — resolves via a `TaskAssignee::whereIn('task_id', ...)` query plus a `CASE id WHEN ... END` on `tasks.id`, not `assigned_to`.
+Sort-by-assignee (`orderByAssigneeName` in `modules/Tracking/Livewire/Concerns/Tasks/FiltersTaskDirectory.php`, used by `tasks/⚡index.blade.php`) now orders by each task's alphabetically-first assignee name, computed at the TASK level (not employee level) since a task can map to several employees — resolves via a `TaskAssignee::whereIn('task_id', ...)` query plus a `CASE id WHEN ... END` on `tasks.id`, not `assigned_to`.
 
 **Duplicate action removed**: `duplicateTask()` and every "Duplicate" button/icon in the task list and board are gone. `tasks.duplicate`/`duplicate_title`/`task_duplicated` lang keys removed.
 

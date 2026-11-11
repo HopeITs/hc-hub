@@ -4,6 +4,8 @@ use App\Models\HrDepartment;
 use App\Models\Role;
 use Illuminate\Database\ClassMorphViolationException;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\Account;
@@ -66,6 +68,8 @@ test('the morph map registers exactly the target sources, task sources, media ow
         'report_template' => ReportTemplate::class,
         'proposal_location' => ProposalLocation::class,
         'program_request' => ProgramRequest::class,
+        'city' => City::class,
+        'center' => Center::class,
     ]);
 });
 

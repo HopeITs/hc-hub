@@ -23,7 +23,7 @@ use Modules\Tracking\Models\LibraryIndicator;
 /**
  * The Indicator Library's entry dialog and its deactivate, reactivate and
  * delete confirmations. Every write goes through the
- * App\Actions\IndicatorLibrary actions, which authorize, lock the row and
+ * Modules\Tracking\Actions\IndicatorLibrary actions, which authorize, lock the row and
  * re-check the in-use and has-targets rules themselves; the flags kept here
  * only shape the form.
  *

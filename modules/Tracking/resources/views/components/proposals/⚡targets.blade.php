@@ -33,7 +33,7 @@ use Livewire\Component;
  * institutional ones, attached to nodes of the proposal's own framework) and
  * the per-center targets grid (rows = instances in the framework, columns =
  * linked projects, labelled center · city). Every write goes through the
- * App\Actions\Targets actions, which authorize, lock the proposal and refuse
+ * Modules\Tracking\Actions\Targets actions, which authorize, lock the proposal and refuse
  * foreign ids; the flags kept here only shape the page.
  *
  * The grid is held in $grid and sent only on Save, as one batch, with the

@@ -19,7 +19,7 @@ use Livewire\Component;
  * The managed evidence type list (contracts.md §12.4, D-42). MEAL
  * (evidence-types.manage) reads it and adds, renames, reorders, deactivates
  * and deletes; there is no read-only view. Every write goes through an
- * App\Actions\EvidenceTypes action, which authorizes again under lock.
+ * Modules\Tracking\Actions\EvidenceTypes action, which authorizes again under lock.
  */
 new #[Layout('layouts::desk'), Title('titles.evidence_types')] class extends Component {
     public bool $showEvidenceTypeModal = false;

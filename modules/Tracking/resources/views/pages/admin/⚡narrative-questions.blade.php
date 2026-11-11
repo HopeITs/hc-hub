@@ -21,7 +21,7 @@ use Livewire\Component;
 /*
  * The org-wide narrative question bank (contracts.md §12.4, D-43). Only MEAL
  * (narrative-questions.manage) opens it: there is no view permission. Every
- * write goes through an App\Actions\NarrativeQuestions action, which
+ * write goes through an Modules\Tracking\Actions\NarrativeQuestions action, which
  * authorizes again under lock. Questions are ordered within their frequency.
  */
 new #[Layout('layouts::desk'), Title('titles.narrative_questions')] class extends Component {

@@ -1,0 +1,557 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Hr\Models;
+
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Hr\Enums\News\AudienceType;
+use Modules\Hr\Enums\News\NewsState;
+use Modules\Hr\Enums\News\NewsStatus;
+use Modules\Hr\Enums\News\NewsType;
+
+/**
+ * A piece of News & Events content. Six concepts, kept apart:
+ *
+ *   type            NewsType       what it is (news, announcement, event)
+ *   tags            NewsTag        what it is ABOUT (free labels); never restricts who sees it
+ *   audience_type + audienceTargets  AudienceType  who may see it (scopeVisibleTo)
+ *   status + published_at           NewsStatus     draft / published / archived, and Publish At
+ *   event_starts_at / event_ends_at              when an event happens (event_date = its local day)
+ *   display_until                                 expiration of the item in active feeds
+ *
+ * Every date is stored and compared in config('app.timezone'). Scheduled,
+ * expired, upcoming, today and past are derived here in SQL, never stored and
+ * never decided in Blade.
+ *
+ * @property int $id
+ * @property NewsType $type
+ * @property NewsStatus $status
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property string $title_ar
+ * @property string|null $title_en
+ * @property string $description_ar
+ * @property string|null $description_en
+ * @property string|null $newsable_type
+ * @property int|null $newsable_id
+ * @property AudienceType $audience_type
+ * @property string|null $photo
+ * @property mixed|null $display_until
+ * @property mixed|null $archived_at
+ * @property mixed|null $published_at
+ * @property CarbonImmutable|null $event_date
+ * @property mixed|null $event_starts_at
+ * @property mixed|null $event_ends_at
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ */
+#[Fillable(['type', 'status', 'title_ar', 'title_en', 'description_ar', 'description_en', 'photo', 'display_until', 'published_at', 'event_date', 'event_starts_at', 'event_ends_at', 'archived_at', 'newsable_id', 'newsable_type', 'audience_type'])]
+class News extends Model
+{
+    protected $table = 'news';
+
+    protected $attributes = [
+        'type' => 'news',
+        'status' => 'published',
+        'audience_type' => 'all',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'type' => NewsType::class,
+            'status' => NewsStatus::class,
+            'audience_type' => AudienceType::class,
+            'published_at' => 'datetime',
+            'display_until' => 'datetime',
+            'archived_at' => 'datetime',
+            'event_date' => 'date',
+            'event_starts_at' => 'datetime',
+            'event_ends_at' => 'datetime',
+        ];
+    }
+
+    protected static function booted(): void
+    {
+        // event_date is the event's local day: kept for date-indexed queries
+        // and for the code that has always read it.
+        static::saving(function (News $news) {
+            if ($news->type === NewsType::Event && $news->event_starts_at) {
+                $news->event_date = $news->event_starts_at->copy()->startOfDay();
+            }
+        });
+    }
+
+    // ------------------------------------------------------------------
+    // Relations
+    // ------------------------------------------------------------------
+
+    /**
+     * The legacy "Related To" subject (newsable_*). Kept for old rows only:
+     * the app now describes what an item is about with tags().
+     */
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function newsable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * Free labels describing what the item is about (never its audience).
+     *
+     * @return HasMany<NewsTag, $this>
+     */
+    public function tags(): HasMany
+    {
+        return $this->hasMany(NewsTag::class)->orderBy('id');
+    }
+
+    /**
+     * The ids of the cities/centers/... in the audience (kind = audience_type).
+     *
+     * @return HasMany<NewsAudienceTarget, $this>
+     */
+    public function audienceTargets(): HasMany
+    {
+        return $this->hasMany(NewsAudienceTarget::class);
+    }
+
+    /**
+     * @return HasMany<NewsExternalPublication, $this>
+     */
+    public function externalPublications(): HasMany
+    {
+        return $this->hasMany(NewsExternalPublication::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function createdBy(): BelongsTo
+    {
+        return $this->creator();
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function updatedBy(): BelongsTo
+    {
+        return $this->updater();
+    }
+
+    // ------------------------------------------------------------------
+    // Lifecycle scopes (the SQL twin of NewsState::of)
+    // ------------------------------------------------------------------
+
+    /**
+     * Published, its Publish At reached, not expired: what feeds may show.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeLive(Builder $query, ?CarbonInterface $now = null): Builder
+    {
+        $now ??= now();
+
+        return $query
+            ->where('news.status', NewsStatus::Published->value)
+            ->whereNotNull('news.published_at')
+            ->where('news.published_at', '<=', $now)
+            ->where(fn (Builder $q) => $q->whereNull('news.display_until')->orWhere('news.display_until', '>', $now));
+    }
+
+    /**
+     * Published and its Publish At reached, expired or not: what the
+     * News & Events page and archive may show (past events stay reachable).
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeReleased(Builder $query, ?CarbonInterface $now = null): Builder
+    {
+        $now ??= now();
+
+        return $query
+            ->where('news.status', NewsStatus::Published->value)
+            ->whereNotNull('news.published_at')
+            ->where('news.published_at', '<=', $now);
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeInState(Builder $query, NewsState|string $state, ?CarbonInterface $now = null): Builder
+    {
+        $state = $state instanceof NewsState ? $state : NewsState::from($state);
+        $now ??= now();
+
+        return match ($state) {
+            NewsState::Draft => $query->where('news.status', NewsStatus::Draft->value),
+            NewsState::Archived => $query->where('news.status', NewsStatus::Archived->value),
+            NewsState::Scheduled => $query->where('news.status', NewsStatus::Published->value)
+                ->where(fn (Builder $q) => $q->whereNull('news.published_at')->orWhere('news.published_at', '>', $now)),
+            NewsState::Expired => $query->released($now)
+                ->whereNotNull('news.display_until')->where('news.display_until', '<=', $now),
+            NewsState::Published => $query->live($now),
+        };
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeOfType(Builder $query, NewsType|string $type): Builder
+    {
+        return $query->where('news.type', $type instanceof NewsType ? $type->value : $type);
+    }
+
+    /**
+     * News articles and announcements: everything that is not an event.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeArticles(Builder $query): Builder
+    {
+        return $query->where('news.type', '!=', NewsType::Event->value);
+    }
+
+    // ------------------------------------------------------------------
+    // Event categorization (by the app timezone's calendar day)
+    // ------------------------------------------------------------------
+
+    /**
+     * Events starting after today.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeUpcomingEvents(Builder $query, ?CarbonInterface $now = null): Builder
+    {
+        $endOfToday = ($now ?? now())->copy()->endOfDay();
+
+        return $query->ofType(NewsType::Event)
+            ->where('news.event_starts_at', '>', $endOfToday)
+            ->orderBy('news.event_starts_at');
+    }
+
+    /**
+     * Events taking place today: starting today, or running across today.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeTodayEvents(Builder $query, ?CarbonInterface $now = null): Builder
+    {
+        $now ??= now();
+        $start = $now->copy()->startOfDay();
+        $end = $now->copy()->endOfDay();
+
+        return $query->ofType(NewsType::Event)
+            ->where('news.event_starts_at', '<=', $end)
+            ->where(fn (Builder $q) => $q
+                ->where('news.event_starts_at', '>=', $start)
+                ->orWhere('news.event_ends_at', '>=', $start))
+            ->orderBy('news.event_starts_at');
+    }
+
+    /**
+     * Events that ended before today.
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopePastEvents(Builder $query, ?CarbonInterface $now = null): Builder
+    {
+        $start = ($now ?? now())->copy()->startOfDay();
+
+        return $query->ofType(NewsType::Event)
+            ->where(fn (Builder $q) => $q
+                ->where(fn (Builder $one) => $one->whereNull('news.event_ends_at')->where('news.event_starts_at', '<', $start))
+                ->orWhere(fn (Builder $one) => $one->whereNotNull('news.event_ends_at')->where('news.event_ends_at', '<', $start)))
+            ->orderByDesc('news.event_starts_at');
+    }
+
+    // ------------------------------------------------------------------
+    // Audience (backend-enforced visibility)
+    // ------------------------------------------------------------------
+
+    // ------------------------------------------------------------------
+    // Derived values
+    // ------------------------------------------------------------------
+
+    public function state(?CarbonInterface $now = null): NewsState
+    {
+        return NewsState::of($this, $now);
+    }
+
+    public function isEvent(): bool
+    {
+        return $this->type === NewsType::Event;
+    }
+
+    /**
+     * 'upcoming' | 'today' | 'past' for an event, null otherwise.
+     */
+    public function eventTiming(?CarbonInterface $now = null): ?string
+    {
+        if (! $this->isEvent() || ! $this->event_starts_at) {
+            return null;
+        }
+
+        $now ??= now();
+        $start = $now->copy()->startOfDay();
+        $end = $now->copy()->endOfDay();
+        $last = $this->event_ends_at ?? $this->event_starts_at;
+
+        return match (true) {
+            $this->event_starts_at->gt($end) => 'upcoming',
+            $last->lt($start) => 'past',
+            default => 'today',
+        };
+    }
+
+    public function getIsExpiredAttribute(): bool
+    {
+        return $this->display_until !== null && $this->display_until->isPast();
+    }
+
+    public function getTitleAttribute(): string
+    {
+        return $this->localizedTitle();
+    }
+
+    public function getDescriptionAttribute(): ?string
+    {
+        return $this->localizedDescription();
+    }
+
+    public function localizedTitle(?string $locale = null): string
+    {
+        $locale ??= app()->getLocale();
+
+        return $locale === 'ar'
+            ? ($this->title_ar ?: ($this->title_en ?? ''))
+            : ($this->title_en ?: ($this->title_ar ?? ''));
+    }
+
+    public function localizedDescription(?string $locale = null): ?string
+    {
+        $locale ??= app()->getLocale();
+
+        return $locale === 'ar'
+            ? ($this->description_ar ?: $this->description_en)
+            : ($this->description_en ?: $this->description_ar);
+    }
+
+    /**
+     * The direction of the text actually shown for $locale (it may fall back).
+     */
+    public function textDirection(?string $locale = null): string
+    {
+        $locale ??= app()->getLocale();
+        $usesArabic = $locale === 'ar' ? filled($this->title_ar) : blank($this->title_en);
+
+        return $usesArabic ? 'rtl' : 'ltr';
+    }
+
+    // ------------------------------------------------------------------
+    // Tags (what the item is about; never who sees it)
+    // ------------------------------------------------------------------
+
+    public const MAX_TAGS = 10;
+
+    public const MAX_TAG_LENGTH = 60;
+
+    /**
+     * @return list<string> the item's tags, in the order they were added
+     */
+    public function tagNames(): array
+    {
+        $tags = $this->relationLoaded('tags') ? $this->tags : $this->tags()->get();
+
+        return array_values($tags->pluck('tag')->map(fn ($tag): string => (string) $tag)->all());
+    }
+
+    /**
+     * Trimmed, inner whitespace collapsed, at most 60 characters, without
+     * case-insensitive duplicates (the first spelling wins), at most 10.
+     *
+     * @param  iterable<mixed>  $tags
+     * @return list<string>
+     */
+    public static function normalizeTags(iterable $tags): array
+    {
+        $clean = [];
+
+        foreach ($tags as $tag) {
+            if (! is_scalar($tag)) {
+                continue;
+            }
+
+            $tag = trim((string) preg_replace('/\s+/u', ' ', (string) $tag));
+            $tag = trim(mb_substr($tag, 0, self::MAX_TAG_LENGTH));
+
+            if ($tag === '') {
+                continue;
+            }
+
+            $key = mb_strtolower($tag);
+            $clean[$key] ??= $tag;
+
+            if (count($clean) >= self::MAX_TAGS) {
+                break;
+            }
+        }
+
+        return array_values($clean);
+    }
+
+    /**
+     * Replace the item's tags with $tags (normalized, see normalizeTags()).
+     *
+     * @param  iterable<mixed>  $tags
+     * @return list<string> what was stored
+     */
+    public function syncTags(iterable $tags): array
+    {
+        $tags = self::normalizeTags($tags);
+
+        $this->tags()->delete();
+
+        if ($tags !== []) {
+            // insertOrIgnore: a collation may still fold two spellings into one key.
+            NewsTag::query()->insertOrIgnore(array_map(
+                fn (string $tag) => ['news_id' => $this->getKey(), 'tag' => $tag],
+                $tags,
+            ));
+        }
+
+        $this->unsetRelation('tags');
+
+        return $tags;
+    }
+
+    /**
+     * Items carrying $tag (case-insensitive, surrounding spaces ignored).
+     *
+     * @param  Builder<self>  $query
+     * @return Builder<self>
+     */
+    public function scopeTagged(Builder $query, string $tag): Builder
+    {
+        $tag = mb_strtolower(trim((string) preg_replace('/\s+/u', ' ', $tag)));
+
+        return $query->whereExists(fn ($sub) => $sub->selectRaw('1')
+            ->from('news_tags')
+            ->whereColumn('news_tags.news_id', 'news.id')
+            ->whereRaw('LOWER(tag) = ?', [$tag]));
+    }
+
+    /**
+     * The tags used most across all items, most used first.
+     *
+     * @return list<string>
+     */
+    public static function popularTags(int $limit = 30): array
+    {
+        return array_values(NewsTag::query()
+            ->select('tag')
+            ->selectRaw('COUNT(*) as uses')
+            ->groupBy('tag')
+            ->orderByDesc('uses')
+            ->orderBy('tag')
+            ->limit($limit)
+            ->pluck('tag')
+            ->map(fn ($tag): string => (string) $tag)
+            ->all());
+    }
+
+    /**
+     * "All employees", or "Centers: A, B" — the audience, for display.
+     */
+    public function audienceSummary(int $names = 3): string
+    {
+        if (! $this->audience_type->needsTargets()) {
+            return $this->audience_type->label();
+        }
+
+        $entities = $this->audienceEntities();
+        $shown = $entities->take($names)->pluck('name')->filter()->implode('، ');
+        $more = $entities->count() - min($names, $entities->count());
+
+        return $this->audience_type->label().': '.$shown.($more > 0 ? ' +'.$more : '');
+    }
+
+    /**
+     * The audience's cities/centers/... as models.
+     *
+     * @return Collection<int, Model>
+     */
+    public function audienceEntities(): Collection
+    {
+        $class = $this->audience_type->modelClass();
+
+        if ($class === null) {
+            return collect();
+        }
+
+        $ids = $this->relationLoaded('audienceTargets')
+            ? $this->audienceTargets->pluck('target_id')
+            : $this->audienceTargets()->pluck('target_id');
+
+        return $ids->isEmpty() ? collect() : $class::query()->whereIn('id', $ids)->get();
+    }
+
+    /**
+     * @param  iterable<int>  $ids
+     */
+    public function syncAudience(AudienceType $type, iterable $ids): void
+    {
+        $this->audience_type = $type;
+        $this->save();
+
+        $this->audienceTargets()->delete();
+
+        if ($type->needsTargets()) {
+            $rows = collect($ids)->map(fn ($id) => (int) $id)->filter()->unique()
+                ->map(fn (int $id) => ['news_id' => $this->getKey(), 'target_id' => $id])->values()->all();
+
+            if ($rows !== []) {
+                NewsAudienceTarget::query()->insert($rows);
+            }
+        }
+
+        $this->unsetRelation('audienceTargets');
+    }
+}

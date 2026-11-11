@@ -18,7 +18,7 @@ use Modules\Core\Models\User;
 /**
  * A supervision exception or addition on top of the HR direct manager
  * (contracts §10, D-13). Routing reads it through Modules\Tracking\Support\SupervisionMap;
- * the only writers are App\Actions\Supervisions\{AddSupervision,RemoveSupervision}.
+ * the only writers are Modules\Tracking\Actions\Supervisions\{AddSupervision,RemoveSupervision}.
  * Supervision grants no permission and no visibility.
  *
  * @property int $id

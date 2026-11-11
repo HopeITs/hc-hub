@@ -19,7 +19,7 @@ use Livewire\Component;
  * The managed sector list (contracts.md §12.5, D-47). Everyone with
  * sectors.view reads it; MEAL and the General Manager (sectors.manage)
  * add, rename, reorder, deactivate and delete. Every write goes through
- * an App\Actions\Sectors action, which authorizes again under lock.
+ * an Modules\Tracking\Actions\Sectors action, which authorizes again under lock.
  */
 new #[Layout('layouts::desk'), Title('titles.sectors')] class extends Component {
     public bool $showSectorModal = false;

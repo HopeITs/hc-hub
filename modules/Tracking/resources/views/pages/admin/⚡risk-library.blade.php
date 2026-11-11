@@ -21,7 +21,7 @@ use Livewire\Component;
  * logframe picks its risks from this list and nowhere else. Only holders of
  * risk-library.manage (MEAL, General Manager) open the page and add, edit,
  * reorder, deactivate and delete entries. Every write goes through an
- * App\Actions\RiskLibrary action, which authorizes again under lock.
+ * Modules\Tracking\Actions\RiskLibrary action, which authorizes again under lock.
  */
 new #[Layout('layouts::desk'), Title('titles.risk_library')] class extends Component {
     #[Url(except: '')]

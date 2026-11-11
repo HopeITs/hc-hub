@@ -39,6 +39,8 @@ use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Livewire\Component;
 use Livewire\Livewire;
 use LogicException;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\Account;
@@ -315,7 +317,8 @@ class AppServiceProvider extends ServiceProvider
      * subject of role and permission changes in the audit trail. Every model
      * activity is recorded against (see App\Notifications\TracksActivity) is
      * mapped too, because `activities.subject_type` and
-     * `notifications.subject_type` store these keys.
+     * `notifications.subject_type` store these keys. `city` and `center` are
+     * what an HR news item can be about (`news.newsable_type`).
      */
     protected function configureMorphMap(): void
     {
@@ -350,6 +353,8 @@ class AppServiceProvider extends ServiceProvider
             'report_template' => ReportTemplate::class,
             'proposal_location' => ProposalLocation::class,
             'program_request' => ProgramRequest::class,
+            'city' => City::class,
+            'center' => Center::class,
         ]);
     }
 
@@ -374,7 +379,7 @@ class AppServiceProvider extends ServiceProvider
         Factory::guessModelNamesUsing(function (Factory $factory): string {
             $model = substr(class_basename($factory), 0, -strlen('Factory'));
 
-            foreach (['App\\Models\\', 'Modules\\Core\\Models\\', 'Modules\\Tracking\\Models\\'] as $namespace) {
+            foreach (['App\\Models\\', 'Modules\\Core\\Models\\', 'Modules\\Tracking\\Models\\', 'Modules\\Hr\\Models\\'] as $namespace) {
                 if (is_a($namespace.$model, Model::class, true)) {
                     return $namespace.$model;
                 }
