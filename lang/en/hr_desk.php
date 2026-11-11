@@ -77,14 +77,26 @@ return [
         ],
         'calendar' => [
             'title' => 'HR calendar',
-            'description' => 'Holidays, events and your leaves over the next 30 days.',
+            'description' => 'Holidays, events and your leaves, with the leaves, birthdays and ending contracts of your team, over the next 30 days.',
             'tagline' => 'The next 30 days',
             'empty' => 'Nothing in the next 30 days.',
             'kind' => [
                 'holiday' => 'Holiday',
                 'event' => 'Event',
                 'leave' => 'My leave',
+                'team-leave' => 'Team leave',
+                'birthday' => 'Birthday',
+                'contract' => 'Contract ends',
             ],
+        ],
+        'attention' => [
+            'title' => 'Needs your attention',
+            'description' => 'Your contract ending soon and your leave requests left waiting.',
+            'tagline' => 'Only what is on your own record',
+            'empty' => 'Nothing needs your attention.',
+            'contract' => 'Your contract ends',
+            'leave' => 'Your leave request is still waiting',
+            'still_waiting' => 'Waiting',
         ],
         'clock' => [
             'title' => 'My working day',

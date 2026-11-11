@@ -36,8 +36,10 @@ abstract class PageCard
 
     /**
      * Headline figures, the most telling first. The card shows as many as fit.
+     * A figure marked `clock` is the time of day, which the browser keeps
+     * turning (resources/js/desk-clock.js).
      *
-     * @return list<array{label: string, value: string, tone: string}>
+     * @return list<array{label: string, value: string, tone: string, clock?: bool}>
      */
     abstract public function figures(User $user): array;
 

@@ -7,6 +7,7 @@ namespace Modules\Hr\Support\Desk;
 use Closure;
 use Illuminate\Support\Facades\Route;
 use Modules\Core\Models\User;
+use Modules\Hr\Support\Desk\Cards\AttentionCard;
 use Modules\Hr\Support\Desk\Cards\BadgesCard;
 use Modules\Hr\Support\Desk\Cards\BirthdaysCard;
 use Modules\Hr\Support\Desk\Cards\CalendarCard;
@@ -58,6 +59,7 @@ final class HrPanels
         EventsCard::class,
         CalendarCard::class,
         ClockCard::class,
+        AttentionCard::class,
         LeaveBalanceCard::class,
         MyLeavesCard::class,
         NextHolidayCard::class,

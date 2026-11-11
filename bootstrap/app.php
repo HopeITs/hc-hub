@@ -4,6 +4,7 @@ use App\Http\DeniedAccessRecorder;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureRequestCameThroughTrustedProxy;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
+use App\Http\Middleware\RecordPresence;
 use App\Http\Middleware\RedirectToHttps;
 use App\Http\Middleware\RemembersRecentRecord;
 use App\Http\Middleware\SecurityHeaders;
@@ -48,6 +49,7 @@ return Application::configure(basePath: dirname(__DIR__))
             SetLocale::class,
             EnsureAccountIsActive::class,
             RemembersRecentRecord::class,
+            RecordPresence::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

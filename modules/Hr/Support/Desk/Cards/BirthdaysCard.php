@@ -46,7 +46,7 @@ final class BirthdaysCard extends HrCard
 
     public function figures(User $user): array
     {
-        $people = $this->people($user);
+        $people = $this->within($user, self::Days);
         $today = CarbonImmutable::today()->toDateString();
 
         return [
@@ -57,7 +57,7 @@ final class BirthdaysCard extends HrCard
 
     protected function records(User $user, string $search): Collection
     {
-        return $this->people($user)->map(function (array $person): array {
+        return $this->within($user, self::Days)->map(function (array $person): array {
             $date = CarbonImmutable::parse($person['date']);
             $isToday = $date->isToday();
 
@@ -69,9 +69,12 @@ final class BirthdaysCard extends HrCard
     }
 
     /**
+     * The viewer's team whose birthday falls in the next $days days (today
+     * included), soonest first. Also read by the HR calendar (CalendarCard).
+     *
      * @return Collection<int, array{id: int, name: string, words: string, date: string}>
      */
-    private function people(User $user): Collection
+    public function within(User $user, int $days): Collection
     {
         $ids = $this->viewer($user)->teamIds();
 
@@ -82,7 +85,7 @@ final class BirthdaysCard extends HrCard
         $today = CarbonImmutable::today();
         $week = [];
 
-        for ($day = $today; $day->lte($today->addDays(self::Days - 1)); $day = $day->addDay()) {
+        for ($day = $today; $day->lte($today->addDays($days - 1)); $day = $day->addDay()) {
             $week[$day->format('m-d')] = $day->toDateString();
         }
 
@@ -91,7 +94,7 @@ final class BirthdaysCard extends HrCard
         }
 
         /* Birthdays do not change during a day: one read per team and day. */
-        $rows = Cache::remember('hr.desk.birthdays.'.md5(implode(',', $ids)).'.'.app()->getLocale().'.'.$today->toDateString(), 900, fn (): array => Employee::query()
+        $rows = Cache::remember('hr.desk.birthdays.'.md5(implode(',', $ids)).'.'.$days.'.'.app()->getLocale().'.'.$today->toDateString(), 900, fn (): array => Employee::query()
             ->select([...Employee::NameColumns, 'actual_dob'])
             ->whereIn('id', $ids)
             ->where('is_active', true)

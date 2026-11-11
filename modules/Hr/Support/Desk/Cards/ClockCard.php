@@ -55,7 +55,7 @@ final class ClockCard extends HrCard
     {
         $now = CarbonImmutable::now(self::Timezone);
         $day = $this->today($user, $now);
-        $figures = [$this->figure($now->translatedFormat('l j F'), $now->format('H:i'), 'active')];
+        $figures = [[...$this->figure($now->translatedFormat('l j F'), $now->format('H:i'), 'active'), 'clock' => true]];
 
         if ($day === null) {
             return $figures;

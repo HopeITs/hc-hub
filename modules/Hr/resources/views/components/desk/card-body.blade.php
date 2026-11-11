@@ -22,7 +22,7 @@
             @foreach ($figures as $figure)
                 <div class="dk-card-fig" data-tone="{{ $figure['tone'] }}">
                     <dt>{{ $figure['label'] }}</dt>
-                    <dd class="dk-num">{{ $figure['value'] }}</dd>
+                    <dd class="dk-num" @if ($figure['clock'] ?? false) data-desk-clock @endif>{{ $figure['value'] }}</dd>
                 </div>
             @endforeach
         </dl>

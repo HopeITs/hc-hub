@@ -8,6 +8,7 @@ import './list-layout';
 import './charts';
 import './count-up';
 import './desk-ask';
+import './desk-clock';
 import './desk-customize';
 import './desk-drop';
 import './desk-filters';

@@ -91,9 +91,12 @@ final class EndingContractsCard extends HrCard
     }
 
     /**
+     * The running contracts ending within EndingSoonDays that the viewer
+     * oversees, soonest first. Also read by the HR calendar (CalendarCard).
+     *
      * @return Collection<int, Contract>
      */
-    private function contracts(User $user): Collection
+    public function contracts(User $user): Collection
     {
         $viewer = $this->viewer($user);
 
