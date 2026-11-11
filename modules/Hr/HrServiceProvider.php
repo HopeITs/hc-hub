@@ -5,10 +5,18 @@ declare(strict_types=1);
 namespace Modules\Hr;
 
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
+use Modules\Hr\Console\ApplyContractAmendmentsCommand;
+use Modules\Hr\Console\CheckContractAmendmentsCommand;
 use Modules\Hr\Console\ImportHrCommand;
+use Modules\Hr\Console\Journeys\DeactivateDepartedEmployees;
+use Modules\Hr\Console\Journeys\SendContractExpirationWarnings;
+use Modules\Hr\Console\Journeys\SendOrientationReminders;
+use Modules\Hr\Console\Journeys\TrackRenewalJourneys;
+use Modules\Hr\Support\Journeys\JourneyHooks;
 use Modules\Hr\Support\Recruitment\RecruitmentBootstrap;
 use Modules\Hr\Support\SalaryCipher;
 
@@ -39,10 +47,32 @@ class HrServiceProvider extends ServiceProvider
 
         $this->commands([
             ImportHrCommand::class,
+            ApplyContractAmendmentsCommand::class,
+            CheckContractAmendmentsCommand::class,
+            SendOrientationReminders::class,
+            SendContractExpirationWarnings::class,
+            TrackRenewalJourneys::class,
+            DeactivateDepartedEmployees::class,
         ]);
+
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            // Contract amendments take effect on their date; the weekly check logs a broken history.
+            $schedule->command(ApplyContractAmendmentsCommand::class)->dailyAt('21:25')->withoutOverlapping()->onOneServer();
+            $schedule->command(CheckContractAmendmentsCommand::class)->weeklyOn(0, '06:00')->onOneServer();
+
+            // Journeys (as the HR app ran them): expiry warnings and overdue orientations in the
+            // morning; renewal journeys, then departed volunteers, after the evening contract runs.
+            $schedule->command(SendContractExpirationWarnings::class)->dailyAt('08:00')->withoutOverlapping()->onOneServer();
+            $schedule->command(SendOrientationReminders::class)->dailyAt('08:10')->withoutOverlapping()->onOneServer();
+            $schedule->command(TrackRenewalJourneys::class)->dailyAt('21:45')->withoutOverlapping()->onOneServer();
+            $schedule->command(DeactivateDepartedEmployees::class)->dailyAt('21:50')->withoutOverlapping()->onOneServer();
+        });
 
         // Rate limiters, observers and bindings; outside the routes so it also runs under route:cache.
         RecruitmentBootstrap::boot();
+
+        // Contract writes that start or move an employee journey.
+        JourneyHooks::register();
 
         if (! $this->app->routesAreCached()) {
             $this->loadAreaRoutes();

@@ -14,7 +14,8 @@ use Modules\Hr\Models\TerminationReason;
  */
 final class ContractOptions
 {
-    public const WEEK_DAYS = [0 => 'saturday', 1 => 'sunday', 2 => 'monday', 3 => 'tuesday', 4 => 'wednesday', 5 => 'thursday', 6 => 'friday'];
+    /** Stored work_day_from / work_day_to values: Carbon's dayOfWeek, Sunday = 0 (as HR's composer and the Desk clock read them). */
+    public const WEEK_DAYS = [0 => 'sunday', 1 => 'monday', 2 => 'tuesday', 3 => 'wednesday', 4 => 'thursday', 5 => 'friday', 6 => 'saturday'];
 
     /**
      * @return array<int, string>

@@ -47,9 +47,9 @@ enum ContractAmendmentStatus: int implements HasStatusTone
     public function label(): string
     {
         return __(match ((int) $this->value) {
-            self::Applied->value => 'contracts.amendment.status.applied',
-            self::Approved->value => 'contracts.amendment.status.approved',
-            default => 'contracts.amendment.status.draft',
+            self::Applied->value => 'hr_contract_amendments.status.applied',
+            self::Approved->value => 'hr_contract_amendments.status.approved',
+            default => 'hr_contract_amendments.status.draft',
         });
     }
 }

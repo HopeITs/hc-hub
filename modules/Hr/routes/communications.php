@@ -20,5 +20,5 @@ Route::get('/hr/news/{news}/cover', ShowNewsCover::class)->whereNumber('news')->
 Route::livewire('/hr/inbox', 'hr::inbox.index')->name('hr.inbox');
 Route::livewire('/hr/feedback', 'hr::feedback.index')->name('hr.feedback.index');
 Route::livewire('/hr/activity', 'hr::activity.index')->name('hr.activity.index');
-Route::livewire('/hr/statistics', 'hr::desk.statistics')->name('hr.statistics.index');
+Route::redirect('/hr/statistics', '/hr/statistics/general')->name('hr.statistics.index');
 Route::livewire('/hr/assistant', 'hr::assistant.index')->name('hr.assistant');

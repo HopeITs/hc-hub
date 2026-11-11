@@ -171,6 +171,10 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.show')] class extends 
                 @can('export', $contract)
                     <x-ui.button icon="printer" :href="route('hr.contracts.print', $contract->id)" target="_blank" data-test="print-contract">{{ __('hr_contracts.actions.print') }}</x-ui.button>
                 @endcan
+                @can('export', $contract)
+                    <x-ui.button icon="document-text" :href="route('hr.contracts.legal', $contract->id)" target="_blank" data-test="print-contract-legal">{{ __('hr_contract_amendments.actions.print_legal') }}</x-ui.button>
+                @endcan
+                <x-ui.button icon="document-duplicate" :href="route('hr.contracts.amendments.index', $contract->id)" wire:navigate data-test="contract-amendments">{{ __('hr_contract_amendments.actions.list') }}</x-ui.button>
                 @can('update', $contract)
                     <x-ui.button icon="pencil-square" :href="route('hr.contracts.edit', $contract->id)" wire:navigate>{{ __('hr_contracts.actions.edit') }}</x-ui.button>
                     @unless ($contract->isTerminated() || $status === ContractStatus::Draft)

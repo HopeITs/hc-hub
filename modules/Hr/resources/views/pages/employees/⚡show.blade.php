@@ -19,7 +19,7 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
     use ReadsEmployeeProfile;
     use WithFileUploads;
 
-    public const TABS = ['overview', 'records', 'family', 'contracts', 'leave', 'badges', 'card'];
+    public const TABS = ['overview', 'records', 'family', 'contracts', 'leave', 'badges', 'card', 'journeys'];
 
     #[Url(except: 'overview')]
     public string $tab = 'overview';
@@ -57,6 +57,7 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
             'leave' => $this->isSelf || $this->canViewRecords,
             'badges' => $this->canViewBadges,
             'card' => $this->canViewCard,
+            'journeys' => $this->canEdit,
             default => true,
         }));
     }
@@ -76,7 +77,7 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
     $muted = 'text-secondary-medium dark:text-ink-muted';
     $ink = 'text-secondary-dark dark:text-ink';
     $fallback = auth()->user()->can('employees.view') ? route('hr.employees.index') : route('dashboard');
-    $tabs = array_map(fn (string $key): array => ['key' => $key, 'label' => __('hr_employees.tabs.'.$key)], $this->visibleTabs());
+    $tabs = array_map(fn (string $key): array => ['key' => $key, 'label' => $key === 'journeys' ? __('hr_journeys.tab') : __('hr_employees.tabs.'.$key)], $this->visibleTabs());
 @endphp
 
 <section class="@container/directory flex flex-col gap-5" data-employee-profile="{{ $employee->id }}">
@@ -134,6 +135,8 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
         @include('hr::pages.employees._show-badges')
     @elseif ($tab === 'card')
         @include('hr::pages.employees._show-card')
+    @elseif ($tab === 'journeys')
+        <livewire:hr::employees.journeys :employee-id="$employee->id" :key="'employee-journeys-'.$employee->id" lazy />
     @endif
 
     @include('hr::pages.employees._show-modals')
