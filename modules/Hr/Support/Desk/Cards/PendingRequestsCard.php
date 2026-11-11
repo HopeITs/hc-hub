@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Support\Desk\Cards;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Checklist;
@@ -42,7 +43,10 @@ final class PendingRequestsCard extends HrCard
 
     public function figures(User $user): array
     {
-        return [$this->figure(__('hr_desk.cards.pending-requests.waiting'), $this->pending($user)->count(), 'warn')];
+        $employeeId = $this->viewer($user)->employeeId();
+        $waiting = $employeeId === null ? 0 : $this->waitingOn($employeeId)->count();
+
+        return [$this->figure(__('hr_desk.cards.pending-requests.waiting'), $waiting, 'warn')];
     }
 
     public function health(User $user): ?string
@@ -73,13 +77,21 @@ final class PendingRequestsCard extends HrCard
             return new Collection;
         }
 
-        return once(fn (): Collection => Checklist::query()
+        return once(fn (): Collection => $this->waitingOn($employeeId)
             ->select(['id', 'item_id', 'employee_id', 'delivered_id', 'delivered_status', 'created_at'])
-            ->where('delivered_id', $employeeId)
-            ->where('delivered_status', 'pending')
             ->with(['item:id,name', 'employee:'.implode(',', Employee::NameColumns)])
             ->latest()
             ->limit(self::RowLimit)
             ->get());
+    }
+
+    /**
+     * The requests waiting on the employee to hand an item over, as the figure counts them and the list shows them.
+     *
+     * @return Builder<Checklist>
+     */
+    private function waitingOn(int $employeeId): Builder
+    {
+        return Checklist::query()->where('delivered_id', $employeeId)->where('delivered_status', 'pending');
     }
 }

@@ -42,11 +42,17 @@ final class BadgesCard extends HrCard
 
     public function figures(User $user): array
     {
-        $badges = $this->mine($user);
+        $employeeId = $this->viewer($user)->employeeId();
+        $byType = $employeeId === null ? collect() : Badge::query()
+            ->where('employee_id', $employeeId)
+            ->whereIn('type', [BadgeType::Reward->value, BadgeType::Warning->value])
+            ->groupBy('type')
+            ->selectRaw('type, count(*) as badges')
+            ->pluck('badges', 'type');
 
         return [
-            $this->figure(__('hr_desk.cards.badges.rewards'), $badges->where('type', (string) BadgeType::Reward->value)->count(), 'good'),
-            $this->figure(__('hr_desk.cards.badges.warnings'), $badges->where('type', (string) BadgeType::Warning->value)->count(), 'warn'),
+            $this->figure(__('hr_desk.cards.badges.rewards'), (int) ($byType[BadgeType::Reward->value] ?? 0), 'good'),
+            $this->figure(__('hr_desk.cards.badges.warnings'), (int) ($byType[BadgeType::Warning->value] ?? 0), 'warn'),
         ];
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Support\Desk\Cards;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Checklist;
@@ -41,7 +42,10 @@ final class ChecklistCard extends HrCard
 
     public function figures(User $user): array
     {
-        return [$this->figure(__('hr_desk.cards.checklist.with_me'), $this->mine($user)->count(), 'active')];
+        $employeeId = $this->viewer($user)->employeeId();
+        $withMe = $employeeId === null ? 0 : $this->withMe($employeeId)->count();
+
+        return [$this->figure(__('hr_desk.cards.checklist.with_me'), $withMe, 'active')];
     }
 
     protected function records(User $user, string $search): Collection
@@ -66,13 +70,21 @@ final class ChecklistCard extends HrCard
             return new Collection;
         }
 
-        return once(fn (): Collection => Checklist::query()
+        return once(fn (): Collection => $this->withMe($employeeId)
             ->select(['id', 'item_id', 'employee_id', 'brand', 'model', 'serial', 'delivered_at', 'delivered_status', 'returned_status'])
-            ->where('employee_id', $employeeId)
-            ->where('delivered_status', 'delivered')
             ->with('item:id,name')
             ->orderByDesc('delivered_at')
             ->limit(self::RowLimit)
             ->get());
+    }
+
+    /**
+     * The items handed to the employee, as the figure counts them and the list shows them.
+     *
+     * @return Builder<Checklist>
+     */
+    private function withMe(int $employeeId): Builder
+    {
+        return Checklist::query()->where('employee_id', $employeeId)->where('delivered_status', 'delivered');
     }
 }

@@ -18,6 +18,11 @@ use Modules\Tracking\Models\DonorReport;
  */
 final class DonorReportsCard extends PageCard
 {
+    /**
+     * How many weeks ahead the hero charts what falls due.
+     */
+    private const int HeroWeeks = 8;
+
     public function route(): string
     {
         return 'donor-reports.index';
@@ -25,47 +30,41 @@ final class DonorReportsCard extends PageCard
 
     public function figures(User $user): array
     {
-        $today = CarbonImmutable::today();
+        $counts = $this->counts($user);
 
         return [
-            $this->figure(DonorReportState::Overdue->label(), $this->visible($user)->whereNull('submitted_on')->whereDate('due_on', '<', $today)->count(), 'critical'),
-            $this->figure(__('desk-workspace.card.figure.due_30'), $this->visible($user)->whereNull('submitted_on')->whereBetween('due_on', [$today, $today->addDays(30)])->count(), 'warn'),
-            $this->figure(DonorReportState::Submitted->label(), $this->visible($user)->whereNotNull('submitted_on')->count(), 'good'),
+            $this->figure(DonorReportState::Overdue->label(), $counts['overdue'], 'critical'),
+            $this->figure(__('desk-workspace.card.figure.due_30'), $counts['due_30'], 'warn'),
+            $this->figure(DonorReportState::Submitted->label(), $counts['sent'], 'good'),
         ];
     }
 
     public function breakdown(User $user): array
     {
-        $today = CarbonImmutable::today()->toDateString();
-        $overdue = $this->visible($user)->whereNull('submitted_on')->whereDate('due_on', '<', $today)->count();
-        $due = $this->visible($user)->whereNull('submitted_on')->whereDate('due_on', '>=', $today)->count();
-        $sent = $this->visible($user)->whereNotNull('submitted_on')->count();
+        $counts = $this->counts($user);
 
         return $this->parts([
-            ['label' => DonorReportState::Overdue->label(), 'count' => $overdue, 'tone' => DonorReportState::Overdue->tone()->value],
-            ['label' => DonorReportState::Due->label(), 'count' => $due, 'tone' => DonorReportState::Due->tone()->value],
-            ['label' => DonorReportState::Submitted->label(), 'count' => $sent, 'tone' => DonorReportState::Submitted->tone()->value],
+            ['label' => DonorReportState::Overdue->label(), 'count' => $counts['overdue'], 'tone' => DonorReportState::Overdue->tone()->value],
+            ['label' => DonorReportState::Due->label(), 'count' => $counts['due'], 'tone' => DonorReportState::Due->tone()->value],
+            ['label' => DonorReportState::Submitted->label(), 'count' => $counts['sent'], 'tone' => DonorReportState::Submitted->tone()->value],
         ]);
     }
 
     public function hero(User $user): ?array
     {
         $today = CarbonImmutable::today();
-        $overdue = $this->visible($user)->whereNull('submitted_on')->whereDate('due_on', '<', $today)->count();
-        $due = $this->visible($user)->whereNull('submitted_on')->whereBetween('due_on', [$today, $today->addWeeks(8)])->pluck('due_on');
+        $counts = $this->counts($user);
         $weeks = [];
 
-        for ($week = 0; $week < 8; $week++) {
-            $start = $today->addWeeks($week);
-            $count = $due->filter(fn ($date): bool => $date >= $start && $date < $start->addWeek())->count();
-            $weeks[] = ['label' => $start->translatedFormat('j/n'), 'value' => (string) $count, 'count' => $count, 'tone' => $week < 2 && $count > 0 ? 'warn' : 'active'];
+        foreach ($counts['weeks'] as $week => $count) {
+            $weeks[] = ['label' => $today->addWeeks($week)->translatedFormat('j/n'), 'value' => (string) $count, 'count' => $count, 'tone' => $week < 2 && $count > 0 ? 'warn' : 'active'];
         }
 
         return [
             'kind' => 'weeks',
-            'big' => $this->number($overdue),
+            'big' => $this->number($counts['overdue']),
             'caption' => (string) DonorReportState::Overdue->label(),
-            'tone' => $overdue > 0 ? 'critical' : 'good',
+            'tone' => $counts['overdue'] > 0 ? 'critical' : 'good',
             'items' => $weeks,
         ];
     }
@@ -94,6 +93,46 @@ final class DonorReportsCard extends PageCard
                     lead: ['kind' => 'date', 'big' => $report->due_on->translatedFormat('j'), 'small' => $report->due_on->translatedFormat('M y'), 'tone' => $badge['tone']],
                 );
             });
+    }
+
+    /**
+     * Every figure, the breakdown and the hero's eight weeks in one query
+     * over the reports the viewer may open, read once per card.
+     *
+     * @return array{overdue: int, due_30: int, due: int, sent: int, weeks: list<int>}
+     */
+    private function counts(User $user): array
+    {
+        return once(function () use ($user): array {
+            $today = CarbonImmutable::today();
+            $open = 'submitted_on is null and ';
+            $columns = [
+                'overdue' => [$open.'due_on < ?', [$today->toDateString()]],
+                'due_30' => [$open.'due_on between ? and ?', [$today->toDateString(), $today->addDays(30)->toDateString()]],
+                'due' => [$open.'due_on >= ?', [$today->toDateString()]],
+                'sent' => ['submitted_on is not null', []],
+            ];
+
+            for ($week = 0; $week < self::HeroWeeks; $week++) {
+                $columns['week_'.$week] = [$open.'due_on >= ? and due_on < ?', [$today->addWeeks($week)->toDateString(), $today->addWeeks($week + 1)->toDateString()]];
+            }
+
+            $query = $this->visible($user)->toBase();
+
+            foreach ($columns as $name => [$condition, $bindings]) {
+                $query->selectRaw("sum(case when {$condition} then 1 else 0 end) as {$name}", $bindings);
+            }
+
+            $row = (array) $query->first();
+
+            return [
+                'overdue' => (int) ($row['overdue'] ?? 0),
+                'due_30' => (int) ($row['due_30'] ?? 0),
+                'due' => (int) ($row['due'] ?? 0),
+                'sent' => (int) ($row['sent'] ?? 0),
+                'weeks' => array_map(fn (int $week): int => (int) ($row['week_'.$week] ?? 0), range(0, self::HeroWeeks - 1)),
+            ];
+        });
     }
 
     /**
