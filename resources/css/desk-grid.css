@@ -205,6 +205,19 @@
         .dk-hint .dk-btn { min-height: 44px; }
         .dk-panel .dk-load { grid-template-columns: repeat(14, 44px); overflow-x: auto; scrollbar-width: none; }
     }
+
+    /* A panel while its data loads (components/desk/panel-placeholder): a few quiet bars; a failed load says so with Retry (desk-load.js). */
+    .dk-panel-pending .dk-pb { justify-content: center; }
+    .dk-pending-lines { display: grid; gap: 12px; padding-block: 8px; }
+    .dk-pending-lines > span { height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--sunk), var(--paper), var(--sunk)); background-size: 200% 100%; animation: dk-shimmer 1.2s linear infinite; }
+    .dk-pending-lines > span:nth-child(2) { width: 82%; }
+    .dk-pending-lines > span:nth-child(3) { width: 64%; }
+    .dk-pending-failed { display: grid; justify-items: start; gap: 10px; color: var(--ink-2); }
+    .dk-pending-failed[hidden] { display: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .dk-pending-lines > span { animation: none; }
+    }
 }
 
 /* ── Pinned and folded panels (resources/js/desk-fold.js) ─────────────

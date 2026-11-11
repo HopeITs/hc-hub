@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Desk;
 
+use App\Support\Desk\Panels;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -66,6 +68,29 @@ trait IsDeskPanel
      * @var array<string, string>
      */
     public array $facets = [];
+
+    /**
+     * What a deferred panel shows until its data arrives (the Desk mounts
+     * its panels with `defer`): its title on the panel's own grid cells. The
+     * Desk item id is the card a page or HR card draws, else the panel's own
+     * component name.
+     *
+     * @param  array<string, mixed>  $params
+     */
+    public function placeholder(array $params = []): View
+    {
+        $id = is_string($params['card'] ?? null) && $params['card'] !== '' ? $params['card'] : Str::afterLast($this->getName(), '.');
+        $size = is_string($params['size'] ?? null) ? $params['size'] : 'M';
+        $panels = app(Panels::class);
+        $user = auth()->user();
+
+        return view('components.desk.panel-placeholder', [
+            'id' => $id,
+            'title' => $user !== null ? ($panels->availableTo($user)[$id]['title'] ?? '') : '',
+            'index' => (int) ($params['index'] ?? 0),
+            ...$panels->footprint($id, $size, (int) ($params['gridCols'] ?? 0), (int) ($params['gridRows'] ?? 0)),
+        ]);
+    }
 
     public function updatedFacets(): void
     {

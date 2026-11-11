@@ -21,11 +21,8 @@
 @php
     /* A page card (App\Support\Desk\PageCards) brings its page's own title and line; a hand-made panel reads its own keys. */
     $title = $title ?? __("desk.panel.{$id}.title");
-    $sizes = \App\Support\Desk\Panels::Sizes;
-    $panels = app(\App\Support\Desk\Panels::class);
     /* The free cell grid: the entry's exact columns and row units, or the size's columns and the panel's own height for older layouts. */
-    $span = (int) $cols > 0 ? max(\App\Support\Desk\Panels::MinCols, min(12, (int) $cols)) : $sizes[$size];
-    $rows = (int) $height > 0 ? max(2, min(8, (int) $height)) : max(2, min(8, $panels->rowsOf($id)));
+    ['cols' => $span, 'rows' => $rows] = app(\App\Support\Desk\Panels::class)->footprint($id, $size, (int) $cols, (int) $height);
     $tagline = $tagline ?? __("desk-cards.tagline.{$id}");
     /* The panel state for its count colour and live dot: brand (decisions), critical, warn or good; none when neutral. */
     $health = in_array($health, ['brand', 'critical', 'warn', 'good'], true) ? $health : null;

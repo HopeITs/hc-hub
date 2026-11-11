@@ -898,6 +898,22 @@ final class Panels
     /**
      * How many grid row units (desk.css --row-unit) a panel is tall.
      */
+    /**
+     * The cells a panel takes on the free grid as it is drawn: its exact
+     * columns and row units, or the size's columns and the panel's own
+     * height for older layouts. The panel and its loading placeholder share
+     * it, so nothing moves when the panel arrives.
+     *
+     * @return array{cols: int, rows: int}
+     */
+    public function footprint(string $id, string $size, int $cols, int $rows): array
+    {
+        return [
+            'cols' => $cols > 0 ? max(self::MinCols, min(self::MaxCols, $cols)) : (self::Sizes[$size] ?? self::Sizes['M']),
+            'rows' => max(self::MinRows, min(self::MaxRows, $rows > 0 ? $rows : $this->rowsOf($id))),
+        ];
+    }
+
     public function rowsOf(string $id): int
     {
         return Shortcuts::isShortcut($id) ? self::MinTileRows : ($this->definitions()[$id]['rows'] ?? self::DefaultRows);

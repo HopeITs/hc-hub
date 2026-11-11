@@ -402,17 +402,18 @@ new #[Layout('layouts::desk'), Title('titles.dashboard')] class extends Componen
     {{-- Panels pinned to the top and folded into tiles (resources/js/desk-fold.js). --}}
     <script type="application/json" data-desk-flags>@json($this->panelFlags)</script>
     <div class="dk-grid" id="dk-grid" data-desk-grid data-desk-drop data-drop-text="{{ __('desk-workspace.drop_here', ['item' => '__I__']) }}">
+        {{-- Each panel loads right after the Desk paints (defer): the page never waits for its slowest panel, and one that fails says so in its own cells (desk-load.js). --}}
         @foreach ($layout as $i => $entry)
             @php
                 $kind = $this->library[$entry['panel']]['kind'] ?? 'panel';
             @endphp
             @if ($kind === 'card')
-                <livewire:desk.panels.page :card="$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols']" :grid-rows="$entry['rows']" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
+                <livewire:desk.panels.page defer :card="$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols']" :grid-rows="$entry['rows']" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
             @elseif (\Modules\Hr\Support\Desk\HrPanels::isHrPanel($entry['panel']))
                 {{-- An HR card ("hr-…"): drawn by the HR module's own component from its HrCard class. --}}
-                <livewire:is :component="\Modules\Hr\Support\Desk\HrPanels::componentFor($entry['panel'])" :card="$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
+                <livewire:is defer :component="\Modules\Hr\Support\Desk\HrPanels::componentFor($entry['panel'])" :card="$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
             @else
-                <livewire:is :component="'desk.panels.'.$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
+                <livewire:is defer :component="'desk.panels.'.$entry['panel']" :size="$entry['size']" :grid-cols="$entry['cols'] ?? 0" :grid-rows="$entry['rows'] ?? 0" :index="$i" :total="count($layout)" :wire:key="'panel-'.$entry['panel']" />
             @endif
         @endforeach
     </div>

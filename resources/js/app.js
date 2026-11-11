@@ -15,6 +15,7 @@ import './desk-fold';
 import './desk-grid';
 import './desk-hero';
 import './desk-items';
+import './desk-load';
 import './desk-quick';
 import './desk-tab-child';
 import './desk-tabs';
