@@ -1,0 +1,127 @@
+<?php
+
+declare(strict_types=1);
+
+return [
+    'titles' => [
+        'index' => 'الأخبار والفعاليات',
+        'create' => 'خبر جديد',
+        'edit' => 'تعديل الخبر',
+        'form' => 'خبر',
+        'show' => 'الأخبار',
+    ],
+
+    'states' => [
+        'draft' => 'مسودة',
+        'scheduled' => 'مجدول',
+        'published' => 'منشور',
+        'expired' => 'انتهى عرضه',
+        'archived' => 'مؤرشف',
+    ],
+
+    'types' => [
+        'news' => 'خبر',
+        'announcement' => 'إعلان',
+        'event' => 'فعالية',
+    ],
+
+    'audience' => [
+        'all' => 'الجميع',
+        'cities' => 'المحافظات',
+        'centers' => 'المراكز',
+        'programs' => 'البرامج',
+        'departments' => 'الأقسام',
+        'employees' => 'الموظفون',
+    ],
+
+    'list' => [
+        'create' => 'عنصر جديد',
+        'search' => 'ابحث في العناوين',
+        'all_states' => 'كل الحالات',
+        'all_types' => 'كل الأنواع',
+        'all_tags' => 'كل الوسوم',
+        'empty' => 'لا أخبار أو فعاليات بعد.',
+        'empty_filtered' => 'لا شيء يطابق هذه التصفية.',
+        'open' => 'فتح',
+        'preview' => 'معاينة',
+        'publish_now' => 'انشر الآن',
+        'unpublish' => 'أعده مسودة',
+        'restore' => 'استعادة',
+        'archive' => 'أرشفة',
+        'delete_title' => 'حذف هذا العنصر؟',
+        'delete_body' => 'سيُحذف العنصر وجمهوره ووسومه وصورته. لا يمكن التراجع عن ذلك.',
+        'deleted' => 'حُذف العنصر.',
+        'published_now' => 'نُشر.',
+        'unpublished' => 'أُعيد إلى المسودات.',
+        'archived' => 'أُرشف.',
+        'restored' => 'استُعيد.',
+        'not_allowed_now' => 'هذا التغيير لا ينطبق على هذا العنصر الآن.',
+        'columns' => [
+            'title' => 'العنوان',
+            'type' => 'النوع',
+            'audience' => 'الجمهور',
+            'publish_at' => 'موعد النشر',
+            'event_date' => 'تاريخ الفعالية',
+            'status' => 'الحالة',
+            'author' => 'كتبه',
+            'actions' => 'إجراءات',
+            'tags' => 'الوسم',
+        ],
+    ],
+
+    'form' => [
+        'sections' => [
+            'what' => 'المحتوى',
+            'who' => 'من يراه',
+            'when' => 'التوقيت',
+            'cover' => 'صورة الغلاف',
+        ],
+        'fields' => [
+            'type' => 'النوع',
+            'title_ar' => 'العنوان (عربي)',
+            'title_en' => 'العنوان (إنجليزي)',
+            'description_ar' => 'النص (عربي)',
+            'description_en' => 'النص (إنجليزي)',
+            'tags' => 'الوسوم',
+            'audience_type' => 'الجمهور',
+            'audience_ids' => 'اختر من',
+            'publish_mode' => 'موعد النشر',
+            'publish_at' => 'انشر في',
+            'event_starts_at' => 'بداية الفعالية',
+            'event_ends_at' => 'نهاية الفعالية',
+            'display_until' => 'اعرضه حتى',
+            'photo' => 'الصورة',
+        ],
+        'tags_help' => 'افصل الوسوم بفواصل، حتى :max وسوم.',
+        'display_until_help' => 'اتركه فارغاً ليبقى ظاهراً.',
+        'publish_now' => 'الآن',
+        'publish_later' => 'في وقت محدد',
+        'save_draft' => 'احفظ كمسودة',
+        'publish' => 'انشر',
+        'schedule' => 'جدولة',
+        'saved_draft' => 'حُفظت المسودة.',
+        'published' => 'حُفظ ونُشر.',
+        'errors' => [
+            'audience_required' => 'اختر واحداً على الأقل.',
+            'audience_offered' => 'اختر من القائمة المعروضة.',
+            'publish_at_required' => 'اختر موعد النشر.',
+            'publish_at_future' => 'يجب أن يكون موعد النشر في المستقبل.',
+            'event_start_required' => 'الفعالية تحتاج وقت بداية.',
+            'event_end_after_start' => 'لا يمكن أن تنتهي الفعالية قبل بدايتها.',
+            'display_until_after_publish' => 'يجب أن يبقى ظاهراً بعد نشره.',
+            'display_until_after_event' => 'يجب أن يبقى ظاهراً حتى تبدأ الفعالية.',
+        ],
+    ],
+
+    'show' => [
+        'all_items' => 'كل العناصر',
+        'preview_note' => 'القرّاء لا يرونه بعد.',
+        'event_when' => 'الموعد',
+        'more' => 'أخبار أخرى',
+        'timing' => [
+            'upcoming' => 'قادمة',
+            'today' => 'اليوم',
+            'past' => 'انتهت',
+        ],
+    ],
+];

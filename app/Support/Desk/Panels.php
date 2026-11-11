@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Modules\Core\Models\User;
+use Modules\Hr\Support\Desk\HrPanels;
 use Modules\Tracking\Models\ProposalReviewer;
 use Modules\Tracking\Models\Task;
 
@@ -380,6 +381,7 @@ final class Panels
             PageCards::isCard($panel) => 'pages',
             str_starts_with($panel, Shortcuts::ActionPrefix) => 'actions',
             Shortcuts::isShortcut($panel) => 'buttons',
+            HrPanels::isHrPanel($panel) => 'people',
             default => self::ReadyKinds[$panel] ?? 'work',
         };
     }
@@ -429,8 +431,8 @@ final class Panels
 
             $panels[$id] = [
                 'id' => $id,
-                'title' => __("desk.panel.{$id}.title"),
-                'description' => __("desk.panel.{$id}.description"),
+                'title' => __($panel['title'] ?? "desk.panel.{$id}.title"),
+                'description' => __($panel['description'] ?? "desk.panel.{$id}.description"),
                 'icon' => $panel['icon'],
                 'size' => $panel['size'],
                 'register' => $panel['register'],
@@ -522,7 +524,7 @@ final class Panels
      */
     private function itemAmong(array $available, string $route): ?string
     {
-        $candidates = [self::RoutePanels[$route] ?? null, PageCards::idFor($route), Shortcuts::PagePrefix.Destinations::slugOf($route)];
+        $candidates = [self::RoutePanels[$route] ?? HrPanels::RoutePanels[$route] ?? null, PageCards::idFor($route), Shortcuts::PagePrefix.Destinations::slugOf($route)];
 
         foreach ($candidates as $id) {
             if ($id !== null && isset($available[$id])) {
@@ -572,8 +574,8 @@ final class Panels
 
             $panels[$id] = [
                 'id' => $id,
-                'title' => (string) __("desk.panel.{$id}.title"),
-                'reason' => (string) __("desk.panel.{$id}.locked"),
+                'title' => (string) __($panel['title'] ?? "desk.panel.{$id}.title"),
+                'reason' => (string) __($panel['locked'] ?? "desk.panel.{$id}.locked"),
             ];
         }
 
@@ -880,7 +882,9 @@ final class Panels
     public function defaultLayoutFor(User $user): array
     {
         $roles = $user->getRoleNames()->all();
-        $role = collect(array_keys(self::RoleLayouts))->first(fn (string $name): bool => in_array($name, $roles, true));
+        /* The HR app's roles start from the HR cards (HrPanels), after the Tracking roles a person may also hold. */
+        $layouts = self::RoleLayouts + HrPanels::RoleLayouts;
+        $role = collect(array_keys($layouts))->first(fn (string $name): bool => in_array($name, $roles, true));
 
         if ($role === null && $user->hasRole(config('access-control.administrator_roles', []))) {
             $role = 'General Manager';
@@ -888,7 +892,7 @@ final class Panels
 
         return array_values(array_map(
             fn (array $entry): array => ['panel' => $entry[0], 'size' => $entry[1]],
-            self::RoleLayouts[$role ?? self::FallbackRole],
+            $layouts[$role ?? self::FallbackRole],
         ));
     }
 
@@ -944,7 +948,7 @@ final class Panels
     }
 
     /**
-     * @return array<string, array{icon: string, size: string, rows?: int, register: string|null, allows: Closure(User): bool}>
+     * @return array<string, array{icon: string, size: string, rows?: int, register: string|null, allows: Closure(User): bool, title?: string, description?: string, locked?: string}>
      */
     private function definitions(): array
     {
@@ -975,6 +979,8 @@ final class Panels
             'duties' => ['icon' => 'file', 'size' => 'M', 'register' => 'reporting-duties.index', 'allows' => fn (User $user): bool => $user->can('reports.aggregate') || $user->can('funding-agreements.update') || $user->hasReportingDuties()],
             'milestones' => ['icon' => 'flag', 'size' => 'M', 'register' => 'milestones.index', 'allows' => $can('milestones.view')],
             'donors' => ['icon' => 'users', 'size' => 'L', 'register' => 'donors.index', 'allows' => $can('donors.view')],
+            /* The HR cards ("hr-…"): defined, permitted and drawn by the HR module (HrPanels). */
+            ...app(HrPanels::class)->definitions(),
         ];
     }
 
