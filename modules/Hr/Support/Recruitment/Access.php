@@ -31,9 +31,24 @@ final class Access
     /** @var array<int, array{role: ?string, permissions: array<string, true>}> */
     private static array $memo = [];
 
+    /** @var array<string, mixed> per-user values for the length of one request (the old User::remember) */
+    private static array $remembered = [];
+
     public static function flush(): void
     {
         self::$memo = [];
+        self::$remembered = [];
+    }
+
+    public static function remember(User $user, string $key, \Closure $resolve): mixed
+    {
+        $key = $user->getKey().'|'.($user->getAttributes()['active_role_id'] ?? '').'|'.$key;
+
+        if (! array_key_exists($key, self::$remembered)) {
+            self::$remembered[$key] = $resolve();
+        }
+
+        return self::$remembered[$key];
     }
 
     public static function myRole(?User $user): ?string

@@ -114,7 +114,7 @@ class RecruitmentScopeResolver
         ));
 
         if ($fallbacks !== []) {
-            $ids = array_merge($ids, $user->remember('governorate-city-ids:'.$role.':'.implode(',', $fallbacks), fn (): array => City::query()
+            $ids = array_merge($ids, Access::remember($user, 'governorate-city-ids:'.$role.':'.implode(',', $fallbacks), fn (): array => City::query()
                 ->whereIn('slug', $fallbacks)
                 ->pluck('id')
                 ->map(fn ($id): int => (int) $id)
@@ -998,7 +998,7 @@ class RecruitmentScopeResolver
         return DB::table('model_has_permissions')
             ->join('permissions', 'permissions.id', '=', 'model_has_permissions.permission_id')
             ->where('permissions.name', $permission)
-            ->where('model_has_permissions.model_type', User::class)
+            ->where('model_has_permissions.model_type', (new User)->getMorphClass())
             ->pluck('model_has_permissions.model_id')
             ->map(fn ($id): int => (int) $id)
             ->all();
@@ -1016,8 +1016,7 @@ class RecruitmentScopeResolver
             ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
             ->join('users', 'users.id', '=', 'model_has_roles.model_id')
             ->join('employees', 'employees.id', '=', 'users.employee_id')
-            ->where('model_has_roles.model_type', User::class)
-            ->where('model_has_roles.is_active', true)
+            ->where('model_has_roles.model_type', (new User)->getMorphClass())
             ->where('roles.name', $roleName)
             ->where('employees.is_active', true)
             ->exists();
