@@ -29,7 +29,7 @@ class SweepRecruitmentRetention extends Command
         $this->info(($dryRun ? '[dry run] ' : '').'Retention sweep finished.');
         $this->table(['Result', 'Applicants'], collect($stats)->map(fn (int $count, string $key): array => [$key, $count])->values()->all());
 
-        if (! RecruitmentConfig::get('recruitment.privacy_ui.retention.enforce') && $stats['due_held'] > 0) {
+        if (! RecruitmentConfig::get('recruitment-privacy.retention.enforce') && $stats['due_held'] > 0) {
             $this->warn("{$stats['due_held']} applicant(s) are past retention_until but were left alone: RECRUITMENT_RETENTION_ENFORCE is off.");
         }
 

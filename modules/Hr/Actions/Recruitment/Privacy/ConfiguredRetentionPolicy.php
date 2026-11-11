@@ -56,12 +56,12 @@ final class ConfiguredRetentionPolicy implements RetentionPolicy
 
         if ($closings->isEmpty()) {
             return CarbonImmutable::instance($applicant->last_seen_at ?? $applicant->created_at ?? now())
-                ->addDays((int) RecruitmentConfig::get('recruitment.privacy_ui.retention.no_application_days'));
+                ->addDays((int) RecruitmentConfig::get('recruitment-privacy.retention.no_application_days'));
         }
 
         return $closings
             ->map(fn (object $row): CarbonImmutable => CarbonImmutable::parse($row->decided_at ?? $row->submitted_at))
             ->max()
-            ->addDays((int) RecruitmentConfig::get('recruitment.privacy_ui.retention.closed_application_days'));
+            ->addDays((int) RecruitmentConfig::get('recruitment-privacy.retention.closed_application_days'));
     }
 }

@@ -6,6 +6,7 @@ namespace Modules\Hr\Models;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -120,7 +121,7 @@ class RecruitmentApplicant extends Model
             return '—';
         }
 
-        $key = 'recruitment-applicant.sources.'.$source;
+        $key = 'hr_recruitment.applicant_ui.sources.'.$source;
 
         return __($key) === $key ? str($source)->headline()->toString() : __($key);
     }

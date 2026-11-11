@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Route;
 use Modules\Core\Models\User;
 use Modules\Hr\Actions\Recruitment\RecruitmentApproverEligibility;
 use Modules\Hr\Models\InAppFeedback;
+use Modules\Hr\Models\RecruitmentApplicant;
+use Modules\Hr\Models\RecruitmentInterview;
+use Modules\Hr\Models\RecruitmentJobOffer;
 use Modules\Hr\Support\Assistant\HrAssistant;
 use Modules\Hr\Support\Inbox\WorkInbox;
 use Modules\Hr\Support\Recruitment\Access;
@@ -51,6 +54,10 @@ final class HrDestinations
             ['hr.recruitment.requests.index', 'recruitment_requests', 'file', 'nav-file-plus', $can('recruitment-requests.view')],
             ['hr.recruitment.approvals.pending', 'recruitment_approvals', 'check', 'nav-list-checks', fn (User $user): bool => Access::hasActivePermission($user, 'recruitment-requests.approve') && self::mayReceiveApprovals($user), true],
             ['hr.recruitment.campaigns.index', 'vacancies', 'search', 'nav-clipboard-list', $can('recruitment-vacancies.view')],
+            ['hr.recruitment.applicants.index', 'applicants', 'users', 'nav-circle-user', fn (User $user): bool => $user->can('viewAny', RecruitmentApplicant::class)],
+            ['hr.recruitment.interviews.index', 'interviews', 'cal', 'nav-calendar-range', fn (User $user): bool => $user->can('viewAny', RecruitmentInterview::class)],
+            ['hr.recruitment.offers.index', 'job_offers', 'file', 'nav-handshake', fn (User $user): bool => $user->can('viewAny', RecruitmentJobOffer::class)],
+            ['hr.recruitment.indicator-rules', 'indicator_rules', 'grid', 'nav-sliders-horizontal', fn (User $user): bool => Access::hasActivePermission($user, 'recruitment-indicators.manage')],
             ['hr.checklists.index', 'checklists', 'check', 'nav-list-checks', $can('checklists.view-own', 'checklists.view-all', 'checklists.manage')],
             ['hr.news.index', 'news', 'bell', 'nav-book-open', $can('news.view')],
             ['hr.statistics.index', 'statistics', 'chart', 'nav-chart-line', $can('statistics.view')],

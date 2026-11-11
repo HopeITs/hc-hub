@@ -39,8 +39,8 @@ class RecruitmentEndorsementService
         $type = $scope->scopeType($user);
 
         return match (true) {
-            $type === RecruitmentScopeType::City => self::ROLE_HR,
-            $type === RecruitmentScopeType::DirectReports => self::ROLE_MANAGER,
+            $type === RecruitmentScopeType::City->value => self::ROLE_HR,
+            $type === RecruitmentScopeType::DirectReports->value => self::ROLE_MANAGER,
             default => null,
         };
     }

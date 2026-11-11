@@ -69,16 +69,16 @@ class RecruitmentApplicationFlag extends Model
 
     public function typeLabel(): string
     {
-        return __('recruitment-applicant.flags.types.'.$this->type);
+        return __('hr_recruitment.applicant_ui.flags.types.'.$this->type);
     }
 
     public function categoryLabel(): string
     {
-        return __('recruitment-applicant.flags.categories.'.$this->category);
+        return __('hr_recruitment.applicant_ui.flags.categories.'.$this->category);
     }
 
     public function reasonLabel(): string
     {
-        return __('recruitment-applicant.flags.reasons.'.$this->reason);
+        return __('hr_recruitment.applicant_ui.flags.reasons.'.$this->reason);
     }
 }

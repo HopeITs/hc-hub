@@ -75,7 +75,7 @@ class RecruitmentRetentionService
     /** @param array<string, int> $stats */
     private function anonymizeDue(bool $dryRun, array &$stats): void
     {
-        $enforce = (bool) RecruitmentConfig::get('recruitment.privacy_ui.retention.enforce');
+        $enforce = (bool) RecruitmentConfig::get('recruitment-privacy.retention.enforce');
 
         if (! $enforce) {
             $stats['due_held'] = RecruitmentApplicant::query()

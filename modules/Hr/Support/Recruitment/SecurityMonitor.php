@@ -95,7 +95,7 @@ class SecurityMonitor
             $occurrences = null;
 
             if ($dedupeKey !== null) {
-                $occurrences = $this->tick("dedupe:{$event}:{$dedupeKey}", (int) RecruitmentConfig::get('recruitment.privacy_ui.monitoring.dedupe_window', 300));
+                $occurrences = $this->tick("dedupe:{$event}:{$dedupeKey}", (int) RecruitmentConfig::get('recruitment-privacy.monitoring.dedupe_window', 300));
 
                 if (! $this->isMilestone($occurrences)) {
                     return;
@@ -117,7 +117,7 @@ class SecurityMonitor
      * Count one occurrence and record the event when the count reaches the
      * threshold — and again at every further multiple of it.
      *
-     * The limit is read from \Modules\Hr\Support\Recruitment\RecruitmentConfig::get('recruitment.privacy_ui.monitoring.{counter}')
+     * The limit is read from \Modules\Hr\Support\Recruitment\RecruitmentConfig::get('recruitment-privacy.monitoring.{counter}')
      * inside the guard, falling back to DEFAULT_LIMITS: a missing or malformed
      * config key must degrade the monitor, never fail the request.
      *
@@ -272,7 +272,7 @@ class SecurityMonitor
     /** @return array{threshold: int, window: int} */
     private function limit(string $counter): array
     {
-        $configured = RecruitmentConfig::get("recruitment.privacy_ui.monitoring.{$counter}");
+        $configured = RecruitmentConfig::get("recruitment-privacy.monitoring.{$counter}");
 
         if (is_array($configured) && isset($configured['threshold'], $configured['window'])) {
             return ['threshold' => (int) $configured['threshold'], 'window' => (int) $configured['window']];
@@ -306,7 +306,7 @@ class SecurityMonitor
 
     private function logger(): LoggerInterface
     {
-        $channel = (string) RecruitmentConfig::get('recruitment.privacy_ui.monitoring.channel', 'security');
+        $channel = (string) RecruitmentConfig::get('recruitment-privacy.monitoring.channel', 'security');
 
         if (! is_array(config("logging.channels.{$channel}"))) {
             $channel = (string) config('logging.default');

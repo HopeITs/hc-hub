@@ -158,6 +158,12 @@ class RecruitmentInterview extends Model
         return $this->currentParticipants()->where('user_id', $user->getKey())->exists();
     }
 
+    /** Did this user request the position the interview is for (PositionRequester)? */
+    public function isRequestedBy(User $user): bool
+    {
+        return static::query()->whereKey($this->getKey())->requestedBy($user)->exists();
+    }
+
     /**
      * @return BelongsTo<User, $this>
      */

@@ -114,7 +114,7 @@ class RecruitmentAnonymizer
     private function stripApplicant(int $id, string $reason, mixed $now): void
     {
         DB::table('recruitment_applicants')->where('id', $id)->update([
-            'full_name' => RecruitmentConfig::get('recruitment.privacy_ui.anonymized.name'),
+            'full_name' => RecruitmentConfig::get('recruitment-privacy.anonymized.name'),
             'email_normalized' => $this->email("applicant-{$id}"),
             'phone_normalized' => null,
             'phone_match_key' => null,
@@ -206,7 +206,7 @@ class RecruitmentAnonymizer
         // (campaign_id, email_normalized) is unique, so each invite gets its own address.
         foreach ($invites as $inviteId) {
             DB::table('recruitment_campaign_invites')->where('id', $inviteId)->update([
-                'full_name' => RecruitmentConfig::get('recruitment.privacy_ui.anonymized.name'),
+                'full_name' => RecruitmentConfig::get('recruitment-privacy.anonymized.name'),
                 'email_normalized' => $this->email("invite-{$inviteId}"),
                 'updated_at' => $now,
             ]);
@@ -227,7 +227,7 @@ class RecruitmentAnonymizer
         ]);
 
         DB::table('recruitment_interview_reschedules')->whereIn('interview_id', $interviewIds)->update([
-            'reason' => RecruitmentConfig::get('recruitment.privacy_ui.anonymized.text'),
+            'reason' => RecruitmentConfig::get('recruitment-privacy.anonymized.text'),
         ]);
 
         $evaluationIds = DB::table('recruitment_interview_evaluations')
@@ -254,7 +254,7 @@ class RecruitmentAnonymizer
         ]);
 
         DB::table('recruitment_interview_evaluation_notes')->whereIn('evaluation_id', $evaluationIds)->update([
-            'body' => RecruitmentConfig::get('recruitment.privacy_ui.anonymized.text'),
+            'body' => RecruitmentConfig::get('recruitment-privacy.anonymized.text'),
             'updated_at' => $now,
         ]);
     }
@@ -289,7 +289,7 @@ class RecruitmentAnonymizer
     {
         // Every note, soft-deleted ones included: the query builder sees them all.
         DB::table('recruitment_applicant_notes')->where('applicant_id', $applicantId)->update([
-            'body' => RecruitmentConfig::get('recruitment.privacy_ui.anonymized.text'),
+            'body' => RecruitmentConfig::get('recruitment-privacy.anonymized.text'),
             'deletion_reason' => null,
         ]);
 
@@ -334,6 +334,6 @@ class RecruitmentAnonymizer
     /** An address that can never be delivered to (RFC 2606's .invalid). */
     private function email(string $local): string
     {
-        return "anonymized-{$local}@".RecruitmentConfig::get('recruitment.privacy_ui.anonymized.email_domain');
+        return "anonymized-{$local}@".RecruitmentConfig::get('recruitment-privacy.anonymized.email_domain');
     }
 }

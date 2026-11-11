@@ -32,7 +32,7 @@ class NewEmployeeWelcome extends Notification implements ShouldQueue
                 'en' => "Let's welcome $emp->name_en to the team, we’re excited to have them join us!",
                 'ar' => "أهلًا وسهلًا بـ$emp->name_ar في فريقنا!",
             ],
-            'url' => route('employees.show', $this->employee->username),
+            'url' => route('hr.employees.show', ['employee' => $this->employee->username]),
         ];
     }
 }
