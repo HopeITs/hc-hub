@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{config/fortify.php,app/Console/Commands/**,app/Enums/**}'
+  - '{config/fortify.php,app/Console/Commands/**,modules/Tracking/Console/Commands/**,app/Enums/**,modules/Tracking/Enums/**}'
 ---
 
 # Enums

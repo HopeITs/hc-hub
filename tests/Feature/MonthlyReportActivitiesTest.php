@@ -1,31 +1,31 @@
 <?php
 
-use App\Actions\MonthlyReports\DecideMonthlyReportReopen;
-use App\Actions\MonthlyReports\RequestMonthlyReportReopen;
-use App\Actions\MonthlyReports\ReturnMonthlyReport;
-use App\Actions\MonthlyReports\SaveMonthlyReportActivities;
-use App\Actions\MonthlyReports\SubmitMonthlyReport;
-use App\Actions\MonthlyReports\ValidateMonthlyReport;
-use App\Enums\ActivityKind;
-use App\Enums\ActivityStatus;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ProposalStatus;
-use App\Enums\ResultType;
 use App\Models\Activity;
-use App\Models\ActivitySchedule;
-use App\Models\MealCoverageAssignment;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportActivityEntry;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\ProjectActivityStatus;
-use App\Models\Proposal;
-use App\Models\Result;
-use App\Support\MonthlyReportActivities;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Actions\MonthlyReports\DecideMonthlyReportReopen;
+use Modules\Tracking\Actions\MonthlyReports\RequestMonthlyReportReopen;
+use Modules\Tracking\Actions\MonthlyReports\ReturnMonthlyReport;
+use Modules\Tracking\Actions\MonthlyReports\SaveMonthlyReportActivities;
+use Modules\Tracking\Actions\MonthlyReports\SubmitMonthlyReport;
+use Modules\Tracking\Actions\MonthlyReports\ValidateMonthlyReport;
+use Modules\Tracking\Enums\ActivityKind;
+use Modules\Tracking\Enums\ActivityStatus;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\ActivitySchedule;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportActivityEntry;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ProjectActivityStatus;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Support\MonthlyReportActivities;
 
 /*
 | Activities this month (contracts §13, §13.1 item 8; D-49b, D-51): what the

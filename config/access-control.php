@@ -133,7 +133,7 @@ return [
     |
     | task_department_scoped_roles only ever see tasks of their own HR
     | department, plus their own tasks and tasks on projects they answer for
-    | (App\Models\Scopes\TaskVisibilityScope). A bypass role sees every
+    | (Modules\Tracking\Models\Scopes\TaskVisibilityScope). A bypass role sees every
     | department and wins when a user holds both kinds.
     |
     | task_status_and_files_only_roles (Media Team, UAT 2026-11-09) edit only

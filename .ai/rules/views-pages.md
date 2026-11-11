@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Models/**,routes/web.php,resources/views/pages/**}'
+  - '{app/Models/**,modules/*/Models/**,routes/web.php,modules/Tracking/routes/web.php,resources/views/pages/**,modules/Tracking/resources/views/pages/**}'
 ---
 
 # Views Pages

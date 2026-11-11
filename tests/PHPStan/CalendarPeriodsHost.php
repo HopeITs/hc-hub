@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\NavigatesCalendarPeriods;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\NavigatesCalendarPeriods;
 
 /**
  * Stands in for calendar/index, milestones/index and tasks/index, which

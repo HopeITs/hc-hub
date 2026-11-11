@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Support\DefaultNarrativeQuestions;
 use Illuminate\Database\Seeder;
+use Modules\Tracking\Support\DefaultNarrativeQuestions;
 
 /**
  * The starting narrative question bank (four monthly, two quarter-end

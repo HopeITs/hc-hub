@@ -1,11 +1,11 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\MealCoverageAssignment;
-use App\Models\Project;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Notifications\Recipients\OversightRecipients;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\Project;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);

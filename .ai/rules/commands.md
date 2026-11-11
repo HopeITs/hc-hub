@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Actions/Fortify/**,app/Console/Commands/**,config/fortify.php}'
+  - '{app/Actions/Fortify/**,app/Console/Commands/**,modules/Tracking/Console/Commands/**,config/fortify.php}'
 ---
 
 # Commands

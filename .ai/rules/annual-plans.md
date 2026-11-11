@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/pages/annual-plans/**'
+  - 'modules/Tracking/resources/views/pages/annual-plans/**'
 ---
 
 # Annual Plans

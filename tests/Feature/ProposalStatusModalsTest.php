@@ -1,11 +1,11 @@
 <?php
 
-use App\Enums\ProposalStatus;
-use App\Enums\StatusNoteKind;
-use App\Models\Proposal;
-use App\Models\ProposalStatusNote;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\StatusNoteKind;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
 
 /**
  * Open the Change Status modal on the proposal page as the given role.
@@ -13,7 +13,7 @@ use Livewire\Livewire;
 function statusModal(string $role, Proposal $proposal): Testable
 {
     return Livewire::actingAs(userWithRole($role))
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openStatusModal', $proposal->id);
 }
 
@@ -102,7 +102,7 @@ test('a user without proposals.update cannot open the modal', function () {
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
 
     Livewire::actingAs(userWithRole('Team Member'))
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openStatusModal', $proposal->id)
         ->assertForbidden();
 });
@@ -112,9 +112,9 @@ test('the page offers the status button only while a move exists', function () {
     $approved = Proposal::factory()->create(['status' => ProposalStatus::Approved]);
     $user = userWithRole('Financial');
 
-    Livewire::actingAs($user)->test('pages::proposals.show', ['proposal' => $open])
+    Livewire::actingAs($user)->test('tracking::proposals.show', ['proposal' => $open])
         ->assertSeeHtml('data-test="open-status-modal"');
-    Livewire::actingAs($user)->test('pages::proposals.show', ['proposal' => $approved])
+    Livewire::actingAs($user)->test('tracking::proposals.show', ['proposal' => $approved])
         ->assertDontSeeHtml('data-test="open-status-modal"');
 });
 
@@ -122,7 +122,7 @@ test('correct status is offered to its holders for a terminal status, with every
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Rejected]);
 
     $component = Livewire::actingAs(userWithRole($role))
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertSeeHtml('data-test="open-correct-status-modal"')
         ->call('openCorrectModal', $proposal->id)
         ->assertSet('showCorrectModal', true);
@@ -138,7 +138,7 @@ test('a correction records the reason and flags the note', function () {
     $user = userWithRole('General Manager');
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openCorrectModal', $proposal->id)
         ->set('correctTarget', ProposalStatus::Submitted->value)
         ->set('correctReason', 'The rejection was entered on the wrong proposal.')
@@ -157,7 +157,7 @@ test('a correction without a reason or with approved as target changes nothing',
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Rejected]);
 
     $component = Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openCorrectModal', $proposal->id)
         ->set('correctTarget', ProposalStatus::Submitted->value)
         ->set('correctReason', '   ')
@@ -175,7 +175,7 @@ test('a correction without a reason or with approved as target changes nothing',
 test('correct status is hidden from and refused to users without proposals.correct-status', function (string $role) {
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Rejected]);
 
-    $fresh = fn () => Livewire::actingAs(userWithRole($role))->test('pages::proposals.show', ['proposal' => $proposal]);
+    $fresh = fn () => Livewire::actingAs(userWithRole($role))->test('tracking::proposals.show', ['proposal' => $proposal]);
 
     $fresh()->assertDontSeeHtml('data-test="open-correct-status-modal"');
     $fresh()->call('openCorrectModal', $proposal->id)->assertForbidden();
@@ -189,7 +189,7 @@ test('correct status is hidden from and refused to users without proposals.corre
 
 test('the hold actions are offered only where a hold is allowed', function () {
     $user = userWithRole('Financial');
-    $page = fn (Proposal $proposal) => Livewire::actingAs($user)->test('pages::proposals.show', ['proposal' => $proposal]);
+    $page = fn (Proposal $proposal) => Livewire::actingAs($user)->test('tracking::proposals.show', ['proposal' => $proposal]);
 
     foreach ([ProposalStatus::Submitted, ProposalStatus::ConceptNoteSubmitted] as $holdable) {
         $page(Proposal::factory()->create(['status' => $holdable]))
@@ -218,7 +218,7 @@ test('putting a proposal on hold records the flag and its note without moving th
     $user = userWithRole('Financial');
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openHoldModal')
         ->assertSet('showHoldModal', true)
         ->set('holdReason', 'The donor asked for the revised budget first.')
@@ -244,7 +244,7 @@ test('taking a proposal off hold clears the flag and its reminder', function () 
     $proposal->forceFill(['on_hold_since' => today()->subMonth(), 'status_remind_on' => today()->addWeek()])->save();
 
     Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openOffHoldModal')
         ->assertSet('showOffHoldModal', true)
         ->set('offHoldNote', 'The donor came back with questions.')
@@ -266,7 +266,7 @@ test('a hold without a reason or with a past reminder date is refused and writes
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
 
     Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openHoldModal')
         ->set('holdReason', '   ')
         ->set('holdRemindOn', today()->addWeek()->toDateString())
@@ -286,7 +286,7 @@ test('a hold on a proposal someone else moved meanwhile is refused with the stal
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
 
     $component = Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openHoldModal')
         ->set('holdReason', 'Waiting on the donor.')
         ->set('holdRemindOn', today()->addWeek()->toDateString());
@@ -305,7 +305,7 @@ test('a user without proposals.update cannot reach either hold action', function
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
     $proposal->forceFill(['on_hold_since' => today()])->save();
 
-    $fresh = fn () => Livewire::actingAs(userWithRole('Team Member'))->test('pages::proposals.show', ['proposal' => $proposal]);
+    $fresh = fn () => Livewire::actingAs(userWithRole('Team Member'))->test('tracking::proposals.show', ['proposal' => $proposal]);
 
     $fresh()->assertDontSeeHtml('data-test="open-off-hold-modal"');
     $fresh()->call('openHoldModal')->assertForbidden();
@@ -320,7 +320,7 @@ test('the hold modals read in Arabic', function () {
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
 
     Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertSee(__('proposals.put_on_hold'))
         ->call('openHoldModal')
         ->assertSee(__('proposals.put_on_hold_consequence'))

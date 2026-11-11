@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
-use App\Models\DonorReport;
-use App\Models\ProposalReviewer;
-use App\Models\RiskLibrary;
-use App\Models\Task;
-use App\Models\User;
 use Closure;
 use Illuminate\Support\Str;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\ProposalReviewer;
+use Modules\Tracking\Models\RiskLibrary;
+use Modules\Tracking\Models\Task;
 
 /**
  * Every page the Tracking Desk can open, with the rule that decides who may.

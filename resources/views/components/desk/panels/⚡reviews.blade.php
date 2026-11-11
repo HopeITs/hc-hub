@@ -1,7 +1,7 @@
 <?php
 
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\ProposalReviewer;
+use Modules\Tracking\Models\ProposalReviewer;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -57,7 +57,7 @@ new class extends Component {
                     <span class="dk-pill dk-act dk-rv-s">{{ $review->stage->label() }}</span>
                     <span @class(['dk-rv-m dk-is', 'dk-bad' => $long]) title="{{ $review->created_at?->translatedFormat(__('formats.date_long')) }}">{{ __('desk.asked_on', ['when' => \App\Support\Desk\RelativeDay::for($review->created_at)]) }}@if ($long) · {{ __('desk.review_waiting_long') }}@endif · {{ $review->slot->label() }}</span>
                     @if ($review->proposal !== null)
-                        <a href="{{ \App\Support\ProposalStoryLink::review(auth()->user(), $review->proposal) }}" wire:navigate @class(['dk-btn dk-sm dk-rv-a', 'dk-primary' => $long])>{{ __('desk.review_action') }}</a>
+                        <a href="{{ \Modules\Tracking\Support\ProposalStoryLink::review(auth()->user(), $review->proposal) }}" wire:navigate @class(['dk-btn dk-sm dk-rv-a', 'dk-primary' => $long])>{{ __('desk.review_action') }}</a>
                     @endif
                 </li>
             @endforeach

@@ -4,16 +4,16 @@ namespace Database\Seeders;
 
 use App\Enums\MediaCollection;
 use App\Models\Media;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Risk;
-use App\Models\Task;
-use App\Models\TaskAssignee;
-use App\Models\TaskAttachment;
-use App\Models\User;
 use Database\Seeders\Concerns\PicksHrRecords;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAssignee;
+use Modules\Tracking\Models\TaskAttachment;
 
 /**
  * The delivery layer: risks, milestones, tasks, task updates and attachments.

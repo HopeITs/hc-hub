@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Enums\ResultType;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportActivityEntry;
-use App\Models\Result;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportActivityEntry;
+use Modules\Tracking\Models\Result;
 
 /**
  * @extends Factory<MonthlyReportActivityEntry>

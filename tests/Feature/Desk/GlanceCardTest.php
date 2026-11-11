@@ -1,14 +1,14 @@
 <?php
 
-use App\Enums\ProjectStatus;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\DonorProposal;
-use App\Models\Project;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->travelTo('2026-09-16 09:00:00');

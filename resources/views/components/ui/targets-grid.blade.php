@@ -6,8 +6,8 @@
     'editable' => false,
 ])
 
-@use('App\Enums\DonorAttribution')
-@use('App\Enums\Period')
+@use('Modules\Tracking\Enums\DonorAttribution')
+@use('Modules\Tracking\Enums\Period')
 
 @php
     /*

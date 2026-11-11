@@ -2,9 +2,9 @@
 
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\User;
 use App\Policies\UserPolicy;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 beforeEach(function () {
     $this->generalManager = userWithRole('General Manager');

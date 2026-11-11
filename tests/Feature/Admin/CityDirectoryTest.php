@@ -1,11 +1,11 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\MealCoverageAssignment;
-use App\Models\Project;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\Project;
 
 test('guests are redirected from the city directory', function () {
     $this->get(route('admin.cities.index'))->assertRedirect(route('login'));
@@ -31,7 +31,7 @@ test('the directory lists every hr city in english and arabic, active or not', f
     insertHrCity('Tartus', 'طرطوس', isActive: false);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->assertSee('Damascus')
         ->assertSee('دمشق')
         ->assertSee('Tartus')
@@ -43,7 +43,7 @@ test('the directory searches english and arabic names and clears the search', fu
     insertHrCity('Aleppo', 'حلب');
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->set('view', 'grid') // the map keeps every city visible; this exercises the grid's own hide-on-search behaviour
         ->set('search', 'Damas')
         ->assertSee('Damascus')
@@ -62,7 +62,7 @@ test('each city shows how many projects run in it', function () {
     Project::factory(2)->create(['city_id' => $aleppo]);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->assertSee('2 projects')
         ->assertSee('0 projects');
 });
@@ -72,14 +72,14 @@ test('city names are escaped in the directory', function () {
     insertHrCity($unsafeName);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->assertSee($unsafeName)
         ->assertDontSee($unsafeName, false);
 });
 
 test('the directory offers no way to change hr cities', function () {
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->assertDontSee('Add city')
         ->assertDontSee('data-test="create-city-button"', false);
 });
@@ -92,7 +92,7 @@ test('the summary strip reports the portfolio footprint independent of the searc
     Project::factory()->closed()->create(['city_id' => $aleppo, 'target_beneficiaries' => 300]);
 
     $component = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->set('search', 'Homs'); // search narrows the grid, not the portfolio-wide summary
 
     expect($component->instance()->summary())->toBe([
@@ -109,7 +109,7 @@ test('the directory filters by active status', function () {
     insertHrCity('Tartus', 'طرطوس', isActive: false);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->set('view', 'grid') // the map keeps every city visible; this exercises the grid's own hide-on-filter behaviour
         ->set('status', 'active')
         ->assertSee('Damascus')
@@ -129,7 +129,7 @@ test('the directory sorts cities by project count', function () {
     Project::factory(1)->create(['city_id' => $homs]);
 
     $component = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->set('sort', 'projects');
 
     $names = $component->instance()->cities()->pluck('name')->all();
@@ -141,7 +141,7 @@ test('a city links straight to its filtered project list', function () {
     $aleppo = insertHrCity('Aleppo');
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->assertSee(route('projects.index', ['city' => $aleppo]), false);
 });
 
@@ -150,7 +150,7 @@ test('the map view plots every city with a real link, even one the search would 
     $homs = insertHrCity('Homs');
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->set('view', 'map')
         ->set('search', 'Homs')
         ->assertSee('Aleppo') // dimmed on the map, but never removed from it
@@ -162,7 +162,7 @@ test('a city with no plotted position falls into the "not shown on map" tray', f
     insertHrCity('Neverland');
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->set('view', 'map')
         ->assertSee('Neverland')
         ->assertSee(__('cities.not_shown_on_map'));
@@ -172,7 +172,7 @@ test('the coverage map is the default view', function () {
     insertHrCity('Aleppo');
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->assertSet('view', 'map')
         ->assertSee(__('cities.coverage_map'));
 });
@@ -186,7 +186,7 @@ test('each governorate shows its meal officer in the grid and on the map, flaggi
     });
 
     Livewire::actingAs(User::factory()->role('Team Member')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->set('view', $view)
         ->assertSee(__('cities.meal_officer'))
         ->assertSee('Nour Ali')
@@ -204,7 +204,7 @@ test('the project officers section shows each project\'s own officer or the inhe
     });
 
     Livewire::actingAs(User::factory()->role('MEAL')->create())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->assertSee(__('cities.project_officers'))
         ->assertSee('Lina Haddad')
         ->assertSee(__('cities.inherited_from_governorate'))
@@ -218,7 +218,7 @@ test('the meal manager assigns a governorate officer through the modal', functio
     $officer = insertHrEmployee(firstNameEn: 'Nour', lastNameEn: 'Ali');
 
     Livewire::actingAs(mealManager())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->set('view', 'grid')
         ->assertSeeHtml('data-test="assign-meal-officer-city-'.$aleppo.'"')
         ->call('openMealModal', 'city', $aleppo)
@@ -237,7 +237,7 @@ test('the meal manager gives a project its own officer through the modal', funct
     $officer = insertHrEmployee(firstNameEn: 'Lina', lastNameEn: 'Haddad');
 
     Livewire::actingAs(mealManager())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->assertSeeHtml('data-test="assign-meal-officer-project-'.$project->id.'"')
         ->call('openMealModal', 'project', $project->id)
         ->set('mealEmployeeId', (string) $officer)
@@ -251,7 +251,7 @@ test('the modal refuses an employee inactive in hr and warns about a city inacti
     $tartus = insertHrCity('Tartus', 'طرطوس', isActive: false);
 
     Livewire::actingAs(mealManager())
-        ->test('pages::admin.cities')
+        ->test('tracking::admin.cities')
         ->call('openMealModal', 'city', $tartus)
         ->assertSee(__('cities.city_inactive_in_hr'))
         ->set('mealEmployeeId', (string) insertHrEmployee(isActive: false))
@@ -268,7 +268,7 @@ test('without the meal manager slot the assign controls are hidden and the actio
     holdMealManagerSlot();
     $user = userWithRole('MEAL', $employeeId);
     Project::factory()->create(['city_id' => $aleppo]);
-    $fresh = fn () => Livewire::actingAs($user)->test('pages::admin.cities')->set('view', 'grid');
+    $fresh = fn () => Livewire::actingAs($user)->test('tracking::admin.cities')->set('view', 'grid');
 
     $fresh()->assertDontSeeHtml('data-test="assign-meal-officer-');
     $fresh()->call('openMealModal', 'city', $aleppo)->assertForbidden();
@@ -290,7 +290,7 @@ test('meal coverage adds a flat number of queries however many cities and projec
             $queries++;
         });
 
-        Livewire::actingAs($user)->test('pages::admin.cities')->set('view', 'grid');
+        Livewire::actingAs($user)->test('tracking::admin.cities')->set('view', 'grid');
 
         return $queries;
     };

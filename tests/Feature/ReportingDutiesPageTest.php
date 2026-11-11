@@ -1,13 +1,13 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Proposal;
-use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Proposal;
 
 /*
 | My Reporting Duties (contracts §14.3): the donor reports a person is
@@ -39,7 +39,7 @@ test('the page lists only my reports, late first and submitted last', function (
     Activity::withoutRecording(fn () => DonorReport::factory()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Late financial', 'type' => 'financial', 'due_on' => '2026-11-01', 'responsible_employee_id' => $this->employeeId]));
     Activity::withoutRecording(fn () => DonorReport::factory()->submitted()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Sent last year', 'due_on' => '2025-12-01', 'responsible_employee_id' => $this->employeeId]));
 
-    Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index')
+    Livewire::actingAs($this->responsible)->test('tracking::reporting-duties.index')
         ->assertSeeInOrder(['Late financial', 'Q1 narrative', 'Sent last year'])
         ->assertSeeHtml('data-duty-overdue')
         ->assertSeeHtml('data-duty-due')
@@ -50,7 +50,7 @@ test('three disjoint buttons count and filter my reports, and pressing one again
     Activity::withoutRecording(fn () => DonorReport::factory()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Late financial', 'due_on' => '2026-11-01', 'responsible_employee_id' => $this->employeeId]));
     Activity::withoutRecording(fn () => DonorReport::factory()->submitted()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Sent last year', 'due_on' => '2025-12-01', 'responsible_employee_id' => $this->employeeId]));
 
-    $page = Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index');
+    $page = Livewire::actingAs($this->responsible)->test('tracking::reporting-duties.index');
 
     expect($page->instance()->focusCounts)->toBe(['late' => 1, 'open' => 1, 'submitted' => 1, 'total' => 3]);
 
@@ -65,7 +65,7 @@ test('three disjoint buttons count and filter my reports, and pressing one again
 });
 
 test('search narrows by title, donor or proposal and an empty result offers a reset', function () {
-    $page = Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index')
+    $page = Livewire::actingAs($this->responsible)->test('tracking::reporting-duties.index')
         ->set('search', 'Safe Schools')->assertSeeText('Q1 narrative')
         ->set('search', 'nothing like this')->assertDontSeeText('Q1 narrative')
         ->assertSeeHtml('data-test="reset-filters"');
@@ -76,7 +76,7 @@ test('search narrows by title, donor or proposal and an empty result offers a re
 });
 
 test('the status buttons, search and rows sit inside the Livewire root', function () {
-    $html = Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index')->html();
+    $html = Livewire::actingAs($this->responsible)->test('tracking::reporting-duties.index')->html();
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
     $xpath = new DOMXPath($dom);
@@ -113,7 +113,7 @@ test('the responsible person submits from the page', function () {
     $this->travelBack();
     Storage::fake('local');
 
-    Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index')
+    Livewire::actingAs($this->responsible)->test('tracking::reporting-duties.index')
         ->call('openSubmit', $this->mine->id)
         ->assertSet('showSubmitModal', true)
         ->set('submissionFile', validUpload('q1.pdf'))
@@ -125,7 +125,7 @@ test('the responsible person submits from the page', function () {
 });
 
 test('a report of someone else cannot be reached from the page', function () {
-    Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index')
+    Livewire::actingAs($this->responsible)->test('tracking::reporting-duties.index')
         ->call('openSubmit', $this->theirs->id)
         ->assertNotFound();
 
@@ -156,7 +156,7 @@ test('the board splits my duties into late, to submit and submitted, and the cal
     $late = Activity::withoutRecording(fn () => DonorReport::factory()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Late financial', 'type' => 'financial', 'due_on' => '2026-11-01', 'responsible_employee_id' => $this->employeeId]));
     $sent = Activity::withoutRecording(fn () => DonorReport::factory()->submitted()->create(['donor_proposal_id' => $this->agreement->id, 'title' => 'Sent report', 'due_on' => '2026-11-10', 'responsible_employee_id' => $this->employeeId]));
 
-    $page = Livewire::actingAs($this->responsible)->test('pages::reporting-duties.index')
+    $page = Livewire::actingAs($this->responsible)->test('tracking::reporting-duties.index')
         ->set('view', 'board')
         ->assertSeeHtml('data-test="duty-board-card-'.$this->mine->id.'"')
         ->assertDontSee('Someone else report');

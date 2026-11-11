@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\Strategy;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\Tracking\Models\Strategy;
 
 /**
  * Laravel `$table->json()` columns, keyed as `table.column`. MariaDB

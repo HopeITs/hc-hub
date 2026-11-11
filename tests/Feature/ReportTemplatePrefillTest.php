@@ -1,30 +1,30 @@
 <?php
 
-use App\Enums\IndicatorCollector;
-use App\Enums\LineSchedule;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
-use App\Enums\ReportTemplateLineStatus;
-use App\Enums\ReportTemplateStatus;
-use App\Enums\ResultType;
-use App\Events\ProposalStatusChanged;
-use App\Listeners\PrefillReportTemplates;
 use App\Models\Activity;
-use App\Models\AnnualPlan;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\MealCoverageAssignment;
-use App\Models\NarrativeQuestion;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ReportTemplate;
-use App\Models\ReportTemplateLine;
-use App\Models\Result;
 use App\Models\UserNotification;
-use App\Support\ReportTemplatePrefiller;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\IndicatorCollector;
+use Modules\Tracking\Enums\LineSchedule;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ReportTemplateLineStatus;
+use Modules\Tracking\Enums\ReportTemplateStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Listeners\PrefillReportTemplates;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\NarrativeQuestion;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Support\ReportTemplatePrefiller;
 
 beforeEach(function () {
     $this->travelTo('2026-10-16 10:00:00');

@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Report;
-use App\Models\ReportFile;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportFile;
 
 test('a report file belongs to a report', function () {
     $report = Report::factory()->create();

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\ChecksFinanceVisibility;
-use App\Livewire\Concerns\Donors\ChartsDonorPortfolio;
-use App\Livewire\Concerns\Donors\ExportsDonorRegister;
-use App\Livewire\Concerns\Donors\PresentsDonorRegister;
-use App\Livewire\Concerns\Donors\ReadsDonorRegister;
-use App\Livewire\Concerns\FiltersFinanceRegister;
-use App\Livewire\Concerns\ManagesDonorForm;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Tracking\Livewire\Concerns\ChecksFinanceVisibility;
+use Modules\Tracking\Livewire\Concerns\Donors\ChartsDonorPortfolio;
+use Modules\Tracking\Livewire\Concerns\Donors\ExportsDonorRegister;
+use Modules\Tracking\Livewire\Concerns\Donors\PresentsDonorRegister;
+use Modules\Tracking\Livewire\Concerns\Donors\ReadsDonorRegister;
+use Modules\Tracking\Livewire\Concerns\FiltersFinanceRegister;
+use Modules\Tracking\Livewire\Concerns\ManagesDonorForm;
 
 /**
  * Stands in for donors/index, with every trait that page uses.

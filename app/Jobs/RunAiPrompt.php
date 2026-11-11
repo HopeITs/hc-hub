@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Events\AiPromptFinished;
-use App\Models\User;
 use App\Support\Ai\AiGateway;
 use App\Support\Ai\HcAgent;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Modules\Core\Models\User;
 use Throwable;
 
 /**

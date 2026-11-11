@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\NarrativeQuestionFrequency;
-use App\Models\NarrativeQuestion;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\NarrativeQuestionFrequency;
+use Modules\Tracking\Models\NarrativeQuestion;
 
 /**
  * `is_active` and `sort_order` carry database defaults, so the definition

@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Enums\ProposalStatus;
-use App\Models\Proposal;
-use App\Models\ProposalStatusNote;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
 
 /**
  * @extends Factory<ProposalStatusNote>

@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\AnnualPlan;
 use App\Models\HrEmployee;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\User;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\PlanIndicator;
 
 test('a annual plan belongs to a program and an hr employee manager', function () {
     $program = Program::factory()->create();

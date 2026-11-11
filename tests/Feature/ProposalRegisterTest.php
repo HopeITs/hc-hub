@@ -1,18 +1,18 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Enums\ProposalStatus;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -27,7 +27,7 @@ beforeEach(function () {
  */
 function proposalRegister(array $query = []): Testable
 {
-    return Livewire::actingAs(test()->user)->withQueryParams($query)->test('pages::proposals.index');
+    return Livewire::actingAs(test()->user)->withQueryParams($query)->test('tracking::proposals.index');
 }
 
 /**
@@ -235,7 +235,7 @@ test('the table opens newest planned start first and a heading sorts it', functi
 test('someone who may not see agreements gets the proposals with no donor, no money and no money query', function () {
     registerFundedProposal();
 
-    $page = Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))->test('pages::proposals.index');
+    $page = Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))->test('tracking::proposals.index');
 
     $page->assertOk()
         ->assertSee('Water Response')
@@ -255,7 +255,7 @@ test('someone who may see agreements but not transfers gets budgets without tran
     registerFundedProposal();
     $viewer = userWithRole('Public Relations Manager')->givePermissionTo('funding-agreements.view');
 
-    $page = Livewire::actingAs($viewer)->test('pages::proposals.index');
+    $page = Livewire::actingAs($viewer)->test('tracking::proposals.index');
 
     $page->assertSee('ECHO')
         ->assertSee('1,000.00')
@@ -304,7 +304,7 @@ test('the export holds every filtered line and only the columns the viewer may s
         ->and($dollars[13])->toBe('200.00')
         ->and($dollars[14])->toBe('2026-06-05');
 
-    $fundraiser = Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))->test('pages::proposals.index')->call('exportCsv');
+    $fundraiser = Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))->test('tracking::proposals.index')->call('exportCsv');
     $plain = downloadedCsv($fundraiser);
 
     expect($plain[0])->toHaveCount(6)
@@ -316,7 +316,7 @@ test('exporting needs the proposals view permission', function () {
     registerFundedProposal();
 
     Livewire::actingAs(User::factory()->create())
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('exportCsv')
         ->assertForbidden();
 });

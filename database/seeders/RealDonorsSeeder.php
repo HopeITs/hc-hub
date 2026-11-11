@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Donor;
 use Illuminate\Database\Seeder;
+use Modules\Tracking\Models\Donor;
 
 /**
  * The organisation's real donors.

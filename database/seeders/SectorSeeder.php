@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Support\DefaultSectors;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Support\DefaultSectors;
 
 /**
  * The six D-47 sectors, and one sector for every seeded project that has

@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Livewire/Concerns/ManagesReportForm.php,resources/views/pages/reports/**,resources/views/components/reports/**}'
+  - '{modules/Tracking/Livewire/Concerns/ManagesReportForm.php,modules/Tracking/resources/views/pages/reports/**,modules/Tracking/resources/views/components/reports/**}'
 ---
 
 # Reports

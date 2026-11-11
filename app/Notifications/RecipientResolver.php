@@ -7,11 +7,11 @@ namespace App\Notifications;
 use App\Enums\EventImportance;
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\Program;
 use App\Models\Role;
-use App\Models\User;
 use App\Notifications\Recipients\ModuleRecipients;
 use App\Notifications\Recipients\OversightRecipients;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
 
 /**
  * Turns one activity into the users who hear about it:

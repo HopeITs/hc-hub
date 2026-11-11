@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{database/seeders/**,app/Console/Commands/**}'
+  - '{database/seeders/**,app/Console/Commands/**,modules/Tracking/Console/Commands/**}'
 ---
 
 # Console Commands

@@ -2,7 +2,7 @@
 
 namespace App\Support\Desk;
 
-use App\Models\User;
+use Modules\Core\Models\User;
 
 /**
  * The Desk's Quick access list: pages and "New …" actions a person dragged out

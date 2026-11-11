@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Notifications\Recipients;
 
 use App\Enums\OversightMode;
-use App\Models\Project;
 use App\Models\Role;
-use App\Models\User;
 use App\Notifications\EmployeeRecipients;
 use App\Notifications\EventCatalog;
 use App\Support\EmployeeProfile;
-use App\Support\MealCoverage;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\MealCoverage;
 
 /**
  * The oversight layer of a catalog event (contracts.md §15.1): MEAL (role

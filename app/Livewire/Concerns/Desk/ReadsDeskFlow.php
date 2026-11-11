@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Desk;
 
-use App\Enums\MilestoneStatus;
-use App\Enums\ProjectStatus;
-use App\Models\Project;
 use App\Support\Desk\ProjectStage;
 use Livewire\Attributes\Computed;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Project;
 
 /**
  * Project flow: how many live projects stand on each of the seven stages

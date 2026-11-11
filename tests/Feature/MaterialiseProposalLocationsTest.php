@@ -1,20 +1,20 @@
 <?php
 
-use App\Actions\Proposals\ApproveProposal;
-use App\Actions\Proposals\MaterialiseProposalLocations;
-use App\Enums\ProposalStatus;
-use App\Events\ProposalStatusChanged;
 use App\Models\Activity;
-use App\Models\Program;
-use App\Models\ProgramRequest;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalLocation;
-use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\ApproveProposal;
+use Modules\Tracking\Actions\Proposals\MaterialiseProposalLocations;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Models\ProgramRequest;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 
 /*
 | W-34a slice 2 (D-62): approving a proposal materialises the projects its

@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Program;
-use App\Models\Strategy;
-use App\Models\User;
 use Illuminate\Support\Facades\Date;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Strategy;
 
 test('guests are redirected from the strategy portfolio', function () {
     $this->get(route('strategies.index'))->assertRedirect(route('login'));
@@ -141,7 +141,7 @@ test('the Upcoming tab shows only the upcoming section', function () {
 
     Date::withTestNow('2026-06-15', function () use ($user) {
         Livewire::actingAs($user)
-            ->test('pages::strategies.index')
+            ->test('tracking::strategies.index')
             ->call('filterByStatus', 'upcoming')
             ->assertSeeHtml('data-test="upcoming-strategies"')
             ->assertDontSeeHtml('data-test="current-strategies"')
@@ -159,7 +159,7 @@ test('the status tabs filter the list and ignore an unknown status', function ()
 
     Date::withTestNow('2026-06-15', function () use ($user) {
         Livewire::actingAs($user)
-            ->test('pages::strategies.index')
+            ->test('tracking::strategies.index')
             ->call('filterByStatus', 'upcoming')
             ->assertSet('status', 'upcoming')
             ->assertSeeText('Upcoming strategy')
@@ -221,7 +221,7 @@ test('several active strategies each get their own block with their year', funct
     $regional = Strategy::factory()->create(['name' => 'Regional Strategy', 'start_year' => 2026, 'end_year' => 2028]);
 
     Date::withTestNow('2026-06-15', function () use ($user, $country, $regional) {
-        $html = Livewire::actingAs($user)->test('pages::strategies.index')->html();
+        $html = Livewire::actingAs($user)->test('tracking::strategies.index')->html();
 
         foreach ([[$country, 2, 5], [$regional, 1, 3]] as [$strategy, $year, $total]) {
             $block = str($html)->after('data-test="current-strategy-'.$strategy->id.'"')->before('</article>')->toString();
@@ -329,7 +329,7 @@ test('a current strategy with no programs says it is not set up instead of showi
     $strategy = Strategy::factory()->create(['name' => 'Empty Strategy', 'start_year' => 2026, 'end_year' => 2030]);
 
     Date::withTestNow('2026-06-15', function () use ($strategy) {
-        $viewer = Livewire::actingAs(User::factory()->role('Team Member')->create())->test('pages::strategies.index')->html();
+        $viewer = Livewire::actingAs(User::factory()->role('Team Member')->create())->test('tracking::strategies.index')->html();
         $block = str($viewer)->after('data-test="current-strategy-'.$strategy->id.'"')->before('</article>')->toString();
 
         expect($block)
@@ -342,7 +342,7 @@ test('a current strategy with no programs says it is not set up instead of showi
             ->not->toContain('data-test="strategy-programs-link"')
             ->not->toContain('openProgramsModal');
 
-        $editor = Livewire::actingAs(User::factory()->role('General Manager')->create())->test('pages::strategies.index')->html();
+        $editor = Livewire::actingAs(User::factory()->role('General Manager')->create())->test('tracking::strategies.index')->html();
 
         expect(str($editor)->after('data-test="current-strategy-'.$strategy->id.'"')->before('</article>')->toString())
             ->toContain('wire:click="openProgramsModal('.$strategy->id.')" data-test="strategy-empty-link-programs"')

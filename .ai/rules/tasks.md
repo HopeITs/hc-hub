@@ -1,7 +1,7 @@
 ---
 paths:
-  - 'resources/views/pages/tasks/**'
-  - resources/views/pages/tasks/_list-group.blade.php
+  - 'modules/Tracking/resources/views/pages/tasks/**'
+  - modules/Tracking/resources/views/pages/tasks/_list-group.blade.php
 ---
 
 # Tasks

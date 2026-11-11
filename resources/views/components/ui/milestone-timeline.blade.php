@@ -1,7 +1,7 @@
 @props(['milestones', 'window' => null])
 
 @php
-    use App\Enums\MilestoneStatus;
+    use Modules\Tracking\Enums\MilestoneStatus;
     use Carbon\CarbonImmutable;
 
     $today = CarbonImmutable::today();

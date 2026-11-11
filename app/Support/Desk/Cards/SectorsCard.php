@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support\Desk\Cards;
 
-use App\Models\Sector;
-use App\Models\User;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Sector;
 
 /**
  * Sectors in card form: the active list and how many projects each tags.

@@ -2,13 +2,13 @@
 
 use App\Http\UserAgent;
 use App\Models\KnownDevice;
-use App\Models\User;
 use App\Notifications\NewDeviceSignIn;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Notification;
+use Modules\Core\Models\User;
 use Monolog\Handler\NullHandler;
 
 beforeEach(function () {

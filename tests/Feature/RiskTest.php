@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
 
 /**
  * Insert a project owned by a freshly created user, and return its id.

@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportAnswer;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportAnswer;
 
 /**
  * @extends Factory<MonthlyReportAnswer>

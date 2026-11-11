@@ -1,18 +1,5 @@
 <?php
 
-use App\Actions\Results\SaveActivitySchedule;
-use App\Actions\Results\SaveResult;
-use App\Enums\ActivityKind;
-use App\Enums\ProposalStatus;
-use App\Enums\ResultType;
-use App\Events\ProposalStatusChanged;
-use App\Listeners\ShiftActivitySchedulesOnApproval;
-use App\Models\ActivitySchedule;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Result;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -21,6 +8,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Results\SaveActivitySchedule;
+use Modules\Tracking\Actions\Results\SaveResult;
+use Modules\Tracking\Enums\ActivityKind;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Listeners\ShiftActivitySchedulesOnApproval;
+use Modules\Tracking\Models\ActivitySchedule;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Result;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);

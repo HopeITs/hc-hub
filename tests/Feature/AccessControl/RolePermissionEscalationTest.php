@@ -3,9 +3,9 @@
 use App\Models\Activity;
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 /*
 | Someone who may edit roles but is not a Super Admin must not be able to

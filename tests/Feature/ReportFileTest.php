@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\ReportFile;
-use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\ReportFile;
 
 /**
  * Attach a means-of-verification file to a report, and return its id.

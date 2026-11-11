@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Fortify;
 
-use App\Models\User;
 use App\Notifications\EmailLoginCode;
 use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Modules\Core\Models\User;
 use Throwable;
 
 /**

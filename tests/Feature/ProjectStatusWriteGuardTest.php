@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\File;
 | below (and the T05 data migration, which lives outside the scanned
 | folders). T08 adds ApproveProjectFromProposal and ActivateProject when it
 | implements them; they are listed already so their stubs are covered. This
-| test reads app/ and resources/views/ and fails on any other write it can
+| test reads app/, modules/ and resources/views/ and fails on any other write it can
 | recognise.
 */
 
@@ -19,13 +19,13 @@ use Illuminate\Support\Facades\File;
 function projectStatusWriters(): array
 {
     return [
-        'app/Actions/Projects/SaveProject.php',
-        'app/Actions/Projects/ApproveProjectFromProposal.php',
-        'app/Actions/Projects/ActivateProject.php',
-        'app/Actions/Projects/CloseProject.php',
-        'app/Actions/Projects/ReopenProjectAsDraft.php',
-        'app/Actions/Projects/ArchiveProject.php',
-        'app/Actions/Projects/RestoreProject.php',
+        'modules/Tracking/Actions/Projects/SaveProject.php',
+        'modules/Tracking/Actions/Projects/ApproveProjectFromProposal.php',
+        'modules/Tracking/Actions/Projects/ActivateProject.php',
+        'modules/Tracking/Actions/Projects/CloseProject.php',
+        'modules/Tracking/Actions/Projects/ReopenProjectAsDraft.php',
+        'modules/Tracking/Actions/Projects/ArchiveProject.php',
+        'modules/Tracking/Actions/Projects/RestoreProject.php',
     ];
 }
 
@@ -40,7 +40,7 @@ function projectStatusWrites(string $source): array
     $patterns = [
         // $project->status = …, $locked->status = ProjectStatus::Closed
         '/\$(?:this->)?\w*project\w*->status\s*=(?![=>])/i',
-        '/->status\s*=\s*\x5c?(?:App\x5cEnums\x5c)?ProjectStatus::/',
+        '/->status\s*=\s*\x5c?(?:(?:App|Modules\x5cTracking)\x5cEnums\x5c)?ProjectStatus::/',
         // $project->setAttribute('status', …)
         '/\$(?:this->)?\w*project\w*->setAttribute\(\s*[\'"]status[\'"]/i',
         // $project->fill([... 'status' => …]) and friends
@@ -75,7 +75,7 @@ function projectStatusScannedSources(): array
 {
     $sources = [];
 
-    foreach ([app_path(), resource_path('views')] as $directory) {
+    foreach ([app_path(), base_path('modules'), resource_path('views')] as $directory) {
         foreach (File::allFiles($directory) as $file) {
             $path = str_replace('\\', '/', substr($file->getPathname(), strlen(base_path()) + 1));
             $sources[$path] = $file->getContents();

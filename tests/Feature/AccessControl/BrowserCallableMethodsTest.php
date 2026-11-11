@@ -14,9 +14,9 @@ test('the browser cannot call a page helper that returns data', function (string
         ->call($method, ...$arguments))
         ->toThrow(MethodNotFoundException::class);
 })->with([
-    'annual plan row' => ['pages::annual-plans.index', 'planFor', [1, 2026]],
-    'agreement money' => ['pages::proposals.index', 'agreementMoney', [1]],
-    'donor money' => ['pages::donors.index', 'donorMoney', [1]],
-    'delete check' => ['pages::milestones.index', 'canDelete', [1]],
-    'matrix figure' => ['pages::reports.monthly-matrix', 'matrixNumber', [1.0]],
+    'annual plan row' => ['tracking::annual-plans.index', 'planFor', [1, 2026]],
+    'agreement money' => ['tracking::proposals.index', 'agreementMoney', [1]],
+    'donor money' => ['tracking::donors.index', 'donorMoney', [1]],
+    'delete check' => ['tracking::milestones.index', 'canDelete', [1]],
+    'matrix figure' => ['tracking::reports.monthly-matrix', 'matrixNumber', [1.0]],
 ]);

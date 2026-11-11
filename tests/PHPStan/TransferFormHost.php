@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\ManagesTransferForm;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\ManagesTransferForm;
 
 /**
  * Stands in for the pages that record a tranche.

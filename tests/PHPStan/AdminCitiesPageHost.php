@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\Admin\ManagesMealCoverage;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\Admin\ManagesMealCoverage;
 
 /**
  * Stands in for admin/cities so PHPStan analyses ManagesMealCoverage.

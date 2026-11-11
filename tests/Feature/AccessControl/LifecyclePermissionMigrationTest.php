@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Role;
-use App\Models\User;
+use Modules\Core\Models\User;
 
 /**
  * Puts the database in the state it was in before T02: General Manager and

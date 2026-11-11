@@ -2,16 +2,7 @@
 
 use App\Enums\FileType;
 use App\Enums\MediaCollection;
-use App\Enums\ProposalStatus;
-use App\Enums\ReportStatus;
 use App\Models\Media;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\ReportFile;
-use App\Models\Task;
-use App\Models\TaskAttachment;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
@@ -20,6 +11,15 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportFile;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -53,7 +53,7 @@ function uploadSurface(string $kind): array
 
             return [
                 'table' => 'media',
-                'page' => fn () => Livewire::actingAs($user)->test('pages::projects.show', ['project' => $project])->set('tab', 'files')->call('openCreateFileModal'),
+                'page' => fn () => Livewire::actingAs($user)->test('tracking::projects.show', ['project' => $project])->set('tab', 'files')->call('openCreateFileModal'),
                 'user' => $user,
                 'fill' => fn (Testable $page) => $page->set('fileCategory', MediaCollection::Photo->value)->set('fileDisplayName', 'Site document'),
                 'row' => fn () => Media::query()->where('mediable_type', 'project')->where('mediable_id', $project->id)->latest('id')->firstOrFail(),
@@ -69,7 +69,7 @@ function uploadSurface(string $kind): array
 
             return [
                 'table' => 'media',
-                'page' => fn () => Livewire::actingAs($user)->test('pages::proposals.show', ['proposal' => $proposal])->call('openCreateFileModal'),
+                'page' => fn () => Livewire::actingAs($user)->test('tracking::proposals.show', ['proposal' => $proposal])->call('openCreateFileModal'),
                 'user' => $user,
                 'fill' => fn (Testable $page) => $page->set('fileCategory', MediaCollection::Evidence->value)->set('fileDisplayName', 'Evidence'),
                 'row' => fn () => Media::query()->where('mediable_type', 'proposal')->where('mediable_id', $proposal->id)->latest('id')->firstOrFail(),
@@ -85,7 +85,7 @@ function uploadSurface(string $kind): array
 
             return [
                 'table' => 'report_files',
-                'page' => fn () => Livewire::actingAs($user)->test('pages::reports.show', ['report' => $report])->call('openCreateFileModal'),
+                'page' => fn () => Livewire::actingAs($user)->test('tracking::reports.show', ['report' => $report])->call('openCreateFileModal'),
                 'user' => $user,
                 'fill' => fn (Testable $page) => $page->set('fileDisplayName', 'Attendance')->set('fileDate', '2026-03-31'),
                 'row' => fn () => ReportFile::query()->where('report_id', $report->id)->latest('id')->firstOrFail(),
@@ -101,7 +101,7 @@ function uploadSurface(string $kind): array
 
             return [
                 'table' => 'task_attachments',
-                'page' => fn () => Livewire::actingAs($user)->test('pages::tasks.show', ['task' => $task])->call('openCreateFileModal'),
+                'page' => fn () => Livewire::actingAs($user)->test('tracking::tasks.show', ['task' => $task])->call('openCreateFileModal'),
                 'user' => $user,
                 'fill' => fn (Testable $page) => $page->set('fileDisplayName', 'Minutes')->set('fileDate', '2026-03-31'),
                 'row' => fn () => TaskAttachment::query()->where('task_id', $task->id)->latest('id')->firstOrFail(),

@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
+use Modules\Core\Models\User;
 
 /*
 | Each user's inbox is pushed on their own private channel. Nobody else may

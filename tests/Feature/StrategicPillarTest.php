@@ -1,16 +1,16 @@
 <?php
 
-use App\Actions\Strategies\AssignProgramToPillar;
-use App\Actions\Strategies\DeleteStrategicPillar;
-use App\Actions\Strategies\SaveStrategicPillar;
-use App\Models\Program;
-use App\Models\StrategicPillar;
-use App\Models\Strategy;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Actions\Strategies\AssignProgramToPillar;
+use Modules\Tracking\Actions\Strategies\DeleteStrategicPillar;
+use Modules\Tracking\Actions\Strategies\SaveStrategicPillar;
+use Modules\Tracking\Models\StrategicPillar;
+use Modules\Tracking\Models\Strategy;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -23,7 +23,7 @@ beforeEach(function () {
  */
 function strategyPage($user, Strategy $strategy)
 {
-    return Livewire::actingAs($user)->test('pages::strategies.show', ['strategy' => $strategy]);
+    return Livewire::actingAs($user)->test('tracking::strategies.show', ['strategy' => $strategy]);
 }
 
 describe('assigning a program', function () {
@@ -238,7 +238,7 @@ it('keeps a strategy that still has pillars, with a message instead of a databas
     StrategicPillar::factory()->for($this->strategy)->create();
 
     Livewire::actingAs($this->manager)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('confirmDelete', $this->strategy->id)
         ->call('deleteStrategy')
         ->assertDispatched('toast-show', fn (string $event, array $params): bool => ($params['slots']['text'] ?? null) === __('strategies.strategy_has_pillars'));

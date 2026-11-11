@@ -7,10 +7,10 @@ namespace App\Console\Commands;
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Models\HrUser;
-use App\Models\User;
 use App\Notifications\AppNotification;
 use App\Notifications\NotificationPayload;
 use Illuminate\Console\Command;
+use Modules\Core\Models\User;
 
 /**
  * Sends one notification to a user, to try out toasts and desktop popups.

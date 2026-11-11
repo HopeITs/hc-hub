@@ -1,7 +1,8 @@
 ---
 paths:
   - 'app/Observers/**'
-  - 'app/Observers/{MilestoneObserver,ResultObserver}.php'
+  - 'modules/Tracking/Observers/**'
+  - 'modules/Tracking/Observers/{MilestoneObserver,ResultObserver}.php'
 ---
 
 # Observers

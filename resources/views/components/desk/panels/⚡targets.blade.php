@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\RagStatus;
+use Modules\Tracking\Enums\RagStatus;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\Indicator;
+use Modules\Tracking\Models\Indicator;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;

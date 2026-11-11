@@ -1,38 +1,38 @@
 <?php
 
-use App\Models\Account;
-use App\Models\AnnualPlan;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
 use App\Models\HrDepartment;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\MealCoverageAssignment;
-use App\Models\Milestone;
-use App\Models\MonthlyReport;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\ProgramRequest;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalLocation;
-use App\Models\ProposalStatusNote;
-use App\Models\Report;
-use App\Models\ReportFile;
-use App\Models\ReportTemplate;
-use App\Models\Result;
-use App\Models\Risk;
-use App\Models\RiskLibrary;
 use App\Models\Role;
-use App\Models\StrategicPillar;
-use App\Models\Strategy;
-use App\Models\Supervision;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Illuminate\Database\ClassMorphViolationException;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\ProgramRequest;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
+use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportFile;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\RiskLibrary;
+use Modules\Tracking\Models\StrategicPillar;
+use Modules\Tracking\Models\Strategy;
+use Modules\Tracking\Models\Supervision;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 test('the morph map registers exactly the target sources, task sources, media owners, the permission model side and the activity subjects', function () {
     expect(Relation::morphMap())->toBe([

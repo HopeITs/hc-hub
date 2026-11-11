@@ -6,7 +6,6 @@ use App\Actions\Fortify\AuthenticateWithHrAccount;
 use App\Actions\Fortify\RedirectIfTwoFactorRequired;
 use App\Http\Responses\LoginResponse;
 use App\Http\Responses\TwoFactorLoginResponse;
-use App\Models\User;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -19,6 +18,7 @@ use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseCo
 use Laravel\Fortify\Fortify;
 use Laravel\Passkeys\Contracts\PasskeyUser;
 use Laravel\Passkeys\Passkeys;
+use Modules\Core\Models\User;
 
 class FortifyServiceProvider extends ServiceProvider
 {

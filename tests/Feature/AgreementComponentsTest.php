@@ -1,12 +1,12 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\TransfersTracking;
-use App\Support\AgreementMoney;
 use Illuminate\Support\Facades\Blade;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\TransfersTracking;
+use Modules\Tracking\Support\AgreementMoney;
 
 /**
  * A 1,000 USD agreement with 400 received (390 net), 200 overdue and one
@@ -50,7 +50,7 @@ test('an agreement row prints every money column exactly', function () {
     $columns = AgreementMoney::columns();
 
     $html = Blade::render(
-        '<table><tbody><x-funding.agreement-row :agreement="$agreement" :columns="$columns" /></tbody></table>',
+        '<table><tbody><x-tracking::funding.agreement-row :agreement="$agreement" :columns="$columns" /></tbody></table>',
         compact('agreement', 'columns'),
     );
 
@@ -69,8 +69,8 @@ test('the row and the head always print the same number of cells', function (arr
     $agreement = componentAgreement();
     $columns = AgreementMoney::columns(...$arguments);
 
-    $head = Blade::render('<table><thead><tr><x-funding.agreement-head :columns="$columns" /></tr></thead></table>', compact('columns'));
-    $row = Blade::render('<table><tbody><x-funding.agreement-row :agreement="$agreement" :columns="$columns" /></tbody></table>', compact('agreement', 'columns'));
+    $head = Blade::render('<table><thead><tr><x-tracking::funding.agreement-head :columns="$columns" /></tr></thead></table>', compact('columns'));
+    $row = Blade::render('<table><tbody><x-tracking::funding.agreement-row :agreement="$agreement" :columns="$columns" /></tbody></table>', compact('agreement', 'columns'));
 
     expect(substr_count($head, '<th scope='))->toBe(count($columns) + 1)
         ->and(substr_count($row, '<td'))->toBe(count($columns));
@@ -86,7 +86,7 @@ test('without the transfers columns a row shows the budget and nothing derived f
     $agreement = componentAgreement();
     $columns = AgreementMoney::columns(withTransfers: false, withReports: false);
 
-    $html = Blade::render('<table><tbody><x-funding.agreement-row :agreement="$agreement" :columns="$columns" /></tbody></table>', compact('agreement', 'columns'));
+    $html = Blade::render('<table><tbody><x-tracking::funding.agreement-row :agreement="$agreement" :columns="$columns" /></tbody></table>', compact('agreement', 'columns'));
 
     expect($html)->toContain('1,000.00')
         ->and($html)->not->toContain('390.00')

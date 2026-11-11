@@ -1,18 +1,18 @@
 <?php
 
-use App\Actions\Proposals\AttachLibraryRisk;
-use App\Enums\ResultType;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Result;
-use App\Models\Risk;
-use App\Models\RiskLibrary;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\AttachLibraryRisk;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\RiskLibrary;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);

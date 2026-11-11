@@ -2,13 +2,13 @@
 
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\Indicator;
-use App\Models\IndicatorProgress;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Result;
-use App\Models\Risk;
 use App\Models\UserNotification;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\IndicatorProgress;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Risk;
 
 test('a risk that happens is critical for the owner, managers, meal and the top roles', function () {
     $ownerEmployee = insertHrEmployee();

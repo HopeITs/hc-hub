@@ -1,16 +1,16 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
-use App\Models\User;
-use App\Support\AgreementHealth;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
+use Modules\Tracking\Support\AgreementHealth;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -25,7 +25,7 @@ beforeEach(function () {
  */
 function agreementRegister(array $query = []): Testable
 {
-    return Livewire::actingAs(test()->user)->withQueryParams($query)->test('pages::funding-agreements.index');
+    return Livewire::actingAs(test()->user)->withQueryParams($query)->test('tracking::funding-agreements.index');
 }
 
 /**
@@ -288,7 +288,7 @@ test('a viewer without the update permission gets the table with no edit buttons
     $viewer = User::factory()->role('Managers')->create()->givePermissionTo('funding-agreements.view');
     $agreement = registerMixedAgreement();
 
-    Livewire::actingAs($viewer)->test('pages::funding-agreements.index')
+    Livewire::actingAs($viewer)->test('tracking::funding-agreements.index')
         ->assertSeeHtml('data-agreement-row="'.$agreement->id.'"')
         ->assertDontSeeHtml('data-test="edit-agreement-'.$agreement->id.'"')
         ->assertDontSeeHtml('data-test="create-agreement-button"');
@@ -328,7 +328,7 @@ test('exporting needs the funding agreements view permission', function () {
     registerMixedAgreement();
 
     Livewire::actingAs(User::factory()->create())
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('exportCsv')
         ->assertForbidden();
 });

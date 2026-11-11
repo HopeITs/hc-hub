@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Project;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Notifications\Alerts\WorkingCalendar;
 use App\Notifications\Inbox;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Models\Project;
 
 // 2026-09-21 is a Monday.
 function calendarDay(string $date): CarbonImmutable

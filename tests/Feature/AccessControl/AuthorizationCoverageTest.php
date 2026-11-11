@@ -62,17 +62,31 @@ function livewireComponentSources(): array
 {
     $sources = [];
 
-    $views = collect(File::allFiles(resource_path('views')))
-        ->filter(fn (SplFileInfo $file): bool => str_starts_with($file->getFilename(), '⚡'));
+    $viewRoots = ['resources/views', ...array_map(
+        fn (string $path): string => str_replace('\\', '/', substr($path, strlen(base_path()) + 1)),
+        glob(base_path('modules/*/resources/views')) ?: [],
+    )];
 
-    foreach ($views as $file) {
-        $contents = $file->getContents();
-        $end = strpos($contents, '?>');
-        $sources['resources/views/'.str_replace('\\', '/', $file->getRelativePathname())] = $end === false ? $contents : substr($contents, 0, $end);
+    foreach ($viewRoots as $root) {
+        $views = collect(File::allFiles(base_path($root)))
+            ->filter(fn (SplFileInfo $file): bool => str_starts_with($file->getFilename(), '⚡'));
+
+        foreach ($views as $file) {
+            $contents = $file->getContents();
+            $end = strpos($contents, '?>');
+            $sources[$root.'/'.str_replace('\\', '/', $file->getRelativePathname())] = $end === false ? $contents : substr($contents, 0, $end);
+        }
     }
 
-    foreach (File::allFiles(app_path('Livewire')) as $file) {
-        $sources['app/Livewire/'.str_replace('\\', '/', $file->getRelativePathname())] = $file->getContents();
+    $livewireRoots = ['app/Livewire', ...array_map(
+        fn (string $path): string => str_replace('\\', '/', substr($path, strlen(base_path()) + 1)),
+        glob(base_path('modules/*/Livewire')) ?: [],
+    )];
+
+    foreach ($livewireRoots as $root) {
+        foreach (File::allFiles(base_path($root)) as $file) {
+            $sources[$root.'/'.str_replace('\\', '/', $file->getRelativePathname())] = $file->getContents();
+        }
     }
 
     return $sources;
@@ -108,7 +122,8 @@ test('the scanner finds the Livewire components it guards', function () {
     $sources = livewireComponentSources();
 
     expect($sources)->toHaveKey('resources/views/pages/admin/⚡users.blade.php')
-        ->and($sources)->toHaveKey('app/Livewire/Concerns/ManagesDonorForm.php')
+        ->and($sources)->toHaveKey('modules/Tracking/Livewire/Concerns/ManagesDonorForm.php')
+        ->and($sources)->toHaveKey('modules/Tracking/resources/views/pages/proposals/⚡show.blade.php')
         ->and($sources)->toHaveKey('app/Livewire/Concerns/Admin/ManagesRoles.php')
         ->and(collect(livewireMethods($sources['app/Livewire/Concerns/Admin/ManagesRoles.php']))->pluck('name'))
         ->toContain('saveRolePermissions');

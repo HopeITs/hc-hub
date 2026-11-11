@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\ManagesDonorForm;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\ManagesDonorForm;
 
 /**
  * Stands in for donors/index and donors/show.

@@ -1,14 +1,14 @@
 <?php
 
 use App\Enums\NotificationPriority;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\Task;
-use App\Models\User;
 use App\Models\UserNotification;
-use App\Notifications\Alerts\DueSoonScanner;
 use App\Notifications\Alerts\NotificationSettings;
 use Carbon\CarbonImmutable;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Notifications\Alerts\DueSoonScanner;
 
 // 2026-09-21 is a Monday; working days default Monday–Friday.
 function dueTask(string $due, ?User $assignee = null, TaskStatus $status = TaskStatus::Todo): Task

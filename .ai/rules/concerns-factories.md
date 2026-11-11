@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Models/User.php,app/Models/Program.php,app/Models/Hr*.php,app/Models/Concerns/RemembersHrLookup.php,database/factories/{UserFactory,ProgramFactory}.php}'
+  - '{modules/Core/Models/User.php,modules/Core/Models/Program.php,app/Models/Hr*.php,app/Models/Concerns/RemembersHrLookup.php,database/factories/{UserFactory,ProgramFactory}.php}'
 ---
 
 # Concerns Factories

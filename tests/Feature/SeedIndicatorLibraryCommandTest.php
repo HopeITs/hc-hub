@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\CollectionFrequency;
-use App\Enums\DenominatorBasis;
-use App\Enums\IndicatorMeasure;
-use App\Enums\ResultType;
 use App\Models\Activity;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\Program;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\CollectionFrequency;
+use Modules\Tracking\Enums\DenominatorBasis;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
 
 /**
  * A tracking program whose HR row carries the given code, and its id.

@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Enums\ResultType;
-use App\Models\Result;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Result;
 
 /**
  * @extends Factory<Result>

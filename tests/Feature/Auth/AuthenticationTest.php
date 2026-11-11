@@ -2,7 +2,6 @@
 
 use App\Http\Middleware\EnsureHrAccountIsActive;
 use App\Models\Activity;
-use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Cache\Store;
 use Illuminate\Http\Request;
@@ -11,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Fortify\Features;
+use Modules\Core\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 
 test('login screen can be rendered', function () {

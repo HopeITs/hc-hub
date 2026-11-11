@@ -1,31 +1,31 @@
 <?php
 
-use App\Actions\Proposals\AddNegotiationNote;
-use App\Actions\Proposals\AddProposalReviewer;
-use App\Actions\Proposals\MarkProposalReviewed;
-use App\Actions\Proposals\SaveProposalFile;
-use App\Actions\Proposals\TransitionProposal;
-use App\Enums\Currency;
 use App\Enums\MediaCollection;
-use App\Enums\ProposalStatus;
-use App\Enums\ReviewerSlot;
-use App\Enums\ReviewStage;
 use App\Models\Activity;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalLocation;
-use App\Models\ProposalReviewer;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\ActivityParameters;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Support\Slots;
-use App\Support\TransitionResult;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\AddNegotiationNote;
+use Modules\Tracking\Actions\Proposals\AddProposalReviewer;
+use Modules\Tracking\Actions\Proposals\MarkProposalReviewed;
+use Modules\Tracking\Actions\Proposals\SaveProposalFile;
+use Modules\Tracking\Actions\Proposals\TransitionProposal;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ReviewerSlot;
+use Modules\Tracking\Enums\ReviewStage;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
+use Modules\Tracking\Models\ProposalReviewer;
+use Modules\Tracking\Support\TransitionResult;
 
 /**
  * Point a default-reviewer slot (contracts §9) at a new HR position held by
@@ -262,7 +262,7 @@ test('sending to the donor warns about unseen reviewers by name but never blocks
     ProposalReviewer::factory()->create(['proposal_id' => $proposal->id, 'stage' => ReviewStage::ConceptNote, 'employee_id' => $unseen]);
     $actor = userWithRole('Financial');
 
-    $modal = Livewire::actingAs($actor)->test('pages::proposals.index')
+    $modal = Livewire::actingAs($actor)->test('tracking::proposals.index')
         ->call('openStatusModal', $proposal->id)
         ->set('newStatus', ProposalStatus::ConceptNoteSubmitted->value);
 
@@ -295,7 +295,7 @@ test('the meeting time is stored on the note that opens the review, sent with th
     expect($result->note->fresh()->meeting_at?->format('Y-m-d H:i'))->toBe('2026-10-20 10:30')
         ->and(sentencesFor($mealUser)[0])->toContain('Oct 20, 2026 · 10:30');
 
-    Livewire::actingAs($mealUser)->test('pages::calendar.index')
+    Livewire::actingAs($mealUser)->test('tracking::calendar.index')
         ->assertSee(__('calendar.review_meeting'))
         ->assertSee($proposal->name);
 });

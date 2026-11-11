@@ -2,16 +2,16 @@
 
 namespace Database\Factories;
 
-use App\Enums\DeliverableKind;
-use App\Enums\DeliveryState;
-use App\Enums\TaskKind;
-use App\Enums\TaskStatus;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Database\Factories\Concerns\CreatesHrRecords;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\DeliverableKind;
+use Modules\Tracking\Enums\DeliveryState;
+use Modules\Tracking\Enums\TaskKind;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
 
 /**
  * @extends Factory<Task>

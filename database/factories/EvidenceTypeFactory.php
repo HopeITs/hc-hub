@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\EvidenceType;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\EvidenceType;
 
 /**
  * `is_active` and `sort_order` carry database defaults, so the definition

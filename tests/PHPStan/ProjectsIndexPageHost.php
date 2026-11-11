@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\Projects\ArchivesProjects;
-use App\Livewire\Concerns\Projects\FiltersProjectDirectory;
-use App\Livewire\Concerns\Projects\ManagesProjectForm;
-use App\Livewire\Concerns\Projects\PresentsProjectDirectory;
-use App\Livewire\Concerns\Projects\SummarisesProjectFunding;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Tracking\Livewire\Concerns\Projects\ArchivesProjects;
+use Modules\Tracking\Livewire\Concerns\Projects\FiltersProjectDirectory;
+use Modules\Tracking\Livewire\Concerns\Projects\ManagesProjectForm;
+use Modules\Tracking\Livewire\Concerns\Projects\PresentsProjectDirectory;
+use Modules\Tracking\Livewire\Concerns\Projects\SummarisesProjectFunding;
 
 /**
  * Stands in for projects/index, with every trait that page uses.

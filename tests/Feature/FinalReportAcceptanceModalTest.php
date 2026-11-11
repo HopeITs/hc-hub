@@ -1,15 +1,15 @@
 <?php
 
-use App\Actions\Proposals\TransitionProposal;
 use App\Enums\MediaCollection;
-use App\Enums\ProposalStatus;
-use App\Models\Donor;
 use App\Models\Media;
-use App\Models\Milestone;
-use App\Models\Proposal;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\TransitionProposal;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Proposal;
 
 beforeEach(fn () => $this->travelTo('2026-10-13 10:00:00'));
 
@@ -34,7 +34,7 @@ test('a proposal editor records the acceptance from the page and then sees it in
     $proposal = proposalAwaitingFinalReportAcceptance($actor);
 
     $component = Livewire::actingAs($actor)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertSeeHtml('data-test="open-final-report-modal"')
         ->assertDontSeeHtml('data-test="final-report-accepted"')
         ->call('openAcceptanceModal')
@@ -64,11 +64,11 @@ test('a user without proposals.update neither sees the button nor may record the
     $viewer = userWithRole('Team Member');
 
     Livewire::actingAs($viewer)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertDontSeeHtml('data-test="open-final-report-modal"');
 
     Livewire::actingAs($viewer)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('finalReportAcceptedOn', '2026-10-10')
         ->call('recordFinalReportAcceptance')
         ->assertForbidden();
@@ -82,7 +82,7 @@ test('the button stays hidden until the final report is filed', function () {
     Media::query()->where('mediable_type', 'proposal')->where('mediable_id', $proposal->id)->delete();
 
     Livewire::actingAs($actor)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertDontSeeHtml('data-test="open-final-report-modal"');
 });
 
@@ -91,7 +91,7 @@ test('a future acceptance date is refused on the date field', function () {
     $proposal = proposalAwaitingFinalReportAcceptance($actor);
 
     Livewire::actingAs($actor)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openAcceptanceModal')
         ->set('finalReportAcceptedOn', '2026-10-14')
         ->call('recordFinalReportAcceptance')
@@ -106,7 +106,7 @@ test('once recorded from the page the proposal can close', function () {
     $proposal = proposalAwaitingFinalReportAcceptance($actor);
 
     Livewire::actingAs($actor)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openAcceptanceModal')
         ->call('recordFinalReportAcceptance')
         ->assertHasNoErrors();
@@ -125,13 +125,13 @@ test('a payroll proposal offers the acceptance with the final report filed and n
     ]);
 
     Livewire::actingAs($actor)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertDontSeeHtml('data-test="open-final-report-modal"');
 
     Media::query()->findOrFail(insertMedia('proposal', $proposal->id, $actor->id))->update(['collection' => MediaCollection::FinalReport]);
 
     Livewire::actingAs($actor)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertSeeHtml('data-test="open-final-report-modal"')
         ->call('openAcceptanceModal')
         ->set('finalReportAcceptedOn', '2026-10-10')

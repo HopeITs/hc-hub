@@ -6,7 +6,6 @@ namespace App\Http\Controllers;
 
 use App\Actions\Fortify\EmailLoginCodes;
 use App\Actions\Fortify\RedirectIfTwoFactorRequired;
-use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +14,7 @@ use Illuminate\View\View;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse;
 use Laravel\Fortify\Events\TwoFactorAuthenticationFailed;
 use Laravel\Fortify\Events\ValidTwoFactorAuthenticationCodeProvided;
+use Modules\Core\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 
 /**

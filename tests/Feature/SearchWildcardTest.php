@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Donor;
-use App\Models\User;
 use App\Support\Like;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Donor;
 
 test('Like escapes wildcard characters and the escape character', function () {
     expect(Like::escape('50%_off\\'))->toBe('50\\%\\_off\\\\')
@@ -23,7 +23,7 @@ test('a bare wildcard typed in a search box is matched literally', function () {
     Donor::factory()->create(['name' => '100% Aid', 'country' => null, 'contact_person' => null]);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->set('search', '%')
         ->assertSee('100% Aid')
         ->assertDontSee('UNICEF')
@@ -40,7 +40,7 @@ test('register search boxes fold Arabic letters and read the other keyboard layo
     Donor::factory()->create(['name' => 'مؤسسة الإغاثة', 'country' => null, 'contact_person' => null]);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->set('search', 'ىهؤثب')
         ->assertSee('UNICEF')
         ->assertDontSee('مؤسسة الإغاثة')
@@ -56,7 +56,7 @@ test('register search boxes match each word, with «ال» optional, and leave s
     Donor::factory()->create(['name' => 'Hd Partners', 'country' => null, 'contact_person' => null]);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->set('search', 'موسسه اغاثه')
         ->assertSee('مؤسسة الإغاثة')
         ->set('search', 'في')
@@ -69,7 +69,7 @@ test('register search boxes find each word in any field', function () {
     Donor::factory()->create(['name' => 'UNICEF', 'country' => 'Syria', 'contact_person' => null]);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->set('search', 'unicef syria')
         ->assertSee('UNICEF')
         ->set('search', 'unicef jordan')

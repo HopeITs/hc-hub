@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Risk;
-use App\Models\Task;
 use Livewire\Livewire;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\Task;
 
 test('the today and last 7 days numbers count only what the area, person and search filters allow', function () {
     $this->actingAs(userWithRole('Managers'));

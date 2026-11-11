@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Models/User.php,app/Console/Commands/**,app/Http/Middleware/**,app/Actions/Fortify/**}'
+  - '{modules/Core/Models/User.php,app/Console/Commands/**,modules/Tracking/Console/Commands/**,app/Http/Middleware/**,modules/Tracking/Http/Middleware/**,app/Actions/Fortify/**}'
 ---
 
 # Middleware Actions Fortify

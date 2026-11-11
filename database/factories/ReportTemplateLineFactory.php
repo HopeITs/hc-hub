@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\IndicatorCollector;
-use App\Enums\LineSchedule;
-use App\Enums\ReportTemplateLineStatus;
-use App\Models\PlanIndicator;
-use App\Models\ReportTemplate;
-use App\Models\ReportTemplateLine;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\IndicatorCollector;
+use Modules\Tracking\Enums\LineSchedule;
+use Modules\Tracking\Enums\ReportTemplateLineStatus;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\ReportTemplateLine;
 
 /**
  * `status` (`pending`) and `schedule` (`library_default`) carry database

@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{resources/views/components/ui/gantt.blade.php,resources/js/gantt/**,app/Livewire/Concerns/*Gantt.php}'
+  - '{resources/views/components/ui/gantt.blade.php,resources/js/gantt/**,modules/Tracking/Livewire/Concerns/*Gantt.php}'
 ---
 
 # Livewire Concerns

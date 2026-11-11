@@ -1,11 +1,11 @@
 <?php
 
 use App\Actions\Fortify\AuthenticateWithHrAccount;
-use App\Models\User;
 use App\Support\Turnstile;
 use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
+use Modules\Core\Models\User;
 
 /*
 | Cloudflare Turnstile on the login form (App\Support\Turnstile): off until

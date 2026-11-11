@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\BuildsPortfolioGantt;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\BuildsPortfolioGantt;
 
 /**
  * Stands in for funding-agreements/show, the read-only portfolio Gantt.

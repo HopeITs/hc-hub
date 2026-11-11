@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Enums\Currency;
-use App\Models\Account;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Models\Account;
 
 /**
  * @extends Factory<Account>

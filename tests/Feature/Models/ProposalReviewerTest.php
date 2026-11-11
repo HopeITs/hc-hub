@@ -1,13 +1,13 @@
 <?php
 
-use App\Enums\ReviewerSlot;
-use App\Enums\ReviewStage;
-use App\Models\Proposal;
-use App\Models\ProposalReviewer;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ReviewerSlot;
+use Modules\Tracking\Enums\ReviewStage;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalReviewer;
 
 test('a person is a reviewer of one proposal stage at most once', function () {
     $row = ProposalReviewer::factory()->create();

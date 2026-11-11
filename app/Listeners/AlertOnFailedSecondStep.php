@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Http\UserAgent;
-use App\Models\User;
 use App\Notifications\SecondStepFailed;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Laravel\Fortify\Events\TwoFactorAuthenticationFailed;
+use Modules\Core\Models\User;
 use Throwable;
 
 /**

@@ -3,12 +3,12 @@
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\AppNotification;
 use App\Notifications\Inbox;
 use App\Notifications\NotificationPayload;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 function pageNotify(User $user, string $subject, string $module = 'tasks', NotificationKind $kind = NotificationKind::Action, NotificationPriority $priority = NotificationPriority::Info): string
 {

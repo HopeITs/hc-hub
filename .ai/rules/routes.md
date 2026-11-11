@@ -1,6 +1,7 @@
 ---
 paths:
   - routes/web.php
+  - modules/Tracking/routes/web.php
 ---
 
 # Routes

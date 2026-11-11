@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Enums\TaskPriority;
-use App\Enums\TaskStatus;
-use App\Models\Milestone;
-use App\Models\Task;
-use App\Models\User;
 use Illuminate\Database\Seeder;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskPriority;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Task;
 use RuntimeException;
 
 /**

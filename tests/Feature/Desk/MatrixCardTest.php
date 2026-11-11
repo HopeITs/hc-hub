@@ -1,12 +1,12 @@
 <?php
 
 use App\Enums\Locale;
-use App\Enums\MonthlyReportStatus;
 use App\Models\Activity;
-use App\Models\MonthlyReport;
-use App\Models\Project;
 use Carbon\CarbonImmutable;
 use Livewire\Livewire;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Project;
 
 beforeEach(function () {
     $this->travelTo('2026-09-16 09:00:00');

@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\Supervision;
-use App\Support\SupervisionMap;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Models\Supervision;
+use Modules\Tracking\Support\SupervisionMap;
 
 /**
  * A local supervision row written without recording.

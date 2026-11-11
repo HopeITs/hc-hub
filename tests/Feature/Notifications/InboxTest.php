@@ -4,7 +4,6 @@ use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Events\NotificationPushed;
 use App\Models\Activity;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\AppNotification;
 use App\Notifications\Inbox;
@@ -14,6 +13,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Broadcasting\BroadcastEvent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
+use Modules\Core\Models\User;
 
 function inboxPayload(string $module = 'tasks', NotificationPriority $priority = NotificationPriority::Info): NotificationPayload
 {

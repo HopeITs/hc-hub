@@ -3,11 +3,11 @@
 use App\Http\Middleware\SyncProgramsFromHr;
 use App\Models\Activity;
 use App\Models\HrProgram;
-use App\Models\Program;
-use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\Project;
 use Symfony\Component\HttpFoundation\Response;
 
 test('syncing mirrors every hr program under its hr id, inactive ones included', function () {

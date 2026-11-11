@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\File;
 
 /*
-| Every class in app/Actions/{Reports,Transfers,Donors,FundingAgreements,Tasks,Projects,Proposals,IndicatorLibrary,ReportTemplates} is the single
+| Every class in modules/Tracking/Actions/{Reports,Transfers,Donors,FundingAgreements,Tasks,Projects,Proposals,IndicatorLibrary,ReportTemplates} is the single
 | entry point for a sensitive write, so each must authorize itself: a caller
 | (a Livewire page, a command, a job) can then never skip the check.
 */
@@ -56,7 +56,7 @@ function systemActions(): array
 }
 
 it('authorizes inside every sensitive action', function (string $directory) {
-    $files = File::files(app_path("Actions/{$directory}"));
+    $files = File::files(base_path("modules/Tracking/Actions/{$directory}"));
     $stubs = [...lifecycleActionStubs(), ...systemActions(), ...array_keys(callerAuthorizedActions())];
 
     expect($files)->not->toBeEmpty();
@@ -73,17 +73,17 @@ it('authorizes inside every sensitive action', function (string $directory) {
 })->with(['Reports', 'Transfers', 'Donors', 'FundingAgreements', 'Tasks', 'Projects', 'Proposals', 'IndicatorLibrary', 'ReportTemplates', 'DonorReports']);
 
 it('exempts only queued system actions that never read the signed-in user', function (string $action) {
-    $source = File::get(app_path("Actions/{$action}"));
+    $source = File::get(base_path("modules/Tracking/Actions/{$action}"));
 
     expect($source)->not->toContain('Auth::')->not->toContain('auth()')->not->toContain('Gate::');
 })->with(systemActions());
 
 it('exempts a caller-authorized action only while every caller authorizes', function () {
     foreach (callerAuthorizedActions() as $action => $callers) {
-        expect(File::get(app_path("Actions/{$action}")))->not->toContain('Gate::');
+        expect(File::get(base_path("modules/Tracking/Actions/{$action}")))->not->toContain('Gate::');
 
         foreach ($callers as $caller) {
-            expect(File::get(app_path("Actions/{$caller}")))
+            expect(File::get(base_path("modules/Tracking/Actions/{$caller}")))
                 ->toMatch('/Gate::(forUser\([^)]*\)->)?authorize\(/')
                 ->toContain(pathinfo($action, PATHINFO_FILENAME));
         }
@@ -93,13 +93,13 @@ it('exempts a caller-authorized action only while every caller authorizes', func
 // A loop, not a dataset: Pest rejects an empty dataset, and the list empties as tasks land.
 it('exempts only actions that are still contract stubs', function () {
     foreach (lifecycleActionStubs() as $stub) {
-        expect(File::get(app_path("Actions/{$stub}")))->toContain("throw new LogicException('Implemented in T");
+        expect(File::get(base_path("modules/Tracking/Actions/{$stub}")))->toContain("throw new LogicException('Implemented in T");
     }
 
     expect(lifecycleActionStubs())->toBeArray();
 });
 
 it('keeps deletes out of the Livewire form traits', function (string $file) {
-    expect(File::get(app_path("Livewire/Concerns/{$file}")))
+    expect(File::get(base_path("modules/Tracking/Livewire/Concerns/{$file}")))
         ->not->toMatch('/->(delete|forceDelete)\(/');
 })->with(['ManagesReportForm.php', 'ManagesTransferForm.php', 'ManagesAgreementForm.php', 'ManagesDonorForm.php']);

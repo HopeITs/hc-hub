@@ -2,13 +2,13 @@
 
 use App\Models\Activity;
 use App\Models\NotificationMute;
-use App\Models\Project;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Notifications\Alerts\OversightDigestScanner;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
 
 // 2026-10-14 is a Wednesday; 2026-10-17/18 is a weekend (Mon–Fri default).
 beforeEach(function () {

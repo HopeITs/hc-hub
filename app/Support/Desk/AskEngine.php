@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
-use App\Models\User;
 use Illuminate\Support\Str;
+use Modules\Core\Models\User;
 
 /**
  * Reads what someone typed into the Ask bar, in English or Arabic, with

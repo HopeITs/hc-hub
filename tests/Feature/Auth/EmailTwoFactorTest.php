@@ -1,7 +1,6 @@
 <?php
 
 use App\Actions\Fortify\EmailLoginCodes;
-use App\Models\User;
 use App\Notifications\EmailLoginCode;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Routing\Middleware\ThrottleRequests;
@@ -10,6 +9,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Sleep;
 use Laravel\Fortify\Features;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 /**
  * Log in with the HR password and return the code that was emailed.

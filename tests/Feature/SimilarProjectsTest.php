@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\User;
-use App\Support\SimilarProjects;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\SimilarProjects;
 
 beforeEach(function () {
     $this->user = User::factory()->role('General Manager')->create();
@@ -21,7 +21,7 @@ beforeEach(function () {
         ...$attributes,
     ]);
     $this->openForm = fn () => Livewire::actingAs($this->user)
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->call('openCreateModal')
         ->set('sectorIds', newProjectSectorIds())
         ->set(['centerId' => (string) $this->centerId, 'programId' => (string) $this->program->id, 'userId' => (string) $this->owner]);

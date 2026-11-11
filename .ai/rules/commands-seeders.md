@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Actions/Fortify/**,app/Console/Commands/**,config/auth.php,database/seeders/**}'
+  - '{app/Actions/Fortify/**,app/Console/Commands/**,modules/Tracking/Console/Commands/**,config/auth.php,database/seeders/**}'
 ---
 
 # Commands Seeders

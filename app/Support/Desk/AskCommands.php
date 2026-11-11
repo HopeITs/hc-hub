@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
-use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
+use Modules\Core\Models\User;
 
 /**
  * Everything the Ask bar can do without asking the server, shipped once with

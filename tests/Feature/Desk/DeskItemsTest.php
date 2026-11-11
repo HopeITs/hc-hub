@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\Project;
-use App\Models\User;
 use App\Support\Desk\Panels;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
 
 /**
  * @return list<string>

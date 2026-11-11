@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use Modules\Core\Models\User;
 
 /**
  * The opening <html> tag of a rendered page.

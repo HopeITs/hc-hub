@@ -1,14 +1,14 @@
 <?php
 
-use App\Enums\ProposalStatus;
 use App\Models\Activity;
-use App\Models\Project;
-use App\Models\Proposal;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\NotificationSettings;
-use App\Notifications\Alerts\OnHoldReminderScanner;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Notifications\Alerts\OnHoldReminderScanner;
 
 // 2026-10-14 is a Wednesday; 2026-10-17/18 is a weekend (Mon–Fri default).
 beforeEach(function () {

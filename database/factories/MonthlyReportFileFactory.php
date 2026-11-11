@@ -3,12 +3,12 @@
 namespace Database\Factories;
 
 use App\Enums\FileType;
-use App\Models\EvidenceType;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportFile;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\EvidenceType;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportFile;
 
 /**
  * @extends Factory<MonthlyReportFile>

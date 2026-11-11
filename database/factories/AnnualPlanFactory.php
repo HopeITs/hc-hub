@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\AnnualPlan;
-use App\Models\Program;
 use Database\Factories\Concerns\CreatesHrRecords;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\AnnualPlan;
 
 /**
  * @extends Factory<AnnualPlan>

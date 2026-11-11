@@ -1,5 +1,5 @@
 import tailwindcss from '@tailwindcss/vite';
-import laravel from 'laravel-vite-plugin';
+import laravel, { refreshPaths } from 'laravel-vite-plugin';
 import { defineConfig, lazyPlugins } from 'vite-plus';
 
 export default defineConfig({
@@ -10,7 +10,8 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/passkeys.js',
             ],
-            refresh: true,
+            // Module views and routes reload the page in dev like resources/views does.
+            refresh: [...refreshPaths, 'modules/*/resources/views/**', 'modules/*/routes/**'],
         }),
         tailwindcss(),
     ]),

@@ -2,18 +2,18 @@
 
 namespace Database\Seeders;
 
-use App\Enums\ProjectStatus;
-use App\Models\AnnualPlan;
-use App\Models\Donor;
-use App\Models\DonorProposal;
 use App\Models\HrProgram;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Strategy;
 use Database\Seeders\Concerns\PicksHrRecords;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Seeder;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Strategy;
 
 /**
  * Demo delivery under the first four programs: annual plans, projects,

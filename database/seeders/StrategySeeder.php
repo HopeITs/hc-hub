@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Strategy;
 use Illuminate\Database\Seeder;
+use Modules\Tracking\Models\Strategy;
 
 /**
  * The country strategies programs are delivered against.

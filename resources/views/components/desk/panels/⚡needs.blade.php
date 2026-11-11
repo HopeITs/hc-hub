@@ -1,10 +1,10 @@
 <?php
 
-use App\Actions\Tasks\AcceptDepartmentTask;
-use App\Enums\DeliveryState;
+use Modules\Tracking\Actions\Tasks\AcceptDepartmentTask;
+use Modules\Tracking\Enums\DeliveryState;
 use App\Livewire\Concerns\Dashboard\ReadsDeskDecisions;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\Task;
+use Modules\Tracking\Models\Task;
 use Flux\Flux;
 use Livewire\Component;
 

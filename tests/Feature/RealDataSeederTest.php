@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Account;
 use App\Models\Activity;
 use Database\Seeders\NotificationDemoSeeder;
 use Database\Seeders\RealAccountsSeeder;
@@ -13,6 +12,7 @@ use Database\Seeders\RealResultsSeeder;
 use Database\Seeders\RealRisksSeeder;
 use Database\Seeders\RealTasksSeeder;
 use Illuminate\Database\Seeder;
+use Modules\Tracking\Models\Account;
 
 /**
  * The real-data seeders in the order their dependencies require.

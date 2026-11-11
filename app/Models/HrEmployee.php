@@ -18,6 +18,12 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAssignee;
 
 /**
  * An employee from the HR database (hchr_employees).

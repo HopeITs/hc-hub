@@ -1,9 +1,9 @@
 <?php
 
-use App\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ProposalStatus;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
 use App\Models\HrEmployee;
-use App\Models\Proposal;
+use Modules\Tracking\Models\Proposal;
 use App\Support\Desk\DeskWork;
 use App\Support\Desk\Money;
 use Carbon\CarbonImmutable;

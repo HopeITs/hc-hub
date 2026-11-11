@@ -2,10 +2,10 @@
 
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\Program;
 use App\Models\UserNotification;
-use App\Notifications\Alerts\EscalationScanner;
-use App\Notifications\Alerts\OverdueScanner;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Notifications\Alerts\EscalationScanner;
+use Modules\Tracking\Notifications\Alerts\OverdueScanner;
 
 test('overdue fires on day one then every three working days', function () {
     $assignee = userWithRole('Managers', insertHrEmployee());

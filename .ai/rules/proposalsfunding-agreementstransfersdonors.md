@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Models/Proposal.php,app/Models/DonorProposal.php,resources/views/pages/{proposals,funding-agreements,transfers,donors}/**}'
+  - '{modules/Tracking/Models/Proposal.php,modules/Tracking/Models/DonorProposal.php,modules/Tracking/resources/views/pages/{proposals,funding-agreements,transfers,donors}/**}'
 ---
 
 # Proposalsfunding Agreementstransfersdonors

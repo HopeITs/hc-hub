@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Testing\TestResponse;
+use Modules\Core\Models\User;
 
 /**
  * The test suite broadcasts through the null driver, which authorizes every

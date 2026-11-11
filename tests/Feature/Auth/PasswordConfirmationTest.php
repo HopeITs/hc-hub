@@ -1,11 +1,11 @@
 <?php
 
 use App\Actions\Fortify\AuthenticateWithHrAccount;
-use App\Models\User;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
+use Modules\Core\Models\User;
 
 test('confirm password screen can be rendered', function () {
     $user = User::factory()->create();

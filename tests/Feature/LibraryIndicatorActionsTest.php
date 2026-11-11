@@ -1,17 +1,17 @@
 <?php
 
-use App\Actions\IndicatorLibrary\DeactivateLibraryIndicator;
-use App\Actions\IndicatorLibrary\DeleteLibraryIndicator;
-use App\Actions\IndicatorLibrary\ReactivateLibraryIndicator;
-use App\Actions\IndicatorLibrary\SaveLibraryIndicator;
-use App\Enums\DenominatorBasis;
-use App\Enums\IndicatorMeasure;
 use App\Models\Activity;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\PlanIndicator;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
+use Modules\Tracking\Actions\IndicatorLibrary\DeactivateLibraryIndicator;
+use Modules\Tracking\Actions\IndicatorLibrary\DeleteLibraryIndicator;
+use Modules\Tracking\Actions\IndicatorLibrary\ReactivateLibraryIndicator;
+use Modules\Tracking\Actions\IndicatorLibrary\SaveLibraryIndicator;
+use Modules\Tracking\Enums\DenominatorBasis;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\PlanIndicator;
 
 describe('authorization', function () {
     it('lets MEAL and the General Manager create, edit, deactivate, reactivate and delete an unused entry', function (string $role) {

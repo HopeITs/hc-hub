@@ -3,10 +3,10 @@
 namespace App\Http\Responses;
 
 use App\Actions\Fortify\TrustedDevices;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Laravel\Fortify\Contracts\TwoFactorLoginResponse as TwoFactorLoginResponseContract;
 use Laravel\Fortify\Fortify;
+use Modules\Core\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 
 class TwoFactorLoginResponse implements TwoFactorLoginResponseContract

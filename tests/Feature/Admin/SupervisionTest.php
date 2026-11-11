@@ -1,16 +1,16 @@
 <?php
 
-use App\Actions\Supervisions\AddSupervision;
-use App\Actions\Supervisions\RemoveSupervision;
 use App\Models\Activity;
-use App\Models\Supervision;
-use App\Models\User;
 use App\Notifications\ActivityPresenter;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Supervisions\AddSupervision;
+use Modules\Tracking\Actions\Supervisions\RemoveSupervision;
+use Modules\Tracking\Models\Supervision;
 
 /**
  * Run an add and return its validation errors, keyed by field.

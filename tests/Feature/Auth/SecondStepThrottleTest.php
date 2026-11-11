@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\Notification;
+use Modules\Core\Models\User;
 use Monolog\Handler\NullHandler;
 
 beforeEach(function () {

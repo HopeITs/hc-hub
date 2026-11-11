@@ -1,6 +1,7 @@
 ---
 paths:
   - 'app/Notifications/Alerts/**'
+  - 'modules/Tracking/Notifications/Alerts/**'
 ---
 
 # Alerts

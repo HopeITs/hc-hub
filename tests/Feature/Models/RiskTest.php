@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Project;
-use App\Models\Risk;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Risk;
 
 test('a risk belongs to a project', function () {
     $project = Project::factory()->create();

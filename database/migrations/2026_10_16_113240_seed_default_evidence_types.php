@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Support\DefaultEvidenceTypes;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\Tracking\Support\DefaultEvidenceTypes;
 
 /**
  * The five starting evidence types, created here as well as in the seeder so

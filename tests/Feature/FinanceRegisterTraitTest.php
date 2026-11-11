@@ -1,10 +1,10 @@
 <?php
 
-use App\Livewire\Concerns\FiltersFinanceRegister;
-use App\Models\TransfersTracking;
 use Livewire\Component;
 use Livewire\Livewire;
 use Livewire\WithPagination;
+use Modules\Tracking\Livewire\Concerns\FiltersFinanceRegister;
+use Modules\Tracking\Models\TransfersTracking;
 
 function registerProbe(): Component
 {

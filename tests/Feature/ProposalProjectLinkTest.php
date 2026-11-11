@@ -1,24 +1,24 @@
 <?php
 
-use App\Actions\Projects\ReopenProjectAsDraft;
-use App\Actions\Proposals\LinkProposalProject;
-use App\Actions\Proposals\UnlinkProposalProject;
-use App\Enums\AssignmentStatus;
-use App\Enums\ProjectStatus;
 use App\Models\Activity;
-use App\Models\Assignment;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Projects\ReopenProjectAsDraft;
+use Modules\Tracking\Actions\Proposals\LinkProposalProject;
+use Modules\Tracking\Actions\Proposals\UnlinkProposalProject;
+use Modules\Tracking\Enums\AssignmentStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Assignment;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -75,7 +75,7 @@ function linkedIds(Proposal $proposal): array
 test('the proposal page links a project through the action and records its name, never an amount', function () {
     $project = Project::factory()->active()->create(['name' => 'Aleppo Clinics']);
 
-    Livewire::test('pages::proposals.show', ['proposal' => $this->proposal])
+    Livewire::test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->set('projectToLink', (string) $project->id)
         ->call('linkProject')
         ->assertHasNoErrors();
@@ -94,7 +94,7 @@ test('the proposal page unlinks a project through the action and records its nam
     $dropped = Project::factory()->create(['name' => 'Homs Schools']);
     fileLink($this->proposal, $kept, $dropped);
 
-    Livewire::test('pages::proposals.show', ['proposal' => $this->proposal])
+    Livewire::test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->call('confirmUnlinkProject', $dropped->id)
         ->assertSet('showUnlinkModal', true)
         ->call('unlinkProject')
@@ -111,7 +111,7 @@ test('the project page links and unlinks a proposal through the same actions', f
     $other = Project::factory()->create();
     fileLink($this->proposal, $other);
 
-    Livewire::test('pages::projects.show', ['project' => $project])
+    Livewire::test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'proposals')
         ->assertSee('Winter Response')
         ->set('proposalToAttach', (string) $this->proposal->id)
@@ -121,7 +121,7 @@ test('the project page links and unlinks a proposal through the same actions', f
     expect(linkedIds($this->proposal))->toBe([min($project->id, $other->id), max($project->id, $other->id)])
         ->and(Activity::query()->where('event', 'proposal.project_linked')->count())->toBe(1);
 
-    Livewire::test('pages::projects.show', ['project' => $project])
+    Livewire::test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'proposals')
         ->call('detachProposal', $this->proposal->id)
         ->assertHasNoErrors();
@@ -135,7 +135,7 @@ test('the project page needs proposals.update, not projects.update, to link or u
     $project = Project::factory()->active()->create();
     fileLink($this->proposal, $project, Project::factory()->create());
     $unlinked = Proposal::factory()->create();
-    $fresh = fn () => Livewire::actingAs($manager)->test('pages::projects.show', ['project' => $project]);
+    $fresh = fn () => Livewire::actingAs($manager)->test('tracking::projects.show', ['project' => $project]);
 
     expect($fresh()->instance()->attachableProposals)->toBeEmpty();
 
@@ -149,7 +149,7 @@ test('the project page needs proposals.update, not projects.update, to link or u
 test('the project page offers no proposal while the project itself cannot be linked', function () {
     $project = Project::factory()->status(ProjectStatus::Archived)->create();
 
-    expect(Livewire::test('pages::projects.show', ['project' => $project])->instance()->attachableProposals)->toBeEmpty();
+    expect(Livewire::test('tracking::projects.show', ['project' => $project])->instance()->attachableProposals)->toBeEmpty();
 });
 
 test('the proposal page refuses linking and unlinking to a user without proposals.update', function () {
@@ -157,7 +157,7 @@ test('the proposal page refuses linking and unlinking to a user without proposal
     $project = Project::factory()->create();
     fileLink($this->proposal, $project, Project::factory()->create());
     $candidate = Project::factory()->create();
-    $fresh = fn () => Livewire::actingAs($viewer)->test('pages::proposals.show', ['proposal' => $this->proposal]);
+    $fresh = fn () => Livewire::actingAs($viewer)->test('tracking::proposals.show', ['proposal' => $this->proposal]);
 
     $fresh()->set('projectToLink', (string) $candidate->id)->call('linkProject')->assertForbidden();
     $fresh()->call('confirmUnlinkProject', $project->id)->assertForbidden();
@@ -184,7 +184,7 @@ test('the last linked project cannot be unlinked', function () {
     $project = Project::factory()->create();
     fileLink($this->proposal, $project);
 
-    Livewire::test('pages::proposals.show', ['proposal' => $this->proposal])
+    Livewire::test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->call('confirmUnlinkProject', $project->id)
         ->call('unlinkProject')
         ->assertHasErrors(['project' => __('proposals.the_last_linked_project_cannot_be_unlinked')])
@@ -216,7 +216,7 @@ test('the unlink confirmation counts the unreported targets, which stay after th
     proposalTarget($this->proposal, $project);
     proposalTarget($this->proposal, $project);
 
-    Livewire::test('pages::proposals.show', ['proposal' => $this->proposal])
+    Livewire::test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->set('tab', 'projects')
         ->call('confirmUnlinkProject', $project->id)
         ->assertSet('unlinkUnreportedTargetCount', 2)
@@ -282,7 +282,7 @@ test('a project that cannot be linked is refused and never offered', function (C
     expect(refusal(fn () => app(LinkProposalProject::class)->handle($this->proposal, $projectId)))
         ->toBe(['projectIds' => [__('proposals.that_project_is_no_longer_available')]])
         ->and(linkedIds($this->proposal))->toBe([])
-        ->and(Livewire::test('pages::proposals.show', ['proposal' => $this->proposal])->instance()->linkableProjects->pluck('id')->all())
+        ->and(Livewire::test('tracking::proposals.show', ['proposal' => $this->proposal])->instance()->linkableProjects->pluck('id')->all())
         ->not->toContain($projectId);
 })->with([
     'archived' => fn (): int => Project::factory()->status(ProjectStatus::Archived)->create()->id,
@@ -305,7 +305,7 @@ test('a project that cannot be linked is refused and never offered', function (C
 test('the proposal page shows a refused link under the project picker', function () {
     $archived = Project::factory()->status(ProjectStatus::Archived)->create();
 
-    Livewire::test('pages::proposals.show', ['proposal' => $this->proposal])
+    Livewire::test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->set('projectToLink', (string) $archived->id)
         ->call('linkProject')
         ->assertHasErrors(['projectToLink' => __('proposals.that_project_is_no_longer_available')]);

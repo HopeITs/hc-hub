@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\Media;
-use App\Models\ReportFile;
-use App\Models\TaskAttachment;
 use Illuminate\Support\Facades\Storage;
+use Modules\Tracking\Models\ReportFile;
+use Modules\Tracking\Models\TaskAttachment;
 
 /**
  * Write a file to a faked disk and backdate it by the given number of hours.

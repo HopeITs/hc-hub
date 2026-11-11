@@ -1,25 +1,25 @@
 <?php
 
-use App\Enums\ProjectStatus;
-use App\Enums\ReportStatus;
-use App\Enums\TaskStatus;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Milestone;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportLine;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
-use App\Support\MonthlyReportPeriods;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportLine;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
+use Modules\Tracking\Support\MonthlyReportPeriods;
 
 /** Attach the user's account to an HR employee record, bypassing mass-assignment guarding. */
 function linkUserToEmployee(User $user, int $employeeId): User
@@ -38,7 +38,7 @@ test('a user with no linked HR employee sees an explanation instead of a calenda
     $user = User::factory()->role('General Manager')->create(['employee_id' => null]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->assertSeeText('No linked employee record')
         ->assertDontSee('data-test="calendar-day-', false);
 });
@@ -60,7 +60,7 @@ test('a linked user sees their own responsible milestones on the correct day, an
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-milestone-'.$mine->id.'"', false)
         ->assertSee('My milestone')
@@ -76,7 +76,7 @@ test('clicking a day pre-fills the add milestone form with that date', function 
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->call('openCreateModal', '2026-06-15')
         ->assertSet('plannedStartDate', '2026-06-15')
         ->assertSet('showMilestoneModal', true)
@@ -89,7 +89,7 @@ test('saving from the calendar creates a milestone on the clicked date', functio
     $project = Project::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->call('openCreateModal', '2026-06-15')
         ->set('name', 'Kickoff review')
         ->set('milestoneProjectId', (string) $project->id)
@@ -119,7 +119,7 @@ test('month navigation shows the new month and hides the old one', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-milestone-'.$june->id.'"', false)
         ->assertDontSee('data-test="calendar-milestone-'.$july->id.'"', false)
@@ -139,7 +139,7 @@ test('a milestone can be edited and deleted from the calendar', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->call('openEditModal', $milestone->id)
         ->assertSet('name', 'Original name')
@@ -150,7 +150,7 @@ test('a milestone can be edited and deleted from the calendar', function () {
     expect($milestone->refresh()->name)->toBe('Renamed');
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->call('confirmDelete', $milestone->id)
         ->assertSet('showDeleteModal', true)
@@ -169,7 +169,7 @@ test('deleting a milestone that still has a task from the calendar is refused', 
     Task::factory()->create(['source_type' => 'milestone', 'source_id' => $milestone->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->call('confirmDelete', $milestone->id)
         ->call('deleteMilestone')
@@ -199,7 +199,7 @@ test('a linked user sees their own assigned tasks on the correct day, and not an
     $notMine->taskAssignees()->create(['employee_id' => $otherEmployeeId]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-task-'.$mine->id.'"', false)
         ->assertSee('My task')
@@ -211,7 +211,7 @@ test('the right-click context menu offers to add either a milestone or a task, t
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-context-menu"', false)
         ->assertSee('data-test="calendar-context-add-milestone"', false)
@@ -225,7 +225,7 @@ test('clicking a day pre-fills the add task form with that date and defaults the
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->call('openCreateTaskModal', '2026-06-15')
         ->assertSet('dueDate', '2026-06-15')
         ->assertSet('showTaskModal', true)
@@ -238,7 +238,7 @@ test('saving a task from the calendar creates it with the clicked due date', fun
     $proposal = Proposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->call('openCreateTaskModal', '2026-06-15')
         ->set('title', 'Follow up with donor')
         ->set('taskSourceType', 'proposal')
@@ -270,7 +270,7 @@ test('a linked user sees their own report deadlines on the correct day, and not 
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-report-'.$mine->id.'"', false)
         ->assertDontSee('data-test="calendar-report-'.$notMine->id.'"', false);
@@ -294,7 +294,7 @@ test('a linked user sees their own unscheduled tasks in the unscheduled panel', 
     $scheduled->taskAssignees()->create(['employee_id' => $employeeId]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->assertSee('data-test="calendar-unscheduled-'.$mine->id.'"', false)
         ->assertSee('My unscheduled task')
         ->assertDontSee('data-test="calendar-unscheduled-'.$notMine->id.'"', false)
@@ -310,13 +310,13 @@ test('rescheduling a task from the calendar sets its due date, and clearing it u
     $task->taskAssignees()->create(['employee_id' => $employeeId]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->call('rescheduleTask', $task->id, '2026-06-20');
 
     expect($task->refresh()->due_date->toDateString())->toBe('2026-06-20');
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->call('rescheduleTask', $task->id, '');
 
     expect($task->refresh()->due_date)->toBeNull();
@@ -333,7 +333,7 @@ test('a task can be edited and deleted from the calendar', function () {
     $task->taskAssignees()->create(['employee_id' => $employeeId]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->call('openEditTaskModal', $task->id)
         ->assertSet('title', 'Original task')
@@ -344,7 +344,7 @@ test('a task can be edited and deleted from the calendar', function () {
     expect($task->refresh()->title)->toBe('Renamed task');
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->call('confirmDeleteTask', $task->id)
         ->assertSet('showTaskDeleteModal', true)
@@ -366,7 +366,7 @@ test('a completed task cannot be reopened from the calendar edit form', function
     $task->taskAssignees()->create(['employee_id' => $employeeId]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->call('openEditTaskModal', $task->id)
         ->set('taskStatus', TaskStatus::Todo->value)
@@ -395,7 +395,7 @@ test('turning off a type filter hides that type\'s chips without affecting the o
     $task->taskAssignees()->create(['employee_id' => $employeeId]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-milestone-'.$milestone->id.'"', false)
         ->assertSee('data-test="calendar-task-'.$task->id.'"', false)
@@ -421,7 +421,7 @@ test('the responsible filter switches the calendar to another employee\'s items,
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-milestone-'.$mine->id.'"', false)
         ->assertDontSee('data-test="calendar-milestone-'.$theirs->id.'"', false)
@@ -439,7 +439,7 @@ test('adding a milestone while viewing another employee\'s calendar assigns it t
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $myEmployeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('filterEmployeeIds', [(string) $otherEmployeeId])
         ->call('openCreateModal', '2026-06-15')
         ->assertSet('responsibleUserId', (string) $otherEmployeeId);
@@ -462,7 +462,7 @@ test('selecting several employees in the responsible filter merges their milesto
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->set('filterEmployeeIds', [(string) $myEmployeeId, (string) $otherEmployeeId])
         ->assertSee('data-test="calendar-milestone-'.$mine->id.'"', false)
@@ -486,7 +486,7 @@ test('switching to day view shows only the anchor date, and week view shows its 
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('anchorDate', '2026-06-15')
         ->set('viewMode', 'day')
         ->assertSee('data-test="calendar-allday-2026-06-15"', false)
@@ -502,7 +502,7 @@ test('previous and next move by the active view\'s period, not always by a month
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('viewMode', 'four_days')
         ->set('anchorDate', '2026-06-15')
         ->call('nextPeriod')
@@ -529,7 +529,7 @@ test('a linked user sees start/end dates for their own projects, and not another
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-project-start-'.$mine->id.'"', false)
         ->assertSee('data-test="calendar-project-end-'.$mine->id.'"', false)
@@ -552,7 +552,7 @@ test('a linked user sees deadlines for proposals funding their own projects, and
     $notMine->projects()->attach($theirProject);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-proposal-'.$mine->id.'"', false)
         ->assertDontSee('data-test="calendar-proposal-'.$notMine->id.'"', false);
@@ -583,7 +583,7 @@ test('a linked user sees transfer dates for funding agreements under their own p
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-transfer-'.$mine->id.'"', false)
         ->assertDontSee('data-test="calendar-transfer-'.$notMine->id.'"', false);
@@ -612,7 +612,7 @@ test('a linked user sees donor follow-ups and donor report deadlines tied to the
     $theirReport = DonorReport::factory()->create(['donor_proposal_id' => $theirAgreement->id, 'due_on' => Carbon::create(2026, 6, 15)]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-donor-followup-'.$myDonor->id.'"', false)
         ->assertSee('data-test="calendar-donor-report-'.$myReport->id.'"', false)
@@ -633,7 +633,7 @@ test('toggling off the new type filters hides their chips without affecting the 
     $proposal->projects()->attach($project);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-project-start-'.$project->id.'"', false)
         ->assertSee('data-test="calendar-proposal-'.$proposal->id.'"', false)
@@ -653,7 +653,7 @@ test('narrowing the type filter to exactly one type shows the focused banner, an
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertDontSee('data-test="calendar-focused-banner"', false)
         ->set('showTasks', false)
@@ -684,7 +684,7 @@ test('focusOnlyType isolates one type in a single call, closes the menu and jump
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('showTypeFilterMenu', true)
         ->call('focusOnlyType', 'milestone')
         ->assertSet('showMilestones', true)
@@ -704,7 +704,7 @@ test('toggling a type keeps the menu open, so unchecking several types in a row 
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('showTypeFilterMenu', true)
         ->call('toggleType', 'task')
         ->assertSet('showTypeFilterMenu', true)
@@ -723,7 +723,7 @@ test('narrowing to a single type via toggleType jumps the grid to its nearest oc
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('showTasks', false)
         ->set('showReports', false)
         ->set('showMonthlyReports', false)
@@ -739,7 +739,7 @@ test('an unknown type sent to toggleType or focusOnlyType changes no type filter
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('showTasks', false)
         ->set('showTypeFilterMenu', true)
         ->call($method, 'unknown')
@@ -760,7 +760,7 @@ test('an impossible month in the URL falls back to the current month', function 
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', $month)
         ->assertOk()
         ->assertSee('data-test="calendar-day-2026-06-15"', false)
@@ -774,7 +774,7 @@ test('an impossible anchor date in the URL falls back to today', function (strin
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('viewMode', 'day')
         ->set('anchorDate', $anchorDate)
         ->assertOk()
@@ -793,7 +793,7 @@ test('the related-dates panel lists both occurrences of a composite type with cl
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('showMilestones', false)
         ->set('showTasks', false)
         ->set('showReports', false)
@@ -819,7 +819,7 @@ test('the related-dates panel lists upcoming project ends instead of past projec
     )->create(['user_id' => $employeeId]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->call('focusOnlyType', 'project');
 
     $items = $component->instance()->focusedItems;
@@ -843,7 +843,7 @@ test('the related-dates panel falls back to the most recent past dates across bo
     ]);
 
     $items = Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->call('focusOnlyType', 'project')
         ->instance()
         ->focusedItems;
@@ -865,7 +865,7 @@ test('opening the day-detail list shows every visible item on that day and can e
     $task->taskAssignees()->create(['employee_id' => $employeeId]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->call('openDayDetail', '2026-06-15')
         ->assertSet('showDayDetailModal', true)
@@ -881,7 +881,7 @@ test('a day with no visible items has no clickable content area', function () {
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertDontSee('data-test="calendar-day-content-2026-06-15"', false);
 });
@@ -891,7 +891,7 @@ test('the today button resets both the month grid and the day/week anchor', func
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('viewMode', 'week')
         ->set('anchorDate', '2026-06-15')
         ->call('goToToday')
@@ -904,19 +904,19 @@ test('the milestone, task and day-detail forms are rendered only while their mod
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->assertDontSeeHtml('data-test="calendar-form-planned-date"')
         ->call('openCreateModal')
         ->assertSeeHtml('data-test="calendar-form-planned-date"');
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->assertDontSeeHtml('data-test="calendar-task-form-due-date"')
         ->call('openCreateTaskModal')
         ->assertSeeHtml('data-test="calendar-task-form-due-date"');
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->assertDontSeeHtml('data-test="calendar-daydetail-list"')
         ->call('openDayDetail', now()->toDateString())
         ->assertSeeHtml('data-test="calendar-daydetail-list"');
@@ -936,12 +936,12 @@ test('an active proposal with an extended end shows on the extended day, marked 
     $extended->projects()->attach($project);
     $plain->projects()->attach($project);
 
-    Livewire::actingAs($user)->test('pages::calendar.index')->set('month', '2026-06')
+    Livewire::actingAs($user)->test('tracking::calendar.index')->set('month', '2026-06')
         ->assertDontSee('data-test="calendar-proposal-'.$extended->id.'"', false)
         ->assertSee('data-test="calendar-proposal-'.$plain->id.'"', false)
         ->assertDontSee('data-test="calendar-proposal-extended-'.$plain->id.'"', false);
 
-    Livewire::actingAs($user)->test('pages::calendar.index')->set('month', '2026-08')
+    Livewire::actingAs($user)->test('tracking::calendar.index')->set('month', '2026-08')
         ->assertSee('data-test="calendar-proposal-'.$extended->id.'"', false)
         ->assertSee('data-test="calendar-proposal-extended-'.$extended->id.'"', false);
 });
@@ -951,7 +951,7 @@ test('someone who may add neither milestones nor tasks gets no Add button and no
     $viewer = linkUserToEmployee(User::factory()->role('Team Member')->create(), $employeeId);
 
     Livewire::actingAs($viewer)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->assertOk()
         ->assertDontSee('data-test="calendar-add-button"', false)
         ->assertDontSee('data-test="calendar-context-add-milestone"', false)
@@ -959,7 +959,7 @@ test('someone who may add neither milestones nor tasks gets no Add button and no
         ->assertDontSee('menuOpen = true', false);
 
     Livewire::actingAs(linkUserToEmployee(User::factory()->role('General Manager')->create(), insertHrEmployee()))
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->assertSee('data-test="calendar-add-button"', false)
         ->assertSee('menuOpen = true', false);
 });
@@ -983,7 +983,7 @@ test('a task, report and project whose date passed with the work unfinished are 
     $closedProject = Project::factory()->status(ProjectStatus::Closed)->create(['user_id' => $employeeId, 'start_date' => Carbon::create(2025, 1, 1), 'end_date' => Carbon::create(2026, 6, 10)]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee('data-test="calendar-late-task-'.$lateTask->id.'"', false)
         ->assertDontSee('data-test="calendar-late-task-'.$doneTask->id.'"', false)
@@ -1010,7 +1010,7 @@ test('a monthly report appears on its due date and is marked late once that date
     $draftDue = $periods->dueDate(CarbonImmutable::create(2026, 6, 1));
     $validatedDue = $periods->dueDate(CarbonImmutable::create(2026, 5, 1));
 
-    $component = Livewire::actingAs($viewer)->test('pages::calendar.index');
+    $component = Livewire::actingAs($viewer)->test('tracking::calendar.index');
 
     $component->set('month', $draftDue->format('Y-m'))
         ->assertSeeHtml('data-test="calendar-day-'.$draftDue->toDateString().'"')
@@ -1034,7 +1034,7 @@ test('focusing on monthly reports lists their due dates in the related-dates pan
     MonthlyReportLine::factory()->for($report)->create();
 
     $items = Livewire::actingAs($viewer)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->call('focusOnlyType', 'monthly_report')
         ->assertSet('showTasks', false)
         ->instance()
@@ -1050,7 +1050,7 @@ test('a busy day shows its item count for phone screens', function () {
     Project::factory()->count(3)->create(['user_id' => $employeeId, 'start_date' => Carbon::create(2025, 1, 1), 'end_date' => Carbon::create(2026, 12, 31)]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-12')
         ->assertSee('data-test="calendar-day-count-2026-12-31"', false)
         ->assertSeeText(trans_choice('calendar.items_short', 3, ['count' => 3]));
@@ -1061,7 +1061,7 @@ test('the type filter is kept in the address, so a reload shows the same types',
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->call('toggleType', 'task')
         ->assertSet('shownTypes', 'milestone,report,monthly_report,proposal,transfer,donor,project')
         ->call('resetFilters')
@@ -1069,7 +1069,7 @@ test('the type filter is kept in the address, so a reload shows the same types',
 
     Livewire::withQueryParams(['types' => 'milestone,not-a-type'])
         ->actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->assertSet('showMilestones', true)
         ->assertSet('showTasks', false)
         ->assertSet('showProjects', false)
@@ -1084,7 +1084,7 @@ test('"Only" keeps the month on screen when it already has that type', function 
     Milestone::factory()->create(['responsible_user_id' => $employeeId, 'planned_start_date' => Carbon::create(2026, 8, 1)]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->call('focusOnlyType', 'milestone')
         ->assertSet('month', '')
         ->assertNotDispatched('toast-show');
@@ -1097,7 +1097,7 @@ test('a busy day shows three chips and a "+N more" button to the rest', function
     Project::factory()->count(2)->create(['user_id' => $employeeId, 'start_date' => Carbon::create(2025, 1, 1), 'end_date' => Carbon::create(2026, 12, 29)]);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-12')
         ->assertSee('data-test="calendar-day-more-2026-12-30"', false)
         ->assertSeeText(trans_choice('calendar.more_items', 2, ['count' => 2]))
@@ -1112,7 +1112,7 @@ test('the heading names whose calendar is on screen', function () {
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), $employeeId);
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->assertSeeText(__('common.my_calendar'))
         ->set('filterEmployeeIds', [(string) $ranaId])
         ->assertSeeText(__('calendar.calendar_of', ['name' => 'Rana Nassar']))
@@ -1125,7 +1125,7 @@ test('dates use the language patterns, with the year only when it is not this ye
     $user = linkUserToEmployee(User::factory()->role('General Manager')->create(), insertHrEmployee());
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('viewMode', 'day')
         ->set('anchorDate', '2026-11-04')
         ->assertSeeText('Wednesday, November 4')
@@ -1137,7 +1137,7 @@ test('dates use the language patterns, with the year only when it is not this ye
     expect(CarbonImmutable::getLocale())->toBe('ar_SY');
 
     Livewire::actingAs($user)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->assertSeeText('الأربعاء')
         ->assertSeeText('تشرين الثاني 2026');
 });
@@ -1147,10 +1147,10 @@ test('people who may add can open the add menu from the keyboard on the day numb
     $viewer = linkUserToEmployee(User::factory()->role('Team Member')->create(), insertHrEmployee());
     $today = now()->toDateString();
 
-    Livewire::actingAs($user)->test('pages::calendar.index')
+    Livewire::actingAs($user)->test('tracking::calendar.index')
         ->assertSee('data-test="calendar-day-add-'.$today.'"', false);
 
-    Livewire::actingAs($viewer)->test('pages::calendar.index')
+    Livewire::actingAs($viewer)->test('tracking::calendar.index')
         ->assertDontSee('data-test="calendar-day-add-'.$today.'"', false);
 });
 
@@ -1167,7 +1167,7 @@ test('rejected and completed proposals leave the calendar, and an extended propo
         $proposal->projects()->attach($project);
     }
 
-    $html = Livewire::actingAs($user)->test('pages::calendar.index')->set('month', '2026-08')
+    $html = Livewire::actingAs($user)->test('tracking::calendar.index')->set('month', '2026-08')
         ->assertDontSee('data-test="calendar-proposal-'.$rejected->id.'"', false)
         ->assertDontSee('data-test="calendar-proposal-'.$completed->id.'"', false)
         ->html();

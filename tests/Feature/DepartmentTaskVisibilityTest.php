@@ -1,13 +1,13 @@
 <?php
 
-use App\Enums\TaskStatus;
-use App\Models\Proposal;
 use App\Models\Role;
-use App\Models\Scopes\TaskVisibilityScope;
-use App\Models\Task;
-use App\Models\User;
 use App\Support\Desk\Panels;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Scopes\TaskVisibilityScope;
+use Modules\Tracking\Models\Task;
 
 /**
  * An HR employee holding an active contract in the given department.

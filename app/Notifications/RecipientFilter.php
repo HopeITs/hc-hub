@@ -6,7 +6,7 @@ namespace App\Notifications;
 
 use App\Models\NotificationMute;
 use App\Models\Permission;
-use App\Models\User;
+use Modules\Core\Models\User;
 
 /**
  * The removals every notification goes through: the actor, anyone lacking the

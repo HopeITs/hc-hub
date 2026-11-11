@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\HrCity;
-use App\Models\Project;
+use Modules\Tracking\Models\Project;
 
 test('projects delivered in an hr city can be found by its id', function () {
     $city = HrCity::find(insertHrCity());

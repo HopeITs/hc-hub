@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Modules\Core\Models\User;
 
 /**
  * Writes a refused request (a 403) to the activity log, so repeated probing

@@ -1,19 +1,19 @@
 <?php
 
-use App\Actions\FundingAgreements\SaveAgreementInstallments;
-use App\Enums\Currency;
-use App\Events\FundingAgreementRecorded;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\FundingAgreementInstallment;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\FundingAgreements\SaveAgreementInstallments;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Events\FundingAgreementRecorded;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\FundingAgreementInstallment;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -171,7 +171,7 @@ test('the form saves the agreement and its schedule together and generates the t
     $proposal = Proposal::factory()->running()->create(['planned_date_begin' => '2026-01-01', 'planned_date_end' => '2026-12-31']);
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementCreate')
         ->set('agreementProposalId', (string) $proposal->id)
         ->set('budget', '3000.00')
@@ -194,7 +194,7 @@ test('a schedule that does not add up warns and saves only after an explicit yes
     $proposal = Proposal::factory()->running()->create(['planned_date_begin' => '2026-01-01', 'planned_date_end' => '2026-12-31']);
 
     $page = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementCreate')
         ->set('agreementProposalId', (string) $proposal->id)
         ->set('budget', '3000.00')
@@ -217,7 +217,7 @@ test('changing an amount after confirming asks again', function () {
     $proposal = Proposal::factory()->running()->create(['planned_date_begin' => '2026-01-01', 'planned_date_end' => '2026-12-31']);
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementCreate')
         ->set('agreementProposalId', (string) $proposal->id)
         ->set('budget', '3000.00')
@@ -232,7 +232,7 @@ test('the form refuses a date outside the term on the offending row', function (
     $proposal = Proposal::factory()->running()->create(['planned_date_begin' => '2026-01-01', 'planned_date_end' => '2026-12-31']);
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementCreate')
         ->set('agreementProposalId', (string) $proposal->id)
         ->set('budget', '1000.00')
@@ -253,7 +253,7 @@ test('clearing an existing schedule through the form is refused', function () {
     app(SaveAgreementInstallments::class)->handle($agreement, schedule(2));
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementEdit', $agreement->id)
         ->set('installments', [])
         ->call('saveAgreement')
@@ -267,7 +267,7 @@ test('a legacy agreement with manual transfers is saved without a schedule and i
     $manual = TransfersTracking::factory()->create(['donor_proposal_id' => $agreement->id, 'payment_amount' => '700.00']);
 
     Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementEdit', $agreement->id)
         ->set('budget', '3500.00')
         ->call('saveAgreement')
@@ -285,7 +285,7 @@ test('the edit form lists the stored schedule', function () {
     app(SaveAgreementInstallments::class)->handle($agreement, schedule(2));
 
     Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementEdit', $agreement->id)
         ->assertSet('installments', [
             ['amount' => '1000.00', 'scheduled_date' => '2026-02-15'],
@@ -302,13 +302,13 @@ test('FundingAgreementRecorded fires once after a successful save and never for 
     $approved = Proposal::factory()->running()->create();
     $concept = Proposal::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::funding-agreements.index')
+    Livewire::actingAs($user)->test('tracking::funding-agreements.index')
         ->call('openAgreementCreate')->set('agreementProposalId', (string) $concept->id)->set('budget', '10')->call('saveAgreement')
         ->assertHasErrors(['agreementProposalId']);
 
     expect($fired)->toBe([]);
 
-    Livewire::actingAs($user)->test('pages::funding-agreements.index')
+    Livewire::actingAs($user)->test('tracking::funding-agreements.index')
         ->call('openAgreementCreate')->set('agreementProposalId', (string) $approved->id)->set('budget', '10')->call('saveAgreement')
         ->assertHasNoErrors();
 
@@ -320,7 +320,7 @@ test('an agreement saved with a schedule that fails validation leaves nothing be
     $proposal = Proposal::factory()->running()->create(['planned_date_begin' => '2026-01-01', 'planned_date_end' => '2026-12-31']);
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementCreate')
         ->set('agreementProposalId', (string) $proposal->id)
         ->set('budget', '100')
@@ -337,7 +337,7 @@ test('a user without update rights cannot reach the schedule through the form', 
     $proposal = Proposal::factory()->running()->create(['planned_date_begin' => '2026-01-01', 'planned_date_end' => '2026-12-31']);
 
     Livewire::actingAs($viewer)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementCreate')
         ->set('agreementProposalId', (string) $proposal->id)
         ->set('budget', '100')

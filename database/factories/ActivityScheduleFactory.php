@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\ResultType;
-use App\Models\ActivitySchedule;
-use App\Models\Result;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\ActivitySchedule;
+use Modules\Tracking\Models\Result;
 
 /**
  * @extends Factory<ActivitySchedule>

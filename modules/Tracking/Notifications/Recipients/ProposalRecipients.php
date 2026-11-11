@@ -1,0 +1,231 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Tracking\Notifications\Recipients;
+
+use App\Enums\NotificationPriority;
+use App\Models\Activity;
+use App\Models\Role;
+use App\Notifications\EmployeeRecipients;
+use App\Notifications\Recipients\WatcherRecipients;
+use App\Support\Slots;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ProposalReviewer;
+use Modules\Tracking\Support\MealCoverage;
+
+/**
+ * Proposals: watched by Financial and the Public Relations Manager; approved
+ * (important) and rejected (critical) are ★.
+ *
+ * A beneficiary change after approval (proposal.beneficiaries_changed, D-25)
+ * also reaches MEAL: the officer responsible for each changed project
+ * (MealCoverage) directly, and every MEAL role holder as a watcher. MEAL holds
+ * no proposals.view, so those people skip the permission check for this event.
+ *
+ * The review loop (T07, contracts §15.2): a review request reaches the
+ * reviewers it names, an added or removed reviewer is told, a reviewer who
+ * has seen the proposal tells the project owners, and a need assessment tells
+ * the owners and the MEAL Manager slot. Reviewers hold no proposals.view
+ * (ProposalPolicy::view admits them), so the proposal's reviewers, the
+ * removed reviewer and the MEAL Manager skip the permission check for these
+ * events.
+ *
+ * A negotiation note (proposal.negotiation_noted, W-07, D-59) tells the
+ * proposal's reviewers and the CEO slot holder, besides the usual watchers;
+ * the reviewers and the CEO skip the permission check for it.
+ *
+ * An extension (proposal.extended, W-08, D-60) tells the owners of the linked
+ * projects, besides the usual watchers; the owners skip the permission check.
+ * The activity carries names and dates only.
+ *
+ * The approval rebase (proposal.plan_rebased, T31) is the system's: it tells
+ * the project owners, and only when a milestone or task date was cut at the
+ * grant end, so they can re-plan it. No watcher hears of it, and the owners
+ * (who hold no proposals.view) skip the permission check for it.
+ *
+ * Program requests (W-34a, contracts §15.2): an opened request reaches the
+ * HR liaison slot holder (Slots, contracts §9) directly, beside the Public
+ * Relations Manager who watches every proposal event; a linked request
+ * reaches the proposal owner. Both may hold no proposals.view, so they skip
+ * the permission check for these two events.
+ */
+final class ProposalRecipients extends WatcherRecipients
+{
+    private const BeneficiariesChanged = 'proposal.beneficiaries_changed';
+
+    private const ReviewRequested = 'proposal.review_requested';
+
+    private const ReviewerAdded = 'proposal.reviewer_added';
+
+    private const ReviewerRemoved = 'proposal.reviewer_removed';
+
+    private const ReviewerSeen = 'proposal.reviewer_seen';
+
+    private const NeedAssessmentAdded = 'proposal.need_assessment_added';
+
+    private const NegotiationNoted = 'proposal.negotiation_noted';
+
+    private const ReviewEvents = [self::ReviewRequested, self::ReviewerAdded, self::ReviewerRemoved, self::ReviewerSeen, self::NeedAssessmentAdded, self::NegotiationNoted];
+
+    private const PlanRebased = 'proposal.plan_rebased';
+
+    private const Extended = 'proposal.extended';
+
+    private const ProgramRequestOpened = 'program_request.opened';
+
+    private const ProgramRequestLinked = 'program_request.linked';
+
+    protected function roles(): array
+    {
+        return ['Financial', 'Public Relations Manager'];
+    }
+
+    public function watcherRoles(Activity $activity): array
+    {
+        return match ($activity->event) {
+            self::BeneficiariesChanged => [...$this->roles(), 'MEAL'],
+            self::PlanRebased => [],
+            default => $this->roles(),
+        };
+    }
+
+    public function directEmployeeIds(Activity $activity): array
+    {
+        return match ($activity->event) {
+            self::BeneficiariesChanged => $this->mealOfficerIds($activity),
+            self::ReviewRequested => $this->idsFromProperty($activity, 'employee_ids'),
+            self::ReviewerAdded, self::ReviewerRemoved => $this->idsFromProperty($activity, 'employee_id'),
+            self::ReviewerSeen => $this->projectOwnerIds($activity),
+            self::NeedAssessmentAdded => $this->uniqueIds([...$this->projectOwnerIds($activity), Slots::holderOf('meal_manager')]),
+            self::NegotiationNoted => $this->uniqueIds([
+                ...ProposalReviewer::query()->where('proposal_id', $activity->subject_id)->pluck('employee_id')->all(),
+                Slots::holderOf('ceo'),
+            ]),
+            self::PlanRebased => $this->hasClippedDates($activity) ? $this->projectOwnerIds($activity) : [],
+            self::Extended => $this->projectOwnerIds($activity),
+            self::ProgramRequestOpened => $this->uniqueIds([Slots::holderOf(Slots::HrLiaison)]),
+            self::ProgramRequestLinked => $this->projectOwnerIds($activity),
+            default => [],
+        };
+    }
+
+    /**
+     * The reviewers a request or an addition is about: they get the "…you…"
+     * wording, and the actor is told about any who have no account.
+     */
+    public function assignedEmployeeIds(Activity $activity): array
+    {
+        return match ($activity->event) {
+            self::ReviewRequested => $this->idsFromProperty($activity, 'employee_ids'),
+            self::ReviewerAdded => $this->idsFromProperty($activity, 'employee_id'),
+            default => [],
+        };
+    }
+
+    public function permissionExemptUserIds(Activity $activity): array
+    {
+        if ($activity->event === self::BeneficiariesChanged) {
+            $mealHolders = Role::query()->where('name', 'MEAL')->exists()
+                ? User::role('MEAL')->pluck('users.id')->all()
+                : [];
+
+            return $this->uniqueIds([
+                ...array_values(app(EmployeeRecipients::class)->usersFor($this->mealOfficerIds($activity))),
+                ...$mealHolders,
+            ]);
+        }
+
+        if ($activity->event === self::PlanRebased) {
+            return $this->hasClippedDates($activity)
+                ? $this->uniqueIds(array_values(app(EmployeeRecipients::class)->usersFor($this->projectOwnerIds($activity))))
+                : [];
+        }
+
+        if ($activity->event === self::Extended) {
+            return $this->uniqueIds(array_values(app(EmployeeRecipients::class)->usersFor($this->projectOwnerIds($activity))));
+        }
+
+        if (in_array($activity->event, [self::ProgramRequestOpened, self::ProgramRequestLinked], true)) {
+            return $this->uniqueIds(array_values(app(EmployeeRecipients::class)->usersFor($this->directEmployeeIds($activity))));
+        }
+
+        if (! in_array($activity->event, self::ReviewEvents, true)) {
+            return [];
+        }
+
+        $employeeIds = ProposalReviewer::query()->where('proposal_id', $activity->subject_id)->pluck('employee_id')->all();
+
+        $employeeIds = match ($activity->event) {
+            self::ReviewerRemoved => [...$employeeIds, ...$this->idsFromProperty($activity, 'employee_id')],
+            self::NeedAssessmentAdded => [...$employeeIds, Slots::holderOf('meal_manager')],
+            self::NegotiationNoted => [...$employeeIds, Slots::holderOf('ceo')],
+            default => $employeeIds,
+        };
+
+        return $this->uniqueIds(array_values(app(EmployeeRecipients::class)->usersFor($this->uniqueIds($employeeIds))));
+    }
+
+    public function isKeyEvent(Activity $activity): bool
+    {
+        return $activity->event === 'proposal.approved'
+            || ($activity->event === 'proposal.status_changed'
+                && in_array($this->changedTo($activity, 'status'), ['approved', 'rejected'], true));
+    }
+
+    public function priority(Activity $activity): NotificationPriority
+    {
+        return match (true) {
+            $this->isKeyEvent($activity) && $this->changedTo($activity, 'status') === 'rejected' => NotificationPriority::Critical,
+            $this->isKeyEvent($activity) => NotificationPriority::Important,
+            default => NotificationPriority::Info,
+        };
+    }
+
+    /**
+     * The MEAL officer responsible for each project the change names.
+     *
+     * @return list<int>
+     */
+    private function mealOfficerIds(Activity $activity): array
+    {
+        $projects = $activity->properties['projects'] ?? [];
+        $projectIds = is_array($projects)
+            ? array_map(fn (mixed $project): int => is_array($project) ? (int) ($project['project_id'] ?? 0) : 0, $projects)
+            : [];
+
+        $officerIds = Project::query()
+            ->select(['id', 'city_id', 'center_id'])
+            ->whereKey($this->uniqueIds($projectIds))
+            ->get()
+            ->map(fn (Project $project): ?int => MealCoverage::responsibleFor($project))
+            ->all();
+
+        return $this->uniqueIds($officerIds);
+    }
+
+    /**
+     * Whether the approval rebase cut a milestone or task date at the grant
+     * end (RebaseProposalPlan's clipped lists).
+     */
+    private function hasClippedDates(Activity $activity): bool
+    {
+        return ($activity->properties['clipped_milestones'] ?? []) !== []
+            || ($activity->properties['clipped_tasks'] ?? []) !== [];
+    }
+
+    /**
+     * The owners of the projects the proposal funds: the proposal has no
+     * owner of its own (contracts §15.2 "proposal owner").
+     *
+     * @return list<int>
+     */
+    private function projectOwnerIds(Activity $activity): array
+    {
+        return $this->uniqueIds(Project::query()
+            ->whereHas('proposals', fn ($query) => $query->whereKey($activity->subject_id))
+            ->pluck('user_id')
+            ->all());
+    }
+}

@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/pages/results/**'
+  - 'modules/Tracking/resources/views/pages/results/**'
 ---
 
 # Results

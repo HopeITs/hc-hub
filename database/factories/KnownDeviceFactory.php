@@ -4,8 +4,8 @@ namespace Database\Factories;
 
 use App\Http\UserAgent;
 use App\Models\KnownDevice;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\User;
 
 /**
  * @extends Factory<KnownDevice>

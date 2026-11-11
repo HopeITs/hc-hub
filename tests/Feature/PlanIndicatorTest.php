@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
 
 test('a planned target defaults to a quarterly period and no project', function () {
     $indicatorId = insertIndicator(insertResult());

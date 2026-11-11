@@ -1,6 +1,6 @@
 {{--
     One project number. An internal number belongs to a proposal and carries an amber chip while it is
-    still a migration placeholder (App\Models\Proposal::isPlaceholderNumber, so the TEMP- prefix lives
+    still a migration placeholder (Modules\Tracking\Models\Proposal::isPlaceholderNumber, so the TEMP- prefix lives
     in one place). An external number belongs to a funding agreement and may be empty. The number sits
     in <bdi dir="ltr"> so "HC-2026-001" never flips to "001-2026-HC" on an Arabic page.
 --}}
@@ -12,7 +12,7 @@
 
 @php
     $isInternal = $kind === 'internal';
-    $isPlaceholder = $isInternal && \App\Models\Proposal::isPlaceholderNumber($number);
+    $isPlaceholder = $isInternal && \Modules\Tracking\Models\Proposal::isPlaceholderNumber($number);
 @endphp
 
 <span {{ $attributes->class('inline-flex flex-wrap items-center gap-x-1.5 gap-y-1') }} data-project-number="{{ $kind }}">

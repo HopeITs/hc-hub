@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\Program;
-use App\Models\Strategy;
 use Database\Factories\Concerns\CreatesHrRecords;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\Strategy;
 
 /**
  * @extends Factory<Program>

@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
+use Modules\Core\Models\User;
 
 test('only the owner may listen on a user notification channel', function () {
     [$owner, $other] = Activity::withoutRecording(fn () => User::factory()->count(2)->create());

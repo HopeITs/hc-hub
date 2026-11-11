@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\TaskAttachment;
-use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\TaskAttachment;
 
 /**
  * Attach a file to a task and return the attachment id.

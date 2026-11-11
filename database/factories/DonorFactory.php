@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Enums\DonorApprovalStatus;
-use App\Enums\DonorType;
-use App\Models\Donor;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\DonorApprovalStatus;
+use Modules\Tracking\Enums\DonorType;
+use Modules\Tracking\Models\Donor;
 
 /**
  * @extends Factory<Donor>

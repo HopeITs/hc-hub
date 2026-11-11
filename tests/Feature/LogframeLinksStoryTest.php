@@ -1,14 +1,14 @@
 <?php
 
-use App\Enums\ResultType;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Result;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Result;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -20,7 +20,7 @@ beforeEach(function () {
 });
 
 test('the empty targets checklist switches the proposal to the logframe tab in place', function () {
-    Livewire::actingAs($this->user)->test('pages::proposals.show', ['proposal' => $this->proposal, 'embedded' => true])
+    Livewire::actingAs($this->user)->test('tracking::proposals.show', ['proposal' => $this->proposal, 'embedded' => true])
         ->set('tab', 'targets')
         ->assertSeeHtml('data-test="open-logframe-tab"')
         ->assertDontSeeHtml('tab=logframe')
@@ -31,7 +31,7 @@ test('the empty targets checklist switches the proposal to the logframe tab in p
 test('the results framework links a proposal group straight to its Story block', function () {
     Result::factory()->create(['type' => ResultType::Impact, 'program_id' => $this->program->id, 'proposal_id' => $this->proposal->id]);
 
-    Livewire::actingAs($this->user)->test('pages::results.index')
+    Livewire::actingAs($this->user)->test('tracking::results.index')
         ->assertSeeHtml('href="'.e(route('projects.show', ['project' => $this->project, 'proposal' => $this->proposal->id, 'ptab' => 'logframe']).'#proposal').'"')
         ->assertDontSeeHtml(route('proposals.show', $this->proposal));
 });

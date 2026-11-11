@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\Report;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Report;
 
 test('every hr account gets a Team Member tracking user, listed admins as super admin', function () {
     config(['auth.hr_admin_emails' => ['admin@example.org']]);

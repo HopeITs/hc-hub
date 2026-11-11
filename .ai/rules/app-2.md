@@ -1,6 +1,7 @@
 ---
 paths:
   - 'app/**'
+  - 'modules/**'
 ---
 
 # App 2

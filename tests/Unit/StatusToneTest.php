@@ -1,24 +1,27 @@
 <?php
 
 use App\Enums\Concerns\HasStatusTone;
-use App\Enums\MilestoneStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\RagStatus;
 use App\Enums\StatusTone;
-use App\Enums\TaskStatus;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\RagStatus;
+use Modules\Tracking\Enums\TaskStatus;
 
 /**
- * Every enum under app/Enums that implements HasStatusTone.
+ * Every enum under app/Enums or modules/*\/Enums that implements HasStatusTone.
  *
  * @return array<string, class-string<HasStatusTone&UnitEnum>>
  */
 function statusToneEnums(): array
 {
     $enums = [];
+    $classes = array_map(fn (string $file): string => 'App\\Enums\\'.basename($file, '.php'), glob(dirname(__DIR__, 2).'/app/Enums/*.php') ?: []);
 
-    foreach (glob(dirname(__DIR__, 2).'/app/Enums/*.php') as $file) {
-        $class = 'App\\Enums\\'.basename($file, '.php');
+    foreach (glob(dirname(__DIR__, 2).'/modules/*/Enums/*.php') ?: [] as $file) {
+        $classes[] = 'Modules\\'.basename(dirname($file, 2)).'\\Enums\\'.basename($file, '.php');
+    }
 
+    foreach ($classes as $class) {
         if (enum_exists($class) && is_subclass_of($class, HasStatusTone::class)) {
             $enums[class_basename($class)] = $class;
         }

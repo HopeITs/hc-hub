@@ -1,13 +1,13 @@
 <?php
 
 use App\Enums\FileType;
-use App\Enums\ReportStatus;
-use App\Models\Report;
-use App\Models\ReportFile;
-use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportFile;
 
 /**
  * Upload a real file to a draft report through the page and return its row.
@@ -15,7 +15,7 @@ use Livewire\Livewire;
 function uploadReportFile(Report $report, User $user, UploadedFile $upload, string $displayName = ''): ReportFile
 {
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('openCreateFileModal')
         ->set('newFile', $upload)
         ->set('fileDisplayName', $displayName)
@@ -60,7 +60,7 @@ test('an upload is required, capped at 5MB and limited to the allowed types', fu
     $report = Report::factory()->create(['status' => ReportStatus::Draft]);
 
     Livewire::actingAs(reportAuthor($report))
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('openCreateFileModal')
         ->set('newFile', $makeFile === null ? null : $makeFile())
         ->call('saveFile')
@@ -82,7 +82,7 @@ test('editing updates the name and date without touching the stored file', funct
     $originalPath = $file->path;
 
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('openEditFileModal', $file->id)
         ->assertSet('fileDisplayName', 'list.xlsx')
         ->set('fileDisplayName', 'Distribution list Q1')
@@ -107,7 +107,7 @@ test('editing with a replacement file swaps the stored file and removes the old 
     $oldPath = $file->path;
 
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('openEditFileModal', $file->id)
         ->set('newFile', validUpload('final.pdf', 80))
         ->set('fileDisplayName', 'Narrative')
@@ -132,7 +132,7 @@ test('deleting a file removes its row and its stored file', function () {
     $file = uploadReportFile($report, $user, validUpload('evidence.pdf', 10));
 
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('confirmDeleteFile', $file->id)
         ->assertSet('showDeleteFileModal', true)
         ->call('deleteFile')
@@ -147,7 +147,7 @@ test('a reference-only file record can still be deleted', function () {
     $file = ReportFile::factory()->create(['report_id' => $report->id]);
 
     Livewire::actingAs(reportAuthor($report))
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('confirmDeleteFile', $file->id)
         ->call('deleteFile');
 
@@ -194,7 +194,7 @@ test('edit and delete refuse a file that belongs to another report', function (s
     $foreignFile = ReportFile::factory()->create();
 
     Livewire::actingAs(reportAuthor($report))
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call($method, $foreignFile->id)
         ->assertNotFound();
 })->with(['openEditFileModal', 'confirmDeleteFile']);
@@ -253,7 +253,7 @@ test('the preview modal renders the right viewer and steps between files, even o
     $report->update(['status' => ReportStatus::Approved]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('openPreview', $pdf->id)
         ->assertSet('showPreviewModal', true)
         ->assertSeeHtml('data-test="pdf-preview"');
@@ -271,7 +271,7 @@ test('opening a preview refuses a file from another report', function () {
     $report = Report::factory()->create();
 
     Livewire::actingAs(reportAuthor($report))
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('openPreview', ReportFile::factory()->create()->id)
         ->assertNotFound();
 });

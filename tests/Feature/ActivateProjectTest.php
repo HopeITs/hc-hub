@@ -1,18 +1,18 @@
 <?php
 
-use App\Actions\Projects\ActivateProject;
-use App\Enums\AssignmentStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
-use App\Events\ProjectActivated;
-use App\Events\ProposalStatusChanged;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Projects\ActivateProject;
+use Modules\Tracking\Enums\AssignmentStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Events\ProjectActivated;
+use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 beforeEach(fn () => $this->travelTo('2026-10-14 10:00:00'));
 

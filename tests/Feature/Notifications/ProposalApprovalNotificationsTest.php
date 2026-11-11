@@ -1,15 +1,15 @@
 <?php
 
-use App\Actions\Proposals\ApproveProposal;
-use App\Enums\AssignmentStatus;
-use App\Enums\ProposalStatus;
 use App\Models\Activity;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
 use App\Notifications\RecipientResolver;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Actions\Proposals\ApproveProposal;
+use Modules\Tracking\Enums\AssignmentStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 beforeEach(function () {
     $this->travelTo('2026-10-14 10:00:00');

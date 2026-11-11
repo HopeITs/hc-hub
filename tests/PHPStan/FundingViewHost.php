@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\SwitchesFundingView;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\SwitchesFundingView;
 
 /**
  * Stands in for donors/show, funding-agreements/show and proposals/show.

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\ManagesReportForm;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\ManagesReportForm;
 
 /**
  * Stands in for reports/index and reports/show.

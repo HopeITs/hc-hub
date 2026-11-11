@@ -12,20 +12,23 @@ function stylesheetSource(): string
 }
 
 /**
- * The project's own Blade views, keyed by path relative to resources/views.
+ * The project's own Blade views (resources/views and each module's
+ * resources/views), keyed by path relative to that views folder.
  *
  * @return array<string, string>
  */
 function bladeViews(): array
 {
-    $root = dirname(__DIR__, 2).'/resources/views';
+    $roots = [dirname(__DIR__, 2).'/resources/views', ...(glob(dirname(__DIR__, 2).'/modules/*/resources/views') ?: [])];
     $views = [];
 
-    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)) as $file) {
-        $relative = str_replace('\\', '/', substr($file->getPathname(), strlen($root) + 1));
+    foreach ($roots as $root) {
+        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)) as $file) {
+            $relative = str_replace('\\', '/', substr($file->getPathname(), strlen($root) + 1));
 
-        if (str_ends_with($relative, '.blade.php') && ! str_starts_with($relative, 'vendor/')) {
-            $views[$relative] = file_get_contents($file->getPathname());
+            if (str_ends_with($relative, '.blade.php') && ! str_starts_with($relative, 'vendor/')) {
+                $views[$relative] = file_get_contents($file->getPathname());
+            }
         }
     }
 

@@ -1,9 +1,9 @@
 <?php
 
 use App\Http\Middleware\RemembersRecentRecord;
-use App\Models\Project;
-use App\Models\Task;
-use App\Models\User;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
 
 test('a person can pin a sidebar page and unpin it again', function () {
     $user = User::factory()->role('Super Admin')->create();

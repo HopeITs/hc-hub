@@ -3,9 +3,9 @@
 use App\Enums\NotificationPriority;
 use App\Jobs\FanOutActivity;
 use App\Models\Activity;
-use App\Models\Task;
 use App\Models\UserNotification;
 use App\Notifications\NotificationPresenter;
+use Modules\Tracking\Models\Task;
 
 test('assigning someone with no login warns the actor, naming them', function () {
     $actor = userWithRole('Managers');

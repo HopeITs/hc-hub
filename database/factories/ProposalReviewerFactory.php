@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Enums\ReviewerSlot;
-use App\Enums\ReviewStage;
-use App\Models\Proposal;
-use App\Models\ProposalReviewer;
 use Database\Factories\Concerns\CreatesHrRecords;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\ReviewerSlot;
+use Modules\Tracking\Enums\ReviewStage;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalReviewer;
 
 /**
  * @extends Factory<ProposalReviewer>

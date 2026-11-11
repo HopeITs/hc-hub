@@ -1,20 +1,20 @@
 <?php
 
-use App\Actions\Proposals\DeleteProposal;
-use App\Enums\ResultType;
 use App\Models\Activity;
-use App\Models\DonorProposal;
-use App\Models\Indicator;
-use App\Models\Milestone;
-use App\Models\PlanIndicator;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\DeleteProposal;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -118,7 +118,7 @@ test('the register deletes through the action and explains a refusal', function 
     ]);
     Report::factory()->create(['plan_indicator_id' => $target->id]);
 
-    Livewire::test('pages::proposals.index')
+    Livewire::test('tracking::proposals.index')
         ->call('confirmDelete', $this->proposal->id)
         ->call('deleteProposal')
         ->assertSet('showDeleteModal', false);
@@ -128,7 +128,7 @@ test('the register deletes through the action and explains a refusal', function 
     $clean = Proposal::factory()->create(['name' => 'Spring Response']);
     proposalFrameworkOnFile($clean);
 
-    Livewire::test('pages::proposals.index')
+    Livewire::test('tracking::proposals.index')
         ->call('confirmDelete', $clean->id)
         ->call('deleteProposal');
 

@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Milestone;
-use App\Models\ScheduleDependency;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\ScheduleDependency;
 
 /**
  * @extends Factory<ScheduleDependency>

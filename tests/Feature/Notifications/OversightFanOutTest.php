@@ -3,14 +3,14 @@
 use App\Jobs\FanOutActivity;
 use App\Models\Activity;
 use App\Models\NotificationMute;
-use App\Models\Project;
 use App\Models\Role;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Notifications\RecipientResolver;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);

@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Enums\ArStatus;
-use App\Enums\ReportStatus;
-use App\Enums\TaskStatus;
-use App\Models\Assignment;
 use App\Models\HrEmployee;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Scopes\TaskVisibilityScope;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use App\Models\UserNotification;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Gate;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Assignment;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Scopes\TaskVisibilityScope;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * One-click actions offered inside a notification. Offered only to people

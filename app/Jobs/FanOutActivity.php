@@ -7,7 +7,6 @@ namespace App\Jobs;
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\ActivityParameters;
 use App\Notifications\AppNotification;
@@ -18,6 +17,7 @@ use App\Notifications\RecipientResolver;
 use App\Notifications\ResolvedRecipients;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Modules\Core\Models\User;
 
 /**
  * Turns one activity into notifications. Idempotent: a recipient whose inbox

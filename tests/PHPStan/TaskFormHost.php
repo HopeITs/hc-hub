@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\SavesTaskForm;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\SavesTaskForm;
 
 /**
  * Stands in for calendar/index and tasks/index, which PHPStan cannot read.

@@ -1,11 +1,11 @@
 <?php
 
-use App\Enums\ArStatus;
+use Modules\Tracking\Enums\ArStatus;
 use App\Livewire\Concerns\Dashboard\ChartsDashboard;
 use App\Livewire\Concerns\Dashboard\ReadsDashboardAttention;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\DonorProposal;
-use App\Models\TransfersTracking;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\TransfersTracking;
 use App\Support\Desk\Money;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;

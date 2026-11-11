@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Milestone;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Models\Milestone;
 
 test('links to models loaded without their slug read every slug in one query', function () {
     $milestones = Milestone::factory()->count(3)->create();

@@ -1,18 +1,18 @@
 <?php
 
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\DonorProposal;
-use App\Models\Milestone;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Strategy;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Strategy;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 test('the timeline shows who did what and each field change', function () {
     $actor = Activity::withoutRecording(fn () => User::factory()->create(['name' => 'Sami']));
@@ -90,7 +90,7 @@ test('each record page carries its activity', function (string $route, Closure $
 test('the project Story shows its activity timeline in the side column', function () {
     $project = Activity::withoutRecording(fn () => Project::factory()->create());
 
-    Livewire::actingAs(Activity::withoutRecording(fn () => User::factory()->create()))->test('pages::projects.show', ['project' => $project])
+    Livewire::actingAs(Activity::withoutRecording(fn () => User::factory()->create()))->test('tracking::projects.show', ['project' => $project])
         ->assertSeeLivewire('activity.timeline');
 });
 

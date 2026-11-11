@@ -1,20 +1,6 @@
 <?php
 
-use App\Actions\Milestones\SaveProposalMilestone;
-use App\Actions\Proposals\DeleteProposalPlan;
-use App\Actions\Tasks\SaveDepartmentTask;
-use App\Enums\DeliverableKind;
-use App\Enums\DeliveryState;
-use App\Enums\ProposalStatus;
-use App\Enums\TaskKind;
 use App\Exceptions\InvalidParentException;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalReviewer;
-use App\Models\Task;
-use App\Models\TaskAttachment;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -22,6 +8,20 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Milestones\SaveProposalMilestone;
+use Modules\Tracking\Actions\Proposals\DeleteProposalPlan;
+use Modules\Tracking\Actions\Tasks\SaveDepartmentTask;
+use Modules\Tracking\Enums\DeliverableKind;
+use Modules\Tracking\Enums\DeliveryState;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\TaskKind;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalReviewer;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 
 beforeEach(function (): void {
     $this->travelTo(CarbonImmutable::parse('2026-03-01 09:00:00'));
@@ -577,7 +577,7 @@ test('a proposal-level milestone is shown under its proposal on the milestone pa
     Milestone::factory()->forProposal($proposal)->create(['name' => 'Donor kickoff']);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', $view)
         ->assertSee('Winter Response')
         ->assertSee('Donor kickoff');
@@ -588,7 +588,7 @@ test('a proposal-level milestone is shown on the milestone calendar', function (
     Milestone::factory()->forProposal(proposalPlanProposal())->create(['name' => 'Donor kickoff']);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'calendar')
         ->set('month', '2026-01')
         ->assertSee('Donor kickoff');
@@ -601,11 +601,11 @@ test('a proposal-level milestone and its tasks open with the proposal named', fu
     $task = Task::factory()->create(['source_type' => 'milestone', 'source_id' => $milestone->id, 'title' => 'Book the venue']);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->assertSee('Donor kickoff')
         ->assertSee('Winter Response');
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->assertSee('Book the venue')
         ->assertSee('Donor kickoff · Winter Response');
 });
@@ -632,7 +632,7 @@ test('the calendar day detail names the proposal of a proposal-level milestone',
     ]);
 
     $items = Livewire::actingAs(userWithRole('Managers', $employeeId))
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->set('month', '2026-01')
         ->call('openDayDetail', '2026-01-01')
         ->instance()
@@ -645,7 +645,7 @@ test('a proposal-level milestone is offered as a task source labelled with its p
     Milestone::factory()->forProposal(proposalPlanProposal(name: 'Winter Response'))->create(['name' => 'Donor kickoff']);
 
     $options = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('taskSourceType', 'milestone')
         ->instance()
         ->sourceOptions;
@@ -658,12 +658,12 @@ test('a proposal milestone gets its related milestones on the plan, not on its o
     $milestone = Milestone::factory()->forProposal(proposalPlanProposal())->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'list')
         ->assertSee($milestone->name)
         ->assertDontSee('data-test="milestone-add-nested-'.$milestone->id.'"', false);
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->assertDontSee('data-test="add-related-milestone-button"', false)
         ->call('openRelatedModal')
         ->assertForbidden();
@@ -676,7 +676,7 @@ test('a project milestone is never offered a parent from a proposal plan', funct
     $sibling = Milestone::factory()->create(['project_id' => $project->id]);
     $centerSpecific = Milestone::factory()->forProposal(proposalPlanProposal())->create(['project_id' => $project->id]);
 
-    $component = Livewire::actingAs($user)->test('pages::milestones.show', ['milestone' => $milestone]);
+    $component = Livewire::actingAs($user)->test('tracking::milestones.show', ['milestone' => $milestone]);
     $offered = $component->instance()->parentOptions->modelKeys();
     $component->set('parentMilestoneId', (string) $centerSpecific->id)->call('updateMilestone');
 
@@ -692,7 +692,7 @@ test('a project milestone is never offered a parent from a proposal plan', funct
 test('the old tasks tab lands on the plan tab', function () {
     Livewire::actingAs(userWithRole('Public Relations Manager'))
         ->withQueryParams(['tab' => 'tasks'])
-        ->test('pages::proposals.show', ['proposal' => proposalPlanProposal()])
+        ->test('tracking::proposals.show', ['proposal' => proposalPlanProposal()])
         ->assertSet('tab', 'plan')
         ->assertSeeHtml('data-tab-panel="plan"');
 });
@@ -714,7 +714,7 @@ test('the plan tab groups the milestones and the media, finance and other depart
     app(SaveDepartmentTask::class)->handle($proposal, null, proposalPlanTaskInput($media['department'], ['title' => 'Book the venue']));
 
     $component = Livewire::actingAs($manager)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan');
 
     expect($component->instance()->planGroups['media']->pluck('title')->all())->toBe(['Film the distribution'])
@@ -739,7 +739,7 @@ test('a milestone and the final report are added through the plan tab forms', fu
     $responsible = insertHrEmployee();
 
     $page = Livewire::actingAs(userWithRole('Public Relations Manager'))
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan')
         ->call('openPlanMilestoneForm')
         ->assertSet('showPlanMilestoneModal', true)
@@ -774,7 +774,7 @@ test('a milestone and the final report are added through the plan tab forms', fu
 
 test('a milestone outside the period shows the message on its field', function () {
     Livewire::actingAs(userWithRole('Public Relations Manager'))
-        ->test('pages::proposals.show', ['proposal' => proposalPlanProposal()])
+        ->test('tracking::proposals.show', ['proposal' => proposalPlanProposal()])
         ->set('tab', 'plan')
         ->call('openPlanMilestoneForm')
         ->set('planMilestone.name', 'Too late')
@@ -789,7 +789,7 @@ test('a milestone outside the period shows the message on its field', function (
 
 test('the plan tab is read-only once submitted and says why', function () {
     Livewire::actingAs(userWithRole('Public Relations Manager'))
-        ->test('pages::proposals.show', ['proposal' => proposalPlanProposal(ProposalStatus::Submitted)])
+        ->test('tracking::proposals.show', ['proposal' => proposalPlanProposal(ProposalStatus::Submitted)])
         ->set('tab', 'plan')
         ->assertSeeHtml('data-plan-read-only')
         ->assertSeeText(__('milestones.plan_window_locked'))
@@ -803,7 +803,7 @@ test('a user without plan rights is refused by the plan forms and nothing is wri
     $viewer = userWithRole('Media Team');
 
     Livewire::actingAs($viewer)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('planMilestone.name', 'Sneaky milestone')
         ->set('planMilestone.planned_start_date', '2026-03-10')
         ->set('planMilestone.responsible_employee_id', (string) $department['employee'])
@@ -811,7 +811,7 @@ test('a user without plan rights is refused by the plan forms and nothing is wri
         ->assertForbidden();
 
     Livewire::actingAs($viewer)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('planTask.title', 'Sneaky task')
         ->set('planTask.department_id', (string) $department['department'])
         ->set('planTask.due_date', '2026-03-20')
@@ -832,17 +832,17 @@ test('another proposal\'s milestone or task cannot be opened through this page',
     $foreignTask = app(SaveDepartmentTask::class)->handle($other, null, proposalPlanTaskInput($department['department'], ['title' => 'Foreign task']));
 
     Livewire::actingAs($manager)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openPlanMilestoneForm', $foreignMilestone->id)
         ->assertStatus(404);
 
     Livewire::actingAs($manager)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openPlanTaskForm', $foreignTask->id)
         ->assertStatus(404);
 
     Livewire::actingAs($manager)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openAssignModal', $foreignTask->id)
         ->assertStatus(404);
 
@@ -858,7 +858,7 @@ test('the person is assigned from the plan tab among the department\'s people on
     $task = app(SaveDepartmentTask::class)->handle($proposal, null, proposalPlanTaskInput($media['department']));
 
     $page = Livewire::actingAs($manager)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan')
         ->call('openAssignModal', $task->id)
         ->assertSet('showAssignModal', true);
@@ -887,7 +887,7 @@ test('the plan tab holds a flat query count whatever the number of tasks', funct
         DB::flushQueryLog();
         DB::enableQueryLog();
 
-        Livewire::actingAs($manager)->test('pages::proposals.show', ['proposal' => $proposal])->set('tab', 'plan');
+        Livewire::actingAs($manager)->test('tracking::proposals.show', ['proposal' => $proposal])->set('tab', 'plan');
 
         $queries = DB::getQueryLog();
         DB::disableQueryLog();
@@ -912,7 +912,7 @@ test('the milestone page edits a plan milestone through the plan window and only
     $milestone = app(SaveProposalMilestone::class)->handle($proposal, null, proposalPlanMilestoneInput());
 
     Livewire::actingAs($manager)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->set('plannedStartDate', '2027-02-01')
         ->set('plannedEndDate', '2027-02-10')
         ->call('updateMilestone')
@@ -921,7 +921,7 @@ test('the milestone page edits a plan milestone through the plan window and only
     expect($milestone->fresh()->planned_start_date->toDateString())->toBe('2026-03-01');
 
     Livewire::actingAs($manager)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->set('name', 'Community consultations, round 2')
         ->call('updateMilestone')
         ->assertHasNoErrors();
@@ -931,7 +931,7 @@ test('the milestone page edits a plan milestone through the plan window and only
     Proposal::query()->whereKey($proposal->id)->update(['status' => ProposalStatus::Submitted->value]);
 
     Livewire::actingAs($manager)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->set('name', 'Edited while locked')
         ->call('updateMilestone')
         ->assertHasNoErrors();

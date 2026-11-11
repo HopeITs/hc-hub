@@ -1,19 +1,19 @@
 <?php
 
-use App\Enums\IndicatorMeasure;
-use App\Enums\Period;
-use App\Models\AnnualPlan;
-use App\Models\Donor;
-use App\Models\Indicator;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Enums\Period;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
 
 test('guests are redirected from the target directory', function () {
     $this->get(route('targets.index'))->assertRedirect(route('login'));
@@ -36,7 +36,7 @@ test('targets can be filtered by source type', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->assertSee('Committed in a plan')
         ->assertSee('Committed in a proposal')
         ->set('sourceType', 'annual_plan')
@@ -54,7 +54,7 @@ test('a target stores the morph map key and never a class name', function () {
     $indicator = Indicator::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('openCreateModal')
         ->set('targetSourceType', 'annual_plan')
         ->set('targetSourceId', (string) $plan->id)
@@ -75,7 +75,7 @@ test('the source type select offers exactly the two mapped sources', function ()
     $user = User::factory()->role('MEAL')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('openCreateModal')
         ->assertSee('Annual plan')
         ->assertSee('Proposal')
@@ -87,7 +87,7 @@ test('changing the source type clears the chosen source', function () {
     $plan = AnnualPlan::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('openCreateModal')
         ->set('targetSourceType', 'annual_plan')
         ->set('targetSourceId', (string) $plan->id)
@@ -112,7 +112,7 @@ test('a target whose source was removed renders instead of throwing', function (
     DB::table('annual_plans')->where('id', $plan->id)->delete();
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->assertSee('Orphaned target indicator')
         ->assertSee('Source no longer available');
 });
@@ -127,7 +127,7 @@ test('a target with no project reads as organisation wide', function () {
         'project_id' => null,
     ]);
 
-    Livewire::actingAs($user)->test('pages::targets.index')->assertSee('Organisation-wide');
+    Livewire::actingAs($user)->test('tracking::targets.index')->assertSee('Organisation-wide');
 });
 
 test('an unreported target can be deleted', function () {
@@ -138,7 +138,7 @@ test('an unreported target can be deleted', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('confirmDelete', $target->id)
         ->call('deleteTarget')
         ->assertHasNoErrors();
@@ -155,7 +155,7 @@ test('a reported target is not deleted because its reports would cascade', funct
     $report = Report::factory()->create(['plan_indicator_id' => $target->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('confirmDelete', $target->id)
         ->call('deleteTarget');
 
@@ -169,7 +169,7 @@ test('a target value that would overflow the decimal column is rejected', functi
     $indicator = Indicator::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('openCreateModal')
         ->set('targetSourceType', 'annual_plan')
         ->set('targetSourceId', (string) $plan->id)
@@ -182,7 +182,7 @@ test('a target value that would overflow the decimal column is rejected', functi
 test('the target directory renders with no targets', function () {
     $user = User::factory()->role('General Manager')->create();
 
-    Livewire::actingAs($user)->test('pages::targets.index')->assertSee('No targets yet');
+    Livewire::actingAs($user)->test('tracking::targets.index')->assertSee('No targets yet');
 });
 
 test('achievement counts only approved reports and sums numeric indicators', function () {
@@ -198,7 +198,7 @@ test('achievement counts only approved reports and sums numeric indicators', fun
     Report::factory()->for($target, 'planIndicator')->create(['value' => 30, 'status' => 'approved']);
     Report::factory()->for($target, 'planIndicator')->create(['value' => 100, 'status' => 'reviewed']);
 
-    $component = Livewire::actingAs($user)->test('pages::targets.index');
+    $component = Livewire::actingAs($user)->test('tracking::targets.index');
     $row = $component->instance()->targets->first();
 
     expect((float) $row->actual_value)->toBe(80.0)
@@ -219,7 +219,7 @@ test('a percentage indicator uses its latest approved value instead of a sum', f
     Report::factory()->for($target, 'planIndicator')->create(['value' => 40, 'status' => 'approved', 'planned_date' => '2026-03-31', 'period_end' => '2026-03-31']);
     Report::factory()->for($target, 'planIndicator')->create(['value' => 55, 'status' => 'approved', 'planned_date' => '2026-06-30', 'period_end' => '2026-06-30']);
 
-    $row = Livewire::actingAs($user)->test('pages::targets.index')->instance()->targets->first();
+    $row = Livewire::actingAs($user)->test('tracking::targets.index')->instance()->targets->first();
 
     expect((float) $row->actual_value)->toBe(55.0);
 });
@@ -238,7 +238,7 @@ test('the pulse counts and filters targets by achievement status', function () {
     Report::factory()->for($make('Halfway indicator', 10), 'planIndicator')->create(['value' => 5, 'status' => 'approved']);
     $make('Untouched indicator', 10);
 
-    $component = Livewire::actingAs($user)->test('pages::targets.index');
+    $component = Livewire::actingAs($user)->test('tracking::targets.index');
 
     expect($component->instance()->pulse)->toMatchArray(['total' => 3, 'achieved' => 1, 'in_progress' => 1, 'not_started' => 1]);
 
@@ -262,7 +262,7 @@ test('confirming a delete opens the dialog and cancelling closes it', function (
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('confirmDelete', $target->id)
         ->assertSet('showDeleteModal', true)
         ->call('cancelDelete')
@@ -282,7 +282,7 @@ test('a target shows the program behind its plan and the donors behind its propo
     $planTarget = PlanIndicator::factory()->create(['source_type' => 'annual_plan', 'source_id' => $plan->id]);
     $proposalTarget = PlanIndicator::factory()->create(['source_type' => 'proposal', 'source_id' => $proposal->id]);
 
-    $component = Livewire::actingAs($user)->test('pages::targets.index');
+    $component = Livewire::actingAs($user)->test('tracking::targets.index');
 
     // The row names where it was committed; the links and the money sit behind Details.
     $component->assertSee('Winter Response Proposal')
@@ -306,7 +306,7 @@ test('expanding a target lists its reports with links', function () {
     $report = Report::factory()->for($target, 'planIndicator')->create(['status' => 'reviewed']);
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->assertDontSee(route('reports.show', $report), false)
         ->assertSee('1 awaiting approval')
         ->call('toggleReports', $target->id)
@@ -327,7 +327,7 @@ test('a result with more targets than a page never splits across pages', functio
         'indicator_id' => $indicator->id,
     ]);
 
-    $component = Livewire::actingAs($user)->test('pages::targets.index');
+    $component = Livewire::actingAs($user)->test('tracking::targets.index');
 
     expect($component->instance()->targets)->toHaveCount(20)
         ->and($component->instance()->resultPage->total())->toBe(1);
@@ -356,7 +356,7 @@ test('targets can be filtered by donor, program and year', function () {
     $make('Donor funded indicator', 'proposal', $proposal->id);
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->set('donor', (string) $donor->id)
         ->assertSee('Donor funded indicator')
         ->assertDontSee('Programme plan indicator')
@@ -381,7 +381,7 @@ test('the report trail shows evidence files and MEAL visibility', function () {
     Report::factory()->for($target, 'planIndicator')->create(['is_seen_by_meal' => true]);
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('toggleReports', $target->id)
         ->assertSee('No evidence files')
         ->assertSee('Seen by MEAL');
@@ -394,7 +394,7 @@ test('the indicator chain can open the commit form already tied to an indicator'
 
     Livewire::actingAs($user)
         ->withQueryParams(['indicator' => $indicator->id, 'create' => 1])
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->assertSet('showTargetModal', true)
         ->assertSet('targetIndicatorId', (string) $indicator->id)
         ->assertSet('targetPeriod', Period::Monthly->value)
@@ -415,7 +415,7 @@ test('the form offers only the plans and projects that fit the chosen indicator 
     $proposal->projects()->attach($funded);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('openCreateModal')
         ->set('targetIndicatorId', (string) $indicator->id);
 
@@ -434,7 +434,7 @@ test('a target that does not fit its chain is refused', function () {
     $otherPlan = AnnualPlan::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('openCreateModal')
         ->set('targetIndicatorId', (string) $indicator->id)
         ->set('targetSourceType', 'annual_plan')
@@ -446,7 +446,7 @@ test('a target that does not fit its chain is refused', function () {
     $proposal = Proposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('openCreateModal')
         ->set('targetIndicatorId', (string) Indicator::factory()->create()->id)
         ->set('targetSourceType', 'proposal')
@@ -464,7 +464,7 @@ test('a percentage target above 100 is refused', function () {
     $indicator = Indicator::factory()->create(['measure' => IndicatorMeasure::Percentage]);
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('openCreateModal')
         ->set('targetIndicatorId', (string) $indicator->id)
         ->set('targetSourceId', (string) AnnualPlan::factory()->create()->id)
@@ -480,7 +480,7 @@ test('the same indicator cannot be targeted twice in one source for one project'
     $existing = PlanIndicator::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('openCreateModal')
         ->set('targetIndicatorId', (string) $existing->indicator_id)
         ->set('targetSourceType', 'annual_plan')
@@ -498,14 +498,14 @@ test('a reported target keeps its indicator and source but its value can still c
     Report::factory()->for($target)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('openEditModal', $target->id)
         ->set('targetIndicatorId', (string) Indicator::factory()->create()->id)
         ->call('saveTarget')
         ->assertHasErrors(['targetIndicatorId']);
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('openEditModal', $target->id)
         ->set('targetValue', '250')
         ->call('saveTarget')
@@ -522,7 +522,7 @@ test('a target already out of step is flagged but its value can still be correct
         ->create(['indicator_id' => $indicator->id, 'target' => 100]);
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->assertSeeHtml('data-test="chain-issue-'.$target->id.'"')
         ->assertSee(__('targets.issue_plan_program_differs_from_result'))
         ->call('openEditModal', $target->id)
@@ -542,7 +542,7 @@ test('targets can be scoped to one indicator or one result from a deep link', fu
 
     Livewire::actingAs($user)
         ->withQueryParams(['indicator' => $shown->id])
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->assertSee('Scoped indicator')
         ->assertDontSee('Other indicator')
         ->assertSeeHtml('data-test="indicator-scope-chip"')
@@ -551,7 +551,7 @@ test('targets can be scoped to one indicator or one result from a deep link', fu
 
     Livewire::actingAs($user)
         ->withQueryParams(['result' => $shown->result_id])
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->assertSee('Scoped indicator')
         ->assertDontSee('Other indicator');
 });
@@ -563,7 +563,7 @@ test('the program filter reaches an organisation-wide proposal target through it
     PlanIndicator::factory()->forProposal(Proposal::factory()->create())->create(['indicator_id' => $indicator->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->set('program', (string) $program->id)
         ->assertSee('Program logframe indicator');
 });
@@ -573,7 +573,7 @@ test('each target links to recording a report against it', function () {
     $target = PlanIndicator::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->assertSeeHtml('href="'.e(route('reports.index', ['create' => 1, 'target' => $target->id])).'"');
 });
 
@@ -590,7 +590,7 @@ test('each row says its status in one plain word and the headline buttons carry 
     $untouched = $make('Untouched indicator');
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->assertSee('Nothing approved yet')
         ->assertSeeHtml('data-test="target-status-'.$untouched->id.'"')
         ->assertDontSee('No approved actuals')
@@ -611,7 +611,7 @@ test('inside a result the target nobody has reported on comes before the one tha
     $make('Zzz untouched indicator');
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->assertSeeInOrder(['Zzz untouched indicator', 'Aaa finished indicator']);
 });
 
@@ -619,14 +619,14 @@ test('the secondary filters sit behind More filters and the controls stay inside
     $user = User::factory()->role('General Manager')->create();
     PlanIndicator::factory()->create(['source_type' => 'annual_plan', 'source_id' => AnnualPlan::factory()->create()->id]);
 
-    $html = Livewire::actingAs($user)->test('pages::targets.index')->html();
+    $html = Livewire::actingAs($user)->test('tracking::targets.index')->html();
 
     expect($html)->toContain('data-test="more-filters-button"')->toContain('More filters');
 
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
     $xpath = new DOMXPath($dom);
-    $root = '//section[@*[name()="wire:name"]="pages::targets.index"]';
+    $root = '//section[@*[name()="wire:name"]="tracking::targets.index"]';
 
     foreach (['more-filters-button', 'status-filter-achieved', 'status-filter-not_started'] as $control) {
         expect($xpath->query($root.'//*[@data-test="'.$control.'"]')->length)->toBeGreaterThan(0, "{$control} sits outside the component");
@@ -642,7 +642,7 @@ test('a filter with no match offers a way out and the delete dialog names the ta
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->set('search', 'nothing matches this')
         ->assertSeeHtml('data-test="empty-reset-filters"')
         ->call('clearFilters')

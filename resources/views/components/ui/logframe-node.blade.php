@@ -1,13 +1,13 @@
 {{--
     One node of the read-only results chain (T16): a node array from
-    App\Support\ResultsChain, never a Result to query. Keeps the shared
+    Modules\Tracking\Support\ResultsChain, never a Result to query. Keeps the shared
     ResultType mark/accent identity and the data-tree-depth /
     data-result-type attributes (ResultsFrameworkTest, ProgramDetailTest).
 --}}
 @props(['node', 'depth'])
 
 @php
-    use App\Enums\ResultType;
+    use Modules\Tracking\Enums\ResultType;
 
     $result = $node['result'];
     $children = $node['children'];

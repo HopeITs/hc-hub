@@ -1,13 +1,13 @@
 <?php
 
-use App\Enums\MilestoneStatus;
-use App\Enums\TaskStatus;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
 
 test('guests are redirected from the milestone show page', function () {
     $milestone = Milestone::factory()->create();
@@ -24,7 +24,7 @@ test('the milestone show page renders the edit form with the current values', fu
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->assertSee('Baseline assessment')
         ->assertSee('Aleppo Wells')
         ->assertSet('name', 'Baseline assessment')
@@ -36,7 +36,7 @@ test('a milestone can be updated from its own page', function () {
     $milestone = Milestone::factory()->create(['name' => 'Initial gate', 'sequence' => 5]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->set('name', '  Revised gate  ')
         ->set('weightPercentage', '35.50')
         ->call('updateMilestone')
@@ -54,7 +54,7 @@ test('updating a milestone requires its core delivery fields', function () {
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->set('name', '   ')
         ->set('plannedStartDate', '')
         ->set('responsibleUserId', '')
@@ -72,7 +72,7 @@ test('the edit parent picker is project local and excludes the milestone and its
     Milestone::factory()->create(['project_id' => $otherProject->id, 'name' => 'Other project gate']);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $root]);
+        ->test('tracking::milestones.show', ['milestone' => $root]);
 
     $names = $component->instance()->parentOptions()->pluck('name')->all();
 
@@ -93,7 +93,7 @@ test('a related milestone can be added from the show page as a child by default'
     $milestone = Milestone::factory()->create(['project_id' => $project->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->call('openRelatedModal')
         ->assertSet('showRelatedModal', true)
         ->assertSet('relatedParentMilestoneId', (string) $milestone->id)
@@ -117,7 +117,7 @@ test('a related milestone can instead be created at the top level of the same pr
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->call('openRelatedModal')
         ->set('relatedName', 'Standalone gate')
         ->set('relatedResponsibleUserId', (string) $responsible)
@@ -137,7 +137,7 @@ test('newly related milestones appear in the related milestones panel', function
     $child = Milestone::factory()->childOf($parent)->create(['name' => 'Household survey']);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $parent])
+        ->test('tracking::milestones.show', ['milestone' => $parent])
         ->assertSee('Household survey')
         ->assertSee('href="'.route('milestones.show', $child).'"', false);
 });
@@ -147,7 +147,7 @@ test('creating a related milestone requires its core delivery fields', function 
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->call('openRelatedModal')
         ->set('relatedName', '   ')
         ->set('relatedPlannedStartDate', '')
@@ -162,7 +162,7 @@ test('a task can be added from the milestone show page pre-filled with this mile
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->call('openAddTaskModal')
         ->assertSet('showAddTaskModal', true)
         ->set('newTaskTitle', '  Household survey  ')
@@ -184,7 +184,7 @@ test('a task added from a milestone outside any program keeps its description an
     $milestone = Milestone::factory()->forProposal(Proposal::factory()->create())->create(['name' => 'Works handover']);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->call('openAddTaskModal')
         ->assertSeeHtml('data-test="new-milestone-task-related-to"')
         ->assertSee('Works handover')
@@ -202,7 +202,7 @@ test('adding a task from the milestone show page requires a title but no assigne
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->call('openAddTaskModal')
         ->set('newTaskTitle', '   ')
         ->set('newTaskAssignedTo', [])
@@ -228,7 +228,7 @@ test('tasks linked to this milestone appear in the related tasks panel', functio
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->assertSee('Survey households')
         ->assertSee('href="'.route('tasks.show', $task).'"', false)
         ->assertDontSee('Unrelated task');
@@ -239,7 +239,7 @@ test('the status can be changed from the edit form', function () {
     $milestone = Milestone::factory()->create(['status' => MilestoneStatus::Planned]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->set('milestoneStatus', MilestoneStatus::Reached->value)
         ->call('updateMilestone')
         ->assertHasNoErrors();
@@ -252,7 +252,7 @@ test('the related milestone form is rendered only while its modal is open', func
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.show', ['milestone' => $milestone])
+        ->test('tracking::milestones.show', ['milestone' => $milestone])
         ->assertDontSeeHtml('wire:model="relatedName"')
         ->call('openRelatedModal')
         ->assertSeeHtml('wire:model="relatedName"');

@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\DonorReport;
-use App\Models\User;
 use App\Support\Desk\Destinations;
 use App\Support\Desk\PageCards;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\DonorReport;
 
 /**
  * The pages a user's sidebar lists, in order.

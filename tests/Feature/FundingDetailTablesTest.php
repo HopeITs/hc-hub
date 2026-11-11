@@ -1,17 +1,17 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Enums\DonorReportType;
-use App\Models\Account;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\DonorReportType;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -65,7 +65,7 @@ test('the agreement page opens on its totals and a table of every tranche', func
     $agreement = detailAgreement();
 
     Livewire::actingAs($this->user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->assertSet('view', 'table')
         ->assertSeeHtml('data-register')
         ->assertDontSeeHtml('data-dial')
@@ -88,7 +88,7 @@ test('the agreement page overview shows the dial and the journeys instead of the
     $agreement = detailAgreement();
 
     Livewire::actingAs($this->user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->set('view', 'overview')
         ->assertSeeHtml('data-dial')
         ->assertSeeHtml('data-trace')
@@ -98,7 +98,7 @@ test('the agreement page overview shows the dial and the journeys instead of the
 
     Livewire::actingAs($this->user)
         ->withQueryParams(['view' => 'sideways'])
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->assertSet('view', 'table');
 });
 
@@ -108,7 +108,7 @@ test('the agreement page lists donor reports as a table with their state and act
     $sent = DonorReport::factory()->create(['donor_proposal_id' => $agreement->id, 'title' => 'Inception report', 'due_on' => '2026-03-01', 'submitted_on' => '2026-02-27']);
 
     Livewire::actingAs($this->user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->assertSeeHtml('data-donor-report="'.$overdue->id.'"')
         ->assertSeeHtml('data-donor-report="'.$sent->id.'"')
         ->assertSee('Interim financial report')
@@ -124,7 +124,7 @@ test('the agreement page exports its tranches', function () {
     $agreement = detailAgreement();
 
     $page = Livewire::actingAs($this->user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->call('exportTranchesCsv')
         ->assertFileDownloaded('agreement-tranches-2026-06-15.csv');
 
@@ -142,7 +142,7 @@ test('the agreement page exports its tranches', function () {
         ->and($csv[2][0])->toBe('Overdue');
 
     Livewire::actingAs(User::factory()->create())
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->call('exportTranchesCsv')
         ->assertForbidden();
 });
@@ -156,7 +156,7 @@ test('the donor page opens on its agreements and all its tranches as tables', fu
     ]);
 
     $page = Livewire::actingAs($this->user)
-        ->test('pages::donors.show', ['donor' => $agreement->donor])
+        ->test('tracking::donors.show', ['donor' => $agreement->donor])
         ->assertSet('view', 'table')
         ->assertDontSeeHtml('data-money-river')
         ->assertSeeHtml('data-agreements')
@@ -184,7 +184,7 @@ test('the donor page overview shows the money river and the calendar instead of 
     $agreement = detailAgreement();
 
     Livewire::actingAs($this->user)
-        ->test('pages::donors.show', ['donor' => $agreement->donor])
+        ->test('tracking::donors.show', ['donor' => $agreement->donor])
         ->set('view', 'overview')
         ->assertSeeHtml('data-money-river')
         ->assertSeeHtml('data-money-calendar')
@@ -196,7 +196,7 @@ test('the donor page shows budgets without tranches to someone who may not see t
     $agreement = detailAgreement();
     $viewer = userWithRole('Public Relations Manager')->givePermissionTo('funding-agreements.view');
 
-    $page = Livewire::actingAs($viewer)->test('pages::donors.show', ['donor' => $agreement->donor]);
+    $page = Livewire::actingAs($viewer)->test('tracking::donors.show', ['donor' => $agreement->donor]);
 
     $page->assertSee('1,000.00')
         ->assertDontSee('390.00')
@@ -207,7 +207,7 @@ test('the donor page shows budgets without tranches to someone who may not see t
         ->and($page->instance()->allTranches)->toBeEmpty();
 
     Livewire::actingAs($viewer)
-        ->test('pages::donors.show', ['donor' => $agreement->donor])
+        ->test('tracking::donors.show', ['donor' => $agreement->donor])
         ->call('exportTranchesCsv')
         ->assertForbidden();
 });
@@ -216,7 +216,7 @@ test('the donor page exports every tranche of the donor', function () {
     $agreement = detailAgreement();
 
     $page = Livewire::actingAs($this->user)
-        ->test('pages::donors.show', ['donor' => $agreement->donor])
+        ->test('tracking::donors.show', ['donor' => $agreement->donor])
         ->call('exportTranchesCsv')
         ->assertFileDownloaded('donor-tranches-2026-06-15.csv');
 
@@ -232,7 +232,7 @@ test('the proposal funding tab opens on its agreements and tranches as tables', 
     $agreement = detailAgreement();
 
     $page = Livewire::actingAs($this->user)
-        ->test('pages::proposals.show', ['proposal' => $agreement->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $agreement->proposal])
         ->set('tab', 'funding')
         ->assertSet('view', 'table')
         ->assertDontSeeHtml('data-chronology')
@@ -256,7 +256,7 @@ test('the proposal funding tab overview shows the chronology instead of the tabl
     $agreement = detailAgreement();
 
     Livewire::actingAs($this->user)
-        ->test('pages::proposals.show', ['proposal' => $agreement->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $agreement->proposal])
         ->set('tab', 'funding')
         ->set('view', 'overview')
         ->assertSeeHtml('data-chronology')
@@ -269,7 +269,7 @@ test('the proposal funding tab shows budgets without tranches to someone who may
     $viewer = userWithRole('Public Relations Manager')->givePermissionTo('funding-agreements.view');
 
     $page = Livewire::actingAs($viewer)
-        ->test('pages::proposals.show', ['proposal' => $agreement->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $agreement->proposal])
         ->set('tab', 'funding');
 
     $page->assertSee('1,000.00')

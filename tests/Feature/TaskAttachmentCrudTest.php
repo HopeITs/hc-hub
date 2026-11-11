@@ -1,13 +1,13 @@
 <?php
 
 use App\Enums\FileType;
-use App\Models\Task;
-use App\Models\TaskAttachment;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 
 beforeEach(fn () => $this->seed(RolesAndPermissionsSeeder::class));
 
@@ -17,7 +17,7 @@ beforeEach(fn () => $this->seed(RolesAndPermissionsSeeder::class));
 function uploadTaskAttachment(Task $task, User $user, UploadedFile $upload, string $displayName = ''): TaskAttachment
 {
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->call('openCreateFileModal')
         ->set('newFile', $upload)
         ->set('fileDisplayName', $displayName)
@@ -62,7 +62,7 @@ test('an upload is required, capped at 5MB and limited to the allowed types', fu
     $task = Task::factory()->create();
 
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->call('openCreateFileModal')
         ->set('newFile', $makeFile === null ? null : $makeFile())
         ->call('saveFile')
@@ -84,7 +84,7 @@ test('editing updates the name and date without touching the stored file', funct
     $originalPath = $file->path;
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->call('openEditFileModal', $file->id)
         ->assertSet('fileDisplayName', 'list.xlsx')
         ->set('fileDisplayName', 'Distribution list Q1')
@@ -109,7 +109,7 @@ test('editing with a replacement file swaps the stored file and removes the old 
     $oldPath = $file->path;
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->call('openEditFileModal', $file->id)
         ->set('newFile', validUpload('final.pdf', 80))
         ->set('fileDisplayName', 'Narrative')
@@ -134,7 +134,7 @@ test('deleting a file removes its row and its stored file', function () {
     $file = uploadTaskAttachment($task, $user, validUpload('evidence.pdf', 10));
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->call('confirmDeleteFile', $file->id)
         ->assertSet('showDeleteFileModal', true)
         ->call('deleteFile')
@@ -149,7 +149,7 @@ test('a reference-only attachment record can still be deleted', function () {
     $file = TaskAttachment::factory()->create(['task_id' => $task->id]);
 
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->call('confirmDeleteFile', $file->id)
         ->call('deleteFile');
 
@@ -164,7 +164,7 @@ test('a user without update permission cannot open the upload, edit or delete ac
     $task->taskAssignees()->create(['employee_id' => $employeeId]);
 
     Livewire::actingAs($assignee)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->call($method, ...$args)
         ->assertForbidden();
 })->with([
@@ -210,7 +210,7 @@ test('edit and delete refuse an attachment that belongs to another task', functi
     $foreignFile = TaskAttachment::factory()->create();
 
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->call($method, $foreignFile->id)
         ->assertNotFound();
 })->with(['openEditFileModal', 'confirmDeleteFile']);
@@ -253,7 +253,7 @@ test('the preview modal renders the right viewer and steps between files', funct
     $docx = uploadTaskAttachment($task, $user, validUpload('b.docx', 10));
 
     $component = Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->call('openPreview', $pdf->id)
         ->assertSet('showPreviewModal', true)
         ->assertSeeHtml('data-test="pdf-preview"');
@@ -269,7 +269,7 @@ test('the preview modal renders the right viewer and steps between files', funct
 
 test('opening a preview refuses an attachment from another task', function () {
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::tasks.show', ['task' => Task::factory()->create()])
+        ->test('tracking::tasks.show', ['task' => Task::factory()->create()])
         ->call('openPreview', TaskAttachment::factory()->create()->id)
         ->assertNotFound();
 });

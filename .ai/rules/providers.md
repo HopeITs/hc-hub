@@ -1,6 +1,7 @@
 ---
 paths:
   - 'app/Providers/**'
+  - 'modules/*/*ServiceProvider.php'
 ---
 
 # Providers

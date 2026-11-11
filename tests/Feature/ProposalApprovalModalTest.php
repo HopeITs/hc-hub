@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\AssignmentStatus;
 use App\Enums\MediaCollection;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
 use App\Models\Media;
-use App\Models\Project;
-use App\Models\Proposal;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Tracking\Enums\AssignmentStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 beforeEach(fn () => $this->travelTo('2026-10-14 10:00:00'));
 
@@ -37,7 +37,7 @@ function proposalReadyToApprove(): array
 function approveModal(string $role, Proposal $proposal): Testable
 {
     return Livewire::actingAs(userWithRole($role))
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openApproveModal', $proposal->id);
 }
 
@@ -45,17 +45,17 @@ test('the button shows only while the proposal can be approved and only to the P
     ['proposal' => $proposal] = proposalReadyToApprove();
 
     foreach (['Financial', 'General Manager', 'Managers'] as $role) {
-        Livewire::actingAs(userWithRole($role))->test('pages::proposals.show', ['proposal' => $proposal])->assertDontSeeHtml('data-test="open-approve-modal"');
+        Livewire::actingAs(userWithRole($role))->test('tracking::proposals.show', ['proposal' => $proposal])->assertDontSeeHtml('data-test="open-approve-modal"');
     }
 
-    Livewire::actingAs(userWithRole('Financial'))->test('pages::proposals.show', ['proposal' => $proposal])->call('openApproveModal', $proposal->id)->assertForbidden();
+    Livewire::actingAs(userWithRole('Financial'))->test('tracking::proposals.show', ['proposal' => $proposal])->call('openApproveModal', $proposal->id)->assertForbidden();
 
-    Livewire::actingAs(userWithRole('Public Relations Manager'))->test('pages::proposals.show', ['proposal' => $proposal])->assertSeeHtml('data-test="open-approve-modal"');
-    Livewire::actingAs(userWithRole('Team Member'))->test('pages::proposals.show', ['proposal' => $proposal])->assertDontSeeHtml('data-test="open-approve-modal"');
+    Livewire::actingAs(userWithRole('Public Relations Manager'))->test('tracking::proposals.show', ['proposal' => $proposal])->assertSeeHtml('data-test="open-approve-modal"');
+    Livewire::actingAs(userWithRole('Team Member'))->test('tracking::proposals.show', ['proposal' => $proposal])->assertDontSeeHtml('data-test="open-approve-modal"');
 
     $proposal->forceFill(['status' => ProposalStatus::ProposalDraft])->save();
 
-    Livewire::actingAs(userWithRole('Public Relations Manager'))->test('pages::proposals.show', ['proposal' => $proposal])->assertDontSeeHtml('data-test="open-approve-modal"');
+    Livewire::actingAs(userWithRole('Public Relations Manager'))->test('tracking::proposals.show', ['proposal' => $proposal])->assertDontSeeHtml('data-test="open-approve-modal"');
 });
 
 test('the dialog pre-fills the planned dates and previews each project in English and Arabic', function (string $locale) {
@@ -152,7 +152,7 @@ test('a proposal approved elsewhere meanwhile shows the explanation and a reload
 test('someone without proposals.update cannot open the dialog', function () {
     ['proposal' => $proposal] = proposalReadyToApprove();
 
-    Livewire::actingAs(userWithRole('Team Member'))->test('pages::proposals.show', ['proposal' => $proposal])->call('openApproveModal', $proposal->id)->assertForbidden();
+    Livewire::actingAs(userWithRole('Team Member'))->test('tracking::proposals.show', ['proposal' => $proposal])->call('openApproveModal', $proposal->id)->assertForbidden();
 
     expect($proposal->fresh()->status)->toBe(ProposalStatus::Submitted);
 });

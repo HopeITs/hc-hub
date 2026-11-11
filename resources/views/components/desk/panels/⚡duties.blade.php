@@ -1,7 +1,7 @@
 <?php
 
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\DonorReport;
+use Modules\Tracking\Models\DonorReport;
 use App\Models\HrEmployee;
 use App\Support\Desk\DeskWork;
 use Carbon\CarbonImmutable;

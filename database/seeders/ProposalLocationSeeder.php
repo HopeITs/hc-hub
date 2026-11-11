@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\ProgramRequest;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalLocation;
-use App\Models\User;
-use App\Support\ProposalLocationBackfill;
 use Illuminate\Database\Seeder;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\ProgramRequest;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
+use Modules\Tracking\Support\ProposalLocationBackfill;
 
 /**
  * Location rows for the seeded proposals (W-34a): one per existing link

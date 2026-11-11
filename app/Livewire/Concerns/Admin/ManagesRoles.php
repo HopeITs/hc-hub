@@ -6,13 +6,13 @@ namespace App\Livewire\Concerns\Admin;
 
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\User;
 use App\Policies\UserPolicy;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
+use Modules\Core\Models\User;
 
 /**
  * The Roles tab of admin/users: the role directory and the selected role, what

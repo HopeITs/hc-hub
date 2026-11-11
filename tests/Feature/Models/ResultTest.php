@@ -1,10 +1,10 @@
 <?php
 
-use App\Enums\ResultType;
-use App\Models\Indicator;
-use App\Models\Program;
-use App\Models\Result;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Result;
 
 test('a result nests under a parent result', function () {
     $outcome = Result::factory()->type(ResultType::Outcome)->create();

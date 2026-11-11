@@ -1,7 +1,7 @@
 <?php
 
 use App\Support\Desk\Money;
-use App\Support\StrategyRollup;
+use Modules\Tracking\Support\StrategyRollup;
 
 test('the verdict reads the share of targets on pace', function (int $on, int $total, string $key, string $tone, int $behind) {
     expect(StrategyRollup::verdict($on, $total))->toBe(['key' => $key, 'tone' => $tone, 'on' => $on, 'total' => $total, 'behind' => $behind, 'unrated' => 0, 'all' => $total]);

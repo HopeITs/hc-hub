@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
 use App\Models\UserTodo;
 use App\Support\Desk\Panels;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 /**
  * The viewer's to-dos as the panel lists them: open ones in their order, then done ones.

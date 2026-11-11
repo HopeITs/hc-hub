@@ -1,16 +1,16 @@
 <?php
 
-use App\Enums\Currency;
 use App\Enums\MediaCollection;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
 use App\Models\Media;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * One project funded by one proposal: a budget of 731,942 with 123,457 already
@@ -61,7 +61,7 @@ test('a Managers user sees no funding amounts on the project page but keeps the 
     ['project' => $project] = seedProjectMoneyFixture();
 
     $page = Livewire::actingAs(userWithRole('Managers'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertOk()
         ->assertDontSee('731,942')
         ->assertDontSee('123,457')
@@ -86,7 +86,7 @@ test('Financial and General Manager see the funding envelope, the amounts and a 
     ['project' => $project, 'proposal' => $proposal] = seedProjectMoneyFixture();
 
     $page = Livewire::actingAs(userWithRole($role))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSee('Funding envelope')
         ->assertSee('731,942')
         ->assertSee('123,457');
@@ -105,7 +105,7 @@ test('a proposal editor without the money permissions links and unlinks proposal
     $proposal->projects()->attach(Project::factory()->create());
 
     $page = Livewire::actingAs(userWithRole('Public Relations Manager'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'proposals')
         ->assertSee('Hilltop Schools')
         ->set('proposalToAttach', (string) $proposal->id)
@@ -123,7 +123,7 @@ test('Public Relations Manager opens the proposal from the project page but sees
     ['project' => $project, 'proposal' => $proposal] = seedProjectMoneyFixture();
 
     Livewire::actingAs(userWithRole('Public Relations Manager'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertDontSee('Funding envelope')
         ->set('tab', 'proposals')
         ->assertSeeHtml('href="'.route('projects.show', ['project' => $project, 'proposal' => $proposal->id]).'#proposal"')
@@ -165,7 +165,7 @@ test('a Managers user is not shown funding paper on the project files tab and ca
     ['project' => $project] = seedProjectFilesFixture();
 
     $page = Livewire::actingAs(userWithRole('Managers'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->assertSee('site-visit.pdf')
         ->assertDontSee('signed-agreement.pdf')
@@ -182,7 +182,7 @@ test('Financial sees the agreement and MOU files and counts them', function () {
     ['project' => $project] = seedProjectFilesFixture();
 
     $page = Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->assertSee('signed-agreement.pdf')
         ->assertSee('signed-mou.pdf')
@@ -194,7 +194,7 @@ test('Financial sees the agreement and MOU files and counts them', function () {
 test('the project directory card counts funding paper only for viewers of funding agreements', function () {
     ['project' => $project] = seedProjectFilesFixture();
     $fileCount = fn (string $role): int => Livewire::actingAs(userWithRole($role))
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->instance()
         ->projects
         ->firstWhere('id', $project->id)
@@ -206,7 +206,7 @@ test('the project directory card counts funding paper only for viewers of fundin
 
 test('a Managers user cannot edit, delete, or file a document into the funding paper categories', function () {
     ['project' => $project, 'agreement' => $agreement, 'photo' => $photo] = seedProjectFilesFixture();
-    $fresh = fn () => Livewire::actingAs(userWithRole('Managers'))->test('pages::projects.show', ['project' => $project]);
+    $fresh = fn () => Livewire::actingAs(userWithRole('Managers'))->test('tracking::projects.show', ['project' => $project]);
 
     $fresh()->call('openEditFileModal', $agreement->id)->assertForbidden();
     $fresh()->call('confirmDeleteFile', $agreement->id)->assertForbidden();
@@ -239,7 +239,7 @@ test('General Manager may still edit and delete funding paper on a project', fun
     ['project' => $project, 'agreement' => $agreement] = seedProjectFilesFixture();
 
     Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->call('confirmDeleteFile', $agreement->id)
         ->assertOk()
         ->call('deleteFile')
@@ -263,7 +263,7 @@ test('the projects directory shows committed budgets in every view only to viewe
     ['project' => $project] = seedProjectMoneyFixture();
 
     $managers = Livewire::actingAs(userWithRole('Managers'))
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->set('view', $view)
         ->assertOk()
         ->assertDontSee('731,942')
@@ -281,7 +281,7 @@ test('the projects directory shows committed budgets in every view only to viewe
     }
 
     $financial = Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->set('view', $view)
         ->assertSee('731,942');
 
@@ -292,7 +292,7 @@ test('the projects directory keeps the beneficiaries figure when the committed f
     seedProjectMoneyFixture();
 
     Livewire::actingAs(userWithRole('Team Member'))
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->assertSee(__('projects.tile_beneficiaries'))
         ->assertDontSee(__('projects.tile_committed_funding'));
 });
@@ -301,7 +301,7 @@ test('the project page loads no budget pivot for a viewer without funding agreem
     ['project' => $project] = seedProjectMoneyFixture();
 
     $proposal = Livewire::actingAs(userWithRole('Managers'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->instance()
         ->attachedProposals
         ->first();

@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\ResultType;
-use App\Models\AnnualPlan;
-use App\Models\Indicator;
-use App\Models\Milestone;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Result;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Result;
 
 test('guests are redirected from annual plan detail', function () {
     $plan = AnnualPlan::factory()->create();
@@ -119,7 +119,7 @@ test('annual plan chain shows the activities with milestones planned that year a
     $oldTarget = PlanIndicator::factory()->create(['source_id' => $lastYear->id, 'indicator_id' => $indicator->id, 'project_id' => $project->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.show', ['annualPlan' => $plan])
+        ->test('tracking::annual-plans.show', ['annualPlan' => $plan])
         ->assertSeeHtml('data-chain-view')
         ->assertSeeInOrder(['Wells are rehabilitated.', 'Activity planned this year.'])
         ->assertDontSee('Activity planned last year.')

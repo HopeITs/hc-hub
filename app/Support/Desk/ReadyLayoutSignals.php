@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
-use App\Enums\ArStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\RagStatus;
-use App\Enums\TaskStatus;
 use App\Livewire\Concerns\Desk\ReadsDeskFlow;
-use App\Models\Donor;
-use App\Models\DonorReport;
 use App\Models\HrEmployee;
-use App\Models\Indicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\TaskAssignee;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\RagStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAssignee;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * One live line per ready layout: what that layout would show right now,

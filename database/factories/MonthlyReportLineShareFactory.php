@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\MonthlyReportLine;
-use App\Models\MonthlyReportLineShare;
-use App\Models\PlanIndicator;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\MonthlyReportLine;
+use Modules\Tracking\Models\MonthlyReportLineShare;
+use Modules\Tracking\Models\PlanIndicator;
 
 /**
  * @extends Factory<MonthlyReportLineShare>

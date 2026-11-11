@@ -1,29 +1,29 @@
 <?php
 
-use App\Enums\MilestoneStatus;
-use App\Enums\ProjectStatus;
 use App\Models\Activity;
-use App\Models\DonorReport;
 use App\Models\HrCenter;
-use App\Models\Indicator;
-use App\Models\IndicatorProgress;
-use App\Models\Milestone;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportLine;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Report;
-use App\Models\Task;
-use App\Models\User;
-use App\Notifications\Alerts\DataGapScanner;
 use App\Notifications\Alerts\DeadlineCatalog;
-use App\Notifications\Alerts\OffTrackIndicatorScanner;
-use App\Notifications\Alerts\ProjectDatesScanner;
-use App\Notifications\Alerts\StalledScanner;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\IndicatorProgress;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportLine;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Notifications\Alerts\DataGapScanner;
+use Modules\Tracking\Notifications\Alerts\OffTrackIndicatorScanner;
+use Modules\Tracking\Notifications\Alerts\ProjectDatesScanner;
+use Modules\Tracking\Notifications\Alerts\StalledScanner;
 
 /*
 | D-66, W-02 slice 2: while the HR center of a project is inactive, its

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Enums\ReviewerSlot;
 use App\Notifications\Alerts\NotificationSettings;
 use InvalidArgumentException;
+use Modules\Tracking\Enums\ReviewerSlot;
 
 /**
  * The one resolver for the named organisational slots (contracts.md §9):

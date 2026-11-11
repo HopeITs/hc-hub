@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Enums\IndicatorCollector;
-use App\Models\LibraryIndicator;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportLine;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\IndicatorCollector;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportLine;
 
 /**
  * @extends Factory<MonthlyReportLine>

@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Enums\ProjectStatus;
-use App\Models\Program;
-use App\Models\Project;
 use Carbon\CarbonImmutable;
 use Database\Factories\Concerns\CreatesHrRecords;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Project;
 
 /**
  * @extends Factory<Project>

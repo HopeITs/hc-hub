@@ -1,9 +1,9 @@
 <?php
 
-use App\Actions\Proposals\SaveDefaultReviewerSlots;
+use Modules\Tracking\Actions\Proposals\SaveDefaultReviewerSlots;
 use App\Enums\EventImportance;
 use App\Enums\OversightMode;
-use App\Enums\ReviewerSlot;
+use Modules\Tracking\Enums\ReviewerSlot;
 use App\Models\HrPosition;
 use App\Models\Role;
 use App\Notifications\Alerts\NotificationSettings;

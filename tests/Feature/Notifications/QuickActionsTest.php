@@ -1,20 +1,20 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\ReportStatus;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\DonorProposal;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use App\Models\UserNotification;
-use App\Notifications\Alerts\OverdueScanner;
 use App\Notifications\QuickActions;
 use Carbon\CarbonImmutable;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
+use Modules\Tracking\Notifications\Alerts\OverdueScanner;
 
 function taskNotificationFor(User $assignee, TaskStatus $status = TaskStatus::Todo): array
 {
@@ -107,7 +107,7 @@ test('mark received opens the tranche edit form instead of guessing amounts', fu
     expect($result['redirect'])->toBe(route('transfers.index', ['edit' => $transfer->id]))
         ->and($transfer->fresh()->ar_status)->toBe(ArStatus::Pending);
 
-    Livewire::actingAs($financial)->withQueryParams(['edit' => $transfer->id])->test('pages::transfers.index')
+    Livewire::actingAs($financial)->withQueryParams(['edit' => $transfer->id])->test('tracking::transfers.index')
         ->assertSet('showTransferModal', true)
         ->assertSet('editingTransferId', $transfer->id);
 });

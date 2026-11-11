@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Program;
 use Illuminate\Database\Seeder;
+use Modules\Core\Models\Program;
 
 /**
  * Programs, filled by syncing from HR.

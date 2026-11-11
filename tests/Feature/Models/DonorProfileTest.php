@@ -1,10 +1,10 @@
 <?php
 
-use App\Enums\Currency;
-use App\Enums\DonorType;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Proposal;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\DonorType;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Proposal;
 
 test('a donor carries a contactable profile', function () {
     $donor = Donor::factory()->ofType(DonorType::Bilateral)->create([

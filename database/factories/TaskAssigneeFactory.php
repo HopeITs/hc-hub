@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Task;
-use App\Models\TaskAssignee;
 use Database\Factories\Concerns\CreatesHrRecords;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAssignee;
 
 /**
  * @extends Factory<TaskAssignee>

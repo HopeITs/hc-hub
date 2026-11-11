@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\MonthlyReports\EditsMonthlyReportActivities;
-use App\Livewire\Concerns\MonthlyReports\EditsMonthlyReportLines;
-use App\Livewire\Concerns\MonthlyReports\ManagesMonthlyReportFiles;
-use App\Livewire\Concerns\MonthlyReports\ReadsMonthlyReport;
-use App\Livewire\Concerns\MonthlyReports\RunsMonthlyReportWorkflow;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\MonthlyReports\EditsMonthlyReportActivities;
+use Modules\Tracking\Livewire\Concerns\MonthlyReports\EditsMonthlyReportLines;
+use Modules\Tracking\Livewire\Concerns\MonthlyReports\ManagesMonthlyReportFiles;
+use Modules\Tracking\Livewire\Concerns\MonthlyReports\ReadsMonthlyReport;
+use Modules\Tracking\Livewire\Concerns\MonthlyReports\RunsMonthlyReportWorkflow;
 
 /**
  * Stands in for monthly-reports/show.

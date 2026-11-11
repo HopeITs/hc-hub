@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Dashboard;
 
-use App\Enums\ArStatus;
-use App\Models\DonorProposal;
-use App\Models\TransfersTracking;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * The funding position: money committed against money received, per

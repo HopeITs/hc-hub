@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Support\Desk\Cards;
 
-use App\Enums\IndicatorMeasure;
-use App\Models\Indicator;
-use App\Models\User;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Models\Indicator;
 
 /**
  * Indicators in card form: how many are measured and how, and each one with

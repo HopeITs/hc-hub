@@ -1,9 +1,9 @@
 <?php
 
-use App\Enums\ReportStatus;
-use App\Models\Report;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\Report;
 
 function seedReportsInEveryState(): array
 {
@@ -18,7 +18,7 @@ function seedReportsInEveryState(): array
 test('the three headline counts are disjoint, add up to the total and match what a click shows', function () {
     $reports = seedReportsInEveryState();
 
-    $page = Livewire::actingAs(User::factory()->role('Media Team')->create())->test('pages::reports.index');
+    $page = Livewire::actingAs(User::factory()->role('Media Team')->create())->test('tracking::reports.index');
 
     expect($page->instance()->focusCounts)->toMatchArray(['attention' => 2, 'progress' => 1, 'approved' => 1, 'total' => 4]);
 
@@ -38,7 +38,7 @@ test('each report names one status word and late drafts come before waiting ones
     seedReportsInEveryState();
 
     Livewire::actingAs(User::factory()->role('Media Team')->create())
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->assertSeeInOrder(['111', '222', '333', '444'])
         ->assertSeeText('Late draft')
         ->assertSeeText('Waiting for approval')
@@ -49,13 +49,13 @@ test('author and MEAL review sit behind More filters and the controls stay insid
     seedReportsInEveryState();
 
     $html = Livewire::actingAs(User::factory()->role('Media Team')->create())
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->html();
 
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
     $xpath = new DOMXPath($dom);
-    $root = '//section[@*[name()="wire:name"]="pages::reports.index"]';
+    $root = '//section[@*[name()="wire:name"]="tracking::reports.index"]';
 
     foreach (['more-filters-button', 'focus-tab-attention', 'focus-tab-progress', 'focus-tab-approved'] as $control) {
         expect($xpath->query($root.'//*[@data-test="'.$control.'"]')->length)->toBeGreaterThan(0, "{$control} sits outside the component");
@@ -68,7 +68,7 @@ test('only a draft offers edit and delete in the row menu; an approved report sh
     $reports = seedReportsInEveryState();
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->assertSeeHtml('data-test="delete-report-'.$reports['late']->id.'"')
         ->assertDontSeeHtml('data-test="delete-report-'.$reports['approved']->id.'"')
         ->assertSeeText('Only draft reports can be edited');

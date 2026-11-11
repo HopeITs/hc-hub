@@ -1,12 +1,12 @@
 <?php
 
 use App\Models\Permission;
-use App\Models\Program;
 use App\Models\Role;
-use App\Models\Strategy;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Strategy;
 
 beforeEach(function () {
     Permission::query()->firstOrCreate(['name' => 'strategies.create', 'guard_name' => 'web']);
@@ -23,7 +23,7 @@ test('a manager can create a strategy and two strategies may share a name', func
     Strategy::factory()->create(['name' => 'Country Strategy']);
 
     Livewire::actingAs($manager)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('openCreateModal')
         ->set('name', '  Country Strategy  ')
         ->set('startYear', '2026')
@@ -41,7 +41,7 @@ test('creating a strategy requires a name and a valid year span', function () {
     $manager = User::factory()->role('Managers')->create();
 
     Livewire::actingAs($manager)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('openCreateModal')
         ->set('name', '')
         ->set('startYear', '2026')
@@ -50,7 +50,7 @@ test('creating a strategy requires a name and a valid year span', function () {
         ->assertHasErrors(['name']);
 
     Livewire::actingAs($manager)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('openCreateModal')
         ->set('name', 'Backwards Strategy')
         ->set('startYear', '2030')
@@ -63,7 +63,7 @@ test('typing a year after a failed save clears only that year error', function (
     $manager = User::factory()->role('Managers')->create();
 
     Livewire::actingAs($manager)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('openCreateModal')
         ->call('saveStrategy')
         ->assertHasErrors(['name', 'startYear', 'endYear'])
@@ -79,7 +79,7 @@ test('a manager can edit a strategy', function () {
     $strategy = Strategy::factory()->create(['name' => 'Draft Strategy', 'start_year' => 2026, 'end_year' => 2028]);
 
     Livewire::actingAs($manager)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('openEditModal', $strategy->id)
         ->assertSet('name', 'Draft Strategy')
         ->set('name', 'Renamed Strategy')
@@ -94,7 +94,7 @@ test('the create and edit modals show only a title; the delete modal names the s
     $manager = User::factory()->role('Managers')->create();
     $strategy = Strategy::factory()->create();
 
-    $component = Livewire::actingAs($manager)->test('pages::strategies.index');
+    $component = Livewire::actingAs($manager)->test('tracking::strategies.index');
 
     $createHtml = $component->call('openCreateModal')->html();
     $editHtml = $component->call('openEditModal', $strategy->id)->html();
@@ -119,7 +119,7 @@ test('confirming deletion opens the delete modal for the right strategy', functi
     // to (Flux's flux:modal has no reactive `open` prop, only wire:model), so
     // this is what actually makes the "yes/cancel" dialog appear.
     Livewire::actingAs($manager)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->assertSet('showDeleteModal', false)
         ->call('confirmDelete', $strategy->id)
         ->assertSet('showDeleteModal', true)
@@ -131,7 +131,7 @@ test('a strategy with no programs can be deleted', function () {
     $strategy = Strategy::factory()->create();
 
     Livewire::actingAs($manager)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('confirmDelete', $strategy->id)
         ->call('deleteStrategy')
         ->assertHasNoErrors()
@@ -147,7 +147,7 @@ test('a strategy with linked programs is not deleted', function () {
     Program::factory()->create(['strategy_id' => $strategy->id]);
 
     Livewire::actingAs($manager)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('confirmDelete', $strategy->id)
         ->call('deleteStrategy')
         ->assertSet('showDeleteModal', false);
@@ -160,7 +160,7 @@ test('cancelling the delete confirmation closes the modal without deleting', fun
     $strategy = Strategy::factory()->create();
 
     Livewire::actingAs($manager)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('confirmDelete', $strategy->id)
         ->set('showDeleteModal', false)
         ->assertSet('showDeleteModal', false);
@@ -172,7 +172,7 @@ test('admins can also manage strategies', function () {
     $admin = User::factory()->role('Super Admin')->create();
 
     Livewire::actingAs($admin)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('openCreateModal')
         ->set('name', 'Admin Strategy')
         ->set('startYear', '2026')
@@ -188,17 +188,17 @@ test('team members and meal staff cannot manage strategies', function (string $r
     $strategy = Strategy::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('openCreateModal')
         ->assertForbidden();
 
     Livewire::actingAs($user)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('openEditModal', $strategy->id)
         ->assertForbidden();
 
     Livewire::actingAs($user)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('confirmDelete', $strategy->id)
         ->assertForbidden();
 
@@ -255,7 +255,7 @@ test('the strategy buttons follow their own permission, not create alone', funct
     Role::create(['name' => 'Strategy Clerk', 'guard_name' => 'web'])->givePermissionTo($permission);
     $clerk = User::factory()->role('Strategy Clerk')->create();
 
-    $page = Livewire::actingAs($clerk)->test('pages::strategies.index');
+    $page = Livewire::actingAs($clerk)->test('tracking::strategies.index');
 
     foreach ($shown as $marker) {
         $page->assertSeeHtml('data-test="'.$marker.'"');
@@ -275,7 +275,7 @@ test('the strategy form is rendered only while its modal is open', function () {
     $manager = User::factory()->role('Managers')->create();
 
     Livewire::actingAs($manager)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->assertDontSeeHtml('wire:model.live.blur="startYear"')
         ->call('openCreateModal')
         ->assertSeeHtml('wire:model.live.blur="startYear"');

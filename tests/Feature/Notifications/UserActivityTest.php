@@ -3,9 +3,9 @@
 use App\Models\Activity;
 use App\Models\HrUser;
 use App\Models\Role;
-use App\Models\User;
 use App\Models\UserNotification;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 test('changing roles tells the affected user even without user-management permission, and super admins', function () {
     $superAdmin = userWithRole('Super Admin');

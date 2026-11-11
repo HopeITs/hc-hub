@@ -7,7 +7,6 @@ namespace App\Livewire\Concerns\Admin;
 use App\Models\HrUser;
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\User;
 use Flux\Flux;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\QueryException;
@@ -16,6 +15,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Modules\Core\Models\User;
 
 /**
  * The Users tab of admin/users: the directory query and its lookups, picking a

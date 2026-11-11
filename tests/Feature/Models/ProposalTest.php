@@ -1,13 +1,13 @@
 <?php
 
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalStatusNote;
-use App\Models\Task;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Models\Task;
 
 test('a proposal has its funding agreements and donors', function () {
     $proposal = Proposal::factory()->create();

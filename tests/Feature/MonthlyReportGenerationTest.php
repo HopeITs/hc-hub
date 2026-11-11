@@ -1,25 +1,25 @@
 <?php
 
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ProposalStatus;
-use App\Events\ProjectActivated;
-use App\Events\ProjectPeriodChanged;
 use App\Models\Activity;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportLine;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ReportTemplate;
-use App\Models\ReportTemplateLine;
-use App\Models\User;
 use App\Models\UserNotification;
-use App\Support\MonthlyReportGenerator;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Events\ProjectActivated;
+use Modules\Tracking\Events\ProjectPeriodChanged;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportLine;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Support\MonthlyReportGenerator;
 
 /*
 | Monthly report generation (contracts §13 "generate", D-04b, D-05, D-29):

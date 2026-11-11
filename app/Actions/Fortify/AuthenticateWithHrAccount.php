@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Actions\Fortify;
 
 use App\Models\HrUser;
-use App\Models\User;
 use App\Support\BackoffThrottle;
 use App\Support\Turnstile;
 use Illuminate\Auth\Events\Failed;
@@ -18,6 +17,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Fortify;
 use Laravel\Fortify\LoginRateLimiter;
+use Modules\Core\Models\User;
 
 /**
  * Logs people in with their HR account.

@@ -1,14 +1,14 @@
 <?php
 
 use App\Enums\Locale;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\ReopenRequestStatus;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ReopenRequestStatus;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
 use App\Models\HrEmployee;
-use App\Models\MonthlyReport;
-use App\Models\Project;
-use App\Support\MealCoverage;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\MealCoverage;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;

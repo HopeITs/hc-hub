@@ -1,22 +1,22 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Enums\DonorType;
-use App\Enums\ProjectStatus;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Indicator;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\DonorType;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -32,7 +32,7 @@ test('donors can be searched', function () {
     Donor::factory()->create(['name' => 'ECHO', 'country' => null, 'contact_person' => null]);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->assertSee('UNICEF')
         ->assertSee('ECHO')
         ->set('search', 'UNI')
@@ -45,7 +45,7 @@ test('a donor can be created and two donors may share a name', function () {
     Donor::factory()->create(['name' => 'Country Office']);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->call('openCreateModal')
         ->set('name', '  Country Office  ')
         ->call('saveDonor')
@@ -58,7 +58,7 @@ test('creating a donor requires a name', function () {
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->call('openCreateModal')
         ->set('name', '')
         ->call('saveDonor')
@@ -70,7 +70,7 @@ test('a donor with no agreements can be deleted', function () {
     $donor = Donor::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->call('confirmDelete', $donor->id)
         ->call('deleteDonor')
         ->assertHasNoErrors();
@@ -86,7 +86,7 @@ test('a donor holding an agreement is not deleted', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->call('confirmDelete', $donor->id)
         ->call('deleteDonor');
 
@@ -205,7 +205,7 @@ test('donor detail counts only received tranches as money in and flags overdue o
         'ar_status' => ArStatus::Pending,
     ]);
 
-    $component = Livewire::actingAs($user)->test('pages::donors.show', ['donor' => $donor])->set('view', 'overview');
+    $component = Livewire::actingAs($user)->test('tracking::donors.show', ['donor' => $donor])->set('view', 'overview');
 
     expect($component->instance()->moneyByCurrency['USD'])->toMatchArray([
         'committed' => 1000.0,
@@ -226,7 +226,7 @@ test('opening the delete confirmation opens its dialog and cancelling closes it'
     $donor = Donor::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->call('confirmDelete', $donor->id)
         ->assertSet('showDeleteModal', true)
         ->call('cancelDelete')
@@ -242,7 +242,7 @@ test('donors can be filtered by type from the rail and by relationship', functio
     DonorProposal::factory()->create(['donor_id' => $funder->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->call('toggleType', 'unclassified')
         ->assertSee('Unclassified Office')
         ->assertDontSee('Quiet Foundation')
@@ -272,7 +272,7 @@ test('the share of wallet splits each currency by donor and never adds currencie
         'amount_received_currency' => Currency::Usd,
     ]);
 
-    $wallet = Livewire::actingAs($user)->test('pages::donors.index')->instance()->wallet;
+    $wallet = Livewire::actingAs($user)->test('tracking::donors.index')->instance()->wallet;
 
     expect($wallet)->toHaveCount(2)
         ->and($wallet[0]['currency'])->toBe('EUR')
@@ -298,7 +298,7 @@ test('sorting by next transfer due puts the soonest scheduled donor first', func
     }
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->set('view', 'overview')
         ->assertSeeInOrder(['Alpha Donor', 'Zulu Donor'])
         ->set('sort', 'next_due')
@@ -310,7 +310,7 @@ test('the overview sizes itself to the funders on screen', function () {
     $donor = Donor::factory()->create(['type' => DonorType::Bilateral]);
     DonorProposal::factory()->create(['donor_id' => $donor->id, 'currency' => Currency::Usd]);
 
-    $component = Livewire::actingAs($user)->test('pages::donors.index')->set('view', 'overview');
+    $component = Livewire::actingAs($user)->test('tracking::donors.index')->set('view', 'overview');
 
     expect($component->instance()->overviewRows)->toBe(3);
     $component->assertSeeText('None yet: Foundation, Individual, Corporate, Not classified');
@@ -321,7 +321,7 @@ test('a donor opens from its eye button, not from a linked name', function () {
     $donor = Donor::factory()->create(['name' => 'UNICEF']);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->assertSeeHtml('aria-label="View UNICEF"')
         ->assertSeeHtml('href="'.route('donors.show', $donor).'"')
         ->assertDontSeeHtml('hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium text-secondary-dark dark:text-ink">UNICEF</a>');
@@ -337,7 +337,7 @@ test('a pending tranche with no scheduled date does not break the transfers ahea
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->set('view', 'overview')
         ->assertOk()
         ->assertSeeText(__('donors.no_transfer_scheduled_ahead'));
@@ -349,7 +349,7 @@ test('donors can be found by email', function () {
     Donor::factory()->create(['name' => 'Other Funder', 'email' => 'x@other.org']);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->set('search', 'grants@')
         ->assertSee('Mail Found')
         ->assertDontSee('Other Funder');
@@ -360,7 +360,7 @@ test('a donor phone link dials digits only', function () {
     Donor::factory()->create(['phone' => '+961 (1) 234-567']);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->set('view', 'overview')
         ->assertSeeHtml('href="tel:+9611234567"');
 });
@@ -369,7 +369,7 @@ test('a donor country longer than its column is rejected, not sent to the databa
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->call('openCreateModal')
         ->set('name', 'Long Country')
         ->set('country', str_repeat('a', 101))
@@ -381,7 +381,7 @@ test('the follow-up is recorded with the donor and needs a due date', function (
     $user = User::factory()->role('Financial')->create();
 
     $component = Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->call('openCreateModal')
         ->set('name', 'Prospect Foundation')
         ->set('nextStep', 'Send the concept note')
@@ -406,7 +406,7 @@ test('overdue follow-ups are counted and sort first', function () {
     Donor::factory()->create(['name' => 'Zebra Trust', 'next_step' => 'Call back', 'next_step_due_on' => now()->subDays(3)->toDateString()]);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->set('view', 'overview')
         ->assertSeeHtml('data-follow-ups-due')
         ->assertSeeText('1 follow-up due')
@@ -420,7 +420,7 @@ test('a donor can be edited from its own page and only that donor', function () 
     $other = Donor::factory()->create(['name' => 'Untouched']);
 
     $page = Livewire::actingAs($user)
-        ->test('pages::donors.show', ['donor' => $donor])
+        ->test('tracking::donors.show', ['donor' => $donor])
         ->assertSeeHtml('data-test="edit-donor-button"')
         ->call('openEditModal', $other->id)
         ->assertSet('showDonorModal', true)
@@ -460,7 +460,7 @@ test('donor detail lists each tranche in full and each report against its target
     $report = Report::factory()->create(['plan_indicator_id' => $planIndicator->id, 'user_id' => $user->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.show', ['donor' => $donor])
+        ->test('tracking::donors.show', ['donor' => $donor])
         ->set('view', 'overview')
         ->assertSeeHtml('data-tranche-row="failed"')
         ->assertSeeHtml('data-point="failed"')
@@ -483,7 +483,7 @@ test('the donor page shows each agreement\'s internal number beside its external
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::donors.show', ['donor' => $donor])
+        ->test('tracking::donors.show', ['donor' => $donor])
         ->set('view', 'overview')
         ->assertSeeHtmlInOrder([
             'data-lane="'.$agreement->id.'"', 'HC-2026-085', 'MCC-85',
@@ -503,7 +503,7 @@ test('a money calendar lane puts the internal number and the external number on 
         'scheduled_date' => now()->addMonth()->toDateString(),
     ]);
 
-    $html = Livewire::actingAs($user)->test('pages::donors.show', ['donor' => $donor])->set('view', 'overview')->html();
+    $html = Livewire::actingAs($user)->test('tracking::donors.show', ['donor' => $donor])->set('view', 'overview')->html();
     $lane = str($html)->after('data-lane="'.$agreement->id.'"')->before('relative h-14')->toString();
 
     // 15rem fits a placeholder number and its chip on one line in English and
@@ -519,7 +519,7 @@ test('the donor form is rendered only while its modal is open', function () {
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->assertDontSeeHtml('data-follow-up-fields')
         ->call('openCreateModal')
         ->assertSeeHtml('data-follow-up-fields');

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Observers;
 
 use App\Models\Media;
-use App\Models\Milestone;
-use App\Models\Project;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
 
 /**
  * Removes a media owner's files when the owner is deleted, and bridges the

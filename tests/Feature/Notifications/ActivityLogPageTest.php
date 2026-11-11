@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\Risk;
-use App\Models\Task;
 use Livewire\Livewire;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\Task;
 
 test('only super admins and the general manager can open the activity log', function (string $role, int $status) {
     $this->actingAs(userWithRole($role))->get(route('activity.index'))->assertStatus($status);

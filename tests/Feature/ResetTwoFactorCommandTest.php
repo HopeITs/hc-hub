@@ -1,9 +1,9 @@
 <?php
 
 use App\Models\TrustedDevice;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
+use Modules\Core\Models\User;
 use Monolog\Handler\NullHandler;
 
 /**

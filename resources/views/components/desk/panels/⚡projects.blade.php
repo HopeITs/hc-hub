@@ -1,13 +1,13 @@
 <?php
 
-use App\Enums\MilestoneStatus;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\RagStatus;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\RagStatus;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\Indicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 use App\Support\Desk\DeskWork;
 use App\Support\Desk\ProjectStage;
 use Carbon\CarbonImmutable;
@@ -211,8 +211,8 @@ new class extends Component
                         <a href="{{ route('projects.show', $project) }}" wire:navigate title="{{ $project->name }}">@if ($line['attention'] > 0)<span class="dk-att" title="{{ trans_choice('desk.attention_items', $line['attention'], ['count' => $line['attention']]) }}">{{ $line['attention'] }}</span>@endif{{ $project->name }}</a>
                         <span class="dk-is dk-num" data-project-dates>{{ $project->start_date?->translatedFormat('M Y') ?? '—' }} → {{ $project->end_date?->translatedFormat('M Y') ?? '—' }}</span>
                         <span class="dk-is" title="{{ $line['donor'] }}">{{ $line['donor'] !== '' ? $line['donor'] : __('desk.no_donor_yet') }} · {{ $project->user?->name ?? '—' }}</span>
-                        <x-projects.host-center-badge :project="$project" class="dk-is" />
-                        <x-projects.center-inactive-badge :project="$project" class="dk-is" />
+                        <x-tracking::projects.host-center-badge :project="$project" class="dk-is" />
+                        <x-tracking::projects.center-inactive-badge :project="$project" class="dk-is" />
                     </div>
                     <div class="dk-pj-l">
                         @switch($shownLens)
@@ -246,7 +246,7 @@ new class extends Component
                                     @endphp
                                     <div class="dk-pj-tl" title="{{ $project->start_date->translatedFormat(__('formats.date')) }} → {{ $project->end_date->translatedFormat(__('formats.date')) }}"><b style="width:{{ $at }}%"></b><i style="inset-inline-start:{{ $at }}%"></i></div>
                                     <span class="dk-pj-v dk-num">{{ $project->start_date->translatedFormat('M Y') }} → {{ $project->end_date->translatedFormat('M Y') }} · <span @class(['dk-bad' => $left < 0])>{{ $left < 0 ? trans_choice('desk.days_late', -$left, ['count' => -$left]) : trans_choice('desk.days_left', $left, ['count' => $left]) }}</span></span>
-                                @elseif ($stage >= 4 || $line['lead']?->status === \App\Enums\ProposalStatus::Approved)
+                                @elseif ($stage >= 4 || $line['lead']?->status === \Modules\Tracking\Enums\ProposalStatus::Approved)
                                     {{-- The donor already approved: the dates are simply missing, so say so and point to where they are set. --}}
                                     <a href="{{ route('projects.show', $project) }}" wire:navigate class="dk-small dk-bad" data-dates-not-set>{{ __('desk.dates_not_set') }}</a>
                                 @else

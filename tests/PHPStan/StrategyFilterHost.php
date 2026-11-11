@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\FiltersByStrategy;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Tracking\Livewire\Concerns\FiltersByStrategy;
 
 /**
  * Stands in for the registers that can be narrowed to one strategy (risks,

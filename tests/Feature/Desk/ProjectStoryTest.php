@@ -1,16 +1,16 @@
 <?php
 
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
-use App\Enums\ReviewStage;
 use App\Models\Activity;
-use App\Models\DonorProposal;
-use App\Models\MonthlyReport;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalReviewer;
 use App\Models\UserNotification;
 use Livewire\Livewire;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ReviewStage;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalReviewer;
 
 beforeEach(function () {
     $this->travelTo('2026-09-15 09:00:00');
@@ -33,7 +33,7 @@ test('the Story marks the chapters before the lead proposal done, its own chapte
     $project = storyProject(ProposalStatus::ProposalDraft);
 
     Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSeeHtml('data-chapter="0" data-state="done"')
         ->assertSeeHtml('data-chapter="1" data-state="done"')
         ->assertSeeHtml('data-chapter="2" data-state="now"')
@@ -48,7 +48,7 @@ test('a running project with last month\'s report still open is off track and as
     Activity::withoutRecording(fn () => MonthlyReport::factory()->create(['project_id' => $project->id, 'period' => '2026-08-01']));
 
     Livewire::actingAs($owner)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSeeHtml('data-chapter="5" data-state="now"')
         ->assertSee('Submit the August 2026 report')
         ->assertSee('Off track')
@@ -62,7 +62,7 @@ test('nudging the holder of the next step reaches them once a day', function () 
     $project = storyProject(ProposalStatus::ConceptNote, $owner->employee_id);
 
     $story = Livewire::actingAs($viewer)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSee('Waiting on Rana Darwish.')
         ->assertSeeHtml('data-test="story-nudge"')
         ->call('nudgeNextStep')
@@ -78,11 +78,11 @@ test('the Story shows money received only to viewers who may see money', functio
     Activity::withoutRecording(fn () => DonorProposal::factory()->create(['proposal_id' => $proposal->id, 'budget' => 1000]));
 
     Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSeeHtml('data-test="story-received"');
 
     Livewire::actingAs(userWithRole('Team Member'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertDontSeeHtml('data-test="story-received"');
 });
 
@@ -145,21 +145,21 @@ test('the Story embeds the chosen proposal on the asked tab and ignores a propos
     $viewer = userWithRole('General Manager');
 
     Livewire::actingAs($viewer)->withQueryParams(['proposal' => (string) $second->id, 'ptab' => 'deadlines'])
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSet('embeddedProposalId', $second->id)
         ->assertSeeHtml('data-proposal-id="'.$second->id.'"')
         ->assertSeeHtml('data-tab-panel="deadlines"')
         ->assertDontSeeHtml('data-compact-proposal');
 
     Livewire::actingAs($viewer)->withQueryParams(['ptab' => 'deadlines'])
-        ->test('pages::proposals.show', ['proposal' => $second, 'embedded' => true])
+        ->test('tracking::proposals.show', ['proposal' => $second, 'embedded' => true])
         ->assertSet('tab', 'deadlines')
         ->assertSeeHtml('data-tab-panel="deadlines"')
         ->assertSeeHtml('data-embedded-proposal-head')
         ->assertDontSeeHtml('data-detail-back');
 
     Livewire::actingAs($viewer)->withQueryParams(['proposal' => (string) $stranger->id])
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSet('embeddedProposalId', $lead->id);
 });
 
@@ -167,7 +167,7 @@ test('the compact embedded proposal hides the tabs until one is picked', functio
     $proposal = storyProject(ProposalStatus::Submitted)->proposals()->first();
 
     Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::proposals.show', ['proposal' => $proposal, 'embedded' => true, 'compact' => true])
+        ->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true, 'compact' => true])
         ->assertSeeHtml('data-compact-proposal')
         ->assertDontSeeHtml('data-tab-panel')
         ->set('tab', 'deadlines')
@@ -182,7 +182,7 @@ test('the embedded proposal funding tab shows the table without the overview tog
     $proposal = storyProject(ProposalStatus::Approved)->proposals()->first();
 
     Livewire::actingAs(userWithRole('General Manager'))->withQueryParams(['ptab' => 'funding'])
-        ->test('pages::proposals.show', ['proposal' => $proposal, 'embedded' => true])
+        ->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true])
         ->assertDontSee(__('finance_tables.view_overview'));
 });
 
@@ -192,12 +192,12 @@ test('the embedded proposal keeps money from a viewer without money permission',
     Activity::withoutRecording(fn () => DonorProposal::factory()->create(['proposal_id' => $proposal->id, 'budget' => 987654]));
 
     Livewire::actingAs(userWithRole('General Manager'))->withQueryParams(['ptab' => 'funding'])
-        ->test('pages::proposals.show', ['proposal' => $proposal, 'embedded' => true])
+        ->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true])
         ->assertSet('tab', 'funding')
         ->assertSee('987,654');
 
     Livewire::actingAs(userWithRole('Team Member'))->withQueryParams(['ptab' => 'funding'])
-        ->test('pages::proposals.show', ['proposal' => $proposal, 'embedded' => true])
+        ->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true])
         ->assertSet('tab', 'status')
         ->assertDontSee('987,654');
 });
@@ -207,7 +207,7 @@ test('a rejected proposal keeps its owner on the next step but offers no nudge',
     $project = storyProject(ProposalStatus::Rejected, $owner->employee_id);
 
     Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSee('Waiting on Rana Darwish.')
         ->assertDontSeeHtml('data-test="story-nudge"');
 });

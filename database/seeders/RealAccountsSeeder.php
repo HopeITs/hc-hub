@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\Account;
 use Illuminate\Database\Seeder;
+use Modules\Tracking\Models\Account;
 
 /**
  * The organisation's real bank accounts.

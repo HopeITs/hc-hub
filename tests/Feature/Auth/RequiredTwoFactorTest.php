@@ -1,12 +1,12 @@
 <?php
 
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
-use App\Models\User;
 use Illuminate\Routing\Route as RoutingRoute;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Testing\TestResponse;
 use Laravel\Fortify\Features;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 /**
  * The snapshot of the named Livewire component in a rendered page, as the

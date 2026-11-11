@@ -4,7 +4,7 @@ paths:
   - 'resources/views/pages/desk/**'
   - 'app/Support/Desk/**'
   - 'resources/js/desk-*.js'
-  - 'resources/js/ask-index.js'
+  - resources/js/ask-index.js
 ---
 
 # Desk

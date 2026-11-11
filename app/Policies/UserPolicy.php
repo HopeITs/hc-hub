@@ -6,7 +6,7 @@ namespace App\Policies;
 
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\User;
+use Modules\Core\Models\User;
 use Spatie\Permission\Models\Permission as SpatiePermission;
 
 class UserPolicy

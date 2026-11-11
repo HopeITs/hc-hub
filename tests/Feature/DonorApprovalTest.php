@@ -1,15 +1,15 @@
 <?php
 
-use App\Actions\Donors\ApproveDonor;
-use App\Actions\Donors\DeclineDonor;
-use App\Actions\Donors\SaveDonor;
-use App\Enums\DonorApprovalStatus;
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\Proposal;
 use App\Models\UserNotification;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
+use Modules\Tracking\Actions\Donors\ApproveDonor;
+use Modules\Tracking\Actions\Donors\DeclineDonor;
+use Modules\Tracking\Actions\Donors\SaveDonor;
+use Modules\Tracking\Enums\DonorApprovalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Proposal;
 
 /**
  * The donor form's validated input for SaveDonor.

@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\Currency;
 use App\Support\CsvExport;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Enums\Currency;
 
 test('a csv starts with a byte order mark and writes plain cells', function () {
     $response = CsvExport::download('x.csv', ['Name', 'Amount'], [

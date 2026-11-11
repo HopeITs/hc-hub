@@ -13,7 +13,7 @@
 
     <form wire:submit="saveDefaultReviewers" class="mt-4 grid gap-4" novalidate>
         <div class="grid gap-4 @3xl/rules:grid-cols-2">
-            @foreach (\App\Enums\ReviewerSlot::defaultSlots() as $slot)
+            @foreach (\Modules\Tracking\Enums\ReviewerSlot::defaultSlots() as $slot)
                 <x-ui.form-select wire:model="reviewerPositions.{{ $slot->value }}" :label="$slot->label()" :placeholder="__('notifications.admin.default_reviewers.none')" wire:key="reviewer-slot-{{ $slot->value }}" data-reviewer-slot="{{ $slot->value }}">
                     <option value="">{{ __('notifications.admin.default_reviewers.none') }}</option>
                     @foreach ($positionOptions as $position)

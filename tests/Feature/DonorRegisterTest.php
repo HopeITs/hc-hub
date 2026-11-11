@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Enums\DonorType;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\DonorType;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -24,7 +24,7 @@ beforeEach(function () {
  */
 function donorRegister(array $query = []): Testable
 {
-    return Livewire::actingAs(test()->user)->withQueryParams($query)->test('pages::donors.index');
+    return Livewire::actingAs(test()->user)->withQueryParams($query)->test('tracking::donors.index');
 }
 
 /**
@@ -210,7 +210,7 @@ test('the table opens by donor name and a heading sorts it', function () {
 test('someone who may not see agreements gets the donors with no money columns and no money query', function () {
     registerFundingDonor();
 
-    $page = Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))->test('pages::donors.index');
+    $page = Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))->test('tracking::donors.index');
 
     $page->assertOk()
         ->assertSee('UNICEF')
@@ -230,7 +230,7 @@ test('someone who may see agreements but not transfers gets budgets without tran
     registerFundingDonor();
     $viewer = userWithRole('Public Relations Manager')->givePermissionTo('funding-agreements.view');
 
-    $page = Livewire::actingAs($viewer)->test('pages::donors.index');
+    $page = Livewire::actingAs($viewer)->test('tracking::donors.index');
 
     $page->assertSee('1,000.00')
         ->assertDontSee('390.00')
@@ -322,7 +322,7 @@ test('the export holds every filtered line and only the columns the viewer may s
         ->and($unicef[15])->toBe('200.00')
         ->and($unicef[17])->toBe('2026-06-05');
 
-    $fundraiser = Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))->test('pages::donors.index')->call('exportCsv');
+    $fundraiser = Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))->test('tracking::donors.index')->call('exportCsv');
     $plain = downloadedCsv($fundraiser);
 
     expect($plain[0])->toHaveCount(9)
@@ -333,7 +333,7 @@ test('exporting needs the donors view permission', function () {
     registerFundingDonor();
 
     Livewire::actingAs(User::factory()->create())
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->call('exportCsv')
         ->assertForbidden();
 });
@@ -349,7 +349,7 @@ test('the General Manager sees the pending requests above the register with who 
     Donor::factory()->pending($requester)->create(['name' => 'Nordic Relief Fund']);
     Donor::factory()->create(['name' => 'Approved Aid']);
 
-    Livewire::actingAs(userWithRole('General Manager'))->test('pages::donors.index')
+    Livewire::actingAs(userWithRole('General Manager'))->test('tracking::donors.index')
         ->assertSeeHtml('data-pending-requests')
         ->assertSee('Nordic Relief Fund')
         ->assertSee($requester->name);
@@ -367,7 +367,7 @@ test('someone who cannot approve sees no pending section but the Pending badge o
 test('the General Manager approves a request from the page', function () {
     $donor = Donor::factory()->pending(userWithRole('Public Relations'))->create();
 
-    Livewire::actingAs(userWithRole('General Manager'))->test('pages::donors.index')
+    Livewire::actingAs(userWithRole('General Manager'))->test('tracking::donors.index')
         ->call('approveDonor', $donor->id)
         ->assertDontSeeHtml('data-pending-requests');
 
@@ -377,7 +377,7 @@ test('the General Manager approves a request from the page', function () {
 test('approving from the page needs donors.approve', function () {
     $donor = Donor::factory()->pending(userWithRole('Public Relations'))->create();
 
-    Livewire::actingAs(userWithRole('Public Relations Manager'))->test('pages::donors.index')
+    Livewire::actingAs(userWithRole('Public Relations Manager'))->test('tracking::donors.index')
         ->call('approveDonor', $donor->id)
         ->assertForbidden();
 
@@ -387,7 +387,7 @@ test('approving from the page needs donors.approve', function () {
 test('declining asks for a reason of at least ten characters', function () {
     $donor = Donor::factory()->pending(userWithRole('Public Relations'))->create();
 
-    Livewire::actingAs(userWithRole('General Manager'))->test('pages::donors.index')
+    Livewire::actingAs(userWithRole('General Manager'))->test('tracking::donors.index')
         ->call('confirmDecline', $donor->id)
         ->assertSet('showDeclineModal', true)
         ->set('declineReason', 'No.')
@@ -407,7 +407,7 @@ test('the agreement form offers approved donors and your own requests only', fun
     Donor::factory()->pending($requester)->create(['name' => 'Mine Pending']);
     Donor::factory()->pending(userWithRole('Public Relations'))->create(['name' => 'Theirs Pending']);
 
-    $options = Livewire::actingAs($requester)->test('pages::funding-agreements.index')->instance()->donorOptions->pluck('name')->all();
+    $options = Livewire::actingAs($requester)->test('tracking::funding-agreements.index')->instance()->donorOptions->pluck('name')->all();
 
     expect($options)->toContain('Approved Aid', 'Mine Pending')->not->toContain('Theirs Pending');
 });

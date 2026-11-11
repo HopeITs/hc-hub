@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Milestone;
-use App\Models\ScheduleBaseline;
-use App\Models\ScheduleBaselineItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\ScheduleBaseline;
+use Modules\Tracking\Models\ScheduleBaselineItem;
 
 /**
  * @extends Factory<ScheduleBaselineItem>

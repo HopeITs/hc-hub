@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\FundingAgreements\ManagesDonorReports;
-use App\Livewire\Concerns\FundingAgreements\ReadsAgreementAttention;
-use App\Livewire\Concerns\FundingAgreements\ReadsAgreementConnections;
-use App\Livewire\Concerns\FundingAgreements\ReadsAgreementMoney;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\FundingAgreements\ManagesDonorReports;
+use Modules\Tracking\Livewire\Concerns\FundingAgreements\ReadsAgreementAttention;
+use Modules\Tracking\Livewire\Concerns\FundingAgreements\ReadsAgreementConnections;
+use Modules\Tracking\Livewire\Concerns\FundingAgreements\ReadsAgreementMoney;
 
 /**
  * Stands in for funding-agreements/show, with every trait that page gained

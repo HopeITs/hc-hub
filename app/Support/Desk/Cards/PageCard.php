@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Support\Desk\Cards;
 
 use App\Enums\StatusTone;
-use App\Models\User;
 use App\Support\ArabicText;
 use BackedEnum;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
+use Modules\Core\Models\User;
 
 /**
  * A page in card form: what a register page is about, said in the space of a

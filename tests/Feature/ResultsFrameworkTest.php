@@ -1,21 +1,21 @@
 <?php
 
-use App\Enums\Period;
-use App\Enums\ResultType;
-use App\Models\AnnualPlan;
-use App\Models\DonorProposal;
-use App\Models\Indicator;
-use App\Models\IndicatorProgress;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\Period;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\IndicatorProgress;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
 
 test('guests are redirected from the results framework', function () {
     $this->get(route('results.index'))->assertRedirect(route('login'));
@@ -38,7 +38,7 @@ test('results render as a nested logframe grouped by program', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->assertSee('Water Security')
         ->assertSee('Reduced waterborne disease.')
         ->assertSee('Improved access to safe water.')
@@ -54,7 +54,7 @@ test('a result with no program still appears under unassigned', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->assertSee('Unassigned')
         ->assertSee('Orphaned statement.');
 });
@@ -68,7 +68,7 @@ test('results can be filtered by program and type', function () {
     Result::factory()->create(['program_id' => $second->id, 'statement' => 'Second output.', 'type' => ResultType::Output]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->set('program', (string) $first->id)
         ->assertSee('First impact.')
         ->assertDontSee('Second output.')
@@ -88,7 +88,7 @@ test('a program with a purely numeric name does not break either view', function
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->assertOk()
         ->assertSee('Numeric program statement.')
         ->assertOk()
@@ -101,7 +101,7 @@ test('a result can be created under a parent', function () {
     $parent = Result::factory()->create(['program_id' => $program->id, 'type' => ResultType::Outcome]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('openCreateModal')
         ->set('statement', '  Latrines constructed and handed over.  ')
         ->set('resultType', ResultType::Output->value)
@@ -125,7 +125,7 @@ test('the parent picker excludes the edited result and its own descendants', fun
     Result::factory()->create(['statement' => 'Unrelated statement.', 'type' => ResultType::Impact]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('openEditModal', $root->id);
 
     $statements = $component->instance()->parentOptions()->pluck('statement')->all();
@@ -140,7 +140,7 @@ test('a leaf result with no indicators can be deleted', function () {
     $result = Result::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('confirmDelete', $result->id)
         ->call('deleteResult')
         ->assertHasNoErrors();
@@ -154,7 +154,7 @@ test('a result with children is not deleted because the subtree would cascade', 
     $child = Result::factory()->create(['parent_id' => $parent->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('confirmDelete', $parent->id)
         ->call('deleteResult');
 
@@ -168,7 +168,7 @@ test('a result carrying indicators is not deleted because targets and reports wo
     $indicator = Indicator::factory()->create(['result_id' => $result->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('confirmDelete', $result->id)
         ->call('deleteResult');
 
@@ -179,7 +179,7 @@ test('a result carrying indicators is not deleted because targets and reports wo
 test('the results framework renders with no results', function () {
     $user = User::factory()->role('General Manager')->create();
 
-    Livewire::actingAs($user)->test('pages::results.index')->assertSee('No results yet');
+    Livewire::actingAs($user)->test('tracking::results.index')->assertSee('No results yet');
 });
 
 test('the overview counts statements, indicators, targets and measurement coverage', function () {
@@ -198,7 +198,7 @@ test('the overview counts statements, indicators, targets and measurement covera
     PlanIndicator::factory()->create(['indicator_id' => $indicator->id]);
 
     $overview = Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->instance()
         ->overview();
 
@@ -217,7 +217,7 @@ test('the search matches an indicator name as well as a statement', function () 
     Indicator::factory()->create(['result_id' => $measured->id, 'name' => 'Litres of water distributed']);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->set('search', 'litres of water')
         ->assertSee('Households reached with cash.')
         ->assertDontSee('Unrelated statement.');
@@ -231,7 +231,7 @@ test('the needs indicators chip keeps only statements carrying no indicator', fu
     Indicator::factory()->create(['result_id' => $measured->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('setFocus', 'unmeasured')
         ->assertSet('focus', 'unmeasured')
         ->assertSee('Unmeasured statement.')
@@ -256,7 +256,7 @@ test('the off track chip keeps only statements whose indicators are rating amber
     IndicatorProgress::factory()->create(['indicator_id' => $aheadIndicator->id, 'value' => 100]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('setFocus', 'offtrack')
         ->assertSee('Statement falling behind.')
         ->assertDontSee('Statement on track.');
@@ -280,7 +280,7 @@ test('a statement whose parent a filter hides is promoted to the top and keeps i
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->set('program', (string) $second->id)
         ->assertSee('Child outcome statement.')
         // The hidden parent is named as lineage, not drawn as a card of its own.
@@ -305,7 +305,7 @@ test('the framework lists every visible statement, nested under its program', fu
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->assertSee('Matrix impact statement.')
         ->assertSee('Matrix output statement.')
         ->assertSee('data-tree-depth="1"', false);
@@ -317,7 +317,7 @@ test('adding a result from a statement pre-wires it as the parent', function () 
     $parent = Result::factory()->create(['program_id' => $program->id, 'type' => ResultType::Impact]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('openCreateModal', $parent->id)
         ->assertSet('showResultModal', true)
         ->assertSet('parentId', (string) $parent->id)
@@ -330,7 +330,7 @@ test('confirming a delete opens the dialog, and cancelling closes it', function 
     $result = Result::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('confirmDelete', $result->id)
         ->assertSet('deletingResultId', $result->id)
         // The dialog is driven by the boolean; asserting the id alone passes while the UI stays dead.
@@ -354,7 +354,7 @@ test('a statement shows the plan, the proposal and the donor its targets were co
     PlanIndicator::factory()->forProposal($agreement->proposal)->create(['indicator_id' => $indicator->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->assertSee('Funded output statement.')
         // The plan the target sits in, the proposal, and the donor behind it.
         ->assertSee('Annual plan 2026')
@@ -371,7 +371,7 @@ test('the attention chips count under the other active filters, not the whole ta
     Result::factory()->create(['program_id' => $first->id, 'statement' => 'Unmeasured in first.']);
     Result::factory()->create(['program_id' => $second->id, 'statement' => 'Unmeasured in second.']);
 
-    $component = Livewire::actingAs($user)->test('pages::results.index');
+    $component = Livewire::actingAs($user)->test('tracking::results.index');
 
     expect($component->instance()->focusCounts())->toBe(['unmeasured' => 2, 'offtrack' => 0, 'waiting' => 0]);
 
@@ -387,7 +387,7 @@ test('the parent picker offers only statements one level up the chain', function
     Result::factory()->type(ResultType::Output)->create(['statement' => 'An output.']);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('openCreateModal')
         ->set('resultType', ResultType::Output->value);
 
@@ -405,7 +405,7 @@ test('a result cannot contribute to a statement that is not directly above it', 
     $impact = Result::factory()->type(ResultType::Impact)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('openCreateModal')
         ->set('statement', 'Wells repaired.')
         ->set('resultType', ResultType::Output->value)
@@ -421,7 +421,7 @@ test('changing the level clears a parent that can no longer hold it', function (
     $outcome = Result::factory()->type(ResultType::Outcome)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('openCreateModal', $outcome->id)
         ->assertSet('parentId', (string) $outcome->id)
         ->set('resultType', ResultType::Outcome->value)
@@ -434,7 +434,7 @@ test('nothing can be added under an activity, while an output takes activities',
     $activity = Result::factory()->activity($output)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->assertSeeHtml('data-test="add-child-result-'.$output->id.'"')
         ->assertDontSeeHtml('data-test="add-child-result-'.$activity->id.'"')
         ->call('openCreateModal', $activity->id)
@@ -450,7 +450,7 @@ test('a contributing result always takes its parent program', function () {
     $outcome = Result::factory()->type(ResultType::Outcome)->create(['program_id' => $program->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('openCreateModal')
         ->set('resultType', ResultType::Output->value)
         ->set('statement', 'Latrines built.')
@@ -469,7 +469,7 @@ test('a level change is refused while nested results sit at the old level below 
     Result::factory()->type(ResultType::Output)->create(['parent_id' => $outcome->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('openEditModal', $outcome->id)
         ->set('resultType', ResultType::Impact->value)
         ->call('saveResult')
@@ -487,7 +487,7 @@ test('moving a statement to another program moves its whole subtree', function (
     $output = Result::factory()->type(ResultType::Output)->create(['program_id' => $from->id, 'parent_id' => $outcome->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('openEditModal', $impact->id)
         ->set('resultProgramId', (string) $to->id)
         ->call('saveResult')
@@ -512,7 +512,7 @@ test('a program move is refused when it would strand an indicator or a plan targ
 
     foreach ([$scoped, $planned] as $result) {
         Livewire::actingAs($user)
-            ->test('pages::results.index')
+            ->test('tracking::results.index')
             ->call('openEditModal', $result->id)
             ->set('resultProgramId', (string) $to->id)
             ->call('saveResult')
@@ -534,7 +534,7 @@ test('a target reads its achievement from approved reports only, and an unmeasur
     Report::factory()->for($target)->create(['value' => 150]);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->assertSee('25% achieved')
         ->assertDontSee('100% achieved')
         ->assertSeeHtml('href="'.route('indicators.index', ['create' => $unmeasured->id]).'"');
@@ -549,7 +549,7 @@ test('each proposal framework reads as its own group after the program groups', 
     Result::factory()->activity($proposalOutput)->create(['statement' => 'Proposal-level activity.']);
 
     $groups = Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->assertSeeInOrder(['Water Security', 'Program-level impact.', __('results_framework.proposal_group', ['name' => 'Dry Season Response']), 'Proposal-level output.', 'Proposal-level activity.'])
         ->assertSeeHtml('data-result-type="activity"')
         ->instance()
@@ -568,7 +568,7 @@ test('the framework filter narrows to the program framework or to one proposal',
     Result::factory()->type(ResultType::Impact)->create(['proposal_id' => Proposal::factory()->create()->id, 'statement' => 'Another proposal impact.']);
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->set('proposal', 'none')
         ->assertSee('Program-level impact.')
         ->assertDontSee('Proposal-level impact.')
@@ -587,7 +587,7 @@ test('a proposal node is edited in its own framework from the results page', fun
     $programOutcome = Result::factory()->type(ResultType::Outcome)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->call('openCreateModal', $output->id)
         ->assertSet('formProposalId', $proposal->id)
         ->assertSet('resultType', ResultType::Activity->value)
@@ -623,11 +623,11 @@ test('the results page holds a flat query count across both kinds of framework',
     };
 
     $countQueries = function () use ($user): int {
-        Livewire::actingAs($user)->test('pages::results.index');
+        Livewire::actingAs($user)->test('tracking::results.index');
         DB::flushQueryLog();
         DB::enableQueryLog();
 
-        Livewire::actingAs($user)->test('pages::results.index');
+        Livewire::actingAs($user)->test('tracking::results.index');
 
         $count = count(DB::getQueryLog());
         DB::disableQueryLog();
@@ -646,7 +646,7 @@ test('the results page holds a flat query count across both kinds of framework',
 describe('the create deep link (T14)', function () {
     beforeEach(function () {
         $this->program = Program::factory()->create(['name' => 'Water Security']);
-        $this->deepLink = fn (User $user, array $query) => Livewire::withQueryParams($query)->actingAs($user)->test('pages::results.index');
+        $this->deepLink = fn (User $user, array $query) => Livewire::withQueryParams($query)->actingAs($user)->test('tracking::results.index');
     });
 
     test('?program=&create=1 opens the create form pre-filled with that program at impact level', function () {
@@ -684,7 +684,7 @@ test('a statement whose only reading is old is waiting for a measurement, never 
 
     Indicator::factory()->create(['result_id' => $never->id, 'frequency' => Period::Quarterly]);
 
-    $component = Livewire::actingAs($user)->test('pages::results.index');
+    $component = Livewire::actingAs($user)->test('tracking::results.index');
 
     expect($component->instance()->measurements()[$old->id]['status'])->toBe('waiting')
         ->and($component->instance()->measurements()[$fresh->id]['status'])->toBe('ontrack')
@@ -707,7 +707,7 @@ test('the average achievement caps one over-target indicator at 100 percent', fu
     $under = Indicator::factory()->create(['result_id' => $result->id, 'baseline' => 0, 'target' => 100]);
     IndicatorProgress::factory()->create(['indicator_id' => $under->id, 'value' => 50]);
 
-    $component = Livewire::actingAs($user)->test('pages::results.index');
+    $component = Livewire::actingAs($user)->test('tracking::results.index');
 
     expect($component->instance()->measurements()[$result->id]['achieved'])->toBe(75.0);
 });
@@ -716,7 +716,7 @@ test('the three headline buttons render inside the livewire root so they work', 
     $user = User::factory()->role('General Manager')->create();
     Result::factory()->create();
 
-    $html = Livewire::actingAs($user)->test('pages::results.index')->html();
+    $html = Livewire::actingAs($user)->test('tracking::results.index')->html();
 
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
@@ -731,7 +731,7 @@ test('framework and type filters sit behind more filters, open when one is activ
     $user = User::factory()->role('General Manager')->create();
     Result::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::results.index')
+    Livewire::actingAs($user)->test('tracking::results.index')
         ->assertSeeHtml('data-test="more-filters-button"')
         ->assertSeeHtml('x-data="{ open: false }"')
         ->set('type', ResultType::Output->value)
@@ -751,7 +751,7 @@ test('the chart view is a program by level grid showing each cell worst status, 
     IndicatorProgress::factory()->create(['indicator_id' => $indicator->id, 'value' => 2, 'date' => '2026-06-20']);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::results.index')
+        ->test('tracking::results.index')
         ->assertDontSeeHtml('data-test="results-chart"')
         ->set('view', 'chart')
         ->assertSeeHtml('data-test="results-chart"');
@@ -773,7 +773,7 @@ test('the chart view is a program by level grid showing each cell worst status, 
 test('the headline buttons say what each count means, and below target is named plainly', function () {
     $user = User::factory()->role('General Manager')->create();
 
-    Livewire::actingAs($user)->test('pages::results.index')
+    Livewire::actingAs($user)->test('tracking::results.index')
         ->assertSee('Below target')
         ->assertDontSee('Behind')
         ->assertSee('smaller share of its target than the share of the year that has passed');

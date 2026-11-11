@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use Laravel\Fortify\Features;
+use Modules\Core\Models\User;
 
 beforeEach(function () {
     $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());

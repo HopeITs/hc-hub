@@ -3,12 +3,12 @@
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\AppNotification;
 use App\Notifications\NotificationPayload;
 use App\Support\Desk\Panels;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 function bellNotify(User $user, NotificationPriority $priority = NotificationPriority::Info, NotificationKind $kind = NotificationKind::Action, string $subject = 'Plan'): string
 {

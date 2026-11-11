@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Project;
-use App\Models\Risk;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Risk;
 
 /**
  * @extends Factory<Risk>

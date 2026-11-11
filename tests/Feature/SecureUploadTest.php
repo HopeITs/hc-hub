@@ -1,14 +1,14 @@
 <?php
 
-use App\Models\Task;
-use App\Models\TaskAttachment;
-use App\Models\User;
 use App\Rules\SecureUpload;
 use App\Support\UploadName;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 
 beforeEach(fn () => $this->seed(RolesAndPermissionsSeeder::class));
 
@@ -88,7 +88,7 @@ test('the task upload form refuses a fake pdf with a clear message and stores no
     $task = Task::factory()->create();
 
     Livewire\Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->call('openCreateFileModal')
         ->set('newFile', UploadedFile::fake()->createWithContent('invoice.pdf', 'MZ not a pdf'))
         ->set('fileDate', '2026-03-31')

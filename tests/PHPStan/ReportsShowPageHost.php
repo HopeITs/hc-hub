@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\Reports\ManagesReportFiles;
-use App\Livewire\Concerns\Reports\RunsReportWorkflow;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Modules\Tracking\Livewire\Concerns\Reports\ManagesReportFiles;
+use Modules\Tracking\Livewire\Concerns\Reports\RunsReportWorkflow;
 
 /**
  * Stands in for reports/show, with every trait that page gained when it was

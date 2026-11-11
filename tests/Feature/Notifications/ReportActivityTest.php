@@ -1,11 +1,11 @@
 <?php
 
-use App\Enums\ReportStatus;
 use App\Models\Activity;
-use App\Models\Report;
-use App\Models\ReportFile;
 use App\Models\UserNotification;
 use Livewire\Livewire;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportFile;
 
 test('submitting, approving and meal seeing a report are distinct events for the author and meal', function () {
     $author = userWithRole('Public Relations');
@@ -52,7 +52,7 @@ test('submitting from the report page records the submission', function () {
     $author = userWithRole('MEAL');
     $report = Activity::withoutRecording(fn () => Report::factory()->create(['user_id' => $author->id]));
 
-    Livewire::actingAs($author)->test('pages::reports.show', ['report' => $report])->call('submitForReview');
+    Livewire::actingAs($author)->test('tracking::reports.show', ['report' => $report])->call('submitForReview');
 
     expect(Activity::query()->sole()->event)->toBe('report.submitted');
 });

@@ -1,15 +1,6 @@
 <?php
 
-use App\Enums\ProjectStatus;
 use App\Models\Activity;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Indicator;
-use App\Models\IndicatorProgress;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Result;
-use App\Models\User;
 use App\Notifications\Alerts\MonthlyDigestScanner;
 use App\Notifications\AppNotification;
 use App\Notifications\MonthlyDigestMail;
@@ -19,6 +10,15 @@ use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\IndicatorProgress;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Result;
 
 // 2026-11-01 is a Sunday, so Monday 2026-11-02 is November's first working day (Mon–Fri default).
 beforeEach(function () {

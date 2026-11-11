@@ -1,21 +1,21 @@
 <?php
 
-use App\Enums\TaskStatus;
+use Modules\Tracking\Enums\TaskStatus;
 use App\Livewire\Concerns\Dashboard\ChartsDashboard;
 use App\Livewire\Concerns\Dashboard\ReadsDashboardAttention;
 use App\Livewire\Concerns\Dashboard\ReadsDashboardWork;
-use App\Models\AnnualPlan;
-use App\Models\Donor;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Donor;
 use App\Models\HrProgram;
-use App\Models\Indicator;
-use App\Models\Milestone;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Risk;
-use App\Models\Strategy;
-use App\Models\Task;
-use App\Models\TransfersTracking;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Milestone;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\Strategy;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 use App\Support\ArabicText;
 use App\Support\Desk\AskEngine;
 use App\Support\KeyboardLayout;

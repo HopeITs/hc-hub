@@ -1,16 +1,16 @@
 <?php
 
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\Project;
-use App\Models\Supervision;
-use App\Models\Task;
-use App\Models\User;
 use App\Support\Desk\Panels;
 use App\Support\Desk\TeamScope;
-use App\Support\SupervisionMap;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Supervision;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Support\SupervisionMap;
 
 beforeEach(function () {
     $this->travelTo('2026-09-15 09:00:00');

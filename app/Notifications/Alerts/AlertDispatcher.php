@@ -6,11 +6,11 @@ namespace App\Notifications\Alerts;
 
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
-use App\Models\User;
 use App\Notifications\AppNotification;
 use App\Notifications\NotificationPayload;
 use App\Notifications\RecipientFilter;
 use App\Notifications\RecipientResolver;
+use Modules\Core\Models\User;
 
 /**
  * The shared delivery path of every scheduled alert: filter, claim the

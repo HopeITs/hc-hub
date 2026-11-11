@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Models\Account;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -36,7 +36,7 @@ test('transfers can be filtered by stage and account', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->assertSee('111,111.00')
         ->assertSee('222,222.00')
         ->call('toggleStage', 'received')
@@ -53,7 +53,7 @@ test('a tranche can be scheduled with no account assigned', function () {
     $agreement = DonorProposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->call('openCreateModal')
         ->set('transferAgreementId', (string) $agreement->id)
         ->set('transferAccountId', '')
@@ -75,7 +75,7 @@ test('a pending tranche with no received figures saves those columns as null', f
     $agreement = DonorProposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->call('openCreateModal')
         ->set('transferAgreementId', (string) $agreement->id)
         ->set('paymentAmount', '100000.00')
@@ -100,7 +100,7 @@ test('the three currency columns are recorded independently', function () {
     $account = Account::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->call('openCreateModal')
         ->set('transferAgreementId', (string) $agreement->id)
         ->set('transferAccountId', (string) $account->id)
@@ -129,7 +129,7 @@ test('a negative payment amount is rejected', function () {
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->call('openCreateModal')
         ->set('transferAgreementId', (string) DonorProposal::factory()->create()->id)
         ->set('paymentAmount', '-5')
@@ -143,7 +143,7 @@ test('a tranche can be deleted from its edit form', function () {
     $user = User::factory()->role('Financial')->create();
     $transfer = TransfersTracking::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::transfers.index')
+    Livewire::actingAs($user)->test('tracking::transfers.index')
         ->call('openTransferEdit', $transfer->id)
         ->call('confirmTransferDelete')
         ->assertSet('confirmingTransferDelete', true)
@@ -157,7 +157,7 @@ test('deleting a tranche needs the delete permission', function () {
     $user = User::factory()->create();
     $transfer = TransfersTracking::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::transfers.index')
+    Livewire::actingAs($user)->test('tracking::transfers.index')
         ->call('deleteTransfer')
         ->assertForbidden();
 
@@ -168,7 +168,7 @@ test('tranche dates and status must agree', function (array $input, string $erro
     $user = User::factory()->role('Financial')->create();
     $agreement = DonorProposal::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::transfers.index')
+    Livewire::actingAs($user)->test('tracking::transfers.index')
         ->call('openTransferCreate', $agreement->id)
         ->set(['paymentAmount' => '100', ...$input])
         ->call('saveTransfer')
@@ -185,7 +185,7 @@ test('choosing an agreement for a new tranche takes its currency', function () {
     $user = User::factory()->role('Financial')->create();
     $agreement = DonorProposal::factory()->create(['currency' => Currency::Eur]);
 
-    Livewire::actingAs($user)->test('pages::transfers.index')
+    Livewire::actingAs($user)->test('tracking::transfers.index')
         ->call('openTransferCreate')
         ->set('transferAgreementId', (string) $agreement->id)
         ->assertSet('transferredCurrency', 'EUR')
@@ -206,7 +206,7 @@ test('transfer totals are never summed across currencies', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->assertSee('100,000.00')
         ->assertSee('50,000.00')
         ->assertDontSee('150,000.00');
@@ -215,14 +215,14 @@ test('transfer totals are never summed across currencies', function () {
 test('transfer tracking renders with no transfers', function () {
     $user = User::factory()->role('Financial')->create();
 
-    Livewire::actingAs($user)->test('pages::transfers.index')->assertSee('No transfers recorded');
+    Livewire::actingAs($user)->test('tracking::transfers.index')->assertSee('No transfers recorded');
 });
 
 test('a user without transfer permissions cannot schedule a tranche', function () {
     $viewer = User::factory()->role('Managers')->create()->givePermissionTo('transfers.view');
     $agreement = DonorProposal::factory()->create(['currency' => Currency::Usd]);
 
-    $fresh = fn () => Livewire::actingAs($viewer)->test('pages::transfers.index');
+    $fresh = fn () => Livewire::actingAs($viewer)->test('tracking::transfers.index');
 
     $fresh()->assertDontSeeHtml('data-test="create-transfer-button"');
     $fresh()->call('openCreateModal')->assertForbidden();
@@ -240,7 +240,7 @@ test('the Public Relations Manager cannot schedule, edit or delete a tranche eve
     $agreement = DonorProposal::factory()->create(['currency' => Currency::Usd]);
     $tranche = TransfersTracking::factory()->create(['donor_proposal_id' => $agreement->id, 'payment_amount' => '500.00']);
 
-    $fresh = fn () => Livewire::actingAs($prManager)->test('pages::transfers.index');
+    $fresh = fn () => Livewire::actingAs($prManager)->test('tracking::transfers.index');
 
     $fresh()->assertDontSeeHtml('data-test="create-transfer-button"');
     $fresh()->call('openCreateModal')->assertForbidden();
@@ -286,7 +286,7 @@ test('the ledger counts shortfall only on money that finished its journey', func
     ]);
 
     $line = Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->instance()
         ->ledger
         ->firstWhere('currency', Currency::Usd->value);
@@ -318,7 +318,7 @@ test('a tranche that landed in another currency is never subtracted from what wa
     ]);
 
     $line = Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->instance()
         ->ledger
         ->firstWhere('currency', Currency::Usd->value);
@@ -360,7 +360,7 @@ test('a ledger figure narrows the ladder to that stage and clears when chosen ag
     $user = User::factory()->role('Financial')->create();
     [$overdue, $upcoming] = overdueAndUpcomingTranche();
 
-    $component = Livewire::actingAs($user)->test('pages::transfers.index');
+    $component = Livewire::actingAs($user)->test('tracking::transfers.index');
 
     // Asserted on the ladder rows, not on the figures: the ledger above keeps
     // describing the whole filtered set on purpose while a stage narrows only
@@ -389,7 +389,7 @@ test('the default ladder order leads with money that is overdue', function () {
     $upcomingRow = 'wire:key="transfer-'.$upcoming->id.'"';
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->set('view', 'overview')
         ->assertSet('sort', 'attention')
         ->assertSeeHtmlInOrder([$overdueRow, $upcomingRow])
@@ -423,7 +423,7 @@ test('a tranche that arrived over never cancels one that arrived short', functio
     TransfersTracking::factory()->create($settled('50000.00', '80000.00'));
 
     $line = Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->instance()
         ->ledger
         ->firstWhere('currency', Currency::Usd->value);
@@ -452,7 +452,7 @@ test('a tranche marked received with no net amount is not reported as landed', f
     // "Not recorded yet" became "Net not recorded" when the page settled on one
     // word per idea; the behaviour under test is unchanged.)
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->set('view', 'overview')
         ->assertSeeHtml('aria-label="Sent 100,000.00 USD · Net not recorded"')
         ->assertDontSeeHtml('aria-label="Sent 100,000.00 USD · Received"');
@@ -471,7 +471,7 @@ test('an exchange rate of zero is shown as zero rather than an empty cell', func
 
     // Trimming the raw decimal:6 string turned "0.000000" into "".
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->set('view', 'overview')
         ->assertSeeHtml('<dd class="mt-0.5 font-semibold tabular-nums">0</dd>');
 });
@@ -493,7 +493,7 @@ test('a receive date before the transfer date never reports a negative transit t
 
     // It falls back to the plain state rather than reporting the typo as a fact.
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->set('view', 'overview')
         ->assertDontSee('-3 day')
         ->assertDontSee('−3 day')
@@ -521,7 +521,7 @@ test('the headline separates what is expected from what has actually been sent',
     ]);
 
     $line = Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->instance()
         ->ledger
         ->firstWhere('currency', Currency::Usd->value);
@@ -551,7 +551,7 @@ test('a small fee is never reported as a zero percent shortfall', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->set('view', 'overview')
         ->assertDontSee('−0%')
         ->assertDontSee('-0%')
@@ -578,7 +578,7 @@ test('landed in full is never claimed while money is still outstanding', functio
     TransfersTracking::factory()->create($settled);
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->set('view', 'overview')
         ->assertSee('Landed in full')
         ->assertDontSee('Settled money landed in full');
@@ -595,7 +595,7 @@ test('landed in full is never claimed while money is still outstanding', functio
     // The row badge may still say "Landed in full" — that tranche did. It is
     // the currency-wide headline that must no longer make the claim.
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->set('view', 'overview')
         ->assertSee('Settled money landed in full');
 });
@@ -612,7 +612,7 @@ test('the transfers ledger finds a tranche by either project number', function (
     ])->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->set('search', 'ECHO-86')
         ->assertSeeHtml('wire:key="transfer-'.$echo->id.'"')
         ->assertDontSeeHtml('wire:key="transfer-'.$unicef->id.'"')
@@ -632,7 +632,7 @@ test('each tranche shows its proposal\'s internal number beside the external one
     ])->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->set('view', 'overview')
         ->assertSeeInOrder(['HC-2026-088', 'External no. ECHO-88'])
         ->assertSee('HC-2026-089')
@@ -652,7 +652,7 @@ test('the transfer picker names each agreement by both project numbers', functio
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->call('openTransferCreate')
         ->assertSee('ECHO · Winter Shelter Kit · HC-2026-090 · ECHO-90 · 2,000 USD')
         ->assertSee('UNICEF · Cash for Work · HC-2026-091 · 1,000 USD');
@@ -663,6 +663,6 @@ test('the transfers search hint names the project number', function () {
     TransfersTracking::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->assertSeeHtml('placeholder="Project number, donor, or proposal"');
 });

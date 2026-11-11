@@ -1,13 +1,13 @@
 <?php
 
-use App\Enums\Currency;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Task;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
 
 beforeEach(function () {
     $this->travelTo('2026-09-15 09:00:00');

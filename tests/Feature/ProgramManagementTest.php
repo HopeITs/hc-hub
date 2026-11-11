@@ -1,20 +1,20 @@
 <?php
 
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ProjectStatus;
 use App\Http\Middleware\SyncProgramsFromHr;
-use App\Models\AnnualPlan;
-use App\Models\MonthlyReport;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Risk;
-use App\Models\Strategy;
-use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\Strategy;
 
 test('guests are redirected from program management', function () {
     $this->get(route('programs.index'))->assertRedirect(route('login'));
@@ -54,7 +54,7 @@ test('authenticated users can search and filter programs by strategy and manager
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertSee('Water Security')
         ->assertSee('Safe Shelter')
         ->set('search', 'Layla')
@@ -83,7 +83,7 @@ test('an hr program can be linked to a strategy and manager without changing its
     $program = Program::factory()->unassigned()->create(['name' => 'Hope Center']);
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('openLinkModal')
         ->assertSet('strategyId', '')
         ->assertSet('managerId', '')
@@ -104,7 +104,7 @@ test('a program assignment can be cleared back to not assigned', function () {
     $program = Program::factory()->create();
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('openLinkModal')
         ->set('strategyId', '')
         ->set('managerId', '')
@@ -120,7 +120,7 @@ test('unassigned programs are listed as not assigned', function () {
     Program::factory()->unassigned()->create(['name' => 'Study Zone']);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertSee('Study Zone')
         ->assertSee('Not assigned');
 });
@@ -129,7 +129,7 @@ test('strategy and manager assignments must reference available records', functi
     $program = Program::factory()->unassigned()->create();
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('openLinkModal')
         ->set('strategyId', '999999')
         ->set('managerId', '999999')
@@ -143,7 +143,7 @@ test('strategy and manager assignments must reference available records', functi
 
 test('the directory offers no way to create programs', function () {
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertDontSee('Add program')
         ->assertDontSee('data-test="create-program-button"', false);
 });
@@ -163,7 +163,7 @@ test('program strategy and manager names are escaped in the directory', function
     Project::factory()->create(['program_id' => $program->id, 'status' => ProjectStatus::Active, 'end_date' => today()->addYear()]);
 
     Livewire::actingAs($user)
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->set('strategy', (string) $strategy->id)
         ->assertSee($unsafeProgram)
         ->assertSee($unsafeStrategy)
@@ -185,7 +185,7 @@ test('program cards link to their details', function () {
     $program = Program::factory()->create(['name' => 'Water Security']);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertSee('Water Security')
         ->assertSee(route('programs.show', $program), false)
         ->assertDontSee('Programs come from the HR system.')
@@ -198,7 +198,7 @@ test('every program card shows at once, with no load more button', function () {
     }
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertSee('Program 01')
         ->assertSee('Program 09')
         ->assertDontSee('Load more');
@@ -209,7 +209,7 @@ test('program gap filter focuses programs without a manager', function () {
     Program::factory()->unassigned()->create(['name' => 'Unmanaged Program']);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->set('gap', 'no_manager')
         ->assertSee('Unmanaged Program')
         ->assertDontSee('Managed Program');
@@ -222,7 +222,7 @@ test('program filter pickers apply strategy and manager selections', function ()
     Program::factory()->create(['name' => 'Other Program']);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->call('filterByStrategy', $strategy->id)
         ->assertSet('strategy', (string) $strategy->id)
         ->assertSee('Selected Program')
@@ -253,7 +253,7 @@ test('the link form on the program page is rendered only while its dialog is ope
     $program = Program::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertDontSeeHtml('wire:model="managerId"')
         ->call('openLinkModal')
         ->assertSeeHtml('wire:model="managerId"');
@@ -264,7 +264,7 @@ test('the strategy and manager filters can list programs nobody is linked to', f
     Program::factory()->unassigned()->create(['name' => 'Orphan Program']);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->set('strategy', 'none')
         ->assertSee('Orphan Program')
         ->assertDontSee('Linked Program')
@@ -280,7 +280,7 @@ test('the card list no longer repeats a "showing" count under the cards', functi
     }
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertDontSee('Showing 8 of 9 programs')
         ->assertDontSeeHtml('data-program-shown');
 });
@@ -289,7 +289,7 @@ test('an empty search offers one reset button, not two', function () {
     Program::factory()->create(['name' => 'Water Security']);
 
     $html = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->set('search', 'zzzz-no-match')
         ->assertSee('No matching programs')
         ->html();
@@ -301,7 +301,7 @@ test('the link dialog on the program page names what it links and guards unsaved
     $program = Program::factory()->unassigned()->create(['name' => 'Water Security']);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertDontSeeHtml('data-discard-guard')
         ->call('openLinkModal')
         ->assertSee('Link Water Security to a strategy and manager')
@@ -323,7 +323,7 @@ test('the no plan gap lists the strategy programs without a plan for this year',
     PlanIndicator::factory()->forAnnualPlan(AnnualPlan::factory()->create(['program_id' => $lastYear->id, 'year' => 2025]))->create();
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->set('strategy', (string) $strategy->id)
         ->set('gap', 'no_plan')
         ->assertSet('gap', 'no_plan')
@@ -345,7 +345,7 @@ test('the Needs attention filter lists programs with overdue, risky or proposal-
     Risk::factory()->happened()->create(['project_id' => $closed->id]);
 
     $html = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->set('gap', $gap)
         ->assertSet('gap', $gap)
         ->html();
@@ -367,7 +367,7 @@ test('the no proposal choice is funding data and is refused without proposal acc
     expect($user->can('proposals.view'))->toBeFalse();
 
     Livewire::actingAs($user)
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertDontSee('Open projects with no proposal')
         ->set('gap', 'no_proposal')
         ->assertSet('gap', '');
@@ -383,7 +383,7 @@ test('the program page counts last month monthly reports and how many are valida
     MonthlyReport::factory()->create(['project_id' => $first->id, 'period' => '2026-07-01', 'status' => MonthlyReportStatus::Validated]);
 
     Livewire::actingAs(User::factory()->role('MEAL')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertSee('August reports: 1 of 2 validated');
 });
 
@@ -393,7 +393,7 @@ test('the program page says plainly when last month has no reports', function ()
     Project::factory()->create(['program_id' => $program->id, 'status' => ProjectStatus::Active, 'end_date' => '2027-01-01']);
 
     Livewire::actingAs(User::factory()->role('MEAL')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertSee('No August reports yet')
         ->assertDontSee('0 of 0 validated');
 });
@@ -402,11 +402,11 @@ test('only people who may update a program see its link button', function () {
     $program = Program::factory()->create();
 
     Livewire::actingAs(User::factory()->role('Team Member')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertDontSeeHtml('data-test="link-program-button"');
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertSeeHtml('data-test="link-program-button"');
 });
 
@@ -415,7 +415,7 @@ test('the card pencil links a program to a strategy and manager from the list', 
     $program = Program::factory()->unassigned()->create(['name' => 'Hope Center']);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertDontSeeHtml('data-discard-guard')
         ->call('openEditModal', $program->id)
         ->assertSet('editingProgramName', 'Hope Center')
@@ -436,7 +436,7 @@ test('the manager filter lists only people who manage a program, with their coun
     Program::factory()->unassigned()->create();
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertSee('Amal Manager')
         ->assertSee('(2)')
         ->assertDontSee('Idle Bystander')
@@ -449,7 +449,7 @@ test('the manager filter shows one name in the interface language with its count
     app()->setLocale($locale);
 
     $options = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->instance()->managerOptions;
 
     expect($options[0]['label'])->toBe("\u{2068}{$shown}\u{2069} (1)")
@@ -464,7 +464,7 @@ test('a strategy name keeps its own direction so Arabic cards cut its end, not i
     Program::factory()->create(['strategy_id' => $strategy->id]);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertSeeHtml('dir="auto" title="Country Strategy 2026-2030"');
 });
 
@@ -472,7 +472,7 @@ test('a program with no strategy reads "Not linked yet" with an Assign shortcut'
     Program::factory()->unassigned()->create(['name' => 'Orphan Program']);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertSeeHtml('data-program-unlinked')
         ->assertSee('Not linked yet')
         ->assertSee('Assign a strategy and manager to Orphan Program');
@@ -483,7 +483,7 @@ test('a register narrowed to a gap names it in the Needs attention picker', func
 
     Livewire::withQueryParams(['gap' => 'no_plan'])
         ->actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertSeeText('Needs attention')
         ->assertSeeHtml('<span class="truncate">No 2026 plan</span>')
         ->set('gap', '')
@@ -501,7 +501,7 @@ test('each card shows only strategy, manager, open projects and closed projects'
     MonthlyReport::factory()->create(['project_id' => $late->id, 'period' => '2026-08-01', 'status' => MonthlyReportStatus::Validated]);
 
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::programs.index')
+        ->test('tracking::programs.index')
         ->assertSee('Country Strategy 2026-2030')
         ->assertSee('Amal Manager')
         ->assertSeeHtml('data-program-open-projects>1</p>')

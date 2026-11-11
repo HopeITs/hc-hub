@@ -1,13 +1,13 @@
 <?php
 
-use App\Models\Account;
 use App\Models\Activity;
-use App\Models\User;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Laravel\Fortify\Fortify;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Account;
 
 /**
  * Point the app at a new APP_KEY (and previous keys) and drop the resolved

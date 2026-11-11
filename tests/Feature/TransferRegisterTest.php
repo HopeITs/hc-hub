@@ -1,16 +1,16 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Models\Account;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\Blade;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -24,7 +24,7 @@ beforeEach(function () {
  */
 function transferRegister(array $query = []): Testable
 {
-    return Livewire::actingAs(test()->user)->withQueryParams($query)->test('pages::transfers.index');
+    return Livewire::actingAs(test()->user)->withQueryParams($query)->test('tracking::transfers.index');
 }
 
 /**
@@ -141,7 +141,7 @@ test('the full tranche table keeps every column, so the agreement page is unchan
     // x-funding.tranche-row is shared; only the transfers register asks for
     // the compact set, so the agreement, donor and proposal pages keep theirs.
     $html = Blade::render(
-        '<table><tbody><x-funding.tranche-row :transfer="$transfer" /></tbody></table>',
+        '<table><tbody><x-tracking::funding.tranche-row :transfer="$transfer" /></tbody></table>',
         ['transfer' => $tranche->fresh()],
     );
 
@@ -434,7 +434,7 @@ test('a viewer without the update permission gets the table with no edit buttons
     $viewer = User::factory()->role('Managers')->create()->givePermissionTo('transfers.view');
     $tranche = registerPendingTranche();
 
-    Livewire::actingAs($viewer)->test('pages::transfers.index')
+    Livewire::actingAs($viewer)->test('tracking::transfers.index')
         ->assertSeeHtml('data-transfer="'.$tranche->id.'"')
         ->assertDontSeeHtml('data-test="edit-transfer-'.$tranche->id.'"')
         ->assertDontSeeHtml('data-test="create-transfer-button"');
@@ -450,7 +450,7 @@ test('a row links to its donor, proposal and agreement only for people who may o
         ->assertSeeHtml('href="'.route('proposals.show', $agreement->proposal).'"')
         ->assertSeeHtml('href="'.route('funding-agreements.show', $agreement).'"');
 
-    Livewire::actingAs($viewer)->test('pages::transfers.index')
+    Livewire::actingAs($viewer)->test('tracking::transfers.index')
         ->assertSee($agreement->donor->name)
         ->assertDontSeeHtml('href="'.route('donors.show', $agreement->donor).'"')
         ->assertDontSeeHtml('href="'.route('funding-agreements.show', $agreement).'"');
@@ -515,7 +515,7 @@ test('exporting needs the transfers view permission', function () {
     registerPendingTranche();
 
     Livewire::actingAs(User::factory()->create())
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->call('exportCsv')
         ->assertForbidden();
 });

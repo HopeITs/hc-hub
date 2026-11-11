@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use App\Events\AiPromptFinished;
 use App\Jobs\RunAiPrompt;
-use App\Models\User;
 use App\Support\Ai\AiGateway;
 use App\Support\Ai\HcAgent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
+use Modules\Core\Models\User;
 
 class QueuedProbeAgent extends HcAgent
 {

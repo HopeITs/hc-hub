@@ -1,17 +1,17 @@
 <?php
 
-use App\Enums\ResultType;
-use App\Models\AnnualPlan;
-use App\Models\Indicator;
-use App\Models\Milestone;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\User;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
 
 beforeEach(function () {
     $this->program = Program::factory()->create();
@@ -22,7 +22,7 @@ beforeEach(function () {
 function resultsTab(Program $program): Testable
 {
     return Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'results');
 }
 

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Support\DefaultSectors;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Support\DefaultSectors;
 
 /**
  * The six starting sectors (D-47), created here as well as in the seeder so

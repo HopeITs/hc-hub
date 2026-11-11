@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\DenominatorBasis;
-use App\Enums\IndicatorMeasure;
-use App\Enums\ReportStatus;
 use App\Models\Activity;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\PlanIndicator;
-use App\Models\Report;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Enums\DenominatorBasis;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Report;
 
 /*
 | PlanIndicator::pooledRatioSql() (over pooledTermsSelectSql()) and its PHP twin pooledRatio() (contracts

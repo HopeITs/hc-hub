@@ -2,11 +2,11 @@
 
 use App\Actions\Fortify\TrustedDevices;
 use App\Models\TrustedDevice;
-use App\Models\User;
 use App\Notifications\EmailLoginCode;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Features;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 /**
  * Sign in with the password and the emailed code, ticking "don't ask again"

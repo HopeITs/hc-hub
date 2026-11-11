@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\TaskPriority;
-use App\Enums\TaskStatus;
-use App\Models\Milestone;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\TaskAttachment;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Renderless;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskPriority;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 use Spatie\Permission\Models\Role;
 
 use function Livewire\invade;
@@ -48,7 +48,7 @@ test('tasks can be filtered by search status priority and assignee', function ()
     $verify->taskAssignees()->create(['employee_id' => $bob]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSee('Draft distribution plan')->assertSee('Verify beneficiary list')
         ->set('search', 'delivery sequence')->assertSee('Draft distribution plan')->assertDontSee('Verify beneficiary list')
         ->call('clearFilters')->set('search', 'Bob Rahman')->assertDontSee('Draft distribution plan')->assertSee('Verify beneficiary list')
@@ -72,7 +72,7 @@ test('the my tasks only filter is a checkbox that scopes every view', function (
     $other = Task::factory()->create(['title' => 'Someone else\'s task']);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSeeHtml('data-test="task-filter-my-tasks-only"')
         ->assertSee('My own task')->assertSee('Someone else\'s task')
         ->set('myTasksOnly', true)
@@ -94,7 +94,7 @@ test('tasks can be filtered by source type and by a specific source record', fun
     Task::factory()->create(['title' => 'Loose task', 'source_type' => 'proposal', 'source_id' => $proposal->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSee('Attached task')->assertSee('Loose task')
         ->set('sourceType', 'milestone')->assertSee('Attached task')->assertDontSee('Loose task')
         ->set('sourceId', (string) $milestone->id)->assertSee('Attached task')->assertDontSee('Loose task')
@@ -107,7 +107,7 @@ test('a task records its creator and safely normalizes optional values', functio
     $proposal = Proposal::factory()->create();
 
     Livewire::actingAs($creator)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openCreateDrawer')
         ->set('title', '  Prepare the sitrep  ')
         ->set('description', '   ')
@@ -142,7 +142,7 @@ test('a task can have several assignees at once', function () {
     $proposal = Proposal::factory()->create();
 
     Livewire::actingAs($creator)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openCreateDrawer')
         ->set('title', 'Coordinate the handover')
         ->set('taskSourceType', 'proposal')
@@ -161,7 +161,7 @@ test('creating a task rejects missing and invalid required selections', function
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openCreateDrawer')
         ->set('title', '   ')
         ->set('taskSourceType', 'proposal')
@@ -177,7 +177,7 @@ test('creating a task rejects a missing source type or source', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openCreateDrawer')
         ->set('title', 'Valid title')
         ->set('assignedTo', [(string) insertHrEmployee()])
@@ -191,7 +191,7 @@ test('creating a task rejects an unrecognized source type', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openCreateDrawer')
         ->set('title', 'Valid title')
         ->set('taskSourceType', 'not-a-real-type')
@@ -207,7 +207,7 @@ test('a task can be created with no assignee at all', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openCreateDrawer')
         ->set('title', 'Valid title')
         ->set('taskSourceType', 'proposal')
@@ -223,7 +223,7 @@ test('creating a task rejects invalid workflow values and progress', function (s
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openCreateDrawer')
         ->set('title', 'Valid title')
         ->set('taskSourceType', 'proposal')
@@ -245,7 +245,7 @@ test('a due date before the start date is rejected', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openCreateDrawer')
         ->set('title', 'Schedule delivery')
         ->set('taskSourceType', 'proposal')
@@ -274,7 +274,7 @@ test('a task can be fully edited without changing its creator', function () {
     ]);
 
     Livewire::actingAs($editor)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openEditDrawer', $task->id)
         ->assertSet('title', 'Original')->assertSet('description', '')->assertSet('taskSourceType', 'proposal')->assertSet('taskSourceId', (string) $originalProposal->id)
         ->set('title', '  Revised task  ')
@@ -314,7 +314,7 @@ test('editing a task to drop an assignee removes only that assignment', function
     $task->taskAssignees()->create(['employee_id' => $bob]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openEditDrawer', $task->id)
         ->assertSet('assignedTo', [(string) $alice, (string) $bob])
         ->set('assignedTo', [(string) $alice])
@@ -333,7 +333,7 @@ test('toggleAssignee adds and removes an assignee directly from the list row', f
     $task->taskAssignees()->create(['employee_id' => $alice]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('toggleAssignee', $task->id, $bob)
         ->assertHasNoErrors();
 
@@ -341,7 +341,7 @@ test('toggleAssignee adds and removes an assignee directly from the list row', f
         ->toBe(collect([$alice, $bob])->sort()->values()->all());
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('toggleAssignee', $task->id, $bob);
 
     expect($task->refresh()->taskAssignees->pluck('employee_id')->all())->toBe([$alice]);
@@ -355,7 +355,7 @@ test('toggleAssignee removes the last assignee and leaves the task unassigned', 
     $task->taskAssignees()->create(['employee_id' => $alice]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('toggleAssignee', $task->id, $alice);
 
     expect($task->refresh()->taskAssignees)->toBeEmpty();
@@ -372,7 +372,7 @@ test('the list row assignee trigger opens a shared popover fed by the employee l
     // The popover draws its options in the browser from the shared
     // employeeOptions store, so the page carries no per-employee markup.
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->assertSee('data-test="task-assignee-trigger-'.$task->id.'"', false)
         ->assertSee('x-data="assigneePopover"', false)
@@ -401,7 +401,7 @@ test('no tasks view renders the employee option list', function (string $view) {
     // of HTML on /tasks. They all open the one shared popover, which the
     // browser fills from the employee list endpoint.
     $html = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', $view)
         ->html();
 
@@ -419,7 +419,7 @@ test('a task can be deleted and takes only its own attachments with it', functio
     $otherAttachment = TaskAttachment::factory()->create(['task_id' => $otherTask->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('confirmDelete', $task->id)
         ->assertSet('deletingTaskId', $task->id)
         ->assertSet('showDeleteModal', true)
@@ -440,7 +440,7 @@ test('the delete confirmation can be cancelled without deleting the task', funct
     $task = Task::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('confirmDelete', $task->id)
         ->assertSet('showDeleteModal', true)
         ->call('cancelDelete')
@@ -454,7 +454,7 @@ test('delete is a no-op until a task is confirmed', function () {
     $user = User::factory()->role('General Manager')->create();
     $task = Task::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::tasks.index')->call('deleteTask')->assertHasNoErrors();
+    Livewire::actingAs($user)->test('tracking::tasks.index')->call('deleteTask')->assertHasNoErrors();
 
     $this->assertDatabaseHas('tasks', ['id' => $task->id]);
 });
@@ -464,7 +464,7 @@ test('task rows link to the registered task detail route', function () {
     $task = Task::factory()->create(['title' => 'Open my details']);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSeeHtml('href="'.route('tasks.show', $task).'"');
 });
 
@@ -481,7 +481,7 @@ test('task directory content is escaped', function () {
     $task->taskAssignees()->create(['employee_id' => $assignee]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSee('<script>task()</script>')
         ->assertSee('<script>assignee()</script>')
         ->assertSee('<svg onload=milestone()>')
@@ -493,14 +493,14 @@ test('task directory content is escaped', function () {
 test('the task directory renders with no tasks', function () {
     $user = User::factory()->role('General Manager')->create();
 
-    Livewire::actingAs($user)->test('pages::tasks.index')->assertSee('No tasks yet');
+    Livewire::actingAs($user)->test('tracking::tasks.index')->assertSee('No tasks yet');
 });
 
 test('the cards view says nothing is open for the viewer when none of the tasks are theirs', function () {
     $user = User::factory()->role('General Manager')->create();
     Task::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::tasks.index')
+    Livewire::actingAs($user)->test('tracking::tasks.index')
         ->set('view', 'cards')
         ->assertSee('Nothing open is assigned to you.')
         ->assertDontSeeHtml('data-test="task-cards-grid"');
@@ -511,7 +511,7 @@ test('a cards view card title links to the task detail page', function () {
     $task = Task::factory()->create(['title' => 'Reconcile the ledger', 'created_by' => $user->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'cards')
         ->assertSeeHtml('href="'.route('tasks.show', $task).'"')
         ->assertSeeHtml('data-test="cards-task-title-'.$task->id.'"');
@@ -524,7 +524,7 @@ test('the cards view shows only the viewers own tasks that match the filters', f
     $someoneElsesTask = Task::factory()->create(['status' => TaskStatus::Todo]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'cards')
         ->set('status', TaskStatus::Todo->value)
         ->assertSeeHtml('data-test="task-cards-grid"')
@@ -538,14 +538,14 @@ test('toggling completion marks a task done, and a completed task cannot be un-c
     $user = User::factory()->role('General Manager')->create();
     $task = Task::factory()->create(['status' => TaskStatus::InProgress, 'progress_percentage' => 40, 'completed_date' => null]);
 
-    Livewire::actingAs($user)->test('pages::tasks.index')->call('toggleComplete', $task->id);
+    Livewire::actingAs($user)->test('tracking::tasks.index')->call('toggleComplete', $task->id);
 
     $task->refresh();
     expect($task->status)->toBe(TaskStatus::Done)
         ->and($task->progress_percentage)->toBe(100)
         ->and($task->completed_date?->toDateString())->toBe(now()->toDateString());
 
-    Livewire::actingAs($user)->test('pages::tasks.index')
+    Livewire::actingAs($user)->test('tracking::tasks.index')
         ->call('toggleComplete', $task->id)
         ->assertDispatched('toast-show');
 
@@ -559,7 +559,7 @@ test('clicking a column header sorts by it ascending, then toggles descending on
     Task::factory()->create(['title' => 'Bravo task']);
     Task::factory()->create(['title' => 'Alpha task']);
 
-    $component = Livewire::actingAs($user)->test('pages::tasks.index');
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index');
 
     $component->call('setSort', 'title')->assertSet('sortField', 'title')->assertSet('sortDirection', 'asc');
     expect($component->get('tasks')->pluck('title')->all())->toBe(['Alpha task', 'Bravo task']);
@@ -576,7 +576,7 @@ test('sorting by priority and status follows workflow severity order, not alphab
     Task::factory()->create(['title' => 'Low priority task', 'priority' => TaskPriority::Low, 'status' => TaskStatus::UnderReview]);
     Task::factory()->create(['title' => 'High priority task', 'priority' => TaskPriority::High, 'status' => TaskStatus::Todo]);
 
-    $component = Livewire::actingAs($user)->test('pages::tasks.index');
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index');
 
     $component->call('setSort', 'priority');
     expect($component->get('tasks')->pluck('title')->all())->toBe(['Low priority task', 'High priority task']);
@@ -599,7 +599,7 @@ test('sorting by assignee orders by employee name even though it lives on the re
     $amirTask->taskAssignees()->delete();
     $amirTask->taskAssignees()->create(['employee_id' => $amir]);
 
-    $component = Livewire::actingAs($user)->test('pages::tasks.index')->call('setSort', 'assignee');
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index')->call('setSort', 'assignee');
 
     expect($component->get('tasks')->pluck('title')->all())->toBe(['Amir task', 'Zoe task']);
 });
@@ -609,7 +609,7 @@ test('sorting by created date orders newest or oldest first', function () {
     Task::factory()->create(['title' => 'Older task', 'created_at' => now()->subDay()]);
     Task::factory()->create(['title' => 'Newer task', 'created_at' => now()]);
 
-    $component = Livewire::actingAs($user)->test('pages::tasks.index')->call('setSort', 'created');
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index')->call('setSort', 'created');
 
     expect($component->get('tasks')->pluck('title')->all())->toBe(['Older task', 'Newer task']);
 
@@ -621,7 +621,7 @@ test('an unrecognized sort field is ignored and leaves the current sort untouche
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('setSort', 'not-a-real-field')
         ->assertSet('sortField', 'due')
         ->assertSet('sortDirection', 'asc');
@@ -631,7 +631,7 @@ test('sorting stays server-side and correct across paginated pages', function ()
     $user = User::factory()->role('General Manager')->create();
     Task::factory()->count(25)->sequence(fn ($sequence) => ['title' => sprintf('Task %02d', $sequence->index)])->create();
 
-    $component = Livewire::actingAs($user)->test('pages::tasks.index')->call('setSort', 'title');
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index')->call('setSort', 'title');
 
     $firstPageTitles = $component->get('tasks')->pluck('title')->all();
     expect($firstPageTitles)->toBe(collect($firstPageTitles)->sort(SORT_STRING)->values()->all());
@@ -648,7 +648,7 @@ test('the list view computes stat tiles with one aggregate query instead of load
     $user = User::factory()->role('General Manager')->create();
     Task::factory()->count(10)->create();
 
-    $page = Livewire::actingAs($user)->test('pages::tasks.index');
+    $page = Livewire::actingAs($user)->test('tracking::tasks.index');
 
     DB::flushQueryLog();
     DB::enableQueryLog();
@@ -682,7 +682,7 @@ test('cards view cards visually distinguish tasks assigned to the viewer from ta
     $delegatedByMe->taskAssignees()->create(['employee_id' => insertHrEmployee(firstNameEn: 'Someone', lastNameEn: 'Else')]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'cards')
         ->assertSee('data-test="cards-task-role-assigned-'.$assignedToMe->id.'"', false)
         ->assertSee('data-test="cards-task-role-delegated-'.$delegatedByMe->id.'"', false)
@@ -697,7 +697,7 @@ test('the list view groups tasks by status with a colored collapsible header', f
     Task::factory()->create(['title' => 'Grouped done task', 'status' => TaskStatus::Done]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('group', 'status')
         ->assertSee('Grouped todo task')
@@ -712,7 +712,7 @@ test('list view group headers count every task in the group, not just the curren
     Task::factory()->count(10)->create(['priority' => TaskPriority::High]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('group', 'priority');
 
@@ -733,7 +733,7 @@ test('list view status groups follow the workflow order and stay together across
     Task::factory()->create(['status' => TaskStatus::Todo, 'due_date' => null]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('group', 'status');
 
@@ -749,7 +749,7 @@ test('list view milestone group counts are keyed like the milestone groups', fun
     Task::factory()->create(['source_type' => 'proposal', 'source_id' => Proposal::factory()->create()->id]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('group', 'milestone');
 
@@ -775,7 +775,7 @@ test('list view assignee groups keep each assignee set together and count across
     $assign(2, null);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('group', 'assignee');
 
@@ -792,14 +792,14 @@ test('quickCreateTask opens the drawer pre-filled with the title and the group c
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('quickCreateTask', '  Draft the report  ', TaskStatus::UnderReview->value, null)
         ->assertSet('showTaskDrawer', true)
         ->assertSet('title', 'Draft the report')
         ->assertSet('taskStatus', TaskStatus::UnderReview->value);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('quickCreateTask', 'Another task', null, (string) $milestone->id)
         ->assertSet('showTaskDrawer', false);
 
@@ -811,7 +811,7 @@ test('quickCreateTask does nothing for a blank title', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('quickCreateTask', '   ')
         ->assertSet('showTaskDrawer', false);
 });
@@ -822,7 +822,7 @@ test('quickCreateTask creates the task directly with no drawer when the mileston
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('quickCreateTask', '  Inline task  ', TaskStatus::InProgress->value, (string) $milestone->id)
         ->assertSet('showTaskDrawer', false);
 
@@ -840,7 +840,7 @@ test('quickCreateTask falls back to the active source filter when no milestone c
     $proposal = Proposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('sourceType', 'proposal')
         ->set('sourceId', (string) $proposal->id)
         ->call('quickCreateTask', 'Filtered task', null, null)
@@ -857,7 +857,7 @@ test('quickCreateTask falls back to the drawer when neither a milestone nor an a
     $user = User::factory()->role('General Manager')->create(['employee_id' => $employeeId]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('quickCreateTask', 'Ambiguous task')
         ->assertSet('showTaskDrawer', true)
         ->assertSet('title', 'Ambiguous task');
@@ -873,7 +873,7 @@ test('quickCreateTask files a task with no other context under the viewer\'s own
     Task::factory()->create(['status' => TaskStatus::Todo]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('group', 'status')
         ->assertSee('Department: Monitoring & Evaluation')
@@ -894,7 +894,7 @@ test('the inline row\'s more fields button opens the drawer with the typed title
     Task::factory()->create(['status' => TaskStatus::Todo]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('group', 'status')
         ->assertSeeHtml('data-test="task-quick-add-more-status-todo"')
@@ -915,7 +915,7 @@ test('a user who cannot create tasks cannot open the inline row in the drawer', 
     $viewer = User::factory()->role('Task Viewer')->create();
 
     Livewire::actingAs($viewer)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openQuickTaskInDrawer', 'Sneaky task')
         ->assertForbidden();
 });
@@ -925,7 +925,7 @@ test('quickCreateTask creates the task unassigned when the signed-in user has no
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('quickCreateTask', 'Unassigned task', null, (string) $milestone->id)
         ->assertSet('showTaskDrawer', false);
 
@@ -938,7 +938,7 @@ test('an inline add row whose assignees were all removed creates the task unassi
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('toggleTaskDraftAssignee', 'row-1', $employeeId)
         ->call('toggleTaskDraftAssignee', 'row-1', $employeeId)
         ->call('quickCreateTask', 'Nobody yet', null, (string) $milestone->id, 'row-1');
@@ -950,7 +950,7 @@ test('the shared assignee popover offers to remove every assignee', function () 
     Task::factory()->create();
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->assertSeeHtml('data-test="assignee-remove-all"')
         ->assertSee('Remove all assignees');
@@ -966,7 +966,7 @@ test('the list view inline add task row honours its own due date priority status
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('taskDrafts.row-1.due_date', '2026-11-05')
         ->set('taskDrafts.row-1.priority', TaskPriority::High->value)
         ->set('taskDrafts.row-1.status', TaskStatus::Done->value)
@@ -991,7 +991,7 @@ test('quickCreateTask falling back to the drawer carries the row draft into the 
     $user = User::factory()->role('General Manager')->create(['employee_id' => null]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('taskDrafts.row-1.due_date', '2026-12-01')
         ->set('taskDrafts.row-1.priority', TaskPriority::Low->value)
         ->set('taskDrafts.row-1.status', TaskStatus::UnderReview->value)
@@ -1011,7 +1011,7 @@ test('toggleTaskDraftAssignee toggles an employee in and out of the add-task dra
     $user = User::factory()->role('General Manager')->create();
 
     $component = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('toggleTaskDraftAssignee', 'row-1', $alice);
 
     expect(invade($component->instance())->taskDraft('row-1')['assignees'])->toBe([(string) $alice]);
@@ -1027,7 +1027,7 @@ test('quickCreateTask uses the calendar days own due date over any draft due dat
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('sourceType', 'milestone')
         ->set('sourceId', (string) $milestone->id)
         ->set('taskDrafts.calendar|2026-08-30.due_date', '2099-01-01')
@@ -1050,7 +1050,7 @@ test('addSubtaskQuick creates a subtask inheriting the parent source and assigne
     $parent->taskAssignees()->create(['employee_id' => $alice]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('addSubtaskQuick', $parent->id, '  Follow up call  ');
 
     $subtask = Task::query()->where('title', 'Follow up call')->sole();
@@ -1067,7 +1067,7 @@ test('addSubtaskQuick refuses to nest a subtask under another subtask', function
     $subtask = Task::factory()->create(['parent_task_id' => $parent->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('addSubtaskQuick', $subtask->id, 'Grandchild task');
 
     expect(Task::query()->where('title', 'Grandchild task')->exists())->toBeFalse();
@@ -1078,7 +1078,7 @@ test('addSubtaskQuick does nothing for a blank title', function () {
     $parent = Task::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('addSubtaskQuick', $parent->id, '   ');
 
     expect($parent->subtasks()->count())->toBe(0);
@@ -1091,7 +1091,7 @@ test('subtaskDraft defaults to todo medium priority no due date and the parents 
     $parent->taskAssignees()->delete();
     $parent->taskAssignees()->create(['employee_id' => $alice]);
 
-    $draft = invade(Livewire::actingAs($user)->test('pages::tasks.index')->instance())
+    $draft = invade(Livewire::actingAs($user)->test('tracking::tasks.index')->instance())
         ->subtaskDraft($parent->fresh(['taskAssignees']));
 
     expect($draft)->toBe([
@@ -1111,7 +1111,7 @@ test('the list view inline add subtask row honours its own due date priority sta
     $parent->taskAssignees()->create(['employee_id' => $alice]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set("subtaskDrafts.{$parent->id}.due_date", '2026-11-05')
         ->set("subtaskDrafts.{$parent->id}.priority", TaskPriority::High->value)
         ->set("subtaskDrafts.{$parent->id}.status", TaskStatus::Done->value)
@@ -1136,7 +1136,7 @@ test('toggleSubtaskDraftAssignee removes an employee already in the draft', func
     $parent->taskAssignees()->create(['employee_id' => $alice]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('toggleSubtaskDraftAssignee', $parent->id, $alice);
 
     expect(invade($component->instance())->subtaskDraft($parent->fresh(['taskAssignees']))['assignees'])->toBe([]);
@@ -1150,7 +1150,7 @@ test('addSubtaskQuick adds the subtask unassigned when the draft removed every a
     $parent->taskAssignees()->create(['employee_id' => $alice]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('toggleSubtaskDraftAssignee', $parent->id, $alice)
         ->call('addSubtaskQuick', $parent->id, 'Untouched assignees');
 
@@ -1164,7 +1164,7 @@ test('dropping a task into a different board column persists the status change',
     $task = Task::factory()->create(['status' => TaskStatus::Todo]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->call('quickSetStatus', $task->id, TaskStatus::InProgress->value)
         ->assertHasNoErrors()
@@ -1180,7 +1180,7 @@ test('dropping a task that no longer exists reports the failure instead of faili
     $deletedTask->delete();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->call('quickSetStatus', $deletedId, TaskStatus::Done->value)
         ->assertHasNoErrors()
@@ -1193,7 +1193,7 @@ test('each board column shows its task count and an empty column collapses to a 
     Task::factory()->create(['status' => TaskStatus::InProgress]);
 
     $html = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->assertSeeHtml('data-test="task-board-count-todo">2</span>')
         ->assertSeeHtml('data-test="task-board-count-in progress">1</span>')
@@ -1215,7 +1215,7 @@ test('every board column offers an add control that creates the task straight in
     Task::factory()->create(['status' => TaskStatus::Todo]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->assertSeeHtml('data-test="task-board-header-add-done"')
         ->assertSeeHtml('data-test="task-board-strip-add-done"')
@@ -1235,7 +1235,7 @@ test('a view-only user sees the board counts but no add task control in any colu
     Task::factory()->create(['status' => TaskStatus::Todo]);
 
     $board = Livewire::actingAs($viewer)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->assertSeeHtml('data-test="task-board-count-todo">1</span>');
 
@@ -1252,7 +1252,7 @@ test('the board view offers a keyboard accessible status menu as a non pointer a
     $task = Task::factory()->create(['status' => TaskStatus::Todo]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->assertSee('data-test="task-quick-status-'.$task->id.'"', false)
         ->assertSee("\$store.taskMenu.openFor('status', 'board-status-".$task->id."'", false)
@@ -1273,7 +1273,7 @@ test('the board view marks a todo task missed once its due date passes', functio
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->assertSee('data-test="task-board-missed-'.$missedTask->id.'"', false)
         ->assertDontSee('data-test="task-board-missed-'.$onTimeTask->id.'"', false);
@@ -1287,7 +1287,7 @@ test('the board view marks an in progress task overdue once its due date passes,
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->assertDontSee('data-test="task-board-missed-'.$task->id.'"', false);
 
@@ -1301,7 +1301,7 @@ test('the board view shows a subtask count badge on parent cards', function () {
     Task::factory()->subtaskOf($parent)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->assertSee('data-test="task-board-card-'.$parent->id.'"', false);
 });
@@ -1312,7 +1312,7 @@ test('the board view offers an inline priority flag dropdown for subtasks, like 
     $subtask = Task::factory()->subtaskOf($parent)->create(['priority' => TaskPriority::Low]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->assertSee('data-test="task-board-subtask-priority-trigger-'.$subtask->id.'"', false)
         ->assertSee("\$store.taskMenu.openFor('priority', 'board-sub-priority-".$subtask->id."'", false)
@@ -1328,7 +1328,7 @@ test('a task with subtasks cannot be deleted until they are moved or removed', f
     $subtask = Task::factory()->subtaskOf($parent)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('confirmDelete', $parent->id)
         ->call('deleteTask')
         ->assertHasNoErrors()
@@ -1343,7 +1343,7 @@ test('a task with no subtasks deletes normally', function () {
     $task = Task::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('confirmDelete', $task->id)
         ->call('deleteTask')
         ->assertHasNoErrors();
@@ -1356,7 +1356,7 @@ test('quickSetStatus moves a task and syncs its completion fields', function () 
     $task = Task::factory()->create(['status' => TaskStatus::Todo, 'completed_date' => null]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('quickSetStatus', $task->id, TaskStatus::Done->value)
         ->assertHasNoErrors();
 
@@ -1365,7 +1365,7 @@ test('quickSetStatus moves a task and syncs its completion fields', function () 
         ->and($task->completed_date)->not->toBeNull();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('quickSetStatus', $task->id, 'not-a-real-status');
 
     expect($task->refresh()->status)->toBe(TaskStatus::Done);
@@ -1376,7 +1376,7 @@ test('quickSetStatus sets the start date when a task moves into ongoing', functi
     $task = Task::factory()->create(['status' => TaskStatus::Todo, 'start_date' => null]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('quickSetStatus', $task->id, TaskStatus::InProgress->value)
         ->assertHasNoErrors();
 
@@ -1388,7 +1388,7 @@ test('quickSetStatus does not overwrite an already-recorded start date', functio
     $task = Task::factory()->create(['status' => TaskStatus::Todo, 'start_date' => '2026-01-01']);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('quickSetStatus', $task->id, TaskStatus::InProgress->value)
         ->assertHasNoErrors();
 
@@ -1400,7 +1400,7 @@ test('the stats section counts overdue and missed tasks separately and filters b
     $missedTask = Task::factory()->create(['status' => TaskStatus::Todo, 'due_date' => now()->subDay()->toDateString()]);
     Task::factory()->create(['status' => TaskStatus::InProgress, 'due_date' => now()->subDay()->toDateString()]);
 
-    $component = Livewire::actingAs($user)->test('pages::tasks.index');
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index');
 
     expect($component->get('taskStats')['overdue'])->toBe(1)
         ->and($component->get('taskStats')['missed'])->toBe(1);
@@ -1417,7 +1417,7 @@ test('pressing a headline figure filters the list but keeps every figure steady'
     Task::factory()->create(['status' => TaskStatus::Todo, 'due_date' => now()->addDays(2)->toDateString()]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('toggleDueFilter', 'overdue')
         ->assertSeeHtml('data-test="task-stat-overdue"')
         ->assertSeeHtml('aria-pressed="true"');
@@ -1433,7 +1433,7 @@ test('choosing a due filter in the bar returns the list to page one', function (
 
     Livewire::actingAs($user)
         ->withQueryParams(['view' => 'list', 'page' => 2])
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSet('paginators.page', 2)
         ->set('dueFilter', 'overdue')
         ->assertSet('paginators.page', 1);
@@ -1445,7 +1445,7 @@ test('filters kept behind the Filters button show as chips that remove them', fu
     Task::factory()->create(['title' => 'Calm one', 'priority' => TaskPriority::Low]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertDontSeeHtml('data-test="task-active-filter-chips"')
         ->set('priority', TaskPriority::High->value)
         ->assertSeeHtml('data-test="task-active-filter-priority"')
@@ -1460,7 +1460,7 @@ test('quickSetStatus refuses to change the status of a completed task', function
     $task = Task::factory()->completed()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('quickSetStatus', $task->id, TaskStatus::Todo->value)
         ->assertDispatched('toast-show');
 
@@ -1473,7 +1473,7 @@ test('the calendar view places tasks on their due date and lists unscheduled tas
     Task::factory()->create(['title' => 'Unscheduled task', 'due_date' => null]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'calendar')
         ->assertSee('Scheduled task')
         ->assertSee('Unscheduled task')
@@ -1495,7 +1495,7 @@ test('the calendar view labels a missed todo chip differently from an overdue in
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'calendar')
         ->assertSee('data-test="task-calendar-chip-badge-'.$missedTask->id.'"', false)
         ->assertSee('data-test="task-calendar-chip-badge-'.$overdueTask->id.'"', false);
@@ -1505,7 +1505,7 @@ test('the calendar view switches between day, 4-days, week and month periods', f
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'calendar')
         ->assertSet('viewMode', 'month')
         ->call('setViewMode', 'week')
@@ -1522,7 +1522,7 @@ test('the calendar view period navigation moves the anchor date in day/week/4-da
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'calendar')
         ->call('setViewMode', 'week')
         ->set('anchorDate', '2026-04-08')
@@ -1539,7 +1539,7 @@ test('a task shows on its due date in the week calendar view', function () {
     Task::factory()->create(['title' => 'Weekly task', 'due_date' => '2026-04-15']);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'calendar')
         ->call('setViewMode', 'week')
         ->set('anchorDate', '2026-04-15')
@@ -1551,26 +1551,26 @@ test('rescheduleTask sets or clears a due date from calendar drag and drop', fun
     $task = Task::factory()->create(['due_date' => null, 'created_by' => $user->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('rescheduleTask', $task->id, '2026-05-10')
         ->assertHasNoErrors();
 
     expect($task->refresh()->due_date?->toDateString())->toBe('2026-05-10');
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('rescheduleTask', $task->id, '');
 
     expect($task->refresh()->due_date)->toBeNull();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('rescheduleTask', $task->id, 'not-a-date');
 
     expect($task->refresh()->due_date)->toBeNull();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('rescheduleTask', $task->id, '2026-02-31');
 
     expect($task->refresh()->due_date)->toBeNull();
@@ -1582,7 +1582,7 @@ test('rescheduleTask refuses to change the due date for anyone but the task crea
     $task = Task::factory()->create(['due_date' => '2026-05-01', 'created_by' => $creator->id]);
 
     Livewire::actingAs($otherUser)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('rescheduleTask', $task->id, '2026-05-10')
         ->assertDispatched('toast-show');
 
@@ -1595,7 +1595,7 @@ test('a view-only user gets no calendar drag handles or drag hint, and a resched
     $task = Task::factory()->create(['title' => 'Someone else task', 'due_date' => null]);
 
     Livewire::actingAs($viewer)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'calendar')
         ->assertSee('Someone else task')
         ->assertDontSee('data-task-id="'.$task->id.'"', false)
@@ -1613,7 +1613,7 @@ test('the task creator can drag their unscheduled tasks onto the calendar', func
     $task = Task::factory()->create(['due_date' => null, 'created_by' => $user->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'calendar')
         ->assertSee('data-task-id="'.$task->id.'"', false)
         ->assertSeeHtml('data-test="task-calendar-schedule-'.$task->id.'"')
@@ -1628,7 +1628,7 @@ test('a busy calendar day shows its first chips and puts the rest behind a "+N m
     $urgent = Task::factory()->create(['due_date' => $day, 'priority' => TaskPriority::High]);
 
     $page = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'calendar')
         ->assertSeeHtml('data-test="task-calendar-more-'.$day.'"')
         ->assertSee('+4 more')
@@ -1647,7 +1647,7 @@ test('the calendar shows the visible month and every unscheduled task however la
     Task::factory()->create(['title' => 'Undated backlog task', 'due_date' => null]);
 
     $page = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'calendar')
         ->assertSee('Undated backlog task')
         ->call('nextMonth')
@@ -1662,7 +1662,7 @@ test('the default due-date sort lists unfinished tasks before done ones', functi
     Task::factory()->create(['title' => 'Undated open task', 'status' => TaskStatus::UnderReview, 'due_date' => null]);
     Task::factory()->create(['title' => 'Dated open task', 'status' => TaskStatus::Todo, 'due_date' => now()->addWeek()]);
 
-    $component = Livewire::actingAs($user)->test('pages::tasks.index')->set('view', 'list');
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index')->set('view', 'list');
 
     expect($component->instance()->tasks->getCollection()->pluck('title')->all())
         ->toBe(['Dated open task', 'Undated open task', 'Old finished task']);
@@ -1674,7 +1674,7 @@ test('a view-only user sees plain status and due date text on board cards and a 
     $task = Task::factory()->create(['status' => TaskStatus::Todo, 'due_date' => '2024-03-25']);
 
     Livewire::actingAs($viewer)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->assertDontSee('data-test="task-board-due-date-'.$task->id.'"', false)
         ->assertDontSee('data-test="task-quick-status-'.$task->id.'"', false)
@@ -1688,7 +1688,7 @@ test('the task creator keeps the editable due date on their board card and sees 
     $task = Task::factory()->create(['status' => TaskStatus::Todo, 'created_by' => $user->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->assertSee('data-test="task-board-due-date-'.$task->id.'"', false)
         ->assertDontSee('data-test="task-board-due-date-text-'.$task->id.'"', false)
@@ -1700,7 +1700,7 @@ test('the task register explains overdue and missed, and labels the related-to f
     Task::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSee('Started, past its due date')
         ->assertSee('Not started, past its due date')
         ->assertSee('Anything')
@@ -1712,7 +1712,7 @@ test('list cards show the year on a due date outside the current year', function
     $task = Task::factory()->create(['due_date' => '2024-03-25', 'created_by' => $user->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->assertSee('data-test="task-card-due-date-'.$task->id.'"', false)
         ->assertSee('Mar 25, 2024');
@@ -1723,7 +1723,7 @@ test('stat chips are only coloured when their count is above zero', function () 
     Task::factory()->create(['status' => TaskStatus::Todo, 'due_date' => now()->addMonths(2)]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertDontSeeHtml('class="dk-bad"')
         ->assertDontSeeHtml('class="dk-warn"');
 });
@@ -1735,7 +1735,7 @@ test('list cards offer the subtask toggle only when a task has subtasks', functi
     Task::factory()->subtaskOf($parent)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('listLayout', 'narrow')
         ->assertSeeHtml('data-test="task-subtasks-toggle-mobile-'.$parent->id.'"')
@@ -1749,7 +1749,7 @@ test('list rows spell out how late a task is, not only by colour', function (str
     $finished = Task::factory()->create(['status' => TaskStatus::Done, 'due_date' => today()->subDays(4)]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('listLayout', $layout)
         ->assertSeeHtml('data-test="task-missed'.$hookSuffix.'-'.$missed->id.'"')
@@ -1767,7 +1767,7 @@ test('list rows name the priority in words beside its flag', function () {
     $task = Task::factory()->create(['priority' => TaskPriority::High, 'created_by' => $user->id]);
 
     $html = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('listLayout', 'wide')
         ->html();
@@ -1783,7 +1783,7 @@ test('the table offers the subtask toggle with done-of-total only when a task ha
     Task::factory()->subtaskOf($parent)->create(['status' => TaskStatus::Todo]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('listLayout', 'wide')
         ->assertSeeHtml('data-test="task-subtasks-toggle-'.$parent->id.'"')
@@ -1805,7 +1805,7 @@ test('the scope tabs show my tasks, tasks I assigned and tasks waiting for my re
 
     $titles = fn ($component) => $component->instance()->tasks->getCollection()->pluck('title')->sort()->values()->all();
 
-    $component = Livewire::actingAs($user)->test('pages::tasks.index')->set('view', 'list')
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index')->set('view', 'list')
         ->assertSeeHtml('data-test="task-scope-tabs"')
         ->assertSeeHtml('data-test="task-scope-review-count"');
 
@@ -1821,7 +1821,7 @@ test('the assigned to me tab is empty for a user with no employee record', funct
     $user = User::factory()->role('General Manager')->create(['employee_id' => null]);
     Task::factory()->create();
 
-    $component = Livewire::actingAs($user)->test('pages::tasks.index')->set('view', 'list')->call('setScope', 'mine');
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index')->set('view', 'list')->call('setScope', 'mine');
 
     expect($component->instance()->tasks->total())->toBe(0);
 });
@@ -1830,7 +1830,7 @@ test('the show all subtasks switch drives the list and board but not the calenda
     $user = User::factory()->role('General Manager')->create();
     Task::factory()->create();
 
-    $page = Livewire::actingAs($user)->test('pages::tasks.index');
+    $page = Livewire::actingAs($user)->test('tracking::tasks.index');
 
     $page->set('view', 'list')
         ->assertSeeHtml('data-test="task-subtasks-toggle-all"')
@@ -1851,7 +1851,7 @@ test('assignee avatars on board cards and list rows name the person on hover', f
     $task->taskAssignees()->delete();
     $task->taskAssignees()->create(['employee_id' => $alice]);
 
-    $page = Livewire::actingAs($user)->test('pages::tasks.index');
+    $page = Livewire::actingAs($user)->test('tracking::tasks.index');
 
     // The board shows a person card on hover, filled from the avatar's data.
     $page->set('view', 'board')
@@ -1865,7 +1865,7 @@ test('the task form is rendered only while its drawer is open', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertDontSeeHtml('wire:model="progressPercentage"')
         ->call('openCreateDrawer')
         ->assertSeeHtml('wire:model="progressPercentage"');
@@ -1878,7 +1878,7 @@ test('opening the create drawer files the task under the viewer\'s department an
     $user = User::factory()->role('General Manager')->create(['employee_id' => $employeeId]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openCreateDrawer')
         ->assertSet('showTaskDrawer', true)
         ->assertSet('taskSourceType', 'department')
@@ -1890,7 +1890,7 @@ test('the create dialog is one screen, not a step wizard', function () {
     $user = User::factory()->role('General Manager')->create(['employee_id' => insertHrEmployee()]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('openCreateDrawer')
         ->assertSeeHtml('data-test="task-drawer-composer"')
         ->assertSeeHtml('data-test="task-drawer-title-input"')
@@ -1908,7 +1908,7 @@ test('the popover toggle actions skip the list re-render and still save', functi
 
     // Re-rendering the whole list for each click made picking assignees feel
     // slow; the popover refreshes the list once, when it closes.
-    $component = Livewire::actingAs($user)->test('pages::tasks.index')->set('view', 'list');
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index')->set('view', 'list');
     $class = get_class($component->instance());
 
     foreach (['togglePickedAssignee', 'toggleTaskDraftAssignee', 'toggleSubtaskDraftAssignee'] as $method) {
@@ -1930,7 +1930,7 @@ test('the list renders only the layout the browser reported', function (?string 
     // Rendering every task as a table row and a mobile card cost ~40% of the
     // list's server time; the browser reports its width and gets one layout.
     $html = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('listLayout', $layout)
         ->html();
@@ -1947,7 +1947,7 @@ test('only wide and narrow are accepted as a reported list layout', function () 
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('setListLayout', 'narrow')
         ->assertSet('listLayout', 'narrow')
         ->call('setListLayout', 'sideways')
@@ -1959,7 +1959,7 @@ test('status and priority menus render once per page, not once per row', functio
     Task::factory()->count(3)->create();
 
     $html = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('listLayout', 'wide')
         ->html();
@@ -1975,7 +1975,7 @@ test('the board opens the shared menu for priority instead of a dropdown per car
     $tasks = Task::factory()->count(3)->create();
 
     $html = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->html();
 
@@ -1997,7 +1997,7 @@ test('quick actions stay silent on the board, including moving a card, and still
     // A toast per pick piles up when the board is worked in bursts, and a
     // moved card already shows its new status by sitting in the new column.
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->call('quickSetPriority', $task->id, TaskPriority::High->value)
         ->call('toggleAssignee', $task->id, $bob)
@@ -2009,7 +2009,7 @@ test('quick actions stay silent on the board, including moving a card, and still
         ->and($task->taskAssignees()->count())->toBe(2);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->call('quickSetPriority', $task->id, TaskPriority::Low->value)
         ->assertDispatched('toast-show');
@@ -2020,7 +2020,7 @@ test('a refused quick action still explains itself on the board', function () {
     $task = Task::factory()->completed()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'board')
         ->call('toggleComplete', $task->id)
         ->assertDispatched('toast-show');
@@ -2030,7 +2030,7 @@ test('a long board column draws its first cards and the rest on request', functi
     $user = User::factory()->role('General Manager')->create();
     Task::factory()->count(27)->create(['status' => TaskStatus::Todo]);
 
-    $board = Livewire::actingAs($user)->test('pages::tasks.index');
+    $board = Livewire::actingAs($user)->test('tracking::tasks.index');
 
     expect(substr_count($board->html(), 'wire:key="task-board-card-'))->toBe(25);
     $board->assertSeeHtml('data-test="task-board-more-todo"')
@@ -2050,7 +2050,7 @@ test('the due today filter lists only unfinished tasks due today', function () {
 
     $titles = fn ($component) => $component->instance()->tasks->getCollection()->pluck('title')->all();
 
-    $component = Livewire::actingAs($user)->test('pages::tasks.index')->set('view', 'list')->set('dueFilter', 'due_today');
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index')->set('view', 'list')->set('dueFilter', 'due_today');
 
     expect($titles($component))->toBe(['Due today open'])
         ->and($component->get('taskStats'))->toMatchArray(['total' => 1, 'all' => 3]);
@@ -2069,7 +2069,7 @@ test('search status due filter and scope narrow the list together', function () 
     Task::factory()->create(['title' => 'Venue booking mine', 'created_by' => $user->id, ...$overdue]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'list')
         ->set('search', '  budget  ')
         ->set('status', TaskStatus::InProgress->value)
@@ -2083,7 +2083,7 @@ test('the Filters badge counts only the popover filters that apply', function ()
     $user = User::factory()->role('General Manager')->create();
     $milestone = Milestone::factory()->create();
 
-    $component = Livewire::actingAs($user)->test('pages::tasks.index');
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index');
     $count = fn () => $component->instance()->activeAdvancedFilterCount();
 
     expect($count())->toBe(0);
@@ -2102,7 +2102,7 @@ test('the Filters badge counts only the popover filters that apply', function ()
     expect($count())->toBe(5);
 
     $scopedUser = User::factory()->role('Team Member')->create();
-    $scoped = Livewire::actingAs($scopedUser)->test('pages::tasks.index')->set('departmentId', '3');
+    $scoped = Livewire::actingAs($scopedUser)->test('tracking::tasks.index')->set('departmentId', '3');
 
     expect($scoped->instance()->activeAdvancedFilterCount())->toBe(0);
 });
@@ -2110,7 +2110,7 @@ test('the Filters badge counts only the popover filters that apply', function ()
 test('the scope tab and a blank search are not active filters', function () {
     $user = User::factory()->role('General Manager')->create();
 
-    $component = Livewire::actingAs($user)->test('pages::tasks.index')->call('setScope', 'mine')->set('search', '   ');
+    $component = Livewire::actingAs($user)->test('tracking::tasks.index')->call('setScope', 'mine')->set('search', '   ');
 
     expect($component->instance()->hasActiveFilters())->toBeFalse();
 
@@ -2123,7 +2123,7 @@ test('clearing the filters keeps the scope tab and the calendar period', functio
     $user = User::factory()->role('General Manager')->create();
 
     $component = Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('view', 'calendar')
         ->call('setScope', 'assigned')
         ->set('viewMode', 'week')
@@ -2145,7 +2145,7 @@ test('the popover Clear resets only the Filters popover filters', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('search', 'report')
         ->set('dueFilter', 'overdue')
         ->set('priority', TaskPriority::High->value)
@@ -2161,7 +2161,7 @@ test('an empty scope tab offers to show all tasks instead of adding the first on
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->call('setScope', 'review')
         ->assertSee(__('tasks.empty_scope_heading'))
         ->assertSeeHtml('data-test="task-empty-show-all"');

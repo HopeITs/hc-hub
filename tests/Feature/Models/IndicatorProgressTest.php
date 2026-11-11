@@ -1,11 +1,11 @@
 <?php
 
-use App\Enums\Period;
-use App\Enums\RagStatus;
-use App\Models\Indicator;
-use App\Models\IndicatorProgress;
-use App\Models\Project;
-use App\Models\User;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\Period;
+use Modules\Tracking\Enums\RagStatus;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\IndicatorProgress;
+use Modules\Tracking\Models\Project;
 
 test('an indicator reports its readings oldest first', function () {
     $indicator = Indicator::factory()->create();

@@ -1,14 +1,14 @@
 <?php
 
-use App\Enums\IndicatorMeasure;
-use App\Models\AnnualPlan;
-use App\Models\Indicator;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Result;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
 
 test('a target planned in a annual plan resolves that plan as its source', function () {
     $plan = AnnualPlan::factory()->create();

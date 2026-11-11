@@ -6,7 +6,6 @@ namespace App\Actions\Desk;
 
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
-use App\Models\User;
 use App\Notifications\ActivityRecorder;
 use App\Notifications\AppNotification;
 use App\Notifications\EmployeeRecipients;
@@ -16,6 +15,7 @@ use App\Notifications\RecipientFilter;
 use App\Notifications\TracksActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
+use Modules\Core\Models\User;
 
 /**
  * A Desk poke (shown as "Poke"; the class and events keep the old nudge

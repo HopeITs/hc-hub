@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Models\User;
 use App\Models\UserNotification;
+use Modules\Core\Models\User;
 
 /**
  * Which records have unread notifications for a user, for the dots on list

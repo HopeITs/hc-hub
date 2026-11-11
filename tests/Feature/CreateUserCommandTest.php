@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Role;
-use App\Models\User;
+use Modules\Core\Models\User;
 
 test('the command gives an hr account access with the given role', function () {
     Role::findOrCreate('MEAL', 'web');

@@ -6,7 +6,6 @@ namespace App\Console\Commands;
 
 use App\Exceptions\FileStorageNotConfigured;
 use App\Exceptions\UnreadableStoredFile;
-use App\Models\Account;
 use App\Models\Activity;
 use App\Support\FileKeyring;
 use App\Support\StoredFiles;
@@ -19,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Fortify;
+use Modules\Tracking\Models\Account;
 use RuntimeException;
 use stdClass;
 use Throwable;

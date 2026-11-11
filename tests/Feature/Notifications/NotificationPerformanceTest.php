@@ -3,12 +3,12 @@
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\User;
 use App\Notifications\AppNotification;
 use App\Notifications\NotificationPayload;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 function fillInbox(User $user, int $count): void
 {

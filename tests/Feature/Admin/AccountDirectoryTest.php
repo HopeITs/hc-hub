@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Account;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\TransfersTracking;
 
 test('guests are redirected from the account directory', function () {
     $this->get(route('admin.accounts.index'))->assertRedirect(route('login'));
@@ -17,7 +17,7 @@ test('accounts can be filtered by open and closed state', function () {
     Account::factory()->create(['account_name' => 'Legacy EUR', 'is_active' => false, 'closed_at' => '2026-01-31']);
 
     Livewire::actingAs($user)
-        ->test('pages::admin.accounts')
+        ->test('tracking::admin.accounts')
         ->assertSee('Operations USD')
         ->assertSee('Legacy EUR')
         ->set('state', 'active')
@@ -33,7 +33,7 @@ test('an account can be opened', function () {
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::admin.accounts')
+        ->test('tracking::admin.accounts')
         ->call('openCreateModal')
         ->set('accountName', '  Reserve SYP  ')
         ->set('bankName', 'Fransbank')
@@ -55,7 +55,7 @@ test('an account can be opened with no known opening date', function () {
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::admin.accounts')
+        ->test('tracking::admin.accounts')
         ->call('openCreateModal')
         ->set('accountName', 'Cash Account')
         ->set('bankName', 'Cash')
@@ -74,7 +74,7 @@ test('opening an account requires the core banking fields', function () {
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::admin.accounts')
+        ->test('tracking::admin.accounts')
         ->call('openCreateModal')
         ->set('accountName', '')
         ->set('bankName', '')
@@ -89,7 +89,7 @@ test('closing an account sets both the flag and the date together', function () 
     $account = Account::factory()->create(['is_active' => true]);
 
     Livewire::actingAs($user)
-        ->test('pages::admin.accounts')
+        ->test('tracking::admin.accounts')
         ->call('confirmClose', $account->id)
         ->call('closeAccount')
         ->assertHasNoErrors();
@@ -105,7 +105,7 @@ test('accounts offer no delete because transfers restrict it', function () {
     $account = Account::factory()->create();
     TransfersTracking::factory()->create(['account_id' => $account->id]);
 
-    $component = Livewire::actingAs($user)->test('pages::admin.accounts');
+    $component = Livewire::actingAs($user)->test('tracking::admin.accounts');
 
     $component->assertDontSee('wire:click="confirmDelete');
 
@@ -116,7 +116,7 @@ test('accounts offer no delete because transfers restrict it', function () {
 test('the account directory renders with no accounts', function () {
     $user = User::factory()->role('Financial')->create();
 
-    Livewire::actingAs($user)->test('pages::admin.accounts')->assertSee('No accounts yet');
+    Livewire::actingAs($user)->test('tracking::admin.accounts')->assertSee('No accounts yet');
 });
 
 test('accounts can be searched by part of their encrypted account number', function () {
@@ -126,7 +126,7 @@ test('accounts can be searched by part of their encrypted account number', funct
     Account::factory()->create(['account_name' => 'Legacy EUR', 'bank_name' => 'Bank Audi', 'account_number' => '4040Z06926201']);
 
     Livewire::actingAs($user)
-        ->test('pages::admin.accounts')
+        ->test('tracking::admin.accounts')
         ->set('search', 'nra2010004')
         ->assertSee('Operations USD')
         ->assertDontSee('Legacy EUR')
@@ -142,7 +142,7 @@ test('the directory finds an account by the last four characters of its number',
     Account::factory()->create(['account_name' => 'Ends Other', 'account_number' => '5550001234']);
 
     Livewire::actingAs($user)
-        ->test('pages::admin.accounts')
+        ->test('tracking::admin.accounts')
         ->set('search', '0311')
         ->assertSee('Ends Eleven')
         ->assertDontSee('Ends Other')
@@ -155,7 +155,7 @@ test('the account form is rendered only while its modal is open', function () {
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::admin.accounts')
+        ->test('tracking::admin.accounts')
         ->assertDontSeeHtml('wire:model="accountNumber"')
         ->call('openCreateModal')
         ->assertSeeHtml('wire:model="accountNumber"');

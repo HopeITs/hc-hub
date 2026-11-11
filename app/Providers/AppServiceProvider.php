@@ -5,46 +5,19 @@ namespace App\Providers;
 use App\Actions\Fortify\DisableTwoFactorAuthenticationUnlessRequired;
 use App\Enums\Locale;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
-use App\Models\Account;
-use App\Models\AnnualPlan;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
 use App\Models\HrDepartment;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\MealCoverageAssignment;
-use App\Models\Milestone;
-use App\Models\MonthlyReport;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\ProgramRequest;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalLocation;
-use App\Models\ProposalStatusNote;
-use App\Models\Report;
-use App\Models\ReportTemplate;
-use App\Models\Result;
-use App\Models\Risk;
-use App\Models\RiskLibrary;
 use App\Models\Role;
-use App\Models\StrategicPillar;
-use App\Models\Strategy;
-use App\Models\Supervision;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use App\Notifications\Alerts\NotificationSettings;
+use App\Policies\UserPolicy;
 use App\Support\Desk\Destinations;
 use App\Support\Desk\PageCards;
 use App\Support\Desk\Panels;
 use App\Support\Desk\Shortcuts;
 use App\Support\RouteSlugs;
-use App\Support\SupervisionMap;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\DevCommands;
@@ -55,6 +28,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
@@ -64,6 +38,35 @@ use Illuminate\Validation\Rules\Password;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
 use Livewire\Component;
 use Livewire\Livewire;
+use LogicException;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\ProgramRequest;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
+use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\RiskLibrary;
+use Modules\Tracking\Models\StrategicPillar;
+use Modules\Tracking\Models\Strategy;
+use Modules\Tracking\Models\Supervision;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -77,7 +80,6 @@ class AppServiceProvider extends ServiceProvider
         // One instance per request or job, so queue workers never hold stale values.
         $this->app->scoped(NotificationSettings::class);
         $this->app->scoped(RouteSlugs::class);
-        $this->app->scoped(SupervisionMap::class);
         // The Desk's catalogues are asked many times per page (sidebar, Ask, cards, tabs, drops): built once per request.
         $this->app->scoped(Destinations::class);
         $this->app->scoped(Panels::class);
@@ -154,6 +156,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureFactories();
+        $this->configurePolicies();
         $this->configureHttps();
         $this->configureMorphMap();
         $this->configureLivewire();
@@ -347,6 +351,46 @@ class AppServiceProvider extends ServiceProvider
             'proposal_location' => ProposalLocation::class,
             'program_request' => ProgramRequest::class,
         ]);
+    }
+
+    /**
+     * Models live in app/Models, modules/Core/Models and
+     * modules/Tracking/Models, while every factory stays in
+     * database/factories. Laravel only guesses names for App\Models, so both
+     * directions are resolved by class basename here.
+     */
+    protected function configureFactories(): void
+    {
+        Factory::guessFactoryNamesUsing(function (string $modelName): string {
+            $factory = 'Database\\Factories\\'.class_basename($modelName).'Factory';
+
+            if (! is_a($factory, Factory::class, true)) {
+                throw new LogicException("No factory [{$factory}] for [{$modelName}].");
+            }
+
+            return $factory;
+        });
+
+        Factory::guessModelNamesUsing(function (Factory $factory): string {
+            $model = substr(class_basename($factory), 0, -strlen('Factory'));
+
+            foreach (['App\\Models\\', 'Modules\\Core\\Models\\', 'Modules\\Tracking\\Models\\'] as $namespace) {
+                if (is_a($namespace.$model, Model::class, true)) {
+                    return $namespace.$model;
+                }
+            }
+
+            throw new LogicException("No model [{$model}] for [".$factory::class.'].');
+        });
+    }
+
+    /**
+     * User moved to Modules\Core\Models, where Laravel's policy guess no
+     * longer finds App\Policies\UserPolicy.
+     */
+    protected function configurePolicies(): void
+    {
+        Gate::policy(User::class, UserPolicy::class);
     }
 
     /**

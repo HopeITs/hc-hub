@@ -6,10 +6,10 @@ namespace App\Console\Commands;
 
 use App\Models\HrUser;
 use App\Models\Role;
-use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Modules\Core\Models\User;
 
 use function Laravel\Prompts\select;
 use function Laravel\Prompts\text;

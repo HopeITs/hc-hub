@@ -1,12 +1,12 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Notifications\Alerts\WorkingCalendar;
 use Carbon\CarbonImmutable;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 use function Livewire\invade;
 

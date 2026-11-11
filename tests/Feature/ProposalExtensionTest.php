@@ -1,24 +1,8 @@
 <?php
 
-use App\Actions\Proposals\ExtendProposal;
 use App\Enums\MediaCollection;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
-use App\Enums\ReportTemplateLineStatus;
-use App\Enums\StatusNoteKind;
-use App\Events\ProjectPeriodChanged;
 use App\Models\Activity;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
 use App\Models\Media;
-use App\Models\MonthlyReport;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalStatusNote;
-use App\Models\ReportTemplate;
-use App\Models\ReportTemplateLine;
-use App\Models\User;
 use App\Models\UserNotification;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RolesAndPermissionsSeeder;
@@ -27,6 +11,22 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\ExtendProposal;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ReportTemplateLineStatus;
+use Modules\Tracking\Enums\StatusNoteKind;
+use Modules\Tracking\Events\ProjectPeriodChanged;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\ReportTemplateLine;
 
 beforeEach(function () {
     $this->travelTo('2026-10-14 10:00:00');
@@ -277,13 +277,13 @@ test('the owners of the linked projects hear of the extension, with dates and na
 
 test('the Extend action shows only on an active proposal, for someone who may update it', function () {
     Livewire::actingAs($this->user)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->assertSeeHtml('data-test="open-extension-modal"');
 
     $member = User::factory()->role('Team Member')->create();
 
     Livewire::actingAs($member)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->assertDontSeeHtml('data-test="open-extension-modal"')
         ->call('saveExtension')
         ->assertForbidden();
@@ -292,7 +292,7 @@ test('the Extend action shows only on an active proposal, for someone who may up
     $this->proposal->forceFill(['status' => ProposalStatus::Approved])->save();
 
     Livewire::actingAs($this->user)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->assertDontSeeHtml('data-test="open-extension-modal"');
 });
 
@@ -300,7 +300,7 @@ test('the page extends the proposal and shows the new end beside the original wi
     extLinkedProject(ProjectStatus::Active);
 
     Livewire::actingAs($this->user)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->call('openExtensionModal')
         ->assertSet('showExtensionModal', true)
         ->set('extensionDateEnd', '2028-03-31')
@@ -319,7 +319,7 @@ test('the page extends the proposal and shows the new end beside the original wi
 
 test('the page shows the validation message next to the field', function () {
     Livewire::actingAs($this->user)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->call('openExtensionModal')
         ->set('extensionDateEnd', '2027-06-30')
         ->set('extensionReason', 'The donor approved six more months.')
@@ -330,19 +330,19 @@ test('the page shows the validation message next to the field', function () {
 
 test('?extend=1 opens the dialog only for someone who may extend an active proposal', function () {
     Livewire::withQueryParams(['extend' => '1'])->actingAs($this->user)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->assertSet('showExtensionModal', true)
         ->assertSet('extendLink', false);
 
     $member = User::factory()->role('Team Member')->create();
 
     Livewire::withQueryParams(['extend' => '1'])->actingAs($member)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->assertSet('showExtensionModal', false);
 
     $this->proposal->forceFill(['status' => ProposalStatus::Submitted])->save();
 
     Livewire::withQueryParams(['extend' => '1'])->actingAs($this->user)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->assertSet('showExtensionModal', false);
 });

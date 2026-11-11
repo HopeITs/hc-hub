@@ -1,11 +1,11 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Models\Account;
-use App\Models\DonorProposal;
-use App\Models\TransfersTracking;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 test('a tranche resolves the transfers_tracking table', function () {
     expect((new TransfersTracking)->getTable())->toBe('transfers_tracking');

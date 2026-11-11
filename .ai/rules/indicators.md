@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/pages/indicators/**'
+  - 'modules/Tracking/resources/views/pages/indicators/**'
 ---
 
 # Indicators

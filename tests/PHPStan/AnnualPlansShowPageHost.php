@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\AnnualPlans\ReadsAnnualPlanSummary;
-use App\Livewire\Concerns\Results\FiltersResultsChain;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\AnnualPlans\ReadsAnnualPlanSummary;
+use Modules\Tracking\Livewire\Concerns\Results\FiltersResultsChain;
 
 /**
  * Stands in for annual-plans/show, with every trait that page uses.

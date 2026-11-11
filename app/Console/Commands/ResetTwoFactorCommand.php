@@ -6,12 +6,12 @@ namespace App\Console\Commands;
 
 use App\Actions\Fortify\TrustedDevices;
 use App\Models\HrUser;
-use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
+use Modules\Core\Models\User;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\text;

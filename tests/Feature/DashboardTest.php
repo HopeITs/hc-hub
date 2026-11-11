@@ -1,18 +1,18 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Enums\ProposalStatus;
-use App\Enums\TaskStatus;
-use App\Models\DonorProposal;
-use App\Models\Milestone;
-use App\Models\Proposal;
-use App\Models\Risk;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use App\Support\Desk\Panels;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->travelTo('2026-09-15 09:00:00');

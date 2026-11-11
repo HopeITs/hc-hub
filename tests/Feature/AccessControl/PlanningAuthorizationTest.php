@@ -1,22 +1,22 @@
 <?php
 
-use App\Models\AnnualPlan;
-use App\Models\Program;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\AnnualPlan;
 
 beforeEach(function () {
     $this->program = Program::factory()->create();
     $this->plan = AnnualPlan::factory()->create(['program_id' => $this->program->id]);
-    $this->plans = fn (User $user) => Livewire::actingAs($user)->test('pages::annual-plans.index');
+    $this->plans = fn (User $user) => Livewire::actingAs($user)->test('tracking::annual-plans.index');
 });
 
 test('a Team Member cannot edit a program; Managers can', function () {
-    Livewire::actingAs(userWithRole('Team Member'))->test('pages::programs.show', ['program' => $this->program])
+    Livewire::actingAs(userWithRole('Team Member'))->test('tracking::programs.show', ['program' => $this->program])
         ->call('openLinkModal')
         ->assertForbidden();
 
-    Livewire::actingAs(userWithRole('Managers'))->test('pages::programs.show', ['program' => $this->program])
+    Livewire::actingAs(userWithRole('Managers'))->test('tracking::programs.show', ['program' => $this->program])
         ->call('openLinkModal')
         ->assertOk();
 });

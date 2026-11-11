@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\ChecksFinanceVisibility;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\ChecksFinanceVisibility;
 
 /**
  * Stands in for the calendar, donors, projects/show, proposals (index and

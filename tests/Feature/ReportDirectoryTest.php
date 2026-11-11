@@ -1,21 +1,21 @@
 <?php
 
-use App\Enums\IndicatorMeasure;
-use App\Enums\ReportStatus;
 use App\Models\Activity;
-use App\Models\AnnualPlan;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\MonthlyReport;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\ReportFile;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportFile;
 
 test('guests are redirected from the report directory', function () {
     $this->get(route('reports.index'))->assertRedirect(route('login'));
@@ -28,7 +28,7 @@ test('reports can be filtered by status and meal visibility', function () {
     Report::factory()->create(['value' => '222222.00', 'status' => ReportStatus::Draft, 'is_seen_by_meal' => false]);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->assertSee('111,111')
         ->assertSee('222,222')
         ->set('status', 'approved')
@@ -52,7 +52,7 @@ test('a report records its author from the authenticated user', function () {
     ]);
 
     Livewire::actingAs($author)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openCreateModal')
         ->set('reportTargetId', (string) $target->id)
         ->set('plannedDate', '2026-03-31')
@@ -75,7 +75,7 @@ test('creating a report persists the narrative sections and period window', func
     ]);
 
     Livewire::actingAs($author)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openCreateModal')
         ->set('reportTargetId', (string) $target->id)
         ->set('plannedDate', '2026-03-31')
@@ -103,7 +103,7 @@ test('creating a report requires a target a planned date and a value', function 
     $user = User::factory()->role('Media Team')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openCreateModal')
         ->set('reportTargetId', '')
         ->set('plannedDate', '')
@@ -121,12 +121,12 @@ test('editing a report does not change its recorded author', function () {
 
     // Only the author edits a draft; anyone else is refused outright.
     Livewire::actingAs($editor)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openEditModal', $report->id)
         ->assertForbidden();
 
     Livewire::actingAs($author)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openEditModal', $report->id)
         ->set('value', '200.00')
         ->call('saveReport')
@@ -142,7 +142,7 @@ test('editing an approved report is refused', function () {
     $report = Report::factory()->approved()->create(['value' => '100.00']);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openEditModal', $report->id)
         ->assertSet('editingReportId', null)
         ->assertSet('showReportModal', false);
@@ -158,7 +158,7 @@ test('editing a reviewed report is refused', function () {
     $report = Report::factory()->reviewed()->create(['value' => '100.00']);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openEditModal', $report->id)
         ->assertSet('editingReportId', null)
         ->assertSet('showReportModal', false);
@@ -174,7 +174,7 @@ test('saving an edit to a report that was approved meanwhile is refused', functi
     $report = Report::factory()->create(['value' => '100.00', 'user_id' => $user->id]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openEditModal', $report->id)
         ->set('value', '999.00');
 
@@ -196,7 +196,7 @@ test('a report value that would overflow the decimal column is rejected', functi
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openCreateModal')
         ->set('reportTargetId', (string) $target->id)
         ->set('plannedDate', '2026-03-31')
@@ -213,7 +213,7 @@ test('a narrative window end before its start is rejected', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openCreateModal')
         ->set('reportTargetId', (string) $target->id)
         ->set('plannedDate', '2026-03-31')
@@ -232,7 +232,7 @@ test('narrative sections are trimmed and blank narrative sections are stored as 
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openCreateModal')
         ->set('reportTargetId', (string) $target->id)
         ->set('plannedDate', '2026-03-31')
@@ -254,7 +254,7 @@ test('only a draft report offers delete', function () {
     $approved = Report::factory()->approved()->create(['user_id' => $user->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->assertSeeHtml('data-test="delete-report-'.$draft->id.'"')
         ->assertDontSeeHtml('data-test="delete-report-'.$approved->id.'"');
 });
@@ -262,7 +262,7 @@ test('only a draft report offers delete', function () {
 test('the report directory renders with no reports', function () {
     $user = User::factory()->role('Media Team')->create();
 
-    Livewire::actingAs($user)->test('pages::reports.index')->assertSee('No reports yet');
+    Livewire::actingAs($user)->test('tracking::reports.index')->assertSee('No reports yet');
 });
 
 test('the targets page can open the form already tied to a target, and a draft can be opened for editing', function () {
@@ -273,7 +273,7 @@ test('the targets page can open the form already tied to a target, and a draft c
 
     Livewire::actingAs($user)
         ->withQueryParams(['create' => 1, 'target' => $target->id])
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->assertSet('showReportModal', true)
         ->assertSet('reportTargetId', (string) $target->id)
         ->assertSeeHtml('report-form-modal')
@@ -283,7 +283,7 @@ test('the targets page can open the form already tied to a target, and a draft c
 
     Livewire::actingAs($user)
         ->withQueryParams(['edit' => $draft->id])
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->assertSet('editingReportId', $draft->id);
 });
 
@@ -296,7 +296,7 @@ test('two targets on one indicator can be told apart in the form, and a target w
     $orphan = PlanIndicator::factory()->forAnnualPlan($orphanPlan)->create();
     DB::table('annual_plans')->where('id', $orphanPlan->id)->delete();
 
-    $options = collect(Livewire::actingAs($user)->test('pages::reports.index')->instance()->targetOptions())->keyBy('id');
+    $options = collect(Livewire::actingAs($user)->test('tracking::reports.index')->instance()->targetOptions())->keyBy('id');
 
     expect($options[$plan->id]['label'])->toContain('Latrines built')->toContain('Annual plan 2026')
         ->and($options[$proposal->id]['label'])->toContain('Latrines built')->toContain('WASH Response')
@@ -312,7 +312,7 @@ test('a figure must fall inside the plan year or proposal period it was committe
 
     foreach ([[$planTarget, '2025-12-31'], [$proposalTarget, '2026-02-01']] as [$target, $outside]) {
         Livewire::actingAs($user)
-            ->test('pages::reports.index')
+            ->test('tracking::reports.index')
             ->call('openCreateModal', $target->id)
             ->set('plannedDate', $outside)
             ->set('value', '10')
@@ -331,7 +331,7 @@ test('a percentage report cannot exceed 100', function () {
         ->create(['target' => 80]);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openCreateModal', $target->id)
         ->set('plannedDate', '2026-06-30')
         ->set('value', '120')
@@ -344,7 +344,7 @@ test('the form never writes a submit date: only submitting for review does', fun
     $target = PlanIndicator::factory()->forAnnualPlan(AnnualPlan::factory()->create(['year' => 2026]))->create();
 
     $component = Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openCreateModal', $target->id)
         ->set('plannedDate', '2026-06-30')
         ->set('value', '10')
@@ -364,7 +364,7 @@ test('a draft report can be deleted with its files, and an approved one cannot',
     $approved = Report::factory()->approved()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('confirmDeleteReport', $draft->id)
         ->assertSet('showDeleteReportModal', true)
         ->call('deleteReport')
@@ -383,7 +383,7 @@ test('a row shows its target achievement from approved reports only', function (
     Report::factory()->approved()->for($target)->create(['value' => 100]);
     Report::factory()->for($target)->create(['value' => 300]);
 
-    $component = Livewire::actingAs($user)->test('pages::reports.index');
+    $component = Livewire::actingAs($user)->test('tracking::reports.index');
 
     $component->assertSee('target 25% achieved')->assertDontSee('target 75% achieved');
 
@@ -398,7 +398,7 @@ test('reports can be narrowed to overdue drafts, a project and a single target',
     $onTime = Report::factory()->create(['planned_date' => now()->addMonth()->toDateString(), 'value' => 222]);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('toggleOverdue')
         ->assertSee('111')
         ->assertDontSee(route('reports.show', $onTime))
@@ -416,7 +416,7 @@ test('the report form is rendered only while its modal is open', function () {
     $user = User::factory()->role('Media Team')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->assertDontSeeHtml('wire:model="keyAchievements"')
         ->call('openCreateModal')
         ->assertSeeHtml('wire:model="keyAchievements"');
@@ -430,7 +430,7 @@ test('a monthly report mirror row links to its monthly report and offers no edit
     ]));
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->assertSeeText(__('reports.monthly_report_chip'))
         ->assertSeeHtml(route('monthly-reports.show', $mirror->monthlyReport))
         ->assertDontSeeHtml('wire:click="openEditModal('.$mirror->id.')"')
@@ -456,7 +456,7 @@ test('a ratio indicator takes numerator and denominator, and the server computes
     $target = ratioTarget();
 
     Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openCreateModal', $target->id)
         ->assertSeeText('Passed the test')
         ->assertSeeText('Took the test')
@@ -479,7 +479,7 @@ test('an average indicator stores the plain ratio', function () {
     $target = ratioTarget(IndicatorMeasure::Average);
 
     Livewire::actingAs(User::factory()->role('Media Team')->create())
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openCreateModal', $target->id)
         ->set('plannedDate', '2026-06-30')
         ->set('numerator', '45')
@@ -494,7 +494,7 @@ test('a ratio report rejects a zero denominator and a numerator above the denomi
     $user = User::factory()->role('Media Team')->create();
     $target = ratioTarget();
     $form = fn (string $numerator, string $denominator) => Livewire::actingAs($user)
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->call('openCreateModal', $target->id)
         ->set('plannedDate', '2026-06-30')
         ->set('numerator', $numerator)

@@ -1,12 +1,12 @@
 <?php
 
-use App\Models\AnnualPlan;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Strategy;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Strategy;
 
 /**
  * Create a program a plan can be written against.
@@ -25,7 +25,7 @@ test('a plan is created from the matrix', function () {
     $manager = insertHrEmployee(firstNameEn: 'Layla', lastNameEn: 'Haddad');
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->call('openCreateModal')
         ->set('planProgramId', (string) $program->id)
         ->set('planManagerId', (string) $manager)
@@ -47,7 +47,7 @@ test('clicking an empty cell carries its program and fiscal year into the form',
     AnnualPlan::factory()->create(['program_id' => $shelter->id, 'year' => 2025]);
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->call('openCreateModal', $water->id, 2025)
         ->assertSet('showPlanModal', true)
         ->assertSet('planProgramId', (string) $water->id)
@@ -62,7 +62,7 @@ test('a program cannot hold two plans for the same fiscal year', function () {
     AnnualPlan::factory()->create(['program_id' => $program->id, 'year' => 2025]);
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->call('openCreateModal')
         ->set('planProgramId', (string) $program->id)
         ->set('planManagerId', (string) $manager)
@@ -80,7 +80,7 @@ test('a plan keeps its own year when it is edited', function () {
     $replacement = insertHrEmployee(firstNameEn: 'Nour', lastNameEn: 'Saleh');
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->call('openEditModal', $plan->id)
         ->assertSet('planYear', '2025')
         ->set('planManagerId', (string) $replacement)
@@ -96,7 +96,7 @@ test('the program and the manager are both required', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->call('openCreateModal')
         ->set('planYear', '2027')
         ->call('savePlan')
@@ -111,7 +111,7 @@ test('deleting a plan from the matrix takes the targets committed in it', functi
     $target = PlanIndicator::factory()->forAnnualPlan($plan)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->call('confirmDelete', $plan->id)
         ->assertSet('deletingPlanId', $plan->id)
         // The dialog is bound with wire:model, so the flag it reads has to be
@@ -132,7 +132,7 @@ test('dismissing the delete confirmation leaves the plan alone', function () {
     $plan = AnnualPlan::factory()->create(['program_id' => $program->id, 'year' => 2025]);
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->call('confirmDelete', $plan->id)
         ->call('cancelDelete')
         ->assertSet('deletingPlanId', null)
@@ -150,7 +150,7 @@ test('the matrix redraws itself after a write in the same request', function () 
     AnnualPlan::factory()->create(['program_id' => $program->id, 'year' => 2027]);
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->assertSee('Water Security, 2026, no plan')
         ->call('openCreateModal', $program->id, 2026)
         ->set('planManagerId', (string) $manager)
@@ -163,7 +163,7 @@ test('the fiscal year list reaches next year without a plan existing for it', fu
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->call('openCreateModal')
         ->assertSee((string) (now()->year + 1));
 });
@@ -175,7 +175,7 @@ test('the plan detail page edits the manager and the fiscal year', function () {
     $replacement = insertHrEmployee(firstNameEn: 'Nour', lastNameEn: 'Saleh');
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.show', ['annualPlan' => $plan])
+        ->test('tracking::annual-plans.show', ['annualPlan' => $plan])
         ->call('openEditModal')
         ->assertSet('planYear', '2025')
         ->set('planYear', '2026')
@@ -195,7 +195,7 @@ test('the plan detail page refuses a fiscal year the program already covers', fu
     AnnualPlan::factory()->create(['program_id' => $program->id, 'year' => 2026]);
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.show', ['annualPlan' => $plan])
+        ->test('tracking::annual-plans.show', ['annualPlan' => $plan])
         ->call('openEditModal')
         ->set('planYear', '2026')
         ->call('savePlan')
@@ -210,7 +210,7 @@ test('deleting a plan from its detail page returns to the matrix', function () {
     $plan = AnnualPlan::factory()->create(['program_id' => $program->id, 'year' => 2025]);
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.show', ['annualPlan' => $plan])
+        ->test('tracking::annual-plans.show', ['annualPlan' => $plan])
         ->call('deletePlan')
         ->assertRedirect(route('annual-plans.index'));
 
@@ -231,7 +231,7 @@ test('the create and delete controls cost the matrix no extra read of annual_pla
     DB::flushQueryLog();
     DB::enableQueryLog();
 
-    Livewire::actingAs($user)->test('pages::annual-plans.index');
+    Livewire::actingAs($user)->test('tracking::annual-plans.index');
 
     $planQueries = collect(DB::getQueryLog())
         ->filter(fn (array $query): bool => str_contains($query['query'], 'annual_plans'));
@@ -256,7 +256,7 @@ test('editing a plan keeps the reader on the page of programs they were reading'
     $replacement = insertHrEmployee(firstNameEn: 'Nour', lastNameEn: 'Saleh');
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->set('paginators.page', 2)
         ->call('openEditModal', $plan->id)
         ->set('planManagerId', (string) $replacement)
@@ -275,7 +275,7 @@ test('a plan written outside the visible span opens the year window onto it', fu
     AnnualPlan::factory()->create(['program_id' => $anchor->id, 'year' => 2025]);
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->call('toggleYear', 2023)
         ->call('openCreateModal')
         ->set('planProgramId', (string) $program->id)
@@ -298,7 +298,7 @@ test('a plan written inside the visible span leaves the filters untouched', func
     AnnualPlan::factory()->create(['program_id' => $program->id, 'year' => 2025]);
 
     Livewire::actingAs($user)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->call('toggleYear', 2025)
         ->call('openCreateModal', $other->id, 2025)
         ->set('planManagerId', (string) $manager)

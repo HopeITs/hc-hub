@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportReopenRequest;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportReopenRequest;
 
 /**
  * @extends Factory<MonthlyReportReopenRequest>

@@ -3,11 +3,11 @@
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\AppNotification;
 use App\Notifications\NotificationPayload;
 use App\Notifications\NotificationPresenter;
+use Modules\Core\Models\User;
 
 function desktopAppNotification(User $user): UserNotification
 {

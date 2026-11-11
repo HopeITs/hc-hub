@@ -1,45 +1,45 @@
 <?php
 
-use App\Enums\ActivityKind;
-use App\Enums\ActivityStatus;
-use App\Enums\CollectionFrequency;
-use App\Enums\DenominatorBasis;
-use App\Enums\DonorAttribution;
-use App\Enums\IndicatorCollector;
-use App\Enums\IndicatorMeasure;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\NarrativeQuestionFrequency;
-use App\Enums\ProposalStatus;
-use App\Enums\ReopenRequestStatus;
-use App\Enums\ResultType;
 use App\Models\Activity;
-use App\Models\ActivitySchedule;
-use App\Models\Donor;
-use App\Models\EvidenceType;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\MealCoverageAssignment;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportActivityEntry;
-use App\Models\MonthlyReportAnswer;
-use App\Models\MonthlyReportFile;
-use App\Models\MonthlyReportLine;
-use App\Models\MonthlyReportLineShare;
-use App\Models\MonthlyReportReopenRequest;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\ProjectActivityStatus;
-use App\Models\Proposal;
-use App\Models\ReportTemplate;
-use App\Models\ReportTemplateLine;
-use App\Models\ReportTemplateQuestion;
-use App\Models\Result;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ActivityKind;
+use Modules\Tracking\Enums\ActivityStatus;
+use Modules\Tracking\Enums\CollectionFrequency;
+use Modules\Tracking\Enums\DenominatorBasis;
+use Modules\Tracking\Enums\DonorAttribution;
+use Modules\Tracking\Enums\IndicatorCollector;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\NarrativeQuestionFrequency;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ReopenRequestStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\ActivitySchedule;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\EvidenceType;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportActivityEntry;
+use Modules\Tracking\Models\MonthlyReportAnswer;
+use Modules\Tracking\Models\MonthlyReportFile;
+use Modules\Tracking\Models\MonthlyReportLine;
+use Modules\Tracking\Models\MonthlyReportLineShare;
+use Modules\Tracking\Models\MonthlyReportReopenRequest;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ProjectActivityStatus;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Models\ReportTemplateQuestion;
+use Modules\Tracking\Models\Result;
 
 /*
 | The Monthly Report page (T17B slice 1; contracts §13, §13.1 items 2, 6, 7
@@ -120,7 +120,7 @@ function mrsLine(MonthlyReport $report, array $library = [], array $shareDenomin
 
 function mrsPage(MonthlyReport $report, ?User $as = null): mixed
 {
-    return Livewire::actingAs($as ?? test()->owner)->test('pages::monthly-reports.show', ['monthlyReport' => $report->fresh()]);
+    return Livewire::actingAs($as ?? test()->owner)->test('tracking::monthly-reports.show', ['monthlyReport' => $report->fresh()]);
 }
 
 function mrsToast(string $text): Closure

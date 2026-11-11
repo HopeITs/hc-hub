@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Support/AgreementMoney.php,app/Support/Tranches.php,app/Models/TransfersTracking.php}'
+  - '{modules/Tracking/Support/AgreementMoney.php,modules/Tracking/Support/Tranches.php,modules/Tracking/Models/TransfersTracking.php}'
 ---
 
 # Support Models

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\ManagesAgreementForm;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\ManagesAgreementForm;
 
 /**
  * Stands in for the pages that record a funding agreement.

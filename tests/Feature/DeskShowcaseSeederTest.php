@@ -1,13 +1,13 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\Project;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\DeskShowcaseSeeder;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 test('the showcase seeder fills the empty desk cards once and records no activity', function () {
     $this->seed(RolesAndPermissionsSeeder::class);

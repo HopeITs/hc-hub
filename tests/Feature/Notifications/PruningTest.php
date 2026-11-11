@@ -1,10 +1,10 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Str;
+use Modules\Core\Models\User;
 
 function storedNotification(User $user, ?string $readAt): UserNotification
 {

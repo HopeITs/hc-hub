@@ -1,11 +1,12 @@
 ---
 paths:
   - 'app/Models/**'
-  - app/Models/Account.php
+  - 'modules/*/Models/**'
+  - modules/Tracking/Models/Account.php
   - 'app/Models/Hr*.php'
-  - app/Models/Program.php
-  - app/Models/User.php
-  - app/Models/Task.php
+  - modules/Core/Models/Program.php
+  - modules/Core/Models/User.php
+  - modules/Tracking/Models/Task.php
 ---
 
 # Models

@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\Core\Models\User;
 
 test('a project is stored against its city, program and user', function () {
     $user = User::factory()->create();

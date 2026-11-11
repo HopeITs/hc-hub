@@ -2,23 +2,23 @@
 
 namespace Database\Seeders;
 
-use App\Enums\ArStatus;
-use App\Enums\MilestoneStatus;
-use App\Enums\ProposalStatus;
-use App\Enums\TaskPriority;
-use App\Enums\TaskStatus;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Risk;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use App\Models\UserNotification;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\TaskPriority;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * Demo notifications for looking at the inbox, bell, badges and activity log.

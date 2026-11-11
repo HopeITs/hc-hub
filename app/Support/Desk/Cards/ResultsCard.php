@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Support\Desk\Cards;
 
-use App\Enums\ResultType;
-use App\Models\Result;
-use App\Models\User;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Result;
 
 /**
  * The programs' results framework in card form: how many results sit at each

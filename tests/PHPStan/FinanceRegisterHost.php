@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\FiltersFinanceRegister;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\FiltersFinanceRegister;
 
 /**
  * Stands in for the finance registers: accounts, donors, funding agreements, proposals and transfers.

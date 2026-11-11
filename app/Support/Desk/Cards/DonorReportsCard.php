@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Support\Desk\Cards;
 
-use App\Enums\DonorReportState;
-use App\Models\DonorReport;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\DonorReportState;
+use Modules\Tracking\Models\DonorReport;
 
 /**
  * Donor reports in card form: what is late, what falls due next and what

@@ -2,7 +2,7 @@
 
 {{--
     The removable "Strategy: …" chip a register shows while it is narrowed to
-    one strategy (App\Livewire\Concerns\FiltersByStrategy). Nothing renders
+    one strategy (Modules\Tracking\Livewire\Concerns\FiltersByStrategy). Nothing renders
     when no strategy filter applies.
 --}}
 @if ($strategy !== null)

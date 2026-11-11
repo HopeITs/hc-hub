@@ -1,20 +1,20 @@
 <?php
 
 use App\Enums\MediaCollection;
-use App\Enums\ProjectStatus;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Project;
 
 beforeEach(function () {
     Storage::fake('local');
     $this->ownerEmployee = insertHrEmployee();
     $this->owner = userWithRole('Team Member', $this->ownerEmployee);
     $this->project = Project::factory()->create(['user_id' => $this->ownerEmployee]);
-    $this->show = fn (User $user) => Livewire::actingAs($user)->test('pages::projects.show', ['project' => $this->project]);
-    $this->index = fn (User $user) => Livewire::actingAs($user)->test('pages::projects.index');
+    $this->show = fn (User $user) => Livewire::actingAs($user)->test('tracking::projects.show', ['project' => $this->project]);
+    $this->index = fn (User $user) => Livewire::actingAs($user)->test('tracking::projects.index');
 });
 
 test('a Team Member cannot edit someone else\'s project or file on it', function () {

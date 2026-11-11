@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{resources/views/pages/transfers/**,resources/views/pages/funding-agreements/**,resources/views/pages/donors/**,resources/views/pages/proposals/**,resources/views/pages/admin/⚡accounts.blade.php}'
+  - '{modules/Tracking/resources/views/pages/transfers/**,modules/Tracking/resources/views/pages/funding-agreements/**,modules/Tracking/resources/views/pages/donors/**,modules/Tracking/resources/views/pages/proposals/**,modules/Tracking/resources/views/pages/admin/⚡accounts.blade.php}'
 ---
 
 # Admin

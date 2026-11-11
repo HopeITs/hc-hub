@@ -1,13 +1,13 @@
 <?php
 
-use App\Actions\Projects\CloseProject;
-use App\Enums\ProjectStatus;
 use App\Models\Activity;
-use App\Models\Program;
-use App\Models\Project;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Actions\Projects\CloseProject;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Project;
 
 beforeEach(function () {
     $this->ownerEmployee = insertHrEmployee();
@@ -20,7 +20,7 @@ beforeEach(function () {
     ]);
     auth()->logout();
 
-    $this->close = fn ($user) => Livewire::actingAs($user)->test('pages::projects.show', ['project' => $this->project]);
+    $this->close = fn ($user) => Livewire::actingAs($user)->test('tracking::projects.show', ['project' => $this->project]);
 });
 
 test('a projects.update holder and the owner close an active project, keeping its dates', function (string $who) {

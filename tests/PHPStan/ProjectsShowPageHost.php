@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\ChecksFinanceVisibility;
-use App\Livewire\Concerns\Projects\ArchivesProjects;
-use App\Livewire\Concerns\Projects\ManagesProjectAssignment;
-use App\Livewire\Concerns\Projects\ManagesProjectFiles;
-use App\Livewire\Concerns\Projects\ManagesProjectForm;
-use App\Livewire\Concerns\Projects\ManagesReportTemplate;
-use App\Livewire\Concerns\Projects\ReadsProjectDelivery;
-use App\Livewire\Concerns\Projects\ReadsProjectFunding;
-use App\Livewire\Concerns\Projects\ReadsProjectStory;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Modules\Tracking\Livewire\Concerns\ChecksFinanceVisibility;
+use Modules\Tracking\Livewire\Concerns\Projects\ArchivesProjects;
+use Modules\Tracking\Livewire\Concerns\Projects\ManagesProjectAssignment;
+use Modules\Tracking\Livewire\Concerns\Projects\ManagesProjectFiles;
+use Modules\Tracking\Livewire\Concerns\Projects\ManagesProjectForm;
+use Modules\Tracking\Livewire\Concerns\Projects\ManagesReportTemplate;
+use Modules\Tracking\Livewire\Concerns\Projects\ReadsProjectDelivery;
+use Modules\Tracking\Livewire\Concerns\Projects\ReadsProjectFunding;
+use Modules\Tracking\Livewire\Concerns\Projects\ReadsProjectStory;
 
 /**
  * Stands in for projects/show, with every trait that page gained when it was

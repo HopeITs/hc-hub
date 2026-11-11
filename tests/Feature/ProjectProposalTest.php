@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\Project;
-use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
 
 /**
  * Link a project to a proposal.

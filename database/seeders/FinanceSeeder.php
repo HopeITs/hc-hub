@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Enums\DonorReportType;
-use App\Enums\ProposalStatus;
-use App\Enums\ReviewStage;
-use App\Models\Account;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Proposal;
-use App\Models\ProposalReviewer;
-use App\Models\ProposalStatusNote;
-use App\Models\TransfersTracking;
 use Illuminate\Database\Seeder;
+use Modules\Tracking\Enums\DonorReportType;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ReviewStage;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalReviewer;
+use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * The finance layer: bank accounts, payment tranches, the reports owed to

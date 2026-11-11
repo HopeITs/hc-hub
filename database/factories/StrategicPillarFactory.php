@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\StrategicPillar;
-use App\Models\Strategy;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\StrategicPillar;
+use Modules\Tracking\Models\Strategy;
 
 /**
  * `sort_order` carries a database default, so the definition leaves it to the

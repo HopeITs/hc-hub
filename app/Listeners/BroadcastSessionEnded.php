@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Events\SessionEnded;
-use App\Models\User;
 use Illuminate\Auth\Events\CurrentDeviceLogout;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\OtherDeviceLogout;
+use Modules\Core\Models\User;
 use Throwable;
 
 /**

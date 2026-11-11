@@ -3,8 +3,8 @@
 use App\Livewire\Concerns\Admin\ManagesRoles;
 use App\Livewire\Concerns\Admin\ManagesUserAccess;
 use App\Models\Role;
-use App\Models\Supervision;
-use App\Models\User;
+use Modules\Tracking\Models\Supervision;
+use Modules\Core\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -103,7 +103,7 @@ new #[Layout('layouts::desk'), Title('titles.user_directory')] class extends Com
 
     <x-slot:actions>
         @if ($activeTab === 'users')
-            @can('create', App\Models\User::class)
+            @can('create', Modules\Core\Models\User::class)
                 <x-ui.button tone="primary" icon="plus" class="min-h-11 max-sm:h-11!" wire:click="openCreateModal" data-test="create-user-button" data-quick-create>{{ __('users.add_user') }}</x-ui.button>
             @endcan
         @endif

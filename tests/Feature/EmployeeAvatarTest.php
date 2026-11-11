@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\HrEmployee;
-use App\Models\User;
 use Illuminate\Support\Facades\Storage;
+use Modules\Core\Models\User;
 
 test('guests cannot fetch an employee photo', function () {
     $employee = insertHrEmployee();

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Listeners;
 
 use App\Actions\Fortify\RecognisedBrowsers;
-use App\Models\User;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Http\Request;
+use Modules\Core\Models\User;
 use Throwable;
 
 /**

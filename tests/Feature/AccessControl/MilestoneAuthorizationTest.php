@@ -1,17 +1,17 @@
 <?php
 
-use App\Enums\MilestoneStatus;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
 
 beforeEach(function () {
     $this->ownerEmployee = insertHrEmployee();
     $this->owner = userWithRole('Team Member', $this->ownerEmployee);
     $this->ownProject = Project::factory()->create(['user_id' => $this->ownerEmployee]);
     $this->otherProject = Project::factory()->create();
-    $this->index = fn (User $user) => Livewire::actingAs($user)->test('pages::milestones.index');
+    $this->index = fn (User $user) => Livewire::actingAs($user)->test('tracking::milestones.index');
     $this->fillForm = fn ($page, Project $project, string $name) => $page
         ->set('milestoneProjectId', (string) $project->id)
         ->set('name', $name)
@@ -51,7 +51,7 @@ test('the responsible person moves status but cannot rename the milestone', func
 
     expect($milestone->fresh()->status)->toBe(MilestoneStatus::Ongoing);
 
-    Livewire::actingAs($responsible)->test('pages::milestones.show', ['milestone' => $milestone])
+    Livewire::actingAs($responsible)->test('tracking::milestones.show', ['milestone' => $milestone])
         ->set('name', 'Renamed by responsible')
         ->call('updateMilestone');
 

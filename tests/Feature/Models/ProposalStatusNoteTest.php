@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Proposal;
-use App\Models\ProposalStatusNote;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
 
 test('a status note belongs to a proposal', function () {
     $proposal = Proposal::factory()->create();

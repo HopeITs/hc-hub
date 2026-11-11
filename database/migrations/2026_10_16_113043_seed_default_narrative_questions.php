@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use App\Support\DefaultNarrativeQuestions;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\Tracking\Support\DefaultNarrativeQuestions;
 
 /**
  * The starting narrative question bank, created here as well as in the

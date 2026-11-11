@@ -1,7 +1,7 @@
 @props(['groups', 'format'])
 
 @php
-    use App\Enums\ResultType;
+    use Modules\Tracking\Enums\ResultType;
 
     $mark = fn (ResultType $type): string => match ($type) {
         ResultType::Impact => 'bg-secondary-dark ring-secondary-dark dark:bg-ink dark:ring-ink',

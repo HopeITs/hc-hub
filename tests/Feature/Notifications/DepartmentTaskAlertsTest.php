@@ -1,25 +1,25 @@
 <?php
 
-use App\Actions\Tasks\DeliverDepartmentTask;
-use App\Actions\Tasks\ReturnDepartmentTask;
-use App\Actions\Tasks\SaveDepartmentTask;
-use App\Enums\DeliverableKind;
-use App\Enums\DeliveryState;
-use App\Enums\ProposalStatus;
-use App\Enums\TaskKind;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\DeadlineCatalog;
-use App\Notifications\Alerts\DueSoonScanner;
 use App\Notifications\Alerts\NotificationSettings;
-use App\Notifications\Alerts\OverdueScanner;
 use Carbon\CarbonImmutable;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Tasks\DeliverDepartmentTask;
+use Modules\Tracking\Actions\Tasks\ReturnDepartmentTask;
+use Modules\Tracking\Actions\Tasks\SaveDepartmentTask;
+use Modules\Tracking\Enums\DeliverableKind;
+use Modules\Tracking\Enums\DeliveryState;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\TaskKind;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Notifications\Alerts\DueSoonScanner;
+use Modules\Tracking\Notifications\Alerts\OverdueScanner;
 
 /*
  * Department tasks in the deadline scanners (T31, D-33, contracts §15.2):

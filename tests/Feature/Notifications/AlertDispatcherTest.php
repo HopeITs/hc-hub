@@ -3,13 +3,13 @@
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
 use App\Models\NotificationMute;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\AlertDispatcher;
 use App\Notifications\Alerts\AlertLedger;
 use App\Notifications\Alerts\DeadlineItem;
 use App\Notifications\NotificationPayload;
 use Carbon\CarbonImmutable;
+use Modules\Core\Models\User;
 
 function alertPayload(): NotificationPayload
 {

@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\Program;
-use App\Models\Strategy;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\Strategy;
 
 test('a strategy has the programs delivered under it', function () {
     $strategy = Strategy::factory()->create();

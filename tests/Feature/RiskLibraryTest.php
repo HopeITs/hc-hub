@@ -1,21 +1,21 @@
 <?php
 
-use App\Actions\RiskLibrary\DeactivateRiskLibraryEntry;
-use App\Actions\RiskLibrary\DeleteRiskLibraryEntry;
-use App\Actions\RiskLibrary\MoveRiskLibraryEntry;
-use App\Actions\RiskLibrary\ReactivateRiskLibraryEntry;
-use App\Actions\RiskLibrary\SaveRiskLibraryEntry;
-use App\Models\Proposal;
-use App\Models\Result;
-use App\Models\Risk;
-use App\Models\RiskLibrary;
-use App\Models\User;
-use App\Support\DefaultRiskLibrary;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\RiskLibrary\DeactivateRiskLibraryEntry;
+use Modules\Tracking\Actions\RiskLibrary\DeleteRiskLibraryEntry;
+use Modules\Tracking\Actions\RiskLibrary\MoveRiskLibraryEntry;
+use Modules\Tracking\Actions\RiskLibrary\ReactivateRiskLibraryEntry;
+use Modules\Tracking\Actions\RiskLibrary\SaveRiskLibraryEntry;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\RiskLibrary;
+use Modules\Tracking\Support\DefaultRiskLibrary;
 
 /**
  * A library entry some proposal's risk was picked from.
@@ -84,13 +84,13 @@ describe('the page', function () {
     });
 
     it('explains an empty library and offers the create button', function () {
-        Livewire::actingAs(mealManager())->test('pages::admin.risk-library')
+        Livewire::actingAs(mealManager())->test('tracking::admin.risk-library')
             ->assertSee(__('risk_library.empty_heading'))
             ->assertSeeHtml('data-test="empty-create-risk-library-entry"');
     });
 
     it('creates and edits an entry from the dialog', function () {
-        $component = Livewire::actingAs(mealManager())->test('pages::admin.risk-library')
+        $component = Livewire::actingAs(mealManager())->test('tracking::admin.risk-library')
             ->call('openCreateModal')
             ->assertSet('showEntryModal', true)
             ->set('titleEn', 'Funding delay')
@@ -119,7 +119,7 @@ describe('the page', function () {
     it('shows field errors for a missing title, a duplicate title and an out-of-range rating', function () {
         RiskLibrary::factory()->create(['title_en' => 'Funding delay']);
 
-        Livewire::actingAs(mealManager())->test('pages::admin.risk-library')
+        Livewire::actingAs(mealManager())->test('tracking::admin.risk-library')
             ->call('openCreateModal')
             ->set('titleEn', '  ')
             ->set('titleAr', '')
@@ -138,13 +138,13 @@ describe('the page', function () {
     });
 
     it('does not even mount for a role that cannot manage the library or a MEAL user without the slot', function (string $role) {
-        Livewire::actingAs(userWithRole($role, insertHrEmployee(firstNameEn: 'Omar', lastNameEn: 'Officer')))->test('pages::admin.risk-library')->assertForbidden();
+        Livewire::actingAs(userWithRole($role, insertHrEmployee(firstNameEn: 'Omar', lastNameEn: 'Officer')))->test('tracking::admin.risk-library')->assertForbidden();
     })->with(['Team Member', 'Financial', 'Public Relations Manager', 'MEAL']);
 
     it('explains in the delete dialog that a used entry is deactivated instead', function () {
         $entry = usedRiskLibraryEntry();
 
-        Livewire::actingAs(libraryManager('General Manager'))->test('pages::admin.risk-library')
+        Livewire::actingAs(libraryManager('General Manager'))->test('tracking::admin.risk-library')
             ->call('confirmDelete', $entry->id)
             ->assertSet('showDeleteModal', true)
             ->assertSet('deletingEntryInUse', true)
@@ -159,7 +159,7 @@ describe('the page', function () {
         $first = RiskLibrary::factory()->create(['title_en' => 'First', 'sort_order' => 1]);
         $second = RiskLibrary::factory()->create(['title_en' => 'Second', 'sort_order' => 2]);
 
-        Livewire::actingAs(mealManager())->test('pages::admin.risk-library')
+        Livewire::actingAs(mealManager())->test('tracking::admin.risk-library')
             ->call('moveEntry', $second->id, 'up')
             ->assertSet('announcement', __('risk_library.moved_to', ['name' => 'Second', 'position' => 1, 'total' => 2]));
 

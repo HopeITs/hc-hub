@@ -1,29 +1,29 @@
 <?php
 
-use App\Enums\AssignmentStatus;
-use App\Enums\CollectionFrequency;
-use App\Enums\DenominatorBasis;
-use App\Enums\LineSchedule;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
-use App\Enums\ReportTemplateLineStatus;
-use App\Enums\ReportTemplateStatus;
 use App\Models\Activity;
-use App\Models\EvidenceType;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\MealCoverageAssignment;
-use App\Models\MonthlyReport;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ReportTemplate;
-use App\Models\ReportTemplateLine;
-use App\Models\ReportTemplateQuestion;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\AssignmentStatus;
+use Modules\Tracking\Enums\CollectionFrequency;
+use Modules\Tracking\Enums\DenominatorBasis;
+use Modules\Tracking\Enums\LineSchedule;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ReportTemplateLineStatus;
+use Modules\Tracking\Enums\ReportTemplateStatus;
+use Modules\Tracking\Models\EvidenceType;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Models\ReportTemplateQuestion;
 
 /*
 | The "Report template" tab on projects/show (contracts.md §12.4, T33 slice 3):
@@ -100,7 +100,7 @@ function rtpResponsibleOfficer(Project $project): User
 
 function rtpPage(User $user, Project $project): Testable
 {
-    return Livewire::actingAs($user)->withQueryParams(['tab' => 'template'])->test('pages::projects.show', ['project' => $project]);
+    return Livewire::actingAs($user)->withQueryParams(['tab' => 'template'])->test('tracking::projects.show', ['project' => $project]);
 }
 
 test('the responsible officer and the MEAL Manager see the lines grouped by proposal, with edit and confirm controls', function (string $who) {

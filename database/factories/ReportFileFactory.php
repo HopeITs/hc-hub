@@ -3,9 +3,9 @@
 namespace Database\Factories;
 
 use App\Enums\FileType;
-use App\Models\Report;
-use App\Models\ReportFile;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportFile;
 
 /**
  * @extends Factory<ReportFile>

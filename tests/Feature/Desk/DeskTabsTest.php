@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use App\Support\Desk\DeskTab;
+use Modules\Core\Models\User;
 
 test('a page opened in a desk tab is drawn without its own frame', function () {
     $user = User::factory()->role('MEAL')->create();

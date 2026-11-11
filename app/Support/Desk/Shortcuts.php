@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
-use App\Models\EvidenceType;
-use App\Models\NarrativeQuestion;
-use App\Models\RiskLibrary;
-use App\Models\Sector;
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\EvidenceType;
+use Modules\Tracking\Models\NarrativeQuestion;
+use Modules\Tracking\Models\RiskLibrary;
+use Modules\Tracking\Models\Sector;
 
 /**
  * The Desk's buttons: every "New …" action and every page, each one a small

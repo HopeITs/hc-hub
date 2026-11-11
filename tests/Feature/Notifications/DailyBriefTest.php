@@ -1,10 +1,10 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\Task;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\DailyBriefScanner;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Models\Task;
 
 test('the daily brief counts my due, overdue and new assignments and goes once a day', function () {
     $me = userWithRole('Managers', insertHrEmployee());

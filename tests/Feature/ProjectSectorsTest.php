@@ -1,16 +1,16 @@
 <?php
 
-use App\Actions\Projects\SaveProject;
-use App\Actions\Projects\SyncProjectSectors;
 use App\Models\Activity;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Sector;
-use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Projects\SaveProject;
+use Modules\Tracking\Actions\Projects\SyncProjectSectors;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Sector;
 
 /**
  * The sector ids linked to a project, read straight from the pivot.
@@ -129,7 +129,7 @@ describe('the project form', function () {
     });
 
     it('creates a project with its sectors', function () {
-        Livewire::actingAs($this->user)->test('pages::projects.index')
+        Livewire::actingAs($this->user)->test('tracking::projects.index')
             ->call('openCreateModal')
             ->assertSeeHtml('data-test="sector-picker"')
             ->set(($this->form)(['sectorIds' => [(string) $this->health->id]]))
@@ -144,7 +144,7 @@ describe('the project form', function () {
 
         expect($prManager->can('projects.update'))->toBeFalse();
 
-        Livewire::actingAs($prManager)->test('pages::projects.index')
+        Livewire::actingAs($prManager)->test('tracking::projects.index')
             ->call('openCreateModal')
             ->set(($this->form)(['sectorIds' => [(string) $this->health->id]]))
             ->call('saveProject')
@@ -154,7 +154,7 @@ describe('the project form', function () {
     });
 
     it('refuses a new project without a sector and creates nothing', function () {
-        Livewire::actingAs($this->user)->test('pages::projects.index')
+        Livewire::actingAs($this->user)->test('tracking::projects.index')
             ->call('openCreateModal')
             ->set(($this->form)())
             ->call('saveProject')
@@ -166,7 +166,7 @@ describe('the project form', function () {
     });
 
     it('reports a missing sector together with the other field errors', function () {
-        Livewire::actingAs($this->user)->test('pages::projects.index')
+        Livewire::actingAs($this->user)->test('tracking::projects.index')
             ->call('openCreateModal')
             ->set(($this->form)(['programId' => '']))
             ->call('saveProject')
@@ -198,7 +198,7 @@ describe('the project form', function () {
         $withSector = Project::factory()->create(['program_id' => Program::factory()->create(['manager_id' => $this->owner])->id, 'user_id' => $this->owner]);
         $withSector->sectors()->attach($this->health->id);
 
-        Livewire::actingAs($this->user)->test('pages::projects.index')
+        Livewire::actingAs($this->user)->test('tracking::projects.index')
             ->call('openEditModal', $withSector->id)
             ->assertSet('sectorIds', [(string) $this->health->id])
             ->call('openEditModal', $legacy->id)
@@ -217,7 +217,7 @@ describe('the project form', function () {
         $project = Project::factory()->create(['center_id' => $this->centerId, 'city_id' => $this->cityId, 'program_id' => $this->program->id, 'user_id' => $this->owner]);
         $project->sectors()->attach($retired->id);
 
-        Livewire::actingAs($this->user)->test('pages::projects.index')
+        Livewire::actingAs($this->user)->test('tracking::projects.index')
             ->call('openEditModal', $project->id)
             ->assertSeeHtml('data-picker-sector="'.$this->health->id.'"')
             ->assertSeeHtml('data-picker-sector="'.$retired->id.'"')
@@ -248,7 +248,7 @@ describe('display', function () {
         $clinic->sectors()->attach($health->id);
         $wells->sectors()->attach($wash->id);
 
-        Livewire::actingAs(userWithRole('General Manager'))->test('pages::projects.index')
+        Livewire::actingAs(userWithRole('General Manager'))->test('tracking::projects.index')
             ->set('view', 'list')
             ->assertSee('Clinic project')
             ->assertSee('Wells project')
@@ -273,7 +273,7 @@ describe('display', function () {
                 $queries++;
             });
 
-            Livewire::actingAs($user)->test('pages::projects.index')->set('view', 'list');
+            Livewire::actingAs($user)->test('tracking::projects.index')->set('view', 'list');
 
             return $queries;
         };

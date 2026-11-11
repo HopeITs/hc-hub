@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Indicator;
-use App\Models\IndicatorProgress;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\IndicatorProgress;
 
 /**
  * @extends Factory<IndicatorProgress>

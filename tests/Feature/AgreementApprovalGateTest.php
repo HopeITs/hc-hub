@@ -1,15 +1,15 @@
 <?php
 
-use App\Actions\FundingAgreements\SaveFundingAgreement;
-use App\Enums\Currency;
-use App\Enums\ProposalStatus;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Proposal;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\FundingAgreements\SaveFundingAgreement;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Proposal;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -26,7 +26,7 @@ function donorApprovedProposal(array $attributes = []): Proposal
 function recordAgreementOn(User $user, Proposal $proposal, string $budget = '1000.00', string $currency = 'USD')
 {
     return Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementCreate')
         ->set('agreementProposalId', (string) $proposal->id)
         ->set('budget', $budget)
@@ -133,7 +133,7 @@ test('a proposal page files the agreement for its own proposal whatever the payl
     $other = donorApprovedProposal();
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $own])
+        ->test('tracking::proposals.show', ['proposal' => $own])
         ->call('openAgreementCreate')
         ->set('agreementProposalId', (string) $other->id)
         ->set('budget', '500')
@@ -150,7 +150,7 @@ test('a donor page refuses a proposal of another donor', function () {
     $foreign = donorApprovedProposal();
 
     Livewire::actingAs($user)
-        ->test('pages::donors.show', ['donor' => $donor])
+        ->test('tracking::donors.show', ['donor' => $donor])
         ->call('openAgreementCreate')
         ->set('agreementProposalId', (string) $foreign->id)
         ->set('budget', '500')
@@ -168,7 +168,7 @@ test('the picker lists only eligible proposals and carries no money', function (
     Proposal::factory()->create(['name' => 'Still A Concept']);
 
     $options = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementCreate')
         ->instance()
         ->proposalOptions;
@@ -182,7 +182,7 @@ test('a user without funding-agreements.create cannot open or save the form', fu
     $viewer = User::factory()->role('Managers')->create()->givePermissionTo('funding-agreements.view');
     $proposal = donorApprovedProposal();
 
-    $fresh = fn () => Livewire::actingAs($viewer)->test('pages::funding-agreements.index');
+    $fresh = fn () => Livewire::actingAs($viewer)->test('tracking::funding-agreements.index');
 
     $fresh()->call('openAgreementCreate')->assertForbidden();
     $fresh()->set('agreementProposalId', (string) $proposal->id)->set('budget', '10')->call('saveAgreement')->assertForbidden();
@@ -197,7 +197,7 @@ test('a legacy agreement on a non-approved proposal can still be edited and show
     expect($agreement->proposal->status->isApprovedByDonor())->toBeFalse();
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementEdit', $agreement->id)
         ->assertSeeHtml('data-agreement-proposal-warning')
         ->assertSee(__('funding_agreements.proposal_status_inconsistent_with_agreement'))
@@ -213,7 +213,7 @@ test('choosing a proposal pre-fills the requested budget and currency', function
     $proposal = donorApprovedProposal(['requested_budget' => '12000.50', 'requested_currency' => Currency::Eur]);
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementCreate')
         ->set('agreementProposalId', (string) $proposal->id)
         ->assertSet('budget', '12000.50')
@@ -228,14 +228,14 @@ test('the Public Relations Manager can record and edit an agreement but not dele
     $agreement = DonorProposal::query()->sole();
 
     Livewire::actingAs($manager)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementEdit', $agreement->id)
         ->set('budget', '2000.00')
         ->call('saveAgreement')
         ->assertHasNoErrors();
 
     Livewire::actingAs($manager)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openAgreementEdit', $agreement->id)
         ->call('deleteAgreement')
         ->assertForbidden();
@@ -245,7 +245,7 @@ test('the Public Relations Manager can record and edit an agreement but not dele
 
 test('the Record Agreement button shows only for a donor-approved proposal without one, to a holder of create', function () {
     $proposal = donorApprovedProposal();
-    $page = fn (User $user) => Livewire::actingAs($user)->test('pages::proposals.show', ['proposal' => $proposal]);
+    $page = fn (User $user) => Livewire::actingAs($user)->test('tracking::proposals.show', ['proposal' => $proposal]);
 
     $page(User::factory()->role('Financial')->create())->assertSeeHtml('data-test="record-agreement-button"');
     $page(User::factory()->role('Media Team')->create())->assertDontSeeHtml('data-test="record-agreement-button"');
@@ -254,7 +254,7 @@ test('the Record Agreement button shows only for a donor-approved proposal witho
     $page(User::factory()->role('Financial')->create())->assertDontSeeHtml('data-test="record-agreement-button"');
 
     $concept = Proposal::factory()->create();
-    Livewire::actingAs(User::factory()->role('Financial')->create())->test('pages::proposals.show', ['proposal' => $concept])
+    Livewire::actingAs(User::factory()->role('Financial')->create())->test('tracking::proposals.show', ['proposal' => $concept])
         ->assertDontSeeHtml('data-test="record-agreement-button"');
 });
 
@@ -263,7 +263,7 @@ test('the notification deep link opens the agreement form once, pre-filled, and 
     $proposal = donorApprovedProposal(['requested_budget' => '800.00', 'requested_currency' => Currency::Eur]);
 
     Livewire::withQueryParams(['record_agreement' => '1'])->actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertSet('showAgreementModal', true)
         ->assertSet('budget', '800.00')
         ->assertSet('agreementCurrency', 'EUR')
@@ -272,7 +272,7 @@ test('the notification deep link opens the agreement form once, pre-filled, and 
     DonorProposal::factory()->create(['proposal_id' => $proposal->id]);
 
     Livewire::withQueryParams(['record_agreement' => '1'])->actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertSet('showAgreementModal', false);
 });
 
@@ -280,10 +280,10 @@ test('a proposal moved away from approved after its agreement was recorded warns
     $user = User::factory()->role('Financial')->create();
     $agreement = DonorProposal::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::proposals.show', ['proposal' => $agreement->proposal])
+    Livewire::actingAs($user)->test('tracking::proposals.show', ['proposal' => $agreement->proposal])
         ->assertSee(__('funding_agreements.proposal_status_inconsistent_with_agreement'));
 
-    Livewire::actingAs($user)->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+    Livewire::actingAs($user)->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->assertSee(__('funding_agreements.proposal_status_inconsistent_with_agreement'));
 });
 

@@ -1,20 +1,20 @@
 <?php
 
-use App\Actions\DonorReports\ComposeDonorReport;
-use App\Actions\DonorReports\RegenerateDonorReport;
-use App\Actions\DonorReports\SaveDonorReportSnapshot;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ReportingPeriod;
-use App\Enums\ReportStatus;
 use App\Models\Activity;
-use App\Models\DonorReport;
-use App\Models\LibraryIndicator;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\DonorReports\ComposeDonorReport;
+use Modules\Tracking\Actions\DonorReports\RegenerateDonorReport;
+use Modules\Tracking\Actions\DonorReports\SaveDonorReportSnapshot;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ReportingPeriod;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
 
 /*
 | Composing, saving and regenerating a donor report (contracts §14.3; D-27a,

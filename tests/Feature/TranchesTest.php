@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Models\TransfersTracking;
-use App\Support\Tranches;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Models\TransfersTracking;
+use Modules\Tracking\Support\Tranches;
 
 beforeEach(fn () => $this->travelTo('2026-06-15 09:00:00'));
 

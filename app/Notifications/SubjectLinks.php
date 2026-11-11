@@ -4,21 +4,21 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Models\AnnualPlan;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Milestone;
-use App\Models\MonthlyReport;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Strategy;
-use App\Models\Task;
 use App\Models\UserNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Strategy;
+use Modules\Tracking\Models\Task;
 
 /**
  * Where a notification or activity row leads. Returns null when the record

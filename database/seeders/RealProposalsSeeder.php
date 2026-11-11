@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Enums\ProposalStatus;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalStatusNote;
 use Illuminate\Database\Seeder;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
 use RuntimeException;
 
 /**

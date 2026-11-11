@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Models\User;
 use Illuminate\Notifications\Notification;
+use Modules\Core\Models\User;
 
 /**
  * The single notification class of this app. It is sent synchronously from

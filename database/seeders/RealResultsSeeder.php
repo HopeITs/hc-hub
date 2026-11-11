@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Enums\ReportStatus;
-use App\Models\Indicator;
-use App\Models\IndicatorProgress;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\User;
 use Illuminate\Database\Seeder;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\IndicatorProgress;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
 use RuntimeException;
 
 /**

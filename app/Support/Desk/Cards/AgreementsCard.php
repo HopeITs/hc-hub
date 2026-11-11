@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support\Desk\Cards;
 
-use App\Models\DonorProposal;
-use App\Models\User;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\DonorProposal;
 
 /**
  * Funding agreements in card form (funding-agreements.view only, like the

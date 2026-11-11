@@ -1,19 +1,19 @@
 <?php
 
-use App\Actions\Milestones\LinkMilestoneToActivity;
-use App\Enums\MilestoneStatus;
-use App\Enums\ResultType;
-use App\Models\Milestone;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Result;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Milestones\LinkMilestoneToActivity;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Result;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -140,7 +140,7 @@ test('an activity removed meanwhile is refused, not a server error', function ()
 
 test('the milestone page links an activity and refuses a foreign one on the field', function () {
     Livewire::actingAs($this->editor)
-        ->test('pages::milestones.show', ['milestone' => $this->milestone])
+        ->test('tracking::milestones.show', ['milestone' => $this->milestone])
         ->assertSee($this->fundingActivity->statement)
         ->assertDontSee($this->strangerActivity->statement)
         ->set('milestoneActivityId', (string) $this->strangerActivity->id)
@@ -158,7 +158,7 @@ test('the milestone page shows a flagged link without blocking other edits', fun
     DB::table('project_proposal')->where('proposal_id', $this->funding->id)->delete();
 
     Livewire::actingAs($this->editor)
-        ->test('pages::milestones.show', ['milestone' => $this->milestone])
+        ->test('tracking::milestones.show', ['milestone' => $this->milestone])
         ->assertSee(__('milestones.activity_link_not_funding'))
         ->set('name', 'Renamed milestone')
         ->call('updateMilestone')
@@ -171,7 +171,7 @@ test('the milestone page shows a flagged link without blocking other edits', fun
 
 test('a related milestone is created with its activity', function () {
     Livewire::actingAs($this->editor)
-        ->test('pages::milestones.show', ['milestone' => $this->milestone])
+        ->test('tracking::milestones.show', ['milestone' => $this->milestone])
         ->call('openRelatedModal')
         ->set('relatedName', 'Training session two')
         ->set('relatedPlannedStartDate', '2026-11-02')
@@ -185,7 +185,7 @@ test('a related milestone is created with its activity', function () {
 
 test('the milestone directory creates a milestone with its activity and rolls back a refused one', function () {
     $create = fn (string $name, Result $activity) => Livewire::actingAs($this->editor)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('openCreateModal')
         ->set('milestoneProjectId', (string) $this->project->id)
         ->set('name', $name)
@@ -204,7 +204,7 @@ test('the milestone directory creates a milestone with its activity and rolls ba
 
 test('the calendar creates a milestone with its activity', function () {
     Livewire::actingAs($this->editor)
-        ->test('pages::calendar.index')
+        ->test('tracking::calendar.index')
         ->call('openCreateModal', '2026-11-02')
         ->set('milestoneProjectId', (string) $this->project->id)
         ->set('name', 'Calendar delivery')

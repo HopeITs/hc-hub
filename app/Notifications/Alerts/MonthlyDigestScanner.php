@@ -6,20 +6,21 @@ namespace App\Notifications\Alerts;
 
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
-use App\Enums\ProjectStatus;
-use App\Models\Indicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Result;
 use App\Models\Role;
-use App\Models\User;
 use App\Notifications\EmployeeRecipients;
 use App\Notifications\EventCatalog;
 use App\Notifications\MonthlyDigestMail;
 use App\Notifications\NotificationPayload;
-use App\Support\MealCoverage;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Notifications\Alerts\OffTrackIndicatorScanner;
+use Modules\Tracking\Support\MealCoverage;
 
 /**
  * The monthly digest (reports:monthly-digest): on the first working day of a

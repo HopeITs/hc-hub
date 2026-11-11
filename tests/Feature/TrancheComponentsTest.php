@@ -1,12 +1,12 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Models\Account;
-use App\Models\DonorProposal;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
 use Illuminate\Support\Facades\Blade;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * A tranche as the components receive it: saved, re-read so every column is
@@ -34,7 +34,7 @@ test('a settled tranche row prints every money column exactly', function () {
         'ar_status' => ArStatus::Received,
     ]);
 
-    $html = Blade::render('<table><tbody><x-funding.tranche-row :transfer="$tranche" /></tbody></table>', ['tranche' => $tranche]);
+    $html = Blade::render('<table><tbody><x-tracking::funding.tranche-row :transfer="$tranche" /></tbody></table>', ['tranche' => $tranche]);
 
     expect($html)->toContain('wire:key="transfer-'.$tranche->id.'"')
         ->and($html)->toContain('data-transfer-state="received"')
@@ -57,7 +57,7 @@ test('a pending tranche shows dashes for what has not happened, never its prefil
         'ar_status' => ArStatus::Pending,
     ]);
 
-    $html = Blade::render('<table><tbody><x-funding.tranche-row :transfer="$tranche" /></tbody></table>', ['tranche' => $tranche]);
+    $html = Blade::render('<table><tbody><x-tracking::funding.tranche-row :transfer="$tranche" /></tbody></table>', ['tranche' => $tranche]);
 
     expect($html)->toContain('data-transfer-state="upcoming"')
         ->and($html)->toContain('1,000.00')
@@ -81,7 +81,7 @@ test('a received tranche with no net reads not recorded, and one in another curr
         'ar_status' => ArStatus::Received,
     ]);
 
-    $render = fn (TransfersTracking $tranche): string => Blade::render('<table><tbody><x-funding.tranche-row :transfer="$tranche" /></tbody></table>', ['tranche' => $tranche]);
+    $render = fn (TransfersTracking $tranche): string => Blade::render('<table><tbody><x-tracking::funding.tranche-row :transfer="$tranche" /></tbody></table>', ['tranche' => $tranche]);
 
     expect($render($missing))->toContain('Not recorded yet')
         ->and($render($missing))->toContain('data-state="net-missing"')
@@ -94,7 +94,7 @@ test('the row prints its lead and actions slots around the shared cells', functi
     $tranche = componentTranche(['ar_status' => ArStatus::Pending]);
 
     $html = Blade::render(
-        '<table><tbody><x-funding.tranche-row :transfer="$tranche"><x-slot:lead><td>LEAD CELL</td></x-slot:lead><x-slot:actions><td>ACTION CELL</td></x-slot:actions></x-funding.tranche-row></tbody></table>',
+        '<table><tbody><x-tracking::funding.tranche-row :transfer="$tranche"><x-slot:lead><td>LEAD CELL</td></x-slot:lead><x-slot:actions><td>ACTION CELL</td></x-slot:actions></x-tracking::funding.tranche-row></tbody></table>',
         ['tranche' => $tranche],
     );
 
@@ -107,7 +107,7 @@ test('a group row carries its label and a subtotal line per currency', function 
         ['currency' => 'USD', 'tranches' => 26, 'sent' => 2600.0, 'fees' => 0.0, 'gross' => 0.0, 'net' => 0.0, 'shortfall' => 0.0, 'overage' => 0.0],
     ];
 
-    $html = Blade::render('<table><tbody><x-funding.tranche-group label="Alpha Fund" group="7" :lines="$lines" :lead="1" /></tbody></table>', ['lines' => $lines]);
+    $html = Blade::render('<table><tbody><x-tracking::funding.tranche-group label="Alpha Fund" group="7" :lines="$lines" :lead="1" /></tbody></table>', ['lines' => $lines]);
 
     expect($html)->toContain('data-group="7"')
         ->and($html)->toContain('register-group')
@@ -117,8 +117,8 @@ test('a group row carries its label and a subtotal line per currency', function 
 });
 
 test('the head offers a sort button per sortable column only when asked', function () {
-    $sortable = Blade::render('<table><thead><tr><x-funding.tranche-head sortable active="amount" dir="desc" /></tr></thead></table>');
-    $plain = Blade::render('<table><thead><tr><x-funding.tranche-head :actions="false" /></tr></thead></table>');
+    $sortable = Blade::render('<table><thead><tr><x-tracking::funding.tranche-head sortable active="amount" dir="desc" /></tr></thead></table>');
+    $plain = Blade::render('<table><thead><tr><x-tracking::funding.tranche-head :actions="false" /></tr></thead></table>');
 
     expect($sortable)->toContain('wire:click="sortRegister(\'amount\')"')
         ->and($sortable)->toContain('aria-sort="descending"')
@@ -138,7 +138,7 @@ test('the tranche table prints every tranche and an identity column when asked, 
         componentTranche(['donor_proposal_id' => $agreement->id, 'payment_amount' => '100.00', 'amount_transfered_currency' => Currency::Usd, 'ar_status' => ArStatus::Pending, 'transfer_date' => null]),
     ])->each(fn (TransfersTracking $tranche) => $tranche->setRelation('donorProposal', $agreement->load('proposal')));
 
-    $html = Blade::render('<x-funding.tranche-table :transfers="$tranches" caption="Tranches" party="proposal" />', ['tranches' => $tranches]);
+    $html = Blade::render('<x-tracking::funding.tranche-table :transfers="$tranches" caption="Tranches" party="proposal" />', ['tranches' => $tranches]);
 
     expect($html)->toContain('data-register')
         ->and($html)->toContain('Water Response')

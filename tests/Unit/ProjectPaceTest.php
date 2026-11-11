@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\ProjectStatus;
-use App\Support\ProjectPace;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Support\ProjectPace;
 
 test('a project is rated by its progress against the share of its window elapsed', function (ProjectStatus $status, string $start, string $end, ?int $progress, string $expected) {
     $today = CarbonImmutable::parse('2026-07-01');

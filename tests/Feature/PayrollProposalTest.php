@@ -1,29 +1,29 @@
 <?php
 
-use App\Actions\Proposals\ApproveProposal;
-use App\Actions\Proposals\CloneProposalForRenewal;
-use App\Actions\Proposals\CorrectProposalStatus;
-use App\Actions\Proposals\LinkProposalProject;
-use App\Actions\Proposals\RecordFinalReportAcceptance;
-use App\Actions\Proposals\SaveProposal;
-use App\Actions\Proposals\TransitionProposal;
-use App\Enums\Currency;
 use App\Enums\MediaCollection;
-use App\Enums\ProposalKind;
-use App\Enums\ProposalStatus;
-use App\Events\ProposalStatusChanged;
-use App\Models\Donor;
 use App\Models\Media;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalStatusNote;
-use App\Models\User;
-use App\Support\ProposalTransitions;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\ApproveProposal;
+use Modules\Tracking\Actions\Proposals\CloneProposalForRenewal;
+use Modules\Tracking\Actions\Proposals\CorrectProposalStatus;
+use Modules\Tracking\Actions\Proposals\LinkProposalProject;
+use Modules\Tracking\Actions\Proposals\RecordFinalReportAcceptance;
+use Modules\Tracking\Actions\Proposals\SaveProposal;
+use Modules\Tracking\Actions\Proposals\TransitionProposal;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalKind;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Support\ProposalTransitions;
 
 beforeEach(fn () => $this->travelTo('2026-10-14 10:00:00'));
 

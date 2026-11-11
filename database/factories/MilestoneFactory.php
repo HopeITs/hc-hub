@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Enums\MilestoneStatus;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
 use Database\Factories\Concerns\CreatesHrRecords;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 /**
  * @extends Factory<Milestone>

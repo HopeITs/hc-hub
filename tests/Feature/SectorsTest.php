@@ -1,17 +1,17 @@
 <?php
 
-use App\Actions\Sectors\DeactivateSector;
-use App\Actions\Sectors\DeleteSector;
-use App\Actions\Sectors\MoveSector;
-use App\Actions\Sectors\ReactivateSector;
-use App\Actions\Sectors\SaveSector;
-use App\Models\Project;
-use App\Models\Sector;
-use App\Support\DefaultSectors;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Tracking\Actions\Sectors\DeactivateSector;
+use Modules\Tracking\Actions\Sectors\DeleteSector;
+use Modules\Tracking\Actions\Sectors\MoveSector;
+use Modules\Tracking\Actions\Sectors\ReactivateSector;
+use Modules\Tracking\Actions\Sectors\SaveSector;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Sector;
+use Modules\Tracking\Support\DefaultSectors;
 
 /**
  * A sector some project already uses.
@@ -47,17 +47,17 @@ describe('the page', function () {
     ]);
 
     it('explains an empty list and offers the create button only to managers', function () {
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.sectors')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.sectors')
             ->assertSee(__('sectors.empty_heading'))
             ->assertSeeHtml('data-test="empty-create-sector"');
 
-        Livewire::actingAs(userWithRole('Team Member'))->test('pages::admin.sectors')
+        Livewire::actingAs(userWithRole('Team Member'))->test('tracking::admin.sectors')
             ->assertSee(__('sectors.empty_heading'))
             ->assertDontSeeHtml('data-test="empty-create-sector"');
     });
 
     it('creates and edits a sector from the dialog', function () {
-        $component = Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.sectors')
+        $component = Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.sectors')
             ->call('openCreateModal')
             ->assertSet('showSectorModal', true)
             ->set('nameAr', 'الحماية')
@@ -79,7 +79,7 @@ describe('the page', function () {
     });
 
     it('shows the field error next to the Arabic name', function () {
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.sectors')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.sectors')
             ->call('openCreateModal')
             ->set('nameAr', '   ')
             ->call('saveSector')
@@ -93,7 +93,7 @@ describe('the page', function () {
         $sector = Sector::factory()->create(['name_ar' => 'التعليم']);
         $user = userWithRole('Team Member');
 
-        $fresh = fn () => Livewire::actingAs($user)->test('pages::admin.sectors');
+        $fresh = fn () => Livewire::actingAs($user)->test('tracking::admin.sectors');
 
         $fresh()->call($method, ...$arguments($sector))->assertForbidden();
 
@@ -111,7 +111,7 @@ describe('the page', function () {
     it('explains in the delete dialog that a used sector is deactivated instead', function () {
         $sector = sectorInUse(['name_en' => 'Shelter']);
 
-        Livewire::actingAs(userWithRole('General Manager'))->test('pages::admin.sectors')
+        Livewire::actingAs(userWithRole('General Manager'))->test('tracking::admin.sectors')
             ->call('confirmDelete', $sector->id)
             ->assertSet('showDeleteModal', true)
             ->assertSet('deletingSectorInUse', true)
@@ -125,7 +125,7 @@ describe('the page', function () {
     it('names the sector in the deactivate and delete dialogs', function () {
         $sector = Sector::factory()->create(['name_ar' => 'الصحة', 'name_en' => 'Health']);
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.sectors')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.sectors')
             ->call('confirmDeactivate', $sector->id)
             ->assertSet('showDeactivateModal', true)
             ->assertSet('deactivatingSectorName', 'Health')
@@ -142,7 +142,7 @@ describe('the page', function () {
     it('moves a sector with the keyboard-reachable buttons and announces its new position', function () {
         [$first, $second] = [Sector::factory()->create(['name_en' => 'First', 'sort_order' => 1]), Sector::factory()->create(['name_en' => 'Second', 'sort_order' => 2])];
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.sectors')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.sectors')
             ->call('moveSector', $second->id, 'up')
             ->assertSet('announcement', __('sectors.moved_to', ['name' => 'Second', 'position' => 1, 'total' => 2]))
             ->assertSeeHtml('aria-live="polite"')

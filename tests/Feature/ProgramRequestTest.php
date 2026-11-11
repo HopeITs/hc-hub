@@ -1,17 +1,17 @@
 <?php
 
-use App\Actions\Proposals\SaveProposal;
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Notifications\RecipientResolver;
 use App\Support\Slots;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\SaveProposal;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 /*
 | W-34a slice 2 (contracts §15.2): a program request opened by a proposal

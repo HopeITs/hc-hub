@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
-use App\Models\ProposalReviewer;
-use App\Models\Task;
-use App\Models\User;
 use Closure;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\ProposalReviewer;
+use Modules\Tracking\Models\Task;
 
 /**
  * The panels a Desk can hold, who may see each one, and the layout each role

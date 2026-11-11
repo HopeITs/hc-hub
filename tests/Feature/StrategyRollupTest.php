@@ -1,24 +1,24 @@
 <?php
 
-use App\Enums\MilestoneStatus;
-use App\Models\AnnualPlan;
-use App\Models\DonorProposal;
-use App\Models\Indicator;
-use App\Models\IndicatorProgress;
-use App\Models\Milestone;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\Risk;
-use App\Models\StrategicPillar;
-use App\Models\Strategy;
-use App\Models\User;
-use App\Support\StrategyRollup;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\IndicatorProgress;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\StrategicPillar;
+use Modules\Tracking\Models\Strategy;
+use Modules\Tracking\Support\StrategyRollup;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -75,7 +75,7 @@ test('each current strategy adds up its targets on pace, high risks and late wor
 
     $user = User::factory()->role('Team Member')->create();
 
-    $block = currentStrategyBlock(Livewire::actingAs($user)->test('pages::strategies.index')->html(), $this->strategy);
+    $block = currentStrategyBlock(Livewire::actingAs($user)->test('tracking::strategies.index')->html(), $this->strategy);
 
     expect($block)
         ->toContain('data-verdict="off_track"')
@@ -102,7 +102,7 @@ test('targets with no figures yet are counted in the sentence and keep the verdi
         'target' => 100,
     ]);
 
-    $block = currentStrategyBlock(Livewire::actingAs(User::factory()->role('Team Member')->create())->test('pages::strategies.index')->html(), $this->strategy);
+    $block = currentStrategyBlock(Livewire::actingAs(User::factory()->role('Team Member')->create())->test('tracking::strategies.index')->html(), $this->strategy);
 
     expect($block)
         ->toContain('class="dk-verdict dk-warn"')
@@ -117,7 +117,7 @@ test('the verdict sentence names the verdict in its tone', function (array $read
         strategyIndicator($this->program, $reading);
     }
 
-    $block = currentStrategyBlock(Livewire::actingAs(User::factory()->role('Team Member')->create())->test('pages::strategies.index')->html(), $this->strategy);
+    $block = currentStrategyBlock(Livewire::actingAs(User::factory()->role('Team Member')->create())->test('tracking::strategies.index')->html(), $this->strategy);
 
     expect($block)
         ->toContain('class="dk-verdict '.$tone.'"')
@@ -133,7 +133,7 @@ test('the verdict sentence names the verdict in its tone', function (array $read
 ]);
 
 test('with no rated targets the verdict is a neutral sentence', function () {
-    $block = currentStrategyBlock(Livewire::actingAs(User::factory()->role('Team Member')->create())->test('pages::strategies.index')->html(), $this->strategy);
+    $block = currentStrategyBlock(Livewire::actingAs(User::factory()->role('Team Member')->create())->test('tracking::strategies.index')->html(), $this->strategy);
 
     expect($block)
         ->toContain('class="dk-verdict dk-mute"')
@@ -144,7 +144,7 @@ test('the attention list links a late report to the late reports register, and s
     planProgramFor2026($this->program);
     $user = User::factory()->role('Team Member')->create();
 
-    $calm = currentStrategyBlock(Livewire::actingAs($user)->test('pages::strategies.index')->html(), $this->strategy);
+    $calm = currentStrategyBlock(Livewire::actingAs($user)->test('tracking::strategies.index')->html(), $this->strategy);
 
     expect($calm)->toContain(__('strategies.nothing_needs_attention'));
 
@@ -153,7 +153,7 @@ test('the attention list links a late report to the late reports register, and s
         'planned_date' => '2026-05-31',
     ]);
 
-    $late = currentStrategyBlock(Livewire::actingAs($user)->test('pages::strategies.index')->html(), $this->strategy);
+    $late = currentStrategyBlock(Livewire::actingAs($user)->test('tracking::strategies.index')->html(), $this->strategy);
 
     expect($late)
         ->toContain(trans_choice('strategies.attention_late_reports', 1, ['count' => '<bdi>1</bdi>']))
@@ -164,7 +164,7 @@ test('the attention list links a late report to the late reports register, and s
 test('the attention list counts the programs with no plan for this year', function () {
     Program::factory()->create(['strategy_id' => $this->strategy->id]);
 
-    $block = currentStrategyBlock(Livewire::actingAs(User::factory()->role('Team Member')->create())->test('pages::strategies.index')->html(), $this->strategy);
+    $block = currentStrategyBlock(Livewire::actingAs(User::factory()->role('Team Member')->create())->test('tracking::strategies.index')->html(), $this->strategy);
 
     expect($block)
         ->toContain(trans_choice('strategies.attention_no_plan', 2, ['count' => '<bdi>2</bdi>', 'year' => '<bdi>2026</bdi>']))
@@ -183,13 +183,13 @@ test('funding shows the agreed amount and the share funded, only to roles that m
         ->and($teamMember->can('funding-agreements.view'))->toBeFalse();
 
     Livewire::actingAs($financial)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->assertSeeText(__('strategies.col_funding'))
         ->assertSeeHtml('<bdi>$120K</bdi>')
         ->assertSeeText(__('strategies.percent_funded', ['percent' => 60]));
 
     Livewire::actingAs($teamMember)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->assertDontSeeHtml('data-test="strategy-funding"')
         ->assertDontSeeText(__('strategies.col_funding'))
         ->assertDontSeeText('$120K');
@@ -202,7 +202,7 @@ test('funding in several currencies shows every currency inline, with no "+1"', 
     DonorProposal::factory()->create(['proposal_id' => $dollars->id, 'budget' => 420000, 'currency' => 'USD']);
     DonorProposal::factory()->create(['proposal_id' => $euros->id, 'budget' => 3960000, 'currency' => 'EUR']);
 
-    $block = currentStrategyBlock(Livewire::actingAs(User::factory()->role('Financial')->create())->test('pages::strategies.index')->html(), $this->strategy);
+    $block = currentStrategyBlock(Livewire::actingAs(User::factory()->role('Financial')->create())->test('tracking::strategies.index')->html(), $this->strategy);
 
     expect($block)
         ->toContain('<bdi>$420K</bdi>')
@@ -216,7 +216,7 @@ test('a past strategy with no programs offers a labelled "Link programs" button,
     $empty = Strategy::factory()->create(['name' => 'Empty Strategy', 'start_year' => 2016, 'end_year' => 2020]);
 
     $html = Livewire::actingAs(User::factory()->role('Managers')->create())
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->assertSeeText(__('strategies.no_programs_linked'))
         ->assertSeeHtml('wire:click="openProgramsModal('.$empty->id.')"')
         ->assertSeeHtml('data-test="strategy-link-programs">'.__('strategies.link_programs').'</button>')
@@ -231,7 +231,7 @@ test('a past strategy with no programs offers a labelled "Link programs" button,
     expect($labels)->not->toBeEmpty()->not->toContain('');
 
     Livewire::actingAs(User::factory()->role('Team Member')->create())
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->assertSeeText(__('strategies.no_programs_linked'))
         ->assertDontSeeHtml('data-test="strategy-link-programs"');
 });
@@ -244,7 +244,7 @@ test('a past strategy with pillars or programs offers no delete; one with neithe
     $bare = Strategy::factory()->create(['name' => 'Bare Strategy', 'start_year' => 2006, 'end_year' => 2010]);
 
     $html = Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->html();
 
     expect(substr_count($html, 'data-test="delete-strategy-button"'))->toBe(1)
@@ -258,7 +258,7 @@ test('the form warns about overlapping years but still saves', function () {
     $manager = User::factory()->role('Super Admin')->create();
 
     Livewire::actingAs($manager)
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('openCreateModal')
         ->set('name', 'Regional Strategy')
         ->set('startYear', '2030')
@@ -273,14 +273,14 @@ test('the form warns about overlapping years but still saves', function () {
 
 test('editing a strategy never warns that it overlaps itself', function () {
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('openEditModal', $this->strategy->id)
         ->assertDontSeeHtml('data-test="strategy-overlap-warning"');
 });
 
 test('missing years get the same plain instructions as a missing name', function () {
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::strategies.index')
+        ->test('tracking::strategies.index')
         ->call('openCreateModal')
         ->call('saveStrategy')
         ->assertHasErrors([

@@ -1,35 +1,35 @@
 <?php
 
-use App\Enums\ActivityStatus;
-use App\Enums\ArStatus;
-use App\Enums\DenominatorBasis;
-use App\Enums\DonorAttribution;
-use App\Enums\Gender;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ReportingPeriod;
-use App\Enums\ResultType;
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\LibraryIndicator;
-use App\Models\MonthlyReportActivityEntry;
-use App\Models\MonthlyReportAnswer;
-use App\Models\MonthlyReportFile;
-use App\Models\MonthlyReportLine;
-use App\Models\MonthlyReportLineBreakdown;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\ReportTemplate;
-use App\Models\ReportTemplateLine;
-use App\Models\Result;
-use App\Models\TransfersTracking;
-use App\Support\DonorReportAggregator;
-use App\Support\DonorReportPeriods;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\ActivityStatus;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\DenominatorBasis;
+use Modules\Tracking\Enums\DonorAttribution;
+use Modules\Tracking\Enums\Gender;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ReportingPeriod;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MonthlyReportActivityEntry;
+use Modules\Tracking\Models\MonthlyReportAnswer;
+use Modules\Tracking\Models\MonthlyReportFile;
+use Modules\Tracking\Models\MonthlyReportLine;
+use Modules\Tracking\Models\MonthlyReportLineBreakdown;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\TransfersTracking;
+use Modules\Tracking\Support\DonorReportAggregator;
+use Modules\Tracking\Support\DonorReportPeriods;
 
 /*
 | The donor report aggregator (contracts §14, §14.1, §14.3; D-25, D-40/D-46,

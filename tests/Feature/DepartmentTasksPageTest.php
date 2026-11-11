@@ -1,20 +1,20 @@
 <?php
 
-use App\Enums\Currency;
-use App\Enums\DeliverableKind;
-use App\Enums\DeliveryState;
-use App\Enums\TaskStatus;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\DeliverableKind;
+use Modules\Tracking\Enums\DeliveryState;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
 
 beforeEach(function () {
     Storage::fake('local');
@@ -50,7 +50,7 @@ test('the page lists the department\'s tasks with no money and no proposal link 
     departmentPageDeliverable();
 
     $html = Livewire::actingAs($this->mediaUser)
-        ->test('pages::department-tasks.index')
+        ->test('tracking::department-tasks.index')
         ->assertSeeText('Film the distribution')
         ->assertSeeText('Winter Response')
         ->assertSeeHtml('data-proposal-name')
@@ -69,7 +69,7 @@ test('a proposal name links to the plan for people who can view the proposal', f
     departmentPageDeliverable();
 
     Livewire::actingAs(userWithRole('Public Relations Manager'))
-        ->test('pages::department-tasks.index')
+        ->test('tracking::department-tasks.index')
         ->assertSeeHtml('data-proposal-link');
 });
 
@@ -84,7 +84,7 @@ test('another department\'s employee sees none of these tasks', function () {
     $financeEmployee = insertHrEmployee();
     insertHrContract($financeEmployee, insertHrPosition($finance));
 
-    $component = Livewire::actingAs(userWithRole('Team Member', $financeEmployee))->test('pages::department-tasks.index');
+    $component = Livewire::actingAs(userWithRole('Team Member', $financeEmployee))->test('tracking::department-tasks.index');
 
     expect($component->instance()->departmentTasks)->toHaveCount(0);
     $component->assertDontSeeText('Film the distribution');
@@ -95,7 +95,7 @@ test('filters narrow the list and an empty result offers to clear them', functio
     Task::factory()->forProposal($this->proposal, $this->media)->create(['title' => 'Book the hall', 'created_by' => $this->requester->id]);
 
     Livewire::actingAs($this->mediaUser)
-        ->test('pages::department-tasks.index')
+        ->test('tracking::department-tasks.index')
         ->set('kind', 'media_deliverable')
         ->assertSeeText('Film the distribution')
         ->assertDontSeeText('Book the hall')
@@ -109,7 +109,7 @@ test('a media employee delivers a video link through the page and the requester 
     $task = departmentPageDeliverable();
 
     Livewire::actingAs($this->mediaUser)
-        ->test('pages::department-tasks.index')
+        ->test('tracking::department-tasks.index')
         ->assertSeeHtml('data-test="deliver-'.$task->id.'"')
         ->call('openDelivery', $task->id)
         ->assertSet('showDeliveryModal', true)
@@ -121,7 +121,7 @@ test('a media employee delivers a video link through the page and the requester 
     expect($task->fresh()->delivery_state)->toBe(DeliveryState::Delivered);
 
     Livewire::actingAs($this->requester)
-        ->test('pages::department-tasks.index')
+        ->test('tracking::department-tasks.index')
         ->call('confirmAccept', $task->id)
         ->assertSet('showAcceptModal', true)
         ->call('accept')
@@ -136,7 +136,7 @@ test('a delivery without the required evidence or in the future is refused on it
     $task = departmentPageDeliverable([DeliverableKind::Video]);
 
     Livewire::actingAs($this->mediaUser)
-        ->test('pages::department-tasks.index')
+        ->test('tracking::department-tasks.index')
         ->call('openDelivery', $task->id)
         ->call('deliver')
         ->assertHasErrors('deliveredLink')
@@ -153,7 +153,7 @@ test('photos are delivered as files through the page', function () {
     $task = departmentPageDeliverable([DeliverableKind::Photos]);
 
     Livewire::actingAs($this->mediaUser)
-        ->test('pages::department-tasks.index')
+        ->test('tracking::department-tasks.index')
         ->call('openDelivery', $task->id)
         ->call('addDeliveryFileSlot')
         ->assertSet('deliveryFileSlots', 2)
@@ -169,7 +169,7 @@ test('a return needs a reason and a stale view writes nothing', function () {
     $task = departmentPageDeliverable(attributes: ['delivery_state' => DeliveryState::Delivered, 'status' => TaskStatus::UnderReview, 'delivered_on' => '2026-10-14', 'delivered_link' => 'https://video.example/a']);
 
     $page = Livewire::actingAs($this->requester)
-        ->test('pages::department-tasks.index')
+        ->test('tracking::department-tasks.index')
         ->call('confirmReturn', $task->id)
         ->assertSet('showReturnModal', true)
         ->call('returnDelivery')
@@ -192,7 +192,7 @@ test('someone who may not deliver or review is refused and nothing is written', 
     DB::table('tasks')->where('id', $task->id)->update(['created_by' => $outsider->id]);
 
     Livewire::actingAs($this->requester)
-        ->test('pages::department-tasks.index')
+        ->test('tracking::department-tasks.index')
         ->call('openDelivery', $task->id)
         ->set('deliveredLink', 'https://video.example/a')
         ->call('deliver')
@@ -206,7 +206,7 @@ test('a task the viewer cannot see cannot be acted on through the page', functio
     $foreign = Task::factory()->forProposal($this->proposal, $finance)->mediaDeliverable()->create(['created_by' => $this->requester->id]);
 
     Livewire::actingAs($this->mediaUser)
-        ->test('pages::department-tasks.index')
+        ->test('tracking::department-tasks.index')
         ->call('openDelivery', $foreign->id)
         ->assertStatus(404);
 
@@ -220,7 +220,7 @@ test('the page holds a flat query count whatever the number of tasks', function 
         DB::flushQueryLog();
         DB::enableQueryLog();
 
-        Livewire::actingAs($this->mediaUser)->test('pages::department-tasks.index');
+        Livewire::actingAs($this->mediaUser)->test('tracking::department-tasks.index');
 
         $queries = DB::getQueryLog();
         DB::disableQueryLog();
@@ -246,7 +246,7 @@ test('a department task on a milestone of a paused project wears the Paused chip
     departmentPageDeliverable(attributes: ['title' => 'Film the paused center', 'source_type' => 'milestone', 'source_id' => $milestone->id]);
     departmentPageDeliverable(attributes: ['title' => 'Film the plan']);
 
-    $page = Livewire::actingAs($this->mediaUser)->test('pages::department-tasks.index')
+    $page = Livewire::actingAs($this->mediaUser)->test('tracking::department-tasks.index')
         ->assertSeeText('Film the paused center')
         ->assertSeeText('Film the plan');
 

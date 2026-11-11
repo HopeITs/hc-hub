@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Actions\Fortify;
 
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
-use App\Models\User;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Actions\DisableTwoFactorAuthentication;
+use Modules\Core\Models\User;
 
 /**
  * Fortify's "disable two-factor" action, bound in its place by

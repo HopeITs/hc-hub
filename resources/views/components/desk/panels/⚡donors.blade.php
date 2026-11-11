@@ -1,12 +1,12 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\ProposalPhase;
-use App\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\ProposalPhase;
+use Modules\Tracking\Enums\ProposalStatus;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\TransfersTracking;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\TransfersTracking;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;

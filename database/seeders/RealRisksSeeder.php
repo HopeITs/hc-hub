@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Activity;
-use App\Models\Project;
-use App\Models\Risk;
 use Illuminate\Database\Seeder;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Risk;
 use RuntimeException;
 
 /**

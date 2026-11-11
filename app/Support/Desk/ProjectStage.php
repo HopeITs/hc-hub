@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
-use App\Enums\MilestoneStatus;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * Where a project stands on its seven stages and how healthy it is, shared

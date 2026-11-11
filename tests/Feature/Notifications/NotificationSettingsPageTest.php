@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 test('a user can opt in to desktop popups and the page tells the script', function () {
     $user = Activity::withoutRecording(fn () => User::factory()->create());

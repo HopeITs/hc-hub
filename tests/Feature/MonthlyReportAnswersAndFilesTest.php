@@ -1,32 +1,32 @@
 <?php
 
-use App\Actions\MonthlyReports\DeleteMonthlyReport;
-use App\Actions\MonthlyReports\DeleteMonthlyReportFile;
-use App\Actions\MonthlyReports\SaveMonthlyReportAnswers;
-use App\Actions\MonthlyReports\SaveMonthlyReportFile;
-use App\Actions\MonthlyReports\SubmitMonthlyReport;
-use App\Enums\IndicatorCollector;
-use App\Enums\MonthlyReportStatus;
 use App\Models\Activity;
-use App\Models\EvidenceType;
-use App\Models\LibraryIndicator;
-use App\Models\MealCoverageAssignment;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportAnswer;
-use App\Models\MonthlyReportFile;
-use App\Models\MonthlyReportLine;
-use App\Models\MonthlyReportLineShare;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\ReportTemplate;
-use App\Models\ReportTemplateLine;
-use App\Models\ReportTemplateQuestion;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Actions\MonthlyReports\DeleteMonthlyReport;
+use Modules\Tracking\Actions\MonthlyReports\DeleteMonthlyReportFile;
+use Modules\Tracking\Actions\MonthlyReports\SaveMonthlyReportAnswers;
+use Modules\Tracking\Actions\MonthlyReports\SaveMonthlyReportFile;
+use Modules\Tracking\Actions\MonthlyReports\SubmitMonthlyReport;
+use Modules\Tracking\Enums\IndicatorCollector;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Models\EvidenceType;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportAnswer;
+use Modules\Tracking\Models\MonthlyReportFile;
+use Modules\Tracking\Models\MonthlyReportLine;
+use Modules\Tracking\Models\MonthlyReportLineShare;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Models\ReportTemplateQuestion;
 
 /*
 | Narrative answers and typed evidence files of a monthly report (contracts

@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/pages/risks/**'
+  - 'modules/Tracking/resources/views/pages/risks/**'
 ---
 
 # Risks

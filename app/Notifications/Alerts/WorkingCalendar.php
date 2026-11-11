@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Notifications\Alerts;
 
-use App\Models\Project;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
+use Modules\Tracking\Models\Project;
 
 /**
  * Counts in the admin-configured working days. Every deadline, overdue,

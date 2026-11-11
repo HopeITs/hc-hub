@@ -1,19 +1,19 @@
 <?php
 
-use App\Enums\AssignmentStatus;
 use App\Enums\NotificationPriority;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
 use App\Models\Activity;
-use App\Models\Assignment;
 use App\Models\HrContract;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\QuickActions;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\AssignmentStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Assignment;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 /**
  * A draft project in a program run by a manager, owned by $ownerEmployee,
@@ -88,7 +88,7 @@ test('acknowledging with a note tells the assigner and the program manager', fun
     ['project' => $project, 'owner' => $owner, 'assigner' => $assigner, 'programManager' => $programManager] = projectAssignedToANewOwner();
 
     Livewire::actingAs($owner)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->call('openAssignmentModal', 'acknowledge')
         ->set('assignmentNote', 'Accepted, but I am on leave until the 15th')
         ->call('submitAssignment')
@@ -122,7 +122,7 @@ test('rejecting needs a reason', function () {
     ['project' => $project, 'owner' => $owner] = projectAssignedToANewOwner();
 
     Livewire::actingAs($owner)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->call('openAssignmentModal', 'reject')
         ->set('assignmentNote', 'no')
         ->call('submitAssignment')
@@ -135,7 +135,7 @@ test('a rejection reaches the assigner and the program manager with the reason',
     ['project' => $project, 'owner' => $owner, 'assigner' => $assigner, 'programManager' => $programManager] = projectAssignedToANewOwner();
 
     Livewire::actingAs($owner)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->call('openAssignmentModal', 'reject')
         ->set('assignmentNote', 'Already running three projects')
         ->call('submitAssignment')
@@ -157,7 +157,7 @@ test('only the assignee can respond, and only while it is pending', function () 
     expect($assigner->can('respond', $assignment))->toBeFalse()
         ->and($owner->can('respond', $assignment))->toBeTrue();
 
-    Livewire::actingAs($assigner)->test('pages::projects.show', ['project' => $project])->call('openAssignmentModal', 'reject')->assertForbidden();
+    Livewire::actingAs($assigner)->test('tracking::projects.show', ['project' => $project])->call('openAssignmentModal', 'reject')->assertForbidden();
 
     $assignment->acknowledge($owner);
 
@@ -196,7 +196,7 @@ test('a rejection locks the project for everyone: no edit, no new owner', functi
         ->and($owner->can('update', $locked))->toBeFalse()
         ->and($assigner->can('delete', $locked))->toBeTrue();
 
-    Livewire::actingAs($assigner)->test('pages::projects.index')->call('openEditModal', $project->id)->assertForbidden();
+    Livewire::actingAs($assigner)->test('tracking::projects.index')->call('openEditModal', $project->id)->assertForbidden();
 });
 
 test('the rejected project tells the assigner that nothing can be done any more', function () {
@@ -204,7 +204,7 @@ test('the rejected project tells the assigner that nothing can be done any more'
     $project->currentAssignment('user_id')->reject($owner, 'Already running three projects');
 
     Livewire::actingAs($assigner)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSeeHtml('data-status="rejected"')
         ->assertSee('Already running three projects')
         ->assertSee(__('projects.assignment_rejected_hint'))
@@ -214,11 +214,11 @@ test('the rejected project tells the assigner that nothing can be done any more'
 test('the projects page badges a rejected owner and nothing else', function () {
     ['project' => $project, 'owner' => $owner, 'assigner' => $assigner] = projectAssignedToANewOwner();
 
-    Livewire::actingAs($assigner)->test('pages::projects.index')->assertDontSeeHtml('data-test="owner-rejected-badge"');
+    Livewire::actingAs($assigner)->test('tracking::projects.index')->assertDontSeeHtml('data-test="owner-rejected-badge"');
 
     $project->currentAssignment('user_id')->reject($owner, 'Already running three projects');
 
-    Livewire::actingAs($assigner)->test('pages::projects.index')->assertSeeHtml('data-test="owner-rejected-badge"')->assertSee('Rejected');
+    Livewire::actingAs($assigner)->test('tracking::projects.index')->assertSeeHtml('data-test="owner-rejected-badge"')->assertSee('Rejected');
 });
 
 test('a rejected project shows Blocked instead of edit, and only the CEO can unblock it with a note', function () {
@@ -230,7 +230,7 @@ test('a rejected project shows Blocked instead of edit, and only the CEO can unb
     ['project' => $project, 'owner' => $owner, 'assigner' => $assigner] = projectAssignedToANewOwner();
     $project->currentAssignment('user_id')->reject($owner, 'Already running three projects');
 
-    Livewire::actingAs($assigner)->test('pages::projects.index')
+    Livewire::actingAs($assigner)->test('tracking::projects.index')
         ->assertSeeHtml('data-test="blocked-badge"')
         ->assertDontSeeHtml('data-test="blocked-badge-unblock"')
         ->assertDontSeeHtml('wire:click="openEditModal('.$project->id.')"')
@@ -239,7 +239,7 @@ test('a rejected project shows Blocked instead of edit, and only the CEO can unb
     $rejected = $project->fresh()->ownerAssignment;
     expect($assigner->can('unblock', $rejected))->toBeFalse();
 
-    Livewire::actingAs($top)->test('pages::projects.index')
+    Livewire::actingAs($top)->test('tracking::projects.index')
         ->assertSeeHtml('data-test="blocked-badge-unblock"')
         ->assertDontSeeHtml('wire:click="openEditModal('.$project->id.')"')
         ->call('openUnblockModal', $project->id)
@@ -314,7 +314,7 @@ test('a new project starts as a draft whatever the form is sent', function () {
     $program = Program::factory()->create(['manager_id' => $owner]);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->call('openCreateModal')
         ->set('sectorIds', newProjectSectorIds())
         ->set('name', 'Draft by default')
@@ -333,7 +333,7 @@ test('editing a project through the form leaves its status alone', function () {
     $project->update(['status' => ProjectStatus::Active, 'start_date' => '2026-01-01', 'end_date' => '2026-12-31']);
 
     Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->call('openEditModal', $project->id)
         ->set('name', 'Renamed through the form')
         ->call('saveProject')
@@ -352,7 +352,7 @@ test('answering on the page reads the notification and takes its buttons away', 
         ->and(array_column($before->data['actions'], 'type'))->toBe(['assignment.acknowledge', 'assignment.reject']);
 
     Livewire::actingAs($owner)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->call('openAssignmentModal', 'reject')
         ->set('assignmentNote', 'Already running three projects')
         ->call('submitAssignment');
@@ -379,7 +379,7 @@ test('answering from the bell updates an open project page', function () {
     $notification = UserNotification::query()->forUser($owner)->sole();
 
     $page = Livewire::actingAs($owner)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSeeHtml('data-status="pending"');
 
     app(QuickActions::class)->run($owner, $notification, 'assignment.acknowledge');
@@ -401,7 +401,7 @@ test('the owner dropdown lists only the managers of programs', function () {
     Program::factory()->create(['manager_id' => $managerEmployee]);
     $unmanaged = Program::factory()->create(['manager_id' => null]);
 
-    $page = Livewire::actingAs(userWithRole('General Manager'))->test('pages::projects.index')->call('openCreateModal');
+    $page = Livewire::actingAs(userWithRole('General Manager'))->test('tracking::projects.index')->call('openCreateModal');
 
     expect($page->instance()->ownerOptions->pluck('id')->all())->toBe([$managerEmployee]);
 
@@ -420,7 +420,7 @@ test('choosing a program picks its manager, who can be swapped for another progr
     $second = Program::factory()->create(['manager_id' => $secondManager]);
     $noManager = Program::factory()->create(['manager_id' => null]);
 
-    $page = Livewire::actingAs(userWithRole('General Manager'))->test('pages::projects.index')
+    $page = Livewire::actingAs(userWithRole('General Manager'))->test('tracking::projects.index')
         ->call('openCreateModal')
         ->set('sectorIds', newProjectSectorIds())
         ->set('programId', (string) $first->id)
@@ -450,7 +450,7 @@ test('acknowledging on the project page approves a draft waiting on a donor-appr
     $project->forceFill(['start_date' => '2026-11-01', 'end_date' => '2027-10-31'])->saveQuietly();
 
     Livewire::actingAs($owner)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->call('openAssignmentModal', 'reject')
         ->set('assignmentNote', 'I cannot take this project on.')
         ->call('submitAssignment');
@@ -462,7 +462,7 @@ test('acknowledging on the project page approves a draft waiting on a donor-appr
     $project->currentAssignment('user_id')->forceFill(['status' => AssignmentStatus::Pending])->save();
 
     Livewire::actingAs($owner)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->call('openAssignmentModal', 'acknowledge')
         ->call('submitAssignment');
 

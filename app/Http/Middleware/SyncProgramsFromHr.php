@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Jobs\CheckProgramLogframe;
-use App\Models\Program;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Jobs\CheckProgramLogframe;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 

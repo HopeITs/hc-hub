@@ -1,6 +1,7 @@
 ---
 paths:
   - 'resources/views/**/*.blade.php'
+  - 'modules/*/resources/views/**/*.blade.php'
 ---
 
 # Views

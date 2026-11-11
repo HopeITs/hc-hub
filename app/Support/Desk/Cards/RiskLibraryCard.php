@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support\Desk\Cards;
 
-use App\Models\RiskLibrary;
-use App\Models\User;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\RiskLibrary;
 
 /**
  * The risk library in card form: the ready-made risks, their categories and

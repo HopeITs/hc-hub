@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use Modules\Core\Models\User;
 
 test('the login screen shows no loading splash', function () {
     $this->get(route('login'))

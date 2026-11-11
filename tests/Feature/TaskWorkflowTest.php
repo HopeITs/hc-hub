@@ -1,17 +1,17 @@
 <?php
 
-use App\Actions\Tasks\ChangeTaskStatus;
-use App\Actions\Tasks\CompleteTask;
-use App\Enums\DependencyType;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\Project;
-use App\Models\ScheduleDependency;
-use App\Models\Task;
-use App\Models\TaskAttachment;
-use App\Models\User;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Tasks\ChangeTaskStatus;
+use Modules\Tracking\Actions\Tasks\CompleteTask;
+use Modules\Tracking\Enums\DependencyType;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ScheduleDependency;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 
 beforeEach(function () {
     $this->travelTo('2026-09-16 09:00:00');
@@ -132,7 +132,7 @@ test('the task page form follows the same rules', function () {
     $worker = userWithRole('Team Member', insertHrEmployee());
     $task = workflowTask($creator, [$worker->employee_id]);
 
-    Livewire::actingAs($worker)->test('pages::tasks.show', ['task' => $task])
+    Livewire::actingAs($worker)->test('tracking::tasks.show', ['task' => $task])
         ->set('taskStatus', TaskStatus::Done->value)
         ->call('updateTask')
         ->assertHasErrors(['taskStatus']);

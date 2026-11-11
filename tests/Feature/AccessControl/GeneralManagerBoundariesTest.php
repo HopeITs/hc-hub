@@ -15,7 +15,7 @@ test('the General Manager holds none of the MEAL-only or AI drafting permissions
 
 test('the General Manager cannot create a target', function () {
     Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::targets.index')
+        ->test('tracking::targets.index')
         ->call('openCreateModal')
         ->assertForbidden();
 });

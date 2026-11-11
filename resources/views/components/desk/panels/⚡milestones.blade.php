@@ -1,9 +1,9 @@
 <?php
 
-use App\Enums\MilestoneStatus;
-use App\Enums\TaskStatus;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\TaskStatus;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\Milestone;
+use Modules\Tracking\Models\Milestone;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;

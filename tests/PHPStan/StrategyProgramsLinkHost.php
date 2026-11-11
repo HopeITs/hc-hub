@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\Strategies\LinksStrategyPrograms;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\Strategies\LinksStrategyPrograms;
 
 /**
  * Stands in for strategies/index and strategies/show, which share

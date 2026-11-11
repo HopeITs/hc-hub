@@ -1,29 +1,29 @@
 <?php
 
-use App\Enums\ActivityStatus;
-use App\Enums\MilestoneStatus;
-use App\Enums\ResultType;
-use App\Enums\TaskKind;
-use App\Enums\TaskStatus;
-use App\Models\ActivitySchedule;
-use App\Models\AnnualPlan;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\Milestone;
-use App\Models\MonthlyReport;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\ProjectActivityStatus;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\Task;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ActivityStatus;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Enums\TaskKind;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\ActivitySchedule;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ProjectActivityStatus;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Task;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -233,8 +233,8 @@ test('the chain reads a flat number of queries for 3 or 30 nodes', function (str
 
     $render = fn (): Testable => match ($page) {
         'proposal' => chainTab($this->viewer, $this->proposal),
-        'program' => Livewire::actingAs($this->viewer)->test('pages::programs.show', ['program' => $this->program])->set('tab', 'results'),
-        'annual plan' => Livewire::actingAs($this->viewer)->test('pages::annual-plans.show', ['annualPlan' => $plan]),
+        'program' => Livewire::actingAs($this->viewer)->test('tracking::programs.show', ['program' => $this->program])->set('tab', 'results'),
+        'annual plan' => Livewire::actingAs($this->viewer)->test('tracking::annual-plans.show', ['annualPlan' => $plan]),
     };
 
     $countQueries = function () use ($render): array {
@@ -264,7 +264,7 @@ test('proposal and donor names render as text without links for a user without p
     $donorName = $this->proposal->donor->name;
     $meal = User::factory()->role('MEAL')->create();
 
-    Livewire::actingAs($meal)->test('pages::programs.show', ['program' => $this->program])->set('tab', 'results')
+    Livewire::actingAs($meal)->test('tracking::programs.show', ['program' => $this->program])->set('tab', 'results')
         ->assertSee('Water Access Proposal')
         ->assertSee($donorName)
         ->assertDontSeeHtml(route('proposals.show', $this->proposal))
@@ -272,7 +272,7 @@ test('proposal and donor names render as text without links for a user without p
         ->assertDontSee('987,654')
         ->assertDontSee('987654');
 
-    Livewire::actingAs($this->viewer)->test('pages::programs.show', ['program' => $this->program])->set('tab', 'results')
+    Livewire::actingAs($this->viewer)->test('tracking::programs.show', ['program' => $this->program])->set('tab', 'results')
         ->assertSeeHtml(route('proposals.show', $this->proposal))
         ->assertSeeHtml(route('donors.show', $this->proposal->donor));
 });

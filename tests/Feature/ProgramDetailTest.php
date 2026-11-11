@@ -1,26 +1,26 @@
 <?php
 
-use App\Enums\DonorAttribution;
-use App\Enums\MilestoneStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\ResultType;
-use App\Models\AnnualPlan;
-use App\Models\DonorProposal;
-use App\Models\Indicator;
-use App\Models\Milestone;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\Strategy;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\DonorAttribution;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Strategy;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 test('guests are redirected from program detail', function () {
     $program = Program::factory()->create();
@@ -86,7 +86,7 @@ test('program detail lists only its own projects', function () {
     Project::factory()->create(['name' => 'Homs Shelter', 'program_id' => $other->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $subject])
+        ->test('tracking::programs.show', ['program' => $subject])
         ->assertSet('tab', 'overview')
         ->assertSee('Aleppo Wells')
         ->assertDontSee('Homs Shelter');
@@ -103,7 +103,7 @@ test('program detail switches to annual plans and results', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'plans')
         ->assertSee('Annual plan 2026')
         ->set('tab', 'results')
@@ -123,7 +123,7 @@ test('program detail tasks tab shows tasks raised on the program, its projects a
     Task::factory()->create(['source_type' => 'program', 'source_id' => $otherProgram->id, 'title' => 'Unrelated program task']);
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSee('Approve the annual workplan')
         ->assertSee('Sign the site access agreement')
@@ -137,7 +137,7 @@ test('a task can be added from the program show page pre-filled with this progra
     $program = Program::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->call('openAddTaskModal')
         ->assertSet('showAddTaskModal', true)
@@ -159,7 +159,7 @@ test('adding a task from the program show page requires a title but no assignee'
     $program = Program::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->call('openAddTaskModal')
         ->set('newTaskTitle', '   ')
@@ -185,7 +185,7 @@ test('program detail renders the results logframe as a tree', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'results')
         ->assertSee('Root impact statement.')
         ->assertSee('Nested outcome statement.')
@@ -203,7 +203,7 @@ test('program detail shows only the program framework, never a proposal framewor
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'results')
         ->assertSee('Program impact statement.')
         ->assertDontSee('Proposal impact statement.');
@@ -220,7 +220,7 @@ test('program logframe counts statements per level and flags unmeasured ones', f
     Indicator::factory()->count(2)->create(['result_id' => $output->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'results')
         ->assertSet('resultSummary', [
             'levels' => ['impact' => 1, 'outcome' => 1, 'output' => 1, 'activity' => 0, 'cross-cutting' => 0],
@@ -246,7 +246,7 @@ test('program plan years fill the strategy window and total each plan', function
     Report::factory()->create(['plan_indicator_id' => $target->id]);
 
     $years = Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'plans')
         ->assertSee('No plan')
         ->instance()
@@ -295,7 +295,7 @@ test('program detail calculates milestone progress without cancelled milestones'
     ]);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertSee('40%')
         ->assertSee('40 of 100 progress points reached');
 });
@@ -305,7 +305,7 @@ test('program detail links each annual plan year to its plan', function () {
     $plan = AnnualPlan::factory()->create(['program_id' => $program->id, 'year' => 2026]);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'plans')
         ->assertSee(route('annual-plans.show', $plan), false);
 });
@@ -315,7 +315,7 @@ test('MEAL sets the program donor attribution and it is logged', function () {
     $program = Program::factory()->create();
 
     Livewire::actingAs(User::factory()->role('MEAL')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertSeeText(__('programs.donor_attribution'))
         ->call('setDonorAttribution', 'split')
         ->assertHasNoErrors();
@@ -329,7 +329,7 @@ test('only report-templates.manage holders set the donor attribution', function 
     $program = Program::factory()->create();
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertSeeText(DonorAttribution::Shared->label())
         ->call('setDonorAttribution', 'split')
         ->assertForbidden();
@@ -350,14 +350,14 @@ test('program results chain lists each contributing proposal under the program r
     $rootThere->forceFill(['contributes_to_result_id' => $otherImpact->id])->saveQuietly();
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'results')
         ->assertSeeHtml('data-chain-contributions')
         ->assertSeeInOrder(['Program impact statement.', 'Multi-program proposal', $proposal->donor->name, 'Proposal root for this program.'])
         ->assertDontSee('Proposal root for the other program.');
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $otherProgram])
+        ->test('tracking::programs.show', ['program' => $otherProgram])
         ->set('tab', 'results')
         ->assertSee('Multi-program proposal')
         ->assertSee('Proposal root for the other program.')
@@ -376,7 +376,7 @@ test('the program overview ranks the viewer\'s own past-due tasks first and call
     Task::factory()->create(['source_type' => 'program', 'source_id' => $program->id, 'due_date' => now()->addWeek()]);
 
     $page = Livewire::actingAs(userWithRole('General Manager', $employeeId))
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertSeeHtml('data-program-verdict="at_risk"')
         ->assertSee('You have 1 task past its due date')
         ->assertSee('1 more task is past due for others');
@@ -397,7 +397,7 @@ test('the projects grid lists each project once behind filter chips that count t
     ]);
 
     $page = Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::programs.show', ['program' => $program]);
+        ->test('tracking::programs.show', ['program' => $program]);
     $html = $page->html();
 
     expect(substr_count($html, 'wire:key="program-card-'.$late->id.'"'))->toBe(1)
@@ -427,7 +427,7 @@ test('the attention list shows three items first and loads more three at a time'
     ]);
 
     $page = Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::programs.show', ['program' => $program]);
+        ->test('tracking::programs.show', ['program' => $program]);
     $total = count($page->instance()->attention);
 
     expect($total)->toBeGreaterThan(3);
@@ -445,7 +445,7 @@ test('the program overview flags late milestones and a missing monthly report fo
     Milestone::factory()->create(['project_id' => $project->id, 'status' => MilestoneStatus::Reached, 'planned_end_date' => now()->subWeek()]);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertSee('Shelter Fix has 1 late milestone')
         ->assertSee(route('projects.show', ['project' => $project, 'tab' => 'milestones']), false)
         ->assertSee('1 active project has no '.now()->subMonthNoOverflow()->translatedFormat('F').' report yet')
@@ -457,7 +457,7 @@ test('the program overview calls a program with nothing late on track', function
     Project::factory()->create(['program_id' => $program->id, 'status' => ProjectStatus::Closed]);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertSeeHtml('data-program-verdict="on_track"')
         ->assertSee('All clear: nothing is late, missing or slipping.');
 });
@@ -468,11 +468,11 @@ test('the program overview shows money only to holders of both money permissions
     Project::factory()->create(['program_id' => $program->id]);
 
     Livewire::actingAs(User::factory()->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertDontSeeHtml('data-program-funding');
 
     Livewire::actingAs(User::factory()->role('Financial')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->assertSeeHtml('data-program-funding');
 });
 
@@ -482,13 +482,13 @@ test('old timeline tab links and unknown tabs fall back to the overview', functi
 
     foreach (['projects', 'timeline'] as $oldTab) {
         Livewire::withQueryParams(['tab' => $oldTab])->actingAs($user)
-            ->test('pages::programs.show', ['program' => $program])
+            ->test('tracking::programs.show', ['program' => $program])
             ->assertSet('tab', 'overview')
             ->assertDontSeeHtml('data-test="program-tab-timeline"');
     }
 
     Livewire::actingAs($user)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'bogus')
         ->assertSet('tab', 'overview');
 });
@@ -504,7 +504,7 @@ test('the program overview totals money per project and counts an agreement shar
     TransfersTracking::factory()->create(['donor_proposal_id' => $agreement->id, 'net_amount_received' => '400.00']);
 
     $page = Livewire::actingAs(User::factory()->role('Financial')->create())
-        ->test('pages::programs.show', ['program' => $program]);
+        ->test('tracking::programs.show', ['program' => $program]);
 
     expect($page->instance()->programFunding)->toBe([['currency' => 'USD', 'committed' => 1000.0, 'received' => 400.0]])
         ->and(collect($page->instance()->projectLedger)->pluck('funding')->all())
@@ -516,7 +516,7 @@ test('a project needs attention only once its past-due tasks reach the threshold
     $project = Project::factory()->create(['program_id' => $program->id, 'status' => ProjectStatus::Closed]);
     $pastDue = fn () => Task::factory()->create(['source_type' => 'project', 'source_id' => $project->id, 'due_date' => now()->subDays(2)]);
     $needsAttention = fn (): bool => Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->instance()->projectLedger[0]['needsAttention'];
 
     foreach (range(1, 2) as $i) {
@@ -537,7 +537,7 @@ test('the tasks tab lists each project beside the picked project tasks, the late
     Task::factory()->create(['source_type' => 'project', 'source_id' => $other->id, 'title' => 'Calm one', 'due_date' => now()->addWeek()]);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtmlInOrder(['data-task-bucket="all"', 'data-task-bucket="project-'.$project->id.'"', 'data-task-bucket="project-'.$other->id.'"'])
         ->assertSeeHtml('data-task-pane="all"')
@@ -566,7 +566,7 @@ test('a late transfer is listed for attention but does not flag the project card
     ]);
 
     $page = Livewire::actingAs(User::factory()->role('Financial')->create())
-        ->test('pages::programs.show', ['program' => $program]);
+        ->test('tracking::programs.show', ['program' => $program]);
 
     expect(array_column($page->instance()->attention, 'key'))->toContain('transfers')
         ->and($page->instance()->projectLedger[0]['needsAttention'])->toBeFalse();

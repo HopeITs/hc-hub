@@ -1,12 +1,12 @@
 <?php
 
-use App\Models\AnnualPlan;
-use App\Models\DonorProposal;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
 use Illuminate\Database\QueryException;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 test('a proposal delete that is blocked leaves its targets untouched', function () {
     $proposal = Proposal::factory()->create();

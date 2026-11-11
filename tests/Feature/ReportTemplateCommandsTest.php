@@ -1,25 +1,25 @@
 <?php
 
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
-use App\Enums\ReportTemplateLineStatus;
-use App\Enums\ReportTemplateStatus;
-use App\Enums\ResultType;
-use App\Events\ProjectActivated;
 use App\Models\Activity;
-use App\Models\AnnualPlan;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\NarrativeQuestion;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ReportTemplate;
-use App\Models\ReportTemplateLine;
-use App\Models\Result;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ReportTemplateLineStatus;
+use Modules\Tracking\Enums\ReportTemplateStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Events\ProjectActivated;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\NarrativeQuestion;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Models\Result;
 
 describe('annual-plans:ensure-2026', function () {
     test('creates the missing 2026 plan of every managed program once, copying the program manager', function () {

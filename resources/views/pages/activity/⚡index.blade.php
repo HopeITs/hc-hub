@@ -1,8 +1,8 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\Program;
-use App\Models\User;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
 use App\Notifications\ActivityPresenter;
 use App\Notifications\NotificationPresenter;
 use App\Notifications\SubjectLinks;

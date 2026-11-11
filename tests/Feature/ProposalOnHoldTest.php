@@ -1,21 +1,21 @@
 <?php
 
-use App\Actions\Proposals\ClearProposalOnHold;
-use App\Actions\Proposals\SetProposalOnHold;
-use App\Actions\Proposals\TransitionProposal;
-use App\Enums\Currency;
-use App\Enums\ProposalStatus;
-use App\Enums\StatusNoteKind;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\User;
 use App\Notifications\Alerts\DeadlineCatalog;
 use App\Notifications\Alerts\DeadlineItem;
-use App\Notifications\Alerts\OnHoldReminderScanner;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\ClearProposalOnHold;
+use Modules\Tracking\Actions\Proposals\SetProposalOnHold;
+use Modules\Tracking\Actions\Proposals\TransitionProposal;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\StatusNoteKind;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Notifications\Alerts\OnHoldReminderScanner;
 
 /*
 | W-06 (D-58): a hold is a flag on a proposal that keeps its status, not a

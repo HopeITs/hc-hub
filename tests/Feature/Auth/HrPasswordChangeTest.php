@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Hash;
+use Modules\Core\Models\User;
 
 /**
  * Change a user's password in HR, as the HR system would.

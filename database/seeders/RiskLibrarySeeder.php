@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Support\DefaultRiskLibrary;
 use Illuminate\Database\Seeder;
+use Modules\Tracking\Support\DefaultRiskLibrary;
 
 /**
  * The starting risk library (W-09, D-61): MEAL's Theory of Change risk

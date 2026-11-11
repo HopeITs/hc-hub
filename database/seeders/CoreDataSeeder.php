@@ -2,17 +2,17 @@
 
 namespace Database\Seeders;
 
-use App\Enums\DonorType;
-use App\Enums\ProposalStatus;
-use App\Models\Donor;
 use App\Models\HrUser;
-use App\Models\Proposal;
-use App\Models\User;
 use Database\Seeders\Concerns\PicksHrRecords;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\DonorType;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Proposal;
 
 /**
  * Master data every other seeder builds on: staff, donors, and a

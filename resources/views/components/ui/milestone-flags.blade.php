@@ -1,7 +1,7 @@
 @props(['milestone'])
 
 @php
-    /** @var \App\Models\Milestone $milestone */
+    /** @var \Modules\Tracking\Models\Milestone $milestone */
 @endphp
 
 @if ($milestone->isMissed())

@@ -1,20 +1,20 @@
 <?php
 
-use App\Actions\FundingAgreements\SaveFundingAgreement;
-use App\Enums\ProposalStatus;
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\User;
 use Database\Seeders\CoreDataSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\FundingAgreements\SaveFundingAgreement;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 test('a proposal carries its donor and the lifecycle columns', function () {
     $donorId = insertDonor();
@@ -200,7 +200,7 @@ test('the funding sources panel shows donor names to everyone but amounts only t
     DonorProposal::factory()->create(['proposal_id' => $proposal->id, 'budget' => '731942.00']);
 
     $managers = Livewire::actingAs(userWithRole('Managers'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSee('Funding sources')
         ->assertSee('Aurora Foundation')
         ->assertDontSee('731,942');
@@ -208,7 +208,7 @@ test('the funding sources panel shows donor names to everyone but amounts only t
     expect($managers->instance()->fundingSources->first()->relationLoaded('donorProposals'))->toBeFalse();
 
     Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSee('Aurora Foundation')
         ->assertSee('731,942');
 });
@@ -218,7 +218,7 @@ test('creating a proposal requires a donor', function () {
     $donor = Donor::factory()->create();
 
     $form = Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('openCreateModal')
         ->set('name', 'Donorless')
         ->set('internalProjectNumber', 'HC-2026-044')

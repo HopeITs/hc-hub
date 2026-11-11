@@ -1,10 +1,10 @@
 <?php
 
-use App\Enums\AssignmentStatus;
-use App\Enums\ProposalStatus;
-use App\Models\Project;
-use App\Models\Proposal;
 use Livewire\Livewire;
+use Modules\Tracking\Enums\AssignmentStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 /**
  * A draft project linked to a proposal at the given status.
@@ -43,14 +43,14 @@ test('the detail page and the directory show the funding badge in English and Ar
     $waiting = draftLinkedTo(ProposalStatus::Approved);
     $user = userWithRole('General Manager');
 
-    Livewire::actingAs($user)->test('pages::projects.show', ['project' => $waiting])
+    Livewire::actingAs($user)->test('tracking::projects.show', ['project' => $waiting])
         ->assertSeeHtml('data-test="funding-badge-awaiting_owner"')
         ->assertSee(__('projects.awaiting_owner_acknowledgement'));
 
     $awaitingFunding = draftLinkedTo(ProposalStatus::Submitted);
     $funded = Project::factory()->approved()->create();
 
-    Livewire::actingAs($user)->test('pages::projects.index')
+    Livewire::actingAs($user)->test('tracking::projects.index')
         ->assertSee(__('projects.awaiting_owner_acknowledgement'))
         ->assertSee(__('projects.awaiting_funding'))
         ->assertSee(__('projects.funded_awaiting_template'));

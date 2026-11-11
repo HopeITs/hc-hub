@@ -1,26 +1,26 @@
 <?php
 
-use App\Enums\CollectionFrequency;
-use App\Enums\DonorAttribution;
-use App\Enums\IndicatorCollector;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ProposalStatus;
 use App\Models\Activity;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportLine;
-use App\Models\MonthlyReportLineShare;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ReportTemplate;
-use App\Models\ReportTemplateLine;
-use App\Support\MonthlyReportLineBuilder;
-use App\Support\MonthlyReportPeriods;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\CollectionFrequency;
+use Modules\Tracking\Enums\DonorAttribution;
+use Modules\Tracking\Enums\IndicatorCollector;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportLine;
+use Modules\Tracking\Models\MonthlyReportLineShare;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Support\MonthlyReportLineBuilder;
+use Modules\Tracking\Support\MonthlyReportPeriods;
 
 /*
 | The lines of a monthly report (contracts §13 "Lines of month M", §13.1

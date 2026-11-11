@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\NarrativeQuestionFrequency;
-use App\Models\ReportTemplate;
-use App\Models\ReportTemplateQuestion;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\NarrativeQuestionFrequency;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\ReportTemplateQuestion;
 
 /**
  * `is_active` and `sort_order` carry database defaults, so the definition

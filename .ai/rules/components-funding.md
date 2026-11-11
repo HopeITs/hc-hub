@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/components/funding/**'
+  - 'modules/Tracking/resources/views/components/funding/**'
 ---
 
 # Components Funding

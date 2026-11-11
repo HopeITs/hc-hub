@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\Task;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Task;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -35,7 +35,7 @@ beforeEach(function () {
 
 test('a scoped team role only sees tasks assigned within its own department by default', function () {
     Livewire::actingAs($this->mediaUser)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSee('Media task')
         ->assertDontSee('Finance task');
 });
@@ -54,7 +54,7 @@ test('a scoped team role cannot open another department\'s task show page', func
 
 test('a bypass role sees every department by default and can filter down to one', function () {
     Livewire::actingAs($this->managerUser)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSee('Media task')->assertSee('Finance task')
         ->set('departmentId', (string) $this->mediaDepartmentId)
         ->assertSee('Media task')->assertDontSee('Finance task');
@@ -66,11 +66,11 @@ test('a task created in one department but assigned to another still shows for t
     $crossTask->taskAssignees()->create(['employee_id' => $this->financeEmployeeId]);
 
     Livewire::actingAs($this->mediaUser)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSee('Cross-department task');
 
     Livewire::actingAs($this->financeUser)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSee('Cross-department task');
 });
 
@@ -81,7 +81,7 @@ test('my tasks stays visible to a scoped viewer even when assigned outside their
     $assignedElsewhere->taskAssignees()->create(['employee_id' => $this->financeEmployeeId]);
 
     Livewire::actingAs($this->mediaUser)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('myTasksOnly', true)
         ->assertSee('Assigned to media from finance')
         ->assertDontSee('Finance task');
@@ -115,7 +115,7 @@ test('a scoped viewer opens the board, the list and the page of a colleague, but
     $subtask->taskAssignees()->create(['employee_id' => $colleagueEmployeeId]);
 
     Livewire::actingAs($this->mediaUser)
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSee('Colleague task')
         ->set('view', 'list')
         ->assertSee('Colleague task')

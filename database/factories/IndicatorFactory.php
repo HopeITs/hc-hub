@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Enums\Period;
-use App\Models\Indicator;
-use App\Models\Project;
-use App\Models\Result;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\Period;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Result;
 
 /**
  * @extends Factory<Indicator>

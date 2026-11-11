@@ -34,7 +34,7 @@
 
     /* Inside a project, the sidebar leads with that project's own sections. */
     $project = $routeName === 'projects.show' ? request()->route('project') : null;
-    $project = $project instanceof \App\Models\Project ? $project : null;
+    $project = $project instanceof \Modules\Tracking\Models\Project ? $project : null;
     $sections = [];
 
     if ($project !== null) {

@@ -6,13 +6,13 @@ namespace App\Notifications;
 
 use App\Enums\EventImportance;
 use App\Enums\OversightMode;
-use App\Events\FundingAgreementRecorded;
-use App\Events\ProjectActivated;
-use App\Events\ProjectPeriodChanged;
-use App\Events\ProposalLocationsChanged;
-use App\Events\ProposalStatusChanged;
 use App\Notifications\Alerts\NotificationSettings;
 use LogicException;
+use Modules\Tracking\Events\FundingAgreementRecorded;
+use Modules\Tracking\Events\ProjectActivated;
+use Modules\Tracking\Events\ProjectPeriodChanged;
+use Modules\Tracking\Events\ProposalLocationsChanged;
+use Modules\Tracking\Events\ProposalStatusChanged;
 
 /**
  * The one list of notification events (contracts.md §15). Every movement on

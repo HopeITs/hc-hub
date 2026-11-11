@@ -1,21 +1,21 @@
 <?php
 
-use App\Events\ProjectActivated;
 use App\Models\Activity;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\LibraryIndicator;
-use App\Models\MealCoverageAssignment;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\TransfersTracking;
 use App\Models\UserNotification;
 use App\Notifications\EventCatalog;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Lang;
+use Modules\Tracking\Events\ProjectActivated;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * Activity events that are deliberately not catalog movements, with why.
@@ -89,8 +89,17 @@ test('every catalog key has its lang, a known direct source, an oversight mode a
 test('every domain event dispatched after commit is a catalog event', function () {
     $catalogEvents = array_values(array_filter(array_column(EventCatalog::all(), 'event')));
 
-    foreach (glob(app_path('Events/*.php')) as $file) {
-        $class = 'App\\Events\\'.basename($file, '.php');
+    $events = [];
+
+    foreach (glob(app_path('Events/*.php')) ?: [] as $file) {
+        $events[] = 'App\\Events\\'.basename($file, '.php');
+    }
+
+    foreach (glob(base_path('modules/*/Events/*.php')) ?: [] as $file) {
+        $events[] = 'Modules\\'.basename(dirname($file, 2)).'\\Events\\'.basename($file, '.php');
+    }
+
+    foreach ($events as $class) {
         $reflection = new ReflectionClass($class);
 
         if ($reflection->isFinal() && $reflection->implementsInterface(ShouldDispatchAfterCommit::class)) {

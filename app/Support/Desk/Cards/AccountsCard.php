@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support\Desk\Cards;
 
-use App\Models\Account;
-use App\Models\User;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Account;
 
 /**
  * Bank accounts in card form (accounts.view only, like the page): the open

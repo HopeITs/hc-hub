@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Notifications\Recipients;
 
 use App\Models\Activity;
-use App\Models\User;
 use App\Notifications\EmployeeRecipients;
+use Modules\Core\Models\User;
 
 /**
  * Users & roles: the affected user is direct and hears about their own

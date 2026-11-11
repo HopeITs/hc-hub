@@ -1,16 +1,16 @@
 <?php
 
-use App\Enums\ReportStatus;
-use App\Models\Report;
-use App\Models\User;
 use App\Notifications\QuickActions;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\Report;
 
 beforeEach(function () {
     $this->author = userWithRole('Media Team');
     $this->draft = Report::factory()->create(['user_id' => $this->author->id]);
-    $this->show = fn (User $user, ?Report $report = null) => Livewire::actingAs($user)->test('pages::reports.show', ['report' => $report ?? $this->draft]);
-    $this->index = fn (User $user) => Livewire::actingAs($user)->test('pages::reports.index');
+    $this->show = fn (User $user, ?Report $report = null) => Livewire::actingAs($user)->test('tracking::reports.show', ['report' => $report ?? $this->draft]);
+    $this->index = fn (User $user) => Livewire::actingAs($user)->test('tracking::reports.index');
 });
 
 test('the author edits and submits their own draft', function () {

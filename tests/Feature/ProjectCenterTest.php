@@ -1,15 +1,15 @@
 <?php
 
-use App\Actions\Projects\SaveProject;
-use App\Enums\ProjectStatus;
-use App\Models\MealCoverageAssignment;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\User;
-use App\Support\MealCoverage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Projects\SaveProject;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\MealCoverage;
 
 beforeEach(function () {
     $this->user = User::factory()->role('General Manager')->create();
@@ -18,7 +18,7 @@ beforeEach(function () {
     $this->owner = insertHrEmployee();
     $this->program = Program::factory()->create(['manager_id' => $this->owner]);
     $this->create = fn (array $fields = []) => Livewire::actingAs($this->user)
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->call('openCreateModal')
         ->set('sectorIds', newProjectSectorIds())
         ->set([
@@ -135,7 +135,7 @@ test('moving a project onto a center and program that already has an open projec
     $moving = Project::factory()->create(['center_id' => $otherCenter, 'city_id' => $this->cityId, 'program_id' => $this->program->id]);
 
     Livewire::actingAs($this->user)
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->call('openEditModal', $moving->id)
         ->set('centerId', (string) $this->centerId)
         ->call('saveProject')
@@ -148,7 +148,7 @@ test('a project that is not yet mapped to a center can still be edited and keeps
     $project = Project::factory()->create(['name' => 'Legacy', 'center_id' => null, 'city_id' => $this->cityId, 'program_id' => $this->program->id, 'user_id' => $this->owner]);
 
     Livewire::actingAs($this->user)
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->call('openEditModal', $project->id)
         ->set('name', 'Legacy renamed')
         ->call('saveProject')
@@ -165,7 +165,7 @@ test('a project keeps its inactive center on edit and shows it as inactive', fun
     $project = Project::factory()->create(['center_id' => $closedCenter, 'city_id' => $this->cityId, 'program_id' => $this->program->id, 'user_id' => $this->owner]);
 
     Livewire::actingAs($this->user)
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->call('openEditModal', $project->id)
         ->assertSet('centerId', (string) $closedCenter)
         ->set('name', 'Still here')
@@ -173,14 +173,14 @@ test('a project keeps its inactive center on edit and shows it as inactive', fun
         ->assertHasNoErrors();
 
     Livewire::actingAs($this->user)
-        ->test('pages::projects.show', ['project' => $project->fresh()])
+        ->test('tracking::projects.show', ['project' => $project->fresh()])
         ->assertSee('Old Center')
         ->assertSee('Center inactive');
 });
 
 test('someone without project create rights still cannot create one', function () {
     Livewire::actingAs(User::factory()->role('Team Member')->create())
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->call('openCreateModal')
         ->assertForbidden();
 
@@ -192,13 +192,13 @@ test('managers see the projects that have no center yet', function () {
     Project::factory()->create(['name' => 'Mapped Project', 'center_id' => $this->centerId]);
 
     Livewire::actingAs($this->user)
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->assertSeeText('Projects without a center (1)')
         ->set('showProjectsWithoutCenter', true)
         ->assertSeeInOrder(['Projects without a center', 'Unmapped Project']);
 
     Livewire::actingAs(User::factory()->role('Team Member')->create())
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->assertDontSeeText('Projects without a center');
 });
 
@@ -313,7 +313,7 @@ describe('hosted projects (W-01, D-55)', function () {
         ]);
 
         Livewire::actingAs($this->user)
-            ->test('pages::projects.index')
+            ->test('tracking::projects.index')
             ->call('openEditModal', $project->id)
             ->assertSet('hostCenterId', (string) $this->hostId)
             ->assertSet('cityId', (string) $this->idlebId)
@@ -347,7 +347,7 @@ test('a project whose center HR has deactivated says so on the directory, the pr
     $closedId = insertHrCenter($this->cityId, 'Closed Center', 'مركز مغلق', isActive: false);
     $project = Project::factory()->create(['name' => 'Closed Center Water', 'center_id' => $closedId, 'city_id' => $this->cityId]);
 
-    Livewire::actingAs($this->user)->test('pages::projects.index')
+    Livewire::actingAs($this->user)->test('tracking::projects.index')
         ->assertSeeHtml('data-test="center-inactive-badge"')
         ->assertSeeText(__('projects.center_inactive_badge'));
 
@@ -356,7 +356,7 @@ test('a project whose center HR has deactivated says so on the directory, the pr
         ->assertOk()
         ->assertSee('data-test="center-inactive-badge"', false);
 
-    Livewire::actingAs($this->user)->test('pages::proposals.index')
+    Livewire::actingAs($this->user)->test('tracking::proposals.index')
         ->call('openCreateModal')
         ->assertSeeText('Closed Center Water')
         ->assertSeeHtml('data-test="center-inactive-badge"');
@@ -367,7 +367,7 @@ test('an active center, a hosted project and a project with no center carry no b
     Project::factory()->hostedBy(insertHrCenter(insertHrCity('Aleppo', 'حلب'), 'Head Office Aleppo', 'المكتب الرئيسي حلب', isActive: false))->create(['name' => 'Hosted Water']);
     Project::factory()->create(['name' => 'Unmapped Water', 'center_id' => null]);
 
-    Livewire::actingAs($this->user)->test('pages::projects.index')
+    Livewire::actingAs($this->user)->test('tracking::projects.index')
         ->assertDontSeeHtml('data-test="center-inactive-badge"');
 });
 
@@ -380,7 +380,7 @@ test('the inactive badge adds no query per row', function () {
         DB::listen(function () use (&$queries): void {
             $queries++;
         });
-        Livewire::actingAs($this->user)->test('pages::projects.index');
+        Livewire::actingAs($this->user)->test('tracking::projects.index');
 
         return $queries;
     };

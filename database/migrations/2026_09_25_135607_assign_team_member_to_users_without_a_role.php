@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Models\Activity;
 use App\Models\Role;
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
+use Modules\Core\Models\User;
 use Spatie\Permission\PermissionRegistrar;
 
 return new class extends Migration

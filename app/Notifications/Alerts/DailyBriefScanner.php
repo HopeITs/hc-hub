@@ -9,6 +9,7 @@ use App\Enums\NotificationPriority;
 use App\Models\UserNotification;
 use App\Notifications\NotificationPayload;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Notifications\Alerts\StalledScanner;
 
 /**
  * Each person's morning summary of their own items. Sent only when there is

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use Modules\Core\Models\User;
 
 test('guests visiting the root url are sent straight to login', function () {
     $this->get(route('home'))->assertRedirect(route('login'));

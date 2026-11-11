@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\User;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
 
 beforeEach(function () {
     $this->user = User::factory()->role('General Manager')->create();
@@ -16,7 +16,7 @@ beforeEach(function () {
     $this->aleppoCenterId = insertHrCenter($this->aleppoId, 'Hope Center Aleppo', 'مركز الأمل حلب');
     $this->owner = insertHrEmployee();
     $this->program = Program::factory()->create(['manager_id' => $this->owner]);
-    $this->open = fn (): Testable => Livewire::actingAs($this->user)->test('pages::projects.index')->call('openCreateModal');
+    $this->open = fn (): Testable => Livewire::actingAs($this->user)->test('tracking::projects.index')->call('openCreateModal');
 });
 
 /**
@@ -38,7 +38,7 @@ test('the create dialog is titled «Add center» and an edit keeps «Edit projec
 
     $project = Project::factory()->create(['center_id' => $this->idlibCenterId, 'city_id' => $this->idlibId, 'program_id' => $this->program->id]);
 
-    Livewire::actingAs($this->user)->test('pages::projects.index')
+    Livewire::actingAs($this->user)->test('tracking::projects.index')
         ->call('openEditModal', $project->id)
         ->assertSee(__('projects.edit_project'));
 });
@@ -148,7 +148,7 @@ test('the name default is worked out in the browser and the server never writes 
 
 test('a Team Member cannot open the create dialog', function () {
     Livewire::actingAs(User::factory()->role('Team Member')->create())
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->call('openCreateModal')
         ->assertForbidden();
 });

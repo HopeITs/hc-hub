@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Enums\ProposalStatus;
-use App\Models\ProposalPlanShift;
-use App\Models\ProposalStatusNote;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\ProposalPlanShift;
+use Modules\Tracking\Models\ProposalStatusNote;
 
 /**
  * @extends Factory<ProposalPlanShift>

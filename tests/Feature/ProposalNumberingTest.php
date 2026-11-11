@@ -1,11 +1,11 @@
 <?php
 
-use App\Actions\Proposals\SaveProposal;
-use App\Models\Donor;
-use App\Models\Project;
-use App\Models\Proposal;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Tracking\Actions\Proposals\SaveProposal;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 function numberingInput(Project $project, string $start): array
 {

@@ -1,23 +1,23 @@
 <?php
 
-use App\Actions\Tasks\AcceptDepartmentTask;
-use App\Actions\Tasks\DeliverDepartmentTask;
-use App\Actions\Tasks\ReturnDepartmentTask;
-use App\Enums\DeliverableKind;
-use App\Enums\DeliveryState;
 use App\Enums\FileType;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\TaskAttachment;
-use App\Models\User;
 use App\Support\StoredFiles;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Tasks\AcceptDepartmentTask;
+use Modules\Tracking\Actions\Tasks\DeliverDepartmentTask;
+use Modules\Tracking\Actions\Tasks\ReturnDepartmentTask;
+use Modules\Tracking\Enums\DeliverableKind;
+use Modules\Tracking\Enums\DeliveryState;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 
 beforeEach(function () {
     Storage::fake('local');

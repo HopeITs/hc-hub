@@ -2,12 +2,12 @@
 
 use App\Models\HrCity;
 use App\Models\HrEmployee;
-use App\Models\Milestone;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Risk;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Risk;
 
 test('a project belongs to an hr city, a program and an hr employee', function () {
     $city = HrCity::find(insertHrCity());

@@ -6,7 +6,6 @@ namespace App\Listeners;
 
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
-use App\Models\User;
 use App\Notifications\AppNotification;
 use App\Notifications\LockoutSurge;
 use App\Notifications\NotificationPayload;
@@ -16,6 +15,7 @@ use Illuminate\Auth\Events\Lockout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
+use Modules\Core\Models\User;
 use Throwable;
 
 /**

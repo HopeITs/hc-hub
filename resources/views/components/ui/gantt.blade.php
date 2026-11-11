@@ -126,7 +126,7 @@
         $shortcuts['R'] = __('gantt.shortcuts.trace');
         $shortcuts['Esc'] = __('gantt.shortcuts.clear');
     }
-    $linkTypes = collect(\App\Enums\DependencyType::cases())->mapWithKeys(fn ($type) => [$type->value => $type->code().' · '.$type->label()]);
+    $linkTypes = collect(\Modules\Tracking\Enums\DependencyType::cases())->mapWithKeys(fn ($type) => [$type->value => $type->code().' · '.$type->label()]);
     $labels = [
         'confirmDeleteBaseline' => __('gantt.confirm_delete_baseline'),
         'kinds' => [

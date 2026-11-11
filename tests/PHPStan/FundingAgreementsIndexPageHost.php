@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\FiltersByStrategy;
-use App\Livewire\Concerns\FiltersFinanceRegister;
-use App\Livewire\Concerns\FundingAgreements\ChartsAgreementCalendar;
-use App\Livewire\Concerns\FundingAgreements\ExportsAgreementRegister;
-use App\Livewire\Concerns\FundingAgreements\ReadsAgreementRegister;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Tracking\Livewire\Concerns\FiltersByStrategy;
+use Modules\Tracking\Livewire\Concerns\FiltersFinanceRegister;
+use Modules\Tracking\Livewire\Concerns\FundingAgreements\ChartsAgreementCalendar;
+use Modules\Tracking\Livewire\Concerns\FundingAgreements\ExportsAgreementRegister;
+use Modules\Tracking\Livewire\Concerns\FundingAgreements\ReadsAgreementRegister;
 
 /**
  * Stands in for funding-agreements/index, with every trait that page gained

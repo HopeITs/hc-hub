@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\MonthlyReportStatus;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReport;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;

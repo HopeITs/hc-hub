@@ -1,12 +1,12 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Proposal;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Proposal;
 
 /*
 | The donor reports register (W-16): every report the viewer may open, as
@@ -35,7 +35,7 @@ beforeEach(function () {
 
 test('a funding-agreements.view holder sees every report with its proposal name', function () {
     Livewire::actingAs(User::factory()->role('Financial')->create())
-        ->test('pages::donor-reports.index')
+        ->test('tracking::donor-reports.index')
         ->assertOk()
         ->assertSeeText('Safe Schools')
         ->assertSeeText('Q1 narrative')
@@ -47,7 +47,7 @@ test('a funding-agreements.view holder sees every report with its proposal name'
 
 test('the state filter hides reports in another state', function () {
     Livewire::actingAs(User::factory()->role('Financial')->create())
-        ->test('pages::donor-reports.index')
+        ->test('tracking::donor-reports.index')
         ->set('state', 'submitted')
         ->assertSeeText('Final financial')
         ->assertDontSeeText('Q1 narrative')
@@ -61,7 +61,7 @@ test('the state filter hides reports in another state', function () {
 });
 
 test('the donor and proposal filters and the proposal search narrow the list', function () {
-    $page = Livewire::actingAs(User::factory()->role('Financial')->create())->test('pages::donor-reports.index');
+    $page = Livewire::actingAs(User::factory()->role('Financial')->create())->test('tracking::donor-reports.index');
 
     $page->set('donor', (string) $this->open->donorProposal->donor_id)
         ->assertSeeText('Q1 narrative')

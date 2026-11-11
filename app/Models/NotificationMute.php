@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Modules\Core\Models\User;
 
 /**
  * A module one user has muted. Direct notifications ignore it.

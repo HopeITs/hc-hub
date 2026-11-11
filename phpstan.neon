@@ -5,6 +5,7 @@ includes:
 parameters:
     paths:
         - app/
+        - modules/
         - bootstrap/app.php
         - config/
         - database/
@@ -12,6 +13,12 @@ parameters:
         # Hosts for the Livewire traits only the Blade pages use (see that folder).
         # The rest of tests/ stays out: see .ai/rules/enums.md.
         - tests/PHPStan/
+
+    # A module's Blade views (Livewire SFCs included) stay out, as
+    # resources/views always has.
+    excludePaths:
+        analyse:
+            - modules/*/resources/*
 
     level: 7
 
@@ -24,13 +31,32 @@ parameters:
             # foreign key throws QueryException. Model::delete()'s @throws lists
             # only LogicException, so PHPStan calls the catch dead.
             identifier: catch.neverThrown
-            path: app/Models/User.php
+            path: modules/Core/Models/User.php
             count: 1
         -
             # $user->email reads the HR database, which can fail; a log line must
             # never break the sign-in it describes. Accessors declare no @throws.
             identifier: catch.neverThrown
             path: app/Listeners/LogAuthenticationEvent.php
+            count: 1
+
+        # Fortify's events document their $user as \App\Models\User in their
+        # own docblocks; the app's user model is Modules\Core\Models\User (the
+        # guard's model, config/auth.php), so the object really passed is ours.
+        -
+            message: '#expects App.Models.User, Modules.Core.Models.User given#'
+            identifier: argument.type
+            path: app/Http/Controllers/EmailTwoFactorController.php
+            count: 2
+        -
+            message: '#expects Modules.Core.Models.User, App.Models.User given#'
+            identifier: argument.type
+            path: app/Listeners/AlertOnFailedSecondStep.php
+            count: 1
+        -
+            message: '#expects Modules.Core.Models.User, App.Models.User given#'
+            identifier: argument.type
+            path: app/Listeners/ForgetTrustedDevicesOnNewRecoveryCodes.php
             count: 1
         -
             # Seeder::$command is documented as non-null but is only set when the
@@ -48,28 +74,28 @@ parameters:
             # transfers_tracking.amount_*_currency are NOT NULL (default USD), so
             # PHPStan calls the `?? ''` fallback dead.
             identifier: nullCoalesce.expr
-            path: app/Livewire/Concerns/Proposals/ChartsProposalChronology.php
+            path: modules/Tracking/Livewire/Concerns/Proposals/ChartsProposalChronology.php
             count: 1
         -
             # chronology() skips a status note whose date is null;
             # proposal_status_notes.date is NOT NULL (useCurrent()), so the check
             # can never be true.
             identifier: identical.alwaysFalse
-            path: app/Livewire/Concerns/Proposals/ChartsProposalChronology.php
+            path: modules/Tracking/Livewire/Concerns/Proposals/ChartsProposalChronology.php
             count: 1
         -
             # laneLabels() returns its labels with a lane and an anchor added.
             # PHPStan cannot express "template T plus two keys", so the docblock
             # says list<T> and the added keys are reported as breaking T.
             identifier: return.type
-            path: app/Livewire/Concerns/Proposals/ChartsProposalChronology.php
+            path: modules/Tracking/Livewire/Concerns/Proposals/ChartsProposalChronology.php
             count: 1
         -
             # agreementMoney() compares `amount_received_currency?->value` and
             # `amount_transfered_currency?->value`; both columns are NOT NULL
             # (default USD), so the `?->` is reported as never meeting null.
             identifier: nullsafe.neverNull
-            path: app/Livewire/Concerns/Proposals/ReadsProposalFunding.php
+            path: modules/Tracking/Livewire/Concerns/Proposals/ReadsProposalFunding.php
             count: 4
         -
             # deadlines() has two: `amount_transfered_currency?->value` (NOT NULL
@@ -78,14 +104,14 @@ parameters:
             # organisation-wide target on purpose: keep it. PHPStan flags only
             # the `?->`, which is redundant on the left of `??`.
             identifier: nullsafe.neverNull
-            path: app/Livewire/Concerns/Proposals/ReadsProposalHealth.php
+            path: modules/Tracking/Livewire/Concerns/Proposals/ReadsProposalHealth.php
             count: 2
         -
             # deadlines() tests $grantEnd (actual end ?? planned end) and
             # warnings() tests planned_date_end against null;
             # proposals.planned_date_end is NOT NULL, so both are always true.
             identifier: notIdentical.alwaysTrue
-            path: app/Livewire/Concerns/Proposals/ReadsProposalHealth.php
+            path: modules/Tracking/Livewire/Concerns/Proposals/ReadsProposalHealth.php
             count: 2
         -
             # tasks() eager-loads `source` with a callback typed for the MorphTo
@@ -93,7 +119,7 @@ parameters:
             # callback as taking any Relation.
             message: '#MorphTo#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Proposals/ReadsProposalDelivery.php
+            path: modules/Tracking/Livewire/Concerns/Proposals/ReadsProposalDelivery.php
             count: 1
         -
             # agendaBetween() eager-loads a task's `source` with a callback typed
@@ -113,14 +139,14 @@ parameters:
             # action that reaches it, returns first when canSeeType() rejects
             # the key, and canSeeType() rejects any key outside the seven.
             identifier: match.unhandled
-            path: app/Livewire/Concerns/Calendar/FiltersCalendarTypes.php
+            path: modules/Tracking/Livewire/Concerns/Calendar/FiltersCalendarTypes.php
             count: 1
         -
             # focusedItems() reads `planIndicator?->indicator?->name ?? fallback`.
             # The fallback is wanted (a report's indicator can be gone); PHPStan
             # flags only the last `?->`, redundant on the left of `??`.
             identifier: nullsafe.neverNull
-            path: app/Livewire/Concerns/Calendar/FindsFocusedTypeDates.php
+            path: modules/Tracking/Livewire/Concerns/Calendar/FindsFocusedTypeDates.php
             count: 1
         -
             # focusedItems() documents title as string and date as non-null.
@@ -128,26 +154,26 @@ parameters:
             # read due_date/next_step_due_on, nullable casts the queries already
             # filter with whereNotNull().
             identifier: return.type
-            path: app/Livewire/Concerns/Calendar/FindsFocusedTypeDates.php
+            path: modules/Tracking/Livewire/Concerns/Calendar/FindsFocusedTypeDates.php
             count: 1
         -
             # saveMilestone() reads `$existingMilestone?->project_id ?? (int) ...`;
             # the `?->` is redundant on the left of `??`.
             identifier: nullsafe.neverNull
-            path: app/Livewire/Concerns/Calendar/ManagesCalendarMilestones.php
+            path: modules/Tracking/Livewire/Concerns/Calendar/ManagesCalendarMilestones.php
             count: 1
         -
             # saveMilestone() passes Rule::in(...) to Rule::when(). Rules\In is a
             # valid rule object at runtime, but Rule::when()'s signature does not
             # list it.
             identifier: argument.type
-            path: app/Livewire/Concerns/Calendar/ManagesCalendarMilestones.php
+            path: modules/Tracking/Livewire/Concerns/Calendar/ManagesCalendarMilestones.php
             count: 1
         -
             # dayDetailItems() reads `planIndicator?->indicator?->name ?? fallback`;
             # same as focusedItems() above.
             identifier: nullsafe.neverNull
-            path: app/Livewire/Concerns/Calendar/ShowsCalendarDay.php
+            path: modules/Tracking/Livewire/Concerns/Calendar/ShowsCalendarDay.php
             count: 1
 
         # The indicators/index traits below hold code moved unchanged from the
@@ -158,7 +184,7 @@ parameters:
             # types every with() callback as taking any Relation.
             message: '#MorphTo#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Indicators/BuildsIndicatorRows.php
+            path: modules/Tracking/Livewire/Concerns/Indicators/BuildsIndicatorRows.php
             count: 1
         -
             # describeTarget() documents sourceLabel as string|null and donors as
@@ -168,14 +194,14 @@ parameters:
             # types as array<int, mixed> (not a list, values untyped). The
             # docblock states the exact shape the page relies on, so it stays.
             identifier: return.type
-            path: app/Livewire/Concerns/Indicators/BuildsIndicatorRows.php
+            path: modules/Tracking/Livewire/Concerns/Indicators/BuildsIndicatorRows.php
             count: 1
         -
             # changeKeepsTargetsInChain() eager-loads `source` with a callback
             # typed for the MorphTo it receives; same as allIndicators() above.
             message: '#MorphTo#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Indicators/ManagesIndicatorForm.php
+            path: modules/Tracking/Livewire/Concerns/Indicators/ManagesIndicatorForm.php
             count: 1
 
         # Raw SQL that cannot be a literal string but carries no user input.
@@ -188,22 +214,22 @@ parameters:
             # values are today's date and a year's bounds (sprintf('%04d', int)).
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Models/TransfersTracking.php
+            path: modules/Tracking/Models/TransfersTracking.php
             count: 4
         -
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Support/AccountMoney.php
+            path: modules/Tracking/Support/AccountMoney.php
             count: 2
         -
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Support/AgreementMoney.php
+            path: modules/Tracking/Support/AgreementMoney.php
             count: 1
         -
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Models/DonorProposal.php
+            path: modules/Tracking/Models/DonorProposal.php
             count: 1
         -
             # Sort terms are SQL each register page writes in its own code; only
@@ -213,7 +239,7 @@ parameters:
             # FundingAgreementsIndexPageHost and AdminAccountsPageHost).
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Livewire/Concerns/FiltersFinanceRegister.php
+            path: modules/Tracking/Livewire/Concerns/FiltersFinanceRegister.php
             count: 6
         -
             # orderByEnumSequence() builds a CASE from the fixed value lists
@@ -222,14 +248,14 @@ parameters:
             # each build one from task ids cast to int and list positions.
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Tasks/FiltersTaskDirectory.php
+            path: modules/Tracking/Livewire/Concerns/Tasks/FiltersTaskDirectory.php
             count: 4
         -
             # taskStats() inlines two dates it formats itself (toDateString())
             # into one aggregate select; there is no user input in it.
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Tasks/ReadsTaskViews.php
+            path: modules/Tracking/Livewire/Concerns/Tasks/ReadsTaskViews.php
             count: 1
 
         # The proposals/index traits hold code moved unchanged from the page,
@@ -240,14 +266,14 @@ parameters:
             # `amount_transfered_currency?->value`; both columns are NOT NULL
             # (default USD), so the `?->` is reported as never meeting null.
             identifier: nullsafe.neverNull
-            path: app/Livewire/Concerns/Proposals/ChartsProposalPipeline.php
+            path: modules/Tracking/Livewire/Concerns/Proposals/ChartsProposalPipeline.php
             count: 5
         -
             # togglePhase() reads `ProposalPhase::tryFrom($phase)?->value ?? ''`.
             # tryFrom() does return null; PHPStan only objects that `??` already
             # covers null, so the `?->` is redundant.
             identifier: nullsafe.neverNull
-            path: app/Livewire/Concerns/Proposals/ReadsProposalRegister.php
+            path: modules/Tracking/Livewire/Concerns/Proposals/ReadsProposalRegister.php
             count: 1
         -
             # selectLine() and totals() pass AgreementMoney::ownerSelect() and
@@ -256,7 +282,7 @@ parameters:
             # key against a pattern.
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Proposals/ReadsProposalRegister.php
+            path: modules/Tracking/Livewire/Concerns/Proposals/ReadsProposalRegister.php
             count: 2
         -
             # flow() maps each funded proposal and project through
@@ -264,7 +290,7 @@ parameters:
             # PHPStan reads as array<string, mixed>; the docblock states the exact
             # shapes the Overview view relies on, so it stays.
             identifier: return.type
-            path: app/Livewire/Concerns/Proposals/ChartsProposalPipeline.php
+            path: modules/Tracking/Livewire/Concerns/Proposals/ChartsProposalPipeline.php
             count: 1
         -
             # registerSorts() builds its date columns with a closure whose $dir is
@@ -272,7 +298,7 @@ parameters:
             # and reports it against the declared 'asc'|'desc'. Reported once per
             # return statement.
             identifier: return.type
-            path: app/Livewire/Concerns/Proposals/ReadsProposalRegister.php
+            path: modules/Tracking/Livewire/Concerns/Proposals/ReadsProposalRegister.php
             count: 3
 
         # The results/index traits below hold code moved unchanged from the page.
@@ -286,7 +312,7 @@ parameters:
             # types as array<int, mixed> (not a list, values untyped). The
             # docblock states the exact shape the page relies on, so it stays.
             identifier: return.type
-            path: app/Livewire/Concerns/Results/BuildsResultsFramework.php
+            path: modules/Tracking/Livewire/Concerns/Results/BuildsResultsFramework.php
             count: 1
         -
             # groupedRoots() reads a statement's program as `program?->name ??
@@ -294,21 +320,21 @@ parameters:
             # fallback is what puts program-less statements in the Unassigned
             # group; PHPStan only flags the `?->` as redundant on the left of `??`.
             identifier: nullsafe.neverNull
-            path: app/Livewire/Concerns/Results/BuildsResultsTree.php
+            path: modules/Tracking/Livewire/Concerns/Results/BuildsResultsTree.php
             count: 1
         -
             # overview() bumps $levels[$level][...] for a string $level; PHPStan
             # cannot tell that every ResultType value was seeded with all three
             # counters, so it reports the keys as possibly missing.
             identifier: offsetAccess.notFound
-            path: app/Livewire/Concerns/Results/SummarisesResults.php
+            path: modules/Tracking/Livewire/Concerns/Results/SummarisesResults.php
             count: 2
         -
             # The same $levels array: after those increments PHPStan reads
             # `measured` / `indicators` as optional, so the declared `levels` shape
             # in the return docblock no longer matches.
             identifier: return.type
-            path: app/Livewire/Concerns/Results/SummarisesResults.php
+            path: modules/Tracking/Livewire/Concerns/Results/SummarisesResults.php
             count: 1
 
         # The projects/show traits below hold code moved unchanged from the page,
@@ -328,19 +354,19 @@ parameters:
             # `$resultOrder[...] ?? 99` fallback is dead (ResultType has only
             # those three cases).
             identifier: return.type
-            path: app/Livewire/Concerns/Projects/ReadsProjectDelivery.php
+            path: modules/Tracking/Livewire/Concerns/Projects/ReadsProjectDelivery.php
             count: 1
         -
             # The same chain: sortBy()'s callback reads `$group['result']->type`
             # from that mis-typed shape, which PHPStan cannot resolve.
             identifier: argument.unresolvableType
-            path: app/Livewire/Concerns/Projects/ReadsProjectDelivery.php
+            path: modules/Tracking/Livewire/Concerns/Projects/ReadsProjectDelivery.php
             count: 1
         -
             # The same chain: values() after that sortBy() returns the
             # unresolvable type.
             identifier: method.unresolvableReturnType
-            path: app/Livewire/Concerns/Projects/ReadsProjectDelivery.php
+            path: modules/Tracking/Livewire/Concerns/Projects/ReadsProjectDelivery.php
             count: 1
 
         # The targets/index traits below hold code moved unchanged from the page,
@@ -354,7 +380,7 @@ parameters:
             # real shape the partial relies on, so it stays.
             message: '#portfolio\(\) should return#'
             identifier: return.type
-            path: app/Livewire/Concerns/Reports/ReadsReportPortfolio.php
+            path: modules/Tracking/Livewire/Concerns/Reports/ReadsReportPortfolio.php
             count: 1
         -
             # targets() eager-loads `source` with a callback typed for the MorphTo
@@ -362,14 +388,14 @@ parameters:
             # callback as taking any Relation.
             message: '#MorphTo#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Targets/ReadsTargets.php
+            path: modules/Tracking/Livewire/Concerns/Targets/ReadsTargets.php
             count: 1
         -
             # saveTarget() loads the original row's `source` the same way, to
             # compare its chain issues with the edited ones.
             message: '#MorphTo#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Targets/ManagesTargetForm.php
+            path: modules/Tracking/Livewire/Concerns/Targets/ManagesTargetForm.php
             count: 1
 
         # The funding-agreements/show traits hold code moved unchanged from the
@@ -381,7 +407,7 @@ parameters:
             # planned_date_end are NOT NULL, so after the `??` neither can be null
             # and both `=== null` checks are reported as always false.
             identifier: identical.alwaysFalse
-            path: app/Livewire/Concerns/FundingAgreements/ReadsAgreementMoney.php
+            path: modules/Tracking/Livewire/Concerns/FundingAgreements/ReadsAgreementMoney.php
             count: 2
         -
             # journeys() documents each stop label and the timing line as
@@ -389,7 +415,7 @@ parameters:
             # string|array (the keys used always resolve to strings), so the
             # declared shape is reported.
             identifier: return.type
-            path: app/Livewire/Concerns/FundingAgreements/ReadsAgreementMoney.php
+            path: modules/Tracking/Livewire/Concerns/FundingAgreements/ReadsAgreementMoney.php
             count: 1
 
         # The transfers/index traits hold code moved unchanged from the page,
@@ -404,7 +430,7 @@ parameters:
             # user types is bound with ? placeholders. Typed plain string.
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Transfers/ReadsTransferRegister.php
+            path: modules/Tracking/Livewire/Concerns/Transfers/ReadsTransferRegister.php
             count: 5
         -
             # ledgerLines(), stageCounts() and groupTotals() inline the same
@@ -413,7 +439,7 @@ parameters:
             # aggregate selects; there is no user input in them.
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Transfers/ReadsTransferLedger.php
+            path: modules/Tracking/Livewire/Concerns/Transfers/ReadsTransferLedger.php
             count: 4
         -
             # amount(), percent() and amountAtLeast() return Number::format(),
@@ -425,13 +451,13 @@ parameters:
             # is missing. The closures they came from declared string too, so
             # declaring a wider type would be a change.
             identifier: return.type
-            path: app/Livewire/Concerns/Transfers/PresentsTransferRegister.php
+            path: modules/Tracking/Livewire/Concerns/Transfers/PresentsTransferRegister.php
             count: 3
         -
             # percent() hands that same Number::format() result (string|false)
             # to str_replace().
             identifier: argument.type
-            path: app/Livewire/Concerns/Transfers/PresentsTransferRegister.php
+            path: modules/Tracking/Livewire/Concerns/Transfers/PresentsTransferRegister.php
             count: 1
         -
             # groupLabelOf() reads an account name as `account?->account_name ??
@@ -440,7 +466,7 @@ parameters:
             # those rows on purpose: keep it. PHPStan types the BelongsTo as
             # never null and flags only the `?->`, redundant on the left of `??`.
             identifier: nullsafe.neverNull
-            path: app/Livewire/Concerns/Transfers/ReadsTransferRegister.php
+            path: modules/Tracking/Livewire/Concerns/Transfers/ReadsTransferRegister.php
             count: 1
 
         # The donors/index traits hold code moved unchanged from the page, which
@@ -453,14 +479,14 @@ parameters:
             # checks its key against a pattern. Typed plain string.
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Donors/ReadsDonorRegister.php
+            path: modules/Tracking/Livewire/Concerns/Donors/ReadsDonorRegister.php
             count: 2
         -
             # exportCsv() passes AgreementMoney::ownerSelect() to selectRaw(); same
             # fixed column list as rows() above.
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Donors/ExportsDonorRegister.php
+            path: modules/Tracking/Livewire/Concerns/Donors/ExportsDonorRegister.php
             count: 1
         -
             # wallet() reads donor_id, currency and total off tranches fetched
@@ -470,7 +496,7 @@ parameters:
             # overrides the one inferred from the collection (a @param on the
             # closure is ignored), so the three reads are reported.
             identifier: property.notFound
-            path: app/Livewire/Concerns/Donors/ChartsDonorPortfolio.php
+            path: modules/Tracking/Livewire/Concerns/Donors/ChartsDonorPortfolio.php
             count: 3
         -
             # upcomingTransfers() documents each row's date as non-null. The query
@@ -478,7 +504,7 @@ parameters:
             # scheduled_date is nullable (migration 2026_09_14_111851) and PHPStan
             # cannot see the filter, so the nullable cast is reported.
             identifier: return.type
-            path: app/Livewire/Concerns/Donors/ChartsDonorPortfolio.php
+            path: modules/Tracking/Livewire/Concerns/Donors/ChartsDonorPortfolio.php
             count: 1
         -
             # donorMoney() compares `amount_received_currency?->value` and
@@ -486,7 +512,7 @@ parameters:
             # (default USD, never made nullable), so the `?->` is reported as
             # never meeting null.
             identifier: nullsafe.neverNull
-            path: app/Livewire/Concerns/Donors/ChartsDonorPortfolio.php
+            path: modules/Tracking/Livewire/Concerns/Donors/ChartsDonorPortfolio.php
             count: 2
         -
             # moneyByCurrency() adds every value of agreementMoney()'s array shape
@@ -495,7 +521,7 @@ parameters:
             # `missingNet: int`. The loop does not tell it that key only ever
             # receives an int; splitting the sum per key is a logic change.
             identifier: return.type
-            path: app/Livewire/Concerns/Donors/ReadsDonorMoney.php
+            path: modules/Tracking/Livewire/Concerns/Donors/ReadsDonorMoney.php
             count: 1
         -
             # receivedElsewhere() tests `amount_received_currency !== null`, but
@@ -504,7 +530,7 @@ parameters:
             # `@property Currency` (non-null, from the enum cast), so PHPStan
             # takes the test as always true. Dropping it is a logic change.
             identifier: notIdentical.alwaysTrue
-            path: app/Livewire/Concerns/Donors/ReadsDonorMoney.php
+            path: modules/Tracking/Livewire/Concerns/Donors/ReadsDonorMoney.php
             count: 1
         -
             # amount() and shortAmount() return Number::format() and
@@ -514,7 +540,7 @@ parameters:
             # is missing. The closures they came from declared string too, so
             # declaring string|false would be a change.
             identifier: return.type
-            path: app/Livewire/Concerns/Donors/PresentsDonorRegister.php
+            path: modules/Tracking/Livewire/Concerns/Donors/PresentsDonorRegister.php
             count: 2
 
         # The admin/accounts traits hold code moved unchanged from the page, which
@@ -526,7 +552,7 @@ parameters:
             # app/Support/AccountMoney.php, outside this page.
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Livewire/Concerns/Admin/ReadsAccountRegister.php
+            path: modules/Tracking/Livewire/Concerns/Admin/ReadsAccountRegister.php
             count: 2
 
         # The dashboard/index traits hold code moved unchanged from the page,
@@ -606,7 +632,7 @@ parameters:
             # string parameter does not give a subtype of the inferred closure.
             message: '#expects (.+\|)?literal-string, .+ given#'
             identifier: argument.type
-            path: app/Livewire/Concerns/FundingAgreements/ReadsAgreementRegister.php
+            path: modules/Tracking/Livewire/Concerns/FundingAgreements/ReadsAgreementRegister.php
             count: 3
         -
             # calendar() reads ar_status, transfer_date and scheduled_date off the
@@ -618,7 +644,7 @@ parameters:
             # an arrow function, and a typed @var on $sum is rejected because it
             # narrows the native callable parameter.
             identifier: property.notFound
-            path: app/Livewire/Concerns/FundingAgreements/ChartsAgreementCalendar.php
+            path: modules/Tracking/Livewire/Concerns/FundingAgreements/ChartsAgreementCalendar.php
             count: 5
 
         # The admin/users traits hold code moved unchanged from the page, which
@@ -640,15 +666,15 @@ parameters:
             # selectedRoleUsers() calls $this->selectedRole->users(). Spatie's
             # Role::users() builds its morphedByMany from the guard's user
             # model at run time (getModelForGuard()), so PHPStan types the
-            # relation as Model rather than App\Models\User; the docblock and
+            # relation as Model rather than Modules\Core\Models\User; the docblock and
             # the closure's User type hint state what the guard really holds.
-            message: '#should return .*Collection<int, App.Models.User> but returns#'
+            message: '#should return .*Collection<int, Modules.Core.Models.User> but returns#'
             identifier: return.type
             path: app/Livewire/Concerns/Admin/ManagesRoles.php
             count: 1
         -
             # The sortBy() closure in selectedRoleUsers() is typed for
-            # App\Models\User, but Spatie's Role::users() relation is typed
+            # Modules\Core\Models\User, but Spatie's Role::users() relation is typed
             # Model (the user model comes from the guard at run time).
             message: '#sortBy\(\) expects#'
             identifier: argument.type
@@ -674,7 +700,7 @@ parameters:
             # help either: matching what PHPStan infers means `result: mixed` and
             # a bare Collection, which drops the shape instead of fixing it.
             identifier: return.type
-            path: app/Livewire/Concerns/AnnualPlans/ReadsAnnualPlanSummary.php
+            path: modules/Tracking/Livewire/Concerns/AnnualPlans/ReadsAnnualPlanSummary.php
             count: 1
         -
             # planYears() tests `$strategy->start_year !== null` and
@@ -683,5 +709,5 @@ parameters:
             # Strategy documents both as `@property int`, so PHPStan takes each
             # test as always true. Dropping them is a logic change.
             identifier: notIdentical.alwaysTrue
-            path: app/Livewire/Concerns/Programs/ReadsProgramDelivery.php
+            path: modules/Tracking/Livewire/Concerns/Programs/ReadsProgramDelivery.php
             count: 2

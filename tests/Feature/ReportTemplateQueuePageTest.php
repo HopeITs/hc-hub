@@ -1,17 +1,17 @@
 <?php
 
-use App\Enums\ProjectStatus;
-use App\Enums\ReportTemplateLineStatus;
 use App\Models\Activity;
-use App\Models\MealCoverageAssignment;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ReportTemplate;
-use App\Models\ReportTemplateLine;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ReportTemplateLineStatus;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Models\ReportTemplateLine;
 
 /*
 | MEAL's "Templates to confirm" queue (contracts.md §12.4, T33 slice 3): the
@@ -105,7 +105,7 @@ test('a confirmed template is listed only while it has pending lines, with their
     $grown = rtqTemplate('Growing Project', confirmed: true, lineStatuses: [ReportTemplateLineStatus::Confirmed, ReportTemplateLineStatus::Pending, ReportTemplateLineStatus::Pending], proposalName: 'Spring Hygiene');
 
     Livewire::actingAs($manager)
-        ->test('pages::report-templates.index')
+        ->test('tracking::report-templates.index')
         ->assertDontSee('Settled Project')
         ->assertSee('Growing Project')
         ->assertSee('Spring Hygiene')
@@ -116,7 +116,7 @@ test('a confirmed template is listed only while it has pending lines, with their
 
 test('an empty queue says so', function () {
     Livewire::actingAs(mealManager())
-        ->test('pages::report-templates.index')
+        ->test('tracking::report-templates.index')
         ->assertSee('No templates to confirm');
 });
 
@@ -128,7 +128,7 @@ test('the city filter keeps the projects of that governorate', function () {
 
     Livewire::actingAs($manager)
         ->withQueryParams(['city' => (string) $aleppo])
-        ->test('pages::report-templates.index')
+        ->test('tracking::report-templates.index')
         ->assertSee('Aleppo Literacy')
         ->assertDontSee('Homs Nutrition');
 });
@@ -142,7 +142,7 @@ test('the queue runs a fixed number of queries however many templates it lists',
             $queries++;
         });
 
-        Livewire::actingAs($manager)->test('pages::report-templates.index');
+        Livewire::actingAs($manager)->test('tracking::report-templates.index');
 
         return $queries;
     };
@@ -183,7 +183,7 @@ test('the two status buttons count what a click shows, and pressing one again cl
     rtqTemplate('Growing Project', confirmed: true, lineStatuses: [ReportTemplateLineStatus::Confirmed, ReportTemplateLineStatus::Pending]);
     rtqTemplate('Growing Again', confirmed: true, lineStatuses: [ReportTemplateLineStatus::Pending]);
 
-    $page = Livewire::actingAs($manager)->test('pages::report-templates.index');
+    $page = Livewire::actingAs($manager)->test('tracking::report-templates.index');
 
     expect($page->instance()->focusCounts)->toBe(['pending' => 1, 'lines' => 2, 'total' => 3]);
 
@@ -204,7 +204,7 @@ test('search narrows the counts and the list, and Reset filters is the way out o
     rtqTemplate('Aleppo Literacy', proposalName: 'Winter WASH');
     rtqTemplate('Homs Nutrition', confirmed: true, proposalName: 'Spring Hygiene');
 
-    $page = Livewire::actingAs($manager)->test('pages::report-templates.index')
+    $page = Livewire::actingAs($manager)->test('tracking::report-templates.index')
         ->set('search', 'hygiene')
         ->assertSee('Homs Nutrition')
         ->assertDontSee('Aleppo Literacy');
@@ -222,7 +222,7 @@ test('search narrows the counts and the list, and Reset filters is the way out o
 test('the status buttons, search and review links sit inside the component root', function () {
     $template = rtqTemplate('Aleppo Literacy');
 
-    $html = Livewire::actingAs(mealManager())->test('pages::report-templates.index')->html();
+    $html = Livewire::actingAs(mealManager())->test('tracking::report-templates.index')->html();
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8" ?>'.$html);
     $xpath = new DOMXPath($dom);

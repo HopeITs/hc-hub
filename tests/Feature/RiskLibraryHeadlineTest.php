@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Proposal;
-use App\Models\Result;
-use App\Models\Risk;
-use App\Models\RiskLibrary;
 use Livewire\Livewire;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\RiskLibrary;
 
 function riskLibraryEntryInEveryState(): array
 {
@@ -23,7 +23,7 @@ function riskLibraryEntryInEveryState(): array
 it('counts in use, not used yet and switched off as three disjoint buttons that match a click', function () {
     riskLibraryEntryInEveryState();
 
-    $page = Livewire::actingAs(mealManager())->test('pages::admin.risk-library');
+    $page = Livewire::actingAs(mealManager())->test('tracking::admin.risk-library');
 
     expect($page->instance()->focusCounts)->toMatchArray(['inuse' => 1, 'unused' => 1, 'off' => 1, 'total' => 3]);
 
@@ -41,7 +41,7 @@ it('counts in use, not used yet and switched off as three disjoint buttons that 
 it('searches by title or category and keeps each entry\'s place in the whole library', function () {
     riskLibraryEntryInEveryState();
 
-    $page = Livewire::actingAs(mealManager())->test('pages::admin.risk-library')
+    $page = Livewire::actingAs(mealManager())->test('tracking::admin.risk-library')
         ->set('search', 'old')
         ->assertSee('Old risk')
         ->assertDontSee('Fresh risk')
@@ -67,7 +67,7 @@ it('searches by title or category and keeps each entry\'s place in the whole lib
 it('names the entry in the switch off and delete dialogs', function () {
     $entries = riskLibraryEntryInEveryState();
 
-    Livewire::actingAs(mealManager())->test('pages::admin.risk-library')
+    Livewire::actingAs(mealManager())->test('tracking::admin.risk-library')
         ->call('confirmDeactivate', $entries['unused']->id)
         ->assertSet('showDeactivateModal', true)
         ->assertSee('Switch off “Fresh risk”?')
@@ -79,12 +79,12 @@ it('names the entry in the switch off and delete dialogs', function () {
 it('keeps the buttons and rows inside the component and moves switching and deleting into the menu', function () {
     $entries = riskLibraryEntryInEveryState();
 
-    $html = Livewire::actingAs(mealManager())->test('pages::admin.risk-library')->html();
+    $html = Livewire::actingAs(mealManager())->test('tracking::admin.risk-library')->html();
 
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
     $xpath = new DOMXPath($dom);
-    $root = '//section[@*[name()="wire:name"]="pages::admin.risk-library"]';
+    $root = '//section[@*[name()="wire:name"]="tracking::admin.risk-library"]';
 
     foreach (['focus-tab-inuse', 'focus-tab-unused', 'focus-tab-off'] as $control) {
         expect($xpath->query($root.'//*[@data-test="'.$control.'"]')->length)->toBeGreaterThan(0, "{$control} sits outside the component");

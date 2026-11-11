@@ -1,27 +1,27 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
 use App\Enums\MediaCollection;
-use App\Enums\ProposalStatus;
-use App\Enums\TaskStatus;
-use App\Models\Account;
-use App\Models\Donor;
-use App\Models\DonorProposal;
 use App\Models\Media;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -38,7 +38,7 @@ beforeEach(function () {
 
 function proposalPage(): Testable
 {
-    return Livewire::actingAs(test()->user)->test('pages::proposals.show', ['proposal' => test()->proposal]);
+    return Livewire::actingAs(test()->user)->test('tracking::proposals.show', ['proposal' => test()->proposal]);
 }
 
 function usdAgreement(Proposal $proposal, string $budget = '1000.00'): DonorProposal
@@ -393,7 +393,7 @@ test('a user without proposal permissions sees no edit controls and cannot chang
     $viewer = User::factory()->role('Team Member')->create()->givePermissionTo('proposals.view');
     $agreement = usdAgreement($this->proposal);
     $media = Media::factory()->create(['mediable_type' => 'proposal', 'mediable_id' => $this->proposal->id]);
-    $page = Livewire::actingAs($viewer)->test('pages::proposals.show', ['proposal' => $this->proposal]);
+    $page = Livewire::actingAs($viewer)->test('tracking::proposals.show', ['proposal' => $this->proposal]);
 
     $page->assertDontSeeHtml('data-test="open-status-modal"')
         ->assertDontSeeHtml('data-test="open-details-modal"');
@@ -404,7 +404,7 @@ test('a user without proposal permissions sees no edit controls and cannot chang
         ->assertDontSeeHtml('data-test="upload-proposal-file"')
         ->assertDontSeeHtml('data-test="delete-file-'.$media->id.'"');
 
-    $fresh = fn () => Livewire::actingAs($viewer)->test('pages::proposals.show', ['proposal' => $this->proposal]);
+    $fresh = fn () => Livewire::actingAs($viewer)->test('tracking::proposals.show', ['proposal' => $this->proposal]);
 
     $fresh()->call('openStatusModal', $this->proposal->id)->assertForbidden();
     $fresh()->set('newStatus', ProposalStatus::Completed->value)->set('statusContext', 'Done')->set('statusDate', '2026-06-15')->call('changeStatus')->assertNotFound();

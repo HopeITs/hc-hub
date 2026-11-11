@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\Media;
-use App\Models\ReportFile;
-use App\Models\TaskAttachment;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
+use Modules\Tracking\Models\ReportFile;
+use Modules\Tracking\Models\TaskAttachment;
 
 /**
  * Deletes uploaded files that no record points at any more, and temporary

@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\Activity;
-use App\Models\Milestone;
-use App\Models\Project;
 use Database\Seeders\Concerns\PicksHrRecords;
 use Illuminate\Database\Seeder;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
 use RuntimeException;
 
 /**

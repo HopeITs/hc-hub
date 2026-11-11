@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\ChecksFinanceVisibility;
-use App\Livewire\Concerns\FiltersFinanceRegister;
-use App\Livewire\Concerns\Proposals\ChartsProposalPipeline;
-use App\Livewire\Concerns\Proposals\DeletesProposals;
-use App\Livewire\Concerns\Proposals\ExportsProposalRegister;
-use App\Livewire\Concerns\Proposals\ManagesProposalForm;
-use App\Livewire\Concerns\Proposals\ManagesProposalStatus;
-use App\Livewire\Concerns\Proposals\ReadsProposalBoard;
-use App\Livewire\Concerns\Proposals\ReadsProposalRegister;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Tracking\Livewire\Concerns\ChecksFinanceVisibility;
+use Modules\Tracking\Livewire\Concerns\FiltersFinanceRegister;
+use Modules\Tracking\Livewire\Concerns\Proposals\ChartsProposalPipeline;
+use Modules\Tracking\Livewire\Concerns\Proposals\DeletesProposals;
+use Modules\Tracking\Livewire\Concerns\Proposals\ExportsProposalRegister;
+use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalForm;
+use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalStatus;
+use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalBoard;
+use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalRegister;
 
 /**
  * Stands in for proposals/index, with every trait that page uses.

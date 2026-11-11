@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\ManagesReportForm;
-use App\Livewire\Concerns\Reports\ReadsReportPortfolio;
-use App\Models\Report;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Tracking\Livewire\Concerns\ManagesReportForm;
+use Modules\Tracking\Livewire\Concerns\Reports\ReadsReportPortfolio;
+use Modules\Tracking\Models\Report;
 
 /**
  * Stands in for reports/index, with every trait that page uses.

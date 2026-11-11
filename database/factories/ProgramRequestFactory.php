@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Enums\ProgramRequestStatus;
-use App\Models\ProgramRequest;
-use App\Models\ProposalLocation;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ProgramRequestStatus;
+use Modules\Tracking\Models\ProgramRequest;
+use Modules\Tracking\Models\ProposalLocation;
 
 /**
  * @extends Factory<ProgramRequest>

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support;
 
-use App\Enums\TaskPriority;
-use App\Enums\TaskStatus;
 use Illuminate\Support\HtmlString;
+use Modules\Tracking\Enums\TaskPriority;
+use Modules\Tracking\Enums\TaskStatus;
 
 /**
  * Plain-markup versions of the few Flux pieces a task list row repeats dozens

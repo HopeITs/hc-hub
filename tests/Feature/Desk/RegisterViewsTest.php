@@ -1,16 +1,16 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\ProposalStatus;
-use App\Enums\ReportStatus;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Risk;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->travelTo('2026-10-15 09:00:00');
@@ -26,7 +26,7 @@ test('the proposals board puts each proposal under its status, money only for ag
     ]);
 
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->set('view', 'board')
         ->assertSet('view', 'board')
         ->assertSeeHtml('data-desk-board-column="'.ProposalStatus::ProposalDraft->value.'"')
@@ -35,7 +35,7 @@ test('the proposals board puts each proposal under its status, money only for ag
         ->assertSee('12,500');
 
     Livewire::actingAs(userWithRole('Team Member')->givePermissionTo('proposals.view'))
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->set('view', 'board')
         ->assertSee('Board Proposal')
         ->assertDontSee('Board Donor')
@@ -47,7 +47,7 @@ test('the proposals calendar shows follow-up dates and planned starts in the cho
     Proposal::factory()->create(['name' => 'Starts Soon', 'planned_date_begin' => '2026-11-03']);
 
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->set('view', 'calendar')
         ->assertSeeHtml('data-desk-calendar="2026-10"')
         ->assertSee('Follow Me')
@@ -61,7 +61,7 @@ test('the proposals calendar shows follow-up dates and planned starts in the cho
 test('an unknown view in the URL falls back to the table', function () {
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
         ->withQueryParams(['view' => 'gallery'])
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->assertSet('view', 'table');
 });
 
@@ -71,7 +71,7 @@ test('the transfers board sorts tranches by state and opens the form for a write
     $received = TransfersTracking::factory()->create(['donor_proposal_id' => $agreement->id, 'ar_status' => ArStatus::Received, 'scheduled_date' => '2026-09-01', 'receive_date' => '2026-10-08']);
 
     $page = Livewire::actingAs(User::factory()->role('Financial')->create())
-        ->test('pages::transfers.index')
+        ->test('tracking::transfers.index')
         ->set('view', 'board')
         ->assertSet('view', 'board')
         ->assertSeeHtml('wire:click="openTransferEdit('.$late->id.')"');
@@ -90,7 +90,7 @@ test('the reports board and calendar list reports by status and planned date', f
     $approved = Report::factory()->create(['status' => ReportStatus::Approved, 'planned_date' => '2026-08-01']);
 
     $page = Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::reports.index')
+        ->test('tracking::reports.index')
         ->set('view', 'board')
         ->assertSeeHtml('data-test="report-board-card-'.$draft->id.'"')
         ->assertSeeHtml('href="'.route('reports.show', $draft).'"');
@@ -109,7 +109,7 @@ test('the risks board separates potential risks from the ones that happened', fu
     $happened = Risk::factory()->create(['name' => 'Flooded depot', 'happened' => true]);
 
     $page = Livewire::actingAs(User::factory()->role('Managers')->create())
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->set('view', 'board')
         ->assertSeeHtml('wire:click="openEditModal('.$potential->id.')"');
 
@@ -118,7 +118,7 @@ test('the risks board separates potential risks from the ones that happened', fu
         ->and($columns['happened']['items']->pluck('id')->all())->toBe([$happened->id]);
 
     Livewire::actingAs(User::factory()->role('Team Member')->create())
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->set('view', 'board')
         ->assertSee('Road closure')
         ->assertDontSeeHtml('wire:click="openEditModal('.$potential->id.')"');

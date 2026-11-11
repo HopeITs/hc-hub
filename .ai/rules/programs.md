@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/pages/programs/**'
+  - 'modules/Tracking/resources/views/pages/programs/**'
 ---
 
 # Programs

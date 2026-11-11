@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Prunable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\DatabaseNotification;
+use Modules\Core\Models\User;
 
 /**
  * One row of a user's inbox.

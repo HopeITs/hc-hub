@@ -1,20 +1,20 @@
 <?php
 
-use App\Actions\MonthlyReports\ValidateMonthlyReport;
-use App\Actions\Reports\DeleteReportFile;
-use App\Actions\Reports\SaveReportFile;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ReportStatus;
 use App\Models\Activity;
-use App\Models\MealCoverageAssignment;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportReopenRequest;
-use App\Models\Project;
-use App\Models\Report;
-use App\Models\ReportFile;
-use App\Models\Supervision;
-use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\MonthlyReports\ValidateMonthlyReport;
+use Modules\Tracking\Actions\Reports\DeleteReportFile;
+use Modules\Tracking\Actions\Reports\SaveReportFile;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportReopenRequest;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportFile;
+use Modules\Tracking\Models\Supervision;
 
 /*
 | MonthlyReportPolicy (contracts §13.1 items 6 and 9, D-09a, D-12a, D-20a).

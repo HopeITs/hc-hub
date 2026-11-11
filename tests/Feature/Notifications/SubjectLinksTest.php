@@ -1,15 +1,15 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\MonthlyReport;
-use App\Models\Report;
-use App\Models\Risk;
-use App\Models\Strategy;
 use App\Notifications\NotificationPresenter;
 use App\Notifications\SubjectLinks;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\Strategy;
 
 test('every subject type leads to its page', function (string $type, Closure $record, Closure $expected) {
     $model = Activity::withoutRecording($record);

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Notifications;
 
 use App\Models\Activity;
-use App\Models\Strategy;
 use BackedEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
+use Modules\Tracking\Models\Strategy;
 
 /**
  * Builds the typed sentence params for an activity. Nothing is translated

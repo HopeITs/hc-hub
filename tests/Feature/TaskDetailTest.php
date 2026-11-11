@@ -1,15 +1,15 @@
 <?php
 
 use App\Enums\FileType;
-use App\Enums\TaskPriority;
-use App\Enums\TaskStatus;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\TaskAttachment;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskPriority;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 use Spatie\Permission\Models\Role;
 
 test('guests are redirected from task detail', function () {
@@ -102,7 +102,7 @@ test('attachments are listed as metadata without exposing storage or controls', 
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->assertSee('private-distribution-plan.pdf')
         ->assertSee('PDF')
         ->assertSee('Sep 10, 2026')
@@ -133,7 +133,7 @@ test('task detail escapes all user controlled content', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->assertSee('<script>task()</script>')
         ->assertSee('<img src=x onerror=description()>')
         ->assertSee('<script>assignee()</script>')
@@ -167,7 +167,7 @@ test('a subtask can be added from the task detail page via the add subtask modal
     $parent->taskAssignees()->create(['employee_id' => $assignee]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $parent])
+        ->test('tracking::tasks.show', ['task' => $parent])
         ->call('openAddSubtaskModal')
         ->assertSet('newSubtaskAssignedTo', [(string) $assignee])
         ->set('newSubtaskTitle', '  Confirm the delivery window  ')
@@ -194,7 +194,7 @@ test('adding a subtask with a blank title is rejected', function () {
     $parent = Task::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $parent])
+        ->test('tracking::tasks.show', ['task' => $parent])
         ->call('openAddSubtaskModal')
         ->set('newSubtaskTitle', '   ')
         ->call('addSubtask')
@@ -208,7 +208,7 @@ test('a subtask added without an assignee is left unassigned', function () {
     $parent = Task::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $parent])
+        ->test('tracking::tasks.show', ['task' => $parent])
         ->call('openAddSubtaskModal')
         ->set('newSubtaskTitle', 'Confirm the delivery window')
         ->set('newSubtaskAssignedTo', [])
@@ -245,7 +245,7 @@ test('the related tasks panel lists a subtask without inline editing controls', 
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $parent])
+        ->test('tracking::tasks.show', ['task' => $parent])
         ->assertSeeText('Related tasks')
         ->assertSeeText('Confirm the delivery window')
         ->assertDontSee('data-test="subtask-toggle-complete-'.$subtask->id.'"', false)
@@ -258,7 +258,7 @@ test('a subtask panel does not appear on a subtask s own detail page', function 
     $subtask = Task::factory()->subtaskOf($parent)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $subtask])
+        ->test('tracking::tasks.show', ['task' => $subtask])
         ->assertDontSee('Add subtask')
         ->assertSeeText('Subtask of');
 });
@@ -272,7 +272,7 @@ test('a task can be edited from its own detail page', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->set('title', '  Finalize distribution plan  ')
         ->set('taskStatus', TaskStatus::InProgress->value)
         ->set('progressPercentage', '40')
@@ -293,7 +293,7 @@ test('editing a task can remove every assignee', function () {
     $task = Task::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->set('assignedTo', [])
         ->call('updateTask')
         ->assertHasNoErrors();
@@ -311,7 +311,7 @@ test('a subtask is edited from its own detail page, not from the parent', functi
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $subtask])
+        ->test('tracking::tasks.show', ['task' => $subtask])
         ->set('title', '  Confirm the final delivery window  ')
         ->set('taskStatus', TaskStatus::Done->value)
         ->set('progressPercentage', '100')
@@ -331,7 +331,7 @@ test('the add subtask form is rendered only while its modal is open', function (
     $task = Task::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->assertDontSeeHtml('data-test="new-subtask-title-input"')
         ->call('openAddSubtaskModal')
         ->assertSeeHtml('data-test="new-subtask-title-input"');
@@ -361,7 +361,7 @@ test('the properties column saves a priority change in place', function () {
     $task = Task::factory()->create(['priority' => TaskPriority::Low]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->assertSeeHtml('data-test="task-properties"')
         ->set('taskPriority', TaskPriority::High->value)
         ->assertHasNoErrors();
@@ -374,7 +374,7 @@ test('a refused in-place date change puts the field back and keeps the stored da
     $task = Task::factory()->create(['created_by' => $user->id, 'start_date' => '2026-09-10', 'due_date' => '2026-09-30']);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->set('dueDate', '2026-09-01')
         ->assertHasErrors(['dueDate'])
         ->assertSet('dueDate', '2026-09-30');
@@ -388,7 +388,7 @@ test('only the task creator moves the due date in place', function () {
     $task = Task::factory()->create(['created_by' => $creator->id, 'due_date' => '2026-09-30']);
 
     Livewire::actingAs($editor)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->assertDontSeeHtml('data-test="task-edit-due-date-input"')
         ->assertSeeHtml('data-test="task-edit-start-date-input"')
         ->set('dueDate', '2026-10-15')
@@ -397,7 +397,7 @@ test('only the task creator moves the due date in place', function () {
     expect($task->fresh()->due_date->toDateString())->toBe('2026-09-30');
 
     Livewire::actingAs($creator)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->assertSeeHtml('data-test="task-edit-due-date-input"')
         ->set('dueDate', '2026-10-15')
         ->assertHasNoErrors();
@@ -410,7 +410,7 @@ test('a status picked in the properties column is saved at once', function () {
     $task = Task::factory()->create(['status' => TaskStatus::Todo]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->call('changeStatus', TaskStatus::InProgress->value)
         ->assertHasNoErrors();
 
@@ -422,7 +422,7 @@ test('sending an Under review task back waits for the approver note', function (
     $task = Task::factory()->create(['created_by' => $user->id, 'status' => TaskStatus::UnderReview]);
 
     $page = Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->call('changeStatus', TaskStatus::InProgress->value)
         ->assertSeeHtml('data-test="task-send-back-form"');
 
@@ -448,7 +448,7 @@ test('the title and description are edited in place from the description panel',
     $task = Task::factory()->create(['title' => 'Draft plan', 'description' => null]);
 
     Livewire::actingAs($user)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->assertSeeHtml('data-test="task-no-description"')
         ->set('title', 'Final plan')
         ->set('description', 'Cover every district.')
@@ -476,7 +476,7 @@ test('someone who may only view a task reads every property as text', function (
     $task->taskAssignees()->create(['employee_id' => $assignee]);
 
     Livewire::actingAs($viewer)
-        ->test('pages::tasks.show', ['task' => $task])
+        ->test('tracking::tasks.show', ['task' => $task])
         ->assertSeeText('Sep 1, 2026')
         ->assertSeeText('Sep 30, 2026')
         ->assertSeeText('35%')

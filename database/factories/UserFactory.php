@@ -3,12 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\Role;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Modules\Core\Models\User;
 use stdClass;
 
 /**

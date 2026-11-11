@@ -6,13 +6,14 @@ namespace App\Notifications\Alerts;
 
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
-use App\Models\Indicator;
-use App\Models\Program;
-use App\Models\Risk;
 use App\Notifications\EmployeeRecipients;
 use App\Notifications\NotificationPayload;
 use App\Notifications\RecipientResolver;
 use Carbon\CarbonImmutable;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Notifications\Alerts\OffTrackIndicatorScanner;
 
 /**
  * Monday-morning (first working day) picture per program.

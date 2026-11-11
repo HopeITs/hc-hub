@@ -5,7 +5,7 @@
         throw new InvalidArgumentException('x-ui.money requires a currency; amounts are never shown bare because USD, EUR and SYP are not convertible in this system.');
     }
 
-    $currencyCode = $currency instanceof \App\Enums\Currency ? $currency->value : (string) $currency;
+    $currencyCode = $currency instanceof \Modules\Tracking\Enums\Currency ? $currency->value : (string) $currency;
     $formattedAmount = number_format((float) $amount, 2);
 @endphp
 

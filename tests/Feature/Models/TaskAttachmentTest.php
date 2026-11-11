@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Task;
-use App\Models\TaskAttachment;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 
 test('a task attachment belongs to a task', function () {
     $task = Task::factory()->create();

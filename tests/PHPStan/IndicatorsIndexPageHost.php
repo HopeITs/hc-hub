@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\FiltersByStrategy;
-use App\Livewire\Concerns\Indicators\BuildsIndicatorRows;
-use App\Livewire\Concerns\Indicators\InspectsIndicatorChain;
-use App\Livewire\Concerns\Indicators\ManagesIndicatorForm;
-use App\Livewire\Concerns\Indicators\ManagesIndicatorReadings;
-use App\Livewire\Concerns\Indicators\PresentsIndicators;
-use App\Livewire\Concerns\Indicators\SummarisesIndicators;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Tracking\Livewire\Concerns\FiltersByStrategy;
+use Modules\Tracking\Livewire\Concerns\Indicators\BuildsIndicatorRows;
+use Modules\Tracking\Livewire\Concerns\Indicators\InspectsIndicatorChain;
+use Modules\Tracking\Livewire\Concerns\Indicators\ManagesIndicatorForm;
+use Modules\Tracking\Livewire\Concerns\Indicators\ManagesIndicatorReadings;
+use Modules\Tracking\Livewire\Concerns\Indicators\PresentsIndicators;
+use Modules\Tracking\Livewire\Concerns\Indicators\SummarisesIndicators;
 
 /**
  * Stands in for indicators/index, with every trait that page uses.

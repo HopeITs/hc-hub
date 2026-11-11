@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Indicator;
-use App\Models\PlanIndicator;
-use App\Models\Result;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Result;
 
 test('an indicator belongs to a result', function () {
     $result = Result::factory()->create();

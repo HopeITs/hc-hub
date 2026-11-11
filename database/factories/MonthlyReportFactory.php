@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Enums\MonthlyReportStatus;
-use App\Models\MonthlyReport;
-use App\Models\Project;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Project;
 
 /**
  * @extends Factory<MonthlyReport>

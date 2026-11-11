@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Actions\Fortify;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Fortify;
+use Modules\Core\Models\User;
 
 /**
  * Fortify's login step that stops for a second factor, bound in its place by

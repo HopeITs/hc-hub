@@ -1,14 +1,14 @@
 <?php
 
-use App\Enums\ActivityKind;
-use App\Enums\IndicatorMeasure;
-use App\Enums\ResultType;
 use App\Models\Activity;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\Program;
-use App\Models\Result;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\ActivityKind;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\Result;
 
 const MicroUrbanFile = 'database/seeders/data/logframes/micro-urban.json';
 const MicroAgriFile = 'database/seeders/data/logframes/micro-agri.json';

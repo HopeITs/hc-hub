@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 test('a funded project reports how many of its milestones are reached', function () {
     $user = User::factory()->create();
@@ -17,7 +17,7 @@ test('a funded project reports how many of its milestones are reached', function
     $proposal->projects()->attach($project);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'projects')
         ->assertSee('Latrine Block Rehabilitation')
         // Two of the five milestones are reached; the other three are not.
@@ -40,7 +40,7 @@ test('a project running past the grant term is flagged', function () {
     );
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'projects')
         ->assertSee('Runs past the end of this grant')
         ->assertSeeHtml('data-outruns-grant');
@@ -62,7 +62,7 @@ test('a project ending inside the grant term is not flagged', function () {
     );
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'projects')
         ->assertSee('Contained Mobile Clinic')
         ->assertDontSeeHtml('data-outruns-grant');
@@ -87,7 +87,7 @@ test('counting reached milestones does not query once per project', function () 
         $queries = 0;
 
         Livewire::actingAs($user)
-            ->test('pages::proposals.show', ['proposal' => $proposal])
+            ->test('tracking::proposals.show', ['proposal' => $proposal])
             ->set('tab', 'projects');
 
         return $queries;

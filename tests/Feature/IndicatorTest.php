@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\ResultType;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Enums\ResultType;
 
 test('a new indicator is measured numerically', function () {
     $indicator = DB::table('indicators')->find(insertIndicator(insertResult()));

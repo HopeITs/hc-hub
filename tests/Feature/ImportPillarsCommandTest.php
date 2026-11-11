@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\Program;
-use App\Models\StrategicPillar;
-use App\Models\Strategy;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\StrategicPillar;
+use Modules\Tracking\Models\Strategy;
 
 const StrategyPillarsFile = 'database/seeders/data/strategy-2026-2030.json';
 

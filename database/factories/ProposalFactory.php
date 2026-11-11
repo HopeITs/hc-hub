@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Enums\ProposalKind;
-use App\Enums\ProposalStatus;
-use App\Models\Donor;
-use App\Models\Proposal;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\ProposalKind;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Proposal;
 
 /**
  * @extends Factory<Proposal>

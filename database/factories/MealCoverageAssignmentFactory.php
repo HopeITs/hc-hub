@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Enums\MealCoverageScope;
-use App\Models\MealCoverageAssignment;
-use App\Models\Project;
 use Database\Factories\Concerns\CreatesHrRecords;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\MealCoverageScope;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\Project;
 
 /**
  * @extends Factory<MealCoverageAssignment>

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\Programs\LinksProgram;
-use App\Livewire\Concerns\Programs\ManagesProgramTasks;
-use App\Livewire\Concerns\Programs\ReadsProgramDelivery;
-use App\Livewire\Concerns\Programs\TracksProgramHealth;
-use App\Livewire\Concerns\Results\FiltersResultsChain;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\Programs\LinksProgram;
+use Modules\Tracking\Livewire\Concerns\Programs\ManagesProgramTasks;
+use Modules\Tracking\Livewire\Concerns\Programs\ReadsProgramDelivery;
+use Modules\Tracking\Livewire\Concerns\Programs\TracksProgramHealth;
+use Modules\Tracking\Livewire\Concerns\Results\FiltersResultsChain;
 
 /**
  * Stands in for programs/show, with the trait that page gained when it was

@@ -6,12 +6,12 @@ namespace App\Listeners;
 
 use App\Http\UserAgent;
 use App\Models\KnownDevice;
-use App\Models\User;
 use App\Notifications\NewDeviceSignIn;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Modules\Core\Models\User;
 use Throwable;
 
 /**

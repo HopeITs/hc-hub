@@ -1,10 +1,10 @@
 <?php
 
 use App\Actions\Fortify\RecognisedBrowsers;
-use App\Models\User;
 use App\Notifications\EmailLoginCode;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Testing\TestResponse;
+use Modules\Core\Models\User;
 
 beforeEach(function () {
     $this->freezeTime();

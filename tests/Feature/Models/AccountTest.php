@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\Account;
 use App\Models\Activity;
-use App\Models\TransfersTracking;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\TransfersTracking;
 
 test('an account has the transfers that landed in it', function () {
     $account = Account::factory()->create();

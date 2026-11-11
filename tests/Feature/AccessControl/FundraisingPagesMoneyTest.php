@@ -1,15 +1,15 @@
 <?php
 
 use App\Enums\MediaCollection;
-use App\Models\Account;
-use App\Models\Donor;
-use App\Models\DonorProposal;
 use App\Models\Media;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * One donor funding one proposal: a budget of 731,942 and a pending transfer of
@@ -41,7 +41,7 @@ function seedMoneyPagesFixture(): array
 
 test('a fundraiser without agreements sees donor names on the donor directory but no money', function () {
     seedMoneyPagesFixture();
-    $page = fn (string $role) => Livewire::actingAs(userWithRole($role))->test('pages::donors.index')->set('view', 'overview');
+    $page = fn (string $role) => Livewire::actingAs(userWithRole($role))->test('tracking::donors.index')->set('view', 'overview');
 
     $page(fundraiserWithoutAgreements())->assertOk()
         ->assertSee('Aurora Foundation')
@@ -64,7 +64,7 @@ test('a fundraiser without agreements sees donor names on the donor directory bu
 
 test('a fundraiser without agreements sees the donor page without agreements, budgets or tranches', function () {
     ['donor' => $donor] = seedMoneyPagesFixture();
-    $page = fn (string $role) => Livewire::actingAs(userWithRole($role))->test('pages::donors.show', ['donor' => $donor])->set('view', 'overview');
+    $page = fn (string $role) => Livewire::actingAs(userWithRole($role))->test('tracking::donors.show', ['donor' => $donor])->set('view', 'overview');
 
     $fundraiser = $page(fundraiserWithoutAgreements());
     $fundraiser->assertOk()
@@ -93,7 +93,7 @@ test('a fundraiser without agreements sees the donor page without agreements, bu
 
 test('a fundraiser without agreements sees proposal names on the proposal directory but no money', function () {
     seedMoneyPagesFixture();
-    $page = fn (string $role) => Livewire::actingAs(userWithRole($role))->test('pages::proposals.index')->set('view', 'overview');
+    $page = fn (string $role) => Livewire::actingAs(userWithRole($role))->test('tracking::proposals.index')->set('view', 'overview');
 
     $fundraiser = $page(fundraiserWithoutAgreements());
     $fundraiser->assertOk()
@@ -123,7 +123,7 @@ test('the proposal directory ignores the donor filter for someone who cannot see
     Proposal::factory()->create(['name' => 'Unfunded Clinic Rebuild']);
 
     Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('toggleDonor', $donor->id)
         ->assertSet('donor', '')
         ->assertSee('Unfunded Clinic Rebuild')
@@ -132,7 +132,7 @@ test('the proposal directory ignores the donor filter for someone who cannot see
 
 test('a fundraiser without agreements sees the proposal page without a funding tab or any money', function () {
     ['proposal' => $proposal, 'donor' => $donor] = seedMoneyPagesFixture();
-    $page = fn (string $role) => Livewire::actingAs(userWithRole($role))->test('pages::proposals.show', ['proposal' => $proposal]);
+    $page = fn (string $role) => Livewire::actingAs(userWithRole($role))->test('tracking::proposals.show', ['proposal' => $proposal]);
 
     // The concept note card names the proposal's own donor, as the board does for
     // everyone who sees proposals; what stays hidden is the agreement's donor link.
@@ -172,20 +172,20 @@ test('Public Relations Manager sees agreement budgets but no tranches', function
     ['donor' => $donor, 'proposal' => $proposal] = seedMoneyPagesFixture();
     $viewer = fn () => userWithRole('Public Relations Manager');
 
-    $donorPage = Livewire::actingAs($viewer())->test('pages::donors.show', ['donor' => $donor]);
+    $donorPage = Livewire::actingAs($viewer())->test('tracking::donors.show', ['donor' => $donor]);
     $donorPage->assertSee('731,942.00')->assertDontSee('123,457');
     expect($donorPage->instance()->agreements->first()->transfers)->toBeEmpty();
 
-    $proposalPage = Livewire::actingAs($viewer())->test('pages::proposals.show', ['proposal' => $proposal])->set('tab', 'funding');
+    $proposalPage = Livewire::actingAs($viewer())->test('tracking::proposals.show', ['proposal' => $proposal])->set('tab', 'funding');
     $proposalPage->assertSee('731,942.00')->assertDontSee('123,457.00')->assertDontSeeHtml('data-transfer=');
     expect($proposalPage->instance()->agreements->first()->transfers)->toBeEmpty();
 
-    Livewire::actingAs($viewer())->test('pages::donors.index')
+    Livewire::actingAs($viewer())->test('tracking::donors.index')
         ->assertSee('731,942')
         ->assertDontSee('123.5K')
         ->assertDontSeeHtml('data-upcoming-transfers');
 
-    Livewire::actingAs($viewer())->test('pages::proposals.index')
+    Livewire::actingAs($viewer())->test('tracking::proposals.index')
         ->assertSee('731,942')
         ->assertDontSee('123,457');
 });
@@ -229,7 +229,7 @@ function seedProposalPaperwork(): array
 test('a fundraiser without agreements does not see agreement or MOU files on the proposal page', function () {
     $paperwork = seedProposalPaperwork();
     $page = fn (string $role) => Livewire::actingAs(userWithRole($role))
-        ->test('pages::proposals.show', ['proposal' => $paperwork['proposal']])
+        ->test('tracking::proposals.show', ['proposal' => $paperwork['proposal']])
         ->set('tab', 'documents');
 
     $fundraiser = $page(fundraiserWithoutAgreements());
@@ -253,7 +253,7 @@ test('a fundraiser without agreements does not see agreement or MOU files on the
 test('a fundraiser without agreements cannot upload, edit or delete agreement or MOU files', function () {
     $paperwork = seedProposalPaperwork();
     $fresh = fn () => Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))
-        ->test('pages::proposals.show', ['proposal' => $paperwork['proposal']]);
+        ->test('tracking::proposals.show', ['proposal' => $paperwork['proposal']]);
 
     $fresh()->call('openEditFileModal', $paperwork['agreement']->id)->assertForbidden();
     $fresh()->call('confirmDeleteFile', $paperwork['agreement']->id)->assertForbidden();
@@ -301,7 +301,7 @@ test('the proposal file routes refuse agreement and MOU files to a fundraiser wi
 test('the proposal page transfer modal builds no budgets or account names for someone who cannot record transfers', function () {
     ['proposal' => $proposal] = seedMoneyPagesFixture();
     Account::factory()->create(['account_name' => 'Zephyr Escrow Account']);
-    $page = fn (string $role) => Livewire::actingAs(userWithRole($role))->test('pages::proposals.show', ['proposal' => $proposal]);
+    $page = fn (string $role) => Livewire::actingAs(userWithRole($role))->test('tracking::proposals.show', ['proposal' => $proposal]);
 
     $fundraiser = $page(fundraiserWithoutAgreements())->set('showTransferModal', true);
     $fundraiser->assertDontSee('731,942')

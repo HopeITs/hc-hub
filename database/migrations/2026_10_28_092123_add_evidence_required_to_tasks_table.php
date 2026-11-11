@@ -10,7 +10,7 @@ return new class extends Migration
      * Run the migrations.
      *
      * A task flagged evidence_required can only be marked done once it has
-     * an attachment (App\Support\TaskWorkflow).
+     * an attachment (Modules\Tracking\Support\TaskWorkflow).
      */
     public function up(): void
     {

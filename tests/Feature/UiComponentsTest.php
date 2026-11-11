@@ -1,18 +1,18 @@
 <?php
 
-use App\Enums\Currency;
-use App\Enums\MilestoneStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\RagStatus;
-use App\Enums\ResultType;
-use App\Enums\TaskStatus;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\ViewErrorBag;
 use Illuminate\View\ViewException;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\RagStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Enums\TaskStatus;
 
 test('the ui input carries the shared control classes', function () {
     // Rendered outside a request, so share the empty error bag the web middleware normally provides.

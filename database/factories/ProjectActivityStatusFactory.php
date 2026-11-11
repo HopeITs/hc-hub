@@ -2,13 +2,13 @@
 
 namespace Database\Factories;
 
-use App\Enums\ActivityStatus;
-use App\Enums\ResultType;
-use App\Models\MonthlyReport;
-use App\Models\Project;
-use App\Models\ProjectActivityStatus;
-use App\Models\Result;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\ActivityStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ProjectActivityStatus;
+use Modules\Tracking\Models\Result;
 
 /**
  * @extends Factory<ProjectActivityStatus>

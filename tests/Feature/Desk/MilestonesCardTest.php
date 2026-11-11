@@ -1,11 +1,11 @@
 <?php
 
-use App\Enums\MilestoneStatus;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\Milestone;
-use App\Models\Task;
 use Livewire\Livewire;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Task;
 
 beforeEach(function () {
     $this->travelTo('2026-09-16 09:00:00');

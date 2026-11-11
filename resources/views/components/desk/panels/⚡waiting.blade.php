@@ -3,12 +3,12 @@
 use App\Actions\Desk\SendNudge;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
 use App\Models\HrEmployee;
-use App\Models\MonthlyReport;
-use App\Models\Proposal;
-use App\Models\ProposalReviewer;
-use App\Models\Task;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalReviewer;
+use Modules\Tracking\Models\Task;
 use App\Support\Desk\DeskWork;
-use App\Support\MealCoverage;
+use Modules\Tracking\Support\MealCoverage;
 use Carbon\CarbonImmutable;
 use Flux\Flux;
 use Illuminate\Support\Collection;

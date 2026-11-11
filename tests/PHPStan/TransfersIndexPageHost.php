@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\FiltersFinanceRegister;
-use App\Livewire\Concerns\ManagesTransferForm;
-use App\Livewire\Concerns\Transfers\ExportsTransferRegister;
-use App\Livewire\Concerns\Transfers\FiltersTransferRegister;
-use App\Livewire\Concerns\Transfers\PresentsTransferRegister;
-use App\Livewire\Concerns\Transfers\ReadsTransferBoard;
-use App\Livewire\Concerns\Transfers\ReadsTransferLedger;
-use App\Livewire\Concerns\Transfers\ReadsTransferRegister;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Tracking\Livewire\Concerns\FiltersFinanceRegister;
+use Modules\Tracking\Livewire\Concerns\ManagesTransferForm;
+use Modules\Tracking\Livewire\Concerns\Transfers\ExportsTransferRegister;
+use Modules\Tracking\Livewire\Concerns\Transfers\FiltersTransferRegister;
+use Modules\Tracking\Livewire\Concerns\Transfers\PresentsTransferRegister;
+use Modules\Tracking\Livewire\Concerns\Transfers\ReadsTransferBoard;
+use Modules\Tracking\Livewire\Concerns\Transfers\ReadsTransferLedger;
+use Modules\Tracking\Livewire\Concerns\Transfers\ReadsTransferRegister;
 
 /**
  * Stands in for transfers/index, with every trait that page uses.

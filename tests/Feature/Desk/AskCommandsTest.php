@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use App\Support\Desk\AskCommands;
+use Modules\Core\Models\User;
 
 test('the instant index holds only the pages and actions the viewer may use', function () {
     $index = fn (User $user): array => app(AskCommands::class)->for($user);

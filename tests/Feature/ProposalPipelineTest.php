@@ -1,20 +1,20 @@
 <?php
 
-use App\Enums\ProposalPhase;
-use App\Enums\ProposalStatus;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ProposalPhase;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -31,7 +31,7 @@ test('proposals can be filtered by search and status', function () {
     Proposal::factory()->create(['name' => 'Winter Shelter Kit', 'status' => ProposalStatus::Rejected]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->assertSee('Emergency WASH Response')
         ->assertSee('Winter Shelter Kit')
         ->set('search', 'WASH')
@@ -52,7 +52,7 @@ test('the phase filter selects every status belonging to that phase', function (
     Proposal::factory()->create(['name' => 'Planned proposal', 'status' => ProposalStatus::ProposalDraft]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->set('phase', ProposalPhase::Monitoring->value)
         ->assertSee('Monitored proposal')
         ->assertDontSee('Planned proposal')
@@ -66,7 +66,7 @@ test('a proposal can be created with a trimmed name', function () {
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('openCreateModal')
         ->set('name', '  Rapid Response Fund  ')
         ->set('donorId', (string) insertDonor())->set('projectIds', [(string) Project::factory()->create()->id])->set('internalProjectNumber', 'HC-2026-041')
@@ -85,7 +85,7 @@ test('a proposal end date cannot fall before its begin date', function () {
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('openCreateModal')
         ->set('name', 'Backwards Proposal')
         ->set('donorId', (string) insertDonor())->set('projectIds', [(string) Project::factory()->create()->id])->set('internalProjectNumber', 'HC-2026-042')
@@ -100,7 +100,7 @@ test('an unfunded proposal can be deleted', function () {
     $proposal = Proposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('confirmDelete', $proposal->id)
         ->call('deleteProposal')
         ->assertHasNoErrors();
@@ -119,7 +119,7 @@ test('a proposal holding a funding agreement is not deleted and says why', funct
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('confirmDelete', $proposal->id)
         ->call('deleteProposal');
 
@@ -130,7 +130,7 @@ test('a proposal holding a funding agreement is not deleted and says why', funct
 test('the pipeline renders with no proposals', function () {
     $user = User::factory()->role('Financial')->create();
 
-    Livewire::actingAs($user)->test('pages::proposals.index')->assertSee('No proposals yet');
+    Livewire::actingAs($user)->test('tracking::proposals.index')->assertSee('No proposals yet');
 });
 
 test('the delete confirmation opens and closes through its boolean', function () {
@@ -138,7 +138,7 @@ test('the delete confirmation opens and closes through its boolean', function ()
     $proposal = Proposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('confirmDelete', $proposal->id)
         ->assertSet('showDeleteModal', true)
         ->call('cancelDelete')
@@ -151,7 +151,7 @@ test('moving a proposal to its next stage records the status and the standard no
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::ProposalReview]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('openStatusModal', $proposal->id)
         ->assertSet('showStatusModal', true)
         ->assertSet('newStatus', ProposalStatus::Submitted->value)
@@ -175,7 +175,7 @@ test('a stage move without a reason changes nothing', function () {
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('openStatusModal', $proposal->id)
         ->set('newStatus', ProposalStatus::ProposalDraft->value)
         ->set('statusContext', '   ')
@@ -191,7 +191,7 @@ test('a proposal with no allowed move opens the status modal with an explanation
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Rejected]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('openStatusModal', $proposal->id)
         ->assertSet('newStatus', '')
         ->assertSee(__('proposals.no_status_moves_from_here'));
@@ -211,7 +211,7 @@ test('selecting a donor shows only the proposals it funds, and selecting it agai
     DonorProposal::factory()->create(['donor_id' => $giz->id, 'proposal_id' => $other->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('toggleDonor', $echo->id)
         ->assertSet('donor', (string) $echo->id)
         ->assertSee('Funded by ECHO')
@@ -228,7 +228,7 @@ test('the pipeline rail toggles the phase filter and still counts the phases it 
     Proposal::factory()->create(['status' => ProposalStatus::Rejected]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('togglePhase', ProposalPhase::Monitoring->value)
         ->assertSet('phase', ProposalPhase::Monitoring->value);
 
@@ -258,7 +258,7 @@ test('the funding position splits committed, received and pending per currency f
     TransfersTracking::factory()->create(['donor_proposal_id' => $usd->id, 'ar_status' => 'pending', 'payment_amount' => 200, 'amount_transfered_currency' => 'USD']);
 
     $position = Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->set('search', 'Shown')
         ->instance()
         ->fundingPosition
@@ -284,7 +284,7 @@ test('each currency line of the funding position counts only the proposals funde
     }
 
     $component = Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->set('view', 'overview')
         ->assertSee('Across 2 proposals')
         ->assertSee('Across 1 proposal')
@@ -307,7 +307,7 @@ test('the funding flow draws one graph per currency and lists unfunded proposals
     DonorProposal::factory()->create(['donor_id' => $donor->id, 'proposal_id' => $funded->id, 'budget' => 1250, 'currency' => 'USD']);
 
     $flow = Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->set('view', 'overview')
         ->assertSee('Water Network Expansion')
         ->instance()
@@ -331,7 +331,7 @@ test('each proposal row shows its task progress and overdue work', function () {
     Task::factory()->create(['source_type' => 'proposal', 'source_id' => $proposal->id, 'status' => TaskStatus::InProgress, 'due_date' => now()->addDays(3)->toDateString()]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->set('view', 'overview')
         ->assertSee('1 of 3 tasks done')
         ->assertSee('1 overdue');
@@ -341,7 +341,7 @@ test('a user without proposal permissions sees no edit controls and cannot creat
     $viewer = User::factory()->role('Team Member')->create()->givePermissionTo('proposals.view');
     $proposal = Proposal::factory()->create();
 
-    $fresh = fn () => Livewire::actingAs($viewer)->test('pages::proposals.index');
+    $fresh = fn () => Livewire::actingAs($viewer)->test('tracking::proposals.index');
 
     $fresh()->assertDontSeeHtml('data-test="create-proposal-button"')
         ->assertDontSeeHtml('data-test="advance-proposal-'.$proposal->id.'"');
@@ -361,7 +361,7 @@ test('a new proposal gets a generated number whatever internal number the form s
     Proposal::factory()->create(['internal_project_number' => 'HC-2026-044']);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('openCreateModal')
         ->set('name', 'Rapid Response Fund')
         ->set('donorId', (string) insertDonor())->set('projectIds', [(string) Project::factory()->create()->id])->set('internalProjectNumber', $typed)
@@ -384,7 +384,7 @@ test('editing a proposal never changes its internal number, a placeholder includ
     $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create(['internal_project_number' => 'TEMP-0007']));
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('openEditModal', $proposal->id)
         ->assertSet('internalProjectNumber', 'TEMP-0007')
         ->set('internalProjectNumber', 'HC-2026-047')
@@ -405,7 +405,7 @@ test('saving a proposal with its own internal number raises no duplicate error',
     $proposal = Proposal::factory()->create(['internal_project_number' => 'HC-2026-046']);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('openEditModal', $proposal->id)
         ->set('notes', 'Checked against the donor letter')
         ->call('saveProposal')
@@ -426,7 +426,7 @@ test('a duplicate that slips past the number sequence shows the duplicate error 
     });
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('openCreateModal')
         ->set('name', 'Rapid Response Fund')
         ->set('donorId', (string) insertDonor())->set('projectIds', [(string) Project::factory()->create()->id])
@@ -447,7 +447,7 @@ test('the proposals list finds a proposal by its internal number', function () {
     Proposal::factory()->create(['name' => 'Cash for Work', 'internal_project_number' => 'HC-2026-062']);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->set('search', '2026-061')
         ->assertSee('Winter Shelter Kit')
         ->assertDontSee('Cash for Work');
@@ -459,7 +459,7 @@ test('a placeholder internal number carries the replace chip and a real one does
     Proposal::factory()->create(['internal_project_number' => 'HC-2026-063']);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->set('view', 'overview')
         ->assertSeeHtml('<bdi dir="ltr" class="font-semibold tabular-nums">HC-2026-063</bdi>')
         ->assertSeeHtml('data-placeholder-chip="TEMP-0063"')
@@ -472,7 +472,7 @@ test('the proposals search hint says it also matches the internal number', funct
     Proposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->assertSeeHtml('placeholder="Name, number or notes"');
 });
 
@@ -481,7 +481,7 @@ test('the pipeline counts a held proposal in its own phase and shows the hold as
     $held->forceFill(['on_hold_since' => today()])->save();
     Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
 
-    $page = Livewire::actingAs(User::factory()->role('Financial')->create())->test('pages::proposals.index');
+    $page = Livewire::actingAs(User::factory()->role('Financial')->create())->test('tracking::proposals.index');
     $planning = collect($page->instance()->pipeline)->firstWhere('phase', ProposalPhase::Planning);
 
     // A hold keeps the status, so both proposals count in Planning (W-06, D-58).
@@ -499,7 +499,7 @@ test('the pipeline counts payroll proposals beside project ones, and the kind fi
     Proposal::factory()->create(['status' => ProposalStatus::ProposalDraft]);
     Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
 
-    $planning = fn (array $query = []): int => collect(Livewire::actingAs($user)->withQueryParams($query)->test('pages::proposals.index')->instance()->pipeline)
+    $planning = fn (array $query = []): int => collect(Livewire::actingAs($user)->withQueryParams($query)->test('tracking::proposals.index')->instance()->pipeline)
         ->firstWhere('phase', ProposalPhase::Planning)['count'];
 
     expect($planning())->toBe(2)

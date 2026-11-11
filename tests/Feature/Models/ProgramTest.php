@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\AnnualPlan;
 use App\Models\HrEmployee;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Result;
-use App\Models\Strategy;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Strategy;
 
 test('a program belongs to a strategy and an hr employee manager', function () {
     $strategy = Strategy::factory()->create();

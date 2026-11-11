@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Enums\ArStatus;
-use App\Models\Account;
-use App\Models\DonorProposal;
-use App\Models\TransfersTracking;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * @extends Factory<TransfersTracking>

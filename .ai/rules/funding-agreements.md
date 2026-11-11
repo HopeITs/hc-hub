@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/pages/funding-agreements/**'
+  - 'modules/Tracking/resources/views/pages/funding-agreements/**'
 ---
 
 # Funding Agreements

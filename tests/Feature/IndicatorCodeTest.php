@@ -1,11 +1,11 @@
 <?php
 
-use App\Actions\IndicatorLibrary\SaveLibraryIndicator;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Support\IndicatorCode;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Tracking\Actions\IndicatorLibrary\SaveLibraryIndicator;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Support\IndicatorCode;
 
 /**
  * IndicatorCode::next() inside the transaction it requires.

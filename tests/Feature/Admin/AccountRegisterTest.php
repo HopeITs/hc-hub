@@ -1,13 +1,13 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Models\Account;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -22,7 +22,7 @@ beforeEach(function () {
  */
 function accountRegister(array $query = []): Testable
 {
-    return Livewire::actingAs(test()->user)->withQueryParams($query)->test('pages::admin.accounts');
+    return Livewire::actingAs(test()->user)->withQueryParams($query)->test('tracking::admin.accounts');
 }
 
 /**
@@ -221,7 +221,7 @@ test('the table and the export mask account numbers for someone who cannot chang
     registerBusyAccount();
     $viewer = userWithRole('Team Member')->givePermissionTo('accounts.view');
 
-    $viewerPage = Livewire::actingAs($viewer)->test('pages::admin.accounts')
+    $viewerPage = Livewire::actingAs($viewer)->test('tracking::admin.accounts')
         ->assertSeeHtml('•••• /1/3')
         ->assertDontSee('2531267')
         ->call('exportCsv');
@@ -266,7 +266,7 @@ test('exporting needs the accounts view permission', function () {
     registerBusyAccount();
 
     Livewire::actingAs(User::factory()->create())
-        ->test('pages::admin.accounts')
+        ->test('tracking::admin.accounts')
         ->call('exportCsv')
         ->assertForbidden();
 });

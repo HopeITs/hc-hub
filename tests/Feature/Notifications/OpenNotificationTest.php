@@ -3,11 +3,11 @@
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\Task;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\AppNotification;
 use App\Notifications\NotificationPayload;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Task;
 
 function notifyAboutTask(User $user, int $taskId): string
 {

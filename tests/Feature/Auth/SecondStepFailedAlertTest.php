@@ -1,12 +1,12 @@
 <?php
 
 use App\Http\UserAgent;
-use App\Models\User;
 use App\Notifications\EmailLoginCode;
 use App\Notifications\SecondStepFailed;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Events\TwoFactorAuthenticationFailed;
+use Modules\Core\Models\User;
 use Monolog\Handler\NullHandler;
 
 beforeEach(function () {

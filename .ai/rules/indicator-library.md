@@ -1,7 +1,7 @@
 ---
 paths:
-  - 'resources/views/pages/indicator-library/**'
-  - 'app/Livewire/Concerns/IndicatorLibrary/**'
+  - 'modules/Tracking/resources/views/pages/indicator-library/**'
+  - 'modules/Tracking/Livewire/Concerns/IndicatorLibrary/**'
 ---
 
 # Indicator library

@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
+use Modules\Core\Models\User;
 
 beforeEach(function () {
     $this->freezeTime();

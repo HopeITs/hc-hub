@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Support\Desk\Cards;
 
-use App\Models\EvidenceType;
-use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\EvidenceType;
 
 /**
  * Evidence types in card form: how many are offered, how many files use

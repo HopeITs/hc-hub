@@ -1,20 +1,20 @@
 <?php
 
-use App\Models\Account;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\EvidenceType;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\NarrativeQuestion;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\RiskLibrary;
-use App\Models\Sector;
-use App\Models\Strategy;
-use App\Models\User;
 use App\Support\Desk\PageCards;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\EvidenceType;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\NarrativeQuestion;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\RiskLibrary;
+use Modules\Tracking\Models\Sector;
+use Modules\Tracking\Models\Strategy;
 
 /**
  * Every page with a card of its own (PageCards), kept in step by the test below it.

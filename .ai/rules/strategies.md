@@ -1,7 +1,7 @@
 ---
 paths:
-  - resources/views/pages/strategies/⚡show.blade.php
-  - resources/views/pages/strategies/⚡index.blade.php
+  - modules/Tracking/resources/views/pages/strategies/⚡show.blade.php
+  - modules/Tracking/resources/views/pages/strategies/⚡index.blade.php
 ---
 
 # Strategies

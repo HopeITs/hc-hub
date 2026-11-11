@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\Milestones\ManagesMilestoneDirectoryForm;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\Milestones\ManagesMilestoneDirectoryForm;
 
 /**
  * Stands in for milestones/index, with every trait that page uses.

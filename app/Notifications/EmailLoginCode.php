@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Models\User;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Modules\Core\Models\User;
 
 /**
  * The one-time sign-in code emailed during login when the user has turned on

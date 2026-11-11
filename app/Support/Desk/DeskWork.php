@@ -4,26 +4,26 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
-use App\Enums\DeliveryState;
-use App\Enums\MilestoneStatus;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
-use App\Enums\TaskStatus;
-use App\Models\DonorReport;
-use App\Models\Milestone;
-use App\Models\MonthlyReport;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalReviewer;
-use App\Models\Task;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\DeliveryState;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalReviewer;
+use Modules\Tracking\Models\Task;
 
 /**
  * The queries behind what the Desk calls "my tasks", "waiting on others",

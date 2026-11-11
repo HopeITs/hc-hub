@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\Project;
-use App\Models\Risk;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Risk;
 
 test('guests are redirected from the risk register', function () {
     $this->get(route('risks.index'))->assertRedirect(route('login'));
@@ -34,7 +34,7 @@ test('risks can be filtered by search project and whether they materialised', fu
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->assertSee('Access restrictions')->assertSee('Currency collapse')
         ->set('search', 'checkpoint')->assertSee('Access restrictions')->assertDontSee('Currency collapse')
         ->call('clearFilters')->set('search', 'Homs Shelter')->assertDontSee('Access restrictions')->assertSee('Currency collapse')
@@ -62,7 +62,7 @@ test('a risk can be logged against a project', function () {
     $project = Project::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->call('openCreateModal')
         ->set('name', '  Fuel shortage  ')
         ->set('impact', '  Generators cannot run, pumping stops.  ')
@@ -87,7 +87,7 @@ test('blank mitigation is normalized to null', function () {
     $project = Project::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->call('openCreateModal')
         ->set('name', 'Fuel shortage')
         ->set('impact', 'Pumping stops.')
@@ -103,7 +103,7 @@ test('logging a risk requires a name an impact and an existing project', functio
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->call('openCreateModal')
         ->set('name', '   ')
         ->set('impact', '   ')
@@ -119,7 +119,7 @@ test('a risk is rated for likelihood and severity, and the rating can be cleared
     $risk = Risk::factory()->rated(2, 3)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->call('openEditModal', $risk->id)
         ->assertSet('likelihood', '2')->assertSet('severity', '3')
         ->set('likelihood', '3')
@@ -138,7 +138,7 @@ test('a rating outside 1 to 3 is refused', function () {
     $risk = Risk::factory()->create();
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->call('openEditModal', $risk->id)
         ->set('likelihood', '4')
         ->set('severity', '0')
@@ -154,7 +154,7 @@ test('a risk can be edited and marked as materialised', function () {
     $newProject = Project::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->call('openEditModal', $risk->id)
         ->assertSet('name', 'Old risk')->assertSet('solution', '')->assertSet('happened', false)
         ->set('name', '  Updated risk  ')
@@ -179,7 +179,7 @@ test('a risk can be deleted after confirmation', function () {
     $risk = Risk::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->call('confirmDelete', $risk->id)
         ->assertSet('deletingRiskId', $risk->id)
         ->assertSet('showDeleteModal', true)
@@ -196,7 +196,7 @@ test('cancelling a delete closes the modal without deleting the risk', function 
     $risk = Risk::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->call('confirmDelete', $risk->id)
         ->assertSet('showDeleteModal', true)
         ->call('cancelDelete')
@@ -210,7 +210,7 @@ test('delete is a no-op until a risk is confirmed', function () {
     $user = User::factory()->role('General Manager')->create();
     $risk = Risk::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::risks.index')->call('deleteRisk')->assertHasNoErrors();
+    Livewire::actingAs($user)->test('tracking::risks.index')->call('deleteRisk')->assertHasNoErrors();
 
     $this->assertDatabaseHas('risks', ['id' => $risk->id]);
 });
@@ -220,7 +220,7 @@ test('a risk can be marked materialised directly from its card', function () {
     $risk = Risk::factory()->create(['happened' => false]);
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->call('setHappened', $risk->id, true)
         ->assertHasNoErrors();
 
@@ -232,7 +232,7 @@ test('a risk can be moved back to potential directly from its card', function ()
     $risk = Risk::factory()->create(['happened' => true]);
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->call('setHappened', $risk->id, false)
         ->assertHasNoErrors();
 
@@ -251,7 +251,7 @@ test('risk content is escaped in the register', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->assertSee('<script>name()</script>')
         ->assertSee('<img src=x onerror=impact()>')
         ->assertSee('<svg onload=solution()>')
@@ -265,7 +265,7 @@ test('risk content is escaped in the register', function () {
 test('the risk register renders with no risks', function () {
     $user = User::factory()->role('General Manager')->create();
 
-    Livewire::actingAs($user)->test('pages::risks.index')->assertSee('No risks logged');
+    Livewire::actingAs($user)->test('tracking::risks.index')->assertSee('No risks logged');
 });
 
 test('the materialised count stays stable regardless of the materialised-only toggle', function () {
@@ -273,7 +273,7 @@ test('the materialised count stays stable regardless of the materialised-only to
     Risk::factory()->count(2)->create(['happened' => true]);
     Risk::factory()->create(['happened' => false]);
 
-    $component = Livewire::actingAs($user)->test('pages::risks.index');
+    $component = Livewire::actingAs($user)->test('tracking::risks.index');
 
     expect($component->get('materialisedCount'))->toBe(2);
 
@@ -288,7 +288,7 @@ test('toggling materialised-only filters the register to materialised risks', fu
     Risk::factory()->create(['name' => 'Open risk', 'happened' => false]);
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->assertSee('Materialised risk')->assertSee('Open risk')
         ->call('toggleMaterialisedOnly')
         ->assertSet('materialisedOnly', true)
@@ -304,7 +304,7 @@ test('the unmitigated toggle filters to challenges with no mitigation recorded',
     Risk::factory()->create(['name' => 'No mitigation', 'solution' => null, 'happened' => true]);
     Risk::factory()->create(['name' => 'Blank mitigation', 'solution' => '', 'happened' => true]);
 
-    $component = Livewire::actingAs($user)->test('pages::risks.index');
+    $component = Livewire::actingAs($user)->test('tracking::risks.index');
 
     expect($component->get('unmitigatedCount'))->toBe(2);
 
@@ -322,7 +322,7 @@ test('a potential risk that has not happened never counts toward challenges with
     $user = User::factory()->role('General Manager')->create();
     Risk::factory()->create(['name' => 'Not yet occurred', 'solution' => null, 'happened' => false]);
 
-    $component = Livewire::actingAs($user)->test('pages::risks.index');
+    $component = Livewire::actingAs($user)->test('tracking::risks.index');
 
     expect($component->get('unmitigatedCount'))->toBe(0);
 
@@ -333,7 +333,7 @@ test('clearing filters also clears the unmitigated toggle', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->call('toggleUnmitigated')
         ->assertSet('unmitigated', true)
         ->call('clearFilters')
@@ -348,7 +348,7 @@ test('the project chart splits challenges from potential risks per project', fun
     Risk::factory()->count(2)->create(['project_id' => $projectA->id, 'happened' => true]);
     Risk::factory()->create(['project_id' => $projectB->id, 'happened' => false]);
 
-    $component = Livewire::actingAs($user)->test('pages::risks.index');
+    $component = Livewire::actingAs($user)->test('tracking::risks.index');
 
     $chart = $component->get('projectRiskChart');
 
@@ -366,7 +366,7 @@ test('the risk landscape totals match the currently filtered risks', function ()
     Risk::factory()->count(2)->create(['happened' => true]);
     Risk::factory()->create(['happened' => false]);
 
-    $component = Livewire::actingAs($user)->test('pages::risks.index');
+    $component = Livewire::actingAs($user)->test('tracking::risks.index');
 
     expect($component->get('riskLandscape'))->toBe(['challenges' => 2, 'potential' => 1]);
 
@@ -383,7 +383,7 @@ test('the project chart respects every active filter, including the project filt
     Risk::factory()->count(2)->create(['project_id' => $projectA->id, 'solution' => 'A plan.', 'happened' => true]);
     Risk::factory()->create(['project_id' => $projectB->id, 'solution' => null, 'happened' => false]);
 
-    $component = Livewire::actingAs($user)->test('pages::risks.index');
+    $component = Livewire::actingAs($user)->test('tracking::risks.index');
 
     $component->call('toggleMaterialisedOnly');
     $materialisedChart = $component->get('projectRiskChart');
@@ -403,7 +403,7 @@ test('the state picker in the risk form saves the string values it sends as the 
     $project = Project::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->call('openCreateModal')
         ->set('name', 'Fuel shortage')
         ->set('impact', 'Generators cannot run.')
@@ -422,7 +422,7 @@ test('the risk form is rendered only while its modal is open', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::risks.index')
+        ->test('tracking::risks.index')
         ->assertDontSeeHtml('wire:model="impact"')
         ->call('openCreateModal')
         ->assertSeeHtml('wire:model="impact"');

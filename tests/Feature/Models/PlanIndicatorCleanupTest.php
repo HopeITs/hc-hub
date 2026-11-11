@@ -1,11 +1,11 @@
 <?php
 
-use App\Models\AnnualPlan;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\ReportFile;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportFile;
 
 test('deleting a annual plan deletes the targets committed in it', function () {
     $plan = AnnualPlan::factory()->create();

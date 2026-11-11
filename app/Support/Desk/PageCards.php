@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
-use App\Models\User;
 use App\Support\Desk\Cards\AccountsCard;
 use App\Support\Desk\Cards\ActivityCard;
 use App\Support\Desk\Cards\AgreementsCard;
@@ -23,6 +22,7 @@ use App\Support\Desk\Cards\RiskLibraryCard;
 use App\Support\Desk\Cards\SectorsCard;
 use App\Support\Desk\Cards\StrategiesCard;
 use App\Support\Desk\Cards\UsersCard;
+use Modules\Core\Models\User;
 
 /**
  * The register pages that have a card of their own (App\Support\Desk\Cards):

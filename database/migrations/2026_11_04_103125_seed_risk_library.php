@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Support\DefaultRiskLibrary;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Support\DefaultRiskLibrary;
 
 /**
  * The starting risk library, created here as well as in the seeder so

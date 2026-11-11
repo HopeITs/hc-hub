@@ -1,10 +1,10 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Models\Account;
-use App\Models\TransfersTracking;
-use App\Support\AccountMoney;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\TransfersTracking;
+use Modules\Tracking\Support\AccountMoney;
 
 beforeEach(function () {
     $this->travelTo('2026-06-15 09:00:00');

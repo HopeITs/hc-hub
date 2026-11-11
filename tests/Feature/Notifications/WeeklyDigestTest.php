@@ -2,17 +2,17 @@
 
 use App\Jobs\RunScanner;
 use App\Models\Activity;
-use App\Models\Milestone;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Risk;
-use App\Models\Task;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\DailyBriefScanner;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Notifications\Alerts\WeeklyDigestScanner;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Queue;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\Task;
 
 test('program managers get their program digest and the general manager the whole picture, on monday only', function () {
     $managerEmployee = insertHrEmployee();

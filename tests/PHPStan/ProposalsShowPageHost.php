@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\AddsQuickTask;
-use App\Livewire\Concerns\ChecksFinanceVisibility;
-use App\Livewire\Concerns\ManagesAgreementForm;
-use App\Livewire\Concerns\ManagesTransferForm;
 use App\Livewire\Concerns\PreviewsFiles;
-use App\Livewire\Concerns\Proposals\ChartsProposalChronology;
-use App\Livewire\Concerns\Proposals\ManagesProposalApproval;
-use App\Livewire\Concerns\Proposals\ManagesProposalFiles;
-use App\Livewire\Concerns\Proposals\ManagesProposalForm;
-use App\Livewire\Concerns\Proposals\ManagesProposalRecord;
-use App\Livewire\Concerns\Proposals\ManagesProposalReviewers;
-use App\Livewire\Concerns\Proposals\ManagesProposalStatus;
-use App\Livewire\Concerns\Proposals\ReadsProposalDelivery;
-use App\Livewire\Concerns\Proposals\ReadsProposalFunding;
-use App\Livewire\Concerns\Proposals\ReadsProposalHealth;
-use App\Livewire\Concerns\Proposals\ReadsProposalVitals;
-use App\Livewire\Concerns\SwitchesFundingView;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Modules\Tracking\Livewire\Concerns\AddsQuickTask;
+use Modules\Tracking\Livewire\Concerns\ChecksFinanceVisibility;
+use Modules\Tracking\Livewire\Concerns\ManagesAgreementForm;
+use Modules\Tracking\Livewire\Concerns\ManagesTransferForm;
+use Modules\Tracking\Livewire\Concerns\Proposals\ChartsProposalChronology;
+use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalApproval;
+use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalFiles;
+use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalForm;
+use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalRecord;
+use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalReviewers;
+use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalStatus;
+use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalDelivery;
+use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalFunding;
+use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalHealth;
+use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalVitals;
+use Modules\Tracking\Livewire\Concerns\SwitchesFundingView;
 
 /**
  * Stands in for proposals/show, with every trait that page uses.

@@ -1,27 +1,27 @@
 <?php
 
-use App\Actions\Proposals\ApproveProposal;
-use App\Actions\Proposals\SetProposalOnHold;
-use App\Enums\AssignmentStatus;
 use App\Enums\MediaCollection;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
-use App\Events\ProjectPeriodChanged;
-use App\Events\ProposalStatusChanged;
-use App\Models\Assignment;
-use App\Models\DonorProposal;
 use App\Models\Media;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalLocation;
-use App\Models\ProposalStatusNote;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\QuickActions;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\ApproveProposal;
+use Modules\Tracking\Actions\Proposals\SetProposalOnHold;
+use Modules\Tracking\Enums\AssignmentStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Events\ProjectPeriodChanged;
+use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Models\Assignment;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
+use Modules\Tracking\Models\ProposalStatusNote;
 
 beforeEach(fn () => $this->travelTo('2026-10-14 10:00:00'));
 

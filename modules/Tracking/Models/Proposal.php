@@ -1,0 +1,660 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Tracking\Models;
+
+use App\Concerns\HasSlug;
+use App\Concerns\RecordsActivity;
+use App\Models\Media;
+use App\Notifications\TracksActivity;
+use App\Observers\MediaOwnerObserver;
+use Carbon\CarbonImmutable;
+use Database\Factories\ProposalFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalKind;
+use Modules\Tracking\Enums\ProposalPhase;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Observers\PlanIndicatorSourceObserver;
+use Modules\Tracking\Observers\ProposalObserver;
+use Modules\Tracking\Support\ProposalTransitions;
+
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ * @property string $internal_project_number
+ * @property int $donor_id
+ * @property string|null $requested_budget
+ * @property Currency|null $requested_currency
+ * @property CarbonImmutable|null $status_remind_on
+ * @property CarbonImmutable|null $on_hold_since
+ * @property string|null $approval_note
+ * @property CarbonImmutable|null $final_report_accepted_on
+ * @property int|null $final_report_accepted_by
+ * @property int|null $previous_proposal_id
+ * @property CarbonImmutable $planned_date_begin
+ * @property CarbonImmutable $planned_date_end
+ * @property CarbonImmutable|null $actual_date_begin
+ * @property CarbonImmutable|null $actual_date_end
+ * @property CarbonImmutable|null $extended_date_end
+ * @property string|null $extension_reason
+ * @property ProposalStatus $status
+ * @property ProposalKind $kind
+ * @property-read ProposalPhase $phase
+ * @property string|null $notes
+ * @property string|null $concept_note
+ * @property string|null $narrative
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ */
+#[Fillable([
+    'name',
+    'donor_id',
+    'internal_project_number',
+    'planned_date_begin',
+    'planned_date_end',
+    'actual_date_begin',
+    'actual_date_end',
+    'notes',
+    'concept_note',
+    'narrative',
+    'requested_budget',
+    'requested_currency',
+    'status_remind_on',
+    'approval_note',
+    'final_report_accepted_on',
+    'final_report_accepted_by',
+    'previous_proposal_id',
+])]
+#[ObservedBy([PlanIndicatorSourceObserver::class, MediaOwnerObserver::class, ProposalObserver::class])]
+class Proposal extends Model implements TracksActivity
+{
+    /** @use HasFactory<ProposalFactory> */
+    use HasFactory, HasSlug, RecordsActivity;
+
+    /**
+     * Marks the internal numbers the migration wrote for proposals that had
+     * none. Reserved: nobody may type a new number starting with it.
+     */
+    public const PLACEHOLDER_NUMBER_PREFIX = 'TEMP-';
+
+    /**
+     * The shortest narrative a payroll proposal may carry (contracts.md §2,
+     * key `narrative`, W-32).
+     */
+    public const NARRATIVE_MIN_LENGTH = 50;
+
+    protected function slugSource(): string
+    {
+        return $this->name;
+    }
+
+    /**
+     * Whether an internal project number is a migration placeholder still
+     * waiting for the real number, compared case-insensitively.
+     */
+    public static function isPlaceholderNumber(?string $number): bool
+    {
+        return $number !== null && str_starts_with(mb_strtoupper($number), self::PLACEHOLDER_NUMBER_PREFIX);
+    }
+
+    /**
+     * Whether a payroll narrative says enough: at least 50 characters once
+     * trimmed. The one definition SaveProposal and TransitionProposal share.
+     */
+    public static function isNarrativeComplete(?string $narrative): bool
+    {
+        return mb_strlen(trim((string) $narrative)) >= self::NARRATIVE_MIN_LENGTH;
+    }
+
+    /**
+     * Mirror the column default so an unrefreshed model can still report a
+     * phase.
+     *
+     * The factory omits `status` on purpose, so the attribute is unhydrated
+     * until the model is refreshed, and `phase` would fail on a model straight
+     * out of create(). `Account::$is_active` carries the same mirror for the
+     * same reason. The column default is still proven independently by a raw
+     * insert in tests/Feature/ProposalTest.php.
+     *
+     * @var array<string, string>
+     */
+    protected $attributes = [
+        'status' => 'concept note',
+        'kind' => 'project',
+    ];
+
+    /**
+     * `phase` has no column, so it is appended explicitly.
+     *
+     * Without this it would be absent from toArray() and from any JSON an API
+     * resource or Livewire payload builds, even though $proposal->phase reads
+     * fine in PHP.
+     *
+     * @var list<string>
+     */
+    protected $appends = ['phase'];
+
+    /**
+     * Delete the model inside a transaction.
+     *
+     * Its observer deletes the targets committed in this proposal, which no
+     * foreign key can reach. Those deletions bracket the delete of
+     * this row, so a failure partway through must not leave them committed.
+     */
+    public function delete(): bool
+    {
+        return (bool) DB::transaction(fn () => parent::delete());
+    }
+
+    /**
+     * The proposal this one renews, or null when it starts a funding line or
+     * its predecessor was deleted.
+     *
+     * @return BelongsTo<Proposal, $this>
+     */
+    public function previousProposal(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'previous_proposal_id');
+    }
+
+    /**
+     * The proposals that renew this one.
+     *
+     * @return HasMany<Proposal, $this>
+     */
+    public function renewals(): HasMany
+    {
+        return $this->hasMany(self::class, 'previous_proposal_id');
+    }
+
+    /**
+     * The projects this proposal funds.
+     *
+     * @return BelongsToMany<Project, $this>
+     */
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class)->withPivot('target_beneficiaries')->withTimestamps();
+    }
+
+    /**
+     * The location rows of this proposal (contracts.md §7, W-34a): one per
+     * city and program, in form order. Written only through SaveProposal,
+     * the link wrappers and the backfill.
+     *
+     * @return HasMany<ProposalLocation, $this>
+     */
+    public function locations(): HasMany
+    {
+        return $this->hasMany(ProposalLocation::class)->orderBy('sort')->orderBy('id');
+    }
+
+    /**
+     * The one donor that funds this proposal.
+     *
+     * A co-funder is a separate proposal. The funding agreement, if any, must
+     * name this same donor: the database enforces it.
+     *
+     * @return BelongsTo<Donor, $this>
+     */
+    public function donor(): BelongsTo
+    {
+        return $this->belongsTo(Donor::class);
+    }
+
+    /**
+     * The user who recorded the donor's acceptance of the final report.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function finalReportAcceptedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'final_report_accepted_by');
+    }
+
+    /**
+     * The funding agreements signed against this proposal.
+     *
+     * @return HasMany<DonorProposal, $this>
+     */
+    public function donorProposals(): HasMany
+    {
+        return $this->hasMany(DonorProposal::class);
+    }
+
+    /**
+     * The donors funding this proposal.
+     *
+     * The donor_proposal table carries budget and currency, so prefer
+     * donorProposals() when those columns matter.
+     *
+     * @return BelongsToMany<Donor, $this>
+     */
+    public function donors(): BelongsToMany
+    {
+        return $this->belongsToMany(Donor::class, 'donor_proposal')
+            ->withPivot(['budget', 'currency', 'external_project_number'])
+            ->withTimestamps();
+    }
+
+    /**
+     * The donors funding this proposal, by name only.
+     *
+     * Unlike donors() it carries no pivot, so a page that shows who funds a
+     * proposal to someone who may not see the money never loads the budget.
+     *
+     * @return BelongsToMany<Donor, $this>
+     */
+    public function donorNames(): BelongsToMany
+    {
+        return $this->belongsToMany(Donor::class, 'donor_proposal');
+    }
+
+    /**
+     * The tasks sourced directly from this proposal.
+     *
+     * Does not include tasks sourced from one of this proposal's funded
+     * projects' milestones — see the Tasks tab query in
+     * proposals/⚡show.blade.php for that broader listing.
+     *
+     * @return MorphMany<Task, $this>
+     */
+    public function tasks(): MorphMany
+    {
+        return $this->morphMany(Task::class, 'source');
+    }
+
+    /**
+     * The milestones on this proposal's plan (contracts.md §12.2): shared at
+     * proposal level, or center-specific when they also carry a project_id.
+     *
+     * @return HasMany<Milestone, $this>
+     */
+    public function milestones(): HasMany
+    {
+        return $this->hasMany(Milestone::class);
+    }
+
+    /**
+     * Every task on this proposal's plan: raised on the proposal itself or on
+     * one of its milestones. Goes through the task visibility scope like any
+     * other task query.
+     *
+     * @return Builder<Task>
+     */
+    public function planTasks(): Builder
+    {
+        return Task::query()->where(fn (Builder $query) => $query
+            ->where(fn (Builder $query) => $query->where('source_type', 'proposal')->where('source_id', $this->id))
+            ->orWhere(fn (Builder $query) => $query->where('source_type', 'milestone')
+                ->whereIn('source_id', Milestone::query()->select('id')->where('proposal_id', $this->id))));
+    }
+
+    /**
+     * The owners of each proposal — the owners (HR employees) of the projects
+     * it funds: a proposal has no owner of its own (contracts §15.2).
+     *
+     * @param  array<int>  $proposalIds
+     * @return array<int, list<int>> proposal id => owner employee ids
+     */
+    public static function ownerEmployeeIdsFor(array $proposalIds): array
+    {
+        if ($proposalIds === []) {
+            return [];
+        }
+
+        $owners = [];
+        $rows = DB::table('project_proposal')
+            ->join('projects', 'projects.id', '=', 'project_proposal.project_id')
+            ->whereIn('project_proposal.proposal_id', $proposalIds)
+            ->whereNotNull('projects.user_id')
+            ->get(['project_proposal.proposal_id', 'projects.user_id']);
+
+        foreach ($rows as $row) {
+            $owners[(int) $row->proposal_id][(int) $row->user_id] = (int) $row->user_id;
+        }
+
+        return array_map(fn (array $ids): array => array_values($ids), $owners);
+    }
+
+    /**
+     * The audit trail of status changes on this proposal.
+     *
+     * @return HasMany<ProposalStatusNote, $this>
+     */
+    public function statusNotes(): HasMany
+    {
+        return $this->hasMany(ProposalStatusNote::class);
+    }
+
+    /**
+     * The people asked to review its concept-note and proposal stages.
+     * Narrow to one stage with ->forStage().
+     *
+     * @return HasMany<ProposalReviewer, $this>
+     */
+    public function reviewers(): HasMany
+    {
+        return $this->hasMany(ProposalReviewer::class);
+    }
+
+    /**
+     * The proposal's own logical framework (contracts §11.2): every result
+     * whose `proposal_id` is this proposal, roots and children alike.
+     *
+     * @return HasMany<Result, $this>
+     */
+    public function results(): HasMany
+    {
+        return $this->hasMany(Result::class);
+    }
+
+    /**
+     * The risks picked from the library onto this proposal's logframe
+     * (W-09, D-61).
+     *
+     * @return HasMany<Risk, $this>
+     */
+    public function risks(): HasMany
+    {
+        return $this->hasMany(Risk::class);
+    }
+
+    /**
+     * The indicator targets committed in this proposal.
+     *
+     * @return MorphMany<PlanIndicator, $this>
+     */
+    public function planIndicators(): MorphMany
+    {
+        return $this->morphMany(PlanIndicator::class, 'source');
+    }
+
+    /**
+     * The documents filed on this proposal itself: concept note, proposal,
+     * signed agreement, MOU.
+     *
+     * @return MorphMany<Media, $this>
+     */
+    public function media(): MorphMany
+    {
+        return $this->morphMany(Media::class, 'mediable');
+    }
+
+    /**
+     * The phase of work this proposal is in.
+     *
+     * Derived from `status`, never stored. There is no `phase` column: it held
+     * a value that could contradict the status sitting next to it.
+     *
+     * Requires `status` to be loaded. A partial select that omits it (e.g.
+     * `Proposal::query()->select('id', 'name')->first()->phase`) throws
+     * "Call to a member function phase() on null" — the `$attributes` mirror
+     * does not help here, because `newFromBuilder` replaces attributes
+     * wholesale rather than merging into it.
+     *
+     * @return Attribute<ProposalPhase, never>
+     */
+    protected function phase(): Attribute
+    {
+        return Attribute::get(fn (): ProposalPhase => $this->status->phase());
+    }
+
+    /**
+     * The grant's end date: the extended one once the proposal was extended
+     * (W-08, D-60), else the actual end set at approval. The original
+     * `actual_date_end` stays untouched.
+     */
+    public function effectiveDateEnd(): ?CarbonImmutable
+    {
+        return $this->extended_date_end ?? $this->actual_date_end;
+    }
+
+    /**
+     * Whether an active proposal runs to an extended end date (W-08), the
+     * case the calendar marks.
+     */
+    public function isExtendedAndActive(): bool
+    {
+        return $this->status === ProposalStatus::Active && $this->extended_date_end !== null;
+    }
+
+    /**
+     * The day the calendar shows the proposal's end on: the extended end of
+     * an active proposal, else the planned end.
+     */
+    public function calendarEndDate(): CarbonImmutable
+    {
+        return $this->isExtendedAndActive() ? $this->extended_date_end : $this->planned_date_end;
+    }
+
+    /**
+     * The status the proposal held before it last entered $status: the
+     * pre-hold status for on hold, the pre-rejection one for rejected.
+     *
+     * Read from the audit trail in insertion order, so a backdated note does
+     * not reorder it. Null when the trail does not show it.
+     */
+    public function statusBefore(ProposalStatus $status): ?ProposalStatus
+    {
+        $enteredAt = $this->statusNotes()->where('status', $status)->max('id');
+
+        if ($enteredAt === null) {
+            return null;
+        }
+
+        $before = $this->statusNotes()
+            ->where('id', '<', $enteredAt)
+            ->where('status', '!=', $status)
+            ->latest('id')
+            ->value('status');
+
+        return $before instanceof ProposalStatus ? $before : ProposalStatus::tryFrom((string) $before);
+    }
+
+    /**
+     * Whether ApproveProposal accepts the proposal now (contracts.md §2).
+     *
+     * A proposal on hold is still `submitted` since W-06, so the hold no
+     * longer needs an arm of its own: approval is allowed and clears it.
+     */
+    public function canBeApproved(): bool
+    {
+        return $this->status === ProposalStatus::Submitted;
+    }
+
+    /**
+     * Whether the proposal is on hold (D-58, W-06): a flag it carries while
+     * it waits on the donor, not a status. Written only by SetProposalOnHold
+     * and ClearProposalOnHold (contracts.md §4).
+     */
+    public function isOnHold(): bool
+    {
+        return $this->on_hold_since !== null;
+    }
+
+    /**
+     * The status as people read it: «Submitted (On hold)» while the flag is
+     * set, the plain status label otherwise. The one place the two are put
+     * together, so every badge, picker and chart reads the same words.
+     */
+    public function statusLabel(): string
+    {
+        return $this->isOnHold()
+            ? __('proposals.status_on_hold_label', ['status' => $this->status->label()])
+            : $this->status->label();
+    }
+
+    /**
+     * The stop of the main lifecycle line the proposal sits at.
+     *
+     * On hold and rejected sit at the stop they left (a rejection during a
+     * hold looks past the hold); the retired final reports status sits at
+     * active. Reads the loaded status notes (all of them) so a register page
+     * costs no extra query per row; falls back to submitted when the trail
+     * does not show where it came from.
+     */
+    public function lifecycleStop(): ProposalStatus
+    {
+        $notes = $this->statusNotes->sortByDesc('id')->values();
+
+        $before = function (ProposalStatus $left) use ($notes): ?ProposalStatus {
+            $position = $notes->search(fn (ProposalStatusNote $note): bool => $note->status === $left);
+
+            return $position === false
+                ? null
+                : $notes->slice($position + 1)->first(fn (ProposalStatusNote $note): bool => $note->status !== $left)?->status;
+        };
+
+        $stop = match ($this->status) {
+            ProposalStatus::Rejected => $before(ProposalStatus::Rejected) === ProposalStatus::OnHold
+                ? $before(ProposalStatus::OnHold)
+                : $before(ProposalStatus::Rejected),
+            ProposalStatus::FinalReports => ProposalStatus::Active,
+            default => $this->status,
+        };
+
+        return $stop !== null && in_array($stop, ProposalStatus::lifecycle(), true) ? $stop : ProposalStatus::Submitted;
+    }
+
+    /**
+     * The statuses TransitionProposal may move this proposal to.
+     *
+     * @return list<ProposalStatus>
+     */
+    public function transitionTargets(): array
+    {
+        return ProposalTransitions::targets($this->status, $this->kind);
+    }
+
+    /**
+     * Whether this is a payroll proposal (D-55b, W-32): a center's salaries
+     * and equipment, with no projects, logframe, targets or monthly reports.
+     */
+    public function isPayroll(): bool
+    {
+        return $this->kind === ProposalKind::Payroll;
+    }
+
+    /**
+     * The paperwork stage this proposal is at: concept_note, proposal or grant.
+     *
+     * Derived, never stored. Rejected keeps the stage of the status it left;
+     * a rejection made during a hold (before W-06 retired the status) looks
+     * past the hold to the status before it.
+     *
+     * @return 'concept_note'|'proposal'|'grant'
+     */
+    public function stage(): string
+    {
+        $before = $this->status === ProposalStatus::Rejected
+            ? $this->statusBefore($this->status)
+            : null;
+
+        if ($this->status === ProposalStatus::Rejected && $before === ProposalStatus::OnHold) {
+            $before = $this->statusBefore(ProposalStatus::OnHold);
+        }
+
+        return $this->status->stage($before);
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string|class-string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => ProposalStatus::class,
+            'kind' => ProposalKind::class,
+            'planned_date_begin' => 'date',
+            'planned_date_end' => 'date',
+            'actual_date_begin' => 'date',
+            'actual_date_end' => 'date',
+            'extended_date_end' => 'date',
+            'requested_budget' => 'decimal:2',
+            'requested_currency' => Currency::class,
+            'status_remind_on' => 'date',
+            'on_hold_since' => 'date',
+            'final_report_accepted_on' => 'date',
+        ];
+    }
+
+    /**
+     * The requested budget is money: it never reaches the activity log.
+     *
+     * @return list<string>
+     */
+    protected function activityExcludedFields(): array
+    {
+        return ['requested_budget'];
+    }
+
+    /**
+     * A renewal's creation names the proposal it renews.
+     *
+     * @return array<string, mixed>
+     */
+    protected function activityProperties(string $event): array
+    {
+        $previousId = $this->activityAttribute('previous_proposal_id');
+
+        return $event === $this->getMorphClass().'.created' && $previousId !== null
+            ? ['renewed_from' => (int) $previousId]
+            : [];
+    }
+
+    public function activityModule(): string
+    {
+        return 'proposals';
+    }
+
+    public function activityLabel(): string
+    {
+        return (string) $this->activityAttribute('name');
+    }
+
+    public function activityProgramId(): ?int
+    {
+        return null;
+    }
+
+    /**
+     * Donor approval is its own event (contracts.md §15); the other status
+     * moves stay proposal.status_changed.
+     */
+    protected function activityEventForChange(string $field, mixed $old, mixed $new): ?string
+    {
+        if ($field === 'status' && $new === ProposalStatus::Approved->value) {
+            return 'approved';
+        }
+
+        return $this->activityEvents()[$field] ?? null;
+    }
+
+    /**
+     * The concept note (W-24) is a movement of its own: the sentence says it
+     * was updated and names no text, as the other entries name no value.
+     *
+     * @return array<string, string>
+     */
+    public function activityEvents(): array
+    {
+        return ['status' => 'status_changed', 'concept_note' => 'concept_note_updated', 'name' => 'updated', 'internal_project_number' => 'updated', 'planned_date_begin' => 'updated', 'planned_date_end' => 'updated', 'narrative' => 'updated'];
+    }
+}

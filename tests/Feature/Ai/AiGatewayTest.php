@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 use App\Enums\AiRequestStatus;
 use App\Models\AiRequest;
-use App\Models\User;
 use App\Support\Ai\AiGateway;
 use App\Support\Ai\HcAgent;
+use Modules\Core\Models\User;
 
 /**
  * A throwaway agent: the gateway works with any agent, so tests use this one.

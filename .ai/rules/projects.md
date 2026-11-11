@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Actions/Proposals/**,resources/views/pages/proposals/**,resources/views/pages/projects/**}'
+  - '{modules/Tracking/Actions/Proposals/**,modules/Tracking/resources/views/pages/proposals/**,modules/Tracking/resources/views/pages/projects/**}'
 ---
 
 # Projects

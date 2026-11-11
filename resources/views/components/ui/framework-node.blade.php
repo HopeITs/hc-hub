@@ -1,8 +1,8 @@
 @props(['node', 'depth' => 0, 'order' => 0, 'editable' => true, 'riskCounts' => null])
 
 @php
-    use App\Enums\RagStatus;
-    use App\Enums\ResultType;
+    use Modules\Tracking\Enums\RagStatus;
+    use Modules\Tracking\Enums\ResultType;
 
     $result = $node['result'];
     $measurement = $node['measurement'];

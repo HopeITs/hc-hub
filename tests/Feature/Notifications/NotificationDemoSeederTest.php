@@ -2,9 +2,9 @@
 
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\User;
 use App\Models\UserNotification;
 use Database\Seeders\NotificationDemoSeeder;
+use Modules\Core\Models\User;
 
 beforeEach(fn () => insertHrSeedReferenceData());
 

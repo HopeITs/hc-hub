@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\ResultType;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Result;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Result;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -56,7 +56,7 @@ test('the proposal page renders the logframe tab', function () {
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->set('tab', 'logframe')
         ->assertSeeLivewire('proposals.logframe');
 });

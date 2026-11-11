@@ -2,36 +2,36 @@
 
 declare(strict_types=1);
 
-use App\Notifications\Alerts\DataGapScanner;
-use App\Notifications\Alerts\DueSoonScanner;
-use App\Notifications\Alerts\EscalationScanner;
-use App\Notifications\Alerts\OffTrackIndicatorScanner;
-use App\Notifications\Alerts\OnHoldReminderScanner;
-use App\Notifications\Alerts\OverdueScanner;
 use App\Notifications\Alerts\OversightDigestScanner;
-use App\Notifications\Alerts\ProjectDatesScanner;
-use App\Notifications\Alerts\ResponsibleInactiveScanner;
-use App\Notifications\Alerts\StalledScanner;
-use App\Notifications\Recipients\AccountRecipients;
-use App\Notifications\Recipients\DonorRecipients;
-use App\Notifications\Recipients\DonorReportRecipients;
-use App\Notifications\Recipients\FundingAgreementRecipients;
-use App\Notifications\Recipients\IndicatorRecipients;
-use App\Notifications\Recipients\LibraryIndicatorRecipients;
-use App\Notifications\Recipients\ManagedRecipients;
-use App\Notifications\Recipients\MealCoverageRecipients;
-use App\Notifications\Recipients\MilestoneRecipients;
-use App\Notifications\Recipients\MonthlyReportRecipients;
-use App\Notifications\Recipients\ProjectRecipients;
-use App\Notifications\Recipients\ProposalRecipients;
-use App\Notifications\Recipients\ReportRecipients;
-use App\Notifications\Recipients\ReportTemplateRecipients;
-use App\Notifications\Recipients\ResultRecipients;
-use App\Notifications\Recipients\RiskRecipients;
-use App\Notifications\Recipients\StrategyRecipients;
-use App\Notifications\Recipients\TaskRecipients;
-use App\Notifications\Recipients\TransferRecipients;
 use App\Notifications\Recipients\UserRecipients;
+use Modules\Tracking\Notifications\Alerts\DataGapScanner;
+use Modules\Tracking\Notifications\Alerts\DueSoonScanner;
+use Modules\Tracking\Notifications\Alerts\EscalationScanner;
+use Modules\Tracking\Notifications\Alerts\OffTrackIndicatorScanner;
+use Modules\Tracking\Notifications\Alerts\OnHoldReminderScanner;
+use Modules\Tracking\Notifications\Alerts\OverdueScanner;
+use Modules\Tracking\Notifications\Alerts\ProjectDatesScanner;
+use Modules\Tracking\Notifications\Alerts\ResponsibleInactiveScanner;
+use Modules\Tracking\Notifications\Alerts\StalledScanner;
+use Modules\Tracking\Notifications\Recipients\AccountRecipients;
+use Modules\Tracking\Notifications\Recipients\DonorRecipients;
+use Modules\Tracking\Notifications\Recipients\DonorReportRecipients;
+use Modules\Tracking\Notifications\Recipients\FundingAgreementRecipients;
+use Modules\Tracking\Notifications\Recipients\IndicatorRecipients;
+use Modules\Tracking\Notifications\Recipients\LibraryIndicatorRecipients;
+use Modules\Tracking\Notifications\Recipients\ManagedRecipients;
+use Modules\Tracking\Notifications\Recipients\MealCoverageRecipients;
+use Modules\Tracking\Notifications\Recipients\MilestoneRecipients;
+use Modules\Tracking\Notifications\Recipients\MonthlyReportRecipients;
+use Modules\Tracking\Notifications\Recipients\ProjectRecipients;
+use Modules\Tracking\Notifications\Recipients\ProposalRecipients;
+use Modules\Tracking\Notifications\Recipients\ReportRecipients;
+use Modules\Tracking\Notifications\Recipients\ReportTemplateRecipients;
+use Modules\Tracking\Notifications\Recipients\ResultRecipients;
+use Modules\Tracking\Notifications\Recipients\RiskRecipients;
+use Modules\Tracking\Notifications\Recipients\StrategyRecipients;
+use Modules\Tracking\Notifications\Recipients\TaskRecipients;
+use Modules\Tracking\Notifications\Recipients\TransferRecipients;
 
 return [
 

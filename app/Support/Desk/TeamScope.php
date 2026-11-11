@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
-use App\Enums\TaskStatus;
-use App\Models\Milestone;
-use App\Models\Scopes\TaskVisibilityScope;
-use App\Models\Task;
-use App\Models\TaskAssignee;
-use App\Models\User;
-use App\Support\SupervisionMap;
 use Illuminate\Database\Eloquent\Builder;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Scopes\TaskVisibilityScope;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAssignee;
+use Modules\Tracking\Support\SupervisionMap;
 
 /**
  * Who belongs to someone's team on the Desk (user decision 2026-10-27): the

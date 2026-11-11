@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Middleware;
 
 use App\Models\HrUser;
-use App\Models\User;
 use Closure;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\SessionGuard;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Modules\Core\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 

@@ -1,16 +1,16 @@
 <?php
 
-use App\Actions\DonorReports\SaveDonorReportSnapshot;
-use App\Enums\MonthlyReportStatus;
 use App\Models\Activity;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\LibraryIndicator;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\DonorReports\SaveDonorReportSnapshot;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\TransfersTracking;
 
 /*
 | The Donor Report Builder, the saved report page, its CSV export and its
@@ -40,7 +40,7 @@ beforeEach(function () {
 
 function drpBuilder(User $user)
 {
-    return Livewire::actingAs($user)->test('pages::donor-reports.compose')
+    return Livewire::actingAs($user)->test('tracking::donor-reports.compose')
         ->set('proposalId', (string) test()->proposal->id)
         ->call('compose')
         ->assertHasNoErrors();
@@ -74,7 +74,7 @@ test('monthly and half-yearly reports save only validated figures in their selec
     donorReportFigures($otherCenter, '2026-01', $this->library, [$otherTarget->id => ['value' => 99]], MonthlyReportStatus::Submitted);
     donorReportFigures($this->center, '2026-02', $this->library, [$this->target->id => ['value' => 40]]);
 
-    Livewire::actingAs($this->aggregatorOnly)->test('pages::donor-reports.compose')
+    Livewire::actingAs($this->aggregatorOnly)->test('tracking::donor-reports.compose')
         ->assertSee('Monthly')
         ->set('proposalId', (string) $this->proposal->id)
         ->set('periodType', $period)
@@ -113,7 +113,7 @@ test('months not yet validated raise the completeness warning at the top', funct
 });
 
 test('a period without validated data says so and can still be saved', function () {
-    $builder = Livewire::actingAs($this->aggregatorOnly)->test('pages::donor-reports.compose')
+    $builder = Livewire::actingAs($this->aggregatorOnly)->test('tracking::donor-reports.compose')
         ->set('proposalId', (string) $this->proposal->id)
         ->set('startMonth', '2026-07')
         ->call('compose')
@@ -128,7 +128,7 @@ test('a period without validated data says so and can still be saved', function 
 test('without a funding agreement the builder previews but cannot save', function () {
     $proposal = donorReportProposal(withAgreement: false);
 
-    Livewire::actingAs($this->aggregatorOnly)->test('pages::donor-reports.compose')
+    Livewire::actingAs($this->aggregatorOnly)->test('tracking::donor-reports.compose')
         ->set('proposalId', (string) $proposal->id)
         ->call('compose')
         ->assertHasNoErrors()
@@ -142,7 +142,7 @@ test('without a funding agreement the builder previews but cannot save', functio
 });
 
 test('a period outside the grant is refused next to the field', function () {
-    Livewire::actingAs($this->aggregatorOnly)->test('pages::donor-reports.compose')
+    Livewire::actingAs($this->aggregatorOnly)->test('tracking::donor-reports.compose')
         ->set('proposalId', (string) $this->proposal->id)
         ->set('startMonth', '2027-02')
         ->call('compose')
@@ -156,7 +156,7 @@ test('saving lands on the saved report, read from its snapshot', function () {
     expect($report->version)->toBe(1)
         ->and($report->snapshot)->not->toHaveKey('finance');
 
-    Livewire::actingAs($this->aggregatorOnly)->test('pages::donor-reports.show', ['donorReport' => $report])
+    Livewire::actingAs($this->aggregatorOnly)->test('tracking::donor-reports.show', ['donorReport' => $report])
         ->assertSeeText('Children enrolled')
         ->assertSeeHtml('data-report-version>v1<')
         ->assertSeeHtml('data-test="regenerate-donor-report"');
@@ -165,7 +165,7 @@ test('saving lands on the saved report, read from its snapshot', function () {
 test('regenerate adds the next version and keeps the first', function () {
     $report = drpSaved($this->aggregatorOnly);
 
-    Livewire::actingAs($this->aggregatorOnly)->test('pages::donor-reports.show', ['donorReport' => $report])
+    Livewire::actingAs($this->aggregatorOnly)->test('tracking::donor-reports.show', ['donorReport' => $report])
         ->call('openRegenerate')
         ->assertSet('showRegenerateModal', true)
         ->call('regenerate')
@@ -196,7 +196,7 @@ test('a regenerate call without reports.aggregate is refused', function () {
     $report = drpSaved($this->aggregatorOnly);
     $viewer = userWithRole('Financial');
 
-    Livewire::actingAs($viewer)->test('pages::donor-reports.show', ['donorReport' => $report])->call('regenerate')->assertForbidden();
+    Livewire::actingAs($viewer)->test('tracking::donor-reports.show', ['donorReport' => $report])->call('regenerate')->assertForbidden();
 
     expect(DonorReport::query()->count())->toBe(1);
 });

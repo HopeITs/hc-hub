@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/pages/admin/*narrative-questions*'
+  - 'modules/Tracking/resources/views/pages/admin/*narrative-questions*'
 ---
 
 # Narrative questions

@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Models\Role;
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
+use Modules\Core\Models\User;
 
 return new class extends Migration
 {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Notifications;
 
 use App\Models\HrEmployee;
-use App\Models\User;
+use Modules\Core\Models\User;
 
 /**
  * Maps HR employees (who are assigned, responsible, owners, managers) to the

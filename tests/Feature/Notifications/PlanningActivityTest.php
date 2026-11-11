@@ -1,16 +1,16 @@
 <?php
 
-use App\Enums\MilestoneStatus;
 use App\Enums\NotificationPriority;
-use App\Enums\ProjectStatus;
 use App\Models\Activity;
-use App\Models\AnnualPlan;
-use App\Models\Milestone;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\ScheduleBaseline;
-use App\Models\Strategy;
 use App\Models\UserNotification;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ScheduleBaseline;
+use Modules\Tracking\Models\Strategy;
 
 test('a new responsible person is told they are responsible, managers watch', function () {
     $ownerEmployee = insertHrEmployee();

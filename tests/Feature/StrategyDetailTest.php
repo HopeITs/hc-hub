@@ -1,16 +1,16 @@
 <?php
 
-use App\Models\AnnualPlan;
-use App\Models\Indicator;
-use App\Models\IndicatorProgress;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Result;
-use App\Models\StrategicPillar;
-use App\Models\Strategy;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\IndicatorProgress;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\StrategicPillar;
+use Modules\Tracking\Models\Strategy;
 
 beforeEach(function () {
     $this->travelTo('2026-06-15 09:00:00');
@@ -335,7 +335,7 @@ test('a manager edits the strategy details from its page', function () {
     $strategy = Strategy::factory()->create(['name' => 'Country Strategy', 'start_year' => 2026, 'end_year' => 2030]);
 
     Livewire::actingAs(User::factory()->role('Managers')->create())
-        ->test('pages::strategies.show', ['strategy' => $strategy])
+        ->test('tracking::strategies.show', ['strategy' => $strategy])
         ->assertSeeHtml('data-test="edit-strategy-button"')
         ->call('openEditModal', $strategy->id)
         ->assertSet('showStrategyModal', true)
@@ -352,7 +352,7 @@ test('deleting a strategy from its page goes back to the list', function () {
     $strategy = Strategy::factory()->create();
 
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::strategies.show', ['strategy' => $strategy])
+        ->test('tracking::strategies.show', ['strategy' => $strategy])
         ->assertSeeHtml('wire:click="confirmDelete('.$strategy->id.')"')
         ->call('confirmDelete', $strategy->id)
         ->assertSet('showDeleteModal', true)
@@ -367,7 +367,7 @@ test('a strategy with programs shows why it cannot be deleted and stays', functi
     Program::factory()->create(['strategy_id' => $strategy->id]);
 
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::strategies.show', ['strategy' => $strategy])
+        ->test('tracking::strategies.show', ['strategy' => $strategy])
         ->assertSeeHtml('data-test="delete-strategy-reason">'.e(__('strategies.cannot_delete_has_programs')).'</p>')
         ->assertDontSeeHtml('wire:click="confirmDelete(')
         ->call('confirmDelete', $strategy->id)

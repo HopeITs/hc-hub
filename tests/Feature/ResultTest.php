@@ -1,9 +1,9 @@
 <?php
 
-use App\Enums\ResultType;
-use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ResultType;
 
 test('a new result checks out quarterly and stands on its own', function () {
     $result = DB::table('results')->find(insertResult());

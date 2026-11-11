@@ -1,13 +1,13 @@
 <?php
 
-use App\Enums\TaskStatus;
 use App\Models\HrEmployee;
-use App\Models\Milestone;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\TaskAttachment;
-use App\Models\User;
 use Carbon\CarbonImmutable;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 
 test('a task resolves its polymorphic source', function () {
     $milestone = Milestone::factory()->create();

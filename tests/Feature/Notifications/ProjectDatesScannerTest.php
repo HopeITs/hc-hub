@@ -1,14 +1,14 @@
 <?php
 
-use App\Enums\ProjectStatus;
 use App\Models\Activity;
-use App\Models\Program;
-use App\Models\Project;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\NotificationSettings;
-use App\Notifications\Alerts\ProjectDatesScanner;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Notifications\Alerts\ProjectDatesScanner;
 
 // 2026-10-14 is a Wednesday; 2026-10-17/18 is a weekend (Mon–Fri default).
 beforeEach(function () {

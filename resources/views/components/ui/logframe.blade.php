@@ -1,5 +1,5 @@
 {{--
-    The read-only results chain (T16), built by App\Support\ResultsChain:
+    The read-only results chain (T16), built by Modules\Tracking\Support\ResultsChain:
     impact → outcome → output → activity, cross-cutting roots below, each node
     with its indicators and per-center targets, gap markers and the chain
     filters. Renders no queries. Hosts: programs/show, annual-plans/show and
@@ -16,7 +16,7 @@
 ])
 
 @php
-    use App\Enums\ResultType;
+    use Modules\Tracking\Enums\ResultType;
 
     $summary ??= $chain['summary'];
     $heading ??= __('programs.results_logframe');

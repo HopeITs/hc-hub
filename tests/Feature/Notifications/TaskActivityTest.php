@@ -1,19 +1,19 @@
 <?php
 
-use App\Enums\TaskStatus;
 use App\Jobs\FanOutActivity;
 use App\Models\Activity;
-use App\Models\Milestone;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Task;
-use App\Models\TaskAttachment;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\NotificationPresenter;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 
 beforeEach(fn () => $this->seed(RolesAndPermissionsSeeder::class));
 
@@ -139,7 +139,7 @@ test('completing a task from the task list notifies its assignee but not the act
         return $task;
     });
 
-    Livewire::actingAs($actor)->test('pages::tasks.index')->call('toggleComplete', $task->id);
+    Livewire::actingAs($actor)->test('tracking::tasks.index')->call('toggleComplete', $task->id);
 
     expect(UserNotification::query()->forUser($actor)->count())->toBe(0);
 

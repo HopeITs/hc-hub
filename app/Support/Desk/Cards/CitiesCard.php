@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Support\Desk\Cards;
 
 use App\Models\HrCity;
-use App\Models\Project;
-use App\Models\User;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
 
 /**
  * Cities in card form: where the work happens, busiest city first.

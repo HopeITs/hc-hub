@@ -1,19 +1,19 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Enums\DonorReportType;
-use App\Models\Account;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\DonorReportType;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 use function Livewire\invade;
 
@@ -40,7 +40,7 @@ test('agreements can be filtered by donor and currency', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->assertSee('Dollar Proposal')
         ->assertSee('Euro Proposal')
         ->set('donor', (string) $unicef->id)
@@ -71,7 +71,7 @@ test('the collection ledger splits each currency from committed to net without m
     $tranche(['payment_amount' => '50.00', 'ar_status' => ArStatus::Pending, 'transfer_date' => now()->subDay(), 'scheduled_date' => now()->subDay()]);
 
     $ledger = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->set('view', 'overview')
         ->assertSeeText('Cash-flow calendar')
         ->instance()
@@ -124,7 +124,7 @@ test('the cash-flow calendar totals each month and quarter per currency and runs
     }
 
     $calendar = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->instance()
         ->calendar;
 
@@ -157,7 +157,7 @@ test('the cash-flow calendar pads an empty schedule around today', function () {
     DonorProposal::factory()->create();
 
     $calendar = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->set('view', 'overview')
         ->assertSeeText('No tranches scheduled')
         ->instance()
@@ -204,7 +204,7 @@ test('agreements can be narrowed to where their money is stuck, most urgent firs
     }
 
     $component = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->assertSeeInOrder(['Late Proposal', 'On Time Proposal']);
 
     expect($component->instance()->stageCounts)->toMatchArray([
@@ -235,7 +235,7 @@ test('an agreement can be created with a budget and currency', function () {
     $proposal = Proposal::factory()->running()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openCreateModal')
         ->set('agreementProposalId', (string) $proposal->id)
         ->set('budget', '750000.00')
@@ -254,7 +254,7 @@ test('a negative budget is rejected', function () {
     $user = User::factory()->role('Financial')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openCreateModal')
         ->set('agreementProposalId', (string) Proposal::factory()->running()->create()->id)
         ->set('budget', '-1')
@@ -267,7 +267,7 @@ test('an agreement with nothing under it can be deleted', function () {
     $user = User::factory()->role('Financial')->create();
     $agreement = DonorProposal::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::funding-agreements.index')
+    Livewire::actingAs($user)->test('tracking::funding-agreements.index')
         ->call('openAgreementEdit', $agreement->id)
         ->call('confirmAgreementDelete')
         ->assertSet('confirmingAgreementDelete', true)
@@ -284,7 +284,7 @@ test('an agreement holding tranches or donor reports is never deleted', function
         ? TransfersTracking::factory()->create(['donor_proposal_id' => $agreement->id])
         : DonorReport::factory()->create(['donor_proposal_id' => $agreement->id]);
 
-    Livewire::actingAs($user)->test('pages::funding-agreements.index')
+    Livewire::actingAs($user)->test('tracking::funding-agreements.index')
         ->call('openAgreementEdit', $agreement->id)
         ->assertSeeHtml('data-agreement-delete-blocked')
         ->call('deleteAgreement');
@@ -296,7 +296,7 @@ test('deleting an agreement needs the delete permission', function () {
     $user = User::factory()->create();
     $agreement = DonorProposal::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::funding-agreements.index')
+    Livewire::actingAs($user)->test('tracking::funding-agreements.index')
         ->call('deleteAgreement')
         ->assertForbidden();
 
@@ -307,7 +307,7 @@ test('deleting the agreement from its own page returns to the directory', functi
     $user = User::factory()->role('Financial')->create();
     $agreement = DonorProposal::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+    Livewire::actingAs($user)->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->call('openAgreementEdit', $agreement->id)
         ->call('deleteAgreement')
         ->assertRedirect(route('funding-agreements.index'));
@@ -318,7 +318,7 @@ test('the agreement currency is fixed once tranches exist', function () {
     $agreement = DonorProposal::factory()->create(['currency' => Currency::Usd]);
     TransfersTracking::factory()->create(['donor_proposal_id' => $agreement->id]);
 
-    Livewire::actingAs($user)->test('pages::funding-agreements.index')
+    Livewire::actingAs($user)->test('tracking::funding-agreements.index')
         ->call('openAgreementEdit', $agreement->id)
         ->set('agreementCurrency', 'EUR')
         ->call('saveAgreement')
@@ -331,7 +331,7 @@ test('a budget larger than its column is rejected, not sent to the database', fu
     $user = User::factory()->role('Financial')->create();
     $agreement = DonorProposal::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::funding-agreements.index')
+    Livewire::actingAs($user)->test('tracking::funding-agreements.index')
         ->call('openAgreementEdit', $agreement->id)
         ->set('budget', '10000000000000')
         ->call('saveAgreement')
@@ -342,7 +342,7 @@ test('recording an agreement against an unapproved proposal is refused', functio
     $user = User::factory()->role('Financial')->create();
     $proposal = Proposal::factory()->create(['status' => 'concept note']);
 
-    Livewire::actingAs($user)->test('pages::funding-agreements.index')
+    Livewire::actingAs($user)->test('tracking::funding-agreements.index')
         ->call('openAgreementCreate')
         ->set('agreementProposalId', (string) $proposal->id)
         ->set('budget', '1000')
@@ -358,10 +358,10 @@ test('the agreement page links to its tranches in the transfers ledger', functio
     TransfersTracking::factory()->create(['donor_proposal_id' => $agreement->id]);
     $other = TransfersTracking::factory()->create();
 
-    Livewire::actingAs($user)->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+    Livewire::actingAs($user)->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->assertSeeHtml(e(route('transfers.index', ['agreement' => $agreement->id])));
 
-    Livewire::actingAs($user)->withQueryParams(['agreement' => (string) $agreement->id])->test('pages::transfers.index')
+    Livewire::actingAs($user)->withQueryParams(['agreement' => (string) $agreement->id])->test('tracking::transfers.index')
         ->assertDontSeeHtml('wire:key="transfer-'.$other->id.'"')
         ->assertSeeHtml('data-agreement-chip');
 });
@@ -405,7 +405,7 @@ test('agreement detail renders an agreement with no tranches', function () {
 test('a user without funding agreement permissions cannot record one', function () {
     $viewer = User::factory()->role('Managers')->create()->givePermissionTo('funding-agreements.view');
 
-    $fresh = fn () => Livewire::actingAs($viewer)->test('pages::funding-agreements.index');
+    $fresh = fn () => Livewire::actingAs($viewer)->test('tracking::funding-agreements.index');
 
     $fresh()->assertDontSeeHtml('data-test="create-agreement-button"');
     $fresh()->call('openCreateModal')->assertForbidden();
@@ -435,7 +435,7 @@ test('agreement detail counts only received tranches as landed and adds the prom
     $tranche(['payment_amount' => '50.00', 'amount_transfered_currency' => Currency::Eur, 'ar_status' => ArStatus::Pending, 'scheduled_date' => now()->addDays(5)]);
 
     $money = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->assertSeeText('10 days late')
         ->assertSeeText('1 tranche was sent in another currency and is not counted here.')
         ->instance()
@@ -482,7 +482,7 @@ test('a tranche saved from the agreement page is filed against that agreement ev
     $other = DonorProposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->call('openTransferCreate', $agreement->id)
         ->assertSet('transferAgreementId', (string) $agreement->id)
         ->assertSet('transferredCurrency', 'EUR')
@@ -509,14 +509,14 @@ test('a tranche the donor sent that has not landed past its date is in transit o
         'transfer_date' => now()->subDays(10),
     ]);
 
-    $index = Livewire::actingAs($user)->test('pages::funding-agreements.index');
+    $index = Livewire::actingAs($user)->test('tracking::funding-agreements.index');
 
     expect(invade($index->instance())->trancheState($sent))->toBe('transit')
         ->and($index->instance()->stageCounts)->toMatchArray(['in_transit' => 1, 'overdue' => 0])
         ->and($index->instance()->ledger->first())->toMatchArray(['inTransit' => 400.0, 'overdue' => 0.0]);
 
     $show = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->assertSeeText('in transit, 12 days past its date')
         ->assertDontSeeText('12 days late');
 
@@ -549,7 +549,7 @@ test('failed transfers are their own stage, apart from upcoming and in transit',
         ]);
     }
 
-    $component = Livewire::actingAs($user)->test('pages::funding-agreements.index')->set('view', 'overview');
+    $component = Livewire::actingAs($user)->test('tracking::funding-agreements.index')->set('view', 'overview');
 
     expect($component->instance()->ledger->first())->toMatchArray([
         'failed' => 300.0,
@@ -590,7 +590,7 @@ test('a received tranche with no net recorded counts as nothing landed on both p
     ]);
 
     $index = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->set('view', 'overview')
         ->assertSeeHtml('data-ledger-net-missing');
 
@@ -606,7 +606,7 @@ test('a received tranche with no net recorded counts as nothing landed on both p
         'missingNet' => 1,
     ]);
 
-    $show = Livewire::actingAs($user)->test('pages::funding-agreements.show', ['donorProposal' => $agreement]);
+    $show = Livewire::actingAs($user)->test('tracking::funding-agreements.show', ['donorProposal' => $agreement]);
 
     expect($show->instance()->money)->toMatchArray([
         'landed' => 195.0,
@@ -622,7 +622,7 @@ test('a tranche cannot be marked received without the net amount and the date it
     $agreement = DonorProposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->call('openTransferCreate', $agreement->id)
         ->set('paymentAmount', '250')
         ->set('transferArStatus', ArStatus::Received->value)
@@ -649,14 +649,14 @@ test('a sliver of money landed reads as under one percent, not zero', function (
         'ar_status' => ArStatus::Received,
     ]);
 
-    $index = Livewire::actingAs($user)->test('pages::funding-agreements.index');
+    $index = Livewire::actingAs($user)->test('tracking::funding-agreements.index');
 
     expect(invade($index->instance())->percentLabel(500.0, 100000.0))->toBe('<1')
         ->and(invade($index->instance())->percentLabel(0.0, 100000.0))->toBe('0')
         ->and(invade($index->instance())->percentLabel(40000.0, 100000.0))->toBe('40');
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->set('view', 'overview')
         ->assertSeeHtml('data-test="dial-percent">&lt;1<');
 });
@@ -666,7 +666,7 @@ test('reports owed to the donor can be added, submitted and deleted on the agree
     $agreement = DonorProposal::factory()->create();
 
     $component = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->call('openReportCreate')
         ->assertSet('showReportModal', true)
         ->set('reportTitle', 'Interim financial report')
@@ -708,7 +708,7 @@ test('reports owed to the donor can be added, submitted and deleted on the agree
 
     $component->assertDontSeeHtml('data-test="delete-report-'.$report->id.'"');
 
-    $fresh = fn () => Livewire::actingAs($user)->test('pages::funding-agreements.show', ['donorProposal' => $agreement]);
+    $fresh = fn () => Livewire::actingAs($user)->test('tracking::funding-agreements.show', ['donorProposal' => $agreement]);
     $fresh()->call('confirmReportDelete', $report->id)->assertForbidden();
     $fresh()->call('openReportEdit', $report->id)->set('reportTitle', 'Changed')->call('saveReport')
         ->assertHasErrors(['reportTitle' => __('donor_reports.already_submitted')]);
@@ -722,7 +722,7 @@ test('an unsubmitted donor report is deleted from the agreement', function () {
     $report = DonorReport::factory()->create(['donor_proposal_id' => $agreement->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->call('confirmReportDelete', $report->id)
         ->assertSet('showReportDeleteModal', true)
         ->call('deleteReport')
@@ -738,7 +738,7 @@ test('the agreement lists saved reports with their audience, period, version and
     $report = DonorReport::factory()->composed()->create(['donor_proposal_id' => $agreement->id, 'version' => 2, 'responsible_employee_id' => $employeeId]);
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->assertSeeHtml('data-report-version>v2<')
         ->assertSeeText('2026-01 – 2026-03')
         ->assertSeeText('Rana Writer')
@@ -753,7 +753,7 @@ test('a donor report cannot be submitted in the future or reached from another a
     $agreement = DonorProposal::factory()->create();
     $foreign = DonorReport::factory()->create();
 
-    $fresh = fn () => Livewire::actingAs($user)->test('pages::funding-agreements.show', ['donorProposal' => $agreement]);
+    $fresh = fn () => Livewire::actingAs($user)->test('tracking::funding-agreements.show', ['donorProposal' => $agreement]);
 
     $fresh()->call('openSubmit', $foreign->id)->assertNotFound();
 
@@ -776,7 +776,7 @@ test('a user who cannot update agreements cannot manage donor reports', function
     $agreement = DonorProposal::factory()->create();
     $report = DonorReport::factory()->create(['donor_proposal_id' => $agreement->id]);
 
-    $fresh = fn () => Livewire::actingAs($viewer)->test('pages::funding-agreements.show', ['donorProposal' => $agreement]);
+    $fresh = fn () => Livewire::actingAs($viewer)->test('tracking::funding-agreements.show', ['donorProposal' => $agreement]);
 
     $fresh()->assertDontSeeHtml('data-test="add-donor-report"')->assertSeeText($report->title);
     $fresh()->call('openReportCreate')->assertForbidden();
@@ -794,7 +794,7 @@ test('the index flags agreements with an overdue donor report', function () {
     // The donor-reports column went; an overdue report now shows where it is
     // harder to miss — the row's status word, and the headline figure above it.
     $page = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->assertSeeHtml('data-health="attention"')
         ->assertSeeText('Needs attention');
 
@@ -815,13 +815,13 @@ test('agreement detail shows when the donor was last contacted and flags a donor
     ]);
 
     $recentPage = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $recent])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $recent])
         ->assertSeeText('Last contacted');
 
     expect(array_column($recentPage->instance()->attention, 'key'))->not->toContain('contact');
 
     $quietPage = Livewire::actingAs($user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $quiet])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $quiet])
         ->assertSeeText('for 120 days');
 
     expect(array_column($quietPage->instance()->attention, 'key'))->toContain('contact');
@@ -842,7 +842,7 @@ test('agreement detail shows the gross amount received beside what landed', func
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->set('view', 'overview')
         ->assertSeeText('gross 990.00')
         ->assertSeeText('985.00 USD landed');
@@ -853,7 +853,7 @@ test('the agreement picker names each proposal with its internal number', functi
     Proposal::factory()->running()->create(['name' => 'Winter Shelter Kit', 'internal_project_number' => 'HC-2026-071']);
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->call('openCreateModal')
         ->assertSee('Winter Shelter Kit · HC-2026-071');
 });
@@ -870,7 +870,7 @@ test('the agreements list finds an agreement by its external number or its propo
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->set('search', 'ECHO/SYR')
         ->assertSee('Winter Shelter Kit')
         ->assertDontSee('Cash for Work')
@@ -887,7 +887,7 @@ test('an agreement card shows its proposal\'s internal number beside its externa
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->set('view', 'overview')
         ->assertSeeInOrder(['Internal project number', 'HC-2026-083', 'External project number', 'ECHO-83']);
 });
@@ -910,7 +910,7 @@ test('the agreements search hint names the project number', function () {
     DonorProposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.index')
+        ->test('tracking::funding-agreements.index')
         ->assertSeeHtml('placeholder="Project number, donor, or proposal"');
 });
 
@@ -919,7 +919,7 @@ test('the donor report form is rendered only while its modal is open', function 
     $agreement = DonorProposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::funding-agreements.show', ['donorProposal' => $agreement])
+        ->test('tracking::funding-agreements.show', ['donorProposal' => $agreement])
         ->assertDontSeeHtml('wire:model="reportTitle"')
         ->call('openReportCreate')
         ->assertSeeHtml('wire:model="reportTitle"');

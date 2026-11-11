@@ -1,9 +1,9 @@
 <?php
 
-use App\Enums\ProposalPhase;
-use App\Enums\ProposalStatus;
-use App\Models\Proposal;
 use Illuminate\Support\Facades\Schema;
+use Modules\Tracking\Enums\ProposalPhase;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Proposal;
 
 test('every status maps to the phase it belongs to', function (ProposalStatus $status, ProposalPhase $phase) {
     expect($status->phase())->toBe($phase);

@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Models/PlanIndicator.php,resources/views/pages/{results,indicators,targets}/**,resources/views/components/ui/framework-node.blade.php}'
+  - '{modules/Tracking/Models/PlanIndicator.php,modules/Tracking/resources/views/pages/{results,indicators,targets}/**,resources/views/components/ui/framework-node.blade.php}'
 ---
 
 # Views Components Ui

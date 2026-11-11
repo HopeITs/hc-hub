@@ -3,11 +3,11 @@
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
 use App\Models\NotificationMute;
-use App\Models\Program;
-use App\Models\Task;
-use App\Models\User;
 use App\Notifications\RecipientResolver;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Task;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);

@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Enums\ReportingPeriod;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\ReportingPeriod;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
 
 /**
  * @extends Factory<DonorReport>

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\Tasks\ManagesSubtasks;
-use App\Livewire\Concerns\Tasks\ManagesTaskAttachments;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Modules\Tracking\Livewire\Concerns\Tasks\ManagesSubtasks;
+use Modules\Tracking\Livewire\Concerns\Tasks\ManagesTaskAttachments;
 
 /**
  * Stands in for tasks/show, with every trait that page gained when it was

@@ -1,23 +1,23 @@
 <?php
 
-use App\Actions\FundingAgreements\GenerateExpectedTransfers;
-use App\Actions\FundingAgreements\SaveAgreementInstallments;
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Events\FundingAgreementRecorded;
-use App\Jobs\GenerateExpectedTransfersJob;
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\FundingAgreementInstallment;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
 use App\Notifications\RecipientResolver;
-use App\Support\Tranches;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Livewire;
+use Modules\Tracking\Actions\FundingAgreements\GenerateExpectedTransfers;
+use Modules\Tracking\Actions\FundingAgreements\SaveAgreementInstallments;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Events\FundingAgreementRecorded;
+use Modules\Tracking\Jobs\GenerateExpectedTransfersJob;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\FundingAgreementInstallment;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
+use Modules\Tracking\Support\Tranches;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -222,7 +222,7 @@ test('state and timing agree that a sent transfer is in transit until it has arr
 test('the transfer form validates sent <= arrived <= received on the field that breaks the order', function () {
     $agreement = scheduledAgreement(0);
     $user = userWithRole('Financial');
-    $form = fn () => Livewire::actingAs($user)->test('pages::transfers.index')
+    $form = fn () => Livewire::actingAs($user)->test('tracking::transfers.index')
         ->call('openTransferCreate', $agreement->id)
         ->set('paymentAmount', '100')
         ->set('transferArStatus', 'received')

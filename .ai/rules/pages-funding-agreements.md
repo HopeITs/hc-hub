@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{database/migrations/**,app/Models/DonorReport.php,resources/views/pages/funding-agreements/**}'
+  - '{database/migrations/**,modules/Tracking/Models/DonorReport.php,modules/Tracking/resources/views/pages/funding-agreements/**}'
 ---
 
 # Pages Funding Agreements

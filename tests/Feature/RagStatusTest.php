@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\RagStatus;
+use Modules\Tracking\Enums\RagStatus;
 
 /**
  * RagStatus has no column of its own — it is derived on read from two

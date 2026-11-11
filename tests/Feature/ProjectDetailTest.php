@@ -1,27 +1,27 @@
 <?php
 
-use App\Enums\Currency;
 use App\Enums\FileType;
 use App\Enums\MediaCollection;
-use App\Enums\MilestoneStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\ResultType;
-use App\Models\AnnualPlan;
-use App\Models\DonorProposal;
-use App\Models\Indicator;
 use App\Models\Media;
-use App\Models\Milestone;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\Risk;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 test('guests are redirected from project detail', function () {
     $project = Project::factory()->create();
@@ -103,7 +103,7 @@ test('project detail renders its milestones as a single delivery timeline', func
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSet('tab', 'milestones')
         ->assertSee('Baseline assessment')
         ->assertSee('Household survey')
@@ -183,7 +183,7 @@ test('the project has no Risks tab; its risks show as a read-only awareness sect
     Risk::factory()->create(['project_id' => null, 'proposal_id' => $unlinked->id, 'name' => 'منع الوصول', 'name_en' => 'Foreign proposal risk']);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $subject])
+        ->test('tracking::projects.show', ['project' => $subject])
         ->assertSeeHtml('data-test="risk-awareness"')
         ->assertSee('Funding delay')
         ->assertSee('Linked Emergency Grant')
@@ -204,7 +204,7 @@ test('a project with no risks shows no awareness section', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => Project::factory()->create()])
+        ->test('tracking::projects.show', ['project' => Project::factory()->create()])
         ->assertDontSeeHtml('data-test="risk-awareness"');
 });
 
@@ -219,7 +219,7 @@ test('project detail tasks tab shows tasks raised directly on the project and on
     Task::factory()->create(['source_type' => 'project', 'source_id' => $otherProject->id, 'title' => 'Unrelated project task']);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'tasks')
         ->assertSee('Sign the site access agreement')
         ->assertSee('Deliver the milestone report')
@@ -232,7 +232,7 @@ test('a task can be added from the project show page pre-filled with this projec
     $project = Project::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'tasks')
         ->call('openAddTaskModal')
         ->assertSet('showAddTaskModal', true)
@@ -254,7 +254,7 @@ test('adding a task from the project show page requires a title but no assignee'
     $project = Project::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'tasks')
         ->call('openAddTaskModal')
         ->set('newTaskTitle', '   ')
@@ -276,7 +276,7 @@ test('project detail shows targets naming this project', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'targets')
         ->assertSee('People reached');
 });
@@ -301,7 +301,7 @@ test('project detail groups targets by result and shows their source, period and
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'targets')
         ->assertSeeText('Improved access to safe drinking water.')
         ->assertSeeText('People reached')
@@ -319,7 +319,7 @@ test('a proposal can be attached to and detached from a project', function () {
     $proposal->projects()->attach(Project::factory()->create());
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'proposals')
         ->set('proposalToAttach', (string) $proposal->id)
         ->call('attachProposal')
@@ -328,7 +328,7 @@ test('a proposal can be attached to and detached from a project', function () {
     expect($project->proposals()->whereKey($proposal->id)->exists())->toBeTrue();
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'proposals')
         ->call('detachProposal', $proposal->id);
 
@@ -342,7 +342,7 @@ test('attaching the same proposal twice does not duplicate the pivot row', funct
     $project->proposals()->attach($proposal->id);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'proposals')
         ->set('proposalToAttach', (string) $proposal->id)
         ->call('attachProposal');
@@ -373,7 +373,7 @@ test('project files list only this projects metadata and download through the au
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->assertSee('signed-agreement.pdf')
         ->assertSee('PDF')
@@ -405,7 +405,7 @@ test('project files show a category filter once more than one category is presen
     ]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->assertSee('signed-agreement.pdf')
         ->assertSee('site-visit.jpg')
@@ -427,7 +427,7 @@ test('project files show no filter chips when every file shares one category', f
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->assertDontSee('All files')
         ->assertDontSee('fileCategoryFilter', false);
@@ -438,7 +438,7 @@ test('project detail escapes free text and offers no project delete action', fun
     $project = Project::factory()->create(['description' => '<script>alert("project")</script>']);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSee('&lt;script&gt;', false)
         ->assertDontSee('<script>alert("project")</script>', false)
         ->assertDontSee('deleteProject', false)
@@ -464,7 +464,7 @@ test('the project page shows a linked proposal\'s internal number and lists atta
     Proposal::factory()->create(['name' => 'Cash for Work', 'internal_project_number' => 'HC-2026-093']);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'proposals')
         ->assertSeeHtml('data-placeholder-chip="TEMP-0021"')
         ->assertSee('Cash for Work · HC-2026-093');
@@ -474,7 +474,7 @@ test('New Concept Note opens the proposal form for this project', function () {
     $project = Project::factory()->create();
 
     Livewire::actingAs(User::factory()->role('Financial')->create())
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertSeeHtml('data-test="new-concept-note"')
         ->assertSeeHtml(e(route('proposals.index', ['for_project' => $project->id])));
 });
@@ -483,7 +483,7 @@ test('New Concept Note is offered only to proposal creators on a project that ca
     $project = Project::factory()->status($status)->create();
 
     Livewire::actingAs(User::factory()->role($role)->create())
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->assertDontSeeHtml('data-test="new-concept-note"');
 })->with([
     'no proposals.create' => ['Managers', ProjectStatus::Draft],

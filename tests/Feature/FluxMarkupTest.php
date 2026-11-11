@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\TaskPriority;
-use App\Enums\TaskStatus;
 use App\Support\FluxMarkup;
+use Modules\Tracking\Enums\TaskPriority;
+use Modules\Tracking\Enums\TaskStatus;
 
 test('an inline icon carries its size and extra classes like flux:icon does', function () {
     $html = (string) FluxMarkup::icon('flag', 'solid', 'size-4 text-status-warn');

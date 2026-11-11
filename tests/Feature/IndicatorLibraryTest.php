@@ -1,12 +1,12 @@
 <?php
 
-use App\Enums\IndicatorMeasure;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\PlanIndicator;
-use App\Models\Program;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\PlanIndicator;
 
 /**
  * An entry linked to one indicator, optionally with a target on it.
@@ -56,7 +56,7 @@ describe('writing through the page', function () {
     it('lets MEAL and the General Manager create, edit, deactivate, reactivate and delete an unused entry', function (string $role) {
         $user = userWithRole($role);
 
-        $component = Livewire::actingAs($user)->test('pages::indicator-library.index')
+        $component = Livewire::actingAs($user)->test('tracking::indicator-library.index')
             ->call('openCreateModal')
             ->assertSet('showEntryModal', true)
             ->set('entry.institutional', true)
@@ -104,7 +104,7 @@ describe('writing through the page', function () {
         $entry = LibraryIndicator::factory()->create(['name_en' => 'Untouched']);
         $user = userWithRole($role);
 
-        $component = Livewire::actingAs($user)->test('pages::indicator-library.index');
+        $component = Livewire::actingAs($user)->test('tracking::indicator-library.index');
 
         $passesId ? $component->call($method, $entry->id) : $component->call($method);
 
@@ -122,7 +122,7 @@ describe('writing through the page', function () {
     ]);
 
     it('shows the Arabic-name message under its field when the Arabic name is missing', function () {
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::indicator-library.index')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::indicator-library.index')
             ->call('openCreateModal')
             ->set('entry.institutional', true)
             ->set('entry.level_ref', 'OP1')
@@ -140,7 +140,7 @@ describe('measure', function () {
     it('refuses a measure change once a linked indicator has targets', function () {
         $entry = libraryEntryInUse(withTargets: true);
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::indicator-library.index')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::indicator-library.index')
             ->call('openEditModal', $entry->id)
             ->assertSet('measureIsLocked', true)
             ->set('entry.measure', 'percentage')
@@ -154,7 +154,7 @@ describe('measure', function () {
     it('carries a measure change to every linked indicator while none has targets', function () {
         $entry = libraryEntryInUse();
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::indicator-library.index')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::indicator-library.index')
             ->call('openEditModal', $entry->id)
             ->assertSet('measureIsLocked', false)
             ->set('entry.measure', 'average')
@@ -170,7 +170,7 @@ describe('deleting and deactivating', function () {
     it('refuses to delete an entry in use and says to deactivate it instead', function () {
         $entry = libraryEntryInUse();
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::indicator-library.index')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::indicator-library.index')
             ->call('confirmDelete', $entry->id)
             ->call('deleteEntry')
             ->assertSet('showDeleteModal', false)
@@ -185,7 +185,7 @@ describe('deleting and deactivating', function () {
 
         expect(LibraryIndicator::query()->active()->pluck('id')->all())->toBe([$active->id]);
 
-        Livewire::actingAs(userWithRole('Team Member'))->test('pages::indicator-library.index')
+        Livewire::actingAs(userWithRole('Team Member'))->test('tracking::indicator-library.index')
             ->assertSee('Withdrawn')
             ->assertSee(__('indicator_library.status_off'))
             ->call('setFocus', 'unused')
@@ -201,7 +201,7 @@ describe('search and filters', function () {
         LibraryIndicator::factory()->create(['name_ar' => 'نسبة الأطفال المُلَقَّحين', 'name_en' => 'Vaccinated children']);
         LibraryIndicator::factory()->create(['name_ar' => 'عدد الآبار', 'name_en' => 'Wells built']);
 
-        Livewire::actingAs(userWithRole('Team Member'))->test('pages::indicator-library.index')
+        Livewire::actingAs(userWithRole('Team Member'))->test('tracking::indicator-library.index')
             ->set('search', $term)
             ->assertSee('Vaccinated children')
             ->assertDontSee('Wells built');
@@ -216,7 +216,7 @@ describe('search and filters', function () {
         LibraryIndicator::factory()->create(['code' => 'HC.G.1', 'level_ref' => 'G', 'name_en' => 'Goal entry']);
         LibraryIndicator::factory()->create(['name_en' => 'Other entry']);
 
-        Livewire::actingAs(userWithRole('Team Member'))->test('pages::indicator-library.index')
+        Livewire::actingAs(userWithRole('Team Member'))->test('tracking::indicator-library.index')
             ->set('search', 'HC.G')
             ->assertSee('Goal entry')
             ->assertDontSee('Other entry');
@@ -232,7 +232,7 @@ describe('search and filters', function () {
         ]);
         LibraryIndicator::factory()->create(['name_en' => null, 'name_ar' => 'مؤشر بلا اسم إنجليزي', 'code' => 'HC.AC1.1', 'level_ref' => 'AC1']);
 
-        $component = Livewire::actingAs(userWithRole('Team Member'))->test('pages::indicator-library.index')
+        $component = Livewire::actingAs(userWithRole('Team Member'))->test('tracking::indicator-library.index')
             ->set($filter, $value === 'program' ? (string) $program->id : $value);
 
         expect($component->get('filteredEntries')->map->localizedName()->values()->all())->toBe([$expected]);
@@ -247,7 +247,7 @@ describe('search and filters', function () {
     it('caps a long search term instead of matching against all of it', function () {
         LibraryIndicator::factory()->create(['name_en' => 'Households reached']);
 
-        Livewire::actingAs(userWithRole('Team Member'))->test('pages::indicator-library.index')
+        Livewire::actingAs(userWithRole('Team Member'))->test('tracking::indicator-library.index')
             ->set('search', 'Households'.str_repeat(' ', 200).'x')
             ->assertSee('Households reached');
     });
@@ -259,7 +259,7 @@ describe('status buttons', function () {
         LibraryIndicator::factory()->create(['name_en' => 'Fresh entry']);
         LibraryIndicator::factory()->inactive()->create(['name_en' => 'Old entry']);
 
-        $page = Livewire::actingAs(userWithRole('MEAL'))->test('pages::indicator-library.index');
+        $page = Livewire::actingAs(userWithRole('MEAL'))->test('tracking::indicator-library.index');
 
         expect($page->instance()->focusCounts)->toBe(['inuse' => 1, 'unused' => 1, 'off' => 1]);
 
@@ -279,7 +279,7 @@ describe('status buttons', function () {
         LibraryIndicator::factory()->create(['name_en' => 'Wells planned']);
         LibraryIndicator::factory()->create(['name_en' => 'Schools opened']);
 
-        $page = Livewire::actingAs(userWithRole('MEAL'))->test('pages::indicator-library.index')
+        $page = Livewire::actingAs(userWithRole('MEAL'))->test('tracking::indicator-library.index')
             ->set('search', 'Wells');
 
         expect($page->instance()->focusCounts)->toBe(['inuse' => 1, 'unused' => 1, 'off' => 0]);
@@ -288,7 +288,7 @@ describe('status buttons', function () {
     it('names the entry in the switch off and delete dialogs', function () {
         $entry = LibraryIndicator::factory()->create(['name_en' => 'Households reached']);
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::indicator-library.index')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::indicator-library.index')
             ->call('confirmDeactivate', $entry->id)
             ->assertSee('Switch off “Households reached”?')
             ->call('cancelDeactivate')
@@ -299,12 +299,12 @@ describe('status buttons', function () {
     it('keeps the buttons and rows inside the component and disables deleting an entry in use with its reason', function () {
         libraryEntryInUse(attributes: ['name_en' => 'Used entry']);
 
-        $html = Livewire::actingAs(userWithRole('MEAL'))->test('pages::indicator-library.index')->html();
+        $html = Livewire::actingAs(userWithRole('MEAL'))->test('tracking::indicator-library.index')->html();
 
         $dom = new DOMDocument;
         @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
         $xpath = new DOMXPath($dom);
-        $root = '//*[@*[name()="wire:name"]="pages::indicator-library.index"]';
+        $root = '//*[@*[name()="wire:name"]="tracking::indicator-library.index"]';
 
         foreach (['focus-tab-inuse', 'focus-tab-unused', 'focus-tab-off', 'more-filters-button'] as $control) {
             expect($xpath->query($root.'//*[@data-test="'.$control.'"]')->length)->toBeGreaterThan(0, "{$control} sits outside the component");
@@ -340,7 +340,7 @@ describe('presentation', function () {
 
         Livewire::withQueryParams(['entry' => $entry->id])
             ->actingAs(userWithRole('Team Member'))
-            ->test('pages::indicator-library.index')
+            ->test('tracking::indicator-library.index')
             ->assertSet('expandedEntryId', $entry->id)
             ->assertSee('Count each household once.');
     });
@@ -354,7 +354,7 @@ describe('presentation', function () {
                 $queries++;
             });
 
-            Livewire::actingAs($user)->test('pages::indicator-library.index');
+            Livewire::actingAs($user)->test('tracking::indicator-library.index');
 
             return $queries;
         };

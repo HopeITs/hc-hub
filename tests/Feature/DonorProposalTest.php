@@ -1,8 +1,8 @@
 <?php
 
-use App\Enums\Currency;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Enums\Currency;
 
 test('a funding agreement defaults to USD', function () {
     $id = insertDonorProposal(insertDonor(), insertProposal(), '500000.00');

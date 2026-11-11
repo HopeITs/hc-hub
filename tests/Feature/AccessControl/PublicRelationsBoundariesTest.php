@@ -1,20 +1,20 @@
 <?php
 
-use App\Actions\Proposals\AddNegotiationNote;
-use App\Actions\Proposals\SaveProposal;
-use App\Actions\Proposals\TransitionProposal;
-use App\Enums\Currency;
-use App\Enums\ProposalStatus;
-use App\Enums\StatusNoteKind;
-use App\Models\Donor;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalLocation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Tracking\Actions\Proposals\AddNegotiationNote;
+use Modules\Tracking\Actions\Proposals\SaveProposal;
+use Modules\Tracking\Actions\Proposals\TransitionProposal;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\StatusNoteKind;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 
 /*
 | UAT PR-01, PR-03 to PR-06: the fundraising officer works the proposal from
@@ -101,8 +101,8 @@ test('the fundraiser cannot manage reviewers, correct a status or approve (PR-05
 test('the fundraiser cannot write on the money pages by calling the actions directly (PR-05)', function () {
     $attempt = fn (string $page) => Livewire::actingAs($this->fundraiser)->test($page);
 
-    $attempt('pages::transfers.index')->call('openCreateModal')->assertForbidden();
-    $attempt('pages::funding-agreements.index')->call('openCreateModal')->assertForbidden();
+    $attempt('tracking::transfers.index')->call('openCreateModal')->assertForbidden();
+    $attempt('tracking::funding-agreements.index')->call('openCreateModal')->assertForbidden();
 });
 
 test('the fundraiser is refused the Transfers and Accounts pages and the sidebar hides them (PR-05)', function () {

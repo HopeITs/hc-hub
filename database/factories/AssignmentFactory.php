@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Assignment;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\Assignment;
 
 /**
  * @extends Factory<Assignment>

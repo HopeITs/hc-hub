@@ -1,12 +1,12 @@
 <?php
 
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\TaskAttachment;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 
 use function Livewire\invade;
 
@@ -53,19 +53,19 @@ test('the calendar never shows another department\'s tasks, whoever is picked', 
     $marker = 'data-test="calendar-task-'.$this->financeTask->id.'"';
 
     // The calendar only draws its grid for an account linked to an HR employee.
-    Livewire::actingAs(userWithRole('Managers', insertHrEmployee()))->test('pages::calendar.index')
+    Livewire::actingAs(userWithRole('Managers', insertHrEmployee()))->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->set('filterEmployeeIds', [(string) $this->financeEmployee])
         ->assertSee($marker, false);
 
-    Livewire::actingAs($this->member)->test('pages::calendar.index')
+    Livewire::actingAs($this->member)->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->set('filterEmployeeIds', [(string) $this->financeEmployee])
         ->assertDontSee($marker, false);
 });
 
 test('the project page hides other departments\' tasks', function () {
-    Livewire::actingAs($this->member)->test('pages::projects.show', ['project' => $this->project])
+    Livewire::actingAs($this->member)->test('tracking::projects.show', ['project' => $this->project])
         ->set('tab', 'tasks')
         ->assertDontSee('Finance-only task');
 });
@@ -73,13 +73,13 @@ test('the project page hides other departments\' tasks', function () {
 test('a project owner sees every task in their own project', function () {
     $this->project->update(['user_id' => $this->mediaEmployee]);
 
-    Livewire::actingAs($this->member->fresh())->test('pages::projects.show', ['project' => $this->project])
+    Livewire::actingAs($this->member->fresh())->test('tracking::projects.show', ['project' => $this->project])
         ->set('tab', 'tasks')
         ->assertSee('Finance-only task');
 });
 
 test('a manager sees every task', function () {
-    Livewire::actingAs(userWithRole('Managers'))->test('pages::projects.show', ['project' => $this->project])
+    Livewire::actingAs(userWithRole('Managers'))->test('tracking::projects.show', ['project' => $this->project])
         ->set('tab', 'tasks')
         ->assertSee('Finance-only task');
 });
@@ -88,20 +88,20 @@ test('a scoped user with no department still sees their own tasks', function () 
     $loner = userWithRole('Team Member');
     Task::factory()->create(['title' => 'My own task', 'created_by' => $loner->id]);
 
-    Livewire::actingAs($loner)->test('pages::tasks.index')->assertSee('My own task');
+    Livewire::actingAs($loner)->test('tracking::tasks.index')->assertSee('My own task');
 });
 
 test('proposal progress counts every task, including hidden ones', function () {
     $proposal = Proposal::factory()->create();
     $this->financeTask->update(['source_type' => 'proposal', 'source_id' => $proposal->id]);
 
-    $row = Livewire::actingAs(userWithRole('Public Relations Manager', $this->mediaEmployee))->test('pages::proposals.index')->instance()->proposals->firstWhere('id', $proposal->id);
+    $row = Livewire::actingAs(userWithRole('Public Relations Manager', $this->mediaEmployee))->test('tracking::proposals.index')->instance()->proposals->firstWhere('id', $proposal->id);
 
     expect($row->tasks_count)->toBe(1);
 });
 
 test('a milestone whose only task is hidden still cannot be deleted', function () {
-    $page = invade(Livewire::actingAs($this->member)->test('pages::milestones.index')->instance());
+    $page = invade(Livewire::actingAs($this->member)->test('tracking::milestones.index')->instance());
 
     expect($page->canDelete($this->milestone->id))->toBeFalse();
 });

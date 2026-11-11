@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
 
 test('a reading keeps its exact figure and its source of verification', function () {
     $user = User::factory()->role('General Manager')->create();

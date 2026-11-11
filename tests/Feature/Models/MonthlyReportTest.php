@@ -1,30 +1,30 @@
 <?php
 
-use App\Enums\ActivityKind;
-use App\Enums\ActivityStatus;
-use App\Enums\Gender;
-use App\Enums\IndicatorCollector;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ReopenRequestStatus;
-use App\Enums\ReportStatus;
 use App\Models\Activity;
-use App\Models\LibraryIndicator;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportActivityEntry;
-use App\Models\MonthlyReportLine;
-use App\Models\MonthlyReportLineBreakdown;
-use App\Models\MonthlyReportLineShare;
-use App\Models\MonthlyReportReopenRequest;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\ProjectActivityStatus;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ActivityKind;
+use Modules\Tracking\Enums\ActivityStatus;
+use Modules\Tracking\Enums\Gender;
+use Modules\Tracking\Enums\IndicatorCollector;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ReopenRequestStatus;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportActivityEntry;
+use Modules\Tracking\Models\MonthlyReportLine;
+use Modules\Tracking\Models\MonthlyReportLineBreakdown;
+use Modules\Tracking\Models\MonthlyReportLineShare;
+use Modules\Tracking\Models\MonthlyReportReopenRequest;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ProjectActivityStatus;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
 
 /**
  * A report with one line, one share and one breakdown, built without

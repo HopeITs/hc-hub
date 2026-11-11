@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\ReportStatus;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\MonthlyReport;
-use App\Models\Report;
-use App\Models\Task;
-use App\Models\TransfersTracking;
 use App\Models\UserNotification;
-use App\Notifications\Alerts\StalledScanner;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
+use Modules\Tracking\Notifications\Alerts\StalledScanner;
 
 function scanStalled(string $at): int
 {

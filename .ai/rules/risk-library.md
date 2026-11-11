@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/pages/admin/*risk-library*'
+  - 'modules/Tracking/resources/views/pages/admin/*risk-library*'
 ---
 
 # Risk library

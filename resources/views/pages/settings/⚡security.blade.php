@@ -5,7 +5,7 @@ use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Http\UserAgent;
 use App\Livewire\Concerns\RequiresConfirmedPassword;
 use App\Models\TrustedDevice;
-use App\Models\User;
+use Modules\Core\Models\User;
 use Flux\Flux;
 use Illuminate\Auth\Events\OtherDeviceLogout;
 use Illuminate\Auth\SessionGuard;

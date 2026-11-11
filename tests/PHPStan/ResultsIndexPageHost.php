@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\Results\BuildsResultsFramework;
-use App\Livewire\Concerns\Results\BuildsResultsTree;
-use App\Livewire\Concerns\Results\ManagesResultForm;
-use App\Livewire\Concerns\Results\SummarisesResults;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\Results\BuildsResultsFramework;
+use Modules\Tracking\Livewire\Concerns\Results\BuildsResultsTree;
+use Modules\Tracking\Livewire\Concerns\Results\ManagesResultForm;
+use Modules\Tracking\Livewire\Concerns\Results\SummarisesResults;
 
 /**
  * Stands in for results/index, with every trait that page uses.

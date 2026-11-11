@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Notifications;
 
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\WorkingCalendar;
 use Carbon\CarbonImmutable;
 use InvalidArgumentException;
+use Modules\Core\Models\User;
 
 /**
  * Every change a person makes to their own inbox. Each operation is scoped to

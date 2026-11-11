@@ -1,7 +1,7 @@
 <?php
 
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\TransfersTracking;
+use Modules\Tracking\Models\TransfersTracking;
 use App\Support\Desk\Money;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;

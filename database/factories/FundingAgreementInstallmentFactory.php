@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\DonorProposal;
-use App\Models\FundingAgreementInstallment;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\FundingAgreementInstallment;
 
 /**
  * @extends Factory<FundingAgreementInstallment>

@@ -3,10 +3,10 @@
 use App\Enums\FileType;
 use App\Enums\MediaCollection;
 use App\Models\Media;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
 
 test('a file resolves its owner through the morph map', function () {
     $project = Project::factory()->create();

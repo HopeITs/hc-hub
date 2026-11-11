@@ -1,29 +1,29 @@
 <?php
 
-use App\Actions\Proposals\CloneProposalForRenewal;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
-use App\Enums\ResultType;
 use App\Exceptions\InvalidParentException;
 use App\Models\Activity;
-use App\Models\DonorProposal;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\Milestone;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalReviewer;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\Task;
-use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\CloneProposalForRenewal;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalReviewer;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Task;
 
-const RENEWAL_TREE_COPIER = 'App\Actions\Results\CopyResultTree';
+const RENEWAL_TREE_COPIER = 'Modules\Tracking\Actions\Results\CopyResultTree';
 
 beforeEach(function () {
     $this->travelTo('2026-10-14 10:00:00');

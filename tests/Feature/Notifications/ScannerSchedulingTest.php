@@ -1,16 +1,16 @@
 <?php
 
 use App\Jobs\RunScanner;
-use App\Notifications\Alerts\DueSoonScanner;
 use App\Notifications\Alerts\MonthlyDigestScanner;
-use App\Notifications\Alerts\OffTrackIndicatorScanner;
-use App\Notifications\Alerts\OnHoldReminderScanner;
 use App\Notifications\Alerts\OversightDigestScanner;
-use App\Notifications\Alerts\ProjectDatesScanner;
-use App\Notifications\Alerts\ResponsibleInactiveScanner;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\DevCommands;
 use Illuminate\Support\Facades\Queue;
+use Modules\Tracking\Notifications\Alerts\DueSoonScanner;
+use Modules\Tracking\Notifications\Alerts\OffTrackIndicatorScanner;
+use Modules\Tracking\Notifications\Alerts\OnHoldReminderScanner;
+use Modules\Tracking\Notifications\Alerts\ProjectDatesScanner;
+use Modules\Tracking\Notifications\Alerts\ResponsibleInactiveScanner;
 
 test('a scan group queues one job per scanner', function () {
     Queue::fake();

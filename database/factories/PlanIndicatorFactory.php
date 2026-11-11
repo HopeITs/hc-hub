@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Models\AnnualPlan;
-use App\Models\Indicator;
-use App\Models\PlanIndicator;
-use App\Models\Proposal;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Proposal;
 
 /**
  * @extends Factory<PlanIndicator>

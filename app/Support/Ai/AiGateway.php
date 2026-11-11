@@ -6,10 +6,10 @@ namespace App\Support\Ai;
 
 use App\Enums\AiRequestStatus;
 use App\Models\AiRequest;
-use App\Models\User;
 use Illuminate\Support\Str;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Responses\AgentResponse;
+use Modules\Core\Models\User;
 use Throwable;
 
 /**

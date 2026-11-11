@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\AnnualPlan;
-use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\AnnualPlan;
 
 /**
  * Insert a annual plan for the given program, manager and year.

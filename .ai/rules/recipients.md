@@ -1,6 +1,7 @@
 ---
 paths:
   - 'app/Notifications/Recipients/**'
+  - 'modules/Tracking/Notifications/Recipients/**'
 ---
 
 # Recipients

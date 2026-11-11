@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Proposal;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Proposal;
 
 test('a donor has its funding agreements', function () {
     $donor = Donor::factory()->create();

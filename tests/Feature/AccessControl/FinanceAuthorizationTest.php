@@ -1,15 +1,15 @@
 <?php
 
-use App\Models\Account;
-use App\Models\Donor;
-use App\Models\Proposal;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Proposal;
 
 test('a viewer who holds only accounts.view sees accounts but cannot open, edit or close one', function () {
     $account = Account::factory()->create(['is_active' => true]);
     $member = userWithRole('Team Member')->givePermissionTo('accounts.view');
-    $page = fn () => Livewire::actingAs($member)->test('pages::admin.accounts');
+    $page = fn () => Livewire::actingAs($member)->test('tracking::admin.accounts');
 
     $page()->assertOk()
         ->assertSee($account->account_name)
@@ -25,7 +25,7 @@ test('a viewer who holds only accounts.view sees accounts but cannot open, edit 
 
 test('only people who may change accounts see or search full account numbers', function () {
     Account::factory()->create(['account_name' => 'Operations USD', 'account_number' => '030/02/353/2531267/1/3']);
-    $page = fn (string $role) => Livewire::actingAs(userWithRole($role)->givePermissionTo('accounts.view'))->test('pages::admin.accounts');
+    $page = fn (string $role) => Livewire::actingAs(userWithRole($role)->givePermissionTo('accounts.view'))->test('tracking::admin.accounts');
 
     $page('Team Member')
         ->assertSee('Operations USD')
@@ -49,7 +49,7 @@ test('Financial closes an account', function () {
     $account = Account::factory()->create(['is_active' => true]);
 
     Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::admin.accounts')
+        ->test('tracking::admin.accounts')
         ->call('confirmClose', $account->id)
         ->call('closeAccount')
         ->assertOk();
@@ -59,7 +59,7 @@ test('Financial closes an account', function () {
 
 test('the browser cannot swap the record a page or form is working on', function () {
     expect(fn () => Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::donors.index')
+        ->test('tracking::donors.index')
         ->set('editingDonorId', Donor::factory()->create()->id))
         ->toThrow(CannotUpdateLockedPropertyException::class);
 });
@@ -70,7 +70,7 @@ test('the browser cannot point a preview, panel or baseline at another record', 
         ->set($property, 999))
         ->toThrow(CannotUpdateLockedPropertyException::class);
 })->with([
-    'proposal file preview' => ['pages::proposals.show', fn (): array => ['proposal' => Proposal::factory()->create()], 'previewingFileId'],
-    'indicator inspect panel' => ['pages::indicators.index', fn (): array => [], 'inspectingIndicatorId'],
-    'expanded target' => ['pages::targets.index', fn (): array => [], 'expandedTargetId'],
+    'proposal file preview' => ['tracking::proposals.show', fn (): array => ['proposal' => Proposal::factory()->create()], 'previewingFileId'],
+    'indicator inspect panel' => ['tracking::indicators.index', fn (): array => [], 'inspectingIndicatorId'],
+    'expanded target' => ['tracking::targets.index', fn (): array => [], 'expandedTargetId'],
 ]);

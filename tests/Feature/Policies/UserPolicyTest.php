@@ -2,8 +2,8 @@
 
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\User;
 use App\Policies\UserPolicy;
+use Modules\Core\Models\User;
 
 function userForPolicy(int $id, ?string $roleName): User
 {

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Support\DefaultEvidenceTypes;
 use Illuminate\Database\Seeder;
+use Modules\Tracking\Support\DefaultEvidenceTypes;
 
 /**
  * The five starting evidence types (D-42). Query builder only, so it is

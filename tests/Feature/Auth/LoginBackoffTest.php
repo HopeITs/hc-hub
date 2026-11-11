@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\User;
 use App\Support\BackoffThrottle;
 use Illuminate\Testing\TestResponse;
+use Modules\Core\Models\User;
 
 beforeEach(function () {
     $this->freezeTime();

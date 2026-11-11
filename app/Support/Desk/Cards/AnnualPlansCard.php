@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Support\Desk\Cards;
 
-use App\Models\AnnualPlan;
-use App\Models\Program;
-use App\Models\User;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\AnnualPlan;
 
 /**
  * Annual plans in card form: this year's plans first, then the years before,

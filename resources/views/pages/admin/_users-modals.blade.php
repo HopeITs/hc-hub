@@ -23,7 +23,7 @@
             <x-ui.form-select wire:model="initialRoleId" :label="__('users.role')">
                 <option value="">{{ __('users.default_role_option', ['role' => config('access-control.default_role')]) }}</option>
                 @foreach ($this->roleOptions as $roleOption)
-                    @can('assignRole', [App\Models\User::class, $roleOption])
+                    @can('assignRole', [Modules\Core\Models\User::class, $roleOption])
                         <option value="{{ $roleOption->id }}">{{ $roleOption->name }}</option>
                     @endcan
                 @endforeach

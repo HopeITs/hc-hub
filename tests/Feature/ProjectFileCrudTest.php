@@ -3,11 +3,11 @@
 use App\Enums\FileType;
 use App\Enums\MediaCollection;
 use App\Models\Media;
-use App\Models\Project;
-use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
 
 test('uploading a valid file creates a media row and writes the file to disk', function () {
     Storage::fake('local');
@@ -16,7 +16,7 @@ test('uploading a valid file creates a media row and writes the file to disk', f
     $file = validUpload('signed-agreement.pdf', 100);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->call('openCreateFileModal')
         ->set('newFile', $file)
@@ -43,7 +43,7 @@ test('a display name typed without an extension keeps the uploaded files real ex
     $file = validUpload('photo.jpg', 100);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->call('openCreateFileModal')
         ->set('newFile', $file)
@@ -65,7 +65,7 @@ test('uploading a file over 5mb is refused on upload and stores no row, disk fil
     $file = UploadedFile::fake()->create('too-big.pdf', 5121, 'application/pdf');
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->call('openCreateFileModal')
         ->set('newFile', $file)
@@ -88,7 +88,7 @@ test('uploading a file with a disallowed extension is refused on upload and stor
     $file = UploadedFile::fake()->create('script.exe', 100, 'application/x-msdownload');
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->call('openCreateFileModal')
         ->set('newFile', $file)
@@ -115,7 +115,7 @@ test('editing a file updates its category and display name only', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->call('openEditFileModal', $media->id)
         ->set('fileCategory', MediaCollection::Mou->value)
@@ -142,7 +142,7 @@ test('editing a file with a display name that already carries the right extensio
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->call('openEditFileModal', $media->id)
         ->set('fileCategory', MediaCollection::Other->value)
@@ -166,7 +166,7 @@ test('deleting a file removes the media row and the file from disk', function ()
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->call('confirmDeleteFile', $media->id)
         ->call('deleteFile');
@@ -263,13 +263,13 @@ test('editing and deleting reject a media id belonging to a different project', 
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->call('openEditFileModal', $media->id)
         ->assertNotFound();
 
     Livewire::actingAs($user)
-        ->test('pages::projects.show', ['project' => $project])
+        ->test('tracking::projects.show', ['project' => $project])
         ->set('tab', 'files')
         ->call('confirmDeleteFile', $media->id)
         ->assertNotFound();

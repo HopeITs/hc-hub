@@ -1,14 +1,14 @@
 <?php
 
-use App\Models\AnnualPlan;
 use App\Models\HrEmployee;
-use App\Models\Milestone;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Report;
-use App\Models\Task;
-use App\Models\User;
 use Carbon\CarbonImmutable;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Task;
 
 test('user timestamps are immutable and preserve their time', function (string $attribute) {
     $user = User::factory()->withTwoFactor()->create([

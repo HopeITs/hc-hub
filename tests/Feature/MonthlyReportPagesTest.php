@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\MonthlyReportStatus;
 use App\Models\Activity;
-use App\Models\MealCoverageAssignment;
-use App\Models\MonthlyReport;
-use App\Models\MonthlyReportLine;
-use App\Models\MonthlyReportReopenRequest;
-use App\Models\Project;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\MonthlyReportLine;
+use Modules\Tracking\Models\MonthlyReportReopenRequest;
+use Modules\Tracking\Models\Project;
 
 /*
 | The Monthly Reports list (T17B slice 1; contracts §13, §13.1 items 2, 6
@@ -75,7 +75,7 @@ test('a center manager sees every generated month with its state, and only a sta
     $november = mrpMonth($project, '2026-11-01');
     mrpMonth($project, '2026-12-01');
 
-    $component = Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+    $component = Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index')
         ->assertSet('tab', 'mine')
         ->assertSeeHtml('data-month="2026-07" data-month-state="validated"')
         ->assertSeeHtml('data-month="2026-08" data-month-state="reopen_pending"')
@@ -97,7 +97,7 @@ test('an upcoming month has no Fill button, only its view link', function () {
     $this->travelTo('2026-11-20 10:00:00');
     $december = mrpMonth(mrpProject($this->aleppo), '2026-12-01');
 
-    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+    Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index')
         ->assertDontSeeHtml('data-fill="'.$december->id.'"')
         ->assertSeeHtml(route('monthly-reports.show', $december));
 });
@@ -108,7 +108,7 @@ test('a month blocked by an unsubmitted earlier month can still be filled and sh
     mrpMonth($project, '2026-10-01');
     $november = mrpMonth($project, '2026-11-01');
 
-    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+    Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index')
         ->assertSeeText(__('monthly_reports.submit_previous_first', ['month' => 'October 2026']))
         ->assertSeeHtml('data-fill="'.$november->id.'"')
         ->call('fillMonth', $november->id)
@@ -116,7 +116,7 @@ test('a month blocked by an unsubmitted earlier month can still be filled and sh
 });
 
 test('a user with no project of their own is told why "My reports" is empty', function () {
-    Livewire::actingAs(userWithRole('Public Relations', insertHrEmployee()))->test('pages::monthly-reports.index')
+    Livewire::actingAs(userWithRole('Public Relations', insertHrEmployee()))->test('tracking::monthly-reports.index')
         ->assertSeeText(__('monthly_reports.empty_mine'));
 });
 
@@ -133,7 +133,7 @@ test('MEAL lands on its queue and sees only the submitted reports of the project
     $draft = mrpMonth($covered, '2026-10-01');
     $foreign = mrpMonth($elsewhere, '2026-09-01', MonthlyReportStatus::Submitted);
 
-    Livewire::actingAs($officer)->test('pages::monthly-reports.index')
+    Livewire::actingAs($officer)->test('tracking::monthly-reports.index')
         ->assertSet('tab', 'validate')
         ->assertSeeHtml('data-validate-row="'.$submitted->id.'"')
         ->assertDontSeeHtml('data-validate-row="'.$draft->id.'"')
@@ -149,10 +149,10 @@ test('a project officer from another governorate sees the project while the gove
     Activity::withoutRecording(fn () => MealCoverageAssignment::factory()->forProject($project->id)->create(['employee_id' => $idlibEmployee]));
     $report = mrpMonth($project, '2026-09-01', MonthlyReportStatus::Submitted);
 
-    Livewire::actingAs(userWithRole('MEAL', $idlibEmployee))->test('pages::monthly-reports.index')
+    Livewire::actingAs(userWithRole('MEAL', $idlibEmployee))->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-validate-row="'.$report->id.'"');
 
-    Livewire::actingAs(userWithRole('MEAL', $governorateEmployee))->test('pages::monthly-reports.index')
+    Livewire::actingAs(userWithRole('MEAL', $governorateEmployee))->test('tracking::monthly-reports.index')
         ->assertDontSeeHtml('data-validate-row="'.$report->id.'"')
         ->assertSeeText(__('monthly_reports.empty_validate'));
 });
@@ -161,7 +161,7 @@ test('with nobody responsible for the project any MEAL user sees it to validate'
     $report = mrpMonth(mrpProject($this->aleppo), '2026-09-01', MonthlyReportStatus::Submitted);
 
     Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
-        ->test('pages::monthly-reports.index')
+        ->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-validate-row="'.$report->id.'"');
 });
 
@@ -173,7 +173,7 @@ test('the queue filters by city, project and month', function () {
     $homsReport = mrpMonth($other, '2026-09-01', MonthlyReportStatus::Submitted);
     $meal = userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal'));
 
-    Livewire::actingAs($meal)->test('pages::monthly-reports.index')
+    Livewire::actingAs($meal)->test('tracking::monthly-reports.index')
         ->set('city', (string) $homs)
         ->assertSeeHtml('data-validate-row="'.$homsReport->id.'"')
         ->assertDontSeeHtml('data-validate-row="'.$september->id.'"')
@@ -190,7 +190,7 @@ test('a Team Member sees the months of a project they own without Fill and is re
     $november = mrpMonth(mrpProject($this->aleppo), '2026-11-01');
     $viewer = userWithRole('Team Member', $this->ownerEmployee);
 
-    Livewire::actingAs($viewer)->test('pages::monthly-reports.index')
+    Livewire::actingAs($viewer)->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-month="2026-11" data-month-state="draft"')
         ->assertDontSeeHtml('data-fill="'.$november->id.'"')
         ->call('fillMonth', $november->id)
@@ -211,7 +211,7 @@ test('a month kept while the status changes still names itself on its filter', f
     $meal = userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal'));
     $monthTrigger = fn (string $choice): string => 'aria-label="'.e(__('common.filter_choice', ['label' => __('monthly_reports.month'), 'choice' => $choice])).'"';
 
-    Livewire::actingAs($meal)->test('pages::monthly-reports.index')
+    Livewire::actingAs($meal)->test('tracking::monthly-reports.index')
         ->set('month', '2026-10')
         ->set('status', 'validated')
         ->assertSeeHtml($monthTrigger('October 2026'))
@@ -225,7 +225,7 @@ test('the queue never lists a draft, even for every status', function () {
     $validated = mrpMonth($project, '2026-09-01', MonthlyReportStatus::Validated);
 
     Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
-        ->test('pages::monthly-reports.index')
+        ->test('tracking::monthly-reports.index')
         ->set('status', 'all')
         ->assertSeeHtml('data-validate-row="'.$submitted->id.'"')
         ->assertSeeHtml('data-validate-row="'.$validated->id.'"')
@@ -238,7 +238,7 @@ test('"Not seen yet" marks only a submitted report still waiting for its first l
     mrpMonth($project, '2026-10-01', MonthlyReportStatus::Submitted, ['seen_by_meal_at' => null]);
 
     Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
-        ->test('pages::monthly-reports.index')
+        ->test('tracking::monthly-reports.index')
         ->assertSeeText(__('monthly_reports.not_seen_yet'))
         ->set('status', 'validated')
         ->assertDontSeeText(__('monthly_reports.not_seen_yet'));
@@ -248,7 +248,7 @@ test('active filters offer one way back, and an empty result does not mention a 
     mrpMonth(mrpProject($this->aleppo), '2026-09-01', MonthlyReportStatus::Submitted);
 
     Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
-        ->test('pages::monthly-reports.index')
+        ->test('tracking::monthly-reports.index')
         ->set('month', '2026-01')
         ->assertSeeText(__('desk.register.clear'))
         ->assertDontSeeText(__('common.reset_filters'))
@@ -262,7 +262,7 @@ test('each month\'s view link on "My reports" names its project', function () {
     mrpMonth(mrpProject($this->aleppo, name: 'Hope Center Aleppo'), '2026-09-01');
     mrpMonth(mrpProject($this->aleppo, name: 'Micro Aleppo'), '2026-09-01');
 
-    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+    Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index')
         ->assertSeeHtml('aria-label="'.e(__('common.view_name', ['name' => 'Hope Center Aleppo · September 2026'])).'"')
         ->assertSeeHtml('aria-label="'.e(__('common.view_name', ['name' => 'Micro Aleppo · September 2026'])).'"');
 });
@@ -271,15 +271,15 @@ test('someone who cannot validate is not offered an empty "To validate" tab', fu
     $this->travelTo('2026-11-20 10:00:00');
     mrpMonth(mrpProject($this->aleppo), '2026-09-01');
 
-    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+    Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index')
         ->assertDontSeeHtml('data-desk-register-view="validate"')
         ->assertSet('tab', 'mine');
 
-    Livewire::withQueryParams(['tab' => 'validate'])->actingAs($this->owner)->test('pages::monthly-reports.index')
+    Livewire::withQueryParams(['tab' => 'validate'])->actingAs($this->owner)->test('tracking::monthly-reports.index')
         ->assertSet('tab', 'mine');
 
     Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
-        ->test('pages::monthly-reports.index')
+        ->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-desk-register-view="validate"');
 });
 
@@ -310,7 +310,7 @@ function mrpPreparerMonths(Project $project): array
 test('"Needs you" lists the months the preparer can fill, overdue first, above the project threads', function () {
     mrpPreparerMonths(mrpProject($this->aleppo));
 
-    $html = Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+    $html = Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index')
         ->assertSeeText(__('monthly_reports.needs_you'))
         ->html();
 
@@ -328,7 +328,7 @@ test('"Needs you" lists the months the preparer can fill, overdue first, above t
 test('someone who reads the months but cannot fill them has no "Needs you" list', function () {
     mrpPreparerMonths(mrpProject($this->aleppo));
 
-    Livewire::actingAs(userWithRole('Team Member', $this->ownerEmployee))->test('pages::monthly-reports.index')
+    Livewire::actingAs(userWithRole('Team Member', $this->ownerEmployee))->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-month="2026-11"')
         ->assertDontSeeHtml('data-needs-you');
 });
@@ -336,7 +336,7 @@ test('someone who reads the months but cannot fill them has no "Needs you" list'
 test('the figures line sums up "My reports"', function () {
     mrpPreparerMonths(mrpProject($this->aleppo));
 
-    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+    Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-figure="to_fill" data-value="2"')
         ->assertSeeHtml('data-figure="overdue" data-value="1"')
         ->assertSeeHtml('data-figure="with_meal" data-value="1"')
@@ -351,7 +351,7 @@ test('the figures line sums up the validation queue, whatever the filters', func
     mrpMonth($project, '2026-11-01');
 
     Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
-        ->test('pages::monthly-reports.index')
+        ->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-figure="waiting" data-value="1"')
         ->assertSeeHtml('data-figure="not_seen" data-value="1"')
         ->assertSeeHtml('data-figure="validated" data-value="1"')
@@ -366,7 +366,7 @@ test('a submitted report in the queue says how long it has waited', function () 
     $validated = mrpMonth($project, '2026-09-01', MonthlyReportStatus::Validated);
 
     Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
-        ->test('pages::monthly-reports.index')
+        ->test('tracking::monthly-reports.index')
         ->set('status', 'all')
         ->assertSeeHtml('data-waiting="'.$waiting->id.'"')
         ->assertSeeText(trans_choice('monthly_reports.waiting_days', 3, ['count' => 3]))
@@ -385,7 +385,7 @@ test('a month of a project with no start or end date offers no Fill and says why
     $november = mrpMonth($project, '2026-11-01');
     DB::table('projects')->where('id', $project->id)->update(['start_date' => null, 'end_date' => null]);
 
-    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+    Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-month="2026-11"')
         ->assertDontSeeHtml('data-fill="'.$november->id.'"')
         ->assertSeeText(__('monthly_reports.project_has_no_period'))
@@ -396,7 +396,7 @@ test('a Fill the server refuses says why instead of doing nothing', function () 
     $this->travelTo('2026-11-20 10:00:00');
     $project = mrpProject($this->aleppo);
     $november = mrpMonth($project, '2026-11-01');
-    $page = Livewire::actingAs($this->owner)->test('pages::monthly-reports.index');
+    $page = Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index');
     DB::table('projects')->where('id', $project->id)->update(['start_date' => null, 'end_date' => null]);
 
     $page->call('fillMonth', $november->id)
@@ -414,7 +414,7 @@ test('a Fill the server refuses says why instead of doing nothing', function () 
 test('the big figures filter "My reports" to the months they count, and a second click clears it', function () {
     mrpPreparerMonths(mrpProject($this->aleppo));
 
-    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+    Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index')
         ->call('showOnly', 'overdue')
         ->assertSet('show', 'overdue')
         ->assertSeeHtml('data-figure="overdue" data-value="1" aria-pressed="true"')
@@ -431,7 +431,7 @@ test('a project shows its months as a strip and folds the validated ones away', 
     $project = mrpProject($this->aleppo);
     mrpPreparerMonths($project);
 
-    Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+    Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-month-strip="'.$project->id.'"')
         ->assertSeeHtml('data-strip-month="2026-08" data-strip-state="validated"')
         ->assertSeeHtml('data-strip-month="2026-10" data-strip-state="overdue"')
@@ -448,7 +448,7 @@ test('a project with no dates says so once, with a way to the project', function
     mrpMonth($project, '2026-11-01');
     DB::table('projects')->where('id', $project->id)->update(['start_date' => null, 'end_date' => null]);
 
-    $html = Livewire::actingAs($this->owner)->test('pages::monthly-reports.index')
+    $html = Livewire::actingAs($this->owner)->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-project-notice="'.$project->id.'"')
         ->assertSeeHtml('href="'.route('projects.show', $project).'"')
         ->html();
@@ -465,7 +465,7 @@ test('the validation queue groups its rows by project, and its figures switch th
     mrpMonth($first, '2026-09-01', MonthlyReportStatus::Validated);
 
     $page = Livewire::actingAs(userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Huda', lastNameEn: 'Meal')))
-        ->test('pages::monthly-reports.index');
+        ->test('tracking::monthly-reports.index');
     $html = $page->html();
 
     expect(strpos($html, 'data-queue-project="'.$first->id.'"'))->toBeLessThan(strpos($html, 'data-validate-row="'.$firstReport->id.'"'))

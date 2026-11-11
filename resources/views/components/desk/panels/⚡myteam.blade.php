@@ -1,16 +1,16 @@
 <?php
 
 use App\Actions\Desk\SendNudge;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\TaskStatus;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\TaskStatus;
 use App\Livewire\Concerns\Dashboard\ReadsDashboardAttention;
 use App\Livewire\Concerns\Dashboard\ReadsDashboardWork;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
 use App\Models\HrEmployee;
-use App\Models\MonthlyReport;
-use App\Models\Task;
-use App\Models\TaskAssignee;
-use App\Models\User;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAssignee;
+use Modules\Core\Models\User;
 use App\Support\Desk\TeamScope;
 use Carbon\CarbonImmutable;
 use Flux\Flux;

@@ -1,18 +1,18 @@
 <?php
 
-use App\Actions\NarrativeQuestions\DeactivateNarrativeQuestion;
-use App\Actions\NarrativeQuestions\DeleteNarrativeQuestion;
-use App\Actions\NarrativeQuestions\MoveNarrativeQuestion;
-use App\Actions\NarrativeQuestions\ReactivateNarrativeQuestion;
-use App\Actions\NarrativeQuestions\SaveNarrativeQuestion;
-use App\Enums\NarrativeQuestionFrequency;
-use App\Models\NarrativeQuestion;
-use App\Models\ReportTemplateQuestion;
-use App\Support\DefaultNarrativeQuestions;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Tracking\Actions\NarrativeQuestions\DeactivateNarrativeQuestion;
+use Modules\Tracking\Actions\NarrativeQuestions\DeleteNarrativeQuestion;
+use Modules\Tracking\Actions\NarrativeQuestions\MoveNarrativeQuestion;
+use Modules\Tracking\Actions\NarrativeQuestions\ReactivateNarrativeQuestion;
+use Modules\Tracking\Actions\NarrativeQuestions\SaveNarrativeQuestion;
+use Modules\Tracking\Enums\NarrativeQuestionFrequency;
+use Modules\Tracking\Models\NarrativeQuestion;
+use Modules\Tracking\Models\ReportTemplateQuestion;
+use Modules\Tracking\Support\DefaultNarrativeQuestions;
 
 describe('the page', function () {
     it('sends a guest to the login page', function () {
@@ -35,13 +35,13 @@ describe('the page', function () {
     ]);
 
     it('explains an empty bank and offers to add the first question', function () {
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.narrative-questions')
             ->assertSee(__('narrative_questions.empty_heading'))
             ->assertSeeHtml('data-test="empty-create-narrative-question"');
     });
 
     it('creates a question and edits it into the other frequency', function () {
-        $component = Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')
+        $component = Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.narrative-questions')
             ->call('openCreateModal')
             ->assertSet('showQuestionModal', true)
             ->assertSet('questionFrequency', 'monthly')
@@ -70,7 +70,7 @@ describe('the page', function () {
     });
 
     it('shows the field errors next to their fields', function () {
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.narrative-questions')
             ->call('openCreateModal')
             ->set('textAr', '   ')
             ->set('textEn', str_repeat('q', 1001))
@@ -87,7 +87,7 @@ describe('the page', function () {
         NarrativeQuestion::factory()->quarterEnd()->create(['text_en' => 'Asked at quarter end']);
         NarrativeQuestion::factory()->monthly()->inactive()->create(['text_en' => 'Old monthly question']);
 
-        $page = Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions');
+        $page = Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.narrative-questions');
 
         expect($page->instance()->focusCounts)->toMatchArray(['monthly' => 1, 'quarter_end' => 1, 'off' => 1, 'total' => 3]);
 
@@ -109,7 +109,7 @@ describe('the page', function () {
         NarrativeQuestion::factory()->monthly()->create(['text_ar' => 'سؤال أول', 'text_en' => 'First one', 'sort_order' => 1]);
         NarrativeQuestion::factory()->monthly()->create(['text_ar' => 'سؤال ثان', 'text_en' => 'Second one', 'sort_order' => 2]);
 
-        $page = Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')
+        $page = Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.narrative-questions')
             ->set('search', 'second')
             ->assertSee('Second one')
             ->assertDontSee('First one')
@@ -136,7 +136,7 @@ describe('the page', function () {
     it('names the question in the switch off and delete dialogs', function () {
         $question = NarrativeQuestion::factory()->create(['text_en' => 'Main achievements?']);
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.narrative-questions')
             ->call('confirmDeactivate', $question->id)
             ->assertSet('showDeactivateModal', true)
             ->assertSee('Switch off “Main achievements?”?')
@@ -149,12 +149,12 @@ describe('the page', function () {
         $question = NarrativeQuestion::factory()->create();
         NarrativeQuestion::factory()->inactive()->create();
 
-        $html = Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')->html();
+        $html = Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.narrative-questions')->html();
 
         $dom = new DOMDocument;
         @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
         $xpath = new DOMXPath($dom);
-        $root = '//section[@*[name()="wire:name"]="pages::admin.narrative-questions"]';
+        $root = '//section[@*[name()="wire:name"]="tracking::admin.narrative-questions"]';
 
         foreach (['focus-tab-monthly', 'focus-tab-quarter_end', 'focus-tab-off', 'edit-narrative-question'] as $control) {
             expect($xpath->query($root.'//*[@data-test="'.$control.'"]')->length)->toBeGreaterThan(0, "{$control} sits outside the component");
@@ -167,13 +167,13 @@ describe('the page', function () {
     it('labels each question with its frequency in words', function () {
         NarrativeQuestion::factory()->quarterEnd()->create();
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.narrative-questions')
             ->assertSeeHtml('data-test="narrative-question-frequency"')
             ->assertSee(__('enums.narrative_question_frequency.quarter_end'));
     });
 
     it('refuses to mount for a user without narrative-questions.manage', function () {
-        Livewire::actingAs(userWithRole('General Manager'))->test('pages::admin.narrative-questions')->assertForbidden();
+        Livewire::actingAs(userWithRole('General Manager'))->test('tracking::admin.narrative-questions')->assertForbidden();
     });
 
     /*
@@ -187,7 +187,7 @@ describe('the page', function () {
         $generalManager = userWithRole('General Manager');
 
         $fresh = function () use ($meal, $generalManager) {
-            $component = Livewire::actingAs($meal)->test('pages::admin.narrative-questions');
+            $component = Livewire::actingAs($meal)->test('tracking::admin.narrative-questions');
             $this->actingAs($generalManager);
 
             return $component;
@@ -209,7 +209,7 @@ describe('the page', function () {
     it('deactivates, reactivates and deletes through the dialogs', function () {
         $question = NarrativeQuestion::factory()->create();
 
-        $component = Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')
+        $component = Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.narrative-questions')
             ->call('confirmDeactivate', $question->id)
             ->assertSet('showDeactivateModal', true)
             ->call('deactivateQuestion')
@@ -236,7 +236,7 @@ describe('the page', function () {
         $second = NarrativeQuestion::factory()->monthly()->create(['text_en' => 'Second', 'sort_order' => 2]);
         NarrativeQuestion::factory()->quarterEnd()->create(['sort_order' => 1]);
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.narrative-questions')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.narrative-questions')
             ->call('moveQuestion', $second->id, 'up')
             ->assertSet('announcement', __('narrative_questions.moved_to', [
                 'text' => 'Second',
@@ -272,7 +272,7 @@ describe('the page', function () {
                 $queries++;
             });
 
-            Livewire::actingAs($user)->test('pages::admin.narrative-questions');
+            Livewire::actingAs($user)->test('tracking::admin.narrative-questions');
 
             return $queries;
         };
@@ -404,7 +404,7 @@ describe('the actions', function () {
         expect(fn () => app(DeleteNarrativeQuestion::class)->handle($question->id))
             ->toThrow(ValidationException::class, __('narrative_questions.in_use'));
 
-        Livewire::test('pages::admin.narrative-questions')
+        Livewire::test('tracking::admin.narrative-questions')
             ->call('confirmDelete', $question->id)
             ->assertSet('deletingQuestionInUse', true)
             ->assertSee(__('narrative_questions.in_use'))

@@ -1,14 +1,14 @@
 <?php
 
-use App\Enums\ProposalStatus;
-use App\Enums\ReviewStage;
-use App\Models\DonorProposal;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalReviewer;
-use App\Models\User;
 use App\Support\Desk\Destinations;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ReviewStage;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalReviewer;
 
 /**
  * A reviewer row for the employee on a new proposal with the given name and status.
@@ -86,7 +86,7 @@ test('the page lists only the reviews still waiting on the viewer, and the finis
 
     $this->actingAs($user)->get(route('reviews.index'))->assertOk();
 
-    Livewire::actingAs($user)->test('pages::reviews.index')
+    Livewire::actingAs($user)->test('tracking::reviews.index')
         ->assertSee('Water Access')
         ->assertSee(__('proposals.my_reviews_waiting_on_you'))
         ->assertDontSee('Already Read')
@@ -109,7 +109,7 @@ test('the three buttons show disjoint counts that match what each click lists, a
     myReview($employeeId, 'School Meals', ProposalStatus::ConceptNoteReview);
     myReview($employeeId, 'Already Read', ProposalStatus::ConceptNoteReview, seen: true);
 
-    $page = Livewire::actingAs($user)->test('pages::reviews.index');
+    $page = Livewire::actingAs($user)->test('tracking::reviews.index');
 
     expect($page->instance()->counts)->toBe(['awaiting' => 2, 'done' => 1, 'asked' => 0]);
     $page->assertSeeHtml('data-test="review-tab-awaiting"')
@@ -132,7 +132,7 @@ test('a stale link with the old All value opens on Waiting on me', function () {
     [$employeeId, $user] = reviewerLogin();
     myReview($employeeId, 'Water Access', ProposalStatus::ConceptNoteReview);
 
-    $page = Livewire::actingAs($user)->test('pages::reviews.index')->set('state', 'all');
+    $page = Livewire::actingAs($user)->test('tracking::reviews.index')->set('state', 'all');
 
     expect($page->instance()->mode)->toBe('awaiting');
     $page->assertSee('Water Access');
@@ -141,7 +141,7 @@ test('a stale link with the old All value opens on Waiting on me', function () {
 test('the buttons and search sit inside the page root', function () {
     [, $user] = reviewerLogin();
 
-    $html = Livewire::actingAs($user)->test('pages::reviews.index')->html();
+    $html = Livewire::actingAs($user)->test('tracking::reviews.index')->html();
     $dom = new DOMDocument;
     @$dom->loadHTML('<?xml encoding="utf-8"?>'.$html);
     $xpath = new DOMXPath($dom);
@@ -159,7 +159,7 @@ test('the page lists the oldest ask first with its wait, and turns red only afte
     $old = myReview($employeeId, 'Old Ask', ProposalStatus::ConceptNoteReview);
     $old->forceFill(['created_at' => now()->subDays(10)])->save();
 
-    Livewire::actingAs($user)->test('pages::reviews.index')
+    Livewire::actingAs($user)->test('tracking::reviews.index')
         ->assertSeeInOrder(['Old Ask', 'Recent Ask'])
         ->assertSeeHtml('data-review-waiting="10"')
         ->assertSeeHtml('data-review-waiting="2"')
@@ -167,7 +167,7 @@ test('the page lists the oldest ask first with its wait, and turns red only afte
         ->assertSee(ProposalStatus::ConceptNoteReview->label())
         ->assertSee(__('desk.review_action'));
 
-    $html = Livewire::actingAs($user)->test('pages::reviews.index')->html();
+    $html = Livewire::actingAs($user)->test('tracking::reviews.index')->html();
 
     expect(substr_count($html, 'data-review-long'))->toBe(1);
 });
@@ -184,7 +184,7 @@ test('asked by me lists other people who still owe a review on the viewer\'s pro
     ProposalReviewer::factory()->seen()->create(['proposal_id' => $proposal->id, 'stage' => ReviewStage::ConceptNote, 'employee_id' => $done]);
     ProposalReviewer::factory()->create(['proposal_id' => $proposal->id, 'stage' => ReviewStage::ConceptNote, 'employee_id' => $ownerId]);
 
-    $page = Livewire::actingAs($owner)->test('pages::reviews.index')->set('state', 'asked');
+    $page = Livewire::actingAs($owner)->test('tracking::reviews.index')->set('state', 'asked');
 
     expect($page->instance()->reviews)->toHaveCount(1);
     $page->assertSee('Water Access')
@@ -198,7 +198,7 @@ test('asked by me lists other people who still owe a review on the viewer\'s pro
 test('asked by me shows its own empty state', function () {
     [, $user] = reviewerLogin();
 
-    Livewire::actingAs($user)->test('pages::reviews.index')
+    Livewire::actingAs($user)->test('tracking::reviews.index')
         ->set('state', 'asked')
         ->assertSee(__('proposals.my_reviews_none_asked'))
         ->assertSee(__('proposals.my_reviews_asked_empty_body'));
@@ -217,7 +217,7 @@ test('the page tour explains reviewing instead of the generic list steps', funct
 test('the page shows an empty state to someone with no reviews', function () {
     [, $user] = reviewerLogin();
 
-    Livewire::actingAs($user)->test('pages::reviews.index')
+    Livewire::actingAs($user)->test('tracking::reviews.index')
         ->assertSee(__('proposals.my_reviews_none_awaiting'));
 });
 
@@ -272,7 +272,7 @@ test('a review on a project opens straight on the viewer\'s own review in that p
     $waiting->proposal->projects()->attach($project->id);
     $onReview = route('projects.show', ['project' => $project, 'proposal' => $waiting->proposal_id, 'ptab' => 'status']).'#my-review';
 
-    Livewire::actingAs($user)->test('pages::reviews.index')->assertSee($onReview);
+    Livewire::actingAs($user)->test('tracking::reviews.index')->assertSee($onReview);
     Livewire::actingAs($user)->test('desk.panels.reviews', ['size' => 'M'])->assertSee($onReview);
     expect(Livewire::actingAs($user)->test('desk.panels.needs', ['size' => 'L'])->get('decisions')->first()['href'])->toBe($onReview);
 });
@@ -286,7 +286,7 @@ test('any reviewer goes from My reviews to their open review box in one click, a
     DonorProposal::factory()->create(['proposal_id' => $waiting->proposal_id, 'budget' => 987654]);
     $story = route('projects.show', ['project' => $project, 'proposal' => $waiting->proposal_id, 'ptab' => 'status']);
 
-    Livewire::actingAs($user)->test('pages::reviews.index')->assertSee($story.'#my-review');
+    Livewire::actingAs($user)->test('tracking::reviews.index')->assertSee($story.'#my-review');
 
     $this->actingAs($user)->get($story)
         ->assertSeeHtml('id="my-review"')
@@ -305,7 +305,7 @@ test('a finished review on All opens the proposal, not the review box', function
     $project = Project::factory()->create();
     $done->proposal->projects()->attach($project->id);
 
-    Livewire::actingAs($user)->test('pages::reviews.index')
+    Livewire::actingAs($user)->test('tracking::reviews.index')
         ->set('state', 'done')
         ->assertSee(route('projects.show', ['project' => $project, 'proposal' => $done->proposal_id, 'ptab' => 'status']).'#proposal')
         ->assertDontSee('#my-review');

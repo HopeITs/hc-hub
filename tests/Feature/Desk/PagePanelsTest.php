@@ -1,13 +1,13 @@
 <?php
 
-use App\Enums\MilestoneStatus;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Task;
-use App\Models\User;
 use App\Support\Desk\Destinations;
 use App\Support\Desk\Panels;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
 
 test('a page starts from its own default set, minus panels the viewer may not see', function () {
     $panels = app(Panels::class);

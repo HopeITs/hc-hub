@@ -3,9 +3,9 @@
 namespace Database\Factories;
 
 use App\Enums\FileType;
-use App\Models\Task;
-use App\Models\TaskAttachment;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
 
 /**
  * @extends Factory<TaskAttachment>

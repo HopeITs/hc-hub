@@ -1,7 +1,7 @@
 <?php
 
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 test('every register opens in the desk frame with a way back to the desk', function (string $route) {
     $this->actingAs(User::factory()->role('Super Admin')->create())
@@ -21,7 +21,7 @@ test('every register opens in the desk frame with a way back to the desk', funct
 
 test('the register view switch writes the page view', function () {
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->assertSeeHtml('data-desk-register-view="calendar"')
         ->assertSeeHtml('aria-pressed="true" data-desk-register-view="board"')
         ->set('view', 'calendar')
@@ -30,7 +30,7 @@ test('the register view switch writes the page view', function () {
 
 test('the task due filter replaces the old quick-filter tiles', function () {
     Livewire::actingAs(User::factory()->role('Super Admin')->create())
-        ->test('pages::tasks.index')
+        ->test('tracking::tasks.index')
         ->set('dueFilter', 'overdue')
         ->assertSeeHtml('data-test="task-clear-filters"')
         ->call('clearFilters')

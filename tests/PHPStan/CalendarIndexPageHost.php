@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\Calendar\BuildsCalendarGrid;
-use App\Livewire\Concerns\Calendar\FiltersCalendarTypes;
-use App\Livewire\Concerns\Calendar\FindsFocusedTypeDates;
-use App\Livewire\Concerns\Calendar\ManagesCalendarMilestones;
-use App\Livewire\Concerns\Calendar\ManagesCalendarTasks;
-use App\Livewire\Concerns\Calendar\PresentsCalendarItems;
-use App\Livewire\Concerns\Calendar\ScopesCalendarPeople;
-use App\Livewire\Concerns\Calendar\ShowsCalendarDay;
-use App\Livewire\Concerns\ChecksFinanceVisibility;
-use App\Livewire\Concerns\NavigatesCalendarPeriods;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\Calendar\BuildsCalendarGrid;
+use Modules\Tracking\Livewire\Concerns\Calendar\FiltersCalendarTypes;
+use Modules\Tracking\Livewire\Concerns\Calendar\FindsFocusedTypeDates;
+use Modules\Tracking\Livewire\Concerns\Calendar\ManagesCalendarMilestones;
+use Modules\Tracking\Livewire\Concerns\Calendar\ManagesCalendarTasks;
+use Modules\Tracking\Livewire\Concerns\Calendar\PresentsCalendarItems;
+use Modules\Tracking\Livewire\Concerns\Calendar\ScopesCalendarPeople;
+use Modules\Tracking\Livewire\Concerns\Calendar\ShowsCalendarDay;
+use Modules\Tracking\Livewire\Concerns\ChecksFinanceVisibility;
+use Modules\Tracking\Livewire\Concerns\NavigatesCalendarPeriods;
 
 /**
  * Stands in for calendar/index, with every trait that page uses.

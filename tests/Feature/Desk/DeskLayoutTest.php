@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\User;
 use App\Support\Desk\Panels;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 /**
  * @return list<string>

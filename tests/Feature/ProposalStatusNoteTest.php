@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\ProposalStatusNote;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Models\ProposalStatusNote;
 
 /**
  * Record a status transition against a proposal, and return the note id.

@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\CollectionFrequency;
-use App\Enums\DenominatorBasis;
-use App\Enums\IndicatorCollector;
-use App\Enums\IndicatorMeasure;
-use App\Enums\ResultType;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Enums\CollectionFrequency;
+use Modules\Tracking\Enums\DenominatorBasis;
+use Modules\Tracking\Enums\IndicatorCollector;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
 
 test('a library entry hydrates its enums, flags and follow-up months', function () {
     $entry = LibraryIndicator::factory()->percentage()->create([

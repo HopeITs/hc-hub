@@ -1,20 +1,20 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\Currency;
-use App\Enums\ProposalStatus;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Indicator;
-use App\Models\PlanIndicator;
-use App\Models\Proposal;
-use App\Models\ProposalStatusNote;
-use App\Models\Report;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Illuminate\Testing\TestResponse;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * One donor funding one proposal for 731,942, with a target set for that
@@ -57,7 +57,7 @@ function hrefTo(string $url): string
 test('MEAL sees a proposal-sourced target with its proposal and donor names but no budget and no links', function () {
     ['donor' => $donor, 'proposal' => $proposal, 'target' => $target] = seedProposalSourcedWork();
 
-    $page = Livewire::actingAs(userWithRole('MEAL'))->test('pages::targets.index')->call('toggleReports', $target->id);
+    $page = Livewire::actingAs(userWithRole('MEAL'))->test('tracking::targets.index')->call('toggleReports', $target->id);
 
     $page->assertOk()
         ->assertSee('Households connected')
@@ -73,7 +73,7 @@ test('MEAL sees a proposal-sourced target with its proposal and donor names but 
 test('Financial sees the same target with the proposal link, the donor link and the budget', function () {
     ['donor' => $donor, 'proposal' => $proposal, 'target' => $target] = seedProposalSourcedWork();
 
-    Livewire::actingAs(userWithRole('Financial'))->test('pages::targets.index')
+    Livewire::actingAs(userWithRole('Financial'))->test('tracking::targets.index')
         ->call('toggleReports', $target->id)
         ->assertOk()
         ->assertSee('Harbour Clean Water')
@@ -86,7 +86,7 @@ test('Financial sees the same target with the proposal link, the donor link and 
 test('a fundraiser without agreements gets the proposal and donor links on targets but not the budget', function () {
     ['donor' => $donor, 'proposal' => $proposal, 'target' => $target] = seedProposalSourcedWork();
 
-    Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))->test('pages::targets.index')
+    Livewire::actingAs(userWithRole(fundraiserWithoutAgreements()))->test('tracking::targets.index')
         ->call('toggleReports', $target->id)
         ->assertOk()
         ->assertSee('Aurora Foundation')
@@ -103,19 +103,19 @@ test('the indicator and results pages show the funding donor by name and never a
         ->assertSee('Aurora Foundation')
         ->assertDontSee('731,942');
 })->with([
-    'indicators' => 'pages::indicators.index',
-    'results' => 'pages::results.index',
+    'indicators' => 'tracking::indicators.index',
+    'results' => 'tracking::results.index',
 ]);
 
 test('a task raised on a proposal names it for a Manager without linking to the proposal', function () {
     ['proposal' => $proposal, 'task' => $task] = seedProposalSourcedWork();
 
-    Livewire::actingAs(userWithRole('Managers'))->test('pages::tasks.show', ['task' => $task])
+    Livewire::actingAs(userWithRole('Managers'))->test('tracking::tasks.show', ['task' => $task])
         ->assertOk()
         ->assertSee('Harbour Clean Water')
         ->assertDontSeeHtml(hrefTo(route('proposals.show', $proposal)));
 
-    Livewire::actingAs(userWithRole('Managers'))->test('pages::tasks.index')
+    Livewire::actingAs(userWithRole('Managers'))->test('tracking::tasks.index')
         ->assertOk()
         ->assertSee('Harbour Clean Water')
         ->assertDontSeeHtml(hrefTo(route('proposals.show', $proposal)));
@@ -125,12 +125,12 @@ test('a report filed against a proposal target names the proposal, and links to 
     ['proposal' => $proposal, 'report' => $report] = seedProposalSourcedWork();
     $link = hrefTo(route('proposals.show', $proposal));
 
-    Livewire::actingAs(userWithRole('Managers'))->test('pages::reports.show', ['report' => $report])
+    Livewire::actingAs(userWithRole('Managers'))->test('tracking::reports.show', ['report' => $report])
         ->assertOk()
         ->assertSee('Harbour Clean Water')
         ->assertDontSeeHtml($link);
 
-    Livewire::actingAs(userWithRole('Financial'))->test('pages::reports.show', ['report' => $report])
+    Livewire::actingAs(userWithRole('Financial'))->test('tracking::reports.show', ['report' => $report])
         ->assertOk()
         ->assertSee('Harbour Clean Water')
         ->assertSeeHtml($link);

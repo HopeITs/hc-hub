@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\HrUser;
-use App\Models\User;
+use Modules\Core\Models\User;
 
 test('a first HR login creates a Team Member account', function () {
     $hrUserId = insertHrUser(insertHrEmployee(), 'new.person@example.org');

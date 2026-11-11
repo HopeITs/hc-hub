@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Dashboard;
 
-use App\Enums\DeliveryState;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\TaskKind;
-use App\Enums\TaskStatus;
 use App\Models\HrEmployee;
-use App\Models\MonthlyReport;
-use App\Models\ProposalReviewer;
-use App\Models\Task;
-use App\Support\ProposalStoryLink;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
+use Modules\Tracking\Enums\DeliveryState;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\TaskKind;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\ProposalReviewer;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Support\ProposalStoryLink;
 
 /**
  * Needs you (user decision 2026-10-27): only what waits on the viewer's

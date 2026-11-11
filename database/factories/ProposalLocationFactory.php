@@ -2,12 +2,12 @@
 
 namespace Database\Factories;
 
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalLocation;
 use Database\Factories\Concerns\CreatesHrRecords;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 
 /**
  * @extends Factory<ProposalLocation>

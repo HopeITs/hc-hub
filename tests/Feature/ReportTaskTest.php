@@ -1,18 +1,18 @@
 <?php
 
-use App\Actions\DonorReports\SaveDonorReportSnapshot;
-use App\Actions\FundingAgreements\DeleteDonorReport;
-use App\Actions\FundingAgreements\MarkDonorReportSubmitted;
-use App\Actions\Tasks\SyncReportTask;
-use App\Enums\DonorReportType;
-use App\Enums\ReportAudience;
-use App\Enums\ReportingPeriod;
-use App\Enums\TaskKind;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\DonorReport;
-use App\Models\Task;
 use Livewire\Livewire;
+use Modules\Tracking\Actions\DonorReports\SaveDonorReportSnapshot;
+use Modules\Tracking\Actions\FundingAgreements\DeleteDonorReport;
+use Modules\Tracking\Actions\FundingAgreements\MarkDonorReportSubmitted;
+use Modules\Tracking\Actions\Tasks\SyncReportTask;
+use Modules\Tracking\Enums\DonorReportType;
+use Modules\Tracking\Enums\ReportAudience;
+use Modules\Tracking\Enums\ReportingPeriod;
+use Modules\Tracking\Enums\TaskKind;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Task;
 
 /*
 | A donor report with a responsible becomes one report task for them
@@ -179,7 +179,7 @@ test('the proposal page lists the report task', function () {
     $proposal = $report->donorProposal->proposal;
 
     $component = Livewire::actingAs($this->actor)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan');
 
     expect($component->instance()->planGroups['other']->pluck('id')->all())->toContain($task->id);
@@ -201,7 +201,7 @@ test('the task page explains that finishing the task does not submit the report'
     $report = reportForTask($this->responsibleEmployeeId);
     $task = syncReportTask($report);
 
-    Livewire::actingAs($this->actor)->test('pages::tasks.show', ['task' => $task])
+    Livewire::actingAs($this->actor)->test('tracking::tasks.show', ['task' => $task])
         ->assertSeeText(__('tasks.report_task_helper'))
         ->assertSeeHtml('href="'.route('donor-reports.show', $report->id).'"');
 });
@@ -216,7 +216,7 @@ test('the Tasks register marks the row with a Report chip and links the title to
     syncReportTask($report);
     $me = userWithRole('Team Member', $this->responsibleEmployeeId);
 
-    Livewire::actingAs($me)->test('pages::tasks.index')
+    Livewire::actingAs($me)->test('tracking::tasks.index')
         ->assertSeeHtml('data-test="report-task-chip"')
         ->assertSeeHtml('href="'.route('donor-reports.show', $report->id).'"');
 });

@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Schema;
  * The central Indicator Library MEAL owns (contracts.md §11.1, D-10).
  *
  * `code` is server-generated as {program code}.{level_ref}.{serial}
- * (App\Support\IndicatorCode) and never typed. `program_id` is an HR program
+ * (Modules\Tracking\Support\IndicatorCode) and never typed. `program_id` is an HR program
  * id with no foreign key (the HR database is read-only); null means an
  * institutional (HC) entry. The (program_id, level_ref, serial) index is what
  * IndicatorCode locks to hand out the next serial, so two saves at the same

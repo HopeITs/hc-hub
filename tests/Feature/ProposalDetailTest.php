@@ -1,27 +1,27 @@
 <?php
 
-use App\Enums\Currency;
 use App\Enums\FileType;
 use App\Enums\MediaCollection;
-use App\Enums\ProposalStatus;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Indicator;
 use App\Models\Media;
-use App\Models\Milestone;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalStatusNote;
-use App\Models\Report;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -83,7 +83,7 @@ test('changing status updates the proposal and appends an audit note in one act'
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openStatusModal', $proposal->id)
         ->set('newStatus', ProposalStatus::ProposalDraft->value)
         ->set('statusContext', '  Donor asked to resubmit.  ')
@@ -106,7 +106,7 @@ test('a status change with no context is rejected and changes nothing', function
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->call('openStatusModal', $proposal->id)
         ->set('newStatus', ProposalStatus::ProposalDraft->value)
         ->set('statusContext', '   ')
@@ -131,7 +131,7 @@ test('funding shows the agreement in its own currency', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'funding')
         ->assertSee('UNICEF')
         ->assertSee('500,000.00')
@@ -150,7 +150,7 @@ test('proposal detail shows targets committed in this proposal', function () {
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'targets')
         ->assertSee('Households assisted');
 });
@@ -186,7 +186,7 @@ test('the money reading is the received share of the committed budget', function
     ]);
 
     $vitals = collect(Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->instance()
         ->vitals)
         ->keyBy('key');
@@ -214,7 +214,7 @@ test('a pending tranche whose scheduled date has passed puts the money reading i
     ]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'funding');
 
     $money = collect($component->instance()->vitals)->firstWhere('key', 'money');
@@ -248,7 +248,7 @@ test('the work reading counts finished tasks and the plan tab lists the funded p
     ]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan');
 
     $work = collect($component->instance()->vitals)->firstWhere('key', 'work');
@@ -279,7 +279,7 @@ test('a task sourced from a milestone whose project this proposal does not fund 
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan')
         ->assertDontSeeText('Stranded task');
 });
@@ -304,7 +304,7 @@ test('a task sourced directly from the proposal is listed apart from funded-proj
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan')
         ->assertSeeHtml('data-plan-group="other"')
         ->assertSeeText('Milestone task')
@@ -335,7 +335,7 @@ test('the promises reading counts targets carrying a report and flags one commit
     ]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'targets');
 
     $promises = collect($component->instance()->vitals)->firstWhere('key', 'promises');
@@ -356,7 +356,7 @@ test('the time reading places today inside the grant term', function () {
     ]);
 
     $time = collect(Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->instance()
         ->vitals)
         ->firstWhere('key', 'time');
@@ -372,7 +372,7 @@ test('an unknown tab from an old bookmark falls back to status history rather th
 
     Livewire::actingAs($user)
         ->withQueryParams(['tab' => 'money'])
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertSet('tab', 'status')
         ->set('tab', 'promises')
         ->assertSet('tab', 'status')
@@ -393,7 +393,7 @@ test('each tab shows only its own content and the strip counts its records', fun
     Task::factory()->create(['source_type' => 'proposal', 'source_id' => $proposal->id, 'title' => 'Draft the budget narrative']);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal]);
+        ->test('tracking::proposals.show', ['proposal' => $proposal]);
 
     expect(collect($component->instance()->tabs)->pluck('count', 'key')->all())
         ->toBe(['status' => 1, 'deadlines' => 1, 'funding' => 1, 'projects' => 0, 'logframe' => null, 'targets' => 0, 'plan' => 1, 'reports' => 0, 'documents' => 0]);
@@ -424,7 +424,7 @@ test('a department task can be added from the plan tab pre-filled with this prop
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::ConceptNote]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan')
         ->call('openPlanTaskForm')
         ->assertSet('showPlanTaskModal', true)
@@ -449,7 +449,7 @@ test('adding a department task from the plan tab requires a title, a department 
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::ConceptNote]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan')
         ->call('openPlanTaskForm')
         ->set('planTask.title', '   ')
@@ -495,7 +495,7 @@ test('the arrivals climb accumulates only received tranches, in the order they l
     ]);
 
     $climb = Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->instance()
         ->arrivals['climbs'][0];
 
@@ -514,7 +514,7 @@ test('the climb is drawn against the commitment in the agreement currency', func
     DonorProposal::factory()->create(['proposal_id' => $proposal->id, 'budget' => '100000.00', 'currency' => Currency::Usd]);
 
     $climbs = collect(Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->instance()
         ->arrivals['climbs'])
         ->keyBy('currency');
@@ -550,7 +550,7 @@ test('the scrubber payload dates a project that began before the scale with a ne
     ]);
 
     $scrub = Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->instance()
         ->arrivals['scrub'];
 
@@ -570,7 +570,7 @@ test('a proposal with no money still renders the chronology and offers no climb'
     $proposal = Proposal::factory()->create(['name' => 'Unfunded Concept']);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'funding')
         ->assertOk()
         ->assertSeeText('Unfunded Concept');
@@ -605,7 +605,7 @@ test('the tasks tab puts open work before finished work and flags overdue and la
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan')
         ->assertSeeTextInOrder(['Late procurement', 'Forgotten status', 'Finished survey'])
         ->assertSeeHtml('data-status-lags')
@@ -625,7 +625,7 @@ test('a finished task waiting under review is not flagged as a lagging status', 
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan')
         ->assertDontSeeHtml('data-status-lags');
 });
@@ -635,7 +635,7 @@ test('the proposal header shows its internal number and the agreement form names
     $proposal = Proposal::factory()->create(['name' => 'Winter Shelter Kit', 'internal_project_number' => 'TEMP-0012']);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertSee('Internal project number')
         ->assertSeeHtml('data-placeholder-chip="TEMP-0012"')
         ->call('openAgreementCreate')
@@ -647,7 +647,7 @@ test('the department task form is rendered only while its modal is open', functi
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::ConceptNote]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->set('tab', 'plan')
         ->assertDontSeeHtml('wire:model="planTask.title"')
         ->call('openPlanTaskForm')
@@ -659,14 +659,14 @@ test('the status and details forms are rendered only while their modals are open
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertDontSeeHtml('wire:model="statusContext"')
         ->call('openStatusModal', $proposal->id)
         ->set('newStatus', ProposalStatus::ProposalDraft->value)
         ->assertSeeHtml('wire:model="statusContext"');
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertDontSeeHtml('wire:model="notes"')
         ->call('openEditModal', $proposal->id)
         ->assertSeeHtml('wire:model="notes"');
@@ -677,7 +677,7 @@ test('the indicators and targets tab renders the targets component, no longer un
     $proposal = Proposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertSeeText('Indicators & Targets')
         ->set('tab', 'targets')
         ->assertSeeHtml('data-tab-panel="targets"')
@@ -690,7 +690,7 @@ test('the logical framework tab renders the proposal framework, no longer under 
     $proposal = Proposal::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertSeeText('Logical Framework')
         ->set('tab', 'logframe')
         ->assertSeeHtml('data-tab-panel="logframe"')
@@ -703,7 +703,7 @@ test('the tab labels read in Arabic', function () {
     app()->setLocale('ar');
 
     Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => Proposal::factory()->create()])
+        ->test('tracking::proposals.show', ['proposal' => Proposal::factory()->create()])
         ->assertSeeText('الإطار المنطقي')
         ->assertSeeText('المؤشرات والمستهدفات')
         ->set('tab', 'plan')
@@ -855,7 +855,7 @@ test('the lifecycle stepper draws the nine merged stops and marks the current on
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Submitted]);
 
     $stops = Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->instance()
         ->lifecycle;
 
@@ -891,7 +891,7 @@ test('a proposal on hold wears the chip on its current stop and reads Submitted 
     $proposal->forceFill(['on_hold_since' => today()->subWeek(), 'status_remind_on' => today()->addWeek()])->save();
 
     $stops = Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->instance()
         ->lifecycle;
 
@@ -919,7 +919,7 @@ test('a rejected proposal still draws its side exit and wears no chip', function
     ProposalStatusNote::factory()->create(['proposal_id' => $proposal->id, 'status' => ProposalStatus::Rejected, 'date' => today()]);
 
     $stops = Livewire::actingAs($user)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->instance()
         ->lifecycle;
 
@@ -936,7 +936,7 @@ test('a payroll proposal offers only the status, documents and funding tabs', fu
     $user = User::factory()->role('General Manager')->create();
     $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
 
-    $component = Livewire::actingAs($user)->test('pages::proposals.show', ['proposal' => $proposal]);
+    $component = Livewire::actingAs($user)->test('tracking::proposals.show', ['proposal' => $proposal]);
 
     expect(array_column($component->instance()->tabs, 'key'))->toBe(['status', 'funding', 'documents']);
 
@@ -957,7 +957,7 @@ test('a stale bookmark to a project tab opens a payroll proposal on its status',
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
         ->withQueryParams(['ptab' => 'targets'])
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertSet('tab', 'status');
 });
 
@@ -965,7 +965,7 @@ test('a project proposal keeps every tab and shows no payroll chip', function ()
     $proposal = Proposal::factory()->create();
 
     $component = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::proposals.show', ['proposal' => $proposal]);
+        ->test('tracking::proposals.show', ['proposal' => $proposal]);
 
     expect(array_column($component->instance()->tabs, 'key'))->toContain('projects', 'logframe', 'targets', 'plan');
     $component->assertDontSeeHtml('data-test="payroll-kind-chip"');
@@ -975,7 +975,7 @@ test('a payroll proposal reads money and time only, and time opens the status ta
     $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
 
     $vitals = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->instance()
         ->vitals;
 

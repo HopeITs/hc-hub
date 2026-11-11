@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
-use App\Models\User;
 use Illuminate\Auth\Events\CurrentDeviceLogout;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
@@ -26,6 +25,7 @@ use Laravel\Fortify\Fortify;
 use Laravel\Passkeys\Events\PasskeyDeleted;
 use Laravel\Passkeys\Events\PasskeyRegistered;
 use Laravel\Passkeys\Events\PasskeyVerified;
+use Modules\Core\Models\User;
 use Throwable;
 
 /**

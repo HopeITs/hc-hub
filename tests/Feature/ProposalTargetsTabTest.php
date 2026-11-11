@@ -1,21 +1,21 @@
 <?php
 
-use App\Actions\Targets\SaveProposalTargetsGrid;
-use App\Enums\IndicatorMeasure;
-use App\Enums\ResultType;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Targets\SaveProposalTargetsGrid;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -65,7 +65,7 @@ function cellKey(Indicator $indicator, Project $project): string
 
 test('the proposal page renders the targets component on the targets tab', function () {
     Livewire::actingAs($this->meal)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->set('tab', 'targets')
         ->assertSee(__('proposals.tab_targets'))
         ->assertSeeLivewire('proposals.targets');

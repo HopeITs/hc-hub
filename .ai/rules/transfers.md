@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/pages/transfers/**'
+  - 'modules/Tracking/resources/views/pages/transfers/**'
 ---
 
 # Transfers

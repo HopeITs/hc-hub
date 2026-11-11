@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
+use Modules\Core\Models\User;
 
 /**
  * Email addresses come from HR, so verification is switched off. Without

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\ReportTemplateStatus;
-use App\Models\Project;
-use App\Models\ReportTemplate;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ReportTemplateStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ReportTemplate;
 
 /**
  * `status` carries a database default (`pending`), so the definition leaves

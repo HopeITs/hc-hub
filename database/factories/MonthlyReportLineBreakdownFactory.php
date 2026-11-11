@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Enums\Gender;
-use App\Models\MonthlyReportLine;
-use App\Models\MonthlyReportLineBreakdown;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\Gender;
+use Modules\Tracking\Models\MonthlyReportLine;
+use Modules\Tracking\Models\MonthlyReportLineBreakdown;
 
 /**
  * @extends Factory<MonthlyReportLineBreakdown>

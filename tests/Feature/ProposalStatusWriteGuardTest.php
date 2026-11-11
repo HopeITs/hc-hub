@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\File;
 | below (and the T04 data migration, which lives outside the scanned
 | folders). Every other change goes through one of them, so each move is
 | checked against the transition table, audited and announced. This test
-| reads app/ and resources/views/ and fails on any other write it can
+| reads app/, modules/ and resources/views/ and fails on any other write it can
 | recognise.
 */
 
@@ -19,10 +19,10 @@ use Illuminate\Support\Facades\File;
 function proposalStatusWriters(): array
 {
     return [
-        'app/Actions/Proposals/TransitionProposal.php',
-        'app/Actions/Proposals/CorrectProposalStatus.php',
-        'app/Actions/Proposals/ApproveProposal.php',
-        'app/Actions/Projects/ActivateProject.php',
+        'modules/Tracking/Actions/Proposals/TransitionProposal.php',
+        'modules/Tracking/Actions/Proposals/CorrectProposalStatus.php',
+        'modules/Tracking/Actions/Proposals/ApproveProposal.php',
+        'modules/Tracking/Actions/Projects/ActivateProject.php',
     ];
 }
 
@@ -71,7 +71,7 @@ function proposalStatusScannedSources(): array
 {
     $sources = [];
 
-    foreach ([app_path(), resource_path('views')] as $directory) {
+    foreach ([app_path(), base_path('modules'), resource_path('views')] as $directory) {
         foreach (File::allFiles($directory) as $file) {
             $path = str_replace('\\', '/', substr($file->getPathname(), strlen(base_path()) + 1));
             $sources[$path] = $file->getContents();
@@ -144,10 +144,10 @@ test('every allowlisted writer exists', function () {
 function proposalOnHoldWriters(): array
 {
     return [
-        'app/Actions/Proposals/SetProposalOnHold.php',
-        'app/Actions/Proposals/ClearProposalOnHold.php',
-        'app/Actions/Proposals/TransitionProposal.php',
-        'app/Actions/Proposals/ApproveProposal.php',
+        'modules/Tracking/Actions/Proposals/SetProposalOnHold.php',
+        'modules/Tracking/Actions/Proposals/ClearProposalOnHold.php',
+        'modules/Tracking/Actions/Proposals/TransitionProposal.php',
+        'modules/Tracking/Actions/Proposals/ApproveProposal.php',
     ];
 }
 

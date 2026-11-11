@@ -1,20 +1,10 @@
 <?php
 
-use App\Actions\Projects\SaveProject;
 use App\Enums\EventImportance;
 use App\Enums\OversightMode;
-use App\Enums\ProjectStatus;
-use App\Enums\ResultType;
 use App\Http\Middleware\SyncProgramsFromHr;
 use App\Models\Activity;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Result;
-use App\Models\Sector;
-use App\Models\User;
 use App\Models\UserNotification;
-use App\Notifications\Alerts\DataGapScanner;
-use App\Notifications\Alerts\LogframeGapAlert;
 use App\Notifications\EventCatalog;
 use App\Notifications\SubjectLinks;
 use Carbon\CarbonImmutable;
@@ -22,6 +12,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Projects\SaveProject;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Sector;
+use Modules\Tracking\Notifications\Alerts\DataGapScanner;
+use Modules\Tracking\Notifications\Alerts\LogframeGapAlert;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\HttpFoundation\Response;

@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{lang/**,resources/views/**,app/Enums/**}'
+  - '{lang/**,resources/views/**,modules/*/resources/views/**,app/Enums/**,modules/Tracking/Enums/**}'
 ---
 
 # Views Enums

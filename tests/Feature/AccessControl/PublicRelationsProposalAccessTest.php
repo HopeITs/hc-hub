@@ -1,14 +1,14 @@
 <?php
 
-use App\Actions\Proposals\TransitionProposal;
-use App\Enums\Currency;
-use App\Enums\ProposalStatus;
-use App\Models\Donor;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalLocation;
 use App\Models\Role;
 use Livewire\Livewire;
+use Modules\Tracking\Actions\Proposals\TransitionProposal;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 
 /*
 | The fundraising officer (user story §1) works the proposals but neither
@@ -27,7 +27,7 @@ test('the fundraiser opens the proposals pages and the donor list', function () 
         ->get(route('proposals.index'))->assertOk();
     $this->get(route('donors.index'))->assertOk();
 
-    Livewire::actingAs($this->fundraiser)->test('pages::proposals.show', ['proposal' => $proposal])->assertOk();
+    Livewire::actingAs($this->fundraiser)->test('tracking::proposals.show', ['proposal' => $proposal])->assertOk();
 });
 
 test('the fundraiser moves a concept note to review, which needs proposals.update', function () {

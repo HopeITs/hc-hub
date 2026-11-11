@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\Core\Models\User;
 
 test('a new milestone is planned, first in sequence and carries no weight', function () {
     $user = User::factory()->create();

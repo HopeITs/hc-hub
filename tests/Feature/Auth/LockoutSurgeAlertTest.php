@@ -2,7 +2,6 @@
 
 use App\Events\NotificationPushed;
 use App\Listeners\AlertOnLockoutSurge;
-use App\Models\User;
 use App\Notifications\AppNotification;
 use App\Notifications\LockoutSurge;
 use Carbon\CarbonImmutable;
@@ -10,6 +9,7 @@ use Illuminate\Auth\Events\Lockout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
+use Modules\Core\Models\User;
 use Monolog\Handler\NullHandler;
 
 beforeEach(function () {

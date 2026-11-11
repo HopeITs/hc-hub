@@ -1,11 +1,11 @@
 <?php
 
-use App\Enums\ReportStatus;
-use App\Models\PlanIndicator;
-use App\Models\Report;
-use App\Models\ReportFile;
-use App\Models\User;
 use Carbon\CarbonImmutable;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportFile;
 
 test('a report belongs to a target and a user', function () {
     $target = PlanIndicator::factory()->create();

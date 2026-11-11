@@ -1,13 +1,13 @@
 <?php
 
-use App\Actions\Proposals\CorrectProposalStatus;
-use App\Enums\ProposalStatus;
-use App\Events\ProposalStatusChanged;
-use App\Models\Proposal;
-use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\CorrectProposalStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Models\Proposal;
 
 /**
  * Run a correction as the given user.

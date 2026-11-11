@@ -1,16 +1,16 @@
 <?php
 
-use App\Actions\Cities\AssignMealCoverage;
-use App\Enums\MealCoverageScope;
 use App\Models\Activity;
-use App\Models\MealCoverageAssignment;
-use App\Models\Project;
 use App\Models\UserNotification;
 use App\Notifications\ActivityPresenter;
-use App\Support\MealCoverage;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Tracking\Actions\Cities\AssignMealCoverage;
+use Modules\Tracking\Enums\MealCoverageScope;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\MealCoverage;
 
 /**
  * A city coverage row written without recording, for routing tests.

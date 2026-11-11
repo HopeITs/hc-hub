@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\Donors\ReadsDonorMoney;
-use App\Livewire\Concerns\ManagesAgreementForm;
-use App\Livewire\Concerns\ManagesDonorForm;
-use App\Livewire\Concerns\SwitchesFundingView;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\Donors\ReadsDonorMoney;
+use Modules\Tracking\Livewire\Concerns\ManagesAgreementForm;
+use Modules\Tracking\Livewire\Concerns\ManagesDonorForm;
+use Modules\Tracking\Livewire\Concerns\SwitchesFundingView;
 
 /**
  * Stands in for donors/show, with every trait that page uses.

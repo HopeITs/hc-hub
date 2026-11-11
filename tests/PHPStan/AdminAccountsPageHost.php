@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\Admin\ExportsAccountRegister;
-use App\Livewire\Concerns\Admin\ManagesAccountForm;
-use App\Livewire\Concerns\Admin\ReadsAccountRegister;
-use App\Livewire\Concerns\FiltersFinanceRegister;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Tracking\Livewire\Concerns\Admin\ExportsAccountRegister;
+use Modules\Tracking\Livewire\Concerns\Admin\ManagesAccountForm;
+use Modules\Tracking\Livewire\Concerns\Admin\ReadsAccountRegister;
+use Modules\Tracking\Livewire\Concerns\FiltersFinanceRegister;
 
 /**
  * Stands in for admin/accounts, with every trait that page uses.

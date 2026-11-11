@@ -6,12 +6,12 @@ namespace App\Notifications;
 
 use App\Enums\Locale;
 use App\Http\UserAgent;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Modules\Core\Models\User;
 
 /**
  * The security email sent when someone signs in from a browser/platform the

@@ -1,13 +1,13 @@
 <?php
 
-use App\Actions\Tasks\MoveTask;
-use App\Models\Milestone;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Task;
-use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Tasks\MoveTask;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
 
 /*
 | "Move to" on the task page: a top-level task, with its subtasks, moves to
@@ -26,7 +26,7 @@ beforeEach(function () {
 
 test('the task page lists every place in the program and marks the current one', function () {
     Livewire::actingAs($this->manager)
-        ->test('pages::tasks.show', ['task' => $this->task])
+        ->test('tracking::tasks.show', ['task' => $this->task])
         ->assertSeeHtml('data-test="task-move-button"')
         ->call('openMoveModal')
         ->assertSet('showMoveModal', true)
@@ -38,7 +38,7 @@ test('the task page lists every place in the program and marks the current one',
 
 test('a task moves with its subtasks to a milestone of its program', function () {
     Livewire::actingAs($this->manager)
-        ->test('pages::tasks.show', ['task' => $this->task])
+        ->test('tracking::tasks.show', ['task' => $this->task])
         ->call('openMoveModal')
         ->set('moveTarget', 'milestone:'.$this->milestone->id)
         ->call('moveTask')
@@ -52,7 +52,7 @@ test('a task never moves outside its program', function () {
     $foreignMilestone = Milestone::factory()->create();
 
     Livewire::actingAs($this->manager)
-        ->test('pages::tasks.show', ['task' => $this->task])
+        ->test('tracking::tasks.show', ['task' => $this->task])
         ->call('openMoveModal')
         ->set('moveTarget', 'milestone:'.$foreignMilestone->id)
         ->call('moveTask')
@@ -63,7 +63,7 @@ test('a task never moves outside its program', function () {
 
 test('a subtask offers no move: it follows its parent', function () {
     Livewire::actingAs($this->manager)
-        ->test('pages::tasks.show', ['task' => $this->subtask])
+        ->test('tracking::tasks.show', ['task' => $this->subtask])
         ->assertDontSeeHtml('data-test="task-move-button"')
         ->set('moveTarget', 'program')
         ->call('moveTask');

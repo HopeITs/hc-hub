@@ -3,12 +3,12 @@
 use App\Enums\NotificationPriority;
 use App\Jobs\FanOutActivity;
 use App\Models\Activity;
-use App\Models\Task;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\AppNotification;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\Notification;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Task;
 
 beforeEach(fn () => $this->seed(RolesAndPermissionsSeeder::class));
 

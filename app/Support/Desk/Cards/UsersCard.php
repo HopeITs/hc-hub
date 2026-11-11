@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Support\Desk\Cards;
 
 use App\Models\Role;
-use App\Models\User;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
 
 /**
  * The user directory in card form: who has an account and in which roles.

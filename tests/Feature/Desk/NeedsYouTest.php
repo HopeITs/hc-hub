@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\DeliveryState;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\TaskKind;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\MonthlyReport;
-use App\Models\Risk;
-use App\Models\Task;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\DeliveryState;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\TaskKind;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\Task;
 
 beforeEach(function () {
     $this->travelTo('2026-09-16 09:00:00');

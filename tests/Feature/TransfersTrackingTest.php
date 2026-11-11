@@ -1,8 +1,8 @@
 <?php
 
-use App\Models\TransfersTracking;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * Schedule a tranche against a funding agreement, and return its id.

@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\Supervision;
 use Database\Factories\Concerns\CreatesHrRecords;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Models\Supervision;
 
 /**
  * @extends Factory<Supervision>

@@ -1,19 +1,19 @@
 <?php
 
-use App\Actions\EvidenceTypes\DeactivateEvidenceType;
-use App\Actions\EvidenceTypes\DeleteEvidenceType;
-use App\Actions\EvidenceTypes\MoveEvidenceType;
-use App\Actions\EvidenceTypes\ReactivateEvidenceType;
-use App\Actions\EvidenceTypes\SaveEvidenceType;
-use App\Models\EvidenceType;
-use App\Models\MonthlyReportFile;
-use App\Models\ReportTemplateLine;
-use App\Support\DefaultEvidenceTypes;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Tracking\Actions\EvidenceTypes\DeactivateEvidenceType;
+use Modules\Tracking\Actions\EvidenceTypes\DeleteEvidenceType;
+use Modules\Tracking\Actions\EvidenceTypes\MoveEvidenceType;
+use Modules\Tracking\Actions\EvidenceTypes\ReactivateEvidenceType;
+use Modules\Tracking\Actions\EvidenceTypes\SaveEvidenceType;
+use Modules\Tracking\Models\EvidenceType;
+use Modules\Tracking\Models\MonthlyReportFile;
+use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Support\DefaultEvidenceTypes;
 
 describe('the page', function () {
     it('sends a guest to the login page', function () {
@@ -36,13 +36,13 @@ describe('the page', function () {
     ]);
 
     it('explains an empty list and offers the create button', function () {
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.evidence-types')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.evidence-types')
             ->assertSee(__('evidence_types.empty_heading'))
             ->assertSeeHtml('data-test="empty-create-evidence-type"');
     });
 
     it('creates and edits an evidence type from the dialog', function () {
-        $component = Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.evidence-types')
+        $component = Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.evidence-types')
             ->call('openCreateModal')
             ->assertSet('showEvidenceTypeModal', true)
             ->set('nameAr', 'صور النشاط')
@@ -64,7 +64,7 @@ describe('the page', function () {
     });
 
     it('shows the field error next to the Arabic name', function () {
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.evidence-types')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.evidence-types')
             ->call('openCreateModal')
             ->set('nameAr', '   ')
             ->call('saveEvidenceType')
@@ -77,7 +77,7 @@ describe('the page', function () {
     it('deactivates, reactivates and deletes an unused type through its dialogs', function () {
         $evidenceType = EvidenceType::factory()->create();
 
-        $component = Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.evidence-types')
+        $component = Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.evidence-types')
             ->call('confirmDeactivate', $evidenceType->id)
             ->assertSet('showDeactivateModal', true)
             ->call('deactivateEvidenceType')
@@ -103,7 +103,7 @@ describe('the page', function () {
         $evidenceType = EvidenceType::factory()->create(['name_ar' => 'قوائم المستفيدين']);
         $user = userWithRole('MEAL');
 
-        $component = Livewire::actingAs($user)->test('pages::admin.evidence-types');
+        $component = Livewire::actingAs($user)->test('tracking::admin.evidence-types');
         $user->syncRoles(['General Manager']);
 
         $call($component, $evidenceType)->assertForbidden();
@@ -126,7 +126,7 @@ describe('the page', function () {
     it('moves a type with the keyboard-reachable buttons and announces its new position', function () {
         [$first, $second] = [EvidenceType::factory()->create(['name_en' => 'First', 'sort_order' => 1]), EvidenceType::factory()->create(['name_en' => 'Second', 'sort_order' => 2])];
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.evidence-types')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.evidence-types')
             ->call('moveEvidenceType', $second->id, 'up')
             ->assertSet('announcement', __('evidence_types.moved_to', ['name' => 'Second', 'position' => 1, 'total' => 2]))
             ->assertSeeHtml('aria-live="polite"')
@@ -140,7 +140,7 @@ describe('the page', function () {
         EvidenceType::factory()->create(['name_ar' => 'كشوف الحضور', 'name_en' => 'Attendance sheets']);
         EvidenceType::factory()->inactive()->create(['name_ar' => 'موافقات التصوير']);
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.evidence-types')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.evidence-types')
             ->assertSeeInOrder(['كشوف الحضور', 'Attendance sheets', 'موافقات التصوير', 'غير فعّال'])
             ->assertSee('إضافة نوع شاهد');
     });
@@ -154,13 +154,13 @@ describe('the page', function () {
                 $queries++;
             });
 
-            Livewire::actingAs($user)->test('pages::admin.evidence-types');
+            Livewire::actingAs($user)->test('tracking::admin.evidence-types');
 
             return $queries;
         };
 
         // A first render loads and caches the user's permissions.
-        Livewire::actingAs($user)->test('pages::admin.evidence-types');
+        Livewire::actingAs($user)->test('tracking::admin.evidence-types');
 
         EvidenceType::factory()->count(2)->create();
         $small = $countQueries();
@@ -238,7 +238,7 @@ describe('the actions', function () {
     it('turns a stale deactivate on the page into a toast and leaves the type as it is', function () {
         $evidenceType = EvidenceType::factory()->inactive()->create();
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.evidence-types')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.evidence-types')
             ->set('deactivatingEvidenceTypeId', $evidenceType->id)
             ->call('deactivateEvidenceType')
             ->assertHasNoErrors()
@@ -269,7 +269,7 @@ describe('the actions', function () {
         expect(fn () => app(DeleteEvidenceType::class)->handle($evidenceType->id))
             ->toThrow(ValidationException::class, 'This evidence type is in use. Deactivate it instead.');
 
-        Livewire::test('pages::admin.evidence-types')
+        Livewire::test('tracking::admin.evidence-types')
             ->call('confirmDelete', $evidenceType->id)
             ->assertSet('deletingEvidenceTypeInUse', true)
             ->assertSee(__('evidence_types.in_use'))
@@ -284,7 +284,7 @@ describe('a type only an uploaded file uses', function () {
         $evidenceType = EvidenceType::factory()->create();
         MonthlyReportFile::factory()->create(['evidence_type_id' => $evidenceType->id]);
 
-        Livewire::actingAs(userWithRole('MEAL'))->test('pages::admin.evidence-types')
+        Livewire::actingAs(userWithRole('MEAL'))->test('tracking::admin.evidence-types')
             ->call('confirmDelete', $evidenceType->id)
             ->assertSet('deletingEvidenceTypeInUse', true);
     });

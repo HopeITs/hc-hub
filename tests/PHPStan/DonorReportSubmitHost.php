@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\DonorReports\SubmitsDonorReport;
-use App\Models\DonorReport;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\DonorReports\SubmitsDonorReport;
+use Modules\Tracking\Models\DonorReport;
 
 /**
  * Stands in for donor-reports/show and reporting-duties/index, which use the

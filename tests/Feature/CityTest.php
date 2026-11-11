@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Project;
+use Modules\Tracking\Models\Project;
 
 test('a project resolves its city from the hr database', function () {
     $cityId = insertHrCity('Deir Az-zor', 'دير الزور');

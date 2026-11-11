@@ -1,15 +1,15 @@
 <?php
 
-use App\Models\AnnualPlan;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Milestone;
-use App\Models\MonthlyReport;
-use App\Models\Program;
-use App\Models\Report;
-use App\Models\Task;
-use App\Models\User;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Task;
 
 test('every record opens as its own full page, not a sheet over its register', function (string $url) {
     $this->actingAs(User::factory()->role('Super Admin')->create())

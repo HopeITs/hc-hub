@@ -1,12 +1,12 @@
 <?php
 
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
 use App\Models\Activity;
-use App\Models\MonthlyReport;
-use App\Models\Project;
-use App\Models\Proposal;
 use Livewire\Livewire;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 beforeEach(function () {
     $this->travelTo('2026-09-15 09:00:00');
@@ -21,7 +21,7 @@ beforeEach(function () {
 
 test('a manager sees the edit and archive actions on the Story', function () {
     Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::projects.show', ['project' => $this->project])
+        ->test('tracking::projects.show', ['project' => $this->project])
         ->assertSeeHtml('data-test="edit-project"')
         ->assertSeeHtml('data-test="archive-project"')
         ->assertDontSeeHtml('data-test="edit-project-locked"');
@@ -29,7 +29,7 @@ test('a manager sees the edit and archive actions on the Story', function () {
 
 test('a viewer without the permissions sees no edit or archive actions at all', function () {
     Livewire::actingAs(userWithRole('Team Member'))
-        ->test('pages::projects.show', ['project' => $this->project])
+        ->test('tracking::projects.show', ['project' => $this->project])
         ->assertDontSeeHtml('data-test="edit-project')
         ->assertDontSeeHtml('data-test="archive-project')
         ->assertDontSeeHtml('wire:click="openEditModal(')
@@ -38,7 +38,7 @@ test('a viewer without the permissions sees no edit or archive actions at all', 
 
 test('archiving from the Story archives the project and offers Restore', function () {
     Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::projects.show', ['project' => $this->project])
+        ->test('tracking::projects.show', ['project' => $this->project])
         ->call('confirmArchive', $this->project->id)
         ->assertSet('showArchiveModal', true)
         ->call('archiveProject')
@@ -53,13 +53,13 @@ test('a viewer without the archive permission sees no Restore on an archived pro
     $this->project->forceFill(['status' => ProjectStatus::Archived])->saveQuietly();
 
     Livewire::actingAs(userWithRole('Team Member'))
-        ->test('pages::projects.show', ['project' => $this->project])
+        ->test('tracking::projects.show', ['project' => $this->project])
         ->assertDontSeeHtml('data-test="restore-project');
 });
 
 test('archiving is refused for a viewer without the permission', function () {
     Livewire::actingAs(userWithRole('Team Member'))
-        ->test('pages::projects.show', ['project' => $this->project])
+        ->test('tracking::projects.show', ['project' => $this->project])
         ->call('confirmArchive', $this->project->id)
         ->assertForbidden();
 
@@ -70,14 +70,14 @@ test('the months strip shows a validated month', function () {
     Activity::withoutRecording(fn () => MonthlyReport::factory()->validated()->create(['project_id' => $this->project->id, 'period' => '2026-08-01']));
 
     Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::projects.show', ['project' => $this->project])
+        ->test('tracking::projects.show', ['project' => $this->project])
         ->assertSeeHtml('data-test="story-months"')
         ->assertSeeHtml('data-month-state="validated"');
 });
 
 test('the side column still shows the funding history entry', function () {
     Livewire::actingAs(userWithRole('General Manager'))
-        ->test('pages::projects.show', ['project' => $this->project])
+        ->test('tracking::projects.show', ['project' => $this->project])
         ->assertSeeHtml('data-test="funding-history"')
         ->assertSee('Clean Water Phase One');
 });

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\AnnualPlans\BuildsPlanMatrix;
-use App\Livewire\Concerns\AnnualPlans\FiltersPlanMatrix;
-use App\Livewire\Concerns\AnnualPlans\ManagesAnnualPlanForm;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Tracking\Livewire\Concerns\AnnualPlans\BuildsPlanMatrix;
+use Modules\Tracking\Livewire\Concerns\AnnualPlans\FiltersPlanMatrix;
+use Modules\Tracking\Livewire\Concerns\AnnualPlans\ManagesAnnualPlanForm;
 
 /**
  * Stands in for annual-plans/index, with every trait that page uses.

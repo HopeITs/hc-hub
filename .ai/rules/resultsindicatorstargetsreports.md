@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Models/PlanIndicator.php,resources/views/pages/{results,indicators,targets,reports}/**}'
+  - '{modules/Tracking/Models/PlanIndicator.php,modules/Tracking/resources/views/pages/{results,indicators,targets,reports}/**}'
 ---
 
 # Resultsindicatorstargetsreports

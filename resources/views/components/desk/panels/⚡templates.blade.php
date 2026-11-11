@@ -1,13 +1,13 @@
 <?php
 
-use App\Enums\ProjectStatus;
-use App\Enums\ReportTemplateStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ReportTemplateStatus;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
 use App\Models\HrEmployee;
-use App\Models\Project;
-use App\Models\ReportTemplate;
-use App\Support\MealCoverage;
-use App\Support\ReportTemplatePrefiller;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Support\MealCoverage;
+use Modules\Tracking\Support\ReportTemplatePrefiller;
 use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;

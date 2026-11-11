@@ -1,13 +1,13 @@
 <?php
 
-use App\Enums\TaskPriority;
-use App\Enums\TaskStatus;
-use App\Models\Project;
 use App\Models\Role;
-use App\Models\Task;
-use App\Models\User;
 use App\Notifications\QuickActions;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskPriority;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
 
 beforeEach(function () {
     $this->employee = insertHrEmployee();
@@ -15,7 +15,7 @@ beforeEach(function () {
     $this->task = Task::factory()->create(['title' => 'Assigned work']);
     $this->task->taskAssignees()->delete();
     $this->task->taskAssignees()->create(['employee_id' => $this->employee]);
-    $this->index = fn (User $user) => Livewire::actingAs($user)->test('pages::tasks.index');
+    $this->index = fn (User $user) => Livewire::actingAs($user)->test('tracking::tasks.index');
 });
 
 test('a Team Member cannot create tasks', function () {
@@ -65,14 +65,14 @@ test('the task being deleted cannot be swapped from the browser', function () {
 test('adding a task on a project needs tasks.create', function () {
     $project = Project::factory()->create();
 
-    Livewire::actingAs($this->assignee)->test('pages::projects.show', ['project' => $project])->call('openAddTaskModal')->assertForbidden();
-    Livewire::actingAs(userWithRole('Media Team'))->test('pages::projects.show', ['project' => $project])->call('openAddTaskModal')->assertOk();
+    Livewire::actingAs($this->assignee)->test('tracking::projects.show', ['project' => $project])->call('openAddTaskModal')->assertForbidden();
+    Livewire::actingAs(userWithRole('Media Team'))->test('tracking::projects.show', ['project' => $project])->call('openAddTaskModal')->assertOk();
 });
 
 test('an assignee on the task page changes status but not the title', function () {
     $this->task->update(['priority' => TaskPriority::Low]);
 
-    $page = Livewire::actingAs($this->assignee)->test('pages::tasks.show', ['task' => $this->task])
+    $page = Livewire::actingAs($this->assignee)->test('tracking::tasks.show', ['task' => $this->task])
         ->assertSeeHtml('data-test="task-edit-status-done"')
         ->assertSeeHtml('data-test="task-edit-progress-input"')
         ->assertSeeHtml('data-test="task-edit-completed-date-input"')
@@ -105,7 +105,7 @@ test('someone who can see a task but has no rights on it cannot change it from t
     $visible->taskAssignees()->create(['employee_id' => $this->employee]);
     $manager = userWithRole('Managers');
 
-    Livewire::actingAs($manager)->test('pages::tasks.show', ['task' => $visible])
+    Livewire::actingAs($manager)->test('tracking::tasks.show', ['task' => $visible])
         ->assertSeeHtml('data-test="task-edit-title-input"')
         ->assertSeeHtml('data-test="task-edit-priority-high"')
         ->assertSeeHtml('data-test="task-edit-progress-input"')
@@ -120,7 +120,7 @@ test('someone who can see a task but has no rights on it cannot change it from t
     Role::create(['name' => 'Task Viewer', 'guard_name' => 'web'])->givePermissionTo('tasks.view');
     $viewer = User::factory()->role('Task Viewer')->create();
 
-    Livewire::actingAs($viewer)->test('pages::tasks.show', ['task' => $visible])
+    Livewire::actingAs($viewer)->test('tracking::tasks.show', ['task' => $visible])
         ->assertSee('Renamed by manager')
         ->assertDontSeeHtml('data-test="task-edit-form"')
         ->assertDontSeeHtml('data-test="task-edit-title-input"')

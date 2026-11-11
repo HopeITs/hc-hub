@@ -5,9 +5,9 @@ namespace Database\Factories;
 use App\Enums\FileType;
 use App\Enums\MediaCollection;
 use App\Models\Media;
-use App\Models\Project;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
 
 /**
  * @extends Factory<Media>

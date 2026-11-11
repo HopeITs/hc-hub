@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use App\Models\User;
 use App\Models\UserTodo;
+use Modules\Core\Models\User;
 
 /**
  * A to-do belongs to one user: only they may see or change it, whatever

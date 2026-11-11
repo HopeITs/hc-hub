@@ -1,16 +1,16 @@
 <?php
 
-use App\Enums\Currency;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 beforeEach(function () {
     $this->travelTo('2026-10-14 10:00:00');
@@ -38,7 +38,7 @@ beforeEach(function () {
 test('the create form offers the renewable proposals and previews what is copied', function () {
     Proposal::factory()->create(['internal_project_number' => 'HC-2026-411']);
 
-    $form = Livewire::actingAs($this->user)->test('pages::proposals.index')->call('openCreateModal');
+    $form = Livewire::actingAs($this->user)->test('tracking::proposals.index')->call('openCreateModal');
 
     expect(collect($form->get('renewableProposals'))->pluck('id')->all())->toBe([$this->previous->id]);
 
@@ -53,7 +53,7 @@ test('the create form offers the renewable proposals and previews what is copied
 });
 
 test('saving a renewal goes through the clone and lands a linked concept note', function () {
-    $form = Livewire::actingAs($this->user)->test('pages::proposals.index')
+    $form = Livewire::actingAs($this->user)->test('tracking::proposals.index')
         ->call('openCreateModal')
         ->set('previousProposalId', (string) $this->previous->id)
         ->set('internalProjectNumber', 'HC-2027-100')
@@ -73,7 +73,7 @@ test('saving a renewal goes through the clone and lands a linked concept note', 
 test('a proposal that cannot be renewed is refused', function () {
     $concept = Proposal::factory()->create();
 
-    Livewire::actingAs($this->user)->test('pages::proposals.index')
+    Livewire::actingAs($this->user)->test('tracking::proposals.index')
         ->call('openCreateModal')
         ->set('previousProposalId', (string) $concept->id)
         ->assertSet('previousProposalId', '')
@@ -86,18 +86,18 @@ test('a proposal that cannot be renewed is refused', function () {
 test('the proposal page shows the renewal chain in both directions', function () {
     $renewal = Proposal::factory()->create(['previous_proposal_id' => $this->previous->id, 'internal_project_number' => 'HC-2027-102']);
 
-    Livewire::actingAs($this->user)->test('pages::proposals.show', ['proposal' => $this->previous])
+    Livewire::actingAs($this->user)->test('tracking::proposals.show', ['proposal' => $this->previous])
         ->assertSeeHtml('data-test="renewal-chain-next"')
         ->assertSee('HC-2027-102')
         ->assertDontSeeHtml('data-test="renewal-chain-previous"');
 
-    Livewire::actingAs($this->user)->test('pages::proposals.show', ['proposal' => $renewal])
+    Livewire::actingAs($this->user)->test('tracking::proposals.show', ['proposal' => $renewal])
         ->assertSeeHtml('data-test="renewal-chain-previous"')
         ->assertSee('HC-2026-410');
 });
 
 test('a proposal outside any chain shows no chain', function () {
-    Livewire::actingAs($this->user)->test('pages::proposals.show', ['proposal' => $this->previous])
+    Livewire::actingAs($this->user)->test('tracking::proposals.show', ['proposal' => $this->previous])
         ->assertDontSeeHtml('data-test="renewal-chain"');
 });
 
@@ -116,7 +116,7 @@ test('a removed predecessor shows as removed and the renewal survives', function
     DB::table('project_proposal')->where('proposal_id', $this->previous->id)->delete();
     DB::table('proposals')->where('id', $this->previous->id)->delete();
 
-    Livewire::actingAs($this->user)->test('pages::proposals.show', ['proposal' => $renewal])
+    Livewire::actingAs($this->user)->test('tracking::proposals.show', ['proposal' => $renewal])
         ->assertSeeHtml('data-test="renewal-chain-removed"');
 
     expect(DB::table('proposals')->where('id', $renewal->id)->value('previous_proposal_id'))->toBeNull();
@@ -138,7 +138,7 @@ test('the project page lists its funding history oldest first without amounts', 
         return $proposal;
     });
 
-    $page = Livewire::actingAs($this->user)->test('pages::projects.show', ['project' => $this->project])->set('tab', 'proposals');
+    $page = Livewire::actingAs($this->user)->test('tracking::projects.show', ['project' => $this->project])->set('tab', 'proposals');
 
     expect($page->get('fundingHistory')->pluck('id')->all())->toBe([$this->previous->id, $renewal->id]);
 
@@ -151,7 +151,7 @@ test('the project page lists its funding history oldest first without amounts', 
 
 test('the funding history is a fixed number of queries', function () {
     $count = function (): int {
-        $page = Livewire::actingAs($this->user)->test('pages::projects.show', ['project' => $this->project]);
+        $page = Livewire::actingAs($this->user)->test('tracking::projects.show', ['project' => $this->project]);
         DB::flushQueryLog();
         DB::enableQueryLog();
         $page->get('fundingHistory');

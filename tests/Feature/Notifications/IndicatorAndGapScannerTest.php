@@ -1,16 +1,16 @@
 <?php
 
-use App\Enums\ProjectStatus;
 use App\Models\Activity;
-use App\Models\Indicator;
-use App\Models\IndicatorProgress;
-use App\Models\MonthlyReport;
-use App\Models\Project;
-use App\Models\Report;
 use App\Models\UserNotification;
-use App\Notifications\Alerts\DataGapScanner;
-use App\Notifications\Alerts\OffTrackIndicatorScanner;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\IndicatorProgress;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Notifications\Alerts\DataGapScanner;
+use Modules\Tracking\Notifications\Alerts\OffTrackIndicatorScanner;
 
 test('an indicator behind pace alerts once and re-arms after recovering', function () {
     $meal = userWithRole('MEAL');

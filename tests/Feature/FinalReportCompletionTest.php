@@ -1,17 +1,17 @@
 <?php
 
-use App\Actions\Proposals\RecordFinalReportAcceptance;
-use App\Actions\Proposals\TransitionProposal;
 use App\Enums\MediaCollection;
-use App\Enums\ProposalStatus;
-use App\Models\Donor;
 use App\Models\Media;
-use App\Models\Milestone;
-use App\Models\Proposal;
-use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\RecordFinalReportAcceptance;
+use Modules\Tracking\Actions\Proposals\TransitionProposal;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Proposal;
 
 /**
  * An active proposal whose final-report milestone is reached.

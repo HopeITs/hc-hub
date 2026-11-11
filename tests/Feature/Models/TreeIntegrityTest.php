@@ -1,10 +1,10 @@
 <?php
 
-use App\Enums\ResultType;
 use App\Exceptions\InvalidParentException;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Result;
+use Modules\Tracking\Enums\ResultType;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Result;
 
 test('a result cannot be its own parent', function () {
     $result = Result::factory()->create();

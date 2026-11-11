@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Support\Desk\Cards;
 
 use App\Models\Activity;
-use App\Models\User;
 use App\Notifications\ActivityPresenter;
 use App\Notifications\NotificationPresenter;
 use App\Notifications\SubjectLinks;
 use App\Support\Desk\RelativeDay;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
 
 /**
  * The activity log in card form: what changed lately, newest first, each line

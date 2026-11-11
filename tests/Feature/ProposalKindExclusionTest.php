@@ -1,23 +1,23 @@
 <?php
 
-use App\Actions\DonorReports\ComposeDonorReport;
-use App\Actions\Results\CopyResultTree;
-use App\Actions\Results\SaveActivitySchedule;
-use App\Actions\Results\SaveResult;
-use App\Actions\Targets\AttachLibraryIndicatorToResult;
-use App\Actions\Targets\SaveProposalTargetsGrid;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ProposalStatus;
 use App\Models\Activity;
-use App\Models\Indicator;
-use App\Models\MonthlyReport;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Result;
-use App\Support\DonorReportAggregator;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Tracking\Actions\DonorReports\ComposeDonorReport;
+use Modules\Tracking\Actions\Results\CopyResultTree;
+use Modules\Tracking\Actions\Results\SaveActivitySchedule;
+use Modules\Tracking\Actions\Results\SaveResult;
+use Modules\Tracking\Actions\Targets\AttachLibraryIndicatorToResult;
+use Modules\Tracking\Actions\Targets\SaveProposalTargetsGrid;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Support\DonorReportAggregator;
 
 beforeEach(fn () => $this->travelTo('2026-10-14 10:00:00'));
 

@@ -1,13 +1,13 @@
 <?php
 
-use App\Models\AnnualPlan;
-use App\Models\Indicator;
-use App\Models\PlanIndicator;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Report;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Report;
 use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
@@ -49,7 +49,7 @@ test('the plans tab opens on the current year and counts its targets by state', 
     AnnualPlan::factory()->create(['program_id' => $program->id, 'year' => 2025]);
 
     $component = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'plans')
         ->assertSee('Annual plan 2026')
         ->assertSee('Clean Water Daraa')
@@ -73,7 +73,7 @@ test('each group card opens its own targets in a modal', function () {
     ]);
 
     $html = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'plans')
         ->assertSee('Show 3 targets')
         ->assertSee("\$flux.modal('plan-targets-project-{$late->project_id}').show()", false)
@@ -91,7 +91,7 @@ test('the year strip offers only last year, this year and next year', function (
     AnnualPlan::factory()->create(['program_id' => $program->id, 'year' => 2023]);
 
     $component = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'plans')
         ->assertDontSee('data-plan-year="2023"', false);
 
@@ -107,7 +107,7 @@ test('a filter card narrows the targets and clicking it again shows them all', f
     ['program' => $program] = programWithPlanTargets();
 
     $component = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'plans')
         ->call('pickPlanFilter', 'late');
 
@@ -123,7 +123,7 @@ test('grouping by reporting puts each target under its most urgent report state'
     ['program' => $program] = programWithPlanTargets();
 
     $groups = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'plans')
         ->set('planGroupBy', 'status')
         ->instance()
@@ -141,7 +141,7 @@ test('a target trailing the share of the year gone counts as behind pace', funct
 
     // On 2 July half the year has gone: 50 of 400 (12.5%) and 2 of 8 (25%) trail it, 12 of 10 is reached.
     $rows = Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'plans')
         ->instance()
         ->planTargetRows;
@@ -154,7 +154,7 @@ test('picking a year with no plan offers to write that year\'s plan', function (
     $program->strategy->update(['start_year' => 2025, 'end_year' => 2027]);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'plans')
         ->call('pickPlanYear', 2027)
         ->assertSee('No plan for 2027 yet')
@@ -167,7 +167,7 @@ test('a viewer who may not see targets gets the plan without its targets', funct
     $viewer->givePermissionTo(Permission::findOrCreate('programs.view', 'web'));
 
     $component = Livewire::actingAs($viewer)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'plans')
         ->assertSee('Annual plan 2026')
         ->assertDontSee('Households reached');
@@ -181,7 +181,7 @@ test('the annual plans page opens the new plan form filled in from a program tab
 
     Livewire::withQueryParams(['create' => 1, 'program' => $program->id, 'year' => 2027])
         ->actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->assertSet('showPlanModal', true)
         ->assertSet('planProgramId', (string) $program->id)
         ->assertSet('planYear', '2027')
@@ -195,6 +195,6 @@ test('the new plan link does not open the form for someone who may not create pl
 
     Livewire::withQueryParams(['create' => 1, 'program' => $program->id, 'year' => 2027])
         ->actingAs($viewer)
-        ->test('pages::annual-plans.index')
+        ->test('tracking::annual-plans.index')
         ->assertSet('showPlanModal', false);
 });

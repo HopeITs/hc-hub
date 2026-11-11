@@ -1,12 +1,12 @@
 <?php
 
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
 use Livewire\Livewire;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 use function Livewire\invade;
 
@@ -47,7 +47,7 @@ test('managers see none of the money items on the calendar, whatever the toggles
     $employeeId = insertHrEmployee();
     $fixture = seedCalendarMoneyFixture($employeeId);
 
-    Livewire::actingAs(userWithRole('Managers', $employeeId))->test('pages::calendar.index')
+    Livewire::actingAs(userWithRole('Managers', $employeeId))->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->set('showProposals', true)
         ->set('showTransfers', true)
@@ -64,7 +64,7 @@ test('managers see none of the money items on the calendar, whatever the toggles
 test('managers get no filter entries or legend for the money types', function () {
     $employeeId = insertHrEmployee();
 
-    Livewire::actingAs(userWithRole('Managers', $employeeId))->test('pages::calendar.index')
+    Livewire::actingAs(userWithRole('Managers', $employeeId))->test('tracking::calendar.index')
         ->set('showTypeFilterMenu', true)
         ->assertSee('data-test="calendar-filter-projects"', false)
         ->assertDontSee('data-test="calendar-filter-proposals"', false)
@@ -79,7 +79,7 @@ test('a hidden type cannot be switched on, focused or reached from the browser',
     $employeeId = insertHrEmployee();
     $fixture = seedCalendarMoneyFixture($employeeId);
 
-    $component = Livewire::actingAs(userWithRole('Managers', $employeeId))->test('pages::calendar.index')
+    $component = Livewire::actingAs(userWithRole('Managers', $employeeId))->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->set('showProposals', false)
         ->call('toggleType', 'proposal')
@@ -108,7 +108,7 @@ test('the day detail and the related-dates list carry no money for managers', fu
     $employeeId = insertHrEmployee();
     seedCalendarMoneyFixture($employeeId);
 
-    $component = Livewire::actingAs(userWithRole('Managers', $employeeId))->test('pages::calendar.index')
+    $component = Livewire::actingAs(userWithRole('Managers', $employeeId))->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->call('openDayDetail', '2026-06-15');
 
@@ -120,7 +120,7 @@ test('financial sees every money item, the transfer with its amount, linked to i
     $employeeId = insertHrEmployee();
     $fixture = seedCalendarMoneyFixture($employeeId);
 
-    Livewire::actingAs(userWithRole('Financial', $employeeId))->test('pages::calendar.index')
+    Livewire::actingAs(userWithRole('Financial', $employeeId))->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee(calendarChip('proposal', $fixture['proposal']->id), false)
         ->assertSee(calendarChip('transfer', $fixture['transfer']->id), false)
@@ -141,7 +141,7 @@ test('a fundraiser without agreements sees proposals and donor follow-ups but no
     $employeeId = insertHrEmployee();
     $fixture = seedCalendarMoneyFixture($employeeId);
 
-    $component = Livewire::actingAs(userWithRole(fundraiserWithoutAgreements(), $employeeId))->test('pages::calendar.index')
+    $component = Livewire::actingAs(userWithRole(fundraiserWithoutAgreements(), $employeeId))->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee(calendarChip('proposal', $fixture['proposal']->id), false)
         ->assertSee(calendarChip('donor-followup', $fixture['donor']->id), false)
@@ -163,7 +163,7 @@ test('a transfer is plain text, not a link, for someone who may not open funding
     $viewer = userWithRole('Managers', $employeeId);
     $viewer->givePermissionTo('transfers.view');
 
-    Livewire::actingAs($viewer)->test('pages::calendar.index')
+    Livewire::actingAs($viewer)->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->assertSee(calendarChip('transfer', $fixture['transfer']->id), false)
         ->assertDontSeeHtml(route('funding-agreements.show', $fixture['transfer']->donorProposal))

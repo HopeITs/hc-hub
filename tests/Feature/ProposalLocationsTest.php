@@ -1,23 +1,23 @@
 <?php
 
-use App\Actions\Proposals\LinkProposalProject;
-use App\Actions\Proposals\SaveProposal;
-use App\Actions\Proposals\UnlinkProposalProject;
-use App\Events\ProposalLocationsChanged;
 use App\Models\Activity;
-use App\Models\Donor;
-use App\Models\Program;
-use App\Models\ProgramRequest;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalLocation;
-use App\Models\User;
-use App\Support\ProposalLocationBackfill;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\LinkProposalProject;
+use Modules\Tracking\Actions\Proposals\SaveProposal;
+use Modules\Tracking\Actions\Proposals\UnlinkProposalProject;
+use Modules\Tracking\Events\ProposalLocationsChanged;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\ProgramRequest;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
+use Modules\Tracking\Support\ProposalLocationBackfill;
 
 /*
 | W-34a slice 1 (D-62): every proposal carries location rows. SaveProposal

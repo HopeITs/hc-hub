@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/pages/reviews/**'
+  - 'modules/Tracking/resources/views/pages/reviews/**'
 ---
 
 # Reviews

@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\ProjectStatus;
 use App\Models\Activity;
-use App\Models\Project;
-use App\Models\User;
 use App\Models\UserNotification;
-use App\Notifications\Alerts\ResponsibleInactiveScanner;
 use App\Notifications\QuickActions;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Notifications\Alerts\ResponsibleInactiveScanner;
 
 /*
 | W-35 (D-62): work still named after someone who has left HR asks to be

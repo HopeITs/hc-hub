@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Livewire/Concerns/**,resources/views/components/funding/**}'
+  - '{app/Livewire/Concerns/**,modules/Tracking/Livewire/Concerns/**,modules/Tracking/resources/views/components/funding/**}'
 ---
 
 # Funding

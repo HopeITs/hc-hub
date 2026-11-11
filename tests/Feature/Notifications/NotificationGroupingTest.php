@@ -3,12 +3,12 @@
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\AppNotification;
 use App\Notifications\Inbox;
 use App\Notifications\NotificationPayload;
 use App\Notifications\UnreadCounts;
+use Modules\Core\Models\User;
 
 /**
  * A payload for task 9, backed by a real activity row (notifications.activity_id

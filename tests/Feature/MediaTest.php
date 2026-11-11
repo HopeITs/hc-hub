@@ -1,9 +1,9 @@
 <?php
 
 use App\Enums\FileType;
-use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
 
 /**
  * Insert a project and return its id, wiring up the city, program and owner it

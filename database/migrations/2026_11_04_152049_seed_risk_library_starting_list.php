@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use App\Support\DefaultRiskLibrary;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Support\DefaultRiskLibrary;
 
 /**
  * MEAL's starting risk list, supplied after `seed_risk_library` had already

@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/pages/milestones/**'
+  - 'modules/Tracking/resources/views/pages/milestones/**'
 ---
 
 # Milestones

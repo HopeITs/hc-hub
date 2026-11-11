@@ -1,21 +1,21 @@
 <?php
 
-use App\Actions\ProposalPlan\RebaseProposalPlan;
-use App\Actions\Proposals\ApproveProposal;
-use App\Enums\AssignmentStatus;
-use App\Enums\ProposalStatus;
-use App\Events\ProposalStatusChanged;
 use App\Models\Activity;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalPlanShift;
-use App\Models\ProposalStatusNote;
-use App\Models\Task;
-use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Exceptions;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\ProposalPlan\RebaseProposalPlan;
+use Modules\Tracking\Actions\Proposals\ApproveProposal;
+use Modules\Tracking\Enums\AssignmentStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalPlanShift;
+use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Models\Task;
 
 beforeEach(fn () => $this->travelTo('2026-10-14 10:00:00'));
 

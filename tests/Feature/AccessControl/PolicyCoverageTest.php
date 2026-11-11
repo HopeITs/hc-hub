@@ -1,10 +1,7 @@
 <?php
 
-use App\Models\Account;
 use App\Models\Activity;
 use App\Models\AiRequest;
-use App\Models\DonorProposal;
-use App\Models\FundingAgreementInstallment;
 use App\Models\HrCenter;
 use App\Models\HrCity;
 use App\Models\HrContract;
@@ -14,40 +11,43 @@ use App\Models\HrJobLevel;
 use App\Models\HrPosition;
 use App\Models\HrProgram;
 use App\Models\HrUser;
-use App\Models\Indicator;
-use App\Models\IndicatorProgress;
 use App\Models\KnownDevice;
 use App\Models\Media;
-use App\Models\MonthlyReportActivityEntry;
-use App\Models\MonthlyReportAnswer;
-use App\Models\MonthlyReportFile;
-use App\Models\MonthlyReportLine;
-use App\Models\MonthlyReportLineBreakdown;
-use App\Models\MonthlyReportLineShare;
-use App\Models\MonthlyReportReopenRequest;
 use App\Models\NotificationMute;
 use App\Models\Permission;
-use App\Models\PlanIndicator;
-use App\Models\ProjectActivityStatus;
-use App\Models\ProposalLocationCenter;
-use App\Models\ProposalReviewer;
-use App\Models\ProposalStatusNote;
-use App\Models\ReportFile;
-use App\Models\ReportTemplateLine;
-use App\Models\ReportTemplateQuestion;
-use App\Models\Result;
 use App\Models\Role;
-use App\Models\ScheduleBaseline;
-use App\Models\ScheduleBaselineItem;
-use App\Models\ScheduleDependency;
-use App\Models\TaskAssignee;
-use App\Models\TaskAttachment;
-use App\Models\TransfersTracking;
 use App\Models\TrustedDevice;
 use App\Models\UserNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\FundingAgreementInstallment;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\IndicatorProgress;
+use Modules\Tracking\Models\MonthlyReportActivityEntry;
+use Modules\Tracking\Models\MonthlyReportAnswer;
+use Modules\Tracking\Models\MonthlyReportFile;
+use Modules\Tracking\Models\MonthlyReportLine;
+use Modules\Tracking\Models\MonthlyReportLineBreakdown;
+use Modules\Tracking\Models\MonthlyReportLineShare;
+use Modules\Tracking\Models\MonthlyReportReopenRequest;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\ProjectActivityStatus;
+use Modules\Tracking\Models\ProposalLocationCenter;
+use Modules\Tracking\Models\ProposalReviewer;
+use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Models\ReportFile;
+use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Models\ReportTemplateQuestion;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\ScheduleBaseline;
+use Modules\Tracking\Models\ScheduleBaselineItem;
+use Modules\Tracking\Models\ScheduleDependency;
+use Modules\Tracking\Models\TaskAssignee;
+use Modules\Tracking\Models\TaskAttachment;
+use Modules\Tracking\Models\TransfersTracking;
 
 /*
 | Every kind of record the application stores has a decided access rule:
@@ -114,14 +114,23 @@ function modelsGuardedWithoutPolicy(): array
 }
 
 /**
- * Every concrete Eloquent model in app/Models.
+ * Every concrete Eloquent model in app/Models and modules/*\/Models.
  *
  * @return list<class-string<Model>>
  */
 function everyApplicationModel(): array
 {
-    return collect(File::files(app_path('Models')))
-        ->map(fn (SplFileInfo $file): string => 'App\\Models\\'.$file->getBasename('.php'))
+    $directories = ['App\\Models\\' => app_path('Models')];
+
+    foreach (glob(base_path('modules/*/Models')) ?: [] as $directory) {
+        $directories['Modules\\'.basename(dirname($directory)).'\\Models\\'] = $directory;
+    }
+
+    return collect($directories)
+        ->flatMap(fn (string $directory, string $namespace): array => array_map(
+            fn (SplFileInfo $file): string => $namespace.$file->getBasename('.php'),
+            File::files($directory),
+        ))
         ->filter(fn (string $class): bool => class_exists($class)
             && is_subclass_of($class, Model::class)
             && ! (new ReflectionClass($class))->isAbstract())

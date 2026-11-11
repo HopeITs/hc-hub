@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Models\User;
 use Closure;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Laravel\Fortify\Features;
 use Livewire\Component;
+use Modules\Core\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 
 /**

@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Enums\CollectionFrequency;
-use App\Enums\DenominatorBasis;
-use App\Enums\IndicatorMeasure;
-use App\Models\LibraryIndicator;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Tracking\Enums\CollectionFrequency;
+use Modules\Tracking\Enums\DenominatorBasis;
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Models\LibraryIndicator;
 
 /**
  * @extends Factory<LibraryIndicator>

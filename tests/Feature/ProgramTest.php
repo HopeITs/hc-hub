@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Modules\Core\Models\User;
 
 test('a program is stored against its strategy and manager', function () {
     $strategyId = insertStrategy();

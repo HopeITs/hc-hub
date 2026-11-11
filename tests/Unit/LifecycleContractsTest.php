@@ -1,27 +1,27 @@
 <?php
 
-use App\Actions\FundingAgreements\SaveAgreementInstallments;
-use App\Actions\Projects\ActivateProject;
-use App\Actions\Projects\ApproveProjectFromProposal;
-use App\Actions\Projects\CloseProject;
-use App\Actions\Projects\ReopenProjectAsDraft;
-use App\Actions\Projects\SaveProject;
-use App\Actions\Proposals\ApproveProposal;
-use App\Actions\Proposals\CorrectProposalStatus;
-use App\Actions\Proposals\InviteDefaultReviewers;
-use App\Actions\Proposals\LinkProposalProject;
-use App\Actions\Proposals\RecordFinalReportAcceptance;
-use App\Actions\Proposals\SaveProposal;
-use App\Actions\Proposals\TransitionProposal;
-use App\Actions\Proposals\UnlinkProposalProject;
-use App\Enums\ReviewStage;
-use App\Events\FundingAgreementRecorded;
-use App\Events\ProjectActivated;
-use App\Events\ProjectPeriodChanged;
-use App\Events\ProposalStatusChanged;
-use App\Support\ApprovalResult;
-use App\Support\TransitionResult;
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
+use Modules\Tracking\Actions\FundingAgreements\SaveAgreementInstallments;
+use Modules\Tracking\Actions\Projects\ActivateProject;
+use Modules\Tracking\Actions\Projects\ApproveProjectFromProposal;
+use Modules\Tracking\Actions\Projects\CloseProject;
+use Modules\Tracking\Actions\Projects\ReopenProjectAsDraft;
+use Modules\Tracking\Actions\Projects\SaveProject;
+use Modules\Tracking\Actions\Proposals\ApproveProposal;
+use Modules\Tracking\Actions\Proposals\CorrectProposalStatus;
+use Modules\Tracking\Actions\Proposals\InviteDefaultReviewers;
+use Modules\Tracking\Actions\Proposals\LinkProposalProject;
+use Modules\Tracking\Actions\Proposals\RecordFinalReportAcceptance;
+use Modules\Tracking\Actions\Proposals\SaveProposal;
+use Modules\Tracking\Actions\Proposals\TransitionProposal;
+use Modules\Tracking\Actions\Proposals\UnlinkProposalProject;
+use Modules\Tracking\Enums\ReviewStage;
+use Modules\Tracking\Events\FundingAgreementRecorded;
+use Modules\Tracking\Events\ProjectActivated;
+use Modules\Tracking\Events\ProjectPeriodChanged;
+use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Support\ApprovalResult;
+use Modules\Tracking\Support\TransitionResult;
 
 /*
 | The drift alarm for docs/lifecycle/contracts.md §5 (events) and §6 (actions).
@@ -60,7 +60,7 @@ it('freezes each domain event constructor (contracts.md §5)', function (string 
             ->and($class->getProperty($parameter->getName())->isReadOnly())->toBeTrue();
     }
 })->with([
-    'ProposalStatusChanged' => [ProposalStatusChanged::class, 'int $proposalId, App\Enums\ProposalStatus $from, App\Enums\ProposalStatus $to, ?int $actorId, bool $isCorrection = false'],
+    'ProposalStatusChanged' => [ProposalStatusChanged::class, 'int $proposalId, Modules\Tracking\Enums\ProposalStatus $from, Modules\Tracking\Enums\ProposalStatus $to, ?int $actorId, bool $isCorrection = false'],
     'ProjectActivated' => [ProjectActivated::class, 'int $projectId, ?int $proposalId, Carbon\CarbonImmutable $startDate, Carbon\CarbonImmutable $endDate, string $via'],
     'ProjectPeriodChanged' => [ProjectPeriodChanged::class, 'int $projectId, Carbon\CarbonImmutable $oldStart, Carbon\CarbonImmutable $oldEnd, Carbon\CarbonImmutable $newStart, Carbon\CarbonImmutable $newEnd'],
     'FundingAgreementRecorded' => [FundingAgreementRecorded::class, 'int $fundingAgreementId, int $proposalId, ?int $actorId'],
@@ -73,7 +73,7 @@ it('freezes each result object (contracts.md §6)', function (string $result, st
         ->and($class->isReadOnly())->toBeTrue()
         ->and(renderedParameters($class->getConstructor()))->toBe($parameters);
 })->with([
-    'TransitionResult' => [TransitionResult::class, 'App\Models\ProposalStatusNote $note, array $warnings'],
+    'TransitionResult' => [TransitionResult::class, 'Modules\Tracking\Models\ProposalStatusNote $note, array $warnings'],
     'ApprovalResult' => [ApprovalResult::class, 'array $approvedProjectIds, array $waitingProjectIds, array $skippedProjectIds, array $warnings'],
 ]);
 
@@ -85,20 +85,20 @@ it('freezes each Team A action entry point (contracts.md §6)', function (string
         ->and(renderedParameters($handle))->toBe($parameters)
         ->and((string) $handle->getReturnType())->toBe($returns);
 })->with([
-    'TransitionProposal' => [TransitionProposal::class, 'App\Models\Proposal $proposal, App\Enums\ProposalStatus $to, App\Enums\ProposalStatus $expectedFrom, array $input', TransitionResult::class],
-    'CorrectProposalStatus' => [CorrectProposalStatus::class, 'App\Models\Proposal $proposal, App\Enums\ProposalStatus $to, App\Enums\ProposalStatus $expectedFrom, string $reason', TransitionResult::class],
-    'RecordFinalReportAcceptance' => [RecordFinalReportAcceptance::class, 'App\Models\Proposal $proposal, Carbon\CarbonImmutable $acceptedOn', 'App\Models\Proposal'],
-    'SaveProposal' => [SaveProposal::class, '?App\Models\Proposal $existing, array $data, App\Models\User $actor', 'App\Models\Proposal'],
-    'LinkProposalProject' => [LinkProposalProject::class, 'App\Models\Proposal $proposal, int $projectId, ?int $targetBeneficiaries = null', 'void'],
-    'UnlinkProposalProject' => [UnlinkProposalProject::class, 'App\Models\Proposal $proposal, int $projectId', 'void'],
-    'InviteDefaultReviewers' => [InviteDefaultReviewers::class, 'App\Models\Proposal $proposal, App\Enums\ReviewStage $stage', 'void'],
-    'ApproveProposal' => [ApproveProposal::class, 'App\Models\Proposal $proposal, App\Enums\ProposalStatus $expectedFrom, array $input', ApprovalResult::class],
-    'ReopenProjectAsDraft' => [ReopenProjectAsDraft::class, 'App\Models\Project $project', 'void'],
-    'SaveProject' => [SaveProject::class, '?App\Models\Project $existing, array $data, App\Models\User $actor', 'App\Models\Project'],
-    'CloseProject' => [CloseProject::class, 'App\Models\Project $project', 'void'],
-    'ApproveProjectFromProposal' => [ApproveProjectFromProposal::class, 'App\Models\Project $project, string $via', 'bool'],
-    'ActivateProject' => [ActivateProject::class, 'App\Models\Project $project, string $via', 'void'],
-    'SaveAgreementInstallments' => [SaveAgreementInstallments::class, 'App\Models\DonorProposal $agreement, array $installments', 'void'],
+    'TransitionProposal' => [TransitionProposal::class, 'Modules\Tracking\Models\Proposal $proposal, Modules\Tracking\Enums\ProposalStatus $to, Modules\Tracking\Enums\ProposalStatus $expectedFrom, array $input', TransitionResult::class],
+    'CorrectProposalStatus' => [CorrectProposalStatus::class, 'Modules\Tracking\Models\Proposal $proposal, Modules\Tracking\Enums\ProposalStatus $to, Modules\Tracking\Enums\ProposalStatus $expectedFrom, string $reason', TransitionResult::class],
+    'RecordFinalReportAcceptance' => [RecordFinalReportAcceptance::class, 'Modules\Tracking\Models\Proposal $proposal, Carbon\CarbonImmutable $acceptedOn', 'Modules\Tracking\Models\Proposal'],
+    'SaveProposal' => [SaveProposal::class, '?Modules\Tracking\Models\Proposal $existing, array $data, Modules\Core\Models\User $actor', 'Modules\Tracking\Models\Proposal'],
+    'LinkProposalProject' => [LinkProposalProject::class, 'Modules\Tracking\Models\Proposal $proposal, int $projectId, ?int $targetBeneficiaries = null', 'void'],
+    'UnlinkProposalProject' => [UnlinkProposalProject::class, 'Modules\Tracking\Models\Proposal $proposal, int $projectId', 'void'],
+    'InviteDefaultReviewers' => [InviteDefaultReviewers::class, 'Modules\Tracking\Models\Proposal $proposal, Modules\Tracking\Enums\ReviewStage $stage', 'void'],
+    'ApproveProposal' => [ApproveProposal::class, 'Modules\Tracking\Models\Proposal $proposal, Modules\Tracking\Enums\ProposalStatus $expectedFrom, array $input', ApprovalResult::class],
+    'ReopenProjectAsDraft' => [ReopenProjectAsDraft::class, 'Modules\Tracking\Models\Project $project', 'void'],
+    'SaveProject' => [SaveProject::class, '?Modules\Tracking\Models\Project $existing, array $data, Modules\Core\Models\User $actor', 'Modules\Tracking\Models\Project'],
+    'CloseProject' => [CloseProject::class, 'Modules\Tracking\Models\Project $project', 'void'],
+    'ApproveProjectFromProposal' => [ApproveProjectFromProposal::class, 'Modules\Tracking\Models\Project $project, string $via', 'bool'],
+    'ActivateProject' => [ActivateProject::class, 'Modules\Tracking\Models\Project $project, string $via', 'void'],
+    'SaveAgreementInstallments' => [SaveAgreementInstallments::class, 'Modules\Tracking\Models\DonorProposal $agreement, array $installments', 'void'],
 ]);
 
 it('freezes the review stages (contracts.md §9)', function () {

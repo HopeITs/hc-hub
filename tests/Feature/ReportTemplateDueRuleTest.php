@@ -1,14 +1,14 @@
 <?php
 
-use App\Enums\CollectionFrequency;
-use App\Enums\LineSchedule;
-use App\Enums\ReportTemplateLineStatus;
-use App\Models\Indicator;
-use App\Models\LibraryIndicator;
-use App\Models\PlanIndicator;
-use App\Models\ReportTemplateLine;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
+use Modules\Tracking\Enums\CollectionFrequency;
+use Modules\Tracking\Enums\LineSchedule;
+use Modules\Tracking\Enums\ReportTemplateLineStatus;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\ReportTemplateLine;
 
 /*
 | ReportTemplateLine::isDueIn() (contracts.md §12.4) is pure: it reads the

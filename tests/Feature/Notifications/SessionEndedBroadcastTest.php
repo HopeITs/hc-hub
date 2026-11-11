@@ -1,13 +1,13 @@
 <?php
 
 use App\Events\SessionEnded;
-use App\Models\User;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 test('a session end is broadcast on the user private channel without a payload', function () {
     $event = new SessionEnded(42);

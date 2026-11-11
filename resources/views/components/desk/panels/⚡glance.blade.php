@@ -1,20 +1,20 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\MonthlyReportStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalPhase;
-use App\Enums\RagStatus;
-use App\Enums\TaskStatus;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\MonthlyReportStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalPhase;
+use Modules\Tracking\Enums\RagStatus;
+use Modules\Tracking\Enums\TaskStatus;
 use App\Livewire\Concerns\Dashboard\ChartsDashboard;
 use App\Livewire\Concerns\Dashboard\ReadsDashboardAttention;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\Indicator;
-use App\Models\MonthlyReport;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Task;
-use App\Models\TransfersTracking;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 use App\Support\Desk\Money;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;

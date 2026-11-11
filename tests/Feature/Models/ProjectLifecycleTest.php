@@ -1,10 +1,10 @@
 <?php
 
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalPhase;
-use App\Enums\ProposalStatus;
-use App\Models\Project;
-use App\Models\Proposal;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalPhase;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 test('a new project is a draft', function () {
     expect(Project::factory()->create()->fresh()->status)->toBe(ProjectStatus::Draft);

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Support\Desk\Cards;
 
-use App\Models\Strategy;
-use App\Models\User;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Strategy;
 
 /**
  * Strategies in card form: the one in force now, the ones before and after

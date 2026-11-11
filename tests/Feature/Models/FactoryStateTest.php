@@ -1,16 +1,16 @@
 <?php
 
-use App\Enums\ArStatus;
-use App\Enums\ProjectStatus;
-use App\Models\Account;
-use App\Models\DonorReport;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Strategy;
-use App\Models\TransfersTracking;
-use App\Models\User;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Strategy;
+use Modules\Tracking\Models\TransfersTracking;
 
 test('a user factory can assign an arbitrary role name', function (string $roleName) {
     $user = User::factory()->role($roleName)->create()->fresh();

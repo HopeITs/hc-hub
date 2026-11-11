@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Notifications/**,resources/views/pages/notifications/**,resources/views/components/notifications/**}'
+  - '{app/Notifications/**,modules/Tracking/Notifications/**,resources/views/pages/notifications/**,resources/views/components/notifications/**}'
 ---
 
 # Views Components Notifications

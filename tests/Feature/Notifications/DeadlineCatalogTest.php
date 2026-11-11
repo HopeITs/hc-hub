@@ -1,26 +1,26 @@
 <?php
 
-use App\Enums\MilestoneStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\DonorReport;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Task;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\DeadlineCatalog;
-use App\Notifications\Alerts\DueSoonScanner;
 use App\Notifications\Alerts\NotificationSettings;
-use App\Notifications\Alerts\OverdueScanner;
 use App\Notifications\SubjectLinks;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
+use Modules\Tracking\Notifications\Alerts\DueSoonScanner;
+use Modules\Tracking\Notifications\Alerts\OverdueScanner;
 
 test('the catalog lists open dated items with their direct people and closes the finished ones', function () {
     $employee = insertHrEmployee();

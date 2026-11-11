@@ -2,10 +2,10 @@
 
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\Task;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Task;
 
 beforeEach(function () {
     Role::findOrCreate('Super Admin', 'web')->givePermissionTo([

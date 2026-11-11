@@ -1,6 +1,6 @@
 ---
 paths:
-  - '{app/Livewire/Concerns/ManagesDonorForm.php,resources/views/components/donors/**,resources/views/pages/donors/**}'
+  - '{modules/Tracking/Livewire/Concerns/ManagesDonorForm.php,modules/Tracking/resources/views/components/donors/**,modules/Tracking/resources/views/pages/donors/**}'
 ---
 
 # Donors

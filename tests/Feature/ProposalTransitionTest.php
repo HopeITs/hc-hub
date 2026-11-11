@@ -1,22 +1,22 @@
 <?php
 
-use App\Actions\Proposals\TransitionProposal;
-use App\Enums\Currency;
-use App\Enums\DonorApprovalStatus;
-use App\Enums\ProposalKind;
-use App\Enums\ProposalStatus;
-use App\Events\ProposalStatusChanged;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalLocation;
-use App\Models\ProposalStatusNote;
-use App\Models\User;
-use App\Support\ProposalTransitions;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\TransitionProposal;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\DonorApprovalStatus;
+use Modules\Tracking\Enums\ProposalKind;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
+use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Support\ProposalTransitions;
 
 /**
  * A proposal at the given status that meets every §2 requirement: one linked
@@ -315,7 +315,7 @@ test('a concept note returned with a reason shows that reason to the proposal ed
     transition($prManager, $proposal, ProposalStatus::ConceptNote, ['reason' => 'Rework the problem statement.']);
 
     Livewire::actingAs($fundraiser)
-        ->test('pages::proposals.show', ['proposal' => $proposal])
+        ->test('tracking::proposals.show', ['proposal' => $proposal])
         ->assertOk()
         ->assertSee('Rework the problem statement.');
 

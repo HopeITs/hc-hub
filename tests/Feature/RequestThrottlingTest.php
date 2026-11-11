@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Middleware\ThrottleRequestsWithoutSession;
-use App\Models\User;
 use Illuminate\Testing\TestResponse;
+use Modules\Core\Models\User;
 
 beforeEach(function () {
     $this->freezeTime();

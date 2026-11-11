@@ -1,19 +1,19 @@
 <?php
 
-use App\Actions\Proposals\AddNegotiationNote;
 use App\Enums\MediaCollection;
-use App\Enums\ProposalStatus;
-use App\Enums\StatusNoteKind;
 use App\Models\Media;
-use App\Models\Proposal;
-use App\Models\ProposalStatusNote;
-use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\AddNegotiationNote;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\StatusNoteKind;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
@@ -85,7 +85,7 @@ test('a team member cannot add a negotiation note', function () {
     expect(fn () => addNegotiationNote(actor: $member))->toThrow(AuthorizationException::class);
 
     Livewire::actingAs($member)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->call('saveNegotiationNote')
         ->assertForbidden();
     expect(ProposalStatusNote::query()->count())->toBe(0);
@@ -114,19 +114,19 @@ test('the migration backfills corrections', function () {
 
 test('the status tab offers the form only while submitted', function () {
     Livewire::actingAs($this->user)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->assertSeeHtml('data-test="add-negotiation-note"');
 
     $this->proposal->forceFill(['status' => ProposalStatus::ProposalDraft])->save();
 
     Livewire::actingAs($this->user)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->assertDontSeeHtml('data-test="add-negotiation-note"');
 });
 
 test('the page saves a negotiation note and the file downloads through the proposal', function () {
     Livewire::actingAs($this->user)
-        ->test('pages::proposals.show', ['proposal' => $this->proposal])
+        ->test('tracking::proposals.show', ['proposal' => $this->proposal])
         ->call('openNegotiationModal')
         ->set('negotiationText', 'The donor wants the logframe indicators reduced to ten.')
         ->set('negotiationFile', validUpload('request.pdf'))

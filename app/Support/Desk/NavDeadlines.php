@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
-use App\Models\User;
 use App\Notifications\Alerts\DeadlineCatalog;
 use App\Notifications\Alerts\DeadlineItem;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
+use Modules\Core\Models\User;
 
 /**
  * Which modules hold something of the viewer's that is due soon or late, so

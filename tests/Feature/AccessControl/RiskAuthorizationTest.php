@@ -1,16 +1,16 @@
 <?php
 
-use App\Models\Project;
-use App\Models\Risk;
-use App\Models\User;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Risk;
 
 beforeEach(function () {
     $this->ownerEmployee = insertHrEmployee();
     $this->owner = userWithRole('Team Member', $this->ownerEmployee);
     $this->ownProject = Project::factory()->create(['user_id' => $this->ownerEmployee]);
     $this->otherProject = Project::factory()->create();
-    $this->risks = fn (User $user) => Livewire::actingAs($user)->test('pages::risks.index');
+    $this->risks = fn (User $user) => Livewire::actingAs($user)->test('tracking::risks.index');
     $this->log = fn (User $user, Project $project, string $name) => ($this->risks)($user)
         ->call('openCreateModal')
         ->set('riskProjectId', (string) $project->id)

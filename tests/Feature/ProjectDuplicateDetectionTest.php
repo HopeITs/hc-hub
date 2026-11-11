@@ -1,13 +1,13 @@
 <?php
 
-use App\Actions\Proposals\LinkProposalProject;
-use App\Enums\ProjectStatus;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\User;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\LinkProposalProject;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 beforeEach(function () {
     $this->user = User::factory()->role('General Manager')->create();
@@ -24,7 +24,7 @@ beforeEach(function () {
         ...$attributes,
     ]);
     $this->form = fn () => Livewire::actingAs($this->user)
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->call('openCreateModal')
         ->set('sectorIds', newProjectSectorIds())
         ->set(['centerId' => (string) $this->centerId, 'programId' => (string) $this->program->id, 'userId' => (string) $this->owner]);
@@ -90,7 +90,7 @@ test('an archived project is offered for restore first', function () {
 test('a user who cannot create projects cannot open the form', function () {
     $viewer = User::factory()->role('Team Member')->create();
 
-    Livewire::actingAs($viewer)->test('pages::projects.index')->call('openCreateModal')->assertForbidden();
+    Livewire::actingAs($viewer)->test('tracking::projects.index')->call('openCreateModal')->assertForbidden();
 });
 
 test('there is no project chain column', function () {

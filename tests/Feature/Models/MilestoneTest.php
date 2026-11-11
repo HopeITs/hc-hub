@@ -1,11 +1,11 @@
 <?php
 
-use App\Enums\MilestoneStatus;
 use App\Models\HrEmployee;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Task;
 use Carbon\CarbonImmutable;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
 
 test('a milestone belongs to a project and a responsible hr employee', function () {
     $project = Project::factory()->create();

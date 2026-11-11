@@ -1,15 +1,15 @@
 <?php
 
-use App\Enums\ReportStatus;
 use App\Models\Activity;
-use App\Models\AnnualPlan;
-use App\Models\MonthlyReport;
-use App\Models\PlanIndicator;
-use App\Models\Report;
-use App\Models\ReportFile;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\MonthlyReport;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportFile;
 
 test('guests are redirected from report detail', function () {
     $report = Report::factory()->create();
@@ -64,7 +64,7 @@ test('submitting for review moves a draft report to reviewed and stamps the subm
     $user = reportAuthor($report);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('submitForReview')
         ->assertHasNoErrors();
 
@@ -79,7 +79,7 @@ test('submitting for review is a no-op when the report is not a draft', function
     $report = Report::factory()->create(['status' => ReportStatus::Reviewed, 'submit_date' => '2026-03-01']);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('submitForReview');
 
     expect($report->refresh()->status)->toBe(ReportStatus::Reviewed);
@@ -90,7 +90,7 @@ test('approving a reviewed report moves it to approved', function () {
     $report = Report::factory()->create(['status' => ReportStatus::Reviewed]);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('approve')
         ->assertHasNoErrors();
 
@@ -102,7 +102,7 @@ test('approving is a no-op when the report is not reviewed', function () {
     $report = Report::factory()->create(['status' => ReportStatus::Draft]);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('approve');
 
     expect($report->refresh()->status)->toBe(ReportStatus::Draft);
@@ -114,7 +114,7 @@ test('returning to draft is valid from reviewed or approved', function () {
     $reviewed = Report::factory()->create(['status' => ReportStatus::Reviewed]);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $reviewed])
+        ->test('tracking::reports.show', ['report' => $reviewed])
         ->call('returnToDraft')
         ->assertHasNoErrors();
 
@@ -123,7 +123,7 @@ test('returning to draft is valid from reviewed or approved', function () {
     $approved = Report::factory()->create(['status' => ReportStatus::Approved]);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $approved])
+        ->test('tracking::reports.show', ['report' => $approved])
         ->call('returnToDraft')
         ->assertHasNoErrors();
 
@@ -135,7 +135,7 @@ test('returning to draft is a no-op when the report is already a draft', functio
     $report = Report::factory()->create(['status' => ReportStatus::Draft]);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('returnToDraft');
 
     expect($report->refresh()->status)->toBe(ReportStatus::Draft);
@@ -145,7 +145,7 @@ test('marking a report seen by meal is a one way acknowledgement', function () {
     $user = User::factory()->role('MEAL')->create();
     $report = Report::factory()->create(['is_seen_by_meal' => false]);
 
-    $component = Livewire::actingAs($user)->test('pages::reports.show', ['report' => $report]);
+    $component = Livewire::actingAs($user)->test('tracking::reports.show', ['report' => $report]);
 
     $component->call('markSeenByMeal');
 
@@ -168,7 +168,7 @@ test('file records cannot be added, edited or deleted on a locked report', funct
     $report = Report::factory()->approved()->create();
     $file = ReportFile::factory()->create(['report_id' => $report->id, 'path' => 'untouched.pdf']);
 
-    $component = Livewire::actingAs($user)->test('pages::reports.show', ['report' => $report]);
+    $component = Livewire::actingAs($user)->test('tracking::reports.show', ['report' => $report]);
 
     $component->call('openCreateFileModal')->assertSet('showFileModal', false);
     $component->call('openEditFileModal', $file->id)->assertSet('showFileModal', false);
@@ -192,7 +192,7 @@ test('returning a report to draft clears its submit date', function () {
     $report = Report::factory()->reviewed()->create(['submit_date' => '2026-04-02']);
 
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->call('returnToDraft');
 
     $row = DB::table('reports')->find($report->id);
@@ -208,7 +208,7 @@ test('a draft can be edited from its own page, and deleting it returns to the di
     $user = reportAuthor($report);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->assertSeeHtml('data-test="edit-report-button"')
         ->call('openEditModal', $report->id)
         ->set('value', '150')
@@ -230,7 +230,7 @@ test('a locked report offers neither edit nor delete', function () {
     $report = Report::factory()->approved()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::reports.show', ['report' => $report])
+        ->test('tracking::reports.show', ['report' => $report])
         ->assertDontSeeHtml('data-test="edit-report-button"')
         ->assertDontSeeHtml('data-test="delete-report-button"');
 });
@@ -241,7 +241,7 @@ test('the detail page rates the whole target from approved reports, not this one
     Report::factory()->approved()->for($target)->create(['value' => 300]);
     $draft = Report::factory()->for($target)->create(['value' => 900]);
 
-    $component = Livewire::actingAs($user)->test('pages::reports.show', ['report' => $draft]);
+    $component = Livewire::actingAs($user)->test('tracking::reports.show', ['report' => $draft]);
 
     expect($component->instance()->achievement())->toBe(30);
     $component->assertSee(__('reports.counts_toward_the_target_once_approved'));
@@ -276,7 +276,7 @@ test('a monthly report mirror links to its report and offers no edit, delete, su
     $draft = monthlyMirror(ReportStatus::Draft, $author);
 
     Livewire::actingAs($author)
-        ->test('pages::reports.show', ['report' => $draft])
+        ->test('tracking::reports.show', ['report' => $draft])
         ->assertSeeText(__('reports.monthly_report_chip'))
         ->assertSeeHtml(route('monthly-reports.show', $draft->monthlyReport))
         ->assertDontSeeHtml('data-test="edit-report-button"')
@@ -287,7 +287,7 @@ test('a monthly report mirror links to its report and offers no edit, delete, su
     $reviewed = monthlyMirror(ReportStatus::Reviewed, $author);
 
     Livewire::actingAs(User::factory()->role('General Manager')->create())
-        ->test('pages::reports.show', ['report' => $reviewed])
+        ->test('tracking::reports.show', ['report' => $reviewed])
         ->assertDontSeeHtml('data-test="approve-button"')
         ->assertDontSeeHtml('data-test="return-to-draft-button"');
 });
@@ -295,7 +295,7 @@ test('a monthly report mirror links to its report and offers no edit, delete, su
 test('the report form refuses to open, save or delete a monthly report mirror', function () {
     $author = User::factory()->role('Media Team')->create();
     $mirror = monthlyMirror(ReportStatus::Draft, $author);
-    $page = fn () => Livewire::actingAs($author)->test('pages::reports.show', ['report' => $mirror]);
+    $page = fn () => Livewire::actingAs($author)->test('tracking::reports.show', ['report' => $mirror]);
 
     $page()->call('openEditModal', $mirror->id)
         ->assertSet('showReportModal', false)

@@ -52,7 +52,7 @@ test('every dotted ability the code checks exists in the permission catalog', fu
     $pattern = '/(?:@can|@cannot|->can|->cannot|\bcan|Gate::(?:allows|denies|check|authorize))\(\s*[\'"]([a-z0-9-]+(?:\.[a-z0-9-]+)+)[\'"]/';
     $unknown = [];
 
-    foreach (['app', 'resources/views', 'routes'] as $directory) {
+    foreach (['app', 'modules', 'resources/views', 'routes'] as $directory) {
         foreach (File::allFiles(base_path($directory)) as $file) {
             preg_match_all($pattern, $file->getContents(), $matches);
 

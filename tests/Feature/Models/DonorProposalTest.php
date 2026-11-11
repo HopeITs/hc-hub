@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\Proposal;
-use App\Models\TransfersTracking;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\TransfersTracking;
 
 test('a donor proposal resolves the donor_proposal table', function () {
     expect((new DonorProposal)->getTable())->toBe('donor_proposal');

@@ -1,16 +1,16 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\DonorProposal;
-use App\Models\Milestone;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\Task;
-use App\Models\TransfersTracking;
 use Database\Seeders\AlWadiShowcaseSeeder;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * @return array{0: Project, 1: Proposal}

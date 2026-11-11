@@ -1,24 +1,24 @@
 <?php
 
-use App\Enums\MilestoneStatus;
-use App\Enums\ReportStatus;
-use App\Enums\TaskStatus;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Indicator;
-use App\Models\Milestone;
-use App\Models\PlanIndicator;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\Report;
-use App\Models\Result;
-use App\Models\Task;
-use App\Models\TaskAttachment;
-use App\Models\TransfersTracking;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAttachment;
+use Modules\Tracking\Models\TransfersTracking;
 
 dataset('media money pages', [
     'proposals' => [fn (): string => route('proposals.index')],
@@ -48,12 +48,12 @@ test('the sidebar hides every money link from Media Team but keeps tasks (MD-02)
 
 test('Media Team cannot create a project or open a logframe create form (MD-03)', function (string $page) {
     Livewire::actingAs(userWithRole('Media Team'))->test($page)->call('openCreateModal')->assertForbidden();
-})->with(['pages::projects.index', 'pages::results.index', 'pages::indicators.index', 'pages::targets.index']);
+})->with(['tracking::projects.index', 'tracking::results.index', 'tracking::indicators.index', 'tracking::targets.index']);
 
 test('Media Team cannot approve another author\'s reviewed report (MD-03)', function () {
     $report = Report::factory()->create(['user_id' => userWithRole('Media Team')->id, 'status' => ReportStatus::Reviewed, 'submit_date' => today()]);
 
-    Livewire::actingAs(userWithRole('Media Team'))->test('pages::reports.show', ['report' => $report])->call('approve')->assertForbidden();
+    Livewire::actingAs(userWithRole('Media Team'))->test('tracking::reports.show', ['report' => $report])->call('approve')->assertForbidden();
 
     expect($report->fresh()->status)->toBe(ReportStatus::Reviewed);
 });
@@ -86,7 +86,7 @@ function seedMediaMoneyFixture(): array
 test('Media Team sees no funding figures on the project page or its proposals tab (MD-02)', function () {
     ['project' => $project] = seedMediaMoneyFixture();
 
-    Livewire::actingAs(userWithRole('Media Team'))->test('pages::projects.show', ['project' => $project])
+    Livewire::actingAs(userWithRole('Media Team'))->test('tracking::projects.show', ['project' => $project])
         ->assertOk()
         ->assertDontSee('864,209')
         ->assertDontSee('135,791')
@@ -99,7 +99,7 @@ test('Media Team sees no funding figures on the project page or its proposals ta
 test('Media Team sees no money items on the calendar (MD-02)', function () {
     ['transfer' => $transfer, 'report' => $report] = seedMediaMoneyFixture();
 
-    Livewire::actingAs(userWithRole('Media Team'))->test('pages::calendar.index')
+    Livewire::actingAs(userWithRole('Media Team'))->test('tracking::calendar.index')
         ->set('month', '2026-06')
         ->set('showProposals', true)
         ->set('showTransfers', true)
@@ -124,16 +124,16 @@ test('Media Team cannot edit or delete framework records (MD-03)', function (Clo
     $attempt()->call('openEditModal', $id)->assertForbidden();
     $attempt()->call('confirmDelete', $id)->assertForbidden();
 })->with([
-    'result' => [fn (): array => ['pages::results.index', Result::factory()->create()->id]],
-    'indicator' => [fn (): array => ['pages::indicators.index', Indicator::factory()->create()->id]],
-    'target' => [fn (): array => ['pages::targets.index', PlanIndicator::factory()->create()->id]],
+    'result' => [fn (): array => ['tracking::results.index', Result::factory()->create()->id]],
+    'indicator' => [fn (): array => ['tracking::indicators.index', Indicator::factory()->create()->id]],
+    'target' => [fn (): array => ['tracking::targets.index', PlanIndicator::factory()->create()->id]],
 ]);
 
 test('Media Team cannot edit, archive or delete projects and milestones (MD-03)', function () {
     $project = Project::factory()->create();
     $milestone = Milestone::factory()->create();
-    $projects = fn () => Livewire::actingAs(userWithRole('Media Team'))->test('pages::projects.index');
-    $milestones = fn () => Livewire::actingAs(userWithRole('Media Team'))->test('pages::milestones.index');
+    $projects = fn () => Livewire::actingAs(userWithRole('Media Team'))->test('tracking::projects.index');
+    $milestones = fn () => Livewire::actingAs(userWithRole('Media Team'))->test('tracking::milestones.index');
 
     $projects()->call('openEditModal', $project->id)->assertForbidden();
     $projects()->call('confirmArchive', $project->id)->assertForbidden();
@@ -148,7 +148,7 @@ test('Media Team cannot acknowledge a report for MEAL or hold the reopen and agg
     $report = Report::factory()->create(['status' => ReportStatus::Reviewed, 'submit_date' => today()]);
     $media = userWithRole('Media Team');
 
-    Livewire::actingAs($media)->test('pages::reports.show', ['report' => $report])->call('markSeenByMeal')->assertForbidden();
+    Livewire::actingAs($media)->test('tracking::reports.show', ['report' => $report])->call('markSeenByMeal')->assertForbidden();
 
     expect($media->can('reports.reopen'))->toBeFalse()
         ->and($media->can('reports.aggregate'))->toBeFalse();
@@ -157,9 +157,9 @@ test('Media Team cannot acknowledge a report for MEAL or hold the reopen and agg
 test('Media Team cannot write on the money pages by calling the actions directly (MD-03)', function () {
     $attempt = fn (string $page) => Livewire::actingAs(userWithRole('Media Team'))->test($page);
 
-    $attempt('pages::transfers.index')->call('openCreateModal')->assertForbidden();
-    $attempt('pages::funding-agreements.index')->call('openCreateModal')->assertForbidden();
-    $attempt('pages::donors.index')->call('confirmDelete', Donor::factory()->create()->id)->assertForbidden();
+    $attempt('tracking::transfers.index')->call('openCreateModal')->assertForbidden();
+    $attempt('tracking::funding-agreements.index')->call('openCreateModal')->assertForbidden();
+    $attempt('tracking::donors.index')->call('confirmDelete', Donor::factory()->create()->id)->assertForbidden();
 });
 
 test('Media Team moves status and manages files on a colleague\'s department task but cannot edit or delete it (MD-01)', function () {
@@ -207,7 +207,7 @@ test('Media Team works a colleague\'s department task on the page: sends it to r
     $task->taskAssignees()->delete();
     $task->taskAssignees()->create(['employee_id' => $colleagueEmployee]);
 
-    $page = Livewire::actingAs($media)->test('pages::tasks.show', ['task' => $task])
+    $page = Livewire::actingAs($media)->test('tracking::tasks.show', ['task' => $task])
         ->assertOk()
         ->assertDontSeeHtml('data-test="task-edit-title-input"')
         ->call('changeStatus', TaskStatus::UnderReview->value)

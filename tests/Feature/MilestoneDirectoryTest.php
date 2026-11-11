@@ -2,14 +2,14 @@
 
 use App\Enums\FileType;
 use App\Enums\MediaCollection;
-use App\Enums\MilestoneStatus;
 use App\Models\Media;
-use App\Models\Milestone;
-use App\Models\Project;
-use App\Models\Task;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
 
 test('guests are redirected from the milestone directory', function () {
     $this->get(route('milestones.index'))->assertRedirect(route('login'));
@@ -30,7 +30,7 @@ test('milestones render as a responsive tree grouped by project with reachable a
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'list')
         ->assertSee('Aleppo Wells')
         ->assertSee('Baseline assessment')
@@ -54,7 +54,7 @@ test('milestones can be filtered by project and status', function () {
     Milestone::factory()->create(['project_id' => $second->id, 'name' => 'Second gate', 'status' => MilestoneStatus::Planned]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('project', (string) $first->id)
         ->assertSee('First gate')
         ->assertDontSee('Second gate')
@@ -70,7 +70,7 @@ test('the dropdown filter actions set and clear the project, status and responsi
     $responsible = insertHrEmployee();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('filterByProject', $project->id)
         ->assertSet('project', (string) $project->id)
         ->call('filterByProject')
@@ -109,7 +109,7 @@ test('a matching child remains visible with its necessary ancestors for status a
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('status', MilestoneStatus::Reached->value)
         ->assertSee('Parent context')
         ->assertSee('Matching child')
@@ -126,7 +126,7 @@ test('the create modal renders a project dropdown with every project option', fu
     $project = Project::factory()->create(['name' => 'Coastal Relief']);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('openCreateModal')
         ->assertSee('id="milestone-form-project"', false)
         ->assertSee('data-option-value="'.$project->id.'"', false)
@@ -140,7 +140,7 @@ test('a milestone can be created under a parent in the same project', function (
     $parent = Milestone::factory()->create(['project_id' => $project->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('openCreateModal')
         ->set('milestoneProjectId', (string) $project->id)
         ->set('name', '  Water quality testing  ')
@@ -167,7 +167,7 @@ test('milestones created through the form are sequenced after their existing sib
     Milestone::factory()->childOf($parent)->create(['sequence' => 1]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('openCreateModal')
         ->set('milestoneProjectId', (string) $project->id)
         ->set('name', 'Second nested gate')
@@ -189,7 +189,7 @@ test('the create modal has a description field and saves it', function () {
     $responsible = insertHrEmployee();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('openCreateModal')
         ->assertSee('wire:model="description"', false)
         ->set('milestoneProjectId', (string) $project->id)
@@ -212,7 +212,7 @@ test('changing the project while creating clears the selected parent', function 
     $parent = Milestone::factory()->create(['project_id' => $first->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('openCreateModal')
         ->set('milestoneProjectId', (string) $first->id)
         ->set('parentMilestoneId', (string) $parent->id)
@@ -225,7 +225,7 @@ test('each milestone links to its own edit page instead of an edit modal', funct
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'list')
         ->assertSee('href="'.route('milestones.show', $milestone).'"', false)
         ->assertDontSee('wire:click="openEditModal', false);
@@ -236,7 +236,7 @@ test('each milestone has a view button that opens its details page', function ()
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'list')
         ->assertSee('data-test="milestone-view-'.$milestone->id.'"', false)
         ->assertSee('href="'.route('milestones.show', $milestone).'"', false);
@@ -249,7 +249,7 @@ test('the add button next to a project prefills its project on the create modal'
     $otherProject = Project::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'list')
         ->assertSee('data-test="milestone-list-add-'.$project->id.'"', false)
         ->call('openCreateModal', null, null, $project->id)
@@ -258,7 +258,7 @@ test('the add button next to a project prefills its project on the create modal'
         ->assertSet('parentMilestoneId', '');
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('openCreateModal', null, null, $otherProject->id + 999)
         ->assertSet('milestoneProjectId', '');
 });
@@ -269,7 +269,7 @@ test('the add button next to a milestone prefills its project and nests the new 
     $parent = Milestone::factory()->create(['project_id' => $project->id, 'name' => 'Root gate']);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'list')
         ->assertSee('data-test="milestone-add-nested-'.$parent->id.'"', false)
         ->call('openCreateModal', null, null, null, $parent->id)
@@ -282,7 +282,7 @@ test('creating a milestone requires its core delivery fields', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('openCreateModal')
         ->set('name', '   ')
         ->set('plannedStartDate', '')
@@ -300,7 +300,7 @@ test('the create parent picker is limited to the selected project', function () 
     Milestone::factory()->create(['project_id' => $otherProject->id, 'name' => 'Other project gate']);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('openCreateModal')
         ->set('milestoneProjectId', (string) $project->id);
 
@@ -322,7 +322,7 @@ test('the list view no longer displays milestone files', function () {
     ]);
 
     $component = Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'list')
         ->set('project', (string) $milestone->project_id)
         ->assertDontSeeText('signed-evidence.pdf')
@@ -336,7 +336,7 @@ test('confirming delete opens the delete modal with the milestone name', functio
     $milestone = Milestone::factory()->create(['name' => 'Foundation poured']);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('confirmDelete', $milestone->id)
         ->assertSet('showDeleteModal', true)
         ->assertSet('deletingMilestoneId', $milestone->id)
@@ -348,7 +348,7 @@ test('cancelling delete closes the modal without deleting the milestone', functi
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('confirmDelete', $milestone->id)
         ->call('cancelDelete')
         ->assertSet('showDeleteModal', false)
@@ -362,7 +362,7 @@ test('a leaf milestone with no tasks can be deleted', function () {
     $milestone = Milestone::factory()->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('confirmDelete', $milestone->id)
         ->assertSet('showDeleteModal', true)
         ->call('deleteMilestone')
@@ -378,7 +378,7 @@ test('a milestone with children is not deleted because the subtree would cascade
     $child = Milestone::factory()->childOf($parent)->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('confirmDelete', $parent->id)
         ->call('deleteMilestone');
 
@@ -392,7 +392,7 @@ test('a milestone carrying tasks is not deleted because tasks would be orphaned'
     $task = Task::factory()->create(['source_type' => 'milestone', 'source_id' => $milestone->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('confirmDelete', $milestone->id)
         ->call('deleteMilestone');
 
@@ -411,7 +411,7 @@ test('the stat cards summarise reached, missed and upcoming milestones', functio
     Milestone::factory()->create(['status' => MilestoneStatus::Planned, 'planned_end_date' => $today->copy()->addDays(30)]);
 
     $stats = Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->instance()
         ->milestoneStats();
 
@@ -427,7 +427,7 @@ test('the milestone directory distinguishes empty and filtered states', function
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->assertSeeText('No milestones yet')
         ->set('status', MilestoneStatus::Cancelled->value)
         ->assertSeeText('No matching milestones')
@@ -444,7 +444,7 @@ test('the timeline view plots milestones as clickable markers grouped by project
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'timeline')
         ->assertSee('Homs Clinic')
         ->assertSee('href="'.route('milestones.show', $milestone).'"', false);
@@ -459,7 +459,7 @@ test('the timeline view counts only root milestones next to the project name, li
     $countBadge = fn (int $count) => '<span class="inline-flex min-w-6 items-center justify-center rounded-full bg-secondary-soft px-2 py-0.5 text-[11px] font-semibold tabular-nums text-secondary-dark dark:bg-surface-2 dark:text-ink">'.$count.'</span>';
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'timeline')
         ->assertSee('Homs Clinic')
         ->assertSee($countBadge(1), false)
@@ -473,7 +473,7 @@ test('a nested milestone marker is dropped one row below its parent in the timel
     $standalone = Milestone::factory()->create(['name' => 'Standalone gate']);
 
     $html = Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'timeline')
         ->html();
 
@@ -496,7 +496,7 @@ test('the timeline view lets clicking a marker offer to add a related milestone 
     $parent = Milestone::factory()->create(['project_id' => $project->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'timeline')
         ->assertSee('data-test="milestone-timeline-add-related-'.$parent->id.'"', false)
         ->assertSee('wire:click="openCreateModal(null, null, null, '.$parent->id.')"', false)
@@ -510,7 +510,7 @@ test('the timeline view offers a zoom slider that switches the tick resolution b
     $milestone = Milestone::factory()->create(['project_id' => $project->id]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'timeline')
         ->assertSee('data-test="milestone-timeline-zoom-'.$project->id.'"', false)
         ->assertSee("tickMode === 'weeks'", false)
@@ -523,7 +523,7 @@ test('a deletable milestone shows a delete action in the timeline view, and a lo
     $child = Milestone::factory()->childOf($parent)->create(['name' => 'Child gate']);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'timeline')
         ->assertSee('wire:click="confirmDelete('.$child->id.')"', false)
         ->assertDontSee('wire:click="confirmDelete('.$parent->id.')"', false);
@@ -535,7 +535,7 @@ test('a deletable milestone shows a delete action in the board view, and a locke
     $child = Milestone::factory()->childOf($parent)->create(['name' => 'Child gate']);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'board')
         ->assertSee('wire:click="confirmDelete('.$child->id.')"', false)
         ->assertDontSee('wire:click="confirmDelete('.$parent->id.')"', false);
@@ -547,7 +547,7 @@ test('the board view renders a card per milestone and honours the status filter'
     $pending = Milestone::factory()->create(['name' => 'Pending gate', 'status' => MilestoneStatus::Planned]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'board')
         ->assertSee('data-test="milestone-board-card-'.$reached->id.'"', false)
         ->assertSee('data-test="milestone-board-card-'.$pending->id.'"', false)
@@ -561,7 +561,7 @@ test('the board view wires each card to be dragged and each column to accept a d
     $milestone = Milestone::factory()->create(['name' => 'Planned gate', 'status' => MilestoneStatus::Planned]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'board')
         // The card is a genuine HTML5 drag source carrying its id and current status.
         ->assertSee('draggable="true"', false)
@@ -578,7 +578,7 @@ test('the board view wires each column to open the create modal with that status
     Milestone::factory()->create(['status' => MilestoneStatus::Planned]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'board')
         ->assertSee('data-milestone-card', false)
         ->assertSee("\$wire.openCreateModal(null, 'planned')", false)
@@ -592,7 +592,7 @@ test('opening the create modal with a status prefills it, and an invalid status 
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('openCreateModal', null, MilestoneStatus::Reached->value)
         ->assertSet('showMilestoneModal', true)
         ->assertSet('milestoneStatus', MilestoneStatus::Reached->value)
@@ -606,7 +606,7 @@ test('a milestone status can be changed from the board view', function () {
     $milestone = Milestone::factory()->create(['status' => MilestoneStatus::Planned]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('quickSetStatus', $milestone->id, MilestoneStatus::Reached->value)
         ->assertHasNoErrors();
 
@@ -618,7 +618,7 @@ test('an invalid quick status change is ignored', function () {
     $milestone = Milestone::factory()->create(['status' => MilestoneStatus::Planned]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->call('quickSetStatus', $milestone->id, 'not-a-real-status');
 
     expect($milestone->refresh()->status)->toBe(MilestoneStatus::Planned);
@@ -641,7 +641,7 @@ test('the calendar view places milestones on their planned date and honours the 
     ]);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'calendar')
         ->set('month', '2026-04')
         ->assertSee('data-test="milestone-calendar-chip-'.$milestone->id.'"', false)
@@ -656,7 +656,7 @@ test('the calendar view month navigation moves the visible month', function () {
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'calendar')
         ->set('month', '2026-04')
         ->call('nextMonth')
@@ -671,7 +671,7 @@ test('clicking a day in the calendar view opens the create modal with that date 
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'calendar')
         ->set('month', '2026-04')
         ->call('openCreateModal', '2026-04-15')
@@ -685,7 +685,7 @@ test('a deletable milestone shows a delete action in the calendar view, and a lo
     $child = Milestone::factory()->childOf($parent)->create(['name' => 'Child gate', 'planned_start_date' => '2026-04-11']);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'calendar')
         ->set('month', '2026-04')
         ->assertSee('data-milestone-chip', false)
@@ -697,7 +697,7 @@ test('the calendar view switches between day, 4-days, week and month periods', f
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'calendar')
         ->assertSet('viewMode', 'month')
         ->call('setViewMode', 'week')
@@ -714,7 +714,7 @@ test('the calendar view period navigation moves the anchor date in day/week/4-da
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'calendar')
         ->call('setViewMode', 'week')
         ->set('anchorDate', '2026-04-08')
@@ -731,7 +731,7 @@ test('a milestone shows on its planned date in the week calendar view', function
     $milestone = Milestone::factory()->create(['name' => 'Foundation poured', 'planned_start_date' => '2026-04-15']);
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->set('view', 'calendar')
         ->call('setViewMode', 'week')
         ->set('anchorDate', '2026-04-15')
@@ -742,7 +742,7 @@ test('the milestone form is rendered only while its modal is open', function () 
     $user = User::factory()->role('General Manager')->create();
 
     Livewire::actingAs($user)
-        ->test('pages::milestones.index')
+        ->test('tracking::milestones.index')
         ->assertDontSeeHtml('wire:model="plannedStartDate"')
         ->call('openCreateModal')
         ->assertSeeHtml('wire:model="plannedStartDate"');
@@ -755,7 +755,7 @@ test('the timeline draws the first project panels and the rest on request', func
         Milestone::factory()->create(['project_id' => Project::factory()->create(['name' => "Timeline project {$number}"])->id]);
     }
 
-    $timeline = Livewire::actingAs($user)->test('pages::milestones.index')
+    $timeline = Livewire::actingAs($user)->test('tracking::milestones.index')
         ->assertSeeHtml('data-test="milestone-timeline-more"');
 
     expect(substr_count($timeline->html(), 'wire:key="milestone-timeline-project-'))->toBe(6);

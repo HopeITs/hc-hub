@@ -1,10 +1,10 @@
 <?php
 
 use App\Models\HrEmployee;
-use App\Models\User;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 test('guests are redirected away from the employee picker options', function () {
     $this->getJson(route('employees.picker-options'))->assertUnauthorized();
@@ -64,12 +64,12 @@ test('person dropdowns and filters on the task and calendar pages read the share
     expect($html)->toContain('picker-options')
         ->and($html)->not->toContain('@js(')
         ->and($html)->not->toContain('Olga Other');
-})->with(['pages::tasks.index', 'pages::calendar.index', 'pages::milestones.index', 'pages::projects.index']);
+})->with(['tracking::tasks.index', 'tracking::calendar.index', 'tracking::milestones.index', 'tracking::projects.index']);
 
 test('a person filter hands its employee list url to the filter menu', function () {
     $user = User::factory()->role('General Manager')->create();
 
-    $html = Livewire::actingAs($user)->test('pages::projects.index')->html();
+    $html = Livewire::actingAs($user)->test('tracking::projects.index')->html();
 
     expect($html)->toContain('data-employees-url="'.route('employees.picker-options', ['l' => app()->getLocale()]).'"')
         ->and($html)->not->toContain('@js(');
@@ -88,7 +88,13 @@ test('no page renders the whole employee list into server-side options', functio
 
     $offenders = [];
 
-    foreach (File::allFiles(resource_path('views/pages')) as $file) {
+    $pages = [...File::allFiles(resource_path('views/pages'))];
+
+    foreach (glob(base_path('modules/*/resources/views/pages')) ?: [] as $directory) {
+        array_push($pages, ...File::allFiles($directory));
+    }
+
+    foreach ($pages as $file) {
         $path = str_replace('\\', '/', $file->getRelativePathname());
 
         if (array_key_exists($path, $allowed)) {

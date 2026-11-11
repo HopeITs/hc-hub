@@ -1,7 +1,8 @@
 ---
 paths:
-  - app/Livewire/Concerns/FiltersFinanceRegister.php
+  - modules/Tracking/Livewire/Concerns/FiltersFinanceRegister.php
   - 'app/Livewire/Concerns/**'
+  - 'modules/Tracking/Livewire/Concerns/**'
 ---
 
 # App Livewire Concerns

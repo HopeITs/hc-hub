@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Storage;
+use Modules\Core\Models\User;
 
 /**
  * A file attached to a project or a milestone.

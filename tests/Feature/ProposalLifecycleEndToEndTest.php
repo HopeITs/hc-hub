@@ -1,29 +1,29 @@
 <?php
 
-use App\Actions\FundingAgreements\SaveAgreementInstallments;
-use App\Actions\FundingAgreements\SaveFundingAgreement;
-use App\Actions\Projects\ActivateProject;
-use App\Actions\Proposals\ApproveProposal;
-use App\Actions\Proposals\RecordFinalReportAcceptance;
-use App\Actions\Proposals\SaveProposal;
-use App\Actions\Proposals\TransitionProposal;
-use App\Enums\AssignmentStatus;
-use App\Enums\Currency;
 use App\Enums\MediaCollection;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalKind;
-use App\Enums\ProposalStatus;
-use App\Models\Donor;
-use App\Models\DonorProposal;
 use App\Models\Media;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalLocation;
-use App\Models\TransfersTracking;
 use App\Models\UserNotification;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Validation\ValidationException;
+use Modules\Tracking\Actions\FundingAgreements\SaveAgreementInstallments;
+use Modules\Tracking\Actions\FundingAgreements\SaveFundingAgreement;
+use Modules\Tracking\Actions\Projects\ActivateProject;
+use Modules\Tracking\Actions\Proposals\ApproveProposal;
+use Modules\Tracking\Actions\Proposals\RecordFinalReportAcceptance;
+use Modules\Tracking\Actions\Proposals\SaveProposal;
+use Modules\Tracking\Actions\Proposals\TransitionProposal;
+use Modules\Tracking\Enums\AssignmentStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalKind;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
+use Modules\Tracking\Models\TransfersTracking;
 
 /*
 | CP4: one proposal walked from a draft project to money expected from the donor.

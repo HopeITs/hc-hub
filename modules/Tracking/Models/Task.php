@@ -1,0 +1,457 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Tracking\Models;
+
+use App\Concerns\HasSlug;
+use App\Concerns\RecordsActivity;
+use App\Notifications\SubjectLinks;
+use App\Notifications\TracksActivity;
+use Carbon\CarbonImmutable;
+use Database\Factories\TaskFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Collection;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\DeliverableKind;
+use Modules\Tracking\Enums\DeliveryState;
+use Modules\Tracking\Enums\TaskKind;
+use Modules\Tracking\Enums\TaskPriority;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Scopes\TaskVisibilityScope;
+use Modules\Tracking\Observers\ScheduleItemObserver;
+
+/**
+ * @property int $id
+ * @property int|null $parent_task_id
+ * @property string $source_type
+ * @property int $source_id
+ * @property int|null $department_id
+ * @property TaskKind $kind
+ * @property Collection<int, DeliverableKind>|null $media_kinds
+ * @property DeliveryState|null $delivery_state
+ * @property CarbonImmutable|null $requested_on
+ * @property CarbonImmutable|null $delivered_on
+ * @property string|null $delivered_link
+ * @property string|null $delivered_text
+ * @property CarbonImmutable|null $accepted_at
+ * @property string|null $returned_reason
+ * @property CarbonImmutable|null $planned_dates_edited_at
+ * @property string $title
+ * @property string $slug
+ * @property string|null $description
+ * @property TaskStatus $status
+ * @property TaskPriority $priority
+ * @property CarbonImmutable|null $start_date
+ * @property CarbonImmutable|null $due_date
+ * @property CarbonImmutable|null $completed_date
+ * @property int $progress_percentage
+ * @property bool $evidence_required
+ * @property int $created_by
+ * @property int|null $copied_from_id
+ * @property string|null $reportable_type
+ * @property int|null $reportable_id
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ */
+#[Fillable([
+    'parent_task_id',
+    'source_type',
+    'source_id',
+    'department_id',
+    'kind',
+    'media_kinds',
+    'delivery_state',
+    'requested_on',
+    'delivered_on',
+    'delivered_link',
+    'delivered_text',
+    'accepted_at',
+    'returned_reason',
+    'title',
+    'description',
+    'status',
+    'priority',
+    'start_date',
+    'due_date',
+    'completed_date',
+    'progress_percentage',
+    'evidence_required',
+    'created_by',
+    'copied_from_id',
+    'reportable_type',
+    'reportable_id',
+])]
+#[ObservedBy(ScheduleItemObserver::class)]
+#[ScopedBy([TaskVisibilityScope::class])]
+class Task extends Model implements TracksActivity
+{
+    /** @use HasFactory<TaskFactory> */
+    use HasFactory, HasSlug, RecordsActivity;
+
+    protected function slugSource(): string
+    {
+        return $this->title;
+    }
+
+    /**
+     * Mirror the column defaults so a task that has not been round-tripped
+     * through the database still reports its status, priority and progress
+     * (and a later change logs the real "from" value, not none).
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'status' => 'todo',
+        'priority' => 'medium',
+        'progress_percentage' => 0,
+        'kind' => 'general',
+        'evidence_required' => false,
+    ];
+
+    /**
+     * A subtask's creation and completion are also news on its parent task.
+     */
+    protected static function booted(): void
+    {
+        // A user who moves an existing task's dates marks it, so the approval
+        // rebase (RebaseProposalPlan) leaves those dates alone (contracts.md
+        // §12.2). The rebase writes through the query builder and never sets it.
+        static::updating(function (Task $task): void {
+            if ($task->isDirty(['start_date', 'due_date'])) {
+                $task->planned_dates_edited_at = CarbonImmutable::now();
+            }
+        });
+
+        static::created(function (Task $task): void {
+            $task->activityParentTask()?->recordActivity('task.subtask_added', properties: ['subtask' => $task->activityLabel()]);
+        });
+
+        static::updated(function (Task $task): void {
+            if ($task->wasChanged('status') && ($task->getAttributes()['status'] ?? null) === TaskStatus::Done->value) {
+                $task->activityParentTask()?->recordActivity('task.subtask_completed', properties: ['subtask' => $task->activityLabel()]);
+            }
+        });
+    }
+
+    public function activityModule(): string
+    {
+        return 'tasks';
+    }
+
+    /**
+     * A task handed to a department on a proposal's plan is announced as a
+     * department task (EventCatalog `department_task.created`).
+     */
+    protected function activityCreatedEvent(): string
+    {
+        return $this->activityAttribute('department_id') !== null ? 'department_task.created' : 'task.created';
+    }
+
+    /**
+     * The rebase bookkeeping stamp is not news.
+     *
+     * @return list<string>
+     */
+    protected function activityExcludedFields(): array
+    {
+        return ['planned_dates_edited_at'];
+    }
+
+    /**
+     * Whether this task is handed to an HR department (contracts.md §12.2).
+     */
+    public function isDepartmentTask(): bool
+    {
+        return $this->department_id !== null;
+    }
+
+    public function activityLabel(): string
+    {
+        return (string) $this->activityAttribute('title');
+    }
+
+    public function activityEvents(): array
+    {
+        return [
+            'status' => 'status_changed',
+            'due_date' => 'due_date_changed',
+            'priority' => 'priority_changed',
+            'title' => 'updated',
+            'start_date' => 'updated',
+        ];
+    }
+
+    public function activityProgramId(): ?int
+    {
+        $sourceId = $this->activityAttribute('source_id');
+
+        $programId = match ($this->activityAttribute('source_type')) {
+            'program' => $sourceId,
+            'project' => Project::query()->whereKey($sourceId)->value('program_id'),
+            'milestone' => Milestone::query()
+                ->join('projects', 'projects.id', '=', 'milestones.project_id')
+                ->where('milestones.id', $sourceId)
+                ->value('projects.program_id'),
+            default => null,
+        };
+
+        return $programId === null ? null : (int) $programId;
+    }
+
+    /**
+     * Who the task named, taken before the assignee rows cascade away.
+     *
+     * @return array<string, mixed>
+     */
+    protected function activityPropertiesBeforeDelete(): array
+    {
+        return [
+            'employee_ids' => $this->taskAssignees()->pluck('employee_id')->map(fn (int|string $id): int => (int) $id)->all(),
+            'creator_id' => $this->activityAttribute('created_by'),
+        ];
+    }
+
+    /**
+     * The parent task, when this is a subtask.
+     */
+    private function activityParentTask(): ?Task
+    {
+        $parentId = $this->activityAttribute('parent_task_id');
+
+        return $parentId === null ? null : Task::query()->whereKey($parentId)->first();
+    }
+
+    /**
+     * The milestone, proposal, project, program or department this task is
+     * raised against.
+     *
+     * There is no foreign key behind source_id, so a source can be deleted
+     * out from under this row.
+     *
+     * @return MorphTo<Model, $this>
+     */
+    public function source(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * The report this task tracks, when it is a report task (W-13).
+     *
+     * @return MorphTo<Model, $this>
+     */
+    public function reportable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
+     * The page of the report this task tracks (W-13), through SubjectLinks.
+     */
+    public function reportUrl(): ?string
+    {
+        if (! $this->isReportTask() || $this->reportable_type === null || $this->reportable_id === null) {
+            return null;
+        }
+
+        return app(SubjectLinks::class)->routeFor($this->reportable_type, $this->reportable_id);
+    }
+
+    /**
+     * Whether this is a report task (TaskKind::Report).
+     */
+    public function isReportTask(): bool
+    {
+        return $this->kind === TaskKind::Report;
+    }
+
+    /**
+     * The source's display name, or a placeholder when it no longer exists.
+     */
+    public function sourceLabel(): string
+    {
+        $name = $this->loadedSource()?->getAttribute('name');
+
+        return is_string($name) ? $name : __('tasks.no_source');
+    }
+
+    /**
+     * The project this task's source sits under, when its source is a
+     * milestone. Used to bucket tasks under a project card (e.g. on a
+     * proposal's Tasks tab).
+     */
+    public function sourceProjectId(): ?int
+    {
+        $source = $this->loadedSource();
+
+        return $source instanceof Milestone ? $source->project_id : null;
+    }
+
+    /**
+     * Whether this task belongs to a paused project (D-66, W-02): its source
+     * is that project, or a milestone of it. The chip on a task only says so;
+     * the due date and status stay. Pass the paused ids once per render.
+     *
+     * @param  list<int>|null  $pausedProjectIds  from Project::pausedIds()
+     */
+    public function isPaused(?array $pausedProjectIds = null): bool
+    {
+        $source = $this->loadedSource();
+        $projectId = match (true) {
+            $source instanceof Project => $source->id,
+            $source instanceof Milestone => $source->project_id,
+            default => null,
+        };
+
+        return $projectId !== null && in_array($projectId, $pausedProjectIds ?? Project::pausedIds(), true);
+    }
+
+    /**
+     * Leaves out the tasks of a paused project: those whose source is the
+     * project, or one of its milestones. Program-, proposal- and
+     * annual-plan-level tasks are never paused.
+     *
+     * @param  Builder<Task>  $query
+     */
+    #[Scope]
+    protected function notPaused(Builder $query): void
+    {
+        $paused = Project::query()->paused()->select('projects.id');
+
+        $query
+            ->where(fn (Builder $inner) => $inner->where('tasks.source_type', '!=', 'project')->orWhereNotIn('tasks.source_id', $paused))
+            ->where(fn (Builder $inner) => $inner->where('tasks.source_type', '!=', 'milestone')
+                ->orWhereNotIn('tasks.source_id', Milestone::query()->select('milestones.id')->whereIn('milestones.project_id', $paused)));
+    }
+
+    /**
+     * The `source` relation, from the loaded relation when there is one.
+     */
+    private function loadedSource(): ?Model
+    {
+        return $this->relationLoaded('source') ? $this->getRelation('source') : $this->source()->first();
+    }
+
+    /**
+     * The task this one is a subtask of, if any. Subtasks are a single
+     * level deep — a subtask cannot itself carry subtasks, enforced in
+     * the task-management components rather than the schema.
+     *
+     * @return BelongsTo<Task, $this>
+     */
+    public function parentTask(): BelongsTo
+    {
+        return $this->belongsTo(Task::class, 'parent_task_id');
+    }
+
+    /**
+     * The subtasks carried out under this task.
+     *
+     * @return HasMany<Task, $this>
+     */
+    public function subtasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'parent_task_id');
+    }
+
+    /**
+     * The HR employees assigned to this task. A task can have several.
+     *
+     * @return HasMany<TaskAssignee, $this>
+     */
+    public function taskAssignees(): HasMany
+    {
+        return $this->hasMany(TaskAssignee::class);
+    }
+
+    /**
+     * The user who raised this task.
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * The task this one was copied from when a proposal was renewed.
+     *
+     * @return BelongsTo<Task, $this>
+     */
+    public function copiedFrom(): BelongsTo
+    {
+        return $this->belongsTo(Task::class, 'copied_from_id');
+    }
+
+    /**
+     * The files attached to this task.
+     *
+     * @return HasMany<TaskAttachment, $this>
+     */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(TaskAttachment::class);
+    }
+
+    /**
+     * Past its due date while actively being worked (in progress or under
+     * review) — distinct from {@see isMissed()}, which covers a task that
+     * never started. A completed task is never overdue.
+     */
+    public function isOverdue(): bool
+    {
+        return $this->status !== TaskStatus::Todo
+            && $this->status !== TaskStatus::Done
+            && $this->due_date !== null
+            && $this->due_date->lt(CarbonImmutable::today());
+    }
+
+    /**
+     * Past its due date while still untouched in To Do — distinct from
+     * {@see isOverdue()}, which covers a task that's actively being worked.
+     */
+    public function isMissed(): bool
+    {
+        return $this->status === TaskStatus::Todo
+            && $this->due_date !== null
+            && $this->due_date->lt(CarbonImmutable::today());
+    }
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string|class-string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => TaskStatus::class,
+            'priority' => TaskPriority::class,
+            'start_date' => 'date',
+            'due_date' => 'date',
+            'completed_date' => 'date',
+            'progress_percentage' => 'integer',
+            'evidence_required' => 'boolean',
+            'department_id' => 'integer',
+            'kind' => TaskKind::class,
+            'media_kinds' => AsEnumCollection::of(DeliverableKind::class),
+            'delivery_state' => DeliveryState::class,
+            'requested_on' => 'date',
+            'delivered_on' => 'date',
+            'accepted_at' => 'datetime',
+            'planned_dates_edited_at' => 'datetime',
+        ];
+    }
+}

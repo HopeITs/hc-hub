@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\User;
 use App\Support\Desk\AskCommands;
 use App\Support\Desk\QuickAccess;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 test('the desk shows no quick access button until something is kept there', function () {
     $user = User::factory()->role('Financial')->create();

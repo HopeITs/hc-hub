@@ -1,18 +1,18 @@
 <?php
 
-use App\Enums\ArStatus;
 use App\Enums\NotificationPriority;
-use App\Enums\ProposalStatus;
-use App\Models\Account;
 use App\Models\Activity;
-use App\Models\DonorProposal;
-use App\Models\DonorReport;
-use App\Models\Proposal;
-use App\Models\ProposalStatusNote;
-use App\Models\Risk;
 use App\Models\Role;
-use App\Models\TransfersTracking;
 use App\Models\UserNotification;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Models\TransfersTracking;
 
 test('a rejected proposal is critical for finance, the pr manager and the top roles', function () {
     $financial = userWithRole('Financial');

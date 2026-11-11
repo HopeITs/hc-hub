@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\ChecksFinanceVisibility;
-use App\Livewire\Concerns\Targets\FiltersTargets;
-use App\Livewire\Concerns\Targets\ManagesTargetForm;
-use App\Livewire\Concerns\Targets\NarrowsTargetFormOptions;
-use App\Livewire\Concerns\Targets\ReadsTargets;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Tracking\Livewire\Concerns\ChecksFinanceVisibility;
+use Modules\Tracking\Livewire\Concerns\Targets\FiltersTargets;
+use Modules\Tracking\Livewire\Concerns\Targets\ManagesTargetForm;
+use Modules\Tracking\Livewire\Concerns\Targets\NarrowsTargetFormOptions;
+use Modules\Tracking\Livewire\Concerns\Targets\ReadsTargets;
 
 /**
  * Stands in for targets/index, with every trait that page uses.

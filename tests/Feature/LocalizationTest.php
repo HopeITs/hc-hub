@@ -1,14 +1,14 @@
 <?php
 
 use App\Enums\Locale;
-use App\Enums\ProposalStatus;
-use App\Enums\TaskStatus;
 use App\Models\HrCity;
 use App\Models\HrEmployee;
-use App\Models\User;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\TaskStatus;
 
 /**
  * The keys of a lang group file, flattened to dot notation.
@@ -76,6 +76,12 @@ test('every translation key used in the code exists in english and arabic', func
         glob(app_path('**/*.php')) ?: [],
         glob(app_path('*/*/*.php')) ?: [],
         glob(app_path('*/*/*/*.php')) ?: [],
+        glob(base_path('modules/*/resources/views/**/*.blade.php')) ?: [],
+        glob(base_path('modules/*/resources/views/*/*/*.blade.php')) ?: [],
+        glob(base_path('modules/*/resources/views/*/*/*/*.blade.php')) ?: [],
+        glob(base_path('modules/*/*/*.php')) ?: [],
+        glob(base_path('modules/*/*/*/*.php')) ?: [],
+        glob(base_path('modules/*/*/*/*/*.php')) ?: [],
     );
 
     $keys = [];
@@ -229,8 +235,13 @@ test('stored enum values stay english while their labels follow the language', f
 });
 
 test('every enum case has an arabic label', function () {
-    foreach (glob(app_path('Enums/*.php')) as $file) {
-        $enum = 'App\\Enums\\'.basename($file, '.php');
+    $enums = array_map(fn (string $file): string => 'App\\Enums\\'.basename($file, '.php'), glob(app_path('Enums/*.php')) ?: []);
+
+    foreach (glob(base_path('modules/*/Enums/*.php')) ?: [] as $file) {
+        $enums[] = 'Modules\\'.basename(dirname($file, 2)).'\\Enums\\'.basename($file, '.php');
+    }
+
+    foreach ($enums as $enum) {
 
         if (! method_exists($enum, 'label')) {
             continue;
@@ -316,12 +327,12 @@ test('a date is formatted with levantine month names without changing the caller
 });
 
 /**
- * Blade views under resources/views that have been swept against the T26 UI
+ * Blade views under resources/views (and each module's resources/views) that have been swept against the T26 UI
  * checklist. A sweep appends its task's files (or whole folders, written with a
  * trailing slash) here; the first sweeps found the whole tree clean, so every
  * top-level folder is listed and new views are covered from the start; both view guards below read this one list.
  *
- * @return list<string> paths relative to resources/views
+ * @return list<string> paths relative to the project root
  */
 function localizedViewFiles(): array
 {
@@ -335,18 +346,29 @@ function localizedViewFiles(): array
         'pages/',
     ];
 
+    $roots = ['resources/views', ...array_map(
+        fn (string $path): string => str_replace('\\', '/', substr($path, strlen(base_path()) + 1)),
+        glob(base_path('modules/*/resources/views')) ?: [],
+    )];
+
     $files = [];
-    foreach ($entries as $entry) {
-        if (! str_ends_with($entry, '/')) {
-            $files[] = $entry;
+    foreach ($roots as $root) {
+        foreach ($entries as $entry) {
+            if (! str_ends_with($entry, '/')) {
+                $files[] = "{$root}/{$entry}";
 
-            continue;
-        }
+                continue;
+            }
 
-        $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(resource_path("views/{$entry}"), FilesystemIterator::SKIP_DOTS));
-        foreach ($iterator as $file) {
-            if (str_ends_with($file->getFilename(), '.blade.php')) {
-                $files[] = str_replace(DIRECTORY_SEPARATOR, '/', substr($file->getPathname(), strlen(resource_path('views/'))));
+            if (! is_dir(base_path("{$root}/{$entry}"))) {
+                continue;
+            }
+
+            $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(base_path("{$root}/{$entry}"), FilesystemIterator::SKIP_DOTS));
+            foreach ($iterator as $file) {
+                if (str_ends_with($file->getFilename(), '.blade.php')) {
+                    $files[] = str_replace(DIRECTORY_SEPARATOR, '/', substr($file->getPathname(), strlen(base_path()) + 1));
+                }
             }
         }
     }
@@ -445,15 +467,15 @@ function literalUiText(string $source): array
 test('listed views use logical direction classes only', function () {
     $violations = [];
     foreach (localizedViewFiles() as $file) {
-        expect(file_exists(resource_path("views/{$file}")))->toBeTrue("{$file} does not exist");
+        expect(file_exists(base_path($file)))->toBeTrue("{$file} does not exist");
 
         // The Gantt keeps its timeline in left-to-right pixel space on purpose
         // (header comment of components/ui/gantt.blade.php); the one reviewed exemption.
-        if ($file === 'components/ui/gantt.blade.php') {
+        if ($file === 'resources/views/components/ui/gantt.blade.php') {
             continue;
         }
 
-        $found = physicalDirectionClasses(file_get_contents(resource_path("views/{$file}")));
+        $found = physicalDirectionClasses(file_get_contents(base_path($file)));
         if ($found !== []) {
             $violations[$file] = $found;
         }
@@ -465,7 +487,7 @@ test('listed views use logical direction classes only', function () {
 test('listed views contain no literal UI text', function () {
     $violations = [];
     foreach (localizedViewFiles() as $file) {
-        $found = literalUiText(file_get_contents(resource_path("views/{$file}")));
+        $found = literalUiText(file_get_contents(base_path($file)));
         if ($found !== []) {
             $violations[$file] = $found;
         }

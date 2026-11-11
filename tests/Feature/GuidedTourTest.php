@@ -1,9 +1,9 @@
 <?php
 
-use App\Models\LibraryIndicator;
-use App\Models\Proposal;
-use App\Models\User;
 use Illuminate\Testing\TestResponse;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\LibraryIndicator;
+use Modules\Tracking\Models\Proposal;
 
 test('the header carries a tour button and the tour overlay with translated steps', function () {
     $user = User::factory()->role('Team Member')->create();

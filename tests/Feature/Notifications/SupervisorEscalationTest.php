@@ -1,14 +1,14 @@
 <?php
 
 use App\Enums\NotificationPriority;
-use App\Enums\TaskStatus;
 use App\Models\Activity;
-use App\Models\Program;
-use App\Models\Proposal;
-use App\Models\Supervision;
-use App\Models\User;
 use App\Models\UserNotification;
-use App\Notifications\Alerts\EscalationScanner;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\Supervision;
+use Modules\Tracking\Notifications\Alerts\EscalationScanner;
 
 /**
  * A local supervision row written without recording.

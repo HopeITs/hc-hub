@@ -1,19 +1,8 @@
 <?php
 
-use App\Actions\Proposals\MarkProposalReviewed;
-use App\Actions\Proposals\RemoveProposalReviewer;
-use App\Enums\Currency;
 use App\Enums\MediaCollection;
-use App\Enums\ProposalStatus;
-use App\Enums\ReviewerSlot;
-use App\Enums\ReviewStage;
 use App\Models\Activity;
-use App\Models\DonorProposal;
 use App\Models\Media;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\ProposalReviewer;
-use App\Models\User;
 use App\Notifications\Alerts\NotificationSettings;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -21,6 +10,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Proposals\MarkProposalReviewed;
+use Modules\Tracking\Actions\Proposals\RemoveProposalReviewer;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Enums\ReviewerSlot;
+use Modules\Tracking\Enums\ReviewStage;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalReviewer;
 
 /**
  * A proposal at the given status with one linked project.
@@ -49,7 +49,7 @@ function reviewerWithLogin(Proposal $proposal, ReviewStage $stage = ReviewStage:
 
 function reviewersPanel(User $user, Proposal $proposal): Testable
 {
-    return Livewire::actingAs($user)->test('pages::proposals.show', ['proposal' => $proposal]);
+    return Livewire::actingAs($user)->test('tracking::proposals.show', ['proposal' => $proposal]);
 }
 
 beforeEach(fn () => $this->travelTo('2026-10-13 10:00:00'));

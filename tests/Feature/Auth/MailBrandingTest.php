@@ -1,10 +1,10 @@
 <?php
 
 use App\Http\UserAgent;
-use App\Models\User;
 use App\Notifications\EmailLoginCode;
 use App\Notifications\NewDeviceSignIn;
 use Carbon\CarbonImmutable;
+use Modules\Core\Models\User;
 use Symfony\Component\Mime\Email;
 
 /**

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Notifications;
 
 use App\Enums\NotificationPriority;
-use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Support\Facades\Cache;
+use Modules\Core\Models\User;
 
 /**
  * One grouped query per user, cached, invalidated whenever that user's inbox

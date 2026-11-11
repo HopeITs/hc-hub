@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Models\User;
 use Illuminate\Console\Command;
+use Modules\Core\Models\User;
 
 /**
  * Keeps tracking users in step with the active HR employees.

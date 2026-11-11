@@ -3,9 +3,9 @@
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Models\Activity;
-use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Support\Str;
+use Modules\Core\Models\User;
 
 /**
  * A raw inbox row for a user, bypassing the notification pipeline.

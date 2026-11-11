@@ -3,9 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\TrustedDevice;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Modules\Core\Models\User;
 
 /**
  * @extends Factory<TrustedDevice>

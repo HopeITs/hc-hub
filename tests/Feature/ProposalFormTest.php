@@ -1,22 +1,6 @@
 <?php
 
-use App\Actions\Donors\ApproveDonor;
-use App\Actions\Proposals\SaveProposal;
-use App\Enums\AssignmentStatus;
-use App\Enums\Currency;
-use App\Enums\DonorApprovalStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalKind;
-use App\Enums\ProposalStatus;
 use App\Models\Activity;
-use App\Models\Assignment;
-use App\Models\Donor;
-use App\Models\DonorProposal;
-use App\Models\MealCoverageAssignment;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\User;
 use App\Models\UserNotification;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
@@ -24,6 +8,22 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Donors\ApproveDonor;
+use Modules\Tracking\Actions\Proposals\SaveProposal;
+use Modules\Tracking\Enums\AssignmentStatus;
+use Modules\Tracking\Enums\Currency;
+use Modules\Tracking\Enums\DonorApprovalStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalKind;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Assignment;
+use Modules\Tracking\Models\Donor;
+use Modules\Tracking\Models\DonorProposal;
+use Modules\Tracking\Models\MealCoverageAssignment;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 /**
  * Valid create data for SaveProposal: one donor, the given projects, planned
@@ -409,7 +409,7 @@ test('a creator without proposals.update starting at the proposal draft gets not
  */
 function openProposalCreateForm(User $actor): Testable
 {
-    return Livewire::actingAs($actor)->test('pages::proposals.index')->call('openCreateModal');
+    return Livewire::actingAs($actor)->test('tracking::proposals.index')->call('openCreateModal');
 }
 
 /**
@@ -515,7 +515,7 @@ test('a skipped concept note asks for the reason in Arabic and the preset reason
 
 test('the budget fields are offered only to someone who may see money', function (Closure $role, bool $seesBudget) {
     $proposal = linkedProposal();
-    $form = Livewire::actingAs(userWithRole($role()))->test('pages::proposals.index')->call('openEditModal', $proposal->id);
+    $form = Livewire::actingAs(userWithRole($role()))->test('tracking::proposals.index')->call('openEditModal', $proposal->id);
 
     $seesBudget
         ? $form->assertSeeHtml('wire:model="requestedBudget"')->assertSet('requestedBudget', '120000.00')
@@ -530,7 +530,7 @@ test('New Concept Note opens the create form with its project already chosen', f
 
     Livewire::withQueryParams(['for_project' => (string) $project->id])
         ->actingAs(userWithRole('Financial'))
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->assertSet('showProposalModal', true)
         ->assertSet('projectIds', [(string) $project->id])
         ->assertSet('forProject', '');
@@ -539,7 +539,7 @@ test('New Concept Note opens the create form with its project already chosen', f
 test('New Concept Note ignores a project that cannot take a proposal', function (Closure $makeProjectId) {
     Livewire::withQueryParams(['for_project' => (string) $makeProjectId()])
         ->actingAs(userWithRole('Financial'))
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->assertSet('showProposalModal', true)
         ->assertSet('projectIds', []);
 })->with([
@@ -552,7 +552,7 @@ test('New Concept Note opens nothing for a user who cannot create proposals', fu
 
     Livewire::withQueryParams(['for_project' => (string) $project->id])
         ->actingAs(userWithRole('Team Member'))
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->assertSet('showProposalModal', false)
         ->assertSet('projectIds', []);
 });
@@ -562,7 +562,7 @@ test('editing from the register changes the beneficiaries and asks for a reason 
     $projectId = (int) $proposal->projects()->value('projects.id');
 
     $form = Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('openEditModal', $proposal->id)
         ->assertSet("beneficiaries.{$projectId}", '400')
         ->assertSeeText('Water Network Rehabilitation')
@@ -829,7 +829,7 @@ test('a second concept note document keeps the older one, newest first', functio
 
     $proposal = Proposal::query()->sole();
 
-    Livewire::actingAs($actor)->test('pages::proposals.index')
+    Livewire::actingAs($actor)->test('tracking::proposals.index')
         ->call('openEditModal', $proposal->id)
         ->set('conceptNoteFile', validUpload('second-draft.pdf'))
         ->call('saveProposal')
@@ -837,7 +837,7 @@ test('a second concept note document keeps the older one, newest first', functio
 
     expect(DB::table('media')->where('mediable_type', 'proposal')->where('mediable_id', $proposal->id)->count())->toBe(2);
 
-    $page = Livewire::actingAs($actor)->test('pages::proposals.show', ['proposal' => $proposal]);
+    $page = Livewire::actingAs($actor)->test('tracking::proposals.show', ['proposal' => $proposal]);
 
     expect($page->instance()->conceptNoteFiles->pluck('original_name')->all())
         ->toBe(['second-draft.pdf', 'first-draft.pdf']);
@@ -885,7 +885,7 @@ test('editing a proposal opens the form with its stored concept note', function 
     $proposal = linkedProposal();
     DB::table('proposals')->where('id', $proposal->id)->update(['concept_note' => 'Stored note.']);
 
-    Livewire::actingAs(userWithRole('Financial'))->test('pages::proposals.index')
+    Livewire::actingAs(userWithRole('Financial'))->test('tracking::proposals.index')
         ->call('openEditModal', $proposal->id)
         ->assertSet('conceptNote', 'Stored note.');
 });
@@ -959,7 +959,7 @@ test('editing a payroll proposal shows its narrative and a locked kind, and a se
     $proposal = Proposal::factory()->payroll()->create(['status' => ProposalStatus::ProposalDraft]);
 
     Livewire::actingAs(userWithRole('Financial'))
-        ->test('pages::proposals.index')
+        ->test('tracking::proposals.index')
         ->call('openEditModal', $proposal->id)
         ->assertSet('narrative', $proposal->narrative)
         ->assertSeeHtml('data-test="proposal-kind-locked"')

@@ -1,7 +1,7 @@
 ---
 paths:
-  - 'resources/views/pages/targets/**'
-  - 'app/Livewire/Concerns/Targets/**'
+  - 'modules/Tracking/resources/views/pages/targets/**'
+  - 'modules/Tracking/Livewire/Concerns/Targets/**'
 ---
 
 # Targets

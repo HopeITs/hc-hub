@@ -6,10 +6,10 @@ namespace App\Actions\Fortify;
 
 use App\Http\UserAgent;
 use App\Models\TrustedDevice;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
+use Modules\Core\Models\User;
 
 /**
  * "Don't ask again on this device": a browser that passed the second sign-in

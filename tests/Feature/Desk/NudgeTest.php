@@ -2,12 +2,12 @@
 
 use App\Actions\Desk\SendNudge;
 use App\Models\Activity;
-use App\Models\Supervision;
-use App\Models\Task;
-use App\Models\User;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\NotificationSettings;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Supervision;
+use Modules\Tracking\Models\Task;
 
 beforeEach(function () {
     $this->travelTo('2026-09-15 09:00:00');

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\PHPStan;
 
-use App\Livewire\Concerns\ManagesTaskVisibility;
 use Livewire\Component;
+use Modules\Tracking\Livewire\Concerns\ManagesTaskVisibility;
 
 /**
  * Stands in for tasks/index.

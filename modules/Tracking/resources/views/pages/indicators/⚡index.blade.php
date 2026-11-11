@@ -1,0 +1,267 @@
+<?php
+
+use Modules\Tracking\Enums\IndicatorMeasure;
+use Modules\Tracking\Livewire\Concerns\FiltersByStrategy;
+use Modules\Tracking\Livewire\Concerns\Indicators\BuildsIndicatorRows;
+use Modules\Tracking\Livewire\Concerns\Indicators\ExportsIndicators;
+use Modules\Tracking\Livewire\Concerns\Indicators\InspectsIndicatorChain;
+use Modules\Tracking\Livewire\Concerns\Indicators\ManagesIndicatorForm;
+use Modules\Tracking\Livewire\Concerns\Indicators\ManagesIndicatorReadings;
+use Modules\Tracking\Livewire\Concerns\Indicators\PresentsIndicators;
+use Modules\Tracking\Livewire\Concerns\Indicators\SummarisesIndicators;
+use Modules\Tracking\Models\Indicator;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Result;
+use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+new #[Layout('layouts::desk'), Title('titles.indicators')] class extends Component {
+    use BuildsIndicatorRows;
+    use ExportsIndicators;
+    use FiltersByStrategy;
+    use InspectsIndicatorChain;
+    use ManagesIndicatorForm;
+    use ManagesIndicatorReadings;
+    use PresentsIndicators;
+    use SummarisesIndicators;
+    use WithPagination;
+
+    #[Url(except: '')]
+    public string $search = '';
+
+    #[Url(except: '')]
+    public string $result = '';
+
+    #[Url(except: '')]
+    public string $measure = '';
+
+    #[Url(except: '')]
+    public string $program = '';
+
+    /** A donor's name, to keep only the indicators one of its proposals funds. */
+    #[Url(except: '')]
+    public string $donor = '';
+
+    /** One of the RagStatus values, or '' for every rating including unrated. */
+    #[Url(except: '')]
+    public string $rag = '';
+
+    /**
+     * Narrows the page to the indicators that need a hand.
+     *
+     * '' shows everything, 'offtrack' the amber and red ones, 'unmeasured'
+     * those carrying no reading at all, 'stale' those whose last reading is
+     * older than their own frequency, 'untargeted' those with no target to be
+     * measured against.
+     */
+    #[Url(except: '')]
+    public string $focus = '';
+
+
+    /**
+     * Deep links from the rest of the chain.
+     *
+     * `?create=<result id>` opens the indicator form already tied to that
+     * statement (the results framework's "Add indicator");
+     * `?create=1&project=<project id>` opens it already scoped to that project
+     * (the project page's "New indicator"); `?inspect=<id>` opens one
+     * indicator's chain. Read once here rather than bound with #[Url], so
+     * closing the dialog and refreshing does not reopen it.
+     */
+    public function mount(): void
+    {
+        $create = request()->integer('create');
+        $createForProject = request()->integer('project');
+
+        if ($create > 0 && Gate::allows('indicators.create')) {
+            if ($createForProject > 0) {
+                if (Project::query()->whereKey($createForProject)->exists()) {
+                    $this->openCreateModal();
+                    $this->indicatorProjectId = (string) $createForProject;
+                }
+            } elseif (Result::query()->whereKey($create)->exists()) {
+                $this->openCreateModal();
+                $this->indicatorResultId = (string) $create;
+            }
+        }
+
+        $inspect = request()->integer('inspect');
+
+        if ($inspect > 0 && Indicator::query()->whereKey($inspect)->exists()) {
+            $this->openInspectModal($inspect);
+        }
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedResult(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedMeasure(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedProgram(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedDonor(): void
+    {
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->search = '';
+        $this->result = '';
+        $this->measure = '';
+        $this->program = '';
+        $this->donor = '';
+        $this->rag = '';
+        $this->focus = '';
+        $this->clearStrategyFilter();
+    }
+
+    /**
+     * Toggle one of the attention chips; clicking the active one clears it.
+     */
+    public function setFocus(string $focus): void
+    {
+        $this->focus = $this->focus === $focus ? '' : $focus;
+        $this->resetPage();
+    }
+
+    /**
+     * Toggle the rating filter from the distribution bar or its legend.
+     */
+    public function setRag(string $rag): void
+    {
+        $this->rag = $this->rag === $rag ? '' : $rag;
+        $this->resetPage();
+    }
+
+    /**
+     * Drop every cached read after a write, so the same request re-renders the
+     * figures it just changed rather than the ones it read at the top.
+     */
+    protected function forgetIndicators(): void
+    {
+        foreach (['allIndicators', 'rows', 'donorOptions', 'filteredRows', 'pagedRows', 'overview', 'focusCounts', 'inspected', 'inspectedReadings'] as $property) {
+            unset($this->{$property});
+        }
+    }
+};
+?>
+
+@php
+    use Modules\Tracking\Enums\ResultType;
+
+    $filtersAreActive = $search !== '' || $result !== '' || $measure !== '' || $program !== '' || $donor !== '' || $rag !== '' || $focus !== '' || $this->strategyFilter !== null;
+    $overview = $this->overview;
+    $paged = $this->pagedRows;
+    $focusCounts = $this->focusCounts;
+
+    // One fixed visual identity for Impact/Outcome/Output app-wide; see
+    // .ai/rules/components-ui.md. Copied, never reinvented.
+    $levelMarks = [
+        ResultType::Impact->value => 'bg-secondary-dark ring-secondary-dark dark:bg-ink dark:ring-ink',
+        ResultType::Outcome->value => 'bg-primary ring-primary',
+        ResultType::Output->value => 'bg-board ring-secondary-light',
+        ResultType::Activity->value => 'bg-transparent ring-secondary-medium dark:ring-ink-muted',
+        ResultType::CrossCutting->value => 'bg-secondary-light ring-secondary-light dark:bg-ink-muted dark:ring-ink-muted',
+    ];
+@endphp
+
+<x-desk.register class="@container/directory" heading-id="indicator-directory-heading" :title="__('common.indicators')" :count="$overview['indicators']">
+    
+        <x-slot:search>
+            <x-desk.register-search :label="__('indicators.search_indicators')" :placeholder="__('indicators.indicator_or_result_statement')" wire:model.live.debounce.300ms="search" />
+        </x-slot:search>
+        <x-slot:filters>
+            <x-desk.strategy-chip :strategy="$this->strategyFilter" />
+
+            <x-ui.header-filter-select :label="__('common.program')" wire:model.live="program" :value="$program">
+                <option value="">{{ __('common.all_programs') }}</option>
+                <option value="none">{{ __('common.unassigned') }}</option>
+                @foreach ($this->programOptions as $programOption)
+                    <option value="{{ $programOption->id }}">{{ $programOption->name }}</option>
+                @endforeach
+            </x-ui.header-filter-select>
+
+            <div class="contents" x-data="{ open: @js($donor !== '' || $result !== '' || $measure !== '') }">
+                <button type="button" class="dk-btn" x-on:click="open = ! open" x-bind:aria-expanded="open.toString()" data-test="more-filters-button">
+                    <flux:icon.adjustments-horizontal variant="micro" class="size-4" />
+                    {{ __('indicators.more_filters') }}
+                </button>
+
+                <div class="contents" x-show="open" x-cloak>
+                <x-ui.header-filter-select :label="__('common.donor')" wire:model.live="donor" :value="$donor">
+                    <option value="">{{ __('common.all_donors') }}</option>
+                    @foreach ($this->donorOptions as $donorOption)
+                        <option value="{{ $donorOption }}">{{ $donorOption }}</option>
+                    @endforeach
+                </x-ui.header-filter-select>
+
+                <x-ui.header-filter-select :label="__('indicators.result')" wire:model.live="result" :value="$result">
+                    <option value="">{{ __('indicators.all_results') }}</option>
+                    @foreach ($this->resultOptions as $resultOption)
+                        <option value="{{ $resultOption->id }}">{{ Str::limit($resultOption->statement, 50) }}</option>
+                    @endforeach
+                </x-ui.header-filter-select>
+
+                <x-ui.header-filter-select :label="__('indicators.measure')" wire:model.live="measure" :value="$measure">
+                    <option value="">{{ __('indicators.all_measures') }}</option>
+                    @foreach (IndicatorMeasure::cases() as $measureCase)
+                        <option value="{{ $measureCase->value }}">{{ $measureCase->label() }}</option>
+                    @endforeach
+                </x-ui.header-filter-select>
+                </div>
+            </div>
+        </x-slot:filters>
+
+        <x-slot:actions>
+            <x-ui.button icon="arrow-down-tray" class="min-h-11 max-sm:h-11! self-end touch-manipulation @sm/directory:min-h-10" wire:click="exportIndicators" data-test="export-indicators-button">
+                {{ __('indicators.export_csv') }}
+            </x-ui.button>
+            @can('indicators.create')<x-ui.button tone="primary" icon="plus" class="min-h-11 max-sm:h-11! self-end touch-manipulation @sm/directory:min-h-10" wire:click="openCreateModal" data-test="create-indicator-button" data-quick-create>
+                {{ __('indicators.add_indicator') }}
+            </x-ui.button>@endcan
+        </x-slot:actions>
+    
+    @include('tracking::pages.indicators._index-focus-bar')
+
+    @if ($paged->isEmpty())
+        <x-ui.panel>
+            <x-ui.empty-state
+                icon="chart-bar"
+                :heading="$filtersAreActive ? __('indicators.no_matching_indicators') : __('indicators.no_indicators_yet')"
+                :body="$filtersAreActive ? __('common.change_the_search_or_filters_and_try_again') : __('indicators.add_the_first_indicator_against_a_result')"
+            >
+                <x-slot:action>
+                    @if ($filtersAreActive || auth()->user()->can('indicators.create'))<x-ui.button tone="primary" :icon="$filtersAreActive ? 'arrow-path' : 'plus'" wire:click="{{ $filtersAreActive ? 'clearFilters' : 'openCreateModal' }}">
+                        {{ $filtersAreActive ? __('common.reset_filters') : __('indicators.add_indicator') }}
+                    </x-ui.button>@endif
+                </x-slot:action>
+            </x-ui.empty-state>
+        </x-ui.panel>
+    @else
+        @include('tracking::pages.indicators._index-list')
+    @endif
+
+    @include('tracking::pages.indicators._index-inspect-modal')
+
+    @include('tracking::pages.indicators._index-form-modal')
+
+    @include('tracking::pages.indicators._index-reading-modal')
+</x-desk.register>

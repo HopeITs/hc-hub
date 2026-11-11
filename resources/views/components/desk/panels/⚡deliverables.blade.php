@@ -1,12 +1,12 @@
 <?php
 
-use App\Enums\DeliveryState;
-use App\Enums\TaskKind;
-use App\Enums\TaskStatus;
+use Modules\Tracking\Enums\DeliveryState;
+use Modules\Tracking\Enums\TaskKind;
+use Modules\Tracking\Enums\TaskStatus;
 use App\Livewire\Concerns\Dashboard\ReadsDashboardAttention;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
-use App\Models\Milestone;
-use App\Models\Task;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Task;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;

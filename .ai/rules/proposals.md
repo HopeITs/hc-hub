@@ -1,6 +1,6 @@
 ---
 paths:
-  - 'resources/views/pages/proposals/**'
+  - 'modules/Tracking/resources/views/pages/proposals/**'
 ---
 
 # Proposals

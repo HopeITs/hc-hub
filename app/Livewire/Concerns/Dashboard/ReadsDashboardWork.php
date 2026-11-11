@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Dashboard;
 
-use App\Enums\ArStatus;
-use App\Enums\MilestoneStatus;
-use App\Enums\ReportStatus;
-use App\Enums\TaskStatus;
 use App\Models\HrEmployee;
-use App\Models\Milestone;
-use App\Models\Report;
-use App\Models\Task;
-use App\Models\TaskAssignee;
-use App\Models\TransfersTracking;
-use App\Models\User;
 use App\Support\Desk\TeamScope;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
 use Livewire\Attributes\Computed;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\ArStatus;
+use Modules\Tracking\Enums\MilestoneStatus;
+use Modules\Tracking\Enums\ReportStatus;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAssignee;
+use Modules\Tracking\Models\TransfersTracking;
 
 /**
  * The signed-in person's team and timeline: their supervisees' overdue

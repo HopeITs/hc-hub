@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
@@ -10,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException;
 use Livewire\Livewire;
+use Modules\Core\Models\User;
 
 /**
  * A password confirmation older than auth.password_timeout, so the

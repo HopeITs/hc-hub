@@ -2,18 +2,18 @@
 
 use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
-use App\Enums\TaskKind;
-use App\Enums\TaskPriority;
-use App\Enums\TaskStatus;
-use App\Models\DonorReport;
-use App\Models\Milestone;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Task;
-use App\Models\User;
 use App\Notifications\AppNotification;
 use App\Notifications\NotificationPayload;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Enums\TaskKind;
+use Modules\Tracking\Enums\TaskPriority;
+use Modules\Tracking\Enums\TaskStatus;
+use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
 
 /**
  * A program with one project and one milestone, and a manager who may do
@@ -49,7 +49,7 @@ test('the stat cards count and filter the tasks, and search reaches every task',
     projectTask($project, ['title' => 'Finished report', 'status' => TaskStatus::Done]);
 
     $page = Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSee(['Late pump order', 'Future survey'])
         ->assertDontSee('Finished report')
@@ -73,7 +73,7 @@ test('the tasks can be grouped by due date and by assignee', function () {
     projectTask($project, ['due_date' => null]);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->set('taskGroupBy', 'due')
         ->assertSeeHtmlInOrder(['data-task-bucket="overdue"', 'data-task-bucket="none"'])
@@ -89,7 +89,7 @@ test('a task is re-prioritised, moved to another status and completed from the r
     $other = projectTask($project);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('setProgramTaskPriority', $task->id, 'high')
         ->call('setProgramTaskStatus', $other->id, TaskStatus::InProgress->value)
         ->call('setProgramTaskStatus', $task->id, TaskStatus::Done->value);
@@ -105,7 +105,7 @@ test('only the task creator moves its due date', function () {
     $someoneElses = projectTask($project);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('rescheduleProgramTask', $own->id, '2027-03-01')
         ->call('rescheduleProgramTask', $someoneElses->id, '2027-03-01');
 
@@ -119,7 +119,7 @@ test('assignees are added and removed, down to none', function () {
     $firstAssignee = $task->taskAssignees()->value('employee_id');
 
     $page = Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('togglePickedAssignee', $task->id, $employeeId);
 
     expect($task->taskAssignees()->pluck('employee_id')->all())->toContain($employeeId);
@@ -138,7 +138,7 @@ test('a group adds a task unassigned when its author has no HR employee', functi
     $author = userWithRole('General Manager', null);
 
     Livewire::actingAs($author)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('addProgramTask', 'Find a volunteer', 'project:'.$project->id);
 
     expect(Task::query()->where('title', 'Find a volunteer')->sole()->taskAssignees()->count())->toBe(0);
@@ -151,7 +151,7 @@ test('a task is deleted from the row unless it still has subtasks', function () 
     $lone = projectTask($project);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('deleteProgramTask', $parent->id)
         ->call('deleteProgramTask', $lone->id);
 
@@ -164,7 +164,7 @@ test('a group adds a task assigned to its author and a row adds a subtask', func
     $parent = projectTask($project);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('addProgramTask', 'Buy spare parts', 'project:'.$project->id)
         ->call('addProgramSubtask', $parent->id, 'Call the supplier');
 
@@ -182,7 +182,7 @@ test('a task of another program is never touched from this page', function () {
     $elsewhere = projectTask(Project::factory()->create());
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('setProgramTaskPriority', $elsewhere->id, 'high')
         ->call('deleteProgramTask', $elsewhere->id);
 
@@ -196,7 +196,7 @@ test('a user without task rights cannot change a task and sees no edit controls'
     $viewer = userWithRole('Team Member');
 
     Livewire::actingAs($viewer)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertDontSeeHtml('data-test="task-status-trigger-'.$task->id.'"')
         ->assertDontSeeHtml('data-test="task-priority-trigger-'.$task->id.'"')
@@ -214,7 +214,7 @@ test('the task list shows seven tasks a page', function () {
     }
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSee(['Paged task 01', 'Paged task 07', '1 of 2'])
         ->assertDontSee('Paged task 08')
@@ -233,7 +233,7 @@ test('each line of the side list shows one task count, flagged when some are pas
     projectTask($calm, ['due_date' => now()->addWeek()]);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtml('title="2 tasks · 1 past due"')
         ->assertSeeHtml('class="dk-ptk-rail-n dk-num dk-bad"')
@@ -246,7 +246,7 @@ test('a subtask shows a remove button and is removed from its parent', function 
     $subtask = projectTask($project, ['parent_task_id' => $parent->id, 'created_by' => $manager->id]);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtml('data-test="subtask-remove-'.$subtask->id.'"')
         ->call('deleteProgramTask', $subtask->id);
@@ -260,7 +260,7 @@ test('a task row shows no progress percentage', function () {
     projectTask($project, ['title' => 'Half-typed task', 'progress_percentage' => 47]);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSee('Half-typed task')
         ->assertDontSee('47%')
@@ -272,7 +272,7 @@ test('an empty subtask field closes on blur, on a click elsewhere and on Esc', f
     $parent = projectTask($project);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtml('data-subtask-add="'.$parent->id.'"')
         ->assertSeeHtml('@click.outside="stopSubtask()"')
@@ -284,7 +284,7 @@ test('the grouping pills carry no visible "Group by" label', function () {
     projectTask($project);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtml('aria-label="Group by"')
         ->assertDontSeeHtml('dk-ptk-seg-l');
@@ -302,7 +302,7 @@ test('a task row shows one assignee by photo and name, several by up to three ph
     }
 
     $html = Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->html();
 
@@ -321,7 +321,7 @@ test('the × on an assignee photo takes that person off the task', function () {
     $assignee = $task->taskAssignees()->value('employee_id');
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtml('data-test="task-assignee-remove-'.$task->id.'-'.$assignee.'"')
         ->assertSeeHtml('data-tip="Remove assignee"')
@@ -338,7 +338,7 @@ test('a single page of a person\'s tasks has no footer line under it', function 
     $task->taskAssignees()->create(['employee_id' => $employeeId]);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtml('class="dk-ptk-foot"')
         ->set('taskGroupBy', 'assignee')
@@ -352,7 +352,7 @@ test('a report task row carries the Report badge and opens its report, as on the
     $task = projectTask($project, ['kind' => TaskKind::Report, 'reportable_type' => 'donor_report', 'reportable_id' => $report->id]);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtml('data-test="report-task-chip"')
         ->assertSeeHtml('href="'.route('donor-reports.show', $report->id).'"');
@@ -369,7 +369,7 @@ test('a task row carries the unread dot only while the task has unread notificat
     )));
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtml('data-unread-dot="task-'.$flagged->id.'"')
         ->assertDontSeeHtml('data-unread-dot="task-'.$quiet->id.'"');
@@ -380,7 +380,7 @@ test('the task menu carries the Desk scope so its icons keep their line style', 
     projectTask($project);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtml('class="dk-scope dk-ptk-menu"')
         ->assertSee('This cannot be undone.');
@@ -392,7 +392,7 @@ test('a task starts a subtask from the + beside its title, not from the ⋯ menu
     $subtask = projectTask($project, ['parent_task_id' => $parent->id]);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtml('data-test="task-add-subtask-'.$parent->id.'"')
         ->assertDontSeeHtml('data-test="task-add-subtask-'.$subtask->id.'"')
@@ -406,7 +406,7 @@ test('a task title line shows its subtask count and the hover buttons the viewer
     projectTask($project, ['parent_task_id' => $parent->id]);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtml('data-task-subtasks="'.$parent->id.'"')
         ->assertSeeHtml('data-test="task-subtask-count-'.$parent->id.'"')
@@ -418,7 +418,7 @@ test('a task is renamed in place, and a blank name is ignored', function () {
     $task = projectTask($project, ['title' => 'Old name']);
 
     $page = Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('renameProgramTask', $task->id, '   ');
 
     expect($task->fresh()->title)->toBe('Old name');
@@ -433,7 +433,7 @@ test('someone who cannot edit a task cannot rename it', function () {
     $task = projectTask($project, ['title' => 'Kept name']);
 
     Livewire::actingAs(User::factory()->create())
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('renameProgramTask', $task->id, 'Taken over');
 
     expect($task->fresh()->title)->toBe('Kept name');
@@ -444,7 +444,7 @@ test('a milestone task names its milestone under the title', function () {
     $task = Task::factory()->create(['source_type' => 'milestone', 'source_id' => $milestone->id]);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertSeeHtml('data-task-milestone="'.$task->id.'"')
         ->assertSeeHtml('title="Milestone: Pumps installed"');
@@ -455,7 +455,7 @@ test('the task menu no longer offers to move a task', function () {
     projectTask($project);
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->assertDontSeeHtml('data-test="task-more-move"')
         ->assertDontSeeHtml('data-move-target=');
@@ -465,7 +465,7 @@ test('the Add task dialog shows where the task goes, starting on the project bei
     ['program' => $program, 'project' => $project, 'manager' => $manager] = programTaskSetup();
 
     Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->set('tab', 'tasks')
         ->call('pickTaskBucket', 'project-'.$project->id)
         ->call('openAddTaskModal')
@@ -484,7 +484,7 @@ test('the Add task dialog sends the task to the picked milestone, and never outs
     $foreignMilestone = Milestone::factory()->create();
 
     $page = Livewire::actingAs($manager)
-        ->test('pages::programs.show', ['program' => $program])
+        ->test('tracking::programs.show', ['program' => $program])
         ->call('openAddTaskModal')
         ->assertSet('newTaskTarget', 'program')
         ->set('newTaskTitle', 'Test the pumps')

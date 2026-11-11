@@ -1,10 +1,10 @@
 <?php
 
 use App\Models\Activity;
-use App\Models\Task;
-use App\Models\User;
 use App\Notifications\ActivityParameters;
 use App\Notifications\NotificationPresenter;
+use Modules\Core\Models\User;
+use Modules\Tracking\Models\Task;
 
 test('a status change renders with translated statuses in english and arabic', function () {
     $data = [

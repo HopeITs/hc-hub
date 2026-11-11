@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Enums\ProjectStatus;
-use App\Models\Program;
-use App\Models\Project;
 use Database\Seeders\Concerns\PicksHrRecords;
 use Illuminate\Database\Seeder;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Project;
 
 /**
  * The organisation's real projects.

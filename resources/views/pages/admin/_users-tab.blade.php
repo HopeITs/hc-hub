@@ -85,7 +85,7 @@
                                         <flux:checkbox
                                             value="{{ $roleOption->id }}"
                                             :label="$roleOption->name"
-                                            :disabled="! Gate::check('update', $selectedUser) || ! Gate::check('assignRole', [App\Models\User::class, $roleOption])"
+                                            :disabled="! Gate::check('update', $selectedUser) || ! Gate::check('assignRole', [Modules\Core\Models\User::class, $roleOption])"
                                             wire:key="user-role-{{ $roleOption->id }}"
                                         />
                                     @endforeach
@@ -121,7 +121,7 @@
                                                     <flux:checkbox
                                                         value="{{ $permission->id }}"
                                                         :label="__('access.actions.'.str($permission->name)->afterLast('.'))"
-                                                        :disabled="! Gate::check('update', $selectedUser) || ! Gate::check('grantPermission', [App\Models\User::class, $permission])"
+                                                        :disabled="! Gate::check('update', $selectedUser) || ! Gate::check('grantPermission', [Modules\Core\Models\User::class, $permission])"
                                                         wire:key="user-permission-{{ $permission->id }}"
                                                     />
                                                 @endforeach

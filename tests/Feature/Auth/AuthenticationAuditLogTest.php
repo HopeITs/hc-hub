@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -8,6 +7,7 @@ use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Log;
 use Laravel\Fortify\Events\RecoveryCodeReplaced;
 use Laravel\Fortify\Events\TwoFactorAuthenticationDisabled;
+use Modules\Core\Models\User;
 use Monolog\Formatter\SyslogFormatter;
 use Monolog\Handler\SocketHandler;
 use Monolog\Handler\TestHandler;

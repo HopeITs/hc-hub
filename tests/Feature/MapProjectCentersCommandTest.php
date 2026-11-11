@@ -1,9 +1,9 @@
 <?php
 
-use App\Enums\ProjectStatus;
-use App\Models\Program;
-use App\Models\Project;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Program;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Models\Project;
 
 beforeEach(function () {
     $this->department = insertHrDepartment();

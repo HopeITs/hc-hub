@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Support\Desk\Panels;
 use App\Support\Desk\QuickAccess;
 use App\Support\Desk\Shortcuts;
@@ -12,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
+use Modules\Core\Models\User;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class ToggleDeskItemController extends Controller

@@ -1,20 +1,20 @@
 <?php
 
-use App\Actions\Projects\ArchiveProject;
-use App\Actions\Projects\RestoreProject;
-use App\Actions\Projects\SaveProject;
-use App\Actions\Proposals\ApproveProposal;
-use App\Enums\AssignmentStatus;
-use App\Enums\ProjectStatus;
-use App\Enums\ProposalStatus;
-use App\Models\Program;
-use App\Models\Project;
-use App\Models\Proposal;
-use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
+use Modules\Tracking\Actions\Projects\ArchiveProject;
+use Modules\Tracking\Actions\Projects\RestoreProject;
+use Modules\Tracking\Actions\Projects\SaveProject;
+use Modules\Tracking\Actions\Proposals\ApproveProposal;
+use Modules\Tracking\Enums\AssignmentStatus;
+use Modules\Tracking\Enums\ProjectStatus;
+use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 
 /*
 | contracts.md §3 (T05): a new project is a dateless draft; dates arrive only
@@ -80,7 +80,7 @@ beforeEach(function () {
         ...$fields,
     ];
     $this->create = fn (array $fields = []) => Livewire::actingAs($this->user)
-        ->test('pages::projects.index')
+        ->test('tracking::projects.index')
         ->call('openCreateModal')
         ->set('sectorIds', newProjectSectorIds())
         ->set(($this->data)($fields))
@@ -126,7 +126,7 @@ test('a status sent with the form never reaches the project', function () {
         'user_id' => $this->owner,
     ]);
 
-    Livewire::actingAs($this->user)->test('pages::projects.index')
+    Livewire::actingAs($this->user)->test('tracking::projects.index')
         ->call('openEditModal', $project->id)
         ->set('status', 'archived')
         ->set('name', 'Renamed')
@@ -144,7 +144,7 @@ test('the date inputs are not rendered for a draft', function () {
         'user_id' => $this->owner,
     ]);
 
-    Livewire::actingAs($this->user)->test('pages::projects.index')
+    Livewire::actingAs($this->user)->test('tracking::projects.index')
         ->call('openCreateModal')
         ->set('sectorIds', newProjectSectorIds())
         ->assertDontSeeHtml('wire:model="startDate"')
@@ -162,7 +162,7 @@ test('the dates of an active project are editable', function () {
         'user_id' => $this->owner,
     ]);
 
-    Livewire::actingAs($this->user)->test('pages::projects.index')
+    Livewire::actingAs($this->user)->test('tracking::projects.index')
         ->call('openEditModal', $project->id)
         ->assertSeeHtml('wire:model="startDate"')
         ->set('startDate', '2026-03-01')
@@ -184,7 +184,7 @@ test('editing a draft keeps its status and writes no dates', function () {
         'user_id' => $this->owner,
     ]);
 
-    Livewire::actingAs($this->user)->test('pages::projects.index')
+    Livewire::actingAs($this->user)->test('tracking::projects.index')
         ->call('openEditModal', $project->id)
         ->set('name', 'Renamed')
         ->call('saveProject')
@@ -296,12 +296,12 @@ test('a draft with dates is only allowed behind a donor-approved proposal', func
 test('a draft project page shows the no-active-proposal badge', function () {
     $draft = Project::factory()->create();
 
-    Livewire::actingAs($this->user)->test('pages::projects.show', ['project' => $draft])
+    Livewire::actingAs($this->user)->test('tracking::projects.show', ['project' => $draft])
         ->assertSeeHtml('data-test="no-active-proposal"');
 
     Proposal::factory()->create(['status' => ProposalStatus::ProposalDraft])->projects()->attach($draft->id);
 
-    Livewire::actingAs($this->user)->test('pages::projects.show', ['project' => $draft])
+    Livewire::actingAs($this->user)->test('tracking::projects.show', ['project' => $draft])
         ->assertDontSeeHtml('data-test="no-active-proposal"');
 });
 
@@ -314,7 +314,7 @@ test('the draft messages read in Arabic', function () {
 
     $draft = Project::factory()->create();
 
-    Livewire::actingAs($this->user)->test('pages::projects.show', ['project' => $draft])
+    Livewire::actingAs($this->user)->test('tracking::projects.show', ['project' => $draft])
         ->assertSee('لا يوجد مقترح فعّال');
 });
 
