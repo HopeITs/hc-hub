@@ -11,7 +11,7 @@
 @endphp
 
 @if ($listDays->isEmpty())
-    <x-ui.empty-state icon="calendar-days" :heading="__('hr_leave_calendar.empty')" />
+    <x-ui.empty-state icon="calendar-days" :heading="__('hr_leave.calendar.empty')" />
 @else
     <x-ui.panel as="ol" class="divide-y divide-secondary-soft dark:divide-line" data-calendar-list>
         @foreach ($listDays as $day)
@@ -25,16 +25,16 @@
                 <div class="w-36 shrink-0">
                     <p @class(['text-sm font-semibold', 'text-primary dark:text-brand-text' => $date === $today])>{{ $dayDate->translatedFormat('l j M') }}</p>
                     @if ($day['is_weekend'])
-                        <p class="text-xs text-secondary-medium dark:text-ink-muted">{{ __('hr_leave_calendar.weekend') }}</p>
+                        <p class="text-xs text-secondary-medium dark:text-ink-muted">{{ __('hr_leave.calendar.weekend') }}</p>
                     @endif
                     @if ($calendar['showCounts'] && $day['expected'] > 0)
-                        <p class="text-xs tabular-nums text-secondary-medium dark:text-ink-muted">{{ __('hr_leave_calendar.away_of', ['away' => $day['away'], 'expected' => $day['expected']]) }}</p>
+                        <p class="text-xs tabular-nums text-secondary-medium dark:text-ink-muted">{{ __('hr_leave.calendar.away_of', ['away' => $day['away'], 'expected' => $day['expected']]) }}</p>
                     @endif
                     @if ($day['pending'] > 0)
-                        <p class="text-xs tabular-nums text-status-warn">{{ __('hr_leave_calendar.pending_count', ['count' => $day['pending']]) }}</p>
+                        <p class="text-xs tabular-nums text-status-warn">{{ __('hr_leave.calendar.pending_count', ['count' => $day['pending']]) }}</p>
                     @endif
                     @if ($calendar['canManageHolidays'])
-                        <button type="button" class="mt-1 text-xs font-semibold text-secondary-medium underline underline-offset-2 hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink" wire:click="openCreateHoliday('{{ $date }}')">{{ __('hr_leave_calendar.add_holiday') }}</button>
+                        <button type="button" class="mt-1 text-xs font-semibold text-secondary-medium underline underline-offset-2 hover:text-secondary-dark dark:text-ink-muted dark:hover:text-ink" wire:click="openCreateHoliday('{{ $date }}')">{{ __('hr_leave.calendar.add_holiday') }}</button>
                     @endif
                 </div>
 
@@ -43,7 +43,7 @@
                         <p class="flex items-center gap-1.5 text-sm font-semibold text-status-critical">
                             <flux:icon.sun variant="micro" class="size-3.5 shrink-0" aria-hidden="true" />
                             @if ($holiday['editable'])
-                                <button type="button" class="truncate hover:underline" wire:click="openEditHoliday({{ $holiday['id'] }})" aria-label="{{ __('hr_leave_calendar.edit_holiday', ['name' => $holiday['name']]) }}">{{ $holiday['name'] }}</button>
+                                <button type="button" class="truncate hover:underline" wire:click="openEditHoliday({{ $holiday['id'] }})" aria-label="{{ __('hr_leave.calendar.edit_holiday', ['name' => $holiday['name']]) }}">{{ $holiday['name'] }}</button>
                             @else
                                 <span class="truncate">{{ $holiday['name'] }}</span>
                             @endif
@@ -53,7 +53,7 @@
                     @foreach ($dayBirthdays as $birthday)
                         <p class="flex items-center gap-1.5 text-sm text-secondary-medium dark:text-ink-muted" wire:key="{{ $birthday['key'] }}">
                             <flux:icon.cake variant="micro" class="size-3.5 shrink-0" aria-hidden="true" />
-                            <span dir="auto">{{ $birthday['is_self'] ? __('hr_leave_calendar.your_birthday') : __('hr_leave_calendar.birthday_of', ['name' => $birthday['name']]) }}</span>
+                            <span dir="auto">{{ $birthday['is_self'] ? __('hr_leave.calendar.your_birthday') : __('hr_leave.calendar.birthday_of', ['name' => $birthday['name']]) }}</span>
                         </p>
                     @endforeach
 
@@ -61,7 +61,7 @@
                         <x-hr::leave.calendar-entry :entry="$entry" wire:key="cal-entry-{{ $date }}-{{ $entry['key'] }}" />
                     @empty
                         @if ($dayHolidays === [] && $dayBirthdays === [])
-                            <p class="text-sm text-secondary-medium dark:text-ink-muted">{{ __('hr_leave_calendar.nobody') }}</p>
+                            <p class="text-sm text-secondary-medium dark:text-ink-muted">{{ __('hr_leave.calendar.nobody') }}</p>
                         @endif
                     @endforelse
                 </div>

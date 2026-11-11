@@ -45,16 +45,16 @@
                                 'inline-flex size-6 items-center justify-center rounded-full text-xs font-semibold tabular-nums',
                                 'bg-primary text-white dark:bg-brand' => $date === $today,
                                 'text-secondary-dark hover:bg-secondary-soft dark:text-ink dark:hover:bg-surface-2' => $date !== $today,
-                            ]) aria-label="{{ __('hr_leave_calendar.open_day', ['date' => \Carbon\CarbonImmutable::parse($date)->translatedFormat('j F')]) }}">{{ (int) substr($date, 8, 2) }}</button>
+                            ]) aria-label="{{ __('hr_leave.calendar.open_day', ['date' => \Carbon\CarbonImmutable::parse($date)->translatedFormat('j F')]) }}">{{ (int) substr($date, 8, 2) }}</button>
 
                             @if ($calendar['showCounts'] && $day['expected'] > 0 && ($day['away'] > 0 || $day['pending'] > 0))
-                                <span class="truncate text-[10px] tabular-nums text-secondary-medium dark:text-ink-muted">{{ __('hr_leave_calendar.away_of', ['away' => $day['away'], 'expected' => $day['expected']]) }}</span>
+                                <span class="truncate text-[10px] tabular-nums text-secondary-medium dark:text-ink-muted">{{ __('hr_leave.calendar.away_of', ['away' => $day['away'], 'expected' => $day['expected']]) }}</span>
                             @endif
                         </div>
 
                         @foreach ($dayHolidays as $holiday)
                             @if ($holiday['editable'])
-                                <button type="button" class="truncate rounded px-1 text-start text-[11px] font-semibold text-status-critical hover:underline" wire:click="openEditHoliday({{ $holiday['id'] }})" title="{{ $holiday['name'] }}" aria-label="{{ __('hr_leave_calendar.edit_holiday', ['name' => $holiday['name']]) }}">{{ $holiday['name'] }}</button>
+                                <button type="button" class="truncate rounded px-1 text-start text-[11px] font-semibold text-status-critical hover:underline" wire:click="openEditHoliday({{ $holiday['id'] }})" title="{{ $holiday['name'] }}" aria-label="{{ __('hr_leave.calendar.edit_holiday', ['name' => $holiday['name']]) }}">{{ $holiday['name'] }}</button>
                             @else
                                 <span class="truncate px-1 text-[11px] font-semibold text-status-critical" title="{{ $holiday['name'] }}">{{ $holiday['name'] }}</span>
                             @endif
@@ -63,7 +63,7 @@
                         @foreach ($dayBirthdays as $birthday)
                             <span class="flex items-center gap-1 truncate px-1 text-[11px] text-secondary-medium dark:text-ink-muted" wire:key="{{ $birthday['key'] }}">
                                 <flux:icon.cake variant="micro" class="size-3 shrink-0" aria-hidden="true" />
-                                <span class="truncate" dir="auto">{{ $birthday['is_self'] ? __('hr_leave_calendar.your_birthday') : __('hr_leave_calendar.birthday_of', ['name' => $birthday['name']]) }}</span>
+                                <span class="truncate" dir="auto">{{ $birthday['is_self'] ? __('hr_leave.calendar.your_birthday') : __('hr_leave.calendar.birthday_of', ['name' => $birthday['name']]) }}</span>
                             </span>
                         @endforeach
                     </div>
@@ -77,7 +77,7 @@
 
                 @foreach ($week['hidden'] as $col => $hiddenCount)
                     @if ($hiddenCount > 0)
-                        <button type="button" class="px-2 pb-1 text-start text-[11px] font-semibold text-secondary-medium hover:underline dark:text-ink-muted" style="grid-column: {{ $col + 1 }}; grid-row: -2" wire:click="openDay('{{ $week['days'][$col]['date'] }}')">{{ __('hr_leave_calendar.more', ['count' => $hiddenCount]) }}</button>
+                        <button type="button" class="px-2 pb-1 text-start text-[11px] font-semibold text-secondary-medium hover:underline dark:text-ink-muted" style="grid-column: {{ $col + 1 }}; grid-row: -2" wire:click="openDay('{{ $week['days'][$col]['date'] }}')">{{ __('hr_leave.calendar.more', ['count' => $hiddenCount]) }}</button>
                     @endif
                 @endforeach
             </div>
@@ -86,5 +86,5 @@
 </div>
 
 @unless ($calendar['hasAbsences'])
-    <p class="mt-3 text-sm text-secondary-medium dark:text-ink-muted">{{ __('hr_leave_calendar.empty') }}</p>
+    <p class="mt-3 text-sm text-secondary-medium dark:text-ink-muted">{{ __('hr_leave.calendar.empty') }}</p>
 @endunless

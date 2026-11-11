@@ -8,12 +8,12 @@
 --}}
 @php
     $pending = $entry['status'] === 'pending';
-    $label = ($entry['is_self'] ? __('hr_leave_calendar.you') : $entry['name']).' · '.$entry['type'];
+    $label = ($entry['is_self'] ? __('hr_leave.calendar.you') : $entry['name']).' · '.$entry['type'];
     $details = collect([
         $entry['position'] !== '' ? $entry['position'] : null,
-        $entry['partial'] ? __('hr_leave_calendar.partial').($entry['hours'] !== null ? ' '.$entry['hours'] : '') : null,
-        $entry['status'] !== null ? __('hr_leave_calendar.status.'.$entry['status']) : null,
-        $entry['substitute'] !== null ? __('hr_leave_calendar.substitute', ['name' => $entry['substitute']]) : null,
+        $entry['partial'] ? __('hr_leave.calendar.partial').($entry['hours'] !== null ? ' '.$entry['hours'] : '') : null,
+        $entry['status'] !== null ? __('hr_leave.calendar.status.'.$entry['status']) : null,
+        $entry['substitute'] !== null ? __('hr_leave.calendar.substitute', ['name' => $entry['substitute']]) : null,
     ])->filter()->implode(' · ');
 @endphp
 
@@ -34,7 +34,7 @@
         <flux:icon.check variant="micro" class="size-3 shrink-0 text-status-good" aria-hidden="true" />
     @endif
     @if ($entry['partial'])
-        <span class="inline-block size-2.5 shrink-0 rounded-full bg-linear-to-r from-current from-50% to-transparent to-50% ring-1 ring-current" aria-label="{{ __('hr_leave_calendar.partial') }}"></span>
+        <span class="inline-block size-2.5 shrink-0 rounded-full bg-linear-to-r from-current from-50% to-transparent to-50% ring-1 ring-current" aria-label="{{ __('hr_leave.calendar.partial') }}"></span>
     @endif
     <span class="truncate" dir="auto">{{ $label }}</span>
     @if (! $compact && $details !== '')

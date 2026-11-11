@@ -8,20 +8,20 @@
     $holidayKind = $holidayForm['kind'] ?? 'official';
     $isNational = $this->isNationalHr;
     $kindOptions = [
-        ['value' => 'official', 'label' => __('hr_leave_calendar.holidays.kinds.official')],
-        ['value' => 'grant', 'label' => __('hr_leave_calendar.holidays.kinds.grant')],
+        ['value' => 'official', 'label' => __('hr_leave.calendar.holidays.kinds.official')],
+        ['value' => 'grant', 'label' => __('hr_leave.calendar.holidays.kinds.grant')],
     ];
 
     if ($isNational) {
-        $kindOptions[] = ['value' => 'birthday', 'label' => __('hr_leave_calendar.holidays.kinds.birthday')];
+        $kindOptions[] = ['value' => 'birthday', 'label' => __('hr_leave.calendar.holidays.kinds.birthday')];
     }
 @endphp
 
 <x-ui.modal
     wire:model="showHolidayModal"
     size="md"
-    :title="$editingHolidayId === null ? __('hr_leave_calendar.holidays.add') : __('hr_leave_calendar.holidays.edit')"
-    :description="__('hr_leave_calendar.holidays.dialog_description')"
+    :title="$editingHolidayId === null ? __('hr_leave.calendar.holidays.add') : __('hr_leave.calendar.holidays.edit')"
+    :description="__('hr_leave.calendar.holidays.dialog_description')"
     submit="saveHoliday"
     close="closeHolidayModal"
     required-note
@@ -29,25 +29,25 @@
     @if ($showHolidayModal)
         <div class="grid gap-y-3" data-holiday-form>
             <div class="grid gap-3 sm:grid-cols-2">
-                <x-ui.form-input wire:model="holidayForm.name_en" :label="__('hr_leave_calendar.holidays.name_en')" required maxlength="255" dir="ltr" lang="en" />
-                <x-ui.form-input wire:model="holidayForm.name_ar" :label="__('hr_leave_calendar.holidays.name_ar')" required maxlength="255" dir="rtl" lang="ar" />
+                <x-ui.form-input wire:model="holidayForm.name_en" :label="__('hr_leave.calendar.holidays.name_en')" required maxlength="255" dir="ltr" lang="en" />
+                <x-ui.form-input wire:model="holidayForm.name_ar" :label="__('hr_leave.calendar.holidays.name_ar')" required maxlength="255" dir="rtl" lang="ar" />
             </div>
 
             <x-ui.form-segmented
                 wire:model.live="holidayForm.kind"
-                :label="__('hr_leave_calendar.holidays.kind')"
+                :label="__('hr_leave.calendar.holidays.kind')"
                 :options="$kindOptions"
-                :help="__('hr_leave_calendar.holidays.kind_hints.'.$holidayKind)"
+                :help="__('hr_leave.calendar.holidays.kind_hints.'.$holidayKind)"
                 required
             />
 
             @if ($isNational)
                 <x-ui.form-segmented
                     wire:model.live="holidayForm.scope"
-                    :label="__('hr_leave_calendar.holidays.applies_to')"
+                    :label="__('hr_leave.calendar.holidays.applies_to')"
                     :options="[
-                        ['value' => 'national', 'label' => __('hr_leave_calendar.holidays.national')],
-                        ['value' => 'projects', 'label' => __('hr_leave_calendar.holidays.selected_projects')],
+                        ['value' => 'national', 'label' => __('hr_leave.calendar.holidays.national')],
+                        ['value' => 'projects', 'label' => __('hr_leave.calendar.holidays.selected_projects')],
                     ]"
                     required
                 />
@@ -62,17 +62,17 @@
                     $projectError = $errors->first('holidayForm.projects') ?: $errors->first('holidayForm.projects.*');
                 @endphp
                 <div class="min-w-0" data-holiday-projects>
-                    <p class="form-label">{{ __('hr_leave_calendar.holidays.projects') }} <span class="form-required" aria-hidden="true">*</span></p>
+                    <p class="form-label">{{ __('hr_leave.calendar.holidays.projects') }} <span class="form-required" aria-hidden="true">*</span></p>
 
                     @if (count($this->projectGovernorates) > 1)
                         <div class="mb-2 flex flex-wrap items-end gap-2">
-                            <x-ui.form-select wire:model="holidayGovernorate" :label="__('hr_leave_calendar.holidays.governorate')" class="min-w-48 flex-1">
-                                <option value="">{{ __('hr_leave_calendar.holidays.governorate') }}</option>
+                            <x-ui.form-select wire:model="holidayGovernorate" :label="__('hr_leave.calendar.holidays.governorate')" class="min-w-48 flex-1">
+                                <option value="">{{ __('hr_leave.calendar.holidays.governorate') }}</option>
                                 @foreach ($this->projectGovernorates as $cityId => $cityName)
                                     <option value="{{ $cityId }}">{{ $cityName }}</option>
                                 @endforeach
                             </x-ui.form-select>
-                            <x-ui.button type="button" tone="secondary" wire:click="selectGovernorateProjects">{{ __('hr_leave_calendar.holidays.select_governorate') }}</x-ui.button>
+                            <x-ui.button type="button" tone="secondary" wire:click="selectGovernorateProjects">{{ __('hr_leave.calendar.holidays.select_governorate') }}</x-ui.button>
                         </div>
                     @endif
 
@@ -83,7 +83,7 @@
                                 <bdi>{{ $projectLabel }}</bdi>
                             </label>
                         @empty
-                            <p class="text-sm text-secondary-medium dark:text-ink-muted">{{ __('hr_leave_calendar.holidays.no_projects_to_pick') }}</p>
+                            <p class="text-sm text-secondary-medium dark:text-ink-muted">{{ __('hr_leave.calendar.holidays.no_projects_to_pick') }}</p>
                         @endforelse
                     </div>
 
@@ -94,12 +94,12 @@
             @endif
 
             <div class="grid gap-3 sm:grid-cols-2">
-                <x-ui.form-input wire:model="holidayForm.start_date" type="date" :label="__($holidayKind === 'birthday' ? 'hr_leave_calendar.holidays.valid_from' : 'hr_leave_calendar.holidays.from')" required />
-                <x-ui.form-input wire:model="holidayForm.end_date" type="date" :label="__($holidayKind === 'birthday' ? 'hr_leave_calendar.holidays.valid_to' : 'hr_leave_calendar.holidays.to')" required />
+                <x-ui.form-input wire:model="holidayForm.start_date" type="date" :label="__($holidayKind === 'birthday' ? 'hr_leave.calendar.holidays.valid_from' : 'hr_leave.calendar.holidays.from')" required />
+                <x-ui.form-input wire:model="holidayForm.end_date" type="date" :label="__($holidayKind === 'birthday' ? 'hr_leave.calendar.holidays.valid_to' : 'hr_leave.calendar.holidays.to')" required />
             </div>
 
             @if ($holidayKind !== 'grant')
-                <flux:checkbox wire:model="holidayForm.is_recurring" :label="__('hr_leave_calendar.holidays.recurring')" :description="__('hr_leave_calendar.holidays.recurring_hint')" />
+                <flux:checkbox wire:model="holidayForm.is_recurring" :label="__('hr_leave.calendar.holidays.recurring')" :description="__('hr_leave.calendar.holidays.recurring_hint')" />
             @endif
         </div>
     @endif

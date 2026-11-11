@@ -21,7 +21,7 @@ use Modules\Hr\Support\Leave\HolidayProjects;
  * manager sees the national holidays (read only) and those on their own
  * projects, and adds official holidays and grants to those projects (H-6).
  */
-new #[Layout('layouts::desk'), Title('hr_leave_calendar.titles.holidays')] class extends Component {
+new #[Layout('layouts::desk'), Title('hr_leave.calendar.titles.holidays')] class extends Component {
     use ManagesHolidayForm;
     use WithPagination;
 
@@ -98,7 +98,7 @@ new #[Layout('layouts::desk'), Title('hr_leave_calendar.titles.holidays')] class
 
         $this->holidaysChanged();
 
-        Flux::toast(variant: 'success', text: __('hr_leave_calendar.holidays.deleted'));
+        Flux::toast(variant: 'success', text: __('hr_leave.calendar.holidays.deleted'));
     }
 
     public function cancelDeleteHoliday(): void
@@ -123,44 +123,44 @@ new #[Layout('layouts::desk'), Title('hr_leave_calendar.titles.holidays')] class
     $listSeparator = app()->getLocale() === 'ar' ? '، ' : ', ';
 @endphp
 
-<x-desk.register class="@container" heading-id="hr-holidays-heading" :title="__('hr_leave_calendar.titles.holidays')" :count="$holidays->total()" data-hr-holidays>
+<x-desk.register class="@container" heading-id="hr-holidays-heading" :title="__('hr_leave.calendar.titles.holidays')" :count="$holidays->total()" data-hr-holidays>
     <x-slot:actions>
-        <x-ui.button tone="secondary" icon="cake" :href="route('hr.leave.birthday-choices')" wire:navigate>{{ __('hr_leave_calendar.holidays.birthday_choices') }}</x-ui.button>
-        <x-ui.button tone="primary" icon="plus" wire:click="openCreateHoliday" data-test="create-holiday" data-quick-create>{{ __('hr_leave_calendar.holidays.add') }}</x-ui.button>
+        <x-ui.button tone="secondary" icon="cake" :href="route('hr.leave.birthday-choices')" wire:navigate>{{ __('hr_leave.calendar.holidays.birthday_choices') }}</x-ui.button>
+        <x-ui.button tone="primary" icon="plus" wire:click="openCreateHoliday" data-test="create-holiday" data-quick-create>{{ __('hr_leave.calendar.holidays.add') }}</x-ui.button>
     </x-slot:actions>
 
     <x-slot:search>
-        <x-desk.register-search :label="__('hr_leave_calendar.holidays.search')" :placeholder="__('hr_leave_calendar.holidays.search_placeholder')" wire:model.live.debounce.300ms="search" />
+        <x-desk.register-search :label="__('hr_leave.calendar.holidays.search')" :placeholder="__('hr_leave.calendar.holidays.search_placeholder')" wire:model.live.debounce.300ms="search" />
     </x-slot:search>
 
     <x-slot:filters>
-        <x-ui.header-filter-select :label="__('hr_leave_calendar.holidays.kind')" wire:model.live="kind" :value="$kind">
-            <option value="">{{ __('hr_leave_calendar.holidays.all_kinds') }}</option>
+        <x-ui.header-filter-select :label="__('hr_leave.calendar.holidays.kind')" wire:model.live="kind" :value="$kind">
+            <option value="">{{ __('hr_leave.calendar.holidays.all_kinds') }}</option>
             @foreach ($this::KINDS as $kindOption)
-                <option value="{{ $kindOption }}">{{ __('hr_leave_calendar.holidays.kinds.'.$kindOption) }}</option>
+                <option value="{{ $kindOption }}">{{ __('hr_leave.calendar.holidays.kinds.'.$kindOption) }}</option>
             @endforeach
         </x-ui.header-filter-select>
     </x-slot:filters>
 
     @unless ($this->isNationalHr)
-        <p class="mb-3 type-meta {{ $muted }}">{{ __('hr_leave_calendar.holidays.manager_hint') }}</p>
+        <p class="mb-3 type-meta {{ $muted }}">{{ __('hr_leave.calendar.holidays.manager_hint') }}</p>
     @endunless
 
     @if ($holidays->isEmpty())
         @if ($search === '' && $kind === '')
-            <x-ui.empty-state icon="sun" :heading="__('hr_leave_calendar.holidays.empty_heading')" :body="__('hr_leave_calendar.holidays.empty_body')" />
+            <x-ui.empty-state icon="sun" :heading="__('hr_leave.calendar.holidays.empty_heading')" :body="__('hr_leave.calendar.holidays.empty_body')" />
         @else
-            <x-ui.empty-state icon="sun" :heading="__('hr_leave_calendar.holidays.no_matching')" :body="__('common.change_the_search_or_filters_and_try_again')" />
+            <x-ui.empty-state icon="sun" :heading="__('hr_leave.calendar.holidays.no_matching')" :body="__('common.change_the_search_or_filters_and_try_again')" />
         @endif
     @else
-        <x-ui.data-table :caption="__('hr_leave_calendar.titles.holidays')">
+        <x-ui.data-table :caption="__('hr_leave.calendar.titles.holidays')">
             <x-slot:head>
-                <th>{{ __('hr_leave_calendar.holidays.name') }}</th>
-                <th class="w-40!">{{ __('hr_leave_calendar.holidays.kind') }}</th>
-                <th>{{ __('hr_leave_calendar.holidays.applies_to') }}</th>
-                <th class="w-32!">{{ __('hr_leave_calendar.holidays.from') }}</th>
-                <th class="w-32!">{{ __('hr_leave_calendar.holidays.to') }}</th>
-                <th class="w-28!">{{ __('hr_leave_calendar.holidays.recurring') }}</th>
+                <th>{{ __('hr_leave.calendar.holidays.name') }}</th>
+                <th class="w-40!">{{ __('hr_leave.calendar.holidays.kind') }}</th>
+                <th>{{ __('hr_leave.calendar.holidays.applies_to') }}</th>
+                <th class="w-32!">{{ __('hr_leave.calendar.holidays.from') }}</th>
+                <th class="w-32!">{{ __('hr_leave.calendar.holidays.to') }}</th>
+                <th class="w-28!">{{ __('hr_leave.calendar.holidays.recurring') }}</th>
                 <th class="w-24!"><span class="sr-only">{{ __('common.actions') }}</span></th>
             </x-slot:head>
 
@@ -170,23 +170,23 @@ new #[Layout('layouts::desk'), Title('hr_leave_calendar.titles.holidays')] class
                     $editable = $projects->canChange($user, $holiday);
                 @endphp
                 <tr wire:key="holiday-{{ $holiday->id }}" data-holiday="{{ $holiday->id }}">
-                    <x-ui.data-table.cell :label="__('hr_leave_calendar.holidays.name')"><span class="font-semibold" dir="auto">{{ $holiday->name }}</span></x-ui.data-table.cell>
-                    <x-ui.data-table.cell :label="__('hr_leave_calendar.holidays.kind')">{{ __('hr_leave_calendar.holidays.kinds.'.$holiday->kind) }}</x-ui.data-table.cell>
-                    <x-ui.data-table.cell :label="__('hr_leave_calendar.holidays.applies_to')">
+                    <x-ui.data-table.cell :label="__('hr_leave.calendar.holidays.name')"><span class="font-semibold" dir="auto">{{ $holiday->name }}</span></x-ui.data-table.cell>
+                    <x-ui.data-table.cell :label="__('hr_leave.calendar.holidays.kind')">{{ __('hr_leave.calendar.holidays.kinds.'.$holiday->kind) }}</x-ui.data-table.cell>
+                    <x-ui.data-table.cell :label="__('hr_leave.calendar.holidays.applies_to')">
                         @if ($holiday->isNational())
-                            {{ __('hr_leave_calendar.holidays.national') }}
+                            {{ __('hr_leave.calendar.holidays.national') }}
                         @elseif ($labels->isEmpty())
-                            <span class="text-status-critical">{{ __('hr_leave_calendar.holidays.no_projects') }}</span>
+                            <span class="text-status-critical">{{ __('hr_leave.calendar.holidays.no_projects') }}</span>
                         @else
                             <span dir="auto">{{ $labels->take(3)->join($listSeparator) }}</span>
                             @if ($labels->count() > 3)
-                                <span class="{{ $muted }}">{{ __('hr_leave_calendar.holidays.more_projects', ['count' => $labels->count() - 3]) }}</span>
+                                <span class="{{ $muted }}">{{ __('hr_leave.calendar.holidays.more_projects', ['count' => $labels->count() - 3]) }}</span>
                             @endif
                         @endif
                     </x-ui.data-table.cell>
-                    <x-ui.data-table.cell :label="__('hr_leave_calendar.holidays.from')"><span class="tabular-nums">{{ $holiday->start_date->translatedFormat(__('formats.date')) }}</span></x-ui.data-table.cell>
-                    <x-ui.data-table.cell :label="__('hr_leave_calendar.holidays.to')"><span class="tabular-nums">{{ $holiday->end_date->translatedFormat(__('formats.date')) }}</span></x-ui.data-table.cell>
-                    <x-ui.data-table.cell :label="__('hr_leave_calendar.holidays.recurring')">{{ $holiday->is_recurring ? __('hr_leave_calendar.holidays.yes') : __('hr_leave_calendar.holidays.no') }}</x-ui.data-table.cell>
+                    <x-ui.data-table.cell :label="__('hr_leave.calendar.holidays.from')"><span class="tabular-nums">{{ $holiday->start_date->translatedFormat(__('formats.date')) }}</span></x-ui.data-table.cell>
+                    <x-ui.data-table.cell :label="__('hr_leave.calendar.holidays.to')"><span class="tabular-nums">{{ $holiday->end_date->translatedFormat(__('formats.date')) }}</span></x-ui.data-table.cell>
+                    <x-ui.data-table.cell :label="__('hr_leave.calendar.holidays.recurring')">{{ $holiday->is_recurring ? __('hr_leave.calendar.holidays.yes') : __('hr_leave.calendar.holidays.no') }}</x-ui.data-table.cell>
                     <td class="px-3.5 py-2.5">
                         @if ($editable)
                             <span class="flex items-center justify-end gap-1">
@@ -209,8 +209,8 @@ new #[Layout('layouts::desk'), Title('hr_leave_calendar.titles.holidays')] class
     <x-ui.confirm-modal
         wire:model="showDeleteModal"
         close="cancelDeleteHoliday"
-        :title="__('hr_leave_calendar.holidays.delete_title', ['name' => $deletingHolidayName])"
-        :message="__('hr_leave_calendar.holidays.delete_message')"
+        :title="__('hr_leave.calendar.holidays.delete_title', ['name' => $deletingHolidayName])"
+        :message="__('hr_leave.calendar.holidays.delete_message')"
         confirm="deleteHoliday"
         :confirm-label="__('common.delete')"
         confirm-test="confirm-delete-holiday"

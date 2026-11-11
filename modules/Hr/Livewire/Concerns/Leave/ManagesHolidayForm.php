@@ -140,7 +140,7 @@ trait ManagesHolidayForm
         $this->closeHolidayModal();
         $this->holidaysChanged();
 
-        Flux::toast(variant: 'success', text: __($created ? 'hr_leave_calendar.holidays.created' : 'hr_leave_calendar.holidays.updated', ['name' => $holiday->name]));
+        Flux::toast(variant: 'success', text: __($created ? 'hr_leave.calendar.holidays.created' : 'hr_leave.calendar.holidays.updated', ['name' => $holiday->name]));
     }
 
     public function closeHolidayModal(): void

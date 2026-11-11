@@ -55,9 +55,9 @@ enum LeaveRequestStatus: int implements HasStatusTone
     private static function labelKey(int $value): string
     {
         return match ($value) {
-            self::Accepted->value => 'leaves.status.accepted',
-            self::Rejected->value => 'leaves.status.rejected',
-            default => 'leaves.status.pending',
+            self::Accepted->value => 'hr_leave.status.accepted',
+            self::Rejected->value => 'hr_leave.status.rejected',
+            default => 'hr_leave.status.pending',
         };
     }
 }

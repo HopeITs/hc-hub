@@ -691,7 +691,7 @@ final class TeamCoverage
             'counted' => $counted,
             'partial' => $partial,
             'hours' => $manager && $partial ? $leave->start_at->format('H:i').'–'.$leave->end_at->format('H:i') : null,
-            'type' => $neutral ? __('hr_leave_calendar.on_leave') : (string) ($type?->name ?? __('hr_leave_calendar.on_leave')),
+            'type' => $neutral ? __('hr_leave.calendar.on_leave') : (string) ($type?->name ?? __('hr_leave.calendar.on_leave')),
             'status' => $manager ? ($pending ? 'pending' : 'accepted') : null,
             'substitute' => $manager ? $leave->alternativeEmployee?->name : null,
             'is_self' => $member['is_self'],

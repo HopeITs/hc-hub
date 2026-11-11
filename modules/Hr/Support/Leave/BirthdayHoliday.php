@@ -126,7 +126,7 @@ final class BirthdayHoliday
         $occurrence = collect($this->occurrencesFor($contract, CarbonImmutable::create($year, 1, 1), CarbonImmutable::create($year, 12, 31)))
             ->first(fn ($o) => $o['holiday']->is($holiday) && $o['year'] === $year);
 
-        $fail = fn (string $key) => throw ValidationException::withMessages(['chosen_date' => __('hr_leave_calendar.birthday.'.$key)]);
+        $fail = fn (string $key) => throw ValidationException::withMessages(['chosen_date' => __('hr_leave.calendar.birthday.'.$key)]);
 
         if (! $occurrence || ! $occurrence['conflict']) {
             $fail('no-choice-needed');

@@ -94,15 +94,15 @@ final class SaveHoliday
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'is_recurring' => ['boolean'],
         ], [
-            'projects.required' => __('hr_leave_calendar.holidays.projects_required'),
-            'projects.*.in' => __('hr_leave_calendar.holidays.invalid_project'),
-            'scope.in' => __('hr_leave_calendar.holidays.invalid_scope'),
-            'kind.in' => __('hr_leave_calendar.holidays.invalid_kind'),
+            'projects.required' => __('hr_leave.calendar.holidays.projects_required'),
+            'projects.*.in' => __('hr_leave.calendar.holidays.invalid_project'),
+            'scope.in' => __('hr_leave.calendar.holidays.invalid_scope'),
+            'kind.in' => __('hr_leave.calendar.holidays.invalid_kind'),
         ]);
 
         $validator->after(function ($validator) use ($input): void {
             if (($input['kind'] ?? null) === Holiday::KIND_GRANT && ($input['scope'] ?? null) !== Holiday::SCOPE_PROJECTS) {
-                $validator->errors()->add('scope', __('hr_leave_calendar.holidays.grant_needs_projects'));
+                $validator->errors()->add('scope', __('hr_leave.calendar.holidays.grant_needs_projects'));
             }
         });
 

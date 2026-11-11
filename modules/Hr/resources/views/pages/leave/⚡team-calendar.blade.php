@@ -26,7 +26,7 @@ use Modules\Hr\Support\Leave\TeamCoverage;
  * each is checked against what the viewer may use, and an unknown or
  * forbidden value falls back to the default.
  */
-new #[Layout('layouts::desk'), Title('hr_leave_calendar.titles.team_calendar')] class extends Component {
+new #[Layout('layouts::desk'), Title('hr_leave.calendar.titles.team_calendar')] class extends Component {
     use ManagesHolidayForm;
     use ReadsTeamCalendar;
 
@@ -164,7 +164,7 @@ new #[Layout('layouts::desk'), Title('hr_leave_calendar.titles.team_calendar')] 
     $muted = 'text-secondary-medium dark:text-ink-muted';
     $periodLabel = match ($viewName) {
         'day' => $anchor->translatedFormat('l j F Y'),
-        'week' => __('hr_leave_calendar.range', ['from' => $from->translatedFormat('j M'), 'to' => $to->translatedFormat('j M Y')]),
+        'week' => __('hr_leave.calendar.range', ['from' => $from->translatedFormat('j M'), 'to' => $to->translatedFormat('j M Y')]),
         default => $anchor->translatedFormat('F Y'),
     };
     $viewOptions = collect($this::CALENDAR_VIEWS)->mapWithKeys(fn (string $key): array => [$key => ['icon' => match ($key) {
@@ -172,41 +172,41 @@ new #[Layout('layouts::desk'), Title('hr_leave_calendar.titles.team_calendar')] 
         'week' => 'board',
         'day' => 'list',
         default => 'table',
-    }, 'label' => __('hr_leave_calendar.views.'.$key)]])->all();
+    }, 'label' => __('hr_leave.calendar.views.'.$key)]])->all();
 @endphp
 
-<x-desk.register heading-id="hr-team-calendar-heading" :title="__('hr_leave_calendar.titles.team_calendar')" :views="$viewOptions" :view="$viewName" view-model="view" data-hr-team-calendar>
-    <x-slot:figures>{{ __('hr_leave_calendar.intro') }}</x-slot:figures>
+<x-desk.register heading-id="hr-team-calendar-heading" :title="__('hr_leave.calendar.titles.team_calendar')" :views="$viewOptions" :view="$viewName" view-model="view" data-hr-team-calendar>
+    <x-slot:figures>{{ __('hr_leave.calendar.intro') }}</x-slot:figures>
 
     <x-slot:actions>
         @if ($calendar['canManageHolidays'])
-            <x-ui.button tone="secondary" icon="plus" wire:click="openCreateHoliday" data-test="calendar-add-holiday">{{ __('hr_leave_calendar.add_holiday') }}</x-ui.button>
+            <x-ui.button tone="secondary" icon="plus" wire:click="openCreateHoliday" data-test="calendar-add-holiday">{{ __('hr_leave.calendar.add_holiday') }}</x-ui.button>
         @endif
         @if ($calendar['requestRoute'] !== null)
-            <x-ui.button tone="primary" icon="plus" :href="route($calendar['requestRoute'], ['new' => 1])" wire:navigate>{{ __('hr_leave_calendar.request_leave') }}</x-ui.button>
+            <x-ui.button tone="primary" icon="plus" :href="route($calendar['requestRoute'], ['new' => 1])" wire:navigate>{{ __('hr_leave.calendar.request_leave') }}</x-ui.button>
         @endif
     </x-slot:actions>
 
     <x-slot:filters>
         @if (count($calendar['scopes']) > 1)
-            <x-ui.header-filter-select :label="__('hr_leave_calendar.scopes.label')" wire:model.live="scope" :value="$calendar['scope']">
+            <x-ui.header-filter-select :label="__('hr_leave.calendar.scopes.label')" wire:model.live="scope" :value="$calendar['scope']">
                 @foreach ($calendar['scopes'] as $scopeOption)
-                    <option value="{{ $scopeOption }}">{{ __('hr_leave_calendar.scopes.'.$scopeOption) }}</option>
+                    <option value="{{ $scopeOption }}">{{ __('hr_leave.calendar.scopes.'.$scopeOption) }}</option>
                 @endforeach
             </x-ui.header-filter-select>
         @endif
 
         @if ($calendar['managerView'])
-            <x-ui.header-filter-select :label="__('hr_leave_calendar.status.label')" wire:model.live="status" :value="$calendar['status']">
+            <x-ui.header-filter-select :label="__('hr_leave.calendar.status.label')" wire:model.live="status" :value="$calendar['status']">
                 @foreach ($this::CALENDAR_STATUSES as $statusOption)
-                    <option value="{{ $statusOption }}">{{ __('hr_leave_calendar.status.'.$statusOption) }}</option>
+                    <option value="{{ $statusOption }}">{{ __('hr_leave.calendar.status.'.$statusOption) }}</option>
                 @endforeach
             </x-ui.header-filter-select>
         @endif
 
         @if ($calendar['cities'] !== [])
-            <x-ui.header-filter-select :label="__('hr_leave_calendar.city.label')" wire:model.live="cityId" :value="(string) ($calendar['cityId'] ?? '')">
-                <option value="">{{ __('hr_leave_calendar.city.all') }}</option>
+            <x-ui.header-filter-select :label="__('hr_leave.calendar.city.label')" wire:model.live="cityId" :value="(string) ($calendar['cityId'] ?? '')">
+                <option value="">{{ __('hr_leave.calendar.city.all') }}</option>
                 @foreach ($calendar['cities'] as $cityOptionId => $cityOptionName)
                     <option value="{{ $cityOptionId }}">{{ $cityOptionName }}</option>
                 @endforeach
@@ -215,9 +215,9 @@ new #[Layout('layouts::desk'), Title('hr_leave_calendar.titles.team_calendar')] 
     </x-slot:filters>
 
     <div class="mb-3 flex flex-wrap items-center gap-2" data-calendar-toolbar>
-        <x-ui.button tone="ghost" size="sm" icon="chevron-left" class="size-9! rtl:rotate-180" wire:click="move(-1)" :aria-label="__('hr_leave_calendar.nav_buttons.previous')" />
-        <x-ui.button tone="secondary" size="sm" wire:click="goToday">{{ __('hr_leave_calendar.nav_buttons.today') }}</x-ui.button>
-        <x-ui.button tone="ghost" size="sm" icon="chevron-right" class="size-9! rtl:rotate-180" wire:click="move(1)" :aria-label="__('hr_leave_calendar.nav_buttons.next')" />
+        <x-ui.button tone="ghost" size="sm" icon="chevron-left" class="size-9! rtl:rotate-180" wire:click="move(-1)" :aria-label="__('hr_leave.calendar.nav_buttons.previous')" />
+        <x-ui.button tone="secondary" size="sm" wire:click="goToday">{{ __('hr_leave.calendar.nav_buttons.today') }}</x-ui.button>
+        <x-ui.button tone="ghost" size="sm" icon="chevron-right" class="size-9! rtl:rotate-180" wire:click="move(1)" :aria-label="__('hr_leave.calendar.nav_buttons.next')" />
         <h2 class="ms-1 text-base font-bold text-secondary-dark dark:text-ink" aria-live="polite">{{ $periodLabel }}</h2>
         <span wire:loading.delay.flex class="hidden items-center gap-1.5 text-xs {{ $muted }}">
             <flux:icon.arrow-path class="size-3.5 animate-spin" />{{ __('common.updating') }}
@@ -225,14 +225,14 @@ new #[Layout('layouts::desk'), Title('hr_leave_calendar.titles.team_calendar')] 
     </div>
 
     @if ($calendar['failed'])
-        <x-ui.empty-state icon="exclamation-triangle" :heading="__('hr_leave_calendar.failed')" />
+        <x-ui.empty-state icon="exclamation-triangle" :heading="__('hr_leave.calendar.failed')" />
     @elseif ($viewName === 'month')
         @include('hr::pages.leave._calendar-month')
     @else
         @include('hr::pages.leave._calendar-list')
     @endif
 
-    <p class="mt-3 type-meta {{ $muted }}">{{ __('hr_leave_calendar.legend') }}</p>
+    <p class="mt-3 type-meta {{ $muted }}">{{ __('hr_leave.calendar.legend') }}</p>
 
     @if ($calendar['canManageHolidays'])
         @include('hr::pages.leave._holidays-modal')
