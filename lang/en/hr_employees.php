@@ -346,6 +346,10 @@ return [
         'file_deleted' => 'File deleted.',
         'shared_done' => 'Sharing updated.',
         'back' => 'All folders',
+        'too_many' => 'Too many uploads. Wait a minute and try again.',
+        'uploading' => 'Uploading…',
+        'download' => 'Download',
+        'updated' => 'Updated',
     ],
 
     'draft' => [
