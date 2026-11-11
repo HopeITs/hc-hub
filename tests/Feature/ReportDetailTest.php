@@ -19,7 +19,7 @@ test('guests are redirected from report detail', function () {
 
 test('report detail shows the figure its target and its author', function () {
     $user = User::factory()->role('General Manager')->create();
-    $author = User::factory()->create(['name' => 'Layla Haddad']);
+    $author = User::factory()->create(['employee_id' => namedEmployee('Layla Haddad')]);
     $report = Report::factory()->create(['user_id' => $author->id, 'value' => '9500.00']);
 
     $this->actingAs($user)

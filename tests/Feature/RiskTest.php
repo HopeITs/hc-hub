@@ -10,7 +10,7 @@ function insertProjectForNewUser(): int
 {
     $user = User::factory()->create();
 
-    return insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
+    return insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
 }
 
 test('a newly registered risk has not happened yet', function () {

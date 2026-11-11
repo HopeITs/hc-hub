@@ -36,7 +36,7 @@ test('a file casts its collection and type to enums', function () {
 });
 
 test('a file reports its uploader', function () {
-    $user = User::factory()->create(['name' => 'Layla Haddad']);
+    $user = User::factory()->create(['employee_id' => namedEmployee('Layla Haddad')]);
     $media = Media::factory()->create(['uploaded_by' => $user->id]);
 
     expect($media->uploader->name)->toBe('Layla Haddad');

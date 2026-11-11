@@ -115,16 +115,16 @@ function createHrImportFixture(): void
 }
 
 /**
- * Two tracking users whose tracking ids are each other's HR ids, so the
- * renumbering has to swap them, each owning a to-do and a role.
+ * Two hub users, ids 1 and 2, each owning a to-do and a role, that the import
+ * meets already in the users table.
  *
  * @return array{first: int, second: int}
  */
 function insertCrossedTrackingUsers(): array
 {
     DB::table('users')->insert([
-        ['id' => 1, 'hr_user_id' => 2],
-        ['id' => 2, 'hr_user_id' => 1],
+        ['id' => 1, 'email' => 'one@hub.test', 'password' => 'hash-1'],
+        ['id' => 2, 'email' => 'two@hub.test', 'password' => 'hash-2'],
     ]);
     DB::table('user_todos')->insert([
         ['user_id' => 1, 'title' => 'todo of HR user 2'],
@@ -148,7 +148,7 @@ test('the import renumbers crossed tracking users to their HR ids and moves what
         ->and(DB::table('user_todos')->where('user_id', 1)->value('title'))->toBe('todo of HR user 1')
         ->and(DB::table('model_has_roles')->where('model_id', 2)->pluck('role_id')->all())
         ->toContain(Role::query()->where('name', 'Team Member')->value('id'));
-});
+})->skip('Obsolete since A2: users.hr_user_id is dropped and the one-off renumbering of users to HR ids has run (UserIdRemap), so there is nothing to renumber.');
 
 test('the import loads HR accounts, cities, roles and HR-owned rows', function () {
     insertCrossedTrackingUsers();
@@ -159,7 +159,6 @@ test('the import loads HR accounts, cities, roles and HR-owned rows', function (
 
     expect(DB::table('users')->where('id', 2)->first(['email', 'password', 'employee_id', 'active_role_id']))
         ->toEqual((object) ['email' => 'two@hr.test', 'password' => 'hash-2', 'employee_id' => 7, 'active_role_id' => $hrManager])
-        ->and(DB::table('users')->where('id', 9)->value('hr_user_id'))->toBe(9)
         ->and(City::query()->pluck('name_ar', 'id')->all())->toBe([1 => 'سوريا', 2 => 'حلب', 17 => 'الوادي'])
         ->and(Employee::query()->forCity(2)->pluck('id')->all())->toBe([7])
         ->and(DB::table('model_has_roles')->where('role_id', $hrManager)->first(['model_type', 'model_id']))

@@ -262,7 +262,7 @@ test('an indicator whose last reading is older than its own frequency needs a re
 
 test('the chain inspector shows the readings and the targets behind one indicator', function () {
     $user = User::factory()->role('General Manager')->create();
-    $recorder = User::factory()->role('General Manager')->create(['name' => 'Rana Saleh']);
+    $recorder = User::factory()->role('General Manager')->create(['employee_id' => namedEmployee('Rana Saleh')]);
     $indicator = Indicator::factory()->create(['name' => 'Households reached']);
 
     IndicatorProgress::factory()->create([

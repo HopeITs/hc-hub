@@ -33,7 +33,7 @@ test('deleting a result deletes the results beneath it', function () {
 
 test('deleting a program detaches its results instead of deleting them', function () {
     $user = User::factory()->create();
-    $programId = insertProgram(insertStrategy(), $user->id);
+    $programId = insertProgram(insertStrategy(), $user->employee_id);
     $resultId = insertResult(programId: $programId);
 
     DB::table('programs')->where('id', $programId)->delete();

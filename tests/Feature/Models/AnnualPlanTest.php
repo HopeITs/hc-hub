@@ -1,8 +1,7 @@
 <?php
 
-use Modules\Hr\Models\Employee as HrEmployee;
 use Modules\Core\Models\Program;
-use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee as HrEmployee;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\PlanIndicator;
 
@@ -37,10 +36,10 @@ test('a annual plan casts its year to an integer', function () {
 });
 
 test('the managedBy scope keeps one manager plans and passes a null id through untouched', function () {
-    $manager = User::factory()->create();
-    AnnualPlan::factory()->create(['manager_id' => $manager->id]);
+    $managerId = insertHrEmployee();
+    AnnualPlan::factory()->create(['manager_id' => $managerId]);
     AnnualPlan::factory()->create();
 
-    expect(AnnualPlan::query()->managedBy($manager->id)->count())->toBe(1)
+    expect(AnnualPlan::query()->managedBy($managerId)->count())->toBe(1)
         ->and(AnnualPlan::query()->managedBy(null)->count())->toBe(2);
 });

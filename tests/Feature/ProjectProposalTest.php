@@ -15,7 +15,7 @@ function linkProjectToProposal(int $projectId, int $proposalId): void
 
 test('a project is linked to a proposal', function () {
     $user = User::factory()->create();
-    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
+    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
     $proposalId = insertProposal();
 
     linkProjectToProposal($projectId, $proposalId);
@@ -28,7 +28,7 @@ test('a project is linked to a proposal', function () {
 
 test('deleting a project removes the link but keeps the proposal', function () {
     $user = User::factory()->create();
-    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
+    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
     $proposalId = insertProposal();
     linkProjectToProposal($projectId, $proposalId);
 
@@ -40,7 +40,7 @@ test('deleting a project removes the link but keeps the proposal', function () {
 
 test('deleting a proposal removes the link but keeps the project', function () {
     $user = User::factory()->create();
-    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
+    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
     $proposalId = insertProposal();
     linkProjectToProposal($projectId, $proposalId);
 
@@ -52,7 +52,7 @@ test('deleting a proposal removes the link but keeps the project', function () {
 
 test('the same project and proposal cannot be linked twice', function () {
     $user = User::factory()->create();
-    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
+    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
     $proposalId = insertProposal();
     linkProjectToProposal($projectId, $proposalId);
 
@@ -64,7 +64,7 @@ test('the same project and proposal cannot be linked twice', function () {
 
 test('one project may be linked to several proposals', function () {
     $user = User::factory()->create();
-    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
+    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
 
     linkProjectToProposal($projectId, insertProposal('Emergency WASH Response'));
     linkProjectToProposal($projectId, insertProposal('Shelter Rehabilitation'));

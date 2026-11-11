@@ -15,7 +15,7 @@ use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TransfersTracking;
 
 test('the timeline shows who did what and each field change', function () {
-    $actor = Activity::withoutRecording(fn () => User::factory()->create(['name' => 'Sami']));
+    $actor = Activity::withoutRecording(fn () => User::factory()->create(['employee_id' => namedEmployee('Sami')]));
     $task = Activity::withoutRecording(fn () => Task::factory()->create(['title' => 'Plan']));
 
     $this->actingAs($actor);
@@ -105,7 +105,7 @@ test('the funding agreement timeline includes its tranches', function () {
 });
 
 test('a program save that links a strategy and manager names the strategy, and clearing the manager reads "removed"', function () {
-    $actor = Activity::withoutRecording(fn () => User::factory()->create(['name' => 'Sami']));
+    $actor = Activity::withoutRecording(fn () => User::factory()->create(['employee_id' => namedEmployee('Sami')]));
     $managerId = insertHrEmployee(firstNameEn: 'Layla', lastNameEn: 'Haddad');
     $strategy = Strategy::factory()->create(['name' => 'Country Strategy 2026-2030']);
     $program = Activity::withoutRecording(fn () => Program::factory()->unassigned()->create(['name' => 'Water Security']));

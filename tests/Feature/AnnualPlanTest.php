@@ -20,20 +20,20 @@ function insertAnnualPlan(int $programId, int $managerId, int $year = 2026): voi
 
 test('a annual plan is stored against its program and manager', function () {
     $manager = User::factory()->create();
-    $programId = insertProgram(insertStrategy(), $manager->id);
+    $programId = insertProgram(insertStrategy(), $manager->employee_id);
 
     insertAnnualPlan($programId, $manager->id, 2026);
 
     $this->assertDatabaseHas('annual_plans', [
         'program_id' => $programId,
-        'manager_id' => $manager->id,
+        'manager_id' => $manager->employee_id,
         'year' => 2026,
     ]);
 });
 
 test('deleting a program deletes the annual plans beneath it', function () {
     $manager = User::factory()->create();
-    $programId = insertProgram(insertStrategy(), $manager->id);
+    $programId = insertProgram(insertStrategy(), $manager->employee_id);
     insertAnnualPlan($programId, $manager->id);
 
     DB::table('programs')->where('id', $programId)->delete();
@@ -41,15 +41,15 @@ test('deleting a program deletes the annual plans beneath it', function () {
     $this->assertDatabaseCount('annual_plans', 0);
 });
 
-test('a annual plan stores its manager hr employee id with no foreign key to users', function () {
+test('a annual plan stores its manager hr employee id with a foreign key to employees', function () {
     $foreignKeyColumns = collect(Schema::getForeignKeys('annual_plans'))->pluck('columns')->flatten();
 
-    expect($foreignKeyColumns)->not->toContain('manager_id');
+    expect($foreignKeyColumns)->toContain('manager_id');
 });
 
 test('a program cannot hold two plans for the same year', function () {
     $manager = User::factory()->create();
-    $programId = insertProgram(insertStrategy(), $manager->id);
+    $programId = insertProgram(insertStrategy(), $manager->employee_id);
     insertAnnualPlan($programId, $manager->id, 2026);
 
     expect(fn () => insertAnnualPlan($programId, $manager->id, 2026))
@@ -61,8 +61,8 @@ test('a program cannot hold two plans for the same year', function () {
 test('two programs may each hold a plan for the same year', function () {
     $manager = User::factory()->create();
     $strategyId = insertStrategy();
-    $wash = insertProgram($strategyId, $manager->id, 'WASH');
-    $health = insertProgram($strategyId, $manager->id, 'Health');
+    $wash = insertProgram($strategyId, $manager->employee_id, 'WASH');
+    $health = insertProgram($strategyId, $manager->employee_id, 'Health');
 
     insertAnnualPlan($wash, $manager->id, 2026);
     insertAnnualPlan($health, $manager->id, 2026);

@@ -246,7 +246,7 @@ test('visiting the app mirrors new hr programs as unassigned', function () {
         ->name->toBe('Children University')
         ->strategy_id->toBeNull()
         ->manager_id->toBeNull();
-});
+})->skip('Obsolete since one database (A2): the HR-account provisioning / program sync API this test calls (forHrAccount, createFromHrAccount, syncFromHr, SyncProgramsFromHr) was removed.');
 
 test('the link form on the program page is rendered only while its dialog is open', function () {
     $user = User::factory()->role('General Manager')->create();

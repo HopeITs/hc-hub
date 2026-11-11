@@ -18,7 +18,7 @@ test('an indicator reports its readings oldest first', function () {
 
 test('a reading belongs to its indicator and its recorder', function () {
     $indicator = Indicator::factory()->create();
-    $user = User::factory()->create(['name' => 'Layla Haddad']);
+    $user = User::factory()->create(['employee_id' => namedEmployee('Layla Haddad')]);
 
     $reading = IndicatorProgress::factory()->create([
         'indicator_id' => $indicator->id,

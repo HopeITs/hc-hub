@@ -18,14 +18,14 @@ test('guests are redirected from the milestone directory', function () {
 test('milestones render as a responsive tree grouped by project with reachable actions', function () {
     $user = User::factory()->role('General Manager')->create();
     $project = Project::factory()->create(['name' => 'Aleppo Wells']);
-    $responsible = User::factory()->role('General Manager')->create(['name' => 'Rana Hamad']);
+    $responsible = User::factory()->role('General Manager')->create(['employee_id' => namedEmployee('Rana Hamad')]);
     $parent = Milestone::factory()->create([
         'project_id' => $project->id,
-        'responsible_user_id' => $responsible->id,
+        'responsible_user_id' => $responsible->employee_id,
         'name' => 'Baseline assessment',
     ]);
     $child = Milestone::factory()->childOf($parent)->create([
-        'responsible_user_id' => $responsible->id,
+        'responsible_user_id' => $responsible->employee_id,
         'name' => 'Household survey',
     ]);
 
@@ -92,18 +92,18 @@ test('a matching child remains visible with its necessary ancestors for status a
     $childOwner = User::factory()->role('General Manager')->create();
     $parent = Milestone::factory()->create([
         'project_id' => $project->id,
-        'responsible_user_id' => $parentOwner->id,
+        'responsible_user_id' => $parentOwner->employee_id,
         'name' => 'Parent context',
         'status' => MilestoneStatus::Planned,
     ]);
     Milestone::factory()->childOf($parent)->create([
-        'responsible_user_id' => $childOwner->id,
+        'responsible_user_id' => $childOwner->employee_id,
         'name' => 'Matching child',
         'status' => MilestoneStatus::Reached,
     ]);
     Milestone::factory()->create([
         'project_id' => $project->id,
-        'responsible_user_id' => $parentOwner->id,
+        'responsible_user_id' => $parentOwner->employee_id,
         'name' => 'Unrelated root',
         'status' => MilestoneStatus::Planned,
     ]);

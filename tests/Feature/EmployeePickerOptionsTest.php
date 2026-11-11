@@ -1,10 +1,10 @@
 <?php
 
-use Modules\Hr\Models\Employee as HrEmployee;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee as HrEmployee;
 
 test('guests are redirected away from the employee picker options', function () {
     $this->getJson(route('employees.picker-options'))->assertUnauthorized();
@@ -178,10 +178,10 @@ test('an employee\'s position leaves out a job level that only repeats the title
 
 test('an employee chip shows the person\'s current position', function () {
     $employeeId = insertHrEmployee(firstNameEn: 'Pia', lastNameEn: 'Placed');
-    insertHrContract($employeeId, insertHrPosition(insertHrDepartment('Media'), 'Field Officer'));
+    insertHrContract($employeeId, insertHrPosition(insertHrDepartment('Media'), 'Field Officer', jobLevelId: insertHrJobLevel('Senior')));
 
     $this->blade('<x-ui.employee-chip :employee="$employee" />', ['employee' => HrEmployee::query()->findOrFail($employeeId)])
-        ->assertSee('Field Officer · Media');
+        ->assertSee('Field Officer · Senior · Media');
 });
 
 test('an employee chip still renders, with the HR id, when HR positions cannot be read', function () {

@@ -74,8 +74,8 @@ test('the page opens on the users tab and can switch to the roles tab', function
 
 test('administrators can view and filter the user directory', function () {
     $admin = accessAdmin();
-    User::factory()->role('Officer')->create(['name' => 'Visible Officer']);
-    User::factory()->role('Managers')->create(['name' => 'Hidden Manager']);
+    User::factory()->role('Officer')->create(['employee_id' => namedEmployee('Visible Officer')]);
+    User::factory()->role('Managers')->create(['employee_id' => namedEmployee('Hidden Manager')]);
 
     Livewire::actingAs($admin)
         ->test('pages::admin.users')
@@ -105,7 +105,7 @@ test('administrators can reset directory filters', function () {
 test('user names are escaped in the directory', function () {
     $admin = accessAdmin();
     $unsafeName = '<script>alert("directory")</script>';
-    User::factory()->create(['name' => $unsafeName]);
+    User::factory()->create(['employee_id' => namedEmployee($unsafeName)]);
 
     Livewire::actingAs($admin)
         ->test('pages::admin.users')
@@ -214,7 +214,7 @@ test('selecting a user loads their assigned roles, active role, and direct permi
 
 test('administrators can assign multiple roles, pick an active role, and grant a direct permission', function () {
     $admin = accessAdmin();
-    $user = User::factory()->role('Officer')->create(['name' => 'Rana Darwish', 'email' => 'rana@example.org']);
+    $user = User::factory()->role('Officer')->create(['employee_id' => namedEmployee('Rana Darwish'), 'email' => 'rana@example.org']);
     $officer = Role::query()->where('name', 'Officer')->sole();
     $managers = Role::query()->where('name', 'Managers')->sole();
     $permission = Permission::query()->where('name', 'programs.view')->sole();
@@ -426,7 +426,7 @@ test('an authorized user can toggle a permission on a role', function () {
 test('the assigned users modal lists holders of the selected role', function () {
     $admin = accessAdmin();
     $role = Role::query()->where('name', 'Managers')->sole();
-    $holder = User::factory()->create(['name' => 'Role Holder']);
+    $holder = User::factory()->create(['employee_id' => namedEmployee('Role Holder')]);
     $holder->assignRole($role);
 
     Livewire::actingAs($admin)
@@ -462,8 +462,8 @@ test('the assigned users modal title counts the holders in the chosen language',
 
 test('administrators can filter the directory by hr account status', function () {
     $admin = accessAdmin();
-    User::factory()->create(['name' => 'Active Person']);
-    $inactive = User::factory()->create(['name' => 'Departed Person']);
+    User::factory()->create(['employee_id' => namedEmployee('Active Person')]);
+    $inactive = User::factory()->create(['employee_id' => namedEmployee('Departed Person')]);
     DB::table('employees')->where('id', $inactive->employee_id)->update(['is_active' => false]);
 
     Livewire::actingAs($admin)
@@ -510,7 +510,7 @@ test('a user the database refuses to delete keeps their roles', function () {
 
 test('the users tab offers add user, delete user and reset filters', function () {
     $admin = accessAdmin();
-    $other = User::factory()->create(['name' => 'Deletable Person']);
+    $other = User::factory()->create(['employee_id' => namedEmployee('Deletable Person')]);
 
     Livewire::actingAs($admin)
         ->test('pages::admin.users')

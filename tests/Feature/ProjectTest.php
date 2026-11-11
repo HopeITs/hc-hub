@@ -7,9 +7,9 @@ use Modules\Core\Models\User;
 test('a project is stored against its city, program and user', function () {
     $user = User::factory()->create();
     $cityId = insertCity();
-    $programId = insertProgram(insertStrategy(), $user->id);
+    $programId = insertProgram(insertStrategy(), $user->employee_id);
 
-    insertProject($cityId, $programId, $user->id);
+    insertProject($cityId, $programId, $user->employee_id);
 
     $this->assertDatabaseHas('projects', [
         'name' => 'Water Network Rehabilitation',
@@ -21,23 +21,23 @@ test('a project is stored against its city, program and user', function () {
 
 test('deleting a program deletes the projects beneath it', function () {
     $user = User::factory()->create();
-    $programId = insertProgram(insertStrategy(), $user->id);
-    insertProject(insertCity(), $programId, $user->id);
+    $programId = insertProgram(insertStrategy(), $user->employee_id);
+    insertProject(insertCity(), $programId, $user->employee_id);
 
     DB::table('programs')->where('id', $programId)->delete();
 
     $this->assertDatabaseCount('projects', 0);
 });
 
-test('projects store an hr city id with no local cities table or foreign key', function () {
+test('projects store their city id with a foreign key to the shared cities table', function () {
     $foreignKeyColumns = collect(Schema::getForeignKeys('projects'))->pluck('columns')->flatten();
 
-    expect(Schema::hasTable('cities'))->toBeFalse()
-        ->and($foreignKeyColumns)->not->toContain('city_id');
+    expect(Schema::hasTable('cities'))->toBeTrue()
+        ->and($foreignKeyColumns)->toContain('city_id');
 });
 
-test('a project stores its responsible hr employee id with no foreign key to users', function () {
+test('a project stores its responsible hr employee id with a foreign key to employees', function () {
     $foreignKeyColumns = collect(Schema::getForeignKeys('projects'))->pluck('columns')->flatten();
 
-    expect($foreignKeyColumns)->not->toContain('user_id');
+    expect($foreignKeyColumns)->toContain('user_id');
 });

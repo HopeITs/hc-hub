@@ -1,11 +1,11 @@
 <?php
 
 use App\Models\Activity;
-use Modules\Core\Models\Center as HrCenter;
 use App\Notifications\Alerts\DeadlineCatalog;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Center as HrCenter;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\MilestoneStatus;
@@ -84,7 +84,7 @@ test('a center HR reactivates brings the project back', function () {
     expect($this->paused->isPaused())->toBeTrue();
 
     DB::table('centers')->where('id', $this->closedCenter)->update(['is_active' => true]);
-    HrCenter::forgetRememberedLookup();
+    HrCenter::forgetLookups();
 
     expect($this->paused->fresh()->isPaused())->toBeFalse();
 });

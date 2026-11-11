@@ -49,7 +49,7 @@ test('a merged notification says how many more updates it holds', function () {
 });
 
 test('activity parameters carry the actor, the label and the changed field typed by its cast', function () {
-    $actor = Activity::withoutRecording(fn () => User::factory()->create(['name' => 'Sami Haddad']));
+    $actor = Activity::withoutRecording(fn () => User::factory()->create(['employee_id' => namedEmployee('Sami Haddad')]));
     $task = Activity::withoutRecording(fn () => Task::factory()->create(['title' => 'Plan']));
     $activity = Activity::withoutRecording(fn () => Activity::query()->create([
         'actor_id' => $actor->id, 'subject_type' => 'task', 'subject_id' => $task->id, 'module' => 'tasks',

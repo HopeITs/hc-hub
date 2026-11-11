@@ -19,7 +19,7 @@ function insertTaskAttachment(int $taskId, string $path = 'task-attachments/2026
 
 test('an attachment defaults to the date it was uploaded', function () {
     $user = User::factory()->create();
-    $taskId = insertTask(insertProposal(), $user->id, $user->id);
+    $taskId = insertTask(insertProposal(), $user->employee_id, $user->id);
 
     $attachment = DB::table('task_attachments')->find(insertTaskAttachment($taskId));
 
@@ -30,7 +30,7 @@ test('an attachment defaults to the date it was uploaded', function () {
 
 test('an attachment can be backdated to the document it holds', function () {
     $user = User::factory()->create();
-    $taskId = insertTask(insertProposal(), $user->id, $user->id);
+    $taskId = insertTask(insertProposal(), $user->employee_id, $user->id);
 
     $id = DB::table('task_attachments')->insertGetId([
         'task_id' => $taskId,
@@ -46,7 +46,7 @@ test('an attachment can be backdated to the document it holds', function () {
 
 test('the same file may be attached to a task more than once', function () {
     $user = User::factory()->create();
-    $taskId = insertTask(insertProposal(), $user->id, $user->id);
+    $taskId = insertTask(insertProposal(), $user->employee_id, $user->id);
 
     insertTaskAttachment($taskId);
     insertTaskAttachment($taskId);
@@ -56,7 +56,7 @@ test('the same file may be attached to a task more than once', function () {
 
 test('deleting a task deletes its attachments', function () {
     $user = User::factory()->create();
-    $taskId = insertTask(insertProposal(), $user->id, $user->id);
+    $taskId = insertTask(insertProposal(), $user->employee_id, $user->id);
     insertTaskAttachment($taskId);
 
     DB::table('tasks')->where('id', $taskId)->delete();
@@ -66,7 +66,7 @@ test('deleting a task deletes its attachments', function () {
 
 test('an attachment cannot be stored without a path', function () {
     $user = User::factory()->create();
-    $taskId = insertTask(insertProposal(), $user->id, $user->id);
+    $taskId = insertTask(insertProposal(), $user->employee_id, $user->id);
 
     DB::table('task_attachments')->insert([
         'task_id' => $taskId,

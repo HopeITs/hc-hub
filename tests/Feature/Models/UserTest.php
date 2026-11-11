@@ -1,9 +1,9 @@
 <?php
 
-use Modules\Hr\Models\Employee as HrEmployee;
 use Carbon\CarbonImmutable;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee as HrEmployee;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
@@ -86,9 +86,9 @@ test('a user not saved yet has no name or email', function () {
 });
 
 test('users sort by the name hr holds for them', function () {
-    $zaid = User::factory()->create(['name' => 'Zaid Haddad']);
-    $amal = User::factory()->create(['name' => 'Amal Saleh']);
-    $maya = User::factory()->create(['name' => 'Maya Khoury']);
+    $zaid = User::factory()->create(['employee_id' => namedEmployee('Zaid Haddad')]);
+    $amal = User::factory()->create(['employee_id' => namedEmployee('Amal Saleh')]);
+    $maya = User::factory()->create(['employee_id' => namedEmployee('Maya Khoury')]);
 
     $ids = User::query()->orderByName()->pluck('id')->all();
 

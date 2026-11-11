@@ -184,7 +184,7 @@ test('a program with no plan keeps its row until the matrix is filtered by manag
 
     AnnualPlan::factory()->create([
         'program_id' => matrixProgram('Water Security')->id,
-        'manager_id' => $manager->id,
+        'manager_id' => $manager->employee_id,
         'year' => 2026,
     ]);
 
@@ -222,7 +222,7 @@ test('changing a filter returns the matrix to its first page', function () {
     $lastProgram = Program::query()->orderByName('desc')->firstOrFail();
     AnnualPlan::factory()->create([
         'program_id' => $lastProgram->id,
-        'manager_id' => $manager->id,
+        'manager_id' => $manager->employee_id,
         'year' => 2026,
     ]);
 
@@ -239,7 +239,7 @@ test('resetting the filters restores the full span and every manager', function 
     $manager = User::factory()->role('General Manager')->create();
     $water = matrixProgram('Water Security');
 
-    AnnualPlan::factory()->create(['program_id' => $water->id, 'manager_id' => $manager->id, 'year' => 2024]);
+    AnnualPlan::factory()->create(['program_id' => $water->employee_id, 'manager_id' => $manager->employee_id, 'year' => 2024]);
     AnnualPlan::factory()->create(['program_id' => matrixProgram('Safe Shelter')->id, 'year' => 2026]);
 
     Livewire::actingAs($user)
@@ -274,7 +274,7 @@ test('the matrix reads the plans of every visible cell in a fixed number of quer
         foreach (range(2020, 2019 + $yearCount) as $year) {
             AnnualPlan::factory()->create([
                 'program_id' => $program->id,
-                'manager_id' => $manager->id,
+                'manager_id' => $manager->employee_id,
                 'year' => $year,
             ]);
         }

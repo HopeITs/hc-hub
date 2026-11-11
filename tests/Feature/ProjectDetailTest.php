@@ -89,14 +89,14 @@ test('project detail renders its milestones as a single delivery timeline', func
     $responsible = User::factory()->role('General Manager')->create();
     Milestone::factory()->create([
         'project_id' => $project->id,
-        'responsible_user_id' => $responsible->id,
+        'responsible_user_id' => $responsible->employee_id,
         'name' => 'Baseline assessment',
         'status' => MilestoneStatus::Reached,
         'sequence' => 1,
     ]);
     Milestone::factory()->create([
         'project_id' => $project->id,
-        'responsible_user_id' => $responsible->id,
+        'responsible_user_id' => $responsible->employee_id,
         'name' => 'Household survey',
         'status' => MilestoneStatus::Planned,
         'sequence' => 2,
@@ -118,13 +118,13 @@ test('project detail shows weighted milestone progress in the header', function 
     $responsible = User::factory()->role('General Manager')->create();
     Milestone::factory()->create([
         'project_id' => $project->id,
-        'responsible_user_id' => $responsible->id,
+        'responsible_user_id' => $responsible->employee_id,
         'status' => MilestoneStatus::Reached,
         'weight_percentage' => 60,
     ]);
     Milestone::factory()->create([
         'project_id' => $project->id,
-        'responsible_user_id' => $responsible->id,
+        'responsible_user_id' => $responsible->employee_id,
         'status' => MilestoneStatus::Planned,
         'weight_percentage' => 40,
     ]);
@@ -388,7 +388,7 @@ test('project files list only this projects metadata and download through the au
 test('project files show a category filter once more than one category is present, and it narrows the grid', function () {
     $user = User::factory()->role('General Manager')->create();
     $project = Project::factory()->create();
-    $uploader = User::factory()->create(['name' => 'Nadia Haddad']);
+    $uploader = User::factory()->create(['employee_id' => namedEmployee('Nadia Haddad')]);
     Media::factory()->inCollection(MediaCollection::Agreement)->create([
         'mediable_type' => 'project',
         'mediable_id' => $project->id,

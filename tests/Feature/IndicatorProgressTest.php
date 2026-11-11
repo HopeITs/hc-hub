@@ -64,7 +64,7 @@ test('an indicator carries an optional baseline target unit and frequency', func
 
 test('an indicator scoped to a project loses that scope when the project goes', function () {
     $user = User::factory()->role('General Manager')->create();
-    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
+    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
     $indicatorId = insertIndicator(insertResult());
 
     DB::table('indicators')->where('id', $indicatorId)->update(['project_id' => $projectId]);

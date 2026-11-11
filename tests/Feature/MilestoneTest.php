@@ -6,9 +6,9 @@ use Modules\Core\Models\User;
 
 test('a new milestone is planned, first in sequence and carries no weight', function () {
     $user = User::factory()->create();
-    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
+    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
 
-    $milestone = DB::table('milestones')->find(insertMilestone($projectId, $user->id));
+    $milestone = DB::table('milestones')->find(insertMilestone($projectId, $user->employee_id));
 
     expect($milestone->status)->toBe('planned')
         ->and((int) $milestone->sequence)->toBe(1)
@@ -22,10 +22,10 @@ test('a new milestone is planned, first in sequence and carries no weight', func
 
 test('a milestone can be nested under a parent milestone', function () {
     $user = User::factory()->create();
-    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
-    $parentId = insertMilestone($projectId, $user->id, name: 'Design phase');
+    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
+    $parentId = insertMilestone($projectId, $user->employee_id, name: 'Design phase');
 
-    $childId = insertMilestone($projectId, $user->id, $parentId, 'Technical drawings');
+    $childId = insertMilestone($projectId, $user->employee_id, $parentId, 'Technical drawings');
 
     $this->assertDatabaseHas('milestones', [
         'id' => $childId,
@@ -35,9 +35,9 @@ test('a milestone can be nested under a parent milestone', function () {
 
 test('deleting a parent milestone deletes the milestones nested under it', function () {
     $user = User::factory()->create();
-    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
-    $parentId = insertMilestone($projectId, $user->id, name: 'Design phase');
-    insertMilestone($projectId, $user->id, $parentId, 'Technical drawings');
+    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
+    $parentId = insertMilestone($projectId, $user->employee_id, name: 'Design phase');
+    insertMilestone($projectId, $user->employee_id, $parentId, 'Technical drawings');
 
     DB::table('milestones')->where('id', $parentId)->delete();
 
@@ -46,16 +46,16 @@ test('deleting a parent milestone deletes the milestones nested under it', funct
 
 test('deleting a project deletes its milestones', function () {
     $user = User::factory()->create();
-    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
-    insertMilestone($projectId, $user->id);
+    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
+    insertMilestone($projectId, $user->employee_id);
 
     DB::table('projects')->where('id', $projectId)->delete();
 
     $this->assertDatabaseCount('milestones', 0);
 });
 
-test('a milestone stores its responsible hr employee id with no foreign key to users', function () {
+test('a milestone stores its responsible hr employee id with a foreign key to employees', function () {
     $foreignKeyColumns = collect(Schema::getForeignKeys('milestones'))->pluck('columns')->flatten();
 
-    expect($foreignKeyColumns)->not->toContain('responsible_user_id');
+    expect($foreignKeyColumns)->toContain('responsible_user_id');
 });

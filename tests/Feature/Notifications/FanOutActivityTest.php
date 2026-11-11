@@ -29,7 +29,7 @@ function fanOutTask(int $employeeId, ?int $createdBy = null): Task
 test('fan-out notifies each recipient once with the assigned wording for the assignee', function () {
     $employee = insertHrEmployee();
     $assignee = Activity::withoutRecording(fn () => User::factory()->role('Managers')->create(['employee_id' => $employee]));
-    $actor = Activity::withoutRecording(fn () => User::factory()->role('Managers')->create(['name' => 'Sami']));
+    $actor = Activity::withoutRecording(fn () => User::factory()->role('Managers')->create(['employee_id' => namedEmployee('Sami')]));
     $task = fanOutTask($employee, $actor->id);
     $activity = Activity::withoutRecording(fn () => Activity::query()->create([
         'actor_id' => $actor->id, 'subject_type' => 'task', 'subject_id' => $task->id, 'module' => 'tasks',

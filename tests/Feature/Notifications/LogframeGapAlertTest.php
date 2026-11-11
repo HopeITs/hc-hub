@@ -198,7 +198,7 @@ describe('the HR sync', function () {
         expect(Program::syncFromHr())->toBe([$newId])
             ->and(Program::syncFromHr())->toBe([])
             ->and(logframeAlertsFor($this->meal))->toHaveCount(0);
-    });
+    })->skip('Obsolete since one database (A2): Program::syncFromHr and the SyncProgramsFromHr middleware were removed.');
 
     test('seeding programs never alerts', function () {
         insertHrProgram('Study Zone');
@@ -206,7 +206,7 @@ describe('the HR sync', function () {
         Activity::withoutRecording(fn () => Program::syncFromHr());
 
         expect(logframeAlertsFor($this->meal))->toHaveCount(0);
-    });
+    })->skip('Obsolete since one database (A2): Program::syncFromHr and the SyncProgramsFromHr middleware were removed.');
 
     test('the request middleware alerts for the programs it newly mirrored', function () {
         $newId = insertHrProgram('Study Zone');
@@ -215,7 +215,7 @@ describe('the HR sync', function () {
         (new SyncProgramsFromHr)->handle(Request::create('/'), fn () => new Response);
 
         expect(logframeAlertsFor($this->meal)->pluck('subject_id')->all())->toBe([$newId]);
-    });
+    })->skip('Obsolete since one database (A2): Program::syncFromHr and the SyncProgramsFromHr middleware were removed.');
 });
 
 test('the catalog carries the key as a MEAL and management digest', function () {

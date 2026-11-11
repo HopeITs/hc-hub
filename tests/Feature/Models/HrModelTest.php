@@ -1,9 +1,9 @@
 <?php
 
 use Modules\Core\Models\City as HrCity;
-use Modules\Hr\Models\Employee as HrEmployee;
 use Modules\Core\Models\Program as HrProgram;
 use Modules\Core\Models\User as HrUser;
+use Modules\Hr\Models\Employee as HrEmployee;
 
 test('hr models read hchr_ tables through the hr connection', function (string $model, string $table) {
     $instance = new $model;
@@ -32,7 +32,7 @@ test('an employee belongs to a city and has an hr login account', function () {
     $employee = HrEmployee::find($employeeId);
 
     expect($employee->city->name_en)->toBe('Homs')
-        ->and($employee->user->email)->toBe('sami@example.org')
+        ->and($employee->account->email)->toBe('sami@example.org')
         ->and(HrCity::find($cityId)->employees)->toHaveCount(1)
         ->and(HrUser::firstWhere('email', 'sami@example.org')->employee->is($employee))->toBeTrue();
 });

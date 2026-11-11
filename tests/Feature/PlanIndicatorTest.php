@@ -34,7 +34,7 @@ test('deleting an indicator deletes the targets planned against it', function ()
 
 test('deleting a project detaches its targets instead of deleting them', function () {
     $user = User::factory()->create();
-    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
+    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
     $indicatorId = insertIndicator(insertResult());
     $planId = insertPlanIndicator($indicatorId, 'annual_plan', 1, $projectId);
 
@@ -51,10 +51,10 @@ test('deleting a project detaches its targets instead of deleting them', functio
  */
 test('a target outlives a source deleted through the query builder', function () {
     $user = User::factory()->create();
-    $programId = insertProgram(insertStrategy(), $user->id);
+    $programId = insertProgram(insertStrategy(), $user->employee_id);
     $annualPlanId = DB::table('annual_plans')->insertGetId([
         'program_id' => $programId,
-        'manager_id' => $user->id,
+        'manager_id' => $user->employee_id,
         'year' => 2026,
         'created_at' => now(),
         'updated_at' => now(),

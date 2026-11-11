@@ -27,7 +27,7 @@ test('missing tasks return not found from task detail', function () {
 test('task detail shows the task milestone project assignees and creator', function () {
     $user = User::factory()->role('General Manager')->create();
     $assignee = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
-    $creator = User::factory()->create(['name' => 'Bob Rahman']);
+    $creator = User::factory()->create(['employee_id' => namedEmployee('Bob Rahman')]);
     $project = Project::factory()->create(['name' => 'Winter Support']);
     $milestone = Milestone::factory()->create([
         'project_id' => $project->id,
@@ -116,7 +116,7 @@ test('attachments are listed as metadata without exposing storage or controls', 
 test('task detail escapes all user controlled content', function () {
     $user = User::factory()->role('General Manager')->create();
     $assignee = insertHrEmployee(firstNameEn: '<script>assignee()</script>', lastNameEn: '');
-    $creator = User::factory()->create(['name' => '<img src=x onerror=creator()>']);
+    $creator = User::factory()->create(['employee_id' => namedEmployee('<img src=x onerror=creator()>')]);
     $proposal = Proposal::factory()->create(['name' => '<svg onload=proposal()>']);
     $task = Task::factory()->create([
         'title' => '<script>task()</script>',

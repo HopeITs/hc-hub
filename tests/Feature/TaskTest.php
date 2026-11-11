@@ -8,7 +8,7 @@ use Modules\Core\Models\User;
 test('a new task starts as todo at medium priority with no progress', function () {
     $user = User::factory()->create();
 
-    $task = DB::table('tasks')->find(insertTask(insertProposal(), $user->id, $user->id));
+    $task = DB::table('tasks')->find(insertTask(insertProposal(), $user->employee_id, $user->id));
 
     expect($task->status)->toBe('todo')
         ->and($task->priority)->toBe('medium')
@@ -26,9 +26,9 @@ test('deleting a milestone leaves tasks sourced from it orphaned', function () {
     // no longer cascades or nulls out — the task keeps pointing at the
     // deleted id, and Task::sourceLabel() falls back to "No source" for it.
     $user = User::factory()->create();
-    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
-    $milestoneId = insertMilestone($projectId, $user->id);
-    $taskId = insertTask(insertProposal(), $user->id, $user->id, $milestoneId);
+    $projectId = insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
+    $milestoneId = insertMilestone($projectId, $user->employee_id);
+    $taskId = insertTask(insertProposal(), $user->employee_id, $user->id, $milestoneId);
 
     DB::table('milestones')->where('id', $milestoneId)->delete();
 
@@ -40,17 +40,17 @@ test('deleting a proposal leaves tasks sourced from it in place', function () {
     // cascade delete anymore.
     $user = User::factory()->create();
     $proposalId = insertProposal();
-    $taskId = insertTask($proposalId, $user->id, $user->id);
+    $taskId = insertTask($proposalId, $user->employee_id, $user->id);
 
     DB::table('proposals')->where('id', $proposalId)->delete();
 
     $this->assertDatabaseHas('tasks', ['id' => $taskId, 'source_type' => 'proposal', 'source_id' => $proposalId]);
 });
 
-test('a task assignment stores its hr employee id with no foreign key to users', function () {
+test('a task assignment stores its hr employee id with a foreign key to employees', function () {
     $foreignKeyColumns = collect(Schema::getForeignKeys('task_assignees'))->pluck('columns')->flatten();
 
-    expect($foreignKeyColumns)->not->toContain('employee_id');
+    expect($foreignKeyColumns)->toContain('employee_id');
 });
 
 test('a user is not deletable while a task they created still exists', function () {

@@ -418,8 +418,8 @@ function insertHrSeedReferenceData(): void
         ]);
     }
 
-    foreach (range(1, 17) as $i) {
-        insertHrCity('City '.$i);
+    foreach (range(1, 17) as $id) {
+        City::factory()->create(['id' => $id, 'name_en' => 'City '.$id]);
     }
 
     $department = insertHrDepartment();
@@ -499,6 +499,19 @@ function insertHrEmployee(?int $cityId = null, string $firstNameEn = 'Sami', str
         'username' => fake()->unique()->userName(),
         'is_active' => $isActive,
     ])->id;
+}
+
+/**
+ * Insert an employee whose English name is the given full name (first word
+ * the first name, the rest the last name) and return the id. A user shows
+ * its employee's name, so fixtures that need a named user pass this as
+ * employee_id.
+ */
+function namedEmployee(string $name): int
+{
+    [$first, $last] = array_pad(explode(' ', $name, 2), 2, '');
+
+    return insertHrEmployee(firstNameEn: $first, lastNameEn: $last);
 }
 
 /**

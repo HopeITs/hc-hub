@@ -1,11 +1,11 @@
 <?php
 
 use App\Models\Activity;
-use Modules\Core\Models\User as HrUser;
 use App\Models\Role;
 use App\Models\UserNotification;
 use Livewire\Livewire;
 use Modules\Core\Models\User;
+use Modules\Core\Models\User as HrUser;
 
 test('changing roles tells the affected user even without user-management permission, and super admins', function () {
     $superAdmin = userWithRole('Super Admin');
@@ -48,4 +48,4 @@ test('creating an account from hr records the account and its role; super admins
 
     expect(Activity::query()->orderBy('id')->pluck('event')->all())->toBe(['user.created', 'user.role_changed'])
         ->and(UserNotification::query()->forUser($superAdmin)->count())->toBe(0); // actor
-});
+})->skip('Obsolete since one database (A2): the HR-account provisioning / program sync API this test calls (forHrAccount, createFromHrAccount, syncFromHr, SyncProgramsFromHr) was removed.');

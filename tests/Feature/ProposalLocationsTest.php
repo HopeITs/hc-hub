@@ -156,7 +156,6 @@ test('a proposal is created with its location rows and their centers', function 
         ->and((bool) $rows[1]['is_new'])->toBeFalse()
         ->and((int) $rows[1]['sort'])->toBe(1)
         ->and($rows[1]['center_ids'])->toBe([])
-        ->and(DB::table('program_requests')->count())->toBe(0)
         ->and($proposal->locations()->count())->toBe(2);
 });
 
@@ -251,6 +250,8 @@ test('a program must exist in tracking', function () {
 });
 
 test('a new row without a program must name the program in both languages', function () {
+    $this->user->givePermissionTo('programs.create');
+
     $errors = refusedLocations(fn () => app(SaveProposal::class)->handle(null, locationFormData([
         aleppoRow(['program_id' => null]),
         aleppoRow(['city_id' => $this->homs, 'center_ids' => [], 'program_id' => null, 'new_program_name_en' => 'Wells', 'new_program_name_ar' => '']),
@@ -281,7 +282,7 @@ test('a new row without a program opens a pending program request on the proposa
         ->and(Activity::query()->where('event', 'program_request.opened')->sole())
         ->subject_type->toBe('proposal')
         ->subject_id->toBe($proposal->id);
-});
+})->skip('Obsolete since A2: the program-request bridge (ProgramRequest, program_requests) was removed; a new program is created by CreateLocationPlaces.');
 
 test('editing keeps a pending request on its row, renames it, and removes it with the row', function () {
     $proposal = app(SaveProposal::class)->handle(null, locationFormData([
@@ -306,7 +307,7 @@ test('editing keeps a pending request on its row, renames it, and removes it wit
 
     expect(DB::table('program_requests')->count())->toBe(0)
         ->and(storedRows($proposal))->toHaveCount(1);
-});
+})->skip('Obsolete since A2: the program-request bridge (ProgramRequest, program_requests) was removed; a new program is created by CreateLocationPlaces.');
 
 // ── Edit: rows replaced as a set ────────────────────────────────────────
 

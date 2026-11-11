@@ -130,7 +130,7 @@ test('nothing is recorded while recording is off', function () {
 test('completing a task from the task list notifies its assignee but not the actor', function () {
     $employee = insertHrEmployee();
     $assignee = Activity::withoutRecording(fn () => User::factory()->role('Managers')->create(['employee_id' => $employee]));
-    $actor = Activity::withoutRecording(fn () => User::factory()->role('Managers')->create(['name' => 'Sami']));
+    $actor = Activity::withoutRecording(fn () => User::factory()->role('Managers')->create(['employee_id' => namedEmployee('Sami')]));
     $task = Activity::withoutRecording(function () use ($employee, $actor) {
         $task = Task::factory()->create(['created_by' => $actor->id, 'title' => 'Plan']);
         $task->taskAssignees()->delete();

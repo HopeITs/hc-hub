@@ -13,7 +13,7 @@ function insertMediaOwningProject(): int
 {
     $user = User::factory()->create();
 
-    return insertProject(insertCity(), insertProgram(insertStrategy(), $user->id), $user->id);
+    return insertProject(insertCity(), insertProgram(insertStrategy(), $user->employee_id), $user->employee_id);
 }
 
 test('a new file takes its collection disk and upload date from the column defaults', function () {
@@ -38,7 +38,7 @@ test('the morph column stores the map key rather than a class name', function ()
 test('a file can be attached to a milestone as well as a project', function () {
     $user = User::factory()->create();
     $projectId = insertMediaOwningProject();
-    $milestoneId = insertMilestone($projectId, $user->id);
+    $milestoneId = insertMilestone($projectId, $user->employee_id);
 
     $media = DB::table('media')->find(insertMedia('milestone', $milestoneId, $user->id));
 

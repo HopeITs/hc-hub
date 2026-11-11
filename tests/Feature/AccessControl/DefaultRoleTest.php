@@ -1,7 +1,7 @@
 <?php
 
-use Modules\Core\Models\User as HrUser;
 use Modules\Core\Models\User;
+use Modules\Core\Models\User as HrUser;
 
 test('a first HR login creates a Team Member account', function () {
     $hrUserId = insertHrUser(insertHrEmployee(), 'new.person@example.org');
@@ -9,7 +9,7 @@ test('a first HR login creates a Team Member account', function () {
     $user = User::forHrAccount(HrUser::query()->findOrFail($hrUserId));
 
     expect($user->roles->pluck('name')->all())->toBe(['Team Member']);
-});
+})->skip('Obsolete since one database (A2): the HR-account provisioning / program sync API this test calls (forHrAccount, createFromHrAccount, syncFromHr, SyncProgramsFromHr) was removed.');
 
 test('an HR admin email still starts as Super Admin', function () {
     config(['auth.hr_admin_emails' => ['boss@example.org']]);
@@ -18,7 +18,7 @@ test('an HR admin email still starts as Super Admin', function () {
     $user = User::forHrAccount(HrUser::query()->findOrFail($hrUserId));
 
     expect($user->roles->pluck('name')->all())->toBe(['Super Admin']);
-});
+})->skip('Obsolete since one database (A2): the HR-account provisioning / program sync API this test calls (forHrAccount, createFromHrAccount, syncFromHr, SyncProgramsFromHr) was removed.');
 
 test('the backfill gives every roleless user Team Member and leaves other users alone', function () {
     // Two or more: strict mode only refuses lazy loads on models fetched in a batch.
