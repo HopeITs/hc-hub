@@ -19,6 +19,7 @@ return [
     'holidays' => 'العطل',
     'recruitment_requests' => 'طلبات التوظيف',
     'vacancies' => 'الشواغر',
+    'recruitment_approvals' => 'موافقات التوظيف',
     'checklists' => 'العهد',
     'news' => 'الأخبار والفعاليات',
     'statistics' => 'إحصاءات الموارد البشرية',

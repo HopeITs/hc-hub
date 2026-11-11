@@ -19,6 +19,7 @@ return [
     'holidays' => 'Holidays',
     'recruitment_requests' => 'Recruitment requests',
     'vacancies' => 'Vacancies',
+    'recruitment_approvals' => 'Recruitment approvals',
     'checklists' => 'Checklists',
     'news' => 'News and events',
     'statistics' => 'HR statistics',

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Modules\Hr\Console\ImportHrCommand;
+use Modules\Hr\Support\Recruitment\RecruitmentBootstrap;
 use Modules\Hr\Support\SalaryCipher;
 
 /**
@@ -39,6 +40,9 @@ class HrServiceProvider extends ServiceProvider
         $this->commands([
             ImportHrCommand::class,
         ]);
+
+        // Rate limiters, observers and bindings; outside the routes so it also runs under route:cache.
+        RecruitmentBootstrap::boot();
 
         if (! $this->app->routesAreCached()) {
             $this->loadAreaRoutes();

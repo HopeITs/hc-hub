@@ -7,6 +7,7 @@ namespace Modules\Hr\Support\Desk;
 use Closure;
 use Illuminate\Support\Facades\Route;
 use Modules\Core\Models\User;
+use Modules\Hr\Actions\Recruitment\RecruitmentApproverEligibility;
 use Modules\Hr\Models\InAppFeedback;
 use Modules\Hr\Support\Assistant\HrAssistant;
 use Modules\Hr\Support\Inbox\WorkInbox;
@@ -46,7 +47,8 @@ final class HrDestinations
             ['hr.leave.team-calendar', 'team', 'users', 'nav-calendar-range', $can('leaves.view-own', 'leaves.view-all')],
             ['hr.leave.holidays', 'holidays', 'cal', 'nav-calendar', $can('project-basics.view')],
             ['hr.recruitment.requests.index', 'recruitment_requests', 'file', 'nav-file-plus', $can('recruitment-requests.view')],
-            ['hr.recruitment.vacancies.index', 'vacancies', 'search', 'nav-clipboard-list', $can('recruitment-vacancies.view')],
+            ['hr.recruitment.approvals.pending', 'recruitment_approvals', 'check', 'nav-list-checks', fn (User $user): bool => app(RecruitmentApproverEligibility::class)->mayReceiveApprovals($user)],
+            ['hr.recruitment.campaigns.index', 'vacancies', 'search', 'nav-clipboard-list', $can('recruitment-vacancies.view')],
             ['hr.checklists.index', 'checklists', 'check', 'nav-list-checks', $can('checklists.view-own', 'checklists.view-all', 'checklists.manage')],
             ['hr.news.index', 'news', 'bell', 'nav-book-open', $can('news.view')],
             ['hr.statistics.index', 'statistics', 'chart', 'nav-chart-line', $can('statistics.view')],
