@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Modules\Core\Models\User;
+use Modules\Hr\Actions\Recruitment\RecruitmentScopeResolver;
 use Modules\Hr\Enums\HiringCampaignStatus;
 
 /**
@@ -186,5 +187,10 @@ class HiringCampaign extends Model
             'minimum_age' => 'integer',
             'maximum_age' => 'integer',
             'starts_at' => 'datetime', 'ends_at' => 'datetime'];
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return app(RecruitmentScopeResolver::class)->scopeCampaigns($query, $user);
     }
 }

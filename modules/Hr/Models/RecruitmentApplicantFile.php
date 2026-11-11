@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Modules\Core\Models\User;
 use Modules\Hr\Enums\RecruitmentFileScanStatus;
+use Modules\Hr\Support\Recruitment\Media\HasHrMedia;
 
 /**
  * @property int $id
@@ -27,6 +28,8 @@ use Modules\Hr\Enums\RecruitmentFileScanStatus;
  */
 class RecruitmentApplicantFile extends Model
 {
+    use HasHrMedia;
+
     public const TYPE_CV = 'cv';
 
     protected $guarded = ['id'];

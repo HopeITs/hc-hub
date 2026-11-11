@@ -12,7 +12,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use LogicException;
 use Modules\Core\Models\User;
+use Modules\Hr\Actions\Recruitment\RecruitmentScopeResolver;
 use Modules\Hr\Enums\RecruitmentInterviewStatus;
+use Modules\Hr\Support\Recruitment\Access;
+use Modules\Hr\Support\Recruitment\Media\HasHrMedia;
+use Modules\Hr\Support\Recruitment\PositionRequester;
 
 /**
  * One interview of one application (Phase 2 Task 7). An application can have
@@ -54,6 +58,8 @@ use Modules\Hr\Enums\RecruitmentInterviewStatus;
 #[Hidden(['meeting_url'])]
 class RecruitmentInterview extends Model
 {
+    use HasHrMedia;
+
     public const ATTACHMENTS = 'attachments';
 
     protected $guarded = ['id'];
@@ -329,5 +335,39 @@ class RecruitmentInterview extends Model
             'evaluations_closed_at' => 'datetime',
             'reschedule_count' => 'integer',
         ];
+    }
+
+    /**
+     * What a user may see: interviews they are currently on, every interview
+     * of a position they requested, plus — for anyone who can read
+     * applicants — every interview of an application in their recruitment
+     * scope. The three add up; none takes away from another.
+     */
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        return $query->where(function (Builder $visible) use ($user): void {
+            $visible->whereHas(
+                'currentParticipants',
+                fn (Builder $participants): Builder => $participants->where('user_id', $user->getKey()),
+            );
+
+            $visible->orWhere(fn (Builder $requested): Builder => $requested->requestedBy($user));
+
+            if (Access::hasActivePermission($user, 'recruitment-applicants.view')) {
+                $visible->orWhereHas(
+                    'application',
+                    fn (Builder $applications): Builder => app(RecruitmentScopeResolver::class)->scopeApplications($applications, $user),
+                );
+            }
+        });
+    }
+
+    /**
+     * Interviews of a position this user requested (PositionRequester). He
+     * follows them read-only; what he may do is the policy's call.
+     */
+    public function scopeRequestedBy(Builder $query, User $user): Builder
+    {
+        return $query->whereHas('application.vacancy.createdFromRequest', fn (Builder $requests): Builder => PositionRequester::constrain($requests, $user));
     }
 }
