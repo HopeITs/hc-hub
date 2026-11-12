@@ -126,6 +126,13 @@
                             <flux:icon.lock-closed variant="outline" class="dk-menu-ic" />
                             <span class="dk-menu-t"><strong>{{ __('common.security') }}</strong></span>
                         </a>
+                        {{-- The page is closed to someone who still has to turn on two-factor, like the bell. --}}
+                        @if ($showsInbox)
+                            <a role="menuitem" href="{{ route('notification-settings.edit') }}" wire:navigate x-on:click="close()" data-test="notification-settings-menu-item">
+                                <flux:icon.bell variant="outline" class="dk-menu-ic" />
+                                <span class="dk-menu-t"><strong>{{ __('desk.my_notifications') }}</strong></span>
+                            </a>
+                        @endif
                         {{-- Below 560px the language and theme pair leaves the bar and sits here. --}}
                         <div class="dk-narrow-tools">
                             <form method="POST" action="{{ route('locale.update') }}" class="contents">

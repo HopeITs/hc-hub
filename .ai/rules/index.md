@@ -28,7 +28,7 @@ Before planning or editing, find the row whose globs match the file's path and r
 | resources/css/*.css, resources/css/desk*.css | .ai/rules/css.md |
 | database/migrations/** | .ai/rules/database-migrations.md |
 | database/seeders/** | .ai/rules/database-seeders.md |
-| resources/views/components/desk/**, resources/views/pages/desk/**, app/Support/Desk/**, resources/js/desk-*.js, resources/js/ask-index.js | .ai/rules/desk.md |
+| resources/views/components/desk/**, resources/views/pages/desk/**, app/Support/Desk/**, resources/js/desk-*.js, resources/js/ask-index.js, resources/views/components/desk/top-bar.blade.php | .ai/rules/desk.md |
 | {database/migrations/**,modules/Tracking/Models/DonorReport.php,modules/Tracking/resources/views/pages/funding-agreements/**,modules/Tracking/resources/views/pages/donor-reports/**} | .ai/rules/donor-reports.md |
 | {modules/Tracking/Livewire/Concerns/ManagesDonorForm.php,modules/Tracking/resources/views/components/donors/**,modules/Tracking/resources/views/pages/donors/**} | .ai/rules/donors.md |
 | {config/fortify.php,app/Console/Commands/**,modules/Tracking/Console/Commands/**,app/Enums/**,modules/Tracking/Enums/**} | .ai/rules/enums.md |

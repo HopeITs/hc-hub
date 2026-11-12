@@ -4,6 +4,7 @@ use App\Support\Desk\Destinations;
 use App\Support\Desk\PageCards;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
+use Laravel\Fortify\Features;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\DonorReport;
 
@@ -36,13 +37,28 @@ test('the panels button sits on My desk only', function () {
         ->assertDontSee('data-panels-trigger', false);
 });
 
-test('the profile menu leaves notification preferences and rules to the bell', function () {
+test('the profile menu links to the viewer\'s own notification preferences and leaves the rules to the bell', function () {
     $html = $this->actingAs(User::factory()->role('Super Admin')->create())->get(route('dashboard'))->assertOk()->getContent();
-    $menu = str($html)->after('dk-usermenu-pop')->before('dk-usermenu-out')->toString();
+    $xpath = new DOMXPath(tap(new DOMDocument, fn (DOMDocument $document) => $document->loadHTML('<?xml encoding="UTF-8">'.$html, LIBXML_NOERROR | LIBXML_NOWARNING)));
 
-    expect($menu)->toContain(route('security.edit'))
-        ->not->toContain(route('notification-settings.edit'))
-        ->not->toContain(route('admin.notification-settings.edit'));
+    $menu = $xpath->query('//*[@data-user-menu]//*[@role="menu"]')->item(0);
+    $links = array_map(fn (DOMElement $link): string => $link->getAttribute('href'), iterator_to_array($xpath->query('.//a[@role="menuitem"]', $menu)));
+    $item = $xpath->query('.//a[@data-test="notification-settings-menu-item"]', $menu)->item(0);
+
+    expect($links)->toBe([route('security.edit'), route('notification-settings.edit')])
+        ->and(trim($item->textContent))->toBe(__('desk.my_notifications'));
+});
+
+test('the profile menu hides notification preferences while two-factor enrolment is pending', function () {
+    $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());
+    config(['access-control.two_factor' => ['enforced' => true, 'required_roles' => ['Super Admin']]]);
+
+    $this->actingAs(User::factory()->role('Super Admin')->create(['email' => '']))
+        ->withSession(['auth.password_confirmed_at' => time()])
+        ->get(route('security.edit'))
+        ->assertOk()
+        ->assertSee('data-test="security-menu-item"', false)
+        ->assertDontSee('data-test="notification-settings-menu-item"', false);
 });
 
 test('a Super Admin sidebar lists every page, grouped like the old sidebar, the Desk first', function () {
