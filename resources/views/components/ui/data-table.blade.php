@@ -12,7 +12,8 @@
                 {{ $head }}
             </tr>
         </thead>
-        <tbody class="divide-y divide-board-line [&>tr]:@max-3xl:flex [&>tr]:@max-3xl:flex-col [&>tr]:@max-3xl:gap-1.5 [&>tr]:@max-3xl:p-3 [&>tr:hover]:bg-ground [&>tr]:transition-colors">
+        {{-- While the page waits on the server for more than a moment (filter, sort, next page) the rows dim, so stale rows never look final. --}}
+        <tbody wire:loading.class.delay="opacity-60" class="transition-opacity duration-150 motion-reduce:transition-none divide-y divide-board-line [&>tr]:@max-3xl:flex [&>tr]:@max-3xl:flex-col [&>tr]:@max-3xl:gap-1.5 [&>tr]:@max-3xl:p-3 [&>tr:hover]:bg-ground [&>tr]:transition-colors">
             {{ $slot }}
         </tbody>
     </table>

@@ -41,5 +41,5 @@ test('the contract form is guarded on its form values and pay tiers', function (
         ->get(route('hr.contracts.create'))
         ->assertOk()
         ->assertSee('data-unsaved-guard', false)
-        ->assertSee('"form","tiers"', false);
+        ->assertSee('[\\u0022form\\u0022,\\u0022tiers\\u0022]', false);
 });

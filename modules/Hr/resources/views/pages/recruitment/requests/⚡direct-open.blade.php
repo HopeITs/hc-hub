@@ -203,6 +203,8 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.direct_open')] c
     />
 
     <form wire:submit="save" novalidate class="space-y-6">
+        <x-ui.unsaved-guard :watch="['data', 'documentation']" />
+
         <x-ui.panel :clip="false">
             <div class="space-y-5 p-4">
                 <x-ui.form-select wire:model.live="documentation.actual_requester_user_id" :label="__('hr_recruitment.direct_open.actual_requester_name')" :placeholder="__('hr_recruitment.choose')" required :help="__('hr_recruitment.direct_open.requester_help')" wrap-labels>

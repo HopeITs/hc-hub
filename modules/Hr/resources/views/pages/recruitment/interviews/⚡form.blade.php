@@ -150,6 +150,8 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.interview_form')
     @enderror
 
     <form wire:submit="save" class="space-y-6">
+        <x-ui.unsaved-guard :watch="['type', 'startsAt', 'duration', 'locationType', 'locationValue', 'meetingUrl', 'participants', 'requiredParticipants', 'reason', 'notifyCandidate']" />
+
         <x-ui.panel :title="__($t.'details')" :clip="false">
             <div class="grid gap-5 p-4 md:grid-cols-3">
                 <x-ui.form-select wire:model="type" :label="__($t.'type')" :help="__($t.'type_hint')" required>

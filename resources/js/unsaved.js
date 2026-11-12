@@ -93,11 +93,13 @@ function prune() {
 function snapshot(wireId, paths) {
     const component = window.Livewire?.find(wireId);
 
-    return JSON.stringify(paths.map((path) => component?.$wire.$get(path) ?? null));
+    // Livewire.find() hands back the component's $wire itself.
+    return JSON.stringify(paths.map((path) => component?.$get(path) ?? null));
 }
 
 function prompt() {
-    return document.querySelector('dialog[data-unsaved-prompt]');
+    // Flux puts the attribute on <ui-modal>; the native <dialog> is inside it.
+    return document.querySelector('[data-unsaved-prompt] dialog');
 }
 
 const unsaved = {

@@ -122,6 +122,8 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.campaign_create'
         </x-ui.panel>
     @else
         <form wire:submit="save" novalidate class="space-y-6">
+            <x-ui.unsaved-guard :watch="['vacancyId', 'linkMode', 'startsAt', 'endsAt', 'minimumAge', 'maximumAge']" />
+
             <x-ui.panel :title="__('hr_recruitment.campaign_ui.vacancy')" :clip="false">
                 <div class="space-y-2 p-4" role="radiogroup" aria-label="{{ __('hr_recruitment.campaign_ui.vacancy') }}">
                     @foreach ($vacancies as $vacancy)

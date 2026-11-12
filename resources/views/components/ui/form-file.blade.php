@@ -87,7 +87,7 @@
             </span>
         </label>
 
-        <div class="form-file-chosen" x-show="name !== null" @if ($fileName === null) style="display: none" @endif>
+        <div class="form-file-chosen" x-show="name !== null" x-transition:enter="form-file-in" x-transition:enter-start="form-file-from" @if ($fileName === null) style="display: none" @endif>
             <span class="form-file-doc" aria-hidden="true">
                 <flux:icon.document class="size-5" />
             </span>

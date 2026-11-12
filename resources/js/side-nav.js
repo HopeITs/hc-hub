@@ -105,6 +105,43 @@ document.addEventListener('alpine:init', () => {
             }
         },
 
+        /**
+         * Moves the sidebar between rail and full width (user decision 2026-11-11:
+         * opening and closing animate). The column's width eases for 220 ms while
+         * html.dk-nav-moving is set (desk-shell.css); a page load never has that
+         * class, so nothing moves then. Opening shows the labels at once and the
+         * growing column uncovers them. Closing narrows the column first
+         * (dk-nav-closing) and only then drops dk-nav-open, so the labels never
+         * vanish from a still-wide sidebar. Reduced motion and the narrow-screen
+         * overlay switch at once.
+         */
+        slide() {
+            const root = document.documentElement.classList;
+
+            clearTimeout(this.slideTimer);
+            root.remove('dk-nav-closing');
+
+            if (! desktop() || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                root.remove('dk-nav-moving');
+                root.toggle('dk-nav-open', this.expanded);
+
+                return;
+            }
+
+            root.add('dk-nav-moving');
+
+            if (this.expanded) {
+                root.add('dk-nav-open');
+            } else {
+                root.add('dk-nav-closing');
+            }
+
+            this.slideTimer = setTimeout(() => {
+                root.toggle('dk-nav-open', this.expanded);
+                root.remove('dk-nav-closing', 'dk-nav-moving');
+            }, 240);
+        },
+
         rail() {
             return ! this.expanded && desktop();
         },
@@ -114,8 +151,7 @@ document.addEventListener('alpine:init', () => {
             this.untip();
             this.unfly();
 
-            // The width switches at once: the sidebar never animates.
-            document.documentElement.classList.toggle('dk-nav-open', this.expanded);
+            this.slide();
 
             try {
                 localStorage.setItem('hc-nav', this.expanded ? 'open' : 'rail');

@@ -134,7 +134,7 @@
                             <flux:icon.chevron-down variant="micro" class="dk-side-gchev" />
                         </button>
                     @endunless
-                    <ul id="dk-side-list-{{ $group['group'] }}" @unless ($flat) x-show="open" @if (! $holdsCurrent) x-cloak @endif @endunless>
+                    <ul id="dk-side-list-{{ $group['group'] }}" @unless ($flat) x-show="open" x-collapse.duration.180ms @if (! $holdsCurrent) x-cloak @endif @endunless>
                         @foreach ($group['items'] as $item)
                             @php
                                 $count = $countOf($item);
@@ -171,7 +171,7 @@
 
                 {{-- Fly-out for the rail: the group's links beside the rail, with counts and pins. --}}
                 @unless ($flat)
-                    <div class="dk-side-fly" x-show="fly === @js($group['group'])" x-cloak x-bind:style="flyStyle" x-on:mouseenter="keepFly()" x-on:mouseleave="leave()" role="menu" aria-label="{{ $group['label'] }}" data-side-fly="{{ $group['group'] }}">
+                    <div class="dk-side-fly" x-show="fly === @js($group['group'])" x-transition:enter="dk-menu-in" x-transition:enter-start="dk-side-fly-from" x-cloak x-bind:style="flyStyle" x-on:mouseenter="keepFly()" x-on:mouseleave="leave()" role="menu" aria-label="{{ $group['label'] }}" data-side-fly="{{ $group['group'] }}">
                         <p class="dk-side-fly-h">{{ $group['label'] }}</p>
                         @foreach ($group['items'] as $item)
                             @php $count = $countOf($item); @endphp
@@ -203,7 +203,7 @@
                             @include('components.desk.side-personal', ['recent' => $recent])
                         </div>
                     </section>
-                    <div class="dk-side-fly" x-show="fly === 'personal'" x-cloak x-bind:style="flyStyle" x-on:mouseenter="keepFly()" x-on:mouseleave="leave()" role="menu" aria-label="{{ __('navigation.pinned_and_recent') }}" data-side-fly="personal">
+                    <div class="dk-side-fly" x-show="fly === 'personal'" x-transition:enter="dk-menu-in" x-transition:enter-start="dk-side-fly-from" x-cloak x-bind:style="flyStyle" x-on:mouseenter="keepFly()" x-on:mouseleave="leave()" role="menu" aria-label="{{ __('navigation.pinned_and_recent') }}" data-side-fly="personal">
                         <p class="dk-side-fly-h">{{ __('navigation.pinned') }}</p>
                         @include('components.desk.side-personal', ['recent' => $recent])
                     </div>

@@ -22,9 +22,14 @@
     }
 
     html.dk-nav-open { --side-w: var(--side-open); }
+    /* Closing: the column narrows first with its labels still in place (clipped), then side-nav.js drops dk-nav-open and the rail takes over. */
+    html.dk-nav-open.dk-nav-closing { --side-w: var(--side-rail); }
 
     /* ---------- App frame: sidebar column + main column ---------- */
     .dk-app { display: grid; grid-template-columns: var(--side-w) minmax(0, 1fr); min-height: 100dvh; }
+    /* Only while the toggle is moving the sidebar (html.dk-nav-moving, side-nav.js): a page load or a visit never animates the column. */
+    html.dk-nav-moving .dk-app { transition: grid-template-columns .22s var(--ease-drawer); }
+    html.dk-nav-moving .dk-side-h { overflow: hidden; }
     .dk-main { min-width: 0; display: flex; flex-direction: column; }
     .dk-main > .dk-scope:not(.dk-top) { flex: 1; display: flex; flex-direction: column; }
     .dk-main > .dk-top { flex: none; }
@@ -81,7 +86,7 @@
     .dk-side-gb { width: 100%; border: 0; background: none; cursor: pointer; text-align: start; font: inherit; font-size: 14px; font-weight: 600; }
     .dk-side-gb.dk-has-on { color: var(--ink); font-weight: 700; }
     .dk-side-icw { position: relative; display: grid; place-items: center; flex: none; }
-    .dk-side-gchev { width: 16px; height: 16px; flex: none; color: var(--ink-3); }
+    .dk-side-gchev { width: 16px; height: 16px; flex: none; color: var(--ink-3); transition: transform .18s cubic-bezier(.2, .8, .2, 1); }
     .dk-side-open > .dk-side-gb .dk-side-gchev { transform: rotate(180deg); }
     .dk-side-g:not(.dk-side-flat):not(.dk-side-me) > ul { gap: 1px; margin-block: 2px 4px; padding-inline-start: 10px; margin-inline-start: 21px; border-inline-start: 1px solid var(--line); }
     .dk-side-sub { height: 34px; font-size: 13.5px; font-weight: 500; padding-inline: 10px; }
@@ -128,6 +133,8 @@
 
     /* Fly-out beside the rail */
     .dk-side-fly { position: fixed; z-index: 75; width: 260px; padding: 6px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--paper); box-shadow: var(--dk-shadow); display: flex; flex-direction: column; gap: 1px; }
+    .dk-side-fly-from { opacity: 0; transform: translateX(-4px); }
+    [dir="rtl"] .dk-side-fly-from { transform: translateX(4px); }
     /* The pointer: a small notch on the edge facing the rail, aimed at the hovered icon's center */
     .dk-side-fly::before { content: ""; position: absolute; top: calc(var(--dk-fly-caret, 26px) - 6px); inset-inline-start: -7px; width: 12px; height: 12px; background: var(--paper); border-inline-start: 1px solid var(--line-2); border-block-end: 1px solid var(--line-2); transform: rotate(45deg); }
     [dir="rtl"] .dk-side-fly::before { transform: rotate(-45deg); }
@@ -329,9 +336,10 @@
     /* ---------- Narrow screens: no rail, the menu button lays the sidebar over the page ---------- */
     @media (max-width: 899px) {
         .dk-app { grid-template-columns: minmax(0, 1fr); }
-        .dk-side { position: fixed; inset-block: 0; inset-inline-start: 0; width: min(300px, calc(100vw - 48px)); visibility: hidden; opacity: 0; box-shadow: var(--dk-shadow); z-index: 70; }
+        .dk-side { position: fixed; inset-block: 0; inset-inline-start: 0; width: min(300px, calc(100vw - 48px)); visibility: hidden; opacity: 0; transform: translateX(-100%); transition: transform .28s var(--ease-drawer), opacity .2s ease-out, visibility 0s .28s; box-shadow: var(--dk-shadow); z-index: 70; }
+        [dir="rtl"] .dk-side { transform: translateX(100%); }
         .dk-side-toggle { display: none; }
-        html.dk-nav-mobile .dk-side { visibility: visible; opacity: 1; }
+        html.dk-nav-mobile .dk-side { visibility: visible; opacity: 1; transform: none; transition-delay: 0s; }
         html.dk-nav-mobile .dk-side-scrim { display: block; position: fixed; inset: 0; z-index: 69; background: var(--scrim); }
         /* The overlay always shows labels, whatever the desktop rail choice. */
         .dk-side .dk-side-h { justify-content: flex-start !important; padding-inline: 16px !important; }
@@ -366,9 +374,13 @@
 
     @media (prefers-reduced-motion: reduce) {
         .dk-side { transition: none; }
+        html.dk-nav-moving .dk-app { transition: none; }
         .dk-where, .dk-where-p::before, .dk-seg-theme svg { animation: none; }
         .dk-menu-in, .dk-menu-out { transition: opacity .1s linear; }
         .dk-menu-from { transform: none; }
+        .dk-side-gchev { transition: none; }
+        .dk-side-g > ul { transition: none !important; }
+        .dk-side-fly-from { transform: none; }
         .dk-top :active { transform: none !important; }
     }
 }
@@ -399,7 +411,8 @@
     .modal-shell-steps li.is-done + li::before, .modal-shell-steps li.is-current::before { background: var(--color-secondary-dark); }
     .modal-shell-steps button { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; padding: 0 4px; border: 0; background: none; cursor: pointer; color: var(--color-secondary-medium); font: inherit; }
     .modal-shell-step-dot { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--color-secondary-soft); background: var(--color-white); font-size: 12px; font-weight: 800; font-variant-numeric: tabular-nums; transition: background .15s, border-color .15s, color .15s; }
-    .modal-shell-step-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 600; line-height: 1.2; }
+    .modal-shell-step-label { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 600; line-height: 1.2; transition: color .15s; }
+    @media (prefers-reduced-motion: reduce) { .modal-shell-step-label { transition: none; } }
     .modal-shell-steps li.is-done .modal-shell-step-dot { border-color: var(--color-secondary-dark); color: var(--color-secondary-dark); }
     .modal-shell-steps li.is-current .modal-shell-step-dot { border-color: var(--color-secondary-dark); background: var(--color-secondary-dark); color: var(--color-white); }
     .modal-shell-steps li.is-current .modal-shell-step-label { color: var(--color-secondary-dark); font-weight: 800; }

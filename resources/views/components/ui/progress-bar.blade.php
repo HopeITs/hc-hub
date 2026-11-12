@@ -44,7 +44,7 @@
         @if ($label !== null) aria-label="{{ $label }}" @endif
     >
         @if ($value !== null)
-            <div class="{{ $fillClasses }} h-full rounded-full" style="width: {{ $isOver ? 100 : $pct }}%"></div>
+            <div class="{{ $fillClasses }} h-full w-full rounded-full translate-x-[calc((var(--fill)_-_100)_*_1%)] rtl:translate-x-[calc((100_-_var(--fill))_*_1%)] transition-[translate] duration-[240ms] ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none" style="--fill: {{ $isOver ? 100 : $pct }}"></div>
         @endif
     </div>
 </div>

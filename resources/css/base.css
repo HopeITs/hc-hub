@@ -78,3 +78,36 @@
         transition: opacity 120ms ease 150ms;
     }
 }
+
+/*
+ * Page arrival: after a wire:navigate visit (or a first load) the page content
+ * fades in briefly, so the swap reads as one soft step instead of a hard cut.
+ * Opacity only: a transform here would trap the page's fixed and sticky parts.
+ * `backwards` leaves nothing behind once it has played.
+ */
+@layer base {
+    main[data-desk-page] {
+        animation: hc-page-in 180ms ease-out backwards;
+    }
+
+    /* A pressed Flux button gives a little under the finger. */
+    [data-flux-button]:not(:disabled, [aria-disabled='true']):active {
+        scale: 0.98;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        main[data-desk-page] {
+            animation: none;
+        }
+
+        [data-flux-button]:active {
+            scale: none;
+        }
+    }
+}
+
+@keyframes hc-page-in {
+    from {
+        opacity: 0;
+    }
+}

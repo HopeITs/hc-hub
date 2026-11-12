@@ -700,6 +700,21 @@
         background-color: var(--color-white);
     }
 
+    .form-file-in {
+        transition: opacity 160ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .form-file-from {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .form-file-from {
+            transform: none;
+        }
+    }
+
     .form-file-icon,
     .form-file-doc {
         display: inline-flex;

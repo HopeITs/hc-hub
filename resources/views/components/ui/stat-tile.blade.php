@@ -22,7 +22,7 @@
     <a
         href="{{ $href }}"
         wire:navigate
-        data-stat-tile {{ $attributes->class('group block rounded-xl border border-secondary-soft bg-white p-4 shadow-card transition-all hover:-translate-y-0.5 hover:shadow-card-hover focus-visible:outline-2 focus-visible:outline-secondary-medium dark:border-transparent dark:bg-surface-1 dark:shadow-raised dark:hover:shadow-raised') }}
+        data-stat-tile {{ $attributes->class('group block rounded-xl border border-secondary-soft bg-white p-4 shadow-card transition-[translate,box-shadow] duration-200 ease-out hover:-translate-y-0.5 hover:shadow-card-hover active:translate-y-0 active:shadow-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium motion-reduce:transition-none motion-reduce:hover:translate-y-0 dark:border-transparent dark:bg-surface-1 dark:shadow-raised dark:hover:shadow-raised') }}
     >
         <div class="flex items-start justify-between gap-3">
             <div class="min-w-0">
@@ -38,7 +38,7 @@
                 </p>
             </div>
             @if ($icon !== null)
-                <div class="{{ $iconBadgeClasses }} flex size-10 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-105">
+                <div class="{{ $iconBadgeClasses }} flex size-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-200 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
                     <flux:icon :name="$icon" class="size-5" />
                 </div>
             @elseif ($scope !== null)
