@@ -27,19 +27,6 @@ return [
         'employees' => 'Employees on record',
     ],
 
-    'statistics' => [
-        'title' => 'HR statistics',
-        'lede' => 'Head counts for the governorates you look after. Numbers refresh every ten minutes.',
-        'by_department' => 'Employees by department',
-        'by_job_level' => 'Employees by job level',
-        'by_contract_type' => 'Running contracts by type',
-        'no_leaves' => 'Never asked for annual leave',
-        'no_leaves_hint' => 'Active employees on a running contract with no annual leave request yet.',
-        'empty' => 'Nothing to count yet.',
-        'count' => 'Count',
-        'name' => 'Name',
-    ],
-
     'cards' => [
         'decisions' => [
             'title' => 'HR decisions',
