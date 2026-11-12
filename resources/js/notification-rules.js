@@ -20,6 +20,7 @@ const NUMBER_BOUNDS = {
     stalledReportDraft: [1, 365],
     stalledReportReviewed: [1, 365],
     stalledProposal: [1, 365],
+    extensionLead: [1, 365],
     offTrackPace: [1, 100],
 };
 

@@ -42,6 +42,27 @@ class DonorReportPolicy
     }
 
     /**
+     * Name who delivers the report, while it is not submitted (a submitted
+     * report is frozen): agreement editors, and report compilers who may see
+     * its proposal. A compiler working from an assigned duty alone cannot
+     * hand the report to someone else, as in the builder.
+     */
+    public function assign(User $user, DonorReport $donorReport): bool
+    {
+        if ($donorReport->isSubmitted()) {
+            return false;
+        }
+
+        if ($user->can('funding-agreements.update')) {
+            return true;
+        }
+
+        $proposal = $donorReport->donorProposal?->proposal;
+
+        return $user->can('reports.aggregate') && $proposal !== null && $user->can('view', $proposal);
+    }
+
+    /**
      * Attach a delivered report file.
      */
     public function uploadFile(User $user, DonorReport $donorReport): bool

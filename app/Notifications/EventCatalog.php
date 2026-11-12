@@ -172,6 +172,9 @@ final class EventCatalog
                 'proposal.extended' => self::entry('proposals', $now, 'module_map', $all, activity: 'proposal.extended'),
                 'proposal.approved' => self::entry('proposals', $now, 'module_map', $all, critical: true, activity: 'proposal.approved'),
                 'proposal.on_hold_reminder' => self::entry('proposals', $now, 'scanner', $all),
+                // An active proposal ending with money still to come (D-60, W-33).
+                // `.due` is the suffix DueSoonScanner looks up, as for department_task.
+                'proposal.ending_with_funds.due' => self::entry('proposals', $now, 'scanner', $all),
                 // Work still named after somebody who has left HR (D-62, W-35).
                 'proposal.responsible_inactive' => self::entry('proposals', $now, 'scanner', $all),
                 'proposal.final_report_accepted' => self::entry('proposals', $now, 'module_map', $all, activity: 'proposal.final_report_accepted'),
@@ -188,6 +191,8 @@ final class EventCatalog
                 'proposal.locations_changed' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.locations_changed', event: ProposalLocationsChanged::class),
                 // T31: the approval moved the plan to the grant period; the project owners hear of it only when a date was cut at the grant end.
                 'proposal.plan_rebased' => self::entry('proposals', $now, 'module_map', OversightMode::None, activity: 'proposal.plan_rebased'),
+                // Page review follow-up (6 Nov 2026): missing actual grant dates filled in after approval.
+                'proposal.grant_dates_set' => self::entry('proposals', $digest, 'module_map', $all, activity: 'proposal.grant_dates_set'),
             ],
             // funding-agreements
             [

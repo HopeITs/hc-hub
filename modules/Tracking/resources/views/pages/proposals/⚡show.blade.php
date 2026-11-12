@@ -7,6 +7,7 @@ use Modules\Tracking\Livewire\Concerns\ManagesTransferForm;
 use App\Livewire\Concerns\PreviewsFiles;
 use Modules\Tracking\Livewire\Concerns\Proposals\ChartsProposalChronology;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesFinalReportAcceptance;
+use Modules\Tracking\Livewire\Concerns\Proposals\ManagesGrantDates;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesNegotiationNotes;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalApproval;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalFiles;
@@ -44,6 +45,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     use ChecksFinanceVisibility;
     use ManagesAgreementForm;
     use ManagesFinalReportAcceptance;
+    use ManagesGrantDates;
     use ManagesNegotiationNotes;
     use ManagesProposalApproval;
     use ManagesProposalExtension;
@@ -131,6 +133,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
         $this->recordAgreementLink = false;
 
         $this->openExtensionFromLink();
+        $this->openGrantDatesFromLink();
     }
 
     /**

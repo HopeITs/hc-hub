@@ -12,6 +12,7 @@ use Modules\Tracking\Livewire\Concerns\ChecksFinanceVisibility;
 use Modules\Tracking\Livewire\Concerns\ManagesAgreementForm;
 use Modules\Tracking\Livewire\Concerns\ManagesTransferForm;
 use Modules\Tracking\Livewire\Concerns\Proposals\ChartsProposalChronology;
+use Modules\Tracking\Livewire\Concerns\Proposals\ManagesGrantDates;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalApproval;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalFiles;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalForm;
@@ -38,6 +39,7 @@ abstract class ProposalsShowPageHost extends Component
     use ChartsProposalChronology;
     use ChecksFinanceVisibility;
     use ManagesAgreementForm;
+    use ManagesGrantDates;
     use ManagesProposalApproval;
     use ManagesProposalFiles;
     use ManagesProposalForm;

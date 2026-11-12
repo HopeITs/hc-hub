@@ -197,6 +197,7 @@ return [
         'project_started' => 'بدأ المشروع «:subject» في :date',
         'project_ended' => 'انتهى المشروع «:subject» في :date',
         'on_hold_reminder' => 'المقترح «:subject» معلّق وقد حلّ موعد مراجعته (:date)',
+        'ending_with_funds' => 'المقترح «:subject» ينتهي في :date ولا يزال في اتفاقيته مبالغ',
         'logframe_missing' => [
             'single' => 'البرنامج «:subject» ليس له إطار برنامج بعد — إنشاء إطار البرنامج',
             'grouped' => 'برامج ليس لها إطار برنامج بعد: :count — إنشاء إطار البرنامج',
@@ -268,6 +269,8 @@ return [
         'stalled_report_draft' => 'تقرير في المسودة',
         'stalled_report_reviewed' => 'تقرير بانتظار الاعتماد',
         'stalled_proposal' => 'مقترح لم تتغير حالته',
+        'extension_lead' => 'تنبيه التمديد',
+        'extension_lead_help' => 'المقترح النشط الذي ما زال في اتفاقيته مبالغ ينبّه المالية قبل انتهائه بهذا العدد من أيام العمل.',
 
         'off_track' => 'المؤشر خارج المسار تحت',
         'off_track_hint' => 'من التقدم المتوقع حتى اليوم.',
@@ -321,6 +324,7 @@ return [
             'report_approve' => 'اعتماد',
             'transfer_mark_received' => 'تعليم كمستلمة',
             'agreement_record' => 'تسجيل الاتفاقية',
+            'proposal_request_extension' => 'طلب تمديد',
             'project_reassign' => 'إعادة التعيين',
             'assignment_acknowledge' => 'تأكيد الاستلام',
             'assignment_reject' => 'رفض',
@@ -330,6 +334,7 @@ return [
         'snoozed' => 'أُجّل التذكير حتى الغد.',
         'opening' => 'جارٍ فتح الدفعة…',
         'opening_record' => 'جارٍ فتح السجل…',
+        'opening_extension' => 'جارٍ فتح التمديد…',
         'already_done' => 'أُنجز مسبقًا — لم يتغير شيء.',
         'already_started' => 'بدأ مسبقًا — لم يتغير شيء.',
         'forbidden' => 'ليس لديك صلاحية لذلك.',
@@ -627,6 +632,12 @@ return [
                 'title' => 'تذكير بمقترح معلّق',
                 'body' => 'ما زال المقترح «:subject» معلّقًا',
             ],
+            'ending_with_funds' => [
+                'due' => [
+                    'title' => 'تنبيه تمديد',
+                    'body' => 'ينتهي المقترح «:subject» قريبًا ولا يزال في اتفاقيته مبالغ',
+                ],
+            ],
             'concept_note_updated' => [
                 'title' => 'تحديث المذكرة المفاهيمية',
                 'body' => 'حدّث :actor المذكرة المفاهيمية للمقترح «:subject»',
@@ -638,6 +649,10 @@ return [
             'targets_saved' => [
                 'title' => 'حفظ المستهدفات',
                 'body' => 'حفظ :actor مستهدفات المقترح «:subject»',
+            ],
+            'grant_dates_set' => [
+                'title' => 'تحديد تواريخ المنحة',
+                'body' => 'حدّد :actor تواريخ المنحة للمقترح «:subject»',
             ],
             'plan_rebased' => [
                 'title' => 'نقل الخطة إلى مدة المنحة',

@@ -5,7 +5,7 @@ description: Run the user-story test scenarios for the General Manager role agai
 
 # UAT: General Manager
 
-Role name in code: `'General Manager'` (`userWithRole('General Manager')`). Source: ClickUp subtask "General manager review" and `docs/user-story.ar.md` §3. The baseline is every permission except: manage-roles, manage-permissions, reports.mark-seen, notification-settings.manage, reports.reopen, MEAL-only (`meal-coverage`, `report-templates`, `evidence-types`, `narrative-questions`), targets create/update, and `ai.draft`.
+Role name in code: `'General Manager'` (`userWithRole('General Manager')`). Source: ClickUp subtask "General manager review" and `docs/user-story.ar.md` §3. The baseline is every permission except: manage-roles, manage-permissions, reports.mark-seen, notification-settings.manage, reports.reopen, MEAL-only (`meal-coverage`, `report-templates`, `evidence-types`, `narrative-questions`), targets create/update, `proposals.approve` (D-70: the PR Manager approves), and `ai.draft`.
 
 ## How to run (same for every role)
 1. Read `.ai/rules/index.md` and the rule files for the paths involved (donors, proposals, activity).
@@ -20,5 +20,6 @@ Role name in code: `'General Manager'` (`userWithRole('General Manager')`). Sour
 - **GM-02** 🚫 Cannot approve a proposal (`approved`): only the Public Relations Manager does (D-70). The approval itself (locations completed, missing projects created) is tested as the PR Manager.
 - **GM-03** ⚠ Approval of a proposal with a location row that has no program or center is refused and writes nothing (tested as the PR Manager; the GM cannot approve).
 - **GM-04** ✅ Open the activity log (only this role and Super Admin can).
-- **GM-05** 🚫 Cannot confirm report templates, set targets, reopen reports or mark them seen, or use AI drafting.
-- **GM-06** ✅ See the AI usage log.
+- **GM-05** 🚫 Cannot confirm report templates, set targets, reopen reports or mark them seen.
+
+Postponed until the AI features are built (team lead, 2026-11-09): AI drafting is refused to this role; GM-06 see the AI usage log (the permission exists, no page yet). The approval cases behind GM-02 and GM-03 are run as the PR Manager: PM-09 and PM-10.
