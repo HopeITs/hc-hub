@@ -32,6 +32,8 @@ final class HrMedia
 
     public const FOLDER = 'App\Models\Folder';
 
+    public const CONTRACT_AMENDMENT = 'App\Models\ContractAmendment';
+
     /** hr_media.disk => folder on the `hr` disk. */
     private const DISK_FOLDERS = ['public' => 'public', 'local' => 'private'];
 

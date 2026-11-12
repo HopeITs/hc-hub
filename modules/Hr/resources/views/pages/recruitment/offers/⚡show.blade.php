@@ -51,6 +51,10 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer')] class e
 
     public string $expiresOn = '';
 
+    /** The expiry date the send dialog opened with: what its discard guard compares against. */
+    #[Locked]
+    public string $suggestedExpiresOn = '';
+
     public string $response = '';
 
     /** Internal: the candidate's reasons, as HR recorded them. */
@@ -121,6 +125,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer')] class e
     {
         $this->openPanel('send');
         $this->expiresOn = today()->addDays((int) RecruitmentConfig::get('recruitment.offers.validity_days', 7))->toDateString();
+        $this->suggestedExpiresOn = $this->expiresOn;
     }
 
     public function send(RecruitmentJobOfferService $offers): void
@@ -194,7 +199,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer')] class e
 
     public function closePanel(): void
     {
-        $this->reset('panel', 'panelOpen', 'expectedVersionId', 'expiresOn', 'response', 'responseNote', 'responseEvidence', 'cancelReason', 'cancelNote');
+        $this->reset('panel', 'panelOpen', 'expectedVersionId', 'expiresOn', 'suggestedExpiresOn', 'response', 'responseNote', 'responseEvidence', 'cancelReason', 'cancelNote');
         $this->resetErrorBag();
     }
 
@@ -493,11 +498,22 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer')] class e
                 default => ['cancelOffer', __('hr_recruitment.applicant_ui.offers.actions.cancel')],
             };
         @endphp
-        <flux:modal wire:model="panelOpen" class="max-w-lg" x-on:close="$wire.closePanel()">
+        {{-- Send, record the answer, cancel. Closing with something typed asks before discarding it. --}}
+        <x-ui.modal
+            wire:model="panelOpen"
+            size="sm"
+            close="closePanel"
+            :title="$modalTitle"
+            :submit="$action"
+            :cancel-label="__('hr_recruitment.applicant_ui.cancel')"
+            :discard-guard="$panelOpen ? [
+                'fields' => ['expiresOn', 'responseNote', 'responseEvidence', 'cancelReason', 'cancelNote'],
+                'original' => ['expiresOn' => $suggestedExpiresOn, 'responseNote' => '', 'responseEvidence' => '', 'cancelReason' => '', 'cancelNote' => ''],
+            ] : null"
+            data-offer-action-modal
+        >
             @if ($panel !== '')
                 <div class="space-y-4">
-                    <flux:heading size="lg">{{ $modalTitle }}</flux:heading>
-
                     @error('offer')
                         <p role="alert" class="rounded-md border border-primary bg-primary/5 p-3 text-sm text-primary">{{ $message }}</p>
                     @enderror
@@ -526,13 +542,12 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer')] class e
                         </x-ui.form-select>
                         <x-ui.form-textarea wire:model="cancelNote" :label="__('hr_recruitment.applicant_ui.interviews.internal_note')" :required="$cancelReason === RecruitmentJobOfferService::REASON_OTHER" rows="2" dir="auto" />
                     @endif
-
-                    <div class="flex justify-end gap-2">
-                        <x-ui.button tone="ghost" wire:click="closePanel">{{ __('hr_recruitment.applicant_ui.cancel') }}</x-ui.button>
-                        <x-ui.button :tone="$panel === 'cancel' ? 'neutral' : 'primary'" wire:click="{{ $action }}" wire:loading.attr="disabled" wire:target="{{ $action }},responseEvidence">{{ $actionLabel }}</x-ui.button>
-                    </div>
                 </div>
             @endif
-        </flux:modal>
+
+            <x-slot:actions>
+                <x-ui.button type="submit" :tone="$panel === 'cancel' ? 'neutral' : 'primary'" wire:loading.attr="disabled" wire:target="{{ $action }},responseEvidence">{{ $actionLabel }}</x-ui.button>
+            </x-slot:actions>
+        </x-ui.modal>
     @endif
 </div>

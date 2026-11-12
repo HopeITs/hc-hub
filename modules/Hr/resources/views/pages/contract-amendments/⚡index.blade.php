@@ -1,5 +1,6 @@
 <?php
 
+use App\Rules\SecureUpload;
 use Flux\Flux;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -10,21 +11,31 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithFileUploads;
 use Modules\Hr\Actions\Contracts\ContractAmendmentCannotApply;
 use Modules\Hr\Actions\Contracts\ContractAmendmentService;
+use Modules\Hr\Http\Controllers\Contracts\ContractAmendmentSignedController;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\ContractAmendment;
 use Modules\Hr\Support\Contracts\ContractAmendmentDescriber;
 use Modules\Hr\Support\Employees\HrAccess;
+use Modules\Hr\Support\Employees\HrMedia;
 
 /**
  * A contract's amendments (ملحق عقد), newest first: what each one changed,
  * and the steps of the one in flight — print the sheet, approve once signed,
- * edit or discard a draft, cancel one approved for a date still to come.
+ * edit or discard a draft, cancel one approved for a date still to come,
+ * attach the signed copy and download it.
  */
 new #[Layout('layouts::desk'), Title('hr_contract_amendments.titles.index')] class extends Component {
+    use WithFileUploads;
+
     #[Locked]
     public int $contractId;
+
+    /** @var array<int|string, mixed> one upload slot per amendment, keyed by its id */
+    public array $signedFiles = [];
 
     #[Locked]
     public bool $canViewPay = false;
@@ -73,6 +84,63 @@ new #[Layout('layouts::desk'), Title('hr_contract_amendments.titles.index')] cla
             ->orderByDesc('number')
             ->get()
             ->each(fn (ContractAmendment $amendment) => $amendment->setRelation('contract', $contract));
+    }
+
+    /**
+     * The amendments that have a signed copy on file, by id.
+     *
+     * @return array<int, true>
+     */
+    #[Computed]
+    public function signedCopies(): array
+    {
+        $ids = array_values($this->amendments->map(fn (ContractAmendment $amendment): int => (int) $amendment->id)->all());
+
+        return HrMedia::for(HrMedia::CONTRACT_AMENDMENT, $ids, ContractAmendmentSignedController::COLLECTION)
+            ->mapWithKeys(fn (object $media): array => [(int) $media->model_id => true])
+            ->all();
+    }
+
+    /**
+     * A file chosen in an amendment's upload slot is its signed copy; a new
+     * one replaces the one on file.
+     */
+    public function updatedSignedFiles(mixed $value, string|int $key): void
+    {
+        $amendment = $this->amendment((int) $key);
+        Gate::authorize('attachSignedAmendment', $amendment);
+
+        try {
+            $this->validate([
+                "signedFiles.{$key}" => ['required', 'file', 'max:10240', 'mimes:'.implode(',', ContractAmendmentSignedController::ALLOWED_EXTENSIONS), new SecureUpload],
+            ], [], ["signedFiles.{$key}" => __('hr_contract_amendments.signed.label')]);
+        } catch (ValidationException $exception) {
+            unset($this->signedFiles[$key]);
+
+            throw $exception;
+        }
+
+        $file = $this->signedFiles[$key];
+
+        if (! $file instanceof TemporaryUploadedFile) {
+            return;
+        }
+
+        $previous = HrMedia::for(HrMedia::CONTRACT_AMENDMENT, (int) $amendment->id, ContractAmendmentSignedController::COLLECTION);
+
+        HrMedia::store(
+            $file,
+            HrMedia::CONTRACT_AMENDMENT,
+            (int) $amendment->id,
+            ContractAmendmentSignedController::COLLECTION,
+            displayName: 'amendment-'.$amendment->contract_id.'-'.$amendment->number,
+        );
+
+        $previous->each(fn (object $media) => HrMedia::delete((int) $media->id));
+
+        unset($this->signedFiles[$key], $this->signedCopies);
+
+        Flux::toast(variant: 'success', text: __('hr_contract_amendments.toasts.signed_attached'));
     }
 
     public function askApprove(int $amendmentId): void
@@ -154,6 +222,7 @@ new #[Layout('layouts::desk'), Title('hr_contract_amendments.titles.index')] cla
     // The amendment whose terms the contract carries now; older ones in effect are superseded.
     $currentId = $amendments->first(fn ($amendment) => $amendment->isApplied())?->id;
     $pending = $pendingId === null ? null : $amendments->firstWhere('id', $pendingId);
+    $signedCopies = $this->signedCopies;
 @endphp
 
 <section class="@container/record flex flex-col gap-5" data-contract-amendments="{{ $contract->id }}">
@@ -196,6 +265,7 @@ new #[Layout('layouts::desk'), Title('hr_contract_amendments.titles.index')] cla
                 default => StatusTone::Warn,
             };
             $terms = $describer->terms($amendment, $canViewPay);
+            $hasSigned = isset($signedCopies[$amendment->id]);
         @endphp
 
         <x-ui.panel wire:key="amendment-{{ $amendment->id }}" data-amendment="{{ $amendment->id }}">
@@ -203,6 +273,18 @@ new #[Layout('layouts::desk'), Title('hr_contract_amendments.titles.index')] cla
                 <div class="flex flex-wrap items-center gap-2">
                     @can('exportAmendment', $amendment)
                         <x-ui.button size="sm" icon="printer" :href="route('hr.contracts.amendments.print', [$contract->id, $amendment->id])" target="_blank">{{ __('hr_contract_amendments.actions.print') }}</x-ui.button>
+                    @endcan
+                    @if ($hasSigned)
+                        @can('exportAmendment', $amendment)
+                            <x-ui.button size="sm" icon="arrow-down-tray" :href="route('hr.contracts.amendments.signed', [$contract->id, $amendment->id])" data-test="download-signed-amendment">{{ __('hr_contract_amendments.actions.download_signed') }}</x-ui.button>
+                        @endcan
+                    @endif
+                    @can('attachSignedAmendment', $amendment)
+                        <label class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-panel-border px-3 py-1.5 text-sm font-semibold" data-test="attach-signed-amendment">
+                            <flux:icon.arrow-up-tray class="size-4" />
+                            {{ $hasSigned ? __('hr_contract_amendments.actions.replace_signed') : __('hr_contract_amendments.actions.attach_signed') }}
+                            <input type="file" class="sr-only" wire:model="signedFiles.{{ $amendment->id }}" accept=".{{ implode(',.', ContractAmendmentSignedController::ALLOWED_EXTENSIONS) }}">
+                        </label>
                     @endcan
                     @can('decideAmendment', $amendment)
                         <x-ui.button size="sm" icon="pencil-square" :href="route('hr.contracts.amendments.edit', [$contract->id, $amendment->id])" wire:navigate>{{ __('hr_contract_amendments.actions.edit') }}</x-ui.button>
@@ -215,10 +297,16 @@ new #[Layout('layouts::desk'), Title('hr_contract_amendments.titles.index')] cla
             </x-slot:toolbar>
 
             <div class="flex flex-col gap-3 p-4">
+                @error('signedFiles.'.$amendment->id) <p class="text-sm text-status-critical" data-test="signed-amendment-error">{{ $message }}</p> @enderror
+                <p wire:loading wire:target="signedFiles.{{ $amendment->id }}" class="text-sm text-secondary-medium dark:text-ink-muted">{{ __('hr_contract_amendments.signed.uploading') }}</p>
+
                 <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <span class="text-base font-bold">{{ __('hr_contract_amendments.number', ['number' => $amendment->number]) }}</span>
                     <x-ui.enum-badge :case="$status" :tone="$tone" :label="$superseded ? __('hr_contract_amendments.status.superseded') : $status->label()" />
                     <span class="text-sm tabular-nums text-secondary-medium dark:text-ink-muted">{{ __('hr_contract_amendments.effective_from_summary', ['date' => $amendment->effective_from->translatedFormat(__('formats.date'))]) }}</span>
+                    @if ($hasSigned)
+                        <span class="inline-flex items-center gap-1 text-sm text-secondary-medium dark:text-ink-muted" data-test="signed-amendment-on-file"><flux:icon.paper-clip class="size-4" />{{ __('hr_contract_amendments.signed.on_file') }}</span>
+                    @endif
                 </div>
 
                 @if (filled($amendment->reason))

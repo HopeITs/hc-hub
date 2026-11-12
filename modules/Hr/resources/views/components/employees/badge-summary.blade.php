@@ -1,6 +1,7 @@
-@props(['badge', 'showPay' => false])
+@props(['badge', 'showPay' => false, 'ownerView' => false])
 
 {{-- One badge in words: its type and kind, the date, then the details its kind carries. Pay figures only when showPay. --}}
+{{-- ownerView: the employee reading their own badge sees type, kind, date and reason only (the other columns are not loaded). --}}
 @php
     use Modules\Hr\Enums\BadgeSubtype;
     use Modules\Hr\Enums\BadgeType;
@@ -15,16 +16,19 @@
     };
     $muted = 'text-secondary-medium dark:text-ink-muted';
     $details = [];
+    $notes = $ownerView ? null : $badge->notes;
 
-    if (BadgeSubtype::isFinancial($badge->subtype) && $showPay && $badge->amount !== null) {
+    if ($ownerView) {
+        $showPay = false;
+    } elseif (BadgeSubtype::isFinancial($badge->subtype) && $showPay && $badge->amount !== null) {
         $details[] = number_format((float) $badge->amount, 2).' '.EnumLabel::of(Currency::class, $badge->currency, '');
     }
 
-    if (BadgeSubtype::isPromotion($badge->subtype) && filled($badge->new_position)) {
+    if (! $ownerView && BadgeSubtype::isPromotion($badge->subtype) && filled($badge->new_position)) {
         $details[] = __('hr_employees.badges.new_position').': '.$badge->new_position;
     }
 
-    if (BadgeSubtype::isLeave($badge->subtype) && $badge->amount !== null) {
+    if (! $ownerView && BadgeSubtype::isLeave($badge->subtype) && $badge->amount !== null) {
         $details[] = trans_choice('hr_employees.badges.leave_'.($badge->leave_unit === 'hour' ? 'hours' : 'days'), (int) $badge->amount, ['count' => (int) $badge->amount]);
     }
 
@@ -47,7 +51,7 @@
     @if (filled($badge->reason))
         <p class="mt-1 text-sm {{ $muted }}" dir="auto">{{ $badge->reason }}</p>
     @endif
-    @if (filled($badge->notes))
-        <p class="mt-1 text-sm {{ $muted }}" dir="auto">{{ $badge->notes }}</p>
+    @if (filled($notes))
+        <p class="mt-1 text-sm {{ $muted }}" dir="auto">{{ $notes }}</p>
     @endif
 </div>

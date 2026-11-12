@@ -11,12 +11,28 @@ use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Modules\Hr\Console\ApplyContractAmendmentsCommand;
 use Modules\Hr\Console\CheckContractAmendmentsCommand;
+use Modules\Hr\Console\DeactivateExpiredContractsCommand;
 use Modules\Hr\Console\ImportHrCommand;
 use Modules\Hr\Console\Journeys\DeactivateDepartedEmployees;
 use Modules\Hr\Console\Journeys\SendContractExpirationWarnings;
 use Modules\Hr\Console\Journeys\SendOrientationReminders;
 use Modules\Hr\Console\Journeys\TrackRenewalJourneys;
+use Modules\Hr\Console\ProcessContractAutoRenewalsCommand;
+use Modules\Hr\Console\RecountPositionSeatsCommand;
+use Modules\Hr\Console\SendLeaveDecisionRemindersCommand;
 use Modules\Hr\Support\Journeys\JourneyHooks;
+use Modules\Hr\Support\Recruitment\Console\AnalyzeRecruitmentCvs;
+use Modules\Hr\Support\Recruitment\Console\ApplyDueRecruitmentRequests;
+use Modules\Hr\Support\Recruitment\Console\CheckRecruitmentScanner;
+use Modules\Hr\Support\Recruitment\Console\ExpireDueHiringCampaigns;
+use Modules\Hr\Support\Recruitment\Console\ExpireRecruitmentJobOffers;
+use Modules\Hr\Support\Recruitment\Console\RedispatchRecruitmentRejectionNotices;
+use Modules\Hr\Support\Recruitment\Console\ScanRecruitmentFiles;
+use Modules\Hr\Support\Recruitment\Console\SeedRecruitmentDemoApplicationLink;
+use Modules\Hr\Support\Recruitment\Console\SendRecruitmentInterviewReminders;
+use Modules\Hr\Support\Recruitment\Console\SnapshotRecruitmentIndicators;
+use Modules\Hr\Support\Recruitment\Console\SweepRecruitmentRetention;
+use Modules\Hr\Support\Recruitment\Console\SyncRecruitmentCampaignStates;
 use Modules\Hr\Support\Recruitment\RecruitmentBootstrap;
 use Modules\Hr\Support\SalaryCipher;
 
@@ -53,11 +69,31 @@ class HrServiceProvider extends ServiceProvider
             SendContractExpirationWarnings::class,
             TrackRenewalJourneys::class,
             DeactivateDepartedEmployees::class,
+            DeactivateExpiredContractsCommand::class,
+            ProcessContractAutoRenewalsCommand::class,
+            SendLeaveDecisionRemindersCommand::class,
+            RecountPositionSeatsCommand::class,
+            AnalyzeRecruitmentCvs::class,
+            ApplyDueRecruitmentRequests::class,
+            CheckRecruitmentScanner::class,
+            ExpireDueHiringCampaigns::class,
+            ExpireRecruitmentJobOffers::class,
+            RedispatchRecruitmentRejectionNotices::class,
+            ScanRecruitmentFiles::class,
+            SeedRecruitmentDemoApplicationLink::class,
+            SendRecruitmentInterviewReminders::class,
+            SnapshotRecruitmentIndicators::class,
+            SweepRecruitmentRetention::class,
+            SyncRecruitmentCampaignStates::class,
         ]);
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
-            // Contract amendments take effect on their date; the weekly check logs a broken history.
+            // Evening contract runs, in this order: amendments take effect on their date, then ended
+            // contracts go inactive and free their seat, then the ones that renew get a successor
+            // (which so inherits the amended terms). The weekly check logs a broken amendment history.
             $schedule->command(ApplyContractAmendmentsCommand::class)->dailyAt('21:25')->withoutOverlapping()->onOneServer();
+            $schedule->command(DeactivateExpiredContractsCommand::class)->dailyAt('21:30')->withoutOverlapping()->onOneServer();
+            $schedule->command(ProcessContractAutoRenewalsCommand::class)->dailyAt('21:35')->withoutOverlapping()->onOneServer();
             $schedule->command(CheckContractAmendmentsCommand::class)->weeklyOn(0, '06:00')->onOneServer();
 
             // Journeys (as the HR app ran them): expiry warnings and overdue orientations in the
@@ -66,6 +102,21 @@ class HrServiceProvider extends ServiceProvider
             $schedule->command(SendOrientationReminders::class)->dailyAt('08:10')->withoutOverlapping()->onOneServer();
             $schedule->command(TrackRenewalJourneys::class)->dailyAt('21:45')->withoutOverlapping()->onOneServer();
             $schedule->command(DeactivateDepartedEmployees::class)->dailyAt('21:50')->withoutOverlapping()->onOneServer();
+
+            // One reminder per leave request still waiting for its decision.
+            $schedule->command(SendLeaveDecisionRemindersCommand::class)->dailyAt('08:05')->withoutOverlapping()->onOneServer();
+
+            // Recruitment (as the HR app ran it). Due position changes early, before the evening
+            // contract runs read the seats; campaign windows every minute; the antivirus safety
+            // net, offers past their answer date, interview reminders and rejection emails a down
+            // queue held; retention dates and erasure requests at night.
+            $schedule->command(ApplyDueRecruitmentRequests::class)->dailyAt('00:30')->onOneServer();
+            $schedule->command(SyncRecruitmentCampaignStates::class)->everyMinute()->withoutOverlapping()->onOneServer();
+            $schedule->command(ScanRecruitmentFiles::class)->everyFifteenMinutes()->withoutOverlapping()->onOneServer();
+            $schedule->command(SendRecruitmentInterviewReminders::class)->everyFiveMinutes()->withoutOverlapping()->onOneServer();
+            $schedule->command(ExpireRecruitmentJobOffers::class)->everyFifteenMinutes()->withoutOverlapping()->onOneServer();
+            $schedule->command(RedispatchRecruitmentRejectionNotices::class)->everyFiveMinutes()->withoutOverlapping()->onOneServer();
+            $schedule->command(SweepRecruitmentRetention::class)->dailyAt('02:15')->withoutOverlapping()->onOneServer();
         });
 
         // Rate limiters, observers and bindings; outside the routes so it also runs under route:cache.

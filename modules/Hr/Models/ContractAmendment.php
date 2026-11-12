@@ -6,8 +6,10 @@ namespace Modules\Hr\Models;
 
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
+use Database\Factories\ContractAmendmentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -44,6 +46,9 @@ use Modules\Hr\Enums\ContractAmendmentStatus;
 #[Fillable(['contract_id', 'number', 'status', 'effective_from', 'reason', 'terms_before', 'terms_after', 'salary_before', 'salary_after', 'created_by', 'approved_by', 'approved_at', 'applied_at'])]
 class ContractAmendment extends Model
 {
+    /** @use HasFactory<ContractAmendmentFactory> */
+    use HasFactory;
+
     /**
      * @return array<string, string>
      */

@@ -1,11 +1,12 @@
 {{--
     The Badges tab of an employee profile: warnings, rewards and salary
-    increases, newest first. Included by ⚡show.blade.php.
+    increases, newest first. Included by ⚡show.blade.php. The owner without
+    badges.view reads their own rewards and warnings, without pay or notes.
 --}}
 @use('Modules\Hr\Models\Badge')
 
 @php
-    $canAddBadge = auth()->user()->can('create', [Badge::class, $employee]);
+    $canAddBadge = ! $ownBadgesOnly && auth()->user()->can('create', [Badge::class, $employee]);
     $canDeleteBadge = auth()->user()->can('badges.delete') && $canAddBadge;
 @endphp
 
@@ -23,7 +24,7 @@
             @foreach ($this->badges as $badge)
                 <li class="flex flex-wrap items-start gap-3 px-4 py-3" wire:key="profile-badge-{{ $badge->id }}">
                     <div class="min-w-0 flex-1">
-                        <x-hr::employees.badge-summary :badge="$badge" :show-pay="$canViewFinancial" />
+                        <x-hr::employees.badge-summary :badge="$badge" :show-pay="$canViewFinancial" :owner-view="$ownBadgesOnly" />
                     </div>
                     <span class="flex shrink-0 items-center gap-1">
                         @if ($canAddBadge)

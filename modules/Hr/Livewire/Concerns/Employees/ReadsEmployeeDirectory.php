@@ -16,6 +16,7 @@ use Modules\Hr\Enums\EmployeeStatus;
 use Modules\Hr\Models\Department;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Support\Employees\HrAccess;
+use Modules\Hr\Support\Employees\WorkPresence;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -73,6 +74,24 @@ trait ReadsEmployeeDirectory
             ->orderBy($this->nameColumn())
             ->orderBy('employees.id')
             ->paginate(25);
+    }
+
+    /**
+     * The presence dot of each person on the page (WorkPresence), read once
+     * for the whole page. Only the active view draws it.
+     *
+     * @return array<int, array{tone: string, label: string}>
+     */
+    #[Computed]
+    public function presence(): array
+    {
+        $viewer = Auth::user();
+
+        if ($viewer === null || $this->effectiveView() !== 'active') {
+            return [];
+        }
+
+        return app(WorkPresence::class)->for($viewer, $this->employees->modelKeys());
     }
 
     /**

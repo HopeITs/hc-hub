@@ -26,10 +26,10 @@ use Modules\Hr\Support\Settings\HrAccess;
  */
 final class HolidayProjects
 {
-    /** @var array<string, Collection<string, array{program_id: int, city_id: int, label: string}>> */
+    /** @var array<string, Collection<string, array{program_id: int, city_id: int, program: string, city: string, label: string}>> */
     private array $managed = [];
 
-    /** @var Collection<string, array{program_id: int, city_id: int, label: string}>|null */
+    /** @var Collection<string, array{program_id: int, city_id: int, program: string, city: string, label: string}>|null */
     private ?Collection $all = null;
 
     public function isNationalHr(?User $user): bool
@@ -57,7 +57,7 @@ final class HolidayProjects
     /**
      * Every project, keyed "programId:cityId".
      *
-     * @return Collection<string, array{program_id: int, city_id: int, label: string}>
+     * @return Collection<string, array{program_id: int, city_id: int, program: string, city: string, label: string}>
      */
     public function all(): Collection
     {
@@ -67,7 +67,7 @@ final class HolidayProjects
     /**
      * The projects $user may set holidays for: all of them for national HR.
      *
-     * @return Collection<string, array{program_id: int, city_id: int, label: string}>
+     * @return Collection<string, array{program_id: int, city_id: int, program: string, city: string, label: string}>
      */
     public function managedBy(?User $user): Collection
     {
@@ -153,7 +153,7 @@ final class HolidayProjects
 
     /**
      * @param  Builder<Holiday>  $query
-     * @param  Collection<string, array{program_id: int, city_id: int, label: string}>  $projects
+     * @param  Collection<string, array{program_id: int, city_id: int, program: string, city: string, label: string}>  $projects
      * @return Builder<Holiday>
      */
     private function onProjects(Builder $query, Collection $projects): Builder
@@ -181,7 +181,7 @@ final class HolidayProjects
 
     /**
      * @param  Collection<int, Position>  $positions
-     * @return Collection<string, array{program_id: int, city_id: int, label: string}>
+     * @return Collection<string, array{program_id: int, city_id: int, program: string, city: string, label: string}>
      */
     private function toProjects(Collection $positions): Collection
     {
@@ -192,6 +192,8 @@ final class HolidayProjects
                 return $city === null ? null : [
                     'program_id' => (int) $position->program_id,
                     'city_id' => (int) $city->id,
+                    'program' => (string) $position->program?->name,
+                    'city' => (string) $city->name,
                     'label' => $position->program?->name.' — '.$city->name,
                 ];
             })

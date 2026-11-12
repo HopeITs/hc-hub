@@ -55,6 +55,9 @@ return [
         'cancel' => 'Cancel amendment',
         'edit' => 'Edit',
         'print' => 'Print sheet',
+        'download_signed' => 'Signed copy',
+        'attach_signed' => 'Attach signed copy',
+        'replace_signed' => 'Replace signed copy',
         'print_legal' => 'Contract text',
         'back_to_contract' => 'Back to contract',
     ],
@@ -67,12 +70,18 @@ return [
         'cancel_title' => 'Cancel this amendment?',
         'cancel_body' => 'It was approved for :date and has not taken effect, so the contract stays as it is.',
     ],
+    'signed' => [
+        'label' => 'signed copy',
+        'on_file' => 'Signed copy on file',
+        'uploading' => 'Uploading…',
+    ],
     'toasts' => [
         'drafted' => 'Amendment saved. Print it, have it signed, then approve it.',
         'redrafted' => 'Amendment updated. Print it again for signing.',
         'approved' => 'Amendment approved. It takes effect on its date.',
         'applied' => 'Amendment approved and in effect.',
         'discarded' => 'Amendment discarded.',
+        'signed_attached' => 'Signed copy attached.',
     ],
     'errors' => [
         'already_applied' => 'An amendment in effect cannot be deleted. To change the terms again, add a new amendment.',

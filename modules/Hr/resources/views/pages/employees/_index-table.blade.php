@@ -1,6 +1,6 @@
 {{--
     The employee directory's table. Included by ⚡index.blade.php; reads
-    $employees (the paginator) and $hasFilters.
+    $employees (the paginator), $hasFilters and the page's presence dots.
 --}}
 @use('Modules\Core\Models\City')
 @use('Modules\Hr\Enums\EmployeeStatus')
@@ -10,6 +10,7 @@
     $muted = 'text-secondary-medium dark:text-ink-muted';
     $canUpdate = auth()->user()->can('employees.update');
     $canDelete = auth()->user()->can('employees.delete');
+    $presence = $this->presence;
 @endphp
 
 @if ($employees->isEmpty())
@@ -45,7 +46,10 @@
             <tr wire:key="employee-{{ $employee->id }}" data-employee="{{ $employee->id }}">
                 <td>
                     <span class="flex min-w-0 items-center gap-2.5">
-                        <x-ui.avatar :src="Employee::photoUrl($employee->id)" class="size-9 shrink-0 rounded-full" />
+                        <span class="relative shrink-0">
+                            <x-ui.avatar :src="Employee::photoUrl($employee->id)" class="size-9 rounded-full" />
+                            <x-hr::employees.presence :status="$presence[$employee->id] ?? null" on-avatar />
+                        </span>
                         <span class="min-w-0">
                             <span class="block truncate font-semibold" dir="auto">{{ $employee->name }}</span>
                             <span class="block truncate text-xs {{ $muted }}" dir="auto">{{ $employee->secondary_name }}</span>

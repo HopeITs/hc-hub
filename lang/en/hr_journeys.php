@@ -138,5 +138,9 @@ return [
             'title' => 'Contract renewal reminder',
             'body' => "Automatic renewal is on for :name's contract, which ends on :date (in :days days). If it should not renew, tell your governorate's HR.",
         ],
+        'contracts-auto-renewed' => [
+            'title' => 'Contracts renewed',
+            'body' => ':count contract(s) were renewed automatically today: :names.',
+        ],
     ],
 ];

@@ -2,12 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Hr\Http\Controllers\Contracts\ContractAmendmentPrintController;
+use Modules\Hr\Http\Controllers\Contracts\ContractAmendmentSignedController;
 use Modules\Hr\Http\Controllers\Contracts\ContractLegalPrintController;
 
 /*
 | Contract amendments (ملحق عقد) and the contract's full legal text: a
-| contract's amendments, draft / edit one, its printable sheet, and the
-| printable signed contract. Loaded by HrServiceProvider inside web + auth +
+| contract's amendments, draft / edit one, its printable sheet and signed
+| copy, and the printable signed contract. Loaded by HrServiceProvider inside web + auth +
 | 2FA. Pages authorize against ContractPolicy / ContractAmendmentPolicy.
 */
 Route::prefix('hr')->name('hr.')->group(function (): void {
@@ -33,6 +34,13 @@ Route::prefix('hr')->name('hr.')->group(function (): void {
         ->can('exportAmendment', 'amendment')
         ->middleware('throttle:30,1')
         ->name('contracts.amendments.print');
+
+    Route::get('contracts/{contract}/amendments/{amendment}/signed', ContractAmendmentSignedController::class)
+        ->whereNumber(['contract', 'amendment'])
+        ->scopeBindings()
+        ->can('exportAmendment', 'amendment')
+        ->middleware('throttle:30,1')
+        ->name('contracts.amendments.signed');
 
     Route::get('contracts/{contract}/legal', ContractLegalPrintController::class)
         ->whereNumber('contract')

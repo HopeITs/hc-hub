@@ -6,6 +6,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Modules\Hr\Support\Employees\WorkPresence;
 use Modules\Hr\Support\Inbox\WorkInbox;
 
 /**
@@ -55,6 +56,18 @@ new #[Layout('layouts::desk'), Title('hr_communications.titles.inbox')] class ex
             ->values();
     }
 
+    /**
+     * The presence dot of each person in the rows shown (WorkPresence), read
+     * once for the whole list.
+     *
+     * @return array<int, array{tone: string, label: string}>
+     */
+    #[Computed]
+    public function presence(): array
+    {
+        return app(WorkPresence::class)->for(auth()->user(), $this->rows->pluck('employee_id')->filter()->unique()->all());
+    }
+
     public function resetFilters(): void
     {
         $this->reset('kind', 'search');
@@ -64,6 +77,7 @@ new #[Layout('layouts::desk'), Title('hr_communications.titles.inbox')] class ex
 @php
     $rows = $this->rows;
     $counts = $this->inbox['counts'];
+    $presence = $rows->isEmpty() ? [] : $this->presence;
 @endphp
 
 <x-desk.register heading-id="hr-inbox-heading" :title="__('hr_communications.titles.inbox')" :count="$counts['all']">
@@ -104,6 +118,7 @@ new #[Layout('layouts::desk'), Title('hr_communications.titles.inbox')] class ex
             @foreach ($rows as $row)
                 <tr wire:key="inbox-{{ $row['key'] }}">
                     <x-ui.data-table.cell>
+                        <x-hr::employees.presence :status="$presence[$row['employee_id']] ?? null" class="me-1" />
                         <span class="font-semibold">{{ $row['name'] }}</span>
                         @if ($row['city'] !== '')
                             <span class="type-meta block text-secondary-medium dark:text-ink-muted">{{ $row['city'] }}</span>

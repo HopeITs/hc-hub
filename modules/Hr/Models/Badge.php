@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Modules\Hr\Models;
 
 use Carbon\CarbonImmutable;
+use Database\Factories\BadgeFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\User;
@@ -33,6 +35,9 @@ use Modules\Hr\Support\Employees\HrAccess;
 #[Fillable(['employee_id', 'evaluation_id', 'currency', 'type', 'subtype', 'date', 'reason', 'amount', 'new_position', 'leave_unit', 'current_salary', 'new_salary', 'notes'])]
 class Badge extends Model
 {
+    /** @use HasFactory<BadgeFactory> */
+    use HasFactory;
+
     /**
      * @return array<string, string>
      */

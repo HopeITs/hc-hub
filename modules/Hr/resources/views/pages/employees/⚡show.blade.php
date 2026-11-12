@@ -92,6 +92,7 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
     >
         <x-slot:meta>
             <x-hr::employees.status-badge :status="$status" />
+            <x-hr::employees.presence :status="$this->presence" with-label />
             @if ($position !== null)
                 <span dir="auto">{{ $position->title }}</span>
                 @if ($position->program_id)

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Modules\Hr\Livewire\Concerns\Leave;
 
 use Flux\Flux;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
-use Modules\Core\Models\City;
 use Modules\Core\Models\User;
 use Modules\Hr\Actions\Leave\SaveHoliday;
 use Modules\Hr\Models\Holiday;
@@ -41,9 +41,6 @@ trait ManagesHolidayForm
         'is_recurring' => false,
     ];
 
-    /** The governorate whose projects "Select all its projects" ticks. */
-    public string $holidayGovernorate = '';
-
     protected function holidayUser(): User
     {
         $user = Auth::user();
@@ -58,25 +55,29 @@ trait ManagesHolidayForm
         return app(HolidayProjects::class)->isNationalHr($this->holidayUser());
     }
 
-    /** @return array<string, string> "programId:cityId" => label */
+    /**
+     * The project picker, one group per governorate (H-2): its header ticks
+     * or clears every project there. Only per-project links are stored;
+     * there is no governorate-wide holiday.
+     *
+     * @return list<array{id: int, name: string, options: list<array{value: string, label: string}>}>
+     */
     #[Computed]
-    public function projectOptions(): array
+    public function projectGroups(): array
     {
-        return app(HolidayProjects::class)->managedBy($this->holidayUser())->map(fn (array $project): string => $project['label'])->all();
-    }
+        $groups = app(HolidayProjects::class)->managedBy($this->holidayUser())
+            ->groupBy('city_id', preserveKeys: true)
+            ->map(fn (Collection $projects, int $cityId): array => [
+                'id' => $cityId,
+                'name' => (string) $projects->first()['city'],
+                'options' => array_values($projects
+                    ->map(fn (array $project, string $key): array => ['value' => $key, 'label' => $project['program']])
+                    ->sortBy('label')
+                    ->all()),
+            ])
+            ->sortBy('name');
 
-    /** @return array<int, string> the governorates of the user's projects */
-    #[Computed]
-    public function projectGovernorates(): array
-    {
-        $cityIds = app(HolidayProjects::class)->managedBy($this->holidayUser())->pluck('city_id')->unique()->all();
-
-        return City::query()
-            ->whereIn('id', $cityIds === [] ? [0] : $cityIds)
-            ->orderBy(City::nameColumn())
-            ->get(['id', 'name_en', 'name_ar'])
-            ->mapWithKeys(fn (City $city): array => [(int) $city->id => (string) $city->name])
-            ->all();
+        return array_values($groups->all());
     }
 
     public function openCreateHoliday(?string $date = null): void
@@ -114,15 +115,16 @@ trait ManagesHolidayForm
         $this->showHolidayModal = true;
     }
 
-    /** H-2 shortcut: tick every project of one governorate (per-project links, never a governorate-wide holiday). */
-    public function selectGovernorateProjects(): void
+    /** H-2 shortcut: tick every project of one governorate, keeping what is ticked elsewhere. */
+    public function selectCityProjects(int $cityId): void
     {
-        $keys = app(HolidayProjects::class)->managedBy($this->holidayUser())
-            ->filter(fn (array $project): bool => $project['city_id'] === (int) $this->holidayGovernorate)
-            ->keys()
-            ->all();
+        $this->holidayForm['projects'] = array_values(array_unique([...$this->holidayForm['projects'], ...$this->cityProjectKeys($cityId)]));
+    }
 
-        $this->holidayForm['projects'] = array_values(array_unique([...$this->holidayForm['projects'], ...$keys]));
+    /** Untick every project of one governorate, keeping what is ticked elsewhere. */
+    public function clearCityProjects(int $cityId): void
+    {
+        $this->holidayForm['projects'] = array_values(array_diff($this->holidayForm['projects'], $this->cityProjectKeys($cityId)));
     }
 
     public function saveHoliday(): void
@@ -152,11 +154,26 @@ trait ManagesHolidayForm
     /** Called after a save or delete, so the page can forget its computed rows. */
     abstract protected function holidaysChanged(): void;
 
+    /**
+     * The picker keys ("programId:cityId") of the user's projects in one governorate.
+     *
+     * @return list<string>
+     */
+    private function cityProjectKeys(int $cityId): array
+    {
+        return array_values(array_map(
+            strval(...),
+            app(HolidayProjects::class)->managedBy($this->holidayUser())
+                ->filter(fn (array $project): bool => $project['city_id'] === $cityId)
+                ->keys()
+                ->all(),
+        ));
+    }
+
     private function resetHolidayForm(): void
     {
         $this->resetValidation();
         $this->editingHolidayId = null;
-        $this->holidayGovernorate = '';
         $this->holidayForm = [
             'name_en' => '',
             'name_ar' => '',

@@ -34,7 +34,13 @@ class ContractAmendmentPolicy
         return $this->contracts->discardAmendment($user, $amendment);
     }
 
-    /** Print the amendment sheet: it carries the pay clause, so the contract print's rule. */
+    /** Attach the signed sheet, at any point after it was drafted. */
+    public function attachSignedAmendment(User $user, ContractAmendment $amendment): bool
+    {
+        return $this->contracts->attachSignedAmendment($user, $amendment);
+    }
+
+    /** Print the amendment sheet or open its signed copy: both carry the pay clause, so the contract print's rule. */
     public function exportAmendment(User $user, ContractAmendment $amendment): bool
     {
         return $this->contracts->export($user, $amendment->contract);

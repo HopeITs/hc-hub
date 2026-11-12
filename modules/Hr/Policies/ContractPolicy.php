@@ -87,6 +87,14 @@ class ContractPolicy
         return ! $amendment->isApplied() && $this->mayAmend($user, $amendment->contract);
     }
 
+    /**
+     * Attach the signed sheet, at any point after the amendment was drafted.
+     */
+    public function attachSignedAmendment(User $user, ContractAmendment $amendment): bool
+    {
+        return $this->mayAmend($user, $amendment->contract);
+    }
+
     private function mayAmend(User $user, Contract $contract): bool
     {
         return HrAccess::is($user, 'HR')

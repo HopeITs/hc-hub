@@ -30,7 +30,8 @@ use WeakMap;
  *    one of the viewer's positions, or (HR with leaves.decide) of anyone in
  *    the viewer's governorates;
  *  - leave requests to review: HR with leaves.review sees decided requests
- *    HR has not confirmed yet, except the ones they decided themselves;
+ *    HR has not confirmed yet, except the ones they decided themselves and
+ *    their own requests;
  *  - checklist items to deliver or to take back (the viewer is named on them);
  *  - returned items to close and profile changes to approve (HR with
  *    employees.update, in their governorates);
@@ -163,6 +164,7 @@ final class WorkInbox
             ->where('status', '!=', LeaveRequestStatus::Pending->value)
             ->where('hr_approved', false)
             ->when($self !== null, fn (Builder $query) => $query->where(fn (Builder $by) => $by->whereNull('approved_by')->orWhere('approved_by', '!=', $self)))
+            ->when($self !== null, fn (Builder $query) => $query->whereDoesntHave('leaveBalance.contract', fn (Builder $contract) => $contract->where('employee_id', $self)))
             ->whereHas('leaveBalance.contract.employee', fn (Builder $employee) => $employee->where('is_active', true)->when($cities !== null, fn (Builder $inCity) => $inCity->whereIn('city_id', $cities)))
             ->get()
             ->map(fn (LeaveRequest $leave): array => $this->leaveRow($leave, 'review'));

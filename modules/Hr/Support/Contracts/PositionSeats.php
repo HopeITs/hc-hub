@@ -6,6 +6,7 @@ namespace Modules\Hr\Support\Contracts;
 
 use Illuminate\Validation\ValidationException;
 use Modules\Hr\Enums\ContractType as ContractTypeEnum;
+use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Position;
 
 /**
@@ -37,6 +38,39 @@ final class PositionSeats
         if (! $position->canAssign()) {
             throw ValidationException::withMessages([$errorKey => __('hr_contracts.errors.position_full')]);
         }
+    }
+
+    /**
+     * Set one position's counter back to the contracts that hold a seat on it
+     * (`positions:recount-seats`). Returns what was off, or null when the
+     * counter was already right; with $write false nothing is changed.
+     *
+     * @return array{stored: int, actual: int, max: int}|null
+     */
+    public static function recount(int $positionId, bool $write = true): ?array
+    {
+        $position = Position::query()->select(['id', 'exist_emp', 'max_emp'])->whereKey($positionId)->lockForUpdate()->first();
+
+        if ($position === null) {
+            return null;
+        }
+
+        $actual = Contract::query()
+            ->where('position_id', $positionId)
+            ->where('is_active', true)
+            ->where('type', '!=', ContractTypeEnum::Draft->value)
+            ->count();
+        $stored = (int) $position->exist_emp;
+
+        if ($stored === $actual) {
+            return null;
+        }
+
+        if ($write) {
+            $position->forceFill(['exist_emp' => $actual])->save();
+        }
+
+        return ['stored' => $stored, 'actual' => $actual, 'max' => (int) $position->max_emp];
     }
 
     /**

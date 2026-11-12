@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Modules\Hr\Enums\BadgeType;
 use Modules\Hr\Models\Badge;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Course;
@@ -20,6 +21,7 @@ use Modules\Hr\Models\LeaveBalance;
 use Modules\Hr\Models\Relative;
 use Modules\Hr\Support\Employees\HrAccess;
 use Modules\Hr\Support\Employees\HrMedia;
+use Modules\Hr\Support\Employees\WorkPresence;
 
 /**
  * What an employee's profile page reads, and what the viewer may see of it.
@@ -55,6 +57,10 @@ trait ReadsEmployeeProfile
     #[Locked]
     public bool $canViewBadges = false;
 
+    /** The owner without badges.view: their own rewards and warnings only, without pay or notes. */
+    #[Locked]
+    public bool $ownBadgesOnly = false;
+
     #[Locked]
     public bool $canViewCard = false;
 
@@ -73,6 +79,19 @@ trait ReadsEmployeeProfile
             ->with('account:id,employee_id,email')
             ->withExists(['realContracts as has_real_contract'])
             ->findOrFail($this->employeeId);
+    }
+
+    /**
+     * The presence dot in the profile header (WorkPresence); null draws none.
+     *
+     * @return array{tone: string, label: string}|null
+     */
+    #[Computed]
+    public function presence(): ?array
+    {
+        $viewer = Auth::user();
+
+        return $viewer === null ? null : app(WorkPresence::class)->forOne($viewer, $this->employeeId);
     }
 
     /**
@@ -227,6 +246,15 @@ trait ReadsEmployeeProfile
             return new Collection;
         }
 
+        if ($this->ownBadgesOnly) {
+            return Badge::query()
+                ->select(['id', 'employee_id', 'type', 'subtype', 'date', 'reason'])
+                ->where('employee_id', $this->employeeId)
+                ->whereIn('type', [BadgeType::Reward->value, BadgeType::Warning->value])
+                ->orderByDesc('date')
+                ->get();
+        }
+
         return Badge::query()
             ->select($this->canViewFinancial
                 ? ['id', 'employee_id', 'type', 'subtype', 'currency', 'date', 'reason', 'amount', 'new_position', 'leave_unit', 'current_salary', 'new_salary', 'notes']
@@ -291,7 +319,8 @@ trait ReadsEmployeeProfile
         $this->canViewFinancial = $isHrInScope && HrAccess::canViewSalary($user);
         $this->canEdit = $isHrInScope && $gate->allows('update', $employee);
         $this->canViewRecords = $gate->allows('viewRecords', $employee);
-        $this->canViewBadges = $gate->allows('viewForEmployee', [Badge::class, $employee]);
+        $this->canViewBadges = $gate->allows('viewProfileBadges', $employee);
+        $this->ownBadgesOnly = $this->canViewBadges && $gate->denies('viewForEmployee', [Badge::class, $employee]);
         $this->canViewCard = $gate->allows('viewCard', $employee);
         $this->canManageCard = $gate->allows('manageCard', $employee);
     }

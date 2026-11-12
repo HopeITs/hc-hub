@@ -64,5 +64,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer_form')] cl
         </x-slot:meta>
     </x-ui.detail-header>
 
+    <x-ui.unsaved-guard :watch="['contractTypeId', 'salary', 'currency', 'salaryPer', 'startDate', 'endDate', 'weeklyHours', 'probationDays', 'employmentType', 'place', 'notes', 'reason']" />
+
     <x-hr::recruitment.offer-form :options="$this->options" :mode="$mode" />
 </div>

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Modules\Hr\Policies;
 
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Badge;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Support\Employees\HrAccess;
@@ -98,6 +100,17 @@ class EmployeePolicy
     public function reportCardLost(User $user, Employee $employee): bool
     {
         return $this->isSelf($user, $employee) && (bool) $employee->is_active;
+    }
+
+    /**
+     * The profile's badges tab: the Badges page's own rule
+     * (BadgePolicy::viewForEmployee), or the owner, who sees their own rewards
+     * and warnings without pay or notes (ReadsEmployeeProfile::badges).
+     */
+    public function viewProfileBadges(User $user, Employee $employee): bool
+    {
+        return $this->isSelf($user, $employee)
+            || Gate::forUser($user)->allows('viewForEmployee', [Badge::class, $employee]);
     }
 
     public function viewCard(User $user, Employee $employee): bool

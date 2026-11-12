@@ -76,11 +76,12 @@ class LeaveRequestPolicy
             && $this->canManage($user, $leaveRequest);
     }
 
-    /** "Seen by HR". Nobody marks their own decision as seen (N-07). */
+    /** "Seen by HR". Nobody marks their own decision as seen (N-07), nor their own request. */
     public function review(User $user, LeaveRequest $leaveRequest, ?LeaveDecisionAuthority $authority = null): bool
     {
         return $leaveRequest->status !== LeaveRequestStatus::Pending->value
             && ! $leaveRequest->hr_approved
+            && ! $this->owns($user, $leaveRequest)
             && ! ($user->employee_id !== null && (int) $leaveRequest->approved_by === (int) $user->employee_id)
             && HrAccess::for($user)->isHr()
             && $user->can('leaves.review')
