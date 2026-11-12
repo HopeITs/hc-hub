@@ -85,19 +85,23 @@ final class Panels
     ];
 
     /**
-     * The starting layout per role, in the order the panels appear.
+     * The starting layout per role, in the order the panels appear. Each one
+     * carries the HR cards that matter to that role next to its Tracking
+     * panels: the viewer's own attention list and clock, the HR decisions and
+     * late work for whoever handles them, and the role's team or leave card.
+     * Cards the viewer may not see drop out when read (clean()).
      *
      * @var array<string, list<array{0: string, 1: string}>>
      */
     private const array RoleLayouts = [
-        'General Manager' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['glance', 'XL'], ['reviews', 'L'], ['pipeline', 'L'], ['money', 'L']],
-        'Public Relations Manager' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['coming', 'L'], ['waiting', 'L'], ['pipeline', 'L'], ['money', 'L'], ['projects', 'XL']],
-        'Public Relations' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['coming', 'L'], ['tasks', 'L'], ['milestones', 'XL'], ['projects', 'XL']],
-        'MEAL' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['validate', 'L'], ['templates', 'L'], ['matrix', 'XL'], ['targets', 'XL'], ['projects', 'XL']],
-        'Financial' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['money', 'L'], ['transfers', 'L'], ['deliverables', 'L'], ['duties', 'L'], ['projects', 'XL']],
-        'Managers' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['coming', 'L'], ['matrix', 'XL'], ['tasks', 'L'], ['myteam', 'L']],
-        'Media Team' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['deliverables', 'L'], ['coming', 'L'], ['tasks', 'XL'], ['projects', 'XL']],
-        'Team Member' => [['needs', 'L'], ['overdue', 'L'], ['flow', 'XL'], ['tasks', 'L'], ['coming', 'L'], ['milestones', 'L'], ['projects', 'XL']],
+        'General Manager' => [['needs', 'L'], ['overdue', 'L'], ['hr-attention', 'W'], ['hr-clock', 'M'], ['hr-decisions', 'L'], ['hr-late', 'L'], ['flow', 'XL'], ['glance', 'XL'], ['reviews', 'L'], ['pipeline', 'L'], ['money', 'L'], ['hr-news', 'L']],
+        'Public Relations Manager' => [['needs', 'L'], ['overdue', 'L'], ['hr-attention', 'W'], ['hr-clock', 'M'], ['hr-decisions', 'L'], ['hr-late', 'L'], ['flow', 'XL'], ['coming', 'L'], ['waiting', 'L'], ['pipeline', 'L'], ['money', 'L'], ['projects', 'XL'], ['hr-who-is-out', 'L'], ['hr-news', 'L']],
+        'Public Relations' => [['needs', 'L'], ['overdue', 'L'], ['hr-attention', 'W'], ['hr-clock', 'M'], ['hr-decisions', 'L'], ['hr-late', 'L'], ['flow', 'XL'], ['coming', 'L'], ['tasks', 'L'], ['milestones', 'XL'], ['projects', 'XL'], ['hr-leave-balance', 'L'], ['hr-news', 'L']],
+        'MEAL' => [['needs', 'L'], ['overdue', 'L'], ['hr-attention', 'W'], ['hr-clock', 'M'], ['hr-decisions', 'L'], ['hr-late', 'L'], ['flow', 'XL'], ['validate', 'L'], ['templates', 'L'], ['matrix', 'XL'], ['targets', 'XL'], ['projects', 'XL'], ['hr-leave-balance', 'L'], ['hr-news', 'L']],
+        'Financial' => [['needs', 'L'], ['overdue', 'L'], ['hr-attention', 'W'], ['hr-clock', 'M'], ['hr-decisions', 'L'], ['hr-late', 'L'], ['flow', 'XL'], ['money', 'L'], ['transfers', 'L'], ['deliverables', 'L'], ['duties', 'L'], ['projects', 'XL'], ['hr-leave-balance', 'L'], ['hr-news', 'L']],
+        'Managers' => [['needs', 'L'], ['overdue', 'L'], ['hr-attention', 'W'], ['hr-clock', 'M'], ['hr-decisions', 'L'], ['hr-late', 'L'], ['flow', 'XL'], ['coming', 'L'], ['matrix', 'XL'], ['tasks', 'L'], ['myteam', 'L'], ['hr-who-is-out', 'L'], ['hr-upcoming-leaves', 'L']],
+        'Media Team' => [['needs', 'L'], ['overdue', 'L'], ['hr-attention', 'W'], ['hr-clock', 'M'], ['hr-decisions', 'L'], ['hr-late', 'L'], ['flow', 'XL'], ['deliverables', 'L'], ['coming', 'L'], ['tasks', 'XL'], ['projects', 'XL'], ['hr-leave-balance', 'L'], ['hr-news', 'L']],
+        'Team Member' => [['needs', 'L'], ['overdue', 'L'], ['hr-attention', 'W'], ['hr-clock', 'M'], ['hr-decisions', 'L'], ['hr-late', 'L'], ['flow', 'XL'], ['tasks', 'L'], ['coming', 'L'], ['milestones', 'L'], ['projects', 'XL'], ['hr-leave-balance', 'L'], ['hr-news', 'L']],
     ];
 
     /**

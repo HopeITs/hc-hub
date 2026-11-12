@@ -1,8 +1,12 @@
 <?php
 
+use App\Models\Role;
 use App\Support\Desk\Panels;
 use Livewire\Livewire;
 use Modules\Core\Models\User;
+use Spatie\Permission\Models\Permission;
+
+dataset('desk roles', ['General Manager', 'Public Relations Manager', 'Public Relations', 'MEAL', 'Financial', 'Managers', 'Media Team', 'Team Member', 'HR-SYR', 'HR-ALP', 'HR-HMS', 'HR-DMS', 'HR-LAT', 'HR-TAR', 'general-manager', 'manager', 'employee']);
 
 /**
  * @return list<string>
@@ -13,14 +17,14 @@ function deskPanelIds(User $user): array
 }
 
 test('each role starts from its own layout, and a Super Admin from the General Manager one', function () {
-    expect(deskPanelIds(User::factory()->role('Team Member')->create()))->toBe(['needs', 'overdue', 'flow', 'tasks', 'coming', 'milestones', 'projects'])
+    expect(deskPanelIds(User::factory()->role('Team Member')->create()))->toBe(['needs', 'overdue', 'hr-attention', 'hr-clock', 'flow', 'tasks', 'coming', 'milestones', 'projects', 'hr-news'])
         ->and(deskPanelIds(User::factory()->role('Super Admin')->create()))->toContain('glance', 'money', 'pipeline')
         /* A department manager, so the deliverables panel is still offered (W-14, D-65). */
-        ->and(deskPanelIds(User::factory()->role('Financial')->create(['employee_id' => insertHrDepartmentManager()])))->toBe(['needs', 'overdue', 'flow', 'money', 'transfers', 'deliverables', 'duties', 'projects']);
+        ->and(deskPanelIds(User::factory()->role('Financial')->create(['employee_id' => insertHrDepartmentManager()])))->toBe(['needs', 'overdue', 'hr-attention', 'hr-clock', 'flow', 'money', 'transfers', 'deliverables', 'duties', 'projects', 'hr-news']);
 });
 
 test('a role without a layout falls back to the Team Member one, minus what it may not see', function () {
-    expect(deskPanelIds(User::factory()->create()))->toBe(['needs', 'overdue']);
+    expect(deskPanelIds(User::factory()->withoutEmployee()->create()))->toBe(['needs', 'overdue', 'hr-news']);
 });
 
 test('a saved layout drops forbidden, unknown and repeated panels and fixes a bad size', function () {
@@ -74,7 +78,7 @@ test('every role opens on full rows, with no empty columns', function (string $r
     }
 
     expect($row)->toBe(0);
-})->with(['General Manager', 'Public Relations Manager', 'Public Relations', 'MEAL', 'Financial', 'Managers', 'Media Team', 'Team Member']);
+})->with('desk roles');
 
 test('a drag or pulled edge saves the arrangement it showed, kept within the grid limits', function () {
     $user = User::factory()->role('Team Member')->create();
@@ -95,7 +99,7 @@ test('a drag or pulled edge saves the arrangement it showed, kept within the gri
 });
 
 test('a card dropped into a full row is saved there, and the card it pushed opens the next row', function () {
-    $user = User::factory()->role('Team Member')->create();
+    $user = User::factory()->withoutEmployee()->role('Team Member')->create();
     $pushed = [
         ['panel' => 'needs', 'cols' => 3, 'rows' => 4],
         ['panel' => 'overdue', 'cols' => 3, 'rows' => 4],
@@ -104,6 +108,7 @@ test('a card dropped into a full row is saved there, and the card it pushed open
         ['panel' => 'coming', 'cols' => 6, 'rows' => 5],
         ['panel' => 'milestones', 'cols' => 6, 'rows' => 5],
         ['panel' => 'projects', 'cols' => 12, 'rows' => 4],
+        ['panel' => 'hr-news', 'cols' => 12, 'rows' => 4],
     ];
 
     Livewire::actingAs($user)->test('pages::desk.index')->call('arrangePanels', $pushed);
@@ -113,7 +118,7 @@ test('a card dropped into a full row is saved there, and the card it pushed open
 });
 
 test('a card grown past its neighbours is saved wider, with them wrapped to the start of the next row', function () {
-    $user = User::factory()->role('Team Member')->create();
+    $user = User::factory()->withoutEmployee()->role('Team Member')->create();
     $grown = [
         ['panel' => 'needs', 'cols' => 4, 'rows' => 3],
         ['panel' => 'overdue', 'cols' => 8, 'rows' => 3],
@@ -122,6 +127,7 @@ test('a card grown past its neighbours is saved wider, with them wrapped to the 
         ['panel' => 'coming', 'cols' => 4, 'rows' => 4],
         ['panel' => 'milestones', 'cols' => 6, 'rows' => 4],
         ['panel' => 'projects', 'cols' => 6, 'rows' => 4],
+        ['panel' => 'hr-news', 'cols' => 12, 'rows' => 4],
     ];
 
     Livewire::actingAs($user)->test('pages::desk.index')->call('arrangePanels', $grown);
@@ -289,4 +295,35 @@ test('the annual plans panel is gone, even from a layout saved before', function
 
     expect(app(Panels::class)->availableTo($user))->not->toHaveKey('plans')
         ->and(deskPanelIds($user))->toBe(['needs']);
+});
+
+/**
+ * A staff member who may see every HR card: the permissions behind them come
+ * from the HR app's own roles, which the test database does not seed.
+ */
+function deskHrStaff(string ...$roles): User
+{
+    $user = User::factory()->create(['employee_id' => insertHrDepartmentManager()]);
+    $user->assignRole(array_map(fn (string $role): Role => Role::findOrCreate($role, 'web'), $roles));
+    $user->givePermissionTo(array_map(fn (string $name): Permission => Permission::findOrCreate($name, 'web'), ['leaves.view-own', 'leaves.decide', 'contracts.view', 'statistics.view', 'checklists.view-own', 'checklists.deliver']));
+
+    return $user;
+}
+
+test('each role starts with every HR card its layout names, and each of them draws', function (string $role) {
+    $user = deskHrStaff($role);
+    $panels = app(Panels::class);
+    $hrCards = fn (array $layout): array => array_values(array_filter(array_column($layout, 'panel'), fn (string $id): bool => str_starts_with($id, 'hr-')));
+
+    expect($hrCards($panels->defaultLayoutFor($user)))->not->toBeEmpty()
+        ->and($hrCards($panels->layoutFor($user)))->toBe($hrCards($panels->defaultLayoutFor($user)));
+
+    foreach ($hrCards($panels->layoutFor($user)) as $card) {
+        Livewire::actingAs($user)->test('hr::desk.card', ['card' => $card])->assertOk();
+    }
+})->with('desk roles');
+
+test('someone holding a Tracking role and an HR role starts from one Desk with both apps on it', function () {
+    expect(deskPanelIds(deskHrStaff('Team Member', 'employee')))->toBe(['needs', 'overdue', 'hr-attention', 'hr-clock', 'hr-decisions', 'hr-late', 'flow', 'tasks', 'coming', 'milestones', 'projects', 'hr-leave-balance', 'hr-news'])
+        ->and(deskPanelIds(deskHrStaff('Managers', 'manager')))->toContain('myteam', 'hr-who-is-out', 'hr-upcoming-leaves', 'hr-attention');
 });

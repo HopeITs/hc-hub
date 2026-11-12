@@ -91,9 +91,9 @@ final class HrPanels
         'HR-DMS' => [['hr-decisions', 'L'], ['hr-late', 'L'], ['hr-ending-contracts', 'L'], ['hr-who-is-out', 'L'], ['hr-news', 'L'], ['hr-calendar', 'L'], ['hr-departments', 'L'], ['hr-birthdays', 'L']],
         'HR-LAT' => [['hr-decisions', 'L'], ['hr-late', 'L'], ['hr-ending-contracts', 'L'], ['hr-who-is-out', 'L'], ['hr-news', 'L'], ['hr-calendar', 'L'], ['hr-departments', 'L'], ['hr-birthdays', 'L']],
         'HR-TAR' => [['hr-decisions', 'L'], ['hr-late', 'L'], ['hr-ending-contracts', 'L'], ['hr-who-is-out', 'L'], ['hr-news', 'L'], ['hr-calendar', 'L'], ['hr-departments', 'L'], ['hr-birthdays', 'L']],
-        'general-manager' => [['needs', 'L'], ['hr-decisions', 'L'], ['hr-news', 'L'], ['hr-late', 'L'], ['hr-departments', 'M'], ['hr-job-levels', 'M'], ['hr-contract-types', 'M']],
-        'manager' => [['hr-decisions', 'L'], ['hr-who-is-out', 'L'], ['hr-news', 'L'], ['hr-upcoming-leaves', 'L'], ['hr-team', 'L'], ['hr-leave-balance', 'L'], ['needs', 'L'], ['tasks', 'L']],
-        'employee' => [['hr-news', 'L'], ['hr-leave-balance', 'L'], ['hr-clock', 'M'], ['hr-next-holiday', 'M'], ['hr-birthdays', 'M'], ['hr-my-leaves', 'L'], ['hr-who-is-out', 'L'], ['needs', 'L'], ['tasks', 'L']],
+        'general-manager' => [['needs', 'L'], ['hr-decisions', 'L'], ['hr-attention', 'W'], ['hr-clock', 'M'], ['hr-news', 'L'], ['hr-late', 'L'], ['hr-departments', 'M'], ['hr-job-levels', 'M'], ['hr-contract-types', 'M']],
+        'manager' => [['hr-decisions', 'L'], ['hr-who-is-out', 'L'], ['hr-attention', 'W'], ['hr-clock', 'M'], ['hr-news', 'L'], ['hr-upcoming-leaves', 'L'], ['hr-team', 'L'], ['hr-leave-balance', 'L'], ['needs', 'L'], ['tasks', 'L']],
+        'employee' => [['hr-news', 'L'], ['hr-leave-balance', 'L'], ['hr-clock', 'M'], ['hr-next-holiday', 'M'], ['hr-attention', 'M'], ['hr-my-leaves', 'L'], ['hr-who-is-out', 'L'], ['needs', 'L'], ['tasks', 'L'], ['hr-birthdays', 'L'], ['hr-calendar', 'L']],
     ];
 
     /**
