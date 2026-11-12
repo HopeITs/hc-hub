@@ -69,6 +69,37 @@ final class Shortcuts
      */
     public function actionsFor(User $user): array
     {
+        return $this->actions[$this->memoKey($user)] ??= $this->buildActions($user);
+    }
+
+    /**
+     * The viewer's actions and page buttons per access and language, kept for
+     * the request: the Ask index, Quick access, the Customize sheet and the
+     * Desk's own items each ask for the same lists. Labels are translated, so
+     * the language is part of the key (memoKey).
+     *
+     * @var array<string, array<string, array{id: string, key: string, kind: 'action', label: string, icon: string, route: string, href: string}>>
+     */
+    private array $actions = [];
+
+    /**
+     * @var array<string, array<string, array{id: string, key: string, kind: 'page', label: string, icon: string, route: string, href: string}>>
+     */
+    private array $pages = [];
+
+    /**
+     * Who is asking, as their access stands now (AccessFingerprint), and in which language.
+     */
+    private function memoKey(User $user): string
+    {
+        return AccessFingerprint::of($user).'|'.app()->getLocale();
+    }
+
+    /**
+     * @return array<string, array{id: string, key: string, kind: 'action', label: string, icon: string, route: string, href: string}>
+     */
+    private function buildActions(User $user): array
+    {
         $actions = [];
 
         foreach (self::Actions as $key => $action) {
@@ -97,6 +128,14 @@ final class Shortcuts
      * @return array<string, array{id: string, key: string, kind: 'page', label: string, icon: string, route: string, href: string}>
      */
     public function pagesFor(User $user): array
+    {
+        return $this->pages[$this->memoKey($user)] ??= $this->buildPages($user);
+    }
+
+    /**
+     * @return array<string, array{id: string, key: string, kind: 'page', label: string, icon: string, route: string, href: string}>
+     */
+    private function buildPages(User $user): array
     {
         $pages = [];
 

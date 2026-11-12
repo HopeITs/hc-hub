@@ -84,6 +84,24 @@ final class Destinations
      */
     public function for(User $user, ?string $group = null): array
     {
+        return $this->offered[$this->memoKey($user).'|'.app()->getLocale().'|'.($group ?? '*')] ??= $this->offeredTo($user, $group);
+    }
+
+    /**
+     * The viewer's destinations per access, language and group, kept for the
+     * request: the sidebar, the top bar, the Ask index, the buttons and Quick
+     * access each ask for the same list (ten times and more per Desk). Labels
+     * are translated, so the language is part of the key.
+     *
+     * @var array<string, list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null}>>
+     */
+    private array $offered = [];
+
+    /**
+     * @return list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null}>
+     */
+    private function offeredTo(User $user, ?string $group): array
+    {
         $destinations = [];
 
         foreach ($this->all() as $destination) {
@@ -172,11 +190,12 @@ final class Destinations
 
     /**
      * Who is asking, as their access stands now: a role given or taken a
-     * permission in the same request reads afresh (as Panels::memoKey).
+     * permission in the same request reads afresh (AccessFingerprint, shared
+     * with Panels and Shortcuts).
      */
     private function memoKey(User $user): string
     {
-        return $user->id.':'.md5($user->getAllPermissions()->pluck('name')->sort()->implode(',').'|'.$user->getRoleNames()->implode(','));
+        return AccessFingerprint::of($user);
     }
 
     /**

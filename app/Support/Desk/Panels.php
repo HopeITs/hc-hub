@@ -413,11 +413,11 @@ final class Panels
 
     /**
      * Who is asking, as their access stands now: a role given or taken a permission in the
-     * same request reads afresh.
+     * same request reads afresh (AccessFingerprint, shared with Destinations and Shortcuts).
      */
     private function memoKey(User $user): string
     {
-        return $user->id.':'.md5($user->getAllPermissions()->pluck('name')->sort()->implode(',').'|'.$user->getRoleNames()->implode(','));
+        return AccessFingerprint::of($user);
     }
 
     /**
