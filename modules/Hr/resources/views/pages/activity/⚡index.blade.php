@@ -174,6 +174,11 @@ new #[Layout('layouts::desk'), Title('hr_communications.titles.activity')] class
 <x-desk.register heading-id="hr-activity-heading" :title="__('hr_communications.titles.activity')" :count="$rows->total()">
     <x-slot:figures>{{ __('hr_communications.activity.intro') }}</x-slot:figures>
 
+    {{-- Back to the hub's own log: the two share one sidebar link. --}}
+    <x-slot:actions>
+        <x-ui.button icon="clock" :href="route('activity.index')" wire:navigate data-activity-current-log>{{ __('hr_communications.activity.current_log') }}</x-ui.button>
+    </x-slot:actions>
+
     <x-slot:search>
         <x-desk.register-search :label="__('hr_communications.activity.search')" wire:model.live.debounce.300ms="search" />
     </x-slot:search>

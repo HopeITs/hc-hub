@@ -298,6 +298,13 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
     :title="__('activity.log_title')"
     :count="$this->activities->total()"
 >
+    {{-- The old HR app's log is the same idea kept apart: one sidebar link, reached from here. --}}
+    @if (Route::has('hr.activity.index'))
+        <x-slot:actions>
+            <x-ui.button icon="archive-box" :href="route('hr.activity.index')" wire:navigate data-activity-hr-archive>{{ __('activity.hr_archive') }}</x-ui.button>
+        </x-slot:actions>
+    @endif
+
     <x-slot:search>
         <x-desk.register-search :label="__('activity.filters.search')" wire:model.live.debounce.300ms="search" />
     </x-slot:search>

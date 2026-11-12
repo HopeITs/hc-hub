@@ -7,6 +7,7 @@ return [
     'load_more' => 'عرض النشاط الأقدم',
     'changed_to' => 'تغيّر إلى',
     'log_title' => 'سجل النشاط',
+    'hr_archive' => 'أرشيف الموارد البشرية (قبل المنصة)',
     'filters' => [
         'module' => 'المجال',
         'all_modules' => 'كل المجالات',

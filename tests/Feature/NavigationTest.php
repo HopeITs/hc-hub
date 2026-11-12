@@ -47,11 +47,52 @@ test('the profile menu leaves notification preferences and rules to the bell', f
 
 test('a Super Admin sidebar lists every page, grouped like the old sidebar, the Desk first', function () {
     $groups = app(Destinations::class)->sidebarFor(User::factory()->role('Super Admin')->create());
+    $routesOf = fn (string $group): array => array_column(collect($groups)->firstWhere('group', $group)['items'], 'route');
 
-    expect(array_column($groups, 'group'))->toBe(['overview', 'strategy_planning', 'projects_delivery', 'monitoring_evaluation', 'funding_finance', 'workspace', 'administration', 'you'])
+    expect(array_column($groups, 'group'))->toBe(['overview', 'strategy_planning', 'projects_delivery', 'monitoring_evaluation', 'funding_finance', 'hr_people', 'hr_leave', 'hr_recruitment', 'workspace', 'administration', 'you'])
         ->and($groups[0]['items'][0]['route'])->toBe('dashboard')
-        ->and(array_column($groups[6]['items'], 'route'))->toContain('admin.users.index', 'activity.index', 'admin.cities.index')
-        ->and(array_column($groups[3]['items'], 'route'))->toContain('report-templates.index');
+        ->and($routesOf('administration'))->toContain('admin.users.index', 'activity.index', 'admin.cities.index')
+        ->and($routesOf('monitoring_evaluation'))->toContain('report-templates.index');
+});
+
+test('HR pages sit in their own groups, and beside the hub pages that share their idea', function () {
+    $groups = app(Destinations::class)->sidebarFor(User::factory()->role('Super Admin')->create());
+    $routesOf = fn (string $group): array => array_column(collect($groups)->firstWhere('group', $group)['items'], 'route');
+
+    expect($routesOf('hr_people'))->toBe(['hr.employees.index', 'hr.contracts.index', 'hr.positions.index', 'hr.positions.team', 'hr.badges.index', 'hr.statistics.general'])
+        ->and($routesOf('hr_leave'))->toBe(['hr.leave.team', 'hr.leave.balances', 'hr.leave.holidays'])
+        ->and($routesOf('hr_recruitment'))->toContain('hr.recruitment.requests.index', 'hr.recruitment.campaigns.index', 'hr.recruitment.applicants.index')
+        ->and($routesOf('workspace'))->toContain('tasks.index', 'calendar.index', 'hr.leave.team-calendar', 'hr.checklists.index', 'hr.news.index')
+        ->and($routesOf('administration'))->toContain('activity.index', 'hr.settings.index');
+});
+
+test('the three HR statistics pages share one sidebar link and stay open to the Ask bar', function () {
+    $user = User::factory()->role('Super Admin')->create();
+    $destinations = app(Destinations::class);
+    $links = collect($destinations->sidebarFor($user))->flatMap(fn (array $group): array => array_column($group['items'], 'route'));
+
+    expect($links)->toContain('hr.statistics.general')
+        ->not->toContain('hr.statistics.contracts', 'hr.statistics.salaries')
+        ->and(deskPageRoutes($user))->toContain('hr.statistics.contracts', 'hr.statistics.salaries')
+        ->and($destinations->currentFor($user, 'hr.statistics.salaries'))->toMatchArray(['route' => 'hr.statistics.general', 'group' => 'hr_people', 'group_label' => __('hr_nav.group_people')]);
+});
+
+test('the old HR activity log is opened from the Activity log, which keeps the one sidebar link', function () {
+    $user = User::factory()->role('Super Admin')->create();
+    $destinations = app(Destinations::class);
+    $links = collect($destinations->sidebarFor($user))->flatMap(fn (array $group): array => array_column($group['items'], 'route'));
+
+    expect($links)->toContain('activity.index')->not->toContain('hr.activity.index')
+        ->and($destinations->currentFor($user, 'hr.activity.index'))->toMatchArray(['route' => 'activity.index', 'group' => 'administration']);
+
+    $this->actingAs($user)->get(route('activity.index'))->assertOk()->assertSee(route('hr.activity.index'));
+    $this->actingAs($user)->get(route('hr.activity.index'))->assertOk()->assertSee('data-activity-current-log', false);
+});
+
+test('an HR page about the viewer themself is not offered to an administrator with no employee record', function () {
+    $routes = deskPageRoutes(User::factory()->role('Super Admin')->create(['employee_id' => null]));
+
+    expect($routes)->not->toContain('hr.employees.me', 'hr.leave.index', 'hr.archives.mine');
 });
 
 test('a Team Member sidebar leaves out the pages their role cannot open', function () {

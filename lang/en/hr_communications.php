@@ -77,6 +77,7 @@ return [
 
     'activity' => [
         'intro' => 'Changes recorded by the old HR app, read only.',
+        'current_log' => 'Current activity log',
         'search' => 'Search descriptions and values',
         'area' => 'Area',
         'all_areas' => 'All areas',

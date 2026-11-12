@@ -7,6 +7,7 @@ return [
     'load_more' => 'Show older activity',
     'changed_to' => 'changed to',
     'log_title' => 'Activity Log',
+    'hr_archive' => 'HR archive (before the hub)',
     'filters' => [
         'module' => 'Area',
         'all_modules' => 'All areas',

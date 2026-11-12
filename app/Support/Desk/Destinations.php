@@ -28,7 +28,7 @@ final class Destinations
      *
      * @var list<string>
      */
-    public const array Groups = ['overview', 'strategy_planning', 'projects_delivery', 'monitoring_evaluation', 'funding_finance', 'hr', 'workspace', 'administration', 'you'];
+    public const array Groups = ['overview', 'strategy_planning', 'projects_delivery', 'monitoring_evaluation', 'funding_finance', 'hr_people', 'hr_leave', 'hr_recruitment', 'workspace', 'administration', 'you'];
 
     /**
      * Pages reached from the top bar instead of the sidebar: the inbox,
@@ -50,7 +50,9 @@ final class Destinations
         'projects_delivery' => 'navigation.group_projects_delivery',
         'monitoring_evaluation' => 'navigation.group_monitoring_evaluation',
         'funding_finance' => 'navigation.group_funding_finance',
-        'hr' => 'hr_nav.group',
+        'hr_people' => 'hr_nav.group_people',
+        'hr_leave' => 'hr_nav.group_leave',
+        'hr_recruitment' => 'hr_nav.group_recruitment',
         'workspace' => 'navigation.group_workspace',
         'administration' => 'navigation.group_administration',
         'you' => 'navigation.group_you',
@@ -67,7 +69,9 @@ final class Destinations
         'projects_delivery' => 'nav-folder-kanban',
         'monitoring_evaluation' => 'nav-chart-line',
         'funding_finance' => 'nav-wallet',
-        'hr' => 'nav-users',
+        'hr_people' => 'nav-users',
+        'hr_leave' => 'nav-tree-palm',
+        'hr_recruitment' => 'nav-briefcase-business',
         'workspace' => 'nav-list-checks',
         'administration' => 'nav-settings',
         'you' => 'nav-circle-user',
@@ -202,7 +206,7 @@ final class Destinations
      */
     public function sidebarFor(User $user): array
     {
-        $byGroup = collect($this->for($user))->reject(fn (array $page): bool => in_array($page['route'], self::OutsideSidebar, true))->groupBy('group');
+        $byGroup = collect($this->for($user))->reject(fn (array $page): bool => in_array($page['route'], self::OutsideSidebar, true) || isset($this->folded()[$page['route']]))->groupBy('group');
         $groups = [];
 
         foreach (self::Groups as $group) {
@@ -226,12 +230,14 @@ final class Destinations
      *
      * A register's own sub-pages (projects.show…) light up their register's
      * link, unless the page has a link of its own (reports.monthly-matrix is
-     * not reports.index).
+     * not reports.index). A page folded under another link lights that one.
      *
      * @return array{route: string, label: string, group: string, group_label: string}|null
      */
     public function currentFor(User $user, string $routeName): ?array
     {
+        $routeName = $this->folded()[$routeName] ?? $routeName;
+
         $links = collect($this->sidebarFor($user))
             ->flatMap(fn (array $group): array => array_map(fn (array $item): array => [
                 'route' => $item['route'],
@@ -247,7 +253,24 @@ final class Destinations
     }
 
     /**
-     * @return list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null, allows: Closure(User): bool, bindsAdministrators: bool}>
+     * Pages reached through another page's sidebar link instead of their own
+     * (the HR statistics pages share one link): route => that link's route.
+     * They stay destinations, so the Ask bar and the Desk still offer them.
+     *
+     * @return array<string, string>
+     */
+    private function folded(): array
+    {
+        return $this->folded ??= array_filter(array_column($this->all(), 'under', 'route'));
+    }
+
+    /**
+     * @var array<string, string>|null
+     */
+    private ?array $folded = null;
+
+    /**
+     * @return list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null, allows: Closure(User): bool, bindsAdministrators: bool, under: string|null}>
      */
     private function all(): array
     {
@@ -255,18 +278,18 @@ final class Destinations
     }
 
     /**
-     * @var list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null, allows: Closure(User): bool, bindsAdministrators: bool}>|null
+     * @var list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null, allows: Closure(User): bool, bindsAdministrators: bool, under: string|null}>|null
      */
     private ?array $table = null;
 
     /**
-     * @return list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null, allows: Closure(User): bool, bindsAdministrators: bool}>
+     * @return list<array{route: string, label: string, icon: string, hero: string, group: string, module: string|null, allows: Closure(User): bool, bindsAdministrators: bool, under: string|null}>
      */
     private function table(): array
     {
         $can = fn (string $ability): Closure => fn (User $user): bool => $user->can($ability);
         $everyone = fn (): bool => true;
-        $page = fn (string $route, string $label, string $icon, string $hero, string $group, Closure $allows, ?string $module = null, bool $bindsAdministrators = false): array => [
+        $page = fn (string $route, string $label, string $icon, string $hero, string $group, Closure $allows, ?string $module = null, bool $bindsAdministrators = false, ?string $under = null): array => [
             'route' => $route,
             'label' => $label,
             'icon' => $icon,
@@ -275,6 +298,7 @@ final class Destinations
             'module' => $module,
             'allows' => $allows,
             'bindsAdministrators' => $bindsAdministrators,
+            'under' => $under,
         ];
 
         return [
@@ -305,9 +329,6 @@ final class Destinations
             $page('transfers.index', 'common.transfers', 'coins', 'nav-arrow-left-right', 'funding_finance', $can('transfers.view'), 'transfers'),
             $page('admin.accounts.index', 'common.accounts', 'coins', 'nav-landmark', 'funding_finance', $can('accounts.view'), 'accounts'),
 
-            /* The HR module's pages (HrDestinations): only the ones whose route exists, each behind its own HR permission. */
-            ...array_map(fn (array $hr): array => $page($hr['route'], $hr['label'], $hr['icon'], $hr['hero'], 'hr', $hr['allows'], bindsAdministrators: $hr['bindsAdministrators']), app(HrDestinations::class)->pages()),
-
             $page('tasks.index', 'common.tasks', 'check', 'nav-square-check-big', 'workspace', $can('tasks.view'), 'tasks'),
             $page('department-tasks.index', 'titles.department_tasks', 'board', 'nav-building', 'workspace', fn (User $user): bool => $user->can('viewDepartmentQueue', Task::class)),
             $page('calendar.index', 'common.my_calendar', 'cal', 'nav-calendar', 'workspace', $can('calendar.view')),
@@ -324,6 +345,9 @@ final class Destinations
 
             $page('security.edit', 'common.security', 'lock', 'nav-shield-check', 'you', $everyone),
             $page('notification-settings.edit', 'desk.my_notifications', 'bell', 'nav-bell-ring', 'you', $everyone),
+
+            /* The HR module's pages (HrDestinations): only the ones whose route exists, each behind its own HR permission, in the group it names (after that group's own pages). */
+            ...array_map(fn (array $hr): array => $page($hr['route'], $hr['label'], $hr['icon'], $hr['hero'], $hr['group'], $hr['allows'], bindsAdministrators: $hr['bindsAdministrators'], under: $hr['under']), app(HrDestinations::class)->pages()),
         ];
     }
 
