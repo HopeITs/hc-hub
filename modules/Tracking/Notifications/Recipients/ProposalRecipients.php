@@ -67,6 +67,15 @@ final class ProposalRecipients extends WatcherRecipients
 
     private const Extended = 'proposal.extended';
 
+    /**
+     * The proposal's owners are its project managers (2026-11-12): a status
+     * change or a newly linked project tells them, since the next step on
+     * the project page is theirs.
+     */
+    private const StatusChanged = 'proposal.status_changed';
+
+    private const ProjectLinked = 'proposal.project_linked';
+
     protected function roles(): array
     {
         return ['Financial', 'Public Relations Manager'];
@@ -95,6 +104,7 @@ final class ProposalRecipients extends WatcherRecipients
             ]),
             self::PlanRebased => $this->hasClippedDates($activity) ? $this->projectOwnerIds($activity) : [],
             self::Extended => $this->projectOwnerIds($activity),
+            self::StatusChanged, self::ProjectLinked => $this->projectOwnerIds($activity),
             default => [],
         };
     }
@@ -132,6 +142,10 @@ final class ProposalRecipients extends WatcherRecipients
         }
 
         if ($activity->event === self::Extended) {
+            return $this->uniqueIds(array_values(app(EmployeeRecipients::class)->usersFor($this->projectOwnerIds($activity))));
+        }
+
+        if (in_array($activity->event, [self::StatusChanged, self::ProjectLinked], true)) {
             return $this->uniqueIds(array_values(app(EmployeeRecipients::class)->usersFor($this->projectOwnerIds($activity))));
         }
 

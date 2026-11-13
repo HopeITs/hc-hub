@@ -2,15 +2,6 @@
 
 use App\Models\Activity;
 use App\Models\AiRequest;
-use Modules\Core\Models\Center as HrCenter;
-use Modules\Core\Models\City as HrCity;
-use Modules\Hr\Models\Contract as HrContract;
-use Modules\Hr\Models\Department as HrDepartment;
-use Modules\Hr\Models\Employee as HrEmployee;
-use Modules\Hr\Models\JobLevel as HrJobLevel;
-use Modules\Hr\Models\Position as HrPosition;
-use Modules\Core\Models\Program as HrProgram;
-use Modules\Core\Models\User as HrUser;
 use App\Models\KnownDevice;
 use App\Models\Media;
 use App\Models\NotificationMute;
@@ -21,7 +12,20 @@ use App\Models\UserNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
+use Modules\Core\Models\Center as HrCenter;
+use Modules\Core\Models\City as HrCity;
+use Modules\Core\Models\Program as HrProgram;
+use Modules\Core\Models\User as HrUser;
+use Modules\Hr\Models\Contract as HrContract;
+use Modules\Hr\Models\Department as HrDepartment;
+use Modules\Hr\Models\Employee as HrEmployee;
+use Modules\Hr\Models\JobLevel as HrJobLevel;
+use Modules\Hr\Models\Position as HrPosition;
 use Modules\Tracking\Models\Account;
+use Modules\Tracking\Models\ActivityPlanBatch;
+use Modules\Tracking\Models\ActivityPlanFollowUp;
+use Modules\Tracking\Models\ActivityPlanItem;
+use Modules\Tracking\Models\ActivityPlanItemCity;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\FundingAgreementInstallment;
 use Modules\Tracking\Models\Indicator;
@@ -34,6 +38,10 @@ use Modules\Tracking\Models\MonthlyReportLineBreakdown;
 use Modules\Tracking\Models\MonthlyReportLineShare;
 use Modules\Tracking\Models\MonthlyReportReopenRequest;
 use Modules\Tracking\Models\PlanIndicator;
+use Modules\Tracking\Models\PlanUpdateFile;
+use Modules\Tracking\Models\PlanUpdateNumber;
+use Modules\Tracking\Models\PlanUpdateQuestion;
+use Modules\Tracking\Models\PlanUpdateWeek;
 use Modules\Tracking\Models\ProjectActivityStatus;
 use Modules\Tracking\Models\ProposalLocationCenter;
 use Modules\Tracking\Models\ProposalReviewer;
@@ -65,6 +73,10 @@ use Modules\Tracking\Models\TransfersTracking;
 function modelsGuardedWithoutPolicy(): array
 {
     return [
+        ActivityPlanBatch::class => ['annual-plans', 'Part of its annual plan (ActivityPlanPolicy::update); written only by SaveActivityPlanItem and CopyActivityPlanItemSettings.'],
+        ActivityPlanFollowUp::class => ['annual-plans', 'Part of its annual plan (ActivityPlanPolicy::review); written only by ManageActivityPlanFollowUps.'],
+        ActivityPlanItem::class => ['annual-plans', 'Part of its annual plan (ActivityPlanPolicy::update); written only by the Modules\Tracking\Actions\AnnualPlans actions.'],
+        ActivityPlanItemCity::class => ['annual-plans', 'Part of its annual plan item (ActivityPlanPolicy::update); written only by SaveActivityPlanItem.'],
         AiRequest::class => ['ai', 'The AI usage ledger: written only by App\Support\Ai\AiGateway, read only under ai.view-usage.'],
         Account::class => ['accounts', 'accounts.* permissions on the admin accounts page and the transfer forms.'],
         Activity::class => ['activity-log', 'The global log needs activity-log.view; a record\'s own Activity tab follows that record\'s page.'],
@@ -92,6 +104,10 @@ function modelsGuardedWithoutPolicy(): array
         MonthlyReportReopenRequest::class => ['reports', 'Raised and decided under MonthlyReportPolicy::requestReopen and decideReopen; never deleted.'],
         NotificationMute::class => [null, 'The signed-in user\'s own notification preferences only.'],
         Permission::class => ['access-management', 'access-management.* permissions and UserPolicy::grantPermission.'],
+        PlanUpdateFile::class => ['annual-plans', 'Part of its monthly update (PlanUpdatePolicy); written only by ManagePlanUpdateFiles, opened through plan-updates.files.download.'],
+        PlanUpdateNumber::class => ['annual-plans', 'Part of its monthly update (PlanUpdatePolicy::canFill); written only by SavePlanUpdate.'],
+        PlanUpdateQuestion::class => ['annual-plans', 'Part of its monthly update (PlanUpdatePolicy); written only by ReviewPlanUpdate::ask and answer.'],
+        PlanUpdateWeek::class => ['annual-plans', 'Part of its monthly update (PlanUpdatePolicy::canFill); written only by SavePlanUpdate.'],
         PlanIndicator::class => ['targets', 'targets.* permissions on the targets page.'],
         ProjectActivityStatus::class => ['reports', 'Written only when a monthly report is validated or reopened (MonthlyReportPolicy::validate, decideReopen).'],
         ProposalStatusNote::class => ['proposals', 'Written only through a proposal status change (ProposalPolicy::update).'],

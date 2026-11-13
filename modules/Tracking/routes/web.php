@@ -2,10 +2,13 @@
 
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use Illuminate\Support\Facades\Route;
+use Modules\Tracking\Http\Controllers\ActivityPlanExportController;
 use Modules\Tracking\Http\Controllers\DonorReportExportController;
 use Modules\Tracking\Http\Controllers\DonorReportFileDownloadController;
 use Modules\Tracking\Http\Controllers\DonorReportPrintController;
 use Modules\Tracking\Http\Controllers\MonthlyReportFileDownloadController;
+use Modules\Tracking\Http\Controllers\PlanUpdateExportController;
+use Modules\Tracking\Http\Controllers\PlanUpdateFileDownloadController;
 use Modules\Tracking\Http\Controllers\ProjectFileDownloadController;
 use Modules\Tracking\Http\Controllers\ProposalFileDownloadController;
 use Modules\Tracking\Http\Controllers\ProposalFilePreviewController;
@@ -46,13 +49,42 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
         ->can('programs.view')
         ->name('programs.show');
 
-    Route::livewire('annual-plans', 'tracking::annual-plans.index')
+    // Annual plans are the week-by-week activity plans agreed with MEAL
+    // (2026-11-12); the older program × year targets plans stay reachable
+    // under annual-plans/targets for the links targets and reports keep.
+    Route::livewire('annual-plans', 'tracking::annual-plans.plans')
         ->can('annual-plans.view')
         ->name('annual-plans.index');
 
-    Route::livewire('annual-plans/{annualPlan}', 'tracking::annual-plans.show')
+    Route::livewire('annual-plans/targets', 'tracking::annual-plans.index')
+        ->can('annual-plans.view')
+        ->name('annual-plans.targets');
+
+    Route::livewire('annual-plans/targets/{annualPlan}', 'tracking::annual-plans.show')
         ->can('annual-plans.view')
         ->name('annual-plans.show');
+
+    Route::livewire('annual-plans/{activityPlan}', 'tracking::annual-plans.plan')
+        ->can('annual-plans.view')
+        ->name('activity-plans.show');
+
+    Route::get('annual-plans/{activityPlan}/export', ActivityPlanExportController::class)
+        ->can('annual-plans.view')
+        ->name('activity-plans.export');
+
+    Route::livewire('annual-plans/{activityPlan}/updates/{project}/{month}', 'tracking::annual-plans.update')
+        ->can('annual-plans.view')
+        ->where('month', '\d{4}-\d{2}')
+        ->name('plan-updates.show');
+
+    Route::get('annual-plans/{activityPlan}/updates/{project}/{month}/export', PlanUpdateExportController::class)
+        ->can('annual-plans.view')
+        ->where('month', '\d{4}-\d{2}')
+        ->name('plan-updates.export');
+
+    Route::get('annual-plans/update-files/{planUpdateFile}', PlanUpdateFileDownloadController::class)
+        ->can('annual-plans.view')
+        ->name('plan-updates.files.download');
 
     Route::livewire('projects', 'tracking::projects.index')
         ->can('projects.view')

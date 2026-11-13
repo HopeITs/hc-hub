@@ -18,6 +18,8 @@ use Modules\Tracking\Console\Commands\ImportStrategyPillars;
 use Modules\Tracking\Console\Commands\MapProjectCenters;
 use Modules\Tracking\Console\Commands\PrefillActiveReportTemplates;
 use Modules\Tracking\Console\Commands\PrepareMonthlyReports;
+use Modules\Tracking\Console\Commands\RemindAnnualPlanUpdates;
+use Modules\Tracking\Console\Commands\RemindProposalOwners;
 use Modules\Tracking\Console\Commands\SeedIndicatorLibrary;
 use Modules\Tracking\Console\Commands\SendMonthlyDigest;
 use Modules\Tracking\Events\FundingAgreementRecorded;
@@ -73,6 +75,8 @@ class TrackingServiceProvider extends ServiceProvider
             MapProjectCenters::class,
             PrefillActiveReportTemplates::class,
             PrepareMonthlyReports::class,
+            RemindAnnualPlanUpdates::class,
+            RemindProposalOwners::class,
             SeedIndicatorLibrary::class,
             SendMonthlyDigest::class,
         ]);

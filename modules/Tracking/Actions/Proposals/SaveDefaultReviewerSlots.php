@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Position;
 use Modules\Tracking\Enums\ReviewerSlot;
+use Modules\Tracking\Support\PlanNotifier;
 
 /**
  * Store the HR position behind each default-reviewer slot (contracts §9,
@@ -63,5 +64,8 @@ final class SaveDefaultReviewerSlots
             'employee_id' => Slots::holderOf('meal_manager'),
             'previous_employee_id' => $previousHolder,
         ]);
+
+        // The new MEAL manager hears of the annual plans already waiting for MEAL.
+        PlanNotifier::notifyAllReviewers();
     }
 }
