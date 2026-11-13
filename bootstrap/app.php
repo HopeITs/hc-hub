@@ -4,6 +4,7 @@ use App\Http\DeniedAccessRecorder;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureRequestCameThroughTrustedProxy;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
+use App\Http\Middleware\KeepDeskTabOnRedirect;
 use App\Http\Middleware\RecordPresence;
 use App\Http\Middleware\RedirectToHttps;
 use App\Http\Middleware\RemembersRecentRecord;
@@ -50,6 +51,7 @@ return Application::configure(basePath: dirname(__DIR__))
             EnsureAccountIsActive::class,
             RemembersRecentRecord::class,
             RecordPresence::class,
+            KeepDeskTabOnRedirect::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
