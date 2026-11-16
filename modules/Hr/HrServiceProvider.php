@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Hr;
 
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
+use App\Support\Modules\ModuleRegistry;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -21,6 +22,8 @@ use Modules\Hr\Console\Journeys\TrackRenewalJourneys;
 use Modules\Hr\Console\ProcessContractAutoRenewalsCommand;
 use Modules\Hr\Console\RecountPositionSeatsCommand;
 use Modules\Hr\Console\SendLeaveDecisionRemindersCommand;
+use Modules\Hr\Support\Desk\HrDestinations;
+use Modules\Hr\Support\Desk\HrPanels;
 use Modules\Hr\Support\Journeys\JourneyHooks;
 use Modules\Hr\Support\Recruitment\Console\AnalyzeRecruitmentCvs;
 use Modules\Hr\Support\Recruitment\Console\ApplyDueRecruitmentRequests;
@@ -127,9 +130,21 @@ class HrServiceProvider extends ServiceProvider
         // Contract writes that start or move an employee journey.
         JourneyHooks::register();
 
+        $this->registerDesk();
+
         if (! $this->app->routesAreCached()) {
             $this->loadAreaRoutes();
         }
+    }
+
+    /**
+     * HR's sidebar pages and Desk cards, read by App\Support\Desk\Destinations and Panels through the module registry.
+     */
+    private function registerDesk(): void
+    {
+        $modules = $this->app->make(ModuleRegistry::class);
+        $modules->addDestinations(HrDestinations::class);
+        $modules->addDeskPanels(HrPanels::class);
     }
 
     /**
