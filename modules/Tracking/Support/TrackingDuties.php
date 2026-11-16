@@ -40,8 +40,8 @@ final class TrackingDuties
     }
 
     /**
-     * Projects this user answers for: the ones they own (projects.user_id is
-     * their HR employee) and every project in a program they manage.
+     * Projects this user answers for: the ones they own (projects.owner_employee_id
+     * is their HR employee) and every project in a program they manage.
      *
      * @return list<int>
      */
@@ -61,7 +61,7 @@ final class TrackingDuties
 
         return $this->ownedProjectIds = array_values(Project::query()
             ->where(fn (Builder $query) => $query
-                ->where('user_id', $employeeId)
+                ->where('owner_employee_id', $employeeId)
                 ->when($programIds !== [], fn (Builder $query) => $query->orWhereIn('program_id', $programIds)))
             ->pluck('id')
             ->map(fn (mixed $id): int => (int) $id)

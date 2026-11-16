@@ -284,7 +284,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plans')] class extends Compo
     $counts = $this->counts;
     $next = $this->nextStep;
     $user = auth()->user();
-    $ownsCentre = $user->employee_id !== null && \Modules\Tracking\Models\Project::query()->where('user_id', $user->employee_id)->exists();
+    $ownsCentre = $user->employee_id !== null && \Modules\Tracking\Models\Project::query()->where('owner_employee_id', $user->employee_id)->exists();
     $guideKey = match (true) {
         $user->hasRole('General Manager') && ! $user->hasRole('Super Admin') => 'ceo',
         \Modules\Tracking\Policies\ActivityPlanPolicy::isMealManager($user) => 'meal',

@@ -50,7 +50,7 @@ class MonthlyReportPolicy
      */
     public function open(User $user, Project $project): bool
     {
-        return $user->can('reports.create') && $this->isPreparerSide($user, $project->id, $project->user_id);
+        return $user->can('reports.create') && $this->isPreparerSide($user, $project->id, $project->owner_employee_id);
     }
 
     /**

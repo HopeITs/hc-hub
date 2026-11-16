@@ -41,7 +41,7 @@ trait ReadsDeskFlow
         $money = $this->canViewFundingPosition();
 
         $projects = $this->visible(Project::query(), 'projects')
-            ->select(['id', 'name', 'status', 'end_date', 'user_id'])
+            ->select(['id', 'name', 'status', 'end_date', 'owner_employee_id'])
             ->whereNotIn('status', [ProjectStatus::Archived, ProjectStatus::Closed])
             ->with([
                 'proposals:id,status',
@@ -63,7 +63,7 @@ trait ReadsDeskFlow
             $watch += ! $late && $signals['soon'] > 0 ? 1 : 0;
             $stages[$stage]['count']++;
             $stages[$stage]['late'] += $late ? 1 : 0;
-            $stages[$stage]['mine'] += $late && $employeeId !== 0 && (int) $project->user_id === (int) $employeeId ? 1 : 0;
+            $stages[$stage]['mine'] += $late && $employeeId !== 0 && (int) $project->owner_employee_id === (int) $employeeId ? 1 : 0;
             $stages[$stage]['top'][] = ['name' => (string) $project->name, 'late' => $late];
         }
 

@@ -28,7 +28,7 @@ final class ActivityPlanScope
         return array_values($plan->proposal()->firstOrFail()->projects()
             ->where('projects.program_id', $plan->program_id)
             ->orderBy('projects.name')
-            ->get(['projects.id', 'projects.slug', 'projects.name', 'projects.city_id', 'projects.center_id', 'projects.user_id', 'projects.program_id'])
+            ->get(['projects.id', 'projects.slug', 'projects.name', 'projects.city_id', 'projects.center_id', 'projects.owner_employee_id', 'projects.program_id'])
             ->all());
     }
 

@@ -41,7 +41,7 @@ new class extends Component {
         }
 
         return Project::query()
-            ->select(['id', 'slug', 'name', 'status', 'city_id', 'center_id', 'program_id', 'user_id'])
+            ->select(['id', 'slug', 'name', 'status', 'city_id', 'center_id', 'program_id', 'owner_employee_id'])
             ->whereIn('status', [ProjectStatus::Active, ProjectStatus::Approved])
             ->with(['reportTemplate' => fn ($query) => $query->select(['id', 'project_id', 'status'])->withCount('lines')])
             ->orderBy('name')

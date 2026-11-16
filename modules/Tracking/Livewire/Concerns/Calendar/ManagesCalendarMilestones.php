@@ -145,7 +145,7 @@ trait ManagesCalendarMilestones
     public function openEditModal(int $milestoneId): void
     {
         $milestone = Milestone::query()
-            ->select(['id', 'project_id', 'proposal_id', 'result_id', 'name', 'planned_start_date', 'planned_end_date', 'status', 'sequence', 'weight_percentage', 'responsible_user_id', 'parent_milestone_id'])
+            ->select(['id', 'project_id', 'proposal_id', 'result_id', 'name', 'planned_start_date', 'planned_end_date', 'status', 'sequence', 'weight_percentage', 'responsible_employee_id', 'parent_milestone_id'])
             ->findOrFail($milestoneId);
 
         // Someone who may not edit the milestone is taken to its own page, and
@@ -164,7 +164,7 @@ trait ManagesCalendarMilestones
         $this->milestoneStatus = $milestone->status->value;
         $this->sequence = (string) $milestone->sequence;
         $this->weightPercentage = $milestone->weight_percentage;
-        $this->responsibleUserId = (string) $milestone->responsible_user_id;
+        $this->responsibleUserId = (string) $milestone->responsible_employee_id;
         $this->milestoneProjectId = (string) $milestone->project_id;
         $this->parentMilestoneId = (string) ($milestone->parent_milestone_id ?? '');
         $this->milestoneActivityId = (string) ($milestone->result_id ?? '');
@@ -229,7 +229,7 @@ trait ManagesCalendarMilestones
             'status' => $validated['milestoneStatus'],
             'sequence' => (int) $validated['sequence'],
             'weight_percentage' => $validated['weightPercentage'],
-            'responsible_user_id' => (int) $validated['responsibleUserId'],
+            'responsible_employee_id' => (int) $validated['responsibleUserId'],
             'parent_milestone_id' => $validated['parentMilestoneId'] === '' || $validated['parentMilestoneId'] === null
                 ? null
                 : (int) $validated['parentMilestoneId'],

@@ -101,7 +101,7 @@ trait TracksProgramHealth
         $openMilestone = fn ($query) => $query->whereNotIn('status', [MilestoneStatus::Reached->value, MilestoneStatus::Cancelled->value]);
 
         $projects = Project::query()
-            ->select(['id', 'slug', 'name', 'status', 'start_date', 'end_date', 'program_id', 'user_id', 'city_id'])
+            ->select(['id', 'slug', 'name', 'status', 'start_date', 'end_date', 'program_id', 'owner_employee_id', 'city_id'])
             ->where('program_id', $this->programId)
             ->with(['user:id,first_name_en,last_name_en,first_name_ar,last_name_ar', 'city'])
             ->withSum(['milestones as weight_total' => fn ($query) => $query->where('status', '!=', MilestoneStatus::Cancelled->value)], 'weight_percentage')
@@ -401,7 +401,7 @@ trait TracksProgramHealth
         foreach ($ledger as $row) {
             $project = $row['project'];
             $projectHref = route('projects.show', $project);
-            $isMine = auth()->user()?->employee_id !== null && (int) $project->user_id === (int) auth()->user()->employee_id;
+            $isMine = auth()->user()?->employee_id !== null && (int) $project->owner_employee_id === (int) auth()->user()->employee_id;
 
             if ($row['pace'] === 'past_end') {
                 $items[] = ['key' => 'past_end', 'tone' => 'critical', 'mine' => $isMine, 'href' => $projectHref, 'label' => __('programs.attention_open_project'),

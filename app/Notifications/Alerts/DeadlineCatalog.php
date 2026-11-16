@@ -211,16 +211,16 @@ final class DeadlineCatalog
             ->where(fn ($query) => $query->whereNull('milestones.proposal_id')
                 ->orWhereNotIn('milestones.proposal_id', Proposal::query()->select('id')->where('status', ProposalStatus::Rejected->value)))
             ->toBase()
-            ->get(['milestones.id', 'milestones.name', 'milestones.planned_end_date', 'milestones.responsible_user_id', 'milestones.proposal_id', 'projects.user_id as owner_id']);
+            ->get(['milestones.id', 'milestones.name', 'milestones.planned_end_date', 'milestones.responsible_employee_id', 'milestones.proposal_id', 'projects.owner_employee_id as owner_id']);
 
         $planOwners = Proposal::ownerEmployeeIdsFor($milestones->whereNull('owner_id')->pluck('proposal_id')->filter()->map(fn ($id): int => (int) $id)->unique()->values()->all());
         $ownersOf = fn (stdClass $row): array => $row->owner_id !== null ? [(int) $row->owner_id] : ($planOwners[(int) $row->proposal_id] ?? []);
 
-        $users = $this->employees->usersFor($milestones->flatMap(fn (object $row): array => [(int) $row->responsible_user_id, ...$ownersOf($row)])->unique()->values()->all());
+        $users = $this->employees->usersFor($milestones->flatMap(fn (object $row): array => [(int) $row->responsible_employee_id, ...$ownersOf($row)])->unique()->values()->all());
 
         return array_values($milestones->map(fn (object $row): DeadlineItem => new DeadlineItem(
             'milestone', (int) $row->id, 'milestones', (string) $row->name, CarbonImmutable::parse($row->planned_end_date),
-            $this->unique([$users[(int) $row->responsible_user_id] ?? null, ...array_map(fn (int $owner): ?int => $users[$owner] ?? null, $ownersOf($row))]),
+            $this->unique([$users[(int) $row->responsible_employee_id] ?? null, ...array_map(fn (int $owner): ?int => $users[$owner] ?? null, $ownersOf($row))]),
         ))->all());
     }
 
@@ -266,8 +266,8 @@ final class DeadlineCatalog
             return [];
         }
 
-        $projects = Project::query()->whereKey($reports->pluck('project_id')->unique()->values())->get(['id', 'name', 'user_id', 'program_id', 'center_id', 'city_id', 'working_days'])->keyBy('id');
-        $owners = $this->employees->usersFor($projects->pluck('user_id')->filter()->map(fn ($id): int => (int) $id)->unique()->values()->all());
+        $projects = Project::query()->whereKey($reports->pluck('project_id')->unique()->values())->get(['id', 'name', 'owner_employee_id', 'program_id', 'center_id', 'city_id', 'working_days'])->keyBy('id');
+        $owners = $this->employees->usersFor($projects->pluck('owner_employee_id')->filter()->map(fn ($id): int => (int) $id)->unique()->values()->all());
         $items = [];
 
         foreach ($reports->groupBy('project_id') as $projectId => $projectReports) {
@@ -288,7 +288,7 @@ final class DeadlineCatalog
 
                 $items[] = new DeadlineItem(
                     'monthly_report', $report->id, 'monthly-reports', $project->name.' · '.$report->period->format('Y-m'), $due,
-                    $this->unique([$owners[(int) $project->user_id] ?? null, $report->prepared_by]), ['MEAL'], 'monthly_report', projectId: $project->id,
+                    $this->unique([$owners[(int) $project->owner_employee_id] ?? null, $report->prepared_by]), ['MEAL'], 'monthly_report', projectId: $project->id,
                 );
             }
         }
@@ -452,12 +452,12 @@ final class DeadlineCatalog
             ->whereIn('status', $open)
             ->whereNotNull('end_date')
             ->whereDate('end_date', '<=', $limit)
-            ->get(['id', 'name', 'end_date', 'user_id']);
+            ->get(['id', 'name', 'end_date', 'owner_employee_id']);
 
-        $users = $this->employees->usersFor($projects->pluck('user_id')->map(fn ($id): int => (int) $id)->unique()->values()->all());
+        $users = $this->employees->usersFor($projects->pluck('owner_employee_id')->map(fn ($id): int => (int) $id)->unique()->values()->all());
 
         return array_values($projects->map(fn (Project $project): DeadlineItem => new DeadlineItem(
-            'project', $project->id, 'projects', $project->name, $project->end_date, $this->unique([$users[(int) $project->user_id] ?? null]),
+            'project', $project->id, 'projects', $project->name, $project->end_date, $this->unique([$users[(int) $project->owner_employee_id] ?? null]),
         ))->all());
     }
 

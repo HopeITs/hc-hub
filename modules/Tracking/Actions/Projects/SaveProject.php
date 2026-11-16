@@ -97,7 +97,7 @@ final class SaveProject
                 'host_center_id' => $hostCenterId,
                 'city_id' => $center !== null ? $center->city_id : ($cityId ?? $project->city_id),
                 'program_id' => $mayReassign ? (int) $validated['programId'] : $project->program_id,
-                'user_id' => $mayReassign ? (int) $validated['userId'] : $project->user_id,
+                'owner_employee_id' => $mayReassign ? (int) $validated['userId'] : $project->owner_employee_id,
             ]);
 
             if ($project->status !== ProjectStatus::Draft) {
@@ -256,7 +256,7 @@ final class SaveProject
         $ids = Program::query()->whereNotNull('manager_id')->pluck('manager_id')->map(fn (mixed $id): int => (int) $id);
 
         if ($project->exists) {
-            $ids->push((int) $project->user_id);
+            $ids->push((int) $project->owner_employee_id);
         }
 
         return $ids->unique()->values()->all();

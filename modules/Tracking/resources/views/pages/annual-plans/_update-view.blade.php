@@ -16,7 +16,7 @@
     };
     $officerName = \Modules\Hr\Models\Employee::query()->whereKey(\Modules\Tracking\Support\MealCoverage::responsibleFor($project))->first()?->name;
     $chain = [
-        [__('annual_plans.up.role_project_manager'), $record?->sender?->name ?? \Modules\Hr\Models\Employee::query()->whereKey($project->user_id)->first()?->name, __('annual_plans.up.chain_fills'), $record?->sent_at],
+        [__('annual_plans.up.role_project_manager'), $record?->sender?->name ?? \Modules\Hr\Models\Employee::query()->whereKey($project->owner_employee_id)->first()?->name, __('annual_plans.up.chain_fills'), $record?->sent_at],
         [__('annual_plans.up.role_officer'), $record?->officer?->name ?? $officerName, __('annual_plans.up.chain_officer'), $record?->officer_approved_at],
         [__('annual_plans.up.role_meal_manager'), $record?->reviewer?->name ?? \Modules\Hr\Models\Employee::query()->whereKey(\Modules\Tracking\Support\MealCoverage::mealManagerEmployeeId())->first()?->name, __('annual_plans.up.chain_meal'), $record?->reviewed_at],
         [__('annual_plans.up.role_program_manager'), $record?->seer?->name ?? $plan->program?->manager?->name, __('annual_plans.up.chain_pm'), $record?->seen_at],

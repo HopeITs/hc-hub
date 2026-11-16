@@ -66,7 +66,7 @@ class MilestonePolicy
     public function updateProgress(User $user, Milestone $milestone): bool
     {
         return $this->update($user, $milestone)
-            || ($user->employee_id !== null && $milestone->responsible_user_id === $user->employee_id);
+            || ($user->employee_id !== null && $milestone->responsible_employee_id === $user->employee_id);
     }
 
     /**

@@ -117,7 +117,7 @@ final class GenerateMonthlyReportsForProject implements ShouldQueue
             return;
         }
 
-        $userIds = array_values(app(EmployeeRecipients::class)->usersFor(array_filter([$project->user_id])));
+        $userIds = array_values(app(EmployeeRecipients::class)->usersFor(array_filter([$project->owner_employee_id])));
         $recipients = app(RecipientFilter::class)->apply($userIds, $catalog['module'], null, $userIds, $userIds);
 
         if ($recipients === []) {

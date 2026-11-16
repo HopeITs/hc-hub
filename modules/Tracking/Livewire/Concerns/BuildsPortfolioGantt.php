@@ -204,7 +204,7 @@ trait BuildsPortfolioGantt
             $this->rollUp($rows, 0);
 
             $projects = $proposal->projects()
-                ->select(['projects.id', 'projects.name', 'projects.status', 'projects.start_date', 'projects.end_date', 'projects.user_id'])
+                ->select(['projects.id', 'projects.name', 'projects.status', 'projects.start_date', 'projects.end_date', 'projects.owner_employee_id'])
                 ->with('user:id,first_name_en,last_name_en,first_name_ar,last_name_ar')
                 ->orderBy('projects.start_date')
                 ->get();
@@ -236,7 +236,7 @@ trait BuildsPortfolioGantt
     private function timelineProjects(?int $programId, ?string $status): EloquentCollection
     {
         return Project::query()
-            ->select(['id', 'name', 'status', 'start_date', 'end_date', 'program_id', 'user_id', 'schedule_weekend'])
+            ->select(['id', 'name', 'status', 'start_date', 'end_date', 'program_id', 'owner_employee_id', 'schedule_weekend'])
             ->when($programId !== null, fn ($query) => $query->where('program_id', $programId))
             ->when($status !== null && $status !== '', fn ($query) => $query->where('status', $status))
             ->with(['program:id', 'user:id,first_name_en,last_name_en,first_name_ar,last_name_ar'])
@@ -254,7 +254,7 @@ trait BuildsPortfolioGantt
     private function timelineMilestones(EloquentCollection $projects): Collection
     {
         return Milestone::query()
-            ->select(['id', 'project_id', 'parent_milestone_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_start_date', 'actual_end_date', 'status', 'sequence', 'responsible_user_id'])
+            ->select(['id', 'project_id', 'parent_milestone_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_start_date', 'actual_end_date', 'status', 'sequence', 'responsible_employee_id'])
             ->whereIn('project_id', $projects->modelKeys())
             ->with('responsibleUser:id,first_name_en,last_name_en,first_name_ar,last_name_ar')
             ->orderBy('sequence')
@@ -313,7 +313,7 @@ trait BuildsPortfolioGantt
         if ($groupBy === 'owner') {
             return array_values($projects
                 ->toBase()
-                ->groupBy(fn (Project $project): int => (int) $project->user_id)
+                ->groupBy(fn (Project $project): int => (int) $project->owner_employee_id)
                 ->map(
                     /** @param Collection<int, Project> $owned */
                     fn (Collection $owned, int $userId): array => [

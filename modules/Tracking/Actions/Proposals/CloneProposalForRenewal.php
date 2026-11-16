@@ -378,7 +378,7 @@ final class CloneProposalForRenewal
                     'planned_end_date' => $milestone->planned_end_date?->addDays($deltaDays)->toDateString(),
                     'sequence' => $milestone->sequence,
                     'weight_percentage' => $milestone->weight_percentage,
-                    'responsible_user_id' => $milestone->responsible_user_id,
+                    'responsible_employee_id' => $milestone->responsible_employee_id,
                     'parent_milestone_id' => $milestone->parent_milestone_id === null ? null : $created[$milestone->parent_milestone_id],
                     'proposal_id' => $renewal->id,
                     'copied_from_id' => $milestone->id,

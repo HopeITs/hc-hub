@@ -83,7 +83,7 @@ final class DeskWork
      */
     public static function projectScopeOf(Collection $projects, User $user): array
     {
-        $mine = $projects->where('user_id', $user->employee_id ?? 0);
+        $mine = $projects->where('owner_employee_id', $user->employee_id ?? 0);
         $hasOthers = $mine->isNotEmpty() && $mine->count() !== $projects->count();
 
         return ['mine' => $mine, 'hasOthers' => $hasOthers, 'shown' => $hasOthers ? $mine : $projects];
@@ -207,6 +207,6 @@ final class DeskWork
      */
     private static function projectsOwnedBy(User $user): Builder
     {
-        return Project::query()->select('id')->where('user_id', $user->employee_id ?? 0);
+        return Project::query()->select('id')->where('owner_employee_id', $user->employee_id ?? 0);
     }
 }

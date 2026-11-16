@@ -78,7 +78,7 @@ final class ProposalOwnerNotifier
     {
         $sent = 0;
 
-        foreach (Proposal::query()->whereIn('status', array_keys(self::Steps))->whereHas('projects', fn ($query) => $query->whereNotNull('projects.user_id'))->get() as $proposal) {
+        foreach (Proposal::query()->whereIn('status', array_keys(self::Steps))->whereHas('projects', fn ($query) => $query->whereNotNull('projects.owner_employee_id'))->get() as $proposal) {
             $sent += self::notifyWaiting($proposal);
         }
 

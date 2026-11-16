@@ -53,7 +53,7 @@ final class SaveProposalMilestone
                 'description' => $this->nullableText($validated['description'] ?? null),
                 'planned_start_date' => $validated['planned_start_date'],
                 'planned_end_date' => $this->nullableText($validated['planned_end_date'] ?? null),
-                'responsible_user_id' => (int) $validated['responsible_employee_id'],
+                'responsible_employee_id' => (int) $validated['responsible_employee_id'],
                 'parent_milestone_id' => $this->nullableId($validated['parent_milestone_id'] ?? null),
             ])->save();
 
@@ -89,7 +89,7 @@ final class SaveProposalMilestone
                 'name' => __('milestones.final_report_milestone_name'),
                 'planned_start_date' => $validated['planned_start_date'],
                 'planned_end_date' => $this->nullableText($validated['planned_end_date'] ?? null),
-                'responsible_user_id' => (int) $validated['responsible_employee_id'],
+                'responsible_employee_id' => (int) $validated['responsible_employee_id'],
             ])->forceFill(['is_final_report' => true])->save();
 
             Task::query()->create([

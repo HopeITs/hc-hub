@@ -134,7 +134,7 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
             $supervisees = SupervisionMap::superviseesOf($user->employee_id);
 
             if ($supervisees !== []) {
-                $ids = [...$ids, ...Project::query()->whereIn('user_id', $supervisees)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all()];
+                $ids = [...$ids, ...Project::query()->whereIn('owner_employee_id', $supervisees)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all()];
             }
         }
 
@@ -168,7 +168,7 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
         $projects = Project::query()
             ->whereIn('id', $projectIds)
             ->orderBy('name')
-            ->get(['id', 'slug', 'name', 'user_id', 'program_id', 'center_id', 'city_id', 'working_days', 'start_date', 'end_date']);
+            ->get(['id', 'slug', 'name', 'owner_employee_id', 'program_id', 'center_id', 'city_id', 'working_days', 'start_date', 'end_date']);
 
         $reports = MonthlyReport::query()
             ->whereIn('project_id', $projectIds)

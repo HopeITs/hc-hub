@@ -20,7 +20,7 @@ trait ScopesCalendarPeople
 {
     /**
      * The employee record for the signed-in user, if their account is linked
-     * to one. `Milestone::responsible_user_id` holds an HR employee id, not a
+     * to one. `Milestone::responsible_employee_id` holds an HR employee id, not a
      * `users.id`, so this is the bridge between "me" and "my milestones".
      */
     protected function employeeId(): ?int

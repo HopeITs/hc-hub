@@ -53,20 +53,20 @@ final class OnHoldReminderScanner implements Scanner
         $proposals = Proposal::query()
             ->whereNotNull('on_hold_since')
             ->whereDate('status_remind_on', '<=', $today->toDateString())
-            ->with('projects:projects.id,projects.user_id')
+            ->with('projects:projects.id,projects.owner_employee_id')
             ->get(['id', 'name', 'status_remind_on']);
 
         if ($proposals->isEmpty()) {
             return 0;
         }
 
-        $owners = $this->employees->usersFor($proposals->flatMap(fn (Proposal $proposal) => $proposal->projects->pluck('user_id'))->filter()->map(fn (mixed $id): int => (int) $id)->all());
+        $owners = $this->employees->usersFor($proposals->flatMap(fn (Proposal $proposal) => $proposal->projects->pluck('owner_employee_id'))->filter()->map(fn (mixed $id): int => (int) $id)->all());
         $editors = $this->editorUserIds();
         $sent = 0;
 
         foreach ($proposals as $proposal) {
             $remindOn = CarbonImmutable::parse($proposal->status_remind_on)->toDateString();
-            $direct = array_values(array_unique(array_filter($proposal->projects->map(fn (Project $project): ?int => $owners[(int) $project->user_id] ?? null)->all())));
+            $direct = array_values(array_unique(array_filter($proposal->projects->map(fn (Project $project): ?int => $owners[(int) $project->owner_employee_id] ?? null)->all())));
             $oversight = $event['importance'] === EventImportance::Immediate ? $this->oversight->userIdsFor(self::Key) : [];
 
             $payload = $this->dispatcher->payload(

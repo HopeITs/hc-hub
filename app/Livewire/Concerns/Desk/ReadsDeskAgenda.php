@@ -52,7 +52,7 @@ trait ReadsDeskAgenda
             ->select(['id', 'slug', 'project_id', 'proposal_id', 'name', 'planned_end_date'])
             ->with(['project:id,name', 'proposal:id,name'])
             ->whereIn('status', [MilestoneStatus::Planned, MilestoneStatus::Ongoing])
-            ->where(fn (Builder $query) => $query->whereIn('project_id', $projectIds === [] ? [0] : $projectIds)->orWhere('responsible_user_id', $employeeId))
+            ->where(fn (Builder $query) => $query->whereIn('project_id', $projectIds === [] ? [0] : $projectIds)->orWhere('responsible_employee_id', $employeeId))
             ->whereBetween('planned_end_date', $window)
             ->get()
             ->map(fn (Milestone $milestone): array => [

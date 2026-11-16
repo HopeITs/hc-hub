@@ -81,7 +81,7 @@ class PlanUpdatePolicy
             return true;
         }
 
-        $owner = $project->getAttribute('user_id') ?? Project::ownerEmployeeIdFor($project->id);
+        $owner = $project->getAttribute('owner_employee_id') ?? Project::ownerEmployeeIdFor($project->id);
 
         return $user->employee_id !== null && $owner !== null && (int) $owner === (int) $user->employee_id;
     }

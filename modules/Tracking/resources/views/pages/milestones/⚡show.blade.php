@@ -62,7 +62,7 @@ new #[Layout('layouts::desk'), Title('titles.milestone')] class extends Componen
         $this->plannedEndDate = $freshMilestone->planned_end_date?->toDateString() ?? '';
         $this->milestoneStatus = $freshMilestone->status->value;
         $this->weightPercentage = $freshMilestone->weight_percentage;
-        $this->responsibleUserId = (string) $freshMilestone->responsible_user_id;
+        $this->responsibleUserId = (string) $freshMilestone->responsible_employee_id;
         $this->parentMilestoneId = (string) ($freshMilestone->parent_milestone_id ?? '');
         $this->milestoneActivityId = (string) ($freshMilestone->result_id ?? '');
     }
@@ -71,7 +71,7 @@ new #[Layout('layouts::desk'), Title('titles.milestone')] class extends Componen
     public function milestone(): Milestone
     {
         return Milestone::query()
-            ->select(['id', 'project_id', 'proposal_id', 'result_id', 'name', 'description', 'planned_start_date', 'planned_end_date', 'actual_start_date', 'actual_end_date', 'status', 'sequence', 'weight_percentage', 'responsible_user_id', 'parent_milestone_id', 'updated_at'])
+            ->select(['id', 'project_id', 'proposal_id', 'result_id', 'name', 'description', 'planned_start_date', 'planned_end_date', 'actual_start_date', 'actual_end_date', 'status', 'sequence', 'weight_percentage', 'responsible_employee_id', 'parent_milestone_id', 'updated_at'])
             ->with(['project:id,name', 'proposal:id,name', 'responsibleUser:id,first_name_en,last_name_en,first_name_ar,last_name_ar', 'parent:id,name'])
             ->findOrFail($this->milestoneId);
     }
@@ -225,7 +225,7 @@ new #[Layout('layouts::desk'), Title('titles.milestone')] class extends Componen
                 'planned_end_date' => $validated['plannedEndDate'] === '' ? null : $validated['plannedEndDate'],
                 'status' => $validated['milestoneStatus'],
                 'weight_percentage' => $validated['weightPercentage'],
-                'responsible_user_id' => (int) $validated['responsibleUserId'],
+                'responsible_employee_id' => (int) $validated['responsibleUserId'],
                 'parent_milestone_id' => $validated['parentMilestoneId'] === '' || $validated['parentMilestoneId'] === null
                     ? null
                     : (int) $validated['parentMilestoneId'],
@@ -369,7 +369,7 @@ new #[Layout('layouts::desk'), Title('titles.milestone')] class extends Componen
                 'planned_end_date' => $validated['relatedPlannedEndDate'] === '' ? null : $validated['relatedPlannedEndDate'],
                 'status' => $validated['relatedStatus'],
                 'weight_percentage' => $validated['relatedWeightPercentage'],
-                'responsible_user_id' => (int) $validated['relatedResponsibleUserId'],
+                'responsible_employee_id' => (int) $validated['relatedResponsibleUserId'],
                 'parent_milestone_id' => $validated['relatedParentMilestoneId'] === '' || $validated['relatedParentMilestoneId'] === null
                     ? null
                     : (int) $validated['relatedParentMilestoneId'],

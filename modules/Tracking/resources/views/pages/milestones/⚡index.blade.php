@@ -190,7 +190,7 @@ new #[Layout('layouts::desk'), Title('titles.milestones')] class extends Compone
             'status',
             'sequence',
             'weight_percentage',
-            'responsible_user_id',
+            'responsible_employee_id',
             'parent_milestone_id',
         ];
 
@@ -309,7 +309,7 @@ new #[Layout('layouts::desk'), Title('titles.milestones')] class extends Compone
         };
 
         return $matchesStatus
-            && ($this->responsible === '' || $milestone->responsible_user_id === (int) $this->responsible);
+            && ($this->responsible === '' || $milestone->responsible_employee_id === (int) $this->responsible);
     }
 
 };

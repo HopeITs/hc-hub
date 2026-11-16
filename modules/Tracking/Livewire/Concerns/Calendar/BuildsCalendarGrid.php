@@ -87,8 +87,8 @@ trait BuildsCalendarGrid
         $milestonesByDay = $employeeIds === [] || ! $this->showMilestones
             ? new Collection
             : Milestone::query()
-                ->select(['id', 'project_id', 'proposal_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_end_date', 'status', 'weight_percentage', 'responsible_user_id'])
-                ->whereIn('responsible_user_id', $employeeIds)
+                ->select(['id', 'project_id', 'proposal_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_end_date', 'status', 'weight_percentage', 'responsible_employee_id'])
+                ->whereIn('responsible_employee_id', $employeeIds)
                 ->whereBetween('planned_start_date', [$gridStart->toDateString(), $gridEnd->toDateString()])
                 ->with(['project:id,name', 'proposal:id,name'])
                 ->withCount(['children', 'tasks' => fn ($query) => $query->withoutGlobalScope(TaskVisibilityScope::class)])
@@ -146,19 +146,19 @@ trait BuildsCalendarGrid
 
         // Proposals, transfers and donors carry no direct "responsible employee"
         // column of their own — the only real ownership signal in the schema is
-        // Project::user_id, so anything funding/funded-by one of my projects
+        // Project::owner_employee_id, so anything funding/funded-by one of my projects
         // counts as "mine" here, the same proxy every one of these queries uses.
         // Each of them is money-adjacent, so each is skipped outright unless the
         // viewer holds the matching view permission (see canSeeType()).
         $ownedProjectIds = $employeeIds === []
             ? []
-            : Project::query()->whereIn('user_id', $employeeIds)->pluck('id')->all();
+            : Project::query()->whereIn('owner_employee_id', $employeeIds)->pluck('id')->all();
 
         $projectStartsByDay = $employeeIds === [] || ! $this->showProjects
             ? new Collection
             : Project::query()
                 ->select(['id', 'name', 'start_date'])
-                ->whereIn('user_id', $employeeIds)
+                ->whereIn('owner_employee_id', $employeeIds)
                 ->whereNotNull('start_date')
                 ->whereBetween('start_date', [$gridStart->toDateString(), $gridEnd->toDateString()])
                 ->orderBy('start_date')
@@ -169,7 +169,7 @@ trait BuildsCalendarGrid
             ? new Collection
             : Project::query()
                 ->select(['id', 'name', 'status', 'end_date'])
-                ->whereIn('user_id', $employeeIds)
+                ->whereIn('owner_employee_id', $employeeIds)
                 ->whereNotNull('end_date')
                 ->whereBetween('end_date', [$gridStart->toDateString(), $gridEnd->toDateString()])
                 ->orderBy('end_date')
@@ -282,7 +282,7 @@ trait BuildsCalendarGrid
             ->with('project')
             ->whereHas('lines')
             ->where(fn (Builder $query) => $query
-                ->whereIn('project_id', Project::query()->whereIn('user_id', $employeeIds)->select('id'))
+                ->whereIn('project_id', Project::query()->whereIn('owner_employee_id', $employeeIds)->select('id'))
                 ->orWhereIn('prepared_by', $preparerUserIds === [] ? [0] : $preparerUserIds));
     }
 

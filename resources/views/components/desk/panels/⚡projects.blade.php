@@ -66,7 +66,7 @@ new class extends Component
         $money = $this->canViewFundingPosition();
 
         return DeskWork::projectsOnCard(auth()->user())
-            ->select(['id', 'slug', 'name', 'status', 'start_date', 'end_date', 'city_id', 'center_id', 'host_center_id', 'user_id'])
+            ->select(['id', 'slug', 'name', 'status', 'start_date', 'end_date', 'city_id', 'center_id', 'host_center_id', 'owner_employee_id'])
             ->with([
                 'city:id,name_en,name_ar',
                 'user:id,first_name_en,last_name_en,first_name_ar,last_name_ar',

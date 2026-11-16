@@ -112,7 +112,7 @@ final class OffTrackIndicatorScanner implements Scanner
      */
     private function ownerUsers(array $projectIds): array
     {
-        $ownerEmployees = Project::query()->whereIn('id', $projectIds)->pluck('user_id', 'id')->map(fn ($id): int => (int) $id)->all();
+        $ownerEmployees = Project::query()->whereIn('id', $projectIds)->pluck('owner_employee_id', 'id')->map(fn ($id): int => (int) $id)->all();
         $users = $this->employees->usersFor(array_values($ownerEmployees));
 
         return array_filter(array_map(fn (int $employeeId): ?int => $users[$employeeId] ?? null, $ownerEmployees));

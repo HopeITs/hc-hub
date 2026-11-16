@@ -98,11 +98,11 @@ final class InviteDefaultReviewers
             }
         }
 
-        $projects = $proposal->projects()->orderBy('projects.id')->get(['projects.id', 'projects.user_id', 'projects.program_id']);
+        $projects = $proposal->projects()->orderBy('projects.id')->get(['projects.id', 'projects.owner_employee_id', 'projects.program_id']);
         $managers = Program::query()->whereKey($projects->pluck('program_id')->filter()->unique()->all())->pluck('manager_id', 'id');
 
         foreach ($projects as $project) {
-            $add($project->user_id, ReviewerSlot::ProjectOwner);
+            $add($project->owner_employee_id, ReviewerSlot::ProjectOwner);
 
             $managerId = $managers->get($project->program_id);
             $add($managerId === null ? null : (int) $managerId, ReviewerSlot::ProgramManager);
