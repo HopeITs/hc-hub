@@ -22,6 +22,7 @@ use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TransfersTracking;
 use Modules\Tracking\Support\MonthlyReportPeriods;
+use Modules\Tracking\Support\TrackingDuties;
 
 /**
  * My agenda (user decision 2026-10-27): every dated item between two days
@@ -44,7 +45,7 @@ trait ReadsDeskAgenda
     {
         $user = auth()->user();
         $employeeId = $user->employee_id ?? 0;
-        $projectIds = $user->ownedProjectIds();
+        $projectIds = TrackingDuties::for($user)->ownedProjectIds();
         $window = [$from->toDateString(), $to->toDateString()];
 
         $milestones = $this->visible(Milestone::query(), 'milestones')

@@ -14,6 +14,7 @@ use App\Models\UserNotification;
 use App\Models\UserTodo;
 use App\Notifications\ActivityRecorder;
 use App\Notifications\TracksActivity;
+use App\Support\EmployeeLookup;
 use App\Support\EmployeeProfile;
 use App\Support\Like;
 use Carbon\CarbonImmutable;
@@ -35,13 +36,6 @@ use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Modules\Core\Models\Concerns\RemembersLookup;
-use Modules\Hr\Models\Department;
-use Modules\Hr\Models\Employee;
-use Modules\Tracking\Models\DonorReport;
-use Modules\Tracking\Models\IndicatorProgress;
-use Modules\Tracking\Models\Project;
-use Modules\Tracking\Models\Report;
-use Modules\Tracking\Models\Task;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -77,6 +71,11 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $remember_token
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
+ *
+ * The modules register their relations on a user (resolveRelationUsing), so
+ * Core depends on neither: HrServiceProvider adds employee(),
+ * TrackingServiceProvider createdTasks(), reports() and indicatorProgress().
+ * Tracking's duties (owned projects, donor reports) are in TrackingDuties.
  */
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements HasLocalePreference, PasskeyUser, TracksActivity
@@ -156,26 +155,6 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     }
 
     /**
-     * The tasks this user raised.
-     *
-     * @return HasMany<Task, $this>
-     */
-    public function createdTasks(): HasMany
-    {
-        return $this->hasMany(Task::class, 'created_by');
-    }
-
-    /**
-     * The reports this user has submitted.
-     *
-     * @return HasMany<Report, $this>
-     */
-    public function reports(): HasMany
-    {
-        return $this->hasMany(Report::class);
-    }
-
-    /**
      * The files this user uploaded.
      *
      * `media.uploaded_by` restricts on delete, so a user who has uploaded
@@ -186,19 +165,6 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     public function uploadedMedia(): HasMany
     {
         return $this->hasMany(Media::class, 'uploaded_by');
-    }
-
-    /**
-     * The indicator readings this user recorded.
-     *
-     * `indicator_progress.recorded_by` restricts on delete, matching
-     * reports.user_id and task_updates.user_id.
-     *
-     * @return HasMany<IndicatorProgress, $this>
-     */
-    public function indicatorProgress(): HasMany
-    {
-        return $this->hasMany(IndicatorProgress::class, 'recorded_by');
     }
 
     /**
@@ -278,7 +244,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
             return false;
         }
 
-        return ! Employee::query()->whereKey($employeeId)->where('is_active', true)->exists();
+        return ! $this->employee()->where('is_active', true)->exists();
     }
 
     /**
@@ -380,7 +346,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     {
         $query->where(Like::everyWord($search, fn (Builder|QueryBuilder $query, string $word) => $query
             ->where(Like::word('users.email', $word))
-            ->orWhereIn('users.employee_id', Employee::query()->select('employees.id')->whereNameLike($word, false))));
+            ->orWhereIn('users.employee_id', app(EmployeeLookup::class)->idsNamedLike($word))));
     }
 
     /**
@@ -393,16 +359,6 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     {
         $query->orderByRaw("COALESCE((SELECT NULLIF(TRIM(CONCAT(employees.first_name_en, ' ', employees.last_name_en)), '') FROM employees WHERE employees.id = users.employee_id), users.email)")
             ->orderBy($query->qualifyColumn('id'));
-    }
-
-    /**
-     * The HR employee record of this user.
-     *
-     * @return BelongsTo<Employee, $this>
-     */
-    public function employee(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class, 'employee_id');
     }
 
     /**
@@ -429,7 +385,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
 
             return $departmentId === null
                 ? []
-                : Department::employeeIdsInDepartment($departmentId);
+                : app(EmployeeLookup::class)->idsInDepartment($departmentId);
         });
     }
 
@@ -463,17 +419,6 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     }
 
     /**
-     * Whether this user is named responsible on any donor report (contracts
-     * §14.3), for the Donor Reports page and the Desk duties card. One exists query,
-     * memoized per user instance.
-     */
-    public function hasReportingDuties(): bool
-    {
-        return once(fn (): bool => $this->employee_id !== null
-            && DonorReport::query()->where('responsible_employee_id', $this->employee_id)->exists());
-    }
-
-    /**
      * Programs this user manages (programs.manager_id is their HR employee).
      * Memoized per user instance.
      *
@@ -484,32 +429,6 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
         return once(fn (): array => $this->employee_id === null
             ? []
             : array_values(Program::query()->where('manager_id', $this->employee_id)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all()));
-    }
-
-    /**
-     * Projects this user answers for: the ones they own (projects.user_id is
-     * their HR employee) and every project in a program they manage.
-     * Memoized per user instance.
-     *
-     * @return list<int>
-     */
-    public function ownedProjectIds(): array
-    {
-        return once(function (): array {
-            if ($this->employee_id === null) {
-                return [];
-            }
-
-            $programIds = $this->managedProgramIds();
-
-            return array_values(Project::query()
-                ->where(fn (Builder $query) => $query
-                    ->where('user_id', $this->employee_id)
-                    ->when($programIds !== [], fn (Builder $query) => $query->orWhereIn('program_id', $programIds)))
-                ->pluck('id')
-                ->map(fn (mixed $id): int => (int) $id)
-                ->all());
-        });
     }
 
     /**
@@ -542,7 +461,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
      */
     public function avatarUrl(): string
     {
-        return Employee::avatarUrl($this->employee_id);
+        return app(EmployeeLookup::class)->avatarUrl($this->employee_id);
     }
 
     /**
@@ -550,7 +469,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
      */
     public function photoUrl(): ?string
     {
-        return Employee::photoUrl($this->employee_id);
+        return app(EmployeeLookup::class)->photoUrl($this->employee_id);
     }
 
     /**

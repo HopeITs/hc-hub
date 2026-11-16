@@ -704,3 +704,12 @@ parameters:
             identifier: notIdentical.alwaysTrue
             path: modules/Tracking/Livewire/Concerns/Programs/ReadsProgramDelivery.php
             count: 2
+
+services:
+    # Relations a module registers on another module's model
+    # (resolveRelationUsing), typed from the booted app. See the class.
+    -
+        class: Tests\PHPStan\Extensions\ResolvedRelationsExtension
+        tags:
+            - phpstan.broker.methodsClassReflectionExtension
+            - phpstan.broker.propertiesClassReflectionExtension

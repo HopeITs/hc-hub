@@ -1,0 +1,39 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Modules\Hr\Support\Employees;
+
+use App\Support\EmployeeLookup;
+use Illuminate\Database\Query\Builder;
+use Modules\Hr\Models\Department;
+use Modules\Hr\Models\Employee;
+
+/**
+ * HR's answers to what an account asks about its employee (App\Support\EmployeeLookup).
+ */
+final class HrEmployeeLookup implements EmployeeLookup
+{
+    public function avatarUrl(?int $employeeId): string
+    {
+        return Employee::avatarUrl($employeeId);
+    }
+
+    public function photoUrl(?int $employeeId): ?string
+    {
+        return Employee::photoUrl($employeeId);
+    }
+
+    /**
+     * @return list<int>
+     */
+    public function idsInDepartment(int $departmentId): array
+    {
+        return Department::employeeIdsInDepartment($departmentId);
+    }
+
+    public function idsNamedLike(string $word): Builder
+    {
+        return Employee::query()->select('employees.id')->whereNameLike($word, false)->toBase();
+    }
+}

@@ -8,6 +8,7 @@ use App\Support\Slots;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Support\MealCoverage;
+use Modules\Tracking\Support\TrackingDuties;
 
 /**
  * A project's report template (contracts.md §12.4) is written by MEAL only:
@@ -25,7 +26,7 @@ class ReportTemplatePolicy
     public function view(User $user, ReportTemplate $reportTemplate): bool
     {
         return $user->can('report-templates.manage')
-            || in_array($reportTemplate->project_id, $user->ownedProjectIds(), true);
+            || in_array($reportTemplate->project_id, TrackingDuties::for($user)->ownedProjectIds(), true);
     }
 
     /**

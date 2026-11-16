@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\ProposalReviewer;
 use Modules\Tracking\Models\Task;
+use Modules\Tracking\Support\TrackingDuties;
 
 /**
  * The panels a Desk can hold, who may see each one, and the layout each role
@@ -996,7 +997,7 @@ final class Panels
             'deliverables' => ['icon' => 'board', 'size' => 'M', 'register' => 'department-tasks.index', 'allows' => fn (User $user): bool => $user->can('viewDepartmentQueue', Task::class)],
             'myteam' => ['icon' => 'users', 'size' => 'M', 'register' => null, 'allows' => fn (User $user): bool => $user->employee_id !== null || $user->isAdministrator()],
             'targets' => ['icon' => 'chart', 'size' => 'L', 'register' => 'targets.index', 'allows' => $can('targets.view')],
-            'duties' => ['icon' => 'file', 'size' => 'M', 'register' => 'donor-reports.index', 'allows' => fn (User $user): bool => $user->can('reports.aggregate') || $user->can('funding-agreements.update') || $user->hasReportingDuties()],
+            'duties' => ['icon' => 'file', 'size' => 'M', 'register' => 'donor-reports.index', 'allows' => fn (User $user): bool => $user->can('reports.aggregate') || $user->can('funding-agreements.update') || TrackingDuties::for($user)->hasReportingDuties()],
             'milestones' => ['icon' => 'flag', 'size' => 'M', 'register' => 'milestones.index', 'allows' => $can('milestones.view')],
             'donors' => ['icon' => 'users', 'size' => 'L', 'register' => 'donors.index', 'allows' => $can('donors.view')],
             /* Each module's panels (ModuleRegistry, e.g. the HR cards "hr-…"): defined, permitted and drawn by the module. */

@@ -8,6 +8,7 @@ use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Support\MonthlyReportPeriods;
 use Modules\Tracking\Support\SupervisionMap;
+use Modules\Tracking\Support\TrackingDuties;
 use Carbon\CarbonImmutable;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
@@ -127,7 +128,7 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
     protected function myProjectIds(): array
     {
         $user = auth()->user();
-        $ids = $user->ownedProjectIds();
+        $ids = TrackingDuties::for($user)->ownedProjectIds();
 
         if ($user->employee_id !== null) {
             $supervisees = SupervisionMap::superviseesOf($user->employee_id);

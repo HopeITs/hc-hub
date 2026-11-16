@@ -5,11 +5,19 @@ declare(strict_types=1);
 namespace Modules\Hr;
 
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
+use App\Support\EmployeeLookup;
 use App\Support\Modules\ModuleRegistry;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
+use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
 use Modules\Hr\Console\ApplyContractAmendmentsCommand;
 use Modules\Hr\Console\CheckContractAmendmentsCommand;
 use Modules\Hr\Console\CopyHrFilesCommand;
@@ -22,8 +30,12 @@ use Modules\Hr\Console\Journeys\TrackRenewalJourneys;
 use Modules\Hr\Console\ProcessContractAutoRenewalsCommand;
 use Modules\Hr\Console\RecountPositionSeatsCommand;
 use Modules\Hr\Console\SendLeaveDecisionRemindersCommand;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Desk\HrDestinations;
 use Modules\Hr\Support\Desk\HrPanels;
+use Modules\Hr\Support\Employees\HrEmployeeLookup;
 use Modules\Hr\Support\Journeys\JourneyHooks;
 use Modules\Hr\Support\Recruitment\Console\AnalyzeRecruitmentCvs;
 use Modules\Hr\Support\Recruitment\Console\ApplyDueRecruitmentRequests;
@@ -64,6 +76,7 @@ class HrServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/database/migrations');
         $this->loadViewsFrom(__DIR__.'/resources/views', 'hr');
         Livewire::addNamespace('hr', viewPath: __DIR__.'/resources/views/pages');
+        $this->registerCoreBridge();
 
         $this->commands([
             ImportHrCommand::class,
@@ -168,5 +181,22 @@ class HrServiceProvider extends ServiceProvider
                 require $file;
             }
         });
+    }
+
+    /**
+     * HR's side of the Core models, kept here so Core does not depend on HR
+     * (D10): the relations Core models used to declare, under the same names
+     * and keys, and the employee lookup User reads through.
+     */
+    private function registerCoreBridge(): void
+    {
+        $this->app->singleton(EmployeeLookup::class, HrEmployeeLookup::class);
+
+        User::resolveRelationUsing('employee', fn (User $user): BelongsTo => $user->belongsTo(Employee::class, 'employee_id', 'id', 'employee'));
+        Program::resolveRelationUsing('manager', fn (Program $program): BelongsTo => $program->belongsTo(Employee::class, 'manager_id', 'id', 'manager'));
+        City::resolveRelationUsing('positions', fn (City $city): HasMany => $city->hasMany(Position::class));
+        City::resolveRelationUsing('employees', fn (City $city): HasMany => $city->hasMany(Employee::class));
+        Center::resolveRelationUsing('positions', fn (Center $center): HasMany => $center->hasMany(Position::class));
+        Center::resolveRelationUsing('contracts', fn (Center $center): HasManyThrough => $center->hasManyThrough(Contract::class, Position::class));
     }
 }
