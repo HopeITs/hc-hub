@@ -18,6 +18,7 @@ use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\ProposalReviewer;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Result;
@@ -357,4 +358,34 @@ test('a lock held by the same user and source makes a parallel call return the e
     $lock->release();
 
     expect($again->id)->toBe($first->id);
+});
+
+test('a renewal copies the location rows that still stand, with their centers', function () {
+    ['previous' => $previous, 'project' => $project] = renewalSource();
+    $projectCenter = insertHrCenter($project->city_id, 'Second Center', 'Second Center AR');
+    ProposalLocation::factory()->forProject($project)->create(['proposal_id' => $previous->id])
+        ->centers()->create(['center_id' => $projectCenter]);
+
+    $homs = insertHrCity('Homs', 'Homs AR');
+    $homsCenter = insertHrCenter($homs, 'Hope Center Homs', 'Hope Center Homs AR');
+    $leaver = insertHrEmployee($homs);
+    DB::table('employees')->where('id', $leaver)->update(['is_active' => false]);
+    $homsProgram = Program::factory()->create();
+    ProposalLocation::factory()->create(['proposal_id' => $previous->id, 'city_id' => $homs, 'program_id' => $homsProgram->id, 'responsible_employee_id' => $leaver])
+        ->centers()->create(['center_id' => $homsCenter]);
+
+    $closedCity = insertHrCity('Raqqa', 'Raqqa AR', isActive: false);
+    ProposalLocation::factory()->complete()->create(['proposal_id' => $previous->id, 'city_id' => $closedCity]);
+    ProposalLocation::factory()->isNew()->create(['proposal_id' => $previous->id, 'city_id' => $homs]);
+
+    $renewal = app(CloneProposalForRenewal::class)->handle($previous, renewalData(), renewalActor())['proposal'];
+    $rows = $renewal->locations()->with('centers')->get();
+
+    expect($rows)->toHaveCount(2)
+        ->and($rows[0]->project_id)->toBe($project->id)
+        ->and($rows[0]->centerIds())->toBe([$projectCenter])
+        ->and($rows[1]->city_id)->toBe($homs)
+        ->and($rows[1]->program_id)->toBe($homsProgram->id)
+        ->and($rows[1]->responsible_employee_id)->toBeNull()
+        ->and($rows[1]->centerIds())->toBe([$homsCenter]);
 });
