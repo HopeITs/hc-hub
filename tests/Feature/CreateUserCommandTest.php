@@ -32,7 +32,7 @@ test('an account gets the default Team Member role when none is given', function
     expect(User::query()->sole()->roles->pluck('name')->all())->toBe(['Team Member']);
 });
 
-test('an email no account uses becomes a new account with the given password and no employee', function () {
+test('an email no account uses becomes a new system account with the given password and no employee', function () {
     $this->artisan('user:create', [
         '--email' => 'new@example.org',
         '--password' => 'Str0ng-Passw0rd-for-tests',
@@ -43,6 +43,8 @@ test('an email no account uses becomes a new account with the given password and
 
     expect($user->email)->toBe('new@example.org')
         ->and($user->employee_id)->toBeNull()
+        ->and($user->is_system)->toBeTrue()
+        ->and($user->hasLostAccess())->toBeFalse()
         ->and($user->email_verified_at)->not->toBeNull()
         ->and($user->roles->pluck('name')->all())->toBe(['Team Member']);
 });

@@ -217,6 +217,8 @@ final class HrImporter
                 $this->db->table('users')->insert([
                     'id' => $id,
                     'employee_id' => $row['employee_id'] ?? null,
+                    // An HR account with no employee is a system account.
+                    'is_system' => ($row['employee_id'] ?? null) === null,
                     'email' => $row['email'],
                     'password' => $row['password'],
                     'email_verified_at' => $row['email_verified_at'] ?? null,

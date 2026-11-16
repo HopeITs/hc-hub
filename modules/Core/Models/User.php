@@ -53,6 +53,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string $email
  * @property string $password
  * @property int|null $employee_id
+ * @property bool $is_system an account with no person behind it, which never loses access
  * @property int|null $active_role_id
  * @property string|null $locale
  * @property list<string>|null $nav_pins the sidebar pages this person pinned, as route names
@@ -93,6 +94,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
      */
     protected $attributes = [
         'employee_id' => null,
+        'is_system' => false,
         'locale' => null,
         'desk_layout' => null,
         'page_panels' => null,
@@ -232,16 +234,20 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     }
 
     /**
-     * Whether this account may no longer sign in: its linked employee is
-     * inactive or gone. An account with no employee (a system account) stays
-     * active.
+     * Whether this account may no longer sign in. A system account never
+     * loses access; any other account needs an active linked employee, so one
+     * with no employee, or with an inactive or missing one, is refused.
      */
     public function hasLostAccess(): bool
     {
+        if ($this->getAttribute('is_system')) {
+            return false;
+        }
+
         $employeeId = $this->getAttribute('employee_id');
 
         if ($employeeId === null) {
-            return false;
+            return true;
         }
 
         return ! $this->employee()->where('is_active', true)->exists();
@@ -311,7 +317,8 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     }
 
     /**
-     * Accounts that may still sign in: no employee, or an active one.
+     * Accounts that may still sign in: system accounts, and accounts with an
+     * active employee (as hasLostAccess() decides).
      *
      * @param  Builder<self>  $query
      */
@@ -319,12 +326,13 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     protected function withActiveAccount(Builder $query): void
     {
         $query->where(fn (Builder $query) => $query
-            ->whereNull($query->qualifyColumn('employee_id'))
+            ->where($query->qualifyColumn('is_system'), true)
             ->orWhereHas('employee', fn (Builder $employee) => $employee->where('is_active', true)));
     }
 
     /**
-     * Accounts whose employee is inactive or gone, the complement of
+     * Accounts that are not system accounts and have no active employee
+     * (none, or an inactive or missing one), the complement of
      * withActiveAccount().
      *
      * @param  Builder<self>  $query
@@ -332,7 +340,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     #[Scope]
     protected function withoutActiveAccount(Builder $query): void
     {
-        $query->whereNotNull($query->qualifyColumn('employee_id'))
+        $query->where($query->qualifyColumn('is_system'), false)
             ->whereDoesntHave('employee', fn (Builder $employee) => $employee->where('is_active', true));
     }
 
@@ -485,6 +493,7 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
             'last_seen_at' => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
             'email_two_factor_enabled' => 'boolean',
+            'is_system' => 'boolean',
             'notification_popups' => 'boolean',
             'tour_seen_at' => 'datetime',
             'desk_layout' => 'array',

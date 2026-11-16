@@ -166,6 +166,12 @@ test('the import loads HR accounts, cities, roles and HR-owned rows', function (
         ->and(News::query()->findOrFail(3)->newsable)->toBeInstanceOf(City::class);
 });
 
+test('an HR account with no employee comes in as a system account', function () {
+    $this->artisan('hub:import-hr', ['--source' => 'hr_fixture'])->assertSuccessful();
+
+    expect(DB::table('users')->orderBy('id')->pluck('is_system', 'id')->all())->toBe([1 => 1, 2 => 0, 9 => 1]);
+});
+
 test('running the import again changes nothing', function () {
     insertCrossedTrackingUsers();
     $this->artisan('hub:import-hr', ['--source' => 'hr_fixture'])->assertSuccessful();
