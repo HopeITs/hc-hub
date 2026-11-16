@@ -16,43 +16,37 @@
  * @return array<string, array{source: string, forbidden: string, max: int, allowed: list<class-string>}>
  */
 return [
-    // Core is the shared base. Items 1.3/1.4 move these relations out.
+    // Core is the shared base. Clean since 1.4: no exceptions.
     'Modules\Core must not use Modules\Hr' => [
         'source' => 'Modules\Core',
         'forbidden' => 'Modules\Hr',
-        'max' => 4,
-        'allowed' => [
-            'Modules\Core\Models\Center',
-            'Modules\Core\Models\City',
-            'Modules\Core\Models\Program',
-            'Modules\Core\Models\User',
-        ],
+        'max' => 0,
+        'allowed' => [],
     ],
-    // Core is the shared base. Items 1.3/1.4 move these relations out.
+    // Core is the shared base. Clean since 1.4: no exceptions.
     'Modules\Core must not use Modules\Tracking' => [
         'source' => 'Modules\Core',
         'forbidden' => 'Modules\Tracking',
-        'max' => 2,
-        'allowed' => [
-            'Modules\Core\Models\Program',
-            'Modules\Core\Models\User',
-        ],
+        'max' => 0,
+        'allowed' => [],
     ],
-    // HR sits below Tracking. Item 1.4 moves these relations out.
+    // HR sits below Tracking. Clean since 1.3: no exceptions.
     'Modules\Hr must not use Modules\Tracking' => [
         'source' => 'Modules\Hr',
         'forbidden' => 'Modules\Tracking',
-        'max' => 1,
-        'allowed' => [
-            'Modules\Hr\Models\Employee',
-        ],
+        'max' => 0,
+        'allowed' => [],
     ],
     // Frozen baseline: new Tracking code must not reach into HR directly.
+    // One sanctioned addition (1.3): TrackingServiceProvider registers the
+    // Tracking relations on Employee (02-target-design §1), which is how the
+    // Hr -> Tracking cycle edge was removed. Net count across rules went down.
     'Modules\Tracking must not use Modules\Hr' => [
         'source' => 'Modules\Tracking',
         'forbidden' => 'Modules\Hr',
-        'max' => 51,
+        'max' => 52,
         'allowed' => [
+            'Modules\Tracking\TrackingServiceProvider',
             'Modules\Tracking\Actions\Cities\AssignMealCoverage',
             'Modules\Tracking\Actions\DonorReports\AssignDonorReportResponsible',
             'Modules\Tracking\Actions\DonorReports\SaveDonorReportSnapshot',
@@ -110,7 +104,7 @@ return [
     'App must not use Modules\Hr' => [
         'source' => 'App',
         'forbidden' => 'Modules\Hr',
-        'max' => 13,
+        'max' => 11,
         'allowed' => [
             'App\Http\Controllers\EmployeeAvatarController',
             'App\Http\Controllers\EmployeePickerOptionsController',
@@ -120,8 +114,6 @@ return [
             'App\Notifications\EmployeeRecipients',
             'App\Notifications\QuickActions',
             'App\Providers\AppServiceProvider',
-            'App\Support\Desk\Destinations',
-            'App\Support\Desk\Panels',
             'App\Support\Desk\ReadyLayoutSignals',
             'App\Support\EmployeeProfile',
             'App\Support\HrHolidays',
