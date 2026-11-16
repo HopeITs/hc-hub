@@ -73,6 +73,8 @@ use Modules\Tracking\Models\TaskAssignee;
  * @property string|null $skills
  * @property string|null $interests
  * @property bool $is_active
+ * @property CarbonImmutable|null $archived_at when the employee left and was archived instead of deleted
+ * @property int|null $archived_by the login that archived them
  * @property CarbonImmutable|null $joined_at
  * @property bool $is_board_member
  * @property mixed|null $board_member_started_at
@@ -106,6 +108,7 @@ class Employee extends Model
             'board_member_end_at' => 'datetime',
             'joined_at' => 'date',
             'is_active' => 'boolean',
+            'archived_at' => 'datetime',
             'is_board_member' => 'boolean',
             'children' => 'integer',
             'digital_id_enabled' => 'boolean',
@@ -189,6 +192,22 @@ class Employee extends Model
     }
 
     /**
+     * Whether the employee left and was archived (ArchiveEmployee).
+     */
+    public function isArchived(): bool
+    {
+        return $this->archived_at !== null;
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function archivedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'archived_by');
+    }
+
+    /**
      * Complete, not active, and never held a real contract: "Ready, awaiting contract".
      */
     public function isAwaitingContract(): bool
@@ -222,6 +241,17 @@ class Employee extends Model
     protected function active(Builder $query): void
     {
         $query->where($query->qualifyColumn('is_active'), true);
+    }
+
+    /**
+     * Employees who left and were archived instead of deleted.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function archived(Builder $query): void
+    {
+        $query->whereNotNull($query->qualifyColumn('archived_at'));
     }
 
     /**
