@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Modules\Tracking;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Modules\Core\Models\Program;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Console\Commands\BackfillMonthlyReports;
 use Modules\Tracking\Console\Commands\BackfillProposalLocations;
 use Modules\Tracking\Console\Commands\EnsureAnnualPlans2026;
@@ -31,6 +34,11 @@ use Modules\Tracking\Listeners\GenerateMonthlyReportsForProject;
 use Modules\Tracking\Listeners\PrefillReportTemplates;
 use Modules\Tracking\Listeners\RebaseProposalPlanOnApproval;
 use Modules\Tracking\Listeners\ShiftActivitySchedulesOnApproval;
+use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\Milestone;
+use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Task;
+use Modules\Tracking\Models\TaskAssignee;
 use Modules\Tracking\Policies\ProgramPolicy;
 use Modules\Tracking\Support\SupervisionMap;
 
@@ -65,6 +73,7 @@ class TrackingServiceProvider extends ServiceProvider
         Gate::policy(Program::class, ProgramPolicy::class);
 
         $this->registerListeners();
+        $this->registerEmployeeRelations();
 
         $this->commands([
             BackfillMonthlyReports::class,
@@ -98,5 +107,18 @@ class TrackingServiceProvider extends ServiceProvider
         Event::listen(ProposalStatusChanged::class, PrefillReportTemplates::class.'@handle');
         Event::listen(ProposalStatusChanged::class, RebaseProposalPlanOnApproval::class.'@handle');
         Event::listen(ProposalStatusChanged::class, ShiftActivitySchedulesOnApproval::class.'@handle');
+    }
+
+    /**
+     * Tracking's relations on HR's Employee, kept here so HR does not depend
+     * on Tracking. Names and keys are the ones Employee used to declare, so
+     * eager loads, whereHas() and Blade keep working.
+     */
+    protected function registerEmployeeRelations(): void
+    {
+        Employee::resolveRelationUsing('managedAnnualPlans', fn (Employee $employee): HasMany => $employee->hasMany(AnnualPlan::class, 'manager_id'));
+        Employee::resolveRelationUsing('projects', fn (Employee $employee): HasMany => $employee->hasMany(Project::class, 'user_id'));
+        Employee::resolveRelationUsing('responsibleMilestones', fn (Employee $employee): HasMany => $employee->hasMany(Milestone::class, 'responsible_user_id'));
+        Employee::resolveRelationUsing('assignedTasks', fn (Employee $employee): HasManyThrough => $employee->hasManyThrough(Task::class, TaskAssignee::class, 'employee_id', 'id', 'id', 'task_id'));
     }
 }
