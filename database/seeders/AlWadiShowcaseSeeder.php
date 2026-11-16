@@ -173,6 +173,8 @@ class AlWadiShowcaseSeeder extends Seeder
                 'status' => $status,
                 'sequence' => $index + 1,
                 'weight_percentage' => $weight,
+                // saveQuietly() skips the model's mirroring, so both columns are written (roadmap 1.9).
+                'responsible_employee_id' => $this->user($index)->id,
                 'responsible_user_id' => $this->user($index)->id,
             ])->saveQuietly();
         }
@@ -416,6 +418,8 @@ class AlWadiShowcaseSeeder extends Seeder
                 'status' => $status,
                 'sequence' => $index + 1,
                 'weight_percentage' => $weight,
+                // saveQuietly() skips the model's mirroring, so both columns are written (roadmap 1.9).
+                'responsible_employee_id' => $this->user($index)->id,
                 'responsible_user_id' => $this->user($index)->id,
                 'result_id' => $outputs[$index % 3]->id,
             ])->saveQuietly();

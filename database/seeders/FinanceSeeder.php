@@ -69,7 +69,7 @@ class FinanceSeeder extends Seeder
             }
 
             // The owners of its projects reviewed the concept note (T07).
-            $proposal->projects()->pluck('user_id')->filter()->unique()->each(fn (int|string $ownerId) => ProposalReviewer::factory()->seen()->create([
+            $proposal->projects()->pluck('owner_employee_id')->filter()->unique()->each(fn (int|string $ownerId) => ProposalReviewer::factory()->seen()->create([
                 'proposal_id' => $proposal->id,
                 'stage' => ReviewStage::ConceptNote,
                 'employee_id' => (int) $ownerId,

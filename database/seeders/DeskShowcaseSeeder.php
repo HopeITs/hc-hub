@@ -194,7 +194,7 @@ class DeskShowcaseSeeder extends Seeder
 
         foreach ($admins->values() as $n => $admin) {
             $owned = $projects->slice(6 + $n * 2, 2);
-            Project::query()->whereKey($owned->modelKeys())->update(['user_id' => $admin->employee_id]);
+            Project::query()->whereKey($owned->modelKeys())->update(['owner_employee_id' => $admin->employee_id, 'user_id' => $admin->employee_id]);
 
             // Their proposal reviews still unread by colleagues.
             foreach ($owned as $i => $project) {

@@ -21,9 +21,11 @@ use Modules\Tracking\Models\Project;
  * or with every other real seeder, in dependency order, via RealDataSeeder.
  *
  * `city_id` and `program_id` are real HR ids, not demo ones — see the HR
- * note in .ai/rules/models.md; programs come from hub:import-hr. `user_id` has
- * no source data (the list has no owner per project) and the column is
- * NOT NULL, so every row is assigned the first active HR employee.
+ * note in .ai/rules/models.md; programs come from hub:import-hr. The owner
+ * (`owner_employee_id`, and its old copy `user_id`, written too because
+ * seeding may run without model events) has no source data (the list has no
+ * owner per project) and is required, so every row is assigned the first
+ * active HR employee.
  *
  * `firstOrCreate` on `name` makes re-running it a no-op for projects already
  * inserted, so it is safe to run again after adding a new row here.
@@ -39,7 +41,7 @@ class RealProjectsSeeder extends Seeder
         foreach ($this->projects() as $project) {
             Project::query()->firstOrCreate(
                 ['name' => $project['name']],
-                [...$project, 'user_id' => $ownerId],
+                [...$project, 'owner_employee_id' => $ownerId, 'user_id' => $ownerId],
             );
         }
     }

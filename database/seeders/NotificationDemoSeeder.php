@@ -108,11 +108,11 @@ class NotificationDemoSeeder extends Seeder
         $this->at($now->subDay(), fn () => $tranche?->update(['ar_status' => ArStatus::Failed]));
 
         $milestone = Milestone::query()->whereNotIn('status', [MilestoneStatus::Reached->value, MilestoneStatus::Cancelled->value])->inRandomOrder()->first();
-        $this->at($now->subHours(5), fn () => $milestone?->update(['responsible_user_id' => $employeeId]));
+        $this->at($now->subHours(5), fn () => $milestone?->update(['responsible_employee_id' => $employeeId]));
         $this->at($now->subHours(3), fn () => $milestone?->update(['status' => MilestoneStatus::Postponed]));
 
-        $project = Project::query()->where('user_id', '!=', $employeeId)->inRandomOrder()->first();
-        $this->at($now->subMinutes(40), fn () => $project?->update(['user_id' => $employeeId]));
+        $project = Project::query()->where('owner_employee_id', '!=', $employeeId)->inRandomOrder()->first();
+        $this->at($now->subMinutes(40), fn () => $project?->update(['owner_employee_id' => $employeeId]));
 
         UserNotification::query()
             ->forUser($recipient)

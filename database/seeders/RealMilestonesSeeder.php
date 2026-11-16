@@ -46,6 +46,10 @@ class RealMilestonesSeeder extends Seeder
                     throw new RuntimeException("Unknown project \"{$milestone['project']}\" — run RealProjectsSeeder first.");
                 }
 
+                $responsibleId = $employeeIds->random();
+
+                // Both columns are written: seeding may run without model
+                // events, and so without Milestone's mirroring (roadmap 1.9).
                 Milestone::query()->firstOrCreate(
                     ['project_id' => $projectId, 'sequence' => $milestone['sequence']],
                     [
@@ -55,7 +59,8 @@ class RealMilestonesSeeder extends Seeder
                         'actual_start_date' => $milestone['actual_start_date'],
                         'status' => $milestone['status'],
                         'weight_percentage' => $milestone['weight_percentage'],
-                        'responsible_user_id' => $employeeIds->random(),
+                        'responsible_employee_id' => $responsibleId,
+                        'responsible_user_id' => $responsibleId,
                         'parent_milestone_id' => null,
                     ],
                 );
