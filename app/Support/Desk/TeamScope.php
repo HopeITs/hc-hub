@@ -12,6 +12,7 @@ use Modules\Tracking\Models\Scopes\TaskVisibilityScope;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TaskAssignee;
 use Modules\Tracking\Support\SupervisionMap;
+use Modules\Tracking\Support\TrackingDuties;
 
 /**
  * Who belongs to someone's team on the Desk (user decision 2026-10-27): the
@@ -83,7 +84,7 @@ final class TeamScope
      */
     private static function projectPeople(User $user): array
     {
-        $projectIds = $user->ownedProjectIds();
+        $projectIds = TrackingDuties::for($user)->ownedProjectIds();
 
         $tasks = Task::query()
             ->withoutGlobalScope(TaskVisibilityScope::class)

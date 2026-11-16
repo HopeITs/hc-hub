@@ -6,10 +6,11 @@ namespace Modules\Tracking\Policies;
 
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\TrackingDuties;
 
 /**
  * Besides holders of the projects.* permissions, a project's owner and its
- * program's manager (see User::ownedProjectIds()) edit the projects they
+ * program's manager (see TrackingDuties::ownedProjectIds()) edit the projects they
  * answer for — its details, files, linked proposals and schedule. Archiving
  * and restoring (projects are never deleted) and reassigning a project to
  * another program or owner stay with projects.* holders.
@@ -50,7 +51,7 @@ class ProjectPolicy
             return false;
         }
 
-        return $user->can('projects.update') || in_array($project->id, $user->ownedProjectIds(), true);
+        return $user->can('projects.update') || in_array($project->id, TrackingDuties::for($user)->ownedProjectIds(), true);
     }
 
     /**

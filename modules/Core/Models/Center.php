@@ -16,11 +16,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Modules\Core\Models\Concerns\RemembersLookup;
-use Modules\Hr\Models\Contract;
-use Modules\Hr\Models\Position;
 
 /**
  * One of the organisation's centers, in one governorate. Shared by every
@@ -41,6 +37,9 @@ use Modules\Hr\Models\Position;
  * @property bool $is_active
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
+ *
+ * HR's relations on a center (positions, contracts) are registered by
+ * HrServiceProvider, so Core does not depend on HR.
  */
 #[Fillable(['name_en', 'name_ar', 'weekends', 'open_at', 'close_at', 'city_id', 'address_en', 'address_ar', 'is_active'])]
 class Center extends Model
@@ -248,23 +247,5 @@ class Center extends Model
     public function city(): BelongsTo
     {
         return $this->belongsTo(City::class);
-    }
-
-    /**
-     * @return HasMany<Position, $this>
-     */
-    public function positions(): HasMany
-    {
-        return $this->hasMany(Position::class);
-    }
-
-    /**
-     * The contracts on positions located at this center.
-     *
-     * @return HasManyThrough<Contract, Position, $this>
-     */
-    public function contracts(): HasManyThrough
-    {
-        return $this->hasManyThrough(Contract::class, Position::class);
     }
 }

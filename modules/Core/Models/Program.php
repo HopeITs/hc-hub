@@ -10,25 +10,14 @@ use App\Support\Like;
 use Carbon\CarbonImmutable;
 use Database\Factories\ProgramFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Concerns\RemembersLookup;
-use Modules\Hr\Models\Employee;
-use Modules\Tracking\Enums\DonorAttribution;
-use Modules\Tracking\Models\AnnualPlan;
-use Modules\Tracking\Models\Project;
-use Modules\Tracking\Models\Result;
-use Modules\Tracking\Models\StrategicPillar;
-use Modules\Tracking\Models\Strategy;
-use Modules\Tracking\Observers\ProgramObserver;
 
 /**
  * A delivery program, shared by every module (Core). HR reads it; Tracking
@@ -47,12 +36,15 @@ use Modules\Tracking\Observers\ProgramObserver;
  * @property int|null $strategy_id
  * @property int|null $strategic_pillar_id
  * @property int|null $manager_id
- * @property DonorAttribution $donor_attribution
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
+ *
+ * The modules register their relations on a program (resolveRelationUsing),
+ * so Core depends on neither: HrServiceProvider adds manager(),
+ * TrackingServiceProvider strategy(), pillar(), projects(), annualPlans() and
+ * results(), the donor_attribution cast and ProgramObserver.
  */
 #[Fillable(['name', 'description_en', 'description_ar', 'code', 'slug', 'start_date', 'end_date', 'is_active', 'strategy_id', 'strategic_pillar_id', 'manager_id', 'donor_attribution'])]
-#[ObservedBy(ProgramObserver::class)]
 class Program extends Model implements TracksActivity
 {
     /** @use HasFactory<ProgramFactory> */
@@ -67,16 +59,44 @@ class Program extends Model implements TracksActivity
     ];
 
     /**
+     * Casts a module adds for a column whose meaning it owns, so Core does
+     * not import the module's types (Tracking: donor_attribution).
+     *
+     * @var array<string, string>
+     */
+    private static array $moduleCasts = [];
+
+    /**
+     * Cast one of this model's columns with a type owned by a module. Call it
+     * from the module's ServiceProvider.
+     */
+    public static function castAttributeUsing(string $attribute, string $cast): void
+    {
+        self::$moduleCasts[$attribute] = $cast;
+    }
+
+    /**
      * @return array<string, string|class-string>
      */
     protected function casts(): array
     {
         return [
-            'donor_attribution' => DonorAttribution::class,
             'start_date' => 'datetime',
             'end_date' => 'datetime',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * The casts, with the ones modules added (castAttributeUsing). Merged
+     * here rather than in casts(), so Larastan, which reads getCasts() from
+     * the booted app, sees them too.
+     *
+     * @return array<string, string>
+     */
+    public function getCasts(): array
+    {
+        return array_merge(parent::getCasts(), self::$moduleCasts);
     }
 
     /**
@@ -195,69 +215,6 @@ class Program extends Model implements TracksActivity
         $direction = $direction === 'desc' ? 'desc' : 'asc';
 
         $query->orderBy($query->qualifyColumn('name'), $direction)->orderBy($query->qualifyColumn('id'), $direction);
-    }
-
-    /**
-     * The strategy this program delivers against.
-     *
-     * @return BelongsTo<Strategy, $this>
-     */
-    public function strategy(): BelongsTo
-    {
-        return $this->belongsTo(Strategy::class);
-    }
-
-    /**
-     * The strategic pillar this program sits under (D-35), always one of its
-     * own strategy's. Null = "No pillar".
-     *
-     * @return BelongsTo<StrategicPillar, $this>
-     */
-    public function pillar(): BelongsTo
-    {
-        return $this->belongsTo(StrategicPillar::class, 'strategic_pillar_id');
-    }
-
-    /**
-     * The employee accountable for this program.
-     *
-     * @return BelongsTo<Employee, $this>
-     */
-    public function manager(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class, 'manager_id');
-    }
-
-    /**
-     * The projects delivered under this program.
-     *
-     * @return HasMany<Project, $this>
-     */
-    public function projects(): HasMany
-    {
-        return $this->hasMany(Project::class);
-    }
-
-    /**
-     * The annual operational plans written for this program.
-     *
-     * @return HasMany<AnnualPlan, $this>
-     */
-    public function annualPlans(): HasMany
-    {
-        return $this->hasMany(AnnualPlan::class);
-    }
-
-    /**
-     * The logframe results this program is measured by: its program
-     * framework only. A proposal framework's nodes carry the program too but
-     * belong to the proposal (contracts §11.2, Proposal::results()).
-     *
-     * @return HasMany<Result, $this>
-     */
-    public function results(): HasMany
-    {
-        return $this->hasMany(Result::class)->programFramework();
     }
 
     public function activityModule(): string

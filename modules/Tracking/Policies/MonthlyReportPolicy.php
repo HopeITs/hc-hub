@@ -12,11 +12,12 @@ use Modules\Tracking\Models\MonthlyReportReopenRequest;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Support\MealCoverage;
 use Modules\Tracking\Support\SupervisionMap;
+use Modules\Tracking\Support\TrackingDuties;
 
 /**
  * Who does what on a monthly report (contracts §13.1 items 6 and 9).
  *
- * - Preparer side: a report writer who owns the project (User::ownedProjectIds())
+ * - Preparer side: a report writer who owns the project (TrackingDuties::ownedProjectIds())
  *   or supervises its owner (SupervisionMap). They open, fill, submit, delete
  *   a never-submitted draft and request a reopen.
  * - Validator: a reports.approve holder who is the responsible MEAL officer
@@ -142,7 +143,7 @@ class MonthlyReportPolicy
      */
     private function isPreparerSide(User $user, int $projectId, ?int $ownerEmployeeId = null): bool
     {
-        if (in_array($projectId, $user->ownedProjectIds(), true)) {
+        if (in_array($projectId, TrackingDuties::for($user)->ownedProjectIds(), true)) {
             return true;
         }
 

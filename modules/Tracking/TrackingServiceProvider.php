@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Tracking;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\Event;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Modules\Core\Models\Program;
+use Modules\Core\Models\User;
 use Modules\Hr\Models\Employee;
 use Modules\Tracking\Console\Commands\BackfillMonthlyReports;
 use Modules\Tracking\Console\Commands\BackfillProposalLocations;
@@ -25,6 +27,7 @@ use Modules\Tracking\Console\Commands\RemindAnnualPlanUpdates;
 use Modules\Tracking\Console\Commands\RemindProposalOwners;
 use Modules\Tracking\Console\Commands\SeedIndicatorLibrary;
 use Modules\Tracking\Console\Commands\SendMonthlyDigest;
+use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Events\FundingAgreementRecorded;
 use Modules\Tracking\Events\ProjectActivated;
 use Modules\Tracking\Events\ProjectPeriodChanged;
@@ -35,10 +38,16 @@ use Modules\Tracking\Listeners\PrefillReportTemplates;
 use Modules\Tracking\Listeners\RebaseProposalPlanOnApproval;
 use Modules\Tracking\Listeners\ShiftActivitySchedulesOnApproval;
 use Modules\Tracking\Models\AnnualPlan;
+use Modules\Tracking\Models\IndicatorProgress;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\Result;
+use Modules\Tracking\Models\StrategicPillar;
+use Modules\Tracking\Models\Strategy;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TaskAssignee;
+use Modules\Tracking\Observers\ProgramObserver;
 use Modules\Tracking\Policies\ProgramPolicy;
 use Modules\Tracking\Support\SupervisionMap;
 
@@ -74,6 +83,7 @@ class TrackingServiceProvider extends ServiceProvider
 
         $this->registerListeners();
         $this->registerEmployeeRelations();
+        $this->registerCoreRelations();
 
         $this->commands([
             BackfillMonthlyReports::class,
@@ -120,5 +130,26 @@ class TrackingServiceProvider extends ServiceProvider
         Employee::resolveRelationUsing('projects', fn (Employee $employee): HasMany => $employee->hasMany(Project::class, 'user_id'));
         Employee::resolveRelationUsing('responsibleMilestones', fn (Employee $employee): HasMany => $employee->hasMany(Milestone::class, 'responsible_user_id'));
         Employee::resolveRelationUsing('assignedTasks', fn (Employee $employee): HasManyThrough => $employee->hasManyThrough(Task::class, TaskAssignee::class, 'employee_id', 'id', 'id', 'task_id'));
+    }
+
+    /**
+     * Tracking's side of the Core models, kept here so Core does not depend
+     * on Tracking (D10): the relations Program and User used to declare (same
+     * names and keys), the donor attribution cast and ProgramObserver.
+     */
+    protected function registerCoreRelations(): void
+    {
+        Program::castAttributeUsing('donor_attribution', DonorAttribution::class);
+        Program::observe(ProgramObserver::class);
+
+        Program::resolveRelationUsing('strategy', fn (Program $program): BelongsTo => $program->belongsTo(Strategy::class, 'strategy_id', 'id', 'strategy'));
+        Program::resolveRelationUsing('pillar', fn (Program $program): BelongsTo => $program->belongsTo(StrategicPillar::class, 'strategic_pillar_id', 'id', 'pillar'));
+        Program::resolveRelationUsing('projects', fn (Program $program): HasMany => $program->hasMany(Project::class));
+        Program::resolveRelationUsing('annualPlans', fn (Program $program): HasMany => $program->hasMany(AnnualPlan::class));
+        Program::resolveRelationUsing('results', fn (Program $program): HasMany => $program->hasMany(Result::class)->programFramework());
+
+        User::resolveRelationUsing('createdTasks', fn (User $user): HasMany => $user->hasMany(Task::class, 'created_by'));
+        User::resolveRelationUsing('reports', fn (User $user): HasMany => $user->hasMany(Report::class));
+        User::resolveRelationUsing('indicatorProgress', fn (User $user): HasMany => $user->hasMany(IndicatorProgress::class, 'recorded_by'));
     }
 }

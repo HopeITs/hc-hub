@@ -10,11 +10,12 @@ use Modules\Core\Models\User;
 use Modules\Tracking\Enums\ProposalPlanWindow;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Support\TrackingDuties;
 
 /**
  * Milestones follow their project: besides holders of the milestones.*
  * permissions, the project's owner and its program's manager (see
- * User::ownedProjectIds()) add and edit the milestones of projects they answer
+ * TrackingDuties::ownedProjectIds()) add and edit the milestones of projects they answer
  * for, and a milestone's responsible person moves its status and actual dates.
  */
 class MilestonePolicy
@@ -45,7 +46,7 @@ class MilestonePolicy
             return true;
         }
 
-        $ownedProjectIds = $user->ownedProjectIds();
+        $ownedProjectIds = TrackingDuties::for($user)->ownedProjectIds();
 
         return $projectId === null ? $ownedProjectIds !== [] : in_array($projectId, $ownedProjectIds, true);
     }
@@ -55,7 +56,7 @@ class MilestonePolicy
      */
     public function update(User $user, Milestone $milestone): bool
     {
-        return $user->can('milestones.update') || in_array($milestone->project_id, $user->ownedProjectIds(), true);
+        return $user->can('milestones.update') || in_array($milestone->project_id, TrackingDuties::for($user)->ownedProjectIds(), true);
     }
 
     /**

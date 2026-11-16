@@ -9,3 +9,7 @@
 arch('hr does not depend on tracking')
     ->expect('Modules\Hr')
     ->not->toUse('Modules\Tracking');
+
+arch('core depends on no module')
+    ->expect('Modules\Core')
+    ->not->toUse(['Modules\Hr', 'Modules\Tracking']);

@@ -16,8 +16,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 use Modules\Core\Models\Concerns\RemembersLookup;
-use Modules\Hr\Models\Employee;
-use Modules\Hr\Models\Position;
 
 /**
  * A governorate, shared by every module. Ids are HR's (hub:import-hr).
@@ -38,6 +36,9 @@ use Modules\Hr\Models\Position;
  * @property bool $is_active
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
+ *
+ * HR's relations on a city (positions, employees) are registered by
+ * HrServiceProvider, so Core does not depend on HR.
  */
 #[Fillable(['name_en', 'name_ar', 'slug', 'code', 'hr_hotline', 'is_active'])]
 class City extends Model
@@ -215,23 +216,5 @@ class City extends Model
     public function centers(): HasMany
     {
         return $this->hasMany(Center::class);
-    }
-
-    /**
-     * @return HasMany<Position, $this>
-     */
-    public function positions(): HasMany
-    {
-        return $this->hasMany(Position::class);
-    }
-
-    /**
-     * The employees living in this governorate.
-     *
-     * @return HasMany<Employee, $this>
-     */
-    public function employees(): HasMany
-    {
-        return $this->hasMany(Employee::class);
     }
 }

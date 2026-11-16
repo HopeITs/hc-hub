@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\Gate;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Risk;
+use Modules\Tracking\Support\TrackingDuties;
 
 /**
  * Risks follow their project: besides holders of the risks.* permissions, the
- * project's owner and its program's manager (see User::ownedProjectIds()) log
+ * project's owner and its program's manager (see TrackingDuties::ownedProjectIds()) log
  * and edit the risks of projects they answer for. Deleting stays with
  * risks.delete.
  *
@@ -48,7 +49,7 @@ class RiskPolicy
             return true;
         }
 
-        $ownedProjectIds = $user->ownedProjectIds();
+        $ownedProjectIds = TrackingDuties::for($user)->ownedProjectIds();
 
         return $projectId === null ? $ownedProjectIds !== [] : in_array($projectId, $ownedProjectIds, true);
     }
@@ -58,7 +59,7 @@ class RiskPolicy
      */
     public function update(User $user, Risk $risk): bool
     {
-        return $user->can('risks.update') || in_array($risk->project_id, $user->ownedProjectIds(), true);
+        return $user->can('risks.update') || in_array($risk->project_id, TrackingDuties::for($user)->ownedProjectIds(), true);
     }
 
     /**
