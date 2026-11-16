@@ -12,6 +12,7 @@ use Modules\Hr\Models\Employee;
 */
 
 test('it lists both logins of an employee with the rows that point at each', function () {
+    allowTwoLoginsPerEmployee();
     $employee = Employee::factory()->create();
     $kept = User::factory()->create(['employee_id' => $employee->id, 'email' => 'kept@hc.test']);
     User::factory()->create(['employee_id' => $employee->id, 'email' => 'spare@hc.test']);

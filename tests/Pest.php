@@ -969,3 +969,21 @@ function donorReportFigures(Project $center, string $month, LibraryIndicator $li
         return $shares;
     });
 }
+
+/**
+ * Lets this test give one employee two logins, as before roadmap 1.7, by
+ * dropping users.employee_id's unique index for the test. The index changes
+ * on a second connection, because DDL on the test's own connection would
+ * commit RefreshDatabase's transaction, and comes back after that
+ * transaction is rolled back. Call it before the test touches users.
+ */
+function allowTwoLoginsPerEmployee(): void
+{
+    config(['database.connections.schema_changes' => config('database.connections.'.config('database.default'))]);
+    DB::connection('schema_changes')->statement('ALTER TABLE users DROP INDEX users_employee_id_unique');
+
+    test()->beforeApplicationDestroyed(function (): void {
+        DB::connection('schema_changes')->statement('ALTER TABLE users ADD UNIQUE users_employee_id_unique (employee_id)');
+        DB::purge('schema_changes');
+    });
+}

@@ -219,3 +219,12 @@ test('the import runs after launch when forced', function () {
 
     expect(DB::table('employees')->count())->toBe(1);
 });
+
+test('a second HR login for an employee who already has one is skipped, not imported', function () {
+    DB::connection('hr_fixture')->table('users')->insert(['id' => 5, 'employee_id' => 7, 'email' => 'spare@hr.test', 'password' => 'hash-5']);
+
+    $this->artisan('hub:import-hr', ['--source' => 'hr_fixture'])->assertSuccessful();
+
+    expect(DB::table('users')->where('employee_id', 7)->pluck('id')->all())->toBe([2])
+        ->and(DB::table('users')->where('id', 5)->exists())->toBeFalse();
+});
