@@ -198,7 +198,7 @@ class EnsureAccountIsActive
      */
     private function lookUpAccount(User $user): array
     {
-        $account = User::query()->whereKey($user->getKey())->first(['id', 'employee_id', 'password']);
+        $account = User::query()->whereKey($user->getKey())->first(['id', 'employee_id', 'is_system', 'password']);
 
         if ($account === null || $account->hasLostAccess()) {
             return ['lost_access' => true, 'password_fingerprint' => ''];
