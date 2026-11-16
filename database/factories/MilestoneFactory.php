@@ -31,7 +31,7 @@ class MilestoneFactory extends Factory
             'name' => fake()->randomElement(['Baseline assessment', 'Community mobilisation', 'Works handover', 'Endline survey']),
             'description' => fake()->sentence(),
             'planned_start_date' => fake()->dateTimeBetween('-1 year', '+1 year')->format('Y-m-d'),
-            'responsible_user_id' => fn (): int => $this->createHrEmployee(),
+            ...$this->renamedEmployeeColumns('responsible_user_id', 'responsible_employee_id'),
         ];
     }
 

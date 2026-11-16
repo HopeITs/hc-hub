@@ -35,7 +35,7 @@ trait HasAssignments
             }
 
             foreach ($model->assignmentFields() as $field) {
-                if ($model->wasRecentlyCreated || $model->wasChanged($field)) {
+                if ($model->wasRecentlyCreated || $model->wasChanged($model->assignmentColumn($field))) {
                     $model->syncAssignment($field);
                 }
             }
@@ -51,6 +51,16 @@ trait HasAssignments
      * @return list<string>
      */
     abstract public function assignmentFields(): array;
+
+    /**
+     * The column that holds a field's employee id. A field is the name
+     * stored in `assignments.field`; it outlives a column rename, so a
+     * model whose column was renamed maps the stored name here.
+     */
+    public function assignmentColumn(string $field): string
+    {
+        return $field;
+    }
 
     /**
      * @return MorphMany<Assignment, $this>
@@ -75,7 +85,7 @@ trait HasAssignments
      */
     public function isAssignmentAcknowledged(string $field): bool
     {
-        if ($this->getAttribute($field) === null) {
+        if ($this->getAttribute($this->assignmentColumn($field)) === null) {
             return true;
         }
 
@@ -90,7 +100,7 @@ trait HasAssignments
     {
         $this->assignments()->current()->where('field', $field)->get()->each->supersede();
 
-        $employeeId = $this->getAttribute($field);
+        $employeeId = $this->getAttribute($this->assignmentColumn($field));
 
         if ($employeeId === null) {
             return;

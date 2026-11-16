@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\DB;
 use Modules\Hr\Models\Employee;
+use Modules\Tracking\Concerns\MirrorsRenamedColumns;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ResultType;
 use Modules\Tracking\Observers\MilestoneObserver;
@@ -42,7 +43,8 @@ use Modules\Tracking\Observers\ScheduleItemObserver;
  * @property MilestoneStatus $status
  * @property int $sequence
  * @property string $weight_percentage
- * @property int $responsible_user_id
+ * @property int $responsible_user_id Legacy copy of responsible_employee_id, dropped in the contract step.
+ * @property int $responsible_employee_id
  * @property int|null $parent_milestone_id
  * @property int|null $proposal_id
  * @property int|null $result_id
@@ -61,6 +63,7 @@ use Modules\Tracking\Observers\ScheduleItemObserver;
     'sequence',
     'weight_percentage',
     'responsible_user_id',
+    'responsible_employee_id',
     'parent_milestone_id',
     'proposal_id',
     'copied_from_id',
@@ -69,7 +72,7 @@ use Modules\Tracking\Observers\ScheduleItemObserver;
 class Milestone extends Model implements TracksActivity
 {
     /** @use HasFactory<MilestoneFactory> */
-    use HasFactory, RecordsActivity;
+    use HasFactory, MirrorsRenamedColumns, RecordsActivity;
 
     use HasSlug, HasTree;
 
@@ -323,16 +326,25 @@ class Milestone extends Model implements TracksActivity
     }
 
     /**
-     * The HR employee accountable for reaching this milestone.
-     *
-     * The column keeps its original name, `responsible_user_id`, but holds an HR
-     * employee id.
+     * The HR employee accountable for reaching this milestone
+     * (`responsible_employee_id`).
      *
      * @return BelongsTo<Employee, $this>
      */
     public function responsibleUser(): BelongsTo
     {
-        return $this->belongsTo(Employee::class, 'responsible_user_id');
+        return $this->belongsTo(Employee::class, 'responsible_employee_id');
+    }
+
+    /**
+     * `responsible_user_id` is the old name of `responsible_employee_id`,
+     * kept equal until it is dropped (roadmap 1.9).
+     *
+     * @return array<string, string>
+     */
+    public function renamedColumns(): array
+    {
+        return ['responsible_user_id' => 'responsible_employee_id'];
     }
 
     /**
@@ -424,7 +436,7 @@ class Milestone extends Model implements TracksActivity
     {
         return [
             'status' => 'status_changed',
-            'responsible_user_id' => 'responsible_changed',
+            'responsible_employee_id' => 'responsible_changed',
             'planned_start_date' => 'dates_changed',
             'planned_end_date' => 'dates_changed',
             'name' => 'updated',
@@ -433,13 +445,16 @@ class Milestone extends Model implements TracksActivity
     }
 
     /**
-     * The rebase bookkeeping stamp is not news.
+     * The rebase bookkeeping stamp is not news. `responsible_user_id`
+     * mirrors `responsible_employee_id` (roadmap 1.9), so logging it would
+     * record the change twice; activities written before the rename keep it
+     * as their key and are still read.
      *
      * @return list<string>
      */
     protected function activityExcludedFields(): array
     {
-        return ['planned_dates_edited_at'];
+        return ['planned_dates_edited_at', 'responsible_user_id'];
     }
 
     /**
@@ -447,7 +462,7 @@ class Milestone extends Model implements TracksActivity
      */
     public function activityEmployeeFields(): array
     {
-        return ['responsible_user_id'];
+        return ['responsible_employee_id'];
     }
 
     /**
@@ -458,7 +473,7 @@ class Milestone extends Model implements TracksActivity
     protected function activityPropertiesBeforeDelete(): array
     {
         return ['employee_ids' => array_values(array_filter([
-            (int) $this->activityAttribute('responsible_user_id'),
+            (int) $this->activityAttribute('responsible_employee_id'),
             Project::ownerEmployeeIdFor($this->activityAttribute('project_id')),
         ]))];
     }

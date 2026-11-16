@@ -195,7 +195,7 @@ function insertProject(int $cityId, int $programId, int $userId): int
         'name' => 'Water Network Rehabilitation',
         'city_id' => $cityId,
         'program_id' => $programId,
-        'user_id' => $userId,
+        'owner_employee_id' => $userId,
     ])->id;
 }
 
@@ -249,7 +249,7 @@ function insertMilestone(int $projectId, int $responsibleUserId, ?int $parentId 
         'name' => $name,
         'description' => null,
         'planned_start_date' => '2026-03-31',
-        'responsible_user_id' => $responsibleUserId,
+        'responsible_employee_id' => $responsibleUserId,
         'parent_milestone_id' => $parentId,
     ])->id;
 }
