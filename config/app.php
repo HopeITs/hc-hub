@@ -84,6 +84,13 @@ return [
      */
     'pretend_today' => env('APP_PRETEND_TODAY'),
 
+    /*
+     * Set once the hub is live. From then on the hub is the source of truth
+     * for HR data, and `hub:import-hr` (which empties and reloads every
+     * HR-owned table) refuses to run unless forced.
+     */
+    'launched' => (bool) env('HUB_LAUNCHED', false),
+
     'timezone' => env('APP_TIMEZONE', 'UTC'),
 
     /*

@@ -51,13 +51,16 @@ return [
             'driver' => null,
         ],
 
-        // The old HR application's storage/app folder, read only: the files of
-        // the imported hr_media rows (employee photos, attachments) until they
-        // move into the hub's media. Nothing here is served directly:
-        // EmployeeAvatarController streams a photo to signed-in users only.
+        // The files of the hr_media rows (employee photos, attachments, news
+        // covers), laid out as <public|private>/<id>/<file>, until they move
+        // into the hub's encrypted media. It lives inside the hub, not in the
+        // old HR app's folder: `php artisan hub:copy-hr-files` copies the old
+        // files here (and never deletes them). Nothing here is served
+        // directly: EmployeeAvatarController streams a photo to signed-in
+        // users only.
         'hr' => [
             'driver' => 'local',
-            'root' => env('HR_STORAGE_PATH') ?: base_path('../hc-hr/storage/app'),
+            'root' => env('HR_STORAGE_PATH') ?: storage_path('app/hr'),
             'serve' => false,
             'throw' => false,
             'report' => false,

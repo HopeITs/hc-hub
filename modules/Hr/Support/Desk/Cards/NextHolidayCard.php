@@ -32,7 +32,7 @@ final class NextHolidayCard extends HrCard
 
     public function register(): ?string
     {
-        return 'hr.leave.holidays.index';
+        return 'hr.leave.holidays';
     }
 
     public function icon(): string
@@ -67,7 +67,7 @@ final class NextHolidayCard extends HrCard
     protected function records(User $user, string $search): Collection
     {
         return $this->upcoming($user)->map(fn (array $holiday): array => $this->shaped(
-            $this->row('nh-'.$holiday['id'].'-'.$holiday['from']->toDateString(), $holiday['name'], $this->span($holiday['from'], $holiday['to']).' · '.trans_choice('hr_desk.day_count', $holiday['length'], ['count' => $holiday['length']]), ['label' => $this->away($holiday['from']), 'tone' => 'active'], $this->link('hr.leave.holidays.index')),
+            $this->row('nh-'.$holiday['id'].'-'.$holiday['from']->toDateString(), $holiday['name'], $this->span($holiday['from'], $holiday['to']).' · '.trans_choice('hr_desk.day_count', $holiday['length'], ['count' => $holiday['length']]), ['label' => $this->away($holiday['from']), 'tone' => 'active'], $this->link('hr.leave.holidays')),
             lead: $this->day($holiday['from'], 'active'),
         ));
     }

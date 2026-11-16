@@ -28,7 +28,7 @@ final class TeamCard extends HrCard
 
     public function register(): ?string
     {
-        return 'hr.team.index';
+        return 'hr.leave.team-calendar';
     }
 
     public function size(): string
@@ -54,7 +54,7 @@ final class TeamCard extends HrCard
     protected function records(User $user, string $search): Collection
     {
         return $this->members($user)->map(fn (array $member): array => $this->shaped(
-            $this->row('tm-'.$member['id'], $member['name'], $member['title'], $member['manager'] ? ['label' => (string) __('hr_desk.cards.team.manager'), 'tone' => 'active'] : null, $this->link('hr.team.index'), $member['words']),
+            $this->row('tm-'.$member['id'], $member['name'], $member['title'], $member['manager'] ? ['label' => (string) __('hr_desk.cards.team.manager'), 'tone' => 'active'] : null, $this->link('hr.leave.team-calendar'), $member['words']),
             lead: $this->face($member['id'], $member['name']),
         ));
     }

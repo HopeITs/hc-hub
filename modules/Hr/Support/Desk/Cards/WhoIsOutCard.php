@@ -28,7 +28,7 @@ final class WhoIsOutCard extends HrCard
 
     public function register(): ?string
     {
-        return 'hr.team.index';
+        return 'hr.leave.team-calendar';
     }
 
     public function layout(): string
@@ -51,7 +51,7 @@ final class WhoIsOutCard extends HrCard
             $name = (string) ($employee?->name ?? '—');
 
             return $this->shaped(
-                $this->row('wo-'.$leave->id, $name, (string) ($leave->leaveBalance?->leaveType?->name ?? ''), ['label' => $leave->type === 'hour' ? $leave->start_at->translatedFormat('H:i').' – '.$leave->end_at->translatedFormat('H:i') : (string) __('hr_desk.until', ['date' => $leave->end_at->translatedFormat('j M')]), 'tone' => 'warn'], $this->link('hr.team.index'), (string) $employee?->secondary_name),
+                $this->row('wo-'.$leave->id, $name, (string) ($leave->leaveBalance?->leaveType?->name ?? ''), ['label' => $leave->type === 'hour' ? $leave->start_at->translatedFormat('H:i').' – '.$leave->end_at->translatedFormat('H:i') : (string) __('hr_desk.until', ['date' => $leave->end_at->translatedFormat('j M')]), 'tone' => 'warn'], $this->link('hr.leave.team-calendar'), (string) $employee?->secondary_name),
                 lead: $this->face((int) $employee?->id, $name),
             );
         });

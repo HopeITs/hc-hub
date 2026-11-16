@@ -289,7 +289,7 @@ final class WorkInbox
                 "leave:{$leave->id}:{$action}", 'leave', $action, $leave->leaveBalance?->contract?->employee,
                 (string) ($leave->leaveBalance?->leaveType?->name ?? ''),
                 $action === 'review' ? ($leave->approved_at ?? $leave->updated_at) : $leave->created_at,
-                $urgent, $this->link('hr.leave.requests.index', ['open' => $leave->id]),
+                $urgent, $this->link('hr.leave.show', ['leaveRequest' => $leave->id]),
             ),
             'from' => $leave->start_at,
             'to' => $leave->end_at,

@@ -15,16 +15,29 @@ use Throwable;
  * HR-owned tables are reloaded, Core and shared tables are upserted, and the
  * renumbering of tracking users only touches users not yet on their HR id.
  * See HrImporter for what happens to each table.
+ *
+ * Reloading empties every HR-owned table first, so after launch it would wipe
+ * whatever was entered in the hub since. It refuses to run in production or
+ * once `app.launched` is set, unless --force is given.
  */
 class ImportHrCommand extends Command
 {
     protected $signature = 'hub:import-hr
-        {--source=hr_import : The database connection holding the HR app\'s tables}';
+        {--source=hr_import : The database connection holding the HR app\'s tables}
+        {--force : Run even in production or after launch (empties and reloads every HR-owned table)}';
 
     protected $description = 'Import the HR app\'s data into the hub (re-runnable until launch)';
 
     public function handle(): int
     {
+        if ($this->isBlocked()) {
+            $this->components->error('Refusing to import: this empties and reloads every HR-owned table, and the hub is '
+                .(app()->isProduction() ? 'in production' : 'marked as launched (HUB_LAUNCHED)')
+                .'. Take a backup and pass --force if you really mean it.');
+
+            return self::FAILURE;
+        }
+
         $source = (string) $this->option('source');
         $pending = UserIdRemap::make()->pending();
 
@@ -75,5 +88,17 @@ class ImportHrCommand extends Command
         $this->components->info('HR import complete.');
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Whether a reload could destroy data entered in the hub.
+     */
+    private function isBlocked(): bool
+    {
+        if ($this->option('force')) {
+            return false;
+        }
+
+        return app()->isProduction() || (bool) config('app.launched');
     }
 }

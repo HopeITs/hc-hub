@@ -105,9 +105,9 @@ final class HrPanels
         'hr.inbox' => 'hr-decisions',
         'hr.news.index' => 'hr-news',
         'hr.contracts.index' => 'hr-ending-contracts',
-        'hr.team.index' => 'hr-team',
+        'hr.leave.team-calendar' => 'hr-team',
         'hr.statistics.index' => 'hr-departments',
-        'hr.leave.holidays.index' => 'hr-next-holiday',
+        'hr.leave.holidays' => 'hr-next-holiday',
     ];
 
     /**

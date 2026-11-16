@@ -28,7 +28,7 @@ final class LeaveBalanceCard extends HrCard
 
     public function register(): ?string
     {
-        return 'hr.leave.requests.index';
+        return 'hr.leave.index';
     }
 
     public function icon(): string
@@ -71,7 +71,7 @@ final class LeaveBalanceCard extends HrCard
                 $share = $balance->deserved > 0 ? $left / $balance->deserved * 100 : 0.0;
 
                 return $this->shaped(
-                    $this->row('lb-'.$balance->id, (string) ($balance->leaveType?->name ?? '—'), (string) __('hr_desk.cards.leave-balance.of_days', ['total' => $this->number(floor($balance->deserved / $hours))]), null, $this->link('hr.leave.requests.index')),
+                    $this->row('lb-'.$balance->id, (string) ($balance->leaveType?->name ?? '—'), (string) __('hr_desk.cards.leave-balance.of_days', ['total' => $this->number(floor($balance->deserved / $hours))]), null, $this->link('hr.leave.index')),
                     end: ['big' => $this->number(floor($left / $hours)), 'small' => (string) __('hr_desk.days_short')],
                     bar: ['to' => $share, 'tone' => $share < 20 ? 'warn' : 'good'],
                 );

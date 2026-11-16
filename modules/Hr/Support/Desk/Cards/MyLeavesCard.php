@@ -28,7 +28,7 @@ final class MyLeavesCard extends HrCard
 
     public function register(): ?string
     {
-        return 'hr.leave.requests.index';
+        return 'hr.leave.index';
     }
 
     public function icon(): string
@@ -62,7 +62,7 @@ final class MyLeavesCard extends HrCard
             };
 
             return $this->shaped(
-                $this->row('ml-'.$leave->id, (string) ($leave->leaveBalance?->leaveType?->name ?? '—'), $leave->start_at === null ? '' : $this->span($leave->start_at, $leave->end_at), ['label' => (string) __('hr_desk.leave_status.'.$status->value), 'tone' => $tone], $this->link('hr.leave.requests.index')),
+                $this->row('ml-'.$leave->id, (string) ($leave->leaveBalance?->leaveType?->name ?? '—'), $leave->start_at === null ? '' : $this->span($leave->start_at, $leave->end_at), ['label' => (string) __('hr_desk.leave_status.'.$status->value), 'tone' => $tone], $this->link('hr.leave.show', ['leaveRequest' => $leave->id])),
                 lead: $leave->start_at === null ? null : $this->day($leave->start_at, $tone),
             );
         });

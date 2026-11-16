@@ -39,7 +39,7 @@ final class CalendarCard extends HrCard
 
     public function register(): ?string
     {
-        return 'hr.team.index';
+        return 'hr.leave.team-calendar';
     }
 
     public function icon(): string
@@ -93,7 +93,7 @@ final class CalendarCard extends HrCard
                 'meta' => $this->span($holiday['from'], $holiday['to']),
                 'tone' => 'good',
                 'from' => $holiday['from'],
-                'href' => $this->link('hr.leave.holidays.index'),
+                'href' => $this->link('hr.leave.holidays'),
             ]);
 
             $events = app(NewsFeed::class)->eventsBetween($user, $today, $until)->map(fn (News $event): array => [
@@ -115,7 +115,7 @@ final class CalendarCard extends HrCard
                     'meta' => $this->span($leave->start_at, $leave->end_at).' · '.__('hr_desk.leave_status.'.(int) $leave->status),
                     'tone' => 'warn',
                     'from' => CarbonImmutable::instance($leave->start_at),
-                    'href' => $this->link('hr.leave.requests.index'),
+                    'href' => $this->link('hr.leave.show', ['leaveRequest' => $leave->id]),
                 ]);
 
             $teamLeaves = app(TeamLeaves::class)
@@ -130,7 +130,7 @@ final class CalendarCard extends HrCard
                         'meta' => $this->span($leave->start_at, $leave->end_at).' · '.($leave->leaveBalance?->leaveType?->name ?? ''),
                         'tone' => 'neutral',
                         'from' => CarbonImmutable::instance($leave->start_at),
-                        'href' => $this->link('hr.team.index'),
+                        'href' => $this->link('hr.leave.team-calendar'),
                     ];
                 });
 
@@ -141,7 +141,7 @@ final class CalendarCard extends HrCard
                 'meta' => CarbonImmutable::parse($person['date'])->translatedFormat('l j M'),
                 'tone' => 'good',
                 'from' => CarbonImmutable::parse($person['date']),
-                'href' => $this->link('hr.team.index'),
+                'href' => $this->link('hr.leave.team-calendar'),
             ]);
 
             $endings = app(EndingContractsCard::class);

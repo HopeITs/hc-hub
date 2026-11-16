@@ -11,6 +11,7 @@ use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Modules\Hr\Console\ApplyContractAmendmentsCommand;
 use Modules\Hr\Console\CheckContractAmendmentsCommand;
+use Modules\Hr\Console\CopyHrFilesCommand;
 use Modules\Hr\Console\DeactivateExpiredContractsCommand;
 use Modules\Hr\Console\ImportHrCommand;
 use Modules\Hr\Console\Journeys\DeactivateDepartedEmployees;
@@ -63,6 +64,7 @@ class HrServiceProvider extends ServiceProvider
 
         $this->commands([
             ImportHrCommand::class,
+            CopyHrFilesCommand::class,
             ApplyContractAmendmentsCommand::class,
             CheckContractAmendmentsCommand::class,
             SendOrientationReminders::class,

@@ -62,7 +62,7 @@ final class BirthdaysCard extends HrCard
             $isToday = $date->isToday();
 
             return $this->shaped(
-                $this->row('bd-'.$person['id'], $person['name'], $date->translatedFormat('l'), ['label' => $this->away($date), 'tone' => $isToday ? 'good' : 'neutral'], $this->link('hr.team.index'), $person['words']),
+                $this->row('bd-'.$person['id'], $person['name'], $date->translatedFormat('l'), ['label' => $this->away($date), 'tone' => $isToday ? 'good' : 'neutral'], $this->link('hr.leave.team-calendar'), $person['words']),
                 lead: $this->day($date, $isToday ? 'good' : 'neutral'),
             );
         });

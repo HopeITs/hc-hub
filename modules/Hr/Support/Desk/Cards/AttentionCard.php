@@ -119,7 +119,7 @@ final class AttentionCard extends HrCard
                     'title' => (string) __('hr_desk.cards.attention.leave'),
                     'meta' => $this->span($leave->start_at, $leave->end_at),
                     'badge' => (string) __('hr_desk.cards.attention.still_waiting'),
-                    'href' => $this->link('hr.leave.requests.index'),
+                    'href' => $this->link('hr.leave.show', ['leaveRequest' => $leave->id]),
                     'date' => CarbonImmutable::parse($leave->start_at),
                 ]));
 

@@ -188,3 +188,34 @@ test('an import that would leave orphan rows is rolled back', function () {
     expect(DB::table('employees')->count())->toBe(0)
         ->and(DB::table('cities')->count())->toBe(0);
 });
+
+test('the import refuses to run once the hub is launched and touches nothing', function () {
+    config(['app.launched' => true]);
+    $employees = DB::table('employees')->count();
+
+    $this->artisan('hub:import-hr', ['--source' => 'hr_fixture'])
+        ->expectsOutputToContain('Refusing to import')
+        ->assertFailed();
+
+    expect(DB::table('employees')->count())->toBe($employees)
+        ->and(DB::table('cities')->count())->toBe(0);
+});
+
+test('the import refuses to run in production and touches nothing', function () {
+    app()->detectEnvironment(fn (): string => 'production');
+
+    $this->artisan('hub:import-hr', ['--source' => 'hr_fixture'])
+        ->expectsOutputToContain('in production')
+        ->assertFailed();
+
+    expect(DB::table('employees')->count())->toBe(0)
+        ->and(DB::table('cities')->count())->toBe(0);
+});
+
+test('the import runs after launch when forced', function () {
+    config(['app.launched' => true]);
+
+    $this->artisan('hub:import-hr', ['--source' => 'hr_fixture', '--force' => true])->assertSuccessful();
+
+    expect(DB::table('employees')->count())->toBe(1);
+});

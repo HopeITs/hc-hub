@@ -11,7 +11,12 @@ use Modules\Hr\Models\Employee;
 
 /**
  * Delete an employee record. A draft is discarded with its placeholder
- * contracts; a record other rows still point at (contracts, a login) stays.
+ * contracts. Any other record with a contract or a login stays: deleting it
+ * would cascade away its contracts, relatives, journeys and notes, and would
+ * leave its login with no employee, which the hub treats as an always-active
+ * system account. Such a person is deactivated instead. Rows that still point
+ * at the employee from Tracking or recruitment block the delete as well
+ * (restrict foreign keys).
  */
 class DeleteEmployee
 {
@@ -25,6 +30,8 @@ class DeleteEmployee
         if ($discardDraft) {
             abort_unless($employee->isDraft(), 403);
             abort_if($employee->realContracts()->exists() || $employee->account()->exists(), 403);
+        } elseif ($employee->allContracts()->exists() || $employee->account()->exists()) {
+            return false;
         }
 
         try {

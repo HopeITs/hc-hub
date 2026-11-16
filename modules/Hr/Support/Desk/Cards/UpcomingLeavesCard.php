@@ -30,7 +30,7 @@ final class UpcomingLeavesCard extends HrCard
 
     public function register(): ?string
     {
-        return 'hr.team.index';
+        return 'hr.leave.team-calendar';
     }
 
     public function icon(): string
@@ -60,7 +60,7 @@ final class UpcomingLeavesCard extends HrCard
             $employee = TeamLeaves::employeeOf($leave);
 
             return $this->shaped(
-                $this->row('ul-'.$leave->id, (string) ($employee?->name ?? '—'), (string) ($leave->leaveBalance?->leaveType?->name ?? ''), ['label' => $this->span($leave->start_at, $leave->end_at), 'tone' => $leave->start_at->isPast() ? 'warn' : 'active'], $this->link('hr.team.index'), (string) $employee?->secondary_name),
+                $this->row('ul-'.$leave->id, (string) ($employee?->name ?? '—'), (string) ($leave->leaveBalance?->leaveType?->name ?? ''), ['label' => $this->span($leave->start_at, $leave->end_at), 'tone' => $leave->start_at->isPast() ? 'warn' : 'active'], $this->link('hr.leave.team-calendar'), (string) $employee?->secondary_name),
                 lead: $this->day($leave->start_at->isPast() ? today() : $leave->start_at, 'active'),
             );
         });
