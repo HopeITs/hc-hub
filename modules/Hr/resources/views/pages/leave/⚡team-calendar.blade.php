@@ -2,7 +2,6 @@
 
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -11,6 +10,7 @@ use Livewire\Component;
 use Modules\Core\Models\City;
 use Modules\Core\Models\User;
 use Modules\Hr\Livewire\Concerns\Leave\ManagesHolidayForm;
+use Modules\Hr\Livewire\Concerns\Leave\ManagesLeaveRequestForm;
 use Modules\Hr\Livewire\Concerns\Leave\ReadsTeamCalendar;
 use Modules\Hr\Support\Leave\HolidayProjects;
 use Modules\Hr\Support\Leave\TeamCoverage;
@@ -25,9 +25,14 @@ use Modules\Hr\Support\Leave\TeamCoverage;
  * browser through the snapshot (§4.4). The URL parameters are client input:
  * each is checked against what the viewer may use, and an unknown or
  * forbidden value falls back to the default.
+ *
+ * "Request leave" opens the leave request dialog here, on the day shown
+ * (from today on), instead of sending the employee to My leaves; after a
+ * save the calendar redraws with the new request.
  */
 new #[Layout('layouts::desk'), Title('hr_leave.calendar.titles.team_calendar')] class extends Component {
     use ManagesHolidayForm;
+    use ManagesLeaveRequestForm;
     use ReadsTeamCalendar;
 
     #[Url(except: 'month')]
@@ -91,6 +96,34 @@ new #[Layout('layouts::desk'), Title('hr_leave.calendar.titles.team_calendar')] 
         unset($this->calendar);
     }
 
+    /**
+     * Open the leave request dialog in place. In the day view the day shown
+     * becomes the start and the end, when it is not in the past.
+     */
+    public function requestLeave(): void
+    {
+        abort_unless($this->user()->can('leaves.create'), 403);
+
+        $this->openRequestForm();
+
+        if (! $this->showRequestModal || $this->calendarView() !== 'day') {
+            return;
+        }
+
+        $day = $this->anchor();
+
+        if ($day->gte(CarbonImmutable::today())) {
+            $this->startAt = $day->toDateString();
+            $this->endAt = $day->toDateString();
+            $this->leaveDate = $day->toDateString();
+        }
+    }
+
+    protected function afterRequestSaved(): void
+    {
+        unset($this->calendar);
+    }
+
     /** @return array<string, mixed> */
     #[Computed]
     public function calendar(): array
@@ -147,8 +180,8 @@ new #[Layout('layouts::desk'), Title('hr_leave.calendar.titles.team_calendar')] 
             // Expected head-counts mean something only for a whole team.
             'showCounts' => in_array($scope, ['reports', 'city', 'org'], true),
             'hasAbsences' => collect($days)->contains(fn (array $day): bool => $day['members'] !== []),
-            // The leave page, when the leave area has it: a day from today on opens the form on that date.
-            'requestRoute' => Route::has('hr.leave.index') && $user->can('leaves.create') ? 'hr.leave.index' : null,
+            // The leave request dialog opens here, on this page.
+            'canRequestLeave' => $user->can('leaves.create'),
         ];
     }
 };
@@ -182,8 +215,8 @@ new #[Layout('layouts::desk'), Title('hr_leave.calendar.titles.team_calendar')] 
         @if ($calendar['canManageHolidays'])
             <x-ui.button tone="secondary" icon="plus" wire:click="openCreateHoliday" data-test="calendar-add-holiday">{{ __('hr_leave.calendar.add_holiday') }}</x-ui.button>
         @endif
-        @if ($calendar['requestRoute'] !== null)
-            <x-ui.button tone="primary" icon="plus" :href="route($calendar['requestRoute'], ['new' => 1])" wire:navigate>{{ __('hr_leave.calendar.request_leave') }}</x-ui.button>
+        @if ($calendar['canRequestLeave'])
+            <x-ui.button tone="primary" icon="plus" wire:click="requestLeave" data-test="calendar-request-leave">{{ __('hr_leave.calendar.request_leave') }}</x-ui.button>
         @endif
     </x-slot:actions>
 
@@ -236,5 +269,9 @@ new #[Layout('layouts::desk'), Title('hr_leave.calendar.titles.team_calendar')] 
 
     @if ($calendar['canManageHolidays'])
         @include('hr::pages.leave._holidays-modal')
+    @endif
+
+    @if ($calendar['canRequestLeave'])
+        @include('hr::pages.leave._request-form-modal')
     @endif
 </x-desk.register>

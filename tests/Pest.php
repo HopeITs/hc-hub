@@ -424,8 +424,12 @@ function insertHrSeedReferenceData(): void
 
     $department = insertHrDepartment();
 
+    // Placed in the reference cities, so the fixtures add none of their own; programs.manager_id is
+    // what the seeders read to find a managed program.
     foreach (range(1, 4) as $programId) {
-        insertHrContract(insertHrEmployee(), insertHrPosition($department, 'Program Manager', $programId));
+        $employeeId = insertHrEmployee($programId);
+        insertHrContract($employeeId, insertHrPosition($department, 'Program Manager', $programId, cityId: $programId));
+        Program::query()->whereKey($programId)->update(['manager_id' => $employeeId]);
     }
 }
 

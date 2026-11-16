@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Modules\Core\Models\Concerns\RemembersLookup;
@@ -70,6 +71,18 @@ class Center extends Model
             'city_id' => 'integer',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * The programs this center serves (center_program; a center may serve
+     * several). Read only for positions without a center of their own: see
+     * LeaveRequestPricing::linkedProgramCenters().
+     *
+     * @return BelongsToMany<Program, $this>
+     */
+    public function programs(): BelongsToMany
+    {
+        return $this->belongsToMany(Program::class)->withTimestamps();
     }
 
     /**
