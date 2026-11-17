@@ -115,7 +115,7 @@ test('a matching child remains visible with its necessary ancestors for status a
         ->assertSee('Matching child')
         ->assertDontSee('Unrelated root')
         ->call('clearFilters')
-        ->set('responsible', (string) $childOwner->id)
+        ->set('responsible', (string) $childOwner->employee_id)
         ->assertSee('Parent context')
         ->assertSee('Matching child')
         ->assertDontSee('Unrelated root');
