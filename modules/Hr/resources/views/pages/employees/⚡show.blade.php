@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\Modules\Contracts\EmployeeTabSource;
+use App\Support\Modules\ModuleRegistry;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -46,9 +48,38 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
     }
 
     /**
+     * HR's own tabs, then the ones other modules add (ModuleRegistry::addEmployeeTabs()).
+     *
      * @return list<string>
      */
     public function visibleTabs(): array
+    {
+        return [...$this->visibleOwnTabs(), ...array_keys($this->moduleTabs())];
+    }
+
+    /**
+     * The module tabs this login sees on this profile, by key.
+     *
+     * @return array<string, EmployeeTabSource>
+     */
+    public function moduleTabs(): array
+    {
+        $viewer = Auth::user();
+        $tabs = [];
+
+        foreach (app(ModuleRegistry::class)->employeeTabSources() as $source) {
+            if ($viewer !== null && ! in_array($source->key(), self::TABS, true) && $source->visibleTo($viewer, $this->employeeId)) {
+                $tabs[$source->key()] = $source;
+            }
+        }
+
+        return $tabs;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function visibleOwnTabs(): array
     {
         return array_values(array_filter(self::TABS, fn (string $tab): bool => match ($tab) {
             'records' => $this->canViewRecords,
@@ -77,7 +108,12 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
     $muted = 'text-secondary-medium dark:text-ink-muted';
     $ink = 'text-secondary-dark dark:text-ink';
     $fallback = auth()->user()->can('employees.view') ? route('hr.employees.index') : route('dashboard');
-    $tabs = array_map(fn (string $key): array => ['key' => $key, 'label' => $key === 'journeys' ? __('hr_journeys.tab') : __('hr_employees.tabs.'.$key)], $this->visibleTabs());
+    $moduleTabs = $this->moduleTabs();
+    $tabs = array_map(fn (string $key): array => ['key' => $key, 'label' => match (true) {
+        isset($moduleTabs[$key]) => $moduleTabs[$key]->label(),
+        $key === 'journeys' => __('hr_journeys.tab'),
+        default => __('hr_employees.tabs.'.$key),
+    }], $this->visibleTabs());
 @endphp
 
 <section class="@container/directory flex flex-col gap-5" data-employee-profile="{{ $employee->id }}">
@@ -138,6 +174,8 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
         @include('hr::pages.employees._show-card')
     @elseif ($tab === 'journeys')
         <livewire:hr::employees.journeys :employee-id="$employee->id" :key="'employee-journeys-'.$employee->id" lazy />
+    @elseif (isset($moduleTabs[$tab]))
+        <livewire:dynamic-component :is="$moduleTabs[$tab]->component()" :employee-id="$employee->id" :key="'employee-tab-'.$tab.'-'.$employee->id" />
     @endif
 
     @include('hr::pages.employees._show-modals')

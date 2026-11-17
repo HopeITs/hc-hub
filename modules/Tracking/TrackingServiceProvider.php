@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Tracking;
 
+use App\Support\Modules\ModuleRegistry;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -51,6 +52,7 @@ use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TaskAssignee;
 use Modules\Tracking\Observers\ProgramObserver;
 use Modules\Tracking\Policies\ProgramPolicy;
+use Modules\Tracking\Support\EmployeeProjectsTab;
 use Modules\Tracking\Support\SupervisionMap;
 
 /**
@@ -86,6 +88,8 @@ class TrackingServiceProvider extends ServiceProvider
         $this->registerListeners();
         $this->registerEmployeeRelations();
         $this->registerCoreRelations();
+
+        $this->app->make(ModuleRegistry::class)->addEmployeeTabs(EmployeeProjectsTab::class);
 
         $this->commands([
             BackfillMonthlyReports::class,

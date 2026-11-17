@@ -294,4 +294,12 @@ return [
         'owner_follows_project' => 'The owner changes when the project is given a new owner.',
         'read_only' => 'Only the project’s manager can change the team.',
     ],
+    'employee_projects' => [
+        'tab' => 'Projects',
+        'title' => 'Projects',
+        'subtitle' => 'The projects this person works on now, and the ones they worked on before.',
+        'current' => 'Working on now',
+        'past' => 'Worked on before',
+        'empty' => 'Not on any project team now.',
+    ],
 ];

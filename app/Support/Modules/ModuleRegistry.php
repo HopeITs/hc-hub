@@ -7,13 +7,14 @@ namespace App\Support\Modules;
 use App\Support\Modules\Contracts\DeskAgendaSource;
 use App\Support\Modules\Contracts\DeskPanelSource;
 use App\Support\Modules\Contracts\DestinationSource;
+use App\Support\Modules\Contracts\EmployeeTabSource;
 use App\Support\Modules\Contracts\SubjectLinkSource;
 
 /**
  * What each module adds to the platform, registered from the module's own
  * ServiceProvider so app/ never names a module (D10). Today: sidebar pages
- * (Destinations), Desk panels (Panels), Desk agenda rows (ReadsDeskAgenda)
- * and record links (SubjectLinks).
+ * (Destinations), Desk panels (Panels), Desk agenda rows (ReadsDeskAgenda),
+ * record links (SubjectLinks) and employee profile tabs.
  *
  * A singleton filled once at boot; it holds class names only, and every read
  * resolves the source from the container, so nothing a request computes
@@ -40,6 +41,31 @@ final class ModuleRegistry
      * @var list<class-string<SubjectLinkSource>>
      */
     private array $subjectLinks = [];
+
+    /**
+     * @var list<class-string<EmployeeTabSource>>
+     */
+    private array $employeeTabs = [];
+
+    /**
+     * @param  class-string<EmployeeTabSource>  $source
+     */
+    public function addEmployeeTabs(string $source): void
+    {
+        if (! in_array($source, $this->employeeTabs, true)) {
+            $this->employeeTabs[] = $source;
+        }
+    }
+
+    /**
+     * The tabs other modules add to an employee profile, in registration order.
+     *
+     * @return list<EmployeeTabSource>
+     */
+    public function employeeTabSources(): array
+    {
+        return array_map(fn (string $source): EmployeeTabSource => app($source), $this->employeeTabs);
+    }
 
     /**
      * @param  class-string<DeskAgendaSource>  $source
