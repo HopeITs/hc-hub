@@ -204,7 +204,7 @@ class TaskPolicy
      */
     private function isOwnOrDepartmentWork(User $user, Task $task): bool
     {
-        if ($this->isAssignee($user, $task) || $this->isDepartmentMember($user, $task)) {
+        if ($this->isAssignee($user, $task) || $this->isDepartmentMember($user, $task) || $this->isRaisedOnOwnDepartment($user, $task)) {
             return true;
         }
 
@@ -230,6 +230,23 @@ class TaskPolicy
     private function isDepartmentMember(User $user, Task $task): bool
     {
         return $task->department_id !== null && $task->department_id === $user->departmentId();
+    }
+
+    /**
+     * Whether the task is raised on the user's own HR department (source
+     * `department`), as opposed to handed to it through department_id.
+     */
+    private function isRaisedOnOwnDepartment(User $user, Task $task): bool
+    {
+        $attributes = $task->getAttributes();
+
+        if (($attributes['source_type'] ?? null) !== 'department') {
+            return false;
+        }
+
+        $departmentId = $user->departmentId();
+
+        return $departmentId !== null && (int) ($attributes['source_id'] ?? 0) === $departmentId;
     }
 
     /**

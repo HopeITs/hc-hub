@@ -52,6 +52,7 @@ trait SavesTaskForm
         'project' => Project::class,
         'program' => Program::class,
         'department' => Department::class,
+        'employee' => Employee::class,
     ];
 
     /** @return array<string, array<int, mixed>> */

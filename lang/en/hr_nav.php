@@ -34,7 +34,7 @@ return [
     'statistics_contracts' => 'Contract statistics',
     'statistics_salaries' => 'Salary statistics',
     'assistant' => 'HR assistant',
-    'activity' => 'HR activity archive',
+    'activity' => 'Activity archive',
     'feedback' => 'Feedback',
     'settings' => 'HR settings',
 ];

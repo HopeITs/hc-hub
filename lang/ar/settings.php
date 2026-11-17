@@ -43,7 +43,7 @@ return [
     'two_factor_authentication_enabled' => 'تم تفعيل المصادقة الثنائية',
     'two_factor_authentication_is_now_enabled_scan_the_qr_code_or' => 'تم تفعيل المصادقة الثنائية. امسح رمز QR أو أدخل مفتاح الإعداد في تطبيق المصادقة.',
     'two_factor_required_cannot_disable' => 'يتطلب دورك المصادقة الثنائية، لذا لا يمكن إيقافها.',
-    'two_factor_required_explanation' => 'يتيح لك دورك الوصول إلى سجلات حساسة، لذا يبقى باقي نظام HC Tracking مغلقاً حتى تفعّل المصادقة الثنائية أدناه.',
+    'two_factor_required_explanation' => 'يتيح لك دورك الوصول إلى سجلات حساسة، لذا يبقى باقي نظام HC Hub مغلقاً حتى تفعّل المصادقة الثنائية أدناه.',
     'two_factor_required_heading' => 'المصادقة الثنائية مطلوبة لدورك',
     'two_factor_required_notice' => 'يتطلب دورك تفعيل المصادقة الثنائية. فعّلها للمتابعة.',
     'verify_authentication_code' => 'تحقق من رمز المصادقة',

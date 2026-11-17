@@ -1,18 +1,20 @@
 <?php
 
+use App\Enums\NoteVisibility;
 use App\Livewire\Concerns\Desk\IsDeskPanel;
+use App\Models\Note;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Livewire\Component;
-use Modules\Hr\Actions\Desk\SaveEmployeeNote;
-use Modules\Hr\Models\EmployeeNote;
 
 /**
- * My HR notes: the private notes an employee kept on the old HR dashboard
- * (employee_notes). The viewer adds, ticks and removes their own lines; done
- * ones sink below the open ones. Every write goes through SaveEmployeeNote,
- * held to the viewer's own employee record.
+ * My notes: the viewer's personal notebook on the shared `notes` table (no
+ * subject, private). The panel keeps its old id (hr-notes) because saved
+ * Desk layouts store panel ids. Every write is held to the viewer's own
+ * personal notes, so another person's note id finds nothing.
  */
 new class extends Component {
     use IsDeskPanel;
@@ -21,66 +23,71 @@ new class extends Component {
     public string $card = 'hr-notes';
 
     /**
-     * Adds a note at the end; true once it is saved.
+     * Adds a note; true once it is saved.
      */
     public function add(string $content): bool
     {
-        $employeeId = $this->ownerId();
+        $this->authorize('create', Note::class);
 
-        if ($employeeId === null) {
-            return false;
-        }
+        $content = trim($content);
 
-        app(SaveEmployeeNote::class)->add($employeeId, $content);
+        Validator::make(
+            ['content' => $content],
+            ['content' => ['required', 'string', 'max:'.Note::MaxLength]],
+            [
+                'content.required' => __('notes.required'),
+                'content.max' => __('notes.too_long', ['max' => Note::MaxLength]),
+            ],
+        )->after(function ($validator): void {
+            if ($this->personal()->count() >= Note::MaxPerAuthor) {
+                $validator->errors()->add('content', __('notes.full'));
+            }
+        })->validate();
+
+        Note::query()->create([
+            'author_id' => auth()->id(),
+            'body' => $content,
+            'visibility' => NoteVisibility::Private,
+        ]);
         unset($this->notes);
 
         return true;
     }
 
-    public function toggle(int $id): void
-    {
-        if ($this->ownerId() !== null) {
-            app(SaveEmployeeNote::class)->toggle($this->ownerId(), $id);
-            unset($this->notes);
-        }
-    }
-
     public function remove(int $id): void
     {
-        if ($this->ownerId() !== null) {
-            app(SaveEmployeeNote::class)->remove($this->ownerId(), $id);
-            unset($this->notes);
-        }
+        $note = $this->personal()->findOrFail($id);
+        $this->authorize('delete', $note);
+
+        $note->delete();
+        unset($this->notes);
     }
 
     /**
-     * @return Collection<int, EmployeeNote>
+     * @return Collection<int, Note>
      */
     #[Computed]
     public function notes(): Collection
     {
-        $employeeId = $this->ownerId();
-
-        return $employeeId === null
-            ? new Collection
-            : EmployeeNote::query()->select(['id', 'employee_id', 'content', 'is_done', 'order'])->forEmployee($employeeId)->orderBy('order')->orderBy('id')->limit(SaveEmployeeNote::MaxNotes)->get();
+        return $this->personal()->select(['id', 'author_id', 'body', 'created_at'])->latest()->latest('id')->limit(Note::MaxPerAuthor)->get();
     }
 
-    private function ownerId(): ?int
+    /**
+     * @return Builder<Note>
+     */
+    private function personal(): Builder
     {
-        $employeeId = auth()->user()?->employee_id;
-
-        return $employeeId === null ? null : (int) $employeeId;
+        return Note::query()->personalFor((int) auth()->id());
     }
 };
 ?>
 
+
 @php
-    [$done, $open] = $this->notes->partition(fn (EmployeeNote $note): bool => $note->is_done);
     $empty = $this->notes->isEmpty();
 @endphp
 
-<x-desk.panel :empty="$empty" :id="$card" :title="__('hr_desk.cards.notes.title')" :tagline="__('hr_desk.cards.notes.tagline')" class="dk-todo-panel" :filterable="false" :count="$open->count()" :size="$size" :cols="$gridCols" :height="$gridRows" :index="$index" :total="$total">
+<x-desk.panel :empty="$empty" :id="$card" :title="__('hr_desk.cards.notes.title')" :tagline="__('hr_desk.cards.notes.tagline')" class="dk-todo-panel" :filterable="false" :count="$this->notes->count()" :size="$size" :cols="$gridCols" :height="$gridRows" :index="$index" :total="$total">
     <div class="dk-todo" x-data="{
         draft: '',
         save() { $wire.add(this.draft).then((saved) => { if (saved === true) { this.draft = '' } }) },
@@ -92,7 +99,7 @@ new class extends Component {
                 type="text"
                 class="dk-todo-input"
                 x-model="draft"
-                maxlength="{{ SaveEmployeeNote::MaxLength }}"
+                maxlength="{{ Note::MaxLength }}"
                 autocomplete="off"
                 placeholder="{{ __('hr_desk.cards.notes.placeholder') }}"
                 @error('content') aria-invalid="true" aria-describedby="dk-hr-note-err-{{ $index }}" @enderror
@@ -107,22 +114,15 @@ new class extends Component {
             <p class="dk-todo-empty">{{ __('hr_desk.cards.notes.empty') }}</p>
         @else
             <div class="dk-todo-scroll">
-                @foreach ([[$open, false], [$done, true]] as [$list, $isDone])
-                    @if ($list->isNotEmpty())
-                        <ul @class(['dk-todo-list', 'dk-todo-done' => $isDone]) aria-label="{{ $isDone ? __('hr_desk.cards.notes.done_list') : __('hr_desk.cards.notes.open_list') }}">
-                            @foreach ($list as $note)
-                                <li class="dk-todo-row" wire:key="hr-note-{{ $note->id }}">
-                                    <span class="dk-todo-grip" aria-hidden="true"></span>
-                                    <button type="button" class="dk-todo-check" role="checkbox" aria-checked="{{ $isDone ? 'true' : 'false' }}" wire:click="toggle({{ $note->id }})">
-                                        <i aria-hidden="true">@if ($isDone)<x-desk.icon name="check" />@endif</i>
-                                        <span class="dk-todo-t">{{ $note->content }}</span>
-                                    </button>
-                                    <button type="button" class="dk-iconbtn dk-sm dk-todo-x" wire:click="remove({{ $note->id }})" aria-label="{{ __('hr_desk.cards.notes.remove') }}"><x-desk.icon name="x" /></button>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @endif
-                @endforeach
+                <ul class="dk-todo-list" aria-label="{{ __('hr_desk.cards.notes.title') }}">
+                    @foreach ($this->notes as $note)
+                        <li class="dk-todo-row" wire:key="my-note-{{ $note->id }}">
+                            <span class="dk-todo-grip" aria-hidden="true"></span>
+                            <span class="dk-todo-t min-w-0 flex-1 break-words" data-test="my-note">{{ $note->body }}</span>
+                            <button type="button" class="dk-iconbtn dk-sm dk-todo-x" wire:click="remove({{ $note->id }})" aria-label="{{ __('hr_desk.cards.notes.remove') }}"><x-desk.icon name="x" /></button>
+                        </li>
+                    @endforeach
+                </ul>
             </div>
         @endif
     </div>

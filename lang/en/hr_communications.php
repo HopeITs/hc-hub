@@ -6,7 +6,7 @@ return [
     'titles' => [
         'inbox' => 'Waiting on you',
         'feedback' => 'Feedback',
-        'activity' => 'HR activity archive',
+        'activity' => 'Activity archive',
         'assistant' => 'Ask HR',
     ],
 

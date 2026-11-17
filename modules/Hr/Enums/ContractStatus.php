@@ -58,10 +58,10 @@ enum ContractStatus: string implements HasStatusTone
     {
         return match ($this) {
             self::Draft => ContractTypeEnum::getLocalizedName(ContractTypeEnum::Draft->value)['value'],
-            self::Terminated => __('contracts.status-terminated'),
-            self::Active => __('general.active'),
-            self::Expired => __('contracts.status-expired'),
-            self::Inactive => __('general.inactive'),
+            self::Terminated => __('hr_contracts.status.terminated'),
+            self::Active => __('hr_contracts.status.active'),
+            self::Expired => __('hr_contracts.status.expired'),
+            self::Inactive => __('hr_contracts.status.inactive'),
         };
     }
 }

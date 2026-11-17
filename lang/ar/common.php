@@ -147,4 +147,13 @@ return [
     'keep_editing' => 'متابعة التعديل',
     'list_separator' => '، ',
     'unsaved_leave_text' => 'ما غيّرته في هذه الصفحة لم يُحفظ بعد. إذا غادرت الآن فسيضيع.',
+    'organisation_name' => 'مركز الأمل المسيحي',
+    'organisation_short_name' => 'مركز الأمل',
+    'we_are_hiring' => 'نوظّف الآن',
+    'version_short' => 'ن:number',
+    'file_size_kb' => ':size كيلوبايت',
+    'utc_offset' => 'UTC:offset',
+    'website' => 'الموقع الإلكتروني',
+    'key_alt' => 'Alt',
+    'edit' => 'تعديل',
 ];

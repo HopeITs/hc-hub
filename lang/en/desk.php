@@ -2,7 +2,7 @@
 
 return [
     'your_desk' => 'Your desk',
-    'logo_label' => 'Hope Center Tracking, your desk',
+    'logo_label' => 'HC Hub, your desk',
     'search' => 'Search',
     'panel_search' => 'Search :panel',
     'search_placeholder' => 'Search by name…',
@@ -29,7 +29,7 @@ return [
     'settings_and_admin' => 'Settings and admin',
     'settings_lede' => 'Set up once. Each opens as a page.',
     'install_app' => 'Install the app',
-    'install_app_hint' => 'Open HC Tracking in its own window, with desktop notifications',
+    'install_app_hint' => 'Open HC Hub in its own window, with desktop notifications',
     'install' => 'Install',
     'report_problem_hint' => 'Tell us what went wrong; the form opens in a new tab',
     'settings_locked' => 'Your role does not open this area.',
@@ -85,6 +85,10 @@ return [
         'validate' => ':month report to validate',
         'approve' => 'Sent for your review',
         'accept' => 'Delivered for your acceptance',
+        'leave' => 'Leave request · :what',
+        'leave_review' => 'Leave request to confirm · :what',
+        'profile_change' => 'Profile change · :what',
+        'recruitment' => 'Recruitment request · :what',
     ],
     'decision_action' => [
         'proposal' => 'Open',
@@ -92,6 +96,10 @@ return [
         'validate' => 'Validate',
         'approve' => 'Approve',
         'accept' => 'Accept',
+        'leave' => 'Decide',
+        'leave_review' => 'Confirm',
+        'profile_change' => 'Approve',
+        'recruitment' => 'Review',
     ],
     'decision_done' => [
         'accept' => 'Deliverable accepted.',
@@ -262,6 +270,8 @@ return [
         'transfer' => 'Transfer',
         'donor-report' => 'Donor report',
         'monthly-report' => 'Monthly report',
+        'holiday' => 'Holiday',
+        'team-leave' => 'Team leave',
     ],
     'agenda_monthly_report' => ':month report due',
     'agenda_items' => '{0} nothing|{1} 1 item|[2,*] :count items',
@@ -469,7 +479,7 @@ return [
         'myteam' => [
             'title' => 'My team',
             'description' => 'Your reports, project teams and department, with what is overdue for each. Poke anyone with a short note.',
-            'locked' => 'Your account is not linked to an HR employee.',
+            'locked' => 'Your account is not linked to an employee record.',
             'empty' => 'Nobody on your team yet.',
         ],
         'targets' => [

@@ -463,7 +463,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.interview')] cla
                         <dt class="{{ $muted }}">{{ __($t.'when') }}</dt>
                         <dd class="font-medium">
                             {{ $starts->translatedFormat('l j F Y') }} · <span class="tabular-nums">{{ $starts->format('H:i') }}@if ($ends) – {{ $ends->format('H:i') }}@endif</span>
-                            <span class="block text-xs font-normal {{ $muted }}">{{ $timezone }} (UTC{{ $starts->format('P') }})</span>
+                            <span class="block text-xs font-normal {{ $muted }}">{{ $timezone }} ({{ __('common.utc_offset', ['offset' => $starts->format('P')]) }})</span>
                         </dd>
                     </div>
                     <div>
@@ -592,7 +592,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.interview')] cla
                         <li wire:key="interview-attachment-{{ $media->id }}" class="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5">
                             <div class="min-w-0">
                                 <p class="font-medium wrap-anywhere" dir="auto">{{ $media->getCustomProperty('original_name', $media->name) }}</p>
-                                <p class="text-xs tabular-nums {{ $muted }}">{{ number_format($media->size / 1024, 1) }} KB · {{ $media->created_at?->format('Y-m-d H:i') }}</p>
+                                <p class="text-xs tabular-nums {{ $muted }}">{{ __('common.file_size_kb', ['size' => number_format($media->size / 1024, 1)]) }} · {{ $media->created_at?->format('Y-m-d H:i') }}</p>
                             </div>
                             <div class="flex items-center gap-1">
                                 <x-ui.button tone="ghost" size="sm" icon="arrow-down-tray" class="size-8!" :href="route('hr.recruitment.interview-attachments.download', ['media' => $media->id])" :aria-label="__('hr_recruitment.hub.download')" />

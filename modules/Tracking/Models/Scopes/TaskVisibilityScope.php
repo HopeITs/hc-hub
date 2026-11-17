@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Support\Employees\HrAccess;
 use Modules\Tracking\Enums\TaskKind;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Task;
@@ -29,6 +31,12 @@ use Modules\Tracking\Models\Task;
  * matches, they stay hidden unless the user holds the Financial role or
  * proposals.update. Jobs and console commands have no signed-in user and are
  * untouched, as are users holding a bypass role.
+ *
+ * A task raised on an employee (source `employee`) is private to that
+ * employee's file for everyone, bypass roles included: only its creator, its
+ * assignees, the employee, and users who may view that employee record
+ * (EmployeePolicy::view) see it. A task raised on a department (source
+ * `department`) is also seen by that department's members.
  *
  * Organisation-wide figures and integrity guards opt out explicitly with
  * withoutGlobalScope(TaskVisibilityScope::class).
@@ -62,6 +70,8 @@ class TaskVisibilityScope implements Scope
      */
     public static function constrain(Builder $query, User $user): void
     {
+        self::constrainEmployeeSubjects($query, $user);
+
         if (! $user->isTaskDepartmentScoped()) {
             return;
         }
@@ -87,6 +97,12 @@ class TaskVisibilityScope implements Scope
             if ($isProposalEditor) {
                 $query->orWhereNotNull($taskDepartmentId);
             }
+
+            if ($departmentId !== null) {
+                $query->orWhere(fn (Builder $query) => $query->where($sourceType, 'department')->where($sourceId, $departmentId));
+            }
+
+            $query->orWhere(fn (Builder $query) => self::onViewableEmployee($query, $user));
 
             if ($user->employee_id !== null) {
                 $query->orWhereHas('taskAssignees', fn (Builder $assignees) => $assignees->where('employee_id', $user->employee_id));
@@ -118,7 +134,7 @@ class TaskVisibilityScope implements Scope
      */
     public static function allows(User $user, Task $task): bool
     {
-        if (! $user->isTaskDepartmentScoped()) {
+        if (! $user->isTaskDepartmentScoped() && $task->source_type !== 'employee') {
             return true;
         }
 
@@ -127,5 +143,47 @@ class TaskVisibilityScope implements Scope
         self::constrain($query, $user);
 
         return $query->exists();
+    }
+
+    /**
+     * Tasks on an employee leave a user's view unless the user raised them,
+     * is assigned to them, or may view that employee.
+     *
+     * @param  Builder<covariant Task>  $query
+     */
+    private static function constrainEmployeeSubjects(Builder $query, User $user): void
+    {
+        $query->where(fn (Builder $query) => $query
+            ->where($query->qualifyColumn('source_type'), '!=', 'employee')
+            ->orWhere($query->qualifyColumn('created_by'), $user->id)
+            ->orWhereHas('taskAssignees', fn (Builder $assignees) => $assignees->where('employee_id', $user->employee_id ?? 0))
+            ->orWhere(fn (Builder $query) => self::onViewableEmployee($query, $user)));
+    }
+
+    /**
+     * Narrows a tasks query to those raised on an employee the user may view:
+     * their own record, or any record in the cities their HR access covers
+     * when they hold employees.view.
+     *
+     * @param  Builder<covariant Task>  $query
+     */
+    private static function onViewableEmployee(Builder $query, User $user): void
+    {
+        $sourceId = $query->qualifyColumn('source_id');
+
+        $query->where($query->qualifyColumn('source_type'), 'employee')
+            ->where(function (Builder $query) use ($user, $sourceId): void {
+                $query->where($sourceId, $user->employee_id ?? 0);
+
+                if (! $user->can('employees.view')) {
+                    return;
+                }
+
+                $cityIds = HrAccess::cityIds($user);
+
+                $cityIds === null
+                    ? $query->orWhereNotNull($sourceId)
+                    : $query->orWhereIn($sourceId, Employee::query()->select('id')->whereIn('city_id', $cityIds));
+            });
     }
 }

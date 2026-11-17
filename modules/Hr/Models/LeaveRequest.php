@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Models;
 
+use App\Concerns\RecordsActivity;
+use App\Notifications\EmployeeRecipients;
+use App\Notifications\TracksActivity;
 use Carbon\CarbonImmutable;
 use Database\Factories\LeaveRequestFactory;
 use DateTimeInterface;
@@ -41,10 +44,90 @@ use Modules\Hr\Support\Settings\HrAccess;
  * @property CarbonImmutable|null $updated_at
  */
 #[Fillable(['leave_balance_id', 'type', 'start_at', 'end_at', 'reason', 'approved_by', 'approved_at', 'hr_approved', 'reject_reason', 'status', 'alternative_employee_id', 'computed_hours', 'rule_version', 'is_exceptional', 'decision_basis', 'decided_on_behalf_of'])]
-class LeaveRequest extends Model
+class LeaveRequest extends Model implements TracksActivity
 {
     /** @use HasFactory<LeaveRequestFactory> */
-    use HasFactory;
+    use HasFactory, RecordsActivity;
+
+    public function activityModule(): string
+    {
+        return 'hr-leave';
+    }
+
+    public function activityProgramId(): ?int
+    {
+        return null;
+    }
+
+    /**
+     * The requester's name, read through the balance's contract.
+     */
+    public function activityLabel(): string
+    {
+        $employeeId = $this->activityEmployeeId();
+
+        return $employeeId === null ? '' : (app(EmployeeRecipients::class)->names([$employeeId])[$employeeId]['en'] ?? '');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function activityEvents(): array
+    {
+        return ['status' => 'status_changed'];
+    }
+
+    /**
+     * Accepted and rejected are their own events; a move back to pending is a plain update.
+     */
+    protected function activityEventForChange(string $field, mixed $old, mixed $new): ?string
+    {
+        return match ((int) $new) {
+            LeaveRequestStatus::Accepted->value => 'approved',
+            LeaveRequestStatus::Rejected->value => 'rejected',
+            default => 'updated',
+        };
+    }
+
+    protected function activityNotifies(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Free-text reasons and the decision basis can name health or family
+     * matters; they stay on the request.
+     *
+     * @return list<string>
+     */
+    protected function activityExcludedFields(): array
+    {
+        return ['reason', 'reject_reason', 'decision_basis'];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function activityProperties(string $event): array
+    {
+        return ['employee_id' => $this->activityEmployeeId()];
+    }
+
+    private function activityEmployeeId(): ?int
+    {
+        $balanceId = $this->activityAttribute('leave_balance_id');
+
+        if ($balanceId === null) {
+            return null;
+        }
+
+        $employeeId = LeaveBalance::query()
+            ->whereKey($balanceId)
+            ->join('contracts', 'contracts.id', '=', 'leave_balances.contract_id')
+            ->value('contracts.employee_id');
+
+        return $employeeId === null ? null : (int) $employeeId;
+    }
 
     /**
      * @return array<string, string>

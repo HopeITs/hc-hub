@@ -494,7 +494,7 @@ function insertHrJobLevel(string $nameEn = 'Senior', string $nameAr = 'أول', 
  */
 function insertHrEmployee(?int $cityId = null, string $firstNameEn = 'Sami', string $lastNameEn = 'Haddad', string $firstNameAr = 'سامي', string $lastNameAr = 'حداد', bool $isActive = true): int
 {
-    return Employee::factory()->create([
+    return Activity::withoutRecording(fn (): int => Employee::factory()->create([
         'city_id' => $cityId,
         'first_name_en' => $firstNameEn,
         'first_name_ar' => $firstNameAr,
@@ -502,7 +502,7 @@ function insertHrEmployee(?int $cityId = null, string $firstNameEn = 'Sami', str
         'last_name_ar' => $lastNameAr,
         'username' => fake()->unique()->userName(),
         'is_active' => $isActive,
-    ])->id;
+    ])->id);
 }
 
 /**
@@ -583,13 +583,13 @@ function insertHrPosition(int $departmentId, string $titleEn = 'Officer', ?int $
  */
 function insertHrContract(int $employeeId, int $positionId, bool $isActive = true, ?string $startDate = null): int
 {
-    return Contract::factory()->create([
+    return Activity::withoutRecording(fn (): int => Contract::factory()->create([
         'employee_id' => $employeeId,
         'position_id' => $positionId,
         'start_date' => $startDate ?? now()->toDateTimeString(),
         'end_date' => null,
         'is_active' => $isActive,
-    ])->id;
+    ])->id);
 }
 
 /**

@@ -27,8 +27,8 @@
 
 <main dir="{{ $direction }}" class="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 sm:py-10">
     <div class="mb-4 flex justify-end gap-2 text-sm font-semibold">
-        <a href="{{ $careerUrl('en') }}" class="cursor-pointer rounded-full px-3 py-1.5 {{ $locale === 'en' ? 'bg-primary text-white' : 'bg-white text-neutral-600' }}">EN</a>
-        <a href="{{ $careerUrl('ar') }}" class="cursor-pointer rounded-full px-3 py-1.5 {{ $locale === 'ar' ? 'bg-primary text-white' : 'bg-white text-neutral-600' }}">AR</a>
+        <a href="{{ $careerUrl('en') }}" class="cursor-pointer rounded-full px-3 py-1.5 {{ $locale === 'en' ? 'bg-primary text-white' : 'bg-white text-neutral-600' }}">{{ strtoupper(\App\Enums\Locale::English->value) }}</a>
+        <a href="{{ $careerUrl('ar') }}" class="cursor-pointer rounded-full px-3 py-1.5 {{ $locale === 'ar' ? 'bg-primary text-white' : 'bg-white text-neutral-600' }}">{{ strtoupper(\App\Enums\Locale::Arabic->value) }}</a>
     </div>
 
     <x-hr::recruitment.public-brand-banner />
@@ -115,7 +115,7 @@
         <input type="hidden" name="locale" value="{{ $locale }}">
         <input type="hidden" name="submission_key" value="{{ $submissionKey }}">
         <div class="absolute -start-[10000px] top-auto size-px overflow-hidden" aria-hidden="true">
-            <label for="website">Website</label>
+            <label for="website">{{ __('common.website') }}</label>
             <input id="website" type="text" name="website" tabindex="-1" autocomplete="off">
         </div>
 
@@ -227,7 +227,7 @@
                                         name="answers[{{ $key }}]"
                                         value="{{ $prefill[$key] ?? '' }}"
                                         placeholder="{{ $field['type'] === 'date' ? '' : __('hr_recruitment.careers.your_answer') }}"
-                                        class="mt-4 block w-full max-w-sm rounded-none border-0 border-b border-neutral-300 bg-transparent px-0 py-2 text-base shadow-none outline-none placeholder:text-neutral-500 focus:border-primary focus:ring-0 {{ in_array($field['type'], ['email', 'tel'], true) ? 'rtl:text-right' : '' }} {{ $workEmail || $invitedEmailField ? 'cursor-not-allowed text-neutral-600' : '' }}"
+                                        class="mt-4 block w-full max-w-sm rounded-none border-0 border-b border-neutral-300 bg-transparent px-0 py-2 text-base shadow-none outline-none placeholder:text-neutral-500 focus:border-primary focus:ring-0 {{ in_array($field['type'], ['email', 'tel'], true) ? 'rtl:text-end' : '' }} {{ $workEmail || $invitedEmailField ? 'cursor-not-allowed text-neutral-600' : '' }}"
                                         @if ($field['type'] === 'email' || $field['type'] === 'tel') dir="ltr" @endif
                                         @if ($isPhone)
                                             inputmode="numeric"
@@ -297,7 +297,7 @@
     </form>
     @endif
 
-    <footer class="py-8 text-center text-sm text-neutral-500">© {{ now()->year }} Christian Hope Center</footer>
+    <footer class="py-8 text-center text-sm text-neutral-500">© {{ now()->year }} {{ __('common.organisation_name') }}</footer>
 </main>
 @endsection
 

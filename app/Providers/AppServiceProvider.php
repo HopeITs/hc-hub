@@ -45,7 +45,10 @@ use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Department;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\LeaveRequest;
 use Modules\Tracking\Models\Account;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\Donor;
@@ -370,7 +373,8 @@ class AppServiceProvider extends ServiceProvider
      * activity is recorded against (see App\Notifications\TracksActivity) is
      * mapped too, because `activities.subject_type` and
      * `notifications.subject_type` store these keys. `city` and `center` are
-     * what an HR news item can be about (`news.newsable_type`).
+     * what an HR news item can be about (`news.newsable_type`); `employee` is
+     * what a note on an employee profile is about (`notes.subject_type`).
      */
     protected function configureMorphMap(): void
     {
@@ -406,6 +410,9 @@ class AppServiceProvider extends ServiceProvider
             'proposal_location' => ProposalLocation::class,
             'city' => City::class,
             'center' => Center::class,
+            'employee' => Employee::class,
+            'leave_request' => LeaveRequest::class,
+            'contract' => Contract::class,
         ]);
     }
 

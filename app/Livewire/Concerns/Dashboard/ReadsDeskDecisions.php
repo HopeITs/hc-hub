@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Employee;
+use Modules\Hr\Support\Inbox\DeskDecisions;
 use Modules\Tracking\Enums\DeliveryState;
 use Modules\Tracking\Enums\MonthlyReportStatus;
 use Modules\Tracking\Enums\ProposalStatus;
@@ -125,7 +126,19 @@ trait ReadsDeskDecisions
 
         $proposals = $this->ownerProposalSteps($user);
 
-        return $reviews->concat($reports)->concat($tasks)->concat($proposals)
+        $approvals = app(DeskDecisions::class)->for($user)
+            ->map(fn (array $row): array => $this->decision(
+                key: $row['key'],
+                kind: $row['kind'],
+                title: $row['title'],
+                context: $row['context'],
+                who: $row['who'],
+                since: $row['since'],
+                due: null,
+                href: $row['href'],
+            ));
+
+        return $reviews->concat($reports)->concat($tasks)->concat($proposals)->concat($approvals)
             ->sortBy([
                 fn (array $a, array $b): int => $b['late'] <=> $a['late'],
                 fn (array $a, array $b): int => ($a['since']?->timestamp ?? PHP_INT_MAX) <=> ($b['since']?->timestamp ?? PHP_INT_MAX),

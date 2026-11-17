@@ -29,7 +29,7 @@
         ->map(fn (array $entry): array => [
             'href' => route($entry['route'], $entry['key']),
             'label' => $entry['label'],
-            'kind' => __('navigation.kind_'.$entry['kind']),
+            'kind' => __('navigation.kinds.'.$entry['kind']),
         ])->values()->all();
 
     /* Inside a project, the sidebar leads with that project's own sections. */

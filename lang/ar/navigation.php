@@ -42,7 +42,7 @@ return [
     'help_tour_hint' => 'جولة إرشادية في هذه الصفحة خطوة بخطوة',
     'help_guideline_hint' => 'الدليل المكتوب، في علامة تبويب جديدة',
     'help_report_hint' => 'أخبر فريق تقنية المعلومات بما حدث',
-    'help_install_hint' => 'افتح HC Tracking في نافذة خاصة به',
+    'help_install_hint' => 'افتح HC Hub في نافذة خاصة به',
     'display' => 'اللغة والمظهر',
     'pinned' => 'المثبتة',
     'recent' => 'الأكثر استخدامًا',
@@ -58,8 +58,10 @@ return [
     'section_targets' => 'المستهدفات',
     'section_funding' => 'التمويل',
     'section_files' => 'الملفات والنشاط',
-    'kind_project' => 'مشروع',
-    'kind_monthly_report' => 'تقرير شهري',
-    'kind_agreement' => 'اتفاقية',
+    'kinds' => [
+        'project' => 'مشروع',
+        'monthly_report' => 'تقرير شهري',
+        'agreement' => 'اتفاقية',
+    ],
     'due_soon' => 'يوجد هنا ما يستحق قريبًا',
 ];

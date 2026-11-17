@@ -1,6 +1,5 @@
 <?php
 
-use Modules\Hr\Models\Department as HrDepartment;
 use App\Models\Role;
 use Illuminate\Database\ClassMorphViolationException;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -8,6 +7,10 @@ use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Department as HrDepartment;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\LeaveRequest;
 use Modules\Tracking\Models\Account;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\Donor;
@@ -19,7 +22,6 @@ use Modules\Tracking\Models\MealCoverageAssignment;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\PlanIndicator;
-use Modules\Tracking\Models\ProgramRequest;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalLocation;
@@ -69,6 +71,9 @@ test('the morph map registers exactly the target sources, task sources, media ow
         'proposal_location' => ProposalLocation::class,
         'city' => City::class,
         'center' => Center::class,
+        'employee' => Employee::class,
+        'leave_request' => LeaveRequest::class,
+        'contract' => Contract::class,
     ]);
 });
 

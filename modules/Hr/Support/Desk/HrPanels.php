@@ -172,7 +172,7 @@ final class HrPanels
             $definitions[$id] = $this->definition($card->key(), $card->icon(), $card->size(), $card->height(), $card->register(), $card->allows(...));
         }
 
-        $definitions[self::Notes] = $this->definition('notes', 'check', 'M', 4, null, fn (User $user): bool => $user->employee_id !== null);
+        $definitions[self::Notes] = $this->definition('notes', 'check', 'M', 4, null, fn (User $user): bool => true);
 
         return $definitions;
     }

@@ -24,10 +24,10 @@ function desktopAppNotification(User $user): UserNotification
     return UserNotification::query()->forUser($user)->latest('created_at')->firstOrFail();
 }
 
-test('the app manifest names HC Tracking, uses the header colour and points at icons that exist', function () {
+test('the app manifest names HC Hub, uses the header colour and points at icons that exist', function () {
     $manifest = json_decode(file_get_contents(public_path('manifest.webmanifest')), true, flags: JSON_THROW_ON_ERROR);
 
-    expect($manifest['name'])->toBe('HC Tracking')
+    expect($manifest['name'])->toBe('HC Hub')
         ->and($manifest['display'])->toBe('standalone')
         ->and($manifest['theme_color'])->toBe('#dcddde')
         ->and($manifest['start_url'])->toBe(route('dashboard', absolute: false))

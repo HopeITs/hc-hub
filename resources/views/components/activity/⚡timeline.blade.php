@@ -41,6 +41,11 @@ new class extends Component {
     {
         $subjects = array_filter($this->subjects);
 
+        // HR records are as private as the activity log itself.
+        if (! auth()->user()?->can('activity-log.view')) {
+            $subjects = array_diff_key($subjects, array_flip(['employee', 'leave_request', 'contract']));
+        }
+
         if ($subjects === []) {
             return collect();
         }

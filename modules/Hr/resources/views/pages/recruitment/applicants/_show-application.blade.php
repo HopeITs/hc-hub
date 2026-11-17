@@ -341,7 +341,7 @@
                         @if ($state['offer'])
                             @php $offer = $state['offer']; @endphp
                             <a href="{{ Route::has('hr.recruitment.offers.show') ? route('hr.recruitment.offers.show', ['offerId' => $offer->id]) : '#' }}" wire:navigate class="flex flex-wrap items-center gap-2 underline-offset-4 hover:underline">
-                                <span class="tabular-nums {{ $muted }}">v{{ $offer->currentVersion?->version_no }}</span>
+                                <span class="tabular-nums {{ $muted }}">{{ __('common.version_short', ['number' => $offer->currentVersion?->version_no]) }}</span>
                                 <x-ui.enum-badge :label="__('hr_recruitment.applicant_ui.offers.statuses.'.$offer->status)" :tone="Labels::tone($offer->status)" />
                                 @if ($offer->hiringConversion?->isConverted())
                                     <span class="font-semibold">{{ __('hr_recruitment.applicant_ui.statuses.hired') }}</span>

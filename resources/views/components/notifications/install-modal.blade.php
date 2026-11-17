@@ -1,6 +1,6 @@
 @php
     /*
-     * The Install HC Tracking dialog, opened by name ('install-app') from the
+     * The Install HC Hub dialog, opened by name ('install-app') from the
      * header icon and the notification settings page. The browser draws its
      * own install confirm, which no page can restyle, so this comes first:
      * it says what the app gives, and Install hands over to the browser

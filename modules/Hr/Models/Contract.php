@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Models;
 
+use App\Concerns\RecordsActivity;
+use App\Notifications\EmployeeRecipients;
+use App\Notifications\TracksActivity;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Closure;
@@ -69,10 +72,73 @@ use Modules\Hr\Support\Employees\HrAccess;
  */
 #[ObservedBy(HrStatisticsObserver::class)]
 #[Fillable(['employee_id', 'position_id', 'contract_type_id', 'type', 'place', 'start_date', 'end_date', 'termination_reason_id', 'terminated_at', 'reason_of_termination', 'salary', 'currency', 'salary_per', 'work_hours_from', 'work_hours_to', 'work_hours_2_from', 'work_hours_2_to', 'work_days_en', 'work_days_ar', 'weekly_hours', 'schedule_mode', 'work_day_from', 'work_day_to', 'show_days_per_week', 'show_hours_per_week', 'show_hours_per_day', 'show_day_range', 'flex_days_per_week', 'flex_hours_per_week', 'flex_hours_per_month', 'flex_varies_by_requirements', 'flex_coordinated_with_manager', 'flex_custom_en', 'flex_custom_ar', 'pay_mode', 'session_duration', 'is_active', 'auto_renew'])]
-class Contract extends Model
+class Contract extends Model implements TracksActivity
 {
     /** @use HasFactory<ContractFactory> */
-    use HasFactory;
+    use HasFactory, RecordsActivity;
+
+    public function activityModule(): string
+    {
+        return 'hr-contracts';
+    }
+
+    public function activityProgramId(): ?int
+    {
+        return null;
+    }
+
+    /**
+     * The employee's name, in English like every stored label.
+     */
+    public function activityLabel(): string
+    {
+        $employeeId = (int) $this->activityAttribute('employee_id');
+
+        return app(EmployeeRecipients::class)->names([$employeeId])[$employeeId]['en'] ?? '';
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function activityEvents(): array
+    {
+        return ['terminated_at' => 'terminated', 'is_active' => 'status_changed'];
+    }
+
+    /**
+     * Clearing a termination is a plain update.
+     */
+    protected function activityEventForChange(string $field, mixed $old, mixed $new): ?string
+    {
+        if ($field === 'terminated_at' && $new === null) {
+            return 'updated';
+        }
+
+        return $this->activityEvents()[$field] ?? null;
+    }
+
+    protected function activityNotifies(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Pay terms and the termination narrative stay on the contract.
+     *
+     * @return list<string>
+     */
+    protected function activityExcludedFields(): array
+    {
+        return ['salary', 'currency', 'salary_per', 'pay_mode', 'session_duration', 'reason_of_termination'];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function activityProperties(string $event): array
+    {
+        return ['employee_id' => (int) $this->activityAttribute('employee_id')];
+    }
 
     /**
      * The person at the top of the organisation: the holder of the active

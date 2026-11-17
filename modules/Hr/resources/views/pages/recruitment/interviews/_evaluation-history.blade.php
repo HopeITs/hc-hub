@@ -4,7 +4,7 @@
         <li class="border-s-2 border-panel-border ps-3" wire:key="revision-{{ $revision->id }}">
             <p class="font-medium">
                 {{ __($e.'actions.'.$revision->action) }}
-                <span class="font-normal {{ $muted }}">· v{{ $revision->version }} · {{ $who($revision->changed_by_user_id) }} · {{ $at($revision->changed_at) }}</span>
+                <span class="font-normal {{ $muted }}">· {{ __('common.version_short', ['number' => $revision->version]) }} · {{ $who($revision->changed_by_user_id) }} · {{ $at($revision->changed_at) }}</span>
             </p>
             @if ($revision->reason)
                 <p class="mt-1 {{ $muted }}">{{ __($e.'reason') }}: {{ $revision->reason }}</p>

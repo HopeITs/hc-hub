@@ -13,7 +13,7 @@ return [
 
     'welcome' => [
         'kicker' => 'Guided tour',
-        'title' => 'Welcome to HC Tracking',
+        'title' => 'Welcome to HC Hub',
         'body' => 'A two-minute walk through what is on this screen and how to move around. You can leave at any time with Esc.',
     ],
     'page' => [

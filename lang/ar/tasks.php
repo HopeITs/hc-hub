@@ -243,4 +243,7 @@ return [
     'empty_scope_heading' => 'لا شيء في هذا التبويب',
     'empty_scope_body' => 'انتقل إلى «كل المهام» لترى كل شيء.',
     'show_all_tasks' => 'عرض كل المهام',
+    'source_type_employee' => 'موظف',
+    'subject_tasks_title' => 'المهام',
+    'subject_tasks_empty' => 'لا توجد مهام بعد.',
 ];

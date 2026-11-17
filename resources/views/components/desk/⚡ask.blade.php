@@ -256,7 +256,7 @@ new class extends Component {
         return Task::query()
             ->whereNull('parent_task_id')
             ->where('status', '!=', TaskStatus::Done)
-            ->whereHas('taskAssignees', fn (Builder $assignee) => $assignee->where('employee_id', $employeeId))
+            ->assignedTo(auth()->user())
             ->when($window === 'today', fn (Builder $query) => $query->whereDate('due_date', '<=', CarbonImmutable::today()))
             ->when($window === 'week', fn (Builder $query) => $query->whereDate('due_date', '<=', CarbonImmutable::today()->addDays(7)))
             ->orderByRaw('due_date is null, due_date')
@@ -285,7 +285,7 @@ new class extends Component {
             'proposals' => Proposal::query(),
             'donors' => Donor::query(),
             'tasks' => Task::query()->whereNull('parent_task_id')->where('status', '!=', TaskStatus::Done)
-                ->when($mine, fn (Builder $query) => $query->whereHas('taskAssignees', fn (Builder $assignee) => $assignee->where('employee_id', auth()->user()->employee_id ?? 0))),
+                ->when($mine, fn (Builder $query) => $query->assignedTo(auth()->user())),
             'milestones' => Milestone::query(),
             'risks' => Risk::query(),
             'transfers' => TransfersTracking::query(),
@@ -494,7 +494,7 @@ new class extends Component {
                 <div class="dk-pal-foot">
                     <span><kbd>↑</kbd> <kbd>↓</kbd> {{ __('desk.ask_move') }}</span>
                     <span><kbd><x-desk.icon name="enter" /></kbd> {{ __('desk.ask_open') }}</span>
-                    <span class="dk-pal-foot-more"><kbd>Alt</kbd> <kbd><x-desk.icon name="enter" /></kbd> {{ __('desk-workspace.ask.alt_enter') }}</span>
+                    <span class="dk-pal-foot-more"><kbd>{{ __('common.key_alt') }}</kbd> <kbd><x-desk.icon name="enter" /></kbd> {{ __('desk-workspace.ask.alt_enter') }}</span>
                     <span class="dk-pal-foot-more"><kbd>&gt;</kbd> {{ __('desk-workspace.ask.commands_only') }}</span>
                     <span><kbd>{{ __('desk.key_esc') }}</kbd> {{ __('desk.ask_close') }}</span>
                 </div>

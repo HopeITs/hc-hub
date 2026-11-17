@@ -105,7 +105,7 @@ return [
             'feed' => ['title' => 'The feed', 'body' => 'Open an item to jump to the record. Select several to mark them read together.'],
         ],
         'notification_settings_edit' => [
-            'intro' => ['title' => 'Notification settings', 'body' => 'Decide how and when HC Tracking gets your attention.'],
+            'intro' => ['title' => 'Notification settings', 'body' => 'Decide how and when HC Hub gets your attention.'],
             'popups' => ['title' => 'Pop-ups', 'body' => 'Choose whether new notifications appear as pop-ups on your device.'],
             'mutes' => ['title' => 'Mute a module', 'body' => 'Silence the modules you do not need to hear about.'],
         ],

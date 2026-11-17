@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
+use Modules\Hr\Support\Inbox\DeskAgenda;
 use Modules\Tracking\Enums\ArStatus;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
@@ -30,7 +31,8 @@ use Modules\Tracking\Support\MonthlyReportPeriods;
  * manage, or that they are responsible for; monthly reports still in draft
  * on their projects or prepared by them, on their due date; indicator
  * reports still in draft (reports viewers); pending tranches (transfers
- * viewers; once sent, one past its date is in transit, not overdue); and the donor reports they are responsible for. Proposals carry
+ * viewers; once sent, one past its date is in transit, not overdue); and the donor reports they are responsible for. Upcoming
+ * holidays and the approved leave of their team come from HR (never overdue). Proposals carry
  * no deadline column, so none appear. Each query keeps the module checks.
  *
  * Calls transferHref() and taskParentName() from ReadsDashboardAttention.
@@ -68,7 +70,7 @@ trait ReadsDeskAgenda
             ->select(['id', 'source_type', 'source_id', 'title', 'slug', 'due_date'])
             ->with(['source' => fn (MorphTo $morphTo) => $morphTo->morphWith([Milestone::class => ['project:id,name', 'proposal:id,name']])])
             ->where('status', '!=', TaskStatus::Done)
-            ->where(fn (Builder $query) => $query->where('created_by', $user->id)->orWhereHas('taskAssignees', fn (Builder $assignee) => $assignee->where('employee_id', $employeeId)))
+            ->involving($user)
             ->whereBetween('due_date', $window)
             ->get()
             ->map(fn (Task $task): array => [
@@ -160,6 +162,7 @@ trait ReadsDeskAgenda
             ->concat($reports)
             ->concat($transfers)
             ->concat($donorReports)
+            ->concat(app(DeskAgenda::class)->between($user, $from, $to))
             ->sortBy(fn (array $item): string => $item['date']->toDateString().$item['key'])
             ->values();
     }

@@ -131,7 +131,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offers')] class 
                     <x-ui.data-table.cell :label="__('hr_recruitment.applicant_ui.status')">
                         <x-ui.enum-badge :case="$offer->status" :label="__('hr_recruitment.applicant_ui.offers.statuses.'.$offer->status)" :tone="Labels::tone($offer->status)" />
                     </x-ui.data-table.cell>
-                    <x-ui.data-table.cell :label="__('hr_recruitment.applicant_ui.offers.version')"><span class="tabular-nums">v{{ $offer->currentVersion?->version_no }}</span></x-ui.data-table.cell>
+                    <x-ui.data-table.cell :label="__('hr_recruitment.applicant_ui.offers.version')"><span class="tabular-nums">{{ __('common.version_short', ['number' => $offer->currentVersion?->version_no]) }}</span></x-ui.data-table.cell>
                     <x-ui.data-table.cell :label="__('hr_recruitment.applicant_ui.offers.start_date')"><span class="whitespace-nowrap tabular-nums">{{ $fmt($offer->currentVersion?->start_date) }}</span></x-ui.data-table.cell>
                     <x-ui.data-table.cell :label="__('hr_recruitment.applicant_ui.offers.sent_at')"><span class="whitespace-nowrap tabular-nums">{{ $fmt($offer->sent_at) }}</span></x-ui.data-table.cell>
                     <x-ui.data-table.cell :label="__('hr_recruitment.applicant_ui.offers.expires_at')"><span class="whitespace-nowrap tabular-nums">{{ $fmt($offer->expires_at) }}</span></x-ui.data-table.cell>

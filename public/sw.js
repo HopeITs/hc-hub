@@ -1,7 +1,7 @@
 /**
- * HC Tracking service worker.
+ * HC Hub service worker.
  *
- * It makes the site installable as the "HC Tracking" app and owns its desktop
+ * It makes the site installable as the "HC Hub" app and owns its desktop
  * notifications (shown by resources/js/notifications.js with the app's name
  * and banner artwork). Popups carry no buttons: a click brings an app window
  * forward on the record, or on the inbox when several were piled up.
@@ -14,7 +14,7 @@ self.addEventListener('install', () => self.skipWaiting());
 
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
-/** Every open HC Tracking window, most recently focused first. */
+/** Every open HC Hub window, most recently focused first. */
 async function appWindows() {
     return self.clients.matchAll({ type: 'window', includeUncontrolled: true });
 }

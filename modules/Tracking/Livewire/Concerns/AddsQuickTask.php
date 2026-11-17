@@ -101,7 +101,7 @@ trait AddsQuickTask
 
         return [
             'type' => __('tasks.source_type_'.$source['type']),
-            'name' => $modelClass === null ? '' : (string) $modelClass::query()->whereKey($source['id'])->value('name'),
+            'name' => $modelClass === null ? '' : (string) $modelClass::query()->whereKey($source['id'])->first()?->getAttribute('name'),
         ];
     }
 

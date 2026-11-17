@@ -1,7 +1,7 @@
 # Secret scanning rules for gitleaks (no CI pipeline; run locally: gitleaks git --config .gitleaks.toml).
 # Known findings in old history are pinned in .gitleaksignore.
 
-title = "HC Tracking secret scanning"
+title = "HC Hub secret scanning"
 
 [extend]
 useDefault = true

@@ -14,6 +14,7 @@ return [
     'search_placeholder' => 'Name, username or national number',
     'needs_review' => 'Needs review',
     'count_years' => '{0} Less than a year|{1} :count year|[2,*] :count years',
+    'count_months' => '{1} :count month|[2,*] :count months',
 
     'views' => [
         'active' => 'Active',

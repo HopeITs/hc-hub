@@ -243,4 +243,7 @@ return [
     'empty_scope_heading' => 'Nothing in this tab',
     'empty_scope_body' => 'Switch to All tasks to see everything.',
     'show_all_tasks' => 'Show all tasks',
+    'source_type_employee' => 'Employee',
+    'subject_tasks_title' => 'Tasks',
+    'subject_tasks_empty' => 'No tasks yet.',
 ];

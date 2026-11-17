@@ -124,5 +124,13 @@
                 </div>
             </x-ui.panel>
         @endif
+
+        @can('view', $employee)
+            @can('viewAny', Modules\Tracking\Models\Task::class)
+                <livewire:tasks.subject-tasks subject-type="employee" :subject-id="$employee->id" :key="'employee-tasks-'.$employee->id" />
+            @endcan
+
+            <livewire:notes.panel subject-type="employee" :subject-id="$employee->id" :key="'employee-notes-'.$employee->id" />
+        @endcan
     </div>
 </div>

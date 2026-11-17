@@ -29,7 +29,7 @@
                     autocomplete="email"
                     required
                     @if ($invitation['error'] ?? null) aria-invalid="true" aria-describedby="invitee_email_error" @endif
-                    class="mt-2 block w-full max-w-sm rounded-none border-0 border-b border-neutral-300 bg-transparent px-0 py-2 text-base shadow-none outline-none focus:border-primary focus:ring-0 rtl:text-right"
+                    class="mt-2 block w-full max-w-sm rounded-none border-0 border-b border-neutral-300 bg-transparent px-0 py-2 text-base shadow-none outline-none focus:border-primary focus:ring-0 rtl:text-end"
                 >
             </div>
             <button

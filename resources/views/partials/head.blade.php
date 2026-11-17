@@ -15,8 +15,8 @@
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 <meta name="theme-color" content="#dcddde" media="(prefers-color-scheme: light)" data-theme-color="light">
 <meta name="theme-color" content="#1c1d20" media="(prefers-color-scheme: dark)" data-theme-color="dark">
-<meta name="application-name" content="HC Tracking">
-<meta name="apple-mobile-web-app-title" content="HC Tracking">
+<meta name="application-name" content="HC Hub">
+<meta name="apple-mobile-web-app-title" content="HC Hub">
 <meta name="mobile-web-app-capable" content="yes">
 
 {{-- Inside a Desk tab (an iframe on My desk) the page drops its own frame before first paint, even when the server could not tell (resources/js/desk-tab-child.js). --}}

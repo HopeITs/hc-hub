@@ -42,7 +42,7 @@ return [
     'help_tour_hint' => 'A guided walk through this page',
     'help_guideline_hint' => 'The written guide, in a new tab',
     'help_report_hint' => 'Tell the IT team what went wrong',
-    'help_install_hint' => 'Open HC Tracking in its own window',
+    'help_install_hint' => 'Open HC Hub in its own window',
     'display' => 'Language and theme',
     'pinned' => 'Pinned',
     'recent' => 'Most used',
@@ -58,8 +58,10 @@ return [
     'section_targets' => 'Targets',
     'section_funding' => 'Funding',
     'section_files' => 'Files and activity',
-    'kind_project' => 'Project',
-    'kind_monthly_report' => 'Monthly report',
-    'kind_agreement' => 'Agreement',
+    'kinds' => [
+        'project' => 'Project',
+        'monthly_report' => 'Monthly report',
+        'agreement' => 'Agreement',
+    ],
     'due_soon' => 'Something here is due soon',
 ];

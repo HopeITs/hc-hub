@@ -41,8 +41,10 @@ final class HrAccess
         }
 
         return once(function () use ($user): string {
-            if ($user->active_role_id !== null) {
-                $name = Role::query()->whereKey($user->active_role_id)->value('name');
+            $activeRoleId = $user->getAttributes()['active_role_id'] ?? null;
+
+            if ($activeRoleId !== null) {
+                $name = Role::query()->whereKey($activeRoleId)->value('name');
 
                 if (is_string($name) && $name !== '') {
                     return strtoupper(trim($name));

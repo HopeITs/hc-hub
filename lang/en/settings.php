@@ -43,7 +43,7 @@ return [
     'two_factor_authentication_enabled' => 'Two-factor authentication enabled',
     'two_factor_authentication_is_now_enabled_scan_the_qr_code_or' => 'Two-factor authentication is now enabled. Scan the QR code or enter the setup key in your authenticator app.',
     'two_factor_required_cannot_disable' => 'Your role requires two-factor authentication, so it cannot be switched off.',
-    'two_factor_required_explanation' => 'Your role can reach sensitive records, so the rest of HC Tracking stays closed until you turn on two-factor authentication below.',
+    'two_factor_required_explanation' => 'Your role can reach sensitive records, so the rest of HC Hub stays closed until you turn on two-factor authentication below.',
     'two_factor_required_heading' => 'Two-factor authentication is required for your role',
     'two_factor_required_notice' => 'Your role requires two-factor authentication. Turn it on to continue.',
     'verify_authentication_code' => 'Verify authentication code',

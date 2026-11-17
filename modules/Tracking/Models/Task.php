@@ -192,6 +192,9 @@ class Task extends Model implements TracksActivity
         ];
     }
 
+    /**
+     * The program the task sits in; none for a department or employee source.
+     */
     public function activityProgramId(): ?int
     {
         $sourceId = $this->activityAttribute('source_id');
@@ -233,8 +236,8 @@ class Task extends Model implements TracksActivity
     }
 
     /**
-     * The milestone, proposal, project, program or department this task is
-     * raised against.
+     * The milestone, proposal, project, program, department or employee this
+     * task is raised against.
      *
      * There is no foreign key behind source_id, so a source can be deleted
      * out from under this row.
@@ -333,6 +336,74 @@ class Task extends Model implements TracksActivity
             ->where(fn (Builder $inner) => $inner->where('tasks.source_type', '!=', 'project')->orWhereNotIn('tasks.source_id', $paused))
             ->where(fn (Builder $inner) => $inner->where('tasks.source_type', '!=', 'milestone')
                 ->orWhereNotIn('tasks.source_id', Milestone::query()->select('milestones.id')->whereIn('milestones.project_id', $paused)));
+    }
+
+    /**
+     * Tasks assigned to the user's HR employee (nothing for a user without one).
+     *
+     * @param  Builder<Task>  $query
+     */
+    #[Scope]
+    protected function assignedTo(Builder $query, User $user): void
+    {
+        $query->whereHas('taskAssignees', fn (Builder $assignee) => $assignee->where('employee_id', $user->employee_id ?? 0));
+    }
+
+    /**
+     * Tasks the user raised.
+     *
+     * @param  Builder<Task>  $query
+     */
+    #[Scope]
+    protected function createdBy(Builder $query, User $user): void
+    {
+        $query->where($query->qualifyColumn('created_by'), $user->id);
+    }
+
+    /**
+     * Tasks the user is assigned to or raised, subtasks included.
+     *
+     * @param  Builder<Task>  $query
+     */
+    #[Scope]
+    protected function involving(Builder $query, User $user): void
+    {
+        $query->where(fn (Builder $mine) => $mine->createdBy($user)->orWhere(fn (Builder $assigned) => $assigned->assignedTo($user)));
+    }
+
+    /**
+     * The one definition of "my tasks": top-level tasks the user is assigned
+     * to or raised.
+     *
+     * @param  Builder<Task>  $query
+     */
+    #[Scope]
+    protected function forUser(Builder $query, User $user): void
+    {
+        $query->whereNull($query->qualifyColumn('parent_task_id'))->involving($user);
+    }
+
+    /**
+     * Tasks the user raised that wait for the user's review.
+     *
+     * @param  Builder<Task>  $query
+     */
+    #[Scope]
+    protected function awaitingReviewBy(Builder $query, User $user): void
+    {
+        $query->where($query->qualifyColumn('status'), TaskStatus::UnderReview->value)->createdBy($user);
+    }
+
+    /**
+     * Tasks raised against one record: a program, project, proposal,
+     * milestone, department or employee (the morph map key).
+     *
+     * @param  Builder<Task>  $query
+     */
+    #[Scope]
+    protected function forSubject(Builder $query, string $type, int $id): void
+    {
+        $query->where($query->qualifyColumn('source_type'), $type)->where($query->qualifyColumn('source_id'), $id);
     }
 
     /**

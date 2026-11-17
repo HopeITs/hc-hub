@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Models;
 
+use App\Concerns\RecordsActivity;
+use App\Notifications\TracksActivity;
 use App\Support\Like;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
@@ -89,10 +91,10 @@ use Modules\Tracking\Models\TaskAssignee;
  */
 #[ObservedBy(HrStatisticsObserver::class)]
 #[Fillable(['city_id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar', 'father_name_en', 'father_name_ar', 'mother_name_en', 'mother_name_ar', 'username', 'national_number', 'actual_dob', 'dob', 'pob_en', 'pob_ar', 'civil_registry_office', 'civil_registry_number', 'gender', 'nationality', 'marital_status', 'children', 'work_phone', 'personal_phone', 'personal_email', 'whatsapp_work', 'telegram_work', 'facebook', 'instagram', 'linkedin', 'address_en', 'address_ar', 'skills', 'interests', 'is_active', 'is_board_member', 'board_member_started_at', 'board_member_end_at', 'joined_at'])]
-class Employee extends Model
+class Employee extends Model implements TracksActivity
 {
     /** @use HasFactory<EmployeeFactory> */
-    use HasFactory, HasTranslation, PresentsEmployee;
+    use HasFactory, HasTranslation, PresentsEmployee, RecordsActivity;
 
     /**
      * @return array<string, string>
@@ -147,6 +149,54 @@ class Employee extends Model
      * Memoized result of isOnLeaveToday() — not a database column.
      */
     protected ?bool $onLeaveTodayMemo = null;
+
+    public function activityModule(): string
+    {
+        return 'hr-employees';
+    }
+
+    public function activityProgramId(): ?int
+    {
+        return null;
+    }
+
+    public function activityLabel(): string
+    {
+        return trim($this->activityAttribute('first_name_en').' '.$this->activityAttribute('last_name_en'));
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function activityEvents(): array
+    {
+        return ['is_active' => 'status_changed'];
+    }
+
+    /**
+     * HR events are logged for the activity log and the profile timeline only.
+     */
+    protected function activityNotifies(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Identity, contact and security columns never reach the log, which more
+     * people can read than the private profile.
+     *
+     * @return list<string>
+     */
+    protected function activityExcludedFields(): array
+    {
+        return [
+            'national_number', 'civil_registry_office', 'civil_registry_number', 'actual_dob', 'dob',
+            'pob_en', 'pob_ar', 'father_name_en', 'father_name_ar', 'mother_name_en', 'mother_name_ar',
+            'personal_phone', 'personal_email', 'address_en', 'address_ar',
+            'digital_id_token', 'digital_id_enabled', 'digital_id_rotated_at', 'digital_id_revoked_at', 'digital_id_card_index',
+            'last_saved_by',
+        ];
+    }
 
     public function nameForLocale(string $locale): string
     {
@@ -702,18 +752,18 @@ class Employee extends Model
         $end = $this->serviceEndDate();
 
         if (! $start || $end->lte($start)) {
-            return trans_choice('general.count.years', 0);
+            return trans_choice('hr_employees.count_years', 0);
         }
 
         $years = $this->yearsOfServiceOn();
         $months = (int) floor($start->copy()->addYears($years)->diffInMonths($end));
 
         $parts = array_filter([
-            $years > 0 ? trans_choice('general.count.years', $years) : null,
-            $months > 0 ? trans_choice('general.count.months', $months) : null,
+            $years > 0 ? trans_choice('hr_employees.count_years', $years, ['count' => $years]) : null,
+            $months > 0 ? trans_choice('hr_employees.count_months', $months, ['count' => $months]) : null,
         ]);
 
-        return $parts !== [] ? implode(' ', $parts) : trans_choice('general.count.years', 0);
+        return $parts !== [] ? implode(' ', $parts) : trans_choice('hr_employees.count_years', 0);
     }
 
     public function getYearsOfServiceAttribute(): int

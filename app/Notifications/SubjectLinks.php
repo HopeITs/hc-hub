@@ -8,6 +8,8 @@ use App\Models\UserNotification;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Modules\Core\Models\Program;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\LeaveRequest;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\Donor;
 use Modules\Tracking\Models\DonorProposal;
@@ -82,8 +84,40 @@ final class SubjectLinks
             'role' => route('admin.users.index', ['tab' => 'roles']),
             'meal_coverage' => route('admin.cities.index'),
             'supervision' => route('admin.users.index', ['tab' => 'supervision']),
+            'employee' => $this->employeeRoute($id),
+            'contract' => route('hr.contracts.show', $id),
+            'leave_request' => $this->leaveRequestRoute($id),
             default => null,
         };
+    }
+
+    /**
+     * The profile is bound by username; a record without one (a draft) leads
+     * to the directory instead.
+     */
+    private function employeeRoute(int $id): ?string
+    {
+        $employee = Employee::query()->find($id, ['id', 'username']);
+
+        if ($employee === null) {
+            return null;
+        }
+
+        return blank($employee->username) ? route('hr.employees.index') : route('hr.employees.show', $employee);
+    }
+
+    /**
+     * A leave request has no page of its own; it leads to the requester's profile.
+     */
+    private function leaveRequestRoute(int $id): ?string
+    {
+        $employeeId = LeaveRequest::query()
+            ->whereKey($id)
+            ->join('leave_balances', 'leave_balances.id', '=', 'leave_requests.leave_balance_id')
+            ->join('contracts', 'contracts.id', '=', 'leave_balances.contract_id')
+            ->value('contracts.employee_id');
+
+        return $employeeId === null ? null : $this->employeeRoute((int) $employeeId);
     }
 
     /**

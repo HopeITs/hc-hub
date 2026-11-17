@@ -498,7 +498,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.application_form
                     @else
                         <x-ui.form-select wire:model="selectedTemplateVersionId" :label="__('hr_recruitment.application_form.choose_form_template')" :placeholder="__('hr_recruitment.application_form.choose')" wrap-labels>
                             @foreach ($templates as $template)
-                                <option value="{{ $template['id'] }}">{{ $template['title'][$locale] }}@if ($template['city'][$locale] !== '') · {{ $template['city'][$locale] }}@endif · v{{ $template['version'] }}@if ($template['published_at']) · {{ $template['published_at'] }}@endif</option>
+                                <option value="{{ $template['id'] }}">{{ $template['title'][$locale] }}@if ($template['city'][$locale] !== '') · {{ $template['city'][$locale] }}@endif · {{ __('common.version_short', ['number' => $template['version']]) }}@if ($template['published_at']) · {{ $template['published_at'] }}@endif</option>
                             @endforeach
                         </x-ui.form-select>
                         <x-ui.button size="sm" tone="secondary" wire:click="applyPublishedTemplate" wire:confirm="{{ __('hr_recruitment.application_form.reuse_confirm') }}">{{ __('hr_recruitment.application_form.use_template') }}</x-ui.button>

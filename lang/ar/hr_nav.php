@@ -34,7 +34,7 @@ return [
     'statistics_contracts' => 'إحصاءات العقود',
     'statistics_salaries' => 'إحصاءات الرواتب',
     'assistant' => 'مساعد الموارد البشرية',
-    'activity' => 'أرشيف نشاط الموارد البشرية',
+    'activity' => 'أرشيف النشاط',
     'feedback' => 'الملاحظات',
     'settings' => 'إعدادات الموارد البشرية',
 ];

@@ -98,6 +98,15 @@ trait RecordsActivity
     }
 
     /**
+     * Whether recorded events may fan out to notifications. False for
+     * subjects that are only logged (HR records), so no job is queued.
+     */
+    protected function activityNotifies(): bool
+    {
+        return true;
+    }
+
+    /**
      * Columns never written to the activity log, on top of the hidden ones:
      * values that must stay out of the log but are still serialized.
      *
@@ -150,14 +159,14 @@ trait RecordsActivity
 
         if ($hook === 'created') {
             $event = $this->activityCreatedEvent();
-            $recorder->record($this, $event, properties: $this->activityProperties($event));
+            $recorder->record($this, $event, properties: $this->activityProperties($event), notify: $this->activityNotifies());
 
             return;
         }
 
         if ($hook === 'deleted') {
             $event = $this->activityDeletedEvent();
-            $recorder->record($this, $event, properties: [...$this->activityDeletionProperties, ...$this->activityProperties($event)]);
+            $recorder->record($this, $event, properties: [...$this->activityDeletionProperties, ...$this->activityProperties($event)], notify: $this->activityNotifies());
 
             return;
         }
@@ -190,7 +199,7 @@ trait RecordsActivity
 
         $event = $this->getMorphClass().'.'.($suffix ?? 'updated');
 
-        $recorder->record($this, $event, $changes, ['field' => $field, ...$this->activityProperties($event)], notify: $suffix !== null);
+        $recorder->record($this, $event, $changes, ['field' => $field, ...$this->activityProperties($event)], notify: $suffix !== null && $this->activityNotifies());
     }
 
     /**

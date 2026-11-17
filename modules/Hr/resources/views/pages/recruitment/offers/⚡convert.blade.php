@@ -222,7 +222,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer_convert')]
         <x-slot:meta>
             <span class="font-medium"><bdi>{{ $applicant?->full_name }}</bdi></span>
             <span dir="auto">{{ $position?->title }}</span>
-            <span>{{ __('hr_recruitment.applicant_ui.offers.document_title') }} <span class="tabular-nums">v{{ $version?->version_no }}</span></span>
+            <span>{{ __('hr_recruitment.applicant_ui.offers.document_title') }} <span class="tabular-nums">{{ __('common.version_short', ['number' => $version?->version_no]) }}</span></span>
         </x-slot:meta>
     </x-ui.detail-header>
 

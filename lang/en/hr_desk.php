@@ -12,7 +12,7 @@ return [
     'until' => 'Until :date',
     'unavailable' => 'This card is not available to you.',
     'no_match' => 'Nothing matches.',
-    'locked' => 'Your role does not include this HR card.',
+    'locked' => 'Your role does not include this card.',
 
     'leave_status' => [
         0 => 'Waiting',
@@ -29,7 +29,7 @@ return [
 
     'cards' => [
         'decisions' => [
-            'title' => 'HR decisions',
+            'title' => 'Decisions',
             'description' => 'Leaves, items and profile changes waiting on you.',
             'tagline' => 'Waiting on you, longest first',
             'empty' => 'Nothing is waiting on you.',
@@ -38,7 +38,7 @@ return [
             'other' => 'Other',
         ],
         'late' => [
-            'title' => 'Late in HR',
+            'title' => 'Late',
             'description' => 'Leaves that started undecided and contracts that ended without a new one.',
             'tagline' => 'Already past its moment',
             'empty' => 'Nothing is late.',
@@ -63,7 +63,7 @@ return [
             'upcoming' => 'Coming up',
         ],
         'calendar' => [
-            'title' => 'HR calendar',
+            'title' => 'Calendar',
             'description' => 'Holidays, events and your leaves, with the leaves, birthdays and ending contracts of your team, over the next 30 days.',
             'tagline' => 'The next 30 days',
             'empty' => 'Nothing in the next 30 days.',
@@ -144,7 +144,7 @@ return [
             'this_week' => 'This week',
         ],
         'team' => [
-            'title' => 'My HR team',
+            'title' => 'My manager and team',
             'description' => 'Your manager and the people of your team, with their positions.',
             'tagline' => 'Your manager and your team',
             'empty' => 'No team to show yet.',
@@ -208,8 +208,8 @@ return [
             'people' => 'People',
         ],
         'notes' => [
-            'title' => 'My HR notes',
-            'description' => 'Your private notes from the HR dashboard.',
+            'title' => 'My notes',
+            'description' => 'Your private notes.',
             'tagline' => 'Private to you',
             'empty' => 'No notes yet. Write the first one above.',
             'label' => 'New note',

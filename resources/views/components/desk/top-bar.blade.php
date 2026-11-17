@@ -2,6 +2,8 @@
 
 @php
     $user = auth()->user();
+    /* The employee's name follows the interface language, as the Desk greeting does. */
+    $displayName = $user?->loadMissing('employee')->employee?->name ?? $user?->name;
     $current = \App\Enums\Locale::current();
     $other = $current === \App\Enums\Locale::Arabic ? \App\Enums\Locale::English : \App\Enums\Locale::Arabic;
     $otherName = $other === \App\Enums\Locale::Arabic ? 'العربية' : 'English';
@@ -118,7 +120,7 @@
                         <div class="dk-usermenu-who">
                             <x-ui.avatar :src="$user?->avatarUrl()" class="dk-avatar dk-avatar-lg" />
                             <span class="min-w-0">
-                                <strong>{{ $user->name }}</strong>
+                                <strong>{{ $displayName }}</strong>
                                 <small>{{ $user->email }}</small>
                             </span>
                         </div>

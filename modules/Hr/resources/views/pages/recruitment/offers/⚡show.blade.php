@@ -319,7 +319,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer')] class e
     >
         <x-slot:meta>
             <x-ui.enum-badge :case="$offer->status" :label="__('hr_recruitment.applicant_ui.offers.statuses.'.$offer->status)" :tone="\Modules\Hr\Support\Recruitment\Labels::tone($offer->status)" />
-            <span>{{ __('hr_recruitment.applicant_ui.offers.document_title') }} · <span class="tabular-nums">v{{ $current?->version_no }}</span></span>
+            <span>{{ __('hr_recruitment.applicant_ui.offers.document_title') }} · <span class="tabular-nums">{{ __('common.version_short', ['number' => $current?->version_no]) }}</span></span>
             <span dir="auto">{{ $offer->position?->title }}</span>
             @if ($state['canSeeApplicant'] && Route::has('hr.recruitment.applicants.show'))
                 <a href="{{ route('hr.recruitment.applicants.show', ['applicantId' => $application->applicant_id]) }}" wire:navigate class="underline-offset-4 hover:underline">{{ __('hr_recruitment.applicant_ui.interviews.open_applicant') }}</a>
@@ -425,7 +425,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer')] class e
                     @foreach ($offer->versions as $version)
                         <li class="space-y-2 px-4 py-3 text-sm" wire:key="version-{{ $version->id }}">
                             <p class="font-semibold">
-                                <span class="tabular-nums">v{{ $version->version_no }}</span> · {{ __('hr_recruitment.applicant_ui.offers.version_statuses.'.$version->status) }}
+                                <span class="tabular-nums">{{ __('common.version_short', ['number' => $version->version_no]) }}</span> · {{ __('hr_recruitment.applicant_ui.offers.version_statuses.'.$version->status) }}
                                 <span class="font-normal {{ $muted }}">
                                     · {{ $name($version->creator) }} · <span class="tabular-nums">{{ $dateTime($version->created_at) }}</span>
                                     @if ($version->sent_at) · {{ __('hr_recruitment.applicant_ui.offers.sent_at') }} <span class="tabular-nums">{{ $dateTime($version->sent_at) }}</span>@endif

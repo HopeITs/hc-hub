@@ -14,12 +14,12 @@ return [
     '419_body' => 'Your session timed out for security. Anything left in an open form may not have been saved.',
 
     '429_heading' => 'A few too many requests, too fast',
-    '429_body' => "We're holding this page for a moment to keep HC Tracking running smoothly for everyone.",
+    '429_body' => "We're holding this page for a moment to keep HC Hub running smoothly for everyone.",
 
     '500_heading' => 'Something broke on our end',
     '500_body' => "An unexpected error interrupted this page. It's been logged for the team to look into.",
 
-    '503_heading' => 'HC Tracking is being improved right now',
+    '503_heading' => 'HC Hub is being improved right now',
     '503_body' => "We're carrying out scheduled maintenance. This should only take a few minutes.",
 
     'file_unreadable' => 'The file could not be opened. Please contact IT.',

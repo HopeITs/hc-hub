@@ -147,4 +147,13 @@ return [
     'keep_editing' => 'Keep editing',
     'list_separator' => ', ',
     'unsaved_leave_text' => 'What you changed on this page has not been saved. If you leave now it is lost.',
+    'organisation_name' => 'Christian Hope Center',
+    'organisation_short_name' => 'Hope Center',
+    'we_are_hiring' => 'We’re hiring',
+    'version_short' => 'v:number',
+    'file_size_kb' => ':size KB',
+    'utc_offset' => 'UTC:offset',
+    'website' => 'Website',
+    'key_alt' => 'Alt',
+    'edit' => 'Edit',
 ];

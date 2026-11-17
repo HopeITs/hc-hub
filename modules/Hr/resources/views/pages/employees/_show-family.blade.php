@@ -51,7 +51,7 @@
                             <p class="font-semibold {{ $ink }}" dir="auto">{{ $attachmentName }}</p>
                             <p class="text-xs {{ $muted }}">
                                 @if ($attachmentCategory !== '') {{ __('hr_employees.records.categories.'.$attachmentCategory) }} · @endif
-                                <span dir="ltr">{{ strtoupper(HrMedia::extension($attachment)) }} · {{ number_format($attachment->size / 1024) }} KB</span>
+                                <span dir="ltr">{{ strtoupper(HrMedia::extension($attachment)) }}</span> · {{ __('common.file_size_kb', ['size' => number_format($attachment->size / 1024)]) }}
                             </p>
                         </div>
                         <x-hr::employees.record-actions kind="attachment" :id="$attachment->id" :file="$attachment->id" :editable="$canEdit" :name="$attachmentName" />

@@ -2,7 +2,7 @@
 
 return [
     'your_desk' => 'مكتبك',
-    'logo_label' => 'متابعة مركز الأمل، مكتبك',
+    'logo_label' => 'HC Hub، مكتبك',
     'search' => 'بحث',
     'panel_search' => 'ابحث في :panel',
     'search_placeholder' => 'ابحث بالاسم…',
@@ -85,6 +85,10 @@ return [
         'validate' => 'تقرير :month للاعتماد',
         'approve' => 'أُرسلت لمراجعتك',
         'accept' => 'سُلّمت لاستلامك',
+        'leave' => 'طلب إجازة · :what',
+        'leave_review' => 'طلب إجازة للتأكيد · :what',
+        'profile_change' => 'تعديل بيانات · :what',
+        'recruitment' => 'طلب توظيف · :what',
     ],
     'decision_action' => [
         'proposal' => 'فتح',
@@ -92,6 +96,10 @@ return [
         'validate' => 'اعتمد',
         'approve' => 'وافق',
         'accept' => 'استلم',
+        'leave' => 'قرّر',
+        'leave_review' => 'أكّد',
+        'profile_change' => 'وافق',
+        'recruitment' => 'راجِع',
     ],
     'decision_done' => [
         'accept' => 'تم استلام المخرَج.',
@@ -262,6 +270,8 @@ return [
         'transfer' => 'تحويل',
         'donor-report' => 'تقرير مانح',
         'monthly-report' => 'تقرير شهري',
+        'holiday' => 'عطلة',
+        'team-leave' => 'إجازة الفريق',
     ],
     'agenda_monthly_report' => 'موعد تقرير :month',
     'agenda_items' => '{0} لا شيء|{1} عنصر واحد|{2} عنصران|[3,10] :count عناصر|[11,*] :count عنصرًا',
@@ -469,7 +479,7 @@ return [
         'myteam' => [
             'title' => 'فريقي',
             'description' => 'من يتبعون لك وفرق مشاريعك وقسمك، مع ما تأخر لدى كل منهم. انكز أي شخص بملاحظة قصيرة.',
-            'locked' => 'حسابك غير مرتبط بموظف في الموارد البشرية.',
+            'locked' => 'حسابك غير مرتبط بسجل موظف.',
             'empty' => 'لا أحد في فريقك بعد.',
         ],
         'targets' => [

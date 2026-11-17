@@ -307,29 +307,11 @@ trait FiltersTaskDirectory
                 $this->departmentId !== '' && auth()->user()->canViewAllTaskDepartments(),
                 fn (Builder $query) => $this->scopeTasksToDepartment($query, (int) $this->departmentId),
             )
-            ->when($this->scope === 'mine', function (Builder $query): void {
-                $employeeId = auth()->user()->employee_id;
-
-                $employeeId === null
-                    ? $query->whereRaw('1 = 0')
-                    : $query->whereHas('taskAssignees', fn (Builder $query) => $query->where('employee_id', $employeeId));
-            })
-            ->when($this->scope === 'assigned', fn (Builder $query) => $query->where('created_by', auth()->id()))
+            ->when($this->scope === 'mine', fn (Builder $query) => $query->assignedTo(auth()->user()))
+            ->when($this->scope === 'assigned', fn (Builder $query) => $query->createdBy(auth()->user()))
             // The creator approves their own tasks (TaskWorkflow::approves).
-            ->when($this->scope === 'review', fn (Builder $query) => $query
-                ->where('status', TaskStatus::UnderReview->value)
-                ->where('created_by', auth()->id()))
-            ->when($this->myTasksOnly || $this->view === 'cards', function (Builder $query): void {
-                $user = auth()->user();
-                $employeeId = $user->employee_id;
-
-                $query->where(fn (Builder $query) => $query
-                    ->when($employeeId !== null, fn (Builder $query) => $query->orWhereHas(
-                        'taskAssignees',
-                        fn (Builder $query) => $query->where('employee_id', $employeeId),
-                    ))
-                    ->orWhere('created_by', $user->id));
-            });
+            ->when($this->scope === 'review', fn (Builder $query) => $query->awaitingReviewBy(auth()->user()))
+            ->when($this->myTasksOnly || $this->view === 'cards', fn (Builder $query) => $query->involving(auth()->user()));
     }
 
     /**

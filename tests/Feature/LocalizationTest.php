@@ -1,12 +1,17 @@
 <?php
 
 use App\Enums\Locale;
-use Modules\Core\Models\City as HrCity;
-use Modules\Hr\Models\Employee as HrEmployee;
+use App\Support\Blaze\NonFoldingBlazeManager;
+use App\Support\Blaze\NonFoldingFolder;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
+use Livewire\Blaze\BlazeManager;
+use Modules\Core\Models\City as HrCity;
 use Modules\Core\Models\User;
+use Modules\Hr\Enums\ContractStatus;
+use Modules\Hr\Enums\EmployeeStatus;
+use Modules\Hr\Models\Employee as HrEmployee;
 use Modules\Tracking\Enums\ProposalStatus;
 use Modules\Tracking\Enums\TaskStatus;
 
@@ -86,9 +91,10 @@ test('every translation key used in the code exists in english and arabic', func
 
     $keys = [];
     foreach (array_unique($files) as $file) {
-        // A literal ending in "." is a prefix joined to a runtime value
-        // (__('access.actions.'.$action)), not a key of its own.
-        preg_match_all("/(?:__|trans_choice)\\('([a-z_]+\\.[a-z0-9_.]*[a-z0-9_])'/", file_get_contents($file), $matches);
+        // A literal ending in "." or joined to a runtime value
+        // (__('access.actions.'.$action), __('indicators.status_'.$status))
+        // is a prefix, not a key of its own.
+        preg_match_all("/(?:__|trans_choice)\\('([a-z_]+\\.[a-z0-9_.]*[a-z0-9_])'(?!\s*\.)/", file_get_contents($file), $matches);
         foreach ($matches[1] as $key) {
             $keys[$key] = true;
         }
@@ -256,6 +262,20 @@ test('every enum case has an arabic label', function () {
     }
 });
 
+test('hr employee and contract statuses are labelled in both languages, never by a raw key', function () {
+    foreach (Locale::values() as $locale) {
+        app()->setLocale($locale);
+
+        foreach ([...EmployeeStatus::cases(), ...ContractStatus::cases()] as $case) {
+            expect($case->label())->not->toMatch('/^[a-z_]+\.[a-z0-9_.\-]+$/', $case::class."::{$case->name} has no {$locale} label");
+        }
+    }
+
+    app()->setLocale('ar');
+    expect(EmployeeStatus::Active->label())->toBe('نشط')
+        ->and(ContractStatus::Expired->label())->toBe('منتهي');
+});
+
 test('hr names show arabic first in arabic and english first in english', function () {
     $employee = HrEmployee::find(insertHrEmployee(firstNameEn: 'Sami', lastNameEn: 'Haddad', firstNameAr: 'سامي', lastNameAr: 'حداد'));
     $city = HrCity::find(insertHrCity('Aleppo', 'حلب'));
@@ -313,8 +333,16 @@ test('the desk greets an arabic user by their arabic first name', function () {
         ->assertDontSeeText('Rami');
 });
 
-test('blaze stays disabled so compiled views never bake in one language', function () {
-    expect(config('blaze.enabled'))->toBeFalse();
+/*
+| Blaze is on since 11 Nov 2026 (.ai/rules/flux.md); what must never come back
+| is folding, which stored labels in whichever language compiled first.
+*/
+
+test('blaze never folds components so compiled views never bake in one language', function () {
+    $folder = (fn (): object => $this->folder)->call(app(BlazeManager::class));
+
+    expect(app(BlazeManager::class))->toBeInstanceOf(NonFoldingBlazeManager::class)
+        ->and($folder)->toBeInstanceOf(NonFoldingFolder::class);
 });
 
 test('a date is formatted with levantine month names without changing the caller locale', function () {

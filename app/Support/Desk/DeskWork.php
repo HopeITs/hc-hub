@@ -96,11 +96,7 @@ final class DeskWork
      */
     public static function myTasks(User $user): Builder
     {
-        return self::visibleTasks($user)
-            ->whereNull('parent_task_id')
-            ->where(fn (Builder $mine) => $mine
-                ->where('created_by', $user->id)
-                ->orWhereHas('taskAssignees', fn (Builder $assignee) => $assignee->where('employee_id', $user->employee_id ?? 0)));
+        return self::visibleTasks($user)->forUser($user);
     }
 
     /**

@@ -17,7 +17,7 @@
  *
  * Desktop popups go through the service worker (public/sw.js) so they carry
  * the app's name and banner artwork, and a click opens the record. The same file
- * makes the site installable as the "HC Tracking" app; the install prompt is
+ * makes the site installable as the "HC Hub" app; the install prompt is
  * exposed on window.hcApp, and the install dialog (appInstallDialog) uses it.
  */
 const POLL_INTERVAL_MS = 60_000;
@@ -432,7 +432,7 @@ document.addEventListener('visibilitychange', () => {
 
 document.addEventListener('alpine:init', () => {
     /**
-     * The Install HC Tracking dialog (x-notifications.install-modal). Install
+     * The Install HC Hub dialog (x-notifications.install-modal). Install
      * hands over to the browser's own confirm and the dialog closes after its
      * answer, whichever it is. If the prompt goes away while the dialog is
      * open (installed from the address bar), there is nothing left to offer,

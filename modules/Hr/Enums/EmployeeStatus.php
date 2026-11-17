@@ -52,10 +52,10 @@ enum EmployeeStatus: string implements HasStatusTone
     public function label(): string
     {
         return match ($this) {
-            self::Incomplete => __('employees.onboarding.status-incomplete'),
-            self::Active => __('general.active'),
-            self::AwaitingContract => __('employees.onboarding.status-awaiting'),
-            self::Inactive => __('general.inactive'),
+            self::Incomplete => __('hr_employees.status.incomplete'),
+            self::Active => __('hr_employees.status.active'),
+            self::AwaitingContract => __('hr_employees.status.awaiting_contract'),
+            self::Inactive => __('hr_employees.status.inactive'),
         };
     }
 }
