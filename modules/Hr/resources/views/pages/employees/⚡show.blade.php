@@ -107,6 +107,13 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
 
         <x-slot:actions>
             <div class="flex flex-wrap items-center gap-2">
+                @if (! $this->isSelf)
+                    <x-hr::employees.message-template-menu :employee="$employee" />
+                @endif
+                @if ($this->dontRenewUrl !== null)
+                    {{-- The direct manager asks the city's HR not to renew: a new email, nothing is sent from here. --}}
+                    <x-ui.button icon="envelope" :href="$this->dontRenewUrl" :title="__('hr_journeys.dont_renew.hint')" data-test="dont-renew">{{ __('hr_journeys.dont_renew.action') }}</x-ui.button>
+                @endif
                 @if ($canEdit)
                     <x-ui.button icon="pencil-square" :href="route('hr.employees.edit', $employee->id)" wire:navigate data-test="edit-employee">{{ __('hr_employees.actions.edit_record') }}</x-ui.button>
                 @endif

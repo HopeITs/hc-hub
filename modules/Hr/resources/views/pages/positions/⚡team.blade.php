@@ -164,6 +164,10 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.team')] class extends 
     $chart = $this->chart;
     $positions = $chart['positions'];
     $openSeats = $positions->sum(fn ($position) => max(0, (int) $position->max_emp - (int) $position->exist_emp));
+    // An open seat links straight to a hiring request for it, position pre-filled.
+    $canRequestHire = \Modules\Hr\Support\Recruitment\Access::hasActivePermission(auth()->user(), 'recruitment-requests.view')
+        && \Modules\Hr\Support\Recruitment\Access::hasActivePermission(auth()->user(), 'recruitment-requests.manage');
+    $teamEmail = config('app.team_email');
 @endphp
 
 <x-desk.register class="@container/directory" heading-id="hr-team-heading" :title="__('hr_positions.titles.team')" :count="$positions->count()">
@@ -199,6 +203,10 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.team')] class extends 
 
     <x-slot:actions>
         <flux:checkbox wire:model.live="openOnly" :label="__('hr_positions.team.open_only')" />
+        @if (filled($teamEmail))
+            {{-- A new message to the team's shared mailbox, not to each address. --}}
+            <x-ui.button icon="envelope" :href="'mailto:'.$teamEmail" data-test="email-team">{{ __('hr_positions.team.email_team') }}</x-ui.button>
+        @endif
         @can('viewAny', \Modules\Hr\Models\Position::class)
             <x-ui.button icon="briefcase" :href="route('hr.positions.index')" wire:navigate>{{ __('hr_positions.titles.index') }}</x-ui.button>
         @endcan

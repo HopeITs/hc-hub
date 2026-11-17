@@ -16,6 +16,7 @@ use Modules\Hr\Models\LeaveRequest;
 use Modules\Hr\Support\Leave\LeaveContext;
 use Modules\Hr\Support\Leave\LeaveDecisionAlreadyMade;
 use Modules\Hr\Support\Leave\LeaveRequestNextStep;
+use Modules\Hr\Support\Leave\LeaveRequestPricing;
 use Modules\Hr\Support\Leave\LeaveRequestReview;
 
 /*
@@ -63,6 +64,40 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
         ]);
 
         return $leaveRequest;
+    }
+
+    /**
+     * The balance a pending request draws on, for whoever decides it: what is
+     * available, what this request takes, what the other pending requests on
+     * the same balance take, and what is left if it is accepted. Hours and
+     * days only, never pay. Advisory: it never blocks the decision.
+     *
+     * @return array{available: float, requested: float, pending: float, after: float, short: bool, perDay: float|null}|null
+     */
+    #[Computed]
+    public function decisionBalance(): ?array
+    {
+        $leaveRequest = $this->leaveRequest;
+        $balance = $leaveRequest->leaveBalance;
+        $contract = $balance?->contract;
+
+        if ($leaveRequest->status !== LeaveRequestStatus::Pending->value || $balance === null || $contract === null) {
+            return null;
+        }
+
+        $pricing = app(LeaveRequestPricing::class);
+        $available = $pricing->availableHoursFor($balance);
+        $requested = $pricing->deductionHours($leaveRequest);
+        $after = round($available - $requested, 2);
+
+        return [
+            'available' => $available,
+            'requested' => $requested,
+            'pending' => $pricing->pendingHoursFor($balance, $leaveRequest),
+            'after' => $after,
+            'short' => $after < -0.005,
+            'perDay' => $pricing->hoursPerDayFor($contract),
+        ];
     }
 
     public function openDecide(string $decision): void
@@ -283,6 +318,38 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.request')] class extends C
         @if ($showDecideModal)
             <div class="grid gap-y-3">
                 <p class="text-sm">{{ __('hr_leave.ui.decide_summary', ['name' => (string) $employee?->name, 'period' => \Modules\Hr\Support\Leave\LeaveFormat::period($leaveRequest), 'duration' => \Modules\Hr\Support\Leave\LeaveFormat::duration($leaveRequest, $perDay)]) }}</p>
+                @if ($this->decisionBalance !== null)
+                    @php
+                        $balanceFigures = $this->decisionBalance;
+                        $balanceAmount = fn (float $hours): string => \Modules\Hr\Support\Leave\LeaveFormat::hours($hours, $balanceFigures['perDay']);
+                    @endphp
+                    {{-- The balance this request draws on: advisory, it never blocks the decision. --}}
+                    <section class="rounded-lg border border-secondary-soft bg-secondary-soft/40 px-3 py-2.5 text-sm dark:border-line dark:bg-surface-2" data-decision-balance aria-labelledby="decision-balance-title">
+                        <h3 id="decision-balance-title" class="font-semibold">{{ __('hr_leave.ui.decision_balance.title') }}</h3>
+                        <dl class="mt-2 grid grid-cols-2 gap-x-4 gap-y-1">
+                            <div>
+                                <dt class="type-label {{ $muted }}">{{ __('hr_leave.ui.decision_balance.available') }}</dt>
+                                <dd>{{ $balanceAmount($balanceFigures['available']) }}</dd>
+                            </div>
+                            <div>
+                                <dt class="type-label {{ $muted }}">{{ __('hr_leave.ui.decision_balance.requested') }}</dt>
+                                <dd>{{ $balanceAmount($balanceFigures['requested']) }}</dd>
+                            </div>
+                            @if ($balanceFigures['pending'] > 0)
+                                <div>
+                                    <dt class="type-label {{ $muted }}">{{ __('hr_leave.ui.decision_balance.pending_others') }}</dt>
+                                    <dd>{{ $balanceAmount($balanceFigures['pending']) }}</dd>
+                                </div>
+                            @endif
+                            <div>
+                                <dt class="type-label {{ $muted }}">{{ __('hr_leave.ui.decision_balance.after') }}</dt>
+                                <dd @class(['font-semibold', 'text-status-critical' => $balanceFigures['short']]) data-decision-balance-after>
+                                    {{ $balanceFigures['short'] ? __('hr_leave.ui.decision_balance.short', ['amount' => $balanceAmount(abs($balanceFigures['after']))]) : $balanceAmount($balanceFigures['after']) }}
+                                </dd>
+                            </div>
+                        </dl>
+                    </section>
+                @endif
                 @if ($decision === 'reject')
                     <x-ui.form-textarea wire:model="rejectReason" :label="__('hr_leave.fields.reject_reason')" required maxlength="255" />
                 @endif

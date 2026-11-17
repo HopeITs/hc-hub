@@ -103,17 +103,29 @@ final class DigitalId
     }
 
     /**
-     * The contract the card shows: the running one with the latest start.
+     * The contract the card shows, among the employee's running contracts:
+     * the one whose position has the highest job level (lowest grade; no
+     * level ranks last); on the same level a fixed contract before a trial
+     * one; then the latest start, the newest contract first on a tie. A
+     * volunteer promoted to another position, with the old contract still
+     * running beside the new one, shows the higher post.
      */
     public static function cardContract(Employee $employee): ?Contract
     {
+        $rank = fn (Contract $contract): array => [
+            $contract->position?->jobLevel?->grade ?? PHP_INT_MAX,
+            $contract->isTrial() ? 1 : 0,
+            -($contract->start_date?->getTimestamp() ?? 0),
+            -(int) $contract->getKey(),
+        ];
+
         return once(fn (): ?Contract => Contract::query()
-            ->select(['id', 'employee_id', 'position_id', 'start_date', 'end_date', 'is_active'])
+            ->select(['id', 'employee_id', 'position_id', 'contract_type_id', 'start_date', 'end_date', 'is_active'])
             ->where('employee_id', $employee->getKey())
             ->activeNow()
-            ->with(['position:id,program_id,center_id,city_id,department_id,title_en,title_ar', 'position.program:id,name,code', 'position.center:id,name_en,name_ar,city_id'])
-            ->orderByDesc('start_date')
-            ->orderByDesc('id')
+            ->with(['position:id,program_id,center_id,city_id,department_id,job_level_id,title_en,title_ar', 'position.program:id,name,code', 'position.center:id,name_en,name_ar,city_id', 'position.jobLevel:id,grade'])
+            ->get()
+            ->sort(fn (Contract $a, Contract $b): int => $rank($a) <=> $rank($b))
             ->first());
     }
 

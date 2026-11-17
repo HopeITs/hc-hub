@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Core\Models\User;
 use Modules\Hr\Actions\Recruitment\RecruitmentApproverEligibility;
 use Modules\Hr\Models\InAppFeedback;
+use Modules\Hr\Models\MessageTemplate;
 use Modules\Hr\Models\RecruitmentApplicant;
 use Modules\Hr\Models\RecruitmentInterview;
 use Modules\Hr\Models\RecruitmentJobOffer;
@@ -71,6 +72,9 @@ final class HrDestinations
             // The viewer's own HR pages join their tasks and calendar.
             ['hr.leave.team-calendar', 'team', 'users', 'nav-calendar-range', 'workspace', $can('leaves.view-own', 'leaves.view-all')],
             ['hr.leave.index', 'leave_requests', 'cal', 'nav-tree-palm', 'workspace', fn (User $user): bool => $staff($user) && $user->can('leaves.view-own'), 'own' => true],
+            ['hr.attendance.timesheets', 'attendance', 'cal', 'nav-calendar-check', 'workspace', fn (User $user): bool => $user->can('attendance.view') || ($staff($user) && $user->can('attendance.view-own'))],
+            ['hr.attendance.upload', 'attendance_upload', 'file', 'nav-file-plus', 'workspace', $can('attendance.manage'), 'under' => 'hr.attendance.timesheets'],
+            ['hr.mail-lists.index', 'mail_lists', 'users', 'nav-inbox', 'workspace', fn (User $user): bool => $staff($user) || $user->can('mail-lists.manage')],
             ['hr.checklists.index', 'checklists', 'check', 'nav-list-checks', 'workspace', $can('checklists.view-own', 'checklists.view-all', 'checklists.manage')],
             ['hr.archives.mine', 'my_folders', 'file', 'nav-folder-open', 'workspace', fn (User $user): bool => $staff($user) && $user->can('archives.view'), 'own' => true],
             ['hr.news.index', 'news', 'bell', 'nav-book-open', 'workspace', $can('news.view')],
@@ -79,6 +83,7 @@ final class HrDestinations
 
             // HR's settings sit with the rest of the administration; the old HR log is opened from the Activity log.
             ['hr.settings.index', 'settings', 'grid', 'nav-settings', 'administration', $can('project-basics.view')],
+            ['hr.message-templates.index', 'message_templates', 'file', 'nav-message-circle-question-mark', 'administration', fn (User $user): bool => $user->can('viewAny', MessageTemplate::class)],
             ['hr.activity.index', 'activity', 'undo', 'nav-file-clock', 'administration', $can('activity-log.view'), 'under' => 'activity.index'],
 
             ['hr.employees.me', 'my_profile', 'users', 'nav-circle-user', 'you', $staff, 'own' => true],

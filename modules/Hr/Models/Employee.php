@@ -770,6 +770,80 @@ class Employee extends Model
     }
 
     /**
+     * A mailto: link that opens a new message to this employee's work email,
+     * optionally copying another address (e.g. their direct manager). Null
+     * when there is no work email. A CC equal to the recipient is dropped.
+     */
+    public function mailtoUrl(?string $cc = null): ?string
+    {
+        $this->loadMissing('account');
+        $to = $this->work_email;
+
+        if (! filled($to)) {
+            return null;
+        }
+
+        $cc = filled($cc) && strcasecmp($cc, $to) !== 0 ? $cc : null;
+
+        return 'mailto:'.rawurlencode($to).($cc !== null ? '?cc='.rawurlencode($cc) : '');
+    }
+
+    /**
+     * The work email of each employee's current direct manager, keyed by
+     * employee id (a missing key means no manager, a vacant post, or a
+     * manager without a work email). Three queries whatever the number of
+     * employees, so lists can use it without an N+1.
+     *
+     * @param  iterable<Employee|int>  $employees
+     * @return array<int, string>
+     */
+    public static function directManagerEmails(iterable $employees): array
+    {
+        $ids = collect($employees)
+            ->map(fn (Employee|int $employee): int => $employee instanceof self ? (int) $employee->getKey() : $employee)
+            ->filter()->unique()->values();
+
+        if ($ids->isEmpty()) {
+            return [];
+        }
+
+        // Oldest first, so the latest running contract wins for someone with several.
+        $positionOf = Contract::query()->activeNow()
+            ->where('type', '!=', ContractTypeEnum::Draft->value)
+            ->whereIn('employee_id', $ids)
+            ->orderBy('start_date')
+            ->pluck('position_id', 'employee_id');
+
+        $managerPositionOf = Position::query()
+            ->whereIn('id', $positionOf->unique()->values())
+            ->whereNotNull('direct_manager_id')
+            ->pluck('direct_manager_id', 'id');
+
+        $emailAt = Contract::query()->activeNow()
+            ->where('type', '!=', ContractTypeEnum::Draft->value)
+            ->whereIn('position_id', $managerPositionOf->unique()->values())
+            ->whereHas('employee', fn (Builder $employee) => $employee->where('is_active', true))
+            ->with('employee.account:id,employee_id,email')
+            ->orderBy('start_date')
+            ->get(['id', 'employee_id', 'position_id', 'start_date'])
+            ->mapWithKeys(fn (Contract $contract): array => [(int) $contract->position_id => $contract->employee?->work_email])
+            ->filter();
+
+        $emails = [];
+
+        foreach ($positionOf as $employeeId => $positionId) {
+            $managerPositionId = $managerPositionOf[$positionId] ?? null;
+            $email = $managerPositionId === null ? null : ($emailAt[$managerPositionId] ?? null);
+
+            if (filled($email)) {
+                $emails[(int) $employeeId] = (string) $email;
+            }
+        }
+
+        return $emails;
+    }
+
+    /**
      * @return Attribute<string|null, string|null>
      */
     protected function firstName(): Attribute

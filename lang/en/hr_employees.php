@@ -145,6 +145,7 @@ return [
     ],
 
     'profile' => [
+        'email_with_manager_cc' => 'New email, with their direct manager on CC',
         'work' => 'Work',
         'personal' => 'Personal details',
         'personal_contact' => 'Personal contact',
@@ -325,6 +326,8 @@ return [
         'mine' => 'My folders',
         'shared' => 'Shared with me',
         'new_folder' => 'New folder',
+        'new_folder_mine' => 'This will be your own folder, under My folders. Only you see it until you share it.',
+        'new_folder_shared' => 'This will be a shared folder, under Shared with me. Everyone you share it with sees it there.',
         'rename' => 'Rename',
         'share' => 'Share',
         'upload' => 'Upload files',

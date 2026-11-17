@@ -208,6 +208,8 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.index')] class extends
             $muted = 'text-secondary-medium dark:text-ink-muted';
             $canUpdate = auth()->user()->can('positions.update');
             $canDelete = auth()->user()->can('positions.delete');
+            $canHire = \Modules\Hr\Support\Recruitment\Access::hasActivePermission(auth()->user(), 'recruitment-requests.view')
+                && \Modules\Hr\Support\Recruitment\Access::hasActivePermission(auth()->user(), 'recruitment-requests.manage');
         @endphp
         <x-ui.data-table :caption="__('hr_positions.titles.index')">
             <x-slot:head>
@@ -216,7 +218,7 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.index')] class extends
                 <th>{{ __('hr_positions.fields.center_id') }}</th>
                 <th class="w-40!">{{ __('hr_positions.fields.job_level_id') }}</th>
                 <th class="w-28!">{{ __('hr_positions.fields.seats') }}</th>
-                <th class="w-32!"><span class="sr-only">{{ __('common.actions') }}</span></th>
+                <th class="w-40!"><span class="sr-only">{{ __('common.actions') }}</span></th>
             </x-slot:head>
 
             @foreach ($positions as $position)
@@ -236,6 +238,10 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.index')] class extends
                     </td>
                     <td>
                         <span class="flex items-center justify-end gap-1">
+                            @if ($canHire && $position->is_active && $position->exist_emp < $position->max_emp)
+                                {{-- A position with a free seat: straight to the hiring request, position pre-filled. --}}
+                                <x-ui.button tone="ghost" size="sm" icon="user-plus" :href="route('hr.recruitment.requests.create', ['type' => \Modules\Hr\Enums\RecruitmentRequestType::FillVacancy->value, 'position_id' => $position->id])" wire:navigate :aria-label="__('hr_positions.actions.open_vacancy_name', ['name' => $position->title])" :title="__('hr_positions.actions.open_vacancy')" data-open-vacancy="{{ $position->id }}" />
+                            @endif
                             @if ($canUpdate)
                                 <x-ui.button tone="ghost" size="sm" icon="pencil-square" wire:click="openPosition({{ $position->id }})" :aria-label="__('common.edit_name', ['name' => $position->title])" />
                                 <x-ui.button tone="ghost" size="sm" :icon="$position->is_active ? 'pause' : 'play'" wire:click="confirm('toggle', {{ $position->id }})" :aria-label="__('hr_positions.actions.toggle_name', ['name' => $position->title])" />

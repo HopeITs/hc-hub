@@ -272,6 +272,16 @@ class LeaveRequestPricing
     }
 
     /**
+     * Hours $balance has available now, the same figure quote() reports as
+     * available_hours (annual: earned to date less used). For whoever decides
+     * a request, who sees the balance without pricing a new window.
+     */
+    public function availableHoursFor(LeaveBalance $balance): float
+    {
+        return $this->availableHours($balance, (int) $balance->type_id === LeaveTypeCases::Annual);
+    }
+
+    /**
      * Length of one working day of $contract in hours (weekly hours ÷ working
      * days of its weekend), or null when it cannot be priced (unknown hours,
      * irregular schedule). Display conversion only: storage stays in hours.

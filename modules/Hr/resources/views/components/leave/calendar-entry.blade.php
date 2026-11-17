@@ -8,12 +8,18 @@
 --}}
 @php
     $pending = $entry['status'] === 'pending';
+    $coverGap = $entry['cover_gap_dates'] ?? [];
     $label = ($entry['is_self'] ? __('hr_leave.calendar.you') : $entry['name']).' · '.$entry['type'];
     $details = collect([
         $entry['position'] !== '' ? $entry['position'] : null,
         $entry['partial'] ? __('hr_leave.calendar.partial').($entry['hours'] !== null ? ' '.$entry['hours'] : '') : null,
         $entry['status'] !== null ? __('hr_leave.calendar.status.'.$entry['status']) : null,
         $entry['substitute'] !== null ? __('hr_leave.calendar.substitute', ['name' => $entry['substitute']]) : null,
+        // Who covers: nobody named (manager level only: a colleague entry has no status),
+        // the cover away on some of the same days, or the viewer is the cover.
+        $entry['substitute'] === null && $entry['status'] !== null ? __('hr_leave.calendar.no_cover') : null,
+        $coverGap !== [] ? __('hr_leave.calendar.cover_also_away', ['dates' => collect($coverGap)->map(fn (string $date): string => \Carbon\CarbonImmutable::parse($date)->format('d-m'))->implode(__('hr_leave.calendar.date_separator'))]) : null,
+        ($entry['covers_you'] ?? false) ? __('hr_leave.calendar.you_cover') : null,
     ])->filter()->implode(' · ');
 @endphp
 
@@ -27,7 +33,12 @@
     title="{{ $label }}{{ $details !== '' ? ' — '.$details : '' }}"
     data-calendar-entry="{{ $entry['key'] }}"
     data-entry-status="{{ $entry['status'] ?? 'accepted' }}"
+    @if ($coverGap !== []) data-cover-gap="{{ implode(',', $coverGap) }}" @endif
+    @if ($entry['covers_you'] ?? false) data-you-cover @endif
 >
+    @if ($coverGap !== [])
+        <flux:icon.exclamation-triangle variant="micro" class="size-3 shrink-0 text-status-warn" aria-hidden="true" />
+    @endif
     @if ($pending)
         <flux:icon.clock variant="micro" class="size-3 shrink-0 text-status-warn" aria-hidden="true" />
     @else

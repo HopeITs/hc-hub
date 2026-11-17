@@ -45,6 +45,8 @@ return [
     ],
 
     'actions' => [
+        'open_vacancy' => 'Open vacancy',
+        'open_vacancy_name' => 'Open a vacancy for :name',
         'add' => 'Add position',
         'edit' => 'Edit position',
         'toggle_name' => 'Activate or deactivate :name',
@@ -75,6 +77,8 @@ return [
     ],
 
     'team' => [
+        'email_team' => 'Email the team',
+        'request_hire' => 'Request hire',
         'positions' => 'Positions',
         'open_seats' => 'Open seats',
         'scope' => 'Show',

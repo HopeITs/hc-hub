@@ -20,6 +20,9 @@ return [
     'team_leaves' => 'Team leave requests',
     'leave_balances' => 'Leave balances',
     'holidays' => 'Holidays',
+    'attendance' => 'Timesheets',
+    'attendance_upload' => 'Upload attendance report',
+    'mail_lists' => 'Mail lists',
     'recruitment_requests' => 'Recruitment requests',
     'vacancies' => 'Vacancies',
     'applicants' => 'Applicants',
@@ -37,4 +40,5 @@ return [
     'activity' => 'HR activity archive',
     'feedback' => 'Feedback',
     'settings' => 'HR settings',
+    'message_templates' => 'Message templates',
 ];

@@ -20,6 +20,9 @@ return [
     'team_leaves' => 'طلبات إجازة الفريق',
     'leave_balances' => 'أرصدة الإجازات',
     'holidays' => 'العطل',
+    'attendance' => 'الجداول الشهرية',
+    'attendance_upload' => 'رفع تقرير الحضور',
+    'mail_lists' => 'القوائم البريدية',
     'recruitment_requests' => 'طلبات التوظيف',
     'vacancies' => 'الشواغر',
     'applicants' => 'المتقدمون',
@@ -37,4 +40,5 @@ return [
     'activity' => 'أرشيف نشاط الموارد البشرية',
     'feedback' => 'الملاحظات',
     'settings' => 'إعدادات الموارد البشرية',
+    'message_templates' => 'قوالب الرسائل',
 ];
