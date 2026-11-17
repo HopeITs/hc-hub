@@ -615,7 +615,9 @@ function insertHrDepartmentManager(?int $departmentId = null, ?string $jobLevel 
 }
 
 /**
- * A user holding one role, optionally linked to an HR employee. Seeds the
+ * A user holding one role, linked to the given HR employee or, when none is
+ * given, to a fresh active employee of its own: since roadmap 1.6 an account
+ * with no employee that is not a system account loses access. Seeds the
  * access-control catalog first when it is missing.
  *
  * Unlike the insertX() helpers this returns a model: the notification tests
@@ -628,7 +630,9 @@ function userWithRole(string $role, ?int $employeeId = null): User
         test()->seed(RolesAndPermissionsSeeder::class);
     }
 
-    return Activity::withoutRecording(fn (): User => User::factory()->role($role)->create(['employee_id' => $employeeId]));
+    return Activity::withoutRecording(fn (): User => User::factory()->role($role)->create(
+        $employeeId === null ? [] : ['employee_id' => $employeeId],
+    ));
 }
 
 /**
