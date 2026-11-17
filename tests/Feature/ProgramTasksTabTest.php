@@ -135,7 +135,7 @@ test('assignees are added and removed, down to none', function () {
 
 test('a group adds a task unassigned when its author has no HR employee', function () {
     ['program' => $program, 'project' => $project] = programTaskSetup();
-    $author = userWithRole('General Manager', null);
+    $author = User::factory()->withoutEmployee()->role('General Manager')->create();
 
     Livewire::actingAs($author)
         ->test('tracking::programs.show', ['program' => $program])
