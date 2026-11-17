@@ -149,6 +149,20 @@ return [
         'off_hold' => 'رفع التعليق',
         'extension' => 'تمديد',
     ],
+    'project_member_role' => [
+        'owner' => 'المالك',
+        'coordinator' => 'منسّق',
+        'member' => 'عضو',
+        'meal_officer' => 'مسؤول MEAL',
+        'finance_officer' => 'مسؤول مالي',
+        'trainer' => 'مدرّب',
+        'consultant' => 'مستشار',
+        'volunteer' => 'متطوّع',
+    ],
+    'project_member_source' => [
+        'manual' => 'أُضيف يدويًا',
+        'inferred' => 'من سجلات سابقة',
+    ],
     'project_status' => [
         'draft' => 'مسودة',
         'submitted' => 'مقدَّم',

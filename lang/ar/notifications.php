@@ -379,6 +379,8 @@ return [
             'status_changed' => 'نقل :actor المشروع «:subject» من :from إلى :to',
             'owner_changed' => 'جعل :actor :to مالكًا للمشروع «:subject»',
             'owner_changed_you' => 'جعلك :actor مالكًا للمشروع «:subject»',
+            'member_added' => 'أضاف :actor :employee إلى فريق «:subject»',
+            'member_ended' => 'أنهى :actor عضوية :employee في فريق «:subject»',
             'dates_changed' => 'غيّر :actor تواريخ المشروع «:subject»',
             'baseline_saved' => 'حفظ :actor خط الأساس الزمني «:baseline» للمشروع «:subject»',
             'assignment_acknowledged' => 'أكّد :actor استلامه مسؤولية المشروع «:subject»',

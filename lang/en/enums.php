@@ -149,6 +149,20 @@ return [
         'off_hold' => 'Taken off hold',
         'extension' => 'Extension',
     ],
+    'project_member_role' => [
+        'owner' => 'Owner',
+        'coordinator' => 'Coordinator',
+        'member' => 'Member',
+        'meal_officer' => 'MEAL officer',
+        'finance_officer' => 'Finance officer',
+        'trainer' => 'Trainer',
+        'consultant' => 'Consultant',
+        'volunteer' => 'Volunteer',
+    ],
+    'project_member_source' => [
+        'manual' => 'Added by hand',
+        'inferred' => 'From earlier records',
+    ],
     'project_status' => [
         'draft' => 'Draft',
         'submitted' => 'Submitted',

@@ -379,6 +379,8 @@ return [
             'status_changed' => ':actor moved “:subject” from :from to :to',
             'owner_changed' => ':actor made :to the owner of “:subject”',
             'owner_changed_you' => ':actor made you the owner of “:subject”',
+            'member_added' => ':actor added :employee to the team of “:subject”',
+            'member_ended' => ':actor ended the team membership of :employee in “:subject”',
             'dates_changed' => ':actor changed the dates of “:subject”',
             'baseline_saved' => ':actor saved the schedule baseline “:baseline” for “:subject”',
             'assignment_acknowledged' => ':actor acknowledged being the owner of “:subject”',

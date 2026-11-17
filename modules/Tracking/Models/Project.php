@@ -36,6 +36,7 @@ use Modules\Tracking\Enums\AssignmentStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ProposalPhase;
 use Modules\Tracking\Enums\ProposalStatus;
+use Modules\Tracking\Observers\ProjectOwnerMemberObserver;
 
 /**
  * @property int $id
@@ -80,7 +81,7 @@ use Modules\Tracking\Enums\ProposalStatus;
     'owner_employee_id',
     'schedule_weekend',
 ])]
-#[ObservedBy(MediaOwnerObserver::class)]
+#[ObservedBy([MediaOwnerObserver::class, ProjectOwnerMemberObserver::class])]
 class Project extends Model implements TracksActivity
 {
     /** @use HasFactory<ProjectFactory> */
@@ -407,6 +408,16 @@ class Project extends Model implements TracksActivity
     public function risks(): HasMany
     {
         return $this->hasMany(Risk::class);
+    }
+
+    /**
+     * The project team, current and past (roadmap 2.2, D4).
+     *
+     * @return HasMany<ProjectMember, $this>
+     */
+    public function members(): HasMany
+    {
+        return $this->hasMany(ProjectMember::class);
     }
 
     /**
