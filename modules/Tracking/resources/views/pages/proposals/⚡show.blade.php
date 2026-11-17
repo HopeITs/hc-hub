@@ -114,6 +114,14 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     #[Url(as: 'record_agreement', except: false)]
     public bool $recordAgreementLink = false;
 
+    /**
+     * Deep link from the register's "Missing a center" list (Y-01 slice 3):
+     * opens the proposal form on the Projects tab, where the rows take their
+     * centers, for someone who may update the proposal; then clears itself.
+     */
+    #[Url(as: 'add-centers', except: false)]
+    public bool $addCentersLink = false;
+
     public function mount(Proposal $proposal): void
     {
         $this->proposalId = $proposal->id;
@@ -131,6 +139,13 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
         }
 
         $this->recordAgreementLink = false;
+
+        if ($this->addCentersLink && ! $this->proposal->isPayroll() && auth()->user()?->can('update', $this->proposal) === true) {
+            $this->tab = 'projects';
+            $this->openEditModal($this->proposalId);
+        }
+
+        $this->addCentersLink = false;
 
         $this->openExtensionFromLink();
         $this->openGrantDatesFromLink();
@@ -340,10 +355,10 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     {
         unset(
             $this->proposal, $this->canRecordAgreement, $this->statusNotes, $this->agreements, $this->agreementRows, $this->fundingTranches, $this->donorReports, $this->agreementMoney, $this->moneyByCurrency,
-            $this->projects, $this->linkableProjects, $this->tasks, $this->targets, $this->reports,
+            $this->projects, $this->locationRows, $this->linkableProjects, $this->tasks, $this->targets, $this->reports,
             $this->planMilestones, $this->planTaskRows, $this->planGroups, $this->planGanttPayload, $this->planWindow, $this->planProjectOptions,
             $this->projectFiles, $this->conceptNoteFiles, $this->documents, $this->deadlines, $this->warnings, $this->lifecycle, $this->chronology,
-            $this->arrivals, $this->vitals, $this->term, $this->tabs, $this->proposalFiles, $this->reviewStages, $this->needAssessments, $this->approvalSubject, $this->approvalPreview,
+            $this->arrivals, $this->vitals, $this->term, $this->tabs, $this->proposalFiles, $this->reviewStages, $this->needAssessments, $this->approvalSubject, $this->approvalPreview, $this->approvalLocations,
             $this->canRecordFinalReportAcceptance, $this->finalReportAcceptance,
         );
     }

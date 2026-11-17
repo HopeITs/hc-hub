@@ -450,6 +450,27 @@ class Position extends Model
     }
 
     /**
+     * Positions that work at $center: those placed at it, and those without a
+     * center of their own in its governorate whose program the center serves
+     * (center_program). A Study Zone position is shared by every Study Zone
+     * center of its city, since its volunteers move between them.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function servingCenter(Builder $query, Center $center): void
+    {
+        $programIds = $center->programs()->pluck('programs.id')->all();
+
+        $query->where(fn (Builder $serving) => $serving
+            ->where($serving->qualifyColumn('center_id'), $center->id)
+            ->when($programIds !== [], fn (Builder $shared) => $shared->orWhere(fn (Builder $linked) => $linked
+                ->whereNull($linked->qualifyColumn('center_id'))
+                ->where($linked->qualifyColumn('city_id'), $center->city_id)
+                ->whereIn($linked->qualifyColumn('program_id'), $programIds))));
+    }
+
+    /**
      * Positions whose English or Arabic title contains the search.
      *
      * @param  Builder<self>  $query

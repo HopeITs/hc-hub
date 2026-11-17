@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\ReportTemplateStatus;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ReportTemplate;
+use Modules\Tracking\Support\Reporting\ReportPlace;
 
 /**
  * `status` carries a database default (`pending`), so the definition leaves
@@ -28,7 +30,24 @@ class ReportTemplateFactory extends Factory
     {
         return [
             'project_id' => Project::factory()->approved(),
+            'city_id' => fn (array $attributes): int => (int) Project::query()->whereKey($attributes['project_id'])->value('city_id'),
+            'program_id' => fn (array $attributes): int => (int) Project::query()->whereKey($attributes['project_id'])->value('program_id'),
         ];
+    }
+
+    /**
+     * A template of the Y-02 kind: at the place, carried by the proposal,
+     * with no legacy project.
+     */
+    public function forPlace(ReportPlace $place, Proposal $proposal): static
+    {
+        return $this->state([
+            'project_id' => null,
+            'city_id' => $place->cityId,
+            'program_id' => $place->programId,
+            'center_id' => $place->centerId,
+            'city_wide' => $place->cityWide,
+        ])->afterCreating(fn (ReportTemplate $template) => $template->proposals()->attach($proposal->id, ['joined_at' => now()]));
     }
 
     /**

@@ -27,12 +27,15 @@ use Modules\Hr\Console\Journeys\DeactivateDepartedEmployees;
 use Modules\Hr\Console\Journeys\SendContractExpirationWarnings;
 use Modules\Hr\Console\Journeys\SendOrientationReminders;
 use Modules\Hr\Console\Journeys\TrackRenewalJourneys;
+use Modules\Hr\Console\LoadMailListsCommand;
 use Modules\Hr\Console\ProcessContractAutoRenewalsCommand;
 use Modules\Hr\Console\RecountPositionSeatsCommand;
 use Modules\Hr\Console\ReportAccountGapsCommand;
+use Modules\Hr\Console\SendAttendanceRemindersCommand;
 use Modules\Hr\Console\SendLeaveDecisionRemindersCommand;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\MailList;
 use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Desk\HrDestinations;
 use Modules\Hr\Support\Desk\HrPanels;
@@ -54,6 +57,7 @@ use Modules\Hr\Support\Recruitment\Console\SweepRecruitmentRetention;
 use Modules\Hr\Support\Recruitment\Console\SyncRecruitmentCampaignStates;
 use Modules\Hr\Support\Recruitment\RecruitmentBootstrap;
 use Modules\Hr\Support\SalaryCipher;
+use Throwable;
 
 /**
  * The HR module: employees, positions, contracts, leave, journeys, archives,
@@ -94,6 +98,8 @@ class HrServiceProvider extends ServiceProvider
             ProcessContractAutoRenewalsCommand::class,
             SendLeaveDecisionRemindersCommand::class,
             RecountPositionSeatsCommand::class,
+            SendAttendanceRemindersCommand::class,
+            LoadMailListsCommand::class,
             AnalyzeRecruitmentCvs::class,
             ApplyDueRecruitmentRequests::class,
             CheckRecruitmentScanner::class,
@@ -130,6 +136,9 @@ class HrServiceProvider extends ServiceProvider
             // One reminder per leave request still waiting for its decision.
             $schedule->command(SendLeaveDecisionRemindersCommand::class)->dailyAt('08:05')->withoutOverlapping()->onOneServer();
 
+            // The first days of a month: managers to approve last month's timesheets, HR to lock them.
+            $schedule->command(SendAttendanceRemindersCommand::class)->dailyAt('08:15')->withoutOverlapping()->onOneServer();
+
             // Recruitment (as the HR app ran it). Due position changes early, before the evening
             // contract runs read the seats; campaign windows every minute; the antivirus safety
             // net, offers past their answer date, interview reminders and rejection emails a down
@@ -148,6 +157,15 @@ class HrServiceProvider extends ServiceProvider
 
         // Contract writes that start or move an employee journey.
         JourneyHooks::register();
+
+        // A new account on the organisation's domain waits to be added to the all-staff mail list.
+        User::created(function (User $user): void {
+            try {
+                MailList::queueNewAccount($user);
+            } catch (Throwable $exception) {
+                report($exception);
+            }
+        });
 
         $this->registerDesk();
 

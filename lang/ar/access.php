@@ -42,6 +42,9 @@ return [
         'activity-log' => 'سجل النشاط',
         'notification-settings' => 'إعدادات الإشعارات',
         'ai' => 'المساعد الذكي',
+        'attendance' => 'الحضور',
+        'mail-lists' => 'القوائم البريدية',
+        'message-templates' => 'قوالب الرسائل',
     ],
     'actions' => [
         'view' => 'عرض',
@@ -59,6 +62,10 @@ return [
         'manage-reviewers' => 'إدارة المراجعين',
         'correct-status' => 'تصحيح الحالة',
         'draft' => 'الصياغة بالذكاء الاصطناعي',
+        'record' => 'تسجيل القياسات',
         'view-usage' => 'عرض الاستخدام',
+        'view-own' => 'عرض الخاص به',
+        'use' => 'استخدام',
+        'confirm' => 'تأكيد',
     ],
 ];

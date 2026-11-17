@@ -19,6 +19,7 @@ use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\Experience;
 use Modules\Hr\Models\LeaveBalance;
 use Modules\Hr\Models\Relative;
+use Modules\Hr\Support\Contracts\ContractNonRenewalMail;
 use Modules\Hr\Support\Employees\HrAccess;
 use Modules\Hr\Support\Employees\HrMedia;
 use Modules\Hr\Support\Employees\WorkPresence;
@@ -137,6 +138,41 @@ trait ReadsEmployeeProfile
             && $contract->terminated_at === null
             && $contract->start_date !== null && $contract->start_date->lte($today)
             && $contract->end_date !== null && $contract->end_date->gte($today));
+    }
+
+    /**
+     * The work email link: a new message to the employee with their direct
+     * manager on CC. Null when they have no work email.
+     */
+    #[Computed]
+    public function workMailto(): ?string
+    {
+        $employee = $this->employee;
+
+        return $employee->mailtoUrl(Employee::directManagerEmails([$employee])[(int) $employee->id] ?? null);
+    }
+
+    /**
+     * "Don't renew" for the employee's direct manager: a new email to the
+     * city's HR asking not to renew the running contract that still renews
+     * by itself. Null for anyone else, or when no HR address is known.
+     */
+    #[Computed]
+    public function dontRenewUrl(): ?string
+    {
+        $currentId = $this->currentContract?->id;
+        $viewer = Auth::user();
+
+        if ($currentId === null || $viewer === null || $this->isSelf) {
+            return null;
+        }
+
+        $contract = Contract::query()
+            ->select(['id', 'employee_id', 'position_id', 'auto_renew', 'is_active', 'terminated_at', 'end_date'])
+            ->find($currentId);
+        $mail = app(ContractNonRenewalMail::class);
+
+        return $contract !== null && $mail->isOfferedTo($contract, $viewer) ? $mail->url($contract, $viewer) : null;
     }
 
     /**

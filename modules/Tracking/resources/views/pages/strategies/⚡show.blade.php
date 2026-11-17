@@ -6,6 +6,7 @@ use Modules\Tracking\Livewire\Concerns\Strategies\ManagesStrategicPillars;
 use Modules\Tracking\Livewire\Concerns\Strategies\ManagesStrategyForm;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Core\Models\Program;
+use Modules\Tracking\Models\StrategicPlan;
 use Modules\Tracking\Models\Strategy;
 use Modules\Tracking\Support\StrategyAttention;
 use Modules\Tracking\Support\StrategyRollup;
@@ -46,6 +47,22 @@ new #[Layout('layouts::desk'), Title('titles.strategy')] class extends Component
             ->select(['id', 'slug', 'name', 'start_year', 'end_year', 'updated_at'])
             ->withCount(['programs', 'pillars'])
             ->findOrFail($this->strategyId);
+    }
+
+    /**
+     * Each program's strategic plan status, keyed by program id; a program
+     * with no plan written yet is absent. One query for the whole page.
+     *
+     * @return array<int, \Modules\Tracking\Enums\StrategicPlanStatus>
+     */
+    #[Computed]
+    public function strategicPlanStatuses(): array
+    {
+        return StrategicPlan::query()
+            ->where('strategy_id', $this->strategyId)
+            ->get(['program_id', 'status'])
+            ->mapWithKeys(fn (StrategicPlan $plan): array => [$plan->program_id => $plan->status])
+            ->all();
     }
 
     /**

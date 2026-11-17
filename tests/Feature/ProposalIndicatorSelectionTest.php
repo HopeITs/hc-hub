@@ -22,7 +22,7 @@ use Modules\Tracking\Models\Result;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
-    $this->actingAs(User::factory()->role('MEAL')->create());
+    $this->actingAs(mealManager());
 
     $this->program = Program::factory()->create();
     $this->proposal = Proposal::factory()->create();

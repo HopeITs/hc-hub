@@ -12,6 +12,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
+use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Settings\HrAccess;
 use Modules\Hr\Support\Settings\OrgCounts;
 
@@ -90,6 +91,19 @@ new #[Layout('layouts::desk'), Title('hr_settings.titles.centers')] class extend
             ->when($this->city !== '', fn ($query) => $query->where('city_id', (int) $this->city))
             ->when($this->status !== '', fn ($query) => $query->where('is_active', $this->status === 'active'))
             ->withCount('positions')
+            // Positions without a center in its governorate whose program it
+            // serves (Position::servingCenter): shared with that program's
+            // other centers there, so they are counted apart.
+            ->addSelect(['shared_positions_count' => Position::query()
+                ->selectRaw('count(*)')
+                ->whereNull('positions.center_id')
+                ->whereColumn('positions.city_id', 'centers.city_id')
+                ->whereExists(fn ($links) => $links
+                    ->selectRaw('1')
+                    ->from('center_program')
+                    ->whereColumn('center_program.center_id', 'centers.id')
+                    ->whereColumn('center_program.program_id', 'positions.program_id')),
+            ])
             ->orderByDesc('is_active')
             ->orderBy(Center::nameColumn())
             ->orderBy('id')
@@ -177,7 +191,12 @@ new #[Layout('layouts::desk'), Title('hr_settings.titles.centers')] class extend
                             <span class="{{ $muted }}">—</span>
                         @endif
                     </x-ui.data-table.cell>
-                    <x-ui.data-table.cell :label="__('hr_settings.cities.positions')" numeric>{{ $center->positions_count }}</x-ui.data-table.cell>
+                    <x-ui.data-table.cell :label="__('hr_settings.cities.positions')" numeric>
+                        {{ $center->positions_count }}
+                        @if ((int) $center->shared_positions_count > 0)
+                            <span class="block text-xs {{ $muted }}" data-test="center-shared-positions">{{ trans_choice('hr_settings.centers.shared_positions', (int) $center->shared_positions_count, ['count' => (int) $center->shared_positions_count]) }}</span>
+                        @endif
+                    </x-ui.data-table.cell>
                     <x-ui.data-table.cell :label="__('hr_settings.cities.employees')" numeric>{{ $employeeCounts->get($center->id, 0) }}</x-ui.data-table.cell>
                     <x-ui.data-table.cell :label="__('common.status')">
                         @if ($center->is_active)

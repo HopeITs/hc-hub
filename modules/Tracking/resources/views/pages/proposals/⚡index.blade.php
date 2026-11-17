@@ -235,10 +235,11 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
     ];
     $flagPills = array_values(array_filter([
         ['label' => __('finance_tables.flag_on_hold'), 'model' => 'flag', 'value' => 'on_hold', 'toggle' => true, 'active' => $chosen['flag'] === 'on_hold', 'tone' => 'warn', 'test' => 'flag-on-hold'],
-        ['label' => __('finance_tables.flag_no_agreement'), 'model' => 'flag', 'value' => 'no_agreement', 'toggle' => true, 'active' => $chosen['flag'] === 'no_agreement', 'test' => 'flag-no-agreement'],
+        $canAgreements ? ['label' => __('finance_tables.flag_no_agreement'), 'model' => 'flag', 'value' => 'no_agreement', 'toggle' => true, 'active' => $chosen['flag'] === 'no_agreement', 'test' => 'flag-no-agreement'] : null,
         $canTransfers ? ['label' => __('finance_tables.flag_has_overdue'), 'model' => 'flag', 'value' => 'overdue', 'toggle' => true, 'active' => $chosen['flag'] === 'overdue', 'tone' => 'critical', 'test' => 'flag-overdue'] : null,
-        ['label' => __('finance_tables.flag_report_overdue'), 'model' => 'flag', 'value' => 'report_overdue', 'toggle' => true, 'active' => $chosen['flag'] === 'report_overdue', 'test' => 'flag-report-overdue'],
-        ['label' => __('finance_tables.flag_no_center'), 'model' => 'flag', 'value' => 'no_center', 'toggle' => true, 'active' => $chosen['flag'] === 'no_center', 'tone' => 'warn', 'test' => 'flag-no-center'],
+        $canAgreements ? ['label' => __('finance_tables.flag_report_overdue'), 'model' => 'flag', 'value' => 'report_overdue', 'toggle' => true, 'active' => $chosen['flag'] === 'report_overdue', 'test' => 'flag-report-overdue'] : null,
+        /* Not money: every viewer of the register may work this list down. */
+        ['label' => __('finance_tables.flag_no_center'), 'model' => 'flag', 'value' => 'no_center', 'toggle' => true, 'active' => $chosen['flag'] === 'no_center', 'tone' => 'warn', 'count' => $this->missingCenterCount, 'test' => 'flag-no-center'],
     ]));
 @endphp
 
@@ -292,8 +293,9 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
 
                         @if ($canAgreements)
                             <x-tracking::funding.pills :label="__('common.currency')" :pills="$currencyPills" />
-                            <x-tracking::funding.pills :label="__('finance_tables.flags')" :pills="$flagPills" />
                         @endif
+
+                        <x-tracking::funding.pills :label="__('finance_tables.flags')" :pills="$flagPills" />
 
                         @if ($this->donorFilterName !== null)
                             <x-tracking::funding.filter-row :label="__('funding_agreements.donor')" on :watch="['donor']" :models="['donor']" x-show="filled(['donor'])">
@@ -341,10 +343,14 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
     @include('tracking::pages.proposals._status-modals')
 
     <x-ui.confirm-modal
+        permanent
         wire:model="showDeleteModal"
         close="cancelDelete"
         :title="__('proposals.delete_this_proposal')"
         :message="__('proposals.its_tasks_project_links_and_status_history_are_removed_with')"
+        :record="$this->deletingProposal?->name"
+        :record-meta="$this->deletingProposal?->internal_project_number"
+        :confirm-text="$this->deletingProposal?->internal_project_number"
         confirm="deleteProposal"
         :confirm-label="__('proposals.delete_proposal')"
         confirm-test="confirm-delete-proposal"

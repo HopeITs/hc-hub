@@ -3,6 +3,7 @@
 use App\Models\Activity;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
+use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ReportTemplateLineStatus;
@@ -12,6 +13,7 @@ use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Support\Reporting\ReportPlace;
 
 /*
 | MEAL's "Templates to confirm" queue (contracts.md §12.4, T33 slice 3): the
@@ -188,12 +190,17 @@ test('the two status buttons count what a click shows, and pressing one again cl
     expect($page->instance()->focusCounts)->toBe(['pending' => 1, 'lines' => 2, 'total' => 3]);
 
     $page->call('setFocus', 'lines')
+        ->assertSeeHtml('data-test="focus-tab-clear-lines"')
+        ->assertSeeText('Showing 2 of 3 templates.')
+        ->assertSeeHtml('wire:click="setFocus(&#039;lines&#039;)" class="cursor-pointer')
         ->assertSet('focus', 'lines')
         ->assertSee('Growing Project')
         ->assertSee('Growing Again')
         ->assertDontSee('Fresh Project')
         ->call('setFocus', 'lines')
         ->assertSet('focus', '')
+        ->assertDontSeeHtml('data-test="focus-showing"')
+        ->assertDontSeeHtml('data-test="focus-tab-clear-lines"')
         ->assertSee('Fresh Project')
         ->call('setFocus', 'bogus')
         ->assertSet('focus', '');
@@ -232,4 +239,41 @@ test('the status buttons, search and review links sit inside the component root'
     }
 
     expect($xpath->query('//*[@*[name()="wire:id"]]//a[@data-queue-open][contains(@href, "'.$template->project->slug.'")]')->length)->toBe(1);
+});
+
+test('two templates at one place are listed with their own proposals at a fixed query count', function () {
+    holdMealManagerSlot();
+    $manager = mealManager();
+    $countQueries = function () use ($manager): int {
+        $this->actingAs($manager);
+        DB::flushQueryLog();
+        DB::enableQueryLog();
+        $this->get(route('report-templates.index'))->assertOk();
+        $count = count(DB::getQueryLog());
+        DB::disableQueryLog();
+
+        return $count;
+    };
+
+    $program = Program::factory()->create();
+    $cityId = insertHrCity('Queue '.Str::random(4), 'طابور');
+    $centerId = insertHrCenter($cityId, 'Queue center '.Str::random(4));
+    $place = new ReportPlace($cityId, $program->id, $centerId, false);
+    $make = function (string $name) use ($place): ReportTemplate {
+        $proposal = Proposal::factory()->create(['name' => $name]);
+        $template = ReportTemplate::factory()->forPlace($place, $proposal)->create();
+        $target = PlanIndicator::factory()->forProposal($proposal)->create();
+        ReportTemplateLine::factory()->create(['report_template_id' => $template->id, 'plan_indicator_id' => $target->id]);
+
+        return $template;
+    };
+
+    $make('First proposal');
+    $countQueries();
+    $before = $countQueries();
+    $make('Second proposal');
+    $make('Third proposal');
+
+    $this->get(route('report-templates.index'))->assertSee('First proposal')->assertSee('Second proposal')->assertSee('Third proposal');
+    expect($countQueries())->toBe($before);
 });

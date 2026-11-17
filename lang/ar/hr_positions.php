@@ -45,6 +45,8 @@ return [
     ],
 
     'actions' => [
+        'open_vacancy' => 'فتح شاغر',
+        'open_vacancy_name' => 'فتح شاغر في :name',
         'add' => 'إضافة منصب',
         'edit' => 'تعديل المنصب',
         'toggle_name' => 'تفعيل أو إيقاف :name',
@@ -75,6 +77,8 @@ return [
     ],
 
     'team' => [
+        'email_team' => 'مراسلة الفريق',
+        'request_hire' => 'طلب توظيف',
         'positions' => 'المناصب',
         'open_seats' => 'المقاعد الشاغرة',
         'scope' => 'العرض',

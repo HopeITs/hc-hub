@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Computed;
@@ -11,7 +12,9 @@ use Livewire\WithPagination;
 use Modules\Core\Models\Center;
 use Modules\Core\Models\Program;
 use Modules\Hr\Livewire\Concerns\Settings\ListsAssignedEmployees;
+use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\ContractType;
+use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Settings\HrAccess;
 use Modules\Hr\Support\Settings\OrgCounts;
 
@@ -19,6 +22,10 @@ use Modules\Hr\Support\Settings\OrgCounts;
  * One center as HR sees it: where it is, when it is open, how many people
  * work there now by contract type and by program, and who they are.
  * Read-only. A regional HR role cannot open another governorate's center.
+ *
+ * "Working here" includes the volunteers of a program the center serves
+ * whose position has no center (Position::servingCenter; Study Zone): they
+ * are counted at every center linked to their program in their city.
  */
 new #[Layout('layouts::desk'), Title('hr_settings.titles.center')] class extends Component {
     use ListsAssignedEmployees;
@@ -43,6 +50,24 @@ new #[Layout('layouts::desk'), Title('hr_settings.titles.center')] class extends
         return ['center_id' => $this->centerId];
     }
 
+    /**
+     * Its own positions' contracts and the shared ones of the programs it serves.
+     *
+     * @param  list<int>|null  $cityIds
+     * @return Builder<Contract>
+     */
+    protected function assignmentQuery(?array $cityIds): Builder
+    {
+        return OrgCounts::activeAssignments($cityIds)
+            ->whereIn('contracts.position_id', $this->servingPositions()->select('positions.id'));
+    }
+
+    /** @return Builder<Position> */
+    private function servingPositions(): Builder
+    {
+        return Position::query()->servingCenter($this->center);
+    }
+
     #[Computed]
     public function center(): Center
     {
@@ -53,14 +78,11 @@ new #[Layout('layouts::desk'), Title('hr_settings.titles.center')] class extends
     #[Computed]
     public function totals(): array
     {
-        $scope = $this->assignmentScope();
-        $counts = OrgCounts::positions('center_id', null, $scope)->get($this->centerId);
-
         return [
-            'positions' => $counts->positions ?? 0,
-            'seats' => $counts->seats ?? 0,
-            'employees' => OrgCounts::headcount(null, $scope),
-            'assignments' => (int) OrgCounts::activeAssignments(null, $scope)->toBase()->count(),
+            'positions' => $this->servingPositions()->count(),
+            'seats' => (int) $this->servingPositions()->sum('max_emp'),
+            'employees' => (int) $this->assignmentQuery(null)->toBase()->distinct()->count('contracts.employee_id'),
+            'assignments' => (int) $this->assignmentQuery(null)->toBase()->count(),
         ];
     }
 
@@ -72,7 +94,7 @@ new #[Layout('layouts::desk'), Title('hr_settings.titles.center')] class extends
     #[Computed]
     public function byContractType(): array
     {
-        $counts = OrgCounts::activeAssignments(null, $this->assignmentScope())
+        $counts = $this->assignmentQuery(null)
             ->toBase()
             ->whereNotNull('contracts.contract_type_id')
             ->groupBy('contracts.contract_type_id')
@@ -94,8 +116,12 @@ new #[Layout('layouts::desk'), Title('hr_settings.titles.center')] class extends
     #[Computed]
     public function byProgram(): array
     {
-        return OrgCounts::employees('program_id', null, $this->assignmentScope())
-            ->mapWithKeys(fn (int $employees, int $programId): array => [Program::nameOf($programId) ?: '#'.$programId => $employees])
+        return $this->assignmentQuery(null)
+            ->toBase()
+            ->groupBy('positions.program_id')
+            ->selectRaw('positions.program_id as program_id, count(distinct contracts.employee_id) as employees')
+            ->pluck('employees', 'program_id')
+            ->mapWithKeys(fn (mixed $employees, mixed $programId): array => [Program::nameOf((int) $programId) ?: '#'.$programId => (int) $employees])
             ->sortKeys()
             ->all();
     }

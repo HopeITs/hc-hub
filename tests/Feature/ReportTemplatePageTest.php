@@ -24,6 +24,7 @@ use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\ReportTemplateLine;
 use Modules\Tracking\Models\ReportTemplateQuestion;
+use Modules\Tracking\Support\Reporting\ReportPlace;
 
 /*
 | The "Report template" tab on projects/show (contracts.md §12.4, T33 slice 3):
@@ -388,4 +389,18 @@ test('a confirmed active template shows when its monthly reports are still being
     MonthlyReport::factory()->for($project)->create(['period' => '2026-11-01']);
 
     rtpPage($manager, $project)->assertDontSeeHtml('data-monthly-reports-preparing');
+});
+
+test('the tab finds a template at the place of the project row and names its proposals', function () {
+    ['project' => $project, 'template' => $legacy] = rtpProject();
+    $legacy->delete();
+    $proposal = rtpProposal($project, 'Place proposal');
+    $row = proposalRowForProject($proposal, $project);
+    $place = new ReportPlace((int) $project->city_id, (int) $project->program_id, $row->centers()->value('center_id'), false);
+    $template = Activity::withoutRecording(fn (): ReportTemplate => ReportTemplate::factory()->forPlace($place, $proposal)->create());
+    rtpLine($template, $proposal, ['name_en' => 'Place line'], attributes: []);
+
+    rtpPage(mealManager(), $project)
+        ->assertSeeHtml('data-test="template-proposals"')
+        ->assertSee('Place proposal');
 });

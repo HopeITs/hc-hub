@@ -293,6 +293,11 @@ return [
         'upcoming' => 'لم يحن موعده',
         'not_due' => 'غير مطلوب',
     ],
+    'strategic_plan_status' => [
+        'draft' => 'مسودة',
+        'submitted' => 'عند مدير البرنامج للموافقة',
+        'approved' => 'معتمدة',
+    ],
     'activity_plan_status' => [
         'draft' => 'مسودة',
         'in_review' => 'عند الميل للمراجعة',

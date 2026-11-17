@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Notifications\NotificationPresenter;
+use App\Support\EmployeeProfile;
 use App\Support\FileKeyring;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RolesAndPermissionsSeeder;
@@ -42,6 +43,7 @@ use Modules\Tracking\Models\MonthlyReportLineShare;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\Sector;
@@ -636,6 +638,30 @@ function userWithRole(string $role, ?int $employeeId = null): User
 }
 
 /**
+ * A location row of the proposal that carries the project (Y-02): the
+ * project's city and program, and one center (a new HR center of the city
+ * unless one is given; `null` makes the row city-wide).
+ *
+ * @param  int|false|null  $centerId  false = city-wide, null = a new center
+ */
+function proposalRowForProject(Proposal $proposal, Project $project, int|false|null $centerId = null): ProposalLocation
+{
+    $row = ProposalLocation::factory()->create([
+        'proposal_id' => $proposal->id,
+        'city_id' => $project->city_id,
+        'program_id' => $project->program_id,
+        'project_id' => $project->id,
+        'city_wide' => $centerId === false,
+    ]);
+
+    if ($centerId !== false) {
+        $row->centers()->create(['center_id' => $centerId ?? insertHrCenter((int) $project->city_id, 'Center '.Str::random(6))]);
+    }
+
+    return $row;
+}
+
+/**
  * A complete Indicator Library form submission for SaveLibraryIndicator: an
  * institutional (HC), monthly, numeric entry at OP1 unless overridden.
  *
@@ -683,6 +709,9 @@ function holdMealManagerSlot(?int $employeeId = null): int
     app(NotificationSettings::class)->save(['proposal_default_reviewers' => [
         'meal_manager' => $positionId, 'finance_manager' => null, 'fundraising_manager' => null, 'ceo' => null,
     ]]);
+
+    // The holder is read through a remembered HR lookup; drop it so a slot moved mid-test is seen.
+    EmployeeProfile::forgetRememberedLookup();
 
     return $employeeId;
 }

@@ -118,11 +118,19 @@ return [
         'details' => 'Details',
         'by_contract_type' => 'By contract type',
         'by_program' => 'By program',
+        'shared_positions' => '+ :count shared|+ :count shared',
     ],
 
     'people' => [
         'title' => 'Working here now',
         'search' => 'Search by name',
         'none' => 'Nobody works here now',
+        'center' => 'Center',
+        'all_centers' => 'All centers',
+        'department' => 'Department',
+        'all_departments' => 'All departments',
+        'level' => 'Job level',
+        'all_levels' => 'All job levels',
+        'reset' => 'Clear filters',
     ],
 ];

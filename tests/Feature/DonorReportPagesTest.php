@@ -262,7 +262,8 @@ test('the saved report page runs a fixed number of queries however many centers 
 });
 
 test('MEAL can compose from an assigned duty without receiving finance access', function () {
-    $meal = mealManager();
+    // A MEAL officer, not the MEAL Manager slot holder: the slot holder is granted the funding agreements (meal_manager_grants).
+    $meal = userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Maha', lastNameEn: 'Officer'));
     $unassigned = donorReportProposal(['name' => 'Unassigned grant']);
     $duty = DonorReport::factory()->create([
         'donor_proposal_id' => $this->proposal->donorProposals()->value('id'),
@@ -358,7 +359,8 @@ test('nobody names a responsible without the right, nor on a submitted report', 
 });
 
 test('a compiler working from an assigned duty alone cannot hand the report to someone else', function () {
-    $meal = mealManager();
+    // A MEAL officer, not the MEAL Manager slot holder: the slot holder is granted the funding agreements (meal_manager_grants).
+    $meal = userWithRole('MEAL', insertHrEmployee(firstNameEn: 'Maha', lastNameEn: 'Officer'));
     $duty = DonorReport::factory()->create([
         'donor_proposal_id' => $this->proposal->donorProposals()->value('id'),
         'responsible_employee_id' => $meal->employee_id,

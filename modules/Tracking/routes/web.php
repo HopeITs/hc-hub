@@ -41,6 +41,10 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
         ->can('strategies.view')
         ->name('strategies.show');
 
+    Route::livewire('strategies/{strategy}/plans/{program}', 'tracking::strategic-plans.show')
+        ->can('strategies.view')
+        ->name('strategic-plans.show');
+
     Route::livewire('programs', 'tracking::programs.index')
         ->can('programs.view')
         ->name('programs.index');
