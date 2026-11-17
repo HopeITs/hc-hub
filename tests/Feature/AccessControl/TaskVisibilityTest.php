@@ -95,7 +95,7 @@ test('proposal progress counts every task, including hidden ones', function () {
     $proposal = Proposal::factory()->create();
     $this->financeTask->update(['source_type' => 'proposal', 'source_id' => $proposal->id]);
 
-    $row = Livewire::actingAs(userWithRole('Public Relations Manager', $this->mediaEmployee))->test('tracking::proposals.index')->instance()->proposals->firstWhere('id', $proposal->id);
+    $row = Livewire::actingAs($this->member->syncRoles(['Public Relations Manager']))->test('tracking::proposals.index')->instance()->proposals->firstWhere('id', $proposal->id);
 
     expect($row->tasks_count)->toBe(1);
 });
@@ -107,7 +107,7 @@ test('a milestone whose only task is hidden still cannot be deleted', function (
 });
 
 test('a Media Team editor moves status on department tasks but cannot edit them, and only views owned-project tasks', function () {
-    $editor = userWithRole('Media Team', $this->mediaEmployee);
+    $editor = $this->member->syncRoles(['Media Team']);
     $this->project->update(['user_id' => $this->mediaEmployee]);
     $colleague = insertHrEmployee(firstNameEn: 'Media', lastNameEn: 'Colleague');
     insertHrContract($colleague, insertHrPosition($this->mediaDepartment));

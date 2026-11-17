@@ -100,7 +100,7 @@ test('a supervisor of the owner prepares on their behalf', function () {
 });
 
 test('the owner without a report-writing permission is refused', function () {
-    $viewer = userWithRole('Team Member', $this->ownerEmployee);
+    $viewer = $this->owner->syncRoles(['Team Member']);
 
     expect($viewer->can('open', [MonthlyReport::class, $this->project]))->toBeFalse();
 });

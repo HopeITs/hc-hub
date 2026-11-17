@@ -188,7 +188,7 @@ test('the queue filters by city, project and month', function () {
 test('a Team Member sees the months of a project they own without Fill and is refused the call', function () {
     $this->travelTo('2026-11-20 10:00:00');
     $november = mrpMonth(mrpProject($this->aleppo), '2026-11-01');
-    $viewer = userWithRole('Team Member', $this->ownerEmployee);
+    $viewer = $this->owner->syncRoles(['Team Member']);
 
     Livewire::actingAs($viewer)->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-month="2026-11" data-month-state="draft"')
@@ -328,7 +328,7 @@ test('"Needs you" lists the months the preparer can fill, overdue first, above t
 test('someone who reads the months but cannot fill them has no "Needs you" list', function () {
     mrpPreparerMonths(mrpProject($this->aleppo));
 
-    Livewire::actingAs(userWithRole('Team Member', $this->ownerEmployee))->test('tracking::monthly-reports.index')
+    Livewire::actingAs($this->owner->syncRoles(['Team Member']))->test('tracking::monthly-reports.index')
         ->assertSeeHtml('data-month="2026-11"')
         ->assertDontSeeHtml('data-needs-you');
 });
