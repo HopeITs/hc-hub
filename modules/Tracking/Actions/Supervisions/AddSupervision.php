@@ -18,7 +18,8 @@ use Modules\Tracking\Support\SupervisionMap;
  * Add a local supervision on top of HR (contracts §10, D-13). Both people
  * must be active in HR now (re-checked here, the picker is never trusted);
  * nobody supervises themselves; HR's own direct manager and any A↔B loop are
- * refused. The unique pair index settles two admins acting at once. Error
+ * refused among running rows; an ended pair may be added again. The unique
+ * index on the open pair settles two admins acting at once. Error
  * keys match the Supervision tab's add modal.
  */
 class AddSupervision
@@ -51,6 +52,7 @@ class AddSupervision
                 return Supervision::query()->create([
                     'supervisor_employee_id' => $supervisorEmployeeId,
                     'supervisee_employee_id' => $superviseeEmployeeId,
+                    'starts_on' => now()->toDateString(),
                     'created_by' => Auth::id(),
                 ]);
             } catch (UniqueConstraintViolationException) {
@@ -95,6 +97,7 @@ class AddSupervision
         $existing = Supervision::query()
             ->where('pair_low', min($supervisorEmployeeId, $superviseeEmployeeId))
             ->where('pair_high', max($supervisorEmployeeId, $superviseeEmployeeId))
+            ->current()
             ->when($lock, fn ($query) => $query->lockForUpdate())
             ->value('supervisor_employee_id');
 

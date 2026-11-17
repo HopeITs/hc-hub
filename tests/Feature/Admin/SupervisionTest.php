@@ -11,6 +11,7 @@ use Modules\Core\Models\User;
 use Modules\Tracking\Actions\Supervisions\AddSupervision;
 use Modules\Tracking\Actions\Supervisions\RemoveSupervision;
 use Modules\Tracking\Models\Supervision;
+use Modules\Tracking\Support\SupervisionMap;
 
 /**
  * Run an add and return its validation errors, keyed by field.
@@ -159,12 +160,20 @@ test('the database refuses a reverse pair on its own', function () {
         ->toThrow(UniqueConstraintViolationException::class);
 });
 
-test('removing a supervision deletes it and records the removal; a second remove is a no-op', function () {
-    $this->actingAs(userWithRole('General Manager'));
+test('removing a supervision ends it, keeps the row and records the removal; a second remove is a no-op', function () {
+    $this->travelTo('2026-11-17 10:00:00');
+    $admin = userWithRole('General Manager');
+    $this->actingAs($admin);
     $supervision = storedSupervision(insertHrEmployee(firstNameEn: 'Nour', lastNameEn: 'Ali'), insertHrEmployee(firstNameEn: 'Rami', lastNameEn: 'Saleh'));
 
-    expect(app(RemoveSupervision::class)->handle($supervision->id))->toBeTrue()
-        ->and(DB::table('supervisions')->count())->toBe(0)
+    expect(app(RemoveSupervision::class)->handle($supervision->id))->toBeTrue();
+
+    $row = DB::table('supervisions')->sole();
+
+    expect((int) $row->id)->toBe($supervision->id)
+        ->and($row->ends_on)->toBe('2026-11-17')
+        ->and((int) $row->ended_by)->toBe($admin->id)
+        ->and(SupervisionMap::supervises($supervision->supervisor_employee_id, $supervision->supervisee_employee_id))->toBeFalse()
         ->and(Activity::query()->sole()->event)->toBe('supervision.removed')
         ->and(Activity::query()->sole()->label())->toBe('Nour Ali → Rami Saleh');
 
@@ -264,7 +273,21 @@ test('General Manager adds and removes a supervision from the tab', function () 
         ->assertSet('showRemoveModal', false)
         ->assertDontSee('Rami Saleh');
 
-    expect(DB::table('supervisions')->count())->toBe(0);
+    expect(DB::table('supervisions')->where('id', $id)->value('ends_on'))->not->toBeNull();
+});
+
+test('a pair that was removed can be added again, and the ended row stays beside it', function () {
+    $this->actingAs(userWithRole('General Manager'));
+    [$supervisor, $supervisee] = [insertHrEmployee(), insertHrEmployee()];
+
+    $first = app(AddSupervision::class)->handle($supervisor, $supervisee);
+    app(RemoveSupervision::class)->handle($first->id);
+    $second = app(AddSupervision::class)->handle($supervisor, $supervisee);
+
+    expect($second->id)->not->toBe($first->id)
+        ->and(DB::table('supervisions')->count())->toBe(2)
+        ->and(DB::table('supervisions')->whereNull('ends_on')->pluck('id')->all())->toBe([$second->id])
+        ->and(SupervisionMap::supervises($supervisor, $supervisee))->toBeTrue();
 });
 
 test('a refused add from the tab shows the message on the field', function () {

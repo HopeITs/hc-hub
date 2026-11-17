@@ -60,7 +60,7 @@ new class extends Component {
             }
         }
 
-        foreach (Supervision::query()->orderBy('id')->get(['id', 'supervisor_employee_id', 'supervisee_employee_id']) as $supervision) {
+        foreach (Supervision::query()->current()->orderBy('id')->get(['id', 'supervisor_employee_id', 'supervisee_employee_id']) as $supervision) {
             $pairs[] = ['supervisor' => $supervision->supervisor_employee_id, 'supervisee' => $supervision->supervisee_employee_id, 'supervisionId' => $supervision->id];
         }
 

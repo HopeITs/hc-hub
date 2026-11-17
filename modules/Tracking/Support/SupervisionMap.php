@@ -11,7 +11,7 @@ use Modules\Tracking\Models\Supervision;
 /**
  * Who supervises whom (contracts §10, D-13): the HR direct manager of each
  * employee's current position (EmployeeProfile::managerOf()) plus the local
- * supervisions rows, which hold exceptions and additions only.
+ * running supervisions rows, which hold exceptions and additions only.
  *
  * Only employees active in HR take part, on either side. Results are
  * de-duplicated, sorted and memoized for the request or job: the instance is
@@ -156,7 +156,7 @@ final class SupervisionMap
             $active = $this->activeEmployees();
             $this->localSupervisors = [];
 
-            foreach (Supervision::query()->toBase()->get(['supervisor_employee_id', 'supervisee_employee_id']) as $row) {
+            foreach (Supervision::query()->current()->toBase()->get(['supervisor_employee_id', 'supervisee_employee_id']) as $row) {
                 $supervisorId = (int) $row->supervisor_employee_id;
                 $superviseeId = (int) $row->supervisee_employee_id;
 
