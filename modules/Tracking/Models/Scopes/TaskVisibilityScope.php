@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Models\Scopes;
 
+use App\Support\EmployeeLookup;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Illuminate\Support\Facades\Auth;
 use Modules\Core\Models\User;
-use Modules\Hr\Models\Employee;
-use Modules\Hr\Support\Employees\HrAccess;
 use Modules\Tracking\Enums\TaskKind;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Task;
@@ -180,11 +179,11 @@ class TaskVisibilityScope implements Scope
                     return;
                 }
 
-                $cityIds = HrAccess::cityIds($user);
+                $reach = app(EmployeeLookup::class)->idsInHrReachOf($user);
 
-                $cityIds === null
+                $reach === null
                     ? $query->orWhereNotNull($sourceId)
-                    : $query->orWhereIn($sourceId, Employee::query()->select('id')->whereIn('city_id', $cityIds));
+                    : $query->orWhereIn($sourceId, $reach);
             });
     }
 }

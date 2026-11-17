@@ -6,6 +6,7 @@ namespace Modules\Hr\Support\Employees;
 
 use App\Support\EmployeeLookup;
 use Illuminate\Database\Query\Builder;
+use Modules\Core\Models\User;
 use Modules\Hr\Models\Department;
 use Modules\Hr\Models\Employee;
 
@@ -35,5 +36,12 @@ final class HrEmployeeLookup implements EmployeeLookup
     public function idsNamedLike(string $word): Builder
     {
         return Employee::query()->select('employees.id')->whereNameLike($word, false)->toBase();
+    }
+
+    public function idsInHrReachOf(User $user): ?Builder
+    {
+        $cityIds = HrAccess::cityIds($user);
+
+        return $cityIds === null ? null : Employee::query()->select('employees.id')->whereIn('city_id', $cityIds)->toBase();
     }
 }

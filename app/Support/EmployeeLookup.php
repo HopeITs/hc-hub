@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support;
 
 use Illuminate\Database\Query\Builder;
+use Modules\Core\Models\User;
 
 /**
  * What an account needs to know about HR employees, without Core depending on
@@ -35,4 +36,10 @@ interface EmployeeLookup
      * the word (on the typed keyboard layout only), for whereIn().
      */
     public function idsNamedLike(string $word): Builder;
+
+    /**
+     * A subquery of the ids of employees in the cities the user's HR access
+     * covers, for whereIn(), or null when it covers every city.
+     */
+    public function idsInHrReachOf(User $user): ?Builder;
 }

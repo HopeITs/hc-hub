@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Support\Modules;
 
+use App\Support\Modules\Contracts\DeskAgendaSource;
 use App\Support\Modules\Contracts\DeskPanelSource;
 use App\Support\Modules\Contracts\DestinationSource;
+use App\Support\Modules\Contracts\SubjectLinkSource;
 
 /**
  * What each module adds to the platform, registered from the module's own
  * ServiceProvider so app/ never names a module (D10). Today: sidebar pages
- * (Destinations) and Desk panels (Panels).
+ * (Destinations), Desk panels (Panels), Desk agenda rows (ReadsDeskAgenda)
+ * and record links (SubjectLinks).
  *
  * A singleton filled once at boot; it holds class names only, and every read
  * resolves the source from the container, so nothing a request computes
@@ -27,6 +30,60 @@ final class ModuleRegistry
      * @var list<class-string<DeskPanelSource>>
      */
     private array $deskPanels = [];
+
+    /**
+     * @var list<class-string<DeskAgendaSource>>
+     */
+    private array $deskAgenda = [];
+
+    /**
+     * @var list<class-string<SubjectLinkSource>>
+     */
+    private array $subjectLinks = [];
+
+    /**
+     * @param  class-string<DeskAgendaSource>  $source
+     */
+    public function addDeskAgenda(string $source): void
+    {
+        if (! in_array($source, $this->deskAgenda, true)) {
+            $this->deskAgenda[] = $source;
+        }
+    }
+
+    /**
+     * @param  class-string<SubjectLinkSource>  $source
+     */
+    public function addSubjectLinks(string $source): void
+    {
+        if (! in_array($source, $this->subjectLinks, true)) {
+            $this->subjectLinks[] = $source;
+        }
+    }
+
+    /**
+     * @return list<DeskAgendaSource>
+     */
+    public function deskAgendaSources(): array
+    {
+        return array_map(fn (string $source): DeskAgendaSource => app($source), $this->deskAgenda);
+    }
+
+    /**
+     * The module whose records carry this morph type, if any.
+     */
+    public function subjectLinkSourceFor(string $type): ?SubjectLinkSource
+    {
+        foreach ($this->subjectLinks as $class) {
+            $source = app($class);
+
+            if ($source->handles($type)) {
+                return $source;
+            }
+        }
+
+        return null;
+    }
 
     /**
      * @param  class-string<DestinationSource>  $source

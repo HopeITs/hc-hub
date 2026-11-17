@@ -37,6 +37,8 @@ use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Desk\HrDestinations;
 use Modules\Hr\Support\Desk\HrPanels;
 use Modules\Hr\Support\Employees\HrEmployeeLookup;
+use Modules\Hr\Support\Inbox\DeskAgenda;
+use Modules\Hr\Support\Inbox\HrSubjectLinks;
 use Modules\Hr\Support\Journeys\JourneyHooks;
 use Modules\Hr\Support\Recruitment\Console\AnalyzeRecruitmentCvs;
 use Modules\Hr\Support\Recruitment\Console\ApplyDueRecruitmentRequests;
@@ -162,6 +164,8 @@ class HrServiceProvider extends ServiceProvider
         $modules = $this->app->make(ModuleRegistry::class);
         $modules->addDestinations(HrDestinations::class);
         $modules->addDeskPanels(HrPanels::class);
+        $modules->addDeskAgenda(DeskAgenda::class);
+        $modules->addSubjectLinks(HrSubjectLinks::class);
     }
 
     /**

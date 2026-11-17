@@ -4,6 +4,8 @@ use App\Support\Desk\Panels;
 use App\Support\Modules\ModuleRegistry;
 use Modules\Hr\Support\Desk\HrDestinations;
 use Modules\Hr\Support\Desk\HrPanels;
+use Modules\Hr\Support\Inbox\DeskAgenda;
+use Modules\Hr\Support\Inbox\HrSubjectLinks;
 
 /*
 | Modules add their sidebar pages and Desk panels from their own
@@ -20,6 +22,16 @@ test('the HR module registers its pages and Desk cards once, from its own provid
         ->and(array_map(get_class(...), $registry->deskPanelSources()))->toBe([HrPanels::class])
         ->and($registry->deskPanelSourceFor('hr-news'))->toBeInstanceOf(HrPanels::class)
         ->and($registry->deskPanelSourceFor('needs'))->toBeNull();
+});
+
+test('the HR module gives the Desk agenda its rows and the notification links their HR pages', function () {
+    $registry = app(ModuleRegistry::class);
+
+    expect(array_map(get_class(...), $registry->deskAgendaSources()))->toBe([DeskAgenda::class])
+        ->and($registry->subjectLinkSourceFor('employee'))->toBeInstanceOf(HrSubjectLinks::class)
+        ->and($registry->subjectLinkSourceFor('leave_request'))->toBeInstanceOf(HrSubjectLinks::class)
+        ->and($registry->subjectLinkSourceFor('contract'))->toBeInstanceOf(HrSubjectLinks::class)
+        ->and($registry->subjectLinkSourceFor('task'))->toBeNull();
 });
 
 test('a module panel is drawn by the module\'s component, the Desk\'s own panels by theirs', function () {

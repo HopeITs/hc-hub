@@ -105,9 +105,11 @@ describe('visibility of a task raised on an employee', function () {
     test('a user who may view employee records sees it, for scoped and unscoped roles alike', function () {
         Permission::findOrCreate('employees.view');
 
+        $viewer = userWithRole('Team Member', $this->outsiderEmployeeId);
+        $viewer->givePermissionTo('employees.view');
+
         foreach (['Team Member', 'Managers'] as $role) {
-            $viewer = userWithRole($role, $this->outsiderEmployeeId);
-            $viewer->givePermissionTo('employees.view');
+            $viewer->syncRoles([$role]);
 
             $this->actingAs($viewer);
             expect(Task::query()->whereKey($this->employeeTask->id)->exists())->toBeTrue($role);

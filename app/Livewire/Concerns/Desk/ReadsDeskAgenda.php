@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Livewire\Concerns\Desk;
 
+use App\Support\Modules\Contracts\DeskAgendaSource;
+use App\Support\Modules\ModuleRegistry;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Number;
-use Modules\Hr\Support\Inbox\DeskAgenda;
 use Modules\Tracking\Enums\ArStatus;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\MonthlyReportStatus;
@@ -163,7 +164,8 @@ trait ReadsDeskAgenda
             ->concat($reports)
             ->concat($transfers)
             ->concat($donorReports)
-            ->concat(app(DeskAgenda::class)->between($user, $from, $to))
+            ->concat(collect(app(ModuleRegistry::class)->deskAgendaSources())
+                ->flatMap(fn (DeskAgendaSource $source): Collection => $source->between($user, $from, $to)))
             ->sortBy(fn (array $item): string => $item['date']->toDateString().$item['key'])
             ->values();
     }

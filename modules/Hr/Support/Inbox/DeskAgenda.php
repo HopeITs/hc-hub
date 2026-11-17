@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Support\Inbox;
 
+use App\Support\Modules\Contracts\DeskAgendaSource;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
@@ -19,7 +20,7 @@ use Modules\Hr\Support\Desk\UpcomingHolidays;
  * (the same reads the HR calendar card makes). Always today or later; a past
  * day is never overdue, so a window that ends before today gets nothing.
  */
-final class DeskAgenda
+final class DeskAgenda implements DeskAgendaSource
 {
     /**
      * The furthest day ahead holidays are read.
@@ -27,7 +28,7 @@ final class DeskAgenda
     private const int HolidayDays = 60;
 
     /**
-     * @return Collection<int, array{key: string, kind: string, date: CarbonImmutable, title: string, context: string, project: null, href: string}>
+     * @return Collection<int, array{key: string, kind: string, date: CarbonImmutable, title: string, context: string, project: string|null, href: string}>
      */
     public function between(User $user, CarbonImmutable $from, CarbonImmutable $to): Collection
     {
