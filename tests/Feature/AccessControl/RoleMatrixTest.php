@@ -12,6 +12,8 @@ const FUNDRAISING_VIEWS = ['donors.view', 'proposals.view'];
  * decision 2026-09-25: everyone may view every module page) — except the
  * activity log, which stays with Super Admin and General Manager, and the
  * money pages (user decision 2026-09-29), which only finance-facing roles hold.
+ * Other people's timesheets (attendance.view) are not a module page: every
+ * role sees only its own (attendance.view-own).
  *
  * @return list<string>
  */
@@ -21,7 +23,8 @@ function everyViewPermission(): array
         ->filter(fn (array $actions): bool => in_array('view', $actions, true))
         ->keys()
         ->map(fn (string $module): string => "{$module}.view")
-        ->reject(fn (string $permission): bool => in_array($permission, ['activity-log.view', ...FINANCE_VIEWS, ...FUNDRAISING_VIEWS], true))
+        ->reject(fn (string $permission): bool => in_array($permission, ['activity-log.view', 'attendance.view', ...FINANCE_VIEWS, ...FUNDRAISING_VIEWS], true))
+        ->push('attendance.view-own')
         ->values()
         ->all();
 }
@@ -118,7 +121,7 @@ test('each role holds every view permission plus exactly its approved write perm
     ]],
     'MEAL' => ['MEAL', [
         'tasks.create', 'tasks.update', 'reports.create', 'reports.update', 'reports.approve', 'reports.mark-seen',
-        'indicators.create', 'indicators.update', 'indicators.delete',
+        'indicators.create', 'indicators.update', 'indicators.delete', 'indicators.record',
         'results.create', 'results.update', 'results.delete',
         'targets.create', 'targets.update', 'targets.delete',
         'indicator-library.create', 'indicator-library.update', 'indicator-library.delete',
@@ -144,13 +147,13 @@ test('each role holds every view permission plus exactly its approved write perm
         'projects.update', 'projects.delete',
         'milestones.create', 'milestones.update', 'milestones.delete',
         'risks.create', 'risks.update', 'risks.delete',
-        'indicators.create', 'indicators.update',
-        'results.create', 'results.update',
+        'indicators.record',
+        'attendance.view',
         'ai.draft',
     ]],
 ]);
 
-test('the General Manager holds everything except role and permission management, the MEAL-only work, notification settings and AI drafting', function () {
+test('the General Manager holds everything except role and permission management, the MEAL-only work, notification settings, AI drafting and the HR work', function () {
     $granted = Role::findByName('General Manager', 'web')->permissions->pluck('name')->all();
     $expected = Permission::query()
         ->whereNotIn('name', [
@@ -160,6 +163,7 @@ test('the General Manager holds everything except role and permission management
             'proposals.approve',
             'ai.draft',
             'annual-plans.review',
+            'attendance.manage', 'mail-lists.manage', 'mail-lists.confirm', 'message-templates.manage', 'message-templates.use',
         ])
         ->pluck('name')
         ->all();

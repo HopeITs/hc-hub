@@ -656,7 +656,7 @@ trait ManagesProposalForm
      * A payroll proposal (W-32) sends its narrative and, on create, its kind;
      * it never sends projects, beneficiaries or a starting stage.
      *
-     * @return array{name: string, internalProjectNumber: string, donorId: string|null, beneficiaries: array<int|string, int|string|null>, beneficiariesReason: string|null, plannedDateBegin: string|null, plannedDateEnd: string|null, notes: string, conceptNote: string|null, narrative?: string|null, kind?: string, projectIds?: list<string>, locations?: list<array{city_id: string, program_id: string|null, responsible_employee_id: string|null, center_ids: list<string>, is_new: bool, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string}>, startingStage?: string, skipReason?: string|null, requestedBudget?: string|null, requestedCurrency?: string|null}
+     * @return array{name: string, internalProjectNumber: string, donorId: string|null, beneficiaries: array<int|string, int|string|null>, beneficiariesReason: string|null, plannedDateBegin: string|null, plannedDateEnd: string|null, notes: string, conceptNote: string|null, narrative?: string|null, kind?: string, projectIds?: list<string>, locations?: list<array{city_id: string, program_id: string|null, responsible_employee_id: string|null, center_ids: list<string>, city_wide: bool, is_new: bool, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string}>, startingStage?: string, skipReason?: string|null, requestedBudget?: string|null, requestedCurrency?: string|null}
      */
     private function proposalFormData(bool $isCreate): array
     {

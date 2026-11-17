@@ -7,15 +7,16 @@ namespace Modules\Tracking\Support;
 use App\Support\Slots;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ReportTemplateLineStatus;
 use Modules\Tracking\Enums\ReportTemplateStatus;
-use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Support\Reporting\PlaceBridge;
 
 /**
  * MEAL's "Templates to confirm" queue (contracts.md §12.4, T33 slice 3): the
@@ -34,7 +35,9 @@ final class ReportTemplateQueue
      *
      * @return list<array{
      *     template: ReportTemplate,
-     *     project: Project,
+     *     project: object|null,
+     *     name: string,
+     *     templateProposals: list<array{id: int, name: string, number: string|null}>,
      *     status: ReportTemplateStatus,
      *     pendingLineCount: int,
      *     annualPlanLineCount: int,
@@ -52,21 +55,33 @@ final class ReportTemplateQueue
             return [];
         }
 
-        $projectIds = $employeeId === Slots::holderOf('meal_manager') ? null : MealCoverage::projectsCoveredBy($employeeId);
+        $coveredProjectIds = $employeeId === Slots::holderOf('meal_manager') ? null : MealCoverage::projectsCoveredBy($employeeId);
 
-        if ($projectIds === []) {
+        if ($coveredProjectIds === []) {
             return [];
         }
 
         $templates = ReportTemplate::query()
-            ->select(['id', 'project_id', 'status', 'updated_at'])
-            ->when($projectIds !== null, fn (Builder $query) => $query->whereIn('project_id', $projectIds))
-            ->whereHas('project', fn (Builder $query) => $query->whereIn('status', [ProjectStatus::Approved->value, ProjectStatus::Active->value]))
+            ->select(['id', 'project_id', 'city_id', 'program_id', 'center_id', 'city_wide', 'status', 'updated_at'])
             ->where(fn (Builder $query) => $query
                 ->where('status', ReportTemplateStatus::Pending->value)
                 ->orWhereHas('lines', fn (Builder $query) => $query->where('status', ReportTemplateLineStatus::Pending->value)))
-            ->with('project:id,name,slug,status,city_id,center_id')
+            ->with(['program:id', 'proposals:id,name,internal_project_number'])
             ->get();
+
+        $bridge = app(PlaceBridge::class);
+        $legacyIds = $bridge->legacyProjectIdsFor($templates);
+        $projects = $bridge->projectsByIds(array_values(array_unique(array_filter($legacyIds))));
+
+        $templates = $templates->filter(function (ReportTemplate $template) use ($legacyIds, $projects, $coveredProjectIds): bool {
+            $project = $projects->get($legacyIds[$template->id] ?? 0);
+
+            if ($project !== null && ! in_array($project->status, [ProjectStatus::Approved, ProjectStatus::Active], true)) {
+                return false;
+            }
+
+            return $coveredProjectIds === null || ($project !== null && in_array($project->id, $coveredProjectIds, true));
+        })->values();
 
         if ($templates->isEmpty()) {
             return [];
@@ -92,25 +107,21 @@ final class ReportTemplateQueue
             ->get(['id', 'name', 'internal_project_number'])
             ->keyBy('id');
 
-        $cityIds = [];
-
-        foreach ($templates as $template) {
-            $cityIds[$template->id] = MealCoverage::cityIdOf($template->project);
-        }
-
-        $knownCityIds = array_values(array_unique(array_filter($cityIds, fn (?int $id): bool => $id !== null)));
-        $cities = $knownCityIds === [] ? collect() : City::query()->whereKey($knownCityIds)->get(['id', 'name_en', 'name_ar'])->keyBy('id');
+        $knownCityIds = $templates->pluck('city_id')->unique()->values()->all();
+        $cities = City::query()->whereKey($knownCityIds)->get(['id', 'name_en', 'name_ar'])->keyBy('id');
 
         $rows = [];
 
         foreach ($templates as $template) {
             $groups = $pendingGroups->where('report_template_id', $template->id);
             $templateProposalIds = $groups->where('source_type', 'proposal')->pluck('source_id')->map(fn (mixed $id): int => (int) $id)->all();
-            $cityId = $cityIds[$template->id];
+            $cityId = $template->city_id;
+            $project = $projects->get($legacyIds[$template->id] ?? 0);
 
             $rows[] = [
                 'template' => $template,
-                'project' => $template->project,
+                'project' => $project,
+                'name' => $project?->name ?? (string) $template->program?->name,
                 'status' => $template->status,
                 'pendingLineCount' => (int) $groups->sum('line_count'),
                 'annualPlanLineCount' => (int) $groups->where('source_type', 'annual_plan')->sum('line_count'),
@@ -119,14 +130,18 @@ final class ReportTemplateQueue
                     ->map(fn (Proposal $proposal): array => ['id' => $proposal->id, 'name' => $proposal->name, 'number' => $proposal->internal_project_number])
                     ->sortBy('name')
                     ->all()),
+                'templateProposals' => array_values($template->proposals
+                    ->sortBy('name')
+                    ->map(fn (Proposal $proposal): array => ['id' => $proposal->id, 'name' => $proposal->name, 'number' => $proposal->internal_project_number])
+                    ->all()),
                 'cityId' => $cityId,
                 'cityName' => $cityId === null ? null : $cities->get($cityId)?->name,
-                'centerName' => $template->project->center()?->name,
+                'centerName' => $template->center_id === null ? ($template->city_wide ? __('report_templates.queue.field_work') : null) : Center::remembered($template->center_id)?->name,
             ];
         }
 
-        usort($rows, fn (array $a, array $b): int => [$a['status'] === ReportTemplateStatus::Pending ? 0 : 1, mb_strtolower($a['project']->name), $a['project']->id]
-            <=> [$b['status'] === ReportTemplateStatus::Pending ? 0 : 1, mb_strtolower($b['project']->name), $b['project']->id]);
+        usort($rows, fn (array $a, array $b): int => [$a['status'] === ReportTemplateStatus::Pending ? 0 : 1, mb_strtolower($a['name']), $a['template']->id]
+            <=> [$b['status'] === ReportTemplateStatus::Pending ? 0 : 1, mb_strtolower($b['name']), $b['template']->id]);
 
         return $rows;
     }

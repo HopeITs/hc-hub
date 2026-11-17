@@ -10,9 +10,11 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Modules\Core\Models\Program;
+use Modules\Tracking\Actions\Indicators\AddIndicatorToLibrary;
 use Modules\Tracking\Enums\IndicatorMeasure;
 use Modules\Tracking\Enums\Period;
 use Modules\Tracking\Models\Indicator;
@@ -26,8 +28,9 @@ use Modules\Tracking\Models\Result;
  * indicator, with the project picker limited to the result's program and
  * the measure locked once targets exist.
  *
- * Used by indicators/index only. The page provides forgetIndicators() and
- * WithPagination's resetPage().
+ * Used by indicators/index and the in-place form on a results framework
+ * (components/indicators/quick-form). The host provides forgetIndicators()
+ * and resetPage() (WithPagination's on the directory).
  *
  * @property-read Collection<int, Project> $projectOptions  #[Computed] projectOptions()
  */
@@ -233,16 +236,40 @@ trait ManagesIndicatorForm
         $indicator->save();
 
         $wasRecentlyCreated = $indicator->wasRecentlyCreated;
+        $libraryRefusal = $wasRecentlyCreated ? $this->addToLibrary($indicator) : null;
 
         $this->showIndicatorModal = false;
         $this->resetIndicatorForm();
         $this->forgetIndicators();
         $this->resetPage();
 
+        if ($libraryRefusal !== null) {
+            Flux::toast(variant: 'warning', text: __('indicators.indicator_created_library_skipped', ['reason' => $libraryRefusal]));
+
+            return;
+        }
+
         Flux::toast(
             variant: 'success',
-            text: $wasRecentlyCreated ? __('indicators.indicator_created') : __('indicators.indicator_updated'),
+            text: $wasRecentlyCreated ? __('indicators.indicator_created_in_library') : __('indicators.indicator_updated'),
         );
+    }
+
+    /**
+     * Every indicator written here also becomes an Indicator Library entry
+     * (AddIndicatorToLibrary). The indicator is kept even when the library
+     * refuses the entry (its program has no usable HR code); the reason is
+     * returned so the user is told.
+     */
+    protected function addToLibrary(Indicator $indicator): ?string
+    {
+        try {
+            app(AddIndicatorToLibrary::class)->handle($indicator);
+        } catch (ValidationException $exception) {
+            return (string) collect($exception->errors())->flatten()->first();
+        }
+
+        return null;
     }
 
     /**

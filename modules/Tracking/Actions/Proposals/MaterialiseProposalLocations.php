@@ -22,6 +22,8 @@ use Modules\Tracking\Support\MaterialisationResult;
  * the proposal row is locked and before the linked projects are approved.
  *
  * A row that carries a project is skipped, so a second run writes nothing.
+ * A city-wide row (field work, no center, D-88) is skipped too: a project
+ * needs a center or a host, and field work has neither.
  * A row without a program is left waiting (its pending request already
  * blocks the approval through the `locations_complete` key, so here it is
  * only reported). Every other row yields one project per center: the open
@@ -132,7 +134,7 @@ final class MaterialiseProposalLocations
 
         /** @var ProposalLocation $row */
         foreach ($proposal->locations()->with('centers')->orderBy('sort')->orderBy('id')->get() as $row) {
-            if ($row->project_id !== null) {
+            if ($row->project_id !== null || $row->city_wide) {
                 continue;
             }
 

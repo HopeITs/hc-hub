@@ -26,6 +26,7 @@ use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TransfersTracking;
+use Modules\Tracking\Support\Reporting\PlaceBridge;
 
 beforeEach(function () {
     $this->travelTo('2026-09-15 09:00:00');
@@ -401,6 +402,7 @@ test('Create on a project with no template pre-fills it and opens its Report tem
     ReportTemplate::factory()->create(['project_id' => $pending->id, 'status' => ReportTemplateStatus::Pending]);
     $proposal = Proposal::factory()->create(['status' => ProposalStatus::Approved, 'actual_date_begin' => '2026-11-15', 'actual_date_end' => '2027-10-20']);
     $proposal->projects()->attach($project->id, ['target_beneficiaries' => 120]);
+    proposalRowForProject($proposal, $project);
     $output = Result::factory()->create(['type' => ResultType::Output, 'program_id' => $project->program_id, 'proposal_id' => $proposal->id]);
     $indicator = Indicator::factory()->create(['result_id' => $output->id, 'library_indicator_id' => LibraryIndicator::factory()->create()->id]);
     PlanIndicator::factory()->forProposal($proposal)->create(['indicator_id' => $indicator->id, 'project_id' => $project->id]);
@@ -411,7 +413,7 @@ test('Create on a project with no template pre-fills it and opens its Report tem
         ->call('createTemplate', $project->id)
         ->assertRedirect(route('projects.show', ['project' => $project, 'tab' => 'template']));
 
-    expect(ReportTemplate::query()->where('project_id', $project->id)->value('status'))->toBe(ReportTemplateStatus::Pending);
+    expect(ReportTemplate::query()->whereKey(app(PlaceBridge::class)->templateIdsOfProject($project->id))->value('status'))->toBe(ReportTemplateStatus::Pending);
 });
 
 test('Create on a project with nothing to plan makes no template and stays on the desk', function () {

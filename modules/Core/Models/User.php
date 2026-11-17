@@ -16,6 +16,7 @@ use App\Notifications\ActivityRecorder;
 use App\Notifications\TracksActivity;
 use App\Support\EmployeeProfile;
 use App\Support\Like;
+use App\Support\Slots;
 use Carbon\CarbonImmutable;
 use Database\Factories\UserFactory;
 use Illuminate\Contracts\Translation\HasLocalePreference;
@@ -42,6 +43,7 @@ use Modules\Tracking\Models\IndicatorProgress;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Task;
+use Spatie\Permission\Contracts\Permission;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -82,7 +84,70 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements HasLocalePreference, PasskeyUser, TracksActivity
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable, RecordsActivity, RemembersLookup, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, PasskeyAuthenticatable, RecordsActivity, RemembersLookup, TwoFactorAuthenticatable;
+
+    use HasRoles {
+        checkPermissionTo as protected roleGrantsPermissionTo;
+    }
+
+    /**
+     * Whether the user holds a permission, as every `can()` and `@can` asks.
+     *
+     * The abilities under `access-control.meal_manager_only` (building the
+     * logframe and its targets) are honoured only for the holder of the MEAL
+     * Manager slot or a bypass role, whatever the user's roles grant. The
+     * abilities under `access-control.meal_manager_grants` (the proposal page,
+     * its Funding tab included) are added for the MEAL Manager slot holder.
+     *
+     * @param  string|int|Permission|\BackedEnum  $permission
+     */
+    public function checkPermissionTo($permission, ?string $guardName = null): bool
+    {
+        if (is_string($permission)
+            && in_array($permission, config('access-control.meal_manager_only.abilities'), true)
+            && ! $this->buildsTheLogframe()) {
+            return false;
+        }
+
+        if ($this->roleGrantsPermissionTo($permission, $guardName)) {
+            return true;
+        }
+
+        return is_string($permission)
+            && in_array($permission, config('access-control.meal_manager_grants'), true)
+            && $this->holdsMealManagerSlot();
+    }
+
+    /**
+     * Whether this user's HR employee holds the MEAL Manager slot right now.
+     */
+    public function holdsMealManagerSlot(): bool
+    {
+        return $this->employee_id !== null && (int) $this->employee_id === Slots::holderOf('meal_manager');
+    }
+
+    /**
+     * Whether the user's roles grant a permission, leaving the MEAL manager
+     * rule aside: for the places that only ask "is this person MEAL?" (a MEAL
+     * reviewer attaching a need assessment), not "may they build the logframe".
+     */
+    public function roleGrants(string $permission): bool
+    {
+        return $this->roleGrantsPermissionTo($permission);
+    }
+
+    /**
+     * Whether this user may build the logframe at all: the MEAL Manager slot
+     * holder, or a bypass role (Super Admin, General Manager).
+     */
+    public function buildsTheLogframe(): bool
+    {
+        if ($this->hasAnyRole(config('access-control.meal_manager_only.bypass_roles'))) {
+            return true;
+        }
+
+        return $this->holdsMealManagerSlot();
+    }
 
     /**
      * Mirror the columns' DB defaults so a user that has not been round-tripped

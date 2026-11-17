@@ -8,7 +8,8 @@
 
     Locations holds the location rows (W-34a slice 3, EditsProposalLocations): city, program or a new
     program, responsible and centers per row (a new center too, for someone who may add one). A row of a
-    linked project shows its city and program locked. The concept note (W-24) offers the text and the document; neither is required, and the
+    linked project shows its city and program locked. A row either lists centers or is ticked "Field work,
+    no center" (city_wide, D-88), which disables and clears its centers; the server stays the validator. The concept note (W-24) offers the text and the document; neither is required, and the
     document is filed on the saved proposal, so a renewal — whose contents are copied, not typed — does
     not show the section at all.
 
@@ -74,7 +75,7 @@
                     ...array_map(fn (array $row): string => 'beneficiaries.'.$row['id'], $projectRows),
                     ...collect(array_keys($locations))->flatMap(fn (int $index): array => array_map(
                         fn (string $field): string => "locations.{$index}.{$field}",
-                        ['city_id', 'program_id', 'responsible_employee_id', 'center_ids', 'new_program_name_en', 'new_program_name_ar', 'new_center_name_en', 'new_center_name_ar'],
+                        ['city_id', 'program_id', 'responsible_employee_id', 'center_ids', 'city_wide', 'new_program_name_en', 'new_program_name_ar', 'new_center_name_en', 'new_center_name_ar'],
                     ))->all(),
                 ],
                 __('proposals.concept_note.section') => ['conceptNote', 'conceptNoteFile'],
@@ -276,6 +277,7 @@
                                 $isLinked = $location['project'] !== null;
                                 $cityCenters = $location['city_id'] === '' ? [] : ($centersByCity[(int) $location['city_id']] ?? []);
                                 $isNewProgram = $location['program_id'] === 'new';
+                                $isCityWide = $location['city_wide'] ?? false;
                             @endphp
                             <li class="grid gap-x-4 gap-y-3 rounded-lg border border-secondary-soft p-3 @2xl/modal:grid-cols-2 dark:border-line" wire:key="proposal-location-{{ $location['key'] }}" data-proposal-location="{{ $index }}">
                                 <div class="flex items-center justify-between gap-2 @2xl/modal:col-span-2">
@@ -312,21 +314,26 @@
 
                                 <x-ui.form-select wire:model="locations.{{ $index }}.responsible_employee_id" :label="__('proposals.location_responsible')" :placeholder="__('proposals.location_select_responsible')" :help="__('proposals.location_responsible_help')" employees />
 
-                                <div wire:key="proposal-location-centers-{{ $location['key'] }}-{{ $location['city_id'] }}">
+                                <div class="grid gap-y-3" wire:key="proposal-location-centers-{{ $location['key'] }}-{{ $location['city_id'] }}-{{ $isCityWide ? 'field' : 'centers' }}">
                                     <x-ui.form-multiselect
                                         wire:model="locations.{{ $index }}.center_ids"
                                         :label="__('proposals.location_centers')"
-                                        :placeholder="__('proposals.location_select_centers')"
-                                        :help="$location['city_id'] === '' ? __('proposals.location_choose_city_first') : ($cityCenters === [] ? __('proposals.location_no_centers_in_city') : ($needsBeneficiariesReason ? __('proposals.location_centers_help_approved') : __('proposals.location_centers_help')))"
-                                        :disabled="$cityCenters === []"
+                                        :placeholder="$isCityWide ? __('proposals.location_field_work') : __('proposals.location_select_centers')"
+                                        :help="$isCityWide ? __('proposals.location_city_wide_help') : ($location['city_id'] === '' ? __('proposals.location_choose_city_first') : ($cityCenters === [] ? __('proposals.location_no_centers_in_city') : ($needsBeneficiariesReason ? __('proposals.location_centers_help_approved') : __('proposals.location_centers_help'))))"
+                                        :disabled="$isCityWide || $cityCenters === []"
                                     >
                                         @foreach ($cityCenters as $center)
                                             <option value="{{ $center['id'] }}">{{ $center['name'] }}</option>
                                         @endforeach
                                     </x-ui.form-multiselect>
+
+                                    <label class="flex min-h-10 items-center gap-2 text-sm text-secondary-dark dark:text-ink" data-test="location-city-wide">
+                                        <input type="checkbox" wire:model.live="locations.{{ $index }}.city_wide" class="size-4 shrink-0 accent-primary dark:accent-brand" @checked($isCityWide) />
+                                        <span>{{ __('proposals.location_city_wide_label') }}</span>
+                                    </label>
                                 </div>
 
-                                @if ($canCreateCenter && $location['city_id'] !== '')
+                                @if ($canCreateCenter && $location['city_id'] !== '' && ! $isCityWide)
                                     <x-ui.form-input wire:model="locations.{{ $index }}.new_center_name_en" :label="__('proposals.location_center_name_en')" :help="__('proposals.location_new_center_help')" maxlength="255" dir="ltr" />
                                     <x-ui.form-input wire:model="locations.{{ $index }}.new_center_name_ar" :label="__('proposals.location_center_name_ar')" maxlength="255" dir="rtl" />
                                 @endif
@@ -371,7 +378,7 @@
 
         {{-- 4 · Concept note (W-24): the text, the document, or both. Neither is required. --}}
         @unless ($isRenewal || $isPayroll)
-        <x-ui.form-section :title="__('proposals.concept_note.section')" :fields="$sectionFields[__('proposals.concept_note.section')]" data-test="concept-note-section">
+        <x-ui.form-section :title="__('proposals.concept_note.section')" :optional="true" :fields="$sectionFields[__('proposals.concept_note.section')]" data-test="concept-note-section">
             <div class="grid gap-y-3">
                 <x-ui.form-textarea
                     wire:model="conceptNote"
@@ -441,7 +448,7 @@
         @endunless
 
         {{-- 7 · Notes, last (D-62). --}}
-        <x-ui.form-section :title="__('proposals.section_notes')" :fields="$sectionFields[__('proposals.section_notes')]">
+        <x-ui.form-section :title="__('proposals.section_notes')" :optional="true" :fields="$sectionFields[__('proposals.section_notes')]">
             <x-ui.form-textarea wire:model="notes" :label="__('common.notes')" rows="2" dir="auto" />
         </x-ui.form-section>
     @endif

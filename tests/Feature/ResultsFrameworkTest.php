@@ -522,7 +522,7 @@ test('a program move is refused when it would strand an indicator or a plan targ
     }
 });
 
-test('a target reads its achievement from approved reports only, and an unmeasured statement links to adding an indicator', function () {
+test('a target reads its achievement from approved reports only, and an unmeasured statement offers to add an indicator', function () {
     $user = User::factory()->role('General Manager')->create();
     $measured = Result::factory()->type(ResultType::Outcome)->create();
     $unmeasured = Result::factory()->type(ResultType::Outcome)->create();
@@ -537,7 +537,7 @@ test('a target reads its achievement from approved reports only, and an unmeasur
         ->test('tracking::results.index')
         ->assertSee('25% achieved')
         ->assertDontSee('100% achieved')
-        ->assertSeeHtml('href="'.route('indicators.index', ['create' => $unmeasured->id]).'"');
+        ->assertSeeHtml('data-test="add-indicator-for-result-'.$unmeasured->id.'"');
 });
 
 test('each proposal framework reads as its own group after the program groups', function () {
@@ -581,7 +581,7 @@ test('the framework filter narrows to the program framework or to one proposal',
 });
 
 test('a proposal node is edited in its own framework from the results page', function () {
-    $user = User::factory()->role('MEAL')->create();
+    $user = mealManager();
     $proposal = Proposal::factory()->create();
     $output = Result::factory()->type(ResultType::Output)->create(['proposal_id' => $proposal->id]);
     $programOutcome = Result::factory()->type(ResultType::Outcome)->create();
@@ -650,7 +650,7 @@ describe('the create deep link (T14)', function () {
     });
 
     test('?program=&create=1 opens the create form pre-filled with that program at impact level', function () {
-        ($this->deepLink)(userWithRole('MEAL'), ['program' => (string) $this->program->id, 'create' => '1'])
+        ($this->deepLink)(mealManager(), ['program' => (string) $this->program->id, 'create' => '1'])
             ->assertSet('showResultModal', true)
             ->assertSet('resultProgramId', (string) $this->program->id)
             ->assertSet('resultType', ResultType::Impact->value);
@@ -738,36 +738,41 @@ test('framework and type filters sit behind more filters, open when one is activ
         ->assertSeeHtml('x-data="{ open: true }"');
 });
 
-test('the chart view is a program by level grid showing each cell worst status, and filters narrow it', function () {
-    $this->travelTo(CarbonImmutable::parse('2026-06-30 12:00:00'));
-
+test('the tree view draws each statement as a box under its parent, with its status and figures', function () {
     $user = User::factory()->role('General Manager')->create();
     $program = Program::factory()->create();
+    $impact = Result::factory()->create(['program_id' => $program->id, 'type' => ResultType::Impact]);
+    $outcome = Result::factory()->create(['program_id' => $program->id, 'type' => ResultType::Outcome, 'parent_id' => $impact->id]);
 
-    $behind = Result::factory()->create(['program_id' => $program->id, 'type' => ResultType::Outcome]);
-    Result::factory()->create(['program_id' => $program->id, 'type' => ResultType::Output]);
-
-    $indicator = Indicator::factory()->create(['result_id' => $behind->id, 'baseline' => 0, 'target' => 100, 'frequency' => Period::Quarterly]);
-    IndicatorProgress::factory()->create(['indicator_id' => $indicator->id, 'value' => 2, 'date' => '2026-06-20']);
-
-    $component = Livewire::actingAs($user)
+    Livewire::actingAs($user)
         ->test('tracking::results.index')
-        ->assertDontSeeHtml('data-test="results-chart"')
-        ->set('view', 'chart')
-        ->assertSeeHtml('data-test="results-chart"');
+        ->assertSeeHtml('data-test="results-view-tree"')
+        ->assertDontSeeHtml('data-test="results-tree"')
+        ->set('view', 'tree')
+        ->assertSeeHtml('data-test="results-tree"')
+        ->assertSeeHtml('data-test="tree-box-'.$impact->id.'"')
+        ->assertSeeHtml('data-test="tree-fold-'.$impact->id.'"')
+        ->assertSeeHtml('data-test="tree-box-'.$outcome->id.'"')
+        ->assertSeeInOrder([$impact->statement, $outcome->statement, 'Needs an indicator', 'No indicators']);
+});
 
-    $grid = $component->instance()->statusGrid();
+test('the tree view follows the filters, and an old chart link shows the list', function () {
+    $user = User::factory()->role('General Manager')->create();
+    $shown = Result::factory()->create(['program_id' => Program::factory()->create()->id, 'type' => ResultType::Outcome]);
+    $hidden = Result::factory()->create(['program_id' => Program::factory()->create()->id, 'type' => ResultType::Outcome]);
 
-    expect(array_column($grid['levels'], 'value'))->toBe(['outcome', 'output'])
-        ->and($grid['rows'])->toHaveCount(1)
-        ->and($grid['rows'][0]['label'])->toBe($program->name)
-        ->and($grid['rows'][0]['cells']['outcome']['worst'])->toBe('behind')
-        ->and($grid['rows'][0]['cells']['output']['worst'])->toBe('none')
-        ->and($grid['totals'])->toMatchArray(['behind' => 1, 'none' => 1, 'ontrack' => 0]);
+    Livewire::actingAs($user)
+        ->test('tracking::results.index')
+        ->set('view', 'tree')
+        ->set('program', (string) $shown->program_id)
+        ->assertSeeHtml('data-test="tree-box-'.$shown->id.'"')
+        ->assertDontSeeHtml('data-test="tree-box-'.$hidden->id.'"');
 
-    $component->set('focus', 'unmeasured');
-
-    expect($component->instance()->statusGrid()['totals']['behind'])->toBe(0);
+    Livewire::withQueryParams(['view' => 'chart'])
+        ->actingAs($user)
+        ->test('tracking::results.index')
+        ->assertDontSeeHtml('data-test="results-tree"')
+        ->assertSeeHtml('id="framework-result-'.$shown->id.'"');
 });
 
 test('the headline buttons say what each count means, and below target is named plainly', function () {
