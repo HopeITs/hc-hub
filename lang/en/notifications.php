@@ -159,6 +159,7 @@ return [
         'hr-employees' => 'HR: employees',
         'hr-leave' => 'HR: leave',
         'hr-contracts' => 'HR: contracts',
+        'hr-positions' => 'HR: positions',
         'system' => 'System',
     ],
 
@@ -861,6 +862,14 @@ return [
             'deleted' => ['title' => 'Contract deleted', 'body' => ':actor deleted a contract of :subject'],
             'status_changed' => ['title' => 'Contract status changed', 'body' => ':actor changed whether the contract of :subject is active'],
             'terminated' => ['title' => 'Contract terminated', 'body' => ':actor terminated the contract of :subject'],
+        ],
+        'position' => [
+            'created' => ['title' => 'Position added', 'body' => ':actor added the position :subject'],
+            'updated' => ['title' => 'Position changed', 'body' => ':actor changed the position :subject'],
+            'deleted' => ['title' => 'Position deleted', 'body' => ':actor deleted the position :subject'],
+            'department_changed' => ['title' => 'Position department changed', 'body' => ':actor moved the position :subject from :from to :to'],
+            'center_changed' => ['title' => 'Position center changed', 'body' => ':actor moved the position :subject from :from to :to'],
+            'manager_changed' => ['title' => 'Position manager changed', 'body' => ':actor changed the manager of the position :subject from :from to :to'],
         ],
         'agreement' => [
             'recorded' => [

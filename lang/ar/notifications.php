@@ -159,6 +159,7 @@ return [
         'hr-employees' => 'الموارد البشرية: الموظفون',
         'hr-leave' => 'الموارد البشرية: الإجازات',
         'hr-contracts' => 'الموارد البشرية: العقود',
+        'hr-positions' => 'الموارد البشرية: المناصب',
         'system' => 'النظام',
     ],
 
@@ -861,6 +862,14 @@ return [
             'deleted' => ['title' => 'حذف عقد', 'body' => 'حذف :actor عقدًا لـ :subject'],
             'status_changed' => ['title' => 'تغيير حالة عقد', 'body' => 'غيّر :actor حالة نشاط عقد :subject'],
             'terminated' => ['title' => 'إنهاء عقد', 'body' => 'أنهى :actor عقد :subject'],
+        ],
+        'position' => [
+            'created' => ['title' => 'أُضيف منصب', 'body' => ':actor أضاف المنصب :subject'],
+            'updated' => ['title' => 'تغيّر منصب', 'body' => ':actor عدّل المنصب :subject'],
+            'deleted' => ['title' => 'حُذف منصب', 'body' => ':actor حذف المنصب :subject'],
+            'department_changed' => ['title' => 'تغيّر قسم المنصب', 'body' => ':actor نقل المنصب :subject من :from إلى :to'],
+            'center_changed' => ['title' => 'تغيّر مركز المنصب', 'body' => ':actor نقل المنصب :subject من :from إلى :to'],
+            'manager_changed' => ['title' => 'تغيّر مدير المنصب', 'body' => ':actor غيّر مدير المنصب :subject من :from إلى :to'],
         ],
         'agreement' => [
             'recorded' => [

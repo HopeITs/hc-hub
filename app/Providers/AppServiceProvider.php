@@ -50,6 +50,7 @@ use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Department;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Models\Position;
 use Modules\Tracking\Models\Account;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\Donor;
@@ -416,6 +417,7 @@ class AppServiceProvider extends ServiceProvider
             'employee' => Employee::class,
             'leave_request' => LeaveRequest::class,
             'contract' => Contract::class,
+            'position' => Position::class,
         ]);
     }
 

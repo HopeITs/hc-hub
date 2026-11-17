@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Models;
 
+use App\Concerns\RecordsActivity;
 use App\Enums\Locale;
+use App\Notifications\TracksActivity;
 use Carbon\CarbonImmutable;
 use Database\Factories\PositionFactory;
 use Illuminate\Database\Eloquent\Attributes\Scope;
@@ -37,11 +39,127 @@ use Modules\Hr\Models\Concerns\HasTranslation;
  * @property bool $is_active
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
+ *
+ * Edits are recorded in the activity log (roadmap 2.6, D3), so changing a
+ * position's department, center or manager no longer rewrites its past
+ * silently: each activity holds the old and the new value. The seat count
+ * (exist_emp) moves with every contract and is left out.
  */
-class Position extends Model
+class Position extends Model implements TracksActivity
 {
     /** @use HasFactory<PositionFactory> */
-    use HasFactory, HasTranslation;
+    use HasFactory, HasTranslation, RecordsActivity;
+
+    /**
+     * The fields whose change has an event of its own, with the name a value is read by.
+     *
+     * @var array<string, string>
+     */
+    private const array ActivityNamedFields = [
+        'department_id' => 'department',
+        'center_id' => 'center',
+        'direct_manager_id' => 'position',
+        'tech_manager_id' => 'position',
+    ];
+
+    public function activityModule(): string
+    {
+        return 'hr-positions';
+    }
+
+    public function activityProgramId(): ?int
+    {
+        $programId = $this->activityAttribute('program_id');
+
+        return $programId === null ? null : (int) $programId;
+    }
+
+    /**
+     * The position's title, in English like every stored label.
+     */
+    public function activityLabel(): string
+    {
+        $title = trim((string) $this->activityAttribute('title_en'));
+
+        return $title !== '' ? $title : trim((string) $this->activityAttribute('title_ar'));
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function activityEvents(): array
+    {
+        return [
+            'department_id' => 'department_changed',
+            'center_id' => 'center_changed',
+            'direct_manager_id' => 'manager_changed',
+            'tech_manager_id' => 'manager_changed',
+        ];
+    }
+
+    protected function activityNotifies(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function activityExcludedFields(): array
+    {
+        return ['exist_emp'];
+    }
+
+    /**
+     * The old and new department, center and manager names in both
+     * languages (read by ActivityParameters::typedChange()), so the log still
+     * reads right after a department or position is renamed or removed.
+     *
+     * @return array<string, mixed>
+     */
+    protected function activityProperties(string $event): array
+    {
+        $names = [];
+
+        foreach (self::ActivityNamedFields as $field => $kind) {
+            if (! array_key_exists($field, $this->getChanges())) {
+                continue;
+            }
+
+            $names[$field] = [
+                $this->activityNameOf($kind, $this->getRawOriginal($field)),
+                $this->activityNameOf($kind, $this->getAttributes()[$field] ?? null),
+            ];
+        }
+
+        return $names === [] ? [] : ['names' => $names];
+    }
+
+    /**
+     * @return array{en: string, ar: string}|null
+     */
+    private function activityNameOf(string $kind, mixed $id): ?array
+    {
+        if ($id === null || $id === '') {
+            return null;
+        }
+
+        if ($kind === 'department') {
+            $name = Department::query()->whereKey((int) $id)->value('name');
+
+            return $name === null ? null : ['en' => (string) $name, 'ar' => (string) $name];
+        }
+
+        if ($kind === 'center') {
+            $center = Center::query()->whereKey((int) $id)->first(['name_en', 'name_ar']);
+
+            return $center === null ? null : ['en' => (string) $center->name_en, 'ar' => (string) $center->name_ar];
+        }
+
+        $position = self::query()->whereKey((int) $id)->first(['title_en', 'title_ar']);
+
+        return $position === null ? null : ['en' => (string) $position->title_en, 'ar' => (string) $position->title_ar];
+    }
 
     /**
      * Active positions for a picker, labelled «title · department» in the

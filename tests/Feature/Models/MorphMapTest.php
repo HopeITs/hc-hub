@@ -11,6 +11,7 @@ use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Department as HrDepartment;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Models\Position;
 use Modules\Tracking\Models\Account;
 use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\Donor;
@@ -74,6 +75,7 @@ test('the morph map registers exactly the target sources, task sources, media ow
         'employee' => Employee::class,
         'leave_request' => LeaveRequest::class,
         'contract' => Contract::class,
+        'position' => Position::class,
     ]);
 });
 

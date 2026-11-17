@@ -14,7 +14,7 @@ use Modules\Hr\Models\LeaveRequest;
  */
 final class HrSubjectLinks implements SubjectLinkSource
 {
-    private const array Types = ['employee', 'contract', 'leave_request'];
+    private const array Types = ['employee', 'contract', 'leave_request', 'position'];
 
     public function handles(string $type): bool
     {
@@ -27,6 +27,7 @@ final class HrSubjectLinks implements SubjectLinkSource
             'employee' => $this->employeeRoute($id),
             'contract' => route('hr.contracts.show', $id),
             'leave_request' => $this->leaveRequestRoute($id),
+            'position' => route('hr.positions.index'),
             default => null,
         };
     }
