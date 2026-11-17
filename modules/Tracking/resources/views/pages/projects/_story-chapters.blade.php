@@ -29,6 +29,15 @@
         'funding' => ['label' => __('story.sections.funding'), 'count' => $project->proposals_count ?: null],
         'files' => ['label' => __('story.sections.files'), 'count' => $project->media_count ?: null],
     ];
+    $canSeeTeam = \Illuminate\Support\Facades\Gate::allows('viewAny', [\Modules\Tracking\Models\ProjectMember::class, $project]);
+
+    if ($canSeeTeam) {
+        $sections['team'] = ['label' => __('projects.team.title'), 'count' => $project->current_members_count ?: null];
+    }
+
+    if ($openSection === 'team' && ! $canSeeTeam) {
+        $openSection = 'overview';
+    }
     $lastStage = count($stages) - 1;
 @endphp
 
@@ -244,4 +253,11 @@
             </div>
         </div>
     </section>
+
+    {{-- Team (roadmap 2.4): who works on the project now and who did before. --}}
+    @if ($canSeeTeam)
+    <section class="dk-pjsec @container/detail" id="dk-section-team" role="tabpanel" aria-labelledby="dk-tab-team" x-show="section === 'team'" x-transition:enter="transition-opacity ease-out duration-150 motion-reduce:transition-none" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" @if ($openSection !== 'team') style="display: none" @endif data-section="team">
+        <livewire:projects.team :project-id="$project->id" :key="'project-team-'.$project->id" />
+    </section>
+    @endif
 </div>

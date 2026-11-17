@@ -53,7 +53,7 @@ new #[Layout('layouts::desk'), Title('titles.project')] class extends Component 
     public string $tab = 'milestones';
 
     /**
-     * The page's open section: overview, work, funding or files. Switched in
+     * The page's open section: overview, work, funding, files or team. Switched in
      * the browser (no round trip); resolved in mount() when the link names none.
      */
     #[Url(as: 'view', except: '')]
@@ -90,7 +90,7 @@ new #[Layout('layouts::desk'), Title('titles.project')] class extends Component 
      */
     private function resolveSection(Project $project): string
     {
-        if (in_array($this->section, ['overview', 'work', 'funding', 'files'], true)) {
+        if (in_array($this->section, ['overview', 'work', 'funding', 'files', 'team'], true)) {
             return $this->section;
         }
 
@@ -227,6 +227,7 @@ new #[Layout('layouts::desk'), Title('titles.project')] class extends Component 
                 'planIndicators',
                 'proposals',
                 'media' => fn ($query) => $query->whereNotIn('collection', $hiddenCollections),
+                'members as current_members_count' => fn ($query) => $query->whereNull('ends_on'),
                 'milestones as reached_milestones_count' => fn ($query) => $query->where('status', MilestoneStatus::Reached->value),
             ])
             ->withSum(['milestones as milestones_reached_weight' => fn ($query) => $query->where('status', MilestoneStatus::Reached->value)], 'weight_percentage')
