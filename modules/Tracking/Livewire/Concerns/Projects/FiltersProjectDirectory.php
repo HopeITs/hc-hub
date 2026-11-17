@@ -228,12 +228,12 @@ trait FiltersProjectDirectory
                     ->where(Like::word('projects.name', $word))
                     ->orWhereIn('projects.city_id', City::query()->select('cities.id')->where(fn (Builder $names) => $names->where(Like::word('cities.name_en', $word))->orWhere(Like::word('cities.name_ar', $word))))
                     ->orWhereIn('projects.program_id', Program::query()->select('programs.id')->whereNameLike($word, false))
-                    ->orWhereIn('projects.user_id', Employee::query()->select('employees.id')->whereNameLike($word, false))));
+                    ->orWhereIn('projects.owner_employee_id', Employee::query()->select('employees.id')->whereNameLike($word, false))));
             })
             ->when($this->city !== '', fn (Builder $query) => $query->where('city_id', (int) $this->city))
             ->when($this->program !== '', fn (Builder $query) => $query->where('program_id', (int) $this->program))
             ->when($this->strategy !== '', fn (Builder $query) => $query->whereHas('program', fn ($query) => $query->where('strategy_id', (int) $this->strategy)))
-            ->when($this->owner !== '', fn (Builder $query) => $query->where('user_id', (int) $this->owner))
+            ->when($this->owner !== '', fn (Builder $query) => $query->where('owner_employee_id', (int) $this->owner))
             ->when($this->sector !== '', fn (Builder $query) => $query->whereHas('sectors', fn (Builder $query) => $query->whereKey((int) $this->sector)))
             ->when($this->stage !== '', fn (Builder $query) => $query->whereIn('id', $this->stageProjectIds))
             ->when($includeStatus && $this->status !== '', fn (Builder $query) => $query->where('status', $this->status))

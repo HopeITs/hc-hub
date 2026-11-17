@@ -136,7 +136,7 @@ final class ProposalLocationRows
                 'proposal_id' => $locked->id,
                 'city_id' => $project->city_id,
                 'program_id' => $project->program_id,
-                'responsible_employee_id' => $project->user_id,
+                'responsible_employee_id' => $project->owner_employee_id,
                 'is_new' => false,
                 'project_id' => $project->id,
                 'sort' => (int) $locked->locations()->max('sort') + ($locked->locations()->exists() ? 1 : 0),
@@ -160,7 +160,7 @@ final class ProposalLocationRows
         $row->forceFill([
             'project_id' => $project->id,
             'is_new' => false,
-            'responsible_employee_id' => $row->responsible_employee_id ?? $project->user_id,
+            'responsible_employee_id' => $row->responsible_employee_id ?? $project->owner_employee_id,
         ])->save();
         $this->writeCenters($row, array_values(array_unique([...$row->centerIds(), ...$centerIds])));
         $counts['changed']++;

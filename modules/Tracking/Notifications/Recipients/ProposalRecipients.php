@@ -223,7 +223,7 @@ final class ProposalRecipients extends WatcherRecipients
     {
         return $this->uniqueIds(Project::query()
             ->whereHas('proposals', fn ($query) => $query->whereKey($activity->subject_id))
-            ->pluck('user_id')
+            ->pluck('owner_employee_id')
             ->all());
     }
 }

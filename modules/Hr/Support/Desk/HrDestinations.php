@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Support\Desk;
 
+use App\Support\Modules\Contracts\DestinationSource;
 use Closure;
 use Illuminate\Support\Facades\Route;
 use Modules\Core\Models\User;
@@ -19,8 +20,9 @@ use Modules\Hr\Support\Recruitment\RecruitmentConfig;
 
 /**
  * The HR pages of the sidebar: every HR page with the permission that opens
- * it and the sidebar group it sits in. App\Support\Desk\Destinations reads
- * this into its own table, so the sidebar, the Ask bar, Desk buttons and
+ * it and the sidebar group it sits in. Registered with the module registry
+ * (HrServiceProvider::registerDesk), App\Support\Desk\Destinations reads it
+ * into its own table, so the sidebar, the Ask bar, Desk buttons and
  * Quick access all offer an HR page by the same rule.
  *
  * HR has three groups of its own (people, leave, recruitment); a page that
@@ -32,7 +34,7 @@ use Modules\Hr\Support\Recruitment\RecruitmentConfig;
  * so no link ever points nowhere. Labels are hr_nav.*; `hero` is a
  * resources/views/flux/icon/nav-* icon, `icon` one of the Desk's own.
  */
-final class HrDestinations
+final class HrDestinations implements DestinationSource
 {
     /**
      * @return list<array{route: string, label: string, icon: string, hero: string, group: string, allows: Closure(User): bool, bindsAdministrators: bool, under: string|null}>

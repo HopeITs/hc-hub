@@ -166,6 +166,12 @@ test('the import loads HR accounts, cities, roles and HR-owned rows', function (
         ->and(News::query()->findOrFail(3)->newsable)->toBeInstanceOf(City::class);
 });
 
+test('an HR account with no employee comes in as a system account', function () {
+    $this->artisan('hub:import-hr', ['--source' => 'hr_fixture'])->assertSuccessful();
+
+    expect(DB::table('users')->orderBy('id')->pluck('is_system', 'id')->all())->toBe([1 => 1, 2 => 0, 9 => 1]);
+});
+
 test('running the import again changes nothing', function () {
     insertCrossedTrackingUsers();
     $this->artisan('hub:import-hr', ['--source' => 'hr_fixture'])->assertSuccessful();
@@ -218,4 +224,13 @@ test('the import runs after launch when forced', function () {
     $this->artisan('hub:import-hr', ['--source' => 'hr_fixture', '--force' => true])->assertSuccessful();
 
     expect(DB::table('employees')->count())->toBe(1);
+});
+
+test('a second HR login for an employee who already has one is skipped, not imported', function () {
+    DB::connection('hr_fixture')->table('users')->insert(['id' => 5, 'employee_id' => 7, 'email' => 'spare@hr.test', 'password' => 'hash-5']);
+
+    $this->artisan('hub:import-hr', ['--source' => 'hr_fixture'])->assertSuccessful();
+
+    expect(DB::table('users')->where('employee_id', 7)->pluck('id')->all())->toBe([2])
+        ->and(DB::table('users')->where('id', 5)->exists())->toBeFalse();
 });

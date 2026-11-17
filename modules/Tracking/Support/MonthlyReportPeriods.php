@@ -187,7 +187,7 @@ final class MonthlyReportPeriods
             return false;
         }
 
-        $centerId = EmployeeProfile::for($project->user_id)['center_id'] ?? null;
+        $centerId = EmployeeProfile::for($project->owner_employee_id)['center_id'] ?? null;
 
         return $centerId !== null && $centerId !== (int) $project->center_id;
     }

@@ -39,11 +39,12 @@ class UserFactory extends Factory
     }
 
     /**
-     * An account with no linked employee (a system account).
+     * A system account: no linked employee, and marked is_system so it may
+     * still sign in.
      */
     public function withoutEmployee(): static
     {
-        return $this->state(['employee_id' => null]);
+        return $this->state(['employee_id' => null, 'is_system' => true]);
     }
 
     /**

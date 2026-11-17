@@ -60,7 +60,7 @@ final class ProposalLocationBackfill
                     $projects = Project::query()
                         ->whereKey($group->pluck('project_id')->all())
                         ->orderBy('id')
-                        ->get(['id', 'city_id', 'center_id', 'host_center_id', 'program_id', 'user_id']);
+                        ->get(['id', 'city_id', 'center_id', 'host_center_id', 'program_id', 'owner_employee_id']);
 
                     foreach ($projects as $project) {
                         if ($locked->locations()->where('project_id', $project->id)->exists()) {

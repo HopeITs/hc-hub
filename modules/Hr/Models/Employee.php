@@ -21,7 +21,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Str;
@@ -33,11 +32,6 @@ use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Models\Concerns\HasTranslation;
 use Modules\Hr\Models\Concerns\PresentsEmployee;
 use Modules\Hr\Observers\HrStatisticsObserver;
-use Modules\Tracking\Models\AnnualPlan;
-use Modules\Tracking\Models\Milestone;
-use Modules\Tracking\Models\Project;
-use Modules\Tracking\Models\Task;
-use Modules\Tracking\Models\TaskAssignee;
 
 /**
  * @property int $id
@@ -75,6 +69,8 @@ use Modules\Tracking\Models\TaskAssignee;
  * @property string|null $skills
  * @property string|null $interests
  * @property bool $is_active
+ * @property CarbonImmutable|null $archived_at when the employee left and was archived instead of deleted
+ * @property int|null $archived_by the login that archived them
  * @property CarbonImmutable|null $joined_at
  * @property bool $is_board_member
  * @property mixed|null $board_member_started_at
@@ -88,6 +84,10 @@ use Modules\Tracking\Models\TaskAssignee;
  * @property int $digital_id_card_index
  * @property string $record_status
  * @property int|null $last_saved_by
+ *
+ * Tracking's relations on an employee (managedAnnualPlans, projects,
+ * responsibleMilestones, assignedTasks) are registered by
+ * TrackingServiceProvider, so HR does not depend on Tracking.
  */
 #[ObservedBy(HrStatisticsObserver::class)]
 #[Fillable(['city_id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar', 'father_name_en', 'father_name_ar', 'mother_name_en', 'mother_name_ar', 'username', 'national_number', 'actual_dob', 'dob', 'pob_en', 'pob_ar', 'civil_registry_office', 'civil_registry_number', 'gender', 'nationality', 'marital_status', 'children', 'work_phone', 'personal_phone', 'personal_email', 'whatsapp_work', 'telegram_work', 'facebook', 'instagram', 'linkedin', 'address_en', 'address_ar', 'skills', 'interests', 'is_active', 'is_board_member', 'board_member_started_at', 'board_member_end_at', 'joined_at'])]
@@ -108,6 +108,7 @@ class Employee extends Model implements TracksActivity
             'board_member_end_at' => 'datetime',
             'joined_at' => 'date',
             'is_active' => 'boolean',
+            'archived_at' => 'datetime',
             'is_board_member' => 'boolean',
             'children' => 'integer',
             'digital_id_enabled' => 'boolean',
@@ -239,6 +240,22 @@ class Employee extends Model implements TracksActivity
     }
 
     /**
+     * Whether the employee left and was archived (ArchiveEmployee).
+     */
+    public function isArchived(): bool
+    {
+        return $this->archived_at !== null;
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function archivedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'archived_by');
+    }
+
+    /**
      * Complete, not active, and never held a real contract: "Ready, awaiting contract".
      */
     public function isAwaitingContract(): bool
@@ -272,6 +289,17 @@ class Employee extends Model implements TracksActivity
     protected function active(Builder $query): void
     {
         $query->where($query->qualifyColumn('is_active'), true);
+    }
+
+    /**
+     * Employees who left and were archived instead of deleted.
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function archived(Builder $query): void
+    {
+        $query->whereNotNull($query->qualifyColumn('archived_at'));
     }
 
     /**
@@ -336,46 +364,6 @@ class Employee extends Model implements TracksActivity
     public function managedPrograms(): HasMany
     {
         return $this->hasMany(Program::class, 'manager_id');
-    }
-
-    /**
-     * The annual plans this employee manages (Tracking).
-     *
-     * @return HasMany<AnnualPlan, $this>
-     */
-    public function managedAnnualPlans(): HasMany
-    {
-        return $this->hasMany(AnnualPlan::class, 'manager_id');
-    }
-
-    /**
-     * The projects this employee is responsible for (projects.user_id).
-     *
-     * @return HasMany<Project, $this>
-     */
-    public function projects(): HasMany
-    {
-        return $this->hasMany(Project::class, 'user_id');
-    }
-
-    /**
-     * The milestones this employee is accountable for.
-     *
-     * @return HasMany<Milestone, $this>
-     */
-    public function responsibleMilestones(): HasMany
-    {
-        return $this->hasMany(Milestone::class, 'responsible_user_id');
-    }
-
-    /**
-     * The tasks assigned to this employee (a task may have several assignees).
-     *
-     * @return HasManyThrough<Task, TaskAssignee, $this>
-     */
-    public function assignedTasks(): HasManyThrough
-    {
-        return $this->hasManyThrough(Task::class, TaskAssignee::class, 'employee_id', 'id', 'id', 'task_id');
     }
 
     /**

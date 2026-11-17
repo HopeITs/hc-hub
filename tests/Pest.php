@@ -195,7 +195,7 @@ function insertProject(int $cityId, int $programId, int $userId): int
         'name' => 'Water Network Rehabilitation',
         'city_id' => $cityId,
         'program_id' => $programId,
-        'user_id' => $userId,
+        'owner_employee_id' => $userId,
     ])->id;
 }
 
@@ -249,7 +249,7 @@ function insertMilestone(int $projectId, int $responsibleUserId, ?int $parentId 
         'name' => $name,
         'description' => null,
         'planned_start_date' => '2026-03-31',
-        'responsible_user_id' => $responsibleUserId,
+        'responsible_employee_id' => $responsibleUserId,
         'parent_milestone_id' => $parentId,
     ])->id;
 }
@@ -615,7 +615,9 @@ function insertHrDepartmentManager(?int $departmentId = null, ?string $jobLevel 
 }
 
 /**
- * A user holding one role, optionally linked to an HR employee. Seeds the
+ * A user holding one role, linked to the given HR employee or, when none is
+ * given, to a fresh active employee of its own: since roadmap 1.6 an account
+ * with no employee that is not a system account loses access. Seeds the
  * access-control catalog first when it is missing.
  *
  * Unlike the insertX() helpers this returns a model: the notification tests
@@ -628,7 +630,9 @@ function userWithRole(string $role, ?int $employeeId = null): User
         test()->seed(RolesAndPermissionsSeeder::class);
     }
 
-    return Activity::withoutRecording(fn (): User => User::factory()->role($role)->create(['employee_id' => $employeeId]));
+    return Activity::withoutRecording(fn (): User => User::factory()->role($role)->create(
+        $employeeId === null ? [] : ['employee_id' => $employeeId],
+    ));
 }
 
 /**
@@ -967,5 +971,23 @@ function donorReportFigures(Project $center, string $month, LibraryIndicator $li
         }
 
         return $shares;
+    });
+}
+
+/**
+ * Lets this test give one employee two logins, as before roadmap 1.7, by
+ * dropping users.employee_id's unique index for the test. The index changes
+ * on a second connection, because DDL on the test's own connection would
+ * commit RefreshDatabase's transaction, and comes back after that
+ * transaction is rolled back. Call it before the test touches users.
+ */
+function allowTwoLoginsPerEmployee(): void
+{
+    config(['database.connections.schema_changes' => config('database.connections.'.config('database.default'))]);
+    DB::connection('schema_changes')->statement('ALTER TABLE users DROP INDEX users_employee_id_unique');
+
+    test()->beforeApplicationDestroyed(function (): void {
+        DB::connection('schema_changes')->statement('ALTER TABLE users ADD UNIQUE users_employee_id_unique (employee_id)');
+        DB::purge('schema_changes');
     });
 }

@@ -13,6 +13,7 @@ use App\Support\Desk\Destinations;
 use App\Support\Desk\PageCards;
 use App\Support\Desk\Panels;
 use App\Support\Desk\Shortcuts;
+use App\Support\Modules\ModuleRegistry;
 use App\Support\RouteSlugs;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
@@ -92,6 +93,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(Panels::class);
         $this->app->scoped(Shortcuts::class);
         $this->app->scoped(PageCards::class);
+        // What each module adds to the sidebar and the Desk, registered once from its own ServiceProvider.
+        $this->app->singleton(ModuleRegistry::class);
 
         $this->registerDevCommands();
 

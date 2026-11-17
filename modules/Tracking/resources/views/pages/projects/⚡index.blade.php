@@ -103,7 +103,7 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
                 'center_id',
                 'host_center_id',
                 'program_id',
-                'user_id',
+                'owner_employee_id',
                 'updated_at',
             ])
             ->with([

@@ -127,7 +127,7 @@ trait ReadsProjectStory
     public function story(): array
     {
         $project = Project::query()
-            ->select(['id', 'status', 'start_date', 'end_date', 'user_id', 'created_at'])
+            ->select(['id', 'status', 'start_date', 'end_date', 'owner_employee_id', 'created_at'])
             ->with([
                 'proposals:proposals.id,proposals.name,proposals.status,proposals.created_at',
                 'proposals.donorNames',
@@ -184,7 +184,7 @@ trait ReadsProjectStory
      */
     private function nextStep(Project $project, ?Proposal $lead, int $stage, string $donor): array
     {
-        $owner = $project->user_id;
+        $owner = $project->owner_employee_id;
         $meal = false;
         $href = null;
         $label = null;
@@ -271,13 +271,13 @@ trait ReadsProjectStory
         $late = $reports->first(fn (MonthlyReport $report): bool => $report->status === MonthlyReportStatus::Draft && $report->period->lt($monthStart));
 
         if ($late !== null) {
-            return [(string) __('story.next.submit_report', ['month' => $late->period->translatedFormat('F Y')]), $project->user_id, $link($late), false];
+            return [(string) __('story.next.submit_report', ['month' => $late->period->translatedFormat('F Y')]), $project->owner_employee_id, $link($late), false];
         }
 
         $returned = $reports->first(fn (MonthlyReport $report): bool => $report->status === MonthlyReportStatus::Draft && $report->returned_at !== null);
 
         if ($returned !== null) {
-            return [(string) __('story.next.fix_report', ['month' => $returned->period->translatedFormat('F Y')]), $project->user_id, $link($returned), false];
+            return [(string) __('story.next.fix_report', ['month' => $returned->period->translatedFormat('F Y')]), $project->owner_employee_id, $link($returned), false];
         }
 
         $submitted = $reports->firstWhere('status', MonthlyReportStatus::Submitted);
@@ -289,7 +289,7 @@ trait ReadsProjectStory
         $milestone = $project->milestones->filter(fn ($milestone): bool => $milestone->planned_end_date !== null)->sortBy('planned_end_date')->first();
 
         if ($milestone !== null) {
-            return [(string) __('story.next.reach_milestone', ['name' => $milestone->name, 'date' => $milestone->planned_end_date->translatedFormat(__('formats.date'))]), $project->user_id, auth()->user()?->can('milestones.view') ? route('milestones.show', $milestone) : null, false];
+            return [(string) __('story.next.reach_milestone', ['name' => $milestone->name, 'date' => $milestone->planned_end_date->translatedFormat(__('formats.date'))]), $project->owner_employee_id, auth()->user()?->can('milestones.view') ? route('milestones.show', $milestone) : null, false];
         }
 
         return [(string) __('story.next.nothing_waiting'), null, null, false];

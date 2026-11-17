@@ -163,7 +163,7 @@ trait BuildsProjectGantt
     private function pushProposalPlanRows(Proposal $proposal, Collection $rows, ?int $projectId = null, ?int $series = null): void
     {
         $milestones = Milestone::query()
-            ->select(['id', 'slug', 'proposal_id', 'project_id', 'parent_milestone_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_start_date', 'actual_end_date', 'status', 'sequence', 'responsible_user_id'])
+            ->select(['id', 'slug', 'proposal_id', 'project_id', 'parent_milestone_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_start_date', 'actual_end_date', 'status', 'sequence', 'responsible_employee_id'])
             ->where('proposal_id', $proposal->id)
             ->when($projectId !== null, fn ($query) => $query->where(fn ($query) => $query->whereNull('project_id')->orWhere('project_id', $projectId)))
             ->with('responsibleUser:id,first_name_en,last_name_en,first_name_ar,last_name_ar')
@@ -400,7 +400,7 @@ trait BuildsProjectGantt
     private function pushDeliveryRows(Project $project, Collection $rows): void
     {
         $milestones = Milestone::query()
-            ->select(['id', 'project_id', 'parent_milestone_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_start_date', 'actual_end_date', 'status', 'sequence', 'responsible_user_id'])
+            ->select(['id', 'project_id', 'parent_milestone_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_start_date', 'actual_end_date', 'status', 'sequence', 'responsible_employee_id'])
             ->where('project_id', $project->id)
             ->whereNull('proposal_id')
             ->with('responsibleUser:id,first_name_en,last_name_en,first_name_ar,last_name_ar')

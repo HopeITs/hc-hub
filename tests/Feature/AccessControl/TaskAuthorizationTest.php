@@ -44,7 +44,7 @@ test('a creator without tasks.update may edit and delete their own task', functi
 });
 
 test('only tasks.delete or the creator may delete someone else\'s task', function () {
-    $media = userWithRole('Media Team', $this->employee);
+    $media = $this->assignee->syncRoles(['Media Team']);
 
     ($this->index)($media)->call('confirmDelete', $this->task->id)->assertForbidden();
     ($this->index)(userWithRole('Managers'))->call('confirmDelete', $this->task->id)->call('deleteTask')->assertOk();

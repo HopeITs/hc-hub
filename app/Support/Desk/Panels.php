@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
+use App\Support\Modules\Contracts\DeskPanelSource;
+use App\Support\Modules\ModuleRegistry;
 use Closure;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use Modules\Core\Models\User;
-use Modules\Hr\Support\Desk\HrPanels;
 use Modules\Tracking\Models\ProposalReviewer;
 use Modules\Tracking\Models\Task;
+use Modules\Tracking\Support\TrackingDuties;
 
 /**
  * The panels a Desk can hold, who may see each one, and the layout each role
@@ -384,7 +386,7 @@ final class Panels
             PageCards::isCard($panel) => 'pages',
             str_starts_with($panel, Shortcuts::ActionPrefix) => 'actions',
             Shortcuts::isShortcut($panel) => 'buttons',
-            HrPanels::isHrPanel($panel) => 'people',
+            ($module = app(ModuleRegistry::class)->deskPanelSourceFor($panel)) !== null => $module->kind(),
             default => self::ReadyKinds[$panel] ?? 'work',
         };
     }
@@ -527,7 +529,7 @@ final class Panels
      */
     private function itemAmong(array $available, string $route): ?string
     {
-        $candidates = [self::RoutePanels[$route] ?? HrPanels::RoutePanels[$route] ?? null, PageCards::idFor($route), Shortcuts::PagePrefix.Destinations::slugOf($route)];
+        $candidates = [self::RoutePanels[$route] ?? $this->moduleRoutePanels()[$route] ?? null, PageCards::idFor($route), Shortcuts::PagePrefix.Destinations::slugOf($route)];
 
         foreach ($candidates as $id) {
             if ($id !== null && isset($available[$id])) {
@@ -885,8 +887,8 @@ final class Panels
     public function defaultLayoutFor(User $user): array
     {
         $roles = $user->getRoleNames()->all();
-        /* The HR app's roles start from the HR cards (HrPanels), after the Tracking roles a person may also hold. */
-        $layouts = self::RoleLayouts + HrPanels::RoleLayouts;
+        /* A module's own roles (the HR app's start from the HR cards) come after the Tracking roles a person may also hold. */
+        $layouts = self::RoleLayouts + $this->moduleRoleLayouts();
         $role = collect(array_keys($layouts))->first(fn (string $name): bool => in_array($name, $roles, true));
 
         if ($role === null && $user->hasRole(config('access-control.administrator_roles', []))) {
@@ -995,12 +997,51 @@ final class Panels
             'deliverables' => ['icon' => 'board', 'size' => 'M', 'register' => 'department-tasks.index', 'allows' => fn (User $user): bool => $user->can('viewDepartmentQueue', Task::class)],
             'myteam' => ['icon' => 'users', 'size' => 'M', 'register' => null, 'allows' => fn (User $user): bool => $user->employee_id !== null || $user->isAdministrator()],
             'targets' => ['icon' => 'chart', 'size' => 'L', 'register' => 'targets.index', 'allows' => $can('targets.view')],
-            'duties' => ['icon' => 'file', 'size' => 'M', 'register' => 'donor-reports.index', 'allows' => fn (User $user): bool => $user->can('reports.aggregate') || $user->can('funding-agreements.update') || $user->hasReportingDuties()],
+            'duties' => ['icon' => 'file', 'size' => 'M', 'register' => 'donor-reports.index', 'allows' => fn (User $user): bool => $user->can('reports.aggregate') || $user->can('funding-agreements.update') || TrackingDuties::for($user)->hasReportingDuties()],
             'milestones' => ['icon' => 'flag', 'size' => 'M', 'register' => 'milestones.index', 'allows' => $can('milestones.view')],
             'donors' => ['icon' => 'users', 'size' => 'L', 'register' => 'donors.index', 'allows' => $can('donors.view')],
-            /* The HR cards ("hr-…"): defined, permitted and drawn by the HR module (HrPanels). */
-            ...app(HrPanels::class)->definitions(),
+            /* Each module's panels (ModuleRegistry, e.g. the HR cards "hr-…"): defined, permitted and drawn by the module. */
+            ...$this->moduleDefinitions(),
         ];
+    }
+
+    /**
+     * The Livewire component that draws a module's panel (ModuleRegistry);
+     * null for the Desk's own panels and page cards.
+     */
+    public function moduleComponentOf(string $id): ?string
+    {
+        return app(ModuleRegistry::class)->deskPanelSourceFor($id)?->component($id);
+    }
+
+    /**
+     * Every module's panel definitions, in registration order.
+     *
+     * @return array<string, array{icon: string, size: string, rows: int, register: string|null, allows: Closure(User): bool, title: string, description: string, locked: string, kind: string}>
+     */
+    private function moduleDefinitions(): array
+    {
+        return array_merge(...array_map(fn (DeskPanelSource $source): array => $source->definitions(), app(ModuleRegistry::class)->deskPanelSources()));
+    }
+
+    /**
+     * The module panel that stands for each module page (route => panel); the first module to name a route wins.
+     *
+     * @return array<string, string>
+     */
+    private function moduleRoutePanels(): array
+    {
+        return array_reduce(app(ModuleRegistry::class)->deskPanelSources(), fn (array $carry, DeskPanelSource $source): array => $carry + $source->routePanels(), []);
+    }
+
+    /**
+     * The modules' own role layouts; the first module to name a role wins.
+     *
+     * @return array<string, list<array{0: string, 1: string}>>
+     */
+    private function moduleRoleLayouts(): array
+    {
+        return array_reduce(app(ModuleRegistry::class)->deskPanelSources(), fn (array $carry, DeskPanelSource $source): array => $carry + $source->roleLayouts(), []);
     }
 
     /**

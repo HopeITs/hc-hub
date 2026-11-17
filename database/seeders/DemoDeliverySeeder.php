@@ -57,11 +57,12 @@ class DemoDeliverySeeder extends Seeder
                     ['status' => ProjectStatus::Active],
                     ['status' => ProjectStatus::Closed],
                 )
+                // One random owner per project, written to both owner columns.
+                ->state(fn (): array => ['owner_employee_id' => $employeeIds->random()])
                 ->create([
                     'name' => fn (): string => $name.' Community Response '.fake()->unique()->numerify('###'),
                     'program_id' => $program->id,
                     'city_id' => fn (): int => $cityIds->random(),
-                    'user_id' => fn (): int => $employeeIds->random(),
                 ]);
 
             $proposal = Proposal::factory()->running()->create([

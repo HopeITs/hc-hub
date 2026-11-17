@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Hr\Support\Import;
 
 use Illuminate\Database\Connection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\Hr\Support\HrTables;
 use RuntimeException;
@@ -194,16 +195,30 @@ final class HrImporter
 
         $existing = $this->db->table('users')->get()->keyBy('id');
         $changed = 0;
+        $skipped = 0;
+        $loginOf = $this->loginsByEmployee($existing);
 
         foreach ($rows as $row) {
             $id = (int) $row['id'];
             /** @var stdClass|null $current */
             $current = $existing->get($id);
 
+            if ($this->belongsToAnotherLogin($loginOf, $row['employee_id'] ?? null, $id)) {
+                $skipped++;
+
+                continue;
+            }
+
+            if (($row['employee_id'] ?? null) !== null) {
+                $loginOf[(int) $row['employee_id']] = $id;
+            }
+
             if ($current === null) {
                 $this->db->table('users')->insert([
                     'id' => $id,
                     'employee_id' => $row['employee_id'] ?? null,
+                    // An HR account with no employee is a system account.
+                    'is_system' => ($row['employee_id'] ?? null) === null,
                     'email' => $row['email'],
                     'password' => $row['password'],
                     'email_verified_at' => $row['email_verified_at'] ?? null,
@@ -236,7 +251,50 @@ final class HrImporter
             }
         }
 
-        $this->record('users', count($rows), $changed, 'Core, upserted by HR id');
+        $note = 'Core, upserted by HR id';
+
+        if ($skipped > 0) {
+            $note .= "; {$skipped} skipped: their employee already has another login (one login per employee)";
+        }
+
+        $this->record('users', count($rows), $changed, $note);
+    }
+
+    /**
+     * Which login each employee already has (users.employee_id is unique).
+     *
+     * @param  Collection<int|string, stdClass>  $existing
+     * @return array<int, int> employee id => user id
+     */
+    private function loginsByEmployee(Collection $existing): array
+    {
+        $loginOf = [];
+
+        foreach ($existing as $user) {
+            if ($user->employee_id !== null) {
+                $loginOf[(int) $user->employee_id] = (int) $user->id;
+            }
+        }
+
+        return $loginOf;
+    }
+
+    /**
+     * True when an HR login points at an employee another login already has,
+     * e.g. a spare login cancelled with hub:cancel-duplicate-account: importing
+     * it again would break users.employee_id's unique index.
+     *
+     * @param  array<int, int>  $loginOf
+     */
+    private function belongsToAnotherLogin(array $loginOf, mixed $employeeId, int $userId): bool
+    {
+        if ($employeeId === null) {
+            return false;
+        }
+
+        $owner = $loginOf[(int) $employeeId] ?? null;
+
+        return $owner !== null && $owner !== $userId;
     }
 
     /**

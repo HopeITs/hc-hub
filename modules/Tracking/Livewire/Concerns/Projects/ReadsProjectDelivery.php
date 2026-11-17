@@ -63,7 +63,7 @@ trait ReadsProjectDelivery
     public function milestonesFlat(): Collection
     {
         return Milestone::query()
-            ->select(['id', 'project_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_start_date', 'actual_end_date', 'status', 'sequence', 'weight_percentage', 'responsible_user_id'])
+            ->select(['id', 'project_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_start_date', 'actual_end_date', 'status', 'sequence', 'weight_percentage', 'responsible_employee_id'])
             ->where('project_id', $this->projectId)
             ->with('responsibleUser:id,first_name_en,last_name_en,first_name_ar,last_name_ar')
             ->orderBy('sequence')

@@ -20,7 +20,7 @@ use function Laravel\Prompts\text;
  *
  * Self-registration is disabled. An account HR already created (hub:import-hr)
  * only gets its role; an email no account uses yet becomes a new account with
- * the given password and no linked employee (a system or local account).
+ * the given password and no linked employee, marked as a system account.
  */
 class CreateUserCommand extends Command
 {
@@ -109,6 +109,7 @@ class CreateUserCommand extends Command
             'email' => $validated['email'],
             'password' => (string) $secret,
             'email_verified_at' => $this->option('unverified') ? null : now(),
+            'is_system' => true,
         ])->save();
 
         $user->grantAccess($validated['role']);

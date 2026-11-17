@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Support\Desk;
 
+use App\Support\Modules\Contracts\DestinationSource;
+use App\Support\Modules\ModuleRegistry;
 use Closure;
 use Illuminate\Support\Str;
 use Modules\Core\Models\User;
-use Modules\Hr\Support\Desk\HrDestinations;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\ProposalReviewer;
 use Modules\Tracking\Models\RiskLibrary;
@@ -365,9 +366,19 @@ final class Destinations
             $page('security.edit', 'common.security', 'lock', 'nav-shield-check', 'you', $everyone),
             $page('notification-settings.edit', 'desk.my_notifications', 'bell', 'nav-bell-ring', 'you', $everyone),
 
-            /* The HR module's pages (HrDestinations): only the ones whose route exists, each behind its own HR permission, in the group it names (after that group's own pages). */
-            ...array_map(fn (array $hr): array => $page($hr['route'], $hr['label'], $hr['icon'], $hr['hero'], $hr['group'], $hr['allows'], bindsAdministrators: $hr['bindsAdministrators'], under: $hr['under']), app(HrDestinations::class)->pages()),
+            /* Each module's pages (ModuleRegistry, e.g. the HR pages): only the ones whose route exists, each behind its own permission, in the group it names (after that group's own pages). */
+            ...array_map(fn (array $module): array => $page($module['route'], $module['label'], $module['icon'], $module['hero'], $module['group'], $module['allows'], bindsAdministrators: $module['bindsAdministrators'], under: $module['under']), $this->modulePages()),
         ];
+    }
+
+    /**
+     * The pages every module registered (ModuleRegistry::addDestinations), in registration order.
+     *
+     * @return list<array{route: string, label: string, icon: string, hero: string, group: string, allows: Closure(User): bool, bindsAdministrators: bool, under: string|null}>
+     */
+    private function modulePages(): array
+    {
+        return array_merge(...array_map(fn (DestinationSource $source): array => $source->pages(), app(ModuleRegistry::class)->destinationSources()));
     }
 
     /**

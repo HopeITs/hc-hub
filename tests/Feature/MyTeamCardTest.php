@@ -51,7 +51,7 @@ function myTeamFor(User $user): array
 
 test('anyone linked to an HR employee may add the card, and an empty team says so', function () {
     $user = userWithRole('Managers', insertHrEmployee());
-    $unlinked = userWithRole('Managers');
+    $unlinked = Activity::withoutRecording(fn (): User => User::factory()->withoutEmployee()->role('Managers')->create());
 
     expect(app(Panels::class)->availableTo($user))->toHaveKey('myteam')
         ->and(app(Panels::class)->availableTo($unlinked))->not->toHaveKey('myteam');

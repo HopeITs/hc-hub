@@ -23,6 +23,7 @@ use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TransfersTracking;
 use Modules\Tracking\Support\MonthlyReportPeriods;
+use Modules\Tracking\Support\TrackingDuties;
 
 /**
  * My agenda (user decision 2026-10-27): every dated item between two days
@@ -46,14 +47,14 @@ trait ReadsDeskAgenda
     {
         $user = auth()->user();
         $employeeId = $user->employee_id ?? 0;
-        $projectIds = $user->ownedProjectIds();
+        $projectIds = TrackingDuties::for($user)->ownedProjectIds();
         $window = [$from->toDateString(), $to->toDateString()];
 
         $milestones = $this->visible(Milestone::query(), 'milestones')
             ->select(['id', 'slug', 'project_id', 'proposal_id', 'name', 'planned_end_date'])
             ->with(['project:id,name', 'proposal:id,name'])
             ->whereIn('status', [MilestoneStatus::Planned, MilestoneStatus::Ongoing])
-            ->where(fn (Builder $query) => $query->whereIn('project_id', $projectIds === [] ? [0] : $projectIds)->orWhere('responsible_user_id', $employeeId))
+            ->where(fn (Builder $query) => $query->whereIn('project_id', $projectIds === [] ? [0] : $projectIds)->orWhere('responsible_employee_id', $employeeId))
             ->whereBetween('planned_end_date', $window)
             ->get()
             ->map(fn (Milestone $milestone): array => [

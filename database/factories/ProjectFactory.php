@@ -46,7 +46,7 @@ class ProjectFactory extends Factory
             'target_girls' => $girls,
             'city_id' => fn (): int => $this->createHrCity(),
             'program_id' => Program::factory(),
-            'user_id' => fn (): int => $this->createHrEmployee(),
+            ...$this->renamedEmployeeColumns('user_id', 'owner_employee_id'),
         ];
     }
 

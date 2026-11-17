@@ -169,7 +169,7 @@ trait ReadsDeskDecisions
         return Proposal::query()
             ->select(['proposals.id', 'proposals.slug', 'proposals.name', 'proposals.status', 'proposals.updated_at'])
             ->whereIn('proposals.status', array_keys($steps))
-            ->whereHas('projects', fn (Builder $query) => $query->where('projects.user_id', $user->employee_id))
+            ->whereHas('projects', fn (Builder $query) => $query->where('projects.owner_employee_id', $user->employee_id))
             ->oldest('proposals.updated_at')
             ->get()
             ->map(fn (Proposal $proposal): array => $this->decision(

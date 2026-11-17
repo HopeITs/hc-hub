@@ -8,6 +8,7 @@ use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Support\MonthlyReportPeriods;
 use Modules\Tracking\Support\SupervisionMap;
+use Modules\Tracking\Support\TrackingDuties;
 use Carbon\CarbonImmutable;
 use Flux\Flux;
 use Illuminate\Database\Eloquent\Builder;
@@ -127,13 +128,13 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
     protected function myProjectIds(): array
     {
         $user = auth()->user();
-        $ids = $user->ownedProjectIds();
+        $ids = TrackingDuties::for($user)->ownedProjectIds();
 
         if ($user->employee_id !== null) {
             $supervisees = SupervisionMap::superviseesOf($user->employee_id);
 
             if ($supervisees !== []) {
-                $ids = [...$ids, ...Project::query()->whereIn('user_id', $supervisees)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all()];
+                $ids = [...$ids, ...Project::query()->whereIn('owner_employee_id', $supervisees)->pluck('id')->map(fn (mixed $id): int => (int) $id)->all()];
             }
         }
 
@@ -167,7 +168,7 @@ new #[Layout('layouts::desk'), Title('titles.monthly_reports')] class extends Co
         $projects = Project::query()
             ->whereIn('id', $projectIds)
             ->orderBy('name')
-            ->get(['id', 'slug', 'name', 'user_id', 'program_id', 'center_id', 'city_id', 'working_days', 'start_date', 'end_date']);
+            ->get(['id', 'slug', 'name', 'owner_employee_id', 'program_id', 'center_id', 'city_id', 'working_days', 'start_date', 'end_date']);
 
         $reports = MonthlyReport::query()
             ->whereIn('project_id', $projectIds)

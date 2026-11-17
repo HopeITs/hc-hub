@@ -74,7 +74,7 @@ trait ReadsMonthlyReport
     {
         $report = MonthlyReport::query()
             ->with([
-                'project:id,slug,name,user_id,program_id,center_id,city_id,working_days,start_date,end_date',
+                'project:id,slug,name,owner_employee_id,program_id,center_id,city_id,working_days,start_date,end_date',
                 'project.program:id,donor_attribution',
                 'lines' => fn (Relation $query) => $query->orderBy('id'),
                 'lines.libraryIndicator',

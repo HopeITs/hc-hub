@@ -31,6 +31,7 @@ use Modules\Core\Models\Program;
 use Modules\Hr\Models\Employee;
 use Modules\Tracking\Actions\Projects\ApproveProjectFromProposal;
 use Modules\Tracking\Concerns\HasAssignments;
+use Modules\Tracking\Concerns\MirrorsRenamedColumns;
 use Modules\Tracking\Enums\AssignmentStatus;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ProposalPhase;
@@ -53,7 +54,8 @@ use Modules\Tracking\Enums\ProposalStatus;
  * @property int|null $center_id
  * @property int|null $host_center_id
  * @property int $program_id
- * @property int $user_id
+ * @property int $user_id Legacy copy of owner_employee_id, dropped in the contract step.
+ * @property int $owner_employee_id
  * @property string $schedule_weekend
  * @property list<int>|null $working_days
  * @property CarbonImmutable|null $created_at
@@ -75,13 +77,14 @@ use Modules\Tracking\Enums\ProposalStatus;
     'host_center_id',
     'program_id',
     'user_id',
+    'owner_employee_id',
     'schedule_weekend',
 ])]
 #[ObservedBy(MediaOwnerObserver::class)]
 class Project extends Model implements TracksActivity
 {
     /** @use HasFactory<ProjectFactory> */
-    use HasAssignments, HasFactory, HasSlug, RecordsActivity;
+    use HasAssignments, HasFactory, HasSlug, MirrorsRenamedColumns, RecordsActivity;
 
     /**
      * How the pending save came about, read by activityProperties().
@@ -321,15 +324,24 @@ class Project extends Model implements TracksActivity
     }
 
     /**
-     * The HR employee responsible for this project.
-     *
-     * The column keeps its original name, `user_id`, but holds an HR employee id.
+     * The HR employee responsible for this project (`owner_employee_id`).
      *
      * @return BelongsTo<Employee, $this>
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(Employee::class, 'user_id');
+        return $this->belongsTo(Employee::class, 'owner_employee_id');
+    }
+
+    /**
+     * `user_id` is the old name of `owner_employee_id`, kept equal until it
+     * is dropped (roadmap 1.9).
+     *
+     * @return array<string, string>
+     */
+    public function renamedColumns(): array
+    {
+        return ['user_id' => 'owner_employee_id'];
     }
 
     /**
@@ -607,7 +619,7 @@ class Project extends Model implements TracksActivity
     {
         return [
             'status' => 'status_changed',
-            'user_id' => 'owner_changed',
+            'owner_employee_id' => 'owner_changed',
             'start_date' => 'dates_changed',
             'end_date' => 'dates_changed',
             'name' => 'updated',
@@ -651,21 +663,45 @@ class Project extends Model implements TracksActivity
     }
 
     /**
+     * `user_id` mirrors `owner_employee_id` (roadmap 1.9), so logging it
+     * would record the owner change twice. Activities written before the
+     * rename keep `user_id` as their key and are still read.
+     *
      * @return list<string>
      */
-    public function activityEmployeeFields(): array
+    protected function activityExcludedFields(): array
     {
         return ['user_id'];
     }
 
     /**
+     * @return list<string>
+     */
+    public function activityEmployeeFields(): array
+    {
+        return ['owner_employee_id'];
+    }
+
+    /**
      * The owner is asked to acknowledge or reject being put in charge.
+     *
+     * `user_id` is the key stored in `assignments.field`; it is kept as is,
+     * and assignmentColumn() maps it to the `owner_employee_id` column.
      *
      * @return list<string>
      */
     public function assignmentFields(): array
     {
         return ['user_id'];
+    }
+
+    /**
+     * Stored assignment rows keep `field = 'user_id'`; the column it names
+     * was renamed to `owner_employee_id` (roadmap 1.9).
+     */
+    public function assignmentColumn(string $field): string
+    {
+        return $field === 'user_id' ? 'owner_employee_id' : $field;
     }
 
     /**
@@ -709,7 +745,7 @@ class Project extends Model implements TracksActivity
      */
     protected function activityPropertiesBeforeDelete(): array
     {
-        return ['employee_ids' => array_filter([(int) $this->activityAttribute('user_id')])];
+        return ['employee_ids' => array_filter([(int) $this->activityAttribute('owner_employee_id')])];
     }
 
     /**
@@ -727,7 +763,7 @@ class Project extends Model implements TracksActivity
      */
     public static function ownerEmployeeIdFor(mixed $projectId): ?int
     {
-        $ownerId = $projectId === null ? null : static::query()->whereKey($projectId)->value('user_id');
+        $ownerId = $projectId === null ? null : static::query()->whereKey($projectId)->value('owner_employee_id');
 
         return $ownerId === null ? null : (int) $ownerId;
     }

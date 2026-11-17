@@ -18,6 +18,9 @@ use Modules\Tracking\Support\MealCoverage;
  * straight to whoever made it and to the program manager; a rejection is
  * important for them, and reaches the top level when a program manager
  * is the one rejecting.
+ *
+ * An owner change is logged under `owner_employee_id`; activities from before
+ * the column rename (roadmap 1.9) carry it as `user_id` and are read too.
  */
 final class ProjectRecipients extends ModuleRecipients
 {
@@ -26,7 +29,7 @@ final class ProjectRecipients extends ModuleRecipients
         return $this->uniqueIds([
             Project::ownerEmployeeIdFor($activity->subject_id),
             ...$this->idsFromProperty($activity, 'employee_ids'),
-            $this->changedFrom($activity, 'user_id'),
+            $this->changedFrom($activity, 'owner_employee_id') ?? $this->changedFrom($activity, 'user_id'),
             ...($this->isAssignmentDecision($activity) || $this->isFundingMilestone($activity) ? $this->programManagerEmployeeIds($activity) : []),
             ...($this->isFundingMilestone($activity) ? [MealCoverage::mealManagerEmployeeId()] : []),
             ...$this->topLevelEmployeeIds($activity),
@@ -41,7 +44,7 @@ final class ProjectRecipients extends ModuleRecipients
     public function assignedEmployeeIds(Activity $activity): array
     {
         return $this->uniqueIds([match ($activity->event) {
-            'project.owner_changed' => $this->changedTo($activity, 'user_id'),
+            'project.owner_changed' => $this->changedTo($activity, 'owner_employee_id') ?? $this->changedTo($activity, 'user_id'),
             'project.created' => Project::ownerEmployeeIdFor($activity->subject_id),
             default => null,
         }]);

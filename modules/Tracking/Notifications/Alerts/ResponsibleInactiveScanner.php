@@ -64,8 +64,8 @@ final class ResponsibleInactiveScanner implements Scanner
     {
         $projects = Project::query()
             ->whereIn('status', array_map(fn (ProjectStatus $status): string => $status->value, array_filter(ProjectStatus::cases(), fn (ProjectStatus $status): bool => $status->isOpen())))
-            ->whereIn('user_id', $inactive->keys()->all())
-            ->get(['id', 'name', 'user_id']);
+            ->whereIn('owner_employee_id', $inactive->keys()->all())
+            ->get(['id', 'name', 'owner_employee_id']);
 
         if ($projects->isEmpty()) {
             return 0;
@@ -75,7 +75,7 @@ final class ResponsibleInactiveScanner implements Scanner
         $sent = 0;
 
         foreach ($projects as $project) {
-            $employeeId = (int) $project->user_id;
+            $employeeId = (int) $project->owner_employee_id;
 
             $payload = $this->dispatcher->payload(
                 // The subject is a project, so the module that guards it is

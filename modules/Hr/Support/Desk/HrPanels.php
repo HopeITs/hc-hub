@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Support\Desk;
 
+use App\Support\Modules\Contracts\DeskPanelSource;
 use Closure;
 use Illuminate\Support\Facades\Route;
 use Modules\Core\Models\User;
@@ -34,13 +35,14 @@ use Modules\Hr\Support\Desk\Cards\WhoIsOutCard;
 /**
  * The HR cards of the Desk: the old HR dashboard's tiles as Desk panels.
  *
+ * Registered with the module registry (HrServiceProvider::registerDesk),
  * App\Support\Desk\Panels reads definitions() into its own catalogue, so an
  * HR card is placed, sized, pinned, folded and removed like any other panel.
  * Ids are "hr-<key>"; every card but the notes is drawn by one component
  * (hr::desk.card) from its HrCard class, the notes by hr::desk.notes.
  * Texts are hr_desk.cards.<key>.{title,description,tagline,empty,locked}.
  */
-final class HrPanels
+final class HrPanels implements DeskPanelSource
 {
     public const string Prefix = 'hr-';
 
@@ -159,6 +161,37 @@ final class HrPanels
         return $id === self::Notes ? 'hr::desk.notes' : 'hr::desk.card';
     }
 
+    public function owns(string $id): bool
+    {
+        return self::isHrPanel($id);
+    }
+
+    public function component(string $id): string
+    {
+        return self::componentFor($id);
+    }
+
+    public function kind(): string
+    {
+        return 'people';
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function routePanels(): array
+    {
+        return self::RoutePanels;
+    }
+
+    /**
+     * @return array<string, list<array{0: string, 1: string}>>
+     */
+    public function roleLayouts(): array
+    {
+        return self::RoleLayouts;
+    }
+
     /**
      * The HR cards as Panels definitions (App\Support\Desk\Panels::definitions).
      *
@@ -192,7 +225,7 @@ final class HrPanels
             'title' => "hr_desk.cards.{$key}.title",
             'description' => "hr_desk.cards.{$key}.description",
             'locked' => 'hr_desk.locked',
-            'kind' => 'people',
+            'kind' => $this->kind(),
         ];
     }
 }

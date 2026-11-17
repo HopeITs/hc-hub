@@ -8,6 +8,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Hr\Actions\Employees\ArchiveEmployee;
 use Modules\Hr\Actions\Employees\DeleteEmployee;
 use Modules\Hr\Actions\Employees\ToggleEmployeeStatus;
 use Modules\Hr\Livewire\Concerns\Employees\ReadsEmployeeDirectory;
@@ -37,7 +38,7 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.index')] class extends
 
     public bool $showConfirmModal = false;
 
-    /** The action the confirmation dialog is about: delete or toggle. */
+    /** The action the confirmation dialog is about: archive, delete or toggle. */
     #[Locked]
     public string $confirming = '';
 
@@ -70,11 +71,12 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.index')] class extends
 
     public function confirm(string $action, int $employeeId): void
     {
-        abort_unless(in_array($action, ['delete', 'toggle'], true), 404);
+        abort_unless(in_array($action, ['archive', 'delete', 'toggle'], true), 404);
 
         $employee = $this->scopedEmployee($employeeId);
 
-        Gate::authorize($action === 'delete' ? 'delete' : 'update', $employee);
+        // Archiving is what HR does instead of deleting, so it takes the same right.
+        Gate::authorize($action === 'toggle' ? 'update' : 'delete', $employee);
 
         $this->confirming = $action;
         $this->confirmingId = $employee->id;
@@ -100,7 +102,14 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.index')] class extends
 
         $employee = $this->scopedEmployee($this->confirmingId);
 
-        if ($this->confirming === 'delete') {
+        if ($this->confirming === 'archive') {
+            $archived = app(ArchiveEmployee::class)->handle($employee);
+
+            Flux::toast(
+                variant: $archived ? 'success' : 'warning',
+                text: $archived ? __('hr_employees.toasts.archived') : __('hr_employees.toasts.already_archived'),
+            );
+        } elseif ($this->confirming === 'delete') {
             $deleted = app(DeleteEmployee::class)->handle($employee);
 
             Flux::toast(
@@ -207,10 +216,10 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.index')] class extends
         wire:model="showConfirmModal"
         close="cancelConfirm"
         :tone="$confirming === 'delete' ? 'danger' : 'neutral'"
-        :title="$confirming === 'delete' ? __('hr_employees.confirm.delete_title', ['name' => $confirmingName]) : __('hr_employees.confirm.toggle_title', ['name' => $confirmingName])"
-        :message="$confirming === 'delete' ? __('hr_employees.confirm.delete_body') : __('hr_employees.confirm.toggle_body')"
+        :title="match ($confirming) { 'delete' => __('hr_employees.confirm.delete_title', ['name' => $confirmingName]), 'archive' => __('hr_employees.confirm.archive_title', ['name' => $confirmingName]), default => __('hr_employees.confirm.toggle_title', ['name' => $confirmingName]) }"
+        :message="match ($confirming) { 'delete' => __('hr_employees.confirm.delete_body'), 'archive' => __('hr_employees.confirm.archive_body'), default => __('hr_employees.confirm.toggle_body') }"
         confirm="runConfirmed"
-        :confirm-label="$confirming === 'delete' ? __('common.delete') : __('common.confirm')"
+        :confirm-label="match ($confirming) { 'delete' => __('common.delete'), 'archive' => __('hr_employees.actions.archive'), default => __('common.confirm') }"
         confirm-test="confirm-employee-action"
     />
 </x-desk.register>

@@ -73,7 +73,7 @@ new class extends Component {
         }
 
         return $this->visible(Project::query(), 'projects')
-            ->select(['id', 'slug', 'name', 'user_id', 'city_id', 'center_id', 'program_id'])
+            ->select(['id', 'slug', 'name', 'owner_employee_id', 'city_id', 'center_id', 'program_id'])
             ->whereIn('id', MonthlyReport::query()->select('project_id'))
             ->where('status', '!=', ProjectStatus::Archived)
             ->with([

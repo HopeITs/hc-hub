@@ -249,7 +249,7 @@ class ReadyLayoutSignals
      */
     private function delivery(): array
     {
-        $projects = DeskWork::projectsOnCard($this->viewer)->get(['id', 'user_id']);
+        $projects = DeskWork::projectsOnCard($this->viewer)->get(['id', 'owner_employee_id']);
 
         if ($projects->isEmpty()) {
             return $this->signal(__('desk.ready.signal.projects_none'), 'neutral', 0);

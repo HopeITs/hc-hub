@@ -200,7 +200,7 @@ trait ManagesMilestoneDirectoryForm
                 'planned_end_date' => $validated['plannedEndDate'] === '' ? null : $validated['plannedEndDate'],
                 'status' => $validated['milestoneStatus'],
                 'weight_percentage' => $validated['weightPercentage'],
-                'responsible_user_id' => (int) $validated['responsibleUserId'],
+                'responsible_employee_id' => (int) $validated['responsibleUserId'],
                 'parent_milestone_id' => $validated['parentMilestoneId'] === '' || $validated['parentMilestoneId'] === null
                     ? null
                     : (int) $validated['parentMilestoneId'],

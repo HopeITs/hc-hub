@@ -339,11 +339,11 @@ class Proposal extends Model implements TracksActivity
         $rows = DB::table('project_proposal')
             ->join('projects', 'projects.id', '=', 'project_proposal.project_id')
             ->whereIn('project_proposal.proposal_id', $proposalIds)
-            ->whereNotNull('projects.user_id')
-            ->get(['project_proposal.proposal_id', 'projects.user_id']);
+            ->whereNotNull('projects.owner_employee_id')
+            ->get(['project_proposal.proposal_id', 'projects.owner_employee_id']);
 
         foreach ($rows as $row) {
-            $owners[(int) $row->proposal_id][(int) $row->user_id] = (int) $row->user_id;
+            $owners[(int) $row->proposal_id][(int) $row->owner_employee_id] = (int) $row->owner_employee_id;
         }
 
         return array_map(fn (array $ids): array => array_values($ids), $owners);

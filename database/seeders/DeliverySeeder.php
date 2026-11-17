@@ -44,7 +44,7 @@ class DeliverySeeder extends Seeder
             $parent = Milestone::factory()->create([
                 'project_id' => $project->id,
                 'name' => 'Inception phase',
-                'responsible_user_id' => $employeeIds->random(),
+                'responsible_employee_id' => $employeeIds->random(),
                 'sequence' => 1,
                 'weight_percentage' => 30,
             ]);
@@ -52,7 +52,7 @@ class DeliverySeeder extends Seeder
             $reached = Milestone::factory()->reached()->create([
                 'project_id' => $project->id,
                 'name' => 'Baseline assessment',
-                'responsible_user_id' => $employeeIds->random(),
+                'responsible_employee_id' => $employeeIds->random(),
                 'parent_milestone_id' => $parent->id,
                 'sequence' => 2,
                 'weight_percentage' => 70,

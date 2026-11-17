@@ -201,7 +201,7 @@ trait ManagesProjectForm
         $ids = $this->programOptions->pluck('manager_id');
 
         if ($this->editingProjectId !== null) {
-            $ids->push(Project::query()->whereKey($this->editingProjectId)->value('user_id'));
+            $ids->push(Project::query()->whereKey($this->editingProjectId)->value('owner_employee_id'));
         }
 
         return $this->userOptions->whereIn('id', $ids->filter()->map(fn (mixed $id): int => (int) $id)->unique()->all())->values();
@@ -433,7 +433,7 @@ trait ManagesProjectForm
                 'center_id',
                 'host_center_id',
                 'program_id',
-                'user_id',
+                'owner_employee_id',
             ])
             ->findOrFail($projectId);
 
@@ -457,7 +457,7 @@ trait ManagesProjectForm
         $this->cityId = (string) $project->city_id;
         $this->savedCenterId = $project->center_id;
         $this->programId = (string) $project->program_id;
-        $this->userId = (string) $project->user_id;
+        $this->userId = (string) $project->owner_employee_id;
         $this->sectorIds = array_values($project->sectors()->ordered()->pluck('sectors.id')->map(fn (mixed $id): string => (string) $id)->all());
         $this->showProjectModal = true;
     }

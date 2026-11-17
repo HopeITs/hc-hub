@@ -94,7 +94,7 @@ trait ManagesProposalPlan
     public function planMilestones(): array
     {
         $milestones = Milestone::query()
-            ->select(['id', 'slug', 'proposal_id', 'project_id', 'parent_milestone_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_end_date', 'status', 'sequence', 'responsible_user_id', 'is_final_report'])
+            ->select(['id', 'slug', 'proposal_id', 'project_id', 'parent_milestone_id', 'name', 'planned_start_date', 'planned_end_date', 'actual_end_date', 'status', 'sequence', 'responsible_employee_id', 'is_final_report'])
             ->where('proposal_id', $this->proposalId)
             ->with(['responsibleUser:id,first_name_en,last_name_en,first_name_ar,last_name_ar', 'project:id,name'])
             ->orderBy('planned_start_date')
@@ -242,7 +242,7 @@ trait ManagesProposalPlan
                 'description' => (string) $milestone->description,
                 'planned_start_date' => (string) $milestone->planned_start_date?->toDateString(),
                 'planned_end_date' => (string) $milestone->planned_end_date?->toDateString(),
-                'responsible_employee_id' => (string) $milestone->responsible_user_id,
+                'responsible_employee_id' => (string) $milestone->responsible_employee_id,
                 'project_id' => (string) $milestone->project_id,
                 'parent_milestone_id' => (string) $milestone->parent_milestone_id,
             ];

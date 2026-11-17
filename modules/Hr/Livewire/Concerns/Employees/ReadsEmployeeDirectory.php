@@ -32,7 +32,7 @@ trait ReadsEmployeeDirectory
 
     private const LIST_COLUMNS = [
         'employees.id', 'employees.city_id', 'employees.username', 'employees.first_name_en', 'employees.first_name_ar',
-        'employees.last_name_en', 'employees.last_name_ar', 'employees.work_phone', 'employees.is_active',
+        'employees.last_name_en', 'employees.last_name_ar', 'employees.work_phone', 'employees.is_active', 'employees.archived_at',
         'employees.joined_at', 'employees.record_status', 'employees.updated_at',
     ];
 

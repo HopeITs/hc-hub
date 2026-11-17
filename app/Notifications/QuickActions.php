@@ -102,7 +102,7 @@ final class QuickActions
             return false;
         }
 
-        $ownerId = Project::query()->whereKey($projectId)->toBase()->value('user_id');
+        $ownerId = Project::query()->whereKey($projectId)->toBase()->value('owner_employee_id');
 
         if ($ownerId === null) {
             return false;

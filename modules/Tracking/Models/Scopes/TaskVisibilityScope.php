@@ -14,6 +14,7 @@ use Modules\Hr\Support\Employees\HrAccess;
 use Modules\Tracking\Enums\TaskKind;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Task;
+use Modules\Tracking\Support\TrackingDuties;
 
 /**
  * Row-level visibility for tasks.
@@ -78,7 +79,7 @@ class TaskVisibilityScope implements Scope
 
         $departmentId = $user->departmentId();
         $departmentEmployeeIds = $user->departmentEmployeeIds();
-        $ownedProjectIds = $user->ownedProjectIds();
+        $ownedProjectIds = TrackingDuties::for($user)->ownedProjectIds();
         $managedProgramIds = $user->managedProgramIds();
         $isProposalEditor = $user->can('proposals.update');
         $seesFinancialTasks = $isProposalEditor || $user->hasRole(self::FinanceRole);

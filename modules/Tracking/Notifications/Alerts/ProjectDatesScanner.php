@@ -133,7 +133,7 @@ final class ProjectDatesScanner implements Scanner
                     $query->orWhereBetween(self::Events[$key][0], [$from, $to]);
                 }
             })
-            ->get(['id', 'name', 'user_id', 'program_id', 'start_date', 'end_date', 'working_days']);
+            ->get(['id', 'name', 'owner_employee_id', 'program_id', 'start_date', 'end_date', 'working_days']);
     }
 
     /**
@@ -210,7 +210,7 @@ final class ProjectDatesScanner implements Scanner
 
         foreach ($projects as $project) {
             $employeeIds[$project->id] = array_values(array_filter([
-                $project->user_id,
+                $project->owner_employee_id,
                 isset($managers[$project->program_id]) ? (int) $managers[$project->program_id] : null,
             ]));
         }

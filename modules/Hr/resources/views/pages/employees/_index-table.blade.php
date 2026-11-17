@@ -89,6 +89,9 @@
                             @endunless
                         @endif
                         @if ($canDelete)
+                            @unless ($employee->isDraft() || $employee->isArchived())
+                                <x-ui.button tone="ghost" size="sm" icon="archive-box" wire:click="confirm('archive', {{ $employee->id }})" :aria-label="__('hr_employees.actions.archive_name', ['name' => $employee->name])" data-test="archive-employee-{{ $employee->id }}" />
+                            @endunless
                             <x-ui.button tone="ghost" size="sm" icon="trash" wire:click="confirm('delete', {{ $employee->id }})" :aria-label="__('common.delete_name', ['name' => $employee->name])" />
                         @endif
                     </span>

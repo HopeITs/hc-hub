@@ -7,6 +7,7 @@ namespace Modules\Tracking\Policies;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\DonorReportType;
 use Modules\Tracking\Models\DonorReport;
+use Modules\Tracking\Support\TrackingDuties;
 
 /**
  * Donor reports (contracts §14.3). The responsible person is the employee
@@ -22,7 +23,7 @@ class DonorReportPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('funding-agreements.view') || $user->can('reports.aggregate') || $user->hasReportingDuties();
+        return $user->can('funding-agreements.view') || $user->can('reports.aggregate') || TrackingDuties::for($user)->hasReportingDuties();
     }
 
     /**

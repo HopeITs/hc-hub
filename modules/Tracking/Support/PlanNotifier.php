@@ -94,7 +94,7 @@ final class PlanNotifier
 
         foreach ($projects as $centre) {
             if (in_array('project_manager', $to, true)) {
-                $employeeIds[] = $centre->getAttribute('user_id') ?? Project::ownerEmployeeIdFor($centre->id);
+                $employeeIds[] = $centre->getAttribute('owner_employee_id') ?? Project::ownerEmployeeIdFor($centre->id);
             }
 
             if (in_array('officer', $to, true)) {
