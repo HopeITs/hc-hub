@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Tracking\Actions\ProjectMembers;
 
 use App\Notifications\EmployeeRecipients;
+use App\Support\EmployeeLookup;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +13,6 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ProjectMemberRole;
 use Modules\Tracking\Enums\ProjectMemberSource;
 use Modules\Tracking\Models\Project;
@@ -44,7 +44,7 @@ class AddProjectMember
             'starts_on' => __('projects.team.starts_on'),
         ])->validate();
 
-        if (! Employee::query()->whereKey($employeeId)->where('is_active', true)->exists()) {
+        if (app(EmployeeLookup::class)->activeIds([$employeeId]) === []) {
             throw ValidationException::withMessages(['employee_id' => __('projects.team.choose_an_active_employee')]);
         }
 

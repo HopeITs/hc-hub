@@ -131,6 +131,7 @@ class TrackingServiceProvider extends ServiceProvider
     {
         Employee::resolveRelationUsing('managedAnnualPlans', fn (Employee $employee): HasMany => $employee->hasMany(AnnualPlan::class, 'manager_id'));
         Employee::resolveRelationUsing('projects', fn (Employee $employee): HasMany => $employee->hasMany(Project::class, 'owner_employee_id'));
+        ProjectMember::resolveRelationUsing('employee', fn (ProjectMember $member): BelongsTo => $member->belongsTo(Employee::class, 'employee_id', 'id', 'employee'));
         Employee::resolveRelationUsing('projectMemberships', fn (Employee $employee): HasMany => $employee->hasMany(ProjectMember::class));
         Employee::resolveRelationUsing('responsibleMilestones', fn (Employee $employee): HasMany => $employee->hasMany(Milestone::class, 'responsible_employee_id'));
         Employee::resolveRelationUsing('assignedTasks', fn (Employee $employee): HasManyThrough => $employee->hasManyThrough(Task::class, TaskAssignee::class, 'employee_id', 'id', 'id', 'task_id'));

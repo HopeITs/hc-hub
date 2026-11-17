@@ -44,4 +44,18 @@ final class HrEmployeeLookup implements EmployeeLookup
 
         return $cityIds === null ? null : Employee::query()->select('employees.id')->whereIn('city_id', $cityIds)->toBase();
     }
+
+    /**
+     * @param  list<int>  $employeeIds
+     * @return list<int>
+     */
+    public function activeIds(array $employeeIds = []): array
+    {
+        return Employee::query()
+            ->where('is_active', true)
+            ->when($employeeIds !== [], fn ($query) => $query->whereKey($employeeIds))
+            ->pluck('id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+    }
 }

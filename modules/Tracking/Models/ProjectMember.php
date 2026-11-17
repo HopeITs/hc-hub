@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Core\Models\User;
-use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ProjectMemberRole;
 use Modules\Tracking\Enums\ProjectMemberSource;
 
@@ -36,6 +35,9 @@ use Modules\Tracking\Enums\ProjectMemberSource;
  * @property int|null $is_open
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
+ *
+ * The `employee` relation is registered by TrackingServiceProvider, so this
+ * model does not import HR.
  */
 #[Fillable(['project_id', 'employee_id', 'role', 'starts_on', 'ends_on', 'added_by', 'ended_by', 'source'])]
 class ProjectMember extends Model
@@ -49,14 +51,6 @@ class ProjectMember extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
-    }
-
-    /**
-     * @return BelongsTo<Employee, $this>
-     */
-    public function employee(): BelongsTo
-    {
-        return $this->belongsTo(Employee::class);
     }
 
     /**

@@ -42,4 +42,12 @@ interface EmployeeLookup
      * covers, for whereIn(), or null when it covers every city.
      */
     public function idsInHrReachOf(User $user): ?Builder;
+
+    /**
+     * Of the given employees, the ones whose record is active (empty ids: every active employee).
+     *
+     * @param  list<int>  $employeeIds
+     * @return list<int>
+     */
+    public function activeIds(array $employeeIds = []): array;
 }

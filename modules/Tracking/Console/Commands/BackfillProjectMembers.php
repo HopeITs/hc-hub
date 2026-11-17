@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Console\Commands;
 
+use App\Notifications\EmployeeRecipients;
+use App\Support\EmployeeLookup;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ProjectMemberRole;
 use Modules\Tracking\Enums\ProjectMemberSource;
 use Modules\Tracking\Models\Milestone;
@@ -49,8 +51,8 @@ class BackfillProjectMembers extends Command
 
         $projects = Project::query()->orderBy('id')->get(['id', 'name', 'status', 'owner_employee_id']);
         $evidence = $this->evidence($projects->pluck('id')->all());
-        $activeEmployees = Employee::query()->where('is_active', true)->pluck('id')->map(fn (mixed $id): int => (int) $id)->flip();
-        $names = Employee::query()->get(['id', 'first_name_en', 'last_name_en'])->mapWithKeys(fn (Employee $employee): array => [(int) $employee->id => trim($employee->first_name_en.' '.$employee->last_name_en)]);
+        $activeEmployees = collect(app(EmployeeLookup::class)->activeIds())->flip();
+        $names = collect(app(EmployeeRecipients::class)->names($this->employeeIdsIn($projects, $evidence)))->map(fn (array $name): string => $name['en']);
         $open = ProjectMember::query()->current()->get(['project_id', 'employee_id', 'role'])
             ->mapWithKeys(fn (ProjectMember $row): array => [$row->project_id.':'.$row->employee_id.':'.$row->role->value => true]);
 
@@ -177,6 +179,24 @@ class BackfillProjectMembers extends Command
         }
 
         return $evidence;
+    }
+
+    /**
+     * Every employee the report names: the owners and everyone in the evidence.
+     *
+     * @param  Collection<int, Project>  $projects
+     * @param  array<int, array<int, list<string>>>  $evidence
+     * @return list<int>
+     */
+    private function employeeIdsIn(Collection $projects, array $evidence): array
+    {
+        $ids = $projects->pluck('owner_employee_id')->filter()->map(fn (mixed $id): int => (int) $id)->all();
+
+        foreach ($evidence as $people) {
+            array_push($ids, ...array_keys($people));
+        }
+
+        return array_values(array_unique($ids));
     }
 
     /**
