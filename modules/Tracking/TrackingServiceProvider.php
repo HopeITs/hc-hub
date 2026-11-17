@@ -16,6 +16,7 @@ use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Employee;
 use Modules\Tracking\Console\Commands\BackfillMonthlyReports;
+use Modules\Tracking\Console\Commands\BackfillProjectMembers;
 use Modules\Tracking\Console\Commands\BackfillProposalLocations;
 use Modules\Tracking\Console\Commands\EnsureAnnualPlans2026;
 use Modules\Tracking\Console\Commands\ImportProgramFramework;
@@ -41,6 +42,7 @@ use Modules\Tracking\Models\AnnualPlan;
 use Modules\Tracking\Models\IndicatorProgress;
 use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ProjectMember;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\StrategicPillar;
@@ -87,6 +89,7 @@ class TrackingServiceProvider extends ServiceProvider
 
         $this->commands([
             BackfillMonthlyReports::class,
+            BackfillProjectMembers::class,
             BackfillProposalLocations::class,
             EnsureAnnualPlans2026::class,
             ImportProgramFramework::class,
@@ -128,6 +131,7 @@ class TrackingServiceProvider extends ServiceProvider
     {
         Employee::resolveRelationUsing('managedAnnualPlans', fn (Employee $employee): HasMany => $employee->hasMany(AnnualPlan::class, 'manager_id'));
         Employee::resolveRelationUsing('projects', fn (Employee $employee): HasMany => $employee->hasMany(Project::class, 'owner_employee_id'));
+        Employee::resolveRelationUsing('projectMemberships', fn (Employee $employee): HasMany => $employee->hasMany(ProjectMember::class));
         Employee::resolveRelationUsing('responsibleMilestones', fn (Employee $employee): HasMany => $employee->hasMany(Milestone::class, 'responsible_employee_id'));
         Employee::resolveRelationUsing('assignedTasks', fn (Employee $employee): HasManyThrough => $employee->hasManyThrough(Task::class, TaskAssignee::class, 'employee_id', 'id', 'id', 'task_id'));
     }
