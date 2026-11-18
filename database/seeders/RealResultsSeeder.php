@@ -12,6 +12,7 @@ use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Result;
+use Modules\Tracking\Support\Reporting\PlaceBridge;
 use RuntimeException;
 
 /**
@@ -130,7 +131,7 @@ class RealResultsSeeder extends Seeder
 
             PlanIndicator::query()->firstOrCreate(
                 ['source_type' => 'proposal', 'source_id' => $proposalId, 'indicator_id' => $indicatorId, 'project_id' => $projectId],
-                ['target' => $row['target'], 'period' => $row['period']],
+                ['target' => $row['target'], 'period' => $row['period'], ...app(PlaceBridge::class)->placeColumnsForTargets(Proposal::query()->whereKey($proposalId)->firstOrFail(), [$projectId])[$projectId]],
             );
         }
 

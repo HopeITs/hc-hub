@@ -103,7 +103,7 @@ test('the Locations chapter shows each row with its status and field work in pla
         ->assertSeeHtml('data-location-row="'.$missing->id.'" data-location-status="missing_center"')
         ->assertSeeText(__('proposals.location_field_work'))
         ->assertSeeText('Youth Clubs')
-        ->assertSeeHtml('data-test="add-centers"')
+        ->assertDontSeeHtml('data-test="add-centers"')
         ->call('openEditModal', $proposal->id)
         ->assertSet('showProposalModal', true);
 });

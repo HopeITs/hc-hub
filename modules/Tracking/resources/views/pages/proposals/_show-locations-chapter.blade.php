@@ -3,19 +3,17 @@
     proposal runs, one card per location row with its city, program, responsible,
     centers and one status word. The status is text with an icon, never colour
     alone. A city-wide row (D-88) shows "Field work" in the centers cell and is
-    Complete. While a row misses its center, someone who may update the proposal
-    gets "Add centers", which opens the proposal form (?add-centers=1 lands here).
-    Reads $this->locationRows; included by _show-projects-tab.blade.php, whose
-    host defines $mutedText and $inkText.
+    Complete. While a row misses its center, someone who may fill it gets
+    "Add centers", which opens the center fill editor (?add-centers=1 lands
+    here). Reads $this->locationRows; included by _show-projects-tab.blade.php,
+    whose host defines $mutedText and $inkText.
 --}}
 <section class="mb-8" aria-labelledby="proposal-locations-title" data-test="locations-chapter">
     <div class="flex flex-wrap items-center justify-between gap-2">
         <h3 id="proposal-locations-title" class="type-label {{ $mutedText }}">{{ __('proposals.locations_chapter_title') }}</h3>
 
-        @if (collect($this->locationRows)->contains('status', 'missing_center'))
-            @can('update', $this->proposal)
-                <x-ui.button size="sm" icon="plus" class="min-h-10 touch-manipulation" wire:click="openEditModal({{ $this->proposal->id }})" data-test="add-centers">{{ __('proposals.add_centers') }}</x-ui.button>
-            @endcan
+        @if ($this->canFillCenters)
+            <x-ui.button type="button" tone="secondary" size="sm" icon="plus" class="min-h-10 touch-manipulation" wire:click="openCenterFill" data-test="add-centers">{{ __('proposals.add_centers') }}</x-ui.button>
         @endif
     </div>
 

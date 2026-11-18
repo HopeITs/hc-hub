@@ -6,6 +6,7 @@ use Modules\Tracking\Livewire\Concerns\ManagesAgreementForm;
 use Modules\Tracking\Livewire\Concerns\ManagesTransferForm;
 use App\Livewire\Concerns\PreviewsFiles;
 use Modules\Tracking\Livewire\Concerns\Proposals\ChartsProposalChronology;
+use Modules\Tracking\Livewire\Concerns\Proposals\FillsProposalCenters;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesFinalReportAcceptance;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesGrantDates;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesNegotiationNotes;
@@ -43,6 +44,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     use BuildsProposalPlanGantt;
     use ChartsProposalChronology;
     use ChecksFinanceVisibility;
+    use FillsProposalCenters;
     use ManagesAgreementForm;
     use ManagesFinalReportAcceptance;
     use ManagesGrantDates;
@@ -115,9 +117,8 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
     public bool $recordAgreementLink = false;
 
     /**
-     * Deep link from the register's "Missing a center" list (Y-01 slice 3):
-     * opens the proposal form on the Projects tab, where the rows take their
-     * centers, for someone who may update the proposal; then clears itself.
+     * Deep link from the "Missing a center" list: opens the Add centers
+     * editor once for a proposal that may take it, then clears itself.
      */
     #[Url(as: 'add-centers', except: false)]
     public bool $addCentersLink = false;
@@ -140,9 +141,9 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
 
         $this->recordAgreementLink = false;
 
-        if ($this->addCentersLink && ! $this->proposal->isPayroll() && auth()->user()?->can('update', $this->proposal) === true) {
+        if ($this->addCentersLink && $this->canFillCenters) {
             $this->tab = 'projects';
-            $this->openEditModal($this->proposalId);
+            $this->openCenterFill();
         }
 
         $this->addCentersLink = false;
@@ -360,6 +361,7 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
             $this->projectFiles, $this->conceptNoteFiles, $this->documents, $this->deadlines, $this->warnings, $this->lifecycle, $this->chronology,
             $this->arrivals, $this->vitals, $this->term, $this->tabs, $this->proposalFiles, $this->reviewStages, $this->needAssessments, $this->approvalSubject, $this->approvalPreview, $this->approvalLocations,
             $this->canRecordFinalReportAcceptance, $this->finalReportAcceptance,
+            $this->canFillCenters, $this->centerFillRows, $this->centerFillCentersByCity,
         );
     }
 };

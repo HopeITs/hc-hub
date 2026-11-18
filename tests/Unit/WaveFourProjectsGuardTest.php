@@ -14,6 +14,8 @@ it('names the Project model only in the place bridge', function (): void {
         ...(glob($root.'/modules/Tracking/Support/Reporting/*.php') ?: []),
         $root.'/modules/Tracking/Support/ReportTemplatePrefiller.php',
         $root.'/modules/Tracking/Support/ReportTemplateReader.php',
+        // Y-09: the change-request actions.
+        ...(glob($root.'/modules/Tracking/Actions/Proposals/*ProposalChange.php') ?: []),
         $root.'/modules/Tracking/Support/ReportTemplateQueue.php',
         ...(glob($root.'/modules/Tracking/Actions/ReportTemplates/*.php') ?: []),
     ];

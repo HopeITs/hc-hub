@@ -121,7 +121,7 @@ final class ReportTemplateQueue
             $rows[] = [
                 'template' => $template,
                 'project' => $project,
-                'name' => $project?->name ?? (string) $template->program?->name,
+                'name' => $project->name ?? (string) $template->program?->name,
                 'status' => $template->status,
                 'pendingLineCount' => (int) $groups->sum('line_count'),
                 'annualPlanLineCount' => (int) $groups->where('source_type', 'annual_plan')->sum('line_count'),
@@ -136,7 +136,7 @@ final class ReportTemplateQueue
                     ->all()),
                 'cityId' => $cityId,
                 'cityName' => $cityId === null ? null : $cities->get($cityId)?->name,
-                'centerName' => $template->center_id === null ? ($template->city_wide ? __('report_templates.queue.field_work') : null) : Center::remembered($template->center_id)?->name,
+                'centerName' => $template->center_id === null ? ($template->city_wide ? (string) __('report_templates.queue.field_work') : null) : Center::remembered($template->center_id)?->name,
             ];
         }
 
