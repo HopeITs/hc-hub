@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 return [
     'group' => 'الموارد البشرية',
-    'group_people' => 'شؤون الموظفين',
-    'group_leave' => 'الإجازات',
-    'group_recruitment' => 'التوظيف',
     'inbox' => 'وارد الموارد البشرية',
     'employees' => 'الموظفون',
     'contracts' => 'العقود',

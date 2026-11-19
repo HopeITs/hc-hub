@@ -205,7 +205,7 @@
             "label": "Notifications",
             "icon": "bell",
             "hero": "nav-bell",
-            "group": "workspace",
+            "group": "overview",
             "module": null
         },
         {
@@ -301,7 +301,7 @@
             "label": "Employees",
             "icon": "users",
             "hero": "nav-users",
-            "group": "hr_people",
+            "group": "people",
             "module": null
         },
         {
@@ -309,7 +309,7 @@
             "label": "Contracts",
             "icon": "file",
             "hero": "nav-file-text",
-            "group": "hr_people",
+            "group": "people",
             "module": null
         },
         {
@@ -317,7 +317,7 @@
             "label": "Positions",
             "icon": "grid",
             "hero": "nav-layers",
-            "group": "hr_people",
+            "group": "people",
             "module": null
         },
         {
@@ -325,7 +325,7 @@
             "label": "Team staffing",
             "icon": "users",
             "hero": "nav-network",
-            "group": "hr_people",
+            "group": "people",
             "module": null
         },
         {
@@ -333,31 +333,7 @@
             "label": "Badges",
             "icon": "check",
             "hero": "nav-shield-check",
-            "group": "hr_people",
-            "module": null
-        },
-        {
-            "route": "hr.statistics.general",
-            "label": "HR statistics",
-            "icon": "chart",
-            "hero": "nav-chart-line",
-            "group": "hr_people",
-            "module": null
-        },
-        {
-            "route": "hr.statistics.contracts",
-            "label": "Contract statistics",
-            "icon": "chart",
-            "hero": "nav-file-text",
-            "group": "hr_people",
-            "module": null
-        },
-        {
-            "route": "hr.statistics.salaries",
-            "label": "Salary statistics",
-            "icon": "chart",
-            "hero": "nav-chart-line",
-            "group": "hr_people",
+            "group": "people",
             "module": null
         },
         {
@@ -365,7 +341,7 @@
             "label": "Team leave requests",
             "icon": "cal",
             "hero": "nav-calendar-check",
-            "group": "hr_leave",
+            "group": "people",
             "module": null
         },
         {
@@ -373,7 +349,7 @@
             "label": "Leave balances",
             "icon": "grid",
             "hero": "nav-gauge",
-            "group": "hr_leave",
+            "group": "people",
             "module": null
         },
         {
@@ -381,7 +357,31 @@
             "label": "Holidays",
             "icon": "cal",
             "hero": "nav-calendar",
-            "group": "hr_leave",
+            "group": "people",
+            "module": null
+        },
+        {
+            "route": "hr.statistics.general",
+            "label": "HR statistics",
+            "icon": "chart",
+            "hero": "nav-chart-line",
+            "group": "people",
+            "module": null
+        },
+        {
+            "route": "hr.statistics.contracts",
+            "label": "Contract statistics",
+            "icon": "chart",
+            "hero": "nav-file-text",
+            "group": "people",
+            "module": null
+        },
+        {
+            "route": "hr.statistics.salaries",
+            "label": "Salary statistics",
+            "icon": "chart",
+            "hero": "nav-chart-line",
+            "group": "people",
             "module": null
         },
         {
@@ -389,7 +389,7 @@
             "label": "Recruitment requests",
             "icon": "file",
             "hero": "nav-file-plus",
-            "group": "hr_recruitment",
+            "group": "recruitment",
             "module": null
         },
         {
@@ -397,7 +397,7 @@
             "label": "Recruitment approvals",
             "icon": "check",
             "hero": "nav-list-checks",
-            "group": "hr_recruitment",
+            "group": "recruitment",
             "module": null
         },
         {
@@ -405,7 +405,7 @@
             "label": "Vacancies",
             "icon": "search",
             "hero": "nav-clipboard-list",
-            "group": "hr_recruitment",
+            "group": "recruitment",
             "module": null
         },
         {
@@ -413,7 +413,7 @@
             "label": "Applicants",
             "icon": "users",
             "hero": "nav-circle-user",
-            "group": "hr_recruitment",
+            "group": "recruitment",
             "module": null
         },
         {
@@ -421,7 +421,7 @@
             "label": "Interviews",
             "icon": "cal",
             "hero": "nav-calendar-range",
-            "group": "hr_recruitment",
+            "group": "recruitment",
             "module": null
         },
         {
@@ -429,7 +429,7 @@
             "label": "Job offers",
             "icon": "file",
             "hero": "nav-handshake",
-            "group": "hr_recruitment",
+            "group": "recruitment",
             "module": null
         },
         {
@@ -437,7 +437,7 @@
             "label": "Matching rules",
             "icon": "grid",
             "hero": "nav-sliders-horizontal",
-            "group": "hr_recruitment",
+            "group": "recruitment",
             "module": null
         },
         {
@@ -1267,24 +1267,6 @@
             "min_rows": 1,
             "icon": "grid"
         },
-        "g-hr-statistics-general": {
-            "kind": "buttons",
-            "rows": 1,
-            "min_rows": 1,
-            "icon": "grid"
-        },
-        "g-hr-statistics-contracts": {
-            "kind": "buttons",
-            "rows": 1,
-            "min_rows": 1,
-            "icon": "grid"
-        },
-        "g-hr-statistics-salaries": {
-            "kind": "buttons",
-            "rows": 1,
-            "min_rows": 1,
-            "icon": "grid"
-        },
         "g-hr-leave-team": {
             "kind": "buttons",
             "rows": 1,
@@ -1298,6 +1280,24 @@
             "icon": "grid"
         },
         "g-hr-leave-holidays": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-statistics-general": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-statistics-contracts": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-statistics-salaries": {
             "kind": "buttons",
             "rows": 1,
             "min_rows": 1,
@@ -1393,7 +1393,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -1402,6 +1402,45 @@
                             "icon": "grid",
                             "hero": "nav-layout-dashboard",
                             "group": "overview",
+                            "module": null
+                        }
+                    ]
+                },
+                {
+                    "group": "workspace",
+                    "label": "My Work",
+                    "icon": "nav-list-checks",
+                    "items": [
+                        {
+                            "route": "tasks.index",
+                            "label": "Tasks",
+                            "icon": "check",
+                            "hero": "nav-square-check-big",
+                            "group": "workspace",
+                            "module": "tasks"
+                        },
+                        {
+                            "route": "calendar.index",
+                            "label": "My Calendar",
+                            "icon": "cal",
+                            "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.assistant",
+                            "label": "HR assistant",
+                            "icon": "info",
+                            "hero": "nav-lightbulb",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.feedback.index",
+                            "label": "Feedback",
+                            "icon": "info",
+                            "hero": "nav-message-circle-question-mark",
+                            "group": "workspace",
                             "module": null
                         }
                     ]
@@ -1524,45 +1563,6 @@
                     ]
                 },
                 {
-                    "group": "workspace",
-                    "label": "My Workspace",
-                    "icon": "nav-list-checks",
-                    "items": [
-                        {
-                            "route": "tasks.index",
-                            "label": "Tasks",
-                            "icon": "check",
-                            "hero": "nav-square-check-big",
-                            "group": "workspace",
-                            "module": "tasks"
-                        },
-                        {
-                            "route": "calendar.index",
-                            "label": "My Calendar",
-                            "icon": "cal",
-                            "hero": "nav-calendar",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.assistant",
-                            "label": "HR assistant",
-                            "icon": "info",
-                            "hero": "nav-lightbulb",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.feedback.index",
-                            "label": "Feedback",
-                            "icon": "info",
-                            "hero": "nav-message-circle-question-mark",
-                            "group": "workspace",
-                            "module": null
-                        }
-                    ]
-                },
-                {
                     "group": "administration",
                     "label": "Administration",
                     "icon": "nav-settings",
@@ -1587,7 +1587,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -1735,7 +1735,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -3073,7 +3073,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -3082,6 +3082,45 @@
                             "icon": "grid",
                             "hero": "nav-layout-dashboard",
                             "group": "overview",
+                            "module": null
+                        }
+                    ]
+                },
+                {
+                    "group": "workspace",
+                    "label": "My Work",
+                    "icon": "nav-list-checks",
+                    "items": [
+                        {
+                            "route": "tasks.index",
+                            "label": "Tasks",
+                            "icon": "check",
+                            "hero": "nav-square-check-big",
+                            "group": "workspace",
+                            "module": "tasks"
+                        },
+                        {
+                            "route": "calendar.index",
+                            "label": "My Calendar",
+                            "icon": "cal",
+                            "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.assistant",
+                            "label": "HR assistant",
+                            "icon": "info",
+                            "hero": "nav-lightbulb",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.feedback.index",
+                            "label": "Feedback",
+                            "icon": "info",
+                            "hero": "nav-message-circle-question-mark",
+                            "group": "workspace",
                             "module": null
                         }
                     ]
@@ -3204,45 +3243,6 @@
                     ]
                 },
                 {
-                    "group": "workspace",
-                    "label": "My Workspace",
-                    "icon": "nav-list-checks",
-                    "items": [
-                        {
-                            "route": "tasks.index",
-                            "label": "Tasks",
-                            "icon": "check",
-                            "hero": "nav-square-check-big",
-                            "group": "workspace",
-                            "module": "tasks"
-                        },
-                        {
-                            "route": "calendar.index",
-                            "label": "My Calendar",
-                            "icon": "cal",
-                            "hero": "nav-calendar",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.assistant",
-                            "label": "HR assistant",
-                            "icon": "info",
-                            "hero": "nav-lightbulb",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.feedback.index",
-                            "label": "Feedback",
-                            "icon": "info",
-                            "hero": "nav-message-circle-question-mark",
-                            "group": "workspace",
-                            "module": null
-                        }
-                    ]
-                },
-                {
                     "group": "administration",
                     "label": "Administration",
                     "icon": "nav-settings",
@@ -3267,7 +3267,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -3415,7 +3415,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -4777,7 +4777,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -4786,6 +4786,45 @@
                             "icon": "grid",
                             "hero": "nav-layout-dashboard",
                             "group": "overview",
+                            "module": null
+                        }
+                    ]
+                },
+                {
+                    "group": "workspace",
+                    "label": "My Work",
+                    "icon": "nav-list-checks",
+                    "items": [
+                        {
+                            "route": "tasks.index",
+                            "label": "Tasks",
+                            "icon": "check",
+                            "hero": "nav-square-check-big",
+                            "group": "workspace",
+                            "module": "tasks"
+                        },
+                        {
+                            "route": "calendar.index",
+                            "label": "My Calendar",
+                            "icon": "cal",
+                            "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.assistant",
+                            "label": "HR assistant",
+                            "icon": "info",
+                            "hero": "nav-lightbulb",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.feedback.index",
+                            "label": "Feedback",
+                            "icon": "info",
+                            "hero": "nav-message-circle-question-mark",
+                            "group": "workspace",
                             "module": null
                         }
                     ]
@@ -4931,45 +4970,6 @@
                     ]
                 },
                 {
-                    "group": "workspace",
-                    "label": "My Workspace",
-                    "icon": "nav-list-checks",
-                    "items": [
-                        {
-                            "route": "tasks.index",
-                            "label": "Tasks",
-                            "icon": "check",
-                            "hero": "nav-square-check-big",
-                            "group": "workspace",
-                            "module": "tasks"
-                        },
-                        {
-                            "route": "calendar.index",
-                            "label": "My Calendar",
-                            "icon": "cal",
-                            "hero": "nav-calendar",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.assistant",
-                            "label": "HR assistant",
-                            "icon": "info",
-                            "hero": "nav-lightbulb",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.feedback.index",
-                            "label": "Feedback",
-                            "icon": "info",
-                            "hero": "nav-message-circle-question-mark",
-                            "group": "workspace",
-                            "module": null
-                        }
-                    ]
-                },
-                {
                     "group": "administration",
                     "label": "Administration",
                     "icon": "nav-settings",
@@ -4994,7 +4994,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -5158,7 +5158,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -6650,7 +6650,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -6659,6 +6659,45 @@
                             "icon": "grid",
                             "hero": "nav-layout-dashboard",
                             "group": "overview",
+                            "module": null
+                        }
+                    ]
+                },
+                {
+                    "group": "workspace",
+                    "label": "My Work",
+                    "icon": "nav-list-checks",
+                    "items": [
+                        {
+                            "route": "tasks.index",
+                            "label": "Tasks",
+                            "icon": "check",
+                            "hero": "nav-square-check-big",
+                            "group": "workspace",
+                            "module": "tasks"
+                        },
+                        {
+                            "route": "calendar.index",
+                            "label": "My Calendar",
+                            "icon": "cal",
+                            "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.assistant",
+                            "label": "HR assistant",
+                            "icon": "info",
+                            "hero": "nav-lightbulb",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.feedback.index",
+                            "label": "Feedback",
+                            "icon": "info",
+                            "hero": "nav-message-circle-question-mark",
+                            "group": "workspace",
                             "module": null
                         }
                     ]
@@ -6828,45 +6867,6 @@
                     ]
                 },
                 {
-                    "group": "workspace",
-                    "label": "My Workspace",
-                    "icon": "nav-list-checks",
-                    "items": [
-                        {
-                            "route": "tasks.index",
-                            "label": "Tasks",
-                            "icon": "check",
-                            "hero": "nav-square-check-big",
-                            "group": "workspace",
-                            "module": "tasks"
-                        },
-                        {
-                            "route": "calendar.index",
-                            "label": "My Calendar",
-                            "icon": "cal",
-                            "hero": "nav-calendar",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.assistant",
-                            "label": "HR assistant",
-                            "icon": "info",
-                            "hero": "nav-lightbulb",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.feedback.index",
-                            "label": "Feedback",
-                            "icon": "info",
-                            "hero": "nav-message-circle-question-mark",
-                            "group": "workspace",
-                            "module": null
-                        }
-                    ]
-                },
-                {
                     "group": "administration",
                     "label": "Administration",
                     "icon": "nav-settings",
@@ -6891,7 +6891,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -7079,7 +7079,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -8741,7 +8741,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -8750,6 +8750,45 @@
                             "icon": "grid",
                             "hero": "nav-layout-dashboard",
                             "group": "overview",
+                            "module": null
+                        }
+                    ]
+                },
+                {
+                    "group": "workspace",
+                    "label": "My Work",
+                    "icon": "nav-list-checks",
+                    "items": [
+                        {
+                            "route": "tasks.index",
+                            "label": "Tasks",
+                            "icon": "check",
+                            "hero": "nav-square-check-big",
+                            "group": "workspace",
+                            "module": "tasks"
+                        },
+                        {
+                            "route": "calendar.index",
+                            "label": "My Calendar",
+                            "icon": "cal",
+                            "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.assistant",
+                            "label": "HR assistant",
+                            "icon": "info",
+                            "hero": "nav-lightbulb",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.feedback.index",
+                            "label": "Feedback",
+                            "icon": "info",
+                            "hero": "nav-message-circle-question-mark",
+                            "group": "workspace",
                             "module": null
                         }
                     ]
@@ -8896,45 +8935,6 @@
                     ]
                 },
                 {
-                    "group": "workspace",
-                    "label": "My Workspace",
-                    "icon": "nav-list-checks",
-                    "items": [
-                        {
-                            "route": "tasks.index",
-                            "label": "Tasks",
-                            "icon": "check",
-                            "hero": "nav-square-check-big",
-                            "group": "workspace",
-                            "module": "tasks"
-                        },
-                        {
-                            "route": "calendar.index",
-                            "label": "My Calendar",
-                            "icon": "cal",
-                            "hero": "nav-calendar",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.assistant",
-                            "label": "HR assistant",
-                            "icon": "info",
-                            "hero": "nav-lightbulb",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.feedback.index",
-                            "label": "Feedback",
-                            "icon": "info",
-                            "hero": "nav-message-circle-question-mark",
-                            "group": "workspace",
-                            "module": null
-                        }
-                    ]
-                },
-                {
                     "group": "administration",
                     "label": "Administration",
                     "icon": "nav-settings",
@@ -8975,7 +8975,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -9147,7 +9147,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -10830,7 +10830,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -10839,6 +10839,45 @@
                             "icon": "grid",
                             "hero": "nav-layout-dashboard",
                             "group": "overview",
+                            "module": null
+                        }
+                    ]
+                },
+                {
+                    "group": "workspace",
+                    "label": "My Work",
+                    "icon": "nav-list-checks",
+                    "items": [
+                        {
+                            "route": "tasks.index",
+                            "label": "Tasks",
+                            "icon": "check",
+                            "hero": "nav-square-check-big",
+                            "group": "workspace",
+                            "module": "tasks"
+                        },
+                        {
+                            "route": "calendar.index",
+                            "label": "My Calendar",
+                            "icon": "cal",
+                            "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.assistant",
+                            "label": "HR assistant",
+                            "icon": "info",
+                            "hero": "nav-lightbulb",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.feedback.index",
+                            "label": "Feedback",
+                            "icon": "info",
+                            "hero": "nav-message-circle-question-mark",
+                            "group": "workspace",
                             "module": null
                         }
                     ]
@@ -11016,45 +11055,6 @@
                     ]
                 },
                 {
-                    "group": "workspace",
-                    "label": "My Workspace",
-                    "icon": "nav-list-checks",
-                    "items": [
-                        {
-                            "route": "tasks.index",
-                            "label": "Tasks",
-                            "icon": "check",
-                            "hero": "nav-square-check-big",
-                            "group": "workspace",
-                            "module": "tasks"
-                        },
-                        {
-                            "route": "calendar.index",
-                            "label": "My Calendar",
-                            "icon": "cal",
-                            "hero": "nav-calendar",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.assistant",
-                            "label": "HR assistant",
-                            "icon": "info",
-                            "hero": "nav-lightbulb",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.feedback.index",
-                            "label": "Feedback",
-                            "icon": "info",
-                            "hero": "nav-message-circle-question-mark",
-                            "group": "workspace",
-                            "module": null
-                        }
-                    ]
-                },
-                {
                     "group": "administration",
                     "label": "Administration",
                     "icon": "nav-settings",
@@ -11079,7 +11079,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -11275,7 +11275,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -13012,7 +13012,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -13021,6 +13021,45 @@
                             "icon": "grid",
                             "hero": "nav-layout-dashboard",
                             "group": "overview",
+                            "module": null
+                        }
+                    ]
+                },
+                {
+                    "group": "workspace",
+                    "label": "My Work",
+                    "icon": "nav-list-checks",
+                    "items": [
+                        {
+                            "route": "tasks.index",
+                            "label": "Tasks",
+                            "icon": "check",
+                            "hero": "nav-square-check-big",
+                            "group": "workspace",
+                            "module": "tasks"
+                        },
+                        {
+                            "route": "calendar.index",
+                            "label": "My Calendar",
+                            "icon": "cal",
+                            "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.assistant",
+                            "label": "HR assistant",
+                            "icon": "info",
+                            "hero": "nav-lightbulb",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.feedback.index",
+                            "label": "Feedback",
+                            "icon": "info",
+                            "hero": "nav-message-circle-question-mark",
+                            "group": "workspace",
                             "module": null
                         }
                     ]
@@ -13143,45 +13182,6 @@
                     ]
                 },
                 {
-                    "group": "workspace",
-                    "label": "My Workspace",
-                    "icon": "nav-list-checks",
-                    "items": [
-                        {
-                            "route": "tasks.index",
-                            "label": "Tasks",
-                            "icon": "check",
-                            "hero": "nav-square-check-big",
-                            "group": "workspace",
-                            "module": "tasks"
-                        },
-                        {
-                            "route": "calendar.index",
-                            "label": "My Calendar",
-                            "icon": "cal",
-                            "hero": "nav-calendar",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.assistant",
-                            "label": "HR assistant",
-                            "icon": "info",
-                            "hero": "nav-lightbulb",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.feedback.index",
-                            "label": "Feedback",
-                            "icon": "info",
-                            "hero": "nav-message-circle-question-mark",
-                            "group": "workspace",
-                            "module": null
-                        }
-                    ]
-                },
-                {
                     "group": "administration",
                     "label": "Administration",
                     "icon": "nav-settings",
@@ -13206,7 +13206,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -13354,7 +13354,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -14848,7 +14848,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -14857,6 +14857,45 @@
                             "icon": "grid",
                             "hero": "nav-layout-dashboard",
                             "group": "overview",
+                            "module": null
+                        }
+                    ]
+                },
+                {
+                    "group": "workspace",
+                    "label": "My Work",
+                    "icon": "nav-list-checks",
+                    "items": [
+                        {
+                            "route": "tasks.index",
+                            "label": "Tasks",
+                            "icon": "check",
+                            "hero": "nav-square-check-big",
+                            "group": "workspace",
+                            "module": "tasks"
+                        },
+                        {
+                            "route": "calendar.index",
+                            "label": "My Calendar",
+                            "icon": "cal",
+                            "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.assistant",
+                            "label": "HR assistant",
+                            "icon": "info",
+                            "hero": "nav-lightbulb",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.feedback.index",
+                            "label": "Feedback",
+                            "icon": "info",
+                            "hero": "nav-message-circle-question-mark",
+                            "group": "workspace",
                             "module": null
                         }
                     ]
@@ -15042,45 +15081,6 @@
                     ]
                 },
                 {
-                    "group": "workspace",
-                    "label": "My Workspace",
-                    "icon": "nav-list-checks",
-                    "items": [
-                        {
-                            "route": "tasks.index",
-                            "label": "Tasks",
-                            "icon": "check",
-                            "hero": "nav-square-check-big",
-                            "group": "workspace",
-                            "module": "tasks"
-                        },
-                        {
-                            "route": "calendar.index",
-                            "label": "My Calendar",
-                            "icon": "cal",
-                            "hero": "nav-calendar",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.assistant",
-                            "label": "HR assistant",
-                            "icon": "info",
-                            "hero": "nav-lightbulb",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.feedback.index",
-                            "label": "Feedback",
-                            "icon": "info",
-                            "hero": "nav-message-circle-question-mark",
-                            "group": "workspace",
-                            "module": null
-                        }
-                    ]
-                },
-                {
                     "group": "administration",
                     "label": "Administration",
                     "icon": "nav-settings",
@@ -15121,7 +15121,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -15325,7 +15325,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -17362,7 +17362,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -17387,6 +17387,77 @@
                             "icon": "flag",
                             "hero": "nav-inbox",
                             "group": "overview",
+                            "module": null
+                        }
+                    ]
+                },
+                {
+                    "group": "workspace",
+                    "label": "My Work",
+                    "icon": "nav-list-checks",
+                    "items": [
+                        {
+                            "route": "tasks.index",
+                            "label": "Tasks",
+                            "icon": "check",
+                            "hero": "nav-square-check-big",
+                            "group": "workspace",
+                            "module": "tasks"
+                        },
+                        {
+                            "route": "department-tasks.index",
+                            "label": "Department Tasks",
+                            "icon": "board",
+                            "hero": "nav-building",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "calendar.index",
+                            "label": "My Calendar",
+                            "icon": "cal",
+                            "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.leave.team-calendar",
+                            "label": "Team calendar",
+                            "icon": "users",
+                            "hero": "nav-calendar-range",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.checklists.index",
+                            "label": "Checklists",
+                            "icon": "check",
+                            "hero": "nav-list-checks",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.news.index",
+                            "label": "News and events",
+                            "icon": "bell",
+                            "hero": "nav-book-open",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.assistant",
+                            "label": "HR assistant",
+                            "icon": "info",
+                            "hero": "nav-lightbulb",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.feedback.index",
+                            "label": "Feedback",
+                            "icon": "info",
+                            "hero": "nav-message-circle-question-mark",
+                            "group": "workspace",
                             "module": null
                         }
                     ]
@@ -17580,8 +17651,8 @@
                     ]
                 },
                 {
-                    "group": "hr_people",
-                    "label": "People",
+                    "group": "people",
+                    "label": "People & Structure",
                     "icon": "nav-users",
                     "items": [
                         {
@@ -17589,7 +17660,7 @@
                             "label": "Employees",
                             "icon": "users",
                             "hero": "nav-users",
-                            "group": "hr_people",
+                            "group": "people",
                             "module": null
                         },
                         {
@@ -17597,7 +17668,7 @@
                             "label": "Contracts",
                             "icon": "file",
                             "hero": "nav-file-text",
-                            "group": "hr_people",
+                            "group": "people",
                             "module": null
                         },
                         {
@@ -17605,7 +17676,7 @@
                             "label": "Positions",
                             "icon": "grid",
                             "hero": "nav-layers",
-                            "group": "hr_people",
+                            "group": "people",
                             "module": null
                         },
                         {
@@ -17613,7 +17684,7 @@
                             "label": "Team staffing",
                             "icon": "users",
                             "hero": "nav-network",
-                            "group": "hr_people",
+                            "group": "people",
                             "module": null
                         },
                         {
@@ -17621,30 +17692,15 @@
                             "label": "Badges",
                             "icon": "check",
                             "hero": "nav-shield-check",
-                            "group": "hr_people",
+                            "group": "people",
                             "module": null
                         },
-                        {
-                            "route": "hr.statistics.general",
-                            "label": "HR statistics",
-                            "icon": "chart",
-                            "hero": "nav-chart-line",
-                            "group": "hr_people",
-                            "module": null
-                        }
-                    ]
-                },
-                {
-                    "group": "hr_leave",
-                    "label": "Leave",
-                    "icon": "nav-tree-palm",
-                    "items": [
                         {
                             "route": "hr.leave.team",
                             "label": "Team leave requests",
                             "icon": "cal",
                             "hero": "nav-calendar-check",
-                            "group": "hr_leave",
+                            "group": "people",
                             "module": null
                         },
                         {
@@ -17652,7 +17708,7 @@
                             "label": "Leave balances",
                             "icon": "grid",
                             "hero": "nav-gauge",
-                            "group": "hr_leave",
+                            "group": "people",
                             "module": null
                         },
                         {
@@ -17660,13 +17716,21 @@
                             "label": "Holidays",
                             "icon": "cal",
                             "hero": "nav-calendar",
-                            "group": "hr_leave",
+                            "group": "people",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.statistics.general",
+                            "label": "HR statistics",
+                            "icon": "chart",
+                            "hero": "nav-chart-line",
+                            "group": "people",
                             "module": null
                         }
                     ]
                 },
                 {
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "label": "Recruitment",
                     "icon": "nav-briefcase-business",
                     "items": [
@@ -17675,7 +17739,7 @@
                             "label": "Recruitment requests",
                             "icon": "file",
                             "hero": "nav-file-plus",
-                            "group": "hr_recruitment",
+                            "group": "recruitment",
                             "module": null
                         },
                         {
@@ -17683,7 +17747,7 @@
                             "label": "Vacancies",
                             "icon": "search",
                             "hero": "nav-clipboard-list",
-                            "group": "hr_recruitment",
+                            "group": "recruitment",
                             "module": null
                         },
                         {
@@ -17691,7 +17755,7 @@
                             "label": "Applicants",
                             "icon": "users",
                             "hero": "nav-circle-user",
-                            "group": "hr_recruitment",
+                            "group": "recruitment",
                             "module": null
                         },
                         {
@@ -17699,7 +17763,7 @@
                             "label": "Interviews",
                             "icon": "cal",
                             "hero": "nav-calendar-range",
-                            "group": "hr_recruitment",
+                            "group": "recruitment",
                             "module": null
                         },
                         {
@@ -17707,7 +17771,7 @@
                             "label": "Job offers",
                             "icon": "file",
                             "hero": "nav-handshake",
-                            "group": "hr_recruitment",
+                            "group": "recruitment",
                             "module": null
                         },
                         {
@@ -17715,78 +17779,7 @@
                             "label": "Matching rules",
                             "icon": "grid",
                             "hero": "nav-sliders-horizontal",
-                            "group": "hr_recruitment",
-                            "module": null
-                        }
-                    ]
-                },
-                {
-                    "group": "workspace",
-                    "label": "My Workspace",
-                    "icon": "nav-list-checks",
-                    "items": [
-                        {
-                            "route": "tasks.index",
-                            "label": "Tasks",
-                            "icon": "check",
-                            "hero": "nav-square-check-big",
-                            "group": "workspace",
-                            "module": "tasks"
-                        },
-                        {
-                            "route": "department-tasks.index",
-                            "label": "Department Tasks",
-                            "icon": "board",
-                            "hero": "nav-building",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "calendar.index",
-                            "label": "My Calendar",
-                            "icon": "cal",
-                            "hero": "nav-calendar",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.leave.team-calendar",
-                            "label": "Team calendar",
-                            "icon": "users",
-                            "hero": "nav-calendar-range",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.checklists.index",
-                            "label": "Checklists",
-                            "icon": "check",
-                            "hero": "nav-list-checks",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.news.index",
-                            "label": "News and events",
-                            "icon": "bell",
-                            "hero": "nav-book-open",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.assistant",
-                            "label": "HR assistant",
-                            "icon": "info",
-                            "hero": "nav-lightbulb",
-                            "group": "workspace",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.feedback.index",
-                            "label": "Feedback",
-                            "icon": "info",
-                            "hero": "nav-message-circle-question-mark",
-                            "group": "workspace",
+                            "group": "recruitment",
                             "module": null
                         }
                     ]
@@ -17856,7 +17849,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -18084,7 +18077,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -18172,7 +18165,7 @@
                     "label": "Employees",
                     "icon": "users",
                     "hero": "nav-users",
-                    "group": "hr_people",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -18180,7 +18173,7 @@
                     "label": "Contracts",
                     "icon": "file",
                     "hero": "nav-file-text",
-                    "group": "hr_people",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -18188,7 +18181,7 @@
                     "label": "Positions",
                     "icon": "grid",
                     "hero": "nav-layers",
-                    "group": "hr_people",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -18196,7 +18189,7 @@
                     "label": "Team staffing",
                     "icon": "users",
                     "hero": "nav-network",
-                    "group": "hr_people",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -18204,31 +18197,7 @@
                     "label": "Badges",
                     "icon": "check",
                     "hero": "nav-shield-check",
-                    "group": "hr_people",
-                    "module": null
-                },
-                {
-                    "route": "hr.statistics.general",
-                    "label": "HR statistics",
-                    "icon": "chart",
-                    "hero": "nav-chart-line",
-                    "group": "hr_people",
-                    "module": null
-                },
-                {
-                    "route": "hr.statistics.contracts",
-                    "label": "Contract statistics",
-                    "icon": "chart",
-                    "hero": "nav-file-text",
-                    "group": "hr_people",
-                    "module": null
-                },
-                {
-                    "route": "hr.statistics.salaries",
-                    "label": "Salary statistics",
-                    "icon": "chart",
-                    "hero": "nav-chart-line",
-                    "group": "hr_people",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -18236,7 +18205,7 @@
                     "label": "Team leave requests",
                     "icon": "cal",
                     "hero": "nav-calendar-check",
-                    "group": "hr_leave",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -18244,7 +18213,7 @@
                     "label": "Leave balances",
                     "icon": "grid",
                     "hero": "nav-gauge",
-                    "group": "hr_leave",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -18252,7 +18221,31 @@
                     "label": "Holidays",
                     "icon": "cal",
                     "hero": "nav-calendar",
-                    "group": "hr_leave",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.statistics.general",
+                    "label": "HR statistics",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.statistics.contracts",
+                    "label": "Contract statistics",
+                    "icon": "chart",
+                    "hero": "nav-file-text",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.statistics.salaries",
+                    "label": "Salary statistics",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -18260,7 +18253,7 @@
                     "label": "Recruitment requests",
                     "icon": "file",
                     "hero": "nav-file-plus",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -18268,7 +18261,7 @@
                     "label": "Vacancies",
                     "icon": "search",
                     "hero": "nav-clipboard-list",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -18276,7 +18269,7 @@
                     "label": "Applicants",
                     "icon": "users",
                     "hero": "nav-circle-user",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -18284,7 +18277,7 @@
                     "label": "Interviews",
                     "icon": "cal",
                     "hero": "nav-calendar-range",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -18292,7 +18285,7 @@
                     "label": "Job offers",
                     "icon": "file",
                     "hero": "nav-handshake",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -18300,7 +18293,7 @@
                     "label": "Matching rules",
                     "icon": "grid",
                     "hero": "nav-sliders-horizontal",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -18410,12 +18403,12 @@
                 "hr.positions.index",
                 "hr.positions.team",
                 "hr.badges.index",
-                "hr.statistics.general",
-                "hr.statistics.contracts",
-                "hr.statistics.salaries",
                 "hr.leave.team",
                 "hr.leave.balances",
                 "hr.leave.holidays",
+                "hr.statistics.general",
+                "hr.statistics.contracts",
+                "hr.statistics.salaries",
                 "hr.recruitment.requests.index",
                 "hr.recruitment.campaigns.index",
                 "hr.recruitment.applicants.index",
@@ -19522,33 +19515,6 @@
                         "register": "hr.badges.index",
                         "kind": "page"
                     },
-                    "g-hr-statistics-general": {
-                        "id": "g-hr-statistics-general",
-                        "title": "HR statistics",
-                        "description": "A button that opens HR statistics.",
-                        "icon": "nav-chart-line",
-                        "size": "S",
-                        "register": "hr.statistics.general",
-                        "kind": "page"
-                    },
-                    "g-hr-statistics-contracts": {
-                        "id": "g-hr-statistics-contracts",
-                        "title": "Contract statistics",
-                        "description": "A button that opens Contract statistics.",
-                        "icon": "nav-file-text",
-                        "size": "S",
-                        "register": "hr.statistics.contracts",
-                        "kind": "page"
-                    },
-                    "g-hr-statistics-salaries": {
-                        "id": "g-hr-statistics-salaries",
-                        "title": "Salary statistics",
-                        "description": "A button that opens Salary statistics.",
-                        "icon": "nav-chart-line",
-                        "size": "S",
-                        "register": "hr.statistics.salaries",
-                        "kind": "page"
-                    },
                     "g-hr-leave-team": {
                         "id": "g-hr-leave-team",
                         "title": "Team leave requests",
@@ -19574,6 +19540,33 @@
                         "icon": "nav-calendar",
                         "size": "S",
                         "register": "hr.leave.holidays",
+                        "kind": "page"
+                    },
+                    "g-hr-statistics-general": {
+                        "id": "g-hr-statistics-general",
+                        "title": "HR statistics",
+                        "description": "A button that opens HR statistics.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.statistics.general",
+                        "kind": "page"
+                    },
+                    "g-hr-statistics-contracts": {
+                        "id": "g-hr-statistics-contracts",
+                        "title": "Contract statistics",
+                        "description": "A button that opens Contract statistics.",
+                        "icon": "nav-file-text",
+                        "size": "S",
+                        "register": "hr.statistics.contracts",
+                        "kind": "page"
+                    },
+                    "g-hr-statistics-salaries": {
+                        "id": "g-hr-statistics-salaries",
+                        "title": "Salary statistics",
+                        "description": "A button that opens Salary statistics.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.statistics.salaries",
                         "kind": "page"
                     },
                     "g-hr-recruitment-requests": {
@@ -19943,12 +19936,12 @@
                     "hr.positions.index": "g-hr-positions",
                     "hr.positions.team": "g-hr-positions-team",
                     "hr.badges.index": "g-hr-badges",
-                    "hr.statistics.general": "g-hr-statistics-general",
-                    "hr.statistics.contracts": "g-hr-statistics-contracts",
-                    "hr.statistics.salaries": "g-hr-statistics-salaries",
                     "hr.leave.team": "g-hr-leave-team",
                     "hr.leave.balances": "g-hr-leave-balances",
                     "hr.leave.holidays": "hr-next-holiday",
+                    "hr.statistics.general": "g-hr-statistics-general",
+                    "hr.statistics.contracts": "g-hr-statistics-contracts",
+                    "hr.statistics.salaries": "g-hr-statistics-salaries",
                     "hr.recruitment.requests.index": "g-hr-recruitment-requests",
                     "hr.recruitment.campaigns.index": "g-hr-recruitment-campaigns",
                     "hr.recruitment.applicants.index": "g-hr-recruitment-applicants",
@@ -20892,33 +20885,6 @@
                     "route": "hr.badges.index",
                     "href": "http://hc-hub.test/hr/badges"
                 },
-                "g-hr-statistics-general": {
-                    "id": "g-hr-statistics-general",
-                    "key": "hr-statistics-general",
-                    "kind": "page",
-                    "label": "HR statistics",
-                    "icon": "nav-chart-line",
-                    "route": "hr.statistics.general",
-                    "href": "http://hc-hub.test/hr/statistics/general"
-                },
-                "g-hr-statistics-contracts": {
-                    "id": "g-hr-statistics-contracts",
-                    "key": "hr-statistics-contracts",
-                    "kind": "page",
-                    "label": "Contract statistics",
-                    "icon": "nav-file-text",
-                    "route": "hr.statistics.contracts",
-                    "href": "http://hc-hub.test/hr/statistics/contracts"
-                },
-                "g-hr-statistics-salaries": {
-                    "id": "g-hr-statistics-salaries",
-                    "key": "hr-statistics-salaries",
-                    "kind": "page",
-                    "label": "Salary statistics",
-                    "icon": "nav-chart-line",
-                    "route": "hr.statistics.salaries",
-                    "href": "http://hc-hub.test/hr/statistics/salaries"
-                },
                 "g-hr-leave-team": {
                     "id": "g-hr-leave-team",
                     "key": "hr-leave-team",
@@ -20945,6 +20911,33 @@
                     "icon": "nav-calendar",
                     "route": "hr.leave.holidays",
                     "href": "http://hc-hub.test/hr/holidays"
+                },
+                "g-hr-statistics-general": {
+                    "id": "g-hr-statistics-general",
+                    "key": "hr-statistics-general",
+                    "kind": "page",
+                    "label": "HR statistics",
+                    "icon": "nav-chart-line",
+                    "route": "hr.statistics.general",
+                    "href": "http://hc-hub.test/hr/statistics/general"
+                },
+                "g-hr-statistics-contracts": {
+                    "id": "g-hr-statistics-contracts",
+                    "key": "hr-statistics-contracts",
+                    "kind": "page",
+                    "label": "Contract statistics",
+                    "icon": "nav-file-text",
+                    "route": "hr.statistics.contracts",
+                    "href": "http://hc-hub.test/hr/statistics/contracts"
+                },
+                "g-hr-statistics-salaries": {
+                    "id": "g-hr-statistics-salaries",
+                    "key": "hr-statistics-salaries",
+                    "kind": "page",
+                    "label": "Salary statistics",
+                    "icon": "nav-chart-line",
+                    "route": "hr.statistics.salaries",
+                    "href": "http://hc-hub.test/hr/statistics/salaries"
                 },
                 "g-hr-recruitment-requests": {
                     "id": "g-hr-recruitment-requests",
@@ -21078,7 +21071,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -21092,157 +21085,8 @@
                     ]
                 },
                 {
-                    "group": "hr_people",
-                    "label": "People",
-                    "icon": "nav-users",
-                    "items": [
-                        {
-                            "route": "hr.employees.index",
-                            "label": "Employees",
-                            "icon": "users",
-                            "hero": "nav-users",
-                            "group": "hr_people",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.contracts.index",
-                            "label": "Contracts",
-                            "icon": "file",
-                            "hero": "nav-file-text",
-                            "group": "hr_people",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.positions.index",
-                            "label": "Positions",
-                            "icon": "grid",
-                            "hero": "nav-layers",
-                            "group": "hr_people",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.positions.team",
-                            "label": "Team staffing",
-                            "icon": "users",
-                            "hero": "nav-network",
-                            "group": "hr_people",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.badges.index",
-                            "label": "Badges",
-                            "icon": "check",
-                            "hero": "nav-shield-check",
-                            "group": "hr_people",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.statistics.general",
-                            "label": "HR statistics",
-                            "icon": "chart",
-                            "hero": "nav-chart-line",
-                            "group": "hr_people",
-                            "module": null
-                        }
-                    ]
-                },
-                {
-                    "group": "hr_leave",
-                    "label": "Leave",
-                    "icon": "nav-tree-palm",
-                    "items": [
-                        {
-                            "route": "hr.leave.team",
-                            "label": "Team leave requests",
-                            "icon": "cal",
-                            "hero": "nav-calendar-check",
-                            "group": "hr_leave",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.leave.balances",
-                            "label": "Leave balances",
-                            "icon": "grid",
-                            "hero": "nav-gauge",
-                            "group": "hr_leave",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.leave.holidays",
-                            "label": "Holidays",
-                            "icon": "cal",
-                            "hero": "nav-calendar",
-                            "group": "hr_leave",
-                            "module": null
-                        }
-                    ]
-                },
-                {
-                    "group": "hr_recruitment",
-                    "label": "Recruitment",
-                    "icon": "nav-briefcase-business",
-                    "items": [
-                        {
-                            "route": "hr.recruitment.requests.index",
-                            "label": "Recruitment requests",
-                            "icon": "file",
-                            "hero": "nav-file-plus",
-                            "group": "hr_recruitment",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.recruitment.approvals.pending",
-                            "label": "Recruitment approvals",
-                            "icon": "check",
-                            "hero": "nav-list-checks",
-                            "group": "hr_recruitment",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.recruitment.campaigns.index",
-                            "label": "Vacancies",
-                            "icon": "search",
-                            "hero": "nav-clipboard-list",
-                            "group": "hr_recruitment",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.recruitment.applicants.index",
-                            "label": "Applicants",
-                            "icon": "users",
-                            "hero": "nav-circle-user",
-                            "group": "hr_recruitment",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.recruitment.interviews.index",
-                            "label": "Interviews",
-                            "icon": "cal",
-                            "hero": "nav-calendar-range",
-                            "group": "hr_recruitment",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.recruitment.offers.index",
-                            "label": "Job offers",
-                            "icon": "file",
-                            "hero": "nav-handshake",
-                            "group": "hr_recruitment",
-                            "module": null
-                        },
-                        {
-                            "route": "hr.recruitment.indicator-rules",
-                            "label": "Matching rules",
-                            "icon": "grid",
-                            "hero": "nav-sliders-horizontal",
-                            "group": "hr_recruitment",
-                            "module": null
-                        }
-                    ]
-                },
-                {
                     "group": "workspace",
-                    "label": "My Workspace",
+                    "label": "My Work",
                     "icon": "nav-list-checks",
                     "items": [
                         {
@@ -21304,6 +21148,148 @@
                     ]
                 },
                 {
+                    "group": "people",
+                    "label": "People & Structure",
+                    "icon": "nav-users",
+                    "items": [
+                        {
+                            "route": "hr.employees.index",
+                            "label": "Employees",
+                            "icon": "users",
+                            "hero": "nav-users",
+                            "group": "people",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.contracts.index",
+                            "label": "Contracts",
+                            "icon": "file",
+                            "hero": "nav-file-text",
+                            "group": "people",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.positions.index",
+                            "label": "Positions",
+                            "icon": "grid",
+                            "hero": "nav-layers",
+                            "group": "people",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.positions.team",
+                            "label": "Team staffing",
+                            "icon": "users",
+                            "hero": "nav-network",
+                            "group": "people",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.badges.index",
+                            "label": "Badges",
+                            "icon": "check",
+                            "hero": "nav-shield-check",
+                            "group": "people",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.leave.team",
+                            "label": "Team leave requests",
+                            "icon": "cal",
+                            "hero": "nav-calendar-check",
+                            "group": "people",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.leave.balances",
+                            "label": "Leave balances",
+                            "icon": "grid",
+                            "hero": "nav-gauge",
+                            "group": "people",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.leave.holidays",
+                            "label": "Holidays",
+                            "icon": "cal",
+                            "hero": "nav-calendar",
+                            "group": "people",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.statistics.general",
+                            "label": "HR statistics",
+                            "icon": "chart",
+                            "hero": "nav-chart-line",
+                            "group": "people",
+                            "module": null
+                        }
+                    ]
+                },
+                {
+                    "group": "recruitment",
+                    "label": "Recruitment",
+                    "icon": "nav-briefcase-business",
+                    "items": [
+                        {
+                            "route": "hr.recruitment.requests.index",
+                            "label": "Recruitment requests",
+                            "icon": "file",
+                            "hero": "nav-file-plus",
+                            "group": "recruitment",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.recruitment.approvals.pending",
+                            "label": "Recruitment approvals",
+                            "icon": "check",
+                            "hero": "nav-list-checks",
+                            "group": "recruitment",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.recruitment.campaigns.index",
+                            "label": "Vacancies",
+                            "icon": "search",
+                            "hero": "nav-clipboard-list",
+                            "group": "recruitment",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.recruitment.applicants.index",
+                            "label": "Applicants",
+                            "icon": "users",
+                            "hero": "nav-circle-user",
+                            "group": "recruitment",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.recruitment.interviews.index",
+                            "label": "Interviews",
+                            "icon": "cal",
+                            "hero": "nav-calendar-range",
+                            "group": "recruitment",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.recruitment.offers.index",
+                            "label": "Job offers",
+                            "icon": "file",
+                            "hero": "nav-handshake",
+                            "group": "recruitment",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.recruitment.indicator-rules",
+                            "label": "Matching rules",
+                            "icon": "grid",
+                            "hero": "nav-sliders-horizontal",
+                            "group": "recruitment",
+                            "module": null
+                        }
+                    ]
+                },
+                {
                     "group": "administration",
                     "label": "Administration",
                     "icon": "nav-settings",
@@ -21328,7 +21314,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -21364,7 +21350,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -21396,7 +21382,7 @@
                     "label": "Employees",
                     "icon": "users",
                     "hero": "nav-users",
-                    "group": "hr_people",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -21404,7 +21390,7 @@
                     "label": "Contracts",
                     "icon": "file",
                     "hero": "nav-file-text",
-                    "group": "hr_people",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -21412,7 +21398,7 @@
                     "label": "Positions",
                     "icon": "grid",
                     "hero": "nav-layers",
-                    "group": "hr_people",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -21420,7 +21406,7 @@
                     "label": "Team staffing",
                     "icon": "users",
                     "hero": "nav-network",
-                    "group": "hr_people",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -21428,31 +21414,7 @@
                     "label": "Badges",
                     "icon": "check",
                     "hero": "nav-shield-check",
-                    "group": "hr_people",
-                    "module": null
-                },
-                {
-                    "route": "hr.statistics.general",
-                    "label": "HR statistics",
-                    "icon": "chart",
-                    "hero": "nav-chart-line",
-                    "group": "hr_people",
-                    "module": null
-                },
-                {
-                    "route": "hr.statistics.contracts",
-                    "label": "Contract statistics",
-                    "icon": "chart",
-                    "hero": "nav-file-text",
-                    "group": "hr_people",
-                    "module": null
-                },
-                {
-                    "route": "hr.statistics.salaries",
-                    "label": "Salary statistics",
-                    "icon": "chart",
-                    "hero": "nav-chart-line",
-                    "group": "hr_people",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -21460,7 +21422,7 @@
                     "label": "Team leave requests",
                     "icon": "cal",
                     "hero": "nav-calendar-check",
-                    "group": "hr_leave",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -21468,7 +21430,7 @@
                     "label": "Leave balances",
                     "icon": "grid",
                     "hero": "nav-gauge",
-                    "group": "hr_leave",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -21476,7 +21438,31 @@
                     "label": "Holidays",
                     "icon": "cal",
                     "hero": "nav-calendar",
-                    "group": "hr_leave",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.statistics.general",
+                    "label": "HR statistics",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.statistics.contracts",
+                    "label": "Contract statistics",
+                    "icon": "chart",
+                    "hero": "nav-file-text",
+                    "group": "people",
+                    "module": null
+                },
+                {
+                    "route": "hr.statistics.salaries",
+                    "label": "Salary statistics",
+                    "icon": "chart",
+                    "hero": "nav-chart-line",
+                    "group": "people",
                     "module": null
                 },
                 {
@@ -21484,7 +21470,7 @@
                     "label": "Recruitment requests",
                     "icon": "file",
                     "hero": "nav-file-plus",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -21492,7 +21478,7 @@
                     "label": "Recruitment approvals",
                     "icon": "check",
                     "hero": "nav-list-checks",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -21500,7 +21486,7 @@
                     "label": "Vacancies",
                     "icon": "search",
                     "hero": "nav-clipboard-list",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -21508,7 +21494,7 @@
                     "label": "Applicants",
                     "icon": "users",
                     "hero": "nav-circle-user",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -21516,7 +21502,7 @@
                     "label": "Interviews",
                     "icon": "cal",
                     "hero": "nav-calendar-range",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -21524,7 +21510,7 @@
                     "label": "Job offers",
                     "icon": "file",
                     "hero": "nav-handshake",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -21532,7 +21518,7 @@
                     "label": "Matching rules",
                     "icon": "grid",
                     "hero": "nav-sliders-horizontal",
-                    "group": "hr_recruitment",
+                    "group": "recruitment",
                     "module": null
                 },
                 {
@@ -21627,12 +21613,12 @@
                 "hr.positions.index",
                 "hr.positions.team",
                 "hr.badges.index",
-                "hr.statistics.general",
-                "hr.statistics.contracts",
-                "hr.statistics.salaries",
                 "hr.leave.team",
                 "hr.leave.balances",
                 "hr.leave.holidays",
+                "hr.statistics.general",
+                "hr.statistics.contracts",
+                "hr.statistics.salaries",
                 "hr.recruitment.requests.index",
                 "hr.recruitment.approvals.pending",
                 "hr.recruitment.campaigns.index",
@@ -21986,33 +21972,6 @@
                         "register": "hr.badges.index",
                         "kind": "page"
                     },
-                    "g-hr-statistics-general": {
-                        "id": "g-hr-statistics-general",
-                        "title": "HR statistics",
-                        "description": "A button that opens HR statistics.",
-                        "icon": "nav-chart-line",
-                        "size": "S",
-                        "register": "hr.statistics.general",
-                        "kind": "page"
-                    },
-                    "g-hr-statistics-contracts": {
-                        "id": "g-hr-statistics-contracts",
-                        "title": "Contract statistics",
-                        "description": "A button that opens Contract statistics.",
-                        "icon": "nav-file-text",
-                        "size": "S",
-                        "register": "hr.statistics.contracts",
-                        "kind": "page"
-                    },
-                    "g-hr-statistics-salaries": {
-                        "id": "g-hr-statistics-salaries",
-                        "title": "Salary statistics",
-                        "description": "A button that opens Salary statistics.",
-                        "icon": "nav-chart-line",
-                        "size": "S",
-                        "register": "hr.statistics.salaries",
-                        "kind": "page"
-                    },
                     "g-hr-leave-team": {
                         "id": "g-hr-leave-team",
                         "title": "Team leave requests",
@@ -22038,6 +21997,33 @@
                         "icon": "nav-calendar",
                         "size": "S",
                         "register": "hr.leave.holidays",
+                        "kind": "page"
+                    },
+                    "g-hr-statistics-general": {
+                        "id": "g-hr-statistics-general",
+                        "title": "HR statistics",
+                        "description": "A button that opens HR statistics.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.statistics.general",
+                        "kind": "page"
+                    },
+                    "g-hr-statistics-contracts": {
+                        "id": "g-hr-statistics-contracts",
+                        "title": "Contract statistics",
+                        "description": "A button that opens Contract statistics.",
+                        "icon": "nav-file-text",
+                        "size": "S",
+                        "register": "hr.statistics.contracts",
+                        "kind": "page"
+                    },
+                    "g-hr-statistics-salaries": {
+                        "id": "g-hr-statistics-salaries",
+                        "title": "Salary statistics",
+                        "description": "A button that opens Salary statistics.",
+                        "icon": "nav-chart-line",
+                        "size": "S",
+                        "register": "hr.statistics.salaries",
                         "kind": "page"
                     },
                     "g-hr-recruitment-requests": {
@@ -22434,12 +22420,12 @@
                     "hr.positions.index": "g-hr-positions",
                     "hr.positions.team": "g-hr-positions-team",
                     "hr.badges.index": "g-hr-badges",
-                    "hr.statistics.general": "g-hr-statistics-general",
-                    "hr.statistics.contracts": "g-hr-statistics-contracts",
-                    "hr.statistics.salaries": "g-hr-statistics-salaries",
                     "hr.leave.team": "g-hr-leave-team",
                     "hr.leave.balances": "g-hr-leave-balances",
                     "hr.leave.holidays": "hr-next-holiday",
+                    "hr.statistics.general": "g-hr-statistics-general",
+                    "hr.statistics.contracts": "g-hr-statistics-contracts",
+                    "hr.statistics.salaries": "g-hr-statistics-salaries",
                     "hr.recruitment.requests.index": "g-hr-recruitment-requests",
                     "hr.recruitment.approvals.pending": "g-hr-recruitment-approvals-pending",
                     "hr.recruitment.campaigns.index": "g-hr-recruitment-campaigns",
@@ -22615,33 +22601,6 @@
                     "route": "hr.badges.index",
                     "href": "http://hc-hub.test/hr/badges"
                 },
-                "g-hr-statistics-general": {
-                    "id": "g-hr-statistics-general",
-                    "key": "hr-statistics-general",
-                    "kind": "page",
-                    "label": "HR statistics",
-                    "icon": "nav-chart-line",
-                    "route": "hr.statistics.general",
-                    "href": "http://hc-hub.test/hr/statistics/general"
-                },
-                "g-hr-statistics-contracts": {
-                    "id": "g-hr-statistics-contracts",
-                    "key": "hr-statistics-contracts",
-                    "kind": "page",
-                    "label": "Contract statistics",
-                    "icon": "nav-file-text",
-                    "route": "hr.statistics.contracts",
-                    "href": "http://hc-hub.test/hr/statistics/contracts"
-                },
-                "g-hr-statistics-salaries": {
-                    "id": "g-hr-statistics-salaries",
-                    "key": "hr-statistics-salaries",
-                    "kind": "page",
-                    "label": "Salary statistics",
-                    "icon": "nav-chart-line",
-                    "route": "hr.statistics.salaries",
-                    "href": "http://hc-hub.test/hr/statistics/salaries"
-                },
                 "g-hr-leave-team": {
                     "id": "g-hr-leave-team",
                     "key": "hr-leave-team",
@@ -22668,6 +22627,33 @@
                     "icon": "nav-calendar",
                     "route": "hr.leave.holidays",
                     "href": "http://hc-hub.test/hr/holidays"
+                },
+                "g-hr-statistics-general": {
+                    "id": "g-hr-statistics-general",
+                    "key": "hr-statistics-general",
+                    "kind": "page",
+                    "label": "HR statistics",
+                    "icon": "nav-chart-line",
+                    "route": "hr.statistics.general",
+                    "href": "http://hc-hub.test/hr/statistics/general"
+                },
+                "g-hr-statistics-contracts": {
+                    "id": "g-hr-statistics-contracts",
+                    "key": "hr-statistics-contracts",
+                    "kind": "page",
+                    "label": "Contract statistics",
+                    "icon": "nav-file-text",
+                    "route": "hr.statistics.contracts",
+                    "href": "http://hc-hub.test/hr/statistics/contracts"
+                },
+                "g-hr-statistics-salaries": {
+                    "id": "g-hr-statistics-salaries",
+                    "key": "hr-statistics-salaries",
+                    "kind": "page",
+                    "label": "Salary statistics",
+                    "icon": "nav-chart-line",
+                    "route": "hr.statistics.salaries",
+                    "href": "http://hc-hub.test/hr/statistics/salaries"
                 },
                 "g-hr-recruitment-requests": {
                     "id": "g-hr-recruitment-requests",
@@ -22828,7 +22814,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -22843,7 +22829,7 @@
                 },
                 {
                     "group": "workspace",
-                    "label": "My Workspace",
+                    "label": "My Work",
                     "icon": "nav-list-checks",
                     "items": [
                         {
@@ -22866,7 +22852,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -22902,7 +22888,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -23541,7 +23527,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -23556,7 +23542,7 @@
                 },
                 {
                     "group": "workspace",
-                    "label": "My Workspace",
+                    "label": "My Work",
                     "icon": "nav-list-checks",
                     "items": [
                         {
@@ -23579,7 +23565,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -23615,7 +23601,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -24258,7 +24244,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -24273,7 +24259,7 @@
                 },
                 {
                     "group": "workspace",
-                    "label": "My Workspace",
+                    "label": "My Work",
                     "icon": "nav-list-checks",
                     "items": [
                         {
@@ -24296,7 +24282,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -24332,7 +24318,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -25015,7 +25001,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -25030,7 +25016,7 @@
                 },
                 {
                     "group": "workspace",
-                    "label": "My Workspace",
+                    "label": "My Work",
                     "icon": "nav-list-checks",
                     "items": [
                         {
@@ -25093,7 +25079,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -25129,7 +25115,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -26004,7 +25990,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -26019,7 +26005,7 @@
                 },
                 {
                     "group": "workspace",
-                    "label": "My Workspace",
+                    "label": "My Work",
                     "icon": "nav-list-checks",
                     "items": [
                         {
@@ -26042,7 +26028,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -26078,7 +26064,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {
@@ -26749,7 +26735,7 @@
             "sidebar": [
                 {
                     "group": "overview",
-                    "label": "Overview",
+                    "label": "Home",
                     "icon": "nav-layout-dashboard",
                     "items": [
                         {
@@ -26764,7 +26750,7 @@
                 },
                 {
                     "group": "you",
-                    "label": "You",
+                    "label": "My Account",
                     "icon": "nav-circle-user",
                     "items": [
                         {
@@ -26792,7 +26778,7 @@
                     "label": "Notifications",
                     "icon": "bell",
                     "hero": "nav-bell",
-                    "group": "workspace",
+                    "group": "overview",
                     "module": null
                 },
                 {

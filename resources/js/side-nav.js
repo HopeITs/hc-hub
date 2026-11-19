@@ -10,7 +10,8 @@
  *
  * Expanded, each group folds open in place; the groups a person opened are
  * remembered (localStorage "hc-nav-groups"), and the group holding the
- * current page always opens.
+ * current page always opens. Group keys saved before the sidebar was
+ * regrouped (hr_people, hr_leave, hr_recruitment) are read as the new ones.
  *
  * Pins: the star beside a link pins that page to the top of the sidebar
  * (POST nav/pins, stored on the user). The sidebar has no keyboard shortcuts.
@@ -26,11 +27,27 @@ function closeMobile() {
     document.documentElement.classList.remove('dk-nav-mobile');
 }
 
+const legacyGroups = { hr_people: 'people', hr_leave: 'people', hr_recruitment: 'recruitment' };
+
 function readGroups() {
     try {
         const saved = JSON.parse(localStorage.getItem('hc-nav-groups') ?? '[]');
 
-        return Array.isArray(saved) ? saved : [];
+        if (!Array.isArray(saved)) {
+            return [];
+        }
+
+        const groups = [...new Set(saved.filter((name) => typeof name === 'string').map((name) => legacyGroups[name] ?? name))];
+
+        if (JSON.stringify(groups) !== JSON.stringify(saved)) {
+            try {
+                localStorage.setItem('hc-nav-groups', JSON.stringify(groups));
+            } catch {
+                // Without storage the old keys are simply mapped again next time.
+            }
+        }
+
+        return groups;
     } catch {
         return [];
     }

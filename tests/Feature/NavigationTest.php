@@ -2,6 +2,7 @@
 
 use App\Support\Desk\Destinations;
 use App\Support\Desk\PageCards;
+use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
@@ -61,25 +62,63 @@ test('the profile menu hides notification preferences while two-factor enrolment
         ->assertDontSee('data-test="notification-settings-menu-item"', false);
 });
 
-test('a Super Admin sidebar lists every page, grouped like the old sidebar, the Desk first', function () {
+test('a Super Admin sidebar lists every page in groups named by the work, the Desk first and their own work second', function () {
     $groups = app(Destinations::class)->sidebarFor(User::factory()->role('Super Admin')->create());
     $routesOf = fn (string $group): array => array_column(collect($groups)->firstWhere('group', $group)['items'], 'route');
 
-    expect(array_column($groups, 'group'))->toBe(['overview', 'strategy_planning', 'projects_delivery', 'monitoring_evaluation', 'funding_finance', 'hr_people', 'hr_leave', 'hr_recruitment', 'workspace', 'administration', 'you'])
+    expect(array_column($groups, 'group'))->toBe(['overview', 'workspace', 'strategy_planning', 'projects_delivery', 'monitoring_evaluation', 'funding_finance', 'people', 'recruitment', 'administration', 'you'])
         ->and($groups[0]['items'][0]['route'])->toBe('dashboard')
         ->and($routesOf('administration'))->toContain('admin.users.index', 'activity.index', 'admin.cities.index')
         ->and($routesOf('monitoring_evaluation'))->toContain('report-templates.index');
 });
 
-test('HR pages sit in their own groups, and beside the hub pages that share their idea', function () {
+test('HR pages sit in groups named by the work, leave management with the people, and no hr_ group remains', function () {
     $groups = app(Destinations::class)->sidebarFor(User::factory()->role('Super Admin')->create());
     $routesOf = fn (string $group): array => array_column(collect($groups)->firstWhere('group', $group)['items'], 'route');
 
-    expect($routesOf('hr_people'))->toBe(['hr.employees.index', 'hr.contracts.index', 'hr.positions.index', 'hr.positions.team', 'hr.badges.index', 'hr.statistics.general'])
-        ->and($routesOf('hr_leave'))->toBe(['hr.leave.team', 'hr.leave.balances', 'hr.leave.holidays'])
-        ->and($routesOf('hr_recruitment'))->toContain('hr.recruitment.requests.index', 'hr.recruitment.campaigns.index', 'hr.recruitment.applicants.index')
+    expect($routesOf('people'))->toBe(['hr.employees.index', 'hr.contracts.index', 'hr.positions.index', 'hr.positions.team', 'hr.badges.index', 'hr.leave.team', 'hr.leave.balances', 'hr.leave.holidays', 'hr.statistics.general'])
+        ->and($routesOf('recruitment'))->toContain('hr.recruitment.requests.index', 'hr.recruitment.campaigns.index', 'hr.recruitment.applicants.index')
         ->and($routesOf('workspace'))->toContain('tasks.index', 'calendar.index', 'hr.leave.team-calendar', 'hr.checklists.index', 'hr.news.index')
-        ->and($routesOf('administration'))->toContain('activity.index', 'hr.settings.index');
+        ->and($routesOf('administration'))->toContain('activity.index', 'hr.settings.index')
+        ->and(array_filter(Destinations::Groups, fn (string $group): bool => str_starts_with($group, 'hr_')))->toBe([]);
+});
+
+test('the people and recruitment groups carry the hub\'s own headings', function () {
+    $groups = collect(app(Destinations::class)->sidebarFor(User::factory()->role('Super Admin')->create()))->pluck('label', 'group');
+
+    expect($groups['people'])->toBe(__('navigation.group_people'))->not->toBe('navigation.group_people')
+        ->and($groups['recruitment'])->toBe(__('navigation.group_recruitment'))->not->toBe('navigation.group_recruitment');
+});
+
+test('the notifications inbox belongs to the overview and stays out of the sidebar', function () {
+    $user = User::factory()->role('Super Admin')->create();
+    $destinations = app(Destinations::class);
+    $links = collect($destinations->sidebarFor($user))->flatMap(fn (array $group): array => array_column($group['items'], 'route'));
+
+    expect($destinations->find('notifications.index')['group'])->toBe('overview')
+        ->and($links)->not->toContain('notifications.index');
+});
+
+test('no page a viewer may open falls out of the sidebar, whatever their role', function () {
+    $this->seed(RolesAndPermissionsSeeder::class);
+
+    $destinations = app(Destinations::class);
+    $reachedElsewhere = ['notifications.index', 'notification-settings.edit', 'admin.notification-settings.edit', 'hr.statistics.contracts', 'hr.statistics.salaries', 'hr.activity.index'];
+
+    foreach ($destinations->routes() as $route) {
+        expect(Destinations::Groups)->toContain($destinations->find($route)['group']);
+    }
+
+    foreach ([...array_keys(config('access-control.role_baselines')), 'Super Admin', 'HR-SYR', 'manager', 'employee'] as $role) {
+        $user = User::factory()->role($role)->create();
+        $expected = array_values(array_diff(deskPageRoutes($user), $reachedElsewhere));
+        $linked = collect($destinations->sidebarFor($user))->flatMap(fn (array $group): array => array_column($group['items'], 'route'))->all();
+
+        sort($expected);
+        sort($linked);
+
+        expect($linked)->toBe($expected, $role);
+    }
 });
 
 test('the three HR statistics pages share one sidebar link and stay open to the Ask bar', function () {
@@ -90,7 +129,7 @@ test('the three HR statistics pages share one sidebar link and stay open to the 
     expect($links)->toContain('hr.statistics.general')
         ->not->toContain('hr.statistics.contracts', 'hr.statistics.salaries')
         ->and(deskPageRoutes($user))->toContain('hr.statistics.contracts', 'hr.statistics.salaries')
-        ->and($destinations->currentFor($user, 'hr.statistics.salaries'))->toMatchArray(['route' => 'hr.statistics.general', 'group' => 'hr_people', 'group_label' => __('hr_nav.group_people')]);
+        ->and($destinations->currentFor($user, 'hr.statistics.salaries'))->toMatchArray(['route' => 'hr.statistics.general', 'group' => 'people', 'group_label' => __('navigation.group_people')]);
 });
 
 test('the old HR activity log is opened from the Activity log, which keeps the one sidebar link', function () {

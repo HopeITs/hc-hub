@@ -25,10 +25,11 @@ use Modules\Hr\Support\Recruitment\RecruitmentConfig;
  * into its own table, so the sidebar, the Ask bar, Desk buttons and
  * Quick access all offer an HR page by the same rule.
  *
- * HR has three groups of its own (people, leave, recruitment); a page that
- * repeats an idea the hub already has joins that group instead: the inbox
- * with the Desk, the viewer's own leaves and folders with their workspace,
- * HR settings and the HR archive with the administration.
+ * The sidebar groups pages by the work, not by module: HR's pages sit in
+ * `people` (staff, structure, leave management) and `recruitment`, and a page
+ * that repeats an idea the hub already has joins that group: the inbox with
+ * the Desk, the viewer's own leaves and folders with their workspace, HR
+ * settings and the HR archive with the administration.
  *
  * A page whose route does not exist (an area still being built) is left out,
  * so no link ever points nowhere. Labels are hr_nav.*; `hero` is a
@@ -48,27 +49,28 @@ final class HrDestinations implements DestinationSource
             // What waits for the viewer sits with their Desk and reviews.
             ['hr.inbox', 'inbox', 'flag', 'nav-inbox', 'overview', fn (User $user): bool => app(WorkInbox::class)->hasSources($user)],
 
-            ['hr.employees.index', 'employees', 'users', 'nav-users', 'hr_people', $can('employees.view')],
-            ['hr.contracts.index', 'contracts', 'file', 'nav-file-text', 'hr_people', $can('contracts.view')],
-            ['hr.positions.index', 'positions', 'grid', 'nav-layers', 'hr_people', $can('positions.view')],
-            ['hr.positions.team', 'team_staffing', 'users', 'nav-network', 'hr_people', $can('positions.view')],
-            ['hr.badges.index', 'badges', 'check', 'nav-shield-check', 'hr_people', $can('badges.view')],
+            ['hr.employees.index', 'employees', 'users', 'nav-users', 'people', $can('employees.view')],
+            ['hr.contracts.index', 'contracts', 'file', 'nav-file-text', 'people', $can('contracts.view')],
+            ['hr.positions.index', 'positions', 'grid', 'nav-layers', 'people', $can('positions.view')],
+            ['hr.positions.team', 'team_staffing', 'users', 'nav-network', 'people', $can('positions.view')],
+            ['hr.badges.index', 'badges', 'check', 'nav-shield-check', 'people', $can('badges.view')],
+
+            ['hr.leave.team', 'team_leaves', 'cal', 'nav-calendar-check', 'people', $can('leaves.view-all')],
+            ['hr.leave.balances', 'leave_balances', 'grid', 'nav-gauge', 'people', $can('leaves.view-all')],
+            ['hr.leave.holidays', 'holidays', 'cal', 'nav-calendar', 'people', $can('project-basics.view')],
+
             // One link for the three statistics pages: each links to the other two.
-            ['hr.statistics.general', 'statistics', 'chart', 'nav-chart-line', 'hr_people', $can('statistics.view')],
-            ['hr.statistics.contracts', 'statistics_contracts', 'chart', 'nav-file-text', 'hr_people', $can('statistics.view'), 'under' => 'hr.statistics.general'],
-            ['hr.statistics.salaries', 'statistics_salaries', 'chart', 'nav-chart-line', 'hr_people', $can('statistics.view'), 'under' => 'hr.statistics.general'],
+            ['hr.statistics.general', 'statistics', 'chart', 'nav-chart-line', 'people', $can('statistics.view')],
+            ['hr.statistics.contracts', 'statistics_contracts', 'chart', 'nav-file-text', 'people', $can('statistics.view'), 'under' => 'hr.statistics.general'],
+            ['hr.statistics.salaries', 'statistics_salaries', 'chart', 'nav-chart-line', 'people', $can('statistics.view'), 'under' => 'hr.statistics.general'],
 
-            ['hr.leave.team', 'team_leaves', 'cal', 'nav-calendar-check', 'hr_leave', $can('leaves.view-all')],
-            ['hr.leave.balances', 'leave_balances', 'grid', 'nav-gauge', 'hr_leave', $can('leaves.view-all')],
-            ['hr.leave.holidays', 'holidays', 'cal', 'nav-calendar', 'hr_leave', $can('project-basics.view')],
-
-            ['hr.recruitment.requests.index', 'recruitment_requests', 'file', 'nav-file-plus', 'hr_recruitment', $can('recruitment-requests.view')],
-            ['hr.recruitment.approvals.pending', 'recruitment_approvals', 'check', 'nav-list-checks', 'hr_recruitment', fn (User $user): bool => Access::hasActivePermission($user, 'recruitment-requests.approve') && self::mayReceiveApprovals($user), 'own' => true],
-            ['hr.recruitment.campaigns.index', 'vacancies', 'search', 'nav-clipboard-list', 'hr_recruitment', $can('recruitment-vacancies.view')],
-            ['hr.recruitment.applicants.index', 'applicants', 'users', 'nav-circle-user', 'hr_recruitment', fn (User $user): bool => $user->can('viewAny', RecruitmentApplicant::class)],
-            ['hr.recruitment.interviews.index', 'interviews', 'cal', 'nav-calendar-range', 'hr_recruitment', fn (User $user): bool => $user->can('viewAny', RecruitmentInterview::class)],
-            ['hr.recruitment.offers.index', 'job_offers', 'file', 'nav-handshake', 'hr_recruitment', fn (User $user): bool => $user->can('viewAny', RecruitmentJobOffer::class)],
-            ['hr.recruitment.indicator-rules', 'indicator_rules', 'grid', 'nav-sliders-horizontal', 'hr_recruitment', fn (User $user): bool => Access::hasActivePermission($user, 'recruitment-indicators.manage')],
+            ['hr.recruitment.requests.index', 'recruitment_requests', 'file', 'nav-file-plus', 'recruitment', $can('recruitment-requests.view')],
+            ['hr.recruitment.approvals.pending', 'recruitment_approvals', 'check', 'nav-list-checks', 'recruitment', fn (User $user): bool => Access::hasActivePermission($user, 'recruitment-requests.approve') && self::mayReceiveApprovals($user), 'own' => true],
+            ['hr.recruitment.campaigns.index', 'vacancies', 'search', 'nav-clipboard-list', 'recruitment', $can('recruitment-vacancies.view')],
+            ['hr.recruitment.applicants.index', 'applicants', 'users', 'nav-circle-user', 'recruitment', fn (User $user): bool => $user->can('viewAny', RecruitmentApplicant::class)],
+            ['hr.recruitment.interviews.index', 'interviews', 'cal', 'nav-calendar-range', 'recruitment', fn (User $user): bool => $user->can('viewAny', RecruitmentInterview::class)],
+            ['hr.recruitment.offers.index', 'job_offers', 'file', 'nav-handshake', 'recruitment', fn (User $user): bool => $user->can('viewAny', RecruitmentJobOffer::class)],
+            ['hr.recruitment.indicator-rules', 'indicator_rules', 'grid', 'nav-sliders-horizontal', 'recruitment', fn (User $user): bool => Access::hasActivePermission($user, 'recruitment-indicators.manage')],
 
             // The viewer's own HR pages join their tasks and calendar.
             ['hr.leave.team-calendar', 'team', 'users', 'nav-calendar-range', 'workspace', $can('leaves.view-own', 'leaves.view-all')],

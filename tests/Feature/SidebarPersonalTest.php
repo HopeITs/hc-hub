@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\RemembersRecentRecord;
+use Illuminate\Support\Js;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Task;
@@ -38,6 +39,16 @@ test('pinned pages show in the sidebar', function () {
         ->assertSee('data-side-personal', false)
         ->assertSee('transfers.index"', false)
         ->assertDontSee('gone.page', false);
+});
+
+test('pins on pages whose sidebar group was renamed still show in the sidebar', function () {
+    $pins = ['hr.leave.team', 'hr.employees.index', 'hr.recruitment.requests.index'];
+    $user = User::factory()->role('Super Admin')->create(['nav_pins' => $pins]);
+
+    $this->actingAs($user)->get(route('dashboard'))
+        ->assertOk()
+        ->assertSee('data-side-personal', false)
+        ->assertSee('pins: '.Js::from($pins)->toHtml(), false);
 });
 
 test('opening a project counts as a use of it, kept once however often it is opened', function () {

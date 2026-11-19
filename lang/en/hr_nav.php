@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 return [
     'group' => 'Human resources',
-    'group_people' => 'People',
-    'group_leave' => 'Leave',
-    'group_recruitment' => 'Recruitment',
     'inbox' => 'HR inbox',
     'employees' => 'Employees',
     'contracts' => 'Contracts',

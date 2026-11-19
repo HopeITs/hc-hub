@@ -29,7 +29,7 @@ final class Destinations
      *
      * @var list<string>
      */
-    public const array Groups = ['overview', 'strategy_planning', 'projects_delivery', 'monitoring_evaluation', 'funding_finance', 'hr_people', 'hr_leave', 'hr_recruitment', 'workspace', 'administration', 'you'];
+    public const array Groups = ['overview', 'workspace', 'strategy_planning', 'projects_delivery', 'monitoring_evaluation', 'funding_finance', 'people', 'recruitment', 'administration', 'you'];
 
     /**
      * Pages reached from the top bar instead of the sidebar: the inbox,
@@ -51,9 +51,8 @@ final class Destinations
         'projects_delivery' => 'navigation.group_projects_delivery',
         'monitoring_evaluation' => 'navigation.group_monitoring_evaluation',
         'funding_finance' => 'navigation.group_funding_finance',
-        'hr_people' => 'hr_nav.group_people',
-        'hr_leave' => 'hr_nav.group_leave',
-        'hr_recruitment' => 'hr_nav.group_recruitment',
+        'people' => 'navigation.group_people',
+        'recruitment' => 'navigation.group_recruitment',
         'workspace' => 'navigation.group_workspace',
         'administration' => 'navigation.group_administration',
         'you' => 'navigation.group_you',
@@ -70,9 +69,8 @@ final class Destinations
         'projects_delivery' => 'nav-folder-kanban',
         'monitoring_evaluation' => 'nav-chart-line',
         'funding_finance' => 'nav-wallet',
-        'hr_people' => 'nav-users',
-        'hr_leave' => 'nav-tree-palm',
-        'hr_recruitment' => 'nav-briefcase-business',
+        'people' => 'nav-users',
+        'recruitment' => 'nav-briefcase-business',
         'workspace' => 'nav-list-checks',
         'administration' => 'nav-settings',
         'you' => 'nav-circle-user',
@@ -352,7 +350,7 @@ final class Destinations
             $page('tasks.index', 'common.tasks', 'check', 'nav-square-check-big', 'workspace', $can('tasks.view'), 'tasks'),
             $page('department-tasks.index', 'titles.department_tasks', 'board', 'nav-building', 'workspace', fn (User $user): bool => $user->can('viewDepartmentQueue', Task::class)),
             $page('calendar.index', 'common.my_calendar', 'cal', 'nav-calendar', 'workspace', $can('calendar.view')),
-            $page('notifications.index', 'desk.notifications', 'bell', 'nav-bell', 'workspace', $everyone),
+            $page('notifications.index', 'desk.notifications', 'bell', 'nav-bell', 'overview', $everyone),
 
             $page('admin.users.index', 'navigation.user_directory', 'users', 'nav-users', 'administration', fn (User $user): bool => $user->can('viewAny', User::class), 'access-management'),
             $page('admin.notification-settings.edit', 'navigation.notification_settings', 'bell', 'nav-sliders-horizontal', 'administration', $can('notification-settings.manage')),
