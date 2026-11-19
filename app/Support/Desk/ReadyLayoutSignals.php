@@ -89,14 +89,14 @@ class ReadyLayoutSignals
             $panels = array_column($layout['entries'], 'panel');
 
             $signal = match ($layout['key']) {
-                'today' => $this->today($needs),
+                'today', 'mine' => $this->today($needs),
                 'money' => $this->money(),
                 'donors' => $this->donors(in_array('duties', $panels, true)),
                 'tasks' => $this->tasks(),
                 'delivery' => $this->delivery(),
                 'impact' => $this->impact(),
                 'fundraising' => $this->fundraising(),
-                'team' => $this->team(),
+                'team', 'management' => $this->team(),
                 default => $this->overview(),
             };
 

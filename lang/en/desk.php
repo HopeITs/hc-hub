@@ -643,6 +643,9 @@ return [
             'buttons' => 'Page buttons',
         ],
         'layouts' => [
+            'mine' => ['title' => 'My space', 'purpose' => 'Your work, your leave and what was handed to you'],
+            'organisation' => ['title' => 'Organisation view', 'purpose' => 'News, holidays, who is out and the organisation in figures'],
+            'management' => ['title' => 'Management view', 'purpose' => 'Decisions waiting, late work and how your team is doing'],
             'today' => ['title' => 'My day', 'purpose' => 'What waits for you, what is coming and what slipped'],
             'money' => ['title' => 'Money tracking', 'purpose' => 'What is arriving, what is late and what we owe donors'],
             'donors' => ['title' => 'Donor tracking', 'purpose' => 'Each donor, their proposals, reports and money'],

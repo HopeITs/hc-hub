@@ -4,6 +4,7 @@ use App\Models\Activity;
 use App\Support\Desk\Panels;
 use App\Support\Desk\ReadyLayoutSignals;
 use App\Support\Desk\Shortcuts;
+use App\Support\Modules\ModuleRegistry;
 use Illuminate\Support\Arr;
 use Livewire\Livewire;
 use Modules\Core\Models\User;
@@ -68,7 +69,7 @@ test('every panel in the catalogue exists, every row totals twelve columns and o
     $panels = app(Panels::class);
     $known = array_keys($panels->availableTo(userWithRole('Super Admin', insertHrEmployee())));
 
-    expect(array_keys($panels->readyCatalogue()))->toBe(['today', 'money', 'donors', 'tasks', 'delivery', 'impact', 'fundraising', 'team', 'overview']);
+    expect(array_keys($panels->readyCatalogue()))->toBe(['mine', 'organisation', 'management', 'today', 'money', 'donors', 'tasks', 'delivery', 'impact', 'fundraising', 'team', 'overview']);
 
     foreach ($panels->readyCatalogue() as $layout) {
         expect($known)->toContain($layout['core']);
@@ -511,7 +512,7 @@ test('for a leader, red stays on their own late work and the suggestion keeps it
     $signals = app(ReadyLayoutSignals::class)->for(tap($admin, fn (User $user) => test()->actingAs($user)), ['total' => 9, 'late' => 5]);
     $suggestion = app(ReadyLayoutSignals::class)->suggestionFor($admin, $signals);
 
-    expect(array_keys(array_filter($signals, fn (array $signal): bool => $signal['tone'] === 'critical')))->toEqualCanonicalizing(['today', 'tasks'])
+    expect(array_keys(array_filter($signals, fn (array $signal): bool => $signal['tone'] === 'critical')))->toEqualCanonicalizing(['mine', 'today', 'tasks'])
         ->and($signals['money']['tone'])->toBe('warn')
         ->and($signals['impact']['tone'])->toBe('warn')
         ->and($signals['delivery']['tone'])->toBe('warn')
@@ -693,4 +694,32 @@ test('every ready string exists in english and arabic, with a title and purpose 
     foreach (array_keys(app(Panels::class)->readyCatalogue()) as $key) {
         expect($english)->toHaveKeys(["ready.layouts.{$key}.title", "ready.layouts.{$key}.purpose"]);
     }
+});
+
+test('the three views lead the catalogue and mix the modules\' cards', function () {
+    $panels = app(Panels::class);
+    $catalogue = $panels->readyCatalogue();
+    $panelsOf = fn (string $key): array => array_merge(...array_map(fn (array $row): array => array_column($row, 0), $catalogue[$key]['rows']));
+
+    expect(array_slice(array_keys($catalogue), 0, 3))->toBe(['mine', 'organisation', 'management'])
+        ->and($panelsOf('mine'))->toContain('needs', 'tasks', 'hr-my-leaves', 'hr-checklist')
+        ->and($panelsOf('organisation'))->toContain('hr-news', 'hr-next-holiday', 'glance')
+        ->and($panelsOf('management'))->toContain('myteam', 'hr-decisions', 'overdue');
+});
+
+test('the management view is offered only to someone who has a team', function () {
+    $loner = userWithRole('Team Member', insertHrEmployee());
+
+    expect(readyLayout($loner, 'management'))->not->toBeNull()
+        ->and(readySignalsFor($loner))->not->toHaveKey('management')
+        ->and(readySignalsFor($loner))->toHaveKey('mine');
+});
+
+test('every role has one starting layout: no role is given one by two modules', function () {
+    $reflection = new ReflectionClass(Panels::class);
+    $own = array_keys($reflection->getConstant('RoleLayouts'));
+    $modules = array_merge(...array_map(fn ($source): array => array_keys($source->roleLayouts()), app(ModuleRegistry::class)->deskPanelSources()));
+
+    expect(array_intersect($own, $modules))->toBe([])
+        ->and(array_unique($modules))->toHaveCount(count($modules));
 });

@@ -180,9 +180,30 @@ final class Panels
      * of [panel, cols, rows] that totals twelve columns and shares one height.
      * Only panels and page cards: buttons live in Quick access, never on the Desk.
      *
+     * The first three are the hub's three views (roadmap 3.7), each mixing the
+     * modules' cards: the viewer's own space, the organisation, and the
+     * management view (offered to whoever has a team, by its signal).
+     *
      * @var array<string, array{core: string, rows: list<list<array{0: string, 1: int, 2: int}>>}>
      */
     private const array ReadyLayouts = [
+        'mine' => ['core' => 'needs', 'rows' => [
+            [['needs', 7, 4], ['coming', 5, 4]],
+            [['tasks', 6, 4], ['hr-attention', 6, 4]],
+            [['hr-my-leaves', 4, 3], ['hr-leave-balance', 4, 3], ['hr-checklist', 4, 3]],
+        ]],
+        'organisation' => ['core' => 'hr-news', 'rows' => [
+            [['hr-news', 7, 4], ['hr-calendar', 5, 4]],
+            [['hr-next-holiday', 4, 3], ['hr-who-is-out', 4, 3], ['hr-birthdays', 4, 3]],
+            [['glance', 12, 2]],
+            [['flow', 12, 2]],
+        ]],
+        'management' => ['core' => 'myteam', 'rows' => [
+            [['myteam', 7, 5], ['hr-who-is-out', 5, 5]],
+            [['hr-decisions', 6, 4], ['overdue', 6, 4]],
+            [['hr-late', 6, 4], ['waiting', 6, 4]],
+            [['matrix', 12, 4]],
+        ]],
         'today' => ['core' => 'needs', 'rows' => [
             [['needs', 7, 4], ['coming', 5, 4]],
             [['tasks', 8, 4], ['milestones', 4, 4]],

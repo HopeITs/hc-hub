@@ -2743,6 +2743,126 @@
                 },
                 "ready": [
                     {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "coming",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "tasks",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            },
+                            {
+                                "panel": "flow",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "matrix",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
                         "key": "today",
                         "title": "My day",
                         "purpose": "What waits for you, what is coming and what slipped",
@@ -4500,6 +4620,126 @@
                     "hr.employees.me": "g-hr-employees-me"
                 },
                 "ready": [
+                    {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "coming",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "tasks",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            },
+                            {
+                                "panel": "flow",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "matrix",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
                     {
                         "key": "today",
                         "title": "My day",
@@ -6366,6 +6606,126 @@
                     "hr.employees.me": "g-hr-employees-me"
                 },
                 "ready": [
+                    {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "coming",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "tasks",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            },
+                            {
+                                "panel": "flow",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "matrix",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
                     {
                         "key": "today",
                         "title": "My day",
@@ -8457,6 +8817,126 @@
                     "hr.employees.me": "g-hr-employees-me"
                 },
                 "ready": [
+                    {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "coming",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "tasks",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            },
+                            {
+                                "panel": "flow",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "matrix",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
                     {
                         "key": "today",
                         "title": "My day",
@@ -10614,6 +11094,126 @@
                 },
                 "ready": [
                     {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "coming",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "tasks",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            },
+                            {
+                                "panel": "flow",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "matrix",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
                         "key": "today",
                         "title": "My day",
                         "purpose": "What waits for you, what is coming and what slipped",
@@ -12742,6 +13342,126 @@
                 },
                 "ready": [
                     {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "coming",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "tasks",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            },
+                            {
+                                "panel": "flow",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "matrix",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
                         "key": "today",
                         "title": "My day",
                         "purpose": "What waits for you, what is coming and what slipped",
@@ -14787,6 +15507,126 @@
                     "hr.employees.me": "g-hr-employees-me"
                 },
                 "ready": [
+                    {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "coming",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "tasks",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            },
+                            {
+                                "panel": "flow",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "matrix",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
                     {
                         "key": "today",
                         "title": "My day",
@@ -17064,6 +17904,126 @@
                     "hr.employees.me": "g-hr-employees-me"
                 },
                 "ready": [
+                    {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "coming",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "tasks",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            },
+                            {
+                                "panel": "flow",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "matrix",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
                     {
                         "key": "today",
                         "title": "My day",
@@ -20583,6 +21543,156 @@
                 },
                 "ready": [
                     {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "coming",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "tasks",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-my-leaves",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-leave-balance",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-checklist",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            },
+                            {
+                                "panel": "flow",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-decisions",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-late",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "matrix",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
                         "key": "today",
                         "title": "My day",
                         "purpose": "What waits for you, what is coming and what slipped",
@@ -23133,6 +24243,126 @@
                 },
                 "ready": [
                     {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-my-leaves",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-leave-balance",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-checklist",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-late",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "L",
+                                "cols": 6,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
                         "key": "today",
                         "title": "My day",
                         "purpose": "What waits for you, what is coming and what slipped",
@@ -24116,6 +25346,102 @@
                 },
                 "ready": [
                     {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
                         "key": "today",
                         "title": "My day",
                         "purpose": "What waits for you, what is coming and what slipped",
@@ -24868,6 +26194,102 @@
                     "hr.employees.me": "g-hr-employees-me"
                 },
                 "ready": [
+                    {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
                     {
                         "key": "today",
                         "title": "My day",
@@ -25661,6 +27083,102 @@
                     "hr.employees.me": "g-hr-employees-me"
                 },
                 "ready": [
+                    {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
                     {
                         "key": "today",
                         "title": "My day",
@@ -26642,6 +28160,120 @@
                 },
                 "ready": [
                     {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-my-leaves",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-leave-balance",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-checklist",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
                         "key": "today",
                         "title": "My day",
                         "purpose": "What waits for you, what is coming and what slipped",
@@ -27468,6 +29100,102 @@
                 },
                 "ready": [
                     {
+                        "key": "mine",
+                        "title": "My space",
+                        "purpose": "Your work, your leave and what was handed to you",
+                        "core": "needs",
+                        "entries": [
+                            {
+                                "panel": "needs",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-attention",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-calendar",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "hr-next-holiday",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "hr-birthdays",
+                                "size": "M",
+                                "cols": 4,
+                                "rows": 3
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
+                    {
+                        "key": "management",
+                        "title": "Management view",
+                        "purpose": "Decisions waiting, late work and how your team is doing",
+                        "core": "myteam",
+                        "entries": [
+                            {
+                                "panel": "myteam",
+                                "size": "L",
+                                "cols": 7,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "hr-who-is-out",
+                                "size": "M",
+                                "cols": 5,
+                                "rows": 5
+                            },
+                            {
+                                "panel": "overdue",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "waiting",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            }
+                        ]
+                    },
+                    {
                         "key": "today",
                         "title": "My day",
                         "purpose": "What waits for you, what is coming and what slipped",
@@ -28069,6 +29797,26 @@
                     "notification-settings.edit": "g-notification-settings-edit"
                 },
                 "ready": [
+                    {
+                        "key": "organisation",
+                        "title": "Organisation view",
+                        "purpose": "News, holidays, who is out and the organisation in figures",
+                        "core": "hr-news",
+                        "entries": [
+                            {
+                                "panel": "hr-news",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 4
+                            },
+                            {
+                                "panel": "glance",
+                                "size": "XL",
+                                "cols": 12,
+                                "rows": 2
+                            }
+                        ]
+                    },
                     {
                         "key": "today",
                         "title": "My day",
