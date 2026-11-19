@@ -123,13 +123,12 @@ test('each listed proposal names its rows missing a center and links to the prop
         ->assertSeeHtml(e(route('proposals.show', ['proposal' => $proposal, 'add-centers' => 1])));
 });
 
-test('the add-centers link opens the proposal form on the Projects tab for someone who may update it', function () {
+test('the add-centers link opens the center fill editor on the Projects tab for someone who may fill it', function () {
     $proposal = missingCenterProposal('Approved Missing', ProposalStatus::Approved);
 
     Livewire::actingAs($this->user)->withQueryParams(['add-centers' => 1])
         ->test('tracking::proposals.show', ['proposal' => $proposal])
-        ->assertSet('showProposalModal', true)
-        ->assertSet('editingProposalId', $proposal->id)
+        ->assertSet('showCenterFillModal', true)
         ->assertSet('tab', 'projects')
         ->assertSet('addCentersLink', false);
 
@@ -138,6 +137,6 @@ test('the add-centers link opens the proposal form on the Projects tab for someo
 
     Livewire::actingAs($viewer)->withQueryParams(['add-centers' => 1])
         ->test('tracking::proposals.show', ['proposal' => $proposal])
-        ->assertSet('showProposalModal', false)
+        ->assertSet('showCenterFillModal', false)
         ->assertSet('addCentersLink', false);
 });

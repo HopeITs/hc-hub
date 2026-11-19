@@ -48,6 +48,7 @@ use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\Risk;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TransfersTracking;
+use Modules\Tracking\Support\Reporting\PlaceBridge;
 
 /**
  * Fills "Al-Wadi Training Center" and its GIZ proposal with fake data for
@@ -174,8 +175,8 @@ class AlWadiShowcaseSeeder extends Seeder
                 'sequence' => $index + 1,
                 'weight_percentage' => $weight,
                 // saveQuietly() skips the model's mirroring, so both columns are written (roadmap 1.9).
-                'responsible_employee_id' => $this->user($index)->id,
-                'responsible_user_id' => $this->user($index)->id,
+                'responsible_employee_id' => $this->user($index)->employee_id,
+                'responsible_user_id' => $this->user($index)->employee_id,
             ])->saveQuietly();
         }
     }
@@ -293,7 +294,7 @@ class AlWadiShowcaseSeeder extends Seeder
 
             PlanIndicator::query()->firstOrCreate(
                 ['source_type' => 'proposal', 'source_id' => $proposal->id, 'indicator_id' => $indicator->id, 'project_id' => $project->id],
-                ['target' => $target, 'target_population' => $measure === 'numeric' ? $target : null, 'period' => $period],
+                ['target' => $target, 'target_population' => $measure === 'numeric' ? $target : null, 'period' => $period, ...app(PlaceBridge::class)->placeColumnsForTargets($proposal, [$project->id])[$project->id]],
             );
 
             IndicatorProgress::query()->firstOrCreate(
@@ -424,8 +425,8 @@ class AlWadiShowcaseSeeder extends Seeder
                 'sequence' => $index + 1,
                 'weight_percentage' => $weight,
                 // saveQuietly() skips the model's mirroring, so both columns are written (roadmap 1.9).
-                'responsible_employee_id' => $this->user($index)->id,
-                'responsible_user_id' => $this->user($index)->id,
+                'responsible_employee_id' => $this->user($index)->employee_id,
+                'responsible_user_id' => $this->user($index)->employee_id,
                 'result_id' => $outputs[$index % 3]->id,
             ])->saveQuietly();
         }

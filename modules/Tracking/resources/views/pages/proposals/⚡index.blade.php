@@ -12,6 +12,7 @@ use Modules\Tracking\Livewire\Concerns\Proposals\ExportsProposalRegister;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalForm;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalStatus;
 use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalBoard;
+use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalChangeQueue;
 use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalRegister;
 use Modules\Tracking\Models\Proposal;
 use Illuminate\Support\Facades\Gate;
@@ -32,6 +33,7 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
     use ManagesProposalForm;
     use ManagesProposalStatus;
     use ReadsProposalBoard;
+    use ReadsProposalChangeQueue;
     use ReadsProposalRegister;
     // The create form carries the concept-note document (W-24).
     use WithFileUploads;
@@ -323,7 +325,11 @@ new #[Layout('layouts::desk'), Title('titles.proposals')] class extends Componen
         </x-slot:actions>
 
 
-    @if (! $this->hasAnyProposal)
+    @include('tracking::pages.proposals._index-change-focus')
+
+    @if ($this->focus !== '')
+        @include('tracking::pages.proposals._index-change-requests')
+    @elseif (! $this->hasAnyProposal)
         <x-ui.empty-state icon="document-text" :heading="__('proposals.no_proposals_yet')" :body="__('proposals.add_the_first_proposal_to_open_the_pipeline')" />
     @elseif ($showsOverview)
         @include('tracking::pages.proposals._overview')

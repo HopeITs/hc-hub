@@ -18,6 +18,7 @@ use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Support\Reporting\PlaceBridge;
 
 /**
  * The target form: its properties, the open, save and close actions, the
@@ -233,6 +234,11 @@ trait ManagesTargetForm
             $this->addError('targetIndicatorId', __('targets.this_indicator_already_has_a_target_here'));
 
             return;
+        }
+
+        // The place moves with the project, in the same save (Y-08).
+        if (! $target->exists || $target->isDirty(['project_id', 'source_type', 'source_id'])) {
+            $target->fill(app(PlaceBridge::class)->placeColumnsForTargets($source, [$projectId])[$projectId ?? '']);
         }
 
         $target->save();

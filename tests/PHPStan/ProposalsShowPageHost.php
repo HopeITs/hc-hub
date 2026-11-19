@@ -12,6 +12,7 @@ use Modules\Tracking\Livewire\Concerns\ChecksFinanceVisibility;
 use Modules\Tracking\Livewire\Concerns\ManagesAgreementForm;
 use Modules\Tracking\Livewire\Concerns\ManagesTransferForm;
 use Modules\Tracking\Livewire\Concerns\Proposals\ChartsProposalChronology;
+use Modules\Tracking\Livewire\Concerns\Proposals\DecidesProposalChange;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesGrantDates;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalApproval;
 use Modules\Tracking\Livewire\Concerns\Proposals\ManagesProposalFiles;
@@ -23,6 +24,7 @@ use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalDelivery;
 use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalFunding;
 use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalHealth;
 use Modules\Tracking\Livewire\Concerns\Proposals\ReadsProposalVitals;
+use Modules\Tracking\Livewire\Concerns\Proposals\RequestsProposalChange;
 use Modules\Tracking\Livewire\Concerns\SwitchesFundingView;
 
 /**
@@ -38,6 +40,7 @@ abstract class ProposalsShowPageHost extends Component
     use AddsQuickTask;
     use ChartsProposalChronology;
     use ChecksFinanceVisibility;
+    use DecidesProposalChange;
     use ManagesAgreementForm;
     use ManagesGrantDates;
     use ManagesProposalApproval;
@@ -52,6 +55,7 @@ abstract class ProposalsShowPageHost extends Component
     use ReadsProposalFunding;
     use ReadsProposalHealth;
     use ReadsProposalVitals;
+    use RequestsProposalChange;
     use SwitchesFundingView;
     use WithFileUploads;
 
