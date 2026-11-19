@@ -303,3 +303,14 @@ test('every wire:navigate link prefetches on hover unless it already names a mod
         ->toContain('href="/b" wire:navigate.preserve-scroll>')
         ->not->toContain('wire:navigate.preserve-scroll.hover');
 });
+
+test('the Checklists page is named Equipment, العهد in Arabic, at the address it always had', function (string $locale, string $name) {
+    app()->setLocale($locale);
+
+    expect(app(Destinations::class)->find('hr.checklists.index')['label'])->toBe($name)
+        ->and(__('hr_checklists.titles.index'))->toBe($name)
+        ->and(route('hr.checklists.index', absolute: false))->toBe('/hr/checklists');
+})->with([
+    'English' => ['en', 'Equipment'],
+    'Arabic' => ['ar', 'العهد'],
+]);

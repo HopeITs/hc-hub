@@ -17,7 +17,7 @@ return [
             'all' => 'Everything',
             'decide' => 'Leaves to decide',
             'review' => 'Leaves to review',
-            'checklist' => 'Checklist items',
+            'checklist' => 'Equipment items',
             'profile' => 'Profile changes',
             'journey' => 'Open journeys',
         ],

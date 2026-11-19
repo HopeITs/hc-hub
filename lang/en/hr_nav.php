@@ -24,7 +24,7 @@ return [
     'job_offers' => 'Job offers',
     'indicator_rules' => 'Matching rules',
     'recruitment_approvals' => 'Recruitment approvals',
-    'checklists' => 'Checklists',
+    'checklists' => 'Equipment',
     'news' => 'News and events',
     'statistics' => 'HR statistics',
     'statistics_general' => 'General statistics',

@@ -15,7 +15,7 @@ return [
         'leave-types' => 'Leave types',
         'annual-leave-rules' => 'Annual leave rules',
         'termination-reasons' => 'Termination reasons',
-        'checklist-items' => 'Checklist items',
+        'checklist-items' => 'Equipment items',
         'job-levels' => 'Job levels',
         'departments' => 'Departments',
         'course-categories' => 'Course categories',

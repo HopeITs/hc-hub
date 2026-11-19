@@ -458,7 +458,7 @@
         },
         {
             "route": "hr.checklists.index",
-            "label": "Checklists",
+            "label": "Equipment",
             "icon": "check",
             "hero": "nav-list-checks",
             "group": "workspace",
@@ -17430,7 +17430,7 @@
                         },
                         {
                             "route": "hr.checklists.index",
-                            "label": "Checklists",
+                            "label": "Equipment",
                             "icon": "check",
                             "hero": "nav-list-checks",
                             "group": "workspace",
@@ -18306,7 +18306,7 @@
                 },
                 {
                     "route": "hr.checklists.index",
-                    "label": "Checklists",
+                    "label": "Equipment",
                     "icon": "check",
                     "hero": "nav-list-checks",
                     "group": "workspace",
@@ -19634,8 +19634,8 @@
                     },
                     "g-hr-checklists": {
                         "id": "g-hr-checklists",
-                        "title": "Checklists",
-                        "description": "A button that opens Checklists.",
+                        "title": "Equipment",
+                        "description": "A button that opens Equipment.",
                         "icon": "nav-list-checks",
                         "size": "S",
                         "register": "hr.checklists.index",
@@ -21006,7 +21006,7 @@
                     "id": "g-hr-checklists",
                     "key": "hr-checklists",
                     "kind": "page",
-                    "label": "Checklists",
+                    "label": "Equipment",
                     "icon": "nav-list-checks",
                     "route": "hr.checklists.index",
                     "href": "http://hc-hub.test/hr/checklists"
@@ -21107,7 +21107,7 @@
                         },
                         {
                             "route": "hr.checklists.index",
-                            "label": "Checklists",
+                            "label": "Equipment",
                             "icon": "check",
                             "hero": "nav-list-checks",
                             "group": "workspace",
@@ -21539,7 +21539,7 @@
                 },
                 {
                     "route": "hr.checklists.index",
-                    "label": "Checklists",
+                    "label": "Equipment",
                     "icon": "check",
                     "hero": "nav-list-checks",
                     "group": "workspace",
@@ -22109,8 +22109,8 @@
                     },
                     "g-hr-checklists": {
                         "id": "g-hr-checklists",
-                        "title": "Checklists",
-                        "description": "A button that opens Checklists.",
+                        "title": "Equipment",
+                        "description": "A button that opens Equipment.",
                         "icon": "nav-list-checks",
                         "size": "S",
                         "register": "hr.checklists.index",
@@ -22740,7 +22740,7 @@
                     "id": "g-hr-checklists",
                     "key": "hr-checklists",
                     "kind": "page",
-                    "label": "Checklists",
+                    "label": "Equipment",
                     "icon": "nav-list-checks",
                     "route": "hr.checklists.index",
                     "href": "http://hc-hub.test/hr/checklists"
@@ -25037,7 +25037,7 @@
                         },
                         {
                             "route": "hr.checklists.index",
-                            "label": "Checklists",
+                            "label": "Equipment",
                             "icon": "check",
                             "hero": "nav-list-checks",
                             "group": "workspace",
@@ -25152,7 +25152,7 @@
                 },
                 {
                     "route": "hr.checklists.index",
-                    "label": "Checklists",
+                    "label": "Equipment",
                     "icon": "check",
                     "hero": "nav-list-checks",
                     "group": "workspace",
@@ -25451,8 +25451,8 @@
                     },
                     "g-hr-checklists": {
                         "id": "g-hr-checklists",
-                        "title": "Checklists",
-                        "description": "A button that opens Checklists.",
+                        "title": "Equipment",
+                        "description": "A button that opens Equipment.",
                         "icon": "nav-list-checks",
                         "size": "S",
                         "register": "hr.checklists.index",
@@ -25934,7 +25934,7 @@
                     "id": "g-hr-checklists",
                     "key": "hr-checklists",
                     "kind": "page",
-                    "label": "Checklists",
+                    "label": "Equipment",
                     "icon": "nav-list-checks",
                     "route": "hr.checklists.index",
                     "href": "http://hc-hub.test/hr/checklists"

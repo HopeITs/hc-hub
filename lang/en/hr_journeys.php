@@ -71,7 +71,7 @@ return [
             'interview' => 'Exit interview',
         ],
         'equipment_outstanding' => '{1} One delivered item has not come back yet.|[2,*] :count delivered items have not come back yet.',
-        'equipment_unrequested' => '{1} One has no return requested: assign a receiver on the checklist.|[2,*] :count have no return requested: assign a receiver on the checklist.',
+        'equipment_unrequested' => '{1} One has no return requested: assign a receiver on their equipment.|[2,*] :count have no return requested: assign a receiver on their equipment.',
         'deactivation_help' => 'Automatic on :date unless a new contract starts.',
         'deactivation-overdue' => 'The automatic deactivation is overdue. Check that the scheduler runs, or deactivate by hand.',
         'access-card-on' => 'The digital card is still on. Disable it on the ID card tab.',
