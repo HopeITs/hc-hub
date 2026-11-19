@@ -23,9 +23,11 @@ use Modules\Tracking\Models\TransfersTracking;
  * read from the same per-day groups the grid's chips use.
  *
  * Used by calendar/index only. The #[Computed] calendar() comes from
- * BuildsCalendarGrid, canViewAgreements() from ChecksFinanceVisibility.
+ * BuildsCalendarGrid, canViewAgreements() from ChecksFinanceVisibility,
+ * layerItemsByDay() from ShowsCalendarLayers.
  *
  * @property-read array{month: CarbonImmutable, weeks: ?array<int, array<int, CarbonImmutable>>, days: ?array<int, CarbonImmutable>, milestonesByDay: \Illuminate\Support\Collection<string, Collection<int, Milestone>>, tasksByDay: \Illuminate\Support\Collection<string, Collection<int, Task>>, reportsByDay: \Illuminate\Support\Collection<string, Collection<int, Report>>, monthlyReportsByDay: \Illuminate\Support\Collection<string, Collection<int, MonthlyReport>>, proposalsByDay: \Illuminate\Support\Collection<string, Collection<int, Proposal>>, transfersByDay: \Illuminate\Support\Collection<string, Collection<int, TransfersTracking>>, donorFollowUpsByDay: \Illuminate\Support\Collection<string, Collection<int, Donor>>, donorReportsByDay: \Illuminate\Support\Collection<string, Collection<int, DonorReport>>, projectStartsByDay: \Illuminate\Support\Collection<string, Collection<int, Project>>, projectEndsByDay: \Illuminate\Support\Collection<string, Collection<int, Project>>, reviewMeetingsByDay: \Illuminate\Support\Collection<string, Collection<int, ProposalStatusNote>>, unscheduledTasks: Collection<int, Task>, nowOffsetPercent: float} $calendar  #[Computed] calendar()
+ * @property-read array<string, list<array{layer: string, icon: string, leads: bool, id: string, title: string, context: string|null, href: string|null}>> $layerItemsByDay  #[Computed] layerItemsByDay()
  */
 trait ShowsCalendarDay
 {
@@ -60,7 +62,7 @@ trait ShowsCalendarDay
      * render from, so this list never disagrees with what the day's chips
      * actually show.
      *
-     * @return \Illuminate\Support\Collection<int, array{type: string, kind: string, id: int, url: ?string, title: string, subLabel: ?string}>
+     * @return \Illuminate\Support\Collection<int, array{type: string, kind: string, id: int|string, url: ?string, title: string, subLabel: ?string}>
      */
     #[Computed]
     public function dayDetailItems(): \Illuminate\Support\Collection
@@ -72,6 +74,12 @@ trait ShowsCalendarDay
         $calendar = $this->calendar;
         $date = $this->dayDetailDate;
         $rows = new \Illuminate\Support\Collection;
+
+        foreach ($this->layerItemsByDay[$date] ?? [] as $item) {
+            if ($item['leads']) {
+                $rows->push(['type' => 'layer', 'kind' => 'link', 'id' => $item['id'], 'url' => $item['href'], 'title' => $item['title'], 'subLabel' => $item['context']]);
+            }
+        }
 
         foreach ($calendar['milestonesByDay']->get($date, new Collection) as $milestone) {
             $rows->push(['type' => 'milestone', 'kind' => 'modal-milestone', 'id' => $milestone->id, 'url' => null, 'title' => $milestone->name, 'subLabel' => $milestone->ownerName()]);
@@ -122,6 +130,12 @@ trait ShowsCalendarDay
 
         foreach ($calendar['projectEndsByDay']->get($date, new Collection) as $project) {
             $rows->push(['type' => 'project', 'kind' => 'link', 'id' => $project->id, 'url' => route('projects.show', $project), 'title' => $project->name, 'subLabel' => __('calendar.project_ends')]);
+        }
+
+        foreach ($this->layerItemsByDay[$date] ?? [] as $item) {
+            if (! $item['leads']) {
+                $rows->push(['type' => 'layer', 'kind' => 'link', 'id' => $item['id'], 'url' => $item['href'], 'title' => $item['title'], 'subLabel' => $item['context']]);
+            }
         }
 
         return $rows;

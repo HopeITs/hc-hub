@@ -13,6 +13,7 @@ use Modules\Tracking\Livewire\Concerns\Calendar\ManagesCalendarTasks;
 use Modules\Tracking\Livewire\Concerns\Calendar\PresentsCalendarItems;
 use Modules\Tracking\Livewire\Concerns\Calendar\ScopesCalendarPeople;
 use Modules\Tracking\Livewire\Concerns\Calendar\ShowsCalendarDay;
+use Modules\Tracking\Livewire\Concerns\Calendar\ShowsCalendarLayers;
 use Modules\Tracking\Livewire\Concerns\ChecksFinanceVisibility;
 use Modules\Tracking\Livewire\Concerns\NavigatesCalendarPeriods;
 
@@ -36,6 +37,7 @@ abstract class CalendarIndexPageHost extends Component
     use PresentsCalendarItems;
     use ScopesCalendarPeople;
     use ShowsCalendarDay;
+    use ShowsCalendarLayers;
 
     public string $month = '';
 
@@ -45,4 +47,7 @@ abstract class CalendarIndexPageHost extends Component
 
     /** @var array<int, string> */
     public array $filterEmployeeIds = [];
+
+    /** @var array<int, string> */
+    public array $hiddenLayers = [];
 }

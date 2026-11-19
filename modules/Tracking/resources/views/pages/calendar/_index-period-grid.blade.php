@@ -3,7 +3,7 @@
     row with each day's chips, and the hourly rows with the "now" line.
     Included by ⚡index.blade.php, whose top PHP block defines $calendar,
     $today, $focusedType, $focusedGroupKeys, $allGroupKeys,
-    $typeRingClasses, $typeDotClasses, $proposalTone and $projectTone.
+    $typeRingClasses, $typeDotClasses, $layerItems, $proposalTone and $projectTone.
 --}}
                 @php
                     $periodDays = $calendar['days'];
@@ -29,7 +29,7 @@
                     @foreach ($periodDays as $day)
                         @php
                             $dayFocusedCount = $focusedType === null ? 0 : collect($focusedGroupKeys[$focusedType])->sum(fn (string $key) => $calendar[$key]->get($day->toDateString(), new \Illuminate\Support\Collection)->count());
-                            $dayItemCount = collect($allGroupKeys)->sum(fn (string $key) => $calendar[$key]->get($day->toDateString(), new \Illuminate\Support\Collection)->count());
+                            $dayItemCount = collect($allGroupKeys)->sum(fn (string $key) => $calendar[$key]->get($day->toDateString(), new \Illuminate\Support\Collection)->count()) + count($layerItems[$day->toDateString()] ?? []);
                         @endphp
                         <div
                             wire:key="calendar-allday-{{ $day->toDateString() }}"
@@ -55,7 +55,9 @@
                                     data-test="calendar-day-content-{{ $day->toDateString() }}"
                                 @endif
                             >
+                                @include('tracking::pages.calendar._layer-chips', ['day' => $day, 'items' => $layerItems, 'leads' => true])
                                 @include('tracking::pages.calendar._item-chips', ['day' => $day, 'calendar' => $calendar, 'markerTone' => $this->markerTone(...), 'taskTone' => $this->taskTone(...), 'reportTone' => $this->reportTone(...), 'monthlyReportTone' => $this->monthlyReportTone(...), 'isMonthlyReportLate' => $this->isMonthlyReportLate(...), 'proposalTone' => $proposalTone, 'transferTone' => $this->transferTone(...), 'donorFollowUpTone' => $this->donorFollowUpTone(...), 'donorReportTone' => $this->donorReportTone(...), 'projectTone' => $projectTone, 'projectEndTone' => $this->projectEndTone(...), 'isLate' => $this->isLate(...), 'typeDotClasses' => $typeDotClasses])
+                                @include('tracking::pages.calendar._layer-chips', ['day' => $day, 'items' => $layerItems, 'leads' => false])
                             </div>
                         </div>
                     @endforeach

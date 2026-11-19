@@ -34,6 +34,8 @@ use Modules\Hr\Console\SendLeaveDecisionRemindersCommand;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\Position;
+use Modules\Hr\Support\Calendar\HolidayCalendarLayer;
+use Modules\Hr\Support\Calendar\LeaveCalendarLayer;
 use Modules\Hr\Support\Desk\HrDestinations;
 use Modules\Hr\Support\Desk\HrPanels;
 use Modules\Hr\Support\Employees\HrEmployeeLookup;
@@ -166,6 +168,8 @@ class HrServiceProvider extends ServiceProvider
         $modules->addDeskPanels(HrPanels::class);
         $modules->addDeskAgenda(DeskAgenda::class);
         $modules->addSubjectLinks(HrSubjectLinks::class);
+        $modules->addCalendarLayer(HolidayCalendarLayer::class);
+        $modules->addCalendarLayer(LeaveCalendarLayer::class);
     }
 
     /**

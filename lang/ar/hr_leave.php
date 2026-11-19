@@ -331,6 +331,10 @@ return [
         'edit' => 'تعديل',
     ],
     'calendar' => [
+        'layers' => [
+            'leave' => 'الإجازات',
+            'holiday' => 'العطل',
+        ],
         'titles' => [
             'holidays' => 'العطل',
             'birthday_choices' => 'عطلة عيد الميلاد',

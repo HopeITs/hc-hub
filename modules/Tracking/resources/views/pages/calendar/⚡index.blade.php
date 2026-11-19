@@ -8,6 +8,7 @@ use Modules\Tracking\Livewire\Concerns\Calendar\ManagesCalendarTasks;
 use Modules\Tracking\Livewire\Concerns\Calendar\PresentsCalendarItems;
 use Modules\Tracking\Livewire\Concerns\Calendar\ScopesCalendarPeople;
 use Modules\Tracking\Livewire\Concerns\Calendar\ShowsCalendarDay;
+use Modules\Tracking\Livewire\Concerns\Calendar\ShowsCalendarLayers;
 use Modules\Tracking\Livewire\Concerns\ChecksFinanceVisibility;
 use Modules\Tracking\Livewire\Concerns\NavigatesCalendarPeriods;
 use Modules\Tracking\Models\Project;
@@ -29,6 +30,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     use PresentsCalendarItems;
     use ScopesCalendarPeople;
     use ShowsCalendarDay;
+    use ShowsCalendarLayers;
 
     #[Url(except: '')]
     public string $month = '';
@@ -45,6 +47,10 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     /** @var array<int, string> */
     #[Url(as: 'responsible', except: [])]
     public array $filterEmployeeIds = [];
+
+    /** @var array<int, string> */
+    #[Url(as: 'hide', except: [])]
+    public array $hiddenLayers = [];
 
     /** @return Collection<int, Project> */
     #[Computed]
@@ -91,6 +97,7 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
         'transfer' => 'bg-status-good',
         'donor' => 'bg-secondary-dark dark:bg-ink-muted',
         'project' => 'bg-secondary-medium',
+        'layer' => 'bg-transparent ring-1 ring-inset ring-secondary-medium',
     ];
 
     // Literal ring-*/text-* utilities kept as their own arrays (rather than
@@ -138,6 +145,9 @@ new #[Layout('layouts::desk'), Title('titles.calendar')] class extends Component
     // day has anything on it at all, so its content area can open the
     // day-detail list instead of the "add" menu.
     $allGroupKeys = ['milestonesByDay', 'tasksByDay', 'reportsByDay', 'monthlyReportsByDay', 'proposalsByDay', 'transfersByDay', 'donorFollowUpsByDay', 'donorReportsByDay', 'projectStartsByDay', 'projectEndsByDay', 'reviewMeetingsByDay'];
+
+    // What other modules add to the days on screen (leave, holidays…), per day.
+    $layerItems = $this->layerItemsByDay;
 
     $focusedType = $this->focusedType();
 

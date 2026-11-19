@@ -97,6 +97,21 @@
                                 </button>
                             </div>
                         @endforeach
+
+                        {{-- What other modules add to the calendar (leave, holidays…): a switch each, no "only". --}}
+                        @if ($this->calendarLayers !== [])
+                            <div class="my-1 border-t border-secondary-soft dark:border-line"></div>
+
+                            @foreach ($this->calendarLayers as $layer)
+                                <div class="flex items-center gap-1 rounded-md hover:bg-secondary-soft dark:hover:bg-white/[0.06]" role="option" aria-selected="{{ $layer['shown'] ? 'true' : 'false' }}">
+                                    <button type="button" data-flux-menu-item wire:click="toggleLayer('{{ $layer['key'] }}')" class="flex min-w-0 flex-1 cursor-pointer items-center gap-2 px-2 py-1.5 text-start text-sm" data-test="calendar-layer-toggle-{{ $layer['key'] }}">
+                                        <flux:icon :name="$layer['icon']" variant="micro" class="size-3 shrink-0 text-secondary-medium dark:text-ink-muted" />
+                                        <span class="min-w-0 flex-1 truncate">{{ $layer['label'] }}</span>
+                                        @if ($layer['shown'])<flux:icon.check class="size-4 shrink-0 text-primary dark:text-brand-text" />@endif
+                                    </button>
+                                </div>
+                            @endforeach
+                        @endif
                     </div>
                 @endif
             </div>

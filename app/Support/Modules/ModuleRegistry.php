@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Modules;
 
+use App\Support\Modules\Contracts\CalendarLayerSource;
 use App\Support\Modules\Contracts\DeskAgendaSource;
 use App\Support\Modules\Contracts\DeskPanelSource;
 use App\Support\Modules\Contracts\DestinationSource;
@@ -14,7 +15,7 @@ use App\Support\Modules\Contracts\SubjectLinkSource;
  * What each module adds to the platform, registered from the module's own
  * ServiceProvider so app/ never names a module (D10). Today: sidebar pages
  * (Destinations), Desk panels (Panels), Desk agenda rows (ReadsDeskAgenda),
- * record links (SubjectLinks) and employee profile tabs.
+ * record links (SubjectLinks), employee profile tabs and calendar layers.
  *
  * A singleton filled once at boot; it holds class names only, and every read
  * resolves the source from the container, so nothing a request computes
@@ -46,6 +47,31 @@ final class ModuleRegistry
      * @var list<class-string<EmployeeTabSource>>
      */
     private array $employeeTabs = [];
+
+    /**
+     * @var list<class-string<CalendarLayerSource>>
+     */
+    private array $calendarLayers = [];
+
+    /**
+     * @param  class-string<CalendarLayerSource>  $source
+     */
+    public function addCalendarLayer(string $source): void
+    {
+        if (! in_array($source, $this->calendarLayers, true)) {
+            $this->calendarLayers[] = $source;
+        }
+    }
+
+    /**
+     * The layers modules add to the calendar, in registration order.
+     *
+     * @return list<CalendarLayerSource>
+     */
+    public function calendarLayerSources(): array
+    {
+        return array_map(fn (string $source): CalendarLayerSource => app($source), $this->calendarLayers);
+    }
 
     /**
      * @param  class-string<EmployeeTabSource>  $source

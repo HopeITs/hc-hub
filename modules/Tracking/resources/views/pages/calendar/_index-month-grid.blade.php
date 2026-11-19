@@ -2,7 +2,7 @@
     The month grid of calendar/index: weekday headers and one cell per day
     with that day's chips. Included by ⚡index.blade.php, whose top PHP block
     defines $calendar, $today, $focusedType, $focusedGroupKeys,
-    $allGroupKeys, $typeRingClasses, $typeDotClasses, $proposalTone and
+    $allGroupKeys, $layerItems, $typeRingClasses, $typeDotClasses, $proposalTone and
     $projectTone.
 --}}
                 <div class="grid grid-cols-7 border-b border-secondary-soft bg-secondary-soft/40 text-center text-xs font-semibold uppercase tracking-wide text-secondary-medium dark:border-line dark:bg-surface-2 dark:text-ink-muted">
@@ -18,7 +18,7 @@
                                 $isCurrentMonth = $day->month === $calendar['month']->month;
                                 $isToday = $day->isSameDay($today);
                                 $dayFocusedCount = $focusedType === null ? 0 : collect($focusedGroupKeys[$focusedType])->sum(fn (string $key) => $calendar[$key]->get($day->toDateString(), new \Illuminate\Support\Collection)->count());
-                                $dayItemCount = collect($allGroupKeys)->sum(fn (string $key) => $calendar[$key]->get($day->toDateString(), new \Illuminate\Support\Collection)->count());
+                                $dayItemCount = collect($allGroupKeys)->sum(fn (string $key) => $calendar[$key]->get($day->toDateString(), new \Illuminate\Support\Collection)->count()) + count($layerItems[$day->toDateString()] ?? []);
                             @endphp
                             <div
                                 wire:key="calendar-day-{{ $day->toDateString() }}"
@@ -72,7 +72,9 @@
                                         data-test="calendar-day-content-{{ $day->toDateString() }}"
                                     @endif
                                 >
+                                    @include('tracking::pages.calendar._layer-chips', ['day' => $day, 'items' => $layerItems, 'leads' => true])
                                     @include('tracking::pages.calendar._item-chips', ['day' => $day, 'calendar' => $calendar, 'markerTone' => $this->markerTone(...), 'taskTone' => $this->taskTone(...), 'reportTone' => $this->reportTone(...), 'monthlyReportTone' => $this->monthlyReportTone(...), 'isMonthlyReportLate' => $this->isMonthlyReportLate(...), 'proposalTone' => $proposalTone, 'transferTone' => $this->transferTone(...), 'donorFollowUpTone' => $this->donorFollowUpTone(...), 'donorReportTone' => $this->donorReportTone(...), 'projectTone' => $projectTone, 'projectEndTone' => $this->projectEndTone(...), 'isLate' => $this->isLate(...), 'typeDotClasses' => $typeDotClasses])
+                                    @include('tracking::pages.calendar._layer-chips', ['day' => $day, 'items' => $layerItems, 'leads' => false])
                                 </div>
 
                                 @if ($dayItemCount > 3)

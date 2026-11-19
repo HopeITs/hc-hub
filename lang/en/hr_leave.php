@@ -331,6 +331,10 @@ return [
         'edit' => 'Edit',
     ],
     'calendar' => [
+        'layers' => [
+            'leave' => 'Leave',
+            'holiday' => 'Holidays',
+        ],
         'titles' => [
             'holidays' => 'Holidays',
             'birthday_choices' => 'Birthday holiday',
