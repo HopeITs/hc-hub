@@ -201,6 +201,10 @@ new class extends Component {
 
         <span class="text-xs font-semibold tabular-nums {{ $muted }}" data-count-badge>{{ trans_choice('hr_settings.count_rows', $cities->count(), ['count' => $cities->count()]) }}</span>
 
+        @if (Route::has('admin.cities.index') && auth()->user()->can('cities.view'))
+            <x-ui.button tone="action" icon="map" :href="route('admin.cities.index')" wire:navigate data-test="hr-settings-cities-coverage">{{ __('hr_settings.cities.coverage') }}</x-ui.button>
+        @endif
+
         @if ($canCreate)
             <x-ui.button tone="primary" icon="plus" class="ms-auto" wire:click="openCreateModal" data-test="hr-settings-add-city" data-quick-create>
                 {{ __('hr_settings.add') }}

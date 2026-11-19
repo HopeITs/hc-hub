@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'staffing_link' => 'Positions and headcount',
     'all_strategies' => 'All strategies',
     'annual_plans' => 'Annual plans',
     'active' => 'Active',

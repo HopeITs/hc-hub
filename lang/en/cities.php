@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'manage_cities' => 'Add or edit cities',
     'active_cities' => 'Open in HR',
     'all_cities' => 'All cities',
     'arabic_name' => 'Arabic name',

@@ -72,6 +72,7 @@ return [
     'delete_message' => 'This cannot be undone. An item that is in use will not be deleted.',
 
     'cities' => [
+        'coverage' => 'Who covers each city',
         'add' => 'Add city',
         'edit' => 'Edit city',
         'dialog_description' => 'The short code names the city\'s HR role (HR-ALP) and the code is printed on ID cards.',
