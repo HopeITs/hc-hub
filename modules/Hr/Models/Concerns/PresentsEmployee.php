@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Modules\Core\Models\Center;
 use Modules\Hr\Models\Department;
 use Modules\Hr\Models\Employee;
@@ -47,6 +48,8 @@ trait PresentsEmployee
     private const PickerCacheSeconds = 300;
 
     private const AvatarCacheKey = 'hub.employees.avatars';
+
+    private const ProfileCacheKey = 'hub.employees.profiles';
 
     /**
      * Where each Spatie disk of the HR app keeps its files, inside HR's storage/app.
@@ -248,6 +251,33 @@ trait PresentsEmployee
             Cache::memo()->forget(self::PickerCacheKeyPrefix.$suffix);
             Cache::memo()->forget(self::PickerCacheKeyPrefix.'labels-with-photo.'.$suffix);
         }
+
+        Cache::memo()->forget(self::ProfileCacheKey);
+    }
+
+    /**
+     * The address of an employee's profile page, for any module that shows a
+     * person by name; null for someone who is no longer active (their page is
+     * HR's to open) or has no username to address it by.
+     *
+     * Every active employee's username is read in one query and cached for
+     * five minutes, like the picker lists, and dropped with them.
+     */
+    public static function profileUrl(?int $employeeId): ?string
+    {
+        if ($employeeId === null || ! Route::has('hr.employees.show')) {
+            return null;
+        }
+
+        /** @var array<int, string> $usernames */
+        $usernames = Cache::memo()->remember(self::ProfileCacheKey, self::PickerCacheSeconds, fn (): array => static::query()
+            ->where('is_active', true)
+            ->whereNotNull('username')
+            ->where('username', '!=', '')
+            ->pluck('username', 'id')
+            ->all());
+
+        return isset($usernames[$employeeId]) ? route('hr.employees.show', ['employee' => $usernames[$employeeId]]) : null;
     }
 
     /**

@@ -332,7 +332,7 @@ new #[Layout('layouts::desk'), Title('titles.donor_report')] class extends Compo
                     <x-ui.button size="sm" wire:click="openAssign" data-test="assign-responsible">{{ $responsible === null ? __('donor_reports.assign') : __('donor_reports.change') }}</x-ui.button>
                 @endcan
             </div>
-            <x-ui.employee-chip :employee="$responsible['employee'] ?? null" class="mt-2" />
+            <x-ui.employee-chip link :employee="$responsible['employee'] ?? null" class="mt-2" />
             @if ($responsible !== null && ! $responsible['reachable'])
                 <p class="mt-2 text-xs text-status-critical" data-responsible-warning>{{ __('donor_reports.responsible_unreachable') }}</p>
             @endif

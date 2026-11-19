@@ -147,6 +147,7 @@ return [
         'family' => 'Family & files',
         'contracts' => 'Contracts',
         'leave' => 'Leave',
+        'equipment' => 'Equipment',
         'badges' => 'Badges',
         'card' => 'ID card',
     ],

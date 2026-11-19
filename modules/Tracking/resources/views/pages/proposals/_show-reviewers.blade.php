@@ -37,7 +37,7 @@
                     <li @if ($row['isMine'] && $group['isOpen']) id="{{ \Modules\Tracking\Support\ProposalStoryLink::MyReview }}" @endif class="flex scroll-mt-36 flex-col gap-3 py-3 @2xl/detail:flex-row @2xl/detail:items-start" wire:key="reviewer-{{ $row['id'] }}" data-reviewer-row="{{ $row['id'] }}">
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-center gap-2">
-                                <x-ui.employee-chip :employee="$row['employee']" compact />
+                                <x-ui.employee-chip link :employee="$row['employee']" compact />
                                 <span class="rounded-md border border-secondary-light px-2 py-0.5 text-[11px] font-semibold {{ $mutedText }}">{{ $row['slot']->label() }}</span>
                                 @if ($row['seenAt'] !== null)
                                     <span class="inline-flex items-center gap-1 rounded-md bg-status-good-soft px-2 py-0.5 text-[11px] font-semibold text-status-good" data-reviewer-state="seen">

@@ -21,7 +21,7 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
     use ReadsEmployeeProfile;
     use WithFileUploads;
 
-    public const TABS = ['overview', 'records', 'family', 'contracts', 'leave', 'badges', 'card', 'journeys'];
+    public const TABS = ['overview', 'records', 'family', 'contracts', 'leave', 'equipment', 'badges', 'card', 'journeys'];
 
     #[Url(except: 'overview')]
     public string $tab = 'overview';
@@ -86,6 +86,7 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
             'family' => $this->canViewPrivate,
             'contracts' => $this->canViewRecords,
             'leave' => $this->isSelf || $this->canViewRecords,
+            'equipment' => $this->canEdit,
             'badges' => $this->canViewBadges,
             'card' => $this->canViewCard,
             'journeys' => $this->canEdit,
@@ -145,6 +146,9 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
             <div class="flex flex-wrap items-center gap-2">
                 @if (! $this->isSelf)
                     <x-hr::employees.message-template-menu :employee="$employee" />
+                @elseif (Route::has('security.edit'))
+                    {{-- Their sign-in (password, codes, devices) is the account's own page, behind its password check. --}}
+                    <x-ui.button icon="lock-closed" :href="route('security.edit')" wire:navigate data-test="own-security">{{ __('common.security') }}</x-ui.button>
                 @endif
                 @if ($this->dontRenewUrl !== null)
                     {{-- The direct manager asks the city's HR not to renew: a new email, nothing is sent from here. --}}
@@ -175,6 +179,8 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.show')] class extends 
         @include('hr::pages.employees._show-contracts')
     @elseif ($tab === 'leave')
         @include('hr::pages.employees._show-leave')
+    @elseif ($tab === 'equipment')
+        <livewire:hr::checklists.employee-checklist :employee-id="$employee->id" :key="'employee-equipment-'.$employee->id" />
     @elseif ($tab === 'badges')
         @include('hr::pages.employees._show-badges')
     @elseif ($tab === 'card')
