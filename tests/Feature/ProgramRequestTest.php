@@ -114,7 +114,7 @@ test('opening a program request tells the HR liaison and the Public Relations Ma
         ->and(deliveredActivityIdsOf($liaison))->toContain($opened)
         ->and(deliveredActivityIdsOf($prManager))->toContain($opened)
         ->and(deliveredActivityIdsOf($actor))->not->toContain($opened);
-});
+})->skip('Obsolete since A2: the program-request bridge (ProgramRequest) was removed; a new program is created straight from the proposal.');
 
 test('the opened request names the typed program and never an amount', function () {
     $liaison = hrLiaison();
@@ -128,7 +128,7 @@ test('the opened request names the typed program and never an amount', function 
     expect($notification)->not->toBeNull()
         ->and($notification->data['params']['name'] ?? null)->toBe('Alternative Energy')
         ->and(json_encode($notification->data))->not->toContain('requested_budget');
-});
+})->skip('Obsolete since A2: the program-request bridge (ProgramRequest) was removed; a new program is created straight from the proposal.');
 
 test('the linked request reaches the proposal owner, who needs no proposals.view for it', function () {
     $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create());
@@ -154,4 +154,4 @@ test('the linked request reaches the proposal owner, who needs no proposals.view
 
     expect($resolved->priorities)->toHaveKey($owner->id)
         ->and($resolved->priorities[$owner->id])->toBe(NotificationPriority::Info);
-});
+})->skip('Obsolete since A2: the program-request bridge (ProgramRequest) was removed; a new program is created straight from the proposal.');

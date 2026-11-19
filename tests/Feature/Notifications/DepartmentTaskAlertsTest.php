@@ -136,7 +136,7 @@ test('a department removed from HR hands its alerts to the proposal owners', fun
 
     expect(UserNotification::query()->forUser($owner)->count())->toBeGreaterThan(0)
         ->and(UserNotification::query()->forUser($this->member)->count())->toBe(0);
-});
+})->skip('Obsolete since one database (A2): tasks.department_id has a real foreign key, so a task cannot point at a department that no longer exists.');
 
 test('tasks and milestones of a rejected proposal stop alerting', function () {
     $task = departmentAlertTask('2026-09-28');
