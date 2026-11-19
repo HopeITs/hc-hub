@@ -17,7 +17,8 @@ use Modules\Tracking\Models\ProposalLocation;
 /**
  * The location rows of the proposal form (W-34a slice 3): where a proposal
  * runs, as city, program (or a new program), responsible and one or more
- * centers. They replace the project picker and go to SaveProposal as
+ * centers, or "field work, no center" (`city_wide`, D-88), which clears and
+ * disables the row's centers. They replace the project picker and go to SaveProposal as
  * `locations`, which validates and writes them; a new program or center a
  * row names is created there (CreateLocationPlaces), for someone who may.
  *
@@ -39,7 +40,7 @@ trait EditsProposalLocations
      * `project` names the linked project of a row that has one and `is_new`
      * carries the stored flag of a kept row; `key` and `project` are not sent.
      *
-     * @var list<array{key: string, city_id: string, program_id: string, responsible_employee_id: string, center_ids: list<string>, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string, is_new: bool, project: string|null}>
+     * @var list<array{key: string, city_id: string, program_id: string, responsible_employee_id: string, center_ids: list<string>, city_wide: bool, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string, is_new: bool, project: string|null}>
      */
     public array $locations = [];
 
@@ -144,8 +145,9 @@ trait EditsProposalLocations
 
     /**
      * Keep each row coherent as it is edited: a new city drops the centers of
-     * the old one, a chosen program proposes its manager as the responsible
-     * when none is set, and a program from the list clears the typed names.
+     * the old one, field work drops the centers and the typed new center, a
+     * chosen program proposes its manager as the responsible when none is
+     * set, and a program from the list clears the typed names.
      */
     public function updatedLocations(mixed $value, string $path): void
     {
@@ -162,6 +164,16 @@ trait EditsProposalLocations
             unset($this->locationCentersByCity);
             $allowed = array_map('strval', array_column($this->locationCentersByCity()[(int) $row['city_id']] ?? [], 'id'));
             $row['center_ids'] = array_values(array_intersect($row['center_ids'], $allowed));
+        }
+
+        if ($field === 'city_wide') {
+            $row['city_wide'] = (bool) $row['city_wide'];
+
+            if ($row['city_wide']) {
+                $row['center_ids'] = [];
+                $row['new_center_name_en'] = '';
+                $row['new_center_name_ar'] = '';
+            }
         }
 
         if ($field === 'program_id' && $row['program_id'] !== self::NewProgramValue) {
@@ -198,6 +210,7 @@ trait EditsProposalLocations
             'program_id' => $row->program_id !== null ? (string) $row->program_id : '',
             'responsible_employee_id' => $row->responsible_employee_id !== null ? (string) $row->responsible_employee_id : '',
             'center_ids' => array_map('strval', $row->centerIds()),
+            'city_wide' => $row->city_wide,
             'new_program_name_en' => '',
             'new_program_name_ar' => '',
             'new_center_name_en' => '',
@@ -219,7 +232,7 @@ trait EditsProposalLocations
      * The rows as SaveProposal's `locations`. A row left completely empty
      * (the one a create starts with, say) is not a place and is not sent.
      *
-     * @return list<array{city_id: string, program_id: string|null, responsible_employee_id: string|null, center_ids: list<string>, is_new: bool, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string}>
+     * @return list<array{city_id: string, program_id: string|null, responsible_employee_id: string|null, center_ids: list<string>, city_wide: bool, is_new: bool, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string}>
      */
     protected function locationPayload(): array
     {
@@ -227,12 +240,13 @@ trait EditsProposalLocations
             'city_id' => $row['city_id'],
             'program_id' => $row['program_id'] === '' || $row['program_id'] === self::NewProgramValue ? null : $row['program_id'],
             'responsible_employee_id' => $row['responsible_employee_id'] === '' ? null : $row['responsible_employee_id'],
-            'center_ids' => $row['center_ids'],
+            'center_ids' => $row['city_wide'] ? [] : $row['center_ids'],
+            'city_wide' => $row['city_wide'],
             'is_new' => $row['program_id'] === self::NewProgramValue || $row['is_new'],
             'new_program_name_en' => $row['program_id'] === self::NewProgramValue ? $row['new_program_name_en'] : '',
             'new_program_name_ar' => $row['program_id'] === self::NewProgramValue ? $row['new_program_name_ar'] : '',
-            'new_center_name_en' => $row['new_center_name_en'],
-            'new_center_name_ar' => $row['new_center_name_ar'],
+            'new_center_name_en' => $row['city_wide'] ? '' : $row['new_center_name_en'],
+            'new_center_name_ar' => $row['city_wide'] ? '' : $row['new_center_name_ar'],
         ], array_filter($this->locations, fn (array $row): bool => ! $this->isBlankLocationRow($row))));
     }
 
@@ -245,7 +259,7 @@ trait EditsProposalLocations
     }
 
     /**
-     * @param  array{city_id: string, program_id: string, responsible_employee_id: string, center_ids: list<string>, new_center_name_en: string, new_center_name_ar: string, project: string|null}  $row
+     * @param  array{city_id: string, program_id: string, responsible_employee_id: string, center_ids: list<string>, city_wide: bool, new_center_name_en: string, new_center_name_ar: string, project: string|null}  $row
      */
     private function isBlankLocationRow(array $row): bool
     {
@@ -254,12 +268,13 @@ trait EditsProposalLocations
             && $row['program_id'] === ''
             && $row['responsible_employee_id'] === ''
             && $row['center_ids'] === []
+            && ! $row['city_wide']
             && $row['new_center_name_en'] === ''
             && $row['new_center_name_ar'] === '';
     }
 
     /**
-     * @return array{key: string, city_id: string, program_id: string, responsible_employee_id: string, center_ids: list<string>, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string, is_new: bool, project: null}
+     * @return array{key: string, city_id: string, program_id: string, responsible_employee_id: string, center_ids: list<string>, city_wide: bool, new_program_name_en: string, new_program_name_ar: string, new_center_name_en: string, new_center_name_ar: string, is_new: bool, project: null}
      */
     private function blankLocationRow(): array
     {
@@ -269,6 +284,7 @@ trait EditsProposalLocations
             'program_id' => '',
             'responsible_employee_id' => '',
             'center_ids' => [],
+            'city_wide' => false,
             'new_program_name_en' => '',
             'new_program_name_ar' => '',
             'new_center_name_en' => '',

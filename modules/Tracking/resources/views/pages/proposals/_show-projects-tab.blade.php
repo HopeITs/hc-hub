@@ -1,10 +1,12 @@
 {{--
-    The Projects tab of proposals/show: link a project, and each funded
+    The Projects tab of proposals/show: the Locations chapter, link a project, and each funded
     project with its milestones and tasks. Included by ⚡show.blade.php,
     whose top PHP block defines $mutedText, $inkText, $hairline, $amount,
     $term, $chronology and $arrivals.
 --}}
 @use('Modules\Tracking\Enums\TaskStatus')
+            @include('tracking::pages.proposals._show-locations-chapter')
+
             @can('update', $this->proposal)
             <form wire:submit="linkProject" class="mb-6 flex flex-col gap-2 @xl/detail:flex-row @xl/detail:items-end" data-link-project>
                 <div class="min-w-0 flex-1">

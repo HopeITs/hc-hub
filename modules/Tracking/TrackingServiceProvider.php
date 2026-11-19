@@ -23,6 +23,8 @@ use Modules\Tracking\Console\Commands\EnsureAnnualPlans2026;
 use Modules\Tracking\Console\Commands\ImportProgramFramework;
 use Modules\Tracking\Console\Commands\ImportStrategyPillars;
 use Modules\Tracking\Console\Commands\MapProjectCenters;
+use Modules\Tracking\Console\Commands\PlaceBackfillPlanIndicators;
+use Modules\Tracking\Console\Commands\PlaceBackfillReportTemplates;
 use Modules\Tracking\Console\Commands\PrefillActiveReportTemplates;
 use Modules\Tracking\Console\Commands\PrepareMonthlyReports;
 use Modules\Tracking\Console\Commands\RemindAnnualPlanUpdates;
@@ -99,6 +101,8 @@ class TrackingServiceProvider extends ServiceProvider
             ImportProgramFramework::class,
             ImportStrategyPillars::class,
             MapProjectCenters::class,
+            PlaceBackfillPlanIndicators::class,
+            PlaceBackfillReportTemplates::class,
             PrefillActiveReportTemplates::class,
             PrepareMonthlyReports::class,
             RemindAnnualPlanUpdates::class,

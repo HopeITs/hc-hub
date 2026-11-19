@@ -457,6 +457,30 @@
             "module": null
         },
         {
+            "route": "hr.attendance.timesheets",
+            "label": "Timesheets",
+            "icon": "cal",
+            "hero": "nav-calendar-check",
+            "group": "workspace",
+            "module": null
+        },
+        {
+            "route": "hr.attendance.upload",
+            "label": "Upload attendance report",
+            "icon": "file",
+            "hero": "nav-file-plus",
+            "group": "workspace",
+            "module": null
+        },
+        {
+            "route": "hr.mail-lists.index",
+            "label": "Mail lists",
+            "icon": "users",
+            "hero": "nav-inbox",
+            "group": "workspace",
+            "module": null
+        },
+        {
             "route": "hr.checklists.index",
             "label": "Equipment",
             "icon": "check",
@@ -501,6 +525,14 @@
             "label": "HR settings",
             "icon": "grid",
             "hero": "nav-settings",
+            "group": "administration",
+            "module": null
+        },
+        {
+            "route": "hr.message-templates.index",
+            "label": "Message templates",
+            "icon": "file",
+            "hero": "nav-message-circle-question-mark",
             "group": "administration",
             "module": null
         },
@@ -1345,6 +1377,24 @@
             "min_rows": 1,
             "icon": "grid"
         },
+        "g-hr-attendance-timesheets": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-attendance-upload": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-mail-lists": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
         "g-hr-checklists": {
             "kind": "buttons",
             "rows": 1,
@@ -1370,6 +1420,12 @@
             "icon": "grid"
         },
         "g-hr-settings": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-message-templates": {
             "kind": "buttons",
             "rows": 1,
             "min_rows": 1,
@@ -1424,6 +1480,22 @@
                             "label": "My Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.attendance.timesheets",
+                            "label": "Timesheets",
+                            "icon": "cal",
+                            "hero": "nav-calendar-check",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
                             "group": "workspace",
                             "module": null
                         },
@@ -1771,6 +1843,22 @@
                     "module": null
                 },
                 {
+                    "route": "hr.attendance.timesheets",
+                    "label": "Timesheets",
+                    "icon": "cal",
+                    "hero": "nav-calendar-check",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.assistant",
                     "label": "HR assistant",
                     "icon": "info",
@@ -1816,6 +1904,8 @@
                 "admin.sectors.index",
                 "security.edit",
                 "notification-settings.edit",
+                "hr.attendance.timesheets",
+                "hr.mail-lists.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.employees.me"
@@ -2299,6 +2389,24 @@
                         "register": "notification-settings.edit",
                         "kind": "page"
                     },
+                    "g-hr-attendance-timesheets": {
+                        "id": "g-hr-attendance-timesheets",
+                        "title": "Timesheets",
+                        "description": "A button that opens Timesheets.",
+                        "icon": "nav-calendar-check",
+                        "size": "S",
+                        "register": "hr.attendance.timesheets",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
+                        "kind": "page"
+                    },
                     "g-hr-assistant": {
                         "id": "g-hr-assistant",
                         "title": "HR assistant",
@@ -2627,6 +2735,8 @@
                     "admin.sectors.index": "p-admin-sectors",
                     "security.edit": "g-security-edit",
                     "notification-settings.edit": "g-notification-settings-edit",
+                    "hr.attendance.timesheets": "g-hr-attendance-timesheets",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.employees.me": "g-hr-employees-me"
@@ -3040,6 +3150,24 @@
                     "route": "notification-settings.edit",
                     "href": "http://hc-hub.test/notifications-settings"
                 },
+                "g-hr-attendance-timesheets": {
+                    "id": "g-hr-attendance-timesheets",
+                    "key": "hr-attendance-timesheets",
+                    "kind": "page",
+                    "label": "Timesheets",
+                    "icon": "nav-calendar-check",
+                    "route": "hr.attendance.timesheets",
+                    "href": "http://hc-hub.test/hr/attendance"
+                },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-assistant": {
                     "id": "g-hr-assistant",
                     "key": "hr-assistant",
@@ -3104,6 +3232,22 @@
                             "label": "My Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.attendance.timesheets",
+                            "label": "Timesheets",
+                            "icon": "cal",
+                            "hero": "nav-calendar-check",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
                             "group": "workspace",
                             "module": null
                         },
@@ -3451,6 +3595,22 @@
                     "module": null
                 },
                 {
+                    "route": "hr.attendance.timesheets",
+                    "label": "Timesheets",
+                    "icon": "cal",
+                    "hero": "nav-calendar-check",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.assistant",
                     "label": "HR assistant",
                     "icon": "info",
@@ -3496,6 +3656,8 @@
                 "admin.sectors.index",
                 "security.edit",
                 "notification-settings.edit",
+                "hr.attendance.timesheets",
+                "hr.mail-lists.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.employees.me"
@@ -3997,6 +4159,24 @@
                         "register": "notification-settings.edit",
                         "kind": "page"
                     },
+                    "g-hr-attendance-timesheets": {
+                        "id": "g-hr-attendance-timesheets",
+                        "title": "Timesheets",
+                        "description": "A button that opens Timesheets.",
+                        "icon": "nav-calendar-check",
+                        "size": "S",
+                        "register": "hr.attendance.timesheets",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
+                        "kind": "page"
+                    },
                     "g-hr-assistant": {
                         "id": "g-hr-assistant",
                         "title": "HR assistant",
@@ -4313,6 +4493,8 @@
                     "admin.sectors.index": "p-admin-sectors",
                     "security.edit": "g-security-edit",
                     "notification-settings.edit": "g-notification-settings-edit",
+                    "hr.attendance.timesheets": "g-hr-attendance-timesheets",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.employees.me": "g-hr-employees-me"
@@ -4744,6 +4926,24 @@
                     "route": "notification-settings.edit",
                     "href": "http://hc-hub.test/notifications-settings"
                 },
+                "g-hr-attendance-timesheets": {
+                    "id": "g-hr-attendance-timesheets",
+                    "key": "hr-attendance-timesheets",
+                    "kind": "page",
+                    "label": "Timesheets",
+                    "icon": "nav-calendar-check",
+                    "route": "hr.attendance.timesheets",
+                    "href": "http://hc-hub.test/hr/attendance"
+                },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-assistant": {
                     "id": "g-hr-assistant",
                     "key": "hr-assistant",
@@ -4808,6 +5008,22 @@
                             "label": "My Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.attendance.timesheets",
+                            "label": "Timesheets",
+                            "icon": "cal",
+                            "hero": "nav-calendar-check",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
                             "group": "workspace",
                             "module": null
                         },
@@ -5194,6 +5410,22 @@
                     "module": null
                 },
                 {
+                    "route": "hr.attendance.timesheets",
+                    "label": "Timesheets",
+                    "icon": "cal",
+                    "hero": "nav-calendar-check",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.assistant",
                     "label": "HR assistant",
                     "icon": "info",
@@ -5241,6 +5473,8 @@
                 "admin.sectors.index",
                 "security.edit",
                 "notification-settings.edit",
+                "hr.attendance.timesheets",
+                "hr.mail-lists.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.employees.me"
@@ -5787,6 +6021,24 @@
                         "register": "notification-settings.edit",
                         "kind": "page"
                     },
+                    "g-hr-attendance-timesheets": {
+                        "id": "g-hr-attendance-timesheets",
+                        "title": "Timesheets",
+                        "description": "A button that opens Timesheets.",
+                        "icon": "nav-calendar-check",
+                        "size": "S",
+                        "register": "hr.attendance.timesheets",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
+                        "kind": "page"
+                    },
                     "g-hr-assistant": {
                         "id": "g-hr-assistant",
                         "title": "HR assistant",
@@ -6107,6 +6359,8 @@
                     "admin.sectors.index": "p-admin-sectors",
                     "security.edit": "g-security-edit",
                     "notification-settings.edit": "g-notification-settings-edit",
+                    "hr.attendance.timesheets": "g-hr-attendance-timesheets",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.employees.me": "g-hr-employees-me"
@@ -6617,6 +6871,24 @@
                     "route": "notification-settings.edit",
                     "href": "http://hc-hub.test/notifications-settings"
                 },
+                "g-hr-attendance-timesheets": {
+                    "id": "g-hr-attendance-timesheets",
+                    "key": "hr-attendance-timesheets",
+                    "kind": "page",
+                    "label": "Timesheets",
+                    "icon": "nav-calendar-check",
+                    "route": "hr.attendance.timesheets",
+                    "href": "http://hc-hub.test/hr/attendance"
+                },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-assistant": {
                     "id": "g-hr-assistant",
                     "key": "hr-assistant",
@@ -6681,6 +6953,22 @@
                             "label": "My Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.attendance.timesheets",
+                            "label": "Timesheets",
+                            "icon": "cal",
+                            "hero": "nav-calendar-check",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
                             "group": "workspace",
                             "module": null
                         },
@@ -7115,6 +7403,22 @@
                     "module": null
                 },
                 {
+                    "route": "hr.attendance.timesheets",
+                    "label": "Timesheets",
+                    "icon": "cal",
+                    "hero": "nav-calendar-check",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.assistant",
                     "label": "HR assistant",
                     "icon": "info",
@@ -7165,6 +7469,8 @@
                 "admin.sectors.index",
                 "security.edit",
                 "notification-settings.edit",
+                "hr.attendance.timesheets",
+                "hr.mail-lists.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.employees.me"
@@ -7792,6 +8098,24 @@
                         "register": "notification-settings.edit",
                         "kind": "page"
                     },
+                    "g-hr-attendance-timesheets": {
+                        "id": "g-hr-attendance-timesheets",
+                        "title": "Timesheets",
+                        "description": "A button that opens Timesheets.",
+                        "icon": "nav-calendar-check",
+                        "size": "S",
+                        "register": "hr.attendance.timesheets",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
+                        "kind": "page"
+                    },
                     "g-hr-assistant": {
                         "id": "g-hr-assistant",
                         "title": "HR assistant",
@@ -8126,6 +8450,8 @@
                     "admin.sectors.index": "p-admin-sectors",
                     "security.edit": "g-security-edit",
                     "notification-settings.edit": "g-notification-settings-edit",
+                    "hr.attendance.timesheets": "g-hr-attendance-timesheets",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.employees.me": "g-hr-employees-me"
@@ -8708,6 +9034,24 @@
                     "route": "notification-settings.edit",
                     "href": "http://hc-hub.test/notifications-settings"
                 },
+                "g-hr-attendance-timesheets": {
+                    "id": "g-hr-attendance-timesheets",
+                    "key": "hr-attendance-timesheets",
+                    "kind": "page",
+                    "label": "Timesheets",
+                    "icon": "nav-calendar-check",
+                    "route": "hr.attendance.timesheets",
+                    "href": "http://hc-hub.test/hr/attendance"
+                },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-assistant": {
                     "id": "g-hr-assistant",
                     "key": "hr-assistant",
@@ -8772,6 +9116,22 @@
                             "label": "My Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.attendance.timesheets",
+                            "label": "Timesheets",
+                            "icon": "cal",
+                            "hero": "nav-calendar-check",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
                             "group": "workspace",
                             "module": null
                         },
@@ -9199,6 +9559,22 @@
                     "module": null
                 },
                 {
+                    "route": "hr.attendance.timesheets",
+                    "label": "Timesheets",
+                    "icon": "cal",
+                    "hero": "nav-calendar-check",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.assistant",
                     "label": "HR assistant",
                     "icon": "info",
@@ -9249,6 +9625,8 @@
                 "admin.narrative-questions.index",
                 "security.edit",
                 "notification-settings.edit",
+                "hr.attendance.timesheets",
+                "hr.mail-lists.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.employees.me"
@@ -9633,42 +10011,6 @@
                         "register": "reports.index",
                         "kind": "action"
                     },
-                    "a-indicator": {
-                        "id": "a-indicator",
-                        "title": "New indicator",
-                        "description": "A button that opens the form for “New indicator”.",
-                        "icon": "chart-bar",
-                        "size": "S",
-                        "register": "indicators.index",
-                        "kind": "action"
-                    },
-                    "a-target": {
-                        "id": "a-target",
-                        "title": "New target",
-                        "description": "A button that opens the form for “New target”.",
-                        "icon": "viewfinder-circle",
-                        "size": "S",
-                        "register": "targets.index",
-                        "kind": "action"
-                    },
-                    "a-result": {
-                        "id": "a-result",
-                        "title": "New result",
-                        "description": "A button that opens the form for “New result”.",
-                        "icon": "trophy",
-                        "size": "S",
-                        "register": "results.index",
-                        "kind": "action"
-                    },
-                    "a-library-entry": {
-                        "id": "a-library-entry",
-                        "title": "New library indicator",
-                        "description": "A button that opens the form for “New library indicator”.",
-                        "icon": "book-open",
-                        "size": "S",
-                        "register": "indicator-library.index",
-                        "kind": "action"
-                    },
                     "a-evidence-type": {
                         "id": "a-evidence-type",
                         "title": "New evidence type",
@@ -9910,6 +10252,24 @@
                         "icon": "nav-bell-ring",
                         "size": "S",
                         "register": "notification-settings.edit",
+                        "kind": "page"
+                    },
+                    "g-hr-attendance-timesheets": {
+                        "id": "g-hr-attendance-timesheets",
+                        "title": "Timesheets",
+                        "description": "A button that opens Timesheets.",
+                        "icon": "nav-calendar-check",
+                        "size": "S",
+                        "register": "hr.attendance.timesheets",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
                         "kind": "page"
                     },
                     "g-hr-assistant": {
@@ -10246,6 +10606,8 @@
                     "admin.narrative-questions.index": "p-admin-narrative-questions",
                     "security.edit": "g-security-edit",
                     "notification-settings.edit": "g-notification-settings-edit",
+                    "hr.attendance.timesheets": "g-hr-attendance-timesheets",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.employees.me": "g-hr-employees-me"
@@ -10518,42 +10880,6 @@
                     "route": "reports.index",
                     "href": "http://hc-hub.test/reports?quick=create"
                 },
-                "a-indicator": {
-                    "id": "a-indicator",
-                    "key": "indicator",
-                    "kind": "action",
-                    "label": "New indicator",
-                    "icon": "chart-bar",
-                    "route": "indicators.index",
-                    "href": "http://hc-hub.test/indicators?quick=create"
-                },
-                "a-target": {
-                    "id": "a-target",
-                    "key": "target",
-                    "kind": "action",
-                    "label": "New target",
-                    "icon": "viewfinder-circle",
-                    "route": "targets.index",
-                    "href": "http://hc-hub.test/targets?quick=create"
-                },
-                "a-result": {
-                    "id": "a-result",
-                    "key": "result",
-                    "kind": "action",
-                    "label": "New result",
-                    "icon": "trophy",
-                    "route": "results.index",
-                    "href": "http://hc-hub.test/results?quick=create"
-                },
-                "a-library-entry": {
-                    "id": "a-library-entry",
-                    "key": "library-entry",
-                    "kind": "action",
-                    "label": "New library indicator",
-                    "icon": "book-open",
-                    "route": "indicator-library.index",
-                    "href": "http://hc-hub.test/indicator-library?quick=create"
-                },
                 "a-evidence-type": {
                     "id": "a-evidence-type",
                     "key": "evidence-type",
@@ -10797,6 +11123,24 @@
                     "route": "notification-settings.edit",
                     "href": "http://hc-hub.test/notifications-settings"
                 },
+                "g-hr-attendance-timesheets": {
+                    "id": "g-hr-attendance-timesheets",
+                    "key": "hr-attendance-timesheets",
+                    "kind": "page",
+                    "label": "Timesheets",
+                    "icon": "nav-calendar-check",
+                    "route": "hr.attendance.timesheets",
+                    "href": "http://hc-hub.test/hr/attendance"
+                },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-assistant": {
                     "id": "g-hr-assistant",
                     "key": "hr-assistant",
@@ -10861,6 +11205,22 @@
                             "label": "My Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.attendance.timesheets",
+                            "label": "Timesheets",
+                            "icon": "cal",
+                            "hero": "nav-calendar-check",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
                             "group": "workspace",
                             "module": null
                         },
@@ -11311,6 +11671,22 @@
                     "module": null
                 },
                 {
+                    "route": "hr.attendance.timesheets",
+                    "label": "Timesheets",
+                    "icon": "cal",
+                    "hero": "nav-calendar-check",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.assistant",
                     "label": "HR assistant",
                     "icon": "info",
@@ -11362,6 +11738,8 @@
                 "admin.sectors.index",
                 "security.edit",
                 "notification-settings.edit",
+                "hr.attendance.timesheets",
+                "hr.mail-lists.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.employees.me"
@@ -12025,6 +12403,24 @@
                         "register": "notification-settings.edit",
                         "kind": "page"
                     },
+                    "g-hr-attendance-timesheets": {
+                        "id": "g-hr-attendance-timesheets",
+                        "title": "Timesheets",
+                        "description": "A button that opens Timesheets.",
+                        "icon": "nav-calendar-check",
+                        "size": "S",
+                        "register": "hr.attendance.timesheets",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
+                        "kind": "page"
+                    },
                     "g-hr-assistant": {
                         "id": "g-hr-assistant",
                         "title": "HR assistant",
@@ -12338,6 +12734,8 @@
                     "admin.sectors.index": "p-admin-sectors",
                     "security.edit": "g-security-edit",
                     "notification-settings.edit": "g-notification-settings-edit",
+                    "hr.attendance.timesheets": "g-hr-attendance-timesheets",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.employees.me": "g-hr-employees-me"
@@ -12979,6 +13377,24 @@
                     "route": "notification-settings.edit",
                     "href": "http://hc-hub.test/notifications-settings"
                 },
+                "g-hr-attendance-timesheets": {
+                    "id": "g-hr-attendance-timesheets",
+                    "key": "hr-attendance-timesheets",
+                    "kind": "page",
+                    "label": "Timesheets",
+                    "icon": "nav-calendar-check",
+                    "route": "hr.attendance.timesheets",
+                    "href": "http://hc-hub.test/hr/attendance"
+                },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-assistant": {
                     "id": "g-hr-assistant",
                     "key": "hr-assistant",
@@ -13043,6 +13459,22 @@
                             "label": "My Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.attendance.timesheets",
+                            "label": "Timesheets",
+                            "icon": "cal",
+                            "hero": "nav-calendar-check",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
                             "group": "workspace",
                             "module": null
                         },
@@ -13390,6 +13822,22 @@
                     "module": null
                 },
                 {
+                    "route": "hr.attendance.timesheets",
+                    "label": "Timesheets",
+                    "icon": "cal",
+                    "hero": "nav-calendar-check",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.assistant",
                     "label": "HR assistant",
                     "icon": "info",
@@ -13435,6 +13883,8 @@
                 "admin.sectors.index",
                 "security.edit",
                 "notification-settings.edit",
+                "hr.attendance.timesheets",
+                "hr.mail-lists.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.employees.me"
@@ -13783,24 +14233,6 @@
                         "register": "risks.index",
                         "kind": "action"
                     },
-                    "a-indicator": {
-                        "id": "a-indicator",
-                        "title": "New indicator",
-                        "description": "A button that opens the form for “New indicator”.",
-                        "icon": "chart-bar",
-                        "size": "S",
-                        "register": "indicators.index",
-                        "kind": "action"
-                    },
-                    "a-result": {
-                        "id": "a-result",
-                        "title": "New result",
-                        "description": "A button that opens the form for “New result”.",
-                        "icon": "trophy",
-                        "size": "S",
-                        "register": "results.index",
-                        "kind": "action"
-                    },
                     "a-annual-plan": {
                         "id": "a-annual-plan",
                         "title": "New annual plan",
@@ -13988,6 +14420,24 @@
                         "icon": "nav-bell-ring",
                         "size": "S",
                         "register": "notification-settings.edit",
+                        "kind": "page"
+                    },
+                    "g-hr-attendance-timesheets": {
+                        "id": "g-hr-attendance-timesheets",
+                        "title": "Timesheets",
+                        "description": "A button that opens Timesheets.",
+                        "icon": "nav-calendar-check",
+                        "size": "S",
+                        "register": "hr.attendance.timesheets",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
                         "kind": "page"
                     },
                     "g-hr-assistant": {
@@ -14330,6 +14780,8 @@
                     "admin.sectors.index": "p-admin-sectors",
                     "security.edit": "g-security-edit",
                     "notification-settings.edit": "g-notification-settings-edit",
+                    "hr.attendance.timesheets": "g-hr-attendance-timesheets",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.employees.me": "g-hr-employees-me"
@@ -14608,24 +15060,6 @@
                     "route": "risks.index",
                     "href": "http://hc-hub.test/risks?quick=create"
                 },
-                "a-indicator": {
-                    "id": "a-indicator",
-                    "key": "indicator",
-                    "kind": "action",
-                    "label": "New indicator",
-                    "icon": "chart-bar",
-                    "route": "indicators.index",
-                    "href": "http://hc-hub.test/indicators?quick=create"
-                },
-                "a-result": {
-                    "id": "a-result",
-                    "key": "result",
-                    "kind": "action",
-                    "label": "New result",
-                    "icon": "trophy",
-                    "route": "results.index",
-                    "href": "http://hc-hub.test/results?quick=create"
-                },
                 "a-annual-plan": {
                     "id": "a-annual-plan",
                     "key": "annual-plan",
@@ -14815,6 +15249,24 @@
                     "route": "notification-settings.edit",
                     "href": "http://hc-hub.test/notifications-settings"
                 },
+                "g-hr-attendance-timesheets": {
+                    "id": "g-hr-attendance-timesheets",
+                    "key": "hr-attendance-timesheets",
+                    "kind": "page",
+                    "label": "Timesheets",
+                    "icon": "nav-calendar-check",
+                    "route": "hr.attendance.timesheets",
+                    "href": "http://hc-hub.test/hr/attendance"
+                },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-assistant": {
                     "id": "g-hr-assistant",
                     "key": "hr-assistant",
@@ -14879,6 +15331,22 @@
                             "label": "My Calendar",
                             "icon": "cal",
                             "hero": "nav-calendar",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.attendance.timesheets",
+                            "label": "Timesheets",
+                            "icon": "cal",
+                            "hero": "nav-calendar-check",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
                             "group": "workspace",
                             "module": null
                         },
@@ -15377,6 +15845,22 @@
                     "module": null
                 },
                 {
+                    "route": "hr.attendance.timesheets",
+                    "label": "Timesheets",
+                    "icon": "cal",
+                    "hero": "nav-calendar-check",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.assistant",
                     "label": "HR assistant",
                     "icon": "info",
@@ -15439,6 +15923,8 @@
                 "admin.sectors.index",
                 "security.edit",
                 "notification-settings.edit",
+                "hr.attendance.timesheets",
+                "hr.mail-lists.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.activity.index",
@@ -16247,6 +16733,24 @@
                         "register": "notification-settings.edit",
                         "kind": "page"
                     },
+                    "g-hr-attendance-timesheets": {
+                        "id": "g-hr-attendance-timesheets",
+                        "title": "Timesheets",
+                        "description": "A button that opens Timesheets.",
+                        "icon": "nav-calendar-check",
+                        "size": "S",
+                        "register": "hr.attendance.timesheets",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
+                        "kind": "page"
+                    },
                     "g-hr-assistant": {
                         "id": "g-hr-assistant",
                         "title": "HR assistant",
@@ -16552,6 +17056,8 @@
                     "admin.sectors.index": "p-admin-sectors",
                     "security.edit": "g-security-edit",
                     "notification-settings.edit": "g-notification-settings-edit",
+                    "hr.attendance.timesheets": "g-hr-attendance-timesheets",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.activity.index": "g-hr-activity",
@@ -17320,6 +17826,24 @@
                     "route": "notification-settings.edit",
                     "href": "http://hc-hub.test/notifications-settings"
                 },
+                "g-hr-attendance-timesheets": {
+                    "id": "g-hr-attendance-timesheets",
+                    "key": "hr-attendance-timesheets",
+                    "kind": "page",
+                    "label": "Timesheets",
+                    "icon": "nav-calendar-check",
+                    "route": "hr.attendance.timesheets",
+                    "href": "http://hc-hub.test/hr/attendance"
+                },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-assistant": {
                     "id": "g-hr-assistant",
                     "key": "hr-assistant",
@@ -17425,6 +17949,22 @@
                             "label": "Team calendar",
                             "icon": "users",
                             "hero": "nav-calendar-range",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.attendance.timesheets",
+                            "label": "Timesheets",
+                            "icon": "cal",
+                            "hero": "nav-calendar-check",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
                             "group": "workspace",
                             "module": null
                         },
@@ -17842,6 +18382,14 @@
                             "label": "HR settings",
                             "icon": "grid",
                             "hero": "nav-settings",
+                            "group": "administration",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.message-templates.index",
+                            "label": "Message templates",
+                            "icon": "file",
+                            "hero": "nav-message-circle-question-mark",
                             "group": "administration",
                             "module": null
                         }
@@ -18305,6 +18853,30 @@
                     "module": null
                 },
                 {
+                    "route": "hr.attendance.timesheets",
+                    "label": "Timesheets",
+                    "icon": "cal",
+                    "hero": "nav-calendar-check",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
+                    "route": "hr.attendance.upload",
+                    "label": "Upload attendance report",
+                    "icon": "file",
+                    "hero": "nav-file-plus",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.checklists.index",
                     "label": "Equipment",
                     "icon": "check",
@@ -18341,6 +18913,14 @@
                     "label": "HR settings",
                     "icon": "grid",
                     "hero": "nav-settings",
+                    "group": "administration",
+                    "module": null
+                },
+                {
+                    "route": "hr.message-templates.index",
+                    "label": "Message templates",
+                    "icon": "file",
+                    "hero": "nav-message-circle-question-mark",
                     "group": "administration",
                     "module": null
                 },
@@ -18416,11 +18996,15 @@
                 "hr.recruitment.offers.index",
                 "hr.recruitment.indicator-rules",
                 "hr.leave.team-calendar",
+                "hr.attendance.timesheets",
+                "hr.attendance.upload",
+                "hr.mail-lists.index",
                 "hr.checklists.index",
                 "hr.news.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.settings.index",
+                "hr.message-templates.index",
                 "hr.activity.index",
                 "hr.employees.me"
             ],
@@ -19632,6 +20216,33 @@
                         "register": "hr.leave.team-calendar",
                         "kind": "page"
                     },
+                    "g-hr-attendance-timesheets": {
+                        "id": "g-hr-attendance-timesheets",
+                        "title": "Timesheets",
+                        "description": "A button that opens Timesheets.",
+                        "icon": "nav-calendar-check",
+                        "size": "S",
+                        "register": "hr.attendance.timesheets",
+                        "kind": "page"
+                    },
+                    "g-hr-attendance-upload": {
+                        "id": "g-hr-attendance-upload",
+                        "title": "Upload attendance report",
+                        "description": "A button that opens Upload attendance report.",
+                        "icon": "nav-file-plus",
+                        "size": "S",
+                        "register": "hr.attendance.upload",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
+                        "kind": "page"
+                    },
                     "g-hr-checklists": {
                         "id": "g-hr-checklists",
                         "title": "Equipment",
@@ -19675,6 +20286,15 @@
                         "icon": "nav-settings",
                         "size": "S",
                         "register": "hr.settings.index",
+                        "kind": "page"
+                    },
+                    "g-hr-message-templates": {
+                        "id": "g-hr-message-templates",
+                        "title": "Message templates",
+                        "description": "A button that opens Message templates.",
+                        "icon": "nav-message-circle-question-mark",
+                        "size": "S",
+                        "register": "hr.message-templates.index",
                         "kind": "page"
                     },
                     "g-hr-activity": {
@@ -19949,11 +20569,15 @@
                     "hr.recruitment.offers.index": "g-hr-recruitment-offers",
                     "hr.recruitment.indicator-rules": "g-hr-recruitment-indicator-rules",
                     "hr.leave.team-calendar": "hr-team",
+                    "hr.attendance.timesheets": "g-hr-attendance-timesheets",
+                    "hr.attendance.upload": "g-hr-attendance-upload",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.checklists.index": "g-hr-checklists",
                     "hr.news.index": "hr-news",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.settings.index": "g-hr-settings",
+                    "hr.message-templates.index": "g-hr-message-templates",
                     "hr.activity.index": "g-hr-activity",
                     "hr.employees.me": "g-hr-employees-me"
                 },
@@ -21002,6 +21626,33 @@
                     "route": "hr.leave.team-calendar",
                     "href": "http://hc-hub.test/hr/team-calendar"
                 },
+                "g-hr-attendance-timesheets": {
+                    "id": "g-hr-attendance-timesheets",
+                    "key": "hr-attendance-timesheets",
+                    "kind": "page",
+                    "label": "Timesheets",
+                    "icon": "nav-calendar-check",
+                    "route": "hr.attendance.timesheets",
+                    "href": "http://hc-hub.test/hr/attendance"
+                },
+                "g-hr-attendance-upload": {
+                    "id": "g-hr-attendance-upload",
+                    "key": "hr-attendance-upload",
+                    "kind": "page",
+                    "label": "Upload attendance report",
+                    "icon": "nav-file-plus",
+                    "route": "hr.attendance.upload",
+                    "href": "http://hc-hub.test/hr/attendance/upload"
+                },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-checklists": {
                     "id": "g-hr-checklists",
                     "key": "hr-checklists",
@@ -21046,6 +21697,15 @@
                     "icon": "nav-settings",
                     "route": "hr.settings.index",
                     "href": "http://hc-hub.test/hr/settings"
+                },
+                "g-hr-message-templates": {
+                    "id": "g-hr-message-templates",
+                    "key": "hr-message-templates",
+                    "kind": "page",
+                    "label": "Message templates",
+                    "icon": "nav-message-circle-question-mark",
+                    "route": "hr.message-templates.index",
+                    "href": "http://hc-hub.test/hr/message-templates"
                 },
                 "g-hr-activity": {
                     "id": "g-hr-activity",
@@ -21102,6 +21762,14 @@
                             "label": "My leaves",
                             "icon": "cal",
                             "hero": "nav-tree-palm",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
                             "group": "workspace",
                             "module": null
                         },
@@ -21538,6 +22206,14 @@
                     "module": null
                 },
                 {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.checklists.index",
                     "label": "Equipment",
                     "icon": "check",
@@ -21628,6 +22304,7 @@
                 "hr.recruitment.indicator-rules",
                 "hr.leave.team-calendar",
                 "hr.leave.index",
+                "hr.mail-lists.index",
                 "hr.checklists.index",
                 "hr.archives.mine",
                 "hr.news.index",
@@ -22107,6 +22784,15 @@
                         "register": "hr.leave.index",
                         "kind": "page"
                     },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
+                        "kind": "page"
+                    },
                     "g-hr-checklists": {
                         "id": "g-hr-checklists",
                         "title": "Equipment",
@@ -22435,6 +23121,7 @@
                     "hr.recruitment.indicator-rules": "g-hr-recruitment-indicator-rules",
                     "hr.leave.team-calendar": "hr-team",
                     "hr.leave.index": "g-hr-leave",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.checklists.index": "g-hr-checklists",
                     "hr.archives.mine": "g-hr-archives-mine",
                     "hr.news.index": "hr-news",
@@ -22736,6 +23423,15 @@
                     "route": "hr.leave.index",
                     "href": "http://hc-hub.test/hr/leaves"
                 },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-checklists": {
                     "id": "g-hr-checklists",
                     "key": "hr-checklists",
@@ -22833,6 +23529,14 @@
                     "icon": "nav-list-checks",
                     "items": [
                         {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
                             "route": "hr.assistant",
                             "label": "HR assistant",
                             "icon": "info",
@@ -22908,6 +23612,14 @@
                     "module": null
                 },
                 {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.assistant",
                     "label": "HR assistant",
                     "icon": "info",
@@ -22937,6 +23649,7 @@
                 "notifications.index",
                 "security.edit",
                 "notification-settings.edit",
+                "hr.mail-lists.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.employees.me"
@@ -23130,6 +23843,15 @@
                         "icon": "nav-bell-ring",
                         "size": "S",
                         "register": "notification-settings.edit",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
                         "kind": "page"
                     },
                     "g-hr-assistant": {
@@ -23387,6 +24109,7 @@
                     "notifications.index": "g-notifications",
                     "security.edit": "g-security-edit",
                     "notification-settings.edit": "g-notification-settings-edit",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.employees.me": "g-hr-employees-me"
@@ -23494,6 +24217,15 @@
                     "route": "notification-settings.edit",
                     "href": "http://hc-hub.test/notifications-settings"
                 },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-assistant": {
                     "id": "g-hr-assistant",
                     "key": "hr-assistant",
@@ -23545,6 +24277,14 @@
                     "label": "My Work",
                     "icon": "nav-list-checks",
                     "items": [
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
+                            "group": "workspace",
+                            "module": null
+                        },
                         {
                             "route": "hr.assistant",
                             "label": "HR assistant",
@@ -23621,6 +24361,14 @@
                     "module": null
                 },
                 {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.assistant",
                     "label": "HR assistant",
                     "icon": "info",
@@ -23650,6 +24398,7 @@
                 "notifications.index",
                 "security.edit",
                 "notification-settings.edit",
+                "hr.mail-lists.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.employees.me"
@@ -23843,6 +24592,15 @@
                         "icon": "nav-bell-ring",
                         "size": "S",
                         "register": "notification-settings.edit",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
                         "kind": "page"
                     },
                     "g-hr-assistant": {
@@ -24104,6 +24862,7 @@
                     "notifications.index": "g-notifications",
                     "security.edit": "g-security-edit",
                     "notification-settings.edit": "g-notification-settings-edit",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.employees.me": "g-hr-employees-me"
@@ -24211,6 +24970,15 @@
                     "route": "notification-settings.edit",
                     "href": "http://hc-hub.test/notifications-settings"
                 },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-assistant": {
                     "id": "g-hr-assistant",
                     "key": "hr-assistant",
@@ -24262,6 +25030,14 @@
                     "label": "My Work",
                     "icon": "nav-list-checks",
                     "items": [
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
+                            "group": "workspace",
+                            "module": null
+                        },
                         {
                             "route": "hr.assistant",
                             "label": "HR assistant",
@@ -24338,6 +25114,14 @@
                     "module": null
                 },
                 {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.assistant",
                     "label": "HR assistant",
                     "icon": "info",
@@ -24367,6 +25151,7 @@
                 "notifications.index",
                 "security.edit",
                 "notification-settings.edit",
+                "hr.mail-lists.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.employees.me"
@@ -24560,6 +25345,15 @@
                         "icon": "nav-bell-ring",
                         "size": "S",
                         "register": "notification-settings.edit",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
                         "kind": "page"
                     },
                     "g-hr-assistant": {
@@ -24861,6 +25655,7 @@
                     "notifications.index": "g-notifications",
                     "security.edit": "g-security-edit",
                     "notification-settings.edit": "g-notification-settings-edit",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.employees.me": "g-hr-employees-me"
@@ -24968,6 +25763,15 @@
                     "route": "notification-settings.edit",
                     "href": "http://hc-hub.test/notifications-settings"
                 },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-assistant": {
                     "id": "g-hr-assistant",
                     "key": "hr-assistant",
@@ -25032,6 +25836,14 @@
                             "label": "My leaves",
                             "icon": "cal",
                             "hero": "nav-tree-palm",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
                             "group": "workspace",
                             "module": null
                         },
@@ -25151,6 +25963,14 @@
                     "module": null
                 },
                 {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.checklists.index",
                     "label": "Equipment",
                     "icon": "check",
@@ -25206,6 +26026,7 @@
                 "notification-settings.edit",
                 "hr.leave.team-calendar",
                 "hr.leave.index",
+                "hr.mail-lists.index",
                 "hr.checklists.index",
                 "hr.archives.mine",
                 "hr.news.index",
@@ -25447,6 +26268,15 @@
                         "icon": "nav-tree-palm",
                         "size": "S",
                         "register": "hr.leave.index",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
                         "kind": "page"
                     },
                     "g-hr-checklists": {
@@ -25802,6 +26632,7 @@
                     "notification-settings.edit": "g-notification-settings-edit",
                     "hr.leave.team-calendar": "hr-team",
                     "hr.leave.index": "g-hr-leave",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.checklists.index": "g-hr-checklists",
                     "hr.archives.mine": "g-hr-archives-mine",
                     "hr.news.index": "hr-news",
@@ -25930,6 +26761,15 @@
                     "route": "hr.leave.index",
                     "href": "http://hc-hub.test/hr/leaves"
                 },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
+                },
                 "g-hr-checklists": {
                     "id": "g-hr-checklists",
                     "key": "hr-checklists",
@@ -26009,6 +26849,14 @@
                     "icon": "nav-list-checks",
                     "items": [
                         {
+                            "route": "hr.mail-lists.index",
+                            "label": "Mail lists",
+                            "icon": "users",
+                            "hero": "nav-inbox",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
                             "route": "hr.assistant",
                             "label": "HR assistant",
                             "icon": "info",
@@ -26084,6 +26932,14 @@
                     "module": null
                 },
                 {
+                    "route": "hr.mail-lists.index",
+                    "label": "Mail lists",
+                    "icon": "users",
+                    "hero": "nav-inbox",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.assistant",
                     "label": "HR assistant",
                     "icon": "info",
@@ -26113,6 +26969,7 @@
                 "notifications.index",
                 "security.edit",
                 "notification-settings.edit",
+                "hr.mail-lists.index",
                 "hr.assistant",
                 "hr.feedback.index",
                 "hr.employees.me"
@@ -26306,6 +27163,15 @@
                         "icon": "nav-bell-ring",
                         "size": "S",
                         "register": "notification-settings.edit",
+                        "kind": "page"
+                    },
+                    "g-hr-mail-lists": {
+                        "id": "g-hr-mail-lists",
+                        "title": "Mail lists",
+                        "description": "A button that opens Mail lists.",
+                        "icon": "nav-inbox",
+                        "size": "S",
+                        "register": "hr.mail-lists.index",
                         "kind": "page"
                     },
                     "g-hr-assistant": {
@@ -26595,6 +27461,7 @@
                     "notifications.index": "g-notifications",
                     "security.edit": "g-security-edit",
                     "notification-settings.edit": "g-notification-settings-edit",
+                    "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.employees.me": "g-hr-employees-me"
@@ -26701,6 +27568,15 @@
                     "icon": "nav-bell-ring",
                     "route": "notification-settings.edit",
                     "href": "http://hc-hub.test/notifications-settings"
+                },
+                "g-hr-mail-lists": {
+                    "id": "g-hr-mail-lists",
+                    "key": "hr-mail-lists",
+                    "kind": "page",
+                    "label": "Mail lists",
+                    "icon": "nav-inbox",
+                    "route": "hr.mail-lists.index",
+                    "href": "http://hc-hub.test/hr/mail-lists"
                 },
                 "g-hr-assistant": {
                     "id": "g-hr-assistant",

@@ -18,7 +18,7 @@ $groups = [
     'programs' => ['view', 'create', 'update'],
     'projects' => ['view', 'create', 'update', 'delete'],
     'milestones' => ['view', 'create', 'update', 'delete'],
-    'indicators' => ['view', 'create', 'update', 'delete'],
+    'indicators' => ['view', 'create', 'update', 'delete', 'record'],
     'indicator-library' => ['view', 'create', 'update', 'delete'],
     'results' => ['view', 'create', 'update', 'delete'],
     'risks' => ['view', 'create', 'update', 'delete'],
@@ -45,6 +45,12 @@ $groups = [
     'activity-log' => ['view'],
     'notification-settings' => ['manage'],
     'ai' => ['draft', 'view-usage'],
+    // HR's attendance, mail lists and message templates (ported 2026-11-17).
+    // HR's own roles (HR-*) get these through hub:import-hr; the grant
+    // migrations of 2026-11-17 give the built-in roles what the baselines say.
+    'attendance' => ['view-own', 'view', 'manage'],
+    'mail-lists' => ['manage', 'confirm'],
+    'message-templates' => ['manage', 'use'],
 ];
 
 $allPermissions = [];
@@ -60,11 +66,22 @@ foreach ($groups as $module => $actions) {
 // decision 2026-09-29), which only the finance-facing roles below add back.
 $financeViews = ['transfers.view', 'funding-agreements.view', 'accounts.view'];
 $fundraisingViews = ['donors.view', 'proposals.view'];
-$restrictedViews = ['activity-log.view', ...$financeViews, ...$fundraisingViews];
-$viewEverything = array_values(array_filter(
-    $allPermissions,
-    fn (string $permission): bool => str_ends_with($permission, '.view') && ! in_array($permission, $restrictedViews, true),
-));
+// Other people's timesheets (attendance.view) go to managers and the General
+// Manager only; everyone sees their own (attendance.view-own).
+$restrictedViews = ['activity-log.view', 'attendance.view', ...$financeViews, ...$fundraisingViews];
+$viewEverything = [
+    ...array_values(array_filter(
+        $allPermissions,
+        fn (string $permission): bool => str_ends_with($permission, '.view') && ! in_array($permission, $restrictedViews, true),
+    )),
+    'attendance.view-own',
+];
+
+// HR's own work: running attendance, the mailing lists (confirming a member
+// is one person's, granted per user) and the message templates stay with the
+// HR roles and Super Admin, as in the HR app; the General Manager only views
+// timesheets.
+$hrOnly = ['attendance.manage', 'mail-lists.manage', 'mail-lists.confirm', 'message-templates.manage', 'message-templates.use'];
 
 // Two-factor enforcement fails closed: only an explicit false/0/off/no turns
 // it off; unset, empty or unrecognised values keep it on.
@@ -86,6 +103,46 @@ $aiDrafter = ['ai.draft'];
 return [
 
     'groups' => $groups,
+
+    /*
+    |--------------------------------------------------------------------------
+    | MEAL manager only
+    |--------------------------------------------------------------------------
+    |
+    | Building the logframe and its targets belongs to the one person holding
+    | the MEAL Manager slot (MEAL manager decision, 2026-11-13), not to every
+    | MEAL officer: a role that grants one of these abilities is honoured only
+    | for that person, or for a role listed under bypass_roles (see
+    | Modules\Core\Models\User::checkPermissionTo()). Logging an indicator reading is
+    | `indicators.record` and is not restricted.
+    */
+    'meal_manager_only' => [
+        'abilities' => [
+            'results.create', 'results.update', 'results.delete',
+            'indicators.create', 'indicators.update', 'indicators.delete',
+            'targets.create', 'targets.update', 'targets.delete',
+            'indicator-library.create', 'indicator-library.update', 'indicator-library.delete',
+        ],
+        'bypass_roles' => ['Super Admin', 'General Manager'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | MEAL manager grants
+    |--------------------------------------------------------------------------
+    |
+    | Granted to the MEAL Manager slot holder whatever their roles say (user
+    | decision 2026-11-16): every proposal tab, editing, status and reviewers,
+    | and the Funding tab's agreements and transfers. Recording the donor's
+    | approval (D-70) and deleting stay out. MEAL officers get none of these.
+    | See Modules\Core\Models\User::checkPermissionTo().
+    */
+    'meal_manager_grants' => [
+        'proposals.view', 'proposals.update', 'proposals.manage-reviewers', 'proposals.correct-status',
+        'donors.view',
+        'funding-agreements.view', 'funding-agreements.create', 'funding-agreements.update',
+        'transfers.view', 'transfers.create', 'transfers.update',
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -198,7 +255,7 @@ return [
         ],
         'MEAL' => [
             ...$viewEverything, ...$taskWriter, ...$reportWriter, 'reports.approve', 'reports.mark-seen',
-            'indicators.create', 'indicators.update', 'indicators.delete',
+            'indicators.create', 'indicators.update', 'indicators.delete', 'indicators.record',
             'results.create', 'results.update', 'results.delete',
             'targets.create', 'targets.update', 'targets.delete',
             'indicator-library.create', 'indicator-library.update', 'indicator-library.delete',
@@ -223,8 +280,10 @@ return [
             'projects.update', 'projects.delete',
             'milestones.create', 'milestones.update', 'milestones.delete',
             'risks.create', 'risks.update', 'risks.delete',
-            'indicators.create', 'indicators.update',
-            'results.create', 'results.update',
+            // Building the logframe is the MEAL manager's alone (2026-11-13); managers still log readings.
+            'indicators.record',
+            // Their direct reports' timesheets (Modules\Hr\Support\Attendance\Roster).
+            'attendance.view',
             ...$aiDrafter,
         ],
         'General Manager' => array_values(array_diff($allPermissions, [
@@ -239,6 +298,7 @@ return [
             ...$mealOnly,
             ...$targetWriter,
             ...$aiDrafter,
+            ...$hrOnly,
         ])),
     ],
 ];

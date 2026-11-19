@@ -444,6 +444,20 @@ return [
                 'body' => 'The program “:subject” has no logframe yet',
             ],
         ],
+        'strategic_plan' => [
+            'submitted' => [
+                'title' => 'Strategic plan to approve',
+                'body' => ':actor sent the :program strategic plan (:strategy) for your approval.',
+            ],
+            'approved' => [
+                'title' => 'Strategic plan approved',
+                'body' => ':actor approved the :program strategic plan (:strategy).',
+            ],
+            'sent_back' => [
+                'title' => 'Strategic plan sent back',
+                'body' => ':actor sent the :program strategic plan back: ":reason"',
+            ],
+        ],
         'annual_plan' => [
             'plan_submitted' => [
                 'title' => 'New annual plan to review',
@@ -651,6 +665,22 @@ return [
             'beneficiaries_changed' => [
                 'title' => 'Beneficiaries changed',
                 'body' => ':actor changed the beneficiaries of “:subject”',
+            ],
+            'change_requested' => [
+                'title' => 'Change request',
+                'body' => ':actor asked for a change to “:subject”',
+            ],
+            'change_reviewed' => [
+                'title' => 'Change request ready for your decision',
+                'body' => ':actor reviewed the change request on “:subject”',
+            ],
+            'change_approved' => [
+                'title' => 'Change request approved',
+                'body' => ':actor approved the change request on “:subject”',
+            ],
+            'change_rejected' => [
+                'title' => 'Change request rejected',
+                'body' => ':actor rejected the change request on “:subject”',
             ],
             'project_linked' => [
                 'title' => 'Project linked',
@@ -952,6 +982,10 @@ return [
                 'title' => 'New indicators to report',
                 'body' => ':actor added indicators for “:proposal” to the report template of “:subject”, from :from_month to :to_month',
             ],
+            'question_added' => ':actor added a narrative question to the report template of “:subject”',
+            'question_changed' => ':actor edited a narrative question of the report template of “:subject”',
+            'question_switched' => ':actor switched a narrative question of the report template of “:subject” off or on',
+            'question_removed' => ':actor deleted a narrative question from the report template of “:subject”',
         ],
         'department_task' => [
             'created' => [

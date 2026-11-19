@@ -4,6 +4,8 @@
 <x-ui.modal wire:model="showFolderModal" size="sm" :title="__('hr_employees.archives.new_folder')" submit="createFolder" close="closeFolderModal">
     @if ($showFolderModal)
         <x-ui.form-input wire:model="newFolderName" :label="__('hr_employees.archives.folder_name')" maxlength="255" required />
+        {{-- Whose folder this creates: the mode decides where it lives and who sees it. --}}
+        <p class="mt-2 text-sm text-secondary-medium dark:text-ink-muted" data-test="new-folder-whose">{{ $isShared ? __('hr_employees.archives.new_folder_shared') : __('hr_employees.archives.new_folder_mine') }}</p>
     @endif
 </x-ui.modal>
 

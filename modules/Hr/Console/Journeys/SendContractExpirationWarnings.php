@@ -19,7 +19,8 @@ use Throwable;
  * whose auto-renewing annual or service contract ends in exactly 30, 21, 14
  * or 7 days gets an in-app reminder. Each contract/manager/day is claimed in
  * notification_deliveries first, which is also what the journey reads as
- * "warning sent".
+ * "warning sent". The reminder opens the volunteer's profile, where the
+ * manager finds "Don't renew" (ContractNonRenewalMail).
  */
 class SendContractExpirationWarnings extends Command
 {
@@ -52,7 +53,7 @@ class SendContractExpirationWarnings extends Command
                     'name' => ['en' => $employee?->nameForLocale('en') ?? '', 'ar' => $employee?->nameForLocale('ar') ?? ''],
                     'date' => $contract->end_date?->format('d-m-Y') ?? '',
                     'days' => (string) (int) $day->diffInDays($contract->end_date->startOfDay()),
-                ], route('dashboard')));
+                ], filled($employee?->username) ? route('hr.employees.show', ['employee' => $employee->username]) : route('dashboard')));
                 $ledger->markDelivered(self::LEDGER_KIND, $manager->id, [$contract->id], $day);
                 $sent++;
             } catch (Throwable $e) {
@@ -80,7 +81,7 @@ class SendContractExpirationWarnings extends Command
         return Contract::query()
             ->select(['id', 'employee_id', 'position_id', 'end_date'])
             ->with([
-                'employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar',
+                'employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar,username',
                 'position:id,direct_manager_id',
             ])
             ->where('auto_renew', true)

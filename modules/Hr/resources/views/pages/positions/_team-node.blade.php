@@ -30,6 +30,9 @@
                     @endforeach
                     @if ($open > 0)
                         <span class="rounded-md bg-status-warn-soft px-1.5 py-0.5 text-xs font-semibold text-status-warn" data-open-seats>{{ trans_choice('hr_positions.team.open_count', $open, ['count' => $open]) }}</span>
+                        @if ($canRequestHire ?? false)
+                            <a href="{{ route('hr.recruitment.requests.create', ['type' => \Modules\Hr\Enums\RecruitmentRequestType::FillVacancy->value, 'position_id' => $nodeId]) }}" wire:navigate class="rounded-md px-1.5 py-0.5 text-xs font-semibold underline underline-offset-4" data-request-hire="{{ $nodeId }}">{{ __('hr_positions.team.request_hire') }}</a>
+                        @endif
                     @endif
                 </span>
                 @if ($kids !== [])

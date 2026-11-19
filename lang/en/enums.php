@@ -14,6 +14,16 @@ return [
         'pending' => 'Pending',
         'approved' => 'Approved',
     ],
+    'proposal_change_request_status' => [
+        'pending' => 'Waiting',
+        'approved' => 'Approved',
+        'rejected' => 'Rejected',
+    ],
+    'change_review_verdict' => [
+        'no_objection' => 'No objection',
+        'remarks' => 'Remarks',
+        'skipped' => 'No holder',
+    ],
     'donor_type' => [
         'bilateral' => 'Bilateral',
         'foundation' => 'Foundation',
@@ -306,6 +316,11 @@ return [
         'not_submitted' => 'Not sent',
         'upcoming' => 'Not due yet',
         'not_due' => 'Not expected',
+    ],
+    'strategic_plan_status' => [
+        'draft' => 'Draft',
+        'submitted' => 'With the program manager',
+        'approved' => 'Approved',
     ],
     'activity_plan_status' => [
         'draft' => 'Draft',

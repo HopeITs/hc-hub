@@ -9,11 +9,16 @@
 
     @include('tracking::pages.proposals._approve-modal')
 
+    @include('tracking::pages.proposals._center-fill-modal')
+
     @include('tracking::pages.proposals._final-report-modal')
+
+    @include('tracking::pages.proposals._change-request-modal')
 
     {{-- W-06 (D-58): a hold keeps the status, so both dialogs state that in one
          sentence and neither offers a status picker. --}}
     <x-ui.confirm-modal
+        icon="pause-circle"
         wire:model="showHoldModal"
         tone="neutral"
         close="closeHoldModal"
@@ -51,6 +56,7 @@
     </x-ui.confirm-modal>
 
     <x-ui.confirm-modal
+        icon="play-circle"
         wire:model="showOffHoldModal"
         tone="neutral"
         close="closeOffHoldModal"
@@ -104,6 +110,7 @@
     @endcanany
 
     <x-ui.confirm-modal
+        icon="link-slash"
         wire:model="showUnlinkModal"
         tone="neutral"
         :title="__('proposals.stop_funding_this_project')"
@@ -264,6 +271,7 @@
         marker
     />
     <x-ui.confirm-modal
+        permanent
         wire:model="confirmingFileDelete"
         :title="__('proposals.delete_this_file')"
         :message="$deletingFileId !== null && ($deletingMedia = $this->proposalFiles->firstWhere('id', $deletingFileId)) !== null ? __('proposals.deleting_the_file_also_removes_it_from_storage', ['name' => $deletingMedia->original_name]) : null"

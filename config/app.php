@@ -93,6 +93,9 @@ return [
 
     'timezone' => env('APP_TIMEZONE', 'UTC'),
 
+    // The shared mailbox that reaches the whole team ("Email the team" on the team chart).
+    'team_email' => env('TEAM_EMAIL', 'team@hcsyria.org'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

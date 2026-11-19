@@ -7,8 +7,10 @@ use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Result;
+use Modules\Tracking\Support\Reporting\ReportPlace;
 
 test('a target planned in a annual plan resolves that plan as its source', function () {
     $plan = AnnualPlan::factory()->create();
@@ -207,3 +209,93 @@ test('an approved NULL value (Not measured) adds nothing and never becomes the l
     'count' => [IndicatorMeasure::Numeric, 40.0],
     'percentage' => [IndicatorMeasure::Percentage, 40.0],
 ]);
+
+/**
+ * A proposal target with the given place columns and no project.
+ *
+ * @param  array<string, mixed>  $columns
+ */
+function placedTarget(array $columns, ?Proposal $proposal = null): PlanIndicator
+{
+    return PlanIndicator::factory()->forProposal($proposal)->create(['project_id' => null, ...$columns]);
+}
+
+test('a target without a city has no place', function () {
+    expect(placedTarget(['program_id' => Program::factory()->create()->id, 'center_id' => 5])->place())->toBeNull();
+});
+
+test('a shared target has no single place', function () {
+    $target = placedTarget(['city_id' => 7, 'program_id' => Program::factory()->create()->id, 'all_centers' => true]);
+
+    expect($target->place())->toBeNull();
+});
+
+test('the place is built from the target columns', function () {
+    $programId = Program::factory()->create()->id;
+    $center = placedTarget(['city_id' => 7, 'program_id' => $programId, 'center_id' => 9])->fresh();
+    $cityWide = placedTarget(['city_id' => 7, 'program_id' => $programId, 'city_wide' => true])->fresh();
+
+    expect($center->place()?->key())->toBe("7:{$programId}:c9")
+        ->and($cityWide->place()?->key())->toBe("7:{$programId}:city-wide");
+});
+
+test('atPlace finds the target at its center and not at another', function () {
+    $programId = Program::factory()->create()->id;
+    $target = placedTarget(['city_id' => 7, 'program_id' => $programId, 'center_id' => 9]);
+    placedTarget(['city_id' => 7, 'program_id' => $programId, 'center_id' => 10]);
+
+    $found = PlanIndicator::query()->atPlace(new ReportPlace(7, $programId, 9, false))->pluck('id')->all();
+
+    expect($found)->toBe([$target->id]);
+});
+
+test('a city-wide target matches the city-wide place of its city and program only', function () {
+    $programId = Program::factory()->create()->id;
+    $target = placedTarget(['city_id' => 7, 'program_id' => $programId, 'city_wide' => true]);
+    placedTarget(['city_id' => 7, 'program_id' => $programId, 'center_id' => 9]);
+
+    expect(PlanIndicator::query()->atPlace(new ReportPlace(7, $programId, null, true))->pluck('id')->all())->toBe([$target->id])
+        ->and(PlanIndicator::query()->atPlace(new ReportPlace(8, $programId, null, true))->exists())->toBeFalse();
+});
+
+test('a target whose center is not set matches nothing, not even an unset place', function () {
+    $programId = Program::factory()->create()->id;
+    $target = placedTarget(['city_id' => 7, 'program_id' => $programId]);
+    $unset = new ReportPlace(7, $programId, null, false);
+
+    expect(PlanIndicator::query()->atPlace($unset)->exists())->toBeFalse()
+        ->and($target->coversPlace($unset))->toBeFalse();
+});
+
+test('a shared target is not found by atPlace', function () {
+    $programId = Program::factory()->create()->id;
+    placedTarget(['city_id' => 7, 'program_id' => $programId, 'all_centers' => true]);
+
+    expect(PlanIndicator::query()->atPlace(new ReportPlace(7, $programId, null, false))->exists())->toBeFalse();
+});
+
+test('a target covers its own place', function () {
+    $programId = Program::factory()->create()->id;
+    $target = placedTarget(['city_id' => 7, 'program_id' => $programId, 'center_id' => 9]);
+
+    expect($target->coversPlace(new ReportPlace(7, $programId, 9, false)))->toBeTrue()
+        ->and($target->coversPlace(new ReportPlace(7, $programId, 10, false)))->toBeFalse();
+});
+
+test('a shared target covers the centers of its row and no third center', function () {
+    $programId = Program::factory()->create()->id;
+    $proposal = Proposal::factory()->create();
+    $cityId = insertHrCity('Homs Shared', 'حمص');
+    $first = insertHrCenter($cityId, 'Shared A');
+    $second = insertHrCenter($cityId, 'Shared B');
+    $third = insertHrCenter($cityId, 'Shared C');
+    $row = ProposalLocation::factory()->create(['proposal_id' => $proposal->id, 'city_id' => $cityId, 'program_id' => $programId, 'city_wide' => false]);
+    $row->centers()->create(['center_id' => $first]);
+    $row->centers()->create(['center_id' => $second]);
+    $target = placedTarget(['city_id' => $cityId, 'program_id' => $programId, 'all_centers' => true], $proposal);
+
+    expect($target->coversPlace(new ReportPlace($cityId, $programId, $first, false)))->toBeTrue()
+        ->and($target->coversPlace(new ReportPlace($cityId, $programId, $second, false)))->toBeTrue()
+        ->and($target->coversPlace(new ReportPlace($cityId, $programId, $third, false)))->toBeFalse()
+        ->and($target->coversPlace(new ReportPlace($cityId, $programId, null, true)))->toBeFalse();
+});

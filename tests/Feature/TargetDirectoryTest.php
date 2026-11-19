@@ -49,7 +49,7 @@ test('targets can be filtered by source type', function () {
 });
 
 test('a target stores the morph map key and never a class name', function () {
-    $user = User::factory()->role('MEAL')->create();
+    $user = mealManager();
     $plan = AnnualPlan::factory()->create();
     $indicator = Indicator::factory()->create();
 
@@ -72,7 +72,7 @@ test('a target stores the morph map key and never a class name', function () {
 });
 
 test('the source type select offers exactly the two mapped sources', function () {
-    $user = User::factory()->role('MEAL')->create();
+    $user = mealManager();
 
     Livewire::actingAs($user)
         ->test('tracking::targets.index')
@@ -83,7 +83,7 @@ test('the source type select offers exactly the two mapped sources', function ()
 });
 
 test('changing the source type clears the chosen source', function () {
-    $user = User::factory()->role('MEAL')->create();
+    $user = mealManager();
     $plan = AnnualPlan::factory()->create();
 
     Livewire::actingAs($user)
@@ -179,7 +179,7 @@ test('a reported target is not deleted because its reports would cascade', funct
 });
 
 test('a target value that would overflow the decimal column is rejected', function () {
-    $user = User::factory()->role('MEAL')->create();
+    $user = mealManager();
     $plan = AnnualPlan::factory()->create();
     $indicator = Indicator::factory()->create();
 
@@ -267,6 +267,29 @@ test('the pulse counts and filters targets by achievement status', function () {
         ->call('filterStatus', 'not_started')
         ->assertSet('status', '')
         ->assertSee('Halfway indicator');
+});
+
+test('a pressed status button says how many targets it shows and how to show all again', function () {
+    $plan = AnnualPlan::factory()->create();
+    foreach (['First untouched', 'Second untouched'] as $name) {
+        PlanIndicator::factory()->create([
+            'source_type' => 'annual_plan',
+            'source_id' => $plan->id,
+            'indicator_id' => Indicator::factory()->create(['name' => $name, 'measure' => 'numeric'])->id,
+            'target' => 10,
+        ]);
+    }
+
+    Livewire::actingAs(User::factory()->role('General Manager')->create())
+        ->test('tracking::targets.index')
+        ->assertDontSeeHtml('data-test="status-showing"')
+        ->call('filterStatus', 'achieved')
+        ->assertSeeHtml('data-test="status-filter-clear-achieved"')
+        ->assertSeeText('Showing 0 of 2 targets.')
+        ->assertSeeHtml('data-test="status-show-all"')
+        ->call('filterStatus', 'achieved')
+        ->assertDontSeeHtml('data-test="status-showing"')
+        ->assertDontSeeHtml('data-test="status-filter-clear-achieved"');
 });
 
 test('confirming a delete opens the dialog and cancelling closes it', function () {
@@ -403,7 +426,7 @@ test('the report trail shows evidence files and MEAL visibility', function () {
 });
 
 test('the indicator chain can open the commit form already tied to an indicator', function () {
-    $user = User::factory()->role('MEAL')->create();
+    $user = mealManager();
     $project = Project::factory()->create();
     $indicator = Indicator::factory()->create(['project_id' => $project->id, 'frequency' => Period::Monthly]);
 
@@ -417,7 +440,7 @@ test('the indicator chain can open the commit form already tied to an indicator'
 });
 
 test('the form offers only the plans and projects that fit the chosen indicator and source', function () {
-    $user = User::factory()->role('MEAL')->create();
+    $user = mealManager();
     $program = Program::factory()->create();
     $indicator = Indicator::factory()->for(Result::factory()->for($program))->create();
     $fittingPlan = AnnualPlan::factory()->for($program)->create();
@@ -444,7 +467,7 @@ test('the form offers only the plans and projects that fit the chosen indicator 
 });
 
 test('a target that does not fit its chain is refused', function () {
-    $user = User::factory()->role('MEAL')->create();
+    $user = mealManager();
     $indicator = Indicator::factory()->for(Result::factory()->for(Program::factory()))->create();
     $otherPlan = AnnualPlan::factory()->create();
 
@@ -475,7 +498,7 @@ test('a target that does not fit its chain is refused', function () {
 });
 
 test('a percentage target above 100 is refused', function () {
-    $user = User::factory()->role('MEAL')->create();
+    $user = mealManager();
     $indicator = Indicator::factory()->create(['measure' => IndicatorMeasure::Percentage]);
 
     Livewire::actingAs($user)
@@ -491,7 +514,7 @@ test('a percentage target above 100 is refused', function () {
 });
 
 test('the same indicator cannot be targeted twice in one source for one project', function () {
-    $user = User::factory()->role('MEAL')->create();
+    $user = mealManager();
     $existing = PlanIndicator::factory()->create();
 
     Livewire::actingAs($user)
@@ -508,7 +531,7 @@ test('the same indicator cannot be targeted twice in one source for one project'
 });
 
 test('a reported target keeps its indicator and source but its value can still change', function () {
-    $user = User::factory()->role('MEAL')->create();
+    $user = mealManager();
     $target = PlanIndicator::factory()->create(['target' => 100]);
     Report::factory()->for($target)->create();
 
@@ -530,7 +553,7 @@ test('a reported target keeps its indicator and source but its value can still c
 });
 
 test('a target already out of step is flagged but its value can still be corrected', function () {
-    $user = User::factory()->role('MEAL')->create();
+    $user = mealManager();
     $indicator = Indicator::factory()->for(Result::factory()->for(Program::factory()))->create();
     $target = PlanIndicator::factory()
         ->forAnnualPlan(AnnualPlan::factory()->create())
@@ -663,4 +686,42 @@ test('a filter with no match offers a way out and the delete dialog names the ta
         ->call('clearFilters')
         ->call('confirmDelete', $target->id)
         ->assertSee('Delete the target for “Meals served”?');
+});
+
+test('a saved form target carries the place of its project, and re-pointing it rewrites the place (Y-08)', function () {
+    $user = mealManager();
+    $program = Program::factory()->create();
+    $indicator = Indicator::factory()->for(Result::factory()->for($program))->create();
+    $plan = AnnualPlan::factory()->for($program)->create();
+    $cityId = insertHrCity('Directory City', 'مدينة');
+    $firstCenterId = insertHrCenter($cityId, 'Directory A');
+    $secondCenterId = insertHrCenter($cityId, 'Directory B');
+    $first = Project::factory()->for($program)->create(['city_id' => $cityId, 'center_id' => $firstCenterId]);
+    $second = Project::factory()->for($program)->create(['city_id' => $cityId, 'center_id' => $secondCenterId]);
+
+    Livewire::actingAs($user)
+        ->test('tracking::targets.index')
+        ->call('openCreateModal')
+        ->set('targetIndicatorId', (string) $indicator->id)
+        ->set('targetSourceType', 'annual_plan')
+        ->set('targetSourceId', (string) $plan->id)
+        ->set('targetProjectId', (string) $first->id)
+        ->set('targetValue', '500')
+        ->call('saveTarget')
+        ->assertHasNoErrors();
+
+    $target = PlanIndicator::query()->sole();
+    expect($target->place()?->centerId)->toBe($firstCenterId)
+        ->and($target->city_id)->toBe($first->city_id)
+        ->and($target->program_id)->toBe($program->id);
+
+    Livewire::actingAs($user)
+        ->test('tracking::targets.index')
+        ->call('openEditModal', $target->id)
+        ->set('targetProjectId', (string) $second->id)
+        ->call('saveTarget')
+        ->assertHasNoErrors();
+
+    expect($target->refresh()->place()?->centerId)->toBe($secondCenterId)
+        ->and($target->city_id)->toBe($second->city_id);
 });

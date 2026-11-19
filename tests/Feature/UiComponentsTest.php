@@ -649,7 +649,46 @@ test('a form section with invalid fields turns its dot red and counts them inste
     $xpath = formXPath(Blade::render('<x-ui.form-section title="Placement" hint="Where it runs" :fields="[\'cityId\', \'programId\', \'userId\']"><p>Fields</p></x-ui.form-section>'));
 
     expect($xpath->query('//section[@data-invalid]')->length)->toBe(1)
-        ->and(trim($xpath->query('//*[contains(@class, "form-section-hint")]')->item(0)->textContent))->toBe('2 fields need attention');
+        ->and(trim($xpath->query('//*[contains(@class, "form-section-hint")]')->item(0)->textContent))->toBe('2 fields need attention')
+        ->and($xpath->query('//section[@data-invalid-count="2"]')->length)->toBe(1);
+});
+
+test('a clean form section reports zero failed fields', function () {
+    View::share('errors', new ViewErrorBag);
+
+    $xpath = formXPath(Blade::render('<x-ui.form-section title="Details"><p>Fields</p></x-ui.form-section>'));
+
+    expect($xpath->query('//section[@data-invalid-count="0"]')->length)->toBe(1);
+});
+
+test('an optional form section starts folded behind an add button', function () {
+    View::share('errors', new ViewErrorBag);
+
+    $xpath = formXPath(Blade::render('<x-ui.form-section title="Notes" hint="Anything the team should know" :optional="true"><p>Fields</p></x-ui.form-section>'));
+
+    expect($xpath->query('//section[@x-data="formSectionFold"]')->length)->toBe(1)
+        ->and(trim($xpath->query('//*[@data-section-fold]//*[contains(@class, "form-section-fold-title")]')->item(0)->textContent))->toBe('Add notes')
+        ->and($xpath->query('//*[contains(@class, "form-section-card")][@x-show="open"]')->length)->toBe(1);
+});
+
+test('a required form section is never folded and carries its live status chip', function () {
+    View::share('errors', new ViewErrorBag);
+
+    $xpath = formXPath(Blade::render('<x-ui.form-section title="Details"><p>Fields</p></x-ui.form-section>'));
+
+    expect($xpath->query('//*[@data-section-fold]')->length)->toBe(0)
+        ->and($xpath->query('//section[@x-data]')->length)->toBe(0)
+        ->and($xpath->query('//*[@data-section-state][@*[name()="wire:ignore"]]')->length)->toBe(1)
+        ->and($xpath->query('//*[contains(@class, "form-section-num")]')->length)->toBe(1);
+});
+
+test('a form section marked optional says so in its heading', function () {
+    View::share('errors', new ViewErrorBag);
+
+    $xpath = formXPath(Blade::render('<x-ui.form-section title="Notes" :optional="true"><p>Fields</p></x-ui.form-section>'));
+
+    expect($xpath->query('//section[@data-optional]')->length)->toBe(1)
+        ->and(trim($xpath->query('//*[contains(@class, "form-section-optional")]')->item(0)->textContent))->toBe('Optional');
 });
 
 test('the attention count reads naturally in arabic', function () {
@@ -682,8 +721,9 @@ test('a danger confirmation carries a red mark and a red action wired to its met
     BLADE));
     $action = $xpath->query('//*[@data-test="confirm-delete-risk"]')->item(0);
 
-    expect($xpath->query('//dialog[contains(@class, "max-w-md")]')->length)->toBe(1)
-        ->and($xpath->query('//header//*[contains(@class, "confirm-mark") and contains(@class, "text-status-critical") and not(contains(@class, "bg-primary/"))]')->length)->toBe(1)
+    expect($xpath->query('//dialog[contains(@class, "max-w-md") and contains(@class, "modal-shell-confirm")]')->length)->toBe(1)
+        ->and($xpath->query('//header//*[@data-confirm-mark and contains(@class, "confirm-mark-danger")]')->length)->toBe(1)
+        ->and(trim($xpath->query('//*[contains(@class, "confirm-hint")]')->item(0)->textContent))->toBe('Esc to cancel')
         ->and(trim($xpath->query('//h2')->item(0)->textContent))->toBe('Delete this risk?')
         ->and(trim($xpath->query('//*[contains(@class, "modal-shell-description")]')->item(0)->textContent))->toBe('The risk and its mitigation notes are removed.')
         ->and($action->getAttribute('wire:click'))->toBe('deleteRisk')
@@ -701,9 +741,44 @@ test('a neutral confirmation uses a grey mark and the dark action', function () 
         </x-ui.confirm-modal>
     BLADE));
 
-    expect($xpath->query('//*[contains(@class, "confirm-mark") and contains(@class, "bg-secondary-soft")]')->length)->toBe(1)
+    expect($xpath->query('//*[@data-confirm-mark and contains(@class, "confirm-mark-neutral")]')->length)->toBe(1)
         ->and($xpath->query('//*[@data-test="confirm-archive-project"]')->item(0)->getAttribute('class'))->toContain('bg-secondary-dark!')
         ->and(trim($xpath->query('//*[contains(@class, "modal-shell-body")]')->item(0)->textContent))->toBe('Kept with the project');
+});
+
+test('a confirmation shows the icon of its own action, and a trash can when it names none', function () {
+    View::share('errors', new ViewErrorBag);
+
+    $markOf = fn (string $blade): string => formXPath(Blade::render($blade))->query('//*[@data-confirm-mark]//*[local-name()="path"]')->item(0)->getAttribute('d');
+    $iconPath = fn (string $name): string => formXPath(Blade::render('<flux:icon name="'.$name.'" />'))->query('//*[local-name()="path"]')->item(0)->getAttribute('d');
+
+    expect($markOf('<x-ui.confirm-modal wire:model="showArchiveModal" tone="neutral" icon="archive-box" title="Archive?" confirm="go" confirm-label="Archive" />'))->toBe($iconPath('archive-box'))
+        ->and($markOf('<x-ui.confirm-modal wire:model="showDeleteModal" title="Delete?" confirm="go" confirm-label="Delete" />'))->toBe($iconPath('trash'));
+});
+
+test('a permanent delete names its record and says it cannot be undone', function () {
+    View::share('errors', new ViewErrorBag);
+
+    $xpath = formXPath(Blade::render(<<<'BLADE'
+        <x-ui.confirm-modal wire:model="showDeleteModal" permanent record="Q3 progress report" record-meta="Gaza North · 3 files" title="Delete this draft report?" confirm="deleteReport" confirm-label="Delete report" />
+    BLADE));
+
+    expect(trim($xpath->query('//*[contains(@class, "confirm-record-name")]')->item(0)->textContent))->toBe('Q3 progress report')
+        ->and(trim($xpath->query('//*[contains(@class, "confirm-record-meta")]')->item(0)->textContent))->toBe('Gaza North · 3 files')
+        ->and(trim($xpath->query('//*[@data-confirm-permanent]')->item(0)->textContent))->toBe('This can’t be undone.');
+});
+
+test('a confirmation with a code to type keeps its action locked until the code matches', function () {
+    View::share('errors', new ViewErrorBag);
+
+    $xpath = formXPath(Blade::render(<<<'BLADE'
+        <x-ui.confirm-modal wire:model="showDeleteModal" confirm-text="PRJ-0142" title="Delete this proposal?" confirm="deleteProposal" confirm-label="Delete proposal" confirm-test="confirm-delete-proposal" />
+    BLADE));
+    $input = $xpath->query('//input[@data-confirm-text]')->item(0);
+
+    expect($xpath->query('//*[@data-test="confirm-delete-proposal"]')->item(0)->hasAttribute('disabled'))->toBeTrue()
+        ->and(trim($xpath->query('//label[@for="'.$input->getAttribute('id').'"]')->item(0)->textContent))->toBe('Type PRJ-0142 to confirm')
+        ->and($input->getAttribute('x-on:input'))->toContain("=== 'PRJ-0142'");
 });
 
 test('the confirm modal rejects an unknown tone', function () {

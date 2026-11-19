@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Livewire\Attributes\Computed;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
+use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ReportStatus;
 use Modules\Tracking\Models\DonorProposal;
@@ -16,8 +19,10 @@ use Modules\Tracking\Models\Milestone;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Task;
+use Modules\Tracking\Support\ProposalLocationRows;
 
 /**
  * The delivery on proposals/show: the funded projects, the tasks and
@@ -30,10 +35,59 @@ use Modules\Tracking\Models\Task;
  * @property-read Proposal $proposal  #[Computed] proposal()
  * @property-read Collection<int, DonorProposal> $agreements  #[Computed] agreements()
  * @property-read Collection<int, Project> $projects  #[Computed] projects()
+ * @property-read list<array{id: int, city: string, program: string|null, responsible: string|null, centers: list<string>, fieldWork: bool, status: string, project: string|null}> $locationRows  #[Computed] locationRows()
  * @property-read Collection<int, PlanIndicator> $targets  #[Computed] targets()
  */
 trait ReadsProposalDelivery
 {
+    /**
+     * The Locations chapter (Y-01): one entry per location row in `sort`
+     * order, with its place and a single status. The status comes from the
+     * one definition of `locations_complete` (ProposalLocationRows): a row it
+     * does not list is `complete`, a listed one says why, program first. A
+     * city-wide row (D-88) shows field work in place of centers and is never
+     * `missing_center`. Names come from the Core and HR rows, loaded once.
+     *
+     * @return list<array{id: int, city: string, program: string|null, responsible: string|null, centers: list<string>, fieldWork: bool, status: string, project: string|null}>
+     */
+    #[Computed]
+    public function locationRows(): array
+    {
+        $rows = $this->proposal->locations()
+            ->with(['centers', 'program', 'project:id,name'])
+            ->orderBy('sort')
+            ->orderBy('id')
+            ->get();
+
+        if ($rows->isEmpty()) {
+            return [];
+        }
+
+        $incomplete = array_flip(ProposalLocationRows::incompleteRowIds($this->proposal));
+        $cities = City::query()->whereKey($rows->pluck('city_id')->unique()->all())->get()->keyBy('id');
+        $employees = Employee::query()->whereKey($rows->pluck('responsible_employee_id')->filter()->unique()->all())->get()->keyBy('id');
+
+        return array_values($rows->map(function (ProposalLocation $row) use ($incomplete, $cities, $employees): array {
+            $status = match (true) {
+                ! isset($incomplete[$row->id]) => 'complete',
+                $row->program_id === null => 'missing_program',
+                $row->responsible_employee_id === null => 'missing_responsible',
+                default => 'missing_center',
+            };
+
+            return [
+                'id' => $row->id,
+                'city' => $cities->get($row->city_id)?->name ?? __('common.unknown_city'),
+                'program' => $row->program?->name,
+                'responsible' => $row->responsible_employee_id === null ? null : ($employees->get($row->responsible_employee_id)?->name ?? '#'.$row->responsible_employee_id),
+                'centers' => $row->city_wide ? [] : array_map(fn (int $centerId): string => Center::remembered($centerId)?->name ?? '#'.$centerId, $row->centerIds()),
+                'fieldWork' => $row->city_wide,
+                'status' => $status,
+                'project' => $row->project?->name,
+            ];
+        })->all());
+    }
+
     /**
      * The projects this proposal funds.
      *

@@ -444,6 +444,20 @@ return [
                 'body' => 'لا يوجد إطار منطقي للبرنامج «:subject» بعد',
             ],
         ],
+        'strategic_plan' => [
+            'submitted' => [
+                'title' => 'خطة استراتيجية بانتظار موافقتك',
+                'body' => 'أرسل :actor الخطة الاستراتيجية لبرنامج :program (:strategy) لموافقتك.',
+            ],
+            'approved' => [
+                'title' => 'اعتُمدت الخطة الاستراتيجية',
+                'body' => 'اعتمد :actor الخطة الاستراتيجية لبرنامج :program (:strategy).',
+            ],
+            'sent_back' => [
+                'title' => 'أُعيدت الخطة الاستراتيجية',
+                'body' => 'أعاد :actor الخطة الاستراتيجية لبرنامج :program: ":reason"',
+            ],
+        ],
         'annual_plan' => [
             'plan_submitted' => [
                 'title' => 'خطة سنوية جديدة للمراجعة',
@@ -651,6 +665,22 @@ return [
             'beneficiaries_changed' => [
                 'title' => 'تغيير عدد المستفيدين',
                 'body' => 'غيّر :actor عدد المستفيدين في «:subject»',
+            ],
+            'change_requested' => [
+                'title' => 'طلب تغيير',
+                'body' => 'طلب :actor تغييرًا على «:subject»',
+            ],
+            'change_reviewed' => [
+                'title' => 'طلب تغيير جاهز لقرارك',
+                'body' => 'راجع :actor طلب التغيير على «:subject»',
+            ],
+            'change_approved' => [
+                'title' => 'اعتُمد طلب التغيير',
+                'body' => 'اعتمد :actor طلب التغيير على «:subject»',
+            ],
+            'change_rejected' => [
+                'title' => 'رُفض طلب التغيير',
+                'body' => 'رفض :actor طلب التغيير على «:subject»',
             ],
             'project_linked' => [
                 'title' => 'ربط مشروع',
@@ -952,6 +982,10 @@ return [
                 'title' => 'مؤشرات جديدة للتقرير',
                 'body' => 'أضاف :actor مؤشرات المقترح «:proposal» إلى قالب تقرير المشروع «:subject»، من :from_month إلى :to_month',
             ],
+            'question_added' => 'أضاف :actor سؤالًا سرديًا إلى قالب تقرير المشروع «:subject»',
+            'question_changed' => 'عدّل :actor سؤالًا سرديًا في قالب تقرير المشروع «:subject»',
+            'question_switched' => 'أوقف :actor سؤالًا سرديًا في قالب تقرير المشروع «:subject» أو شغّله',
+            'question_removed' => 'حذف :actor سؤالًا سرديًا من قالب تقرير المشروع «:subject»',
         ],
         'department_task' => [
             'created' => [

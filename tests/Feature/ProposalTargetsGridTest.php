@@ -20,7 +20,7 @@ use Modules\Tracking\Models\Result;
 
 beforeEach(function () {
     $this->seed(RolesAndPermissionsSeeder::class);
-    $this->actingAs(User::factory()->role('MEAL')->create());
+    $this->actingAs(mealManager());
 
     $this->program = Program::factory()->create();
     $this->proposal = Proposal::factory()->create();
@@ -249,4 +249,39 @@ test('the window scope reads a project\'s proposal targets in a period', functio
     $outside = PlanIndicator::query()->forProjectInWindow($this->centerA->id, CarbonImmutable::parse('2027-02-01'), CarbonImmutable::parse('2027-02-28'))->count();
 
     expect($inside)->toBe(1)->and($outside)->toBe(0);
+});
+
+test('a saved cell carries the place of its project (Y-08)', function () {
+    $centerId = insertHrCenter((int) $this->centerA->city_id, 'Grid Center');
+    $this->centerA->forceFill(['center_id' => $centerId])->save();
+
+    saveGrid($this->proposal, [gridCell($this->indicator, $this->centerA, '120')]);
+
+    expect((array) DB::table('plan_indicators')->first(['city_id', 'program_id', 'center_id', 'city_wide', 'all_centers']))->toBe([
+        'city_id' => $this->centerA->city_id,
+        'program_id' => $this->program->id,
+        'center_id' => $centerId,
+        'city_wide' => 0,
+        'all_centers' => 0,
+    ]);
+});
+
+test('the grid resolves the places once per save, not per cell (3 projects × 5 indicators)', function () {
+    $centerC = Project::factory()->create(['program_id' => $this->program->id]);
+    DB::table('project_proposal')->insert(['project_id' => $centerC->id, 'proposal_id' => $this->proposal->id]);
+    $indicators = [$this->indicator, ...collect(range(1, 4))->map(fn (): Indicator => gridIndicator($this->output))->all()];
+    $cells = [];
+
+    foreach ($indicators as $indicator) {
+        foreach ([$this->centerA, $this->centerB, $centerC] as $project) {
+            $cells[] = gridCell($indicator, $project, '10');
+        }
+    }
+
+    DB::enableQueryLog();
+    saveGrid($this->proposal, $cells);
+    $queries = collect(DB::getQueryLog())->pluck('query');
+
+    expect($queries->filter(fn (string $sql): bool => str_contains($sql, 'from `proposal_locations`'))->count())->toBe(1)
+        ->and(DB::table('plan_indicators')->whereNotNull('city_id')->count())->toBe(15);
 });

@@ -39,6 +39,9 @@ trait PresentsEmployee
      */
     public const DefaultAvatar = 'images/default-avatar.png';
 
+    /** Bumped whenever the picker list's shape changes, so browsers drop the copy they cached for five minutes. */
+    public const int PickerListVersion = 2;
+
     private const PickerCacheKeyPrefix = 'hub.employees.picker.';
 
     private const PickerCacheSeconds = 300;
@@ -168,8 +171,9 @@ trait PresentsEmployee
     /**
      * The picker list as plain `{value, label, detail, photo, inactive}` rows:
      * label is the main and secondary name, detail the current position,
-     * photo the picture; someone without an active contract (or inactive) is
-     * flagged inactive.
+     * photo the picture (a host-less URL, as the list is cached for
+     * everyone); someone without an active contract (or inactive) is flagged
+     * inactive.
      *
      * @return SupportCollection<int, array{value: string, label: string, detail: string, photo: string, inactive: bool}>
      */
@@ -184,10 +188,24 @@ trait PresentsEmployee
                 'value' => (string) $employee->id,
                 'label' => $employee->name.' · '.$employee->secondary_name,
                 'detail' => static::positionSummary($employee->id) ?? (string) __('common.no_active_position'),
-                'photo' => static::avatarUrl($employee->id),
+                'photo' => static::pathOnly(static::avatarUrl($employee->id)),
                 'inactive' => ! (EmployeeProfile::for($employee->id)['is_active'] ?? false),
             ])->all(),
         ));
+    }
+
+    /**
+     * A same-site URL without its scheme and host. The picker list is cached
+     * for every visitor, so an absolute photo URL would carry the host of
+     * whoever built it (localhost vs 127.0.0.1, or another domain) and the
+     * browser would send no sign-in cookie to it.
+     */
+    private static function pathOnly(string $url): string
+    {
+        $path = parse_url($url, PHP_URL_PATH) ?? '/';
+        $query = parse_url($url, PHP_URL_QUERY);
+
+        return $query === null ? $path : $path.'?'.$query;
     }
 
     /**

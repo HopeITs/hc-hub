@@ -373,6 +373,7 @@ new #[Layout('layouts::desk'), Title('titles.project')] class extends Component 
     @endif
 
     <x-ui.confirm-modal
+        icon="lock-closed"
         wire:model="showCloseModal"
         tone="neutral"
         :title="__('projects.close_project_title')"
@@ -397,6 +398,7 @@ new #[Layout('layouts::desk'), Title('titles.project')] class extends Component 
     @include('tracking::pages.projects._index-project-modal')
 
     <x-ui.confirm-modal
+        icon="archive-box"
         wire:model="showArchiveModal"
         close="cancelArchive"
         tone="neutral"

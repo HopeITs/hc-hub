@@ -18,7 +18,8 @@ use Modules\Hr\Support\Settings\OrgCounts;
 
 /*
  * One program as HR sees it: its details, where it runs (positions and
- * headcount per governorate and per center) and who works on it now.
+ * headcount per governorate and per center, the centers linked to it
+ * through center_program included) and who works on it now.
  * Read-only: programs are created and edited from Tracking.
  */
 new #[Layout('layouts::desk'), Title('hr_settings.titles.program')] class extends Component {
@@ -66,7 +67,7 @@ new #[Layout('layouts::desk'), Title('hr_settings.titles.program')] class extend
             'seats' => $counts->seats ?? 0,
             'employees' => OrgCounts::headcount($this->cityIds(), $this->assignmentScope()),
             'cities' => $counts->cities ?? 0,
-            'centers' => $counts->centers ?? 0,
+            'centers' => count($this->breakdown['centers']),
         ];
     }
 
@@ -91,13 +92,35 @@ new #[Layout('layouts::desk'), Title('hr_settings.titles.program')] class extend
                 ->all();
         };
 
+        $centerRow = fn (int $id): array => [
+            'name' => Center::nameOf($id),
+            'city' => City::nameOf(Center::remembered($id)?->city_id),
+        ];
+
+        // The centers linked to the program count its positions without a
+        // center in their city too (Study Zone's have none of their own).
+        $linked = $this->linkedCenters
+            ->map(fn (object $counts, int $id): array => $centerRow($id) + ['id' => $id, 'positions' => $counts->positions, 'employees' => $counts->employees])
+            ->all();
+
+        $centers = collect($build('center_id', $centerRow))
+            ->keyBy('id')
+            ->replace($linked)
+            ->sortBy('name')
+            ->values()
+            ->all();
+
         return [
             'cities' => $build('city_id', fn (int $id): array => ['name' => City::nameOf($id)]),
-            'centers' => $build('center_id', fn (int $id): array => [
-                'name' => Center::nameOf($id),
-                'city' => City::nameOf(Center::remembered($id)?->city_id),
-            ]),
+            'centers' => $centers,
         ];
+    }
+
+    /** @return Collection<int, object{positions: int, seats: int, employees: int}> */
+    #[Computed]
+    public function linkedCenters(): Collection
+    {
+        return OrgCounts::linkedCenters($this->programId, $this->cityIds());
     }
 };
 ?>

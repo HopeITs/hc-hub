@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Modules\Core\Models\Program;
 use Modules\Tracking\Actions\Results\DeleteResult;
 use Modules\Tracking\Actions\Results\SaveResult;
@@ -304,6 +305,23 @@ trait ManagesResultForm
         $this->showResultModal = true;
     }
 
+    /**
+     * Open the form for an activity that stands on its own, unlinked to any
+     * statement, in a program framework (results/index) or in the pinned
+     * proposal's framework (the Logical Framework tab).
+     */
+    public function openCreateActivity(?int $programId = null): void
+    {
+        $this->openCreateModal();
+
+        $this->resultType = ResultType::Activity->value;
+        $this->parentId = '';
+
+        if ($programId !== null && $this->fixedProposalId() === null && Program::query()->whereKey($programId)->exists()) {
+            $this->resultProgramId = (string) $programId;
+        }
+    }
+
     public function openEditModal(int $resultId): void
     {
         Gate::authorize('results.update');
@@ -408,6 +426,16 @@ trait ManagesResultForm
     {
         $this->showResultModal = false;
         $this->resetResultForm();
+    }
+
+    /**
+     * The in-place indicator form (components/indicators/quick-form) wrote an
+     * indicator: re-read the framework so its card shows it.
+     */
+    #[On('indicator-saved')]
+    public function indicatorSaved(): void
+    {
+        $this->forgetFramework();
     }
 
     /**

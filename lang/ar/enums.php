@@ -14,6 +14,16 @@ return [
         'pending' => 'قيد الموافقة',
         'approved' => 'تمت الموافقة',
     ],
+    'proposal_change_request_status' => [
+        'pending' => 'بانتظار القرار',
+        'approved' => 'مُعتمد',
+        'rejected' => 'مرفوض',
+    ],
+    'change_review_verdict' => [
+        'no_objection' => 'لا مانع',
+        'remarks' => 'ملاحظات',
+        'skipped' => 'لا يوجد شاغل',
+    ],
     'donor_type' => [
         'bilateral' => 'ثنائي',
         'foundation' => 'مؤسسة',
@@ -306,6 +316,11 @@ return [
         'not_submitted' => 'غير مُرسَل',
         'upcoming' => 'لم يحن موعده',
         'not_due' => 'غير مطلوب',
+    ],
+    'strategic_plan_status' => [
+        'draft' => 'مسودة',
+        'submitted' => 'عند مدير البرنامج للموافقة',
+        'approved' => 'معتمدة',
     ],
     'activity_plan_status' => [
         'draft' => 'مسودة',

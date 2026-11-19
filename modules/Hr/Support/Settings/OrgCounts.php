@@ -6,7 +6,9 @@ namespace Modules\Hr\Support\Settings;
 
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Position;
 
@@ -72,6 +74,61 @@ final class OrgCounts
     public static function headcount(?array $cityIds = null, array $where = []): int
     {
         return (int) self::activeAssignments($cityIds, $where)->toBase()->distinct()->count('contracts.employee_id');
+    }
+
+    /**
+     * One program at the centers linked to it (center_program): per center,
+     * its positions placed there plus those without a center in the
+     * center's governorate (Study Zone's, shared by its centers there), and
+     * the distinct people on them now.
+     *
+     * @param  list<int>|null  $cityIds
+     * @return Collection<int, object{positions: int, seats: int, employees: int}>
+     */
+    public static function linkedCenters(int $programId, ?array $cityIds = null): Collection
+    {
+        $centerIds = DB::table('center_program')
+            ->join('centers', 'centers.id', '=', 'center_program.center_id')
+            ->where('center_program.program_id', $programId)
+            ->when($cityIds !== null, fn ($query) => $query->whereIn('centers.city_id', $cityIds))
+            ->pluck('centers.id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+
+        if ($centerIds === []) {
+            return collect();
+        }
+
+        $serving = fn (JoinClause $join) => $join
+            ->on('serving.id', '=', 'positions.center_id')
+            ->orWhere(fn (JoinClause $shared) => $shared
+                ->whereNull('positions.center_id')
+                ->whereColumn('serving.city_id', 'positions.city_id'));
+
+        $employees = self::activeAssignments($cityIds, ['program_id' => $programId])
+            ->toBase()
+            ->join('centers as serving', $serving)
+            ->whereIn('serving.id', $centerIds)
+            ->groupBy('serving.id')
+            ->selectRaw('serving.id as center_id, count(distinct contracts.employee_id) as employees')
+            ->pluck('employees', 'center_id');
+
+        $positions = Position::query()
+            ->toBase()
+            ->join('centers as serving', $serving)
+            ->whereIn('serving.id', $centerIds)
+            ->where('positions.program_id', $programId)
+            ->when($cityIds !== null, fn ($query) => $query->whereIn('positions.city_id', $cityIds))
+            ->groupBy('serving.id')
+            ->selectRaw('serving.id as center_id, count(*) as positions, coalesce(sum(positions.max_emp), 0) as seats')
+            ->get()
+            ->keyBy('center_id');
+
+        return collect($centerIds)->mapWithKeys(fn (int $centerId): array => [$centerId => (object) [
+            'positions' => (int) ($positions->get($centerId)->positions ?? 0),
+            'seats' => (int) ($positions->get($centerId)->seats ?? 0),
+            'employees' => (int) ($employees->get($centerId) ?? 0),
+        ]]);
     }
 
     /**

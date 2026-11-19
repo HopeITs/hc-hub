@@ -143,4 +143,12 @@ return [
             'body' => ':count contract(s) were renewed automatically today: :names.',
         ],
     ],
+
+    // "Don't renew": a new email from a manager to HR (mailto; nothing is sent by the system).
+    'dont_renew' => [
+        'action' => "Don't renew",
+        'hint' => 'Opens an email to HR asking not to renew this contract',
+        'subject' => 'Cancel renewing Contract of :name / :position',
+        'body' => "Dear HR,\n\nI would like to cancel the renewal of the following contract. Please switch off automatic renewal and do not renew it.\n\nEmployee: :name\nPosition: :position\nCity: :city\nContract no.: :number\nContract end date: :end\n\nReason (please complete):\n\n\nThank you,\n:sender",
+    ],
 ];

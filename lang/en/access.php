@@ -42,6 +42,9 @@ return [
         'activity-log' => 'Activity log',
         'notification-settings' => 'Notification settings',
         'ai' => 'AI assistant',
+        'attendance' => 'Attendance',
+        'mail-lists' => 'Mail lists',
+        'message-templates' => 'Message templates',
     ],
     'actions' => [
         'view' => 'View',
@@ -60,5 +63,9 @@ return [
         'correct-status' => 'Correct status',
         'draft' => 'Draft with AI',
         'view-usage' => 'View usage',
+        'record' => 'Log readings',
+        'view-own' => 'View own',
+        'use' => 'Use',
+        'confirm' => 'Confirm',
     ],
 ];

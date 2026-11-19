@@ -34,6 +34,8 @@ final class HrMedia
 
     public const CONTRACT_AMENDMENT = 'App\Models\ContractAmendment';
 
+    public const ATTENDANCE_MONTH = 'App\Models\AttendanceMonth';
+
     /** hr_media.disk => folder on the `hr` disk. */
     private const DISK_FOLDERS = ['public' => 'public', 'local' => 'private'];
 

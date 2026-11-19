@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Notifications\NotificationPresenter;
+use App\Support\EmployeeProfile;
 use App\Support\FileKeyring;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RolesAndPermissionsSeeder;
@@ -25,6 +26,7 @@ use Modules\Hr\Models\Department;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\JobLevel;
 use Modules\Hr\Models\Position;
+use Modules\Tracking\Actions\Proposals\SaveProposal;
 use Modules\Tracking\Enums\Currency;
 use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Enums\MonthlyReportStatus;
@@ -42,6 +44,8 @@ use Modules\Tracking\Models\MonthlyReportLineShare;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalChangeRequest;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\Sector;
@@ -636,6 +640,30 @@ function userWithRole(string $role, ?int $employeeId = null): User
 }
 
 /**
+ * A location row of the proposal that carries the project (Y-02): the
+ * project's city and program, and one center (a new HR center of the city
+ * unless one is given; `null` makes the row city-wide).
+ *
+ * @param  int|false|null  $centerId  false = city-wide, null = a new center
+ */
+function proposalRowForProject(Proposal $proposal, Project $project, int|false|null $centerId = null): ProposalLocation
+{
+    $row = ProposalLocation::factory()->create([
+        'proposal_id' => $proposal->id,
+        'city_id' => $project->city_id,
+        'program_id' => $project->program_id,
+        'project_id' => $project->id,
+        'city_wide' => $centerId === false,
+    ]);
+
+    if ($centerId !== false) {
+        $row->centers()->create(['center_id' => $centerId ?? insertHrCenter((int) $project->city_id, 'Center '.Str::random(6))]);
+    }
+
+    return $row;
+}
+
+/**
  * A complete Indicator Library form submission for SaveLibraryIndicator: an
  * institutional (HC), monthly, numeric entry at OP1 unless overridden.
  *
@@ -684,7 +712,66 @@ function holdMealManagerSlot(?int $employeeId = null): int
         'meal_manager' => $positionId, 'finance_manager' => null, 'fundraising_manager' => null, 'ceo' => null,
     ]]);
 
+    // The holder is read through a remembered HR lookup; drop it so a slot moved mid-test is seen.
+    EmployeeProfile::forgetRememberedLookup();
+
     return $employeeId;
+}
+
+/**
+ * Put one HR employee on each change-request review slot's position (Y-09);
+ * false leaves that slot vacant.
+ *
+ * @return array{finance: int|null, meal: int|null}
+ */
+function holdChangeReviewSlots(bool $finance = true, bool $meal = true): array
+{
+    $holders = ['finance' => null, 'meal' => null];
+    $positions = ['finance' => null, 'meal' => null];
+
+    if ($finance) {
+        $holders['finance'] = insertHrEmployee(firstNameEn: 'Fadi', lastNameEn: 'Finance');
+        $positions['finance'] = insertHrPosition(insertHrDepartment('Finance'), 'Finance Manager');
+        insertHrContract($holders['finance'], $positions['finance']);
+    }
+
+    if ($meal) {
+        $holders['meal'] = insertHrEmployee(firstNameEn: 'Maha', lastNameEn: 'Manager');
+        $positions['meal'] = insertHrPosition(insertHrDepartment('Monitoring & Evaluation'), 'MEAL Manager');
+        insertHrContract($holders['meal'], $positions['meal']);
+    }
+
+    app(NotificationSettings::class)->save(['proposal_default_reviewers' => [
+        'meal_manager' => $positions['meal'], 'finance_manager' => $positions['finance'], 'fundraising_manager' => null, 'ceo' => null,
+    ]]);
+
+    EmployeeProfile::forgetRememberedLookup();
+
+    return $holders;
+}
+
+/**
+ * A pending change request on the proposal (Y-09), stored the way
+ * RequestProposalChange stores it: `changes` is what SaveProposal computes
+ * for the payload now, with both reviews waiting. Written without recording.
+ *
+ * @param  array<string, mixed>  $payload
+ */
+function pendingChangeRequestOn(Proposal $proposal, array $payload, ?User $requester = null, string $reason = 'The donor asked for this change.'): ProposalChangeRequest
+{
+    $requester ??= userWithRole('Public Relations');
+
+    return Activity::withoutRecording(function () use ($proposal, $payload, $requester, $reason): ProposalChangeRequest {
+        $changes = DB::transaction(fn (): array => app(SaveProposal::class)->changesFor($proposal->fresh(), $payload, $requester));
+
+        return ProposalChangeRequest::factory()->withReviews()->create([
+            'proposal_id' => $proposal->id,
+            'requested_by' => $requester->id,
+            'reason' => $reason,
+            'changes' => $changes,
+            'payload' => $payload,
+        ]);
+    });
 }
 
 /**

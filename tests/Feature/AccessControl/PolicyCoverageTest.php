@@ -43,6 +43,8 @@ use Modules\Tracking\Models\PlanUpdateNumber;
 use Modules\Tracking\Models\PlanUpdateQuestion;
 use Modules\Tracking\Models\PlanUpdateWeek;
 use Modules\Tracking\Models\ProjectActivityStatus;
+use Modules\Tracking\Models\ProposalChangeRequest;
+use Modules\Tracking\Models\ProposalChangeRequestReview;
 use Modules\Tracking\Models\ProposalLocationCenter;
 use Modules\Tracking\Models\ProposalReviewer;
 use Modules\Tracking\Models\ProposalStatusNote;
@@ -111,6 +113,8 @@ function modelsGuardedWithoutPolicy(): array
         PlanIndicator::class => ['targets', 'targets.* permissions on the targets page.'],
         ProjectActivityStatus::class => ['reports', 'Written only when a monthly report is validated or reopened (MonthlyReportPolicy::validate, decideReopen).'],
         ProposalStatusNote::class => ['proposals', 'Written only through a proposal status change (ProposalPolicy::update).'],
+        ProposalChangeRequest::class => ['proposals', 'Written only by the change-request actions under ProposalPolicy::requestChange, decideChange and withdrawChange (Y-09, D-89a).'],
+        ProposalChangeRequestReview::class => ['proposals', 'Part of its change request; written only by RequestProposalChange and ReviewProposalChange under ProposalPolicy::reviewChange (Y-09).'],
         ProposalReviewer::class => ['proposals', 'Written only by the review actions under ProposalPolicy::transition, manageReviewers and markReviewed (T07).'],
         ReportFile::class => ['reports', 'Follows its report (ReportPolicy); the download controllers check it.'],
         ReportTemplateLine::class => ['report-templates', 'Part of a report template: written only by the report template actions under ReportTemplatePolicy::manage (T33).'],

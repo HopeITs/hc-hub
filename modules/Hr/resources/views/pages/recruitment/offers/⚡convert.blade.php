@@ -251,6 +251,9 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.offer_convert')]
                 @endif
             </div>
         </x-ui.panel>
+
+        {{-- The guided flow: what is left around the new employee. --}}
+        @include('hr::pages.recruitment.offers._convert-onboarding', ['steps' => app(\Modules\Hr\Support\Recruitment\OnboardingChecklist::class)->for($conversion, auth()->user())])
     @else
         <p class="text-sm {{ $muted }}">{{ __('hr_recruitment.applicant_ui.conversions.hint') }}</p>
 

@@ -35,7 +35,12 @@
             @endif
         </div>
         <dl class="grid gap-3 border-t border-panel-border p-4">
-            <x-hr::employees.fact :label="__('hr_employees.fields.work_email')" :value="$employee->account?->email" ltr />
+            <x-hr::employees.fact :label="__('hr_employees.fields.work_email')" :value="$employee->account?->email" ltr>
+                @if ($this->workMailto !== null)
+                    {{-- A new message to the employee, their direct manager on CC. --}}
+                    <a href="{{ $this->workMailto }}" class="underline-offset-4 hover:underline" data-test="work-email-link" title="{{ __('hr_employees.profile.email_with_manager_cc') }}">{{ $employee->account?->email }}</a>
+                @endif
+            </x-hr::employees.fact>
             <x-hr::employees.fact :label="__('hr_employees.fields.work_phone')" :value="$employee->work_phone" ltr />
             @if (filled($employee->whatsapp_work))
                 <x-hr::employees.fact :label="__('hr_employees.fields.whatsapp_work')" :value="$employee->whatsapp_work" ltr />
