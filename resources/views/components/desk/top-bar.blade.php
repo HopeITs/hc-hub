@@ -27,7 +27,7 @@
             </button>
 
             <a class="dk-top-mark" href="{{ route('dashboard') }}" wire:navigate aria-label="{{ __('desk.logo_label') }}">
-                <img src="{{ asset('logo-tracking-icon.svg') }}" alt="" data-no-dim />
+                <img src="{{ asset('logo-hub-icon.svg') }}" alt="" data-no-dim />
             </a>
 
             @if ($where)
