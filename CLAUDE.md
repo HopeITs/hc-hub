@@ -1,3 +1,6 @@
+## Session rule
+At the start of every session, invoke the `session-orchestrator` skill and follow it.
+
 <laravel-boost-guidelines>
 === foundation rules ===
 
