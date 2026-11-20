@@ -33,6 +33,22 @@ enum MediaCollection: string
     case ReportSubmission = 'report_submission';
     case Negotiation = 'negotiation';
     case Amendment = 'amendment';
+    case Avatar = 'avatar';
+    case EmployeeAttachment = 'employee_attachment';
+    case Credential = 'credential';
+    case ArchiveFile = 'archive_file';
+    case NewsImage = 'news_image';
+
+    /**
+     * Whether only a staff record holds files of this collection: a person's
+     * photo and papers, the certificate behind a qualification, an HR archive
+     * folder's files, a news item's picture (roadmap 4.10). Project and
+     * proposal file pickers never offer it.
+     */
+    public function isStaffRecordOnly(): bool
+    {
+        return in_array($this, [self::Avatar, self::EmployeeAttachment, self::Credential, self::ArchiveFile, self::NewsImage], true);
+    }
 
     /**
      * Whether this collection holds signed funding paperwork.

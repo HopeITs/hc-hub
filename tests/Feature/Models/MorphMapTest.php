@@ -8,9 +8,14 @@ use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Course;
 use Modules\Hr\Models\Department as HrDepartment;
+use Modules\Hr\Models\Education;
 use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\Experience;
+use Modules\Hr\Models\Folder;
 use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Models\News;
 use Modules\Hr\Models\Position;
 use Modules\Tracking\Models\Account;
 use Modules\Tracking\Models\AnnualPlan;
@@ -76,6 +81,11 @@ test('the morph map registers exactly the target sources, task sources, media ow
         'leave_request' => LeaveRequest::class,
         'contract' => Contract::class,
         'position' => Position::class,
+        'education' => Education::class,
+        'experience' => Experience::class,
+        'course' => Course::class,
+        'folder' => Folder::class,
+        'news' => News::class,
     ]);
 });
 

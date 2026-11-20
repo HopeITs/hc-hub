@@ -28,6 +28,7 @@ use Modules\Hr\Console\Journeys\SendContractExpirationWarnings;
 use Modules\Hr\Console\Journeys\SendOrientationReminders;
 use Modules\Hr\Console\Journeys\TrackRenewalJourneys;
 use Modules\Hr\Console\LoadMailListsCommand;
+use Modules\Hr\Console\MoveHrMediaCommand;
 use Modules\Hr\Console\ProcessContractAutoRenewalsCommand;
 use Modules\Hr\Console\RecountPositionSeatsCommand;
 use Modules\Hr\Console\ReportAccountGapsCommand;
@@ -122,6 +123,9 @@ class HrServiceProvider extends ServiceProvider
 
         // Hub unification reports (read only).
         $this->commands([ReportAccountGapsCommand::class, ReportRecruitmentAccessCommand::class]);
+
+        // The move of hr_media into the encrypted media store: dry run, --copy, --verify (never deletes).
+        $this->commands([MoveHrMediaCommand::class]);
 
         // HR's background jobs and their times: Modules\Hr\Console\HrSchedule.
         $this->app->make(ModuleRegistry::class)->addSchedule(HrSchedule::class);
