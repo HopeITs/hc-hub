@@ -50,4 +50,13 @@ interface EmployeeLookup
      * @return list<int>
      */
     public function activeIds(array $employeeIds = []): array;
+
+    /**
+     * A subquery of the ids of employees whose record is active, living in
+     * the given cities (null: every city), for whereIn(). The same "active"
+     * as HR's own head count.
+     *
+     * @param  list<int>|null  $cityIds
+     */
+    public function activeIdsIn(?array $cityIds): Builder;
 }

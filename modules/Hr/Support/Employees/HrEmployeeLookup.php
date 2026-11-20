@@ -58,4 +58,13 @@ final class HrEmployeeLookup implements EmployeeLookup
             ->map(fn (mixed $id): int => (int) $id)
             ->all();
     }
+
+    public function activeIdsIn(?array $cityIds): Builder
+    {
+        return Employee::query()
+            ->select('employees.id')
+            ->where('employees.is_active', true)
+            ->forCity($cityIds)
+            ->toBase();
+    }
 }

@@ -5,6 +5,8 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use App\Support\Metrics\OrgMetrics;
+use Modules\Hr\Support\Desk\Cards\HeadcountCard;
 use Modules\Hr\Livewire\Concerns\Statistics\ReadsStatisticsScope;
 use Modules\Hr\Support\Desk\HrStatistics;
 
@@ -13,7 +15,8 @@ use Modules\Hr\Support\Desk\HrStatistics;
  * by department and job level, running contracts by type, personnel traffic
  * over time, the salary-period split (pay readers only) and who never asked
  * for annual leave. Figures are grouped queries remembered ten minutes
- * (HrStatistics).
+ * (HrStatistics); employees on project teams is read from OrgMetrics, the
+ * same definition the Desk cards show.
  */
 new #[Layout('layouts::desk'), Title('hr_statistics.titles.general')] class extends Component {
     use ReadsStatisticsScope;
@@ -43,9 +46,11 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.general')] class exte
     {
         $cities = $this->citiesFor($this->city);
         $stats = app(HrStatistics::class);
+        $metrics = app(OrgMetrics::class);
 
         return [
             'totals' => $stats->totals($cities),
+            'inProjects' => $metrics->has(HeadcountCard::InProjects) ? ['label' => $metrics->label(HeadcountCard::InProjects), 'value' => $metrics->value(HeadcountCard::InProjects, $cities)] : null,
             'departments' => $stats->byDepartment($cities),
             'levels' => $stats->byJobLevel($cities),
             'types' => $stats->byContractType($cities),
@@ -108,11 +113,14 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.general')] class exte
     </x-slot:actions>
 
     <div class="grid gap-6" wire:loading.class="opacity-60" wire:target="city, traffic">
-        <div class="grid grid-cols-2 gap-4 @3xl:grid-cols-4">
+        <div @class(['grid grid-cols-2 gap-4', '@3xl:grid-cols-4' => $figures['inProjects'] === null, '@3xl:grid-cols-3 @6xl:grid-cols-5' => $figures['inProjects'] !== null])>
             <x-ui.stat-tile :label="__('hr_statistics.totals.active')" :value="number_format($totals['active'])" icon="user-group" tone="good" />
             <x-ui.stat-tile :label="__('hr_statistics.totals.contracts')" :value="number_format($totals['contracts'])" icon="document-text" />
             <x-ui.stat-tile :label="__('hr_statistics.totals.ending')" :value="number_format($totals['ending'])" icon="clock" tone="warn" />
             <x-ui.stat-tile :label="__('hr_statistics.totals.employees')" :value="number_format($totals['employees'])" icon="users" />
+            @if ($figures['inProjects'] !== null)
+                <x-ui.stat-tile :label="$figures['inProjects']['label']" :value="number_format($figures['inProjects']['value'])" :denominator="number_format($totals['active'])" icon="briefcase" data-metric="employees_in_projects" />
+            @endif
         </div>
 
         <x-ui.panel :title="__('hr_statistics.traffic.title')" :subtitle="__('hr_statistics.traffic.modes.'.$traffic)">

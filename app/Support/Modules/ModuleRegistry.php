@@ -9,6 +9,7 @@ use App\Support\Modules\Contracts\DeskAgendaSource;
 use App\Support\Modules\Contracts\DeskPanelSource;
 use App\Support\Modules\Contracts\DestinationSource;
 use App\Support\Modules\Contracts\EmployeeTabSource;
+use App\Support\Modules\Contracts\MetricSource;
 use App\Support\Modules\Contracts\ScheduleSource;
 use App\Support\Modules\Contracts\SearchSource;
 use App\Support\Modules\Contracts\SubjectLinkSource;
@@ -90,6 +91,31 @@ final class ModuleRegistry
     public function scheduleSources(): array
     {
         return array_map(fn (string $source): ScheduleSource => app($source), $this->schedule);
+    }
+
+    /**
+     * @var list<class-string<MetricSource>>
+     */
+    private array $metrics = [];
+
+    /**
+     * @param  class-string<MetricSource>  $source
+     */
+    public function addMetrics(string $source): void
+    {
+        if (! in_array($source, $this->metrics, true)) {
+            $this->metrics[] = $source;
+        }
+    }
+
+    /**
+     * The organisation's numbers each module defines (App\Support\Metrics\OrgMetrics), in registration order.
+     *
+     * @return list<MetricSource>
+     */
+    public function metricSources(): array
+    {
+        return array_map(fn (string $source): MetricSource => app($source), $this->metrics);
     }
 
     /**

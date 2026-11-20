@@ -56,6 +56,7 @@ use Modules\Tracking\Models\TaskAssignee;
 use Modules\Tracking\Observers\ProgramObserver;
 use Modules\Tracking\Policies\ProgramPolicy;
 use Modules\Tracking\Support\EmployeeProjectsTab;
+use Modules\Tracking\Support\Metrics\TrackingMetrics;
 use Modules\Tracking\Support\ProjectMembersTimelineSource;
 use Modules\Tracking\Support\SupervisionMap;
 
@@ -95,6 +96,7 @@ class TrackingServiceProvider extends ServiceProvider
 
         $this->app->make(ModuleRegistry::class)->addEmployeeTabs(EmployeeProjectsTab::class);
         $this->app->make(ModuleRegistry::class)->addTimeline(ProjectMembersTimelineSource::class);
+        $this->app->make(ModuleRegistry::class)->addMetrics(TrackingMetrics::class);
         $this->app->make(ModuleRegistry::class)->addSchedule(TrackingSchedule::class);
 
         $this->commands([
