@@ -16,7 +16,7 @@ use Modules\Hr\Models\RecruitmentJobOffer;
  * Not queued, like the other recruitment notices: the bell reads the
  * database row, and this deployment runs no queue worker.
  */
-class RecruitmentCandidateHired extends Notification
+class RecruitmentCandidateHired extends Notification implements NamesItsRecipient
 {
     use Queueable;
 

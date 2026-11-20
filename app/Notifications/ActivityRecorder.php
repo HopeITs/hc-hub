@@ -8,6 +8,7 @@ use App\Jobs\FanOutActivity;
 use App\Models\Activity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Writes one Activity and, when it is meaningful, queues its fan-out after
@@ -32,6 +33,7 @@ final class ActivityRecorder
             'actor_id' => Auth::id(),
             'subject_type' => $subject->getMorphClass(),
             'subject_id' => $subject->getKey(),
+            'employee_id' => $this->aboutEmployee($subject, $properties),
             'program_id' => $subject->activityProgramId(),
             'module' => $subject->activityModule(),
             'event' => $event,
@@ -82,5 +84,23 @@ final class ActivityRecorder
         }
 
         return ['names' => $result];
+    }
+
+    /**
+     * Whom the entry is about (activities.employee_id, roadmap 4.7): the
+     * employee itself when the subject is one, else the employee the caller
+     * named in properties.employee_id. Empty when that id is no employee.
+     *
+     * @param  array<string, mixed>  $properties
+     */
+    private function aboutEmployee(Model $subject, array $properties): ?int
+    {
+        $about = $subject->getMorphClass() === 'employee' ? $subject->getKey() : ($properties['employee_id'] ?? null);
+
+        if (! is_numeric($about) || (int) $about <= 0) {
+            return null;
+        }
+
+        return DB::table('employees')->where('id', (int) $about)->exists() ? (int) $about : null;
     }
 }

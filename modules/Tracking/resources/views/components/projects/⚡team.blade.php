@@ -169,7 +169,7 @@ new class extends Component {
                     <ul class="divide-y divide-panel-border" data-test="team-current">
                         @foreach ($current as $member)
                             <li class="flex flex-wrap items-center justify-between gap-2 py-2" wire:key="team-member-{{ $member->id }}" data-member="{{ $member->id }}">
-                                <x-ui.employee-chip :employee="$member->employee" compact />
+                                <x-ui.employee-chip link :employee="$member->employee" compact />
                                 <div class="flex flex-wrap items-center gap-2 text-xs text-secondary-medium dark:text-ink-muted">
                                     <span class="rounded-md bg-secondary-soft px-1.5 py-0.5 font-semibold text-secondary-dark dark:bg-surface-2 dark:text-ink">{{ $member->role->label() }}</span>
                                     <span>{{ $member->starts_on === null ? __('projects.team.start_unknown') : __('projects.team.since', ['date' => $member->starts_on->translatedFormat(__('formats.date'))]) }}</span>
@@ -192,7 +192,7 @@ new class extends Component {
                     <ul class="divide-y divide-panel-border" data-test="team-past">
                         @foreach ($past as $member)
                             <li class="flex flex-wrap items-center justify-between gap-2 py-2" wire:key="team-past-{{ $member->id }}" data-member="{{ $member->id }}">
-                                <x-ui.employee-chip :employee="$member->employee" compact />
+                                <x-ui.employee-chip link :employee="$member->employee" compact />
                                 <div class="flex flex-wrap items-center gap-2 text-xs text-secondary-medium dark:text-ink-muted">
                                     <span class="rounded-md bg-secondary-soft px-1.5 py-0.5 font-semibold text-secondary-dark dark:bg-surface-2 dark:text-ink">{{ $member->role->label() }}</span>
                                     <span>{{ __('projects.team.period', [

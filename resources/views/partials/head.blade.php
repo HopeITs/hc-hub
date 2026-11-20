@@ -10,7 +10,7 @@
     {{ filled($title ?? null) ? __($title).' - '.config('app.name', 'Laravel') : config('app.name', 'Laravel') }}
 </title>
 
-<link rel="icon" href="{{ asset('logo-tracking-icon.svg') }}" type="image/svg+xml">
+<link rel="icon" href="{{ asset('logo-hub-icon.svg') }}" type="image/svg+xml">
 <link rel="apple-touch-icon" href="{{ asset('app-icons/apple-touch-icon.png') }}">
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 <meta name="theme-color" content="#dcddde" media="(prefers-color-scheme: light)" data-theme-color="light">

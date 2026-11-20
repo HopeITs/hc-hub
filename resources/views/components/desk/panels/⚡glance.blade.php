@@ -16,6 +16,7 @@ use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TransfersTracking;
 use App\Support\Desk\Money;
+use App\Support\Metrics\OrgMetrics;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Computed;
@@ -51,7 +52,7 @@ new class extends Component {
 
         if ($this->canView('projects')) {
             $new = $this->visible(Project::query(), 'projects')->where('status', ProjectStatus::Active)->whereDate('start_date', '>=', $monthStart)->count();
-            $figures[] = $this->figure('running', (string) $this->visible(Project::query(), 'projects')->where('status', ProjectStatus::Active)->count(), $new, upIsGood: true, href: 'projects.index', deltaKey: 'new');
+            $figures[] = $this->figure('running', (string) app(OrgMetrics::class)->value('running_projects'), $new, upIsGood: true, href: 'projects.index', deltaKey: 'new');
         }
 
         if ($this->canView('proposals')) {

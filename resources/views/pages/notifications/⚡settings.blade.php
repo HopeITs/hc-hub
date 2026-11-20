@@ -38,6 +38,10 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
         $user = auth()->user();
 
         return array_values(array_filter(array_keys(config('notifications.modules')), function (string $module) use ($user): bool {
+            if (in_array($module, config('notifications.open_modules', []), true)) {
+                return true;
+            }
+
             $permission = config("notifications.view_permissions.{$module}", "{$module}.view");
 
             return Permission::query()->where('name', $permission)->exists() && $user->can($permission);

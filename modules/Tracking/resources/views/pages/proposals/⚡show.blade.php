@@ -495,6 +495,8 @@ new #[Layout('layouts::desk'), Title('titles.proposal')] class extends Component
             @endif
         </div>
 
+        <x-notes.record :subject="$this->proposal" class="mt-10" />
+
         <section aria-labelledby="record-activity-heading" class="grid gap-3 mt-10" data-record-activity>
             <h2 id="record-activity-heading" class="text-base font-bold">{{ __('activity.title') }}</h2>
             <livewire:activity.timeline :subjects="['proposal' => [$this->proposal->id]]" :key="'proposal-activity-'.$this->proposal->id" />

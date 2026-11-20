@@ -156,6 +156,8 @@ return [
         'report-templates' => 'Report templates',
         'monthly-reports' => 'Monthly reports',
         'donor-reports' => 'Donor reports',
+        'leaves' => 'Leave',
+        'recruitment' => 'Recruitment',
         'hr-employees' => 'HR: employees',
         'hr-leave' => 'HR: leave',
         'hr-contracts' => 'HR: contracts',

@@ -34,6 +34,7 @@ use Modules\Core\Models\User;
  * @property FileType $type
  * @property CarbonImmutable|null $uploaded_at
  * @property int $uploaded_by
+ * @property int|null $hr_media_id the hr_media row this file was copied from (hub:move-hr-media)
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
@@ -50,6 +51,7 @@ use Modules\Core\Models\User;
     'type',
     'uploaded_at',
     'uploaded_by',
+    'hr_media_id',
 ])]
 class Media extends Model
 {

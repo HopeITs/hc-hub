@@ -25,7 +25,7 @@ use Modules\Hr\Models\RecruitmentRequest;
  * synchronously for the same reason. Nothing here can cost an approval:
  * every dispatch goes through RecruitmentNotifier, which catches and logs.
  */
-class RecruitmentRequestDecided extends Notification
+class RecruitmentRequestDecided extends Notification implements NamesItsRecipient
 {
     use Queueable;
 

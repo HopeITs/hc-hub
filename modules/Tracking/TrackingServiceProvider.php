@@ -31,6 +31,7 @@ use Modules\Tracking\Console\Commands\RemindAnnualPlanUpdates;
 use Modules\Tracking\Console\Commands\RemindProposalOwners;
 use Modules\Tracking\Console\Commands\SeedIndicatorLibrary;
 use Modules\Tracking\Console\Commands\SendMonthlyDigest;
+use Modules\Tracking\Console\TrackingSchedule;
 use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Events\FundingAgreementRecorded;
 use Modules\Tracking\Events\ProjectActivated;
@@ -55,6 +56,9 @@ use Modules\Tracking\Models\TaskAssignee;
 use Modules\Tracking\Observers\ProgramObserver;
 use Modules\Tracking\Policies\ProgramPolicy;
 use Modules\Tracking\Support\EmployeeProjectsTab;
+use Modules\Tracking\Support\Metrics\TrackingMetrics;
+use Modules\Tracking\Support\ProjectMembersTimelineSource;
+use Modules\Tracking\Support\ReviewWorkItems;
 use Modules\Tracking\Support\SupervisionMap;
 
 /**
@@ -92,6 +96,10 @@ class TrackingServiceProvider extends ServiceProvider
         $this->registerCoreRelations();
 
         $this->app->make(ModuleRegistry::class)->addEmployeeTabs(EmployeeProjectsTab::class);
+        $this->app->make(ModuleRegistry::class)->addTimeline(ProjectMembersTimelineSource::class);
+        $this->app->make(ModuleRegistry::class)->addMetrics(TrackingMetrics::class);
+        $this->app->make(ModuleRegistry::class)->addSchedule(TrackingSchedule::class);
+        $this->app->make(ModuleRegistry::class)->addWorkItems(ReviewWorkItems::class);
 
         $this->commands([
             BackfillMonthlyReports::class,

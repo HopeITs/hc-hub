@@ -35,7 +35,7 @@ class PlanUpdatePolicy
 
     public static function canRead(User $user): bool
     {
-        return $user->can('annual-plans.view') && ! ($user->hasRole('General Manager') && ! $user->hasRole('Super Admin'));
+        return $user->can('annual-plans.view') && ! ($user->hasAnyRole(config('access-control.observer_roles', [])) && ! $user->isAdministrator());
     }
 
     /**
@@ -77,7 +77,7 @@ class PlanUpdatePolicy
 
     public static function isProjectManager(User $user, Project $project): bool
     {
-        if ($user->hasRole('Super Admin')) {
+        if ($user->isAdministrator()) {
             return true;
         }
 
@@ -88,20 +88,20 @@ class PlanUpdatePolicy
 
     public static function isOfficer(User $user, Project $project): bool
     {
-        if ($user->hasRole('Super Admin')) {
+        if ($user->isAdministrator()) {
             return true;
         }
 
         $responsible = MealCoverage::responsibleFor($project);
 
         return $responsible === null
-            ? $user->hasRole('MEAL')
+            ? $user->can('meal-coverage.stand-in')
             : $user->employee_id !== null && (int) $user->employee_id === $responsible;
     }
 
     public static function isProgramManager(User $user, ActivityPlan $plan): bool
     {
-        if ($user->hasRole('Super Admin')) {
+        if ($user->isAdministrator()) {
             return true;
         }
 

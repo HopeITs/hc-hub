@@ -51,4 +51,5 @@ return [
     'donor_report_builder' => 'إعداد تقرير المانح',
     'donor_reports' => 'تقارير المانحين',
     'monthly_matrix' => 'المصفوفة الشهرية',
+    'waiting' => 'بانتظاري',
 ];

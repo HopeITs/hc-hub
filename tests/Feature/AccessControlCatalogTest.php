@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\File;
 
 test('the permission catalog config drives permission names', function () {
     expect(config('access-control.groups'))->toHaveKey('programs')
-        ->and(config('access-control.groups.programs'))->toBe(['view', 'update']);
+        ->and(config('access-control.groups.programs'))->toBe(['view', 'create', 'update', 'delete']);
 });
 
 test('the lifecycle modules carry exactly their contract actions', function (string $module, array $actions) {
@@ -14,8 +14,8 @@ test('the lifecycle modules carry exactly their contract actions', function (str
 })->with([
     'indicator-library' => ['indicator-library', ['view', 'create', 'update', 'delete']],
     'proposals' => ['proposals', ['view', 'create', 'update', 'delete', 'manage-reviewers', 'correct-status', 'approve']],
-    'reports' => ['reports', ['view', 'create', 'update', 'delete', 'approve', 'mark-seen', 'reopen', 'aggregate']],
-    'meal-coverage' => ['meal-coverage', ['manage']],
+    'reports' => ['reports', ['view', 'create', 'update', 'delete', 'approve', 'mark-seen', 'reopen', 'aggregate', 'reopen-stand-in']],
+    'meal-coverage' => ['meal-coverage', ['manage', 'stand-in']],
     'supervisions' => ['supervisions', ['manage']],
     'sectors' => ['sectors', ['view', 'manage']],
     'report-templates' => ['report-templates', ['manage']],

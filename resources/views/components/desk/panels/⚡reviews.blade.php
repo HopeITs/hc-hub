@@ -2,6 +2,7 @@
 
 use App\Livewire\Concerns\Desk\IsDeskPanel;
 use Modules\Tracking\Models\ProposalReviewer;
+use Modules\Tracking\Support\ReviewWorkItems;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -16,25 +17,15 @@ new class extends Component {
     use IsDeskPanel;
 
     /**
+     * The rows ReviewWorkItems reads for the "Waiting on me" page too, so the
+     * card and that page never disagree.
+     *
      * @return Collection<int, ProposalReviewer>
      */
     #[Computed]
     public function rows(): Collection
     {
-        $employeeId = auth()->user()->employee_id;
-
-        if ($employeeId === null) {
-            return new Collection;
-        }
-
-        return ProposalReviewer::query()
-            ->forEmployee((int) $employeeId)
-            ->awaitingReview()
-            ->with(['proposal:id,slug,name,status', 'proposal.projects:projects.id,projects.slug'])
-            ->oldest('created_at')
-            ->get()
-            ->unique('proposal_id')
-            ->values();
+        return app(ReviewWorkItems::class)->awaiting(auth()->user());
     }
 };
 ?>
@@ -50,7 +41,7 @@ new class extends Component {
             @foreach ($pg['slice'] as $review)
                 @php
                     $waited = $review->created_at === null ? 0 : (int) $review->created_at->startOfDay()->diffInDays(\Carbon\CarbonImmutable::today());
-                    $long = $waited > 7;
+                    $long = $waited > \Modules\Tracking\Support\ReviewWorkItems::LongWaitDays;
                 @endphp
                 <li wire:key="rv-{{ $review->id }}" @class(['dk-long' => $long])>
                     <span class="dk-rv-n" title="{{ $review->proposal?->name }}">{{ $review->proposal?->name ?? '—' }}</span>

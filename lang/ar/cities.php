@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'manage_cities' => 'إضافة أو تعديل المدن',
     'active_cities' => 'مفعّلة في الموارد البشرية',
     'all_cities' => 'كل المدن',
     'arabic_name' => 'الاسم بالعربية',

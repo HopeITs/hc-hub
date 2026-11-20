@@ -5,7 +5,7 @@ use Modules\Hr\Support\Settings\ReferenceTables;
 
 /*
 | HR settings: the reference tables (one page, a tab each) and HR's
-| read-only view of the Core programs and centers. Loaded by
+| read-only view of a program's staffing and of the Core centers. Loaded by
 | HrServiceProvider inside the auth + 2FA group.
 */
 Route::livewire('hr/settings', 'hr::settings.index')
@@ -18,8 +18,8 @@ foreach (['cities', ...ReferenceTables::keys()] as $tab) {
         ->name('hr.settings.'.$tab);
 }
 
-Route::livewire('hr/programs', 'hr::settings.programs')
-    ->can('programs.view')
+// One programs list for the hub (roadmap 3.6): HR's read-only copy leads to it, its name kept for old links.
+Route::redirect('hr/programs', '/programs', 301)
     ->name('hr.settings.programs.index');
 
 Route::livewire('hr/programs/{program}', 'hr::settings.program')

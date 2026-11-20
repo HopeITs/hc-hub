@@ -74,6 +74,7 @@ trait ManagesProposalFiles
         return array_values(array_map(
             fn (MediaCollection $collection): string => $collection->value,
             array_filter(MediaCollection::cases(), fn (MediaCollection $collection): bool => $collection->isDonorReportOnly()
+                || $collection->isStaffRecordOnly()
                 || (! $canViewAgreements && $collection->isFundingPaper())),
         ));
     }

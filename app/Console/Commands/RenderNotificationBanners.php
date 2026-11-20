@@ -125,7 +125,7 @@ class RenderNotificationBanners extends Command
         $svg = str_replace(
             ['fill: #fff;', 'fill: #be1f24;'],
             ['fill: #ffffff;', 'fill: transparent;'],
-            File::get(public_path('logo-tracking-icon.svg')),
+            File::get(public_path('logo-hub-icon.svg')),
         );
 
         File::put("{$work}/watermark.svg", $svg);

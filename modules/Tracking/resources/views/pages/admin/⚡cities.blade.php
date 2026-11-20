@@ -417,6 +417,11 @@ new #[Layout('layouts::desk'), Title('titles.city_directory')] class extends Com
                     :label="__('cities.status')"
                     class="pointer-coarse:h-auto pointer-coarse:[&_button]:min-h-11"
                 />
+
+                @if (Route::has('hr.settings.index') && auth()->user()->can('project-basics.view'))
+                    {{-- Cities are added and renamed on HR's settings page; this page shows who covers them. --}}
+                    <x-ui.button tone="action" icon="pencil-square" :href="route('hr.settings.index')" wire:navigate data-test="cities-manage-link">{{ __('cities.manage_cities') }}</x-ui.button>
+                @endif
             </div>
         </x-slot:actions>
 

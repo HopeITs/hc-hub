@@ -252,6 +252,8 @@
                 </div>
             </div>
         </div>
+
+        <x-notes.record :subject="$project" class="mt-4" />
     </section>
 
     {{-- Team (roadmap 2.4): who works on the project now and who did before. --}}

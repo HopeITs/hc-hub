@@ -3,11 +3,14 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\DisableTwoFactorAuthenticationUnlessRequired;
+use App\Console\PlatformSchedule;
 use App\Enums\Locale;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Models\Role;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Policies\UserPolicy;
+use App\Support\Access\AccessScope;
+use App\Support\Access\RoleAliases;
 use App\Support\Blaze\NonFoldingBlazeManager;
 use App\Support\Desk\Destinations;
 use App\Support\Desk\PageCards;
@@ -15,9 +18,13 @@ use App\Support\Desk\Panels;
 use App\Support\Desk\Shortcuts;
 use App\Support\Modules\ModuleRegistry;
 use App\Support\RouteSlugs;
+use App\Support\Timeline\ActivityTimelineSource;
+use App\Support\Timeline\EmployeeTimelineTab;
+use App\Support\WorkItems\NeedsWorkItems;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -47,9 +54,14 @@ use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Course;
 use Modules\Hr\Models\Department;
+use Modules\Hr\Models\Education;
 use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\Experience;
+use Modules\Hr\Models\Folder;
 use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Models\News;
 use Modules\Hr\Models\Position;
 use Modules\Tracking\Models\Account;
 use Modules\Tracking\Models\AnnualPlan;
@@ -89,6 +101,8 @@ class AppServiceProvider extends ServiceProvider
         // One instance per request or job, so queue workers never hold stale values.
         $this->app->scoped(NotificationSettings::class);
         $this->app->scoped(RouteSlugs::class);
+        $this->app->scoped(RoleAliases::class);
+        $this->app->scoped(AccessScope::class);
         // The Desk's catalogues are asked many times per page (sidebar, Ask, cards, tabs, drops): built once per request.
         $this->app->scoped(Destinations::class);
         $this->app->scoped(Panels::class);
@@ -179,6 +193,41 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
         $this->configureDateLocale();
         $this->configureBlaze();
+        $this->configureTimeline();
+        $this->configureSchedule();
+    }
+
+    /**
+     * The one place a background job reaches the scheduler (roadmap 4.13):
+     * the platform's own jobs, then every module's, each listed in a
+     * ScheduleSource. They are applied once every provider has booted, so a
+     * module that registers late is still read.
+     */
+    protected function configureSchedule(): void
+    {
+        $this->app->make(ModuleRegistry::class)->addSchedule(PlatformSchedule::class);
+
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $this->app->booted(function () use ($schedule): void {
+                foreach ($this->app->make(ModuleRegistry::class)->scheduleSources() as $source) {
+                    $source->schedule($schedule);
+                }
+            });
+        });
+    }
+
+    /**
+     * The platform's own share of an employee's timeline: the profile tab and
+     * what the activity log says about the person, and the Desk's Needs you
+     * as a source of the "Waiting on me" page. Modules add their sources from
+     * their own providers.
+     */
+    protected function configureTimeline(): void
+    {
+        $modules = $this->app->make(ModuleRegistry::class);
+        $modules->addEmployeeTabs(EmployeeTimelineTab::class);
+        $modules->addTimeline(ActivityTimelineSource::class);
+        $modules->addWorkItems(NeedsWorkItems::class);
     }
 
     /**
@@ -379,6 +428,8 @@ class AppServiceProvider extends ServiceProvider
      * `notifications.subject_type` store these keys. `city` and `center` are
      * what an HR news item can be about (`news.newsable_type`); `employee` is
      * what a note on an employee profile is about (`notes.subject_type`).
+     * `education`, `experience`, `course`, `folder` and `news` own, with
+     * `employee`, the files `hub:move-hr-media` copies into `media`.
      */
     protected function configureMorphMap(): void
     {
@@ -418,6 +469,11 @@ class AppServiceProvider extends ServiceProvider
             'leave_request' => LeaveRequest::class,
             'contract' => Contract::class,
             'position' => Position::class,
+            'education' => Education::class,
+            'experience' => Experience::class,
+            'course' => Course::class,
+            'folder' => Folder::class,
+            'news' => News::class,
         ]);
     }
 

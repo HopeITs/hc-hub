@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Notifications\Alerts\OversightDigestScanner;
 use App\Notifications\Recipients\UserRecipients;
+use Modules\Hr\Support\Notifications\NoticeRecipients;
 use Modules\Tracking\Notifications\Alerts\DataGapScanner;
 use Modules\Tracking\Notifications\Alerts\DueSoonScanner;
 use Modules\Tracking\Notifications\Alerts\EscalationScanner;
@@ -67,7 +68,21 @@ return [
         'report-templates' => ReportTemplateRecipients::class,
         'monthly-reports' => MonthlyReportRecipients::class,
         'donor-reports' => DonorReportRecipients::class,
+        'leaves' => NoticeRecipients::class,
+        'recruitment' => NoticeRecipients::class,
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Open modules
+    |--------------------------------------------------------------------------
+    |
+    | Modules whose sender picks every recipient from the record itself (HR's
+    | leave and recruitment notices: the requester, their manager, city HR, an
+    | approver). No view permission gates them, so RecipientFilter only
+    | applies the mute, and everyone is offered the mute switch.
+    */
+    'open_modules' => ['leaves', 'recruitment'],
 
     /*
     |--------------------------------------------------------------------------
@@ -160,6 +175,8 @@ return [
         'report-templates' => 'clipboard-document-list',
         'monthly-reports' => 'document-check',
         'donor-reports' => 'inbox-stack',
+        'leaves' => 'sun',
+        'recruitment' => 'user-plus',
         'system' => 'bell',
     ],
 

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'staffing_link' => 'المناصب وعدد الموظفين',
     'all_strategies' => 'كل الاستراتيجيات',
     'annual_plans' => 'الخطط السنوية',
     'active' => 'نشط',

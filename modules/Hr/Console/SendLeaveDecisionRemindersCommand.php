@@ -8,6 +8,7 @@ use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Notifications\AppNotification;
 use App\Notifications\NotificationPayload;
+use App\Notifications\RecipientFilter;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,6 +33,9 @@ use Throwable;
  *
  * The sentences are hr_leave.notifications.reminder_{manager,hr,hr_decider}
  * and open the request's own page, as every other leave notification does.
+ * Like them it passes RecipientFilter: the copy to city HR is team-wide, so an
+ * HR account that muted the `leaves` module is skipped (and nothing is
+ * claimed for it); whoever has to decide is always reminded.
  */
 class SendLeaveDecisionRemindersCommand extends Command
 {
@@ -43,7 +47,7 @@ class SendLeaveDecisionRemindersCommand extends Command
 
     protected $description = 'Remind direct managers (copy to city HR) once about leave requests still awaiting their decision';
 
-    public function handle(DeliveryLedger $ledger, LeaveNotificationService $notifications, LeaveDecisionAuthority $authority): int
+    public function handle(DeliveryLedger $ledger, LeaveNotificationService $notifications, LeaveDecisionAuthority $authority, RecipientFilter $filter): int
     {
         $sent = 0;
 
@@ -54,6 +58,10 @@ class SendLeaveDecisionRemindersCommand extends Command
             foreach (['manager' => $audience['managers'], 'hr' => $audience['hr']] as $group => $users) {
                 foreach ($users as $user) {
                     $type = $group === 'hr' && $this->decidesItself($authority, $user, $leave) ? 'hr_decider' : $group;
+
+                    if ($filter->apply([$user->id], LeaveNotificationService::MODULE, null, $type === 'hr' ? [] : [$user->id]) === []) {
+                        continue;
+                    }
 
                     if ($ledger->claim(self::LEDGER_KIND, $user->id, [$leave->id], $day) === []) {
                         continue;
@@ -119,7 +127,7 @@ class SendLeaveDecisionRemindersCommand extends Command
 
         return new NotificationPayload(
             kind: NotificationKind::Action,
-            module: 'leaves',
+            module: LeaveNotificationService::MODULE,
             priority: NotificationPriority::Important,
             key: 'hr_leave.notifications.reminder_'.$type,
             params: [

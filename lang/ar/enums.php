@@ -88,6 +88,11 @@ return [
         'negotiation' => 'ملف التفاوض',
         'amendment' => 'ملحق التمديد',
         'report_submission' => 'التقرير المُسلَّم',
+        'avatar' => 'الصورة الشخصية',
+        'employee_attachment' => 'وثيقة موظف',
+        'credential' => 'شهادة',
+        'archive_file' => 'ملف أرشيف',
+        'news_image' => 'صورة خبر',
     ],
     'reporting_period' => [
         'monthly' => 'شهري',

@@ -88,6 +88,11 @@ return [
         'negotiation' => 'Negotiation file',
         'amendment' => 'Amendment',
         'report_submission' => 'Delivered report',
+        'avatar' => 'Profile photo',
+        'employee_attachment' => 'Employee document',
+        'credential' => 'Certificate',
+        'archive_file' => 'Archive file',
+        'news_image' => 'News picture',
     ],
     'reporting_period' => [
         'monthly' => 'Monthly',

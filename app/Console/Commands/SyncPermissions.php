@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Models\Activity;
 use App\Models\Permission;
 use App\Models\Role;
+use App\Support\Access\RoleAliases;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\PermissionRegistrar;
@@ -20,6 +21,8 @@ use Spatie\Permission\PermissionRegistrar;
  * adds: missing permissions, missing roles (created with their baseline), each
  * new permission for the roles whose baseline lists it, and every permission
  * for the administrator roles. It never removes a permission from a role.
+ * It also links roles to their configured aliases (role_aliases), which
+ * grants nothing.
  */
 class SyncPermissions extends Command
 {
@@ -33,7 +36,7 @@ class SyncPermissions extends Command
      */
     protected $description = 'Add new permissions and roles from the access-control config without undoing role changes made in the app';
 
-    public function handle(PermissionRegistrar $registrar): int
+    public function handle(PermissionRegistrar $registrar, RoleAliases $aliases): int
     {
         $administratorRoles = config('access-control.administrator_roles', []);
         $baselines = config('access-control.role_baselines', []);
@@ -58,7 +61,13 @@ class SyncPermissions extends Command
             $this->line("{$role} gains: ".implode(', ', $permissions));
         }
 
-        if ($newPermissions === [] && $newRoles === [] && $grants === []) {
+        $missingAliases = $aliases->missing();
+
+        foreach ($missingAliases as $link) {
+            $this->line("Alias added: {$link['alias']} = {$link['role']}");
+        }
+
+        if ($newPermissions === [] && $newRoles === [] && $grants === [] && $missingAliases === []) {
             $this->components->info('Permissions are already up to date.');
 
             return self::SUCCESS;
@@ -86,6 +95,17 @@ class SyncPermissions extends Command
             }
         }));
 
+        // Roles created above linked themselves; these are the older ones.
+        foreach ($aliases->missing() as $link) {
+            DB::table('role_aliases')->insertOrIgnore([
+                'alias' => $link['alias'],
+                'role_id' => $link['role_id'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $aliases->forget();
         $registrar->forgetCachedPermissions();
 
         $this->components->info(count($newPermissions).' permission(s) and '.count($newRoles).' role(s) added; '.count($grants).' existing role(s) gained permissions.');

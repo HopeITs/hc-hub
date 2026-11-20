@@ -21,7 +21,7 @@ use Modules\Hr\Models\RecruitmentRequest;
  * so a queued notice is a notice nobody receives. Every dispatch goes through
  * RecruitmentNotifier, which catches and logs rather than raising.
  */
-class RecruitmentApprovalUnwound extends Notification
+class RecruitmentApprovalUnwound extends Notification implements NamesItsRecipient
 {
     use Queueable;
 

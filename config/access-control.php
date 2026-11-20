@@ -27,10 +27,10 @@ $groups = [
     'proposals' => ['view', 'create', 'update', 'delete', 'manage-reviewers', 'correct-status', 'approve'],
     'funding-agreements' => ['view', 'create', 'update', 'delete'],
     'transfers' => ['view', 'create', 'update', 'delete'],
-    'strategies' => ['view', 'create', 'update', 'delete'],
+    'strategies' => ['view', 'create', 'update', 'delete', 'approve-unmanaged'],
     'annual-plans' => ['view', 'create', 'update', 'delete', 'review'],
-    'reports' => ['view', 'create', 'update', 'delete', 'approve', 'mark-seen', 'reopen', 'aggregate'],
-    'meal-coverage' => ['manage'],
+    'reports' => ['view', 'create', 'update', 'delete', 'approve', 'mark-seen', 'reopen', 'aggregate', 'reopen-stand-in'],
+    'meal-coverage' => ['manage', 'stand-in'],
     'supervisions' => ['manage'],
     'sectors' => ['view', 'manage'],
     'risk-library' => ['manage'],
@@ -53,6 +53,53 @@ $groups = [
     'message-templates' => ['manage', 'use'],
 ];
 
+/*
+| HR's own catalog (hub roadmap 4.1). Until now these names existed only
+| because hub:import-hr copied them from the old HR database; listing them
+| here lets `permissions:sync` create them on an empty database. No built-in
+| role baseline below gains any of them: who holds them still comes from the
+| HR roles, and Super Admin holds everything. An action listed under a module
+| that already exists above is added to that module.
+*/
+$hrGroups = [
+    'access-management' => ['view', 'manage-employees'],
+    'statistics' => ['view'],
+    'employees' => ['view', 'create', 'update', 'delete', 'export'],
+    'contracts' => ['view', 'create', 'update', 'delete', 'export', 'amend'],
+    'programs' => ['delete'],
+    'centers' => ['view', 'update', 'delete', 'export'],
+    'positions' => ['view', 'create', 'update', 'delete', 'export'],
+    'leaves' => ['view-own', 'view-all', 'create', 'update', 'delete', 'decide', 'review', 'manage-balances', 'export'],
+    'project-basics' => ['view', 'create', 'update', 'delete', 'export'],
+    'news' => ['view', 'create', 'update', 'delete'],
+    'badges' => ['view', 'create', 'update', 'delete'],
+    'archives' => ['view', 'create', 'update', 'delete', 'share', 'download'],
+    'checklists' => ['view-own', 'view-all', 'manage', 'deliver', 'receive'],
+    'recruitment-requests' => ['view', 'manage', 'submit', 'cancel', 'approve', 'reject', 'request-changes', 'direct-open', 'export', 'approve-finance', 'submit-without-manager'],
+    'recruitment-vacancies' => ['view', 'manage'],
+    'recruitment-campaigns' => ['view', 'manage'],
+    'recruitment-job-posts' => ['view', 'manage'],
+    'recruitment-forms' => ['view', 'manage'],
+    'recruitment-links' => ['view', 'manage'],
+    'recruitment-indicators' => ['manage'],
+    'recruitment-applicants' => [
+        'view', 'manage', 'download-cv', 'add-notes', 'delete-notes', 'archive-cv', 'change-status', 'endorse',
+        'tag', 'bulk-tag', 'manage-tags', 'accept', 'bulk-reject', 'schedule-interviews', 'view-evaluations',
+        'correct-evaluations', 'view-offers', 'manage-offers', 'view-offer-salary', 'convert-hires', 'export',
+        'request-erasure',
+    ],
+];
+
+$hrPermissions = [];
+
+foreach ($hrGroups as $module => $actions) {
+    foreach ($actions as $action) {
+        $hrPermissions[] = "{$module}.{$action}";
+    }
+
+    $groups[$module] = [...($groups[$module] ?? []), ...$actions];
+}
+
 $allPermissions = [];
 
 foreach ($groups as $module => $actions) {
@@ -72,7 +119,7 @@ $restrictedViews = ['activity-log.view', 'attendance.view', ...$financeViews, ..
 $viewEverything = [
     ...array_values(array_filter(
         $allPermissions,
-        fn (string $permission): bool => str_ends_with($permission, '.view') && ! in_array($permission, $restrictedViews, true),
+        fn (string $permission): bool => str_ends_with($permission, '.view') && ! in_array($permission, [...$restrictedViews, ...$hrPermissions], true),
     )),
     'attendance.view-own',
 ];
@@ -100,9 +147,45 @@ $targetWriter = ['targets.create', 'targets.update'];
 // Relations roles and Managers; the usage log for the General Manager.
 $aiDrafter = ['ai.draft'];
 
+// Rules that used to name a role inside a policy (roadmap 4.3), each held by
+// the one role the policy named: any MEAL officer covers a project that has
+// no responsible officer; the Public Relations Manager decides reopen
+// requests while there is no MEAL manager; and the General Manager approves
+// the strategic plan of a program that has no manager (through "everything").
+$mealStandIn = ['meal-coverage.stand-in'];
+$reopenStandIn = ['reports.reopen-stand-in'];
+
 return [
 
     'groups' => $groups,
+
+    /*
+    |--------------------------------------------------------------------------
+    | HR permissions
+    |--------------------------------------------------------------------------
+    |
+    | The names HR brought into the catalog (roadmap 4.1). No built-in role
+    | baseline lists them; the HR roles hold them.
+    */
+    'hr_permissions' => $hrPermissions,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Role aliases
+    |--------------------------------------------------------------------------
+    |
+    | HR's role names beside the hub roles that mean the same thing to HR's
+    | checks (roadmap 4.2). App\Support\Access\RoleAliases keeps them as rows
+    | in role_aliases: a role created under one of these names is linked to
+    | its alias, and `permissions:sync` links the ones still missing. Nothing
+    | here grants a permission.
+    */
+    'role_aliases' => [
+        'super-admin' => ['super-admin', 'Super Admin'],
+        'general-manager' => ['general-manager', 'General Manager'],
+        'manager' => ['manager', 'Managers'],
+        'employee' => ['employee', 'Team Member'],
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -154,6 +237,48 @@ return [
     | (see App\Policies\UserPolicy).
     */
     'administrator_roles' => ['Super Admin'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Observer roles
+    |--------------------------------------------------------------------------
+    |
+    | Roles that read the work but stay out of its review chain, whatever
+    | their permissions say: they never validate a monthly report
+    | (MonthlyReportPolicy) and read annual-plan updates as a summary only
+    | (PlanUpdatePolicy). An administrator role is never an observer.
+    */
+    'observer_roles' => ['General Manager'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Roles that count in recruitment
+    |--------------------------------------------------------------------------
+    |
+    | 'all': every role a person holds counts, as in the rest of the hub
+    | (roadmap 4.5, approved by the owner on 2026-11-20). 'active' brings
+    | back the old HR rule: only the role a person is acting under. See
+    | Modules\Hr\Support\Recruitment\Access; `hub:recruitment-access` lists
+    | who differs between the two.
+    */
+    'recruitment_roles' => env('RECRUITMENT_ROLES', 'all'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scoped access grants
+    |--------------------------------------------------------------------------
+    |
+    | A role or a permission given to one user on one scope for a time
+    | (access_grants, read by App\Support\Access\AccessScope; roadmap 4.4).
+    | Off by default: switched off, a grant gives nothing and only the
+    | general permissions decide, exactly as before the table existed. The
+    | project policy is the first reader; a grant on a program or a city
+    | covers the projects under it.
+    */
+    'access_grants' => [
+        'enabled' => (bool) env('ACCESS_GRANTS_ENABLED', false),
+        'scope_types' => ['project', 'program', 'city', 'center', 'department'],
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -250,7 +375,7 @@ return [
             'proposals.approve',
             'projects.create',
             'funding-agreements.view', 'funding-agreements.create', 'funding-agreements.update',
-            'reports.reopen', 'reports.aggregate',
+            'reports.reopen', 'reports.aggregate', ...$reopenStandIn,
             ...$aiDrafter,
         ],
         'MEAL' => [
@@ -260,7 +385,7 @@ return [
             'targets.create', 'targets.update', 'targets.delete',
             'indicator-library.create', 'indicator-library.update', 'indicator-library.delete',
             'reports.reopen', 'reports.aggregate',
-            ...$mealOnly, 'sectors.manage', 'risk-library.manage',
+            ...$mealOnly, ...$mealStandIn, 'sectors.manage', 'risk-library.manage',
             ...$aiDrafter,
         ],
         'Financial' => [
@@ -296,9 +421,12 @@ return [
             'reports.reopen',
             'proposals.approve',
             ...$mealOnly,
+            ...$mealStandIn,
+            ...$reopenStandIn,
             ...$targetWriter,
             ...$aiDrafter,
             ...$hrOnly,
+            ...$hrPermissions,
         ])),
     ],
 ];

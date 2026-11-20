@@ -261,6 +261,11 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
             <span aria-current="page">{{ $program->name }}</span>
         </nav>
 
+        @if (Route::has('hr.settings.programs.show'))
+            {{-- The program's positions and headcount are HR's page; this is the one way to it since the lists became one. --}}
+            <a href="{{ route('hr.settings.programs.show', $program) }}" wire:navigate class="w-fit text-xs font-semibold text-secondary-medium underline hover:text-primary dark:text-ink-muted dark:hover:text-brand-text" data-test="program-staffing-link">{{ __('programs.staffing_link') }}</a>
+        @endif
+
         {{-- Who and what: the name, then the three facts a reader asks first. --}}
         <header class="dk-prog-h">
             <div class="min-w-0">
@@ -421,6 +426,8 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
             @include('tracking::pages.programs._show-results-tab')
         @endif
     </div>
+
+    <x-notes.record :subject="$program" />
 
     {{-- Activity: folded by default; the browser remembers the choice. --}}
     <section class="dk-prog-fold" x-data="{ open: $persist(false).as('program-activity-open') }" :class="{ 'dk-prog-fold-on': open }" data-record-activity>

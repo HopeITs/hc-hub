@@ -2,7 +2,7 @@
     "id": "/",
     "name": "HC Hub",
     "short_name": "HC Hub",
-    "description": "HOPE Center programme, project and funding tracking.",
+    "description": "HOPE Center Hub: people, programmes, projects and funding in one place.",
     "lang": "en",
     "dir": "auto",
     "start_url": "/home",

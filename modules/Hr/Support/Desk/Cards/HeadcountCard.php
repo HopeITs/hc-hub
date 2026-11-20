@@ -4,17 +4,26 @@ declare(strict_types=1);
 
 namespace Modules\Hr\Support\Desk\Cards;
 
+use App\Support\Metrics\OrgMetrics;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\User;
 use Modules\Hr\Support\Desk\HrStatistics;
 
 /**
  * A head count split one way (by department, job level or contract type),
- * the largest first, with the HR totals above it. For people with
- * statistics.view, narrowed to their governorates.
+ * the largest first, with the HR totals and the number of employees on
+ * project teams above it. For people with statistics.view, narrowed to their
+ * governorates.
  */
 abstract class HeadcountCard extends HrCard
 {
+    /**
+     * The organisational number "employees in projects" (OrgMetrics). Its
+     * definition belongs to the module that owns project teams; HR only
+     * shows it, and shows nothing when no module defines it.
+     */
+    public const string InProjects = 'employees_in_projects';
+
     /**
      * The split this card shows.
      *
@@ -45,12 +54,15 @@ abstract class HeadcountCard extends HrCard
 
     public function figures(User $user): array
     {
-        $totals = app(HrStatistics::class)->totals($this->viewer($user)->cityScope());
+        $cities = $this->viewer($user)->cityScope();
+        $totals = app(HrStatistics::class)->totals($cities);
+        $metrics = app(OrgMetrics::class);
 
         return [
             $this->figure(__('hr_desk.stats.active_employees'), $totals['active'], 'active'),
             $this->figure(__('hr_desk.stats.running_contracts'), $totals['contracts'], 'good'),
             $this->figure(__('hr_desk.stats.ending_soon'), $totals['ending'], 'warn'),
+            ...($metrics->has(self::InProjects) ? [$this->figure($metrics->label(self::InProjects), $metrics->value(self::InProjects, $cities), 'neutral')] : []),
         ];
     }
 

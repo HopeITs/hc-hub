@@ -17,7 +17,7 @@ use Modules\Hr\Models\RecruitmentInterview;
  * see it — is read live. No candidate details and no meeting link travel in
  * the mail or in the stored notification.
  */
-class RecruitmentInterviewParticipantNotice extends Notification implements ShouldQueue
+class RecruitmentInterviewParticipantNotice extends Notification implements NamesItsRecipient, ShouldQueue
 {
     use Queueable;
 

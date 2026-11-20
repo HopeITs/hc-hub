@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Desk;
 
 use App\Livewire\Concerns\Desk\ReadsDeskFlow;
+use App\Support\Metrics\OrgMetrics;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,6 @@ use Illuminate\Support\Collection;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ArStatus;
-use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\RagStatus;
 use Modules\Tracking\Enums\TaskStatus;
 use Modules\Tracking\Models\Donor;
@@ -71,7 +71,7 @@ class ReadyLayoutSignals
 
     private User $viewer;
 
-    public function __construct(private readonly Panels $panels) {}
+    public function __construct(private readonly Panels $panels, private readonly OrgMetrics $metrics) {}
 
     /**
      * The signal of every layout the viewer is offered, by layout key. A layout
@@ -89,14 +89,14 @@ class ReadyLayoutSignals
             $panels = array_column($layout['entries'], 'panel');
 
             $signal = match ($layout['key']) {
-                'today' => $this->today($needs),
+                'today', 'mine' => $this->today($needs),
                 'money' => $this->money(),
                 'donors' => $this->donors(in_array('duties', $panels, true)),
                 'tasks' => $this->tasks(),
                 'delivery' => $this->delivery(),
                 'impact' => $this->impact(),
                 'fundraising' => $this->fundraising(),
-                'team' => $this->team(),
+                'team', 'management' => $this->team(),
                 default => $this->overview(),
             };
 
@@ -375,7 +375,7 @@ class ReadyLayoutSignals
             return $this->signal(__('desk.ready.signal.overview_none'), 'neutral', 0);
         }
 
-        $running = $this->visible(Project::query(), 'projects')->where('status', ProjectStatus::Active)->count();
+        $running = $this->metrics->value('running_projects');
 
         return $this->signal(trans_choice('desk.ready.signal.running', $running, ['count' => $running]), 'neutral', $running);
     }

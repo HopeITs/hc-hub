@@ -214,7 +214,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plan')] class extends Compon
 
         <x-slot:actions>
             <div class="flex shrink-0 flex-wrap items-center gap-2">
-                <x-ui.employee-chip :employee="$plan->manager" class="rounded-lg border border-secondary-soft p-2.5 dark:border-line" />
+                <x-ui.employee-chip link :employee="$plan->manager" class="rounded-lg border border-secondary-soft p-2.5 dark:border-line" />
                 <div class="flex items-center gap-1.5">
                     @can('update', $plan)<x-ui.button tone="ghost" size="sm" icon="pencil-square" class="size-11! touch-manipulation @sm/detail:size-10!" wire:click="openEditModal" :aria-label="__('annual_plans.edit_this_annual_plan')" data-test="edit-annual-plan-button" />@endcan
                     @can('delete', $plan)<x-ui.button tone="ghost" size="sm" icon="trash" class="size-11! touch-manipulation @sm/detail:size-10!" wire:click="$set('confirmingDelete', true)" :aria-label="__('annual_plans.delete_this_annual_plan')" data-test="delete-annual-plan-button" />@endcan
@@ -273,7 +273,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plan')] class extends Compon
                     </span>
                     <span class="min-w-0 flex-1">
                         <span class="block type-meta text-secondary-medium dark:text-ink-muted">{{ __('annual_plans.assigned_manager') }}</span>
-                        <x-ui.employee-chip :employee="$plan->manager" compact />
+                        <x-ui.employee-chip link :employee="$plan->manager" compact />
                     </span>
                 </li>
 

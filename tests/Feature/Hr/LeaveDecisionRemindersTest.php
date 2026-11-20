@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\NotificationMute;
 use App\Notifications\AppNotification;
 use Illuminate\Support\Facades\Notification;
 use Modules\Core\Models\City;
@@ -89,3 +90,14 @@ test('the reminder sentences exist in both languages with their placeholders', f
             ->toContain(':employee')->toContain(':type')->toContain(':date');
     }
 })->with(['manager', 'hr', 'hr_decider']);
+
+test('city HR that muted leave gets no reminder copy; the manager who must decide is reminded even when muted', function () {
+    NotificationMute::query()->create(['user_id' => $this->hr->id, 'module' => 'leaves']);
+    NotificationMute::query()->create(['user_id' => $this->manager->id, 'module' => 'leaves']);
+    $waiting = ($this->leave)(['created_at' => '2026-11-08 09:00:00']);
+
+    $this->artisan(SendLeaveDecisionRemindersCommand::class)->assertSuccessful();
+
+    expect(($this->reminderKeys)($this->manager))->toBe(["hr_leave.notifications.reminder_manager#{$waiting->id}"])
+        ->and(($this->reminderKeys)($this->hr))->toBe([]);
+});

@@ -8,6 +8,7 @@ use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Notifications\AppNotification;
 use App\Notifications\NotificationPayload;
+use App\Notifications\RecipientFilter;
 use Illuminate\Support\Facades\Auth;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Checklist;
@@ -20,12 +21,21 @@ use Throwable;
  * task is waiting for them (the old ChecklistAssigned notification). Sent as
  * a hub notification whose sentence lives in hr_checklists.notifications and
  * whose link opens the matching pending list.
+ *
+ * It passes RecipientFilter like every hub notification (decision D7). The
+ * task is assigned to this one person, so they are a direct recipient: no
+ * mute and no view permission keeps it from them, and they are told even
+ * when they assigned it to themself.
  */
 final class ChecklistNotifier
 {
     public const string DELIVER = 'deliver';
 
     public const string RECEIVE = 'receive';
+
+    public const string MODULE = 'checklists';
+
+    public function __construct(private RecipientFilter $filter) {}
 
     /**
      * @param  self::DELIVER|self::RECEIVE  $type
@@ -41,7 +51,7 @@ final class ChecklistNotifier
 
         $recipient = User::query()->where('employee_id', $recipientEmployeeId)->first();
 
-        if ($recipient === null) {
+        if ($recipient === null || $this->filter->apply([$recipient->id], self::MODULE, null, [$recipient->id], [$recipient->id]) === []) {
             return false;
         }
 
@@ -51,7 +61,7 @@ final class ChecklistNotifier
 
         $payload = new NotificationPayload(
             kind: NotificationKind::Action,
-            module: 'checklists',
+            module: self::MODULE,
             priority: NotificationPriority::Important,
             key: 'hr_checklists.notifications.'.$type,
             params: [

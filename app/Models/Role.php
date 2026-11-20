@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Notifications\ActivityRecorder;
 use App\Notifications\TracksActivity;
+use App\Support\Access\RoleAliases;
 use Spatie\Permission\Models\Role as SpatieRole;
 use Spatie\Permission\PermissionRegistrar;
 
@@ -45,8 +46,13 @@ class Role extends SpatieRole implements TracksActivity
                 }
             }
 
+            app(RoleAliases::class)->link($role);
             app(PermissionRegistrar::class)->forgetCachedPermissions();
         });
+
+        // A renamed or removed role changes what its alias stands for.
+        static::updated(fn () => app(RoleAliases::class)->forget());
+        static::deleted(fn () => app(RoleAliases::class)->forget());
     }
 
     public function activityModule(): string

@@ -126,7 +126,7 @@ class RecruitmentRequestPolicy
      */
     public function directOpen(User $user): bool
     {
-        return Access::activeRoleIs($user, 'HR')
+        return Access::isHr($user)
             && Access::hasActivePermission($user, 'recruitment-requests.direct-open');
     }
 

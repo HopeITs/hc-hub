@@ -38,7 +38,7 @@ class ContractPolicy
 
     public function manageAutoRenew(User $user, Contract $contract): bool
     {
-        return HrAccess::is($user, 'HR')
+        return HrAccess::isHr($user)
             && $user->can('contracts.update')
             && $this->isVisibleTo($user, $contract);
     }
@@ -97,7 +97,7 @@ class ContractPolicy
 
     private function mayAmend(User $user, Contract $contract): bool
     {
-        return HrAccess::is($user, 'HR')
+        return HrAccess::isHr($user)
             && $user->can('contracts.amend')
             && $this->isVisibleTo($user, $contract);
     }

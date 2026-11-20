@@ -13,7 +13,7 @@
     <meta name="robots" content="{{ $publicRobots }}">
     <meta name="color-scheme" content="light">
     <title>{{ $publicPageTitle }} - {{ config('app.name') }}</title>
-    <link rel="icon" href="{{ asset('logo-tracking-icon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ asset('logo-hub-icon.svg') }}" type="image/svg+xml">
     @fonts
     @vite(['resources/css/app.css'])
 </head>

@@ -74,7 +74,7 @@ class ActivityPlanPolicy
      */
     public function plansFor(User $user, Program $program): bool
     {
-        if ($user->hasRole('Super Admin')) {
+        if ($user->isAdministrator()) {
             return true;
         }
 

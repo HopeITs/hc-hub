@@ -156,6 +156,8 @@ return [
         'report-templates' => 'قوالب التقارير',
         'monthly-reports' => 'التقارير الشهرية',
         'donor-reports' => 'تقارير المانحين',
+        'leaves' => 'الإجازات',
+        'recruitment' => 'التوظيف',
         'hr-employees' => 'الموارد البشرية: الموظفون',
         'hr-leave' => 'الموارد البشرية: الإجازات',
         'hr-contracts' => 'الموارد البشرية: العقود',

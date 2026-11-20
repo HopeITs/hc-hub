@@ -8,6 +8,7 @@ use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Notifications\AppNotification;
 use App\Notifications\NotificationPayload;
+use App\Notifications\RecipientFilter;
 use Illuminate\Support\Collection;
 use Modules\Core\Models\User;
 use Modules\Hr\Enums\LeaveRequestStatus;
@@ -31,14 +32,23 @@ use Throwable;
  *
  * The actor never notifies themself. A failed send is reported, never thrown:
  * it must not undo the write it describes.
+ *
+ * Every send passes RecipientFilter (hub decision D7), so a user who muted
+ * the `leaves` module is skipped. As everywhere in the hub, a mute only hides
+ * team-wide notices: what is addressed to the person stays (their own request
+ * or balance, and a request waiting on their decision as direct manager).
  */
 class LeaveNotificationService
 {
+    public const string MODULE = 'leaves';
+
+    public function __construct(private readonly RecipientFilter $filter) {}
+
     public function sendNewRequest(LeaveRequest $leaveRequest, ?User $actor = null): void
     {
         $audience = $this->newRequestAudience($leaveRequest, $actor);
 
-        $this->send($audience['managers']->merge($audience['hr']), $leaveRequest, 'new_request', $actor, NotificationPriority::Important);
+        $this->send($audience['managers']->merge($audience['hr']), $leaveRequest, 'new_request', $actor, NotificationPriority::Important, directIds: $this->ids($audience['managers']));
     }
 
     /**
@@ -64,7 +74,7 @@ class LeaveNotificationService
         $accepted = (int) $leaveRequest->status === LeaveRequestStatus::Accepted->value;
         $employees = $this->unique(collect([$this->requesterAccount($leaveRequest)]), [$actor?->id]);
 
-        $this->send($employees, $leaveRequest, $accepted ? 'accepted_you' : 'rejected_you', $actor, NotificationPriority::Important);
+        $this->send($employees, $leaveRequest, $accepted ? 'accepted_you' : 'rejected_you', $actor, NotificationPriority::Important, directIds: $this->ids($employees));
         $this->send(
             $this->unique($this->hrRecipients($leaveRequest), [$actor?->id, ...$employees->pluck('id')->all()]),
             $leaveRequest,
@@ -79,7 +89,7 @@ class LeaveNotificationService
         $leaveRequest = $this->loadContext($leaveRequest);
         $employees = $this->unique(collect([$this->requesterAccount($leaveRequest)]), [$actor?->id]);
 
-        $this->send($employees, $leaveRequest, 'seen_you', $actor, NotificationPriority::Info);
+        $this->send($employees, $leaveRequest, 'seen_you', $actor, NotificationPriority::Info, directIds: $this->ids($employees));
         $this->send(
             $this->unique($this->managerRecipients($leaveRequest), [$actor?->id, ...$employees->pluck('id')->all()]),
             $leaveRequest,
@@ -98,15 +108,10 @@ class LeaveNotificationService
         $leaveRequest = $this->loadContext($leaveRequest);
         $managers = $this->unique($this->managerRecipients($leaveRequest), [$actor?->id]);
 
-        $this->send($managers, $leaveRequest, 'objected', $actor, NotificationPriority::Important, ['note' => $note]);
-        $this->send(
-            $this->unique(collect([$this->requesterAccount($leaveRequest)]), [$actor?->id, ...$managers->pluck('id')->all()]),
-            $leaveRequest,
-            'objected_you',
-            $actor,
-            NotificationPriority::Important,
-            ['note' => $note],
-        );
+        $requester = $this->unique(collect([$this->requesterAccount($leaveRequest)]), [$actor?->id, ...$managers->pluck('id')->all()]);
+
+        $this->send($managers, $leaveRequest, 'objected', $actor, NotificationPriority::Important, ['note' => $note], $this->ids($managers));
+        $this->send($requester, $leaveRequest, 'objected_you', $actor, NotificationPriority::Important, ['note' => $note], $this->ids($requester));
     }
 
     /**
@@ -117,12 +122,12 @@ class LeaveNotificationService
         $contract = Contract::query()
             ->with([
                 'employee:id,first_name_en,first_name_ar,last_name_en,last_name_ar',
-                'employee.account:id,employee_id',
+                'employee.account:id,employee_id,locale',
                 'position:id,direct_manager_id',
                 'position.directManager:id',
                 'position.directManager.activeContracts:id,position_id,employee_id',
                 'position.directManager.activeContracts.employee:id,is_active',
-                'position.directManager.activeContracts.employee.account:id,employee_id',
+                'position.directManager.activeContracts.employee.account:id,employee_id,locale',
             ])
             ->find($balance->contract_id);
 
@@ -140,7 +145,9 @@ class LeaveNotificationService
         $managers = collect($contract->position?->directManager?->activeContracts ?? [])
             ->map(fn (Contract $held) => $held->employee?->is_active ? $held->employee->account : null);
 
-        $this->dispatch($this->unique(collect([$requester]), [$actor?->id]), $key.'_you', $params, $actor, ['route' => 'hr.leave.index']);
+        $own = $this->unique(collect([$requester]), [$actor?->id]);
+
+        $this->dispatch($own, $key.'_you', $params, $actor, ['route' => 'hr.leave.index'], directIds: $this->ids($own));
         $this->dispatch($this->unique($managers, [$actor?->id, $requester?->id]), $key, $params, $actor, ['route' => 'hr.leave.team']);
     }
 
@@ -223,10 +230,20 @@ class LeaveNotificationService
     }
 
     /**
+     * @param  Collection<int, User>  $users
+     * @return list<int>
+     */
+    private function ids(Collection $users): array
+    {
+        return array_values($users->map(fn (User $user): int => (int) $user->id)->all());
+    }
+
+    /**
      * @param  Collection<int, User>  $recipients
      * @param  array<string, mixed>  $extra
+     * @param  list<int>  $directIds  recipients this event is addressed to; a mute never drops them
      */
-    private function send(Collection $recipients, LeaveRequest $leaveRequest, string $event, ?User $actor, NotificationPriority $priority, array $extra = []): void
+    private function send(Collection $recipients, LeaveRequest $leaveRequest, string $event, ?User $actor, NotificationPriority $priority, array $extra = [], array $directIds = []): void
     {
         $type = $leaveRequest->leaveBalance?->leaveType;
         $params = [
@@ -235,23 +252,27 @@ class LeaveNotificationService
             'reason' => (string) $leaveRequest->reject_reason,
         ] + $extra;
 
-        $this->dispatch($recipients, $event, $params, $actor, ['route' => 'hr.leave.show', 'parameters' => ['leaveRequest' => $leaveRequest->id]], $priority);
+        $this->dispatch($recipients, $event, $params, $actor, ['route' => 'hr.leave.show', 'parameters' => ['leaveRequest' => $leaveRequest->id]], $priority, $directIds);
     }
 
     /**
      * @param  Collection<int, User>  $recipients
      * @param  array<string, mixed>  $params
      * @param  array{route?: string, parameters?: array<string, mixed>}  $link
+     * @param  list<int>  $directIds
      */
-    private function dispatch(Collection $recipients, string $event, array $params, ?User $actor, array $link, NotificationPriority $priority = NotificationPriority::Info): void
+    private function dispatch(Collection $recipients, string $event, array $params, ?User $actor, array $link, NotificationPriority $priority = NotificationPriority::Info, array $directIds = []): void
     {
+        $kept = $this->filter->apply($this->ids($recipients), self::MODULE, $actor?->id, $directIds);
+        $recipients = $recipients->filter(fn (User $user): bool => in_array((int) $user->id, $kept, true))->values();
+
         if ($recipients->isEmpty()) {
             return;
         }
 
         $payload = new NotificationPayload(
             kind: NotificationKind::Action,
-            module: 'leaves',
+            module: self::MODULE,
             priority: $priority,
             key: 'hr_leave.notifications.'.$event,
             params: $params,
