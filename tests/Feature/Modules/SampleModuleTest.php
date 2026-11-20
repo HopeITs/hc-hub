@@ -17,9 +17,10 @@ use App\Support\Modules\Contracts\TimelineSource;
 use App\Support\Modules\Contracts\WorkItemSource;
 use App\Support\Modules\ModuleRegistry;
 use App\Support\Timeline\EmployeeTimeline;
-use Carbon\CarbonImmutable;
 use Illuminate\Console\Scheduling\Schedule;
+use Livewire\Livewire;
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Employee;
 use Tests\Fixtures\Modules\Sample\SampleAgenda;
 use Tests\Fixtures\Modules\Sample\SampleCalendarLayer;
 use Tests\Fixtures\Modules\Sample\SampleDestinations;
@@ -131,32 +132,53 @@ test('the Desk draws the module panel with the module component and offers it to
         ->and($panels->availableTo($this->viewer))->toHaveKey(SamplePanels::Panel);
 });
 
-test('the Desk agenda, calendar, work items and search read the module through the registry', function () {
-    $from = CarbonImmutable::parse('2026-03-02');
-    $to = $from->addDays(6);
+test('the Desk agenda card lists the module agenda row', function () {
+    $this->travelTo('2026-03-02 09:00:00');
+    $me = userWithRole('Managers', insertHrEmployee());
 
-    $agenda = collect($this->registry->deskAgendaSources())->first(fn ($source) => $source instanceof SampleAgenda);
-    $layer = collect($this->registry->calendarLayerSources())->first(fn ($source) => $source instanceof SampleCalendarLayer);
-    $work = collect($this->registry->workItemSources())->first(fn ($source) => $source instanceof SampleWorkItems);
-    $search = collect($this->registry->searchSources())->first(fn ($source) => $source instanceof SampleSearch);
+    $card = Livewire::actingAs($me)->test('desk.panels.coming', ['size' => 'L']);
 
-    expect($agenda->between($this->viewer, $from, $to)->pluck('title')->all())->toBe(['Sample agenda row'])
-        ->and($layer->allows($this->viewer))->toBeTrue()
-        ->and($layer->between($this->viewer, $from, $to))->toHaveKey('2026-03-02')
-        ->and($work->allows($this->viewer))->toBeTrue()
-        ->and($work->count($this->viewer))->toBe(1)
-        ->and($work->items($this->viewer)[0]['title'])->toBe('Sample item')
-        ->and($search->allows($this->viewer))->toBeTrue()
-        ->and($search->search($this->viewer, 'thing', 5)[0]['title'])->toBe('Sample thing');
+    expect($card->instance()->events->pluck('title')->all())->toContain('Sample agenda row');
+    $card->assertSee('Sample agenda row');
 });
 
-test('the employee profile gets the module tab and the timeline gets its entries', function () {
-    $tab = collect($this->registry->employeeTabSources())->first(fn ($source) => $source instanceof SampleEmployeeTab);
-    $entries = app(EmployeeTimeline::class)->entries($this->viewer, 1);
+test('the calendar page draws the module layer for someone the layer lets in', function () {
+    $this->travelTo('2026-03-02 09:00:00');
+    $viewer = User::factory()->role('General Manager')->create(['employee_id' => Employee::factory()->create()->id]);
 
-    expect($tab->visibleTo($this->viewer, 1))->toBeTrue()
-        ->and($tab->component())->toBe('sample::employees.tab')
-        ->and(collect($entries)->firstWhere('source', 'sample'))->toMatchArray(['title' => 'Sample entry', 'label' => 'Sample']);
+    Livewire::actingAs($viewer)
+        ->test('tracking::calendar.index')
+        ->set('month', '2026-03')
+        ->assertSee('Sample day')
+        ->assertSeeHtml('data-test="calendar-layer-sample-sample-1-2026-03-01"');
+});
+
+test('the Waiting on me page lists the module work items', function () {
+    $page = Livewire::actingAs($this->viewer)->test('pages::waiting.index')->assertOk();
+    $sample = collect($page->instance()->sources)->firstWhere('key', 'sample');
+
+    expect($sample)->toMatchArray(['label' => 'Sample work', 'count' => 1])
+        ->and($sample['items'][0]['title'])->toBe('Sample item');
+    $page->assertSee('Sample item');
+});
+
+test('Ask finds module records through the module search', function () {
+    $results = Livewire::actingAs($this->viewer)->test('desk.ask')->set('query', 'sample thing')->instance()->results;
+    $group = collect($results['groups'])->firstWhere('source', 'sample');
+
+    expect($group['name'])->toBe('Sample records')
+        ->and($group['items'][0])->toMatchArray(['label' => 'Sample thing', 'href' => '/sample']);
+});
+
+test('the employee profile offers the module tab, and the timeline gets its entries', function () {
+    $employee = Employee::factory()->create();
+    $viewer = User::factory()->role('General Manager')->create(['employee_id' => $employee->id]);
+    $page = Livewire::actingAs($viewer)->test('hr::employees.show')->assertOk();
+
+    expect(array_keys($page->instance()->moduleTabs()))->toContain('sample')
+        ->and($page->instance()->visibleTabs())->toContain('sample')
+        ->and(collect(app(EmployeeTimeline::class)->entries($this->viewer, 1))->firstWhere('source', 'sample'))
+        ->toMatchArray(['title' => 'Sample entry', 'label' => 'Sample']);
 });
 
 test('the organisation numbers include the module number', function () {
@@ -172,14 +194,10 @@ test('a notification about a module record leads to the module page', function (
         ->and(app(SubjectLinks::class)->routeFor('unknown_type', 5))->toBeNull();
 });
 
-test('the module schedule is read when the scheduler is built', function () {
-    $schedule = new Schedule;
+test('the module schedule reaches the real scheduler', function () {
+    $names = collect(app(Schedule::class)->events())->pluck('description')->all();
 
-    foreach ($this->registry->scheduleSources() as $source) {
-        $source->schedule($schedule);
-    }
-
-    expect(collect($schedule->events())->pluck('description')->all())->toContain(SampleSchedule::Name);
+    expect($names)->toContain(SampleSchedule::Name);
 });
 
 test('the module declares a permission and a prefixed route of its own', function () {
@@ -188,6 +206,12 @@ test('the module declares a permission and a prefixed route of its own', functio
 
     $this->get('/sample')->assertOk()->assertSee('sample module');
 });
+
+/*
+| Known gaps: the full list lives in docs/hub-unification/04-adding-a-module.md
+| section 10. The register() call in beforeEach stands in for the module's
+| entry in bootstrap/providers.php, which this test therefore does not cover.
+*/
 
 test('a module can add its permissions to the catalogue without editing config', function () {
     // Gap: permissions are listed in config/access-control.php, so a new module must edit it.

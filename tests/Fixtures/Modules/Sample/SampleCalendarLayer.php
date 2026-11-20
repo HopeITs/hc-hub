@@ -22,7 +22,7 @@ final class SampleCalendarLayer implements CalendarLayerSource
 
     public function icon(): string
     {
-        return 'cal';
+        return 'calendar';
     }
 
     public function leads(): bool
