@@ -311,3 +311,65 @@ test('city hr cannot link a device number to someone in another city', function 
 
     $this->assertDatabaseMissing('attendance_device_links', ['device_no' => '77']);
 });
+
+test('the sheets read in one batch match the sheet read for each person', function () {
+    $first = ($this->volunteer)();
+    $second = ($this->volunteer)();
+    ($this->punch)($first, '2026-09-07 08:00:00');
+    ($this->punch)($first, '2026-09-07 17:30:00');
+    ($this->punch)($second, '2026-09-08 09:00:00');
+    LeaveRequest::factory()->for(LeaveBalance::factory()->for($second->allContracts()->first()))->create([
+        'status' => LeaveRequestStatus::Accepted->value,
+        'start_at' => '2026-09-11 00:00:00',
+        'end_at' => '2026-09-11 23:59:59',
+    ]);
+    $timesheet = app(Timesheet::class);
+
+    $batch = $timesheet->forEmployees(collect([$first, $second]), $this->september);
+
+    foreach ([$first, $second] as $employee) {
+        $single = $timesheet->forEmployee($employee, $this->september);
+
+        expect($batch[$employee->id]['totals'])->toBe($single['totals'])
+            ->and(array_column($batch[$employee->id]['rows'], 'kind'))->toBe(array_column($single['rows'], 'kind'))
+            ->and(count($batch[$employee->id]['balances']))->toBe(count($single['balances']));
+    }
+
+    expect($batch[$second->id]['totals']['leave_hours'])->toBe(8.0)
+        ->and($timesheet->forEmployees(collect(), $this->september))->toBe([]);
+});
+
+test('someone who sees every city starts on their own city, and a city link wins', function () {
+    $home = City::factory()->create();
+    City::factory()->create();
+    $hr = User::factory()->role('HR-SYR')->create(['employee_id' => ($this->volunteer)($home)->id]);
+    $hr->givePermissionTo(['attendance.view-own', 'attendance.view', 'attendance.manage']);
+    $cityHr = ($this->hr)($this->city);
+
+    expect(app(Roster::class)->mode($hr->refresh()))->toBe(Roster::ALL)
+        ->and(app(Roster::class)->defaultCityId($hr))->toBe($home->id)
+        ->and(app(Roster::class)->defaultCityId($cityHr))->toBeNull();
+
+    Livewire::actingAs($hr)->test('hr::attendance.timesheets')->assertSet('cityId', $home->id);
+    Livewire::withQueryParams(['city' => $this->city->id])->actingAs($hr)->test('hr::attendance.timesheets')->assertSet('cityId', $this->city->id);
+});
+
+test('groups start folded, and a search or a hand-opened group shows the rows', function () {
+    $first = ($this->volunteer)();
+    $second = ($this->volunteer)();
+    $hr = ($this->hr)($this->city);
+
+    $page = Livewire::actingAs($hr)->test('hr::attendance.timesheets')
+        ->set('month', '2026-09')
+        ->set('groupBy', Grouping::DEPARTMENT)
+        ->assertSeeHtml('aria-expanded="false"')
+        ->assertDontSeeHtml('aria-expanded="true"');
+
+    $page->set('search', (string) $first->id)->assertSeeHtml('aria-expanded="true"');
+
+    $foldKey = $this->city->id.':'.Grouping::DEPARTMENT.'-'.($second->allContracts()->first()->position->department_id ?: 'none');
+    $page->set('search', '')
+        ->call('toggleGroup', $foldKey, false)
+        ->assertSet('collapsed.'.$foldKey, false)
+        ->assertSeeHtml('aria-expanded="true"');
+});

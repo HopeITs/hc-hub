@@ -68,12 +68,12 @@
         @foreach ($block['groups'] as $group)
             @php
                 $foldKey = $block['id'].':'.$group['key'];
-                $folded = $collapsed[$foldKey] ?? false;
+                $folded = $collapsed[$foldKey] ?? $foldedByDefault;
                 $groupParams = $printBase + ['city_id' => $block['id'], 'group' => $group['id'] ?? 'none'];
             @endphp
             <x-ui.panel wire:key="attendance-group-{{ $foldKey }}" data-attendance-group>
                 <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-panel-border px-4 py-2.5">
-                    <button type="button" wire:click="toggleGroup('{{ $foldKey }}')" aria-expanded="{{ $folded ? 'false' : 'true' }}" class="flex min-h-10 items-center gap-2 text-start">
+                    <button type="button" wire:click="toggleGroup('{{ $foldKey }}', {{ $folded ? 'false' : 'true' }})" aria-expanded="{{ $folded ? 'false' : 'true' }}" class="flex min-h-10 items-center gap-2 text-start">
                         <flux:icon name="chevron-down" @class(['size-4 shrink-0 transition', $muted, '-rotate-90 rtl:rotate-90' => $folded]) />
                         <span class="font-semibold" dir="auto">{{ $group['name'] ?? __($groupLabel) }}</span>
                         <span class="text-xs {{ $muted }}">{{ trans_choice('hr_attendance.timesheets.people-count', $group['totals']['people'], ['count' => $group['totals']['people']]) }}</span>

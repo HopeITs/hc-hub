@@ -47,7 +47,7 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
 
     public bool $onlyToDecide = false;
 
-    /** @var array<string, bool> Group keys the viewer folded away ("<city>:<group>"). */
+    /** @var array<string, bool> Groups the viewer folded (true) or opened (false) by hand ("<city>:<group>"). */
     public array $collapsed = [];
 
     public bool $showDayModal = false;
@@ -79,6 +79,13 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
         }
 
         $this->groupBy = Grouping::normalize($this->groupBy);
+
+        // Someone who sees every city starts on one (their own, else the first) rather than on the
+        // whole organisation: the page is quick and useful at once, and "All cities" is one choice
+        // away. Everyone else is already limited to their own people or place. A ?city= link wins.
+        if ($this->cityId === null && ! request()->has('city')) {
+            $this->cityId = app(Roster::class)->defaultCityId($this->user());
+        }
     }
 
     public function shiftMonth(int $delta): void
@@ -92,9 +99,12 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
         $this->groupBy = Grouping::normalize($this->groupBy);
     }
 
-    public function toggleGroup(string $key): void
+    /**
+     * Groups start folded (see foldedByDefault()), so the toggle says which way it goes.
+     */
+    public function toggleGroup(string $key, bool $fold): void
     {
-        $this->collapsed[$key] = ! ($this->collapsed[$key] ?? false);
+        $this->collapsed[$key] = $fold;
     }
 
     public function openDay(int $employeeId, string $date): void
@@ -277,8 +287,14 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
             $openDay = $employee === null ? null : ['employee' => $employee, 'row' => $this->rowFor($employee, $this->dayDate)];
         }
 
+        $blocks = app(Grouping::class)->group($items, $by);
+
         return [
-            'blocks' => app(Grouping::class)->group($items, $by),
+            'blocks' => $blocks,
+            // A long page opens as a short list of groups; one group, a search or the
+            // days-to-decide filter opens them all, so a match is never hidden.
+            'foldedByDefault' => trim($this->search) === '' && ! $this->onlyToDecide
+                && collect($blocks)->sum(fn (array $block): int => count($block['groups'])) > 1,
             'summary' => $summary,
             'by' => $by,
             'days' => collect(range(1, $month->daysInMonth))->map(fn (int $day): array => [
@@ -306,10 +322,11 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
     private function items(CarbonImmutable $month): Collection
     {
         $user = $this->user();
-        $timesheet = app(Timesheet::class);
         $workflow = app(MonthWorkflow::class);
         $employees = app(Roster::class)->employees($user, $month, $this->cityId)
             ->when(trim($this->search) !== '', fn (Collection $all): Collection => $all->filter(fn (Employee $employee): bool => $this->matchesSearch($employee)));
+        // One batch of reads for everyone on the page, not a set per person.
+        $sheets = app(Timesheet::class)->forEmployees($employees, $month);
 
         $records = AttendanceMonth::query()
             ->with('approver', 'locker')
@@ -318,9 +335,10 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
             ->get()
             ->keyBy('employee_id');
 
-        return $employees->map(function (Employee $employee) use ($timesheet, $workflow, $records, $month, $user): array {
-            $sheet = $timesheet->forEmployee($employee, $month);
-            $record = $records[$employee->id] ?? AttendanceMonth::for($employee, $month);
+        return $employees->map(function (Employee $employee) use ($sheets, $workflow, $records, $month, $user): array {
+            $sheet = $sheets[$employee->id];
+            // No record yet is a blank one, not a query per person.
+            $record = $records[$employee->id] ?? new AttendanceMonth(['employee_id' => $employee->id, 'month' => $month->toDateString()]);
 
             return [
                 'employee' => $employee,

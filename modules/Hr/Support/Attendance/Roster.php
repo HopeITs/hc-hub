@@ -134,6 +134,25 @@ class Roster
     }
 
     /**
+     * The city the page starts on. Only for those who see every city (HR Syria, the general
+     * manager, the administrators): their own city, else the first. Everyone else is already
+     * limited by role (own, team or their cities), so nothing is chosen for them.
+     */
+    public function defaultCityId(User $user): ?int
+    {
+        if ($this->mode($user) !== self::ALL) {
+            return null;
+        }
+
+        $cities = $this->cities($user);
+        $own = $user->employee_id === null ? null : Employee::query()->whereKey($user->employee_id)->value('city_id');
+
+        $cityId = $own !== null && $cities->contains('id', (int) $own) ? (int) $own : $cities->first()?->id;
+
+        return $cityId === null ? null : (int) $cityId;
+    }
+
+    /**
      * Contracts (not drafts) running some day of the month.
      *
      * @template TQuery of Builder|Relation
