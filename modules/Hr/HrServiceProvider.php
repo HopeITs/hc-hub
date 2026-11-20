@@ -31,6 +31,7 @@ use Modules\Hr\Console\LoadMailListsCommand;
 use Modules\Hr\Console\ProcessContractAutoRenewalsCommand;
 use Modules\Hr\Console\RecountPositionSeatsCommand;
 use Modules\Hr\Console\ReportAccountGapsCommand;
+use Modules\Hr\Console\ReportRecruitmentAccessCommand;
 use Modules\Hr\Console\SendAttendanceRemindersCommand;
 use Modules\Hr\Console\SendLeaveDecisionRemindersCommand;
 use Modules\Hr\Models\Contract;
@@ -117,7 +118,7 @@ class HrServiceProvider extends ServiceProvider
         ]);
 
         // Hub unification reports (read only).
-        $this->commands([ReportAccountGapsCommand::class]);
+        $this->commands([ReportAccountGapsCommand::class, ReportRecruitmentAccessCommand::class]);
 
         $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
             // Evening contract runs, in this order: amendments take effect on their date, then ended
