@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AccessGrant;
 use App\Models\Activity;
 use App\Models\AiRequest;
 use App\Models\KnownDevice;
@@ -75,6 +76,7 @@ use Modules\Tracking\Models\TransfersTracking;
 function modelsGuardedWithoutPolicy(): array
 {
     return [
+        AccessGrant::class => ['access-management', 'Scoped grants: written only by GrantScopedAccess and RevokeScopedAccess under access-management.manage-permissions, read by AccessScope.'],
         ActivityPlanBatch::class => ['annual-plans', 'Part of its annual plan (ActivityPlanPolicy::update); written only by SaveActivityPlanItem and CopyActivityPlanItemSettings.'],
         ActivityPlanFollowUp::class => ['annual-plans', 'Part of its annual plan (ActivityPlanPolicy::review); written only by ManageActivityPlanFollowUps.'],
         ActivityPlanItem::class => ['annual-plans', 'Part of its annual plan (ActivityPlanPolicy::update); written only by the Modules\Tracking\Actions\AnnualPlans actions.'],

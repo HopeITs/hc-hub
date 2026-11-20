@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Policies;
 
+use App\Support\Access\AccessScope;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Support\TrackingDuties;
@@ -14,6 +15,11 @@ use Modules\Tracking\Support\TrackingDuties;
  * answer for — its details, files, linked proposals and schedule. Archiving
  * and restoring (projects are never deleted) and reassigning a project to
  * another program or owner stay with projects.* holders.
+ *
+ * A projects.* permission may also be held on this project alone, or on its
+ * program or city, through a scoped access grant that is active today
+ * (roadmap 4.4, App\Support\Access\AccessScope; off unless
+ * config('access-control.access_grants.enabled') is on).
  */
 class ProjectPolicy
 {
@@ -30,7 +36,7 @@ class ProjectPolicy
      */
     public function view(User $user, Project $project): bool
     {
-        return $user->can('projects.view');
+        return $this->holds($user, 'projects.view', $project);
     }
 
     /**
@@ -51,7 +57,7 @@ class ProjectPolicy
             return false;
         }
 
-        return $user->can('projects.update') || in_array($project->id, TrackingDuties::for($user)->ownedProjectIds(), true);
+        return $this->holds($user, 'projects.update', $project) || in_array($project->id, TrackingDuties::for($user)->ownedProjectIds(), true);
     }
 
     /**
@@ -61,7 +67,7 @@ class ProjectPolicy
      */
     public function reassign(User $user, Project $project): bool
     {
-        return ! $project->isOwnerRejected() && $user->can('projects.update');
+        return ! $project->isOwnerRejected() && $this->holds($user, 'projects.update', $project);
     }
 
     /**
@@ -88,7 +94,7 @@ class ProjectPolicy
      */
     public function delete(User $user, Project $project): bool
     {
-        return $user->can('projects.delete');
+        return $this->holds($user, 'projects.delete', $project);
     }
 
     /**
@@ -105,5 +111,18 @@ class ProjectPolicy
     public function forceDelete(User $user, Project $project): bool
     {
         return false;
+    }
+
+    /**
+     * The permission everywhere, or on this project, its program or its city
+     * through an active scoped grant.
+     */
+    private function holds(User $user, string $permission, Project $project): bool
+    {
+        return app(AccessScope::class)->allows($user, $permission, [
+            'project' => (int) $project->id,
+            'program' => (int) $project->program_id,
+            'city' => (int) $project->city_id,
+        ]);
     }
 }
