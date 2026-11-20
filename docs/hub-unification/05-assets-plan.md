@@ -26,7 +26,7 @@
 
 - المفاتيح الأجنبية: `checklists.employee_id`, `delivered_id`, `receiver_id` كلها `cascadeOnDelete`. `default_deliverables.item_id` هو `restrictOnDelete`.
 - الفهارس: `delivered_status`, `returned_status`, و `employee_items.status`.
-- الملف: `modules/Hr/database/migrations/2026_11_11_100001_create_hr_organisation_tables.php` و `..._100005_create_hr_archives_tables.php` و `..._100011_add_hr_foreign_keys.php`.
+- الملفات (في `modules/Hr/database/migrations/`): `2026_11_11_100001_create_hr_organisation_tables.php` (`employee_items`)، `..._100002_create_hr_contracts_tables.php` (`default_deliverables`)، `..._100005_create_hr_archives_tables.php` (`checklists`)، `..._100011_add_hr_foreign_keys.php` (المفاتيح الأجنبية)، `..._100012_add_hr_list_indexes.php` (الفهارس).
 
 ### 1.2 الأعداد (قراءة فقط، من القاعدة المتصلة بالتطوير)
 
@@ -206,7 +206,7 @@
 | --- | --- |
 | لماذا | العُهد مهمة تسليم وليست سجل أصل: بلا رقم تسلسلي، بلا حالة، والإغلاق يحذف التاريخ. Inventory يحتاج أصلاً بهوية وحيازة، وHR يحتاج أن تبقى مهامه تعمل |
 | ما الذي يتأثر | `checklists` (عمود `asset_id`)، `employee_items` (تجميد)، `ChecklistWorkflow::finalizeReturn`، `EquipmentTimelineSource`، خطوة المعدات في `OffboardingJourneys`، تبويب `equipment`، `inventory:migrate-employee-items`. لا يتأثر: بنود غير المعدات، `default_deliverables`، صلاحيات `checklists.*` |
-| من يعتمد عليه | رحلات الانضمام والمغادرة، صندوق العمل، بطاقة `hr-checklist` في الـ Desk، الإشعارات، الخط الزمني للموظف، وحدة Inventory (I09, I11) |
+| من يعتمد عليه | رحلات الانضمام والمغادرة، صندوق العمل، بطاقة `ChecklistCard` في الـ Desk (مفتاحها `checklist`)، الإشعارات، الخط الزمني للموظف، وحدة Inventory (I09, I11) |
 | كيف | الخيار ب. توقّف الحذف في `finalizeReturn` + اختبارات HR أولاً ← Expand ← Backfill ← Verify ← تحويل القراءة خلف flag ← تجميد. التنفيذ داخل مهام Inventory |
 | كيف يُفحص | اختبار لكل انتقال في `ChecklistWorkflow` قبل التعديل. اختبار أن الإغلاق يحفظ الصف. اختبار الجسر: تسليم بأصل يفتح حيازة، وبدون أصل يعمل كما اليوم. اختبار عدم تكرار الخط الزمني. تقارير القسم 6 |
 | التراجع | revert للـ PR. إطفاء flag القراءة. جداول جديدة قابلة للحذف دون أثر. استعادة النسخة الاحتياطية للبيانات. الحذف النهائي مؤجل إلى 6.7 |
@@ -232,5 +232,5 @@
 | مصدران للحقيقة أثناء الانتقال | رقم عُهد مختلف بين الصفحتين | `asset_id` هو المفتاح. قاعدة عرض واحدة. flag |
 | فقد تاريخ مغلق | لا يُسترد | لا نخترع بيانات (5.2). ما بلا مقابل يذهب إلى تقرير |
 | إنشاء أصول من صفوف بلا رقم تسلسلي | أصول وهمية | لا نُنشئ إلا بالرقم التسلسلي. الباقي مراجعة يدوية |
-| تعارض مع جلسة Inventory الجارية | عمل مكرر أو أسماء مختلفة | الوثيقة لا تضيف أسماء. كل ما فيها مرتبط بـ `contracts.md` |
+| تعارض مع جلسة Inventory الجارية | عمل مكرر أو أسماء مختلفة | الوثيقة لا تضيف أسماء. الأسماء من `docs/inventory/decisions.md` (D2، I09). ملاحظة الاتجاه: `contracts.md` فيه `inventory_custodies.checklist_id` (من Inventory إلى HR)، أما `checklists.asset_id` (من HR إلى Inventory) فمصدره D2 و I09 ولا يظهر في `contracts.md`. الاتجاهان متوافقان لكن يجب أن تقرّر Inventory أيّهما يُنفَّذ أو كليهما |
 | ازدواج في الخط الزمني | التسليم يظهر مرتين | قاعدة: الصف المرتبط بأصل يظهر من الحيازة فقط |
