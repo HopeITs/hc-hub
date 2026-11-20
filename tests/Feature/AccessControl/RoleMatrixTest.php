@@ -23,7 +23,7 @@ function everyViewPermission(): array
         ->filter(fn (array $actions): bool => in_array('view', $actions, true))
         ->keys()
         ->map(fn (string $module): string => "{$module}.view")
-        ->reject(fn (string $permission): bool => in_array($permission, ['activity-log.view', 'attendance.view', ...FINANCE_VIEWS, ...FUNDRAISING_VIEWS], true))
+        ->reject(fn (string $permission): bool => in_array($permission, ['activity-log.view', 'attendance.view', ...FINANCE_VIEWS, ...FUNDRAISING_VIEWS, ...config('access-control.hr_permissions')], true))
         ->push('attendance.view-own')
         ->values()
         ->all();
@@ -142,7 +142,7 @@ test('each role holds every view permission plus exactly its approved write perm
     'Managers' => ['Managers', [
         'tasks.create', 'tasks.update', 'tasks.delete', 'reports.create', 'reports.update',
         'strategies.create', 'strategies.update', 'strategies.delete',
-        'programs.update',
+        'programs.create', 'programs.update', 'centers.create',
         'annual-plans.create', 'annual-plans.update', 'annual-plans.delete',
         'projects.update', 'projects.delete',
         'milestones.create', 'milestones.update', 'milestones.delete',
@@ -164,6 +164,7 @@ test('the General Manager holds everything except role and permission management
             'ai.draft',
             'annual-plans.review',
             'attendance.manage', 'mail-lists.manage', 'mail-lists.confirm', 'message-templates.manage', 'message-templates.use',
+            ...config('access-control.hr_permissions'),
         ])
         ->pluck('name')
         ->all();

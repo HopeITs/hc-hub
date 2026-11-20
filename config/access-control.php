@@ -53,6 +53,53 @@ $groups = [
     'message-templates' => ['manage', 'use'],
 ];
 
+/*
+| HR's own catalog (hub roadmap 4.1). Until now these names existed only
+| because hub:import-hr copied them from the old HR database; listing them
+| here lets `permissions:sync` create them on an empty database. No built-in
+| role baseline below gains any of them: who holds them still comes from the
+| HR roles, and Super Admin holds everything. An action listed under a module
+| that already exists above is added to that module.
+*/
+$hrGroups = [
+    'access-management' => ['view', 'manage-employees'],
+    'statistics' => ['view'],
+    'employees' => ['view', 'create', 'update', 'delete', 'export'],
+    'contracts' => ['view', 'create', 'update', 'delete', 'export', 'amend'],
+    'programs' => ['delete'],
+    'centers' => ['view', 'update', 'delete', 'export'],
+    'positions' => ['view', 'create', 'update', 'delete', 'export'],
+    'leaves' => ['view-own', 'view-all', 'create', 'update', 'delete', 'decide', 'review', 'manage-balances', 'export'],
+    'project-basics' => ['view', 'create', 'update', 'delete', 'export'],
+    'news' => ['view', 'create', 'update', 'delete'],
+    'badges' => ['view', 'create', 'update', 'delete'],
+    'archives' => ['view', 'create', 'update', 'delete', 'share', 'download'],
+    'checklists' => ['view-own', 'view-all', 'manage', 'deliver', 'receive'],
+    'recruitment-requests' => ['view', 'manage', 'submit', 'cancel', 'approve', 'reject', 'request-changes', 'direct-open', 'export', 'approve-finance', 'submit-without-manager'],
+    'recruitment-vacancies' => ['view', 'manage'],
+    'recruitment-campaigns' => ['view', 'manage'],
+    'recruitment-job-posts' => ['view', 'manage'],
+    'recruitment-forms' => ['view', 'manage'],
+    'recruitment-links' => ['view', 'manage'],
+    'recruitment-indicators' => ['manage'],
+    'recruitment-applicants' => [
+        'view', 'manage', 'download-cv', 'add-notes', 'delete-notes', 'archive-cv', 'change-status', 'endorse',
+        'tag', 'bulk-tag', 'manage-tags', 'accept', 'bulk-reject', 'schedule-interviews', 'view-evaluations',
+        'correct-evaluations', 'view-offers', 'manage-offers', 'view-offer-salary', 'convert-hires', 'export',
+        'request-erasure',
+    ],
+];
+
+$hrPermissions = [];
+
+foreach ($hrGroups as $module => $actions) {
+    foreach ($actions as $action) {
+        $hrPermissions[] = "{$module}.{$action}";
+    }
+
+    $groups[$module] = [...($groups[$module] ?? []), ...$actions];
+}
+
 $allPermissions = [];
 
 foreach ($groups as $module => $actions) {
@@ -72,7 +119,7 @@ $restrictedViews = ['activity-log.view', 'attendance.view', ...$financeViews, ..
 $viewEverything = [
     ...array_values(array_filter(
         $allPermissions,
-        fn (string $permission): bool => str_ends_with($permission, '.view') && ! in_array($permission, $restrictedViews, true),
+        fn (string $permission): bool => str_ends_with($permission, '.view') && ! in_array($permission, [...$restrictedViews, ...$hrPermissions], true),
     )),
     'attendance.view-own',
 ];
@@ -103,6 +150,16 @@ $aiDrafter = ['ai.draft'];
 return [
 
     'groups' => $groups,
+
+    /*
+    |--------------------------------------------------------------------------
+    | HR permissions
+    |--------------------------------------------------------------------------
+    |
+    | The names HR brought into the catalog (roadmap 4.1). No built-in role
+    | baseline lists them; the HR roles hold them.
+    */
+    'hr_permissions' => $hrPermissions,
 
     /*
     |--------------------------------------------------------------------------
@@ -299,6 +356,7 @@ return [
             ...$targetWriter,
             ...$aiDrafter,
             ...$hrOnly,
+            ...$hrPermissions,
         ])),
     ],
 ];

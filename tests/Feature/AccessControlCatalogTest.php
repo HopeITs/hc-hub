@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\File;
 
 test('the permission catalog config drives permission names', function () {
     expect(config('access-control.groups'))->toHaveKey('programs')
-        ->and(config('access-control.groups.programs'))->toBe(['view', 'update']);
+        ->and(config('access-control.groups.programs'))->toBe(['view', 'create', 'update', 'delete']);
 });
 
 test('the lifecycle modules carry exactly their contract actions', function (string $module, array $actions) {
