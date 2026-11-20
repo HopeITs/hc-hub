@@ -8,6 +8,7 @@ use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Models\Role;
 use App\Notifications\Alerts\NotificationSettings;
 use App\Policies\UserPolicy;
+use App\Support\Access\RoleAliases;
 use App\Support\Blaze\NonFoldingBlazeManager;
 use App\Support\Desk\Destinations;
 use App\Support\Desk\PageCards;
@@ -89,6 +90,7 @@ class AppServiceProvider extends ServiceProvider
         // One instance per request or job, so queue workers never hold stale values.
         $this->app->scoped(NotificationSettings::class);
         $this->app->scoped(RouteSlugs::class);
+        $this->app->scoped(RoleAliases::class);
         // The Desk's catalogues are asked many times per page (sidebar, Ask, cards, tabs, drops): built once per request.
         $this->app->scoped(Destinations::class);
         $this->app->scoped(Panels::class);

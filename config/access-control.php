@@ -163,6 +163,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Role aliases
+    |--------------------------------------------------------------------------
+    |
+    | HR's role names beside the hub roles that mean the same thing to HR's
+    | checks (roadmap 4.2). App\Support\Access\RoleAliases keeps them as rows
+    | in role_aliases: a role created under one of these names is linked to
+    | its alias, and `permissions:sync` links the ones still missing. Nothing
+    | here grants a permission.
+    */
+    'role_aliases' => [
+        'super-admin' => ['super-admin', 'Super Admin'],
+        'general-manager' => ['general-manager', 'General Manager'],
+        'manager' => ['manager', 'Managers'],
+        'employee' => ['employee', 'Team Member'],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | MEAL manager only
     |--------------------------------------------------------------------------
     |

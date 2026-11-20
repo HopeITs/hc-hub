@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Hr\Support\Employees;
 
 use App\Models\Role;
+use App\Support\Access\RoleAliases;
 use Illuminate\Support\Str;
 use Modules\Core\Models\City;
 use Modules\Core\Models\User;
@@ -19,14 +20,6 @@ use Modules\Core\Models\User;
  */
 final class HrAccess
 {
-    /** HR's role names beside the hub roles that mean the same thing. */
-    private const ALIASES = [
-        'SUPER-ADMIN' => ['SUPER-ADMIN', 'SUPER ADMIN'],
-        'GENERAL-MANAGER' => ['GENERAL-MANAGER', 'GENERAL MANAGER'],
-        'MANAGER' => ['MANAGER', 'MANAGERS'],
-        'EMPLOYEE' => ['EMPLOYEE', 'TEAM MEMBER'],
-    ];
-
     /** The role a user without an active role is read as, most senior first. */
     private const FALLBACK_ORDER = ['SUPER-ADMIN', 'HR', 'GENERAL-MANAGER', 'MANAGER'];
 
@@ -135,6 +128,7 @@ final class HrAccess
             return Str::startsWith($active, 'HR-');
         }
 
-        return $active === $wanted || in_array($active, self::ALIASES[$wanted] ?? [], true);
+        // HR's names beside the hub roles that mean the same thing: role_aliases.
+        return $active === $wanted || in_array($active, app(RoleAliases::class)->roleNames($wanted), true);
     }
 }
