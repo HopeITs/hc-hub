@@ -4,6 +4,7 @@
 --}}
 @use('Modules\Hr\Enums\ScheduleMode')
 @use('Modules\Hr\Support\Contracts\ContractOptions')
+@use('Modules\Hr\Support\Contracts\WeekendClause')
 
 @php
     $fixedSchedule = (int) ($form['schedule_mode'] ?? 0) === ScheduleMode::Fixed->value;
@@ -54,6 +55,13 @@
             <div class="flex flex-col justify-end gap-2">
                 <flux:checkbox wire:model="form.flex_varies_by_requirements" :label="__('hr_contracts.fields.flex_varies_by_requirements')" />
                 <flux:checkbox wire:model="form.flex_coordinated_with_manager" :label="__('hr_contracts.fields.flex_coordinated_with_manager')" />
+            </div>
+        @endif
+
+        {{-- Study Zone only, either mode: names the day(s) its centers close. --}}
+        @if ($this->weekendClauseDays !== [])
+            <div class="@2xl/form:col-span-2 @5xl/form:col-span-3" data-test="weekend-clause-option">
+                <flux:checkbox wire:model="form.show_weekend_clause" :label="WeekendClause::label($this->weekendClauseDays)" />
             </div>
         @endif
     </div>

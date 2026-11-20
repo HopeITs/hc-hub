@@ -58,6 +58,7 @@ return [
         'show_hours_per_week' => 'Hours per week',
         'show_hours_per_day' => 'Hours per day',
         'show_day_range' => 'Day range',
+        'show_weekend_clause' => 'Include ":days is considered a day off" in the printed contract',
         'flex_days_per_week' => 'Days per week',
         'flex_hours_per_week' => 'Hours per week',
         'flex_hours_per_month' => 'Hours per month',

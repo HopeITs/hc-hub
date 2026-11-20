@@ -55,6 +55,7 @@ use Modules\Hr\Support\Employees\HrAccess;
  * @property bool $show_hours_per_week
  * @property bool $show_hours_per_day
  * @property bool $show_day_range
+ * @property bool $show_weekend_clause
  * @property int|null $flex_days_per_week
  * @property int|null $flex_hours_per_week
  * @property int|null $flex_hours_per_month
@@ -71,7 +72,7 @@ use Modules\Hr\Support\Employees\HrAccess;
  * @property CarbonImmutable|null $updated_at
  */
 #[ObservedBy(HrStatisticsObserver::class)]
-#[Fillable(['employee_id', 'position_id', 'contract_type_id', 'type', 'place', 'start_date', 'end_date', 'termination_reason_id', 'terminated_at', 'reason_of_termination', 'salary', 'currency', 'salary_per', 'work_hours_from', 'work_hours_to', 'work_hours_2_from', 'work_hours_2_to', 'work_days_en', 'work_days_ar', 'weekly_hours', 'schedule_mode', 'work_day_from', 'work_day_to', 'show_days_per_week', 'show_hours_per_week', 'show_hours_per_day', 'show_day_range', 'flex_days_per_week', 'flex_hours_per_week', 'flex_hours_per_month', 'flex_varies_by_requirements', 'flex_coordinated_with_manager', 'flex_custom_en', 'flex_custom_ar', 'pay_mode', 'session_duration', 'is_active', 'auto_renew'])]
+#[Fillable(['employee_id', 'position_id', 'contract_type_id', 'type', 'place', 'start_date', 'end_date', 'termination_reason_id', 'terminated_at', 'reason_of_termination', 'salary', 'currency', 'salary_per', 'work_hours_from', 'work_hours_to', 'work_hours_2_from', 'work_hours_2_to', 'work_days_en', 'work_days_ar', 'weekly_hours', 'schedule_mode', 'work_day_from', 'work_day_to', 'show_days_per_week', 'show_hours_per_week', 'show_hours_per_day', 'show_day_range', 'show_weekend_clause', 'flex_days_per_week', 'flex_hours_per_week', 'flex_hours_per_month', 'flex_varies_by_requirements', 'flex_coordinated_with_manager', 'flex_custom_en', 'flex_custom_ar', 'pay_mode', 'session_duration', 'is_active', 'auto_renew'])]
 class Contract extends Model implements TracksActivity
 {
     /** @use HasFactory<ContractFactory> */
@@ -182,6 +183,7 @@ class Contract extends Model implements TracksActivity
             'show_hours_per_week' => 'boolean',
             'show_hours_per_day' => 'boolean',
             'show_day_range' => 'boolean',
+            'show_weekend_clause' => 'boolean',
             'flex_days_per_week' => 'integer',
             'flex_hours_per_week' => 'integer',
             'flex_hours_per_month' => 'integer',

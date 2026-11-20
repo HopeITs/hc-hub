@@ -43,6 +43,11 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.form')] class extends 
         unset($this->positionOptions);
     }
 
+    public function updatedFormPositionId(): void
+    {
+        unset($this->weekendClauseDays);
+    }
+
     public function updatedProgramFilter(): void
     {
         unset($this->positionOptions);
@@ -104,7 +109,7 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.form')] class extends 
                         <option value="{{ $programId }}">{{ $programName }}</option>
                     @endforeach
                 </x-ui.form-select>
-                <x-ui.form-select wire:model="form.position_id" :label="__('hr_contracts.fields.position_id')" :placeholder="__('common.select')" required>
+                <x-ui.form-select wire:model.live="form.position_id" :label="__('hr_contracts.fields.position_id')" :placeholder="__('common.select')" required>
                     @foreach ($this->positionOptions as $positionId => $positionLabel)
                         <option value="{{ $positionId }}">{{ $positionLabel }}</option>
                     @endforeach

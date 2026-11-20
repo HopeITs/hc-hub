@@ -70,6 +70,8 @@ $programId = $contract->position?->program_id;
         @endif
 
         @if($isStudyZone)
+            <x-hr::contract-legal.weekend-clause :contract="$contract" />
+
             <x-hr::contract-legal.dual class="mt-1"
                 :en="'Volunteers are entitled to a second day off in the week, to be determined in coordination with management and based on work requirements. It is permitted to adjust working hours and holidays in months that require opening the center 7 days, in coordination with the direct manager and the HR officer.'"
                 :ar="$Glyphs('يحق للمتطوع يوم عطلة ثان ضمن الأسبوع، يتم تحديده بالتنسيق مع الإدارة وما يتطلبه العمل. يسمح بتعديل أوقات الدوام والعطل في الأشهر التي تتطلب فتح المركز 7 أيام، وذلك بالتنسيق مع المدير المباشر ومسؤول الموارد البشرية.')"/>

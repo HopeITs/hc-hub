@@ -58,6 +58,7 @@ return [
         'show_hours_per_week' => 'عدد الساعات في الأسبوع',
         'show_hours_per_day' => 'عدد الساعات في اليوم',
         'show_day_range' => 'أيام العمل',
+        'show_weekend_clause' => 'تضمين «يعتبر يوم :days يوم عطلة» في العقد المطبوع',
         'flex_days_per_week' => 'الأيام في الأسبوع',
         'flex_hours_per_week' => 'الساعات في الأسبوع',
         'flex_hours_per_month' => 'الساعات في الشهر',

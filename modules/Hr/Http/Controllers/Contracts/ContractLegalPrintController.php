@@ -30,7 +30,7 @@ class ContractLegalPrintController extends Controller
             'employee:id,first_name_en,father_name_en,last_name_en,first_name_ar,father_name_ar,last_name_ar,national_number,dob,pob_en,pob_ar,nationality,address_en,address_ar,gender',
             'position:id,title_en,title_ar,program_id,center_id,city_id',
             'position.program:id,name',
-            'position.center:id,name_en,name_ar',
+            'position.center:id,city_id,weekends,name_en,name_ar',
             'position.city:id,name_en,name_ar',
             'contractType:id,name_en,name_ar',
             'payTiers' => fn ($tiers) => $tiers->orderBy('sort_order'),
