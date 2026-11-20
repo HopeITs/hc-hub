@@ -251,6 +251,12 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
         <x-desk.register-search :label="__('hr_mail_lists.search')" :placeholder="__('hr_mail_lists.search_placeholder')" wire:model.live.debounce.300ms="search" />
     </x-slot:search>
 
+    @if ($canManage)
+        <x-slot:actions>
+            <x-ui.button size="sm" icon="check-circle" :href="route('hr.mail-lists.check')" wire:navigate data-test="mail-lists-check">{{ __('hr_mail_lists.check.open') }}</x-ui.button>
+        </x-slot:actions>
+    @endif
+
     <x-slot:filters>
         <x-ui.header-filter-select :label="__('hr_mail_lists.groups')" wire:model.live="category" :value="$category">
             <option value="">{{ __('hr_mail_lists.cat.all') }}</option>

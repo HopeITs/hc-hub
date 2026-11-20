@@ -15,6 +15,7 @@ use Modules\Hr\Http\Controllers\Attendance\AttendanceSignedController;
 use Modules\Hr\Models\AttendanceDayDecision;
 use Modules\Hr\Models\AttendanceMonth;
 use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\MailList;
 use Modules\Hr\Support\Attendance\Grouping;
 use Modules\Hr\Support\Attendance\MonthWorkflow;
 use Modules\Hr\Support\Attendance\Roster;
@@ -310,6 +311,8 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
                 ? HrMedia::for(HrMedia::ATTENDANCE_MONTH, (int) $panel['record']->id, AttendanceSignedController::COLLECTION)->last()
                 : null,
             'canManage' => $user->can('attendance.manage'),
+            // The mailing lists that stand for a city, project or department: "Email this group".
+            'mailLists' => MailList::customRuled(),
         ];
     }
 

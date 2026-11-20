@@ -3,6 +3,7 @@
     and project (or department) by project. Included by ⚡timesheets.
 --}}
 @php
+    use Modules\Hr\Models\MailList;
     use Modules\Hr\Support\Attendance\Grouping;
     use Modules\Hr\Support\Attendance\Timesheet as Sheet;
 
@@ -63,6 +64,15 @@
             @if ($block['totals']['to_decide'] > 0)
                 <flux:badge size="sm" color="red" icon="exclamation-triangle">{{ trans_choice('hr_attendance.timesheets.to-decide', $block['totals']['to_decide'], ['count' => $block['totals']['to_decide']]) }}</flux:badge>
             @endif
+            {{-- The mailing list that stands for this city, when there is one. --}}
+            @php
+                $cityList = MailList::emailFor($block['id'] ? (int) $block['id'] : null, null, null, $mailLists);
+            @endphp
+            @if ($cityList)
+                <a href="mailto:{{ $cityList->address }}" class="inline-flex items-center gap-1.5 text-sm font-semibold underline {{ $muted }}" data-test="attendance-email-city">
+                    <flux:icon name="envelope" class="size-4" /> {{ __('hr_mail_lists.email_group') }}
+                </a>
+            @endif
         </div>
 
         @foreach ($block['groups'] as $group)
@@ -70,6 +80,13 @@
                 $foldKey = $block['id'].':'.$group['key'];
                 $folded = $collapsed[$foldKey] ?? $foldedByDefault;
                 $groupParams = $printBase + ['city_id' => $block['id'], 'group' => $group['id'] ?? 'none'];
+                // The list for this project or department (in this city, else nationwide).
+                $groupList = ($group['id'] ?? null) ? MailList::emailForGroup(
+                    $block['id'] ? (int) $block['id'] : null,
+                    $by === Grouping::PROJECT ? (int) $group['id'] : null,
+                    $by === Grouping::DEPARTMENT ? (int) $group['id'] : null,
+                    $mailLists,
+                ) : null;
             @endphp
             <x-ui.panel wire:key="attendance-group-{{ $foldKey }}" data-attendance-group>
                 <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-panel-border px-4 py-2.5">
@@ -83,6 +100,9 @@
                             <flux:badge size="sm" color="red" icon="exclamation-triangle">{{ trans_choice('hr_attendance.timesheets.to-decide', $group['totals']['to_decide'], ['count' => $group['totals']['to_decide']]) }}</flux:badge>
                         @else
                             <flux:badge size="sm" color="green" icon="check">{{ __('hr_attendance.timesheets.group-ready') }}</flux:badge>
+                        @endif
+                        @if ($groupList)
+                            <x-ui.button size="sm" icon="envelope" :href="'mailto:'.$groupList->address" data-test="attendance-email-group">{{ __('hr_mail_lists.email_group') }}</x-ui.button>
                         @endif
                         @if ($group['totals']['overtime_hours'] > 0)
                             <span class="text-xs tabular-nums {{ $muted }}">{{ __('hr_attendance.timesheets.overtime-line', ['hours' => $group['totals']['overtime_hours'], 'days' => $group['totals']['overtime_days']]) }}</span>

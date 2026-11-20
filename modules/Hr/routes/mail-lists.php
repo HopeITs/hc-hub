@@ -10,3 +10,8 @@ use Illuminate\Support\Facades\Route;
 */
 Route::livewire('hr/mail-lists', 'hr::mail-lists.index')
     ->name('hr.mail-lists.index');
+
+// What each list should hold by HR data, and who is missing or has left: HR only.
+Route::livewire('hr/mail-lists/check', 'hr::mail-lists.check')
+    ->can('mail-lists.manage')
+    ->name('hr.mail-lists.check');
