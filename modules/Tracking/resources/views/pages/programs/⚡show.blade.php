@@ -427,6 +427,8 @@ new #[Layout('layouts::desk'), Title('titles.program')] class extends Component 
         @endif
     </div>
 
+    <x-notes.record :subject="$program" />
+
     {{-- Activity: folded by default; the browser remembers the choice. --}}
     <section class="dk-prog-fold" x-data="{ open: $persist(false).as('program-activity-open') }" :class="{ 'dk-prog-fold-on': open }" data-record-activity>
         <button type="button" class="dk-prog-fold-h" @click="open = ! open" :aria-expanded="open.toString()" aria-controls="program-activity-body">

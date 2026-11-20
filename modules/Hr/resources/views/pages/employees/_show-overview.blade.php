@@ -135,7 +135,7 @@
                 <livewire:tasks.subject-tasks subject-type="employee" :subject-id="$employee->id" :key="'employee-tasks-'.$employee->id" />
             @endcan
 
-            <livewire:notes.panel subject-type="employee" :subject-id="$employee->id" :key="'employee-notes-'.$employee->id" />
+            <x-notes.record :subject="$employee" />
         @endcan
     </div>
 </div>

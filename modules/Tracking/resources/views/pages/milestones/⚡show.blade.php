@@ -637,6 +637,8 @@ new #[Layout('layouts::desk'), Title('titles.milestone')] class extends Componen
 
     <x-tracking::tasks.add-task-modal :open="$showAddTaskModal" test-prefix="new-milestone-task" />
 
+    <x-notes.record :subject="$this->milestone" />
+
     <section aria-labelledby="record-activity-heading" class="grid gap-3" data-record-activity>
         <h2 id="record-activity-heading" class="text-base font-bold">{{ __('activity.title') }}</h2>
         <livewire:activity.timeline :subjects="['milestone' => [$this->milestone->id]]" :key="'milestone-activity-'.$this->milestone->id" />

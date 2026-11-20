@@ -224,6 +224,8 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.show')] class extends 
         @include('hr::pages.contracts._show-terms')
     </div>
 
+    <x-notes.record :subject="$contract" />
+
     <x-ui.modal wire:model="showTerminateModal" size="md" :title="__('hr_contracts.actions.terminate')" submit="terminate" close="closeTerminate">
         @if ($showTerminateModal)
             <div class="flex flex-col gap-3">

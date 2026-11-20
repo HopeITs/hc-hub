@@ -376,6 +376,8 @@ new #[Layout('layouts::desk'), Title('titles.donor')] class extends Component {
     @endif
     @endcan
 
+    <x-notes.record :subject="$donor" />
+
     <x-tracking::donors.form-modal :open="$showDonorModal" :editing="true" :type-options="$this->donorTypeOptions" />
 
     <x-tracking::funding.agreement-modal
