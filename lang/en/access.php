@@ -122,5 +122,11 @@ return [
         'view-offer-salary' => 'View offer salary',
         'convert-hires' => 'Convert to employee',
         'request-erasure' => 'Request data erasure',
+        'stand-in' => 'Cover when no officer is assigned',
+        'reopen-stand-in' => 'Decide reopen requests when there is no MEAL manager',
+        'approve-unmanaged' => 'Approve plans of programs with no manager',
+    ],
+    'grants' => [
+        'administrators_only' => 'Only an administrator may grant a right over users, roles or permissions.',
     ],
 ];

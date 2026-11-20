@@ -59,14 +59,14 @@ class StrategicPlanPolicy
      */
     public function approvesFor(User $user, int $programId): bool
     {
-        if ($user->hasRole('Super Admin')) {
+        if ($user->isAdministrator()) {
             return true;
         }
 
         $managerId = Program::query()->whereKey($programId)->value('manager_id');
 
         if ($managerId === null) {
-            return $user->hasRole('General Manager');
+            return $user->can('strategies.approve-unmanaged');
         }
 
         return $user->employee_id !== null && (int) $user->employee_id === (int) $managerId;

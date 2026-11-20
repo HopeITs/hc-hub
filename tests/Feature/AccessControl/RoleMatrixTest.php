@@ -116,7 +116,7 @@ test('each role holds every view permission plus exactly its approved write perm
         'projects.create',
         'funding-agreements.view', 'funding-agreements.create', 'funding-agreements.update',
         'proposals.manage-reviewers', 'proposals.correct-status', 'proposals.approve',
-        'reports.reopen', 'reports.aggregate',
+        'reports.reopen', 'reports.aggregate', 'reports.reopen-stand-in',
         'ai.draft',
     ]],
     'MEAL' => ['MEAL', [
@@ -126,7 +126,7 @@ test('each role holds every view permission plus exactly its approved write perm
         'targets.create', 'targets.update', 'targets.delete',
         'indicator-library.create', 'indicator-library.update', 'indicator-library.delete',
         'reports.reopen', 'reports.aggregate',
-        'meal-coverage.manage', 'sectors.manage', 'risk-library.manage',
+        'meal-coverage.manage', 'meal-coverage.stand-in', 'sectors.manage', 'risk-library.manage',
         'report-templates.manage', 'evidence-types.manage', 'narrative-questions.manage',
         'ai.draft',
     ]],
@@ -164,6 +164,7 @@ test('the General Manager holds everything except role and permission management
             'ai.draft',
             'annual-plans.review',
             'attendance.manage', 'mail-lists.manage', 'mail-lists.confirm', 'message-templates.manage', 'message-templates.use',
+            'meal-coverage.stand-in', 'reports.reopen-stand-in',
             ...config('access-control.hr_permissions'),
         ])
         ->pluck('name')
@@ -189,7 +190,7 @@ test('Super Admin holds every permission in the catalog', function () {
 });
 
 test('reports gain approve, mark-seen, reopen and aggregate permissions', function () {
-    expect(config('access-control.groups.reports'))->toBe(['view', 'create', 'update', 'delete', 'approve', 'mark-seen', 'reopen', 'aggregate']);
+    expect(config('access-control.groups.reports'))->toBe(['view', 'create', 'update', 'delete', 'approve', 'mark-seen', 'reopen', 'aggregate', 'reopen-stand-in']);
 });
 
 test('Team Member is the default role and is department-scoped for tasks', function () {

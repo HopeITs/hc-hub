@@ -38,7 +38,7 @@ class EmployeePolicy
         $visible = $this->isSelf($user, $employee)
             || $employee->is_active
             || $this->seesFormerEverywhere($user)
-            || (HrAccess::is($user, 'HR') && $this->isInActiveCity($user, $employee));
+            || (HrAccess::isHr($user) && $this->isInActiveCity($user, $employee));
 
         return $visible ? Response::allow() : Response::denyAsNotFound();
     }
@@ -52,15 +52,15 @@ class EmployeePolicy
             return false;
         }
 
-        if ($this->isSelf($user, $employee) || HrAccess::is($user, 'general-manager', 'super-admin')) {
+        if ($this->isSelf($user, $employee) || HrAccess::isGeneralManagerOrSuperAdmin($user)) {
             return true;
         }
 
-        if (HrAccess::is($user, 'HR')) {
+        if (HrAccess::isHr($user)) {
             return $this->isInActiveCity($user, $employee);
         }
 
-        return HrAccess::is($user, 'manager') && $this->isDirectReport($user, $employee);
+        return HrAccess::isManager($user) && $this->isDirectReport($user, $employee);
     }
 
     public function create(User $user, ?int $cityId = null): bool
@@ -93,8 +93,8 @@ class EmployeePolicy
      */
     public function manageCard(User $user, Employee $employee): bool
     {
-        return HrAccess::is($user, 'super-admin')
-            || (HrAccess::is($user, 'HR') && $this->isInActiveCity($user, $employee));
+        return HrAccess::isSuperAdmin($user)
+            || (HrAccess::isHr($user) && $this->isInActiveCity($user, $employee));
     }
 
     public function reportCardLost(User $user, Employee $employee): bool
@@ -130,8 +130,8 @@ class EmployeePolicy
 
     private function seesFormerEverywhere(User $user): bool
     {
-        return HrAccess::is($user, 'general-manager', 'super-admin')
-            || (HrAccess::is($user, 'HR') && HrAccess::cityIds($user) === null);
+        return HrAccess::isGeneralManagerOrSuperAdmin($user)
+            || (HrAccess::isHr($user) && HrAccess::cityIds($user) === null);
     }
 
     private function isDirectReport(User $user, Employee $employee): bool

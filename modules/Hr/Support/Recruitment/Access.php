@@ -75,6 +75,12 @@ final class Access
         return false;
     }
 
+    /** Acting under any HR role: national (HR-SYR) or regional (HR-ALP). */
+    public static function isHr(?User $user): bool
+    {
+        return self::activeRoleIs($user, 'HR');
+    }
+
     public static function isActiveSuperAdmin(?User $user): bool
     {
         return self::activeRoleIs($user, 'super-admin');

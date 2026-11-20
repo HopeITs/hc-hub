@@ -80,6 +80,27 @@ final class HrAccess
         return false;
     }
 
+    /** Any HR role: national (HR-SYR) or regional (HR-ALP). */
+    public static function isHr(?User $user): bool
+    {
+        return self::is($user, 'HR');
+    }
+
+    public static function isSuperAdmin(?User $user): bool
+    {
+        return self::is($user, 'super-admin');
+    }
+
+    public static function isGeneralManagerOrSuperAdmin(?User $user): bool
+    {
+        return self::is($user, 'general-manager', 'super-admin');
+    }
+
+    public static function isManager(?User $user): bool
+    {
+        return self::is($user, 'manager');
+    }
+
     /**
      * The city ids a regional HR role is limited to; null means no limit
      * (HR-SYR and every role that is not HR).

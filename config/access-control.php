@@ -27,10 +27,10 @@ $groups = [
     'proposals' => ['view', 'create', 'update', 'delete', 'manage-reviewers', 'correct-status', 'approve'],
     'funding-agreements' => ['view', 'create', 'update', 'delete'],
     'transfers' => ['view', 'create', 'update', 'delete'],
-    'strategies' => ['view', 'create', 'update', 'delete'],
+    'strategies' => ['view', 'create', 'update', 'delete', 'approve-unmanaged'],
     'annual-plans' => ['view', 'create', 'update', 'delete', 'review'],
-    'reports' => ['view', 'create', 'update', 'delete', 'approve', 'mark-seen', 'reopen', 'aggregate'],
-    'meal-coverage' => ['manage'],
+    'reports' => ['view', 'create', 'update', 'delete', 'approve', 'mark-seen', 'reopen', 'aggregate', 'reopen-stand-in'],
+    'meal-coverage' => ['manage', 'stand-in'],
     'supervisions' => ['manage'],
     'sectors' => ['view', 'manage'],
     'risk-library' => ['manage'],
@@ -147,6 +147,14 @@ $targetWriter = ['targets.create', 'targets.update'];
 // Relations roles and Managers; the usage log for the General Manager.
 $aiDrafter = ['ai.draft'];
 
+// Rules that used to name a role inside a policy (roadmap 4.3), each held by
+// the one role the policy named: any MEAL officer covers a project that has
+// no responsible officer; the Public Relations Manager decides reopen
+// requests while there is no MEAL manager; and the General Manager approves
+// the strategic plan of a program that has no manager (through "everything").
+$mealStandIn = ['meal-coverage.stand-in'];
+$reopenStandIn = ['reports.reopen-stand-in'];
+
 return [
 
     'groups' => $groups,
@@ -229,6 +237,35 @@ return [
     | (see App\Policies\UserPolicy).
     */
     'administrator_roles' => ['Super Admin'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Observer roles
+    |--------------------------------------------------------------------------
+    |
+    | Roles that read the work but stay out of its review chain, whatever
+    | their permissions say: they never validate a monthly report
+    | (MonthlyReportPolicy) and read annual-plan updates as a summary only
+    | (PlanUpdatePolicy). An administrator role is never an observer.
+    */
+    'observer_roles' => ['General Manager'],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Scoped access grants
+    |--------------------------------------------------------------------------
+    |
+    | A role or a permission given to one user on one scope for a time
+    | (access_grants, read by App\Support\Access\AccessScope; roadmap 4.4).
+    | Off by default: switched off, a grant gives nothing and only the
+    | general permissions decide, exactly as before the table existed. The
+    | project policy is the first reader; a grant on a program or a city
+    | covers the projects under it.
+    */
+    'access_grants' => [
+        'enabled' => (bool) env('ACCESS_GRANTS_ENABLED', false),
+        'scope_types' => ['project', 'program', 'city', 'center', 'department'],
+    ],
 
     /*
     |--------------------------------------------------------------------------
@@ -325,7 +362,7 @@ return [
             'proposals.approve',
             'projects.create',
             'funding-agreements.view', 'funding-agreements.create', 'funding-agreements.update',
-            'reports.reopen', 'reports.aggregate',
+            'reports.reopen', 'reports.aggregate', ...$reopenStandIn,
             ...$aiDrafter,
         ],
         'MEAL' => [
@@ -335,7 +372,7 @@ return [
             'targets.create', 'targets.update', 'targets.delete',
             'indicator-library.create', 'indicator-library.update', 'indicator-library.delete',
             'reports.reopen', 'reports.aggregate',
-            ...$mealOnly, 'sectors.manage', 'risk-library.manage',
+            ...$mealOnly, ...$mealStandIn, 'sectors.manage', 'risk-library.manage',
             ...$aiDrafter,
         ],
         'Financial' => [
@@ -371,6 +408,8 @@ return [
             'reports.reopen',
             'proposals.approve',
             ...$mealOnly,
+            ...$mealStandIn,
+            ...$reopenStandIn,
             ...$targetWriter,
             ...$aiDrafter,
             ...$hrOnly,

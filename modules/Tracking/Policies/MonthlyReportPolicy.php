@@ -116,7 +116,7 @@ class MonthlyReportPolicy
             return $user->employee_id === $slotHolder;
         }
 
-        return $user->hasRole('Public Relations Manager')
+        return $user->can('reports.reopen-stand-in')
             && MealCoverage::activeEmployeeIds([$user->employee_id]) !== [];
     }
 
@@ -164,7 +164,7 @@ class MonthlyReportPolicy
     private function isValidator(User $user, MonthlyReport $monthlyReport): bool
     {
         if (! $user->can('reports.approve')
-            || $user->hasRole('General Manager')
+            || $user->hasAnyRole(config('access-control.observer_roles', []))
             || in_array($user->id, [$monthlyReport->prepared_by, $monthlyReport->submitted_by], true)) {
             return false;
         }
@@ -179,6 +179,6 @@ class MonthlyReportPolicy
             return true;
         }
 
-        return $responsible === null && $user->hasRole('MEAL');
+        return $responsible === null && $user->can('meal-coverage.stand-in');
     }
 }
