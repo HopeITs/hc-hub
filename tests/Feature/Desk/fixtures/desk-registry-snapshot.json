@@ -1377,6 +1377,12 @@
             "min_rows": 1,
             "icon": "grid"
         },
+        "g-hr-leave": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
         "g-hr-attendance-timesheets": {
             "kind": "buttons",
             "rows": 1,
@@ -1396,6 +1402,12 @@
             "icon": "grid"
         },
         "g-hr-checklists": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
+        "g-hr-archives-mine": {
             "kind": "buttons",
             "rows": 1,
             "min_rows": 1,
@@ -18913,6 +18925,14 @@
                             "module": null
                         },
                         {
+                            "route": "hr.leave.index",
+                            "label": "My leaves",
+                            "icon": "cal",
+                            "hero": "nav-tree-palm",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
                             "route": "hr.attendance.timesheets",
                             "label": "Timesheets",
                             "icon": "cal",
@@ -18933,6 +18953,14 @@
                             "label": "Equipment",
                             "icon": "check",
                             "hero": "nav-list-checks",
+                            "group": "workspace",
+                            "module": null
+                        },
+                        {
+                            "route": "hr.archives.mine",
+                            "label": "My folders",
+                            "icon": "file",
+                            "hero": "nav-folder-open",
                             "group": "workspace",
                             "module": null
                         },
@@ -19813,6 +19841,14 @@
                     "module": null
                 },
                 {
+                    "route": "hr.leave.index",
+                    "label": "My leaves",
+                    "icon": "cal",
+                    "hero": "nav-tree-palm",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
                     "route": "hr.attendance.timesheets",
                     "label": "Timesheets",
                     "icon": "cal",
@@ -19841,6 +19877,14 @@
                     "label": "Equipment",
                     "icon": "check",
                     "hero": "nav-list-checks",
+                    "group": "workspace",
+                    "module": null
+                },
+                {
+                    "route": "hr.archives.mine",
+                    "label": "My folders",
+                    "icon": "file",
+                    "hero": "nav-folder-open",
                     "group": "workspace",
                     "module": null
                 },
@@ -19956,10 +20000,12 @@
                 "hr.recruitment.offers.index",
                 "hr.recruitment.indicator-rules",
                 "hr.leave.team-calendar",
+                "hr.leave.index",
                 "hr.attendance.timesheets",
                 "hr.attendance.upload",
                 "hr.mail-lists.index",
                 "hr.checklists.index",
+                "hr.archives.mine",
                 "hr.news.index",
                 "hr.assistant",
                 "hr.feedback.index",
@@ -21176,6 +21222,15 @@
                         "register": "hr.leave.team-calendar",
                         "kind": "page"
                     },
+                    "g-hr-leave": {
+                        "id": "g-hr-leave",
+                        "title": "My leaves",
+                        "description": "A button that opens My leaves.",
+                        "icon": "nav-tree-palm",
+                        "size": "S",
+                        "register": "hr.leave.index",
+                        "kind": "page"
+                    },
                     "g-hr-attendance-timesheets": {
                         "id": "g-hr-attendance-timesheets",
                         "title": "Timesheets",
@@ -21210,6 +21265,15 @@
                         "icon": "nav-list-checks",
                         "size": "S",
                         "register": "hr.checklists.index",
+                        "kind": "page"
+                    },
+                    "g-hr-archives-mine": {
+                        "id": "g-hr-archives-mine",
+                        "title": "My folders",
+                        "description": "A button that opens My folders.",
+                        "icon": "nav-folder-open",
+                        "size": "S",
+                        "register": "hr.archives.mine",
                         "kind": "page"
                     },
                     "g-hr-news": {
@@ -21529,10 +21593,12 @@
                     "hr.recruitment.offers.index": "g-hr-recruitment-offers",
                     "hr.recruitment.indicator-rules": "g-hr-recruitment-indicator-rules",
                     "hr.leave.team-calendar": "hr-team",
+                    "hr.leave.index": "g-hr-leave",
                     "hr.attendance.timesheets": "g-hr-attendance-timesheets",
                     "hr.attendance.upload": "g-hr-attendance-upload",
                     "hr.mail-lists.index": "g-hr-mail-lists",
                     "hr.checklists.index": "g-hr-checklists",
+                    "hr.archives.mine": "g-hr-archives-mine",
                     "hr.news.index": "hr-news",
                     "hr.assistant": "g-hr-assistant",
                     "hr.feedback.index": "g-hr-feedback",
@@ -22736,6 +22802,15 @@
                     "route": "hr.leave.team-calendar",
                     "href": "http://hc-hub.test/hr/team-calendar"
                 },
+                "g-hr-leave": {
+                    "id": "g-hr-leave",
+                    "key": "hr-leave",
+                    "kind": "page",
+                    "label": "My leaves",
+                    "icon": "nav-tree-palm",
+                    "route": "hr.leave.index",
+                    "href": "http://hc-hub.test/hr/leaves"
+                },
                 "g-hr-attendance-timesheets": {
                     "id": "g-hr-attendance-timesheets",
                     "key": "hr-attendance-timesheets",
@@ -22771,6 +22846,15 @@
                     "icon": "nav-list-checks",
                     "route": "hr.checklists.index",
                     "href": "http://hc-hub.test/hr/checklists"
+                },
+                "g-hr-archives-mine": {
+                    "id": "g-hr-archives-mine",
+                    "key": "hr-archives-mine",
+                    "kind": "page",
+                    "label": "My folders",
+                    "icon": "nav-folder-open",
+                    "route": "hr.archives.mine",
+                    "href": "http://hc-hub.test/hr/my-folders"
                 },
                 "g-hr-news": {
                     "id": "g-hr-news",
