@@ -14,11 +14,17 @@ use Modules\Core\Models\City;
 use Modules\Core\Models\User;
 
 /**
- * What the old HR app asked its User model: the role a person is acting
- * under (users.active_role_id), the permissions of that role, and the
- * governorate an HR-<CITY> role is limited to. Recruitment rules are written
- * against the active role, so they are answered here and not by the additive
- * can() of Spatie, which would let the other roles of a person leak in.
+ * What recruitment asks about a person: which roles count, what they may do
+ * and the governorates an HR-<CITY> role is limited to.
+ *
+ * Every role a person holds counts, as in the rest of the hub (roadmap 4.5,
+ * decision D5, approved by the owner on 2026-11-20 after the before/after
+ * table of hub:recruitment-access): the permissions of all their roles add
+ * up, any administrator role passes every check, the governorates of all
+ * their HR roles apply, and a role that is blind to pay hides it whatever
+ * else they hold. config('access-control.recruitment_roles') = 'active'
+ * brings back the old HR rule, where only the role a person is acting under
+ * (users.active_role_id, else their first role) counted.
  */
 final class Access
 {
@@ -28,7 +34,7 @@ final class Access
     /** Roles that may never read pay (old config salary.blind_roles). */
     private const SALARY_BLIND = ['super-admin'];
 
-    /** @var array<int, array{role: ?string, permissions: array<string, true>}> */
+    /** @var array<int, array{role: ?string, roles: list<string>, permissions: array<string, true>}> */
     private static array $memo = [];
 
     /** @var array<string, mixed> per-user values for the length of one request (the old User::remember) */
@@ -56,23 +62,62 @@ final class Access
         return $user === null ? null : self::state($user)['role'];
     }
 
+    /**
+     * Whether one of the roles that count for this person is one of the
+     * given roles. "HR" matches every HR-<CITY> role.
+     */
     public static function activeRoleIs(?User $user, string ...$roles): bool
     {
-        $active = self::normalize(self::myRole($user));
+        $counted = self::countedRoles($user);
 
         foreach ($roles as $role) {
             $role = self::normalize($role);
 
-            if ($role === 'HR' && Str::startsWith($active, 'HR-')) {
-                return true;
-            }
-
-            if ($active !== '' && $active === $role) {
-                return true;
+            foreach ($counted as $held) {
+                if ($held === $role || ($role === 'HR' && Str::startsWith($held, 'HR-'))) {
+                    return true;
+                }
             }
         }
 
         return false;
+    }
+
+    /**
+     * The roles that count for this person, in upper case with dashes: all
+     * they hold, or only the one they act under in 'active' mode.
+     *
+     * @return list<string>
+     */
+    public static function countedRoles(?User $user): array
+    {
+        if ($user === null) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map(self::normalize(...), self::state($user)['roles'])));
+    }
+
+    /**
+     * The regional HR roles (HR-ALP, never the national HR-SYR) that count
+     * for this person; empty when one of their roles sees every governorate.
+     *
+     * @return list<string>
+     */
+    public static function regionalHrRoles(?User $user): array
+    {
+        $counted = self::countedRoles($user);
+
+        if (in_array('HR-SYR', $counted, true) || self::isAdministrator($user)) {
+            return [];
+        }
+
+        return array_values(array_filter($counted, fn (string $role): bool => Str::startsWith($role, 'HR-')));
+    }
+
+    public static function everyRoleCounts(): bool
+    {
+        return config('access-control.recruitment_roles', 'all') !== 'active';
     }
 
     /** Acting under any HR role: national (HR-SYR) or regional (HR-ALP). */
@@ -121,32 +166,34 @@ final class Access
      */
     public static function activeCityIds(?User $user): ?array
     {
-        $role = strtoupper(trim((string) self::myRole($user)));
+        $roles = self::regionalHrRoles($user);
 
-        if (! Str::startsWith($role, 'HR-') || $role === 'HR-SYR') {
+        if ($roles === []) {
             return null;
         }
 
         $ids = City::idsBySlug();
         $found = [];
 
-        foreach (City::slugsForHrRole($role) as $slug) {
-            $slug = strtoupper(trim($slug));
+        foreach ($roles as $role) {
+            foreach (City::slugsForHrRole($role) as $slug) {
+                $slug = strtoupper(trim($slug));
 
-            if (isset($ids[$slug]) && $ids[$slug] > 0) {
-                $found[] = $ids[$slug];
+                if (isset($ids[$slug]) && $ids[$slug] > 0) {
+                    $found[] = $ids[$slug];
+                }
             }
         }
 
-        return $found;
+        return array_values(array_unique($found));
     }
 
     /** The home governorate of the role (the one named after "HR-"), null when it sees all. */
     public static function activeCityId(?User $user): ?int
     {
-        $role = strtoupper(trim((string) self::myRole($user)));
+        $role = self::regionalHrRoles($user)[0] ?? null;
 
-        if (! Str::startsWith($role, 'HR-') || $role === 'HR-SYR') {
+        if ($role === null) {
             return null;
         }
 
@@ -189,7 +236,10 @@ final class Access
     }
 
     /**
-     * @return array{role: ?string, permissions: array<string, true>}
+     * The role named in logs (the one acted under, else the first held), the
+     * roles that count, and the permissions they and direct grants give.
+     *
+     * @return array{role: ?string, roles: list<string>, permissions: array<string, true>}
      */
     private static function state(User $user): array
     {
@@ -219,9 +269,24 @@ final class Access
             ->where('grants.model_type', $user->getMorphClass())
             ->pluck('permissions.name');
 
-        $viaRole = $roleId === null ? collect() : DB::table($tables['role_has_permissions'].' as grants')
+        $countedIds = $roleId === null ? [] : [(int) $roleId];
+        $countedNames = $role === null ? [] : [(string) $role];
+
+        if (self::everyRoleCounts()) {
+            $held = DB::table($tables['model_has_roles'].' as members')
+                ->join($tables['roles'].' as roles', 'roles.id', '=', 'members.role_id')
+                ->where('members.model_id', $key)
+                ->where('members.model_type', $user->getMorphClass())
+                ->orderBy('roles.id')
+                ->pluck('roles.name', 'roles.id');
+
+            $countedIds = array_map(fn (mixed $id): int => (int) $id, $held->keys()->all());
+            $countedNames = array_map(fn (mixed $name): string => (string) $name, $held->values()->all());
+        }
+
+        $viaRole = $countedIds === [] ? collect() : DB::table($tables['role_has_permissions'].' as grants')
             ->join($tables['permissions'].' as permissions', 'permissions.id', '=', 'grants.permission_id')
-            ->where('grants.role_id', $roleId)
+            ->whereIn('grants.role_id', $countedIds)
             ->pluck('permissions.name');
 
         $permissions = [];
@@ -230,7 +295,7 @@ final class Access
             $permissions[(string) $name] = true;
         }
 
-        return self::$memo[$memoKey] = ['role' => $role === null ? null : (string) $role, 'permissions' => $permissions];
+        return self::$memo[$memoKey] = ['role' => $role === null ? null : (string) $role, 'roles' => $countedNames, 'permissions' => $permissions];
     }
 
     private static function normalize(?string $role): string

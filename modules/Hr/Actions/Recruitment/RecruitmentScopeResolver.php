@@ -92,15 +92,27 @@ class RecruitmentScopeResolver
      */
     public function governorateCityIds(User $user): array
     {
-        $role = strtoupper(trim(Access::myRole($user) ?? ''));
-
-        if (! Str::startsWith($role, 'HR-') || $role === 'HR-SYR') {
-            return [];
-        }
-
         $ids = [];
 
-        if (($own = Access::activeCityId($user)) !== null) {
+        foreach (Access::regionalHrRoles($user) as $role) {
+            $ids = [...$ids, ...$this->governorateCityIdsOfRole($user, $role)];
+        }
+
+        return array_values(array_unique($ids));
+    }
+
+    /**
+     * The governorates one regional HR role answers for: its own, and those
+     * it reviews on another governorate's behalf.
+     *
+     * @return array<int, int>
+     */
+    private function governorateCityIdsOfRole(User $user, string $role): array
+    {
+        $ids = [];
+        $own = City::idsBySlug()[Str::after($role, 'HR-')] ?? null;
+
+        if ($own !== null && $own !== 0) {
             $ids[] = $own;
         }
 
@@ -941,13 +953,12 @@ class RecruitmentScopeResolver
         };
     }
 
-    /** Is this user's active role the one the city's requests are routed to? */
+    /** Does this user hold, among the roles that count, the one the city's requests are routed to? */
     private function isResolvedReviewer(User $user, int $cityId): bool
     {
-        $role = strtoupper(trim(Access::myRole($user) ?? ''));
+        $routedTo = strtoupper($this->governorateHrRole($cityId));
 
-        return Str::startsWith($role, 'HR-')
-            && strtoupper($this->governorateHrRole($cityId)) === $role;
+        return Str::startsWith($routedTo, 'HR-') && in_array($routedTo, Access::countedRoles($user), true);
     }
 
     private function hasOrganizationWideCreationScope(User $user): bool

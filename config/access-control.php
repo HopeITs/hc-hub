@@ -252,6 +252,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Roles that count in recruitment
+    |--------------------------------------------------------------------------
+    |
+    | 'all': every role a person holds counts, as in the rest of the hub
+    | (roadmap 4.5, approved by the owner on 2026-11-20). 'active' brings
+    | back the old HR rule: only the role a person is acting under. See
+    | Modules\Hr\Support\Recruitment\Access; `hub:recruitment-access` lists
+    | who differs between the two.
+    */
+    'recruitment_roles' => env('RECRUITMENT_ROLES', 'all'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Scoped access grants
     |--------------------------------------------------------------------------
     |

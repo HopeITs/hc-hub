@@ -49,7 +49,8 @@ test('someone acting as an employee who is also HR would gain HR\'s permissions,
         ->and($row['changes'])->toBe(['hr', 'cities', 'salary']);
 });
 
-test('the before column is what recruitment answers today', function () {
+test('the before column is what recruitment answered under the active-role rule', function () {
+    config()->set('access-control.recruitment_roles', 'active');
     $user = ($this->account)(['employee', 'manager', 'HR-ALP'], 'manager');
     $row = ($this->rowFor)($user);
 
