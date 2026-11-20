@@ -312,7 +312,7 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
 
             <x-ui.header-filter-select :label="__('activity.filters.module')" wire:model.live="module" :value="$module">
                 <option value="">{{ __('activity.filters.all_modules') }}</option>
-                @foreach ([...array_keys(config('notifications.modules')), 'hr-employees', 'hr-leave', 'hr-contracts'] as $option)
+                @foreach ([...array_diff(array_keys(config('notifications.modules')), config('notifications.open_modules', [])), 'hr-employees', 'hr-leave', 'hr-contracts'] as $option)
                     <option value="{{ $option }}">{{ $notificationPresenter->moduleLabel($option) }}</option>
                 @endforeach
             </x-ui.header-filter-select>

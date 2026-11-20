@@ -11,7 +11,8 @@ use Modules\Core\Models\User;
 /**
  * The removals every notification goes through: the actor, anyone lacking the
  * module's view permission, and anyone who muted the module (unless they are
- * a direct recipient).
+ * a direct recipient). An open module (notifications.open_modules) has no
+ * view permission: its sender already named the people involved.
  */
 final class RecipientFilter
 {
@@ -58,6 +59,10 @@ final class RecipientFilter
      */
     private function withViewPermission(array $ids, string $module): array
     {
+        if (in_array($module, config('notifications.open_modules', []), true)) {
+            return $ids;
+        }
+
         $permission = config("notifications.view_permissions.{$module}", "{$module}.view");
 
         if (! Permission::query()->where('name', $permission)->exists()) {

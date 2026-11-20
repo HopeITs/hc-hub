@@ -8,6 +8,7 @@ use App\Enums\NotificationKind;
 use App\Enums\NotificationPriority;
 use App\Notifications\AppNotification;
 use App\Notifications\NotificationPayload;
+use App\Notifications\RecipientFilter;
 use Illuminate\Http\Request;
 use Illuminate\Notifications\Notification;
 use Modules\Core\Models\User;
@@ -20,15 +21,29 @@ use Throwable;
  * stored them (a title, a body, both in English and Arabic, and a URL). This
  * channel turns that into the one notification the hub knows, so the bell,
  * the unread counts and the live push all work without a second inbox.
+ *
+ * Every notice passes RecipientFilter first (hub decision D7): a user who
+ * muted the recruitment module is skipped, unless the notice names them
+ * (NamesItsRecipient). The sender has already left the actor out where that
+ * was wanted, so the filter is given no actor. Mail is a separate channel
+ * and is not touched by a mute.
  */
 final class InboxChannel
 {
     /** The module name the inbox files recruitment notices under. */
     public const MODULE = 'recruitment';
 
+    public function __construct(private RecipientFilter $filter) {}
+
     public function send(object $notifiable, Notification $notification): void
     {
         if (! $notifiable instanceof User || ! method_exists($notification, 'toArray')) {
+            return;
+        }
+
+        $directIds = $notification instanceof NamesItsRecipient ? [(int) $notifiable->id] : [];
+
+        if ($this->filter->apply([(int) $notifiable->id], self::MODULE, null, $directIds) === []) {
             return;
         }
 
