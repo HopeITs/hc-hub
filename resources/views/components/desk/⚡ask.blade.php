@@ -19,6 +19,7 @@ use App\Support\ArabicText;
 use App\Support\Desk\AskEngine;
 use App\Support\KeyboardLayout;
 use App\Support\Like;
+use App\Support\Modules\ModuleRegistry;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -341,6 +342,45 @@ new class extends Component {
 
             $groups[] = ['name' => $name, 'records' => true, 'items' => $query->orderBy($column)->limit(self::GroupLimit)->get()
                 ->map(fn (Model $model): array => ['icon' => $icon, ...$row($model)])->all()];
+        }
+
+        return [...$groups, ...$this->moduleRecords($terms, $entity)];
+    }
+
+    /**
+     * Records the modules let Ask find through the registry (employees),
+     * each source under its own heading and by its own visibility rules. A
+     * question that names one of the Desk's own parts ("project …") stays
+     * there; a word that names a source ("employee sami") is not part of
+     * the name searched in it.
+     *
+     * @return list<array{name: string, records: bool, source: string, items: list<array{icon: string, label: string, sub: string, href: string}>}>
+     */
+    private function moduleRecords(string $terms, ?string $entity): array
+    {
+        if ($entity !== null) {
+            return [];
+        }
+
+        $user = auth()->user();
+        $words = preg_split('/\s+/u', $terms) ?: [];
+        $groups = [];
+
+        foreach (app(ModuleRegistry::class)->searchSources() as $source) {
+            if (! $source->allows($user)) {
+                continue;
+            }
+
+            $name = implode(' ', array_filter($words, fn (string $word): bool => ! AskEngine::matchesAny($word, $source->words(), strict: true, typos: false)));
+
+            if (mb_strlen($name) < 2) {
+                continue;
+            }
+
+            $groups[] = ['name' => $source->label(), 'records' => true, 'source' => $source->key(), 'items' => array_map(
+                fn (array $row): array => ['icon' => $source->icon(), 'label' => $row['title'], 'sub' => $row['context'], 'href' => $row['href']],
+                $source->search($user, $name, self::GroupLimit),
+            )];
         }
 
         return $groups;

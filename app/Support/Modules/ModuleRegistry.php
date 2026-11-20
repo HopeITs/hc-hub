@@ -10,6 +10,7 @@ use App\Support\Modules\Contracts\DeskPanelSource;
 use App\Support\Modules\Contracts\DestinationSource;
 use App\Support\Modules\Contracts\EmployeeTabSource;
 use App\Support\Modules\Contracts\ScheduleSource;
+use App\Support\Modules\Contracts\SearchSource;
 use App\Support\Modules\Contracts\SubjectLinkSource;
 use App\Support\Modules\Contracts\TimelineSource;
 
@@ -62,6 +63,11 @@ final class ModuleRegistry
     private array $timeline = [];
 
     /**
+     * @var list<class-string<SearchSource>>
+     */
+    private array $search = [];
+
+    /**
      * @var list<class-string<ScheduleSource>>
      */
     private array $schedule = [];
@@ -84,6 +90,26 @@ final class ModuleRegistry
     public function scheduleSources(): array
     {
         return array_map(fn (string $source): ScheduleSource => app($source), $this->schedule);
+    }
+
+    /**
+     * @param  class-string<SearchSource>  $source
+     */
+    public function addSearch(string $source): void
+    {
+        if (! in_array($source, $this->search, true)) {
+            $this->search[] = $source;
+        }
+    }
+
+    /**
+     * The records modules let the Ask bar find, in registration order.
+     *
+     * @return list<SearchSource>
+     */
+    public function searchSources(): array
+    {
+        return array_map(fn (string $source): SearchSource => app($source), $this->search);
     }
 
     /**
