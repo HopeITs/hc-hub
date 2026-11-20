@@ -102,6 +102,14 @@ test('a granted role gives the permissions that role holds, on that scope only',
         ->and($this->member->hasRole('Managers'))->toBeFalse();
 });
 
+test('a project loaded with only some of its columns is still judged, on the scopes it carries', function () {
+    ($this->grant)();
+    $partial = Project::query()->select(['id', 'name'])->findOrFail($this->project->id);
+
+    expect($this->member->can('update', $partial))->toBeTrue()
+        ->and(userWithRole('Team Member')->can('view', $partial))->toBeTrue();
+});
+
 test('with the switch off a grant gives nothing', function () {
     ($this->grant)();
     config()->set('access-control.access_grants.enabled', false);

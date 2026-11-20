@@ -115,14 +115,25 @@ class ProjectPolicy
 
     /**
      * The permission everywhere, or on this project, its program or its city
-     * through an active scoped grant.
+     * through an active scoped grant. A project loaded with only some of its
+     * columns is matched on the ones it carries.
      */
     private function holds(User $user, string $permission, Project $project): bool
     {
-        return app(AccessScope::class)->allows($user, $permission, [
-            'project' => (int) $project->id,
-            'program' => (int) $project->program_id,
-            'city' => (int) $project->city_id,
+        if ($user->can($permission)) {
+            return true;
+        }
+
+        if (! AccessScope::enabled()) {
+            return false;
+        }
+
+        $loaded = $project->getAttributes();
+
+        return app(AccessScope::class)->grants($user, $permission, [
+            'project' => (int) $project->getKey(),
+            'program' => isset($loaded['program_id']) ? (int) $loaded['program_id'] : null,
+            'city' => isset($loaded['city_id']) ? (int) $loaded['city_id'] : null,
         ]);
     }
 }
