@@ -20,6 +20,7 @@ use App\Support\Modules\ModuleRegistry;
 use App\Support\RouteSlugs;
 use App\Support\Timeline\ActivityTimelineSource;
 use App\Support\Timeline\EmployeeTimelineTab;
+use App\Support\WorkItems\NeedsWorkItems;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -217,14 +218,16 @@ class AppServiceProvider extends ServiceProvider
 
     /**
      * The platform's own share of an employee's timeline: the profile tab and
-     * what the activity log says about the person. Modules add their sources
-     * from their own providers.
+     * what the activity log says about the person, and the Desk's Needs you
+     * as a source of the "Waiting on me" page. Modules add their sources from
+     * their own providers.
      */
     protected function configureTimeline(): void
     {
         $modules = $this->app->make(ModuleRegistry::class);
         $modules->addEmployeeTabs(EmployeeTimelineTab::class);
         $modules->addTimeline(ActivityTimelineSource::class);
+        $modules->addWorkItems(NeedsWorkItems::class);
     }
 
     /**

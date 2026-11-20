@@ -40,6 +40,8 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
 
     Route::livewire('home', 'pages::desk.index')->name('dashboard');
 
+    Route::livewire('waiting-on-me', 'pages::waiting.index')->name('waiting.index');
+
     Route::livewire('admin/notification-settings', 'pages::admin.notification-settings')
         ->can('notification-settings.manage')
         ->name('admin.notification-settings.edit');

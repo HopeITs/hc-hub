@@ -70,7 +70,7 @@ trait ReadsDeskDecisions
                 kind: 'review',
                 title: $review->proposal->name,
                 context: __('desk.decision.review', ['stage' => $review->stage->label()]),
-                who: $review->addedBy?->name ?? '',
+                who: $review->addedBy->name ?? '',
                 since: $review->created_at,
                 due: null,
                 href: ProposalStoryLink::review($user, $review->proposal),
@@ -85,9 +85,9 @@ trait ReadsDeskDecisions
             ->map(fn (MonthlyReport $report): array => $this->decision(
                 key: 'report-'.$report->id,
                 kind: 'validate',
-                title: $report->project?->name ?? '—',
+                title: $report->project->name ?? '—',
                 context: __('desk.decision.validate', ['month' => $report->period->translatedFormat('F Y')]),
-                who: $report->preparer?->name ?? '',
+                who: $report->preparer->name ?? '',
                 since: $report->submitted_at,
                 due: null,
                 href: route('monthly-reports.show', $report),
@@ -141,7 +141,7 @@ trait ReadsDeskDecisions
         return $reviews->concat($reports)->concat($tasks)->concat($proposals)->concat($approvals)
             ->sortBy([
                 fn (array $a, array $b): int => $b['late'] <=> $a['late'],
-                fn (array $a, array $b): int => ($a['since']?->timestamp ?? PHP_INT_MAX) <=> ($b['since']?->timestamp ?? PHP_INT_MAX),
+                fn (array $a, array $b): int => ($a['since']->timestamp ?? PHP_INT_MAX) <=> ($b['since']->timestamp ?? PHP_INT_MAX),
             ])
             ->values();
     }
@@ -176,7 +176,7 @@ trait ReadsDeskDecisions
                 key: 'proposal-'.$proposal->id,
                 kind: 'proposal',
                 title: $proposal->name,
-                context: __('desk.decision.proposal.'.$steps[$proposal->status->value]),
+                context: isset($steps[$proposal->status->value]) ? __('desk.decision.proposal.'.$steps[$proposal->status->value]) : '',
                 who: '',
                 since: $proposal->updated_at,
                 due: null,

@@ -14,6 +14,7 @@ use App\Support\Modules\Contracts\ScheduleSource;
 use App\Support\Modules\Contracts\SearchSource;
 use App\Support\Modules\Contracts\SubjectLinkSource;
 use App\Support\Modules\Contracts\TimelineSource;
+use App\Support\Modules\Contracts\WorkItemSource;
 
 /**
  * What each module adds to the platform, registered from the module's own
@@ -69,6 +70,11 @@ final class ModuleRegistry
     private array $search = [];
 
     /**
+     * @var list<class-string<WorkItemSource>>
+     */
+    private array $workItems = [];
+
+    /**
      * @var list<class-string<ScheduleSource>>
      */
     private array $schedule = [];
@@ -91,6 +97,26 @@ final class ModuleRegistry
     public function scheduleSources(): array
     {
         return array_map(fn (string $source): ScheduleSource => app($source), $this->schedule);
+    }
+
+    /**
+     * @param  class-string<WorkItemSource>  $source
+     */
+    public function addWorkItems(string $source): void
+    {
+        if (! in_array($source, $this->workItems, true)) {
+            $this->workItems[] = $source;
+        }
+    }
+
+    /**
+     * The places where work waits on a person, in registration order.
+     *
+     * @return list<WorkItemSource>
+     */
+    public function workItemSources(): array
+    {
+        return array_map(fn (string $source): WorkItemSource => app($source), $this->workItems);
     }
 
     /**

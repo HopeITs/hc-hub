@@ -46,6 +46,7 @@ use Modules\Hr\Support\Desk\HrPanels;
 use Modules\Hr\Support\Employees\HrEmployeeLookup;
 use Modules\Hr\Support\Inbox\DeskAgenda;
 use Modules\Hr\Support\Inbox\HrSubjectLinks;
+use Modules\Hr\Support\Inbox\InboxWorkItems;
 use Modules\Hr\Support\Journeys\JourneyHooks;
 use Modules\Hr\Support\Metrics\HrMetrics;
 use Modules\Hr\Support\Recruitment\Console\AnalyzeRecruitmentCvs;
@@ -171,6 +172,7 @@ class HrServiceProvider extends ServiceProvider
         $modules->addTimeline(JourneysTimelineSource::class);
         $modules->addSearch(EmployeeSearchSource::class);
         $modules->addMetrics(HrMetrics::class);
+        $modules->addWorkItems(InboxWorkItems::class);
     }
 
     /**

@@ -51,4 +51,5 @@ return [
     'donor_report_builder' => 'Donor report builder',
     'donor_reports' => 'Donor reports',
     'monthly_matrix' => 'Monthly Matrix',
+    'waiting' => 'Waiting on me',
 ];
