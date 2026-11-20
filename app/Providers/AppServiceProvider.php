@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Actions\Fortify\DisableTwoFactorAuthenticationUnlessRequired;
+use App\Console\PlatformSchedule;
 use App\Enums\Locale;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Models\Role;
@@ -22,6 +23,7 @@ use App\Support\Timeline\EmployeeTimelineTab;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -186,6 +188,26 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDateLocale();
         $this->configureBlaze();
         $this->configureTimeline();
+        $this->configureSchedule();
+    }
+
+    /**
+     * The one place a background job reaches the scheduler (roadmap 4.13):
+     * the platform's own jobs, then every module's, each listed in a
+     * ScheduleSource. They are applied once every provider has booted, so a
+     * module that registers late is still read.
+     */
+    protected function configureSchedule(): void
+    {
+        $this->app->make(ModuleRegistry::class)->addSchedule(PlatformSchedule::class);
+
+        $this->callAfterResolving(Schedule::class, function (Schedule $schedule): void {
+            $this->app->booted(function () use ($schedule): void {
+                foreach ($this->app->make(ModuleRegistry::class)->scheduleSources() as $source) {
+                    $source->schedule($schedule);
+                }
+            });
+        });
     }
 
     /**

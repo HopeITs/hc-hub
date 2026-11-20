@@ -1,19 +1,10 @@
 <?php
 
-use App\Models\Activity;
-use App\Models\TrustedDevice;
-use App\Models\UserNotification;
-use Illuminate\Support\Facades\Schedule;
-
-Schedule::command('notifications:wake-snoozed')->everyMinute()->withoutOverlapping();
-
-Schedule::command('notifications:scan frequent')->everyFifteenMinutes()->withoutOverlapping();
-Schedule::command('notifications:scan daily')->dailyAt('06:00')->withoutOverlapping();
-Schedule::command('notifications:digests')->everyMinute()->withoutOverlapping();
-Schedule::command('reports:monthly-digest')->dailyAt('08:00')->withoutOverlapping()->onOneServer();
-Schedule::command('monthly-reports:prepare')->dailyAt('05:00')->withoutOverlapping()->onOneServer();
-Schedule::command('model:prune', ['--model' => [Activity::class, TrustedDevice::class, UserNotification::class]])->daily();
-Schedule::command('files:prune')->dailyAt('03:00')->withoutOverlapping();
-Schedule::command('cache:prune-expired')->hourly()->withoutOverlapping();
-Schedule::command('annual-plans:remind')->dailyAt('07:00')->withoutOverlapping()->onOneServer();
-Schedule::command('proposals:remind-owners')->dailyAt('07:05')->withoutOverlapping()->onOneServer();
+/*
+| No job is scheduled here. Each module, and the platform itself, lists its
+| background jobs in a ScheduleSource registered with ModuleRegistry from its
+| own ServiceProvider (App\Console\PlatformSchedule, Modules\Hr\Console\
+| HrSchedule, Modules\Tracking\Console\TrackingSchedule), and
+| AppServiceProvider applies them all. tests/Feature/ScheduleTest.php pins
+| the full list.
+*/

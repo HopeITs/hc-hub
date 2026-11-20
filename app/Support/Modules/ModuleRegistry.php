@@ -9,6 +9,7 @@ use App\Support\Modules\Contracts\DeskAgendaSource;
 use App\Support\Modules\Contracts\DeskPanelSource;
 use App\Support\Modules\Contracts\DestinationSource;
 use App\Support\Modules\Contracts\EmployeeTabSource;
+use App\Support\Modules\Contracts\ScheduleSource;
 use App\Support\Modules\Contracts\SubjectLinkSource;
 use App\Support\Modules\Contracts\TimelineSource;
 
@@ -59,6 +60,31 @@ final class ModuleRegistry
      * @var list<class-string<TimelineSource>>
      */
     private array $timeline = [];
+
+    /**
+     * @var list<class-string<ScheduleSource>>
+     */
+    private array $schedule = [];
+
+    /**
+     * @param  class-string<ScheduleSource>  $source
+     */
+    public function addSchedule(string $source): void
+    {
+        if (! in_array($source, $this->schedule, true)) {
+            $this->schedule[] = $source;
+        }
+    }
+
+    /**
+     * The background jobs of the platform and of each module, in registration order.
+     *
+     * @return list<ScheduleSource>
+     */
+    public function scheduleSources(): array
+    {
+        return array_map(fn (string $source): ScheduleSource => app($source), $this->schedule);
+    }
 
     /**
      * @param  class-string<TimelineSource>  $source

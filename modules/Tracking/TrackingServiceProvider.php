@@ -31,6 +31,7 @@ use Modules\Tracking\Console\Commands\RemindAnnualPlanUpdates;
 use Modules\Tracking\Console\Commands\RemindProposalOwners;
 use Modules\Tracking\Console\Commands\SeedIndicatorLibrary;
 use Modules\Tracking\Console\Commands\SendMonthlyDigest;
+use Modules\Tracking\Console\TrackingSchedule;
 use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Events\FundingAgreementRecorded;
 use Modules\Tracking\Events\ProjectActivated;
@@ -94,6 +95,7 @@ class TrackingServiceProvider extends ServiceProvider
 
         $this->app->make(ModuleRegistry::class)->addEmployeeTabs(EmployeeProjectsTab::class);
         $this->app->make(ModuleRegistry::class)->addTimeline(ProjectMembersTimelineSource::class);
+        $this->app->make(ModuleRegistry::class)->addSchedule(TrackingSchedule::class);
 
         $this->commands([
             BackfillMonthlyReports::class,
