@@ -17,6 +17,8 @@ use App\Support\Desk\Panels;
 use App\Support\Desk\Shortcuts;
 use App\Support\Modules\ModuleRegistry;
 use App\Support\RouteSlugs;
+use App\Support\Timeline\ActivityTimelineSource;
+use App\Support\Timeline\EmployeeTimelineTab;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -183,6 +185,19 @@ class AppServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
         $this->configureDateLocale();
         $this->configureBlaze();
+        $this->configureTimeline();
+    }
+
+    /**
+     * The platform's own share of an employee's timeline: the profile tab and
+     * what the activity log says about the person. Modules add their sources
+     * from their own providers.
+     */
+    protected function configureTimeline(): void
+    {
+        $modules = $this->app->make(ModuleRegistry::class);
+        $modules->addEmployeeTabs(EmployeeTimelineTab::class);
+        $modules->addTimeline(ActivityTimelineSource::class);
     }
 
     /**

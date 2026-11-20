@@ -60,6 +60,9 @@ use Modules\Hr\Support\Recruitment\Console\SweepRecruitmentRetention;
 use Modules\Hr\Support\Recruitment\Console\SyncRecruitmentCampaignStates;
 use Modules\Hr\Support\Recruitment\RecruitmentBootstrap;
 use Modules\Hr\Support\SalaryCipher;
+use Modules\Hr\Support\Timeline\ContractsTimelineSource;
+use Modules\Hr\Support\Timeline\EquipmentTimelineSource;
+use Modules\Hr\Support\Timeline\JourneysTimelineSource;
 use Throwable;
 
 /**
@@ -189,6 +192,9 @@ class HrServiceProvider extends ServiceProvider
         $modules->addSubjectLinks(HrSubjectLinks::class);
         $modules->addCalendarLayer(HolidayCalendarLayer::class);
         $modules->addCalendarLayer(LeaveCalendarLayer::class);
+        $modules->addTimeline(ContractsTimelineSource::class);
+        $modules->addTimeline(EquipmentTimelineSource::class);
+        $modules->addTimeline(JourneysTimelineSource::class);
     }
 
     /**

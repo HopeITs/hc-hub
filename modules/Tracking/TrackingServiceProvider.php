@@ -55,6 +55,7 @@ use Modules\Tracking\Models\TaskAssignee;
 use Modules\Tracking\Observers\ProgramObserver;
 use Modules\Tracking\Policies\ProgramPolicy;
 use Modules\Tracking\Support\EmployeeProjectsTab;
+use Modules\Tracking\Support\ProjectMembersTimelineSource;
 use Modules\Tracking\Support\SupervisionMap;
 
 /**
@@ -92,6 +93,7 @@ class TrackingServiceProvider extends ServiceProvider
         $this->registerCoreRelations();
 
         $this->app->make(ModuleRegistry::class)->addEmployeeTabs(EmployeeProjectsTab::class);
+        $this->app->make(ModuleRegistry::class)->addTimeline(ProjectMembersTimelineSource::class);
 
         $this->commands([
             BackfillMonthlyReports::class,

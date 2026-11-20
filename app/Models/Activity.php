@@ -25,6 +25,7 @@ use Modules\Core\Models\User;
  * @property int|null $actor_id
  * @property string $subject_type
  * @property int $subject_id
+ * @property int|null $employee_id whom the entry is about, when it is about one employee
  * @property int|null $program_id
  * @property string $module
  * @property string $event
@@ -33,7 +34,7 @@ use Modules\Core\Models\User;
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
-#[Fillable(['actor_id', 'subject_type', 'subject_id', 'program_id', 'module', 'event', 'changes', 'properties'])]
+#[Fillable(['actor_id', 'subject_type', 'subject_id', 'employee_id', 'program_id', 'module', 'event', 'changes', 'properties'])]
 class Activity extends Model
 {
     use Prunable;

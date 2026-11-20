@@ -10,12 +10,14 @@ use App\Support\Modules\Contracts\DeskPanelSource;
 use App\Support\Modules\Contracts\DestinationSource;
 use App\Support\Modules\Contracts\EmployeeTabSource;
 use App\Support\Modules\Contracts\SubjectLinkSource;
+use App\Support\Modules\Contracts\TimelineSource;
 
 /**
  * What each module adds to the platform, registered from the module's own
  * ServiceProvider so app/ never names a module (D10). Today: sidebar pages
  * (Destinations), Desk panels (Panels), Desk agenda rows (ReadsDeskAgenda),
- * record links (SubjectLinks), employee profile tabs and calendar layers.
+ * record links (SubjectLinks), employee profile tabs, calendar layers and
+ * the sources of an employee's timeline.
  *
  * A singleton filled once at boot; it holds class names only, and every read
  * resolves the source from the container, so nothing a request computes
@@ -52,6 +54,31 @@ final class ModuleRegistry
      * @var list<class-string<CalendarLayerSource>>
      */
     private array $calendarLayers = [];
+
+    /**
+     * @var list<class-string<TimelineSource>>
+     */
+    private array $timeline = [];
+
+    /**
+     * @param  class-string<TimelineSource>  $source
+     */
+    public function addTimeline(string $source): void
+    {
+        if (! in_array($source, $this->timeline, true)) {
+            $this->timeline[] = $source;
+        }
+    }
+
+    /**
+     * What modules add to an employee's timeline, in registration order.
+     *
+     * @return list<TimelineSource>
+     */
+    public function timelineSources(): array
+    {
+        return array_map(fn (string $source): TimelineSource => app($source), $this->timeline);
+    }
 
     /**
      * @param  class-string<CalendarLayerSource>  $source
