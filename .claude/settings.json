@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"Before anything else, invoke the session-orchestrator skill and follow it for this whole session.\""
+          }
+        ]
+      }
+    ]
+  }
+}
