@@ -11,11 +11,9 @@
         display: block;
         margin-bottom: 0.375rem;
         color: var(--color-secondary-medium);
-        font-size: 0.6875rem;
-        font-weight: 600;
+        font-size: var(--text-th);
+        font-weight: 700;
         line-height: 1rem;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
     }
 
     /* Tracking pulls Arabic letters apart, and Arabic has no capitals. */
@@ -413,10 +411,8 @@
     .modal-shell-index-caption {
         margin-inline: 0.5rem;
         color: var(--color-secondary-medium);
-        font-size: 0.6875rem;
+        font-size: var(--text-th);
         font-weight: 700;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
     }
 
     .modal-shell-index-caption:lang(ar) {
@@ -478,7 +474,7 @@
         border: 1.5px solid var(--color-secondary-light);
         border-radius: 9999px;
         color: var(--color-secondary-medium);
-        font-size: 0.6875rem;
+        font-size: var(--text-caption);
         font-weight: 800;
         line-height: 1;
         font-variant-numeric: tabular-nums;
@@ -517,7 +513,7 @@
     .modal-shell-index-optional {
         margin-inline-start: auto;
         color: var(--color-secondary-light);
-        font-size: 0.625rem;
+        font-size: var(--text-caption);
         font-weight: 500;
     }
 
@@ -528,7 +524,7 @@
         border-radius: 9999px;
         background-color: var(--color-primary);
         color: var(--color-white);
-        font-size: 0.6875rem;
+        font-size: var(--text-caption);
         font-weight: 700;
         line-height: 1.125rem;
         text-align: center;
@@ -539,7 +535,7 @@
         margin-top: auto;
         margin-inline: 0.5rem;
         color: var(--color-secondary-light);
-        font-size: 0.6875rem;
+        font-size: var(--text-caption);
         line-height: 1rem;
     }
 
@@ -855,7 +851,7 @@
         border-radius: 9999px;
         background-color: var(--color-secondary-soft);
         color: var(--color-secondary-medium);
-        font-size: 0.6875rem;
+        font-size: var(--text-caption);
         font-weight: 600;
         line-height: 1rem;
     }
@@ -883,7 +879,7 @@
         flex-shrink: 0;
         margin-inline-start: auto;
         border-radius: 9999px;
-        font-size: 0.6875rem;
+        font-size: var(--text-caption);
         font-weight: 700;
         line-height: 1.375rem;
         white-space: nowrap;
@@ -1258,7 +1254,7 @@
         background-color: var(--color-white);
         color: var(--color-secondary-medium);
         font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
-        font-size: 0.6875rem;
+        font-size: var(--text-caption);
     }
 
     /* A touch screen has no Esc key to hint at. */
@@ -2056,10 +2052,8 @@
     .filter-section-label {
         position: relative;
         margin-bottom: 0.625rem;
-        font-size: 0.6875rem;
+        font-size: var(--text-th);
         font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
         color: var(--thread-label);
     }
 

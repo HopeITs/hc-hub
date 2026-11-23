@@ -69,10 +69,10 @@
      * bar (.dk-card-r): a meter (0 → to) or a span (from → to) with today (--now) */
     .dk-card-l { grid-area: l; flex: none; margin-inline-end: 12px; display: grid; place-items: center; align-content: center; color: var(--ink-2); font-variant-numeric: tabular-nums; }
     .dk-card-l b { font-weight: 800; line-height: 1; }
-    .dk-card-l small { font-size: 10px; font-weight: 700; line-height: 1; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); }
+    .dk-card-l small { font-size: var(--text-caption); font-weight: 700; line-height: 1; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); }
     .dk-card-e { grid-area: e; margin-inline-start: 12px; display: grid; justify-items: end; gap: 1px; text-align: end; white-space: nowrap; }
     .dk-card-e b { font-size: 15px; font-weight: 800; letter-spacing: -.01em; line-height: 20px; color: var(--ink); }
-    .dk-card-e small { font-size: 11px; font-weight: 700; line-height: 14px; color: var(--ink-3); }
+    .dk-card-e small { font-size: var(--text-caption); font-weight: 700; line-height: 14px; color: var(--ink-3); }
     .dk-card-r { grid-area: r; position: relative; display: block; height: 6px; margin-block-start: 6px; border-radius: 99px; background: var(--sunk); }
     .dk-card-r > i { position: absolute; inset-block: 0; inset-inline-start: var(--from, 0%); width: calc(var(--to) - var(--from, 0%)); min-width: 3px; border-radius: inherit; background: var(--tone); }
     .dk-card-r > em { position: absolute; inset-block: -3px; inset-inline-start: var(--now); width: 2px; border-radius: 2px; background: var(--ink); }
@@ -91,11 +91,11 @@
     .dk-card-l[data-tone="tone-3"] { --av: #a2559b; } .dk-card-l[data-tone="tone-4"] { --av: #3f88c5; } .dk-card-l[data-tone="tone-5"] { --av: #7a8a3a; }
 
     /* Accounts: the currency as a coin. */
-    .dk-card-l[data-kind="coin"] { width: 38px; height: 38px; border-radius: 50%; font-size: 10.5px; letter-spacing: .03em; color: var(--tone); background: color-mix(in srgb, var(--tone) 14%, var(--paper)); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tone) 45%, transparent); }
+    .dk-card-l[data-kind="coin"] { width: 38px; height: 38px; border-radius: 50%; font-size: var(--text-caption); letter-spacing: .03em; color: var(--tone); background: color-mix(in srgb, var(--tone) 14%, var(--paper)); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--tone) 45%, transparent); }
     [data-layout="bank"] .dk-card-e b { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; font-weight: 700; letter-spacing: .06em; color: var(--ink-2); }
 
     /* The library: the indicator's code as a key. */
-    .dk-card-l[data-kind="code"] { min-width: 54px; height: 26px; padding-inline: 7px; border-radius: 7px; background: var(--sunk); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11.5px; color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
+    .dk-card-l[data-kind="code"] { min-width: 54px; height: 26px; padding-inline: 7px; border-radius: 7px; background: var(--sunk); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: var(--text-caption); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line); }
 
     /* Cities: the leaders' places stand out. */
     .dk-card-l[data-kind="rank"] { width: 22px; font-size: 15px; color: var(--ink-3); }
@@ -212,9 +212,9 @@
     /* Strategies: every strategy's years on one ruler, today marked. */
     .dk-hero-ruler { position: relative; display: flex; flex-direction: column; justify-content: flex-end; gap: 5px; padding-block-end: 16px !important; }
     .dk-hero-span { position: relative; display: block; height: 16px; margin-inline-start: var(--from); width: calc(var(--to) - var(--from)); border-radius: 5px; background: color-mix(in srgb, var(--tone) 22%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 45%, transparent); }
-    .dk-hero-span b { position: absolute; inset-inline-start: 6px; inset-block: 0; display: flex; align-items: center; font-size: 10.5px; font-weight: 800; color: var(--ink-2); white-space: nowrap; }
+    .dk-hero-span b { position: absolute; inset-inline-start: 6px; inset-block: 0; display: flex; align-items: center; font-size: var(--text-caption); font-weight: 800; color: var(--ink-2); white-space: nowrap; }
     .dk-hero-ticks { position: absolute; inset-inline: 0; inset-block-end: 0; height: 14px; border-top: 1px solid var(--line); }
-    .dk-hero-ticks i { position: absolute; inset-inline-start: var(--at); translate: -50% 0; font-style: normal; font-size: 9.5px; font-weight: 700; color: var(--ink-3); line-height: 14px; }
+    .dk-hero-ticks i { position: absolute; inset-inline-start: var(--at); translate: -50% 0; font-style: normal; font-size: var(--text-caption); font-weight: 700; color: var(--ink-3); line-height: 14px; }
     [dir="rtl"] .dk-hero-ticks i { translate: 50% 0; }
     .dk-hero-ticks i:first-child { translate: 0; }
     .dk-hero-now { position: absolute; inset-inline-start: var(--now); inset-block: 0 12px; width: 2px; border-radius: 2px; background: var(--brand); }
@@ -237,25 +237,25 @@
     .dk-hero-cols li { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 3px; }
     .dk-hero-cols i { width: 100%; max-width: 34px; height: max(3px, calc(var(--share) * .44px)); border-radius: 4px 4px 1px 1px; background: color-mix(in srgb, var(--tone) 40%, var(--sunk)); }
     .dk-hero-cols li.dk-on i { background: var(--tone); }
-    .dk-hero-cols b { font-size: 11.5px; font-weight: 800; color: var(--ink-2); }
-    .dk-hero-cols span { font-size: 10.5px; font-weight: 700; color: var(--ink-3); }
+    .dk-hero-cols b { font-size: var(--text-caption); font-weight: 800; color: var(--ink-2); }
+    .dk-hero-cols span { font-size: var(--text-caption); font-weight: 700; color: var(--ink-3); }
     .dk-hero-cols li.dk-on :is(b, span) { color: var(--ink); }
     [data-hero="pulse"] .dk-hero-cols { gap: 3px; }
     [data-hero="pulse"] .dk-hero-cols i { max-width: none; height: max(2px, calc(var(--share) * .52px)); border-radius: 3px; }
 
     /* Results: impact over outcomes over outputs, as a pyramid. */
     .dk-hero-pyramid { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 3px; }
-    .dk-hero-pyramid li { width: var(--share); min-width: 0; flex: 0 1 22px; min-height: 13px; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-inline: 9px; border-radius: 6px; background: color-mix(in srgb, var(--tone) 26%, var(--paper)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 50%, transparent); font-size: 11px; font-weight: 700; color: var(--ink); }
+    .dk-hero-pyramid li { width: var(--share); min-width: 0; flex: 0 1 22px; min-height: 13px; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-inline: 9px; border-radius: 6px; background: color-mix(in srgb, var(--tone) 26%, var(--paper)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 50%, transparent); font-size: var(--text-caption); font-weight: 700; color: var(--ink); }
     .dk-hero-pyramid span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     /* Measures, currencies, categories: counted chips. */
     .dk-hero-chips { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 6px; overflow: hidden; }
     .dk-hero-chips li { display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; max-width: 100%; padding: 6px 10px; border-radius: 10px; background: color-mix(in srgb, var(--tone) 12%, var(--paper)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 32%, transparent); }
     .dk-hero-chips b { font-size: 16px; font-weight: 800; color: var(--ink); }
-    .dk-hero-chips span { min-width: 0; font-size: 11.5px; font-weight: 700; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dk-hero-chips span { min-width: 0; font-size: var(--text-caption); font-weight: 700; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     /* Accounts: a coin per currency, its accounts counted on it. */
     [data-hero="coins"] .dk-hero-chips li { flex-direction: column; align-items: center; justify-content: center; gap: 0; width: 52px; height: 52px; padding: 0; border-radius: 50%; box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--tone) 45%, transparent); }
-    [data-hero="coins"] .dk-hero-chips b { order: 2; font-size: 11px; color: var(--ink-3); }
+    [data-hero="coins"] .dk-hero-chips b { order: 2; font-size: var(--text-caption); color: var(--ink-3); }
     [data-hero="coins"] .dk-hero-chips span { order: 1; font-size: 12px; font-weight: 800; color: var(--tone); }
     /* Risk categories: quiet tags. */
     [data-hero="tags"] .dk-hero-chips li { padding: 4px 9px; border-radius: 99px; }
@@ -269,12 +269,12 @@
     [dir="rtl"] .dk-hero-flow li:first-child { clip-path: polygon(8px 0, 100% 0, 100% 100%, 8px 100%, 0 50%); }
     .dk-hero-flow li:not(:first-child) { padding-inline-start: 14px; }
     .dk-hero-flow b { font-size: 17px; font-weight: 800; color: var(--ink); }
-    .dk-hero-flow span { font-size: 10.5px; font-weight: 700; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dk-hero-flow span { font-size: var(--text-caption); font-weight: 700; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     /* Donor reports: the next eight weeks, a pip per report due. */
     .dk-hero-weeks { display: flex; align-items: stretch; gap: 4px; }
     .dk-hero-weeks li { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; padding-block-end: 2px; border-radius: 6px; background: var(--sunk); }
-    .dk-hero-weeks li > span:last-child { font-size: 9.5px; font-weight: 700; color: var(--ink-3); white-space: nowrap; }
+    .dk-hero-weeks li > span:last-child { font-size: var(--text-caption); font-weight: 700; color: var(--ink-3); white-space: nowrap; }
     .dk-hero-pips { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; }
     .dk-hero-pips i { width: 7px; height: 7px; border-radius: 50%; background: var(--tone); }
 
@@ -282,15 +282,15 @@
     .dk-hero-money { display: grid; align-content: center; gap: 6px; }
     .dk-hero-money li { display: grid; grid-template-columns: auto auto 1fr; align-items: baseline; column-gap: 6px; row-gap: 3px; min-width: 0; }
     .dk-hero-money b { font-size: 16px; font-weight: 800; color: var(--ink); }
-    .dk-hero-money span { font-size: 11px; font-weight: 800; color: var(--good); }
-    .dk-hero-money small { justify-self: end; font-size: 11px; color: var(--ink-3); white-space: nowrap; }
+    .dk-hero-money span { font-size: var(--text-caption); font-weight: 800; color: var(--good); }
+    .dk-hero-money small { justify-self: end; font-size: var(--text-caption); color: var(--ink-3); white-space: nowrap; }
     .dk-hero-money i { grid-column: 1 / -1; grid-row: 2; height: 4px; border-radius: 4px; background: linear-gradient(to right, var(--good) var(--share), var(--sunk) 0); }
     [dir="rtl"] .dk-hero-money i { background: linear-gradient(to left, var(--good) var(--share), var(--sunk) 0); }
 
     /* Users: who is here, and their roles. */
     .dk-hero-faces { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
     .dk-hero-stack { display: flex; }
-    .dk-hero-stack i { width: 30px; height: 30px; margin-inline-end: -4px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: 11px; font-weight: 800; color: #fff; background: var(--av, var(--ink-3)); box-shadow: 0 0 0 2px var(--paper); }
+    .dk-hero-stack i { width: 30px; height: 30px; margin-inline-end: -4px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-size: var(--text-caption); font-weight: 800; color: #fff; background: var(--av, var(--ink-3)); box-shadow: 0 0 0 2px var(--paper); }
     .dk-hero-stack [data-tone="tone-0"] { --av: #5b6cd9; } .dk-hero-stack [data-tone="tone-1"] { --av: #2f9e8f; } .dk-hero-stack [data-tone="tone-2"] { --av: #c2703d; }
     .dk-hero-stack [data-tone="tone-3"] { --av: #a2559b; } .dk-hero-stack [data-tone="tone-4"] { --av: #3f88c5; } .dk-hero-stack [data-tone="tone-5"] { --av: #7a8a3a; }
     [data-hero="faces"] .dk-hero-chips li { padding: 3px 8px; border-radius: 99px; }
@@ -299,7 +299,7 @@
     /* Cities: the three with most work, on a podium. */
     .dk-hero-podium { display: flex; align-items: flex-end; justify-content: center; gap: 6px; }
     .dk-hero-podium li { flex: 1 1 0; max-width: 96px; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%; justify-content: flex-end; }
-    .dk-hero-podium span { max-width: 100%; font-size: 11px; font-weight: 700; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dk-hero-podium span { max-width: 100%; font-size: var(--text-caption); font-weight: 700; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dk-hero-podium i { width: 100%; height: max(18px, calc(var(--share) * .42px)); display: grid; place-items: start center; padding-block-start: 3px; border-radius: 7px 7px 2px 2px; background: color-mix(in srgb, var(--tone) 30%, var(--paper)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 50%, transparent); font-style: normal; }
     .dk-hero-podium li:nth-child(2) i { background: color-mix(in srgb, var(--tone) 55%, var(--paper)); }
     .dk-hero-podium b { font-size: 13px; font-weight: 800; color: var(--ink); }
@@ -338,7 +338,7 @@
     /* Two row units are about 120px: the tallest pictures tighten to fit whole. */
     .dk-pagecard[data-rows="2"] .dk-hero { gap: 6px; }
     .dk-pagecard[data-rows="2"] .dk-hero-pyramid { gap: 2px; }
-    .dk-pagecard[data-rows="2"] .dk-hero-pyramid li { font-size: 10px; }
+    .dk-pagecard[data-rows="2"] .dk-hero-pyramid li { font-size: var(--text-caption); }
     .dk-pagecard[data-rows="2"] [data-hero="faces"] .dk-hero-chips { display: none; }
     .dk-pagecard[data-rows="2"] .dk-hero-podium i { height: max(20px, calc(var(--share) * .26px)); padding-block-start: 2px; }
     .dk-pagecard[data-rows="2"] .dk-hero-podium b { line-height: 16px; }
@@ -609,7 +609,7 @@
     [aria-checked="true"] > .dk-addesk-check { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
     /* ── The Ask bar's instant rows (resources/js/ask-index.js) ───── */
-    .dk-pal-kind { flex: none; height: 22px; padding-inline: 8px; border-radius: 6px; display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 800; background: var(--sunk); color: var(--ink-3); }
+    .dk-pal-kind { flex: none; height: 22px; padding-inline: 8px; border-radius: 6px; display: inline-flex; align-items: center; font-size: var(--text-caption); font-weight: 800; background: var(--sunk); color: var(--ink-3); }
     .dk-pal-kind:is([data-kind="add"], [data-kind="action"]) { background: var(--brand-soft); color: var(--brand-ink); }
     .dk-pal-kind[data-kind="remove"] { background: var(--bad-soft); color: var(--bad); }
     .dk-pal-done .dk-pal-kind { background: var(--good-soft); color: var(--good); }

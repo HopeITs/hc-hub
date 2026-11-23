@@ -41,11 +41,9 @@ html[lang='ar'] {
     }
 
     .type-label {
-        font-size: 0.6875rem;
+        font-size: var(--text-th);
         line-height: 1.3;
-        font-weight: 600;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+        font-weight: 700;
     }
 
     .type-label:lang(ar) {

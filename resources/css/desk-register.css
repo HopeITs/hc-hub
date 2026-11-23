@@ -149,7 +149,7 @@
 
     [data-desk-register] [data-data-table] thead { background: var(--paper); }
     [data-desk-register] [data-data-table] thead th {
-        font-size: 11.5px;
+        font-size: var(--text-caption);
         font-weight: 800;
         letter-spacing: .04em;
         text-transform: uppercase;
@@ -174,7 +174,7 @@
     [data-desk-register] .register-scroll { border-block: 0; }
     [data-desk-register] .register thead th {
         background: var(--paper);
-        font-size: 11.5px;
+        font-size: var(--text-caption);
         font-weight: 800;
         letter-spacing: .04em;
         text-transform: uppercase;
@@ -275,7 +275,7 @@
     .dk-pjl-prog > :first-child { flex: 1; min-width: 0; }
     .dk-pjl-prog > .dk-num { width: 2.6rem; text-align: end; font-size: 13px; font-weight: 800; color: var(--ink); }
     .dk-pjl-end { margin: 0; font-size: 13px; color: var(--ink); }
-    .dk-pjl-k { display: block; font-size: 11px; font-weight: 700; color: var(--ink-3); }
+    .dk-pjl-k { display: block; font-size: var(--text-caption); font-weight: 700; color: var(--ink-3); }
     .dk-pjl-owner { min-width: 0; }
     .dk-pjl-acts { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
     .dk-pjl-menu { top: 32px; width: 190px; }
@@ -374,7 +374,7 @@
     }
     .dk-tkf-btn { gap: 6px; font-weight: 600; }
     .dk-tkf-btn.dk-tkf-on { border-color: var(--ink); background: var(--sunk); }
-    .dk-tkf-btn .dk-pc { min-width: 18px; height: 18px; padding-inline: 5px; font-size: 11px; background: var(--ink); color: var(--paper); }
+    .dk-tkf-btn .dk-pc { min-width: 18px; height: 18px; padding-inline: 5px; font-size: var(--text-caption); background: var(--ink); color: var(--paper); }
     .dk-tk-clear { padding-inline: 8px; font-size: 13px; color: var(--ink-2); font-weight: 600; }
     .dk-tk-clear:hover { background: none; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
     .dk-tk-chips { margin-top: -6px; }
@@ -384,7 +384,7 @@
     .dk-tkf-pop { width: min(340px, calc(100vw - 32px)); padding: 14px; gap: 14px; }
     .dk-tkf-sec { display: grid; gap: 8px; }
     .dk-tkf-sec + .dk-tkf-sec { padding-top: 14px; border-top: 1px solid var(--line); }
-    .dk-tkf-h { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+    .dk-tkf-h { font-size: var(--text-caption); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
     [dir="rtl"] .dk-tkf-h { letter-spacing: 0; font-size: 12px; }
     /* The section heading already says "Related to": the type picker's own label stays for screen readers only. */
     .dk-reg-bar .dk-tkf-sec-related > [data-header-filter-select]:first-of-type > label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -406,7 +406,7 @@
     .dk-tk-tabs button[aria-current="page"] { color: var(--ink); }
     .dk-tk-tabs button[aria-current="page"]::after { background: var(--brand); }
     .dk-tk-tabs button:focus-visible { outline: 2px solid var(--ink-3); outline-offset: -2px; border-radius: 6px; }
-    .dk-tk-tab-count { min-width: 18px; height: 18px; padding-inline: 5px; border-radius: 999px; background: var(--sunk); color: var(--ink-2); font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; }
+    .dk-tk-tab-count { min-width: 18px; height: 18px; padding-inline: 5px; border-radius: 999px; background: var(--sunk); color: var(--ink-2); font-size: var(--text-caption); font-weight: 700; line-height: 18px; text-align: center; }
 
     .dk-tk-sort { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 6px; min-width: 0; }
     .dk-tk-sort [data-header-filter-select] { min-width: 0; }
@@ -479,7 +479,7 @@
 
     /* Month grid */
     .dk-tc-weekdays, .dk-tc-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-    .dk-tc-weekdays div { padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: 11.5px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
+    .dk-tc-weekdays div { padding: 8px 10px; border-bottom: 1px solid var(--line); font-size: var(--text-caption); font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
     .dk-tc-cell { position: relative; display: flex; flex-direction: column; gap: 4px; min-height: 124px; min-width: 0; padding: 6px; border-bottom: 1px solid var(--line); border-inline-end: 1px solid var(--line); }
     .dk-tc-cell:nth-child(7n) { border-inline-end: 0; }
     .dk-tc-cell:nth-last-child(-n + 7) { border-bottom: 0; }
@@ -503,7 +503,7 @@
     .dk-tc-dot[data-priority="high"] { background: var(--brand); }
     .dk-tc-dot[data-priority="medium"] { background: var(--warn); }
     [data-state="done"] > .dk-tc-dot { background: var(--good); }
-    .dk-tc-flag { flex: none; font-size: 10.5px; font-weight: 800; line-height: 1.6; color: var(--bad); text-transform: uppercase; letter-spacing: .03em; }
+    .dk-tc-flag { flex: none; font-size: var(--text-caption); font-weight: 800; line-height: 1.6; color: var(--bad); text-transform: uppercase; letter-spacing: .03em; }
 
     /* "+N more" */
     .dk-tc-more-btn { align-self: flex-start; padding: 2px 6px; border: 0; border-radius: 6px; background: none; color: var(--ink-2); font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
@@ -527,7 +527,7 @@
     .dk-tc-col { display: flex; flex-direction: column; min-width: 0; border-inline-end: 1px solid var(--line); }
     .dk-tc-col:last-child { border-inline-end: 0; }
     .dk-tc-col-head { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 10px; border-bottom: 1px solid var(--line); }
-    .dk-tc-col-weekday { font-size: 11.5px; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
+    .dk-tc-col-weekday { font-size: var(--text-caption); font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
     .dk-tc-col .dk-tc-date { padding-inline: 0; }
     .dk-tc-col .dk-tc-date[aria-current="date"] { padding-inline: 6px; margin-inline-start: -6px; }
     .dk-tc-col-body { position: relative; display: flex; flex-direction: column; gap: 6px; min-height: 320px; padding: 8px; }
@@ -538,7 +538,7 @@
     .dk-tc-agenda { display: none; }
     .dk-tc-mini-weekdays, .dk-tc-mini { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; padding-inline: 8px; }
     .dk-tc-mini-weekdays { padding-top: 8px; }
-    .dk-tc-mini-weekdays div { font-size: 11px; font-weight: 700; color: var(--ink-3); text-align: center; }
+    .dk-tc-mini-weekdays div { font-size: var(--text-caption); font-weight: 700; color: var(--ink-3); text-align: center; }
     .dk-tc-mini { padding-bottom: 8px; border-bottom: 1px solid var(--line); }
     .dk-tc-mini-day { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; height: 46px; border: 0; border-radius: 10px; background: none; color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer; }
     .dk-tc-mini-day.is-out { color: var(--faint); }
@@ -589,7 +589,7 @@
     .dk-tc-task-top { display: flex; align-items: flex-start; gap: 8px; }
     .dk-tc-task-meta { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-inline-start: 15px; }
     .dk-tc-avatars { display: inline-flex; flex: none; }
-    .dk-tc-avatars span { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-inline-start: -4px; border: 2px solid var(--paper); border-radius: 999px; background: var(--ink-2); color: var(--paper); font-size: 9px; font-weight: 800; }
+    .dk-tc-avatars span { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; margin-inline-start: -4px; border: 2px solid var(--paper); border-radius: 999px; background: var(--ink-2); color: var(--paper); font-size: var(--text-caption); font-weight: 800; }
     .dk-tc-avatars span:first-of-type { margin-inline-start: 0; }
     .dk-tc-task-actions { padding-inline-start: 15px; }
     .dk-tc-link { display: inline-flex; align-items: center; gap: 4px; padding: 2px 0; border: 0; background: none; color: var(--ink-2); font: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer; }

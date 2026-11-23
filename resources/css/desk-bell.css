@@ -17,7 +17,7 @@
     .dk-nb-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 16px 12px 20px; }
     [dir="rtl"] .dk-nb-h { padding: 16px 20px 12px 16px; }
     .dk-nb-head { display: grid; gap: 4px; min-width: 0; }
-    .dk-nb-title { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+    .dk-nb-title { font-size: var(--text-caption); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
     [lang="ar"] .dk-nb-title { font-size: 12px; letter-spacing: 0; }
     .dk-nb-figure { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 6px; min-width: 0; }
     .dk-nb-figure strong { font-size: 30px; font-weight: 800; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
@@ -46,7 +46,7 @@
     /* All / Unread: the Desk's pill track; Unread carries its count. */
     .dk-nb-tabs { display: inline-flex; align-self: flex-start; gap: 2px; margin: 0 20px 4px; padding: 3px; border-radius: 999px; background: var(--sunk); }
     .dk-nb-tab { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 14px; border: 0; border-radius: 999px; background: none; color: var(--ink-3); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: background .15s, color .15s, box-shadow .15s; }
-    .dk-nb-tab small { font-size: 11px; font-weight: 700; color: var(--faint); font-variant-numeric: tabular-nums; }
+    .dk-nb-tab small { font-size: var(--text-caption); font-weight: 700; color: var(--faint); font-variant-numeric: tabular-nums; }
     .dk-nb-tab:hover { color: var(--ink); }
     .dk-nb-tab[aria-selected="true"] { background: var(--paper); color: var(--ink); box-shadow: 0 1px 2px rgb(16 24 40 / .08), 0 0 0 1px var(--line); }
     .dk-nb-tab[aria-selected="true"] small { color: var(--ink-3); }
@@ -55,7 +55,7 @@
     /* The list scrolls inside the card; group labels are tracked and end in a hairline. */
     .dk-nb-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 6px 8px; scrollbar-width: thin; transition: opacity .15s; }
     .dk-nb-busy { opacity: .55; }
-    .dk-nb-sec { display: flex; align-items: center; gap: 10px; padding: 16px 12px 6px; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+    .dk-nb-sec { display: flex; align-items: center; gap: 10px; padding: 16px 12px 6px; font-size: var(--text-caption); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
     [lang="ar"] .dk-nb-sec { font-size: 12px; letter-spacing: 0; }
     .dk-nb-sec::after { content: ""; flex: 1; height: 1px; background: var(--line); }
     .dk-nb-sec[data-bell-pinned] { color: var(--bad); }
