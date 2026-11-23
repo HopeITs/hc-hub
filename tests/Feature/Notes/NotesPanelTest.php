@@ -85,3 +85,21 @@ test('the desk card keeps the old panel id and lists only the viewer personal no
 
     expect(Note::query()->personalFor($this->admin->id)->count())->toBe(2);
 });
+
+test('deleting a note on the desk card asks first and the note stays until it is confirmed', function () {
+    $note = Note::factory()->create(['author_id' => $this->admin->id, 'body' => 'Keep me']);
+
+    $page = Livewire::actingAs($this->admin)
+        ->test('hr::desk.notes')
+        ->assertSeeHtml('wire:click="confirmRemoveNote('.$note->id.')"')
+        ->call('confirmRemoveNote', $note->id)
+        ->assertSet('showRemoveNoteModal', true);
+
+    expect(Note::query()->find($note->id))->not->toBeNull();
+
+    $page->call('cancelRemoveNote')->assertSet('showRemoveNoteModal', false);
+    expect(Note::query()->find($note->id))->not->toBeNull();
+
+    $page->call('confirmRemoveNote', $note->id)->call('removeConfirmedNote');
+    expect(Note::query()->find($note->id))->toBeNull();
+});

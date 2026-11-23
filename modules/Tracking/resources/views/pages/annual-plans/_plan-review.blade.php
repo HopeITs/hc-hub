@@ -31,7 +31,7 @@
                 <span class="ap-sm ap-muted">{{ $followUp->trigger->label() }}</span>
                 <span class="ap-sm" dir="auto">→ {{ $followUp->description }}</span>
                 <span class="ap-sp"></span>
-                <button type="button" class="dk-btn dk-ghost" wire:click="removeFollowUp({{ $followUp->id }})">{{ __('annual_plans.wf.remove') }}</button>
+                <button type="button" class="dk-btn dk-ghost" wire:click="confirmRemoveFollowUp({{ $followUp->id }})">{{ __('annual_plans.wf.remove') }}</button>
             </div>
         @endforeach
         <div class="ap-task">
@@ -76,4 +76,14 @@
     confirm="approvePlan"
     :confirm-label="__('annual_plans.wf.approve_button')"
     confirm-test="confirm-approve-plan"
+/>
+
+<x-ui.confirm-modal
+    wire:model="showRemoveFollowUpModal"
+    close="cancelRemoveFollowUp"
+    :title="__('annual_plans.wf.remove_follow_up_title')"
+    :message="__('annual_plans.wf.remove_follow_up_message')"
+    confirm="removeConfirmedFollowUp"
+    :confirm-label="__('annual_plans.wf.remove')"
+    confirm-test="confirm-remove-follow-up"
 />

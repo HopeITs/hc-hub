@@ -213,3 +213,21 @@ test('the strategy page links each program to its strategic plan with its status
         ->assertSeeHtml('data-test="strategic-plan-link-'.$this->program->id.'"')
         ->assertSee(StrategicPlanStatus::Submitted->label());
 });
+
+test('removing a linked indicator asks first and the link stays until it is confirmed', function () {
+    $page = strategicPlanPage($this->mealManager)
+        ->set('indicatorToAdd', (string) $this->indicator->id)
+        ->call('addIndicator')
+        ->assertSeeHtml('wire:click="confirmRemoveIndicator('.$this->indicator->id.')"')
+        ->call('confirmRemoveIndicator', $this->indicator->id)
+        ->assertSet('showRemoveIndicatorModal', true)
+        ->assertSet('linkedIndicators', [$this->indicator->id]);
+
+    $page->call('cancelRemoveIndicator')
+        ->assertSet('showRemoveIndicatorModal', false)
+        ->assertSet('linkedIndicators', [$this->indicator->id]);
+
+    $page->call('confirmRemoveIndicator', $this->indicator->id)
+        ->call('removeConfirmedIndicator')
+        ->assertSet('linkedIndicators', []);
+});

@@ -74,6 +74,10 @@ trait EditsActivityPlan
 
     public string $followUpText = '';
 
+    public ?int $removingFollowUpId = null;
+
+    public bool $showRemoveFollowUpModal = false;
+
     public string $sendBackReason = '';
 
     public bool $attentionOnly = false;
@@ -653,5 +657,30 @@ trait EditsActivityPlan
         $user = auth()->user();
 
         return $user;
+    }
+
+    public function confirmRemoveFollowUp(int $id): void
+    {
+        $this->removingFollowUpId = $id;
+        $this->showRemoveFollowUpModal = true;
+    }
+
+    public function cancelRemoveFollowUp(): void
+    {
+        $this->removingFollowUpId = null;
+        $this->showRemoveFollowUpModal = false;
+    }
+
+    /**
+     * The confirmed removal: runs only on the dialog's own button.
+     */
+    public function removeConfirmedFollowUp(): void
+    {
+        $id = $this->removingFollowUpId;
+        $this->cancelRemoveFollowUp();
+
+        if ($id !== null) {
+            $this->removeFollowUp($id);
+        }
     }
 }

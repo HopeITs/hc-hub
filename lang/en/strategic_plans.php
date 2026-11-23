@@ -25,6 +25,8 @@ return [
     'link' => 'Link',
     'remove' => 'Remove',
     'remove_named' => 'Remove :name from the plan',
+    'remove_indicator_title' => 'Remove this indicator from the plan?',
+    'remove_indicator_message' => 'Its targets for the plan years are cleared. The indicator itself is kept.',
     'figure_for' => ':indicator, figure for :year',
     'save_draft' => 'Save draft',
     'send_to_manager' => 'Send to the program manager',

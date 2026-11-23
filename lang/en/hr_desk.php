@@ -216,6 +216,8 @@ return [
             'placeholder' => 'Write a note and press Enter',
             'add' => 'Add note',
             'remove' => 'Remove note',
+            'remove_title' => 'Delete this note?',
+            'remove_body' => 'The note is deleted for good.',
             'open_list' => 'Open notes',
             'done_list' => 'Done notes',
             'invalid' => 'Write a note of up to :max characters.',

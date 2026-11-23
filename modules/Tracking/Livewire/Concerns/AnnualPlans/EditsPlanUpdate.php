@@ -77,6 +77,10 @@ trait EditsPlanUpdate
 
     public ?int $previewFileId = null;
 
+    public ?int $removingFileId = null;
+
+    public bool $showRemoveFileModal = false;
+
     #[Computed]
     public function plan(): ActivityPlan
     {
@@ -412,5 +416,30 @@ trait EditsPlanUpdate
         $user = auth()->user();
 
         return $user;
+    }
+
+    public function confirmRemoveFile(int $id): void
+    {
+        $this->removingFileId = $id;
+        $this->showRemoveFileModal = true;
+    }
+
+    public function cancelRemoveFile(): void
+    {
+        $this->removingFileId = null;
+        $this->showRemoveFileModal = false;
+    }
+
+    /**
+     * The confirmed removal: runs only on the dialog's own button.
+     */
+    public function removeConfirmedFile(): void
+    {
+        $id = $this->removingFileId;
+        $this->cancelRemoveFile();
+
+        if ($id !== null) {
+            $this->removeFile($id);
+        }
     }
 }

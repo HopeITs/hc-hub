@@ -48,6 +48,8 @@ return [
         'unpublish' => 'Back to draft',
         'restore' => 'Restore',
         'archive' => 'Archive',
+        'archive_title' => 'Archive this item?',
+        'archive_body' => 'It leaves the published list. You can restore it later.',
         'delete_title' => 'Delete this item?',
         'delete_body' => 'The item, its audience, tags and cover are removed. This cannot be undone.',
         'deleted' => 'Item deleted.',

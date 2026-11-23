@@ -36,7 +36,7 @@
                             @if ($canManage)
                                 <x-ui.button
                                     tone="ghost" size="sm" icon="trash" class="size-8! text-status-critical!"
-                                    wire:click="detachRisk({{ $risk->id }})"
+                                    wire:click="confirmRemoveRisk({{ $risk->id }})"
                                     wire:loading.attr="disabled" wire:target="detachRisk"
                                     :aria-label="__('risks.remove_risk_name', ['name' => $risk->localizedName()])"
                                     data-test="detach-risk-{{ $risk->id }}"
@@ -98,3 +98,13 @@
         </x-slot:actions>
     @endif
 </x-ui.modal>
+
+<x-ui.confirm-modal
+    wire:model="showRemoveRiskModal"
+    close="cancelRemoveRisk"
+    :title="__('risks.detach_confirm_title')"
+    :message="__('risks.detach_confirm_message')"
+    confirm="removeConfirmedRisk"
+    :confirm-label="__('risks.detach_confirm_button')"
+    confirm-test="confirm-detach-risk"
+/>

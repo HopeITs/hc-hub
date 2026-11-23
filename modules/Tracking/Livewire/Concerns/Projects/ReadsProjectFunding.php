@@ -33,6 +33,10 @@ trait ReadsProjectFunding
 {
     public string $proposalToAttach = '';
 
+    public ?int $removingProposalId = null;
+
+    public bool $showRemoveProposalModal = false;
+
     /**
      * Whether the viewer may see the money on this page: committed and
      * received figures need both the agreements (budgets) and the transfers
@@ -267,5 +271,30 @@ trait ReadsProjectFunding
         unset($this->project, $this->attachedProposals, $this->attachableProposals);
 
         Flux::toast(variant: 'success', text: __('projects.proposal_unlinked_from_this_project'));
+    }
+
+    public function confirmRemoveProposal(int $id): void
+    {
+        $this->removingProposalId = $id;
+        $this->showRemoveProposalModal = true;
+    }
+
+    public function cancelRemoveProposal(): void
+    {
+        $this->removingProposalId = null;
+        $this->showRemoveProposalModal = false;
+    }
+
+    /**
+     * The confirmed removal: runs only on the dialog's own button.
+     */
+    public function removeConfirmedProposal(): void
+    {
+        $id = $this->removingProposalId;
+        $this->cancelRemoveProposal();
+
+        if ($id !== null) {
+            $this->detachProposal($id);
+        }
     }
 }

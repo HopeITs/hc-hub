@@ -608,3 +608,27 @@ test('someone who may not edit the task sees no remove x and cannot drop an assi
 
     expect($task->taskAssignees()->pluck('employee_id')->all())->toBe([$assignee]);
 });
+
+test('the x on an assignee chip asks first and the person stays until it is confirmed', function () {
+    $creator = User::factory()->role('General Manager')->create();
+    $kept = insertHrEmployee(firstNameEn: 'Alice', lastNameEn: 'Nadir');
+    $removed = insertHrEmployee(firstNameEn: 'Bob', lastNameEn: 'Karam');
+    $task = Task::factory()->create(['created_by' => $creator->id]);
+    $task->taskAssignees()->delete();
+    $task->taskAssignees()->create(['employee_id' => $kept]);
+    $task->taskAssignees()->create(['employee_id' => $removed]);
+
+    $page = Livewire::actingAs($creator)
+        ->test('tracking::tasks.show', ['task' => $task])
+        ->assertSeeHtml('wire:click="confirmRemoveAssignee('.$removed.')"')
+        ->call('confirmRemoveAssignee', $removed)
+        ->assertSet('showRemoveAssigneeModal', true);
+
+    expect($task->taskAssignees()->count())->toBe(2);
+
+    $page->call('cancelRemoveAssignee')->assertSet('showRemoveAssigneeModal', false);
+    expect($task->taskAssignees()->count())->toBe(2);
+
+    $page->call('confirmRemoveAssignee', $removed)->call('removeConfirmedAssignee');
+    expect($task->taskAssignees()->pluck('employee_id')->all())->toBe([$kept]);
+});

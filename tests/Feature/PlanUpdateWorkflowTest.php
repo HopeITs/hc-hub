@@ -259,3 +259,23 @@ test('the CEO does not open updates; others read them', function () {
     $this->actingAs($ceo)->get(route('plan-updates.show', [$this->plan, $this->centre, '2027-01']))->assertForbidden();
     $this->actingAs(userWithRole('Team Member'))->get(route('plan-updates.show', [$this->plan, $this->centre, '2027-01']))->assertOk();
 });
+
+test('removing an attached file asks first and the file stays until it is confirmed', function () {
+    app(SavePlanUpdate::class)->handle($this->projectManager, $this->plan, $this->centre, $this->january, januaryDraft());
+    app(ManagePlanUpdateFiles::class)->add($this->projectManager, $this->plan, $this->centre, $this->january, UploadedFile::fake()->create('attendance.pdf', 20, 'application/pdf'));
+    $fileId = PlanUpdate::query()->first()->files()->sole()->id;
+
+    $page = Livewire::actingAs($this->projectManager)->test('tracking::annual-plans.update', ['activityPlan' => $this->plan, 'project' => $this->centre, 'month' => '2027-01'])
+        ->call('goToStep', 1)
+        ->assertSeeHtml('wire:click="confirmRemoveFile('.$fileId.')"')
+        ->call('confirmRemoveFile', $fileId)
+        ->assertSet('showRemoveFileModal', true);
+
+    expect(PlanUpdate::query()->first()->files()->count())->toBe(1);
+
+    $page->call('cancelRemoveFile')->assertSet('showRemoveFileModal', false);
+    expect(PlanUpdate::query()->first()->files()->count())->toBe(1);
+
+    $page->call('confirmRemoveFile', $fileId)->call('removeConfirmedFile');
+    expect(PlanUpdate::query()->first()->files()->count())->toBe(0);
+});

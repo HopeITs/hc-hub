@@ -38,9 +38,9 @@
                                 @if ($canEditTask)
                                     <button
                                         type="button"
-                                        wire:click="removeAssignee({{ $assigneeEmployee->id }})"
+                                        wire:click="confirmRemoveAssignee({{ $assigneeEmployee->id }})"
                                         wire:loading.attr="disabled"
-                                        wire:target="removeAssignee({{ $assigneeEmployee->id }})"
+                                        wire:target="removeConfirmedAssignee({{ $assigneeEmployee->id }})"
                                         class="grid size-5 shrink-0 cursor-pointer place-items-center rounded-full text-secondary-medium hover:bg-primary hover:text-white disabled:opacity-50 dark:text-ink-muted"
                                         aria-label="{{ __('tasks.remove_assignee_name', ['name' => $assigneeEmployee->name]) }}"
                                         title="{{ __('tasks.remove_assignee_name', ['name' => $assigneeEmployee->name]) }}"
@@ -180,3 +180,13 @@
         </div>
     </dl>
 </x-ui.panel>
+
+<x-ui.confirm-modal
+    wire:model="showRemoveAssigneeModal"
+    close="cancelRemoveAssignee"
+    :title="__('tasks.remove_assignee_confirm_title')"
+    :message="__('tasks.remove_assignee_confirm_message')"
+    confirm="removeConfirmedAssignee"
+    :confirm-label="__('tasks.remove_assignee')"
+    confirm-test="confirm-remove-assignee"
+/>

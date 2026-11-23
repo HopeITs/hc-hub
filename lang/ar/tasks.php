@@ -17,6 +17,8 @@ return [
     'assignee_removed' => 'تمت إزالة المكلّف.',
     'remove_all_assignees' => 'إزالة كل المكلّفين',
     'remove_assignee' => 'إزالة المكلّف',
+    'remove_assignee_confirm_title' => 'إزالة هذا المكلّف؟',
+    'remove_assignee_confirm_message' => 'لن يعود مكلّفًا بهذه المهمة.',
     'move_to' => 'نقل إلى',
     'goes_to' => 'تذهب إلى',
     'goes_to_help' => 'البرنامج نفسه، أو أحد مشاريعه، أو مرحلة رئيسية.',
