@@ -373,3 +373,20 @@ test('groups start folded, and a search or a hand-opened group shows the rows', 
         ->assertSet('collapsed.'.$foldKey, false)
         ->assertSeeHtml('aria-expanded="true"');
 });
+
+test('a search opens every group, even one folded by hand, and clearing it brings the choice back', function () {
+    $first = ($this->volunteer)();
+    ($this->volunteer)();
+    $hr = ($this->hr)($this->city);
+    $foldKey = $this->city->id.':'.Grouping::DEPARTMENT.'-'.($first->allContracts()->first()->position->department_id ?: 'none');
+
+    Livewire::actingAs($hr)->test('hr::attendance.timesheets')
+        ->set('month', '2026-09')
+        ->set('groupBy', Grouping::DEPARTMENT)
+        ->call('toggleGroup', $foldKey, true)
+        ->assertDontSeeHtml('aria-expanded="true"')
+        ->set('search', (string) $first->id)
+        ->assertSeeHtml('aria-expanded="true"')
+        ->set('search', '')
+        ->assertDontSeeHtml('aria-expanded="true"');
+});

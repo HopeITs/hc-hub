@@ -17,7 +17,8 @@ use Modules\Core\Models\User;
 /**
  * One address on a mailing list. 'active': already in the group at the mail provider's control
  * panel; 'pending': added here, waiting for the person who holds that panel to add and confirm it
- * (mail-lists.confirm).
+ * (mail-lists.confirm). 'leaving' is the other way round: the person left, and the holder removes
+ * them from the group there and confirms it.
  *
  * @property int $id
  * @property int $mail_list_id
@@ -38,6 +39,9 @@ class MailListMember extends Model
     public const ACTIVE = 'active';
 
     public const PENDING = 'pending';
+
+    /** Left the organisation: still in the group at the control panel until the confirmer removes them. */
+    public const LEAVING = 'leaving';
 
     /** @var array<string, mixed> */
     protected $attributes = ['status' => self::ACTIVE];
@@ -73,6 +77,20 @@ class MailListMember extends Model
     protected function pending(Builder $query): void
     {
         $query->where('status', self::PENDING);
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function leaving(Builder $query): void
+    {
+        $query->where('status', self::LEAVING);
+    }
+
+    public function isLeaving(): bool
+    {
+        return $this->status === self::LEAVING;
     }
 
     public function isPending(): bool

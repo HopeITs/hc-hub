@@ -2,7 +2,9 @@
 
 use Carbon\CarbonImmutable;
 use Livewire\Livewire;
+use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
+use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
@@ -125,4 +127,98 @@ test('the attendance page offers to email the list that stands for a city and a 
         ->set('groupBy', Grouping::DEPARTMENT)
         ->assertSeeHtml('href="mailto:hope.aleppo@hcsyria.org"')
         ->assertSeeHtml('mailto:it@hcsyria.org');
+});
+
+test('a new account is queued on every list its rule matches, once', function () {
+    $team = MailList::factory()->create(['address' => 'team@hcsyria.org', 'rule_type' => MailList::RULE_ALL_STAFF]);
+    $aleppo = MailList::factory()->create(['rule_type' => MailList::RULE_CUSTOM, 'rule_city_id' => $this->aleppo->id]);
+    $homs = MailList::factory()->create(['rule_type' => MailList::RULE_CUSTOM, 'rule_city_id' => $this->homs->id]);
+
+    $employee = ($this->staff)($this->aleppo, 'anna@hcsyria.org');
+
+    expect($team->members()->pluck('email')->all())->toBe(['anna@hcsyria.org'])
+        ->and($aleppo->members()->first()->status)->toBe(MailListMember::PENDING)
+        ->and($homs->members()->count())->toBe(0)
+        ->and(app(MailListSync::class)->queueForPerson($employee))->toBe(0);
+});
+
+test('someone who leaves is flagged for removal and comes back when reactivated', function () {
+    $employee = ($this->staff)($this->aleppo, 'anna@hcsyria.org');
+    $team = MailList::factory()->create(['rule_type' => MailList::RULE_ALL_STAFF]);
+    $queued = MailList::factory()->create();
+    $team->members()->create(['email' => 'anna@hcsyria.org', 'status' => MailListMember::ACTIVE]);
+    $queued->members()->create(['email' => 'anna@hcsyria.org', 'status' => MailListMember::PENDING]);
+
+    $employee->update(['is_active' => false]);
+
+    // In the group at the control panel: flagged. Only queued here: dropped.
+    expect($team->members()->first()->status)->toBe(MailListMember::LEAVING)
+        ->and($queued->members()->count())->toBe(0);
+
+    $employee->update(['is_active' => true]);
+
+    expect($team->members()->first()->status)->toBe(MailListMember::ACTIVE);
+});
+
+test('hr queues a removal from the check page and only the confirmer clears it', function () {
+    ($this->staff)($this->aleppo, 'carla@hcsyria.org', active: false);
+    $team = MailList::factory()->create(['rule_type' => MailList::RULE_ALL_STAFF]);
+    $team->members()->create(['email' => 'carla@hcsyria.org', 'status' => MailListMember::ACTIVE]);
+    $member = $team->members()->first();
+
+    $holder = User::factory()->role('HR-SYR')->create();
+    $holder->givePermissionTo(Permission::findOrCreate('mail-lists.confirm', 'web'));
+    $holder = $holder->refresh();
+
+    Livewire::actingAs(($this->hrManager)())->test('hr::mail-lists.check')->call('queueRemoval', $member->id);
+    expect($member->fresh()->status)->toBe(MailListMember::LEAVING);
+
+    // HR cannot confirm it; the holder of the control panel can, and sees the queue.
+    Livewire::actingAs(($this->hrManager)())->test('hr::mail-lists.index')->call('confirmRemoval', $member->id)->assertForbidden();
+    Livewire::actingAs($holder)->test('hr::mail-lists.index')
+        ->assertSeeHtml('data-mail-lists-leaving')
+        ->call('confirmRemovalEmail', 'carla@hcsyria.org');
+
+    expect($team->members()->count())->toBe(0);
+});
+
+test('the daily command queues people whose contract just started and nobody twice', function () {
+    $team = MailList::factory()->create(['address' => 'team@hcsyria.org', 'rule_type' => MailList::RULE_ALL_STAFF]);
+
+    $starter = function (string $email, string $start): void {
+        $employee = Employee::factory()->create(['city_id' => $this->aleppo->id]);
+        Contract::factory()->create([
+            'employee_id' => $employee->id,
+            'position_id' => Position::factory()->create(['city_id' => $this->aleppo->id])->id,
+            'weekly_hours' => 40, 'start_date' => $start, 'end_date' => '2027-12-31', 'is_active' => true,
+        ]);
+        User::factory()->create(['employee_id' => $employee->id, 'email' => $email]);
+    };
+
+    $starter('recent@hcsyria.org', '2026-11-16');
+    $starter('old@hcsyria.org', '2025-11-17');
+    // The accounts were made before the list had this rule, so nothing was queued then.
+    $team->members()->delete();
+
+    $this->artisan('mail-lists:queue-starters')->assertSuccessful();
+    $this->artisan('mail-lists:queue-starters')->assertSuccessful();
+
+    expect($team->members()->pluck('email')->all())->toBe(['recent@hcsyria.org'])
+        ->and($team->members()->first()->status)->toBe(MailListMember::PENDING);
+});
+
+test('a center and a project page offer to email the list that stands for them', function () {
+    $center = Center::factory()->create(['city_id' => $this->aleppo->id, 'is_active' => true]);
+    $program = Program::factory()->unassigned()->create();
+    MailList::factory()->create(['address' => 'hope.aleppo@hcsyria.org', 'rule_type' => MailList::RULE_CUSTOM, 'rule_city_id' => $this->aleppo->id]);
+    MailList::factory()->create(['address' => 'project@hcsyria.org', 'rule_type' => MailList::RULE_CUSTOM, 'rule_program_id' => $program->id]);
+    $admin = User::factory()->create();
+    foreach (['programs.view', 'centers.view', 'employees.view'] as $permission) {
+        $admin->givePermissionTo(Permission::findOrCreate($permission, 'web'));
+    }
+
+    Livewire::actingAs($admin->refresh())->test('hr::settings.center', ['center' => $center->id])
+        ->assertSeeHtml('href="mailto:hope.aleppo@hcsyria.org"');
+    Livewire::actingAs($admin)->test('hr::settings.program', ['program' => $program])
+        ->assertSeeHtml('href="mailto:project@hcsyria.org"');
 });

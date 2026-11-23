@@ -70,3 +70,12 @@ test('every recruitment command is registered with Artisan', function () {
         'recruitment:sync-campaign-states',
     );
 });
+
+test('the mail-list starters queue runs every morning, after the attendance reminders', function () {
+    $events = hrScheduledEvents();
+
+    expect($events)->toHaveKey('mail-lists:queue-starters')
+        ->and($events['mail-lists:queue-starters']->expression)->toBe('20 8 * * *')
+        ->and($events['mail-lists:queue-starters']->withoutOverlapping)->toBeTrue()
+        ->and($events['mail-lists:queue-starters']->onOneServer)->toBeTrue();
+});

@@ -158,6 +158,12 @@ new #[Layout('layouts::desk'), Title('hr_settings.titles.center')] class extends
                 <span class="inline-flex items-center rounded-md border border-secondary-light px-2 py-0.5 text-xs font-semibold text-secondary-dark dark:border-line-strong dark:text-ink">{{ __('hr_settings.inactive') }}</span>
             @endif
         </x-slot:meta>
+        {{-- The mailing list that stands for this centre's city, when there is one. --}}
+        @if ($groupList = \Modules\Hr\Models\MailList::emailFor($center->city_id ? (int) $center->city_id : null, null, null))
+            <x-slot:actions>
+                <x-ui.button tone="action" icon="envelope" :href="'mailto:'.$groupList->address" data-test="email-group">{{ __('hr_mail_lists.email_group') }}</x-ui.button>
+            </x-slot:actions>
+        @endif
     </x-ui.detail-header>
 
     <p class="type-meta {{ $muted }}">{{ __('hr_settings.centers.read_only_note') }}</p>

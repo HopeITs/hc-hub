@@ -189,6 +189,7 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.upload')] class exten
 
 <x-desk.register class="@container" heading-id="hr-attendance-upload-heading" :title="__('hr_attendance.upload.title')" data-hr-attendance-upload>
     <x-slot:actions>
+        <x-ui.button tone="action" icon="signal" :href="route('hr.attendance.devices')" wire:navigate data-test="attendance-devices-link">{{ __('hr_attendance.devices.title') }}</x-ui.button>
         <x-ui.button tone="action" icon="clock" :href="route('hr.attendance.timesheets')" wire:navigate>{{ __('hr_attendance.upload.then') }}</x-ui.button>
     </x-slot:actions>
 

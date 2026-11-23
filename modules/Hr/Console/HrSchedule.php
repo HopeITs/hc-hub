@@ -46,6 +46,9 @@ final class HrSchedule implements ScheduleSource
         // The first days of a month: managers to approve last month's timesheets, HR to lock them.
         $schedule->command(SendAttendanceRemindersCommand::class)->dailyAt('08:15')->withoutOverlapping()->onOneServer();
 
+        // People whose contract just started join the mail lists their rules match (pending, for the control panel).
+        $schedule->command(QueueMailListStartersCommand::class)->dailyAt('08:20')->withoutOverlapping()->onOneServer();
+
         // Recruitment (as the HR app ran it). Due position changes early, before the evening
         // contract runs read the seats; campaign windows every minute; the antivirus safety
         // net, offers past their answer date, interview reminders and rejection emails a down

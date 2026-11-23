@@ -118,6 +118,23 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
         Flux::toast(variant: 'success', text: __('hr_mail_lists.confirmed'));
     }
 
+    /** "Removed in the control panel": the person who left is no longer in the group, here either. */
+    public function confirmRemoval(int $memberId): void
+    {
+        $this->authorizeConfirmer();
+
+        MailListMember::query()->leaving()->whereKey($memberId)->delete();
+    }
+
+    /** Every removal of one person, across lists, at once. */
+    public function confirmRemovalEmail(string $email): void
+    {
+        $this->authorizeConfirmer();
+
+        MailListMember::query()->leaving()->where('email', Str::lower($email))->delete();
+        Flux::toast(variant: 'success', text: __('hr_mail_lists.confirmed'));
+    }
+
     /** @return array<string, mixed> */
     public function with(): array
     {
@@ -143,6 +160,7 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
                     'former' => $employee !== null && ! $employee->is_active,
                     'external' => $account === null && ! str_ends_with($member->email, '@'.MailList::DOMAIN),
                     'pending' => $member->isPending(),
+                    'leaving' => $member->isLeaving(),
                 ];
             })
                 ->filter(fn (array $member): bool => $canManage || (! $member['former'] && ! $member['external']))
@@ -184,6 +202,7 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
             'canManage' => $canManage,
             'canConfirm' => $canConfirm,
             'pending' => $canConfirm ? $this->pendingQueue($accounts) : collect(),
+            'leaving' => $canConfirm ? $this->leavingQueue() : collect(),
         ];
     }
 
@@ -202,6 +221,29 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
                 'name' => $accounts->get($email)?->employee?->name,
                 'lists' => $members->map(fn (MailListMember $member): string => (string) $member->mailList?->address)->all(),
                 'by' => $members->first()->addedBy?->name,
+            ])
+            ->values();
+    }
+
+    /**
+     * The other way round: who left and must be taken out of the groups at the control panel.
+     *
+     * @return Collection<int, array{email: string, name: ?string, lists: list<string>}>
+     */
+    private function leavingQueue(): Collection
+    {
+        $members = MailListMember::query()->leaving()->with('mailList')->orderBy('updated_at')->get();
+        $accounts = User::query()
+            ->with('employee:id,first_name_en,first_name_ar,last_name_en,last_name_ar,is_active')
+            ->whereIn('email', $members->pluck('email')->unique()->all())
+            ->get()
+            ->keyBy(fn (User $account): string => Str::lower($account->email));
+
+        return $members->groupBy('email')
+            ->map(fn (Collection $group, string $email): array => [
+                'email' => $email,
+                'name' => $accounts->get($email)?->employee?->name,
+                'lists' => array_values($group->map(fn (MailListMember $member): string => (string) $member->mailList?->address)->all()),
             ])
             ->values();
     }
@@ -291,6 +333,25 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
         </x-ui.panel>
     @endif
 
+    @if ($canConfirm && $leaving->isNotEmpty())
+        <x-ui.panel class="mb-6 p-4" data-mail-lists-leaving>
+            <h2 class="font-semibold">{{ __('hr_mail_lists.leaving_title') }}</h2>
+            <p class="mt-1 text-sm {{ $muted }}">{{ __('hr_mail_lists.leaving_help') }}</p>
+            <ul class="mt-3 divide-y divide-panel-border">
+                @foreach ($leaving as $person)
+                    <li class="flex flex-wrap items-center justify-between gap-3 py-2.5" wire:key="leaving-{{ $person['email'] }}" data-leaving-email="{{ $person['email'] }}">
+                        <div class="min-w-0">
+                            <span class="block font-semibold" dir="auto">{{ $person['name'] ?? $person['email'] }}</span>
+                            <span class="block text-xs {{ $muted }}" dir="ltr">{{ $person['email'] }}</span>
+                            <span class="block text-xs {{ $muted }}">{{ __('hr_mail_lists.leaving_lists') }}: <span dir="ltr">{{ implode(', ', $person['lists']) }}</span></span>
+                        </div>
+                        <x-ui.button size="sm" icon="check" wire:click="confirmRemovalEmail({{ \Illuminate\Support\Js::from($person['email']) }})" data-test="mail-lists-confirm-removal">{{ __('hr_mail_lists.leaving_done') }}</x-ui.button>
+                    </li>
+                @endforeach
+            </ul>
+        </x-ui.panel>
+    @endif
+
     @if ($listCount === 0)
         <x-ui.empty-state icon="envelope" :heading="__('hr_mail_lists.empty')" :body="__('hr_mail_lists.empty_help')" />
     @elseif ($rows->isEmpty())
@@ -337,6 +398,9 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
                                         @if ($member['pending'])
                                             <flux:badge size="sm" color="amber">{{ __('hr_mail_lists.pending_tag') }}</flux:badge>
                                         @endif
+                                        @if ($canConfirm && $member['leaving'])
+                                            <flux:badge size="sm" color="zinc">{{ __('hr_mail_lists.leaving_tag') }}</flux:badge>
+                                        @endif
                                         @if ($member['former'])
                                             <flux:badge size="sm" color="zinc">{{ __('hr_mail_lists.former') }}</flux:badge>
                                         @endif
@@ -348,6 +412,9 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
                                 <div class="flex shrink-0 gap-1">
                                     @if ($canConfirm && $member['pending'])
                                         <x-ui.button tone="ghost" size="sm" icon="check" wire:click="confirmMember({{ $member['id'] }})" :aria-label="__('hr_mail_lists.pending_done')">{{ __('hr_mail_lists.pending_done_short') }}</x-ui.button>
+                                    @endif
+                                    @if ($canConfirm && $member['leaving'])
+                                        <x-ui.button tone="ghost" size="sm" icon="check" wire:click="confirmRemoval({{ $member['id'] }})" :aria-label="__('hr_mail_lists.leaving_done')" data-test="mail-list-confirm-removal" />
                                     @endif
                                     @if ($canManage)
                                         <x-ui.button tone="ghost" size="sm" icon="trash" wire:click="removeMember({{ $member['id'] }})" wire:confirm="{{ __('hr_mail_lists.remove_confirm') }}" :aria-label="__('hr_mail_lists.remove')" data-test="mail-list-remove" />

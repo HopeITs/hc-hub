@@ -7,9 +7,14 @@ namespace Modules\Hr;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Support\EmployeeLookup;
 use App\Support\Modules\ModuleRegistry;
+use Closure;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
@@ -30,6 +35,7 @@ use Modules\Hr\Console\Journeys\TrackRenewalJourneys;
 use Modules\Hr\Console\LoadMailListsCommand;
 use Modules\Hr\Console\MoveHrMediaCommand;
 use Modules\Hr\Console\ProcessContractAutoRenewalsCommand;
+use Modules\Hr\Console\QueueMailListStartersCommand;
 use Modules\Hr\Console\RecountPositionSeatsCommand;
 use Modules\Hr\Console\ReportAccountGapsCommand;
 use Modules\Hr\Console\ReportRecruitmentAccessCommand;
@@ -48,6 +54,7 @@ use Modules\Hr\Support\Inbox\DeskAgenda;
 use Modules\Hr\Support\Inbox\HrSubjectLinks;
 use Modules\Hr\Support\Inbox\InboxWorkItems;
 use Modules\Hr\Support\Journeys\JourneyHooks;
+use Modules\Hr\Support\MailLists\MailListSync;
 use Modules\Hr\Support\Metrics\HrMetrics;
 use Modules\Hr\Support\Recruitment\Console\AnalyzeRecruitmentCvs;
 use Modules\Hr\Support\Recruitment\Console\ApplyDueRecruitmentRequests;
@@ -110,6 +117,7 @@ class HrServiceProvider extends ServiceProvider
             RecountPositionSeatsCommand::class,
             SendAttendanceRemindersCommand::class,
             LoadMailListsCommand::class,
+            QueueMailListStartersCommand::class,
             AnalyzeRecruitmentCvs::class,
             ApplyDueRecruitmentRequests::class,
             CheckRecruitmentScanner::class,
@@ -136,6 +144,11 @@ class HrServiceProvider extends ServiceProvider
         // Rate limiters, observers and bindings; outside the routes so it also runs under route:cache.
         RecruitmentBootstrap::boot();
 
+        // A time-clock device calls about every 30 seconds and posts its log in bursts: generous per
+        // device, and by address when it does not say who it is.
+        RateLimiter::for('iclock', fn (Request $request): Limit => Limit::perMinute(300)
+            ->by((string) ($request->query('SN') ?? $request->query('sn') ?? $request->ip())));
+
         // Contract writes that start or move an employee journey.
         JourneyHooks::register();
 
@@ -148,11 +161,59 @@ class HrServiceProvider extends ServiceProvider
             }
         });
 
+        $this->registerMailListHooks();
+
         $this->registerDesk();
 
         if (! $this->app->routesAreCached()) {
             $this->loadAreaRoutes();
         }
+    }
+
+    /**
+     * The rest of a person's lists follow by the rules of the lists (MailListSync): a hire (an
+     * account or a contract) queues them as pending on the lists they belong on, and leaving (the
+     * employee turned inactive) flags them for removal at the control panel. Nothing here may stop
+     * a hire or a departure.
+     */
+    private function registerMailListHooks(): void
+    {
+        $guarded = static fn (callable $work): Closure => static function (Model $model) use ($work): void {
+            try {
+                $work($model, app(MailListSync::class));
+            } catch (Throwable $exception) {
+                report($exception);
+            }
+        };
+
+        User::created($guarded(function (User $user, MailListSync $sync): void {
+            $employee = $user->employee_id === null ? null : Employee::query()->find($user->employee_id);
+
+            if ($employee !== null) {
+                $sync->queueForPerson($employee, auth()->id());
+            }
+        }));
+
+        // A bulk import or command would queue hundreds at once: the check page does that on demand.
+        Contract::created($guarded(function (Contract $contract, MailListSync $sync): void {
+            if ($this->app->runningInConsole() || ! $contract->is_active) {
+                return;
+            }
+
+            $employee = Employee::query()->find($contract->employee_id);
+
+            if ($employee !== null) {
+                $sync->queueForPerson($employee, auth()->id());
+            }
+        }));
+
+        Employee::updated($guarded(function (Employee $employee, MailListSync $sync): void {
+            if (! $employee->wasChanged('is_active')) {
+                return;
+            }
+
+            $employee->is_active ? $sync->unflagLeaving($employee) : $sync->flagLeaving($employee);
+        }));
     }
 
     /**
@@ -187,6 +248,10 @@ class HrServiceProvider extends ServiceProvider
                 require $file;
             }
         });
+
+        // The time-clock devices (ZKTeco ADMS): no session, no login, no language prefix; they are
+        // believed by their registered serial only. routes/device/iclock.php.
+        Route::middleware(['api', 'throttle:iclock'])->group(__DIR__.'/routes/device/iclock.php');
 
         // Pages a guest may open (the careers site): routes/public/*.php.
         $publicFiles = glob(__DIR__.'/routes/public/*.php') ?: [];

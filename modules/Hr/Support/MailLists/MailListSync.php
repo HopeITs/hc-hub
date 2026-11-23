@@ -34,8 +34,8 @@ class MailListSync
     /**
      * @return array{
      *     missing: Collection<int, array{email: string, name: string}>,
-     *     not_matching: Collection<int, array{id: int, email: string, name: string}>,
-     *     left: Collection<int, array{id: int, email: string, name: string}>,
+     *     not_matching: Collection<int, array{id: int, email: string, name: string, leaving: bool}>,
+     *     left: Collection<int, array{id: int, email: string, name: string, leaving: bool}>,
      *     members: int,
      *     in_sync: bool
      * }
@@ -67,7 +67,7 @@ class MailListSync
                 continue; // an outside address: nothing in HR data to compare with
             }
 
-            $row = ['id' => (int) $member->id, 'email' => (string) $email, 'name' => (string) $employee->name];
+            $row = ['id' => (int) $member->id, 'email' => (string) $email, 'name' => (string) $employee->name, 'leaving' => $member->isLeaving()];
 
             if (! $employee->is_active) {
                 $left->push($row);
@@ -125,7 +125,7 @@ class MailListSync
         return $contracts->get()
             ->map(fn (Contract $contract): ?Employee => $contract->employee)
             ->filter(fn (?Employee $employee): bool => filled($employee?->account?->email))
-            ->mapWithKeys(fn (Employee $employee): array => [Str::lower((string) $employee->account?->email) => (string) $employee->name]);
+            ->mapWithKeys(fn (Employee $employee): array => [$this->accountEmail($employee) => (string) $employee->name]);
     }
 
     /**
@@ -163,5 +163,86 @@ class MailListSync
         );
 
         return true;
+    }
+
+    /**
+     * A person who joined (a contract, an account): queue them as pending on every list whose rule
+     * they match and that they are not on. People who are already on a list are left as they are.
+     *
+     * @return int how many lists they were queued on
+     */
+    public function queueForPerson(Employee $employee, ?int $byUserId = null): int
+    {
+        $email = $this->accountEmail($employee);
+
+        if ($email === '') {
+            return 0;
+        }
+
+        $count = 0;
+
+        $lists = MailList::query()->whereNotNull('rule_type')->where('rule_type', '!=', MailList::RULE_BOARD)->get();
+
+        foreach ($lists as $list) {
+            if (! $this->expected($list)->has($email)) {
+                continue;
+            }
+
+            $member = $list->members()->firstOrCreate(
+                ['email' => $email],
+                ['status' => MailListMember::PENDING, 'added_by_user_id' => $byUserId],
+            );
+
+            $count += $member->wasRecentlyCreated ? 1 : 0;
+        }
+
+        return $count;
+    }
+
+    /**
+     * A person who left: what was only queued here is dropped, and what is in a group at the control
+     * panel is flagged for the holder to remove there.
+     *
+     * @return int how many memberships were affected
+     */
+    public function flagLeaving(Employee $employee): int
+    {
+        $email = $this->accountEmail($employee);
+
+        if ($email === '') {
+            return 0;
+        }
+
+        $dropped = MailListMember::query()->pending()->where('email', $email)->delete();
+        $flagged = MailListMember::query()->where('email', $email)->where('status', MailListMember::ACTIVE)
+            ->update(['status' => MailListMember::LEAVING]);
+
+        return $dropped + $flagged;
+    }
+
+    /** They are back: what was flagged for removal and not yet removed stays on the list. */
+    public function unflagLeaving(Employee $employee): int
+    {
+        $email = $this->accountEmail($employee);
+
+        return $email === '' ? 0 : MailListMember::query()->leaving()->where('email', $email)
+            ->update(['status' => MailListMember::ACTIVE]);
+    }
+
+    /** Flag one member (found by the check page as having left) for removal at the control panel. */
+    public function queueRemoval(MailListMember $member): void
+    {
+        if ($member->isPending()) {
+            $member->delete();
+
+            return;
+        }
+
+        $member->update(['status' => MailListMember::LEAVING]);
+    }
+
+    private function accountEmail(Employee $employee): string
+    {
+        return Str::lower((string) $employee->loadMissing('account')->account?->email);
     }
 }

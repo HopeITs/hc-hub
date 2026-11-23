@@ -5,17 +5,22 @@ use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
+use Modules\Hr\Actions\Contracts\ContractAmendmentService;
+use Modules\Hr\Enums\ContractAmendmentStatus;
 use Modules\Hr\Enums\ContractPlace;
 use Modules\Hr\Enums\ContractType as ContractTypeEnum;
 use Modules\Hr\Enums\Currency;
 use Modules\Hr\Enums\PayMode;
 use Modules\Hr\Enums\SalaryPer;
 use Modules\Hr\Enums\ScheduleMode;
+use Modules\Hr\Http\Controllers\Contracts\ContractAmendmentPrintController;
 use Modules\Hr\Http\Controllers\Contracts\ContractLegalPrintController;
 use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\ContractAmendment;
 use Modules\Hr\Models\ContractType;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\Position;
+use Modules\Hr\Support\Contracts\ContractAmendmentDescriber;
 use Modules\Hr\Support\Contracts\WeekendClause;
 use Spatie\Permission\Models\Permission;
 
@@ -99,4 +104,59 @@ test('the contract form offers the checkbox only for a Study Zone position and s
         ->assertHasNoErrors();
 
     expect($contract->fresh()->show_weekend_clause)->toBeTrue();
+});
+
+test('an amendment can add the clause, its sheet states it and approving applies it', function () {
+    $contract = ($this->contract)(($this->position)($this->studyZone), false);
+    $contract->forceFill(['is_active' => true])->save();
+    $contract = $contract->fresh();
+
+    $amendment = app(ContractAmendmentService::class)
+        ->draft($contract, ['show_weekend_clause' => true], today()->toDateString());
+
+    expect($amendment->changedFields())->toBe(['show_weekend_clause'])
+        ->and(app(ContractAmendmentDescriber::class)->lines($amendment, withPay: false))->toBe([
+            [__('hr_contract_amendments.terms.weekend_clause'), __('hr_contract_amendments.terms.weekend_clause_off'), __('hr_contract_amendments.terms.weekend_clause_on')],
+        ])
+        ->and(app(ContractAmendmentPrintController::class)($contract, $amendment)->render())->toContain('Friday is considered a day off');
+
+    // Taking effect today, so approving applies it.
+    app(ContractAmendmentService::class)->approve($amendment);
+
+    expect($contract->fresh()->show_weekend_clause)->toBeTrue();
+});
+
+test('the amendment page reads the clause from the form and records it', function () {
+    $hr = User::factory()->role('HR-SYR')->create();
+    $hr->givePermissionTo(...array_map(fn (string $name) => Permission::findOrCreate($name, 'web'), ['contracts.view', 'contracts.amend']));
+    $contract = ($this->contract)(($this->position)($this->studyZone), false);
+    $contract->forceFill(['is_active' => true])->save();
+
+    Livewire::actingAs($hr->fresh())->test('hr::contract-amendments.form', ['contract' => $contract])
+        ->assertSeeHtml('data-test="weekend-clause-option"')
+        ->set('form.show_weekend_clause', true)
+        ->call('save')
+        ->assertHasNoErrors();
+
+    expect(ContractAmendment::query()->where('contract_id', $contract->id)->sole()->changedFields())->toBe(['show_weekend_clause']);
+});
+
+test('an amendment recorded before the clause existed still matches its contract', function () {
+    $contract = ($this->contract)(($this->position)($this->studyZone), true);
+    $snapshot = ContractAmendment::snapshotOf($contract);
+    unset($snapshot['show_weekend_clause']);
+
+    $amendment = ContractAmendment::query()->create([
+        'contract_id' => $contract->id,
+        'number' => 1,
+        'status' => ContractAmendmentStatus::Approved->value,
+        'salary_before' => $contract->salary,
+        'salary_after' => $contract->salary,
+        'effective_from' => today()->toDateString(),
+        'terms_before' => $snapshot,
+        'terms_after' => [...$snapshot, 'weekly_hours' => 30],
+    ]);
+
+    expect($amendment->matchesContract($contract))->toBeTrue()
+        ->and($amendment->changedFields())->toBe(['weekly_hours']);
 });

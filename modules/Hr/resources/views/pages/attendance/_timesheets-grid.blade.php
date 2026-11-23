@@ -78,7 +78,9 @@
         @foreach ($block['groups'] as $group)
             @php
                 $foldKey = $block['id'].':'.$group['key'];
-                $folded = $collapsed[$foldKey] ?? $foldedByDefault;
+                // While a search or the days-to-decide filter is on every group is open, whatever was
+                // folded by hand, so a match is never hidden; clearing it brings back what was chosen.
+                $folded = ! $searching && ($collapsed[$foldKey] ?? $foldedByDefault);
                 $groupParams = $printBase + ['city_id' => $block['id'], 'group' => $group['id'] ?? 'none'];
                 // The list for this project or department (in this city, else nationwide).
                 $groupList = ($group['id'] ?? null) ? MailList::emailForGroup(

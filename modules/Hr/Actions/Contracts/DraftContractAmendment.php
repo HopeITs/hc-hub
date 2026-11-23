@@ -168,6 +168,8 @@ class DraftContractAmendment
             'show_hours_per_week' => $fixed && (bool) ($data['show_hours_per_week'] ?? false),
             'show_hours_per_day' => $fixed && (bool) ($data['show_hours_per_day'] ?? false),
             'show_day_range' => $fixed && (bool) ($data['show_day_range'] ?? false),
+            // Study Zone's day-off sentence, either mode.
+            'show_weekend_clause' => (bool) ($data['show_weekend_clause'] ?? false),
             'flex_days_per_week' => $fixed ? null : $int('flex_days_per_week'),
             'flex_hours_per_week' => $fixed ? null : $int('flex_hours_per_week'),
             'flex_hours_per_month' => $fixed ? null : $int('flex_hours_per_month'),

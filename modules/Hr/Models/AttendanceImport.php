@@ -17,6 +17,8 @@ use Modules\Core\Models\User;
  * @property int $id
  * @property int|null $user_id
  * @property string $file_name
+ * @property string $source file (an uploaded report) or device (pushed by a time-clock)
+ * @property int|null $device_id
  * @property CarbonImmutable|null $period_start
  * @property CarbonImmutable|null $period_end
  * @property int $punches_total
@@ -26,11 +28,11 @@ use Modules\Core\Models\User;
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
-#[Fillable(['user_id', 'file_name', 'period_start', 'period_end', 'punches_total', 'punches_new', 'punches_locked', 'device_numbers'])]
+#[Fillable(['user_id', 'file_name', 'period_start', 'period_end', 'punches_total', 'punches_new', 'punches_locked', 'device_numbers', 'source', 'device_id'])]
 class AttendanceImport extends Model
 {
     /** @var array<string, mixed> */
-    protected $attributes = ['punches_total' => 0, 'punches_new' => 0, 'punches_locked' => 0, 'device_numbers' => 0];
+    protected $attributes = ['punches_total' => 0, 'punches_new' => 0, 'punches_locked' => 0, 'device_numbers' => 0, 'source' => 'file'];
 
     /**
      * @return array<string, string>

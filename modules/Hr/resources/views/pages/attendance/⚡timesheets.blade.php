@@ -294,6 +294,7 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
             'blocks' => $blocks,
             // A long page opens as a short list of groups; one group, a search or the
             // days-to-decide filter opens them all, so a match is never hidden.
+            'searching' => trim($this->search) !== '' || $this->onlyToDecide,
             'foldedByDefault' => trim($this->search) === '' && ! $this->onlyToDecide
                 && collect($blocks)->sum(fn (array $block): int => count($block['groups'])) > 1,
             'summary' => $summary,
@@ -478,6 +479,7 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.timesheets')] class e
 <x-desk.register class="@container" heading-id="hr-attendance-heading" :title="$title" :count="$summary['people']" data-hr-attendance>
     <x-slot:actions>
         @if ($canManage)
+            <x-ui.button tone="action" icon="signal" :href="route('hr.attendance.devices')" wire:navigate data-test="attendance-devices-link">{{ __('hr_attendance.devices.title') }}</x-ui.button>
             <x-ui.button tone="action" icon="arrow-up-tray" :href="route('hr.attendance.upload')" wire:navigate data-test="attendance-upload-link">{{ __('hr_attendance.timesheets.upload') }}</x-ui.button>
         @endif
         <x-ui.button tone="action" icon="printer" :href="route('hr.attendance.print', $printBase)" target="_blank" data-test="attendance-print-link">{{ $own ? __('hr_attendance.timesheets.print-own') : __('hr_attendance.timesheets.print-all') }}</x-ui.button>
