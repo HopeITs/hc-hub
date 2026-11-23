@@ -74,12 +74,38 @@ test('panels share one radius token and one border token that follows the line c
         ->and($dark)->toContain('--color-panel-border: var(--color-line);');
 });
 
+test('the type scale has a token for every text role and Arabic raises the body size', function (string $token, string $size) {
+    $tokens = file_get_contents(dirname(__DIR__, 2).'/resources/css/tokens.css');
+
+    expect($tokens)->toContain("--text-{$token}: {$size};")
+        ->toContain("--text-{$token}--line-height:")
+        ->toContain("--text-{$token}--font-weight:");
+})->with([
+    ['h1', 'clamp(1.625rem, 4vw, 2.125rem)'],
+    ['h2', '1.6875rem'],
+    ['h3', '1.375rem'],
+    ['h4', '1.125rem'],
+    ['body', '1rem'],
+    ['table', '0.9375rem'],
+    ['small', '0.875rem'],
+    ['th', '0.8125rem'],
+    ['caption', '0.75rem'],
+]);
+
+test('Arabic pages read body text at 17px on a 1.7 line height', function () {
+    $typography = file_get_contents(dirname(__DIR__, 2).'/resources/css/typography.css');
+
+    expect($typography)->toMatch('/html\[lang=\'ar\'\]\s*\{\s*--text-body: 1\.0625rem;\s*--text-body--line-height: 1\.7;/')
+        ->toContain('font-size: var(--text-body);')
+        ->toContain('line-height: var(--text-body--line-height);');
+});
+
 test('every page title shares the HR title style and the eyebrow uses the faint grey', function () {
     $css = dirname(__DIR__, 2).'/resources/css';
     [$light, $dark] = explode('.dark {', file_get_contents($css.'/tokens.css'), 2);
     $views = bladeViews();
 
-    expect($light)->toContain('--text-h1: 2.125rem;')
+    expect($light)->toContain('--text-h1: clamp(1.625rem, 4vw, 2.125rem);')
         ->toContain('--text-h1--line-height: 1.2;')
         ->toContain('--color-heading: #414042;')
         ->and($dark)->toContain('--color-heading: var(--color-desk-ink);')

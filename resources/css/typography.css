@@ -1,5 +1,18 @@
 /* Type roles (.type-*). Prefer these over repeating text-xs/uppercase/tracking utility runs inline. */
 
+/* Arabic sets the body token, so every body-sized element follows. */
+html[lang='ar'] {
+    --text-body: 1.0625rem;
+    --text-body--line-height: 1.7;
+}
+
+@layer base {
+    body {
+        font-size: var(--text-body);
+        line-height: var(--text-body--line-height);
+    }
+}
+
 @layer components {
     .type-figure {
         font-size: 1.75rem;
@@ -49,8 +62,8 @@
 @utility page-title {
     font-size: var(--text-h1);
     line-height: var(--text-h1--line-height);
-    font-weight: 700;
-    letter-spacing: 0;
+    font-weight: var(--text-h1--font-weight);
+    letter-spacing: var(--text-h1--letter-spacing);
     color: var(--color-heading);
 
     @media (width < 40rem) {
