@@ -335,6 +335,22 @@ test('the detail header links every breadcrumb but the last', function () {
         ->and(substr_count($html, '<a '))->toBe(1);
 });
 
+test('the detail header links breadcrumbs given as href as well as url', function () {
+    $html = Blade::render('<x-ui.detail-header :breadcrumbs="$crumbs" title="Offer" />', [
+        'crumbs' => [
+            ['label' => 'Recruitment'],
+            ['label' => 'Offers', 'href' => 'http://localhost/offers'],
+            ['label' => 'Requests', 'url' => 'http://localhost/requests'],
+            ['label' => 'Offer'],
+        ],
+    ]);
+
+    expect($html)->toContain('href="http://localhost/offers"')
+        ->and($html)->toContain('href="http://localhost/requests"')
+        ->and(substr_count($html, '<a '))->toBe(2)
+        ->and($html)->toContain('dk-flip');
+});
+
 test('the relation tabs mark the active tab', function () {
     $html = Blade::render('<x-ui.relation-tabs :tabs="$tabs" active="risks" wire-target="tab" />', [
         'tabs' => [

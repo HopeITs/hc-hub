@@ -115,3 +115,14 @@ test('the cached picker list links photos without a host, so every visitor\'s br
     expect($photo)->toStartWith('/employees/'.$employee.'/avatar?v=')
         ->and(parse_url($photo, PHP_URL_HOST))->toBeNull();
 });
+
+test('a sized avatar is a fixed round box that cannot outgrow its table row', function () {
+    $this->blade('<x-ui.avatar src="/photo.jpg" :size="36" class="size-9 rounded-full" />')
+        ->assertSee('data-avatar-size="36"', false)
+        ->assertSee('width:36px;height:36px;min-width:36px;min-height:36px;max-width:none;max-height:36px;border-radius:999px;object-fit:cover', false)
+        ->assertSee('object-cover', false);
+
+    $this->blade('<x-ui.avatar src="/photo.jpg" class="size-8" />')
+        ->assertDontSee('data-avatar-size', false)
+        ->assertDontSee('style=', false);
+});

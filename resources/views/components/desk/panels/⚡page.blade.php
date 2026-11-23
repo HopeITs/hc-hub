@@ -165,7 +165,8 @@ new class extends Component {
                 <ul class="dk-card-rows" {{ $this->fitAttributes($pg) }} data-card-rows data-layout="{{ $layout }}">
                     @foreach ($pg['slice'] as $row)
                         <li wire:key="{{ $card }}-{{ $row['key'] }}">
-                            <a href="{{ $row['href'] }}" wire:navigate class="dk-card-row" title="{{ $row['title'] }}" data-tone="{{ $row['badge']['tone'] ?? 'neutral' }}">
+                            @php $rowTag = $row['href'] !== '' ? 'a' : 'div'; @endphp
+                            <{{ $rowTag }} @if ($row['href'] !== '') href="{{ $row['href'] }}" wire:navigate @endif class="dk-card-row" title="{{ $row['title'] }}" data-tone="{{ $row['badge']['tone'] ?? 'neutral' }}">
                                 @if ($row['lead'] !== null)
                                     <span class="dk-card-l" data-kind="{{ $row['lead']['kind'] }}" data-tone="{{ $row['lead']['tone'] }}" aria-hidden="true">
                                         @if ($row['lead']['big'] !== '')<b>{{ $row['lead']['big'] }}</b>@endif
@@ -185,7 +186,7 @@ new class extends Component {
                                 @if ($row['badge'] !== null)
                                     <span class="dk-pill {{ $tones[$row['badge']['tone']] ?? 'dk-mute' }} dk-card-b">{{ $row['badge']['label'] }}</span>
                                 @endif
-                            </a>
+                            </{{ $rowTag }}>
                         </li>
                     @endforeach
                 </ul>

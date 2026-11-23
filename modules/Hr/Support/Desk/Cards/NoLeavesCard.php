@@ -47,13 +47,13 @@ final class NoLeavesCard extends HrCard
     protected function records(User $user, string $search): Collection
     {
         return collect($this->people($user))->map(fn (array $person): array => $this->shaped(
-            $this->row('nl-'.$person['id'], $person['name'], '', null, $this->link('hr.employees.show', $person['id']), $person['words']),
+            $this->row('nl-'.$person['id'], $person['name'], '', null, filled($person['username'] ?? null) ? $this->link('hr.employees.show', ['employee' => $person['username']]) : '', $person['words']),
             lead: $this->face($person['id'], $person['name']),
         ));
     }
 
     /**
-     * @return list<array{id: int, name: string, words: string}>
+     * @return list<array{id: int, name: string, words: string, username: string|null}>
      */
     private function people(User $user): array
     {

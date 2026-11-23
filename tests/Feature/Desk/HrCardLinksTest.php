@@ -2,8 +2,16 @@
 
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
+use Modules\Core\Models\User;
+use Modules\Hr\Enums\LeaveTypeCases;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\LeaveBalance;
+use Modules\Hr\Models\LeaveType;
 use Modules\Hr\Support\Desk\Cards\HrCard;
+use Modules\Hr\Support\Desk\Cards\NoLeavesCard;
 use Modules\Hr\Support\Desk\HrPanels;
+use Spatie\Permission\Models\Role;
 
 /*
 | HrCard::link() and WorkInbox::link() return '' for a route that does not
@@ -45,4 +53,24 @@ test('every route an HR card or the HR inbox links to is registered', function (
 
     expect($routes)->not->toBeEmpty()
         ->and($routes->reject(fn (string $route): bool => Route::has($route))->values()->all())->toBe([]);
+});
+
+test('the no-leaves card opens a profile by username, never by id, and shows plain text without one', function () {
+    $withUsername = Employee::factory()->create(['username' => 'lina.haddad', 'is_active' => true]);
+    $withoutUsername = Employee::factory()->create(['username' => null, 'is_active' => true]);
+
+    $annual = LeaveType::factory()->create(['id' => LeaveTypeCases::Annual]);
+
+    foreach ([$withUsername, $withoutUsername] as $employee) {
+        LeaveBalance::factory()->for(Contract::factory()->for($employee)->create(['is_active' => true]))->create(['type_id' => $annual->id]);
+    }
+
+    $viewer = User::factory()->create();
+    Role::findOrCreate('general-manager', 'web');
+    $viewer->assignRole('general-manager');
+
+    $rows = (new NoLeavesCard)->rows($viewer)->keyBy('key');
+
+    expect($rows['nl-'.$withUsername->id]['href'])->toBe(route('hr.employees.show', ['employee' => 'lina.haddad']))
+        ->and($rows['nl-'.$withoutUsername->id]['href'])->toBe('');
 });

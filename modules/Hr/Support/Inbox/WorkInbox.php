@@ -180,7 +180,7 @@ final class WorkInbox
         $query = fn (): Builder => Checklist::query()
             ->select(['id', 'item_id', 'employee_id', 'delivered_id', 'receiver_id', 'delivered_status', 'returned_status', 'returned_at', 'created_at', 'updated_at'])
             ->whereHas('employee')
-            ->with(['item:id,name', 'employee:'.implode(',', [...Employee::NameColumns, 'city_id', 'is_active'])])
+            ->with(['item:id,name', 'employee:'.implode(',', [...Employee::NameColumns, 'city_id', 'is_active', 'username'])])
             ->orderBy('created_at')
             ->limit(self::PerSource);
 
@@ -219,14 +219,14 @@ final class WorkInbox
         return ProfileChangeRequest::query()->pending()
             ->select(['id', 'employee_id', 'section', 'status', 'created_at'])
             ->whereHas('employee', fn (Builder $employee) => $employee->where('is_active', true)->when($cities !== null, fn (Builder $inCity) => $inCity->whereIn('city_id', $cities)))
-            ->with('employee:'.implode(',', [...Employee::NameColumns, 'city_id']))
+            ->with('employee:'.implode(',', [...Employee::NameColumns, 'city_id', 'username']))
             ->orderBy('created_at')
             ->limit(self::PerSource)
             ->get()
             ->map(fn (ProfileChangeRequest $change): array => $this->row(
                 "profile:{$change->id}:approve", 'profile', 'approve', $change->employee,
                 (string) __('hr_communications.inbox.profile_section', ['section' => (string) $change->section]),
-                $change->created_at, false, $this->link('hr.employees.show', $change->employee_id),
+                $change->created_at, false, $this->profileLink($change->employee),
             ));
     }
 
@@ -241,7 +241,7 @@ final class WorkInbox
 
         $cities = $viewer->cityScope();
         $inReach = fn (Builder $employee) => $employee->when($cities !== null, fn (Builder $inCity) => $inCity->whereIn('city_id', $cities));
-        $person = 'employee:'.implode(',', [...Employee::NameColumns, 'city_id']);
+        $person = 'employee:'.implode(',', [...Employee::NameColumns, 'city_id', 'username']);
         $rows = new Collection;
 
         foreach ([
@@ -253,7 +253,7 @@ final class WorkInbox
                 ->map(fn ($journey): array => $this->row(
                     "journey:{$kind}:{$journey->id}", 'journey', $kind, $journey->employee,
                     (string) __('hr_communications.inbox.journey.'.$kind),
-                    $journey->started_at, false, $this->link('hr.employees.show', $journey->employee_id),
+                    $journey->started_at, false, $this->profileLink($journey->employee),
                 )));
         }
 
@@ -331,6 +331,14 @@ final class WorkInbox
     private function isHr(HrViewer $viewer): bool
     {
         return $viewer->isHr() || $viewer->user->isAdministrator();
+    }
+
+    /**
+     * The profile page is keyed by username, never by id; no username, no link.
+     */
+    private function profileLink(?Employee $employee): string
+    {
+        return blank($employee?->username) ? '' : $this->link('hr.employees.show', ['employee' => $employee->username]);
     }
 
     private function link(string $route, mixed $parameters = []): string

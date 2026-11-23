@@ -136,12 +136,12 @@ final class HrStatistics
      * Active employees on a running contract who have never asked for annual leave.
      *
      * @param  list<int>|null  $cities
-     * @return list<array{id: int, name: string, words: string}>
+     * @return list<array{id: int, name: string, words: string, username: string|null}>
      */
     public function withoutLeaves(?array $cities, int $limit = 60): array
     {
         return $this->remember('no-leaves', $cities, fn (): array => $this->employees($cities)
-            ->select(Employee::NameColumns)
+            ->select([...Employee::NameColumns, 'username'])
             ->where('is_active', true)
             ->whereHas('contracts', fn (Builder $contract) => $contract->whereHas('leaveBalances', fn (Builder $balance) => $balance
                 ->where('type_id', LeaveTypeCases::Annual)
@@ -149,7 +149,7 @@ final class HrStatistics
             ->orderBy('first_name_en')
             ->limit($limit)
             ->get()
-            ->map(fn (Employee $employee): array => ['id' => (int) $employee->id, 'name' => (string) $employee->name, 'words' => (string) $employee->secondary_name])
+            ->map(fn (Employee $employee): array => ['id' => (int) $employee->id, 'name' => (string) $employee->name, 'words' => (string) $employee->secondary_name, 'username' => filled($employee->username) ? (string) $employee->username : null])
             ->all());
     }
 

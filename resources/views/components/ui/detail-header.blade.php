@@ -11,11 +11,15 @@
         <nav aria-label="{{ __('ui.breadcrumb') }}" class="dk-crumb mt-0!">
             @foreach ($breadcrumbs as $index => $crumb)
                 @if ($index > 0)
-                    <span aria-hidden="true">›</span>
+                    <span aria-hidden="true" class="dk-flip inline-block">›</span>
                 @endif
 
-                @if (isset($crumb['url']))
-                    <a href="{{ $crumb['url'] }}" wire:navigate>{{ $crumb['label'] }}</a>
+                @php
+                    $crumbUrl = $crumb['url'] ?? $crumb['href'] ?? null;
+                @endphp
+
+                @if ($crumbUrl !== null)
+                    <a href="{{ $crumbUrl }}" wire:navigate>{{ $crumb['label'] }}</a>
                 @else
                     <span @if ($loop->last) aria-current="page" @endif>{{ $crumb['label'] }}</span>
                 @endif

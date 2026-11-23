@@ -18,7 +18,6 @@
         Sheet::HOLIDAY => ['bg-zinc-100 text-zinc-400 dark:bg-white/[0.04] dark:text-ink-muted', null],
         Sheet::OUTSIDE => ['border border-dashed border-panel-border text-zinc-400 dark:text-ink-muted', null],
     ];
-    $stateColor = ['open' => 'zinc', 'confirmed' => 'amber', 'approved' => 'sky', 'locked' => 'green'];
     $hm = fn (?int $minutes): string => $minutes === null ? '' : intdiv($minutes, 60).':'.str_pad((string) ($minutes % 60), 2, '0', STR_PAD_LEFT);
     $groupLabel = $by === Grouping::DEPARTMENT ? 'hr_attendance.timesheets.no-department' : 'hr_attendance.timesheets.no-project';
 @endphp
@@ -61,7 +60,7 @@
             <h2 id="attendance-city-{{ $block['id'] }}" class="text-lg font-semibold">{{ $block['name'] ?? '—' }}</h2>
             <span class="text-sm {{ $muted }}">{{ trans_choice('hr_attendance.timesheets.people-count', $block['totals']['people'], ['count' => $block['totals']['people']]) }}</span>
             @if ($block['totals']['to_decide'] > 0)
-                <flux:badge size="sm" color="red" icon="exclamation-triangle">{{ trans_choice('hr_attendance.timesheets.to-decide', $block['totals']['to_decide'], ['count' => $block['totals']['to_decide']]) }}</flux:badge>
+                <x-ui.enum-badge :case="\App\Enums\StatusTone::Critical" :tone="\App\Enums\StatusTone::Critical" :label="trans_choice('hr_attendance.timesheets.to-decide', $block['totals']['to_decide'], ['count' => $block['totals']['to_decide']])" />
             @endif
         </div>
 
@@ -80,9 +79,9 @@
                     </button>
                     <div class="flex flex-wrap items-center gap-3">
                         @if ($group['totals']['to_decide'] > 0)
-                            <flux:badge size="sm" color="red" icon="exclamation-triangle">{{ trans_choice('hr_attendance.timesheets.to-decide', $group['totals']['to_decide'], ['count' => $group['totals']['to_decide']]) }}</flux:badge>
+                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Critical" :tone="\App\Enums\StatusTone::Critical" :label="trans_choice('hr_attendance.timesheets.to-decide', $group['totals']['to_decide'], ['count' => $group['totals']['to_decide']])" />
                         @else
-                            <flux:badge size="sm" color="green" icon="check">{{ __('hr_attendance.timesheets.group-ready') }}</flux:badge>
+                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Neutral" :tone="\App\Enums\StatusTone::Neutral" :label="__('hr_attendance.timesheets.group-ready')" />
                         @endif
                         @if ($group['totals']['overtime_hours'] > 0)
                             <span class="text-xs tabular-nums {{ $muted }}">{{ __('hr_attendance.timesheets.overtime-line', ['hours' => $group['totals']['overtime_hours'], 'days' => $group['totals']['overtime_days']]) }}</span>
@@ -134,13 +133,13 @@
                                         </td>
                                         <td class="px-3 text-center">
                                             @if ($sheet['totals']['to_decide'] > 0)
-                                                <flux:badge size="sm" color="red">{{ $sheet['totals']['to_decide'] }}</flux:badge>
+                                                <x-ui.enum-badge :case="\App\Enums\StatusTone::Critical" :tone="\App\Enums\StatusTone::Critical" :label="$sheet['totals']['to_decide']" />
                                             @else
                                                 <span class="{{ $muted }}">–</span>
                                             @endif
                                         </td>
                                         <td class="px-3 text-center">
-                                            <flux:badge size="sm" :color="$stateColor[$item['state']]">{{ __('hr_attendance.workflow.states.'.$item['state']) }}</flux:badge>
+                                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Neutral" :tone="\App\Enums\StatusTone::Neutral" :label="__('hr_attendance.workflow.states.'.$item['state'])" />
                                         </td>
                                         @foreach ($sheet['rows'] as $row)
                                             @php

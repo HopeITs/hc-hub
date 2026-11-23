@@ -47,7 +47,7 @@
                 <td>
                     <span class="flex min-w-0 items-center gap-2.5">
                         <span class="relative shrink-0">
-                            <x-ui.avatar :src="Employee::photoUrl($employee->id)" class="size-9 rounded-full" />
+                            <x-ui.avatar :src="Employee::photoUrl($employee->id)" class="size-9 rounded-full" :size="36" />
                             <x-hr::employees.presence :status="$presence[$employee->id] ?? null" on-avatar />
                         </span>
                         <span class="min-w-0">
