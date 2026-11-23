@@ -24,7 +24,7 @@
     @foreach ($plan->items as $row)
         @php $g = $ganttRow($row); $places = array_values(array_intersect_key($this->cityNames, array_flip($row->cityIds()))); @endphp
         <div class="ap-gr" wire:key="gantt-{{ $row->id }}">
-            <div><span dir="auto">{{ $row->activity?->statement }}</span><small>{{ implode('، ', $places) }} · {{ $row->counted($g['count']) }}@if ($row->expected_people) · {{ trans_choice('annual_plans.wf.people', $row->expected_people, ['count' => $row->expected_people]) }}@endif</small></div>
+            <div><span dir="auto">{{ $row->activity?->statement }}</span><small>{{ implode(__('common.list_separator'), $places) }} · {{ $row->counted($g['count']) }}@if ($row->expected_people) · {{ trans_choice('annual_plans.wf.people', $row->expected_people, ['count' => $row->expected_people]) }}@endif</small></div>
             <div class="ap-tl">
                 @foreach ($g['timeline']['months'] as $month)<span class="ap-m" style="inset-inline-start: {{ $month['left'] }}%"></span>@endforeach
                 @foreach ($g['timeline']['bars'] as $bar)

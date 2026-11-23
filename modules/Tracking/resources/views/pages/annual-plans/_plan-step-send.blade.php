@@ -11,7 +11,7 @@
     <div class="ap-facts">
         <div class="ap-fact"><span>{{ __('annual_plans.wf.fact_proposal') }}</span><b dir="auto">{{ $plan->proposal->name }}</b></div>
         <div class="ap-fact"><span>{{ __('annual_plans.wf.fact_activities') }}</span><b class="ap-num">{{ $plan->items->count() }}</b></div>
-        <div class="ap-fact"><span>{{ __('annual_plans.wf.fact_governorates') }}</span><b>{{ implode('، ', $governorates) }}</b></div>
+        <div class="ap-fact"><span>{{ __('annual_plans.wf.fact_governorates') }}</span><b>{{ implode(__('common.list_separator'), $governorates) }}</b></div>
         <div class="ap-fact"><span>{{ __('annual_plans.wf.fact_weeks') }}</span><b class="ap-num">{{ $this->calendar->weekCount() }}</b></div>
     </div>
     @include('tracking::pages.annual-plans._plan-gantt')

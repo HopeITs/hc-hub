@@ -13,7 +13,7 @@
         <div>
             <b dir="auto">{{ $proposal->name }}</b>
             <span class="ap-sm ap-muted">{{ $proposal->internal_project_number }} · {{ $plan->program?->name }}</span><br>
-            <span class="ap-sm ap-num">{{ $formatMoment($this->calendar->begin) }} → {{ $formatMoment($this->calendar->end) }} · {{ trans_choice('annual_plans.wf.weeks_count', $this->calendar->weekCount(), ['count' => $this->calendar->weekCount()]) }} · {{ implode('، ', $this->cityNames) ?: __('annual_plans.wf.no_centres') }}</span>
+            <span class="ap-sm ap-num">{{ $formatMoment($this->calendar->begin) }} → {{ $formatMoment($this->calendar->end) }} · {{ trans_choice('annual_plans.wf.weeks_count', $this->calendar->weekCount(), ['count' => $this->calendar->weekCount()]) }} · {{ implode(__('common.list_separator'), $this->cityNames) ?: __('annual_plans.wf.no_centres') }}</span>
         </div>
     </div>
     <div class="ap-info is-blue">{!! __('annual_plans.wf.own_program_only') !!}</div>
