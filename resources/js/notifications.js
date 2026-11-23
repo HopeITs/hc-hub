@@ -301,8 +301,17 @@ async function renderDesktopPopup(payload) {
 
 window.hcShowDesktopPopup = showDesktopPopup;
 
+/**
+ * One OS alert per notification: when this browser holds an enabled web push
+ * subscription (push-notifications.js, window.hcPush.active()), the server's
+ * web push is the alert and the tab does not also raise its own popup.
+ */
 function maybeShowDesktopPopup(payload) {
     const optedIn = document.body.dataset.notificationPopups === 'on';
+
+    if (window.hcPush?.active()) {
+        return;
+    }
 
     if (optedIn && document.hidden && payload.priority !== 'info') {
         showDesktopPopup(payload);
