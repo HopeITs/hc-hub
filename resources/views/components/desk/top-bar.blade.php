@@ -87,11 +87,15 @@
                             <span class="dk-menu-t"><strong>{{ __('navigation.report_a_problem') }}</strong><small>{{ __('navigation.help_report_hint') }}</small></span>
                             <flux:icon.arrow-up-right variant="micro" class="dk-menu-ext dk-flip" />
                         </a>
-                        <span x-data="{ state: window.hcApp?.state() ?? 'unavailable' }" x-on:hc-app-install-change.window="state = $event.detail" x-show="state === 'available'" x-cloak class="contents">
-                            <button type="button" role="menuitem" x-on:click="close(); $flux.modal('install-app').show()" aria-haspopup="dialog" data-test="top-bar-install-app">
+                        <span x-data="{ state: window.hcApp?.state() ?? 'unavailable' }" x-on:hc-app-install-change.window="state = $event.detail" x-show="state !== 'installed'" x-cloak class="contents" data-install-menu-item>
+                            <button type="button" role="menuitem" x-show="state === 'available'" x-on:click="close(); $flux.modal('install-app').show()" aria-haspopup="dialog" data-test="top-bar-install-app">
                                 <flux:icon.arrow-down-tray variant="outline" class="dk-menu-ic" />
                                 <span class="dk-menu-t"><strong>{{ __('desk.install_app') }}</strong><small>{{ __('navigation.help_install_hint') }}</small></span>
                             </button>
+                            <a role="menuitem" x-show="state !== 'available'" href="{{ route('notification-settings.edit') }}#desktop-app" wire:navigate x-on:click="close()" data-test="top-bar-install-steps">
+                                <flux:icon.arrow-down-tray variant="outline" class="dk-menu-ic" />
+                                <span class="dk-menu-t"><strong>{{ __('desk.install_app') }}</strong><small>{{ __('navigation.help_install_hint') }}</small></span>
+                            </a>
                         </span>
                     </div>
                 </div>

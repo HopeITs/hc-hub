@@ -20,6 +20,8 @@
  * makes the site installable as the "HC Hub" app; the install prompt is
  * exposed on window.hcApp, and the install dialog (appInstallDialog) uses it.
  */
+import { detectPlatform, isStandalone, rememberDismissal } from './app-install';
+
 const POLL_INTERVAL_MS = 60_000;
 const TOAST_DURATION_MS = 6_000;
 const MAX_TOASTS = 4;
@@ -90,48 +92,74 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-let installPrompt = null;
-
-const standalone = () => window.matchMedia('(display-mode: standalone)').matches;
+/**
+ * The browser's install prompt is kept by the inline script in
+ * partials/head.blade.php, which catches it before any module loads.
+ */
+const installPrompt = () => window.__hcInstallPrompt ?? null;
 
 function announceInstallState() {
     window.dispatchEvent(new CustomEvent('hc-app-install-change', { detail: window.hcApp.state() }));
 }
 
 window.hcApp = {
-    /** installed | available | unavailable */
+    /** installed | available (a prompt is waiting) | unavailable */
     state() {
-        if (standalone()) {
+        if (isStandalone()) {
             return 'installed';
         }
 
-        return installPrompt ? 'available' : 'unavailable';
+        return installPrompt() ? 'available' : 'unavailable';
     },
 
+    /** installed | ready (a prompt is waiting) | manual (browser menu steps) | unsupported (cannot install) */
+    status() {
+        const state = this.state();
+
+        if (state === 'installed') {
+            return 'installed';
+        }
+
+        if (state === 'available') {
+            return 'ready';
+        }
+
+        return this.platform() === 'firefox' ? 'unsupported' : 'manual';
+    },
+
+    /** ios | ios_non_safari | android | firefox_android | firefox | desktop_chromium | desktop_safari | other */
+    platform: () => detectPlatform(),
+
     async install() {
-        if (!installPrompt) {
+        const event = installPrompt();
+
+        if (!event) {
             return 'unavailable';
         }
 
-        installPrompt.prompt();
-        const { outcome } = await installPrompt.userChoice;
-        installPrompt = null;
+        let outcome = 'dismissed';
+
+        try {
+            event.prompt();
+            ({ outcome } = await event.userChoice);
+        } catch {
+            outcome = 'failed';
+        }
+
+        window.__hcInstallPrompt = null;
+
+        // Declining the browser's own window is an answer: no banner for 30 days.
+        if (outcome === 'dismissed') {
+            rememberDismissal();
+        }
+
         announceInstallState();
 
         return outcome;
     },
 };
 
-window.addEventListener('beforeinstallprompt', (event) => {
-    event.preventDefault();
-    installPrompt = event;
-    announceInstallState();
-});
-
-window.addEventListener('appinstalled', () => {
-    installPrompt = null;
-    announceInstallState();
-});
+window.addEventListener('hc-install-prompt-change', announceInstallState);
 
 /* ------------------------------------------------------------------ */
 /* Unread count on the installed app's taskbar icon                     */

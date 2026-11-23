@@ -102,25 +102,67 @@ function desktopAppPage(string $routeName): DOMXPath
     return new DOMXPath($document);
 }
 
-test('the settings page offers the desktop app install through the install modal', function () {
+test('the settings page offers the install button and the steps for every platform, with other devices collapsed', function () {
     $xpath = desktopAppPage('notification-settings.edit');
 
     $installButton = $xpath->query('//*[@data-test="install-app-button"]')->item(0);
+    $platforms = ['desktop_chromium', 'desktop_safari', 'android', 'ios', 'ios_non_safari', 'firefox_android', 'firefox', 'other'];
 
     expect(trim($xpath->query('//*[@id="desktop-app-heading"]')->item(0)->textContent))->toBe(__('notifications.app.heading'))
+        ->and($xpath->query('//section[@id="desktop-app"]')->length)->toBe(1)
+        ->and($installButton->getAttribute('x-on:click'))->toBe("\$flux.modal('install-app').show()")
         ->and($xpath->query('//*[@data-app-install-hint]')->length)->toBe(1)
-        ->and($installButton->getAttribute('x-on:click'))->toBe("\$flux.modal('install-app').show()");
+        ->and($xpath->query('//details[@data-install-other-devices]')->length)->toBe(1)
+        ->and($xpath->query('//details[@data-install-other-devices][@open]')->length)->toBe(0);
+
+    foreach ($platforms as $platform) {
+        expect($xpath->query("//*[@data-app-install-hint]//*[@data-install-steps=\"{$platform}\"]")->length)->toBe(1)
+            ->and($xpath->query("//details//*[@data-install-steps=\"{$platform}\"]")->length)->toBe(1)
+            ->and(count(__("notifications.app.platforms.{$platform}.steps")))->toBeGreaterThan(0);
+    }
+
+    expect(implode(' ', __('notifications.app.platforms.firefox.steps')))->toContain('cannot install');
 });
 
-test('the top bar offers the desktop app install while the browser holds an install prompt', function () {
+test('the top bar offers the install item whenever the app is not installed, with the prompt or with the steps', function () {
     $xpath = desktopAppPage('dashboard');
 
+    $item = $xpath->query('//*[@data-install-menu-item]')->item(0);
     $button = $xpath->query('//*[@data-test="top-bar-install-app"]')->item(0);
+    $link = $xpath->query('//*[@data-test="top-bar-install-steps"]')->item(0);
 
-    expect($button->parentNode->getAttribute('x-show'))->toBe("state === 'available'")
-        ->and($button->getAttribute('x-on:click'))->toContain("\$flux.modal('install-app').show()");
+    expect($item->getAttribute('x-show'))->toBe("state !== 'installed'")
+        ->and($button->getAttribute('x-show'))->toBe("state === 'available'")
+        ->and($button->getAttribute('x-on:click'))->toContain("\$flux.modal('install-app').show()")
+        ->and($link->getAttribute('x-show'))->toBe("state !== 'available'")
+        ->and($link->getAttribute('href'))->toBe(route('notification-settings.edit').'#desktop-app')
+        ->and($link->hasAttribute('wire:navigate.hover'))->toBeTrue();
 });
 
+test('every page captures the browser install prompt once, early, in the head', function () {
+    $user = Activity::withoutRecording(fn () => User::factory()->create());
+
+    foreach ([$this->actingAs($user)->get(route('dashboard')), $this->get(route('notification-settings.edit'))] as $response) {
+        $html = $response->getContent();
+        $head = substr($html, 0, strpos($html, '</head>'));
+
+        expect(substr_count($head, 'data-install-capture'))->toBe(1)
+            ->and(substr_count($html, 'data-install-capture'))->toBe(1)
+            ->and($head)->toContain("addEventListener('beforeinstallprompt'")->toContain('window.__hcInstallPrompt');
+    }
+});
+
+test('signed-in pages carry the install banner, and the settings page leaves it out', function () {
+    $dashboard = desktopAppPage('dashboard');
+    $banner = $dashboard->query('//*[@data-install-banner]');
+
+    expect($banner->length)->toBe(1)
+        ->and($banner->item(0)->getAttribute('x-data'))->toBe('appInstallBanner')
+        ->and($dashboard->query('//*[@data-test="install-banner-install"]')->item(0)->getAttribute('x-on:click'))->toBe("\$flux.modal('install-app').show()")
+        ->and($dashboard->query('//*[@data-test="install-banner-how"]')->item(0)->getAttribute('href'))->toBe(route('notification-settings.edit').'#desktop-app')
+        ->and($dashboard->query('//*[@data-test="install-banner-dismiss"]')->length)->toBe(1)
+        ->and(desktopAppPage('notification-settings.edit')->query('//*[@data-install-banner]')->length)->toBe(0);
+});
 test('signed-in pages carry one install modal that explains the app before the browser confirms', function () {
     $xpath = desktopAppPage('dashboard');
 

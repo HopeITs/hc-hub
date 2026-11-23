@@ -1,3 +1,4 @@
+import './app-install';
 import './instant-clicks';
 import './assignee-picker';
 import './person-card';
