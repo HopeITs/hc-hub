@@ -44,6 +44,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // TrustProxies, so $request->ip() is the visitor behind a proxy.
         $middleware->append(ThrottleRequestsWithoutSession::class);
 
+        // The service worker renews a rotated push subscription with no page, so
+        // it has no token to send; the old subscription's secret is its credential.
+        $middleware->validateCsrfTokens(except: ['push/renew']);
+
         // `throttle:guest` limits signed-out requests that do carry a session.
         $middleware->web(append: [
             'throttle:guest',

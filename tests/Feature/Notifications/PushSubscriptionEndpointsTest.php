@@ -107,3 +107,51 @@ test('signing out forgets this browser\'s devices for that person only', functio
         ->and($elsewhere->fresh())->not->toBeNull()
         ->and($someoneElseHere->fresh())->not->toBeNull();
 });
+
+test('the service worker renews a rotated subscription with the old secret and no session', function () {
+    $subscription = PushSubscription::factory()->for($this->user)->create(['failure_count' => 2]);
+    $new = collect(browserSubscription('https://push.example.test/send/rotated'))->except('device')->all();
+
+    $this->postJson(route('push.renew'), [
+        'old_endpoint' => $subscription->endpoint,
+        'old_auth' => $subscription->auth_token,
+        'subscription' => $new,
+    ])->assertOk()->assertJson(['ok' => true]);
+
+    $subscription->refresh();
+
+    expect($subscription->endpoint)->toBe('https://push.example.test/send/rotated')
+        ->and($subscription->user_id)->toBe($this->user->id)
+        ->and($subscription->failure_count)->toBe(0);
+});
+
+test('renewing with a wrong secret or an unknown endpoint changes nothing', function (bool $known) {
+    $subscription = PushSubscription::factory()->for($this->user)->create();
+    $endpoint = $subscription->endpoint;
+
+    $this->postJson(route('push.renew'), [
+        'old_endpoint' => $known ? $endpoint : 'https://push.example.test/send/unknown',
+        'old_auth' => str_repeat('z', 22),
+        'subscription' => collect(browserSubscription('https://push.example.test/send/stolen'))->except('device')->all(),
+    ])->assertNotFound();
+
+    expect($subscription->refresh()->endpoint)->toBe($endpoint);
+})->with(['known endpoint' => [true], 'unknown endpoint' => [false]]);
+
+test('renewing never takes over another person\'s device', function () {
+    $mine = PushSubscription::factory()->for($this->user)->create();
+    $theirs = PushSubscription::factory()->for(Activity::withoutRecording(fn (): User => User::factory()->create()))->create();
+
+    $this->postJson(route('push.renew'), [
+        'old_endpoint' => $mine->endpoint,
+        'old_auth' => $mine->auth_token,
+        'subscription' => [
+            'endpoint' => $theirs->endpoint,
+            'expirationTime' => null,
+            'keys' => ['p256dh' => str_repeat('B', 87), 'auth' => str_repeat('a', 22)],
+        ],
+    ])->assertNotFound();
+
+    expect($theirs->refresh()->user_id)->not->toBe($this->user->id)
+        ->and(PushSubscription::query()->whereKey($mine->id)->exists())->toBeTrue();
+});

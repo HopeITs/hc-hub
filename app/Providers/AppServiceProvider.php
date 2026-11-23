@@ -419,6 +419,10 @@ class AppServiceProvider extends ServiceProvider
             (string) ($request->user()->id ?? $request->ip()),
         ));
 
+        // POST /push/renew: signed out, so by IP. A browser rotates a
+        // subscription rarely; 10 a minute stops guessing at endpoints.
+        RateLimiter::for('push-renew', fn (Request $request) => Limit::perMinute(10)->by((string) $request->ip()));
+
         // The resend endpoint used a flat, IP-only throttle: a distributed
         // caller could spam resends for one still-authenticating login from
         // many IPs. Stacked with a per-IP limit so a single IP can't spam

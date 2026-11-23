@@ -25,6 +25,13 @@ Route::get('/', fn () => redirect()->route(Auth::check() ? 'dashboard' : 'login'
 
 Route::post('locale', SwitchLocaleController::class)->middleware('throttle:locale')->name('locale.update');
 
+// The service worker reports a push subscription the browser rotated, with no
+// page and so no session or CSRF token (exempted in bootstrap/app.php). The old
+// endpoint and its auth secret are the proof of ownership (owner decision 2026-11-23).
+Route::post('push/renew', [PushSubscriptionController::class, 'renew'])
+    ->middleware('throttle:push-renew')
+    ->name('push.renew');
+
 // Second login step for people who turned on email codes (after the HR password).
 Route::middleware('guest')->controller(EmailTwoFactorController::class)->group(function () {
     Route::get('email-two-factor-challenge', 'create')->name('email-two-factor.login');
