@@ -91,7 +91,74 @@ return [
         'help' => 'Install HC Hub on this computer: it opens in its own window from the Start menu and taskbar, and its notifications carry the HC Hub name and logo.',
         'install' => 'Install HC Hub',
         'installed' => 'Installed on this computer. Open it from the Start menu or taskbar.',
-        'manual' => 'To install, open this page in Chrome or Edge and click the install icon at the end of the address bar (or the browser menu → Install HC Hub). Already installed? Open it from the Start menu.',
+        'install_short' => 'Install',
+        'how_to_install' => 'How to install',
+        'banner_label' => 'Install HC Hub',
+        'banner_text' => 'Install HC Hub to open it from its own icon.',
+        'this_device' => 'Steps for this device',
+        'other_devices' => 'Other devices and browsers',
+        'platforms' => [
+            'desktop_chromium' => [
+                'title' => 'Windows or Mac: Chrome or Edge',
+                'steps' => [
+                    'At the end of the address bar, select the install icon (a screen with an arrow). If it is not there, open the browser menu.',
+                    'Chrome: choose Cast, save and share, then Install page as app. Edge: choose Apps, then Install this site as an app.',
+                    'Select Install. HC Hub opens in its own window.',
+                ],
+            ],
+            'desktop_safari' => [
+                'title' => 'Mac: Safari 17 or later',
+                'steps' => [
+                    'In the menu bar, choose File, then Add to Dock.',
+                    'Keep the name HC Hub and select Add.',
+                ],
+            ],
+            'android' => [
+                'title' => 'Android: Chrome, Edge or Samsung Internet',
+                'steps' => [
+                    'Open the browser menu.',
+                    'Tap Install app or Add to Home screen.',
+                    'Tap Install. The HC Hub icon appears on your home screen.',
+                ],
+            ],
+            'ios' => [
+                'title' => 'iPhone or iPad: Safari',
+                'steps' => [
+                    'Tap the Share button (a square with an arrow pointing up).',
+                    'Scroll down and tap Add to Home Screen.',
+                    'Keep the name HC Hub and tap Add.',
+                ],
+            ],
+            'ios_non_safari' => [
+                'title' => 'iPhone or iPad: Chrome, Edge or Firefox',
+                'steps' => [
+                    'On iOS 16.4 or later, tap the Share button, then Add to Home Screen.',
+                    'Keep the name HC Hub and tap Add.',
+                    'If Add to Home Screen is not in the list, open this page in Safari and follow the Safari steps.',
+                ],
+            ],
+            'firefox_android' => [
+                'title' => 'Android: Firefox',
+                'steps' => [
+                    'Open the Firefox menu.',
+                    'Tap Install or Add to Home screen, then confirm.',
+                ],
+            ],
+            'firefox' => [
+                'title' => 'Firefox on a computer',
+                'steps' => [
+                    'Firefox on a computer cannot install web apps.',
+                    'To install HC Hub, open it in Chrome or Edge, or in Safari on a Mac.',
+                ],
+            ],
+            'other' => [
+                'title' => 'Other browsers',
+                'steps' => [
+                    'Look in the browser menu for Install, Add to Home screen or Add to Dock.',
+                    'If there is no such option, open HC Hub in Chrome or Edge, or in Safari on an iPhone, iPad or Mac.',
+                ],
+            ],
+        ],
         'tooltip' => 'Install HC Hub desktop app',
         'description' => 'The desktop app for this computer',
         'not_now' => 'Not now',

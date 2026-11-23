@@ -25,6 +25,24 @@
 {{-- Restores the sidebar's expanded/rail choice before first paint (resources/js/side-nav.js). --}}
 <script>try { if (localStorage.getItem('hc-nav') === 'open') { document.documentElement.classList.add('dk-nav-open'); } } catch (e) {}</script>
 
+{{-- Chromium fires beforeinstallprompt once, often before any module has loaded, so it is kept here as early as possible: window.__hcInstallPrompt holds the deferred event (null once used or installed) and window events announce each change. resources/js/notifications.js reads it (window.hcApp), so a late page or a wire:navigate visit never misses it. The flag stops a second copy of this script adding the listeners twice. --}}
+<script data-install-capture>
+    (function () {
+        if (window.__hcInstallCapture) { return; }
+        window.__hcInstallCapture = true;
+        window.__hcInstallPrompt = window.__hcInstallPrompt || null;
+        window.addEventListener('beforeinstallprompt', function (event) {
+            event.preventDefault();
+            window.__hcInstallPrompt = event;
+            window.dispatchEvent(new Event('hc-install-prompt-change'));
+        });
+        window.addEventListener('appinstalled', function () {
+            window.__hcInstallPrompt = null;
+            window.dispatchEvent(new Event('hc-install-prompt-change'));
+        });
+    })();
+</script>
+
 @fonts
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])

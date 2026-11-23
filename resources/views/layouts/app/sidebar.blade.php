@@ -65,6 +65,10 @@
                 @endpersist
 
                 <x-notifications.install-modal />
+
+                @if ($showsInbox && ! request()->routeIs('notification-settings.edit'))
+                    <x-notifications.install-banner />
+                @endif
             @endunless
         @endauth
 

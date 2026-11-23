@@ -86,11 +86,17 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
 
     <div class="grid max-w-2xl gap-10">
         {{-- The installable app: its own window, Start-menu entry and branded notifications. --}}
+        @php
+            $installPlatforms = ['desktop_chromium', 'desktop_safari', 'android', 'ios', 'ios_non_safari', 'firefox_android', 'firefox', 'other'];
+        @endphp
+
         <section
+            id="desktop-app"
             aria-labelledby="desktop-app-heading"
-            class="grid gap-3"
+            class="grid scroll-mt-24 gap-3"
             x-data="{
                 state: window.hcApp?.state() ?? 'unavailable',
+                platform: window.hcApp?.platform() ?? 'other',
                 init() {
                     window.addEventListener('hc-app-install-change', (event) => (this.state = event.detail));
                 },
@@ -105,20 +111,43 @@ new #[Layout('layouts::desk'), Title('titles.notification_settings')] class exte
                 </div>
             </div>
 
-            <div class="ps-16">
+            <div class="grid gap-4 ps-16">
                 <p x-show="state === 'installed'" x-cloak class="inline-flex items-center gap-2 text-sm font-semibold text-status-good" data-app-installed>
                     <flux:icon.check-circle variant="mini" />
                     {{ __('notifications.app.installed') }}
                 </p>
 
-                <x-ui.button x-show="state === 'available'" x-cloak tone="primary" size="sm" icon="arrow-down-tray" x-on:click="$flux.modal('install-app').show()" aria-haspopup="dialog" data-test="install-app-button">
-                    {{ __('notifications.app.install') }}
-                </x-ui.button>
+                <div x-show="state === 'available'" x-cloak>
+                    <x-ui.button tone="primary" size="sm" icon="arrow-down-tray" x-on:click="$flux.modal('install-app').show()" aria-haspopup="dialog" data-test="install-app-button">
+                        {{ __('notifications.app.install') }}
+                    </x-ui.button>
+                </div>
 
-                <p x-show="state === 'unavailable'" class="text-sm text-secondary-medium dark:text-ink-muted" data-app-install-hint>{{ __('notifications.app.manual') }}</p>
+                {{-- No browser prompt: the steps for this device. --}}
+                <div x-show="state === 'unavailable'" class="grid gap-1" data-app-install-hint>
+                    <p class="text-sm font-semibold">{{ __('notifications.app.this_device') }}</p>
+                    @foreach ($installPlatforms as $installPlatform)
+                        <div x-show="platform === '{{ $installPlatform }}'" x-cloak data-install-steps="{{ $installPlatform }}">
+                            @include('pages.notifications._install-steps', ['platform' => $installPlatform])
+                        </div>
+                    @endforeach
+                </div>
+
+                <details x-show="state !== 'installed'" x-cloak class="group grid gap-3" data-install-other-devices>
+                    <summary class="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold">
+                        <flux:icon.chevron-right variant="micro" class="transition-transform group-open:rotate-90 rtl:-scale-x-100" />
+                        {{ __('notifications.app.other_devices') }}
+                    </summary>
+                    <div class="mt-3 grid gap-5">
+                        @foreach ($installPlatforms as $installPlatform)
+                            <div x-show="platform !== '{{ $installPlatform }}'" x-cloak data-install-steps="{{ $installPlatform }}">
+                                @include('pages.notifications._install-steps', ['platform' => $installPlatform])
+                            </div>
+                        @endforeach
+                    </div>
+                </details>
             </div>
         </section>
-
         {{-- Desktop popups for important and critical notifications. --}}
         <section
             aria-labelledby="desktop-popups-heading"
