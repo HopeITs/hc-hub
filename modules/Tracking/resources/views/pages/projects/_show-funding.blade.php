@@ -161,7 +161,7 @@
                                 <div role="cell" data-label="{{ __('common.status') }}"><x-ui.enum-badge :case="$proposal->status" /></div>
                                 <div role="cell" class="dk-prow-acts">
                                     @can('proposals.update')
-                                        <button type="button" class="dk-iconbtn dk-sm" wire:click="detachProposal({{ $proposal->id }})" aria-label="{{ __('projects.unlink_name', ['name' => $proposal->name]) }}" title="{{ __('projects.unlink_name', ['name' => $proposal->name]) }}"><x-desk.icon name="x" /></button>
+                                        <button type="button" class="dk-iconbtn dk-sm" wire:click="confirmRemoveProposal({{ $proposal->id }})" aria-label="{{ __('projects.unlink_name', ['name' => $proposal->name]) }}" title="{{ __('projects.unlink_name', ['name' => $proposal->name]) }}"><x-desk.icon name="x" /></button>
                                     @endcan
                                     @if ($isEmbedded)
                                         <button type="button" class="dk-iconbtn dk-sm dk-fold-t" @click="openProposal = openProposal === {{ $proposal->id }} ? null : {{ $proposal->id }}" :aria-expanded="openProposal === {{ $proposal->id }}" aria-label="{{ __('story.show_details') }}" title="{{ __('story.show_details') }}"><x-desk.icon name="chev" class="dk-fold-i" /></button>
@@ -245,3 +245,13 @@
         </section>
     @endif
 </div>
+
+<x-ui.confirm-modal
+    wire:model="showRemoveProposalModal"
+    close="cancelRemoveProposal"
+    :title="__('projects.unlink_confirm_title')"
+    :message="__('projects.unlink_confirm_message')"
+    confirm="removeConfirmedProposal"
+    :confirm-label="__('projects.unlink_confirm_button')"
+    confirm-test="confirm-unlink-proposal"
+/>

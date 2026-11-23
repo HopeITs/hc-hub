@@ -44,6 +44,10 @@ new #[Layout('layouts::desk'), Title('hr_news.titles.index')] class extends Comp
 
     public bool $showDeleteModal = false;
 
+    public ?int $removingArchiveId = null;
+
+    public bool $showRemoveArchiveModal = false;
+
     public function mount(): void
     {
         Gate::authorize('viewAny', News::class);
@@ -75,6 +79,31 @@ new #[Layout('layouts::desk'), Title('hr_news.titles.index')] class extends Comp
     public function archive(int $id): void
     {
         $this->change($id, 'update', fn (ChangeNewsState $change, News $news): bool => $change->archive(auth()->user(), $news), 'hr_news.list.archived');
+    }
+
+    public function confirmRemoveArchive(int $id): void
+    {
+        $this->removingArchiveId = $id;
+        $this->showRemoveArchiveModal = true;
+    }
+
+    public function cancelRemoveArchive(): void
+    {
+        $this->removingArchiveId = null;
+        $this->showRemoveArchiveModal = false;
+    }
+
+    /**
+     * The confirmed removal: runs only on the dialog's own button.
+     */
+    public function removeConfirmedArchive(): void
+    {
+        $id = $this->removingArchiveId;
+        $this->cancelRemoveArchive();
+
+        if ($id !== null) {
+            $this->archive($id);
+        }
     }
 
     public function restore(int $id): void
@@ -296,7 +325,7 @@ new #[Layout('layouts::desk'), Title('hr_news.titles.index')] class extends Comp
                                         @if ($itemState === NewsState::Archived)
                                             <flux:menu.item icon="arrow-path" wire:click="restore({{ $news->id }})">{{ __('hr_news.list.restore') }}</flux:menu.item>
                                         @else
-                                            <flux:menu.item icon="archive-box" wire:click="archive({{ $news->id }})">{{ __('hr_news.list.archive') }}</flux:menu.item>
+                                            <flux:menu.item icon="archive-box" wire:click="confirmRemoveArchive({{ $news->id }})">{{ __('hr_news.list.archive') }}</flux:menu.item>
                                         @endif
                                     @endif
                                     @can('delete', $news)
@@ -322,4 +351,14 @@ new #[Layout('layouts::desk'), Title('hr_news.titles.index')] class extends Comp
         confirm="delete"
         :confirm-label="__('common.delete')"
     />
+<x-ui.confirm-modal
+    wire:model="showRemoveArchiveModal"
+    close="cancelRemoveArchive"
+    :title="__('hr_news.list.archive_title')"
+    :message="__('hr_news.list.archive_body')"
+    confirm="removeConfirmedArchive"
+    :confirm-label="__('hr_news.list.archive')"
+    confirm-test="confirm-archive-news"
+/>
+
 </x-desk.register>

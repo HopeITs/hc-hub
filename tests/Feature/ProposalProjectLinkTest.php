@@ -343,3 +343,24 @@ test('the second link of the same closed project finds it a draft and just links
         ->and($project->proposals()->count())->toBe(2)
         ->and(Activity::query()->where('subject_type', 'project')->where('event', 'project.status_changed')->count())->toBe(1);
 });
+
+test('unlinking a proposal on the project page keeps the link until it is confirmed', function () {
+    $project = Project::factory()->active()->create();
+    $other = Project::factory()->create();
+    fileLink($this->proposal, $project, $other);
+    $both = linkedIds($this->proposal);
+
+    $page = Livewire::test('tracking::projects.show', ['project' => $project])
+        ->set('tab', 'proposals')
+        ->assertSeeHtml('wire:click="confirmRemoveProposal('.$this->proposal->id.')"')
+        ->call('confirmRemoveProposal', $this->proposal->id)
+        ->assertSet('showRemoveProposalModal', true);
+
+    expect(linkedIds($this->proposal))->toBe($both);
+
+    $page->call('cancelRemoveProposal')->assertSet('showRemoveProposalModal', false);
+    expect(linkedIds($this->proposal))->toBe($both);
+
+    $page->call('confirmRemoveProposal', $this->proposal->id)->call('removeConfirmedProposal')->assertSet('showRemoveProposalModal', false);
+    expect(linkedIds($this->proposal))->toBe([$other->id]);
+});

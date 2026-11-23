@@ -45,6 +45,10 @@ new #[Layout('layouts::desk'), Title('titles.strategic_plan')] class extends Com
 
     public string $indicatorToAdd = '';
 
+    public ?int $removingIndicatorId = null;
+
+    public bool $showRemoveIndicatorModal = false;
+
     public bool $showSendBackModal = false;
 
     public string $sendBackReason = '';
@@ -133,6 +137,31 @@ new #[Layout('layouts::desk'), Title('titles.strategic_plan')] class extends Com
 
         $this->linkedIndicators = array_values(array_filter($this->linkedIndicators, fn (int $id): bool => $id !== $indicatorId));
         unset($this->targets[$indicatorId]);
+    }
+
+    public function confirmRemoveIndicator(int $id): void
+    {
+        $this->removingIndicatorId = $id;
+        $this->showRemoveIndicatorModal = true;
+    }
+
+    public function cancelRemoveIndicator(): void
+    {
+        $this->removingIndicatorId = null;
+        $this->showRemoveIndicatorModal = false;
+    }
+
+    /**
+     * The confirmed removal: runs only on the dialog's own button.
+     */
+    public function removeConfirmedIndicator(): void
+    {
+        $id = $this->removingIndicatorId;
+        $this->cancelRemoveIndicator();
+
+        if ($id !== null) {
+            $this->removeIndicator($id);
+        }
     }
 
     public function save(): void
@@ -377,7 +406,7 @@ new #[Layout('layouts::desk'), Title('titles.strategic_plan')] class extends Com
                                     @endforeach
                                     @if ($canWrite)
                                         <td class="px-2 py-2 align-top">
-                                            <x-ui.button tone="ghost" size="sm" icon="x-mark" class="size-8!" wire:click="removeIndicator({{ $indicatorId }})" :aria-label="__('strategic_plans.remove_named', ['name' => $indicator->name])" data-test="remove-plan-indicator-{{ $indicatorId }}" />
+                                            <x-ui.button tone="ghost" size="sm" icon="x-mark" class="size-8!" wire:click="confirmRemoveIndicator({{ $indicatorId }})" :aria-label="__('strategic_plans.remove_named', ['name' => $indicator->name])" data-test="remove-plan-indicator-{{ $indicatorId }}" />
                                         </td>
                                     @endif
                                 </tr>
@@ -426,4 +455,14 @@ new #[Layout('layouts::desk'), Title('titles.strategic_plan')] class extends Com
             <x-ui.button type="submit" tone="primary" data-test="confirm-send-back">{{ __('strategic_plans.send_back_action') }}</x-ui.button>
         </x-slot:actions>
     </x-ui.modal>
+<x-ui.confirm-modal
+    wire:model="showRemoveIndicatorModal"
+    close="cancelRemoveIndicator"
+    :title="__('strategic_plans.remove_indicator_title')"
+    :message="__('strategic_plans.remove_indicator_message')"
+    confirm="removeConfirmedIndicator"
+    :confirm-label="__('strategic_plans.remove')"
+    confirm-test="confirm-remove-plan-indicator"
+/>
+
 </section>

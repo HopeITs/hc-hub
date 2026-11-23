@@ -79,6 +79,10 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
      */
     public bool $showActivity = false;
 
+    public ?int $removingAssigneeId = null;
+
+    public bool $showRemoveAssigneeModal = false;
+
     /**
      * What to fix, when the approver sends an Under review task back.
      */
@@ -329,6 +333,31 @@ new #[Layout('layouts::desk'), Title('titles.task')] class extends Component
         ));
 
         $this->saveInPlace('assignedTo');
+    }
+
+    public function confirmRemoveAssignee(int $id): void
+    {
+        $this->removingAssigneeId = $id;
+        $this->showRemoveAssigneeModal = true;
+    }
+
+    public function cancelRemoveAssignee(): void
+    {
+        $this->removingAssigneeId = null;
+        $this->showRemoveAssigneeModal = false;
+    }
+
+    /**
+     * The confirmed removal: runs only on the dialog's own button.
+     */
+    public function removeConfirmedAssignee(): void
+    {
+        $id = $this->removingAssigneeId;
+        $this->cancelRemoveAssignee();
+
+        if ($id !== null) {
+            $this->removeAssignee($id);
+        }
     }
 
     /**

@@ -215,3 +215,22 @@ it('keeps the logframe tab at a flat query count whatever the number of risks', 
 
     expect($count())->toBe($small);
 });
+
+it('keeps a risk on the result until its removal is confirmed', function () {
+    $this->actingAs($this->editor);
+    $risk = app(AttachLibraryRisk::class)->handle($this->proposal, $this->output->id, $this->delay->id, []);
+
+    $page = riskTab($this->editor, $this->proposal)
+        ->call('openRisks', $this->output->id)
+        ->assertSeeHtml('wire:click="confirmRemoveRisk('.$risk->id.')"')
+        ->call('confirmRemoveRisk', $risk->id)
+        ->assertSet('showRemoveRiskModal', true);
+
+    expect(Risk::query()->count())->toBe(1);
+
+    $page->call('cancelRemoveRisk')->assertSet('showRemoveRiskModal', false);
+    expect(Risk::query()->count())->toBe(1);
+
+    $page->call('confirmRemoveRisk', $risk->id)->call('removeConfirmedRisk');
+    expect(Risk::query()->count())->toBe(0);
+});

@@ -22,6 +22,10 @@ new class extends Component {
     #[Locked]
     public string $card = 'hr-notes';
 
+    public ?int $removingNoteId = null;
+
+    public bool $showRemoveNoteModal = false;
+
     /**
      * Adds a note; true once it is saved.
      */
@@ -61,6 +65,31 @@ new class extends Component {
 
         $note->delete();
         unset($this->notes);
+    }
+
+    public function confirmRemoveNote(int $id): void
+    {
+        $this->removingNoteId = $id;
+        $this->showRemoveNoteModal = true;
+    }
+
+    public function cancelRemoveNote(): void
+    {
+        $this->removingNoteId = null;
+        $this->showRemoveNoteModal = false;
+    }
+
+    /**
+     * The confirmed removal: runs only on the dialog's own button.
+     */
+    public function removeConfirmedNote(): void
+    {
+        $id = $this->removingNoteId;
+        $this->cancelRemoveNote();
+
+        if ($id !== null) {
+            $this->remove($id);
+        }
     }
 
     /**
@@ -119,11 +148,21 @@ new class extends Component {
                         <li class="dk-todo-row" wire:key="my-note-{{ $note->id }}">
                             <span class="dk-todo-grip" aria-hidden="true"></span>
                             <span class="dk-todo-t min-w-0 flex-1 break-words" data-test="my-note">{{ $note->body }}</span>
-                            <button type="button" class="dk-iconbtn dk-sm dk-todo-x" wire:click="remove({{ $note->id }})" aria-label="{{ __('hr_desk.cards.notes.remove') }}"><x-desk.icon name="x" /></button>
+                            <button type="button" class="dk-iconbtn dk-sm dk-todo-x" wire:click="confirmRemoveNote({{ $note->id }})" aria-label="{{ __('hr_desk.cards.notes.remove') }}"><x-desk.icon name="x" /></button>
                         </li>
                     @endforeach
                 </ul>
             </div>
         @endif
     </div>
+<x-ui.confirm-modal
+    wire:model="showRemoveNoteModal"
+    close="cancelRemoveNote"
+    :title="__('hr_desk.cards.notes.remove_title')"
+    :message="__('hr_desk.cards.notes.remove_body')"
+    confirm="removeConfirmedNote"
+    :confirm-label="__('hr_desk.cards.notes.remove')"
+    confirm-test="confirm-remove-note"
+/>
+
 </x-desk.panel>

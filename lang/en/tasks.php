@@ -17,6 +17,8 @@ return [
     'assignee_removed' => 'Assignee removed.',
     'remove_all_assignees' => 'Remove all assignees',
     'remove_assignee' => 'Remove assignee',
+    'remove_assignee_confirm_title' => 'Remove this assignee?',
+    'remove_assignee_confirm_message' => 'They will no longer be assigned to this task.',
     'move_to' => 'Move to',
     'goes_to' => 'Goes to',
     'goes_to_help' => 'The program itself, one of its projects, or a milestone.',

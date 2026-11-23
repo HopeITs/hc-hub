@@ -340,3 +340,26 @@ test('the plans register lists several plans, drafts and approved, without lazy 
 
     Livewire::actingAs($this->pm)->test('tracking::annual-plans.plans')->assertOk()->assertSee($other->name);
 });
+
+test('removing a follow-up on the review page asks first and it stays until it is confirmed', function () {
+    $plan = chosenPlan();
+    foreach ($plan->items()->get() as $item) {
+        app(SaveActivityPlanItem::class)->handle($this->pm, $item, itemInput(), true);
+    }
+    $plan = app(SubmitActivityPlan::class)->handle($this->pm, $plan->fresh());
+    $followUp = app(ManageActivityPlanFollowUps::class)->add($this->meal, $plan, $plan->items()->first()->id, 'finish', 'Run the post test');
+
+    $page = Livewire::actingAs($this->meal)->test('tracking::annual-plans.plan', ['activityPlan' => $plan])
+        ->assertSet('mode', 'review')
+        ->assertSeeHtml('wire:click="confirmRemoveFollowUp('.$followUp->id.')"')
+        ->call('confirmRemoveFollowUp', $followUp->id)
+        ->assertSet('showRemoveFollowUpModal', true);
+
+    expect($plan->followUps()->count())->toBe(1);
+
+    $page->call('cancelRemoveFollowUp')->assertSet('showRemoveFollowUpModal', false);
+    expect($plan->followUps()->count())->toBe(1);
+
+    $page->call('confirmRemoveFollowUp', $followUp->id)->call('removeConfirmedFollowUp');
+    expect($plan->followUps()->count())->toBe(0);
+});

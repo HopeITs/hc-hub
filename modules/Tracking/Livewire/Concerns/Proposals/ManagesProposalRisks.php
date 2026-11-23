@@ -35,6 +35,10 @@ trait ManagesProposalRisks
 {
     public bool $showRisksDrawer = false;
 
+    public ?int $removingRiskId = null;
+
+    public bool $showRemoveRiskModal = false;
+
     public ?int $riskResultId = null;
 
     /** @var list<int|string> */
@@ -174,5 +178,30 @@ trait ManagesProposalRisks
         unset($this->proposalRisks, $this->riskCounts, $this->riskHeat);
 
         Flux::toast(variant: 'success', text: __('risks.detached'));
+    }
+
+    public function confirmRemoveRisk(int $id): void
+    {
+        $this->removingRiskId = $id;
+        $this->showRemoveRiskModal = true;
+    }
+
+    public function cancelRemoveRisk(): void
+    {
+        $this->removingRiskId = null;
+        $this->showRemoveRiskModal = false;
+    }
+
+    /**
+     * The confirmed removal: runs only on the dialog's own button.
+     */
+    public function removeConfirmedRisk(): void
+    {
+        $id = $this->removingRiskId;
+        $this->cancelRemoveRisk();
+
+        if ($id !== null) {
+            $this->detachRisk($id);
+        }
     }
 }

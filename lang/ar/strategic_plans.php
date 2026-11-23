@@ -25,6 +25,8 @@ return [
     'link' => 'ربط',
     'remove' => 'إزالة',
     'remove_named' => 'إزالة :name من الخطة',
+    'remove_indicator_title' => 'إزالة هذا المؤشر من الخطة؟',
+    'remove_indicator_message' => 'ستُمسح مستهدفاته لسنوات الخطة، ويبقى المؤشر نفسه.',
     'figure_for' => ':indicator، الرقم المطلوب في :year',
     'save_draft' => 'حفظ المسودة',
     'send_to_manager' => 'إرسال إلى مدير البرنامج',
