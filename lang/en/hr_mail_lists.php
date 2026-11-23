@@ -52,6 +52,11 @@ return [
     'pending_tag' => 'Waiting for the control panel',
     'confirmed' => 'Confirmed.',
     'email_group' => 'Email this group',
+    'email_a_list' => 'Email a list',
+    'menu_search' => 'Search the lists',
+    'menu_suggested' => 'For this place or project',
+    'menu_people' => 'These people, directly',
+    'menu_people_count' => '{1} :count address|[0,*] :count addresses',
 
     'check' => [
         'open' => 'Check the lists',

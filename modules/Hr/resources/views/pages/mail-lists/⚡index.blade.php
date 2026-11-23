@@ -373,7 +373,7 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
                             <p class="text-xs {{ $muted }}">{{ __('hr_mail_lists.matches') }}: <span dir="auto">{{ $row['matches']->map(fn (array $member): string => $member['name'] ?? $member['email'])->implode(', ') }}</span></p>
                         @endif
                         <div class="mt-auto flex flex-wrap gap-2">
-                            <x-ui.button size="sm" icon="envelope" href="mailto:{{ $list->address }}">{{ __('hr_mail_lists.email_list') }}</x-ui.button>
+                            <x-ui.button size="sm" icon="envelope" :href="$list->mailto()">{{ __('hr_mail_lists.email_list') }}</x-ui.button>
                             <x-ui.button tone="ghost" size="sm" icon="users" wire:click="openList({{ $list->id }})" data-test="mail-list-open">{{ __('hr_mail_lists.members_button') }}</x-ui.button>
                         </div>
                     </x-ui.panel>

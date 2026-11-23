@@ -30,10 +30,14 @@ use Modules\Core\Models\Center;
  * @property string|null $attlog_stamp
  * @property string|null $push_version
  * @property int|null $created_by
+ * @property string|null $agent_key_hash
+ * @property string|null $agent_key_hint
+ * @property CarbonImmutable|null $agent_key_created_at
+ * @property CarbonImmutable|null $agent_last_sync_at
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  */
-#[Fillable(['serial', 'name', 'center_id', 'status', 'last_seen_at', 'last_ip', 'last_punch_at', 'attlog_stamp', 'push_version', 'created_by'])]
+#[Fillable(['serial', 'name', 'center_id', 'status', 'last_seen_at', 'last_ip', 'last_punch_at', 'attlog_stamp', 'push_version', 'created_by', 'agent_key_hash', 'agent_key_hint', 'agent_key_created_at', 'agent_last_sync_at'])]
 class AttendanceDevice extends Model
 {
     public const ACTIVE = 'active';
@@ -54,7 +58,10 @@ class AttendanceDevice extends Model
      */
     protected function casts(): array
     {
-        return ['last_seen_at' => 'datetime', 'last_punch_at' => 'datetime'];
+        return [
+            'last_seen_at' => 'datetime', 'last_punch_at' => 'datetime',
+            'agent_key_created_at' => 'datetime', 'agent_last_sync_at' => 'datetime',
+        ];
     }
 
     /**
@@ -80,6 +87,43 @@ class AttendanceDevice extends Model
     protected function active(Builder $query): void
     {
         $query->where('status', self::ACTIVE);
+    }
+
+    /**
+     * A new sync key for this device. Returns the key itself, which is shown to HR once and never kept: only
+     * its hash is stored, so a copy of the database does not hand out working keys.
+     */
+    public function issueAgentKey(): string
+    {
+        $key = 'zk_'.bin2hex(random_bytes(20));
+
+        $this->forceFill([
+            'agent_key_hash' => hash('sha256', $key),
+            'agent_key_hint' => substr($key, -4),
+            'agent_key_created_at' => now(),
+        ])->save();
+
+        return $key;
+    }
+
+    public function revokeAgentKey(): void
+    {
+        $this->forceFill(['agent_key_hash' => null, 'agent_key_hint' => null, 'agent_key_created_at' => null])->save();
+    }
+
+    public function hasAgentKey(): bool
+    {
+        return $this->agent_key_hash !== null;
+    }
+
+    /** The device a presented sync key belongs to, or null. */
+    public static function forAgentKey(?string $key): ?self
+    {
+        if (! is_string($key) || ! str_starts_with($key, 'zk_') || strlen($key) > 80) {
+            return null;
+        }
+
+        return static::query()->where('agent_key_hash', hash('sha256', $key))->first();
     }
 
     public function isBlocked(): bool

@@ -27,6 +27,12 @@ class PrintSelection
      */
     public function fromRequest(Request $request): array
     {
+        // A print, PDF or Excel link with no month opens the month the Timesheets page opens on,
+        // instead of failing validation: on a GET that meant a silent redirect "back".
+        if (blank($request->query('month'))) {
+            $request->merge(['month' => now()->subDays(10)->format('Y-m')]);
+        }
+
         $data = $request->validate([
             'month' => ['required', 'date_format:Y-m'],
             'city_id' => ['nullable', 'integer'],

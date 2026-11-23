@@ -78,6 +78,7 @@ return [
 
     'team' => [
         'email_team' => 'Email the team',
+        'email_team_directly' => 'Email the team directly',
         'request_hire' => 'Request hire',
         'positions' => 'Positions',
         'open_seats' => 'Open seats',

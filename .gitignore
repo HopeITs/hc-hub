@@ -27,3 +27,7 @@ yarn-error.log
 
 # Microsoft Office lock files (created while a .docx/.xlsx is open)
 ~$*
+
+# The attendance agent: local settings and logs
+/modules/Hr/tools/attendance-agent/config.json
+/modules/Hr/tools/attendance-agent/agent.log*

@@ -278,6 +278,19 @@ test('the pages need their permission, and the print shows only the viewer\'s ci
         ->assertSee('مسودة');
 });
 
+test('a print link without a month opens the month the page opens on', function () {
+    $mine = ($this->volunteer)();
+    $hr = ($this->hr)($this->city, ['attendance.view-own', 'attendance.view']);
+
+    // The Timesheets page opens on the month of ten days ago: early October means September.
+    $this->travelTo('2026-10-05 09:00');
+
+    $this->actingAs($hr)->get(route('hr.attendance.print'))
+        ->assertOk()
+        ->assertSee($mine->nameForLocale('ar'))
+        ->assertSee('Monthly TimeSheet');
+});
+
 test('the upload page previews the report, then imports it', function () {
     $employee = ($this->volunteer)();
     $hr = ($this->hr)($this->city);

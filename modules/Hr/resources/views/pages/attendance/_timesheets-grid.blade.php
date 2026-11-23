@@ -69,7 +69,7 @@
                 $cityList = MailList::emailFor($block['id'] ? (int) $block['id'] : null, null, null, $mailLists);
             @endphp
             @if ($cityList)
-                <a href="mailto:{{ $cityList->address }}" class="inline-flex items-center gap-1.5 text-sm font-semibold underline {{ $muted }}" data-test="attendance-email-city">
+                <a href="{{ $cityList->mailto() }}" class="inline-flex items-center gap-1.5 text-sm font-semibold underline {{ $muted }}" data-test="attendance-email-city">
                     <flux:icon name="envelope" class="size-4" /> {{ __('hr_mail_lists.email_group') }}
                 </a>
             @endif
@@ -104,7 +104,7 @@
                             <flux:badge size="sm" color="green" icon="check">{{ __('hr_attendance.timesheets.group-ready') }}</flux:badge>
                         @endif
                         @if ($groupList)
-                            <x-ui.button size="sm" icon="envelope" :href="'mailto:'.$groupList->address" data-test="attendance-email-group">{{ __('hr_mail_lists.email_group') }}</x-ui.button>
+                            <x-ui.button size="sm" icon="envelope" :href="$groupList->mailto()" data-test="attendance-email-group">{{ __('hr_mail_lists.email_group') }}</x-ui.button>
                         @endif
                         @if ($group['totals']['overtime_hours'] > 0)
                             <span class="text-xs tabular-nums {{ $muted }}">{{ __('hr_attendance.timesheets.overtime-line', ['hours' => $group['totals']['overtime_hours'], 'days' => $group['totals']['overtime_days']]) }}</span>

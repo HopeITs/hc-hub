@@ -78,6 +78,7 @@ return [
 
     'team' => [
         'email_team' => 'مراسلة الفريق',
+        'email_team_directly' => 'مراسلة الفريق مباشرة',
         'request_hire' => 'طلب توظيف',
         'positions' => 'المناصب',
         'open_seats' => 'المقاعد الشاغرة',

@@ -35,6 +35,7 @@ use Modules\Hr\Console\Journeys\TrackRenewalJourneys;
 use Modules\Hr\Console\LoadMailListsCommand;
 use Modules\Hr\Console\MoveHrMediaCommand;
 use Modules\Hr\Console\ProcessContractAutoRenewalsCommand;
+use Modules\Hr\Console\PurgeUploadedPunchesCommand;
 use Modules\Hr\Console\QueueMailListStartersCommand;
 use Modules\Hr\Console\RecountPositionSeatsCommand;
 use Modules\Hr\Console\ReportAccountGapsCommand;
@@ -70,7 +71,12 @@ use Modules\Hr\Support\Recruitment\Console\SweepRecruitmentRetention;
 use Modules\Hr\Support\Recruitment\Console\SyncRecruitmentCampaignStates;
 use Modules\Hr\Support\Recruitment\RecruitmentBootstrap;
 use Modules\Hr\Support\SalaryCipher;
+use Modules\Hr\Support\Search\ContractSearchSource;
 use Modules\Hr\Support\Search\EmployeeSearchSource;
+use Modules\Hr\Support\Search\LeaveRequestSearchSource;
+use Modules\Hr\Support\Search\MailListSearchSource;
+use Modules\Hr\Support\Search\PositionSearchSource;
+use Modules\Hr\Support\Search\RecruitmentRequestSearchSource;
 use Modules\Hr\Support\Timeline\ContractsTimelineSource;
 use Modules\Hr\Support\Timeline\EquipmentTimelineSource;
 use Modules\Hr\Support\Timeline\JourneysTimelineSource;
@@ -118,6 +124,7 @@ class HrServiceProvider extends ServiceProvider
             SendAttendanceRemindersCommand::class,
             LoadMailListsCommand::class,
             QueueMailListStartersCommand::class,
+            PurgeUploadedPunchesCommand::class,
             AnalyzeRecruitmentCvs::class,
             ApplyDueRecruitmentRequests::class,
             CheckRecruitmentScanner::class,
@@ -148,6 +155,10 @@ class HrServiceProvider extends ServiceProvider
         // device, and by address when it does not say who it is.
         RateLimiter::for('iclock', fn (Request $request): Limit => Limit::perMinute(300)
             ->by((string) ($request->query('SN') ?? $request->query('sn') ?? $request->ip())));
+
+        // The attendance agent calls every ten minutes, in a few batches. Per key (or per address when it sends none).
+        RateLimiter::for('attendance-agent', fn (Request $request): Limit => Limit::perMinute(60)
+            ->by(sha1((string) ($request->bearerToken() ?: $request->ip()))));
 
         // Contract writes that start or move an employee journey.
         JourneyHooks::register();
@@ -232,6 +243,11 @@ class HrServiceProvider extends ServiceProvider
         $modules->addTimeline(EquipmentTimelineSource::class);
         $modules->addTimeline(JourneysTimelineSource::class);
         $modules->addSearch(EmployeeSearchSource::class);
+        $modules->addSearch(PositionSearchSource::class);
+        $modules->addSearch(ContractSearchSource::class);
+        $modules->addSearch(LeaveRequestSearchSource::class);
+        $modules->addSearch(RecruitmentRequestSearchSource::class);
+        $modules->addSearch(MailListSearchSource::class);
         $modules->addMetrics(HrMetrics::class);
         $modules->addWorkItems(InboxWorkItems::class);
     }
@@ -252,6 +268,9 @@ class HrServiceProvider extends ServiceProvider
         // The time-clock devices (ZKTeco ADMS): no session, no login, no language prefix; they are
         // believed by their registered serial only. routes/device/iclock.php.
         Route::middleware(['api', 'throttle:iclock'])->group(__DIR__.'/routes/device/iclock.php');
+
+        // The LAN agent that reads a device on its own network: believed by a per-device sync key.
+        Route::middleware(['api', 'throttle:attendance-agent'])->group(__DIR__.'/routes/device/agent.php');
 
         // Pages a guest may open (the careers site): routes/public/*.php.
         $publicFiles = glob(__DIR__.'/routes/public/*.php') ?: [];

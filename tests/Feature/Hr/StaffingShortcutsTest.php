@@ -3,6 +3,7 @@
 use Livewire\Livewire;
 use Modules\Core\Models\User;
 use Modules\Hr\Enums\RecruitmentRequestType;
+use Modules\Hr\Models\MailList;
 use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Settings\HrAccess;
 use Spatie\Permission\Models\Permission;
@@ -45,7 +46,7 @@ test('a position with a free seat opens the hiring request, for whoever may writ
 });
 
 test('the team chart asks for a hire on an open seat and emails the team mailbox', function () {
-    config(['app.team_email' => 'team@hcsyria.org']);
+    MailList::query()->create(['name' => 'Team', 'address' => 'team@hcsyria.org', 'position' => 1]);
 
     Livewire::actingAs($this->hirer)->test('hr::positions.team')
         ->assertSeeHtml('data-request-hire="'.$this->open->id.'"')
@@ -57,9 +58,7 @@ test('the team chart asks for a hire on an open seat and emails the team mailbox
         ->assertDontSeeHtml('data-request-hire=');
 });
 
-test('without a team mailbox there is no email the team', function () {
-    config(['app.team_email' => null]);
-
+test('without any mail list there is no email menu', function () {
     Livewire::actingAs($this->viewer)->test('hr::positions.team')
-        ->assertDontSeeHtml('data-test="email-team"');
+        ->assertDontSeeHtml('data-mail-list-menu');
 });

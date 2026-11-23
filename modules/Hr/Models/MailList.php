@@ -66,6 +66,40 @@ class MailList extends Model
         return ['rule_managers_only' => 'boolean', 'rule_city_id' => 'integer', 'rule_program_id' => 'integer', 'rule_department_id' => 'integer'];
     }
 
+    /**
+     * The link that opens a new message in the viewer's mail program: To the list, Cc the
+     * viewer's direct manager. The sender is the account the mail program is signed in with:
+     * a mailto: link cannot choose it.
+     */
+    public function mailto(): string
+    {
+        $cc = self::viewerManagerEmail();
+        $cc = filled($cc) && strcasecmp($cc, $this->address) !== 0 ? $cc : null;
+
+        // '@' stays as it is: it is legal in a mailto: and some mail programs choke on %40.
+        $plain = fn (string $address): string => str_replace('%40', '@', rawurlencode($address));
+
+        return 'mailto:'.$plain($this->address).($cc !== null ? '?cc='.$plain($cc) : '');
+    }
+
+    /**
+     * The viewer's direct manager's work email, looked up once per request for all the links of a page.
+     */
+    private static function viewerManagerEmail(): ?string
+    {
+        static $memo = [];
+
+        $employeeId = auth()->user()?->employee_id;
+
+        if ($employeeId === null) {
+            return null;
+        }
+
+        $key = spl_object_id(app()).':'.$employeeId;
+
+        return $memo[$key] ??= (Employee::directManagerEmails([(int) $employeeId])[(int) $employeeId] ?? '');
+    }
+
     public function hasRule(): bool
     {
         return $this->rule_type !== null;
@@ -103,6 +137,39 @@ class MailList extends Model
 
         return self::emailFor($cityId, $programId, $departmentId, $lists)
             ?? self::emailFor(null, $programId, $departmentId, $lists);
+    }
+
+    /**
+     * Every list, grouped by category in the page's order, for a menu to choose from.
+     *
+     * @return Collection<string, Collection<int, self>>
+     */
+    public static function menuGroups(): Collection
+    {
+        $lists = self::query()->orderBy('position')->orderBy('name')->get()
+            ->groupBy(fn (self $list): string => self::categoryOf($list->address));
+
+        return collect([...self::CATEGORIES, 'other'])
+            ->filter(fn (string $key): bool => $lists->has($key))
+            ->mapWithKeys(fn (string $key): array => [$key => $lists->get($key)]);
+    }
+
+    /**
+     * The lists worth putting first for a place, project or department: the one for exactly this
+     * combination, then the one for each part on its own. Empty when nothing matches.
+     *
+     * @return Collection<int, self>
+     */
+    public static function suggestionsFor(?int $cityId, ?int $programId, ?int $departmentId): Collection
+    {
+        $lists = self::customRuled();
+
+        return collect([
+            self::emailFor($cityId, $programId, $departmentId, $lists),
+            self::emailFor($cityId, null, null, $lists),
+            self::emailFor(null, $programId, null, $lists),
+            self::emailFor(null, null, $departmentId, $lists),
+        ])->filter()->unique('id')->values();
     }
 
     /**

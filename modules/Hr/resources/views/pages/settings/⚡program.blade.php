@@ -157,7 +157,7 @@ new #[Layout('layouts::desk'), Title('hr_settings.titles.program')] class extend
         {{-- The mailing list that stands for this project, when there is one. --}}
         @if ($groupList = \Modules\Hr\Models\MailList::emailFor(null, (int) $program->id, null))
             <x-slot:actions>
-                <x-ui.button tone="action" icon="envelope" :href="'mailto:'.$groupList->address" data-test="email-group">{{ __('hr_mail_lists.email_group') }}</x-ui.button>
+                <x-ui.button tone="action" icon="envelope" :href="$groupList->mailto()" data-test="email-group">{{ __('hr_mail_lists.email_group') }}</x-ui.button>
             </x-slot:actions>
         @endif
     </x-ui.detail-header>

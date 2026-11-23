@@ -34,9 +34,57 @@ new #[Layout('layouts::desk'), Title('hr_attendance.devices.title')] class exten
 
     public string $editCenter = '';
 
+    /** A sync key just made, shown once for that device and then gone (only its hash is kept). */
+    #[Locked]
+    public ?string $newKey = null;
+
+    #[Locked]
+    public ?int $keyForId = null;
+
+    /** Add a device by its serial (Menu, System Info on the device), for one read by the LAN agent that never calls. */
+    public string $addSerial = '';
+
+    public string $addCenter = '';
+
+    public string $addName = '';
+
     public function mount(): void
     {
         $this->authorizeManage();
+    }
+
+    public function addBySerial(): void
+    {
+        $this->authorizeManage();
+
+        $serial = strtoupper(trim($this->addSerial));
+
+        if (! preg_match('/^[A-Z0-9]{5,32}$/', $serial)) {
+            $this->addError('addSerial', __('hr_attendance.devices.serial-invalid'));
+
+            return;
+        }
+
+        $centerId = $this->validCenter($this->addCenter);
+
+        if ($centerId === null) {
+            $this->addError('addCenter', __('hr_attendance.devices.choose-center'));
+
+            return;
+        }
+
+        $name = trim($this->addName);
+
+        AttendanceDevice::query()->firstOrCreate(['serial' => $serial], [
+            'name' => $name !== '' ? mb_substr($name, 0, 120) : Center::query()->find($centerId)?->name,
+            'center_id' => $centerId,
+            'created_by' => $this->user()->id,
+        ]);
+        AttendanceDeviceSighting::query()->where('serial', $serial)->delete();
+
+        $this->reset('addSerial', 'addCenter', 'addName');
+        $this->resetErrorBag();
+        Flux::toast(variant: 'success', text: __('hr_attendance.devices.added'));
     }
 
     /** Register a device that called, with the center it hangs in. */
@@ -118,6 +166,35 @@ new #[Layout('layouts::desk'), Title('hr_attendance.devices.title')] class exten
 
         $device = $this->deviceInScope($id);
         $device->update(['status' => $device->isBlocked() ? AttendanceDevice::ACTIVE : AttendanceDevice::BLOCKED]);
+    }
+
+    /** Make (or replace) the key the agent on a computer next to this device sends its punches with. */
+    public function createKey(int $id): void
+    {
+        $this->authorizeManage();
+
+        $device = $this->deviceInScope($id);
+        $this->newKey = $device->issueAgentKey();
+        $this->keyForId = $device->id;
+    }
+
+    public function revokeKey(int $id): void
+    {
+        $this->authorizeManage();
+
+        $this->deviceInScope($id)->revokeAgentKey();
+
+        if ($this->keyForId === $id) {
+            $this->hideKey();
+        }
+
+        Flux::toast(variant: 'success', text: __('hr_attendance.devices.key-revoked'));
+    }
+
+    public function hideKey(): void
+    {
+        $this->newKey = null;
+        $this->keyForId = null;
     }
 
     /** Take a device off the list. Its punches stay; it can be added again. */
@@ -212,6 +289,24 @@ new #[Layout('layouts::desk'), Title('hr_attendance.devices.title')] class exten
     <div class="grid gap-y-6">
         <p class="text-sm {{ $muted }}">{{ __('hr_attendance.devices.lead') }}</p>
 
+        {{-- A device read by the LAN agent never calls, so it is added by its serial. --}}
+        <x-ui.panel class="grid gap-y-3 p-4" data-device-add>
+            <div>
+                <h2 class="font-semibold">{{ __('hr_attendance.devices.add-title') }}</h2>
+                <p class="text-sm {{ $muted }}">{{ __('hr_attendance.devices.add-help') }}</p>
+            </div>
+            <form wire:submit="addBySerial" class="flex flex-wrap items-start gap-3">
+                <x-ui.form-input wire:model="addSerial" name="addSerial" :label="__('hr_attendance.devices.serial')" dir="ltr" class="w-52" />
+                <x-ui.form-select wire:model="addCenter" name="addCenter" :label="__('hr_attendance.devices.center')" :placeholder="__('hr_attendance.devices.choose-center')" class="w-64">
+                    @foreach ($centers as $center)
+                        <option value="{{ $center->id }}">{{ $center->name }} · {{ $center->city?->name }}</option>
+                    @endforeach
+                </x-ui.form-select>
+                <x-ui.form-input wire:model="addName" name="addName" :label="__('hr_attendance.devices.name')" class="w-48" />
+                <x-ui.button type="submit" size="sm" class="self-end" data-test="device-add">{{ __('hr_attendance.devices.add') }}</x-ui.button>
+            </form>
+        </x-ui.panel>
+
         {{-- A device that called but is not registered: one click to add it. --}}
         @if ($sightings->isNotEmpty())
             <x-ui.panel class="grid gap-y-3 p-4" data-device-sightings>
@@ -257,6 +352,7 @@ new #[Layout('layouts::desk'), Title('hr_attendance.devices.title')] class exten
                         <th>{{ __('hr_attendance.devices.device') }}</th>
                         <th>{{ __('hr_attendance.devices.center') }}</th>
                         <th>{{ __('hr_attendance.devices.state') }}</th>
+                        <th>{{ __('hr_attendance.devices.key-title') }}</th>
                         <th>{{ __('hr_attendance.devices.last-seen') }}</th>
                         <th>{{ __('hr_attendance.devices.last-punch') }}</th>
                         <th><span class="sr-only">{{ __('hr_attendance.devices.actions') }}</span></th>
@@ -267,7 +363,7 @@ new #[Layout('layouts::desk'), Title('hr_attendance.devices.title')] class exten
                         @endphp
                         <tr wire:key="device-{{ $device->id }}" data-health="{{ $state }}" data-device="{{ $device->serial }}">
                             @if ($editingId === $device->id)
-                                <td colspan="6">
+                                <td colspan="7">
                                     <form wire:submit="saveDevice" class="flex flex-wrap items-start gap-3">
                                         <x-ui.form-input wire:model="editName" :label="__('hr_attendance.devices.name')" class="w-56" />
                                         <x-ui.form-select wire:model="editCenter" :label="__('hr_attendance.devices.center')" :placeholder="__('hr_attendance.devices.choose-center')" class="w-64">
@@ -299,6 +395,23 @@ new #[Layout('layouts::desk'), Title('hr_attendance.devices.title')] class exten
                                         <flux:badge size="sm" :color="$tone[$state]" :icon="$icon[$state]">{{ __('hr_attendance.devices.health.'.$state) }}</flux:badge>
                                     @endif
                                 </x-ui.data-table.cell>
+                                <x-ui.data-table.cell :label="__('hr_attendance.devices.key-title')">
+                                    @if ($device->hasAgentKey())
+                                        <span class="block font-semibold tabular-nums" dir="ltr">{{ __('hr_attendance.devices.key-masked', ['hint' => $device->agent_key_hint]) }}</span>
+                                        <span class="block text-xs {{ $muted }}">
+                                            @if ($device->agent_last_sync_at)
+                                                {{ __('hr_attendance.devices.agent-last') }}: <bdi class="tabular-nums">{{ $device->agent_last_sync_at->diffForHumans() }}</bdi>
+                                            @else
+                                                {{ __('hr_attendance.devices.agent-never') }}
+                                            @endif
+                                        </span>
+                                        <button type="button" wire:click="createKey({{ $device->id }})" wire:confirm="{{ __('hr_attendance.devices.key-regenerate-confirm') }}" class="text-sm underline hover:text-primary" data-test="device-key-regenerate">{{ __('hr_attendance.devices.key-regenerate') }}</button>
+                                        <button type="button" wire:click="revokeKey({{ $device->id }})" wire:confirm="{{ __('hr_attendance.devices.key-revoke-confirm') }}" class="ms-2 text-sm underline {{ $muted }} hover:text-primary" data-test="device-key-revoke">{{ __('hr_attendance.devices.key-revoke') }}</button>
+                                    @else
+                                        <span class="block {{ $muted }}">{{ __('hr_attendance.devices.key-none') }}</span>
+                                        <button type="button" wire:click="createKey({{ $device->id }})" class="text-sm underline hover:text-primary" data-test="device-key-create">{{ __('hr_attendance.devices.key-create') }}</button>
+                                    @endif
+                                </x-ui.data-table.cell>
                                 <x-ui.data-table.cell :label="__('hr_attendance.devices.last-seen')"><span class="text-sm tabular-nums">{{ $device->last_seen_at?->diffForHumans() ?? '—' }}</span></x-ui.data-table.cell>
                                 <x-ui.data-table.cell :label="__('hr_attendance.devices.last-punch')"><bdi class="text-sm tabular-nums">{{ $device->last_punch_at?->format('d/m/Y H:i') ?? '—' }}</bdi></x-ui.data-table.cell>
                                 <x-ui.data-table.cell>
@@ -310,6 +423,20 @@ new #[Layout('layouts::desk'), Title('hr_attendance.devices.title')] class exten
                                 </x-ui.data-table.cell>
                             @endif
                         </tr>
+                        {{-- A key just made: shown once, here, and never again. --}}
+                        @if ($newKey && $keyForId === $device->id)
+                            <tr wire:key="device-key-{{ $device->id }}" data-new-key>
+                                <td colspan="7">
+                                    <p class="font-semibold">{{ __('hr_attendance.devices.key-shown-once') }}</p>
+                                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                                        <code class="select-all rounded bg-zinc-100 px-3 py-2 font-semibold dark:bg-white/10" dir="ltr">{{ $newKey }}</code>
+                                        <x-ui.button size="sm" type="button" x-data="{}" x-on:click="navigator.clipboard.writeText($el.dataset.key)" data-key="{{ $newKey }}">{{ __('hr_attendance.devices.key-copy') }}</x-ui.button>
+                                        <x-ui.button size="sm" tone="ghost" wire:click="hideKey">{{ __('hr_attendance.devices.key-hide') }}</x-ui.button>
+                                    </div>
+                                    <p class="mt-2 text-sm {{ $muted }}">{{ __('hr_attendance.devices.key-use') }}</p>
+                                </td>
+                            </tr>
+                        @endif
                     @endforeach
                 </x-ui.data-table>
             @endif
