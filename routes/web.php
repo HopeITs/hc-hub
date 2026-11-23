@@ -6,6 +6,7 @@ use App\Http\Controllers\EmployeePickerOptionsController;
 use App\Http\Controllers\MarkNotificationReadController;
 use App\Http\Controllers\MarkTourSeenController;
 use App\Http\Controllers\OpenNotificationController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\SwitchLocaleController;
 use App\Http\Controllers\ToggleDeskItemController;
 use App\Http\Controllers\ToggleNavPinController;
@@ -61,6 +62,13 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
 
     Route::post('notifications/{notification}/read', MarkNotificationReadController::class)
         ->name('notifications.read');
+
+    // This browser's push subscription: always the signed-in user's own rows.
+    Route::controller(PushSubscriptionController::class)->middleware('throttle:push')->group(function () {
+        Route::post('push/subscriptions', 'store')->name('push.store');
+        Route::post('push/subscriptions/sync', 'sync')->name('push.sync');
+        Route::delete('push/subscriptions/current', 'destroyCurrent')->name('push.destroy');
+    });
 
     Route::livewire('admin/users', 'pages::admin.users')
         ->can('viewAny', User::class)

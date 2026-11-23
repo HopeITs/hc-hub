@@ -23,6 +23,8 @@ final class PlatformSchedule implements ScheduleSource
         $schedule->command('notifications:scan frequent')->everyFifteenMinutes()->withoutOverlapping();
         $schedule->command('notifications:scan daily')->dailyAt('06:00')->withoutOverlapping();
         $schedule->command('notifications:digests')->everyMinute()->withoutOverlapping();
+        $schedule->command('notifications:dispatch-due')->everyMinute()->withoutOverlapping();
+        $schedule->command('push:prune')->dailyAt('03:30')->withoutOverlapping();
 
         $schedule->command('model:prune', ['--model' => [Activity::class, TrustedDevice::class, UserNotification::class]])->daily();
         $schedule->command('files:prune')->dailyAt('03:00')->withoutOverlapping();

@@ -300,6 +300,12 @@ return [
         'important' => 'Important',
         'critical' => 'Critical',
     ],
+    'notification_channel' => [
+        'in_app' => 'In the app',
+        'desktop' => 'Computer',
+        'mobile' => 'Phone',
+        'email' => 'Email',
+    ],
     'notification_kind' => [
         'action' => 'Activity',
         'alert' => 'Alert',

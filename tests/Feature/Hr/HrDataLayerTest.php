@@ -22,14 +22,23 @@ test('the HR migrations create every HR-owned table without the hchr_ prefix', f
 });
 
 test('the HR tables nothing reads are dropped and left out of the import', function () {
-    foreach (['push_subscriptions', 'notification_outbox', 'task_attempts'] as $table) {
+    foreach (['task_attempts'] as $table) {
         expect(Schema::hasTable($table))->toBeFalse("{$table} still exists")
             ->and(HrTables::OWNED)->not->toHaveKey($table);
     }
 });
 
+test('the hub owns the notification delivery tables and the HR import leaves them alone', function () {
+    foreach (['notification_preferences', 'push_subscriptions', 'notification_outbox'] as $table) {
+        expect(Schema::hasTable($table))->toBeTrue("{$table} is missing")
+            ->and(Schema::hasTable("zz_drop_{$table}"))->toBeFalse("zz_drop_{$table} still exists")
+            ->and(HrTables::OWNED)->not->toHaveKey($table)
+            ->and(HrTables::targets())->not->toContain($table);
+    }
+});
+
 test('the unread HR preference tables are parked under zz_drop_ and left out of the import', function () {
-    foreach (['assistant_conversations', 'dashboard_layouts', 'navigation_preferences', 'notification_preferences', 'saved_table_views'] as $table) {
+    foreach (['assistant_conversations', 'dashboard_layouts', 'navigation_preferences', 'saved_table_views'] as $table) {
         expect(Schema::hasTable($table))->toBeFalse("{$table} still exists")
             ->and(Schema::hasTable("zz_drop_{$table}"))->toBeTrue("zz_drop_{$table} is missing")
             ->and(HrTables::OWNED)->not->toHaveKey($table);

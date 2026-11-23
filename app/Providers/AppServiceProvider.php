@@ -6,8 +6,12 @@ use App\Actions\Fortify\DisableTwoFactorAuthenticationUnlessRequired;
 use App\Console\PlatformSchedule;
 use App\Enums\Locale;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
+use App\Models\NotificationPreference;
 use App\Models\Role;
 use App\Notifications\Alerts\NotificationSettings;
+use App\Notifications\Delivery\MinishlinkPushClient;
+use App\Notifications\Delivery\NotificationPreferenceGate;
+use App\Notifications\Delivery\PushClient;
 use App\Policies\UserPolicy;
 use App\Support\Access\AccessScope;
 use App\Support\Access\RoleAliases;
@@ -110,6 +114,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(PageCards::class);
         // What each module adds to the sidebar and the Desk, registered once from its own ServiceProvider.
         $this->app->singleton(ModuleRegistry::class);
+        // Notification settings are read once per request or job, never across jobs.
+        $this->app->scoped(NotificationPreferenceGate::class);
+        $this->app->bind(PushClient::class, MinishlinkPushClient::class);
 
         $this->registerDevCommands();
 
@@ -195,6 +202,16 @@ class AppServiceProvider extends ServiceProvider
         $this->configureBlaze();
         $this->configureTimeline();
         $this->configureSchedule();
+        $this->configureNotificationDelivery();
+    }
+
+    /**
+     * A saved notification preference counts at once for the rest of the
+     * request or job that saved it.
+     */
+    protected function configureNotificationDelivery(): void
+    {
+        NotificationPreference::saved(fn (NotificationPreference $preference) => app(NotificationPreferenceGate::class)->forget($preference->user_id));
     }
 
     /**
@@ -393,6 +410,12 @@ class AppServiceProvider extends ServiceProvider
         // once per load (and on a reconnect), so 30 a minute is far above
         // real use while stopping a script from hammering it.
         RateLimiter::for('broadcasting', fn (Request $request) => Limit::perMinute(30)->by(
+            (string) ($request->user()->id ?? $request->ip()),
+        ));
+
+        // POST/DELETE /push/*: a page subscribes after a click and re-reports
+        // its subscription once per load, so 30 a minute is far above real use.
+        RateLimiter::for('push', fn (Request $request) => Limit::perMinute(30)->by(
             (string) ($request->user()->id ?? $request->ip()),
         ));
 
