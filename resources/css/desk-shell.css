@@ -57,14 +57,14 @@
     .dk-side-gh { font-size: var(--text-caption); font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); padding: 4px 10px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     [lang="ar"] .dk-side-gh { letter-spacing: 0; font-size: 12px; }
     .dk-side-g ul { display: grid; gap: 2px; }
-    .dk-side-a { position: relative; display: flex; align-items: center; gap: 11px; height: 38px; padding-inline: 12px; border-radius: 10px; color: var(--ink-2); text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap; transition: background .12s, color .12s; }
+    .dk-side-a { position: relative; display: flex; align-items: center; gap: 11px; height: 38px; padding-inline: 12px; border-radius: var(--radius-control); color: var(--ink-2); text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap; transition: background .12s, color .12s; }
     .dk-side-a:hover { background: var(--sunk); color: var(--ink); }
     .dk-side-a.dk-on { background: var(--brand); color: var(--on-brand); font-weight: 700; }
     .dark .dk-side-a.dk-on { background: var(--sunk); color: var(--ink); }
-    .dark .dk-side-a.dk-on::before { content: ""; position: absolute; inset-block: 7px; inset-inline-start: 0; width: 3px; border-radius: 3px; background: var(--brand); }
+    .dark .dk-side-a.dk-on::before { content: ""; position: absolute; inset-block: 7px; inset-inline-start: 0; width: 3px; border-radius: var(--radius-inset); background: var(--brand); }
     .dk-side-ic { width: 20px !important; height: 20px !important; flex: none; }
     .dk-side-l { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-    .dk-side-badge { min-width: 20px; height: 20px; padding-inline: 6px; border-radius: 999px; background: var(--brand-soft); color: var(--brand-ink); font-size: var(--text-caption); font-weight: 800; display: inline-grid; place-items: center; }
+    .dk-side-badge { min-width: 20px; height: 20px; padding-inline: 6px; border-radius: var(--radius-round); background: var(--brand-soft); color: var(--brand-ink); font-size: var(--text-caption); font-weight: 800; display: inline-grid; place-items: center; }
     .dk-side-a.dk-on .dk-side-badge { background: rgb(255 255 255 / .22); color: inherit; }
 
     /* Rail (collapsed): icons only, group headings become thin rules, badges become dots. */
@@ -95,7 +95,7 @@
 
     /* Current page: a soft brand tint with a brand edge marker, the same at every width */
     .dk-side-a.dk-on { background: var(--brand-soft); color: var(--brand-ink); }
-    .dk-side-a.dk-on::before { content: ""; position: absolute; inset-block: 8px; inset-inline-start: -10px; width: 3px; border-radius: 3px; background: var(--brand); }
+    .dk-side-a.dk-on::before { content: ""; position: absolute; inset-block: 8px; inset-inline-start: -10px; width: 3px; border-radius: var(--radius-inset); background: var(--brand); }
     .dk-side-sub.dk-on::before { inset-inline-start: -11px; }
     .dk-side-a.dk-on .dk-side-badge { background: var(--brand); color: var(--on-brand); }
     .dark .dk-side-a.dk-on { background: var(--sunk); color: var(--ink); }
@@ -106,7 +106,7 @@
     /* Pins: a star beside each link, shown on hover or when pinned */
     .dk-side-li { position: relative; list-style: none; }
     .dk-side-li > .dk-side-a { padding-inline-end: 34px; }
-    .dk-side-pin { position: absolute; top: 50%; inset-inline-end: 6px; transform: translateY(-50%); width: 24px; height: 24px; border: 0; border-radius: 6px; background: none; color: var(--faint); display: grid; place-items: center; cursor: pointer; opacity: 0; }
+    .dk-side-pin { position: absolute; top: 50%; inset-inline-end: 6px; transform: translateY(-50%); width: 24px; height: 24px; border: 0; border-radius: var(--radius-control); background: none; color: var(--faint); display: grid; place-items: center; cursor: pointer; opacity: 0; }
     .dk-side-li:hover .dk-side-pin, .dk-side-pin:focus-visible, .dk-side-pin.dk-pinned { opacity: 1; }
     .dk-side-pin:hover { background: var(--sunk); color: var(--ink); }
     .dk-side-pin.dk-pinned { color: var(--brand); }
@@ -128,12 +128,12 @@
     /* Project context mode */
     .dk-side-ctx { display: flex; flex-direction: column; gap: 2px; }
     .dk-side-ctx ul { display: grid; gap: 2px; }
-    .dk-side-back { display: inline-flex; align-items: center; gap: 6px; width: max-content; max-width: 100%; height: 30px; padding-inline: 10px; border: 0; border-radius: 8px; background: none; color: var(--ink-3); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+    .dk-side-back { display: inline-flex; align-items: center; gap: 6px; width: max-content; max-width: 100%; height: 30px; padding-inline: 10px; border: 0; border-radius: var(--radius-control); background: none; color: var(--ink-3); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; }
     .dk-side-back:hover { background: var(--sunk); color: var(--ink); }
     .dk-side-ctx-t { margin: 2px 0 8px; padding: 0 10px 10px; border-bottom: 1px solid var(--line); font-size: 15px; font-weight: 700; line-height: 1.25; color: var(--ink); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
     /* Fly-out beside the rail */
-    .dk-side-fly { position: fixed; z-index: 75; width: 260px; padding: 6px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--paper); box-shadow: var(--dk-shadow); display: flex; flex-direction: column; gap: 1px; }
+    .dk-side-fly { position: fixed; z-index: 75; width: 260px; padding: 6px; border: 1px solid var(--line-2); border-radius: var(--radius-surface); background: var(--paper); box-shadow: var(--dk-shadow); display: flex; flex-direction: column; gap: 1px; }
     .dk-side-fly-from { opacity: 0; transform: translateX(-4px); }
     [dir="rtl"] .dk-side-fly-from { transform: translateX(4px); }
     /* The pointer: a small notch on the edge facing the rail, aimed at the hovered icon's center */
@@ -168,27 +168,27 @@
         html:not(.dk-nav-open) .dk-side-ctx .dk-side-a.dk-on { background: var(--brand-soft); color: var(--brand-ink); }
         html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-a.dk-on::before,
         html:not(.dk-nav-open) .dk-side-gb.dk-has-on::before,
-        html:not(.dk-nav-open) .dk-side-ctx .dk-side-a.dk-on::before { content: ""; display: block; position: absolute; inset-block: 9px; inset-inline-start: -14px; width: 3px; border-radius: 3px; background: var(--brand); }
+        html:not(.dk-nav-open) .dk-side-ctx .dk-side-a.dk-on::before { content: ""; display: block; position: absolute; inset-block: 9px; inset-inline-start: -14px; width: 3px; border-radius: var(--radius-inset); background: var(--brand); }
         /* On the rail a count is only a small red dot hugging the icon's top corner (user decision 2026-11-10); the
            number stays in the markup for screen readers, and the fly-out on hover still shows each page's count */
-        html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-badge { position: absolute; top: 4px; inset-inline-end: 4px; width: 8px; min-width: 8px; height: 8px; padding: 0; overflow: hidden; border-radius: 999px; font-size: 0; line-height: 0; color: transparent; background: var(--brand); box-shadow: 0 0 0 2px var(--paper); pointer-events: none; }
+        html:not(.dk-nav-open) .dk-side-all > .dk-side-g .dk-side-badge { position: absolute; top: 4px; inset-inline-end: 4px; width: 8px; min-width: 8px; height: 8px; padding: 0; overflow: hidden; border-radius: var(--radius-round); font-size: 0; line-height: 0; color: transparent; background: var(--brand); box-shadow: 0 0 0 2px var(--paper); pointer-events: none; }
         html:not(.dk-nav-open) .dk-side-ctx { align-items: center; }
         html:not(.dk-nav-open) .dk-side-back { width: 34px; height: 34px; padding: 0; justify-content: center; }
     }
 
     /* Fly-out rows keep their labels even while the rail hides every other label */
-    .dk-side-fly .dk-side-a { width: 100% !important; height: 38px !important; gap: 10px !important; padding-inline: 10px 34px !important; justify-content: flex-start !important; margin: 0 !important; border-radius: 9px !important; }
+    .dk-side-fly .dk-side-a { width: 100% !important; height: 38px !important; gap: 10px !important; padding-inline: 10px 34px !important; justify-content: flex-start !important; margin: 0 !important; border-radius: var(--radius-control) !important; }
     .dk-side-fly .dk-side-rec { height: 42px !important; }
     .dk-side-fly .dk-side-l { display: block !important; }
     .dk-side-fly .dk-side-rec .dk-side-l { display: grid !important; flex: 1 1 auto !important; min-width: 0 !important; }
     .dk-side-fly .dk-side-a.dk-on::before { display: none !important; }
     /* In the fly-out a count reads as a quiet numbered pill right after the label, never a blank blob */
     .dk-side-fly .dk-side-l { flex: 0 1 auto !important; }
-    .dk-side-fly .dk-side-badge { position: static !important; width: auto !important; min-width: 20px !important; height: 20px !important; padding: 0 6px !important; margin-inline-end: auto; border-radius: 999px !important; font-size: var(--text-caption) !important; font-weight: 800 !important; line-height: 20px !important; background: var(--brand-soft) !important; color: var(--brand-ink) !important; box-shadow: none !important; }
+    .dk-side-fly .dk-side-badge { position: static !important; width: auto !important; min-width: 20px !important; height: 20px !important; padding: 0 6px !important; margin-inline-end: auto; border-radius: var(--radius-round) !important; font-size: var(--text-caption) !important; font-weight: 800 !important; line-height: 20px !important; background: var(--brand-soft) !important; color: var(--brand-ink) !important; box-shadow: none !important; }
     .dk-side-fly .dk-side-a.dk-on .dk-side-badge { background: var(--brand) !important; color: var(--on-brand) !important; }
     .dk-side-fly .dk-side-pin { display: grid !important; }
 
-    .dk-side-tip { position: fixed; z-index: 80; transform: translateY(-50%); padding: 6px 10px; border-radius: 8px; background: var(--ink); color: var(--paper); font-size: 13px; font-weight: 700; white-space: nowrap; pointer-events: none; box-shadow: var(--dk-shadow); }
+    .dk-side-tip { position: fixed; z-index: 80; transform: translateY(-50%); padding: 6px 10px; border-radius: var(--radius-control); background: var(--ink); color: var(--paper); font-size: 13px; font-weight: 700; white-space: nowrap; pointer-events: none; box-shadow: var(--dk-shadow); }
 
     .dk-side-scrim { display: none; }
 
@@ -218,7 +218,7 @@
     .dk-where-g i { width: 8px; height: 8px; border: 2px solid var(--line-2); }
     .dk-where-g span { font-size: var(--text-caption); font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); overflow: hidden; text-overflow: ellipsis; }
     [lang="ar"] .dk-where-g span { letter-spacing: 0; text-transform: none; font-size: 12.5px; }
-    .dk-where-p::before { content: ""; flex: none; width: 22px; height: 2px; margin-inline-start: 2px; border-radius: 2px; background: var(--line-2); transform-origin: left center; animation: dk-thread-in .42s .08s cubic-bezier(.2, .8, .2, 1) both; }
+    .dk-where-p::before { content: ""; flex: none; width: 22px; height: 2px; margin-inline-start: 2px; border-radius: var(--radius-inset); background: var(--line-2); transform-origin: left center; animation: dk-thread-in .42s .08s cubic-bezier(.2, .8, .2, 1) both; }
     [dir="rtl"] .dk-where-p::before { transform-origin: right center; }
     .dk-where-p i { width: 12px; height: 12px; border: 3px solid var(--brand); background: var(--paper); }
     .dk-where-p a { font-size: 15px; font-weight: 800; color: var(--ink); text-decoration: none; overflow: hidden; text-overflow: ellipsis; letter-spacing: -.005em; }
@@ -235,7 +235,7 @@
     .dk-top-find .dk-ask { margin-inline: 0; max-width: none; box-shadow: 0 1px 2px rgb(16 24 40 / .05); transition: border-color .15s, box-shadow .15s, background .15s, transform .08s; }
     .dk-top-find .dk-ask:hover { border-color: var(--ink-3); box-shadow: 0 2px 8px -2px rgb(16 24 40 / .12); }
     .dk-top-find .dk-ask:active { transform: scale(.992); }
-    .dk-panels-btn { height: 44px; border-radius: 999px; padding-inline: 16px; flex: none; transition: border-color .15s, background .15s, transform .08s; }
+    .dk-panels-btn { height: 44px; border-radius: var(--radius-round); padding-inline: 16px; flex: none; transition: border-color .15s, background .15s, transform .08s; }
     .dk-panels-btn:hover { border-color: var(--ink-3); }
     .dk-panels-btn:active { transform: scale(.96); }
 
@@ -261,9 +261,9 @@
     }
 
     /* Tools: bell, help, language and theme in one slim floating dock (40px), 32px round buttons, a tiny count chip on the bell. */
-    .dk-tools { display: flex; align-items: center; gap: 6px; height: 42px; padding-inline: 8px; border-radius: 999px; background: var(--paper); border: 1px solid var(--line); box-shadow: 0 1px 2px rgb(16 24 40 / .04), 0 6px 16px -10px rgb(16 24 40 / .18); }
+    .dk-tools { display: flex; align-items: center; gap: 6px; height: 42px; padding-inline: 8px; border-radius: var(--radius-round); background: var(--paper); border: 1px solid var(--line); box-shadow: 0 1px 2px rgb(16 24 40 / .04), 0 6px 16px -10px rgb(16 24 40 / .18); }
     .dark .dk-tools { box-shadow: none; }
-    .dk-top .dk-tools .dk-iconbtn, .dk-tools [data-notification-bell] > button { position: relative; width: 32px !important; min-width: 32px !important; height: 32px !important; padding: 0; border-radius: 999px !important; color: var(--ink-3) !important; background: transparent !important; box-shadow: none !important; transition: background .15s, color .15s, transform .08s; }
+    .dk-top .dk-tools .dk-iconbtn, .dk-tools [data-notification-bell] > button { position: relative; width: 32px !important; min-width: 32px !important; height: 32px !important; padding: 0; border-radius: var(--radius-round) !important; color: var(--ink-3) !important; background: transparent !important; box-shadow: none !important; transition: background .15s, color .15s, transform .08s; }
     .dk-top .dk-tools .dk-iconbtn svg, .dk-tools [data-notification-bell] > button svg { width: 18px !important; height: 18px !important; stroke-width: 1.6; }
     .dk-top .dk-tools .dk-iconbtn:hover, .dk-tools [data-notification-bell] > button:hover, .dk-top .dk-tools .dk-iconbtn[aria-expanded="true"], .dk-tools [data-notification-bell] > button[aria-expanded="true"] { background: var(--sunk) !important; color: var(--ink) !important; }
     /* !important: the bell's own Tailwind utilities sit in a later layer. */
@@ -284,16 +284,16 @@
     @keyframes dk-turn { from { opacity: 0; transform: rotate(-70deg) scale(.6); } to { opacity: 1; transform: none; } }
 
     /* Tooltips: shown after a short hover rest or at once on keyboard focus, never over an open menu. */
-    .dk-tip::after { content: attr(data-tip); position: absolute; z-index: 45; top: calc(100% + 8px); left: 50%; transform: translate(-50%, -3px); padding: 5px 9px; border-radius: 7px; background: var(--ink); color: var(--paper); font-size: 12px; font-weight: 700; line-height: 1.4; letter-spacing: 0; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .12s, transform .12s; }
+    .dk-tip::after { content: attr(data-tip); position: absolute; z-index: 45; top: calc(100% + 8px); left: 50%; transform: translate(-50%, -3px); padding: 5px 9px; border-radius: var(--radius-control); background: var(--ink); color: var(--paper); font-size: 12px; font-weight: 700; line-height: 1.4; letter-spacing: 0; white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .12s, transform .12s; }
     @media (hover: hover) { .dk-tip:hover::after { opacity: 1; transform: translate(-50%, 0); transition-delay: .45s; } }
     .dk-tip:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
     .dk-tip[aria-expanded="true"]::after { opacity: 0 !important; transition-delay: 0s !important; }
 
     /* The avatar button: the photo alone, its end on the page content's edge (the bar and .dk-wrap both pad by --page-edge). */
     .dk-usermenu { display: flex; margin-inline-start: 10px; }
-    .dk-me { display: flex; line-height: 0; padding: 0; border: 0; border-radius: 999px; background: none; cursor: pointer; transition: transform .08s; }
+    .dk-me { display: flex; line-height: 0; padding: 0; border: 0; border-radius: var(--radius-round); background: none; cursor: pointer; transition: transform .08s; }
     .dk-me:active { transform: scale(.95); }
-    .dk-top .dk-me .dk-avatar { display: block; width: 42px; height: 42px; border-radius: 999px; transition: filter .15s, box-shadow .15s; }
+    .dk-top .dk-me .dk-avatar { display: block; width: 42px; height: 42px; border-radius: var(--radius-round); transition: filter .15s, box-shadow .15s; }
     /* No ring on the photo; hover or an open menu only dims it a little. The ring below is for keyboard focus only. */
     .dk-me:hover .dk-avatar, .dk-me[aria-expanded="true"] .dk-avatar { filter: brightness(.92); }
     .dk-me:focus-visible { outline: none; }
@@ -301,10 +301,10 @@
     .dk-avatar-lg { width: 40px; height: 40px; font-size: 14px; flex: none; }
 
     /* Help and avatar menus: rows with an icon, a label and a hint; they grow out of their button. */
-    .dk-menu { top: calc(100% + 8px); width: 300px; padding: 6px; border-radius: 14px; gap: 1px; transform-origin: top right; }
+    .dk-menu { top: calc(100% + 8px); width: 300px; padding: 6px; border-radius: var(--radius-surface); gap: 1px; transform-origin: top right; }
     [dir="rtl"] .dk-menu { transform-origin: top left; }
     .dk-menu .dk-pop-h { padding: 6px 10px 4px; }
-    .dk-menu [role="menuitem"] { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 40px; height: auto; padding: 8px 10px; border: 0; border-radius: 10px; background: none; color: var(--ink); font: inherit; text-align: start; text-decoration: none; cursor: pointer; }
+    .dk-menu [role="menuitem"] { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 40px; height: auto; padding: 8px 10px; border: 0; border-radius: var(--radius-control); background: none; color: var(--ink); font: inherit; text-align: start; text-decoration: none; cursor: pointer; }
     .dk-menu [role="menuitem"]:hover, .dk-menu [role="menuitem"]:focus-visible { background: var(--sunk); outline: none; }
     .dk-menu [role="menuitem"]:focus-visible { box-shadow: inset 0 0 0 2px var(--line-2); }
     .dk-menu-ic { width: 20px; height: 20px; flex: none; color: var(--ink-3); transition: color .12s; }
@@ -359,7 +359,7 @@
     @media (max-width: 560px) {
         .dk-top-find .dk-ask .dk-ph { display: none; }
         /* desk.css makes Ask a fixed bottom bar up to 720px; on a phone it is a round search button in the bar instead. */
-        .dk-top-find .dk-ask { position: static; flex: none; width: 44px; height: 44px; padding: 0; justify-content: center; border: 1px solid var(--line-2); border-radius: 999px; background: var(--paper); backdrop-filter: none; -webkit-backdrop-filter: none; }
+        .dk-top-find .dk-ask { position: static; flex: none; width: 44px; height: 44px; padding: 0; justify-content: center; border: 1px solid var(--line-2); border-radius: var(--radius-round); background: var(--paper); backdrop-filter: none; -webkit-backdrop-filter: none; }
         .dk-top-find .dk-ask .dk-inner { display: contents; }
         .dk-top-find { justify-content: flex-start; }
         /* The language and theme pair moves into the avatar menu. Scoped to
@@ -387,7 +387,7 @@
 /* ---------- Centered popups (shell v2): no side sheets anywhere ---------- */
 @layer components {
     /* The Desk's own sheets (record sheets, Customize, Panels) open in the middle of the screen. */
-    .dk-sheet { top: 50%; bottom: auto; left: 50%; right: auto; inset-inline-end: auto; transform: translate(-50%, -50%); width: min(var(--pop-w), calc(100vw - 32px)); height: var(--pop-h); max-height: calc(100dvh - 32px); border-radius: 18px; overflow: hidden; animation: dk-pop .2s cubic-bezier(.2, .8, .2, 1); }
+    .dk-sheet { top: 50%; bottom: auto; left: 50%; right: auto; inset-inline-end: auto; transform: translate(-50%, -50%); width: min(var(--pop-w), calc(100vw - 32px)); height: var(--pop-h); max-height: calc(100dvh - 32px); border-radius: var(--radius-surface); overflow: hidden; animation: dk-pop .2s cubic-bezier(.2, .8, .2, 1); }
     /* inset-inline-end: auto above is `left: auto` in RTL, which would drop the centring and push a wide sheet off the screen. */
     [dir="rtl"] .dk-sheet { left: 50%; animation-name: dk-pop; }
     .dk-sheet.dk-wide { width: min(var(--pop-w), calc(100vw - 32px)); }
@@ -416,7 +416,7 @@
  * to 40rem and up so forms.css's full-screen phone layout still applies below it.
  */
 @media (width >= 40rem) {
-    [data-flux-modal] > dialog.modal-shell:not([data-flux-flyout]):not([data-flux-modal-overflow]) { width: min(var(--pop-w), calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 48px); border-radius: 18px; }
+    [data-flux-modal] > dialog.modal-shell:not([data-flux-flyout]):not([data-flux-modal-overflow]) { width: min(var(--pop-w), calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 48px); border-radius: var(--radius-surface); }
     [data-flux-modal] > dialog.modal-shell-sm:not([data-flux-flyout]):not([data-flux-modal-overflow]) { width: min(440px, calc(100vw - 32px)); }
     /* :has(), not a class: Flux keeps the <dialog> wire:ignore.self, so a class added when the body arrives never lands. */
     [data-flux-modal] > dialog.modal-shell:has(.modal-shell-main):not([data-flux-flyout]):not([data-flux-modal-overflow]) { width: min(var(--pop-w-indexed), calc(100vw - 32px)); }
@@ -434,12 +434,12 @@
     .dk-pp-tools { display: flex; align-items: center; gap: 8px; flex: none; }
     .dk-pp-body { display: block; background: var(--ground); padding-block: 18px 24px; overflow-y: auto; }
     .dk-pp-add { width: 340px; max-height: min(420px, 60vh); overflow-y: auto; top: 44px; }
-    .dk-pp-add > button { height: auto; min-height: 44px; display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 8px; border: 0; background: none; border-radius: 10px; text-align: start; cursor: pointer; color: var(--ink); }
+    .dk-pp-add > button { height: auto; min-height: 44px; display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 8px; border: 0; background: none; border-radius: var(--radius-control); text-align: start; cursor: pointer; color: var(--ink); }
     .dk-pp-add > button:hover { background: var(--sunk); }
     .dk-pp-add .dk-li-t { display: grid; gap: 2px; min-width: 0; }
     .dk-pp-add .dk-li-t strong { font-size: 13.5px; }
     .dk-pp-add .dk-li-t .dk-is { font-size: 12px; color: var(--ink-3); line-height: 1.35; }
-    .dk-pp-add .dk-li-ic { width: 30px; height: 30px; flex: none; border-radius: 8px; background: var(--sunk); display: grid; place-items: center; color: var(--ink-2); }
+    .dk-pp-add .dk-li-ic { width: 30px; height: 30px; flex: none; border-radius: var(--radius-control); background: var(--sunk); display: grid; place-items: center; color: var(--ink-2); }
     .dk-pp-ghost { min-height: 260px; background: linear-gradient(90deg, var(--paper), var(--sunk), var(--paper)); background-size: 200% 100%; animation: dk-shimmer 1.2s linear infinite; }
     @keyframes dk-shimmer { to { background-position: -200% 0; } }
     .dk-pp-empty { display: grid; justify-items: center; gap: 8px; max-width: 420px; margin: 8vh auto 0; text-align: center; color: var(--ink-3); }
@@ -467,7 +467,7 @@
      * top bar's tools, and the highlighted row (mouse or arrows) shows the ↵ that opens it.
      */
     /* No backdrop blur: every key changes the palette, and a blurred page under it was re-blurred each time, so the whole screen flickered while typing. */
-    .dk-pal { width: min(640px, calc(100% - 32px)); height: min(600px, 72vh); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 30px 70px -24px rgb(16 24 40 / .45), 0 2px 6px rgb(16 24 40 / .06); animation: dk-pal-in .22s cubic-bezier(.2, .8, .2, 1); }
+    .dk-pal { width: min(640px, calc(100% - 32px)); height: min(600px, 72vh); border: 1px solid var(--line); border-radius: var(--radius-surface); box-shadow: 0 30px 70px -24px rgb(16 24 40 / .45), 0 2px 6px rgb(16 24 40 / .06); animation: dk-pal-in .22s cubic-bezier(.2, .8, .2, 1); }
     .dark .dk-pal { box-shadow: 0 30px 70px -20px rgb(0 0 0 / .7); }
     @keyframes dk-pal-in { from { opacity: 0; transform: translate(-50%, -10px) scale(.98); } to { opacity: 1; transform: translateX(-50%); } }
 
@@ -480,7 +480,7 @@
     .dk-pal-busy { position: absolute; inset-inline: 0; bottom: -1px; height: 2px; overflow: hidden; pointer-events: none; }
     .dk-pal-busy::after { content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 40%; background: linear-gradient(90deg, transparent, var(--brand), transparent); animation: dk-pal-scan 1s ease-in-out infinite; will-change: transform; }
     @keyframes dk-pal-scan { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
-    .dk-pal-in .dk-pal-esc { flex: none; height: 24px; padding-inline: 9px; border: 0; border-radius: 999px; background: var(--sunk); color: var(--ink-3); font: inherit; font-size: var(--text-caption); font-weight: 700; letter-spacing: .02em; cursor: pointer; transition: background .15s, color .15s; }
+    .dk-pal-in .dk-pal-esc { flex: none; height: 24px; padding-inline: 9px; border: 0; border-radius: var(--radius-round); background: var(--sunk); color: var(--ink-3); font: inherit; font-size: var(--text-caption); font-weight: 700; letter-spacing: .02em; cursor: pointer; transition: background .15s, color .15s; }
     .dk-pal-in .dk-pal-esc:hover { background: var(--line); color: var(--ink); }
     .dk-pal-in .dk-pal-esc:focus-visible { outline: 2px solid var(--ink-3); outline-offset: 2px; }
 
@@ -489,7 +489,7 @@
     .dk-pal-g::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
     /* Rows: a round icon, the label over its context, and ↵ on the highlighted one. */
-    .dk-pal-i { position: relative; min-height: 50px; padding: 7px 10px; border-radius: 14px; color: var(--ink); text-decoration: none; transition: background .12s; }
+    .dk-pal-i { position: relative; min-height: 50px; padding: 7px 10px; border-radius: var(--radius-surface); color: var(--ink); text-decoration: none; transition: background .12s; }
     .dk-pal-t { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 600; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .dk-pal-t small { margin-top: 1px; font-size: 12.5px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; }
     .dk-pal-i .dk-ic { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper); color: var(--ink-3); transition: border-color .12s, color .12s; }
@@ -497,7 +497,7 @@
     .dk-pal-act .dk-ic, .dk-pal-act.dk-sel .dk-ic, .dk-pal-act:hover .dk-ic { border-color: transparent; background: var(--brand-soft); color: var(--brand-ink); }
     .dk-pal-act .dk-pal-t { font-weight: 700; }
     .dk-pal-i[aria-disabled="true"] { opacity: .55; cursor: default; }
-    .dk-pal-ret { flex: none; display: grid; place-items: center; width: 26px; height: 22px; border-radius: 7px; background: var(--paper); box-shadow: 0 0 0 1px var(--line); color: var(--ink-3); font-size: 13px; font-weight: 700; line-height: 1; opacity: 0; transform: translateX(-4px); transition: opacity .12s, transform .12s; }
+    .dk-pal-ret { flex: none; display: grid; place-items: center; width: 26px; height: 22px; border-radius: var(--radius-control); background: var(--paper); box-shadow: 0 0 0 1px var(--line); color: var(--ink-3); font-size: 13px; font-weight: 700; line-height: 1; opacity: 0; transform: translateX(-4px); transition: opacity .12s, transform .12s; }
     .dk-pal-ret svg.dk-i { width: 13px; height: 13px; }
     [dir="rtl"] .dk-pal-ret { transform: translateX(4px) scaleX(-1); }
     :is(.dk-pal-i, .dk-pal-q).dk-sel .dk-pal-ret { opacity: 1; transform: none; }
@@ -506,8 +506,8 @@
     /* Suggestions: one thread of rings; the highlighted question's ring turns brand, like the top bar's current page. */
     .dk-pal-try { display: grid; }
     .dk-pal-thread { position: relative; display: grid; gap: 2px; }
-    .dk-pal-thread::before { content: ""; position: absolute; inset-block: 20px; inset-inline-start: 22px; width: 2px; border-radius: 2px; background: var(--line); }
-    .dk-pal-q { position: relative; display: flex; align-items: center; gap: 14px; width: 100%; min-height: 40px; padding-block: 6px; padding-inline: 16px 10px; border: 0; border-radius: 14px; background: none; color: var(--ink-2); font: inherit; text-align: start; cursor: pointer; transition: background .12s, color .12s; }
+    .dk-pal-thread::before { content: ""; position: absolute; inset-block: 20px; inset-inline-start: 22px; width: 2px; border-radius: var(--radius-inset); background: var(--line); }
+    .dk-pal-q { position: relative; display: flex; align-items: center; gap: 14px; width: 100%; min-height: 40px; padding-block: 6px; padding-inline: 16px 10px; border: 0; border-radius: var(--radius-surface); background: none; color: var(--ink-2); font: inherit; text-align: start; cursor: pointer; transition: background .12s, color .12s; }
     .dk-pal-q > i { position: relative; flex: none; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--line-2); background: var(--paper); transition: border-color .15s, border-width .15s; }
     .dk-pal-q.dk-sel, .dk-pal-q:hover, .dk-pal-i.dk-sel, .dk-pal-i:hover { background: var(--sunk); color: var(--ink); }
     .dk-pal-q.dk-sel > i { border: 4px solid var(--brand); }
@@ -519,14 +519,14 @@
     .dk-pal-none span { font-size: 13.5px; color: var(--ink-3); }
 
     /* Answers: the figure is the headline, with a live brand dot (they are read from the same data as the panels). */
-    .dk-answer { display: flex; align-items: flex-start; gap: 14px; margin: 10px 2px 2px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(135deg, var(--sunk), var(--paper) 70%); font-size: 13.5px; color: var(--ink-3); }
+    .dk-answer { display: flex; align-items: flex-start; gap: 14px; margin: 10px 2px 2px; padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--radius-surface); background: linear-gradient(135deg, var(--sunk), var(--paper) 70%); font-size: 13.5px; color: var(--ink-3); }
     .dk-answer > i { flex: none; width: 10px; height: 10px; margin-top: 9px; border-radius: 50%; background: var(--brand); }
     .dk-answer > div { display: grid; gap: 3px; min-width: 0; }
     .dk-answer strong { display: block; margin: 0; font-size: 20px; font-weight: 800; line-height: 1.25; letter-spacing: -.015em; color: var(--ink); }
 
     .dk-pal-foot { align-items: center; gap: 4px 18px; padding: 10px 20px; font-size: 12px; }
     .dk-pal-foot > span { display: inline-flex; align-items: center; gap: 6px; }
-    .dk-pal-foot kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding-inline: 5px; border: 0; border-radius: 6px; background: var(--sunk); font-family: inherit; font-size: var(--text-caption); font-weight: 700; color: var(--ink-2); }
+    .dk-pal-foot kbd { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding-inline: 5px; border: 0; border-radius: var(--radius-control); background: var(--sunk); font-family: inherit; font-size: var(--text-caption); font-weight: 700; color: var(--ink-2); }
     .dk-pal-foot kbd svg.dk-i { width: 12px; height: 12px; }
     [dir="rtl"] .dk-pal-foot kbd svg.dk-i { transform: scaleX(-1); }
 
@@ -542,7 +542,7 @@
  * has its own flat layout (desk-story.css).
  */
 @layer components {
-    .dk-story .dk-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1px solid var(--line); border-radius: 14px; background: var(--paper); margin-bottom: 14px; overflow: hidden; }
+    .dk-story .dk-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); border: 1px solid var(--line); border-radius: var(--radius-surface); background: var(--paper); margin-bottom: 14px; overflow: hidden; }
     .dk-story .dk-facts > div, [dir="rtl"] .dk-story .dk-facts > div { padding: 14px 18px; margin: 0; border: 0; border-inline-end: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 
 }
@@ -572,7 +572,7 @@
     .dk-pfilter.dk-on:hover { background: var(--brand-hover); }
     .dk-sheet.dk-pf-pop { width: min(480px, calc(100vw - 32px)); height: auto; max-height: calc(100dvh - 48px); z-index: 71; }
     .dk-pf-scrim { z-index: 70; }
-    .dk-pf-pop .dk-field input, .dk-pf-select { height: 42px; width: 100%; padding-inline: 12px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--paper); color: var(--ink); font-size: 14px; }
+    .dk-pf-pop .dk-field input, .dk-pf-select { height: 42px; width: 100%; padding-inline: 12px; border-radius: var(--radius-control); border: 1px solid var(--line-2); background: var(--paper); color: var(--ink); font-size: 14px; }
     .dk-pf-pop .dk-sh-f { justify-content: flex-end; }
 }
 
@@ -594,7 +594,7 @@
     .dk-panel .dk-plist > li { padding-block: 7px; }
     /* Pipeline: the stage funnel becomes one row of chips, only stages that hold proposals. */
     .dk-funnel-chips { display: flex !important; flex-wrap: nowrap; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 6px; }
-    .dk-funnel-chips .dk-fb { display: inline-flex !important; align-items: center; gap: 6px; flex: none; width: auto !important; height: 30px; padding-inline: 10px; border-radius: 999px; border: 1px solid var(--line-2); }
+    .dk-funnel-chips .dk-fb { display: inline-flex !important; align-items: center; gap: 6px; flex: none; width: auto !important; height: 30px; padding-inline: 10px; border-radius: var(--radius-round); border: 1px solid var(--line-2); }
     .dk-funnel-chips .dk-fbar { display: none !important; }
     .dk-funnel-chips .dk-fb.dk-on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 }
@@ -607,7 +607,7 @@
 }
 @layer components {
     .dk-pf-body { gap: 14px; }
-    .dk-pf-search { display: flex; align-items: center; gap: 10px; height: 44px; padding-inline: 14px; border: 1px solid var(--line-2); border-radius: 12px; background: var(--tint); color: var(--ink-3); }
+    .dk-pf-search { display: flex; align-items: center; gap: 10px; height: 44px; padding-inline: 14px; border: 1px solid var(--line-2); border-radius: var(--radius-surface); background: var(--tint); color: var(--ink-3); }
     .dk-pf-search:focus-within { border-color: var(--ink-3); background: var(--paper); }
     .dk-pf-search input { flex: 1; min-width: 0; height: 100%; border: 0 !important; background: none !important; box-shadow: none !important; outline: none; color: var(--ink); font-size: 14px; }
     .dk-pf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
@@ -669,7 +669,7 @@
     .dk-pb > .dk-glance { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: center; row-gap: 16px; margin: 0; padding: 0; list-style: none; }
     .dk-glance > li { display: flex; min-width: 0; padding-inline: 16px; border-inline-start: 1px solid var(--line); }
     .dk-glance > li:nth-child(2n + 1) { border-inline-start: 0; padding-inline-start: 0; }
-    .dk-gl-a { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-block: 4px; border-radius: 8px; color: inherit; text-decoration: none; }
+    .dk-gl-a { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding-block: 4px; border-radius: var(--radius-control); color: inherit; text-decoration: none; }
     a.dk-gl-a:hover strong { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
     a.dk-gl-a:focus-visible { outline: 2px solid var(--ink-2); outline-offset: 4px; }
     .dk-gl-a strong { font-size: clamp(26px, 4.4cqi, 44px); font-weight: 800; letter-spacing: -.03em; line-height: 1; color: var(--ink); white-space: nowrap; font-variant-numeric: tabular-nums; }
@@ -713,7 +713,7 @@
     /* Waiting on others: kind icon · what is stuck and since when · days waiting and Poke. */
     .dk-wait > li { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 6px 12px; padding-block: 10px; border-bottom: 1px solid var(--line); }
     .dk-wait > li:last-child { border-bottom: 0; }
-    .dk-wt-ic { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: var(--sunk); color: var(--ink-2); }
+    .dk-wt-ic { width: 32px; height: 32px; border-radius: var(--radius-control); display: grid; place-items: center; background: var(--sunk); color: var(--ink-2); }
     .dk-scope .dk-wt-ic svg.dk-i { width: 16px; height: 16px; }
     .dk-wt-task { background: var(--active-soft); color: var(--active); }
     .dk-wt-monthly-report { background: var(--warn-soft); color: var(--warn); }
@@ -731,11 +731,11 @@
 
     /* My agenda, Month: a real month grid (weekday header, one row per week, days of the next and last month muted) that fills the card. */
     .dk-pb > .dk-mm-h { padding-bottom: 6px; }
-    .dk-pb > .dk-mcal { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: auto repeat(var(--weeks, 6), minmax(0, 1fr)); gap: 1px; margin: 0; background: var(--line); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+    .dk-pb > .dk-mcal { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: auto repeat(var(--weeks, 6), minmax(0, 1fr)); gap: 1px; margin: 0; background: var(--line); border: 1px solid var(--line); border-radius: var(--radius-control); overflow: hidden; }
     .dk-mcal .dk-wd { padding: 5px 0; background: var(--tint); font-size: var(--text-caption); font-weight: 800; color: var(--ink-3); text-align: center; text-transform: uppercase; letter-spacing: .04em; }
     [lang="ar"] .dk-mcal .dk-wd { letter-spacing: 0; text-transform: none; }
     .dk-mday { min-width: 0; min-height: 0; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 2px; padding: 4px 6px; border: 0; border-radius: 0; background: var(--paper); color: var(--ink-2); font-size: 12px; font-weight: 700; line-height: 1; text-align: start; cursor: pointer; }
-    .dk-mday > .dk-num { display: inline-grid; place-items: center; min-width: 20px; height: 20px; border-radius: 999px; }
+    .dk-mday > .dk-num { display: inline-grid; place-items: center; min-width: 20px; height: 20px; border-radius: var(--radius-round); }
     .dk-mday:not(.dk-mday-off):hover { background: var(--sunk); }
     .dk-mday.dk-past { color: var(--ink-3); }
     .dk-mday.dk-has { background: var(--tint); }
@@ -777,7 +777,7 @@
 @layer components {
     .dk-psearch-btn { color: var(--ink-3); }
     .dk-psearch-btn.dk-on { color: var(--on-brand); background: var(--brand); }
-    .dk-psearch { display: flex; align-items: center; gap: 8px; height: 36px; margin: 0 12px 8px; padding-inline: 10px; border: 1px solid var(--line-2); border-radius: 10px; background: var(--tint); color: var(--ink-3); flex: none; }
+    .dk-psearch { display: flex; align-items: center; gap: 8px; height: 36px; margin: 0 12px 8px; padding-inline: 10px; border: 1px solid var(--line-2); border-radius: var(--radius-control); background: var(--tint); color: var(--ink-3); flex: none; }
     .dk-psearch:focus-within { border-color: var(--ink-3); background: var(--paper); }
     .dk-scope .dk-psearch svg.dk-i { width: 16px; height: 16px; }
     .dk-psearch input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; outline: none; color: var(--ink); font-size: 13.5px; }

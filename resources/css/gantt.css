@@ -4,7 +4,7 @@
     /* Inline Gantt cell editor: flush with its cell, one focus ring. */
     .gantt-editor {
         height: 1.5rem;
-        border-radius: 0.25rem;
+        border-radius: var(--radius-inset);
         border: 1px solid var(--color-secondary-light);
         background: #fff;
         padding-inline: 0.25rem;
@@ -42,7 +42,7 @@
         width: 0.625rem;
         height: 0.625rem;
         transform: translateY(-50%);
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         border: 2px solid var(--color-primary);
         background: #fff;
         cursor: crosshair;

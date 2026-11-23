@@ -639,7 +639,7 @@
         justify-content: center;
         inline-size: 2rem;
         block-size: 2rem;
-        border-radius: 0.5rem;
+        border-radius: var(--radius-control);
         color: var(--register-muted);
         cursor: pointer;
         touch-action: manipulation;

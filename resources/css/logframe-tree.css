@@ -20,18 +20,18 @@
     .lf-tree ul > li:first-child::before, .lf-tree ul > li:last-child::after { border-top-color: transparent; }
     .lf-tree ul > li:only-child::before { display: none; }
     .lf-tree ul > li:only-child::after { border-top: 0; }
-    .lf-tree ul > li:first-child::after { border-start-start-radius: 8px; }
-    .lf-tree ul > li:last-child::before { border-inline-end: 2px solid var(--color-secondary-soft); border-start-end-radius: 8px; }
+    .lf-tree ul > li:first-child::after { border-start-start-radius: var(--radius-control); }
+    .lf-tree ul > li:last-child::before { border-inline-end: 2px solid var(--color-secondary-soft); border-start-end-radius: var(--radius-control); }
     .lf-tree ul > li:last-child:not(:only-child)::after { border: 0; }
 
-    .lf-box { width: 15rem; overflow: hidden; border-radius: 12px; border: 1px solid var(--color-secondary-soft); background: var(--color-white); box-shadow: var(--shadow-card); transition: border-color .12s, transform .12s; }
+    .lf-box { width: 15rem; overflow: hidden; border-radius: var(--radius-surface); border: 1px solid var(--color-secondary-soft); background: var(--color-white); box-shadow: var(--shadow-card); transition: border-color .12s, transform .12s; }
     .lf-box:hover { border-color: var(--color-secondary-light); transform: translateY(-1px); }
     .lf-box:focus-within { outline: 2px solid var(--color-secondary-light); outline-offset: 2px; }
     .lf-box[data-status="behind"] { border-color: color-mix(in srgb, var(--color-status-critical) 45%, transparent); }
     .lf-box[data-status="waiting"] { border-color: color-mix(in srgb, var(--color-status-warn) 45%, transparent); }
     .lf-box-text { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
-    .lf-fold { position: relative; z-index: 1; margin-top: 9px; display: inline-flex; align-items: center; gap: 4px; border-radius: 999px; border: 1px solid var(--color-secondary-soft); background: var(--color-white); padding: 2px 10px; font-size: 12px; font-weight: 600; color: var(--color-secondary-medium); }
+    .lf-fold { position: relative; z-index: 1; margin-top: 9px; display: inline-flex; align-items: center; gap: 4px; border-radius: var(--radius-round); border: 1px solid var(--color-secondary-soft); background: var(--color-white); padding: 2px 10px; font-size: 12px; font-weight: 600; color: var(--color-secondary-medium); }
     .lf-fold:hover { color: var(--color-secondary-dark); border-color: var(--color-secondary-light); }
     /* The fold button sits on the stem: the child rail starts under it. */
     .lf-fold::before { content: ""; position: absolute; bottom: 100%; inset-inline-start: calc(50% - 1px); height: 9px; border-inline-start: 2px solid var(--color-secondary-soft); }

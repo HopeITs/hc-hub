@@ -51,7 +51,7 @@
     .dk-ph-tools { flex: none; display: flex; align-items: center; gap: 2px; }
     @container panel (max-width: 419px) {
         @media (hover: hover) {
-            .dk-ph-tools { position: absolute; z-index: 3; inset-block-start: 8px; inset-inline-end: calc(var(--panel-pad) - 6px); padding-inline-start: 22px; border-radius: 8px; background: linear-gradient(to right, transparent, var(--paper) 18px); opacity: 0; pointer-events: none; transition: opacity .15s; }
+            .dk-ph-tools { position: absolute; z-index: 3; inset-block-start: 8px; inset-inline-end: calc(var(--panel-pad) - 6px); padding-inline-start: 22px; border-radius: var(--radius-control); background: linear-gradient(to right, transparent, var(--paper) 18px); opacity: 0; pointer-events: none; transition: opacity .15s; }
             [dir="rtl"] .dk-ph-tools { background: linear-gradient(to left, transparent, var(--paper) 18px); }
             .dk-panel:hover .dk-ph-tools, .dk-panel:focus-within .dk-ph-tools, .dk-ph-tools:has([aria-expanded="true"]) { opacity: 1; pointer-events: auto; }
             /* A search or filter that is on stays in sight, in the header's own line. */
@@ -105,7 +105,7 @@
 
     /* ── Resize handles: edges and corner ─────────────────────────── */
     .dk-rz { position: absolute; z-index: 9; touch-action: none; -webkit-user-select: none; user-select: none; opacity: 0; transition: opacity .15s ease; }
-    .dk-rz::after { content: ""; position: absolute; border-radius: 99px; background: var(--ink-3); transition: background .15s, transform .15s; }
+    .dk-rz::after { content: ""; position: absolute; border-radius: var(--radius-round); background: var(--ink-3); transition: background .15s, transform .15s; }
     .dk-rz:hover::after { background: var(--ink-2); }
     .dk-rz-end, .dk-rz-start { inset-block: 24px; width: 14px; cursor: ew-resize; }
     .dk-rz-end { inset-inline-end: -7px; }
@@ -117,7 +117,7 @@
     .dk-rz-top::after, .dk-rz-bottom::after { inset-inline: calc(50% - 16px); inset-block-start: 5px; height: 4px; }
     .dk-rz-corner { inset-block-end: -4px; inset-inline-end: -4px; width: 24px; height: 24px; cursor: nwse-resize; }
     [dir="rtl"] .dk-rz-corner { cursor: nesw-resize; }
-    .dk-rz-corner::after { inset-block-end: 8px; inset-inline-end: 8px; width: 10px; height: 10px; border-radius: 0; background: none; border-block-end: 2.5px solid var(--ink-3); border-inline-end: 2.5px solid var(--ink-3); border-end-end-radius: 6px; }
+    .dk-rz-corner::after { inset-block-end: 8px; inset-inline-end: 8px; width: 10px; height: 10px; border-radius: 0; background: none; border-block-end: 2.5px solid var(--ink-3); border-inline-end: 2.5px solid var(--ink-3); border-end-end-radius: var(--radius-control); }
     .dk-rz-corner:hover::after { background: none; border-color: var(--ink-2); }
     @media (hover: hover) {
         .dk-grid > .dk-panel:hover .dk-rz { opacity: 1; }
@@ -156,7 +156,7 @@
     /* A row that grows past the window's height must not bring the page's scrollbar in and narrow the whole Desk mid-pull. */
     html:has([data-desk-grid]) { scrollbar-gutter: stable; }
 
-    .dk-resize-badge { position: absolute; z-index: 10; inset-block-start: 50%; inset-inline-start: 50%; translate: -50% -50%; pointer-events: none; padding: 6px 14px; border-radius: 999px; background: var(--ink); color: var(--paper); font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: .02em; white-space: nowrap; }
+    .dk-resize-badge { position: absolute; z-index: 10; inset-block-start: 50%; inset-inline-start: 50%; translate: -50% -50%; pointer-events: none; padding: 6px 14px; border-radius: var(--radius-round); background: var(--ink); color: var(--paper); font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: .02em; white-space: nowrap; }
     [dir="rtl"] .dk-resize-badge { translate: 50% -50%; }
 
     .dk-grid { position: relative; }
@@ -180,7 +180,7 @@
 
     .dk-hint {
         display: flex; align-items: center; gap: 12px; margin: 0 0 var(--grid-gap); padding: 10px 12px 10px 16px; width: fit-content; max-width: 100%;
-        border-radius: 14px; font-size: 14px; color: var(--ink);
+        border-radius: var(--radius-surface); font-size: 14px; color: var(--ink);
         background: var(--paper); border: 1px solid var(--line);
         box-shadow: var(--panel-shadow);
     }
@@ -209,7 +209,7 @@
     /* A panel while its data loads (pages/desk/_panel-placeholder): a few quiet bars; a failed load says so with Retry (desk-load.js). */
     .dk-panel-pending .dk-pb { justify-content: center; }
     .dk-pending-lines { display: grid; gap: 12px; padding-block: 8px; }
-    .dk-pending-lines > span { height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--sunk), var(--paper), var(--sunk)); background-size: 200% 100%; animation: dk-shimmer 1.2s linear infinite; }
+    .dk-pending-lines > span { height: 12px; border-radius: var(--radius-control); background: linear-gradient(90deg, var(--sunk), var(--paper), var(--sunk)); background-size: 200% 100%; animation: dk-shimmer 1.2s linear infinite; }
     .dk-pending-lines > span:nth-child(2) { width: 82%; }
     .dk-pending-lines > span:nth-child(3) { width: 64%; }
     .dk-pending-failed { display: grid; justify-items: start; gap: 10px; color: var(--ink-2); }
@@ -230,10 +230,10 @@
     svg.dk-i.dk-tile-pin { position: absolute; z-index: 2; inset-block-start: 8px; inset-inline-start: 8px; margin: 0; }
 
     /* The panel menu: its name on top, then Pin and Collapse, then Remove apart. */
-    .dk-pop.dk-pmenu-pop { width: 232px; padding: 6px; gap: 1px; border-radius: 14px; }
+    .dk-pop.dk-pmenu-pop { width: 232px; padding: 6px; gap: 1px; border-radius: var(--radius-surface); }
     .dk-pmenu-pop > .dk-pop-h { padding: 6px 10px 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 700; color: var(--ink-3); }
     .dk-pmenu-group { display: grid; gap: 1px; padding-block-end: 4px; margin-block-end: 4px; border-block-end: 1px solid var(--line); }
-    .dk-pmenu-pop :is(.dk-pmenu-group > button, > button) { display: flex; align-items: center; gap: 10px; width: 100%; height: 38px; padding-inline: 10px; border: 0; border-radius: 9px; background: none; color: var(--ink); font: inherit; font-size: 13.5px; font-weight: 600; text-align: start; cursor: pointer; }
+    .dk-pmenu-pop :is(.dk-pmenu-group > button, > button) { display: flex; align-items: center; gap: 10px; width: 100%; height: 38px; padding-inline: 10px; border: 0; border-radius: var(--radius-control); background: none; color: var(--ink); font: inherit; font-size: 13.5px; font-weight: 600; text-align: start; cursor: pointer; }
     .dk-pmenu-pop :is(.dk-pmenu-group > button, > button):hover, .dk-pmenu-pop :is(.dk-pmenu-group > button, > button):focus-visible { background: var(--sunk); outline: none; }
     .dk-pmenu-pop button svg.dk-i { flex: none; width: 16px; height: 16px; color: var(--ink-3); }
     .dk-pmenu-pop > button.dk-danger, .dk-pmenu-pop > button.dk-danger svg.dk-i { color: var(--brand); }
@@ -255,7 +255,7 @@
         grid-template-areas: "ic ic" ". ." "t t" "n go"; align-items: end; gap: 0 8px; padding: 14px 14px 13px; border: 0; cursor: default;
     }
     .dk-panel[data-folded] .dk-grip, .dk-panel[data-folded] .dk-tagline { display: none; }
-    .dk-panel[data-folded] .dk-fold-ic { grid-area: ic; align-self: start; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: var(--sunk); color: var(--ink-2); }
+    .dk-panel[data-folded] .dk-fold-ic { grid-area: ic; align-self: start; display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-control); background: var(--sunk); color: var(--ink-2); }
     .dk-panel[data-folded] .dk-fold-ic svg.dk-i { width: 17px; height: 17px; }
     .dk-panel[data-folded] .dk-ph-t { grid-area: t; min-width: 0; }
     .dk-panel[data-folded] .dk-ph-t h2 { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

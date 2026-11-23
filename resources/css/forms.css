@@ -37,7 +37,7 @@
         min-height: 2.75rem;
         padding-inline: 0.875rem;
         border: 1px solid var(--color-secondary-soft);
-        border-radius: 0.5rem;
+        border-radius: var(--radius-control);
         background-color: color-mix(in srgb, var(--color-secondary-soft) 38%, var(--color-white));
         color: var(--color-secondary-dark);
         font-size: 0.875rem;
@@ -223,7 +223,7 @@
         width: 2.25rem;
         height: 2.25rem;
         margin-inline-end: -0.5rem;
-        border-radius: 0.375rem;
+        border-radius: var(--radius-control);
         color: var(--color-secondary-light);
     }
 
@@ -270,7 +270,7 @@
         min-width: 0;
         padding: 0.4375rem 0.875rem;
         border: 1px solid var(--color-primary);
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         color: var(--color-status-critical);
         font-size: 0.8125rem;
         font-weight: 700;
@@ -376,7 +376,7 @@
         gap: 0.75rem;
         padding: 0.75rem;
         border: 1px solid var(--color-secondary-soft);
-        border-radius: 0.75rem;
+        border-radius: var(--radius-surface);
         color: var(--color-secondary-medium);
         font-size: 0.75rem;
         font-weight: 600;
@@ -430,7 +430,7 @@
         align-items: center;
         gap: 0.625rem;
         padding: 0.4375rem 0.5rem;
-        border-radius: 0.625rem;
+        border-radius: var(--radius-control);
         color: var(--color-secondary-medium);
         font-size: 0.8125rem;
         font-weight: 500;
@@ -460,8 +460,8 @@
         inset-block: 0.5rem;
         inset-inline-start: -1rem;
         width: 3px;
-        border-start-end-radius: 3px;
-        border-end-end-radius: 3px;
+        border-start-end-radius: var(--radius-inset);
+        border-end-end-radius: var(--radius-inset);
         background-color: var(--color-primary);
     }
 
@@ -472,7 +472,7 @@
         width: 1.375rem;
         height: 1.375rem;
         border: 1.5px solid var(--color-secondary-light);
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         color: var(--color-secondary-medium);
         font-size: var(--text-caption);
         font-weight: 800;
@@ -521,7 +521,7 @@
         min-width: 1.125rem;
         margin-inline-start: auto;
         padding-inline: 0.375rem;
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         background-color: var(--color-primary);
         color: var(--color-white);
         font-size: var(--text-caption);
@@ -554,7 +554,7 @@
         flex: 0 0 auto;
         padding: 0.3125rem 0.75rem;
         border: 1px solid var(--color-secondary-soft);
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         color: var(--color-secondary-medium);
         font-size: 0.8125rem;
         font-weight: 600;
@@ -767,7 +767,7 @@
         gap: 0.875rem;
         padding: 1rem 1.125rem 1.125rem;
         border: 1px solid var(--color-secondary-soft);
-        border-radius: 0.875rem;
+        border-radius: var(--radius-surface);
         background-color: var(--color-white);
         box-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.06);
         transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -795,7 +795,7 @@
         place-items: center;
         width: 1.625rem;
         height: 1.625rem;
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         background-color: var(--color-primary);
         color: var(--color-white);
         font-size: 0.75rem;
@@ -834,7 +834,7 @@
         flex-shrink: 0;
         width: 7px;
         height: 7px;
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         background-color: var(--color-secondary-dark);
     }
 
@@ -848,7 +848,7 @@
 
     .form-section-optional {
         padding: 1px 8px;
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         background-color: var(--color-secondary-soft);
         color: var(--color-secondary-medium);
         font-size: var(--text-caption);
@@ -878,7 +878,7 @@
     .form-section-state {
         flex-shrink: 0;
         margin-inline-start: auto;
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         font-size: var(--text-caption);
         font-weight: 700;
         line-height: 1.375rem;
@@ -915,7 +915,7 @@
         width: 100%;
         padding: 0.875rem 1.125rem;
         border: 1px dashed var(--color-secondary-light);
-        border-radius: 0.875rem;
+        border-radius: var(--radius-surface);
         background-color: transparent;
         color: var(--color-secondary-medium);
         text-align: start;
@@ -939,7 +939,7 @@
         place-items: center;
         width: 1.625rem;
         height: 1.625rem;
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         background-color: var(--color-primary);
         color: var(--color-white);
         font-size: 1rem;
@@ -1132,7 +1132,7 @@
         width: 2.875rem;
         height: 2.875rem;
         margin: 0.375rem;
-        border-radius: 0.875rem;
+        border-radius: var(--radius-surface);
         box-shadow: 0 0 0 0.375rem var(--color-board-head);
     }
 
@@ -1152,7 +1152,7 @@
         gap: 0.75rem;
         padding: 0.75rem;
         border: 1px solid var(--color-secondary-soft);
-        border-radius: 0.875rem;
+        border-radius: var(--radius-surface);
         background-color: var(--color-board-head);
     }
 
@@ -1163,7 +1163,7 @@
         width: 2.375rem;
         height: 2.375rem;
         border: 1px solid var(--color-secondary-soft);
-        border-radius: 0.625rem;
+        border-radius: var(--radius-control);
         background-color: var(--color-white);
         color: var(--color-secondary-medium);
     }
@@ -1205,7 +1205,7 @@
         display: inline-block;
         padding: 0.0625rem 0.4375rem;
         border: 1px solid var(--color-secondary-soft);
-        border-radius: 0.375rem;
+        border-radius: var(--radius-control);
         background-color: var(--color-board-head);
         font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
         font-size: 0.8125rem;
@@ -1220,7 +1220,7 @@
         height: 2.75rem;
         padding-inline: 0.875rem;
         border: 1px solid var(--color-secondary-light);
-        border-radius: 0.75rem;
+        border-radius: var(--radius-surface);
         background-color: var(--color-white);
         font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
         font-size: 0.875rem;
@@ -1250,7 +1250,7 @@
         padding: 0.0625rem 0.375rem;
         border: 1px solid var(--color-secondary-soft);
         border-bottom-width: 2px;
-        border-radius: 0.3125rem;
+        border-radius: var(--radius-inset);
         background-color: var(--color-white);
         color: var(--color-secondary-medium);
         font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
@@ -1374,7 +1374,7 @@
         width: 0.6875rem;
         height: 0.6875rem;
         border: 2px solid var(--color-primary);
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         background-color: var(--color-white);
     }
 
@@ -1418,7 +1418,7 @@
         min-height: 2.75rem;
         padding: 3px;
         border: 1px solid var(--color-secondary-soft);
-        border-radius: 0.5rem;
+        border-radius: var(--radius-control);
         background-color: color-mix(in srgb, var(--color-secondary-soft) 38%, var(--color-white));
     }
 
@@ -1434,7 +1434,7 @@
         gap: 0.375rem;
         min-width: 0;
         padding-inline: 0.5rem;
-        border-radius: 0.375rem;
+        border-radius: var(--radius-control);
         color: var(--color-secondary-medium);
         font-size: 0.8125rem;
         font-weight: 600;
@@ -1492,7 +1492,7 @@
         gap: 1rem;
         min-height: 5.5rem;
         padding-inline: 1.25rem;
-        border-radius: 0.5rem;
+        border-radius: var(--radius-control);
     }
 
     .form-file-zone {
@@ -1548,13 +1548,13 @@
     }
 
     .form-file-icon {
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         background-color: var(--color-white);
         color: var(--color-secondary-medium);
     }
 
     .form-file-doc {
-        border-radius: 0.5rem;
+        border-radius: var(--radius-control);
         background-color: color-mix(in srgb, var(--color-secondary-medium) 10%, transparent);
         color: var(--color-status-critical);
     }
@@ -1570,14 +1570,14 @@
         flex: 1 1 auto;
         height: 0.25rem;
         overflow: hidden;
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         background-color: var(--color-secondary-soft);
     }
 
     .form-file-bar {
         display: block;
         height: 100%;
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         background-color: var(--color-secondary-dark);
         transition: width 150ms ease;
     }
@@ -1589,7 +1589,7 @@
         justify-content: center;
         width: 2rem;
         height: 2rem;
-        border-radius: 0.375rem;
+        border-radius: var(--radius-control);
         color: var(--color-secondary-light);
     }
 
@@ -1743,7 +1743,7 @@
         height: 2rem;
         padding-inline: 10px;
         border: 1px solid var(--color-secondary-soft);
-        border-radius: 999px;
+        border-radius: var(--radius-round);
         background-color: transparent;
         white-space: nowrap;
         cursor: pointer;
@@ -1793,7 +1793,7 @@
         flex-shrink: 0;
         width: 8px;
         height: 8px;
-        border-radius: 999px;
+        border-radius: var(--radius-round);
         background-color: var(--color-secondary-light);
     }
 
@@ -1995,7 +1995,7 @@
         width: 2.5rem;
         height: 0.3125rem;
         margin-top: 0.625rem;
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         background-color: var(--color-secondary-soft);
     }
 
@@ -2068,7 +2068,7 @@
         top: 50%;
         width: 0.5625rem;
         height: 0.5625rem;
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         background: var(--thread-dot);
         box-shadow: inset 0 0 0 1.5px var(--thread-dot-ring);
         translate: 0 -50%;
@@ -2087,7 +2087,7 @@
         min-height: 2.25rem;
         align-items: center;
         gap: 0.375rem;
-        border-radius: 9999px;
+        border-radius: var(--radius-round);
         padding-inline: 0.875rem;
         font-size: 0.8125rem;
         font-weight: 600;
@@ -2129,6 +2129,6 @@
 
 /* The person's photo at the start of every employee dropdown row (hcEmployeeList in form-fields.js). */
 @layer components {
-    .hc-picker-photo { flex: none; width: 24px; height: 24px; margin-inline-end: 8px; border-radius: 9999px; object-fit: cover; background: var(--color-hr-avatar); }
+    .hc-picker-photo { flex: none; width: 24px; height: 24px; margin-inline-end: 8px; border-radius: var(--radius-round); object-fit: cover; background: var(--color-hr-avatar); }
     .gap-2 > .hc-picker-photo { margin-inline-end: 0; }
 }

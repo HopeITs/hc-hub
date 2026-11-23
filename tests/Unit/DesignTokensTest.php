@@ -65,11 +65,49 @@ test('the stylesheet exposes the project design tokens', function () {
     ]);
 });
 
+test('shape tokens define the four radii and the three ink-tinted elevations, and the old names alias them', function () {
+    $tokens = file_get_contents(dirname(__DIR__, 2).'/resources/css/tokens.css');
+
+    expect($tokens)->toContain('--radius-inset: 0.25rem;')
+        ->toContain('--radius-control: 0.5rem;')
+        ->toContain('--radius-surface: 0.75rem;')
+        ->toContain('--radius-round: 9999px;')
+        ->toContain('--radius-panel: var(--radius-surface);')
+        ->toContain('--shadow-e1: 0 1px 3px 0 rgb(65 64 66 / 0.08);')
+        ->toContain('--shadow-e2: 0 2px 8px -2px rgb(65 64 66 / 0.1);')
+        ->toContain('--shadow-e3: 0 6px 24px 0 rgb(65 64 66 / 0.14);')
+        ->toContain('--shadow-hairline: var(--shadow-e1);')
+        ->toContain('--shadow-card: var(--shadow-e1);')
+        ->toContain('--shadow-card-hover: var(--shadow-e2);')
+        ->toContain('--shadow-overlay: var(--shadow-e3);');
+});
+
+test('no stylesheet sets a literal border radius outside the documented exceptions', function () {
+    // Exceptions: 0 / 50% / inherit, plus fixed shapes with no token (sheet top corners, the bell sheet, the gauge arcs).
+    $allowed = ['16px 16px 0 0', '1.5rem 1.5rem 0 0', '0 0 22px 22px', '76px 76px 0 0', '60px 60px 0 0'];
+    $tokenOrZero = '(?:var\(--(?:radius-(?:inset|control|surface|round|panel)|panel-r|prog-radius|qa-r)\)|0|50%|inherit)';
+    $offenders = [];
+
+    foreach (glob(dirname(__DIR__, 2).'/resources/css/*.css') as $file) {
+        preg_match_all('/(?:border(?:-(?:start|end)-(?:start|end)|-(?:top|bottom)-(?:left|right))?-radius|--panel-r|--prog-radius|--qa-r)\s*:\s*([^;}]+)/', file_get_contents($file), $matches);
+
+        foreach ($matches[1] as $value) {
+            $value = trim(str_replace('!important', '', $value));
+
+            if (! in_array($value, $allowed, true) && ! preg_match('/^'.$tokenOrZero.'(?:\s+'.$tokenOrZero.')*$/', $value)) {
+                $offenders[] = basename($file).': '.$value;
+            }
+        }
+    }
+
+    expect($offenders)->toBe([]);
+});
+
 test('panels share one radius token and one border token that follows the line colour in both themes', function () {
     $tokens = file_get_contents(dirname(__DIR__, 2).'/resources/css/tokens.css');
     [$light, $dark] = explode('.dark {', $tokens, 2);
 
-    expect($light)->toContain('--radius-panel: 0.75rem;')
+    expect($light)->toContain('--radius-panel: var(--radius-surface);')
         ->toContain('--color-panel-border: var(--color-line);')
         ->and($dark)->toContain('--color-panel-border: var(--color-line);');
 });
