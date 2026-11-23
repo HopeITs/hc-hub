@@ -4,6 +4,7 @@ return [
     'add_passkey' => 'Add passkey',
     'authenticating' => 'Authenticating...',
     'breadcrumb' => 'Breadcrumb',
+    'toggle_group' => 'Toggle group',
     'e_g_macbook_pro_iphone' => 'e.g., MacBook Pro, iPhone',
     'give_this_passkey_a_name_to_help_you_identify_it_later' => 'Give this passkey a name to help you identify it later.',
     'no_records' => 'No records yet',

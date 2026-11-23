@@ -12,6 +12,7 @@
         <button
             type="button"
             x-on:click="open = !open"
+            aria-label="{{ __('ui.toggle_group') }}"
             :aria-expanded="open.toString()"
             class="inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded text-secondary-medium hover:bg-secondary-soft dark:text-ink-muted dark:hover:bg-surface-2"
         >
