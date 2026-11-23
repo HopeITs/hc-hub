@@ -89,6 +89,8 @@ return [
         'manage-employees' => 'إدارة الموظفين',
         'export' => 'تصدير',
         'amend' => 'تعديل العقد',
+        'mark-critical' => 'وسم كمنصب حرج',
+        'view-replacements' => 'عرض البدلاء المقترحين',
         'view-all' => 'عرض الكل',
         'decide' => 'البتّ',
         'manage-balances' => 'إدارة الأرصدة',

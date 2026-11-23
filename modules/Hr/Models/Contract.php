@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Modules\Core\Models\User;
 use Modules\Hr\Casts\EncryptedSalary;
 use Modules\Hr\Enums\ContractAmendmentStatus;
@@ -417,6 +418,16 @@ class Contract extends Model implements TracksActivity
     public function terminationReason(): BelongsTo
     {
         return $this->belongsTo(TerminationReason::class, 'termination_reason_id');
+    }
+
+    /**
+     * The last-third review of a trial.
+     *
+     * @return HasOne<ProbationReview, $this>
+     */
+    public function probationReview(): HasOne
+    {
+        return $this->hasOne(ProbationReview::class);
     }
 
     /**

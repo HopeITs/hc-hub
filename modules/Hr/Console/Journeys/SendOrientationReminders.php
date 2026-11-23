@@ -9,13 +9,15 @@ use Illuminate\Database\Eloquent\Builder;
 use Modules\Hr\Models\OnboardingJourney;
 use Modules\Hr\Support\Journeys\DeliveryLedger;
 use Modules\Hr\Support\Journeys\Notifications\JourneyNotice;
+use Modules\Hr\Support\Journeys\OnboardingJourneys;
 use Throwable;
 
 /**
- * D4-I: a new volunteer whose orientation session is past its due date gets
- * ONE in-app reminder to HR in their city (HR-SYR when that city has no HR).
- * The ledger claim is keyed to the journey and its start day, so a later run,
- * a retry or a second worker never reminds again. Inactive staff are skipped.
+ * D4-I: a new volunteer whose orientation session is past its due date gets an
+ * in-app reminder to HR in their city (HR-SYR when that city has no HR),
+ * repeated weekly until the session is held. The ledger claim is keyed to the
+ * journey and the week (due date plus whole weeks), so a retry or a second
+ * worker never sends the same week twice. Inactive staff are skipped.
  */
 class SendOrientationReminders extends Command
 {
@@ -23,7 +25,7 @@ class SendOrientationReminders extends Command
 
     protected $signature = 'hr:send-orientation-reminders';
 
-    protected $description = 'Remind city HR once about new volunteers whose orientation session is overdue';
+    protected $description = 'Remind city HR weekly about new volunteers whose orientation session is overdue';
 
     public function handle(DeliveryLedger $ledger): int
     {
@@ -36,10 +38,11 @@ class SendOrientationReminders extends Command
             ->whereDate('orientation_due_on', '<', $today->toDateString())
             ->whereHas('employee', fn (Builder $query) => $query->where('is_active', true))
             ->with('employee:id,city_id,username,first_name_en,last_name_en,first_name_ar,last_name_ar')
-            ->chunkById(100, function ($journeys) use ($ledger, &$sent): void {
+            ->chunkById(100, function ($journeys) use ($ledger, $today, &$sent): void {
                 foreach ($journeys as $journey) {
                     $employee = $journey->employee;
-                    $day = $journey->started_at->timezone(config('app.timezone'))->startOfDay();
+                    // Weekly until the session is held: the due date plus whole weeks late.
+                    $day = OnboardingJourneys::reminderDay($journey->orientation_due_on, $today);
                     $notice = new JourneyNotice('orientation-overdue', [
                         'name' => ['en' => $employee->nameForLocale('en'), 'ar' => $employee->nameForLocale('ar')],
                         'date' => $journey->orientation_due_on?->format('d-m-Y') ?? '',

@@ -89,6 +89,8 @@ return [
         'manage-employees' => 'Manage employees',
         'export' => 'Export',
         'amend' => 'Amend',
+        'mark-critical' => 'Mark as critical',
+        'view-replacements' => 'View suggested replacements',
         'view-all' => 'View all',
         'decide' => 'Decide',
         'manage-balances' => 'Manage balances',

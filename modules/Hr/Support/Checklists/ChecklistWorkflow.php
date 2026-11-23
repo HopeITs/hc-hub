@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Modules\Hr\Models\Checklist;
 use Modules\Hr\Models\DefaultDeliverable;
 use Modules\Hr\Models\Employee;
+use Modules\Hr\Support\Journeys\OnboardingJourneys;
 
 /**
  * The only place checklist delivery/return state may change.
@@ -50,7 +51,7 @@ final class ChecklistWorkflow
     {
         $this->batchId = $batchId;
 
-        return $this->transition(
+        $checklist = $this->transition(
             fn (Builder $query): Builder => $query
                 ->where('delivered_id', $actorEmployeeId)
                 ->where('delivered_status', self::PENDING),
@@ -63,6 +64,16 @@ final class ChecklistWorkflow
             'delivered_status',
             'checklist_delivered',
         );
+
+        // The onboarding journey reads deliveries from here: it recomputes its own
+        // completion (it owns that write), once the delivery is committed.
+        $employee = Employee::query()->find($checklist->employee_id);
+
+        if ($employee !== null) {
+            app(OnboardingJourneys::class)->settle($employee);
+        }
+
+        return $checklist;
     }
 
     /**

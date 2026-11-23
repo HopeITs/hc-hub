@@ -22,6 +22,9 @@ return [
         'hr' => 'HR',
         'system' => 'Automatic',
         'receiver' => 'Equipment receiver',
+        'manager' => 'Direct manager',
+        'deliverer' => 'Whoever delivers the item',
+        'volunteer' => 'The volunteer',
     ],
     'states' => [
         'done' => 'Done',
@@ -29,6 +32,9 @@ return [
         'waiting' => 'Waiting',
         'problem' => 'Blocked',
         'skipped' => 'Not needed',
+        'todo-manager' => 'Needs the manager',
+        'todo-deliverer' => 'Needs delivery',
+        'todo-volunteer' => 'Needs the volunteer',
     ],
 
     'onboarding' => [
@@ -38,8 +44,36 @@ return [
             'contract' => 'First contract',
             'account' => 'Login account',
             'card' => 'ID card',
-            'orientation' => 'Orientation session',
+            'orientation' => 'Orientation session (HR)',
+            'electronics' => 'Electronics (laptop, mouse, work email...)',
+            'manager_orientation' => 'Orientation session (manager)',
+            'policies' => 'Policies read and agreed',
+            'guideline' => 'Media guideline reviewed',
+            'other_items' => 'Other items to hand over',
         ],
+        'electronics-no-items' => 'No electronics item is set up in the delivery list yet.',
+        'electronics-no-it' => 'There is no IT person in this city to hand the electronics over.',
+        'electronics-choose-it' => 'Several IT people work in this city: choose who hands the electronics over.',
+        'card-items-missing' => 'The card is handed over, but some card items are not delivered yet.',
+        'policies-none-required' => 'No policy is marked as required yet, so this step cannot finish. HR chooses them under Required policies.',
+        'guideline-none-required' => 'No guideline is marked as required yet, so this step cannot finish. HR chooses it under Required policies.',
+        'policies_pending' => ':count of :total still to read and agree',
+        'manager_help' => 'The direct manager covers the programs and how work runs. They set the date, then record it after it happened.',
+        'manager_names' => 'Manager: :names',
+        'manager_none' => 'Nobody runs the manager\'s position: HR records this session.',
+        'manager_orientation_scheduled' => 'Manager session date saved.',
+        'manager_orientation_done' => 'Manager session marked as held.',
+        'missing_items' => 'Still to deliver',
+        'item_by' => ':item (:name)',
+        'item_nobody' => ':item (no deliverer set)',
+        'open_manager_page' => 'Open the manager\'s page',
+        'open_policies_admin' => 'Required policies',
+        'choose_deliverer' => 'IT person',
+        'deliverer_chosen' => 'The IT person for the electronics was saved.',
+        'mug' => 'Mug (after the trial contract)',
+        'mug_not_due' => 'Due once a contract that is not a trial starts.',
+        'mug_due' => 'Due now. It does not hold the journey back.',
+        'mug_done' => 'Delivered.',
         'open_contract' => 'Open contract',
         'create_contract' => 'Create contract',
         'account-missing' => 'No login account yet. A contract whose work email was already in use creates none. Create it from Access Management.',
@@ -126,6 +160,22 @@ return [
     ],
 
     'notify' => [
+        'onboarding-account-overdue' => [
+            'title' => 'Onboarding step overdue',
+            'body' => 'The login account for :name is not ready yet. It was due by :date.',
+        ],
+        'onboarding-electronics-overdue' => [
+            'title' => 'Onboarding step overdue',
+            'body' => 'The electronics (laptop, mouse, work email...) for :name are not ready yet. They were due by :date.',
+        ],
+        'onboarding-card-overdue' => [
+            'title' => 'Onboarding step overdue',
+            'body' => 'The ID card for :name is not ready yet. It was due by :date.',
+        ],
+        'onboarding-manager-orientation-overdue' => [
+            'title' => 'Manager orientation session overdue',
+            'body' => 'You have not held the orientation session (programs and how work runs) with :name yet. It was due by :date.',
+        ],
         'orientation-overdue' => [
             'title' => 'Orientation session overdue',
             'body' => ':name has not had their orientation session yet. It was due by :date.',
@@ -137,6 +187,34 @@ return [
         'contract-expiring' => [
             'title' => 'Contract renewal reminder',
             'body' => "Automatic renewal is on for :name's contract, which ends on :date (in :days days). If it should not renew, tell your governorate's HR.",
+        ],
+        'probation-employee' => [
+            'title' => 'Your trial period is in its last third',
+            'body' => 'Your trial ends :date. Your manager will review it with HR.',
+        ],
+        'probation-manager' => [
+            'title' => 'Trial review: :name',
+            'body' => 'The trial of :name is in its last third (ends :date). Tell HR what you ask for: extend, confirm or cancel, with the reason.',
+        ],
+        'probation-manager-reminder' => [
+            'title' => 'Reminder: trial review of :name',
+            'body' => 'The trial of :name is in its last third (ends :date). Tell HR what you ask for: extend, confirm or cancel, with the reason.',
+        ],
+        'probation-hr' => [
+            'title' => 'Trial in its last third: :name',
+            'body' => 'The trial of :name ends :date. The direct manager was asked for a decision.',
+        ],
+        'probation-requested' => [
+            'title' => 'Trial review request: :name',
+            'body' => 'Request: :request. Reason: :reason',
+        ],
+        'critical-position-vacant' => [
+            'title' => 'Critical position needs a replacement: :position',
+            'body' => '":position" is vacant.',
+        ],
+        'critical-position-contract-ended' => [
+            'title' => 'Critical position needs a replacement: :position',
+            'body' => 'The holder\'s contract of ":position" has ended and nobody holds it now.',
         ],
         'contracts-auto-renewed' => [
             'title' => 'Contracts renewed',

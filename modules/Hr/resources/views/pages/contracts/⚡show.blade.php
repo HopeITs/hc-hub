@@ -54,6 +54,7 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.show')] class extends 
             ->with([
                 'employee:id,first_name_en,last_name_en,first_name_ar,last_name_ar,username,city_id',
                 'position:id,title_en,title_ar,program_id,center_id,department_id',
+                'probationReview',
             ])
             ->when($this->canViewPay, fn ($query) => $query->with(['payTiers' => fn ($tiers) => $tiers->select(['id', 'contract_id', 'condition_en', 'condition_ar', 'amount', 'sort_order'])->orderBy('sort_order')]))
             ->findOrFail($this->contractId);
@@ -223,6 +224,19 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.show')] class extends 
 
         @include('hr::pages.contracts._show-terms')
     </div>
+
+    @if ($contract->isTrial() && $contract->probationReview !== null)
+        {{-- The last-third review of the trial: where it stands, never pay. --}}
+        @php($probation = $contract->probationReview)
+        <x-ui.panel :title="__('hr_probation.card.title')" data-contract-probation>
+            <div class="flex flex-wrap items-center justify-between gap-3 p-4">
+                <span class="text-sm">{{ $probation->isDecided() ? __('hr_probation.decision.'.$probation->decision) : __('hr_probation.status.waiting') }}</span>
+                @can('view', $probation)
+                    <x-ui.button size="sm" :href="route('hr.probation.show', $probation->id)" wire:navigate data-test="open-probation-review">{{ __('hr_probation.card.open') }}</x-ui.button>
+                @endcan
+            </div>
+        </x-ui.panel>
+    @endif
 
     <x-notes.record :subject="$contract" />
 

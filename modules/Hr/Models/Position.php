@@ -37,6 +37,7 @@ use Modules\Hr\Models\Concerns\HasTranslation;
  * @property int $max_emp
  * @property int $exist_emp
  * @property bool $is_active
+ * @property bool $is_critical
  * @property CarbonImmutable|null $created_at
  * @property CarbonImmutable|null $updated_at
  *
@@ -193,6 +194,7 @@ class Position extends Model implements TracksActivity
             'max_emp' => 'integer',
             'exist_emp' => 'integer',
             'is_active' => 'boolean',
+            'is_critical' => 'boolean',
         ];
     }
 

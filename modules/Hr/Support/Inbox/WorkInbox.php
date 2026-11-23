@@ -7,18 +7,28 @@ namespace Modules\Hr\Support\Inbox;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Modules\Core\Models\City;
 use Modules\Core\Models\User;
 use Modules\Hr\Enums\LeaveRequestStatus;
 use Modules\Hr\Models\Checklist;
+use Modules\Hr\Models\ChecklistItem;
+use Modules\Hr\Models\Contract;
+use Modules\Hr\Models\DefaultDeliverable;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\LeaveRequest;
 use Modules\Hr\Models\OffboardingJourney;
 use Modules\Hr\Models\OnboardingJourney;
+use Modules\Hr\Models\PolicyDocument;
+use Modules\Hr\Models\ProbationReview;
 use Modules\Hr\Models\ProfileChangeRequest;
 use Modules\Hr\Models\RenewalJourney;
+use Modules\Hr\Support\Contracts\ProbationReviews;
 use Modules\Hr\Support\Desk\HrViewer;
+use Modules\Hr\Support\Journeys\OnboardingDeliveries;
+use Modules\Hr\Support\Journeys\OnboardingJourneys;
+use Modules\Hr\Support\Journeys\PolicyAcknowledgements;
 use WeakMap;
 
 /**
@@ -100,7 +110,8 @@ final class WorkInbox
         $review = $this->leaveReviews($user, $viewer);
         $checklist = $this->checklistItems($user, $viewer);
         $profile = $this->profileChanges($user, $viewer);
-        $journey = $this->journeys($user, $viewer);
+        // A trial's last-third review waits on the direct manager, not on HR: listed with the journeys.
+        $journey = $this->journeys($user, $viewer)->merge($this->probationRequests($user))->merge($this->onboardingOwnerRows($user));
 
         return [
             'rows' => collect()->merge($decide)->merge($review)->merge($checklist)->merge($profile)->merge($journey)
@@ -258,6 +269,143 @@ final class WorkInbox
         }
 
         return $rows;
+    }
+
+    /**
+     * Trial reviews the user must answer as the direct manager of the trial's
+     * position (ProbationReviews::pendingFor; HR standing in is notified, not
+     * listed). The row opens the review page, which re-authorizes.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function probationRequests(User $user): Collection
+    {
+        if ($user->employee_id === null) {
+            return new Collection;
+        }
+
+        return app(ProbationReviews::class)->pendingFor($user)
+            ->with('employee:'.implode(',', [...Employee::NameColumns, 'city_id']))
+            ->orderBy('started_at')
+            ->limit(self::PerSource)
+            ->get()
+            ->filter(fn (ProbationReview $review): bool => $review->employee !== null && Gate::forUser($user)->allows('decide', $review))
+            ->map(fn (ProbationReview $review): array => $this->row(
+                "probation:{$review->id}:journey", 'journey', 'probation', $review->employee,
+                (string) __('hr_communications.inbox.journey.probation'),
+                $review->started_at, false, $this->link('hr.probation.show', ['review' => $review->id]),
+            ))
+            ->values();
+    }
+
+    /**
+     * Onboarding work that waits on people other than HR: the direct manager's
+     * orientation session with a new volunteer (the row opens the manager's
+     * own page, which re-authorizes), the deliverer's items (electronics and
+     * "other" items of a journey still open, the Mug once the trial is over),
+     * and the volunteer's own policies and guideline. A row lists, it never
+     * decides; a step past its deadline carries the urgent flag.
+     *
+     * @return Collection<int, array<string, mixed>>
+     */
+    private function onboardingOwnerRows(User $user): Collection
+    {
+        if ($user->employee_id === null) {
+            return new Collection;
+        }
+
+        $deliveries = app(OnboardingDeliveries::class);
+        $today = now(config('app.timezone'))->startOfDay();
+        $person = 'employee:'.implode(',', [...Employee::NameColumns, 'city_id']);
+        $row = fn (OnboardingJourney $journey, string $step, bool $late, string $href): array => $this->row(
+            "onboarding-{$step}:{$journey->id}:journey", 'journey', 'onboarding_step', $journey->employee,
+            (string) __('hr_onboarding.inbox.'.$step), $journey->started_at, $late, $href,
+        );
+        $rows = new Collection;
+
+        // The direct manager's own session.
+        OnboardingJourney::query()
+            ->whereNull('completed_at')
+            ->whereNull('manager_orientation_completed_at')
+            ->whereHas('employee', fn (Builder $employee) => $employee->where('is_active', true))
+            ->whereHas('contract.position.directManager.contracts', fn (Builder $running) => $running->activeNow()->where('employee_id', (int) $user->employee_id))
+            ->with([$person, 'contract:id,start_date'])
+            ->orderBy('orientation_due_on')
+            ->limit(self::PerSource)
+            ->get()
+            ->each(fn (OnboardingJourney $journey) => $rows->push($row(
+                $journey,
+                $journey->manager_orientation_scheduled_for === null ? 'manager_schedule' : 'manager_record',
+                $journey->managerOrientationIsLate(),
+                $this->link('hr.onboarding.manager-session', ['employee' => $journey->employee_id]),
+            )));
+
+        // The deliverer: the cities the delivery list names them for, and their own city when they are IT.
+        $cityIds = DefaultDeliverable::query()->where('employee_id', $user->employee_id)->pluck('city_id')
+            ->push($this->isIt($user) ? Employee::query()->whereKey($user->employee_id)->value('city_id') : null)
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($cityIds->isNotEmpty()) {
+            OnboardingJourney::query()
+                ->whereHas('employee', fn (Builder $employee) => $employee->where('is_active', true)->whereIn('city_id', $cityIds))
+                ->with([$person, 'contract:id,start_date', 'employee.onboardingJourney'])
+                ->latest('started_at')
+                ->limit(200)
+                ->get()
+                ->each(function (OnboardingJourney $journey) use ($user, $deliveries, $today, $row, $rows): void {
+                    $mine = fn (string $group): bool => $deliveries->group($journey->employee, $group)['missing']
+                        ->contains(fn (array $item): bool => $item['deliverer']?->id === (int) $user->employee_id);
+
+                    if ($journey->completed_at === null) {
+                        $due = $journey->dueAfterStart(OnboardingJourneys::ELECTRONICS_DAYS);
+
+                        if ($mine(ChecklistItem::GROUP_ELECTRONICS)) {
+                            $rows->push($row($journey, 'electronics', $due !== null && $due->lt($today), $this->link('hr.checklists.pending-delivers')));
+                        }
+
+                        if ($mine(ChecklistItem::GROUP_OTHER)) {
+                            $rows->push($row($journey, 'other_items', false, $this->link('hr.checklists.pending-delivers')));
+                        }
+                    }
+
+                    $mug = $deliveries->mug($journey->employee);
+
+                    if ($mug['due'] && ! $mug['delivered'] && $mine(ChecklistItem::GROUP_AFTER_PROBATION)) {
+                        $rows->push($row($journey, 'mug', false, $this->link('hr.checklists.pending-delivers')));
+                    }
+                });
+        }
+
+        // The volunteer's own policies and guideline, while their journey is open.
+        $own = OnboardingJourney::query()
+            ->where('employee_id', $user->employee_id)
+            ->whereNull('completed_at')
+            ->with([$person])
+            ->first();
+
+        if ($own !== null) {
+            $acknowledgements = app(PolicyAcknowledgements::class);
+
+            foreach (['policies' => PolicyDocument::KIND_POLICY, 'guideline' => PolicyDocument::KIND_REVIEW] as $step => $kind) {
+                if ($acknowledgements->status($own->employee, $kind)['pending']->isNotEmpty()) {
+                    $rows->push($row($own, $step, false, $this->link('hr.onboarding.policies')));
+                }
+            }
+        }
+
+        return $rows->values();
+    }
+
+    /** Whether the person is IT now (a running contract on a position of the IT department): only then do they hand electronics over. */
+    private function isIt(User $user): bool
+    {
+        return Contract::query()
+            ->activeNow()
+            ->where('employee_id', $user->employee_id)
+            ->whereHas('position.department', fn (Builder $department) => $department->where('code', OnboardingDeliveries::IT_DEPARTMENT_CODE))
+            ->exists();
     }
 
     /**

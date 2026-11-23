@@ -16,7 +16,7 @@
 <p class="flex flex-wrap items-center gap-2 font-semibold {{ $ink }}">
     <span class="tabular-nums {{ $muted }}" aria-hidden="true">{{ $index + 1 }}.</span>
     <span>{{ $label }}</span>
-    <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold whitespace-nowrap {{ $stateClasses }}" data-journey-state="{{ $step['state'] }}">{{ __('hr_journeys.states.'.$step['state']) }}</span>
+    <span class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold whitespace-nowrap {{ $stateClasses }}" data-journey-state="{{ $step['state'] }}">{{ __('hr_journeys.states.'.$step['state'].($step['state'] === 'todo' && in_array($step['owner'], ['manager', 'deliverer', 'volunteer'], true) ? '-'.$step['owner'] : '')) }}</span>
     @if ($step['data']['optional'] ?? false)
         <span class="inline-flex items-center rounded-md bg-secondary-soft px-2 py-0.5 text-xs font-semibold text-secondary-dark dark:bg-surface-2 dark:text-ink">{{ __('hr_journeys.optional') }}</span>
     @endif

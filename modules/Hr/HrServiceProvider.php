@@ -30,10 +30,13 @@ use Modules\Hr\Console\HrSchedule;
 use Modules\Hr\Console\ImportHrCommand;
 use Modules\Hr\Console\Journeys\DeactivateDepartedEmployees;
 use Modules\Hr\Console\Journeys\SendContractExpirationWarnings;
+use Modules\Hr\Console\Journeys\SendOnboardingStepReminders;
 use Modules\Hr\Console\Journeys\SendOrientationReminders;
 use Modules\Hr\Console\Journeys\TrackRenewalJourneys;
 use Modules\Hr\Console\LoadMailListsCommand;
 use Modules\Hr\Console\MoveHrMediaCommand;
+use Modules\Hr\Console\NotifyBirthdayConflictsCommand;
+use Modules\Hr\Console\NotifyCriticalPositionsCommand;
 use Modules\Hr\Console\ProcessContractAutoRenewalsCommand;
 use Modules\Hr\Console\PurgeUploadedPunchesCommand;
 use Modules\Hr\Console\QueueMailListStartersCommand;
@@ -42,12 +45,15 @@ use Modules\Hr\Console\ReportAccountGapsCommand;
 use Modules\Hr\Console\ReportRecruitmentAccessCommand;
 use Modules\Hr\Console\SendAttendanceRemindersCommand;
 use Modules\Hr\Console\SendLeaveDecisionRemindersCommand;
+use Modules\Hr\Console\StartProbationReviewsCommand;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\MailList;
 use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Calendar\HolidayCalendarLayer;
 use Modules\Hr\Support\Calendar\LeaveCalendarLayer;
+use Modules\Hr\Support\CriticalPositions\CandidateAiRanker;
+use Modules\Hr\Support\CriticalPositions\NullCandidateAiRanker;
 use Modules\Hr\Support\Desk\HrDestinations;
 use Modules\Hr\Support\Desk\HrPanels;
 use Modules\Hr\Support\Employees\HrEmployeeLookup;
@@ -99,6 +105,9 @@ class HrServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(SalaryCipher::class);
+
+        // Critical positions: the AI re-ranking layer is a no-op unless a real one is bound.
+        $this->app->bind(CandidateAiRanker::class, NullCandidateAiRanker::class);
     }
 
     public function boot(): void
@@ -114,16 +123,20 @@ class HrServiceProvider extends ServiceProvider
             ApplyContractAmendmentsCommand::class,
             CheckContractAmendmentsCommand::class,
             SendOrientationReminders::class,
+            SendOnboardingStepReminders::class,
             SendContractExpirationWarnings::class,
             TrackRenewalJourneys::class,
             DeactivateDepartedEmployees::class,
             DeactivateExpiredContractsCommand::class,
             ProcessContractAutoRenewalsCommand::class,
+            StartProbationReviewsCommand::class,
             SendLeaveDecisionRemindersCommand::class,
             RecountPositionSeatsCommand::class,
             SendAttendanceRemindersCommand::class,
             LoadMailListsCommand::class,
             QueueMailListStartersCommand::class,
+            NotifyBirthdayConflictsCommand::class,
+            NotifyCriticalPositionsCommand::class,
             PurgeUploadedPunchesCommand::class,
             AnalyzeRecruitmentCvs::class,
             ApplyDueRecruitmentRequests::class,

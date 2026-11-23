@@ -232,9 +232,62 @@ trait ManagesLeaveRequestForm
     {
         $employee = $this->requestEmployee;
 
-        return $employee === null ? [] : app(LeaveAlternativeEmployees::class)->for($employee)
+        if ($employee === null) {
+            return [];
+        }
+
+        $kept = $this->editingLeaveRequestId === null
+            ? null
+            : LeaveRequest::query()->whereKey($this->editingLeaveRequestId)->value('alternative_employee_id');
+
+        return app(LeaveAlternativeEmployees::class)
+            ->choices($employee, LeaveRequestDraft::fromArray($this->requestInput())->window(), $kept === null ? null : (int) $kept)
             ->mapWithKeys(fn (Employee $candidate) => [(int) $candidate->id => $candidate->name])
             ->all();
+    }
+
+    /**
+     * The alternatives follow the period typed: a colleague busy in the new
+     * period leaves the list, and the choice with them.
+     */
+    public function updatedRequestType(): void
+    {
+        $this->dropUnavailableAlternative();
+    }
+
+    public function updatedLeaveDate(): void
+    {
+        $this->dropUnavailableAlternative();
+    }
+
+    public function updatedStartHour(): void
+    {
+        $this->dropUnavailableAlternative();
+    }
+
+    public function updatedEndHour(): void
+    {
+        $this->dropUnavailableAlternative();
+    }
+
+    public function updatedStartAt(): void
+    {
+        $this->dropUnavailableAlternative();
+    }
+
+    public function updatedEndAt(): void
+    {
+        $this->dropUnavailableAlternative();
+    }
+
+    /** Clears an alternative the period typed no longer allows, so the select never holds a hidden value. */
+    private function dropUnavailableAlternative(): void
+    {
+        unset($this->alternativeOptions);
+
+        if ($this->alternativeEmployee !== '' && ! array_key_exists((int) $this->alternativeEmployee, $this->alternativeOptions)) {
+            $this->alternativeEmployee = '';
+        }
     }
 
     /** Employees HR may file a request for (its governorates, active). @return array<int, string> */

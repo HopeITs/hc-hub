@@ -80,7 +80,7 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.index')] class extends
         $cities = HrAccess::cityIds(Auth::user());
 
         return Position::query()
-            ->select(['id', 'title_en', 'title_ar', 'program_id', 'city_id', 'center_id', 'department_id', 'job_level_id', 'direct_manager_id', 'max_emp', 'exist_emp', 'is_active'])
+            ->select(['id', 'title_en', 'title_ar', 'program_id', 'city_id', 'center_id', 'department_id', 'job_level_id', 'direct_manager_id', 'max_emp', 'exist_emp', 'is_active', 'is_critical'])
             ->with(['jobLevel:id,name_en,name_ar', 'directManager:id,title_en,title_ar'])
             ->when($cities !== null, fn ($query) => $query->inCity($cities))
             ->search($this->search)
@@ -190,6 +190,9 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.index')] class extends
         @can('positions.view')
             <x-ui.button icon="users" :href="route('hr.positions.team')" wire:navigate>{{ __('hr_positions.titles.team') }}</x-ui.button>
         @endcan
+        @can('positions.view-replacements')
+            <x-ui.button icon="exclamation-triangle" :href="route('hr.positions.critical')" wire:navigate data-test="critical-positions">{{ __('hr_positions.critical.title') }}</x-ui.button>
+        @endcan
         @can('create', \Modules\Hr\Models\Position::class)
             <x-ui.button tone="primary" icon="plus" wire:click="openPosition" data-test="create-position" data-quick-create>{{ __('hr_positions.actions.add') }}</x-ui.button>
         @endcan
@@ -208,6 +211,7 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.index')] class extends
             $muted = 'text-secondary-medium dark:text-ink-muted';
             $canUpdate = auth()->user()->can('positions.update');
             $canDelete = auth()->user()->can('positions.delete');
+            $canSeeCritical = auth()->user()->can('positions.view-replacements');
             $canHire = \Modules\Hr\Support\Recruitment\Access::hasActivePermission(auth()->user(), 'recruitment-requests.view')
                 && \Modules\Hr\Support\Recruitment\Access::hasActivePermission(auth()->user(), 'recruitment-requests.manage');
         @endphp
@@ -224,7 +228,7 @@ new #[Layout('layouts::desk'), Title('hr_positions.titles.index')] class extends
             @foreach ($positions as $position)
                 <tr wire:key="position-{{ $position->id }}" data-position="{{ $position->id }}" @class(['opacity-60' => ! $position->is_active])>
                     <td>
-                        <span class="block font-semibold" dir="auto">{{ $position->title }}</span>
+                        <span class="block font-semibold" dir="auto">{{ $position->title }}@if ($position->is_critical && $canSeeCritical) <span class="ms-1 text-xs font-semibold text-status-critical" data-critical-tag>{{ __('hr_positions.critical.critical') }}</span>@endif</span>
                         <span class="block text-xs {{ $muted }}">{{ Department::nameOf((int) $position->department_id) }}@if ($position->directManager) · {{ __('hr_positions.reports_to', ['title' => $position->directManager->title]) }}@endif</span>
                     </td>
                     <td>{{ Program::nameOf($position->program_id) }}</td>

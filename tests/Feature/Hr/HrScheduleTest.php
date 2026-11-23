@@ -52,6 +52,10 @@ test('the leave decision reminders run every morning', function () {
     expect(hrScheduledEvents()['leaves:send-decision-reminders']->expression)->toBe('5 8 * * *');
 });
 
+test('the birthday conflict reminders run every morning', function () {
+    expect(hrScheduledEvents()['birthday:notify-conflicts']->expression)->toBe('25 8 * * *');
+});
+
 test('every recruitment command is registered with Artisan', function () {
     $registered = array_keys(Artisan::all());
 
