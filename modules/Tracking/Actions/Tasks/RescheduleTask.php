@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Tracking\Actions\Tasks;
 
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Gate;
 use Modules\Tracking\Models\Task;
 
@@ -39,7 +40,13 @@ class RescheduleTask
 
         // Refused with false (a message), never a 403 page: a calendar drop is
         // a casual gesture, and the card simply returns to its day on refusal.
-        if ($task->created_by !== auth()->id() || Gate::denies('update', $task)) {
+        if ($task->created_by !== auth()->id()) {
+            return false;
+        }
+
+        try {
+            Gate::authorize('update', $task);
+        } catch (AuthorizationException) {
             return false;
         }
 

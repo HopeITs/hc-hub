@@ -46,7 +46,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.indicator_rules'
 
     public function save(RecruitmentIndicatorRules $rules): void
     {
-        $this->requirePermission('recruitment-indicators.manage');
+        abort_unless($this->may('recruitment-indicators.manage'), 403);
         $this->resetErrorBag();
 
         try {

@@ -134,6 +134,12 @@ trait ManagesLeaveRequestForm
         $actor = Auth::user();
         $input = $this->requestInput();
 
+        if ($this->editingLeaveRequestId !== null) {
+            Gate::authorize('update', LeaveContext::request($this->editingLeaveRequestId));
+        } else {
+            Gate::authorize('leaves.create');
+        }
+
         try {
             if ($this->editingLeaveRequestId !== null) {
                 app(SaveLeaveRequest::class)->update($actor, $this->editingLeaveRequestId, $input);
