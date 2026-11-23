@@ -206,52 +206,52 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.applicants')] cl
             </x-ui.header-filter-select>
         @endif
         <x-ui.header-filter-select :label="__('hr_recruitment.applicant_ui.source')" wire:model.live="source" :value="$source">
-            <option value="">{{ __('hr_recruitment.hub.all') }}</option>
+            <option value="">{{ __('hr_recruitment.applicant_ui.filters.all_sources') }}</option>
             @foreach ($options['sources'] as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
             @endforeach
         </x-ui.header-filter-select>
         <x-ui.header-filter-select :label="__('hr_recruitment.applicant_ui.cv')" wire:model.live="cv" :value="$cv">
-            <option value="">{{ __('hr_recruitment.hub.all') }}</option>
+            <option value="">{{ __('hr_recruitment.applicant_ui.filters.all_cv') }}</option>
             @foreach ($options['cv'] as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
             @endforeach
         </x-ui.header-filter-select>
         <x-ui.header-filter-select :label="__('hr_recruitment.applicant_ui.previous_applicant')" wire:model.live="previous" :value="$previous">
-            <option value="">{{ __('hr_recruitment.hub.all') }}</option>
+            <option value="">{{ __('hr_recruitment.applicant_ui.filters.all_previous') }}</option>
             @foreach ($options['previous'] as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
             @endforeach
         </x-ui.header-filter-select>
         @if ($options['tags'] !== [])
             <x-ui.header-filter-select :label="__('hr_recruitment.applicant_ui.tags.title')" wire:model.live="tag" :value="$tag" searchable>
-                <option value="">{{ __('hr_recruitment.hub.all') }}</option>
+                <option value="">{{ __('hr_recruitment.applicant_ui.filters.all_tags') }}</option>
                 @foreach ($options['tags'] as $id => $label)
                     <option value="{{ $id }}">{{ $label }}</option>
                 @endforeach
             </x-ui.header-filter-select>
         @endif
         <x-ui.header-filter-select :label="__('hr_recruitment.applicant_ui.flags.type')" wire:model.live="flagType" :value="$flagType">
-            <option value="">{{ __('hr_recruitment.hub.all') }}</option>
+            <option value="">{{ __('hr_recruitment.applicant_ui.filters.all_flag_types') }}</option>
             @foreach ($options['flagTypes'] as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
             @endforeach
         </x-ui.header-filter-select>
         <x-ui.header-filter-select :label="__('hr_recruitment.applicant_ui.flags.category')" wire:model.live="flagCategory" :value="$flagCategory">
-            <option value="">{{ __('hr_recruitment.hub.all') }}</option>
+            <option value="">{{ __('hr_recruitment.applicant_ui.filters.all_flag_categories') }}</option>
             @foreach ($options['flagCategories'] as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
             @endforeach
         </x-ui.header-filter-select>
         <x-ui.header-filter-select :label="__('hr_recruitment.applicant_ui.endorsement.groups_label')" wire:model.live="endorsement" :value="$endorsement">
-            <option value="">{{ __('hr_recruitment.hub.all') }}</option>
+            <option value="">{{ __('hr_recruitment.applicant_ui.filters.all_endorsements') }}</option>
             @foreach ($options['endorsements'] as $value => $label)
                 <option value="{{ $value }}">{{ $label }}</option>
             @endforeach
         </x-ui.header-filter-select>
         @if ($mayEvaluations)
             <x-ui.header-filter-select :label="__('hr_recruitment.applicant_ui.dashboard.evaluation_filter')" wire:model.live="evaluation" :value="$evaluation">
-                <option value="">{{ __('hr_recruitment.hub.all') }}</option>
+                <option value="">{{ __('hr_recruitment.applicant_ui.filters.all_evaluations') }}</option>
                 @foreach ($options['evaluations'] as $value => $label)
                     <option value="{{ $value }}">{{ $label }}</option>
                 @endforeach
