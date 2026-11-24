@@ -46,10 +46,10 @@ test('the stylesheet exposes the project design tokens', function () {
 
     expect($tokens)->toMatchArray([
         '--color-primary' => '#be1f24',
-        '--color-secondary-dark' => '#58595b',
-        '--color-secondary-medium' => '#6d6e71',
-        '--color-secondary-light' => '#939598',
-        '--color-secondary-soft' => '#dcddde',
+        '--color-secondary-dark' => 'var(--color-grey-ink)',
+        '--color-secondary-medium' => 'var(--color-grey-ink-muted)',
+        '--color-secondary-light' => 'var(--color-grey-ink-faint)',
+        '--color-secondary-soft' => 'var(--color-grey-line)',
         '--spacing-ui-2xs' => '0.25rem',
         '--spacing-ui-xs' => '0.5rem',
         '--spacing-ui-sm' => '0.75rem',
@@ -63,6 +63,46 @@ test('the stylesheet exposes the project design tokens', function () {
         '--spacing-section' => 'var(--spacing-ui-3xl)',
         '--spacing-page' => 'var(--spacing-ui-xl)',
     ]);
+});
+
+test('light mode has one grey ramp of the five brand greys, dark has its own five steps, and the old grey token names still resolve', function () {
+    [$light, $dark] = explode('.dark {', file_get_contents(dirname(__DIR__, 2).'/resources/css/tokens.css'), 2);
+    $ramp = ['ink' => '414042', 'ink-muted' => '6d6e71', 'ink-faint' => '939598', 'line-strong' => 'bcbec0', 'line' => 'e6e7e8'];
+
+    foreach ($ramp as $step => $hex) {
+        expect($light)->toContain("--color-grey-{$step}: #{$hex};")
+            ->and(substr_count(strtolower($light), "#{$hex}"))->toBe(1)
+            ->and($dark)->toMatch("/^\s*--color-graphite-{$step}: #[0-9a-f]{6};$/m");
+    }
+
+    // A grey is a hex whose red, green and blue sit within 10 of each other; only the ramp and white may appear.
+    preg_match_all('/#([0-9a-f]{6}|[0-9a-f]{3})\b/i', $light, $matches);
+    $offRamp = [];
+
+    foreach (array_unique(array_map('strtolower', $matches[1])) as $hex) {
+        $full = strlen($hex) === 3 ? preg_replace('/(.)/', '$1$1', $hex) : $hex;
+        $channels = array_map('hexdec', str_split($full, 2));
+
+        if (max($channels) - min($channels) <= 10 && ! in_array($full, [...array_values($ramp), 'ffffff'], true)) {
+            $offRamp[] = '#'.$hex;
+        }
+    }
+
+    expect($offRamp)->toBe([]);
+
+    $legacy = [
+        'secondary-dark', 'secondary-medium', 'secondary-light', 'secondary-soft',
+        'red-50', 'red-100', 'red-200', 'red-300',
+        'zinc-50', 'zinc-100', 'zinc-200', 'zinc-300', 'zinc-400', 'zinc-500', 'zinc-600', 'zinc-700', 'zinc-800', 'zinc-900', 'zinc-950',
+        'ink', 'ink-muted', 'ink-faint', 'line', 'line-strong', 'field-line', 'heading',
+        'desk-ink', 'desk-ink-2', 'desk-ink-3', 'desk-faint', 'desk-line', 'desk-line-2',
+        'paper', 'tint', 'sunk', 'ground', 'board', 'board-line', 'board-head', 'auth-ground',
+        'surface-0', 'surface-1', 'surface-2', 'surface-3', 'brand-soft', 'scrim', 'header-bg',
+    ];
+
+    foreach ($legacy as $name) {
+        expect($light)->toMatch("/^\s*--color-{$name}: [^;]+;$/m");
+    }
 });
 
 test('shape tokens define the four radii and the three ink-tinted elevations, and the old names alias them', function () {
@@ -145,7 +185,7 @@ test('every page title shares the HR title style and the eyebrow uses the faint 
 
     expect($light)->toContain('--text-h1: clamp(1.625rem, 4vw, 2.125rem);')
         ->toContain('--text-h1--line-height: 1.2;')
-        ->toContain('--color-heading: #414042;')
+        ->toContain('--color-heading: var(--color-grey-ink);')
         ->and($dark)->toContain('--color-heading: var(--color-desk-ink);')
         ->and(file_get_contents($css.'/typography.css'))->toContain('@utility page-title')
         ->and(file_get_contents($css.'/desk.css'))->toContain('.dk-eyebrow{ font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint) }');

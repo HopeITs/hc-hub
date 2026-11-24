@@ -488,7 +488,7 @@
 .dk-start-btn:hover{ border-color:var(--ink-3);background:var(--tint) }
 .dk-start-btn svg.dk-i{ width:16px;height:16px;color:var(--ink-3) }
 /* Undo after removing a panel */
-.dk-undo{ position:fixed;z-index:40;inset-block-end:calc(20px + env(safe-area-inset-bottom,0px));inset-inline:16px;margin-inline:auto;width:fit-content;display:flex;align-items:center;gap:10px;padding-block:10px;padding-inline:18px 10px;border-radius:var(--radius-surface);border:1px solid var(--line);background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgb(88 89 91 / .1),0 24px 56px -16px rgb(88 89 91 / .45);font-size:14px;font-weight:600;line-height:1.4;overflow:hidden }
+.dk-undo{ position:fixed;z-index:40;inset-block-end:calc(20px + env(safe-area-inset-bottom,0px));inset-inline:16px;margin-inline:auto;width:fit-content;display:flex;align-items:center;gap:10px;padding-block:10px;padding-inline:18px 10px;border-radius:var(--radius-surface);border:1px solid var(--line);background:var(--paper);color:var(--ink);box-shadow:0 1px 2px rgb(65 64 66 / .1),0 24px 56px -16px rgb(65 64 66 / .45);font-size:14px;font-weight:600;line-height:1.4;overflow:hidden }
 .dk-undo>span{ flex:1;min-width:0;overflow-wrap:anywhere }
 .dk-undo>button{ flex:none }
 /* Time left before the Undo goes, as a red line (toasts use a grey one: flux-overrides.css .hc-toast-timer). */

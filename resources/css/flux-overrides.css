@@ -192,7 +192,7 @@
         overflow-y: auto;
         border-color: var(--color-secondary-soft);
         background-color: var(--color-white);
-        box-shadow: 0 10px 24px rgb(88 89 91 / 12%);
+        box-shadow: 0 10px 24px rgb(65 64 66 / 12%);
     }
 
     .filter-picker [data-flux-menu-item] {
