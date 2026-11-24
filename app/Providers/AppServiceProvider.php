@@ -258,6 +258,7 @@ class AppServiceProvider extends ServiceProvider
      */
     private const array BladeOnlyComponents = [
         'resources/views/components/desk/side-personal.blade.php',
+        'modules/Hr/resources/views/components/recruitment/careers-layout.blade.php',
         'modules/Tracking/resources/views/components/proposals/_logframe-copy-modal.blade.php',
         'resources/views/components/ui/form-file.blade.php',
         'resources/views/components/ui/form-input.blade.php',

@@ -318,9 +318,8 @@ test('an application made before the names were asked is prefilled from its full
 
 test('the invitation check answers in words, and sign-in opens the login in the vacancy language', function () {
     [, , , $token] = ($this->campaign)(($this->approvedVacancy)(), HiringCampaign::INVITE_ONLY);
+    $this->withoutVite();
 
-    // The page body itself is not asserted: Blaze compiles the careers layout
-    // (it sits under components/), so the page renders empty in this app.
     $this->post(route('hr.careers.invitation', ['token' => $token]), ['invitee_email' => 'not-an-email', 'locale' => 'ar'])
         ->assertStatus(422)
         ->assertViewHas('invitation', ['state' => 'check', 'error' => 'أدخل بريداً إلكترونياً صحيحاً.']);
@@ -332,4 +331,14 @@ test('the invitation check answers in words, and sign-in opens the login in the 
     $this->get(route('hr.careers.sign-in', ['token' => $token, 'lang' => 'ar']))
         ->assertRedirect(route('login'))
         ->assertSessionHas(SetLocale::SessionKey, 'ar');
+});
+
+test('a careers page renders inside the careers layout', function () {
+    $title = __('hr_recruitment.careers.unavailable_title', [], 'en');
+
+    $this->withoutVite()->get(route('hr.careers.show', ['token' => 'no-such-link', 'lang' => 'en']))
+        ->assertNotFound()
+        ->assertSee('<!DOCTYPE html>', false)
+        ->assertSee('<title>'.e($title).' - '.e(config('app.name')).'</title>', false)
+        ->assertSee(__('hr_recruitment.careers.unavailable_message', [], 'en'));
 });
