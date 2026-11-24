@@ -43,4 +43,16 @@ enum TaskPriority: string implements HasStatusTone
             self::High => StatusTone::Critical,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Low => 'arrow-down',
+            self::Medium => 'minus',
+            self::High => 'arrow-up',
+        };
+    }
 }

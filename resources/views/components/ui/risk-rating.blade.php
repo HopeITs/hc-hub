@@ -23,5 +23,6 @@
 @endphp
 
 <span {{ $attributes->class('inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap '.$tone->badgeClasses()) }} data-tone="{{ $tone->value }}">
+    <flux:icon :name="$tone->icon()" variant="micro" class="size-3 shrink-0" aria-hidden="true" />
     {{ $name }}: {{ $word }}
 </span>

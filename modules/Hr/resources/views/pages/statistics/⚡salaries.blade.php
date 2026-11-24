@@ -122,7 +122,7 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.salaries')] class ext
                             :label="__('hr_statistics.salaries.by_period')"
                             :series="$counts"
                             :categories="$labels"
-                            :tones="['strong', 'neutral', 'muted']"
+                            :tones="['strong', 'neutral', 'funding']"
                             :total-label="__('hr_statistics.salaries.people')"
                             :height="240"
                             :empty="__('hr_statistics.empty')"
@@ -138,7 +138,7 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.salaries')] class ext
                             :label="__('hr_statistics.salaries.by_program')"
                             :series="array_map(fn (int $index): array => ['name' => $labels[$index], 'data' => array_map(fn (array $row): int => $row['counts'][$periods[$index]->value] ?? 0, $programs)], array_keys($periods))"
                             :categories="array_column($programs, 'program')"
-                            :tones="['strong', 'neutral', 'muted']"
+                            :tones="['strong', 'neutral', 'funding']"
                             :height="max(220, count($programs) * 44)"
                             :empty="__('hr_statistics.empty')"
                         />

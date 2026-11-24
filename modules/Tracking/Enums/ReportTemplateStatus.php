@@ -42,4 +42,15 @@ enum ReportTemplateStatus: string implements HasStatusTone
             self::Confirmed => StatusTone::Good,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Pending => 'clock',
+            self::Confirmed => 'check-circle',
+        };
+    }
 }

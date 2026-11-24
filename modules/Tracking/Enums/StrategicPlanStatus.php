@@ -38,4 +38,16 @@ enum StrategicPlanStatus: string implements HasStatusTone
             self::Approved => StatusTone::Good,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Draft => 'pencil-square',
+            self::Submitted => 'paper-airplane',
+            self::Approved => 'check-circle',
+        };
+    }
 }

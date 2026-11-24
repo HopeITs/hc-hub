@@ -174,9 +174,10 @@ textarea.ap-inp { height: auto; min-height: 90px; padding: 10px 12px; }
 .ap-lg.is-off-dot { position: static; width: 8px; height: 8px; border-radius: 50%; }
 .ap-wline i.is-today, .ap-lg.is-today { outline: 2px solid var(--ink); outline-offset: 1px; }
 .is-plan { background: var(--line-2) !important; }
-.is-started { background: #8db4e2 !important; } .is-ongoing { background: var(--active) !important; } .is-completed { background: var(--good) !important; }
-.is-conducted { background: #8a5a9e !important; } .is-suspended { background: #d6941f !important; } .is-cancelled { background: #7a1418 !important; }
-.is-rescheduled { background: #e07a2f !important; } .ap-wline i.is-not_started, .ap-lg.is-not_started { background: transparent !important; box-shadow: inset 0 0 0 2px var(--brand); }
+/* Week states in brand greys (D1): ink steps plus stripe direction, with the legend naming each one. */
+.is-started { background: repeating-linear-gradient(135deg, var(--ink-2) 0 2px, transparent 2px 5px) !important; } .is-ongoing { background: var(--ink-2) !important; } .is-completed { background: var(--good) !important; }
+.is-conducted { background: repeating-linear-gradient(90deg, var(--good) 0 3px, var(--ink-2) 3px 5px) !important; } .is-suspended { background: repeating-linear-gradient(90deg, var(--ink-3) 0 2px, transparent 2px 4px) !important; } .is-cancelled { background: var(--ink-3) !important; }
+.is-rescheduled { background: repeating-linear-gradient(45deg, var(--ink-3) 0 2px, transparent 2px 5px) !important; } .ap-wline i.is-not_started, .ap-lg.is-not_started { background: transparent !important; box-shadow: inset 0 0 0 2px var(--brand); }
 .ap-notes { padding: 0 16px 14px; display: flex; flex-direction: column; gap: 4px; font-size: .82rem; }
 .ap-grid { display: grid; gap: 4px; font-size: .78rem; align-items: center; min-width: 640px; }
 .ap-grid > span { padding: 6px; border-radius: var(--radius-control); text-align: center; }

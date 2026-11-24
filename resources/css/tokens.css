@@ -100,26 +100,30 @@
     --color-accent-foreground: var(--color-white);
 
     /* Status, funding and board surface tokens — data-viz and record status only, never brand/nav/buttons. */
-    --color-status-good: #1d7a4c;
-    --color-status-good-soft: #e6f2ec;
-    --color-status-warn: #9a6412;
-    --color-status-warn-soft: #f7eedd;
+    /* Brand palette only (D1): red is kept for critical; every other state is a step of the grey ramp and is told
+       apart by fill vs outline, icon shape and its label, never by hue. Done/good is a solid ink fill (white text,
+       10.6:1); active is an ink outline; warn is the muted ink (5.1:1 on white, 4.6:1 on its soft fill). */
+    --color-status-good: var(--color-grey-ink);
+    --color-status-good-soft: color-mix(in srgb, var(--color-grey-line) 60%, white);
+    --color-status-warn: var(--color-grey-ink-muted);
+    --color-status-warn-soft: color-mix(in srgb, var(--color-grey-line) 45%, white);
     --color-status-critical: var(--color-primary);
     --color-status-critical-soft: color-mix(in srgb, var(--color-grey-line) 65%, white);
     /* Critical as small text. Light is the brand red (6.1:1 on white). Dark cannot use red for small text
        (2.9:1 on the page ground), so it reads in light ink beside an icon (D2). */
     --color-status-critical-text: var(--color-primary);
-    --color-status-active: #2563a8;
-    --color-status-active-soft: #e5eef7;
-    --color-funding: #2b5f6b;
-    --color-funding-soft: #e3eef0;
-    /* Proposal plan series (T31): one colour per proposal on the project Gantt, drawn as a row stripe only. */
-    --color-series-1: #3b6ea8;
-    --color-series-2: #8a5a9e;
-    --color-series-3: #2f8f7a;
-    --color-series-4: #b0662a;
-    --color-series-5: #6b7b2a;
-    --color-series-6: #a8456e;
+    --color-status-active: var(--color-grey-ink);
+    --color-status-active-soft: color-mix(in srgb, var(--color-grey-line) 30%, white);
+    --color-funding: var(--color-grey-ink-muted);
+    --color-funding-soft: color-mix(in srgb, var(--color-grey-line) 45%, white);
+    /* Proposal plan series (T31) and chart series, in the brand order (red, ink, faint, muted). Every step is at
+       least 3:1 on white; series 5 and 6 repeat red and ink, so the stripe and chart patterns tell them apart. */
+    --color-series-1: var(--color-primary);
+    --color-series-2: var(--color-grey-ink);
+    --color-series-3: var(--color-grey-ink-faint);
+    --color-series-4: var(--color-grey-ink-muted);
+    --color-series-5: var(--color-primary);
+    --color-series-6: var(--color-grey-ink);
     --color-ground: color-mix(in srgb, var(--color-grey-line) 50%, white);
     --color-board: #ffffff;
     --color-board-line: var(--color-grey-line);
@@ -292,23 +296,25 @@
         --color-accent-content: var(--color-ink);
         --color-accent-foreground: var(--color-surface-0);
 
-        --color-status-good: #5cc690;
-        --color-status-good-soft: rgb(92 198 144 / 0.13);
-        --color-status-warn: #e3ad52;
-        --color-status-warn-soft: rgb(227 173 82 / 0.13);
+        /* The light ramp's dark twins: good and active are the light ink (good as a fill under surface-0 text),
+           warn and funding the muted step (9:1 or more on every Graphite surface). */
+        --color-status-good: var(--color-graphite-ink);
+        --color-status-good-soft: color-mix(in srgb, var(--color-graphite-ink) 10%, transparent);
+        --color-status-warn: var(--color-graphite-ink-muted);
+        --color-status-warn-soft: color-mix(in srgb, var(--color-graphite-ink-muted) 12%, transparent);
         --color-status-critical: var(--color-primary);
         --color-status-critical-soft: rgb(255 255 255 / 0.07);
         --color-status-critical-text: var(--color-graphite-ink);
-        --color-status-active: #7cb1ee;
-        --color-status-active-soft: rgb(124 177 238 / 0.13);
-        --color-funding: #79bccb;
-        --color-funding-soft: rgb(121 188 203 / 0.13);
-        --color-series-1: #8bb4e8;
-        --color-series-2: #c49ad6;
-        --color-series-3: #6fd0b8;
-        --color-series-4: #eaa56a;
-        --color-series-5: #b9c770;
-        --color-series-6: #e48ab0;
+        --color-status-active: var(--color-graphite-ink);
+        --color-status-active-soft: color-mix(in srgb, var(--color-graphite-ink) 6%, transparent);
+        --color-funding: var(--color-graphite-ink-muted);
+        --color-funding-soft: color-mix(in srgb, var(--color-graphite-ink-muted) 12%, transparent);
+        --color-series-1: var(--color-primary);
+        --color-series-2: var(--color-graphite-ink);
+        --color-series-3: var(--color-graphite-ink-faint);
+        --color-series-4: var(--color-graphite-ink-muted);
+        --color-series-5: var(--color-primary);
+        --color-series-6: var(--color-graphite-ink);
         --color-ground: var(--color-surface-0);
         --color-board: var(--color-surface-1);
         --color-board-line: var(--color-line);

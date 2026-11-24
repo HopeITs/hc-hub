@@ -42,12 +42,13 @@ test('the enum badge tones a stalled state as warn, not brand red', function () 
         ->and($html)->not->toContain('bg-primary');
 });
 
-test('the enum badge renders a red RAG status with the critical classes', function () {
+test('the enum badge renders a red RAG status as a critical fill with its icon', function () {
     $html = Blade::render('<x-ui.enum-badge :case="$case" />', ['case' => RagStatus::Red]);
 
     expect($html)->toContain('data-tone="critical"')
-        ->and($html)->toContain('bg-status-critical-soft')
-        ->and($html)->toContain('text-status-critical')
+        ->and($html)->toContain('bg-status-critical')
+        ->and($html)->toContain('text-white')
+        ->and($html)->toContain('<svg')
         ->and($html)->not->toContain('bg-primary');
 });
 

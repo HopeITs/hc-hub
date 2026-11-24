@@ -106,6 +106,19 @@
         display: grid;
     }
 
+    /* A status pill leads with a glyph per tone (D1): the greys share a hue, so the shape tells them apart. */
+    [data-gantt] .gantt-pill::before {
+        margin-inline-end: 0.25em;
+        font-weight: 700;
+    }
+
+    [data-gantt] .gantt-pill[data-tone='good']::before { content: '\2713'; }
+    [data-gantt] .gantt-pill[data-tone='warn']::before { content: '\25D4'; }
+    [data-gantt] .gantt-pill[data-tone='critical']::before { content: '!'; }
+    [data-gantt] .gantt-pill[data-tone='funding']::before { content: '$'; }
+    [data-gantt] .gantt-pill[data-tone='neutral']::before { content: '\25CB'; }
+    [data-gantt] .gantt-pill[data-tone='muted']::before { content: '\2013'; }
+
     /* Route tracing: rows off the traced route recede, their cells stay opaque. */
     [data-gantt] [role='row'] > .gantt-cell > *,
     [data-gantt] [role='row'] > .gantt-lane > * {

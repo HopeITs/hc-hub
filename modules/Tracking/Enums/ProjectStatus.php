@@ -93,4 +93,19 @@ enum ProjectStatus: string implements HasStatusTone
             self::Approved, self::Closed => StatusTone::Good,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Draft => 'pencil-square',
+            self::Submitted => 'paper-airplane',
+            self::Approved => 'check-circle',
+            self::Active => 'play-circle',
+            self::Closed => 'lock-closed',
+            self::Archived => 'archive-box',
+        };
+    }
 }

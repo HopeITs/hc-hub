@@ -42,4 +42,17 @@ enum DeliveryState: string implements HasStatusTone
             self::Returned => StatusTone::Warn,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Requested => 'minus-circle',
+            self::Delivered => 'truck',
+            self::Accepted => 'check-circle',
+            self::Returned => 'arrow-uturn-left',
+        };
+    }
 }

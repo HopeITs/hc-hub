@@ -49,4 +49,16 @@ enum DonorReportState: string implements HasStatusTone
             self::Submitted => StatusTone::Good,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Due => 'calendar',
+            self::Overdue => 'exclamation-triangle',
+            self::Submitted => 'check-circle',
+        };
+    }
 }

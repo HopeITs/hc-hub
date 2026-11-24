@@ -430,3 +430,16 @@ test('dark mode keeps the brand red as a fill and never brightens it', function 
         ->and($dark)->toContain('--color-brand-ink: var(--color-graphite-ink);')
         ->and($dark)->toContain('--color-status-critical-text: var(--color-graphite-ink);');
 });
+
+test('status, funding and series tokens stay on the brand palette in both themes', function (int $theme) {
+    $themes = explode('.dark {', file_get_contents(dirname(__DIR__, 2).'/resources/css/tokens.css'), 2);
+
+    preg_match_all('/--color-(?:status-[a-z-]+|funding[a-z-]*|series-\d)\s*:\s*([^;]+);/', $themes[$theme], $matches);
+
+    expect($matches[1])->not->toBeEmpty();
+
+    foreach ($matches[1] as $value) {
+        expect($value)->not->toMatch('/#[0-9a-f]{3,8}\b/i')
+            ->and($value)->not->toMatch('/--color-(?:green|blue|teal|amber|emerald|sky|yellow|orange)/');
+    }
+})->with(['light' => 0, 'dark' => 1]);

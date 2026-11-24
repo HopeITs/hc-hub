@@ -34,9 +34,10 @@
         'bar' => [
             'neutral' => 'bg-secondary-medium dark:bg-ink-muted',
             'good' => 'bg-status-good',
-            'warn' => 'bg-status-warn',
+            // Greys plus one red (D1): warn and funding share a grey, so each carries its own pattern.
+            'warn' => 'bg-status-warn mark-dots',
             'critical' => 'bg-status-critical',
-            'funding' => 'bg-funding',
+            'funding' => 'bg-funding mark-hatch',
             'muted' => 'bg-secondary-light/70 dark:bg-ink-faint',
         ],
         'track' => [
@@ -59,7 +60,7 @@
             'neutral' => 'bg-board-head text-secondary-dark ring-secondary-soft dark:bg-white/10 dark:text-ink dark:ring-white/15',
             'good' => 'bg-status-good-soft text-status-good ring-status-good/25',
             'warn' => 'bg-status-warn-soft text-status-warn ring-status-warn/25',
-            'critical' => 'bg-status-critical-soft text-status-critical ring-status-critical',
+            'critical' => 'bg-status-critical text-white ring-status-critical',
             'funding' => 'bg-funding-soft text-funding ring-funding/25',
             'muted' => 'bg-transparent text-secondary-medium ring-secondary-soft dark:text-ink-muted dark:ring-white/15',
         ],
@@ -69,8 +70,9 @@
             2 => 'bg-series-2',
             3 => 'bg-series-3',
             4 => 'bg-series-4',
-            5 => 'bg-series-5',
-            6 => 'bg-series-6',
+            // 5 and 6 repeat the red and ink of 1 and 2, so they add a pattern.
+            5 => 'bg-series-5 mark-hatch',
+            6 => 'bg-series-6 mark-dots',
         ],
     ];
     $icons = [
@@ -689,8 +691,9 @@
                                 <span x-show="shown.status" class="min-w-0">
                                     <span
                                         x-show="item.row.statusLabel"
-                                        class="inline-flex max-w-full truncate rounded-full px-2 py-0.5 text-[10.5px] leading-4 font-semibold ring-1 ring-inset"
+                                        class="gantt-pill inline-flex max-w-full truncate rounded-full px-2 py-0.5 text-[10.5px] leading-4 font-semibold ring-1 ring-inset"
                                         x-bind:class="tones.pill[item.row.tone]"
+                                        x-bind:data-tone="item.row.tone"
                                         x-text="item.row.statusLabel"
                                         x-bind:title="item.row.statusLabel"
                                     ></span>
@@ -915,7 +918,7 @@
                                     <span x-text="labels.kinds[inspected.row.kind] ?? inspected.row.kind"></span>
                                     <span class="tabular-nums text-secondary-medium dark:text-ink-faint" x-text="inspected.row.wbs"></span>
                                 </span>
-                                <span x-show="inspected.row.statusLabel" class="inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset" x-bind:class="tones.pill[inspected.row.tone]" x-text="inspected.row.statusLabel"></span>
+                                <span x-show="inspected.row.statusLabel" class="gantt-pill inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset" x-bind:class="tones.pill[inspected.row.tone]" x-bind:data-tone="inspected.row.tone" x-text="inspected.row.statusLabel"></span>
                                 <span x-show="inspected.row.critical" class="inline-flex items-center gap-1 rounded-full bg-status-critical-soft px-2 py-0.5 text-[11px] font-semibold text-status-critical">
                                     <span class="size-1.5 rotate-45 bg-status-critical" aria-hidden="true"></span>{{ __('gantt.critical') }}
                                 </span>
@@ -1130,7 +1133,7 @@
             <span class="inline-flex items-center gap-1.5"><span class="relative h-2.5 w-6 overflow-hidden rounded-[3px] bg-secondary-soft/80 dark:bg-white/15"><span class="absolute inset-y-0 left-0 w-3 bg-secondary-medium dark:bg-ink-muted"></span></span>{{ __('gantt.legend.planned') }}</span>
             <span class="inline-flex items-center gap-1.5"><span class="h-1.5 w-6 rounded-sm bg-secondary-dark/80 dark:bg-white/80"></span>{{ __('gantt.legend.summary') }}</span>
             <span class="inline-flex items-center gap-1.5"><span class="size-2.5 rotate-45 rounded-[2px] bg-secondary-medium"></span>{{ __('gantt.legend.milestone') }}</span>
-            <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-4 rounded-[3px] bg-funding"></span>{{ __('gantt.legend.funding') }}</span>
+            <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-4 rounded-[3px] bg-funding mark-hatch"></span>{{ __('gantt.legend.funding') }}</span>
             <span class="inline-flex items-center gap-1.5"><span class="h-2.5 w-4 rounded-[3px] ring-2 ring-status-critical"></span>{{ __('gantt.legend.critical') }}</span>
             <span class="inline-flex items-center gap-1.5"><span class="gantt-slip h-2 w-5 rounded-e-[3px]"></span>{{ __('gantt.legend.late') }}</span>
             @if ($explorer)
@@ -1200,7 +1203,7 @@
                     </div>
                     <p class="text-sm leading-snug font-bold text-secondary-dark dark:text-ink" dir="auto" x-text="hover.row.name"></p>
                     <div class="flex flex-wrap items-center gap-1.5">
-                        <span x-show="hover.row.statusLabel" class="inline-flex rounded-full px-2 py-0.5 text-[10.5px] font-semibold ring-1 ring-inset" x-bind:class="tones.pill[hover.row.tone]" x-text="hover.row.statusLabel"></span>
+                        <span x-show="hover.row.statusLabel" class="gantt-pill inline-flex rounded-full px-2 py-0.5 text-[10.5px] font-semibold ring-1 ring-inset" x-bind:class="tones.pill[hover.row.tone]" x-bind:data-tone="hover.row.tone" x-text="hover.row.statusLabel"></span>
                         <span x-show="hover.row.critical" class="inline-flex rounded-full bg-status-critical-soft px-2 py-0.5 text-[10.5px] font-semibold text-status-critical">{{ __('gantt.critical') }}</span>
                     </div>
                     <div class="relative h-1.5 rounded-full" x-bind:class="tones.track[hover.row.tone]" aria-hidden="true">

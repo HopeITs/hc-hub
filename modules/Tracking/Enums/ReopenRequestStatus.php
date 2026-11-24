@@ -39,4 +39,16 @@ enum ReopenRequestStatus: string implements HasStatusTone
             self::Denied => StatusTone::Critical,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Pending => 'clock',
+            self::Granted => 'lock-open',
+            self::Denied => 'x-circle',
+        };
+    }
 }

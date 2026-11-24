@@ -40,15 +40,16 @@
         default => 'text-secondary-medium dark:text-ink-muted',
     };
 
-    $dotClasses = match ($tone) {
-        'good' => 'bg-status-good',
-        'warn' => 'bg-status-warn',
-        'critical' => 'bg-primary dark:bg-status-critical',
-        default => 'bg-secondary-light dark:bg-ink-faint',
+    // Greys and one red (D1): the icon shape, not the hue, tells on time, close and overdue apart.
+    $icon = match ($tone) {
+        'good' => 'check-circle',
+        'warn' => 'clock',
+        'critical' => 'exclamation-triangle',
+        default => 'calendar',
     };
 @endphp
 
 <span {{ $attributes->class('inline-flex items-center gap-1.5 type-meta font-semibold '.$textClasses) }}>
-    <span class="size-1.5 shrink-0 rounded-full {{ $dotClasses }}" aria-hidden="true"></span>
+    <flux:icon :name="$icon" variant="micro" class="size-3.5 shrink-0" aria-hidden="true" />
     {{ $text }}
 </span>

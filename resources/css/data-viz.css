@@ -172,7 +172,18 @@
     /* Received, but what landed was never recorded: counted as nothing landed until it is. */
     .money-unrecorded {
         background-color: color-mix(in srgb, var(--color-funding) 14%, transparent);
-        background-image: repeating-linear-gradient(135deg, var(--color-funding) 0 1.5px, transparent 1.5px 5px);
+        background-image: repeating-linear-gradient(45deg, var(--color-funding) 0 1.5px, transparent 1.5px 5px);
+    }
+
+    /* A second channel beside tone (D1 greys): stripes in the board colour cut through any fill, so two marks of
+       the same grey (funding vs warn, series 1 vs 5) still read apart in a greyscale screenshot. */
+    .mark-hatch {
+        background-image: repeating-linear-gradient(135deg, transparent 0 2px, color-mix(in srgb, var(--color-board) 65%, transparent) 2px 4px);
+    }
+
+    .mark-dots {
+        background-image: radial-gradient(color-mix(in srgb, var(--color-board) 70%, transparent) 0.75px, transparent 1px);
+        background-size: 3px 3px;
     }
 
     .flow-ribbon {

@@ -12,8 +12,8 @@
     $toneClasses = fn (string $tone): string => match ($tone) {
         'good' => 'bg-status-good',
         'warn' => 'bg-status-warn',
-        'critical' => 'bg-primary dark:bg-status-critical',
-        'funding' => 'bg-funding',
+        'critical' => 'bg-status-critical',
+        'funding' => 'bg-funding mark-hatch',
         default => 'bg-secondary-light dark:bg-ink-faint',
     };
 @endphp

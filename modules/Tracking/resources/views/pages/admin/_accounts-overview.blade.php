@@ -21,7 +21,7 @@
     $stateChart = [
         'series' => [$summary['active'], $summary['closed']],
         'categories' => [__('accounts.open'), __('accounts.closed')],
-        'tones' => ['good', 'muted'],
+        'tones' => ['good', 'neutral'],
     ];
 @endphp
 

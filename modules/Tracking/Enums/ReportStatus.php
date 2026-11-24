@@ -68,4 +68,16 @@ enum ReportStatus: string implements HasStatusTone
             self::Approved => StatusTone::Good,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Draft => 'pencil-square',
+            self::Reviewed => 'eye',
+            self::Approved => 'check-circle',
+        };
+    }
 }

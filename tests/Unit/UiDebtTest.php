@@ -75,7 +75,7 @@ test('UI debt never goes up', function () {
     $ceilings = [
         'smallFonts' => 0,
         'arbitraryTextSizes' => 319,
-        'rawButtons' => 640,
+        'rawButtons' => 639,
         'importantOverrides' => 566,
         'rawHexColours' => 89,
     ];

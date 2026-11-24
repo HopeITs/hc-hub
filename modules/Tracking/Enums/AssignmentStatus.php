@@ -49,4 +49,17 @@ enum AssignmentStatus: string implements HasStatusTone
             self::Superseded => StatusTone::Neutral,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Pending => 'clock',
+            self::Acknowledged => 'check-circle',
+            self::Rejected => 'x-circle',
+            self::Superseded => 'archive-box',
+        };
+    }
 }

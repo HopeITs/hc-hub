@@ -52,4 +52,19 @@ enum StatusNoteKind: string implements HasStatusTone
             self::Correction, self::OnHold => StatusTone::Warn,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Transition => 'arrow-right',
+            self::Correction => 'pencil-square',
+            self::Negotiation => 'chat-bubble-left-right',
+            self::OnHold => 'pause-circle',
+            self::OffHold => 'play-circle',
+            self::Extension => 'calendar',
+        };
+    }
 }

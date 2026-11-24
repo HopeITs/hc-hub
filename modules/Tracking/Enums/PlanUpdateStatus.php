@@ -67,4 +67,19 @@ enum PlanUpdateStatus: string implements HasStatusTone
             self::Returned => StatusTone::Warn,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Draft => 'pencil-square',
+            self::Sent => 'paper-airplane',
+            self::OfficerApproved => 'check',
+            self::Reviewed => 'eye',
+            self::Seen => 'check-circle',
+            self::Returned => 'arrow-uturn-left',
+        };
+    }
 }

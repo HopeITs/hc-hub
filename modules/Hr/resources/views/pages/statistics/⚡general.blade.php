@@ -134,7 +134,7 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.general')] class exte
                         ['name' => __('hr_statistics.traffic.terminated'), 'data' => $flow['terminated']],
                     ]"
                     :categories="$flow['labels']"
-                    :tones="['good', 'warn', 'critical']"
+                    :tones="['good', 'neutral', 'critical']"
                     :height="260"
                     :empty="__('hr_statistics.empty')"
                 />

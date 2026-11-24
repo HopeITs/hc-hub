@@ -79,12 +79,7 @@ final class FluxMarkup
      */
     public static function statusPill(TaskStatus $case, string $extraClass = '', bool $quiet = false): HtmlString
     {
-        $icon = match ($case) {
-            TaskStatus::Todo => 'stop',
-            TaskStatus::InProgress => 'play',
-            TaskStatus::UnderReview => 'eye',
-            TaskStatus::Done => 'check',
-        };
+        $icon = $case->icon();
 
         // The quiet variant (task list rows and cards): sentence case and a
         // smaller chip, so a column of statuses reads calmly when scanned.

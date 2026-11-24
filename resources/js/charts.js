@@ -19,16 +19,32 @@ const toneTokens = {
 /**
  * Dark ("Graphite") replacements for the tones that disappear on charcoal.
  * The brand greys are mid-greys, so `strong` reads as supporting ink; and
- * `critical` plots status data (e.g. materialised risks), so it takes the
- * dark status red, not the brand red kept for primary actions.
+ * `critical` stays the brand red as a filled mark (D2). `funding` steps down
+ * a grey so it never matches `strong` beside it.
  */
 const darkToneTokens = {
     critical: '--color-status-critical',
     muted: '--color-secondary-medium',
     strong: '--color-ink-muted',
+    funding: '--color-secondary-medium',
 };
 
-const categoricalTones = ['funding', 'critical', 'good', 'warn', 'strong', 'neutral'];
+/**
+ * Brand palette only (D1): the red, then greys that alternate dark and light so
+ * neighbours differ in greyscale. Series 5 and 6 repeat 1 and 2, and every series
+ * also carries its own dash, marker or fill pattern plus a legend entry.
+ */
+const categoricalTones = ['critical', 'neutral', 'strong', 'funding', 'critical', 'strong'];
+
+/** The second channel per series index: line dash, marker shape and bar fill pattern. */
+const seriesDashes = [0, 6, 2, 10, 4, 1];
+const seriesMarkers = ['circle', 'square', 'triangle', 'diamond', 'cross', 'star'];
+const seriesFills = ['solid', 'pattern', 'solid', 'pattern', 'pattern', 'pattern'];
+const seriesPatterns = ['verticalLines', 'slantedLines', 'verticalLines', 'horizontalLines', 'squares', 'circles'];
+
+function perSeries(list, count) {
+    return Array.from({ length: count }, (_, index) => list[index % list.length]);
+}
 
 function isDark() {
     return document.documentElement.classList.contains('dark');
@@ -66,6 +82,7 @@ function buildOptions(config) {
     const colors = tones.map(toneColor);
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isCircular = config.type === 'donut';
+    const seriesCount = isCircular ? 1 : (config.series ?? []).length;
 
     const options = {
         chart: {
@@ -83,7 +100,16 @@ function buildOptions(config) {
         series: config.series,
         colors,
         dataLabels: { enabled: false },
-        legend: { show: false },
+        // A legend whenever colour alone would have to name a series (more than one series, or donut slices).
+        legend: {
+            show: isCircular || seriesCount > 1,
+            position: isCircular ? 'bottom' : 'top',
+            horizontalAlign: 'start',
+            fontSize: '12px',
+            labels: { colors: text },
+            markers: { size: 6, strokeWidth: 0 },
+            itemMargin: { horizontal: 8, vertical: 2 },
+        },
         grid: {
             borderColor: grid,
             strokeDashArray: 3,
@@ -106,6 +132,8 @@ function buildOptions(config) {
         // ApexCharts fills donut tooltips with the series colour (its donut default, kept in light); the pale
         // dark tones would sit under ink text. Set in both modes so a live theme flip never keeps the other value.
         options.tooltip.fillSeriesColor = !dark;
+        // A surface-coloured gap between slices, so two neighbouring greys never merge.
+        options.stroke = { width: 2, colors: [token('--color-surface-1')] };
         options.plotOptions = {
             pie: {
                 expandOnClick: false,
@@ -186,6 +214,14 @@ function buildOptions(config) {
                 distributed: Boolean(config.distributed),
             },
         };
+
+        if (seriesCount > 1 && !config.distributed) {
+            options.fill = {
+                type: perSeries(seriesFills, seriesCount),
+                opacity: 1,
+                pattern: { style: perSeries(seriesPatterns, seriesCount), width: 5, height: 5, strokeWidth: 2 },
+            };
+        }
         options.grid.xaxis = { lines: { show: Boolean(config.horizontal) } };
         options.grid.yaxis = { lines: { show: !config.horizontal } };
     }
@@ -196,6 +232,11 @@ function buildOptions(config) {
             gradient: { shadeIntensity: 0, opacityFrom: 0.28, opacityTo: 0.02, stops: [0, 100] },
         };
         options.markers = { size: 0, hover: { size: 5 } };
+    }
+
+    if ((config.type === 'area' || config.type === 'line') && seriesCount > 1) {
+        options.stroke.dashArray = perSeries(seriesDashes, seriesCount);
+        options.markers = { size: 3, strokeWidth: 0, shape: perSeries(seriesMarkers, seriesCount), hover: { size: 5 } };
     }
 
     return options;

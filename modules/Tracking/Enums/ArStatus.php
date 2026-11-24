@@ -44,4 +44,16 @@ enum ArStatus: string implements HasStatusTone
             self::Failed => StatusTone::Critical,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Pending => 'clock',
+            self::Received => 'check-circle',
+            self::Failed => 'x-circle',
+        };
+    }
 }

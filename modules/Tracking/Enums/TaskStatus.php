@@ -47,4 +47,17 @@ enum TaskStatus: string implements HasStatusTone
             self::Done => StatusTone::Good,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Todo => 'stop',
+            self::InProgress => 'play',
+            self::UnderReview => 'eye',
+            self::Done => 'check',
+        };
+    }
 }

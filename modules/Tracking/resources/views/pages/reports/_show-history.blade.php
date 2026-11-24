@@ -7,7 +7,7 @@
                     :label="__('reports.report_history')"
                     :series="[['name' => __('reports.reported_value'), 'data' => $trendRows->map(fn ($row) => (float) $row->value)->all()]]"
                     :categories="$trendRows->map(fn ($row) => $row->planned_date?->translatedFormat(__('formats.date_short')) ?? '—')->all()"
-                    :tones="['critical']"
+                    :tones="['strong']"
                     :height="160"
                 />
             </div>

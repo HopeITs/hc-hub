@@ -195,4 +195,25 @@ enum ProposalStatus: string implements HasStatusTone
             self::Rejected => StatusTone::Critical,
         };
     }
+
+    /**
+     * The Heroicon drawn before the label in every badge and pill.
+     */
+    public function icon(): string
+    {
+        return match ($this) {
+            self::ConceptNote => 'light-bulb',
+            self::ConceptNoteReview => 'eye',
+            self::ConceptNoteSubmitted => 'paper-airplane',
+            self::ProposalDraft => 'pencil-square',
+            self::ProposalReview => 'eye',
+            self::Submitted => 'paper-airplane',
+            self::OnHold => 'pause-circle',
+            self::Approved => 'check-circle',
+            self::Rejected => 'x-circle',
+            self::Active => 'play-circle',
+            self::FinalReports => 'document-text',
+            self::Completed => 'check-badge',
+        };
+    }
 }

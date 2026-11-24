@@ -62,8 +62,37 @@ test('each tone has badge and dot classes on the status tokens', function (Statu
         ->and($tone->dotClass())->toStartWith('bg-');
 })->with(StatusTone::cases());
 
-test('the critical tone uses the status-critical token, not the brand red', function () {
-    expect(StatusTone::Critical->badgeClasses())->toContain('text-status-critical')
+test('the critical tone is a status-critical fill with white text, not the brand red class', function () {
+    expect(StatusTone::Critical->badgeClasses())->toContain('bg-status-critical')
+        ->and(StatusTone::Critical->badgeClasses())->toContain('text-white')
         ->and(StatusTone::Critical->badgeClasses())->not->toContain('bg-primary')
         ->and(StatusTone::Critical->dotClass())->toBe('bg-status-critical');
+});
+
+/** The only cases allowed the red (D1): critical, overdue and failed-type states. */
+const CRITICAL_STATUS_CASES = [
+    'ArStatus::Failed',
+    'AssignmentStatus::Rejected',
+    'DonorReportState::Overdue',
+    'ProposalStatus::Rejected',
+    'RagStatus::Red',
+    'ReopenRequestStatus::Denied',
+    'TaskPriority::High',
+];
+
+test('every status case has an icon and a palette tone, and only critical-type cases are red', function (string $enum) {
+    foreach ($enum::cases() as $case) {
+        $key = class_basename($enum).'::'.$case->name;
+
+        expect($case->icon())->toBeString()->not->toBeEmpty($key.' has no icon')
+            ->and(StatusTone::cases())->toContain($case->tone())
+            ->and($case->tone() === StatusTone::Critical)->toBe(in_array($key, CRITICAL_STATUS_CASES, true), $key.' red mismatch');
+    }
+})->with(fn () => array_map(fn (string $enum) => [$enum], statusToneEnums()));
+
+test('each tone has its own icon', function () {
+    $icons = array_map(fn (StatusTone $tone): string => $tone->icon(), StatusTone::cases());
+
+    expect($icons)->each->not->toBeEmpty()
+        ->and(array_unique($icons))->toHaveCount(count(StatusTone::cases()));
 });
