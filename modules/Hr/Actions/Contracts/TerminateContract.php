@@ -14,7 +14,8 @@ use Modules\Hr\Support\Contracts\PositionSeats;
 
 /**
  * End a contract early: the date and reason are recorded, the contract goes
- * inactive (so it can no longer auto-renew) and its seat is released.
+ * inactive (so it can no longer auto-renew), its seat is released and an
+ * approved amendment that would start after the end is cancelled.
  */
 class TerminateContract
 {
@@ -49,6 +50,8 @@ class TerminateContract
             if ($held) {
                 PositionSeats::move($contract->position_id, null);
             }
+
+            app(ContractAmendmentService::class)->cancelForEndedContract($contract);
 
             return $contract;
         });

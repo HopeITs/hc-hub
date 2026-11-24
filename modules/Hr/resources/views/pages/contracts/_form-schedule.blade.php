@@ -19,22 +19,34 @@
         <span class="hidden @5xl/form:block"></span>
 
         @if ($fixedSchedule)
-            <x-ui.form-select wire:model="form.work_day_from" :label="__('hr_contracts.fields.work_day_from')" :placeholder="__('common.select')">
+            <x-ui.form-select wire:model.live="form.work_day_from" :label="__('hr_contracts.fields.work_day_from')" :placeholder="__('common.select')">
                 @foreach (ContractOptions::WEEK_DAYS as $dayIndex => $dayKey)
                     <option value="{{ $dayIndex }}">{{ __('hr_contracts.days.'.$dayKey) }}</option>
                 @endforeach
             </x-ui.form-select>
-            <x-ui.form-select wire:model="form.work_day_to" :label="__('hr_contracts.fields.work_day_to')" :placeholder="__('common.select')">
+            <x-ui.form-select wire:model.live="form.work_day_to" :label="__('hr_contracts.fields.work_day_to')" :placeholder="__('common.select')">
                 @foreach (ContractOptions::WEEK_DAYS as $dayIndex => $dayKey)
                     <option value="{{ $dayIndex }}">{{ __('hr_contracts.days.'.$dayKey) }}</option>
                 @endforeach
             </x-ui.form-select>
             <span class="hidden @5xl/form:block"></span>
-            <x-ui.form-input wire:model="form.work_hours_from" :label="__('hr_contracts.fields.work_hours_from')" type="time" required />
-            <x-ui.form-input wire:model="form.work_hours_to" :label="__('hr_contracts.fields.work_hours_to')" type="time" required />
+            <div class="flex flex-col gap-2 @2xl/form:col-span-2 @5xl/form:col-span-3" data-test="work-weekdays">
+                <p class="text-sm font-semibold">{{ __('hr_contracts.fields.work_weekdays') }}</p>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">{{ __('hr_contracts.form.work_weekdays_hint') }}</p>
+                <div class="flex flex-wrap gap-4">
+                    @foreach (ContractOptions::WEEK_DAYS as $dayIndex => $dayKey)
+                        <flux:checkbox wire:model.live="form.work_weekdays" value="{{ $dayIndex }}" :label="__('hr_contracts.days.'.$dayKey)" />
+                    @endforeach
+                </div>
+                @error('form.work_weekdays')
+                    <p class="text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                @enderror
+            </div>
+            <x-ui.form-input wire:model.live.blur="form.work_hours_from" :label="__('hr_contracts.fields.work_hours_from')" type="time" />
+            <x-ui.form-input wire:model.live.blur="form.work_hours_to" :label="__('hr_contracts.fields.work_hours_to')" type="time" />
             <span class="hidden @5xl/form:block"></span>
-            <x-ui.form-input wire:model="form.work_hours_2_from" :label="__('hr_contracts.fields.work_hours_2_from')" type="time" />
-            <x-ui.form-input wire:model="form.work_hours_2_to" :label="__('hr_contracts.fields.work_hours_2_to')" type="time" />
+            <x-ui.form-input wire:model.live.blur="form.work_hours_2_from" :label="__('hr_contracts.fields.work_hours_2_from')" type="time" />
+            <x-ui.form-input wire:model.live.blur="form.work_hours_2_to" :label="__('hr_contracts.fields.work_hours_2_to')" type="time" />
             <span class="hidden @5xl/form:block"></span>
             <div class="flex flex-col gap-2 @2xl/form:col-span-2 @5xl/form:col-span-3">
                 <p class="text-sm font-semibold">{{ __('hr_contracts.form.show_in_clause') }}</p>
@@ -43,6 +55,7 @@
                     <flux:checkbox wire:model="form.show_hours_per_day" :label="__('hr_contracts.fields.show_hours_per_day')" />
                     <flux:checkbox wire:model="form.show_days_per_week" :label="__('hr_contracts.fields.show_days_per_week')" />
                     <flux:checkbox wire:model="form.show_day_range" :label="__('hr_contracts.fields.show_day_range')" />
+                    <flux:checkbox wire:model="form.show_weekend_clause" :label="__('hr_contracts.fields.show_weekend_clause')" />
                 </div>
             </div>
         @else

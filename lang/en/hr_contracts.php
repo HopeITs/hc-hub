@@ -58,6 +58,8 @@ return [
         'show_hours_per_week' => 'Hours per week',
         'show_hours_per_day' => 'Hours per day',
         'show_day_range' => 'Day range',
+        'work_weekdays' => 'Work days',
+        'show_weekend_clause' => 'Weekend clause',
         'flex_days_per_week' => 'Days per week',
         'flex_hours_per_week' => 'Hours per week',
         'flex_hours_per_month' => 'Hours per month',
@@ -86,6 +88,17 @@ return [
         'pay_hidden' => 'Pay is not shown to your role. Saving keeps the pay already on file.',
         'end_date_help' => 'A contract runs at most one year.',
         'show_in_clause' => 'Show in the contract text',
+        'terms_locked' => 'An amendment has changed this contract, so its schedule and pay change only through a new amendment.',
+        'work_weekdays_hint' => 'Pick the days one by one, or leave them empty and use the first and last work day.',
+        'renewing_for' => 'Renewing contract for :name',
+        'renewing_period' => 'New period: :start to :end',
+    ],
+
+    'renew_modal' => [
+        'title' => 'Renew contract',
+        'description' => 'Renew as is copies every term to the new period. Renew with edit opens the form to change them first.',
+        'current_period' => 'Current period',
+        'new_period' => 'New period',
     ],
 
     'schedule' => [
@@ -117,6 +130,9 @@ return [
         'add_tier' => 'Add tier',
         'stop_auto_renew' => 'Stop',
         'start_auto_renew' => 'Turn on',
+        'amend' => 'Amend',
+        'renew_as_is' => 'Renew as is',
+        'renew_with_edit' => 'Renew with edit',
     ],
 
     'toasts' => [
@@ -125,6 +141,8 @@ return [
         'deleted' => 'Contract deleted.',
         'delete_blocked' => 'This contract has linked records (leave balances, amendments) and cannot be deleted.',
         'auto_renew_changed' => 'Automatic renewal updated.',
+        'save_in_progress' => 'This contract is already being saved. Wait a moment.',
+        'renewed' => 'Contract renewed.',
     ],
 
     'confirm' => [
@@ -140,6 +158,7 @@ return [
         'weekly_hours_required' => 'Enter the weekly hours (only service contracts may leave them at 0).',
         'pay_hidden_new' => 'Your role cannot set pay, so it cannot create a contract from scratch. Ask HR.',
         'cannot_auto_renew' => 'A terminated contract or a trial cannot renew automatically.',
+        'work_day_is_day_off' => 'The centre is closed on one of the picked days. Pick its working days only.',
     ],
 
     'empty' => [
