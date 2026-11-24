@@ -115,12 +115,7 @@
                     <x-ui.button tone="ghost" size="sm" wire:click="openReview({{ $reviewApplicationId }})">{{ __('hr_recruitment.applicant_ui.profile_reviews.reload') }}</x-ui.button>
                 </div>
             @enderror
-            <flux:radio.group wire:model="recommendation" :label="__('hr_recruitment.applicant_ui.profile_reviews.recommendation')" variant="segmented">
-                @foreach (RecruitmentEvaluationRecommendation::values() as $value)
-                    <flux:radio :value="$value" :label="__('hr_recruitment.applicant_ui.evaluations.recommendations.'.$value)" />
-                @endforeach
-            </flux:radio.group>
-            @error('recommendation')<p class="text-sm text-primary">{{ $message }}</p>@enderror
+            <x-ui.form-segmented wire:model="recommendation" :label="__('hr_recruitment.applicant_ui.profile_reviews.recommendation')" :options="array_map(fn (string $value): array => ['value' => $value, 'label' => __('hr_recruitment.applicant_ui.evaluations.recommendations.'.$value)], RecruitmentEvaluationRecommendation::values())" />
             <div class="grid gap-4 md:grid-cols-2">
                 <x-ui.form-textarea wire:model="pros" :label="__('hr_recruitment.applicant_ui.profile_reviews.pros')" rows="3" maxlength="{{ $maxText }}" dir="auto" />
                 <x-ui.form-textarea wire:model="cons" :label="__('hr_recruitment.applicant_ui.profile_reviews.cons')" rows="3" maxlength="{{ $maxText }}" dir="auto" />

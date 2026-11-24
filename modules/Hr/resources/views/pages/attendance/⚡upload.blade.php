@@ -252,9 +252,9 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.upload')] class exten
                             <x-ui.data-table.cell :label="__('hr_attendance.upload.punches')"><span class="tabular-nums">{{ $row['punches'] }}</span></x-ui.data-table.cell>
                             <x-ui.data-table.cell :label="__('hr_attendance.upload.status')">
                                 @if ($row['name'])
-                                    <flux:badge size="sm" color="green" icon="check">{{ __('hr_attendance.upload.matched') }}</flux:badge>
+                                    <span class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap {{ \App\Enums\StatusTone::Good->badgeClasses() }}"><flux:icon icon="check" variant="micro" class="size-3.5 shrink-0" />{{ __('hr_attendance.upload.matched') }}</span>
                                 @else
-                                    <flux:badge size="sm" color="amber" icon="exclamation-triangle">{{ __('hr_attendance.upload.not-matched') }}</flux:badge>
+                                    <span class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap {{ \App\Enums\StatusTone::Warn->badgeClasses() }}"><flux:icon icon="exclamation-triangle" variant="micro" class="size-3.5 shrink-0" />{{ __('hr_attendance.upload.not-matched') }}</span>
                                 @endif
                             </x-ui.data-table.cell>
                         </tr>

@@ -20,14 +20,10 @@
             </p>
 
             @if ($bulk === 'tags')
-                <fieldset class="space-y-2">
-                    <legend class="text-sm font-semibold">{{ __('hr_recruitment.applicant_ui.tags.bulk_mode') }}</legend>
-                    <flux:radio.group wire:model="bulkMode" variant="segmented">
-                        <flux:radio value="attach" :label="__('hr_recruitment.applicant_ui.tags.bulk_attach')" />
-                        <flux:radio value="detach" :label="__('hr_recruitment.applicant_ui.tags.bulk_detach')" />
-                    </flux:radio.group>
-                    @error('bulkMode')<p class="text-sm text-primary">{{ $message }}</p>@enderror
-                </fieldset>
+                <x-ui.form-segmented wire:model="bulkMode" :label="__('hr_recruitment.applicant_ui.tags.bulk_mode')" :options="[
+                    ['value' => 'attach', 'label' => __('hr_recruitment.applicant_ui.tags.bulk_attach')],
+                    ['value' => 'detach', 'label' => __('hr_recruitment.applicant_ui.tags.bulk_detach')],
+                ]" />
                 <x-ui.form-select wire:model="bulkTagId" :label="__('hr_recruitment.applicant_ui.tags.tag')" :placeholder="__('hr_recruitment.applicant_ui.tags.choose')" required searchable>
                     @foreach ($this->options['tags'] as $id => $name)
                         <option value="{{ $id }}">{{ $name }}</option>

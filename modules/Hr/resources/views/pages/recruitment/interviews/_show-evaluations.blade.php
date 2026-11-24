@@ -40,13 +40,8 @@
                 @endif
             @else
                 <form wire:submit="saveEvaluation" class="space-y-4">
-                    <flux:radio.group wire:model="recommendation" :label="__($e.'recommendation')" variant="segmented" required>
-                        @foreach (Recommendation::values() as $value)
-                            <flux:radio :value="$value" :label="__($e.'recommendations.'.$value)" />
-                        @endforeach
-                    </flux:radio.group>
+                    <x-ui.form-segmented wire:model="recommendation" :label="__($e.'recommendation')" :options="array_map(fn (string $value): array => ['value' => $value, 'label' => __($e.'recommendations.'.$value)], Recommendation::values())" required />
                     <p class="text-xs {{ $muted }}">{{ __($e.'advisory') }}</p>
-                    @error('recommendation')<p class="text-sm text-status-critical">{{ $message }}</p>@enderror
 
                     <x-ui.form-textarea wire:model="pros" :label="__($e.'pros')" rows="3" maxlength="{{ $state['maxLength'] }}" dir="auto" />
                     <x-ui.form-textarea wire:model="cons" :label="__($e.'cons')" rows="3" maxlength="{{ $state['maxLength'] }}" dir="auto" />

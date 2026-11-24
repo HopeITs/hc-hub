@@ -131,7 +131,7 @@ new #[Layout('layouts::desk'), Title('hr_statistics.titles.contracts')] class ex
                                     @endif
                                 </p>
                             </div>
-                            <flux:badge size="sm">{{ $byProgram ? __('hr_statistics.contracts.program') : __('hr_statistics.contracts.center') }}</flux:badge>
+                            <span class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap {{ \App\Enums\StatusTone::Neutral->badgeClasses() }}">{{ $byProgram ? __('hr_statistics.contracts.program') : __('hr_statistics.contracts.center') }}</span>
                         </div>
 
                         <div class="grid grid-cols-3 gap-2 p-4 pt-2">

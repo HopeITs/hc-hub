@@ -329,13 +329,13 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
                                     <span class="block truncate text-xs {{ $muted }}" dir="ltr">{{ $member['email'] }}</span>
                                     <span class="flex flex-wrap gap-1">
                                         @if ($member['pending'])
-                                            <flux:badge size="sm" color="amber">{{ __('hr_mail_lists.pending_tag') }}</flux:badge>
+                                            <span class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap {{ \App\Enums\StatusTone::Warn->badgeClasses() }}">{{ __('hr_mail_lists.pending_tag') }}</span>
                                         @endif
                                         @if ($member['former'])
-                                            <flux:badge size="sm" color="zinc">{{ __('hr_mail_lists.former') }}</flux:badge>
+                                            <span class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap {{ \App\Enums\StatusTone::Neutral->badgeClasses() }}">{{ __('hr_mail_lists.former') }}</span>
                                         @endif
                                         @if ($member['external'])
-                                            <flux:badge size="sm" color="sky">{{ __('hr_mail_lists.external') }}</flux:badge>
+                                            <span class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold whitespace-nowrap {{ \App\Enums\StatusTone::Active->badgeClasses() }}">{{ __('hr_mail_lists.external') }}</span>
                                         @endif
                                     </span>
                                 </div>
