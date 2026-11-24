@@ -568,7 +568,7 @@ new #[Layout('layouts::desk'), Title('titles.notifications')] class extends Comp
                     <div class="z-10 -mx-1 flex lg:sticky lg:top-0 flex-wrap items-baseline gap-x-3 gap-y-1 bg-white/90 px-1 pt-1 pb-2 backdrop-blur-sm dark:bg-surface-1/90">
                         <h2 id="inbox-day-{{ $day }}" class="text-lg font-bold">{{ $dayLabel }}</h2>
                         <span class="text-sm text-secondary-medium tabular-nums dark:text-ink-muted">{{ $date->translatedFormat(__('formats.date')) }}</span>
-                        <span class="text-xs font-semibold text-secondary-light">{{ trans_choice('notifications.day_count', $rows->count(), ['count' => $rows->count()]) }}</span>
+                        <span class="text-xs font-semibold text-secondary-medium dark:text-ink-faint">{{ trans_choice('notifications.day_count', $rows->count(), ['count' => $rows->count()]) }}</span>
                         <div class="ms-auto flex items-center gap-1 transition-opacity lg:opacity-0 lg:group-hover/day:opacity-100 lg:group-focus-within/day:opacity-100">
                             <button type="button" x-on:click="$wire.set('selected', [...new Set([...$wire.selected, ...@js($dayIds)])])" class="inline-flex min-h-8 cursor-pointer items-center rounded-lg px-2.5 text-xs font-semibold text-secondary-medium hover:bg-secondary-soft/50 hover:text-secondary-dark dark:text-ink-muted dark:hover:bg-white/10 dark:hover:text-ink">{{ __('notifications.select_day') }}</button>
                             @if ($dayUnread !== [])

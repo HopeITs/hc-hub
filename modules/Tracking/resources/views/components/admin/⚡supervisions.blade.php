@@ -208,7 +208,7 @@ new class extends Component {
                 <section class="min-w-0" wire:key="supervisor-{{ $group['id'] }}" aria-labelledby="supervisor-{{ $group['id'] }}-name">
                     <header class="flex items-baseline gap-2.5">
                         <h3 id="supervisor-{{ $group['id'] }}-name" class="truncate text-base font-bold text-secondary-dark dark:text-ink">{{ $group['name'] }}</h3>
-                        <span class="text-xs font-semibold tabular-nums text-secondary-light dark:text-ink-muted">{{ count($group['rows']) }}</span>
+                        <span class="text-xs font-semibold tabular-nums text-secondary-medium dark:text-ink-muted">{{ count($group['rows']) }}</span>
                         @if ($group['inactive'])
                             <span class="inline-flex items-center gap-1 text-xs font-semibold text-secondary-medium dark:text-ink-muted">
                                 <flux:icon.no-symbol variant="micro" class="size-3.5" aria-hidden="true" />

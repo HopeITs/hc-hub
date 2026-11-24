@@ -271,6 +271,11 @@
         --color-graphite-line-strong: #4a4b51;
         --color-graphite-line: #34353a;
 
+        /* Flux's dark text steps: dark:text-zinc-400 landed at 4.49 : 1 on surface-3 and dark:text-zinc-500 at 2.9 : 1,
+           and Flux uses both for readable text (descriptions, hints, modal close). The ink-muted step is 7.3 : 1 on surface-3. */
+        --color-zinc-400: var(--color-graphite-ink-muted);
+        --color-zinc-500: var(--color-graphite-ink-muted);
+
         --color-ink: var(--color-graphite-ink);
         --color-ink-muted: var(--color-graphite-ink-muted);
         --color-ink-faint: var(--color-graphite-ink-faint);

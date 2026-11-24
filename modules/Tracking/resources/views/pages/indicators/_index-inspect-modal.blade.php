@@ -107,7 +107,7 @@
 
                                         <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                                             @if ($entry['reading']->recorder !== null)
-                                                <p class="me-auto type-meta text-secondary-light">
+                                                <p class="me-auto type-meta text-secondary-medium dark:text-ink-faint">
                                                     {{ __('indicators.recorded_by_name', ['name' => $entry['reading']->recorder->name]) }}
                                                 </p>
                                             @endif
@@ -214,7 +214,7 @@
                                             </p>
 
                                             @if ($target['reportRows']->isEmpty())
-                                                <p class="mt-2 type-meta text-secondary-light">{{ __('indicators.no_reports_filed_yet') }}</p>
+                                                <p class="mt-2 type-meta text-secondary-medium dark:text-ink-faint">{{ __('indicators.no_reports_filed_yet') }}</p>
                                             @else
                                                 <ul class="mt-2 space-y-0.5">
                                                     @foreach ($target['reportRows'] as $report)

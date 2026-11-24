@@ -43,7 +43,7 @@
             {{ __('milestones.related_milestones') }}
         </span>
     </div>
-    <div class="flex items-center gap-1.5 px-4 py-2 text-xs text-secondary-light dark:text-ink-faint" aria-hidden="true">
+    <div class="flex items-center gap-1.5 px-4 py-2 text-xs text-secondary-medium dark:text-ink-faint" aria-hidden="true">
         <flux:icon.cursor-arrow-ripple variant="micro" class="size-3.5 shrink-0" />
         {{ __('milestones.timeline_click_hint') }}
     </div>
@@ -242,14 +242,14 @@
                     <div :style="pxPerDay ? ('min-width: ' + contentWidth) : ''">
                         <div class="relative hidden h-4 @2xl/directory:block" aria-hidden="true" x-show="tickMode === 'months'">
                             @foreach ($ticks as $tick)
-                                <span class="absolute top-0 text-xs tabular-nums text-secondary-light dark:text-ink-faint" style="inset-inline-start: {{ $tick['at'] }}%">{{ $tick['label'] }}</span>
+                                <span class="absolute top-0 text-xs tabular-nums text-secondary-medium dark:text-ink-faint" style="inset-inline-start: {{ $tick['at'] }}%">{{ $tick['label'] }}</span>
                             @endforeach
                         </div>
                         <div class="relative h-4" aria-hidden="true" x-show="tickMode === 'weeks'" x-cloak>
                             <template x-if="tickMode === 'weeks'">
                                 <div>
                                     <template x-for="tick in weekTicks" :key="tick.at">
-                                        <span class="absolute top-0 whitespace-nowrap text-xs tabular-nums text-secondary-light dark:text-ink-faint" :style="'inset-inline-start: ' + tick.at + '%'" x-text="tick.label"></span>
+                                        <span class="absolute top-0 whitespace-nowrap text-xs tabular-nums text-secondary-medium dark:text-ink-faint" :style="'inset-inline-start: ' + tick.at + '%'" x-text="tick.label"></span>
                                     </template>
                                 </div>
                             </template>
@@ -258,7 +258,7 @@
                             <template x-if="tickMode === 'days'">
                                 <div>
                                     <template x-for="tick in dayTicks" :key="tick.at">
-                                        <span class="absolute top-0 whitespace-nowrap text-xs tabular-nums text-secondary-light dark:text-ink-faint" :style="'inset-inline-start: ' + tick.at + '%'" x-text="tick.label"></span>
+                                        <span class="absolute top-0 whitespace-nowrap text-xs tabular-nums text-secondary-medium dark:text-ink-faint" :style="'inset-inline-start: ' + tick.at + '%'" x-text="tick.label"></span>
                                     </template>
                                 </div>
                             </template>

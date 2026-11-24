@@ -62,9 +62,9 @@
 
         <div class="ms-auto flex shrink-0 items-center gap-2">
             @if ($row['split'])
-                <bdi dir="ltr" @class(['min-w-16 text-end tabular-nums', 'text-2xl font-extrabold' => $row['computed'] !== '—', 'text-base text-secondary-light dark:text-ink-faint' => $row['computed'] === '—']) data-split-total="{{ $id }}">{{ $row['computed'] }}</bdi>
+                <bdi dir="ltr" @class(['min-w-16 text-end tabular-nums', 'text-2xl font-extrabold' => $row['computed'] !== '—', 'text-base text-secondary-medium dark:text-ink-faint' => $row['computed'] === '—']) data-split-total="{{ $id }}">{{ $row['computed'] }}</bdi>
             @else
-                <bdi dir="ltr" @class(['min-w-16 text-end tabular-nums', 'text-2xl font-extrabold' => $row['computed'] !== '—', 'text-base text-secondary-light dark:text-ink-faint' => $row['computed'] === '—']) data-computed="{{ $id }}">{{ $row['computed'] }}</bdi>
+                <bdi dir="ltr" @class(['min-w-16 text-end tabular-nums', 'text-2xl font-extrabold' => $row['computed'] !== '—', 'text-base text-secondary-medium dark:text-ink-faint' => $row['computed'] === '—']) data-computed="{{ $id }}">{{ $row['computed'] }}</bdi>
             @endif
             <button
                 type="button"

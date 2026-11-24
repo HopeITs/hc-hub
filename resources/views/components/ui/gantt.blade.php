@@ -61,7 +61,7 @@
             'warn' => 'bg-status-warn-soft text-status-warn ring-status-warn/25',
             'critical' => 'bg-status-critical-soft text-status-critical ring-status-critical',
             'funding' => 'bg-funding-soft text-funding ring-funding/25',
-            'muted' => 'bg-transparent text-secondary-light ring-secondary-soft dark:text-ink-muted dark:ring-white/15',
+            'muted' => 'bg-transparent text-secondary-medium ring-secondary-soft dark:text-ink-muted dark:ring-white/15',
         ],
         // A proposal plan's colour (T31): a stripe at the row's start, never the bar's status tone.
         'series' => [
@@ -178,8 +178,8 @@
     $control = 'rounded-lg border border-secondary-soft bg-white px-2.5 py-1.5 text-xs text-secondary-dark dark:border-field-line dark:bg-surface-2 dark:text-ink';
     $menu = 'absolute end-0 top-full z-40 mt-1.5 origin-top-right rtl:origin-top-left rounded-xl border border-secondary-soft bg-white p-1.5 shadow-[0_8px_24px_rgba(16,24,40,0.12),0_2px_6px_rgba(16,24,40,0.06)] dark:border-white/15 dark:bg-surface-3 dark:shadow-raised';
     $menuItem = 'flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-start text-xs text-secondary-dark hover:bg-board-head dark:text-ink dark:hover:bg-white/10';
-    $menuHeading = 'px-2.5 pt-2 pb-1 type-label text-secondary-light dark:text-ink-muted';
-    $inspectorLabel = 'type-label text-secondary-light dark:text-ink-muted';
+    $menuHeading = 'px-2.5 pt-2 pb-1 type-label text-secondary-medium dark:text-ink-muted';
+    $inspectorLabel = 'type-label text-secondary-medium dark:text-ink-muted';
 @endphp
 
 <div
@@ -421,9 +421,9 @@
                     x-model.debounce.150ms="search"
                     x-on:keydown.escape="search = ''; $el.blur()"
                     placeholder="{{ __('gantt.search') }}"
-                    class="h-8 w-full ps-8 pe-7 sm:w-48 {{ $control }} placeholder:text-secondary-light focus:border-secondary-light focus:outline-none"
+                    class="h-8 w-full ps-8 pe-7 sm:w-48 {{ $control }} placeholder:text-secondary-medium dark:placeholder:text-ink-faint focus:border-secondary-light focus:outline-none"
                 >
-                <kbd class="pointer-events-none absolute end-2 rounded border border-secondary-soft px-1 font-sans text-[10px] font-semibold text-secondary-light dark:border-white/15" x-show="search === ''" aria-hidden="true">/</kbd>
+                <kbd class="pointer-events-none absolute end-2 rounded border border-secondary-soft px-1 font-sans text-[10px] font-semibold text-secondary-medium dark:text-ink-faint dark:border-white/15" x-show="search === ''" aria-hidden="true">/</kbd>
             </label>
 
             {{-- Display settings --}}
@@ -543,7 +543,7 @@
                 <button type="button" x-show="baselineId !== null" x-on:click="deleteBaseline()" x-bind:disabled="busy" class="{{ $toolButton }}" aria-label="{{ __('gantt.delete_baseline') }}" title="{{ __('gantt.delete_baseline') }}">
                     <flux:icon.trash variant="micro" class="size-3.5" />
                 </button>
-                <input type="text" x-model="baselineName" maxlength="255" placeholder="{{ __('gantt.baseline_name') }}" aria-label="{{ __('gantt.baseline_name') }}" class="w-40 {{ $control }} placeholder:text-secondary-light" x-on:keydown.enter.prevent="saveBaseline()">
+                <input type="text" x-model="baselineName" maxlength="255" placeholder="{{ __('gantt.baseline_name') }}" aria-label="{{ __('gantt.baseline_name') }}" class="w-40 {{ $control }} placeholder:text-secondary-medium dark:placeholder:text-ink-faint" x-on:keydown.enter.prevent="saveBaseline()">
                 <button type="button" x-on:click="saveBaseline()" x-bind:disabled="busy" class="rounded-lg bg-secondary-dark px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary dark:hover:bg-ink/85 disabled:opacity-40 dark:bg-ink dark:text-surface-0">{{ __('gantt.save_baseline') }}</button>
             </div>
         </div>
@@ -913,7 +913,7 @@
                                         <flux:icon :name="$iconName" variant="micro" class="size-3 {{ $iconTint }}" x-show="iconKey(inspected.row) === '{{ $iconKey }}'" />
                                     @endforeach
                                     <span x-text="labels.kinds[inspected.row.kind] ?? inspected.row.kind"></span>
-                                    <span class="tabular-nums text-secondary-light" x-text="inspected.row.wbs"></span>
+                                    <span class="tabular-nums text-secondary-medium dark:text-ink-faint" x-text="inspected.row.wbs"></span>
                                 </span>
                                 <span x-show="inspected.row.statusLabel" class="inline-flex rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset" x-bind:class="tones.pill[inspected.row.tone]" x-text="inspected.row.statusLabel"></span>
                                 <span x-show="inspected.row.critical" class="inline-flex items-center gap-1 rounded-full bg-status-critical-soft px-2 py-0.5 text-[11px] font-semibold text-status-critical">

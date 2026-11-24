@@ -126,7 +126,7 @@
                         <span x-show="step?.key !== 'welcome'" class="text-4xl leading-none font-bold tracking-tight text-status-critical tabular-nums" x-text="number(index)" aria-hidden="true"></span>
 
                         <div class="min-w-0 flex-1 pt-0.5">
-                            <p class="text-[11px] font-semibold tracking-[0.12em] text-secondary-light uppercase dark:text-ink-muted" x-text="step?.kicker"></p>
+                            <p class="text-[11px] font-semibold tracking-[0.12em] text-secondary-medium uppercase dark:text-ink-muted" x-text="step?.kicker"></p>
                             <p class="mt-1 text-xs text-secondary-medium tabular-nums dark:text-ink-muted" x-text="@js(__('tour.step_of', ['current' => '{c}', 'total' => '{t}'])).replace('{c}', index + 1).replace('{t}', steps.length)"></p>
                         </div>
 

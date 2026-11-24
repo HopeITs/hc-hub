@@ -60,7 +60,7 @@
                         'min-w-0 text-start line-clamp-2 break-words hover:underline',
                         'text-sm font-semibold' => ! $isSubtask,
                         'text-[13px] font-medium' => $isSubtask,
-                        'text-secondary-light line-through' => $isDone,
+                        'text-secondary-medium dark:text-ink-faint line-through' => $isDone,
                         'text-secondary-dark dark:text-ink' => ! $isDone,
                     ])>{{ $task->title }}</a>
                 </div>
@@ -88,7 +88,7 @@
                     <span @class([
                         'tabular-nums',
                         'font-semibold text-primary dark:text-brand-text' => ! $isDone && ($isOverdue || $isMissed),
-                        'text-secondary-light' => $isDone,
+                        'text-secondary-medium dark:text-ink-faint' => $isDone,
                         'text-secondary-medium dark:text-ink-muted' => ! $isDone && ! $isOverdue && ! $isMissed,
                     ]) data-test="task-card-due-date-{{ $task->id }}"><span class="sr-only">{{ __('tasks.due_date_2') }}: </span>{{ $task->due_date->translatedFormat(__($task->due_date->isCurrentYear() ? 'formats.date_short' : 'formats.date')) }}</span>
                     @include('tracking::pages.tasks._list-due-note', ['task' => $task, 'today' => $today, 'hookSuffix' => '-mobile'])

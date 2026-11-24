@@ -54,7 +54,7 @@
 
     .dk-side-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 12px 10px 20px; scrollbar-width: thin; }
     .dk-side-g + .dk-side-g { margin-top: 14px; }
-    .dk-side-gh { font-size: var(--text-caption); font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); padding: 4px 10px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dk-side-gh { font-size: var(--text-caption); font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); padding: 4px 10px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     [lang="ar"] .dk-side-gh { letter-spacing: 0; font-size: 12px; }
     .dk-side-g ul { display: grid; gap: 2px; }
     .dk-side-a { position: relative; display: flex; align-items: center; gap: 11px; height: 38px; padding-inline: 12px; border-radius: var(--radius-control); color: var(--ink-2); text-decoration: none; font-size: 14px; font-weight: 600; white-space: nowrap; transition: background .12s, color .12s; }
@@ -116,14 +116,14 @@
 
     /* Personal zone: Pinned + Recent */
     .dk-side-me ul { display: grid; gap: 1px; }
-    .dk-side-me .dk-side-gh, .dk-side-fly .dk-side-gh { display: block; height: auto; margin: 4px 0 0; padding: 4px 10px; background: none; color: var(--faint); }
+    .dk-side-me .dk-side-gh, .dk-side-fly .dk-side-gh { display: block; height: auto; margin: 4px 0 0; padding: 4px 10px; background: none; color: var(--ink-3); }
     .dk-side-star { display: none; }
-    .dk-side-empty { margin: 0; padding: 6px 10px; font-size: 12.5px; color: var(--faint); }
+    .dk-side-empty { margin: 0; padding: 6px 10px; font-size: 12.5px; color: var(--ink-3); }
     .dk-side-rec { height: 42px; }
     .dk-side-rec .dk-side-l { display: grid; min-width: 0; line-height: 1.2; }
     /* A long record name ends in an ellipsis inside the list (and the rail's fly-out), never past its edge. */
     .dk-side-rec :is(.dk-side-rt, small) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .dk-side-rec small { font-size: var(--text-caption); font-weight: 600; color: var(--faint); }
+    .dk-side-rec small { font-size: var(--text-caption); font-weight: 600; color: var(--ink-3); }
 
     /* Project context mode */
     .dk-side-ctx { display: flex; flex-direction: column; gap: 2px; }
@@ -216,7 +216,7 @@
     .dk-where li.dk-where-p { flex: 0 2 auto; }
     .dk-where i { flex: none; border-radius: 50%; }
     .dk-where-g i { width: 8px; height: 8px; border: 2px solid var(--line-2); }
-    .dk-where-g span { font-size: var(--text-caption); font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--faint); overflow: hidden; text-overflow: ellipsis; }
+    .dk-where-g span { font-size: var(--text-caption); font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); overflow: hidden; text-overflow: ellipsis; }
     [lang="ar"] .dk-where-g span { letter-spacing: 0; text-transform: none; font-size: 12.5px; }
     .dk-where-p::before { content: ""; flex: none; width: 22px; height: 2px; margin-inline-start: 2px; border-radius: var(--radius-inset); background: var(--line-2); transform-origin: left center; animation: dk-thread-in .42s .08s cubic-bezier(.2, .8, .2, 1) both; }
     [dir="rtl"] .dk-where-p::before { transform-origin: right center; }
@@ -340,7 +340,7 @@
         .dk-side .dk-side-h { justify-content: flex-start !important; padding-inline: 16px !important; }
         .dk-side .dk-side-mark { display: none !important; }
         html:not(.dark) .dk-side .dk-side-word-light, html.dark .dk-side .dk-side-word-dark { display: block !important; }
-        .dk-side .dk-side-gh { height: auto !important; padding: 4px 10px 6px !important; margin: 0 !important; background: none !important; color: var(--faint) !important; display: block !important; }
+        .dk-side .dk-side-gh { height: auto !important; padding: 4px 10px 6px !important; margin: 0 !important; background: none !important; color: var(--ink-3) !important; display: block !important; }
         .dk-side .dk-side-a { justify-content: flex-start !important; padding-inline: 12px !important; width: auto !important; margin-inline: 0 !important; height: 44px; }
         .dk-side .dk-side-l { display: block !important; }
         .dk-side .dk-side-badge { position: static !important; width: auto !important; min-width: 20px !important; height: 20px !important; padding-inline: 6px !important; font-size: var(--text-caption) !important; background: var(--brand-soft) !important; box-shadow: none !important; }
@@ -471,7 +471,7 @@
     .dk-pal-in > svg.dk-i { width: 20px; height: 20px; flex: none; color: var(--ink-3); transition: color .15s; }
     .dk-pal-in:focus-within > svg.dk-i { color: var(--ink); }
     .dk-pal-in input { font-size: 17px; font-weight: 500; letter-spacing: -.005em; color: var(--ink); }
-    .dk-pal-in input::placeholder { color: var(--faint); }
+    .dk-pal-in input::placeholder { color: var(--ink-3); }
     /* The scan moves by transform only, so it never repaints anything around it. */
     .dk-pal-busy { position: absolute; inset-inline: 0; bottom: -1px; height: 2px; overflow: hidden; pointer-events: none; }
     .dk-pal-busy::after { content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 40%; background: linear-gradient(90deg, transparent, var(--brand), transparent); animation: dk-pal-scan 1s ease-in-out infinite; will-change: transform; }

@@ -81,7 +81,7 @@
                                     @if ($program->strategy)
                                         <span class="mt-0.5 inline-block max-w-full truncate rounded-full border border-board-line px-1.5 py-px type-meta text-secondary-medium dark:text-ink-muted">{{ $program->strategy->name }}</span>
                                     @else
-                                        <p class="truncate type-meta text-secondary-light">{{ __('common.strategy_not_assigned') }}</p>
+                                        <p class="truncate type-meta text-secondary-medium dark:text-ink-faint">{{ __('common.strategy_not_assigned') }}</p>
                                     @endif
                                 </div>
                                 <span class="ms-auto shrink-0 type-meta font-semibold tabular-nums text-secondary-medium dark:text-ink-muted">{{ $rowPlans->count() }}/{{ count($yearColumns) }}</span>
@@ -104,7 +104,7 @@
                                                 class="flex w-full min-h-11 touch-manipulation items-center justify-between gap-3 rounded-md border border-dashed border-board-line px-3 py-2 text-start transition-colors hover:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary-medium"
                                                 aria-label="{{ __('annual_plans.add_a_plan_for_program_in_year', ['program' => $program->name, 'year' => $year]) }}"
                                             >
-                                                <span class="type-meta font-bold tabular-nums text-secondary-light">{{ $year }}</span>
+                                                <span class="type-meta font-bold tabular-nums text-secondary-medium dark:text-ink-faint">{{ $year }}</span>
                                                 <span class="inline-flex items-center gap-1 type-meta text-secondary-medium dark:text-ink-muted">
                                                     <flux:icon.plus class="size-3.5" />
                                                     {{ __('annual_plans.add_plan') }}
@@ -230,7 +230,7 @@
                                         @if ($program->strategy)
                                             <span class="mt-0.5 inline-block max-w-full truncate rounded-full border border-board-line px-1.5 py-px type-meta text-secondary-medium dark:text-ink-muted">{{ $program->strategy->name }}</span>
                                         @else
-                                            <p class="truncate type-meta text-secondary-light">{{ __('common.strategy_not_assigned') }}</p>
+                                            <p class="truncate type-meta text-secondary-medium dark:text-ink-faint">{{ __('common.strategy_not_assigned') }}</p>
                                         @endif
                                         <div class="mt-1.5 flex items-center gap-1" aria-hidden="true">
                                             @foreach ($yearColumns as $coverageYear)
@@ -277,7 +277,7 @@
                                                 ])
                                                 aria-label="{{ __('annual_plans.add_a_plan_for_program_in_year', ['program' => $program->name, 'year' => $year]) }}"
                                             >
-                                                <span aria-hidden="true" class="text-secondary-light group-hover/gap:hidden">—</span>
+                                                <span aria-hidden="true" class="text-secondary-medium dark:text-ink-faint group-hover/gap:hidden">—</span>
                                                 <flux:icon.plus aria-hidden="true" class="hidden size-4 text-primary dark:text-brand-text group-hover/gap:block" />
                                             </button>@endcan
                                         @else

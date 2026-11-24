@@ -40,7 +40,7 @@
                 </div>
 
                 @if ($summary['reportsTotal'] === 0)
-                    <p class="type-meta text-secondary-light">{{ __('annual_plans.no_reports_submitted_yet') }}</p>
+                    <p class="type-meta text-secondary-medium dark:text-ink-faint">{{ __('annual_plans.no_reports_submitted_yet') }}</p>
                 @else
                     <div class="flex h-2.5 w-full overflow-hidden rounded-full bg-secondary-soft dark:bg-surface-2" role="img" aria-label="{{ __('annual_plans.approved') }} {{ $summary['reportsApproved'] }}, {{ \Modules\Tracking\Enums\ReportStatus::Reviewed->label() }} {{ $summary['reportsReviewed'] }}, {{ \Modules\Tracking\Enums\ReportStatus::Draft->label() }} {{ $summary['reportsDraft'] }}">
                         @foreach ($reportSegments as $segment)

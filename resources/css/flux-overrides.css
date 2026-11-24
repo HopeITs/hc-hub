@@ -103,7 +103,11 @@
         outline-color: var(--color-field-line);
     }
 
-    .admin-directory [data-flux-control]::placeholder,
+    /* A placeholder is readable text: the muted ink (#6d6e71, 5.1 : 1 on white), not the icon grey. */
+    .admin-directory [data-flux-control]::placeholder {
+        color: var(--color-secondary-medium);
+    }
+
     .admin-directory [data-flux-input]>div,
     .admin-directory [data-flux-clear-button],
     .admin-directory [data-flux-clear-button] [data-flux-icon] {
@@ -879,6 +883,11 @@ ui-toast-group {
         border-color: var(--color-field-line);
         background-color: var(--color-surface-2);
         color: var(--color-ink);
+    }
+
+    /* Light placeholders: Flux sets placeholder-zinc-400 (the icon grey, 3 : 1 on white); the muted ink is readable. */
+    :where(input, textarea)[data-flux-control]::placeholder {
+        color: var(--color-ink-muted);
     }
 
     :where(.dark) :where(input, textarea)[data-flux-control]::placeholder {

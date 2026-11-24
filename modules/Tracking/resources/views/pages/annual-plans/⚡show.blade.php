@@ -260,7 +260,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plan')] class extends Compon
                     <span class="min-w-0 flex-1">
                         <span class="block type-meta text-secondary-medium dark:text-ink-muted">{{ __('common.strategy') }}</span>
                         @if ($plan->program->strategy === null)
-                            <span class="block truncate text-sm font-semibold text-secondary-light">{{ __('common.strategy_not_assigned') }}</span>
+                            <span class="block truncate text-sm font-semibold text-secondary-medium dark:text-ink-faint">{{ __('common.strategy_not_assigned') }}</span>
                         @else
                             <a href="{{ route('strategies.show', $plan->program->strategy) }}" wire:navigate class="block truncate text-sm font-semibold hover:underline">{{ $plan->program->strategy->name }}</a>
                         @endif
@@ -280,7 +280,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plan')] class extends Compon
                 @if ($linkedProjects->isEmpty())
                     <li class="p-3.5">
                         <span class="block type-meta text-secondary-medium dark:text-ink-muted">{{ __('common.projects') }}</span>
-                        <p class="mt-1 type-meta text-secondary-light">{{ __('annual_plans.no_projects_attributed_yet') }}</p>
+                        <p class="mt-1 type-meta text-secondary-medium dark:text-ink-faint">{{ __('annual_plans.no_projects_attributed_yet') }}</p>
                     </li>
                 @else
                     @foreach ($linkedProjects as $project)
@@ -340,7 +340,7 @@ new #[Layout('layouts::desk'), Title('titles.annual_plan')] class extends Compon
                                         {{ $report->planIndicator->project?->name ?? __('common.organisation_wide') }}
                                         · <span class="font-semibold tabular-nums text-secondary-dark dark:text-ink">{{ number_format((float) $report->value, 2) }}</span>
                                     </span>
-                                    <span class="mt-0.5 block type-meta text-secondary-light">{{ $report->created_at?->translatedFormat(__('formats.date')) }}</span>
+                                    <span class="mt-0.5 block type-meta text-secondary-medium dark:text-ink-faint">{{ $report->created_at?->translatedFormat(__('formats.date')) }}</span>
                                 </span>
 
                                 <flux:icon.chevron-right variant="micro" class="mt-1 size-3.5 shrink-0 text-secondary-light rtl:-scale-x-100" aria-hidden="true" />

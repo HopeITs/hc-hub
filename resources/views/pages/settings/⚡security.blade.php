@@ -442,7 +442,7 @@ new #[Layout('layouts::desk'), Title('titles.security_settings')] class extends 
         {{-- Sign-in protection: what a new sign-in asks for, then each step as a dot on one thread. --}}
         <section aria-labelledby="sign-in-protection-heading" class="grid gap-8">
             <div class="grid gap-2" data-test="sign-in-protection" data-sign-in-check="{{ $signInCheck }}">
-                <h2 id="sign-in-protection-heading" class="type-label uppercase text-secondary-light dark:text-ink-muted">
+                <h2 id="sign-in-protection-heading" class="type-label uppercase text-secondary-medium dark:text-ink-muted">
                     {{ __('settings.sign_in_protection') }}
                 </h2>
                 <p class="flex items-center gap-3 text-3xl font-bold leading-tight tracking-tight @3xl/directory:text-4xl">

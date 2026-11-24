@@ -20,7 +20,7 @@
     $isOverdue = $task->isOverdue();
     $isMissed = $task->isMissed();
     $dueDateClasses = match (true) {
-        $isDone => 'text-secondary-light',
+        $isDone => 'text-secondary-medium dark:text-ink-faint',
         $isOverdue, $isMissed => 'font-semibold text-primary dark:text-brand-text',
         default => 'text-secondary-dark dark:text-ink',
     };
@@ -109,7 +109,7 @@
                     'min-w-0 truncate hover:underline',
                     'text-sm font-semibold' => ! $isSubtask,
                     'text-[13px] font-medium' => $isSubtask,
-                    'text-secondary-light line-through' => $isDone,
+                    'text-secondary-medium dark:text-ink-faint line-through' => $isDone,
                     'text-secondary-dark dark:text-ink' => ! $isDone,
                 ])
             >{{ $task->title }}</a>
@@ -177,7 +177,7 @@
     </td>
     <td class="px-2 py-3">
         @if ($task->due_date === null && (! $canUpdate || $task->created_by !== auth()->id()))
-            <span class="p-1 text-xs text-secondary-light" data-test="task-due-date-text-{{ $task->id }}" aria-hidden="true">—</span>
+            <span class="p-1 text-xs text-secondary-medium dark:text-ink-faint" data-test="task-due-date-text-{{ $task->id }}" aria-hidden="true">—</span>
             <span class="sr-only">{{ __('tasks.no_due_date') }}</span>
         @elseif (! $canUpdate || $task->created_by !== auth()->id())
             {{-- Only the creator reschedules (RescheduleTask): show text, not a dead date box. --}}
@@ -196,7 +196,7 @@
                 @class([
                     'w-full min-w-0 rounded border-0 bg-transparent p-1 text-xs tabular-nums hover:bg-secondary-soft/60 focus:ring-1 focus:ring-secondary-light focus:outline-none dark:hover:bg-surface-2',
                     $dueDateClasses,
-                    'text-secondary-light!' => $task->due_date === null,
+                    'text-ink-muted!' => $task->due_date === null,
                 ])
                 data-test="task-due-date-{{ $task->id }}"
             />

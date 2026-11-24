@@ -24,7 +24,7 @@
         <input
             type="text"
             placeholder="{{ __('tasks.add_task') }}"
-            class="w-full min-w-0 border-0 bg-transparent p-1 text-sm text-secondary-dark placeholder:text-secondary-light focus:ring-0 focus:outline-none dark:text-ink"
+            class="w-full min-w-0 border-0 bg-transparent p-1 text-sm text-secondary-dark placeholder:text-secondary-medium dark:placeholder:text-ink-faint focus:ring-0 focus:outline-none dark:text-ink"
             wire:keydown.enter="quickCreateTask($event.target.value, {{ Illuminate\Support\Js::from($defaultStatus) }}, {{ Illuminate\Support\Js::from($group === 'milestone' && $groupKeyString !== '' ? $groupKeyString : null) }}, {{ Illuminate\Support\Js::from($rowKey) }}); $event.target.value = ''"
             data-test="task-quick-add-mobile-{{ $group }}-{{ $groupKeyString }}"
         />

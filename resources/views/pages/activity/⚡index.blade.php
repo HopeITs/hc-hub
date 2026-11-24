@@ -451,7 +451,7 @@ new #[Layout('layouts::desk'), Title('titles.activity_log')] class extends Compo
                                         {{ $programName }}
                                     </a>
                                 @else
-                                    <span class="text-secondary-light dark:text-ink-faint">—</span>
+                                    <span class="text-secondary-medium dark:text-ink-faint">—</span>
                                 @endif
                             </x-ui.data-table.cell>
 

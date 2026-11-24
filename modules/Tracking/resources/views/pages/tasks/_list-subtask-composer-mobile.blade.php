@@ -24,7 +24,7 @@
             type="text"
             x-ref="subtaskAddInputMobile{{ $task->id }}"
             placeholder="{{ __('tasks.add_subtask') }}"
-            class="w-full min-w-0 border-0 bg-transparent p-1 text-sm text-secondary-dark placeholder:text-secondary-light focus:ring-0 focus:outline-none dark:text-ink"
+            class="w-full min-w-0 border-0 bg-transparent p-1 text-sm text-secondary-dark placeholder:text-secondary-medium dark:placeholder:text-ink-faint focus:ring-0 focus:outline-none dark:text-ink"
             wire:keydown.enter="addSubtaskQuick({{ $task->id }}, $event.target.value); $event.target.value = ''"
             data-test="task-subtask-quick-add-mobile-{{ $task->id }}"
         />

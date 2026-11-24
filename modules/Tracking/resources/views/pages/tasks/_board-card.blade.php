@@ -191,7 +191,7 @@
                                         href="{{ route('tasks.show', $subtask) }}"
                                         wire:navigate
                                         title="{{ $subtask->title }}"
-                                        @class(['min-w-0 flex-1 truncate text-xs hover:underline', 'text-secondary-light line-through' => $subtask->status === TaskStatus::Done, 'text-secondary-dark dark:text-ink' => $subtask->status !== TaskStatus::Done])
+                                        @class(['min-w-0 flex-1 truncate text-xs hover:underline', 'text-secondary-medium dark:text-ink-faint line-through' => $subtask->status === TaskStatus::Done, 'text-secondary-dark dark:text-ink' => $subtask->status !== TaskStatus::Done])
                                     >{{ $subtask->title }}</a>
                                     @if (! auth()->user()->can('update', $subtask))
                                         {{ FluxMarkup::icon('flag', $subtask->priority === TaskPriority::Low ? 'outline' : 'solid', 'size-3 shrink-0 '.$priorityIconClasses($subtask->priority)) }}
@@ -220,7 +220,7 @@
                                         type="text"
                                         x-ref="subtaskAddInputBoard{{ $task->id }}"
                                         placeholder="{{ __('tasks.add_subtask') }}"
-                                        class="w-full min-w-0 border-0 bg-transparent p-1 text-xs text-secondary-dark placeholder:text-secondary-light focus:ring-0 focus:outline-none dark:text-ink"
+                                        class="w-full min-w-0 border-0 bg-transparent p-1 text-xs text-secondary-dark placeholder:text-secondary-medium dark:placeholder:text-ink-faint focus:ring-0 focus:outline-none dark:text-ink"
                                         wire:keydown.enter="addSubtaskQuick({{ $task->id }}, $event.target.value); $event.target.value = ''"
                                         data-test="task-board-subtask-quick-add-{{ $task->id }}"
                                     />

@@ -178,7 +178,7 @@ test('Arabic pages read body text at 17px on a 1.7 line height', function () {
         ->toContain('line-height: var(--text-body--line-height);');
 });
 
-test('every page title shares the HR title style and the eyebrow uses the faint grey', function () {
+test('every page title shares the HR title style and the eyebrow uses the muted ink', function () {
     $css = dirname(__DIR__, 2).'/resources/css';
     [$light, $dark] = explode('.dark {', file_get_contents($css.'/tokens.css'), 2);
     $views = bladeViews();
@@ -188,7 +188,7 @@ test('every page title shares the HR title style and the eyebrow uses the faint 
         ->toContain('--color-heading: var(--color-grey-ink);')
         ->and($dark)->toContain('--color-heading: var(--color-desk-ink);')
         ->and(file_get_contents($css.'/typography.css'))->toContain('@utility page-title')
-        ->and(file_get_contents($css.'/desk.css'))->toContain('.dk-eyebrow{ font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint) }');
+        ->and(file_get_contents($css.'/desk.css'))->toContain('.dk-eyebrow{ font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3) }');
 
     foreach (['pages/desk/⚡index.blade.php', 'components/desk/register.blade.php', 'pages/projects/_story-header.blade.php', 'pages/programs/⚡show.blade.php'] as $path) {
         expect($views[$path])->toContain('<h1 class="page-title"');
@@ -363,4 +363,46 @@ test('one global focus ring: an ink token in both themes, never red, and no styl
     foreach (glob($css.'*.css') as $file) {
         expect(file_get_contents($file))->not->toMatch('/:focus(?:-visible|-within)?[^{}]*\{[^{}]*outline[^{}]*(?:--color-primary|--color-brand|--rules-accent)/');
     }
+});
+
+test('readable text never uses the faint grey: it is for icons, borders and disabled states, and the text rules read the muted ink', function () {
+    $css = dirname(__DIR__, 2).'/resources/css/';
+    // The text roles (labels, meta, captions, headers, hints, empty states) of the Desk and the annual plan.
+    $textRoles = [
+        'desk.css' => ['.dk-eyebrow', '.dk-muted', '.dk-tl-legend'],
+        'desk-shell.css' => ['.dk-side-empty', '.dk-where-g span', '.dk-pal-in input::placeholder'],
+        'desk-story.css' => ['.dk-prog-stat-n.dk-muted', '.dk-ptk-card-n small'],
+        'annual-plan.css' => ['.ap-faint', '.ap-plab', '.ap-fact span', '.ap-t th'],
+    ];
+
+    foreach ($textRoles as $file => $selectors) {
+        $source = file_get_contents($css.$file);
+
+        foreach ($selectors as $selector) {
+            expect($source)->toMatch('/'.preg_quote($selector, '/').'\s*\{[^}]*\}/', $file.' '.$selector);
+
+            preg_match('/'.preg_quote($selector, '/').'\s*\{[^}]*\}/', $source, $rule);
+
+            expect($rule[0])->not->toMatch('/(?<![-\w])color:\s*var\(--faint\)/', $file.' '.$selector);
+        }
+    }
+
+    // Placeholders read the muted ink in light (the dark rules next to them keep the faint step, which is 4.5 : 1 or more on every Graphite surface).
+    $light = fn (string $file): string => preg_replace('/\.dark[^{}]*\{[^{}]*\}/', '', file_get_contents($css.$file));
+
+    expect($light('forms.css'))->toMatch('/\.form-box-input::placeholder\s*\{\s*color:\s*var\(--color-secondary-medium\)/')
+        ->and($light('forms.css'))->toMatch('/\.task-composer-description::placeholder\s*\{\s*color:\s*var\(--color-secondary-medium\)/')
+        ->and($light('flux-overrides.css'))->toMatch('/:where\(input, textarea\)\[data-flux-control\]::placeholder\s*\{\s*color:\s*var\(--color-ink-muted\)/');
+
+    // Flux's dark:text-zinc-400 / -500 read the muted step, not the 4.49 : 1 and 2.9 : 1 greys.
+    [, $dark] = explode('.dark {', file_get_contents($css.'tokens.css'), 2);
+
+    expect($dark)->toMatch('/--color-zinc-400:\s*var\(--color-graphite-ink-muted\);/')
+        ->and($dark)->toMatch('/--color-zinc-500:\s*var\(--color-graphite-ink-muted\);/');
+
+    // Class-level: no input or select placeholder in the shared form controls is the faint grey.
+    $views = bladeViews();
+
+    expect($views['components/ui/input.blade.php'])->toContain('placeholder:text-ink-muted!')->not->toContain('placeholder:text-secondary-light')
+        ->and($views['components/ui/select.blade.php'])->toContain('placeholder:text-ink-muted!')->not->toContain('placeholder:text-secondary-light');
 });

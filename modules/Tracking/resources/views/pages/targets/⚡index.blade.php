@@ -95,7 +95,7 @@ new #[Layout('layouts::desk'), Title('titles.targets')] class extends Component 
     $statusMeta = [
         'achieved' => ['label' => __('targets.status_achieved'), 'count' => $pulse['achieved'], 'fill' => 'bg-status-good', 'text' => 'text-status-good', 'dot' => 'bg-status-good'],
         'in_progress' => ['label' => __('targets.status_in_progress'), 'count' => $pulse['in_progress'], 'fill' => 'bg-secondary-dark dark:bg-ink-muted', 'text' => 'text-secondary-dark dark:text-ink', 'dot' => 'bg-secondary-dark dark:bg-ink-muted'],
-        'not_started' => ['label' => __('targets.status_not_started'), 'count' => $pulse['not_started'], 'fill' => 'bg-secondary-light', 'text' => 'text-secondary-light', 'dot' => 'bg-secondary-light'],
+        'not_started' => ['label' => __('targets.status_not_started'), 'count' => $pulse['not_started'], 'fill' => 'bg-secondary-light', 'text' => 'text-secondary-medium dark:text-ink-faint', 'dot' => 'bg-secondary-light'],
     ];
     $formatValue = fn (float $value): string => fmod($value, 1.0) === 0.0 ? number_format($value) : number_format($value, 2);
     $resultMark = fn (?ResultType $type): string => match ($type) {

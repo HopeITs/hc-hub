@@ -418,7 +418,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.indicator_rules'
                                                        wire:model="ranges.{{ $option }}.max" placeholder="{{ $t('no_limit') }}"
                                                        @focus="select({ kind: 'exp', option: '{{ $option }}', req: selected?.req ?? 3 })"
                                                        @if ($invalid) aria-invalid="true" aria-describedby="range-{{ $option }}-error" @endif
-                                                       class="w-10 rounded-control border-neutral-300 bg-white dark:bg-surface-1 px-1 py-0.5 text-body tabular-nums sm:w-20 sm:px-2 shadow-e1 placeholder:text-small placeholder:text-secondary-light focus:border-primary focus:ring-2 focus:ring-neutral-200">
+                                                       class="w-10 rounded-control border-neutral-300 bg-white dark:bg-surface-1 px-1 py-0.5 text-body tabular-nums sm:w-20 sm:px-2 shadow-e1 placeholder:text-small placeholder:text-secondary-medium dark:placeholder:text-ink-faint focus:border-primary focus:ring-2 focus:ring-neutral-200">
                                             </span>
                                             @error('ranges.'.$option) <span id="range-{{ $option }}-error" class="mt-1 block text-small font-normal text-primary">{{ $message }}</span> @enderror
                                         </th>
@@ -558,7 +558,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.indicator_rules'
                                                @blur="addChip('{{ $level }}')"
                                                placeholder="{{ $t('add_keyword_placeholder') }}"
                                                @if ($invalid) aria-invalid="true" aria-describedby="keywords-{{ $level }}-error" @endif
-                                               class="min-w-32 flex-1 border-0 bg-transparent px-1 py-0.5 text-small placeholder:text-secondary-light focus:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary rounded-inset">
+                                               class="min-w-32 flex-1 border-0 bg-transparent px-1 py-0.5 text-small placeholder:text-secondary-medium dark:placeholder:text-ink-faint focus:ring-0 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-primary rounded-inset">
                                     </div>
                                     @error('keywords.'.$level) <p id="keywords-{{ $level }}-error" class="mt-1 text-small text-primary">{{ $message }}</p> @enderror
                                 </li>
@@ -667,7 +667,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.indicator_rules'
                         <label for="testText" class="sr-only">{{ $t('tester_title') }}</label>
                         <textarea id="testText" rows="3" dir="auto" x-model="testText"
                                   :placeholder="testMode === 'request' ? @js($t('tester_placeholder.request')) : @js($t('tester_placeholder.cv'))"
-                                  class="mt-3 w-full rounded-control border-neutral-300 text-body shadow-e1 placeholder:text-secondary-light focus:border-primary focus:ring-2 focus:ring-neutral-200"></textarea>
+                                  class="mt-3 w-full rounded-control border-neutral-300 text-body shadow-e1 placeholder:text-secondary-medium dark:placeholder:text-ink-faint focus:border-primary focus:ring-2 focus:ring-neutral-200"></textarea>
 
                         <div x-cloak x-show="testText.trim() !== ''" x-collapse class="mt-3 space-y-2">
                             <p dir="auto" class="rounded-control border border-neutral-100 bg-neutral-50 px-3 py-2 text-body leading-relaxed text-neutral-800 whitespace-pre-wrap"><template x-for="(part, i) in testSegments" :key="i"><span :class="part.chosen ? 'rounded-inset bg-neutral-800 px-0.5 text-white' : (part.hit ? 'rounded-inset bg-selection px-0.5 underline decoration-neutral-400 underline-offset-2' : '')" x-text="part.text"></span></template></p>
@@ -826,7 +826,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.indicator_rules'
         },
         toneFor(outcome) {
             return outcome === 'invalid'
-                ? 'bg-white dark:bg-surface-1 text-secondary-light border border-dashed border-neutral-300'
+                ? 'bg-white dark:bg-surface-1 text-secondary-medium dark:text-ink-faint border border-dashed border-neutral-300'
                 : this.ui.tones[outcome];
         },
         outcomeLabel(outcome) {

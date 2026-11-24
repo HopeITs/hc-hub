@@ -86,7 +86,7 @@
     }
 
     .form-box-input::placeholder {
-        color: var(--color-secondary-light);
+        color: var(--color-secondary-medium);
     }
 
     .form-affix {
@@ -154,7 +154,7 @@
 
     /* Form dropdowns are the header filter picker; these add the form-only states. */
     .form-select-placeholder {
-        color: var(--color-secondary-light);
+        color: var(--color-secondary-medium);
         font-weight: 400;
     }
 
@@ -493,7 +493,7 @@
 
     .modal-shell-index-optional {
         margin-inline-start: auto;
-        color: var(--color-secondary-light);
+        color: var(--color-secondary-medium);
         font-size: var(--text-caption);
         font-weight: 500;
     }
@@ -515,7 +515,7 @@
     .modal-shell-index-hint {
         margin-top: auto;
         margin-inline: 0.5rem;
-        color: var(--color-secondary-light);
+        color: var(--color-secondary-medium);
         font-size: var(--text-caption);
         line-height: 1rem;
     }
@@ -1194,7 +1194,7 @@
         display: inline-flex;
         align-items: center;
         gap: 0.375rem;
-        color: var(--color-secondary-light);
+        color: var(--color-secondary-medium);
         font-size: 0.8125rem;
     }
 
@@ -1646,7 +1646,7 @@
 
     .task-composer-title::placeholder,
     .task-composer-description::placeholder {
-        color: var(--color-secondary-light);
+        color: var(--color-secondary-medium);
         opacity: 1;
     }
 

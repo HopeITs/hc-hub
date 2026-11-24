@@ -41,7 +41,7 @@
                     </div>
                 </div>
             @empty
-                <p class="px-1 py-6 text-center text-xs text-secondary-light">{{ __('calendar.no_related_dates') }}</p>
+                <p class="px-1 py-6 text-center text-xs text-secondary-medium dark:text-ink-faint">{{ __('calendar.no_related_dates') }}</p>
             @endforelse
         </div>
         @endif

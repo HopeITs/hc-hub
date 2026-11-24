@@ -17,7 +17,7 @@
                         <x-ui.enum-badge :case="$task->priority" class="w-fit" />
                     </div>
                 @empty
-                    <p class="px-1 py-6 text-center text-xs text-secondary-light">{{ __('tasks.drop_a_task_here_to_unschedule_it') }}</p>
+                    <p class="px-1 py-6 text-center text-xs text-secondary-medium dark:text-ink-faint">{{ __('tasks.drop_a_task_here_to_unschedule_it') }}</p>
                 @endforelse
             </div>
         </x-ui.panel>

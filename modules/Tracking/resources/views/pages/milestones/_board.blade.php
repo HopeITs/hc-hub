@@ -115,7 +115,7 @@
                         </label>
                     </div>
                 @empty
-                    <p class="px-1 py-4 text-center text-xs text-secondary-light">{{ __('milestones.no_milestones_in_this_status') }}</p>
+                    <p class="px-1 py-4 text-center text-xs text-secondary-medium dark:text-ink-faint">{{ __('milestones.no_milestones_in_this_status') }}</p>
                 @endforelse
             </div>
         </div>

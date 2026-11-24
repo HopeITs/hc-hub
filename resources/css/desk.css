@@ -61,7 +61,7 @@
 .dk-top .dk-wrap{ display:flex;align-items:center;gap:16px;height:64px }
 .dk-logo{ display:flex;align-items:baseline;gap:6px;text-decoration:none;white-space:nowrap;flex:none }
 .dk-logo .dk-wm{ font-weight:800;letter-spacing:.06em;font-size:15px;color:var(--ink-2) }
-.dk-logo .dk-wm span{ color:var(--faint);font-weight:700 }
+.dk-logo .dk-wm span{ color:var(--ink-3);font-weight:700 }
 .dk-logo .dk-ws{ font-weight:700;font-size:13px;color:var(--brand-ink);font-style:italic }
 .dk-ask{ flex:1;max-width:620px;margin-inline:auto;display:flex;align-items:center;gap:10px;height:44px;padding-inline:14px;background:var(--paper);border:1px solid var(--line-2);border-radius:var(--radius-round);color:var(--ink-3);cursor:text;text-align:start;transition:border-color .15s, box-shadow .15s }
 .dk-ask:hover{ border-color:var(--ink-3) }
@@ -74,8 +74,8 @@
 .dk-scope main{ padding-block:28px 96px }
 /* Desk greeting */
 .dk-hello{ display:grid;gap:10px;padding-block:8px 28px }
-/* HR's eyebrow: 12px caps in secondary-light (#939598); the faint grey is a deliberate user choice despite its 2.7:1 contrast */
-.dk-eyebrow{ font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint) }
+/* HR's eyebrow: 12px caps in the muted ink; the faint grey (#939598) is 3:1 on white, so it is for icons and borders only */
+.dk-eyebrow{ font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3) }
 .dk-scope .dk-eyebrow:has(+ h1){ margin-bottom:4px }
 [lang="ar"] .dk-eyebrow{ letter-spacing:0;font-size:13px }
 /* Size, weight and colour come from .page-title (typography.css), shared by every page title */
@@ -180,8 +180,8 @@
 .dk-tl .dk-bar{ position:absolute;top:6px;height:10px;border-radius:var(--radius-inset);background:var(--ink-2) }
 .dk-tl .dk-bar.dk-future{ background:none;border:2px solid var(--ink-2) }
 .dk-tl .dk-today{ position:absolute;top:0;bottom:0;width:2px;background:var(--brand) }
-.dk-tl-legend{ display:flex;justify-content:space-between;font-size:var(--text-caption);color:var(--faint);margin-top:2px }
-.dk-muted{ color:var(--faint) }
+.dk-tl-legend{ display:flex;justify-content:space-between;font-size:var(--text-caption);color:var(--ink-3);margin-top:2px }
+.dk-muted{ color:var(--ink-3) }
 /* Story */
 .dk-back{ display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--ink-2);text-decoration:none;padding:6px 10px 6px 6px;margin-inline-start:-6px;border-radius:var(--radius-control) }
 .dk-back:hover{ background:var(--sunk) }
@@ -239,7 +239,7 @@
 .dk-ch-top .dk-here{ font-size:var(--text-caption);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--paper);background:var(--ink);border-radius:var(--radius-inset);padding:2px 7px }
 [lang="ar"] .dk-ch-top .dk-here{ letter-spacing:0;font-size:12px }
 .dk-ch-sum{ font-size:14.5px;color:var(--ink-2);margin-top:4px;max-width:75ch }
-.dk-ch.dk-later .dk-ch-sum{ color:var(--faint) }
+.dk-ch.dk-later .dk-ch-sum{ color:var(--ink-3) }
 .dk-ch-more{ margin-top:6px;background:none;border:0;padding:0;font-size:13px;font-weight:700;color:var(--ink-2);cursor:pointer;text-decoration:underline;text-underline-offset:3px }
 .dk-ch.dk-now .dk-ch-body{ padding-block:20px 34px }
 .dk-ch-detail{ margin-top:14px }
@@ -293,7 +293,7 @@
 .dk-tasks label{ display:contents;cursor:pointer }
 .dk-tasks input[type="checkbox"]{ width:18px;height:18px;accent-color:var(--brand);margin:0;justify-self:center }
 .dk-tasks .dk-tt{ font-size:14.5px;line-height:1.4 }
-.dk-tasks .dk-done .dk-tt{ text-decoration:line-through;color:var(--faint) }
+.dk-tasks .dk-done .dk-tt{ text-decoration:line-through;color:var(--ink-3) }
 .dk-tasks .dk-ms{ font-size:var(--text-caption);font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--active);margin-inline-end:6px }
 [lang="ar"] .dk-tasks .dk-ms{ letter-spacing:0;font-size:12px }
 .dk-tasks .dk-tm{ font-size:12.5px;color:var(--ink-3);white-space:nowrap;text-align:end }
@@ -452,7 +452,7 @@
 .dk-wrap{ max-width:none;padding-left:max(var(--page-edge),env(safe-area-inset-left,0px));padding-right:max(var(--page-edge),env(safe-area-inset-right,0px)) }
 .dk-scope main{ padding-block:22px 96px }
 .dk-small{ font-size:12.5px }
-.dk-muted{ color:var(--faint) }
+.dk-muted{ color:var(--ink-3) }
 .dk-bad{ color:var(--bad) }
 .dk-good{ color:var(--good) }
 .dk-warn{ color:var(--warn) }
@@ -464,7 +464,7 @@
 .dk-pill.dk-bad{ background:var(--bad-soft);color:var(--bad) }
 .dk-pill.dk-act{ background:var(--active-soft);color:var(--active) }
 .dk-pill.dk-money{ background:var(--money-soft);color:var(--money) }
-.dk-pill.dk-mute{ background:var(--sunk);color:var(--faint) }
+.dk-pill.dk-mute{ background:var(--sunk);color:var(--ink-2) }
 .dk-btn.dk-sm{ height:var(--control-h-compact);padding-inline:10px;font-size:12.5px;border-radius:var(--radius-control) }
 .dk-iconbtn.dk-sm{ min-width:30px;height:30px;padding-inline:4px;border-radius:var(--radius-control) }
 .dk-iconbtn[aria-disabled="true"]{ opacity:.35;cursor:default }
@@ -606,7 +606,7 @@
 .dk-tk-main{ min-width:0 }
 .dk-tk-t{ display:block;font-size:14px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
 .dk-tk-t:hover{ text-decoration:underline }
-.dk-tk .dk-done .dk-tk-t,.dk-tk>li.dk-done .dk-tk-t{ color:var(--faint);text-decoration:line-through }
+.dk-tk .dk-done .dk-tk-t,.dk-tk>li.dk-done .dk-tk-t{ color:var(--ink-3);text-decoration:line-through }
 .dk-tk .dk-ms{ font-size:var(--text-caption);font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--active);margin-inline-end:6px }
 [lang="ar"] .dk-tk .dk-ms{ letter-spacing:0;font-size:12px }
 .dk-tk .dk-is{ display:flex;min-width:0;font-size:12.5px;margin-top:2px;white-space:nowrap }

@@ -28,7 +28,7 @@
                         type="text"
                         x-ref="boardQuickAdd"
                         placeholder="{{ __('tasks.add_task') }}"
-                        class="w-full min-w-0 border-0 bg-transparent p-0 text-sm text-secondary-dark placeholder:text-secondary-light focus:ring-0 focus:outline-none dark:text-ink"
+                        class="w-full min-w-0 border-0 bg-transparent p-0 text-sm text-secondary-dark placeholder:text-secondary-medium dark:placeholder:text-ink-faint focus:ring-0 focus:outline-none dark:text-ink"
                         wire:keydown.enter="quickCreateTask($event.target.value, '{{ $case->value }}', null, {{ Js::from($boardRowKey) }}); $event.target.value = ''"
                         data-test="task-board-quick-add-{{ $case->value }}"
                     />

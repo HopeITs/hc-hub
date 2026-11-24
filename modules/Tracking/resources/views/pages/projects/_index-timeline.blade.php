@@ -44,7 +44,7 @@
                             <div class="relative h-9">
                                 @foreach ($ticks as $tick)
                                     @continue($tick['nearToday'])
-                                    <span class="absolute bottom-2 -translate-x-1/2 text-xs whitespace-nowrap tabular-nums text-secondary-light rtl:translate-x-1/2 dark:text-ink-faint" style="inset-inline-start: {{ $tick['at'] }}%">{{ $tick['label'] }}</span>
+                                    <span class="absolute bottom-2 -translate-x-1/2 text-xs whitespace-nowrap tabular-nums text-secondary-medium rtl:translate-x-1/2 dark:text-ink-faint" style="inset-inline-start: {{ $tick['at'] }}%">{{ $tick['label'] }}</span>
                                 @endforeach
                                 <span class="absolute bottom-1.5 -translate-x-1/2 rounded-full bg-primary dark:bg-ink dark:text-surface-0 px-2 py-0.5 text-[0.6875rem] font-bold whitespace-nowrap text-white rtl:translate-x-1/2" style="inset-inline-start: {{ $todayAt }}%">{{ __('programs.timeline_today') }}</span>
                             </div>

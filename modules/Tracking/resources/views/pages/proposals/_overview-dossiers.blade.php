@@ -114,7 +114,7 @@
                                             'px-0.5 text-center text-[11px] leading-tight',
                                             'font-bold text-primary dark:text-brand-text' => $isCurrent || $isRejectionPoint,
                                             'hidden font-medium @4xl/directory:block '.$inkText => $isPast,
-                                            'hidden font-medium text-secondary-light @4xl/directory:block' => $isAhead,
+                                            'hidden font-medium text-secondary-medium dark:text-ink-faint @4xl/directory:block' => $isAhead,
                                         ])>{{ $isRejectionPoint ? \Modules\Tracking\Enums\ProposalStatus::Rejected->label() : $step->label() }}</span>
                                     </li>
                                 @endforeach
