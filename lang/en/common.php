@@ -164,6 +164,7 @@ return [
     'key_alt' => 'Alt',
     'edit' => 'Edit',
     'to_cancel' => 'to cancel',
+    'key_esc' => 'Esc',
     'cannot_be_undone' => 'This can’t be undone.',
     'type_to_confirm' => 'Type :code to confirm',
 ];
