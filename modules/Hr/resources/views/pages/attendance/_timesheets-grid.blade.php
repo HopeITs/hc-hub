@@ -18,6 +18,7 @@
         Sheet::HOLIDAY => ['bg-zinc-100 text-zinc-400 dark:bg-white/[0.04] dark:text-ink-muted', null],
         Sheet::OUTSIDE => ['border border-dashed border-panel-border text-zinc-400 dark:text-ink-muted', null],
     ];
+    $stateTone = ['open' => \App\Enums\StatusTone::Neutral, 'confirmed' => \App\Enums\StatusTone::Warn, 'approved' => \App\Enums\StatusTone::Active, 'locked' => \App\Enums\StatusTone::Good];
     $hm = fn (?int $minutes): string => $minutes === null ? '' : intdiv($minutes, 60).':'.str_pad((string) ($minutes % 60), 2, '0', STR_PAD_LEFT);
     $groupLabel = $by === Grouping::DEPARTMENT ? 'hr_attendance.timesheets.no-department' : 'hr_attendance.timesheets.no-project';
 @endphp
@@ -81,7 +82,7 @@
                         @if ($group['totals']['to_decide'] > 0)
                             <x-ui.enum-badge :case="\App\Enums\StatusTone::Critical" :tone="\App\Enums\StatusTone::Critical" :label="trans_choice('hr_attendance.timesheets.to-decide', $group['totals']['to_decide'], ['count' => $group['totals']['to_decide']])" />
                         @else
-                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Neutral" :tone="\App\Enums\StatusTone::Neutral" :label="__('hr_attendance.timesheets.group-ready')" />
+                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Good" :tone="\App\Enums\StatusTone::Good" :label="__('hr_attendance.timesheets.group-ready')" />
                         @endif
                         @if ($group['totals']['overtime_hours'] > 0)
                             <span class="text-xs tabular-nums {{ $muted }}">{{ __('hr_attendance.timesheets.overtime-line', ['hours' => $group['totals']['overtime_hours'], 'days' => $group['totals']['overtime_days']]) }}</span>
@@ -139,7 +140,7 @@
                                             @endif
                                         </td>
                                         <td class="px-3 text-center">
-                                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Neutral" :tone="\App\Enums\StatusTone::Neutral" :label="__('hr_attendance.workflow.states.'.$item['state'])" />
+                                            <x-ui.enum-badge :case="$stateTone[$item['state']]" :tone="$stateTone[$item['state']]" :label="__('hr_attendance.workflow.states.'.$item['state'])" />
                                         </td>
                                         @foreach ($sheet['rows'] as $row)
                                             @php

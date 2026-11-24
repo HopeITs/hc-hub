@@ -414,15 +414,17 @@ function insertHrCity(string $nameEn = 'Aleppo', string $nameAr = 'حلب', bool
  */
 function insertHrSeedReferenceData(): void
 {
-    foreach (range(1, 14) as $id) {
-        Program::factory()->unassigned()->create([
-            'id' => $id,
-            'name' => 'Program '.$id,
-            'code' => 'P'.$id,
-            'slug' => 'program-'.$id,
-            'is_active' => true,
-        ]);
-    }
+    Activity::withoutRecording(function (): void {
+        foreach (range(1, 14) as $id) {
+            Program::factory()->unassigned()->create([
+                'id' => $id,
+                'name' => 'Program '.$id,
+                'code' => 'P'.$id,
+                'slug' => 'program-'.$id,
+                'is_active' => true,
+            ]);
+        }
+    });
 
     foreach (range(1, 17) as $id) {
         City::factory()->create(['id' => $id, 'name_en' => 'City '.$id]);
@@ -571,7 +573,7 @@ function insertHrUser(?int $employeeId, string $email, string $password = 'passw
  */
 function insertHrPosition(int $departmentId, string $titleEn = 'Officer', ?int $programId = null, bool $isActive = true, ?int $directManagerId = null, ?int $centerId = null, ?int $cityId = null, ?int $jobLevelId = null): int
 {
-    return Position::factory()->create([
+    return Activity::withoutRecording(fn (): int => Position::factory()->create([
         'department_id' => $departmentId,
         ...($programId === null ? [] : ['program_id' => $programId]),
         'center_id' => $centerId,
@@ -581,7 +583,7 @@ function insertHrPosition(int $departmentId, string $titleEn = 'Officer', ?int $
         'title_en' => $titleEn,
         'title_ar' => $titleEn,
         'is_active' => $isActive,
-    ])->id;
+    ])->id);
 }
 
 /**

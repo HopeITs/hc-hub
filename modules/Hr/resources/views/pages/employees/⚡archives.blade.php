@@ -10,7 +10,6 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Modules\Core\Models\User;
 use Modules\Hr\Actions\Employees\ManageArchive;
 use Modules\Hr\Models\Folder;
 use Modules\Hr\Support\Employees\HrMedia;
@@ -138,20 +137,6 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.archives')] class exte
         }
 
         return $folder === null ? $user->can('create', Folder::class) : $user->can('manage', $folder);
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    #[Computed]
-    public function userOptions(): array
-    {
-        return User::query()
-            ->select(['id', 'email', 'employee_id'])
-            ->orderBy('email')
-            ->get()
-            ->mapWithKeys(fn (User $user): array => [$user->id => trim($user->name.' · '.$user->email, ' ·')])
-            ->all();
     }
 
     public function openFolderModal(): void

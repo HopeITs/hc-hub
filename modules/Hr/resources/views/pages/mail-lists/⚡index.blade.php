@@ -329,13 +329,13 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
                                     <span class="block truncate text-xs {{ $muted }}" dir="ltr">{{ $member['email'] }}</span>
                                     <span class="flex flex-wrap gap-1">
                                         @if ($member['pending'])
-                                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Critical" :tone="\App\Enums\StatusTone::Critical" :label="__('hr_mail_lists.pending_tag')" />
+                                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Warn" :tone="\App\Enums\StatusTone::Warn" :label="__('hr_mail_lists.pending_tag')" />
                                         @endif
                                         @if ($member['former'])
                                             <x-ui.enum-badge :case="\App\Enums\StatusTone::Neutral" :tone="\App\Enums\StatusTone::Neutral" :label="__('hr_mail_lists.former')" />
                                         @endif
                                         @if ($member['external'])
-                                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Neutral" :tone="\App\Enums\StatusTone::Neutral" :label="__('hr_mail_lists.external')" />
+                                            <x-ui.enum-badge :case="\App\Enums\StatusTone::Active" :tone="\App\Enums\StatusTone::Active" :label="__('hr_mail_lists.external')" />
                                         @endif
                                     </span>
                                 </div>

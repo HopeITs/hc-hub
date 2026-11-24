@@ -49,6 +49,7 @@ use Modules\Hr\Support\Inbox\HrSubjectLinks;
 use Modules\Hr\Support\Inbox\InboxWorkItems;
 use Modules\Hr\Support\Journeys\JourneyHooks;
 use Modules\Hr\Support\Metrics\HrMetrics;
+use Modules\Hr\Support\Pickers\HrPickerScopes;
 use Modules\Hr\Support\Recruitment\Console\AnalyzeRecruitmentCvs;
 use Modules\Hr\Support\Recruitment\Console\ApplyDueRecruitmentRequests;
 use Modules\Hr\Support\Recruitment\Console\CheckRecruitmentScanner;
@@ -173,6 +174,7 @@ class HrServiceProvider extends ServiceProvider
         $modules->addSearch(EmployeeSearchSource::class);
         $modules->addMetrics(HrMetrics::class);
         $modules->addWorkItems(InboxWorkItems::class);
+        $modules->addPickerScopes(HrPickerScopes::class);
     }
 
     /**

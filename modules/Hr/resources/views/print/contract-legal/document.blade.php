@@ -9,6 +9,7 @@
     once whatever the page's locale, so they live in the page templates and
     not in lang files.
 --}}
+@use('App\Support\PrintPalette')
 <!doctype html>
 <html lang="{{ app()->getLocale() }}" dir="ltr">
 <head>
@@ -17,16 +18,16 @@
     <title>{{ $fileTitle }}</title>
     @include('hr::print.contract-legal._styles')
     <style>
-        html, body { margin: 0; padding: 0; background: #f4f4f5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        html, body { margin: 0; padding: 0; background: {{ PrintPalette::Ground }}; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .pdf-page { padding: 8mm 0; }
         .contract-a4 { margin: 0 auto; }
-        .print-bar { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px; justify-content: center; padding: 10px 16px; background: rgba(255, 255, 255, .92); border-bottom: 1px solid #dcddde; font-family: 'somar-regular', sans-serif; }
-        .print-bar button, .print-bar a { border-radius: 8px; padding: 6px 14px; font-size: 14px; border: 1px solid #be1f24; text-decoration: none; cursor: pointer; }
-        .print-bar button { background: #be1f24; color: #fff; }
-        .print-bar a { background: #fff; color: #be1f24; }
-        .print-note { text-align: center; font-family: 'somar-regular', sans-serif; font-size: 13px; color: #58595b; margin: 8px 16px 0; }
+        .print-bar { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px; justify-content: center; padding: 10px 16px; background: rgba(255, 255, 255, .92); border-bottom: 1px solid {{ PrintPalette::SecondarySoft }}; font-family: 'somar-regular', sans-serif; }
+        .print-bar button, .print-bar a { border-radius: 8px; padding: 6px 14px; font-size: 14px; border: 1px solid {{ PrintPalette::Primary }}; text-decoration: none; cursor: pointer; }
+        .print-bar button { background: {{ PrintPalette::Primary }}; color: {{ PrintPalette::OnBrand }}; }
+        .print-bar a { background: {{ PrintPalette::Paper }}; color: {{ PrintPalette::Primary }}; }
+        .print-note { text-align: center; font-family: 'somar-regular', sans-serif; font-size: 13px; color: {{ PrintPalette::SecondaryDark }}; margin: 8px 16px 0; }
         @media print {
-            html, body { background: #fff; }
+            html, body { background: {{ PrintPalette::Paper }}; }
             .pdf-page { padding: 0; page-break-after: always; }
             .pdf-page:last-child { page-break-after: auto; }
             .contract-a4 { height: 297mm; box-shadow: none; border-radius: 0; }

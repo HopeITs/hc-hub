@@ -12,8 +12,11 @@
             $stamp = fn ($at): string => $at?->format('d/m/Y H:i') ?? '';
         @endphp
         <div class="grid gap-y-5" data-attendance-month-panel="{{ $pEmployee->id }}">
+            @php
+                $panelTone = ['open' => \App\Enums\StatusTone::Neutral, 'confirmed' => \App\Enums\StatusTone::Warn, 'approved' => \App\Enums\StatusTone::Active, 'locked' => \App\Enums\StatusTone::Good][$panel['state']];
+            @endphp
             <div>
-                <x-ui.enum-badge :case="\App\Enums\StatusTone::Neutral" :tone="\App\Enums\StatusTone::Neutral" :label="__('hr_attendance.workflow.states.'.$panel['state'])" />
+                <x-ui.enum-badge :case="$panelTone" :tone="$panelTone" :label="__('hr_attendance.workflow.states.'.$panel['state'])" />
             </div>
 
             <dl class="grid grid-cols-3 gap-3 text-center">

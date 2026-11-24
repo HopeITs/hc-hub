@@ -192,7 +192,7 @@ test('a program with no plan keeps its row until the matrix is filtered by manag
         ->test('tracking::annual-plans.index')
         ->assertSee('Unplanned Program')
         ->assertSee('Unplanned Program, 2026, no plan')
-        ->set('manager', (string) $manager->id)
+        ->set('manager', (string) $manager->employee_id)
         ->assertDontSee('Unplanned Program');
 });
 
@@ -230,7 +230,7 @@ test('changing a filter returns the matrix to its first page', function () {
         ->test('tracking::annual-plans.index')
         ->call('setPage', 2)
         ->assertSee($lastProgram->name)
-        ->set('manager', (string) $manager->id)
+        ->set('manager', (string) $manager->employee_id)
         ->assertSee($lastProgram->name);
 });
 
@@ -239,13 +239,13 @@ test('resetting the filters restores the full span and every manager', function 
     $manager = User::factory()->role('General Manager')->create();
     $water = matrixProgram('Water Security');
 
-    AnnualPlan::factory()->create(['program_id' => $water->employee_id, 'manager_id' => $manager->employee_id, 'year' => 2024]);
+    AnnualPlan::factory()->create(['program_id' => $water->id, 'manager_id' => $manager->employee_id, 'year' => 2024]);
     AnnualPlan::factory()->create(['program_id' => matrixProgram('Safe Shelter')->id, 'year' => 2026]);
 
     Livewire::actingAs($user)
         ->test('tracking::annual-plans.index')
         ->call('toggleYear', 2024)
-        ->set('manager', (string) $manager->id)
+        ->set('manager', (string) $manager->employee_id)
         ->assertDontSee('Safe Shelter')
         ->call('clearFilters')
         ->assertSet('years', [])

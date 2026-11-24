@@ -15,13 +15,60 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
 use Modules\Core\Models\Center as HrCenter;
 use Modules\Core\Models\City as HrCity;
-use Modules\Core\Models\Program as HrProgram;
-use Modules\Core\Models\User as HrUser;
-use Modules\Hr\Models\Contract as HrContract;
-use Modules\Hr\Models\Department as HrDepartment;
-use Modules\Hr\Models\Employee as HrEmployee;
-use Modules\Hr\Models\JobLevel as HrJobLevel;
-use Modules\Hr\Models\Position as HrPosition;
+use Modules\Hr\Models\ApplicationFormVersion;
+use Modules\Hr\Models\AttendanceDayDecision;
+use Modules\Hr\Models\AttendanceDeviceLink;
+use Modules\Hr\Models\AttendanceImport;
+use Modules\Hr\Models\AttendanceMonth;
+use Modules\Hr\Models\AttendancePunch;
+use Modules\Hr\Models\ContractAmendmentPayTier;
+use Modules\Hr\Models\ContractPayTier;
+use Modules\Hr\Models\Course;
+use Modules\Hr\Models\Education;
+use Modules\Hr\Models\EmployeeNote;
+use Modules\Hr\Models\Evaluation;
+use Modules\Hr\Models\Experience;
+use Modules\Hr\Models\HolidayProject;
+use Modules\Hr\Models\JobPostVersion;
+use Modules\Hr\Models\LeaveRequestNote;
+use Modules\Hr\Models\MailList;
+use Modules\Hr\Models\MailListMember;
+use Modules\Hr\Models\NewsAudienceTarget;
+use Modules\Hr\Models\NewsExternalPublication;
+use Modules\Hr\Models\NewsTag;
+use Modules\Hr\Models\OffboardingJourney;
+use Modules\Hr\Models\OnboardingJourney;
+use Modules\Hr\Models\PolicyDocument;
+use Modules\Hr\Models\ProfileChangeRequest;
+use Modules\Hr\Models\RecruitmentApplicationAnswer;
+use Modules\Hr\Models\RecruitmentApplicationDecision;
+use Modules\Hr\Models\RecruitmentApplicationEndorsement;
+use Modules\Hr\Models\RecruitmentApplicationFlag;
+use Modules\Hr\Models\RecruitmentApplicationIndicatorSnapshot;
+use Modules\Hr\Models\RecruitmentApplicationParticipant;
+use Modules\Hr\Models\RecruitmentApplicationTag;
+use Modules\Hr\Models\RecruitmentCvAnalysis;
+use Modules\Hr\Models\RecruitmentIndicatorCriteriaVersion;
+use Modules\Hr\Models\RecruitmentIndicatorSetting;
+use Modules\Hr\Models\RecruitmentInterviewEvaluationNote;
+use Modules\Hr\Models\RecruitmentInterviewEvaluationRevision;
+use Modules\Hr\Models\RecruitmentInterviewNotice;
+use Modules\Hr\Models\RecruitmentInterviewParticipant;
+use Modules\Hr\Models\RecruitmentInterviewRequiredParticipant;
+use Modules\Hr\Models\RecruitmentInterviewReschedule;
+use Modules\Hr\Models\RecruitmentJobOfferVersion;
+use Modules\Hr\Models\RecruitmentPrivacyAudit;
+use Modules\Hr\Models\RecruitmentRejectionNotice;
+use Modules\Hr\Models\RecruitmentRequestComment;
+use Modules\Hr\Models\RecruitmentRequestExternalConfirmation;
+use Modules\Hr\Models\RecruitmentRequestPositionDetail;
+use Modules\Hr\Models\RecruitmentRequestVersion;
+use Modules\Hr\Models\RecruitmentWorkflowDefinition;
+use Modules\Hr\Models\RecruitmentWorkflowDefinitionVersion;
+use Modules\Hr\Models\RecruitmentWorkflowInstance;
+use Modules\Hr\Models\RecruitmentWorkflowStep;
+use Modules\Hr\Models\Relative;
+use Modules\Hr\Models\RenewalJourney;
 use Modules\Tracking\Models\Account;
 use Modules\Tracking\Models\ActivityPlanBatch;
 use Modules\Tracking\Models\ActivityPlanFollowUp;
@@ -56,6 +103,8 @@ use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\ScheduleBaseline;
 use Modules\Tracking\Models\ScheduleBaselineItem;
 use Modules\Tracking\Models\ScheduleDependency;
+use Modules\Tracking\Models\StrategicPlanTarget;
+use Modules\Tracking\Models\StrategicPlanYear;
 use Modules\Tracking\Models\TaskAssignee;
 use Modules\Tracking\Models\TaskAttachment;
 use Modules\Tracking\Models\TransfersTracking;
@@ -88,13 +137,60 @@ function modelsGuardedWithoutPolicy(): array
         FundingAgreementInstallment::class => ['funding-agreements', 'The payment schedule of an agreement: written only by SaveAgreementInstallments under funding-agreements.update (T09).'],
         HrCenter::class => [null, 'Read-only mirror of the HR database; never written here.'],
         HrCity::class => ['cities', 'cities.* permissions on the admin cities page.'],
-        HrContract::class => [null, 'Read-only mirror of the HR database; never written here.'],
-        HrDepartment::class => [null, 'Read-only mirror of the HR database; never written here.'],
-        HrEmployee::class => [null, 'Read-only mirror of the HR database; never written here.'],
-        HrJobLevel::class => [null, 'Read-only mirror of the HR database; never written here.'],
-        HrPosition::class => [null, 'Read-only mirror of the HR database; never written here.'],
-        HrProgram::class => [null, 'Read-only mirror of the HR database; never written here.'],
-        HrUser::class => [null, 'Read-only mirror of the HR database; never written here.'],
+        ApplicationFormVersion::class => ['recruitment-forms', 'A version of its application form: written only by RecruitmentApplicationFormService under ApplicationFormPolicy (create, manage).'],
+        AttendanceDayDecision::class => ['attendance', 'Part of its attendance month: written only from the timesheets page after the Roster and attendance.manage check (mayDecide).'],
+        AttendanceDeviceLink::class => ['attendance', 'Written only by AttendanceImporter from the upload page under attendance.manage.'],
+        AttendanceImport::class => ['attendance', 'Written only by AttendanceImporter from the upload page under attendance.manage.'],
+        AttendanceMonth::class => ['attendance', 'Moved only by the MonthWorkflow abilities (attendance.view-own for the employee\'s own month, Roster and attendance.manage for others).'],
+        AttendancePunch::class => ['attendance', 'Part of its attendance import: written only by AttendanceImporter under attendance.manage.'],
+        ContractAmendmentPayTier::class => ['contracts', 'Part of its amendment: written only by ContractAmendmentService under ContractPolicy (amend, decideAmendment).'],
+        ContractPayTier::class => ['contracts', 'Part of its contract (ContractPolicy): rewritten only by ContractAmendmentService when an amendment is applied.'],
+        Course::class => ['employees', 'Part of the employee profile (EmployeePolicy): copied in by hub:import-hr, never written here; files go through EmployeeFileController.'],
+        Education::class => ['employees', 'Part of the employee profile (EmployeePolicy): copied in by hub:import-hr, never written here; files go through EmployeeFileController.'],
+        EmployeeNote::class => [null, 'The old notes table: copied in by hub:import-hr and read once by App\Support\Notes\CopyEmployeeNotes; never written here.'],
+        Evaluation::class => ['employees', 'Part of the employee profile (EmployeePolicy): copied in by hub:import-hr, never written here.'],
+        Experience::class => ['employees', 'Part of the employee profile (EmployeePolicy): copied in by hub:import-hr, never written here; files go through EmployeeFileController.'],
+        HolidayProject::class => ['leaves', 'Part of its holiday: written only by SaveHoliday and DeleteHoliday under HolidayPolicy.'],
+        JobPostVersion::class => ['recruitment-job-posts', 'A version of its job post: written only by RecruitmentJobPostService under JobPostPolicy (create, manage).'],
+        LeaveRequestNote::class => ['leaves', 'Part of its leave request: written only by LeaveRequestReview under LeaveRequestPolicy (review, object), removed with it by DeleteLeaveRequest.'],
+        MailList::class => ['mail-lists', 'Loaded by mail-lists:load (MailListImporter) and edited only on the mail-lists page under mail-lists.manage.'],
+        MailListMember::class => ['mail-lists', 'Part of its mail list: written only on the mail-lists page under mail-lists.manage and mail-lists.confirm.'],
+        NewsAudienceTarget::class => ['news', 'Part of its news item: written only by SaveNews under NewsPolicy.'],
+        NewsExternalPublication::class => ['news', 'Part of its news item (NewsPolicy): copied in by hub:import-hr, never written here.'],
+        NewsTag::class => ['news', 'Part of its news item: written only by SaveNews under NewsPolicy.'],
+        OffboardingJourney::class => ['employees', 'Part of its employee: written only from the journeys page under EmployeePolicy::update and by the scheduled journey commands.'],
+        OnboardingJourney::class => ['employees', 'Part of its employee: written only from the journeys page under EmployeePolicy::update and by the scheduled journey commands.'],
+        PolicyDocument::class => [null, 'Copied in by hub:import-hr; nothing here reads or writes it.'],
+        ProfileChangeRequest::class => ['employees', 'Part of its employee: copied in by hub:import-hr, listed only in the work inbox under employees.update, never written here.'],
+        RecruitmentApplicationAnswer::class => ['recruitment-applicants', 'Part of its application: written only by PublicRecruitmentApplicationService through the public link, read under RecruitmentApplicationPolicy.'],
+        RecruitmentApplicationDecision::class => ['recruitment-applicants', 'Part of its application: written only by RecruitmentApplicationStatusService under RecruitmentApplicationPolicy (changeStatus, bulkReject).'],
+        RecruitmentApplicationEndorsement::class => ['recruitment-applicants', 'Part of its application: written only by RecruitmentEndorsementService, which refuses anyone off the review panel.'],
+        RecruitmentApplicationFlag::class => ['recruitment-applicants', 'Part of its application: written only by RecruitmentApplicationFlagService under RecruitmentApplicationPolicy::tag.'],
+        RecruitmentApplicationIndicatorSnapshot::class => ['recruitment-indicators', 'Part of its application (RecruitmentApplicationPolicy): written only by RecruitmentMatchingIndicators.'],
+        RecruitmentApplicationParticipant::class => ['recruitment-applicants', 'Part of its application: written only by RecruitmentApplicationParticipantService under RecruitmentApplicationPolicy (manageReviewParticipants, bulkManageReviewParticipants).'],
+        RecruitmentApplicationTag::class => ['recruitment-applicants', 'Part of its application: written only by RecruitmentTagService under RecruitmentApplicationPolicy (tag, bulkTag).'],
+        RecruitmentCvAnalysis::class => ['recruitment-applicants', 'Part of its application (RecruitmentApplicationPolicy): written only by RecruitmentCvAnalysisService from the AnalyzeRecruitmentCv job.'],
+        RecruitmentIndicatorCriteriaVersion::class => ['recruitment-indicators', 'Written only by RecruitmentMatchingIndicators.'],
+        RecruitmentIndicatorSetting::class => ['recruitment-indicators', 'Written only by RecruitmentIndicatorRules from the rules page under recruitment-indicators.manage.'],
+        RecruitmentInterviewEvaluationNote::class => ['recruitment-applicants', 'Part of its evaluation: written only by RecruitmentInterviewEvaluationService under RecruitmentInterviewEvaluationPolicy.'],
+        RecruitmentInterviewEvaluationRevision::class => ['recruitment-applicants', 'Part of its evaluation: written only by RecruitmentInterviewEvaluationService under RecruitmentInterviewEvaluationPolicy.'],
+        RecruitmentInterviewNotice::class => ['recruitment-applicants', 'Part of its interview (RecruitmentInterviewPolicy): written only by RecruitmentInterviewNoticeService from scheduling and the reminder job.'],
+        RecruitmentInterviewParticipant::class => ['recruitment-applicants', 'Part of its interview: written only by RecruitmentInterviewSchedulingService under RecruitmentInterviewPolicy (schedule, manage).'],
+        RecruitmentInterviewRequiredParticipant::class => ['recruitment-applicants', 'Part of its interview: written only by RecruitmentInterviewSchedulingService under RecruitmentInterviewPolicy (schedule, manage).'],
+        RecruitmentInterviewReschedule::class => ['recruitment-applicants', 'Part of its interview: written only by RecruitmentInterviewSchedulingService under RecruitmentInterviewPolicy (schedule, manage).'],
+        RecruitmentJobOfferVersion::class => ['recruitment-applicants', 'A version of its job offer: written only by RecruitmentJobOfferService under RecruitmentJobOfferPolicy (create, manage).'],
+        RecruitmentPrivacyAudit::class => ['recruitment-applicants', 'Append-only: written only by RecruitmentPrivacyAuditor on export and erasure (RecruitmentApplicantPolicy); the model refuses update and delete.'],
+        RecruitmentRejectionNotice::class => ['recruitment-applicants', 'Part of its application: written only by RecruitmentRejectionNoticeService after a rejection by RecruitmentApplicationStatusService, and by its job.'],
+        RecruitmentRequestComment::class => ['recruitment-requests', 'Part of its recruitment request (RecruitmentRequestPolicy): copied in by hub:import-hr, never written here.'],
+        RecruitmentRequestExternalConfirmation::class => ['recruitment-requests', 'Part of its recruitment request: written only by RecruitmentDirectOpenService under the directOpen ability.'],
+        RecruitmentRequestPositionDetail::class => ['recruitment-requests', 'Part of its recruitment request: written only by RecruitmentRequestSubmissionService under RecruitmentRequestPolicy (submit, cancel).'],
+        RecruitmentRequestVersion::class => ['recruitment-requests', 'A version of its recruitment request: written only by RecruitmentRequestSubmissionService under RecruitmentRequestPolicy (submit, cancel).'],
+        RecruitmentWorkflowDefinition::class => ['recruitment-requests', 'The approval template: copied in by hub:import-hr and read by RecruitmentWorkflowInstanceService; never edited from a page.'],
+        RecruitmentWorkflowDefinitionVersion::class => ['recruitment-requests', 'The approval template: copied in by hub:import-hr and read by RecruitmentWorkflowInstanceService; never edited from a page.'],
+        RecruitmentWorkflowInstance::class => ['recruitment-requests', 'Part of its recruitment request: written only by RecruitmentWorkflowInstanceService from the submission, direct-open and approval actions under RecruitmentRequestPolicy.'],
+        RecruitmentWorkflowStep::class => ['recruitment-requests', 'The approval template: copied in by hub:import-hr and read by RecruitmentWorkflowInstanceService; never edited from a page.'],
+        Relative::class => ['employees', 'Part of the employee profile (EmployeePolicy): copied in by hub:import-hr, never written here.'],
+        RenewalJourney::class => ['employees', 'Part of its contract: written only from the journeys page under ContractPolicy::manageAutoRenew and by the scheduled journey commands.'],
         Indicator::class => ['indicators', 'indicators.* permissions on the indicators page.'],
         IndicatorProgress::class => ['indicators', 'Readings are recorded under indicators.* permissions.'],
         KnownDevice::class => [null, 'The signed-in user\'s own sign-in devices only.'],
@@ -127,6 +223,8 @@ function modelsGuardedWithoutPolicy(): array
         ScheduleBaselineItem::class => ['projects', 'Part of a project schedule (ProjectPolicy::update).'],
         ScheduleDependency::class => ['projects', 'Part of a project schedule (ProjectPolicy::update).'],
         ProposalLocationCenter::class => ['proposals', 'A center of a proposal location row: written only through SaveProposal and the link wrappers under ProposalLocationPolicy (W-34a).'],
+        StrategicPlanTarget::class => ['strategies', 'Part of its strategic plan: written only by SaveStrategicPlan under StrategicPlanPolicy::write.'],
+        StrategicPlanYear::class => ['strategies', 'Part of its strategic plan: written only by SaveStrategicPlan under StrategicPlanPolicy::write.'],
         TaskAssignee::class => ['tasks', 'Follows its task (TaskPolicy).'],
         TaskAttachment::class => ['tasks', 'Follows its task (TaskPolicy); the download controllers check it.'],
         TransfersTracking::class => ['transfers', 'transfers.* permissions (ManagesTransferForm).'],

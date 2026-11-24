@@ -188,7 +188,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.public_link.title')] class 
             @if ($activeLink)
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <p class="font-semibold">{{ __($accepts ? 'hr_recruitment.public_link.active_until' : 'hr_recruitment.public_link.view_only_until', ['date' => $fmt($activeLink->expires_at)]) }}</p>
-                    <x-ui.enum-badge :case="\App\Enums\StatusTone::Neutral" :tone="\App\Enums\StatusTone::Neutral" :label="__($accepts ? 'hr_recruitment.public_link.active' : 'hr_recruitment.public_link.view_only')" />
+                    <x-ui.enum-badge :case="$accepts ? \App\Enums\StatusTone::Good : \App\Enums\StatusTone::Neutral" :tone="$accepts ? \App\Enums\StatusTone::Good : \App\Enums\StatusTone::Neutral" :label="__($accepts ? 'hr_recruitment.public_link.active' : 'hr_recruitment.public_link.view_only')" />
                 </div>
                 @unless ($accepts)
                     <p class="text-sm {{ $muted }}">{{ __('hr_recruitment.public_link.view_only_notice') }}</p>

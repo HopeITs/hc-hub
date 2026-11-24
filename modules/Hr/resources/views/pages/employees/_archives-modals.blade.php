@@ -17,11 +17,8 @@
 
 <x-ui.modal wire:model="showShareModal" size="md" :title="__('hr_employees.archives.share')" submit="saveShare" close="closeShare">
     @if ($showShareModal)
-        <x-ui.form-select wire:model="shareWith" :label="__('hr_employees.archives.shared_with')" multiple searchable>
-            @foreach ($this->userOptions as $userId => $userLabel)
-                <option value="{{ $userId }}">{{ $userLabel }}</option>
-            @endforeach
-        </x-ui.form-select>
+        {{-- Every login (HrPickerScopes::ArchiveUsers), fetched when the menu opens. --}}
+        <x-ui.form-select wire:model="shareWith" wire:key="archive-share-{{ $sharingId }}" picker-scope="hr.archive-users" :picker-parameters="['folder' => $sharingId]" :label="__('hr_employees.archives.shared_with')" multiple />
     @endif
 </x-ui.modal>
 

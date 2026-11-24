@@ -4,6 +4,7 @@
     with days still waiting for an answer is marked DRAFT on every page.
     Rendered by AttendancePrintController with $sheets, $month and $draft.
 --}}
+@use('App\Support\PrintPalette')
 @php
     use Modules\Hr\Support\Attendance\FormRows;
 
@@ -24,36 +25,36 @@
         @font-face { font-family: 'Somar'; font-weight: 700; src: url('{{ $font('Bold') }}') format('woff2'); }
         @page { size: A4 portrait; margin: 10mm; }
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: 'Somar', 'Noto Sans Arabic', Arial, sans-serif; color: #2b2a2c; background: #e6e7e8; }
-        .bar { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #bcbec0; padding: 10px 16px; display: flex; gap: 12px; align-items: center; justify-content: space-between; }
-        .bar button { font: inherit; padding: 8px 16px; border-radius: 8px; border: 0; background: #BE1F24; color: #fff; font-weight: 700; cursor: pointer; }
-        .page { position: relative; width: 190mm; min-height: 277mm; margin: 12px auto; background: #fff; padding: 6mm 5mm; display: flex; flex-direction: column; gap: 8px; page-break-after: always; break-after: page; }
+        body { margin: 0; font-family: 'Somar', 'Noto Sans Arabic', Arial, sans-serif; color: {{ PrintPalette::DeskInk }}; background: {{ PrintPalette::DeskLine }}; }
+        .bar { position: sticky; top: 0; background: {{ PrintPalette::Paper }}; border-bottom: 1px solid {{ PrintPalette::DeskLine2 }}; padding: 10px 16px; display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+        .bar button { font: inherit; padding: 8px 16px; border-radius: 8px; border: 0; background: {{ PrintPalette::Primary }}; color: {{ PrintPalette::OnBrand }}; font-weight: 700; cursor: pointer; }
+        .page { position: relative; width: 190mm; min-height: 277mm; margin: 12px auto; background: {{ PrintPalette::Paper }}; padding: 6mm 5mm; display: flex; flex-direction: column; gap: 8px; page-break-after: always; break-after: page; }
         .page:last-of-type { page-break-after: auto; break-after: auto; }
-        .head { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #414042; padding-bottom: 8px; }
+        .head { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid {{ PrintPalette::Heading }}; padding-bottom: 8px; }
         .head .org { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; }
-        .head .mark { width: 26px; height: 26px; background: #BE1F24; border-radius: 6px; display: block; }
+        .head .mark { width: 26px; height: 26px; background: {{ PrintPalette::Primary }}; border-radius: 6px; display: block; }
         .head h1 { margin: 0; font-size: 19px; font-weight: 700; direction: ltr; }
         .ids { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px 12px; font-size: 12px; }
-        .ids div { display: flex; gap: 6px; border-bottom: 1px dotted #939598; padding-bottom: 2px; }
+        .ids div { display: flex; gap: 6px; border-bottom: 1px dotted {{ PrintPalette::SecondaryLight }}; padding-bottom: 2px; }
         .ids b { white-space: nowrap; }
         table { width: 100%; border-collapse: collapse; font-size: 10.5px; }
-        th { background: #e6e7e8; border: 1px solid #6d6e71; padding: 4px 3px; text-align: center; line-height: 1.25; }
-        td { border: 1px solid #939598; padding: 0 3px; height: 6.3mm; text-align: center; white-space: nowrap; }
+        th { background: {{ PrintPalette::DeskLine }}; border: 1px solid {{ PrintPalette::SecondaryMedium }}; padding: 4px 3px; text-align: center; line-height: 1.25; }
+        td { border: 1px solid {{ PrintPalette::SecondaryLight }}; padding: 0 3px; height: 6.3mm; text-align: center; white-space: nowrap; }
         td.n { text-align: start; white-space: normal; }
-        tr.off td { background: #f3f3f4; color: #6d6e71; }
-        tr.todo td { background: #fff; outline: 1px dashed #414042; }
-        tr.tot td { background: #e6e7e8; font-weight: 700; height: 8mm; border-color: #6d6e71; }
+        tr.off td { background: {{ PrintPalette::Ground }}; color: {{ PrintPalette::SecondaryMedium }}; }
+        tr.todo td { background: {{ PrintPalette::Paper }}; outline: 1px dashed {{ PrintPalette::Heading }}; }
+        tr.tot td { background: {{ PrintPalette::DeskLine }}; font-weight: 700; height: 8mm; border-color: {{ PrintPalette::SecondaryMedium }}; }
         .num { direction: ltr; unicode-bidi: plaintext; font-variant-numeric: tabular-nums; }
         .sign { display: flex; gap: 14px; margin-top: auto; font-size: 12px; }
-        .sign div { flex: 1; border-top: 1px solid #6d6e71; padding-top: 5px; text-align: center; margin-top: 22px; }
+        .sign div { flex: 1; border-top: 1px solid {{ PrintPalette::SecondaryMedium }}; padding-top: 5px; text-align: center; margin-top: 22px; }
         h2 { margin: 0; font-size: 16px; }
         .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-        .kpi div { border: 1px solid #6d6e71; border-radius: 6px; padding: 9px 6px; text-align: center; }
+        .kpi div { border: 1px solid {{ PrintPalette::SecondaryMedium }}; border-radius: 6px; padding: 9px 6px; text-align: center; }
         .kpi b { display: block; font-size: 21px; direction: ltr; }
         .kpi span { font-size: 11px; }
-        .note { font-size: 11px; color: #6d6e71; line-height: 1.6; }
+        .note { font-size: 11px; color: {{ PrintPalette::SecondaryMedium }}; line-height: 1.6; }
         .draft { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; font-size: 110px; font-weight: 700; color: rgba(65, 64, 66, .09); transform: rotate(-28deg); letter-spacing: 6px; }
-        @media print { body { background: #fff; } .bar { display: none; } .page { margin: 0; width: auto; min-height: 0; height: 275mm; padding: 0; box-shadow: none; } }
+        @media print { body { background: {{ PrintPalette::Paper }}; } .bar { display: none; } .page { margin: 0; width: auto; min-height: 0; height: 275mm; padding: 0; box-shadow: none; } }
     </style>
 </head>
 <body>

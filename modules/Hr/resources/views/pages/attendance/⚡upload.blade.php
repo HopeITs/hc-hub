@@ -252,9 +252,9 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.upload')] class exten
                             <x-ui.data-table.cell :label="__('hr_attendance.upload.punches')"><span class="tabular-nums">{{ $row['punches'] }}</span></x-ui.data-table.cell>
                             <x-ui.data-table.cell :label="__('hr_attendance.upload.status')">
                                 @if ($row['name'])
-                                    <x-ui.enum-badge :case="\App\Enums\StatusTone::Neutral" :tone="\App\Enums\StatusTone::Neutral" :label="__('hr_attendance.upload.matched')" />
+                                    <x-ui.enum-badge :case="\App\Enums\StatusTone::Good" :tone="\App\Enums\StatusTone::Good" :label="__('hr_attendance.upload.matched')" />
                                 @else
-                                    <x-ui.enum-badge :case="\App\Enums\StatusTone::Critical" :tone="\App\Enums\StatusTone::Critical" :label="__('hr_attendance.upload.not-matched')" />
+                                    <x-ui.enum-badge :case="\App\Enums\StatusTone::Warn" :tone="\App\Enums\StatusTone::Warn" :label="__('hr_attendance.upload.not-matched')" />
                                 @endif
                             </x-ui.data-table.cell>
                         </tr>

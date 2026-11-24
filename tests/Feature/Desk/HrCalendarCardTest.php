@@ -37,7 +37,8 @@ test('the calendar shows a teammate\'s leave, birthday and ending contract to wh
 });
 
 test('the calendar leaves ending contracts out for someone who may not view contracts', function () {
-    $viewer = User::factory()->role('Super Admin')->create(['employee_id' => Employee::factory()->create()->id]);
+    $viewer = User::factory()->role('Team Member')->create(['employee_id' => Employee::factory()->create()->id]);
 
+    expect($viewer->can('contracts.view'))->toBeFalse();
     expect((new CalendarCard)->rows($viewer)->pluck('key')->filter(fn (string $key): bool => str_starts_with($key, 'cl-c-'))->all())->toBe([]);
 });

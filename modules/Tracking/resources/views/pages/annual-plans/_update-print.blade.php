@@ -1,14 +1,15 @@
 {{-- A monthly update as a plain page for the browser's print-to-PDF (PlanUpdateExportController). --}}
+@use('App\Support\PrintPalette')
 <!doctype html>
 <html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
     <title>{{ $project->name }} · {{ $monthStart->translatedFormat('F Y') }}</title>
     <style>
-        body { font-family: "Somar Sans", Tahoma, sans-serif; color: #232427; margin: 24px; font-size: 13px; line-height: 1.5; }
-        h1 { font-size: 20px; margin: 0 0 4px; } h2 { font-size: 15px; margin: 18px 0 6px; border-bottom: 1px solid #dcddde; padding-bottom: 4px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 8px; } th, td { border: 1px solid #dcddde; padding: 5px 7px; text-align: start; vertical-align: top; }
-        th { background: #f3f3f4; font-size: 11px; text-transform: uppercase; } p { margin: 0 0 6px; white-space: pre-line; } .muted { color: #6d6e71; }
+        body { font-family: "Somar Sans", Tahoma, sans-serif; color: {{ PrintPalette::DeskInk }}; margin: 24px; font-size: 13px; line-height: 1.5; }
+        h1 { font-size: 20px; margin: 0 0 4px; } h2 { font-size: 15px; margin: 18px 0 6px; border-bottom: 1px solid {{ PrintPalette::SecondarySoft }}; padding-bottom: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 8px; } th, td { border: 1px solid {{ PrintPalette::SecondarySoft }}; padding: 5px 7px; text-align: start; vertical-align: top; }
+        th { background: {{ PrintPalette::Ground }}; font-size: 11px; text-transform: uppercase; } p { margin: 0 0 6px; white-space: pre-line; } .muted { color: {{ PrintPalette::SecondaryMedium }}; }
         @media print { .no-print { display: none; } }
     </style>
 </head>

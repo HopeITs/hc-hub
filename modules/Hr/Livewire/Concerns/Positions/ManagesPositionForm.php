@@ -8,7 +8,6 @@ use Flux\Flux;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
 use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
@@ -77,25 +76,13 @@ trait ManagesPositionForm
         app(SavePosition::class)->handle($position, $this->form, Auth::user());
 
         $this->closePosition();
-        unset($this->positions, $this->managerOptions);
+        unset($this->positions);
         Flux::toast(variant: 'success', text: __('hr_positions.toasts.saved'));
     }
 
     public function updatedFormCityId(): void
     {
         $this->form['center_id'] = '';
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    #[Computed]
-    public function managerOptions(): array
-    {
-        return collect(Position::pickerOptions())
-            ->reject(fn (array $option): bool => (int) $option['value'] === $this->editingPositionId)
-            ->mapWithKeys(fn (array $option): array => [(int) $option['value'] => $option['label']])
-            ->all();
     }
 
     /**

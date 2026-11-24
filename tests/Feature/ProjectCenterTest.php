@@ -357,7 +357,7 @@ test('a project whose center HR has deactivated says so on the directory, the pr
         ->assertSee('data-test="center-inactive-badge"', false);
 
     Livewire::actingAs($this->user)->test('tracking::proposals.index')
-        ->call('openCreateModal')
+        ->call('openCreateModal', $project->id)
         ->assertSeeText('Closed Center Water')
         ->assertSeeHtml('data-test="center-inactive-badge"');
 });

@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Proposals;
 
+use App\Enums\Locale;
+use App\Notifications\EmployeeRecipients;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Livewire\Attributes\Computed;
 use Modules\Core\Models\Center;
 use Modules\Core\Models\City;
-use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\MilestoneStatus;
 use Modules\Tracking\Enums\ReportStatus;
 use Modules\Tracking\Models\DonorProposal;
@@ -65,9 +66,10 @@ trait ReadsProposalDelivery
 
         $incomplete = array_flip(ProposalLocationRows::incompleteRowIds($this->proposal));
         $cities = City::query()->whereKey($rows->pluck('city_id')->unique()->all())->get()->keyBy('id');
-        $employees = Employee::query()->whereKey($rows->pluck('responsible_employee_id')->filter()->unique()->all())->get()->keyBy('id');
+        $employees = app(EmployeeRecipients::class)->names($rows->pluck('responsible_employee_id')->filter()->unique()->all());
+        $locale = Locale::current()->value;
 
-        return array_values($rows->map(function (ProposalLocation $row) use ($incomplete, $cities, $employees): array {
+        return array_values($rows->map(function (ProposalLocation $row) use ($incomplete, $cities, $employees, $locale): array {
             $status = match (true) {
                 ! isset($incomplete[$row->id]) => 'complete',
                 $row->program_id === null => 'missing_program',
@@ -79,7 +81,7 @@ trait ReadsProposalDelivery
                 'id' => $row->id,
                 'city' => $cities->get($row->city_id)?->name ?? __('common.unknown_city'),
                 'program' => $row->program?->name,
-                'responsible' => $row->responsible_employee_id === null ? null : ($employees->get($row->responsible_employee_id)?->name ?? '#'.$row->responsible_employee_id),
+                'responsible' => $row->responsible_employee_id === null ? null : (isset($employees[$row->responsible_employee_id]) ? ($employees[$row->responsible_employee_id][$locale] ?: $employees[$row->responsible_employee_id]['en']) : '#'.$row->responsible_employee_id),
                 'centers' => $row->city_wide ? [] : array_map(fn (int $centerId): string => Center::remembered($centerId)?->name ?? '#'.$centerId, $row->centerIds()),
                 'fieldWork' => $row->city_wide,
                 'status' => $status,

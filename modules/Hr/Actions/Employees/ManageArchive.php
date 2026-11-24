@@ -53,14 +53,26 @@ class ManageArchive
     }
 
     /**
+     * Share a folder with these logins (the owner always keeps it). An id
+     * that is not a login is refused, not silently dropped.
+     *
      * @param  list<int>  $userIds
+     *
+     * @throws ValidationException
      */
     public function share(User $actor, Folder $folder, array $userIds): void
     {
         Gate::forUser($actor)->authorize('share', $folder);
 
-        $ids = collect($userIds)->map(fn (mixed $id): int => (int) $id)->push((int) $folder->user_id)->unique()->values();
-        $ids = User::query()->whereIn('id', $ids)->pluck('id')->map(fn (mixed $id): int => (int) $id);
+        $requested = collect($userIds)->map(fn (mixed $id): int => (int) $id)->unique()->values();
+        $ids = User::query()->whereIn('id', $requested->concat([(int) $folder->user_id]))->pluck('id')->map(fn (mixed $id): int => (int) $id);
+
+        if ($requested->diff($ids)->isNotEmpty()) {
+            throw ValidationException::withMessages([
+                'shareWith' => __('validation.exists', ['attribute' => __('hr_employees.archives.shared_with')]),
+            ]);
+        }
+
         $added = $ids->diff($folder->users()->pluck('users.id')->map(fn (mixed $id): int => (int) $id));
 
         $folder->users()->sync($ids->all());

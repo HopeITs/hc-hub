@@ -10,6 +10,7 @@ use App\Support\Modules\Contracts\DeskPanelSource;
 use App\Support\Modules\Contracts\DestinationSource;
 use App\Support\Modules\Contracts\EmployeeTabSource;
 use App\Support\Modules\Contracts\MetricSource;
+use App\Support\Modules\Contracts\PickerScopeSource;
 use App\Support\Modules\Contracts\ScheduleSource;
 use App\Support\Modules\Contracts\SearchSource;
 use App\Support\Modules\Contracts\SubjectLinkSource;
@@ -27,6 +28,7 @@ use Tests\Fixtures\Modules\Sample\SampleDestinations;
 use Tests\Fixtures\Modules\Sample\SampleEmployeeTab;
 use Tests\Fixtures\Modules\Sample\SampleMetrics;
 use Tests\Fixtures\Modules\Sample\SamplePanels;
+use Tests\Fixtures\Modules\Sample\SamplePickerScopes;
 use Tests\Fixtures\Modules\Sample\SampleSchedule;
 use Tests\Fixtures\Modules\Sample\SampleSearch;
 use Tests\Fixtures\Modules\Sample\SampleServiceProvider;
@@ -62,6 +64,7 @@ function sampleModuleCoverage(): array
         DestinationSource::class => ['destinationSources', SampleDestinations::class],
         EmployeeTabSource::class => ['employeeTabSources', SampleEmployeeTab::class],
         MetricSource::class => ['metricSources', SampleMetrics::class],
+        PickerScopeSource::class => ['pickerScopeSourceFor', SamplePickerScopes::class],
         ScheduleSource::class => ['scheduleSources', SampleSchedule::class],
         SearchSource::class => ['searchSources', SampleSearch::class],
         SubjectLinkSource::class => ['subjectLinkSourceFor', SampleSubjectLinks::class],
@@ -98,9 +101,11 @@ test('every extension point of the registry returns what the fixture contributed
     expect($extensionPoints)->toHaveCount(count(sampleModuleCoverage()));
 
     foreach (sampleModuleCoverage() as [$reader, $fixture]) {
-        $read = $reader === 'subjectLinkSourceFor'
-            ? [$this->registry->subjectLinkSourceFor(SampleSubjectLinks::Type)]
-            : $this->registry->{$reader}();
+        $read = match ($reader) {
+            'subjectLinkSourceFor' => [$this->registry->subjectLinkSourceFor(SampleSubjectLinks::Type)],
+            'pickerScopeSourceFor' => [$this->registry->pickerScopeSourceFor(SamplePickerScopes::Scope)],
+            default => $this->registry->{$reader}(),
+        };
 
         expect(array_map(get_class(...), $read))->toContain($fixture);
     }

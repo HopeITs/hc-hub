@@ -10,6 +10,7 @@ use App\Support\Modules\Contracts\DeskPanelSource;
 use App\Support\Modules\Contracts\DestinationSource;
 use App\Support\Modules\Contracts\EmployeeTabSource;
 use App\Support\Modules\Contracts\MetricSource;
+use App\Support\Modules\Contracts\PickerScopeSource;
 use App\Support\Modules\Contracts\ScheduleSource;
 use App\Support\Modules\Contracts\SearchSource;
 use App\Support\Modules\Contracts\SubjectLinkSource;
@@ -48,6 +49,11 @@ final class ModuleRegistry
      * @var list<class-string<SubjectLinkSource>>
      */
     private array $subjectLinks = [];
+
+    /**
+     * @var list<class-string<PickerScopeSource>>
+     */
+    private array $pickerScopes = [];
 
     /**
      * @var list<class-string<EmployeeTabSource>>
@@ -250,6 +256,32 @@ final class ModuleRegistry
     public function deskAgendaSources(): array
     {
         return array_map(fn (string $source): DeskAgendaSource => app($source), $this->deskAgenda);
+    }
+
+    /**
+     * @param  class-string<PickerScopeSource>  $source
+     */
+    public function addPickerScopes(string $source): void
+    {
+        if (! in_array($source, $this->pickerScopes, true)) {
+            $this->pickerScopes[] = $source;
+        }
+    }
+
+    /**
+     * The module that defines this picker scope, if any.
+     */
+    public function pickerScopeSourceFor(string $scope): ?PickerScopeSource
+    {
+        foreach ($this->pickerScopes as $class) {
+            $source = app($class);
+
+            if ($source->handles($scope)) {
+                return $source;
+            }
+        }
+
+        return null;
     }
 
     /**

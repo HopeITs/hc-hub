@@ -19,7 +19,6 @@ use Modules\Hr\Actions\Checklists\DeleteDefaultDeliverable;
 use Modules\Hr\Actions\Checklists\SaveDefaultDeliverable;
 use Modules\Hr\Models\ChecklistItem;
 use Modules\Hr\Models\DefaultDeliverable;
-use Modules\Hr\Models\Employee;
 use Modules\Hr\Support\Checklists\ChecklistPeople;
 use Modules\Hr\Support\Settings\HrAccess;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -78,7 +77,6 @@ new #[Layout('layouts::desk'), Title('hr_checklists.titles.default_deliverables'
         // The employee list follows the governorate: one picked for another governorate no longer applies.
         if ($property === 'cityId') {
             $this->employeeId = '';
-            unset($this->employeeOptions);
         }
     }
 
@@ -142,24 +140,6 @@ new #[Layout('layouts::desk'), Title('hr_checklists.titles.default_deliverables'
     public function itemOptions(): Collection
     {
         return ChecklistItem::query()->orderBy('order')->orderBy('name')->get(['id', 'name']);
-    }
-
-    /**
-     * Service-department staff living in the governorate picked in the form.
-     *
-     * @return Collection<int, Employee>
-     */
-    #[Computed]
-    public function employeeOptions(): Collection
-    {
-        if ($this->cityId === '' || ! array_key_exists((int) $this->cityId, $this->cityOptions)) {
-            return new Collection;
-        }
-
-        return ChecklistPeople::inServiceDepartments()
-            ->where('city_id', (int) $this->cityId)
-            ->orderBy(Employee::translatedColumn('first_name'))
-            ->get(ChecklistPeople::NAME_COLUMNS);
     }
 
     public function openCreateModal(): void
@@ -278,7 +258,6 @@ new #[Layout('layouts::desk'), Title('hr_checklists.titles.default_deliverables'
         $this->employeeId = '';
         $this->cityId = '';
         $this->itemId = '';
-        unset($this->employeeOptions);
     }
 
     private function normaliseFilters(): void
@@ -391,11 +370,8 @@ new #[Layout('layouts::desk'), Title('hr_checklists.titles.default_deliverables'
                     @endforeach
                 </x-ui.form-select>
 
-                <x-ui.form-select wire:model="employeeId" wire:key="deliverable-employee-{{ $cityId }}" :label="__('hr_checklists.columns.employee')" :placeholder="__('hr_checklists.defaults.choose_employee')" :help="__('hr_checklists.defaults.employee_help')" :disabled="$cityId === ''" required>
-                    @foreach ($this->employeeOptions as $employeeOption)
-                        <option value="{{ $employeeOption->id }}">{{ $employeeOption->name }}</option>
-                    @endforeach
-                </x-ui.form-select>
+                {{-- The governorate's service-department staff (HrPickerScopes::DefaultDeliverers), fetched when the menu opens. --}}
+                <x-ui.form-select wire:model="employeeId" wire:key="deliverable-employee-{{ $cityId }}" picker-scope="hr.default-deliverers" :picker-parameters="['city' => $cityId]" :label="__('hr_checklists.columns.employee')" :placeholder="__('hr_checklists.defaults.choose_employee')" :help="__('hr_checklists.defaults.employee_help')" :disabled="$cityId === ''" required />
 
                 <x-ui.form-select wire:model="itemId" :label="__('hr_checklists.columns.item')" :placeholder="__('hr_checklists.defaults.choose_item')" required>
                     @foreach ($this->itemOptions as $itemOption)

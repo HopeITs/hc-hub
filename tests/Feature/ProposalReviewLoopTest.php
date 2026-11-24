@@ -143,7 +143,14 @@ test('entering concept note review invites the four slots, the project owner and
         ->and(DB::table('proposal_reviewers')->whereNotNull('seen_at')->exists())->toBeFalse();
 
     foreach ($reviewerUsers as $user) {
-        expect(notificationKeysOf($user))->toBe([ReviewRequestedForYou]);
+        $keys = notificationKeysOf($user);
+
+        // The project owner is also told their proposal is waiting on them to collect the reviews.
+        $expectedKeys = $user->employee_id === $people['owner']
+            ? [ReviewRequestedForYou, 'notifications.events.proposal.waiting_on_you.collect_concept_reviews']
+            : [ReviewRequestedForYou];
+
+        expect($keys)->toEqualCanonicalizing($expectedKeys);
     }
 });
 
@@ -185,7 +192,8 @@ test('re-entering a review adds only newly linked people and re-notifies only th
         ->and($requests)->toHaveCount(2)
         ->and($requests[1]->properties['employee_ids'])->toBe(array_values($asked))
         ->and(UserNotification::query()->forUser($mealUser)->sole()->data['count'])->toBe(1)
-        ->and(UserNotification::query()->forUser($ownerUser)->sole()->data['count'])->toBe(2);
+        // The owner also hears each status change on their proposal, and those merge into the same row.
+        ->and(UserNotification::query()->forUser($ownerUser)->get()->where('data.key', ReviewRequestedForYou)->sole()->data['activity_ids'])->toContain(...$requests->pluck('id')->all());
 });
 
 test('the review rows of one stage never count for the other', function () {

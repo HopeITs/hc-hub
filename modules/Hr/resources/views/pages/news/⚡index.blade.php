@@ -68,17 +68,26 @@ new #[Layout('layouts::desk'), Title('hr_news.titles.index')] class extends Comp
 
     public function publishNow(int $id): void
     {
-        $this->change($id, 'update', fn (ChangeNewsState $change, News $news): bool => $change->publishNow(auth()->user(), $news), 'hr_news.list.published_now');
+        $news = $this->scoped()->findOrFail($id);
+        Gate::authorize('update', $news);
+
+        $this->finishChange(app(ChangeNewsState::class)->publishNow(auth()->user(), $news), 'hr_news.list.published_now');
     }
 
     public function unpublish(int $id): void
     {
-        $this->change($id, 'update', fn (ChangeNewsState $change, News $news): bool => $change->unpublish(auth()->user(), $news), 'hr_news.list.unpublished');
+        $news = $this->scoped()->findOrFail($id);
+        Gate::authorize('update', $news);
+
+        $this->finishChange(app(ChangeNewsState::class)->unpublish(auth()->user(), $news), 'hr_news.list.unpublished');
     }
 
     public function archive(int $id): void
     {
-        $this->change($id, 'update', fn (ChangeNewsState $change, News $news): bool => $change->archive(auth()->user(), $news), 'hr_news.list.archived');
+        $news = $this->scoped()->findOrFail($id);
+        Gate::authorize('update', $news);
+
+        $this->finishChange(app(ChangeNewsState::class)->archive(auth()->user(), $news), 'hr_news.list.archived');
     }
 
     public function confirmRemoveArchive(int $id): void
@@ -108,7 +117,10 @@ new #[Layout('layouts::desk'), Title('hr_news.titles.index')] class extends Comp
 
     public function restore(int $id): void
     {
-        $this->change($id, 'update', fn (ChangeNewsState $change, News $news): bool => $change->restore(auth()->user(), $news), 'hr_news.list.restored');
+        $news = $this->scoped()->findOrFail($id);
+        Gate::authorize('update', $news);
+
+        $this->finishChange(app(ChangeNewsState::class)->restore(auth()->user(), $news), 'hr_news.list.restored');
     }
 
     public function confirmDelete(int $id): void
@@ -139,14 +151,10 @@ new #[Layout('layouts::desk'), Title('hr_news.titles.index')] class extends Comp
     }
 
     /**
-     * @param  Closure(ChangeNewsState, News): bool  $apply
+     * Refreshes the list and tells the person whether the change went through.
      */
-    private function change(int $id, string $ability, Closure $apply, string $message): void
+    private function finishChange(bool $done, string $message): void
     {
-        $news = $this->scoped()->findOrFail($id);
-        Gate::authorize($ability, $news);
-
-        $done = $apply(app(ChangeNewsState::class), $news);
         unset($this->rows, $this->counts);
         Flux::toast(variant: $done ? 'success' : 'warning', text: __($done ? $message : 'hr_news.list.not_allowed_now'));
     }

@@ -3,17 +3,26 @@
  * 270+ employees. Rather than the server rendering them into each dropdown on
  * every Livewire response, they are fetched once as JSON and shared: dropdowns
  * built with the `employees` prop draw their options from this store.
+ *
+ * A `picker-scope` dropdown reads a filtered list from the same endpoint
+ * (`?scope=`); each URL keeps its own list in `lists`, and `items` stays the
+ * full employee list the other person pickers read.
  */
 document.addEventListener('alpine:init', () => {
     window.Alpine.store('employeeOptions', {
         items: [],
+        lists: {},
         requests: {},
 
         load(url) {
             this.requests[url] ??= fetch(url, { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
                 .then((response) => (response.ok ? response.json() : Promise.reject(response)))
                 .then((items) => {
-                    this.items = items;
+                    this.lists[url] = items;
+
+                    if (! new URL(url, window.location.href).searchParams.has('scope')) {
+                        this.items = items;
+                    }
                 })
                 .catch(() => {
                     delete this.requests[url];
@@ -22,8 +31,12 @@ document.addEventListener('alpine:init', () => {
             return this.requests[url];
         },
 
-        labelFor(value) {
-            return this.items.find((item) => item.value === value)?.label ?? null;
+        itemsFor(url) {
+            return this.lists[url] ?? [];
+        },
+
+        labelFor(value, url) {
+            return this.itemsFor(url).find((item) => item.value === value)?.label ?? null;
         },
     });
 });
@@ -236,7 +249,7 @@ document.addEventListener('alpine:init', () => {
 
         labelFor(optionValue) {
             if (this.employeesUrl !== null) {
-                const employeeLabel = window.Alpine.store('employeeOptions').labelFor(optionValue) ?? this.knownLabels[optionValue] ?? null;
+                const employeeLabel = window.Alpine.store('employeeOptions').labelFor(optionValue, this.employeesUrl) ?? this.knownLabels[optionValue] ?? null;
 
                 if (employeeLabel !== null) {
                     return employeeLabel;
@@ -295,7 +308,7 @@ document.addEventListener('alpine:init', () => {
 
         paintEmployees() {
             const list = this.$refs.employeeList;
-            const items = window.Alpine.store('employeeOptions').items;
+            const items = window.Alpine.store('employeeOptions').itemsFor(this.employeesUrl);
 
             if (! list || items.length === 0) {
                 return;

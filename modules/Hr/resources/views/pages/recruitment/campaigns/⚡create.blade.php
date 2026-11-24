@@ -56,6 +56,8 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.campaign_create'
             return;
         }
 
+        Gate::forUser($this->viewer())->authorize('create', [HiringCampaign::class, $vacancy]);
+
         try {
             $campaign = $campaigns->create($this->viewer(), $vacancy, [
                 'link_mode' => $this->linkMode,

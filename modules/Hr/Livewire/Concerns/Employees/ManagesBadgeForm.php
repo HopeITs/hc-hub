@@ -169,7 +169,9 @@ trait ManagesBadgeForm
     public function deleteBadge(): void
     {
         if ($this->deletingBadgeId !== null) {
-            app(SaveBadge::class)->delete($this->employee->badges()->findOrFail($this->deletingBadgeId));
+            $badge = $this->employee->badges()->findOrFail($this->deletingBadgeId);
+            Gate::authorize('delete', $badge);
+            app(SaveBadge::class)->delete($badge);
 
             Flux::toast(variant: 'success', text: __('hr_employees.toasts.badge_deleted'));
         }
