@@ -13,6 +13,9 @@ Route::prefix('hr/onboarding')->name('hr.onboarding.')->group(function (): void 
         ->whereNumber('employee')
         ->name('manager-session');
 
+    Route::livewire('my-first-days', 'hr::onboarding.my-first-days')
+        ->name('my-first-days');
+
     Route::livewire('policies', 'hr::onboarding.policies')
         ->name('policies');
 

@@ -105,6 +105,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.campaigns')] cla
 @endphp
 
 <x-desk.register class="@container" heading-id="recruitment-campaigns-heading" :title="__('hr_recruitment.hub.titles.campaigns')" :count="$rows->total()">
+    <p class="max-w-2xl text-sm text-secondary-medium dark:text-ink-muted">{{ __('hr_recruitment.hub.campaigns_intro') }}</p>
     @if ($counts !== [])
         <x-slot:figures>
             @foreach ([HiringCampaignStatus::Open, HiringCampaignStatus::Published, HiringCampaignStatus::Draft] as $case)

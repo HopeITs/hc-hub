@@ -338,3 +338,19 @@ test('completion follows every step and unwinds when one is undone, and an older
 
     expect(OnboardingJourney::query()->sole()->completed_at)->not->toBeNull();
 });
+
+test('my first days shows a volunteer their own journey, worded for them, without the HR record step', function () {
+    app()->setLocale('en');
+    $volunteer = ($this->volunteer)();
+    $account = User::query()->where('employee_id', $volunteer->id)->sole();
+
+    Livewire::actingAs($account)->test('hr::onboarding.my-first-days')
+        ->assertOk()
+        ->assertSee('Your contract')
+        ->assertSee('Read and agree to the policies')
+        ->assertSeeHtml('data-step="policies"')
+        ->assertDontSeeHtml('data-step="record"');
+
+    $this->actingAs($account)->get(route('hr.onboarding.my-first-days'))->assertOk();
+    Livewire::actingAs(User::factory()->create(['employee_id' => null]))->test('hr::onboarding.my-first-days')->assertForbidden();
+});

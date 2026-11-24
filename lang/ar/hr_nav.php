@@ -39,4 +39,5 @@ return [
     'settings' => 'إعدادات الموارد البشرية',
     'message_templates' => 'قوالب الرسائل',
     'entitlements' => 'مكتبة الصلاحيات',
+    'first_days' => 'أيامي الأولى',
 ];

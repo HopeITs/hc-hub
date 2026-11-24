@@ -221,7 +221,11 @@ class Timesheet
             $key = ($position?->program_id ?? 0).'-'.($position?->city_id ?? 0);
             $holidayCache[$key] ??= $this->holidaysFor($position?->program_id, $position?->city_id, $first, $last);
 
-            $weekends = array_map('intval', explode(',', (string) ($position?->center?->weekends ?: config('attendance.default_weekends'))));
+            // Days picked one by one on the contract: every other day is off (the center's day plus the volunteer's own).
+            $workdays = $contract->workWeekdays();
+            $weekends = $workdays !== null
+                ? array_values(array_diff(range(0, 6), $workdays))
+                : array_map('intval', explode(',', (string) ($position?->center?->weekends ?: config('attendance.default_weekends'))));
             $isWeekend = in_array($day->dayOfWeek, $weekends, true);
 
             if ($isWeekend || isset($holidayCache[$key][$date])) {

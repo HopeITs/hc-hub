@@ -36,6 +36,7 @@ return [
         'hint' => 'This amendment starts from the terms as that one left them. Check it is not the same change entered twice.',
     ],
     'terms' => [
+        'days_per_week' => '{1} :count day a week|[2,*] :count days a week',
         'hours' => 'Working hours',
         'days' => 'Work days',
         'flexible' => 'Flexible schedule',

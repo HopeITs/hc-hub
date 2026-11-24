@@ -31,6 +31,17 @@
                 @endforeach
             </x-ui.form-select>
             <span class="hidden @5xl/form:block"></span>
+            {{-- Or the days one by one, for a week a range cannot say (Study Zone's center day off plus the volunteer's own). The place's day off is never one of them. --}}
+            <fieldset class="flex flex-col gap-2 @2xl/form:col-span-2 @5xl/form:col-span-3" data-test="work-weekdays">
+                <legend class="text-sm font-semibold">{{ __('hr_contracts.form.work_weekdays') }}</legend>
+                <p class="text-sm text-secondary-medium dark:text-ink-muted">{{ __('hr_contracts.form.work_weekdays_help') }}</p>
+                <div class="flex flex-wrap gap-4">
+                    @foreach (ContractOptions::WEEK_DAYS as $dayIndex => $dayKey)
+                        <flux:checkbox wire:model="form.work_weekdays" value="{{ $dayIndex }}" :disabled="in_array($dayIndex, $this->placeDaysOff, true)" :label="__('hr_contracts.days.'.$dayKey)" />
+                    @endforeach
+                </div>
+                @error('form.work_weekdays')<p class="text-sm text-status-critical" role="alert">{{ $message }}</p>@enderror
+            </fieldset>
             <x-ui.form-input wire:model="form.work_hours_from" :label="__('hr_contracts.fields.work_hours_from')" type="time" required />
             <x-ui.form-input wire:model="form.work_hours_to" :label="__('hr_contracts.fields.work_hours_to')" type="time" required />
             <span class="hidden @5xl/form:block"></span>

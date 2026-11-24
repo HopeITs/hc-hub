@@ -2365,6 +2365,8 @@ return [
             'invalid_email' => 'Enter a valid email address.',
             'invalid_phone' => 'Enter a 10-digit mobile number that starts with 09.',
             'invalid_birth_date' => 'Enter a valid birth date in the past.',
+            'name_arabic' => 'Write this name in Arabic letters.',
+            'name_latin' => 'Write this name in English (Latin) letters.',
             'age_not_eligible' => 'You cannot apply because your age is outside the range allowed for this campaign.',
             'link_expired' => 'This application link has expired or was replaced. Ask the recruitment team for the current link.',
             'link_changed' => 'This application link was replaced while you were filling in the form. Ask the recruitment team for the current link.',
@@ -2375,6 +2377,11 @@ return [
         ],
     ],
     'hub' => [
+        'applicants_intro' => "Everyone who applied through a campaign link appears here. From an applicant's page you review the application and, once shortlisted, schedule an interview.",
+        'campaigns_intro' => 'A campaign opens for a vacancy that came from an approved recruitment request, and receives applicants through its application link.',
+        'offers_intro' => "An offer is made from the applicant's page after the interviews. Once it is accepted, open the offer and convert it to an employee: that creates the employee record and the contract.",
+        'requests_intro' => 'Hiring starts here: a manager raises a recruitment request for a position, it goes through approvals, then becomes a vacancy and a campaign opens for it to receive applicants.',
+        'requests_intro_direct' => 'Direct opening is for a hire already agreed outside the system: record who asked and the approvals given, and it opens without going through the approvals here.',
         'titles' => [
             'requests' => 'Recruitment requests',
             'request' => 'Recruitment request',

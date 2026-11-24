@@ -33,9 +33,39 @@ final class WeekendClause
         }
 
         $contract = (new Contract)->setRelation('position', $position)->setRelation('employee', null);
-        [$weekend, $source] = $this->pricing->weekendFor($contract);
+        // The centers' day off, never the volunteer's own (work_weekdays): that one stays in the
+        // system and is not printed.
+        [$weekend, $source] = $this->pricing->placeWeekendFor($contract);
 
         return $source === 'default' ? [] : array_values($weekend);
+    }
+
+    /**
+     * The place's day off for any program: what the composer's working-day picker greys out.
+     * Empty when no center weekend is set.
+     *
+     * @return list<int>
+     */
+    public function placeDaysForPosition(?Position $position): array
+    {
+        if ($position === null) {
+            return [];
+        }
+
+        $contract = (new Contract)->setRelation('position', $position)->setRelation('employee', null);
+        [$weekend, $source] = $this->pricing->placeWeekendFor($contract);
+
+        return $source === 'default' ? [] : array_values($weekend);
+    }
+
+    /**
+     * Whether any of the picked working days is the place's own day off (it never can be).
+     *
+     * @param  array<int|string, mixed>  $picked
+     */
+    public function clashesWithPlaceDayOff(?Position $position, array $picked): bool
+    {
+        return array_intersect(Contract::parseWeekdays($picked), $this->placeDaysForPosition($position)) !== [];
     }
 
     /**

@@ -39,4 +39,5 @@ return [
     'settings' => 'HR settings',
     'message_templates' => 'Message templates',
     'entitlements' => 'Permissions Library',
+    'first_days' => 'My first days',
 ];

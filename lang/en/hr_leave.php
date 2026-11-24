@@ -22,6 +22,7 @@ return [
     'units' => [
         'days' => '{0} :count days|{1} :count day|[2,*] :count days',
         'hours' => '{0} :count hours|{1} :count hour|[2,*] :count hours',
+        'hours_half' => '{0} half an hour|{1} 1½ hours|[2,*] :count½ hours',
         'minutes' => '{0} :count minutes|{1} :count minute|[2,*] :count minutes',
         'and' => ' and ',
     ],
@@ -157,9 +158,11 @@ return [
         ],
         'reasons' => [
             'weekend' => 'Weekend',
+            'day_off' => 'Your own day off.',
             'holiday' => 'Official holiday',
         ],
         'explain' => [
+            'weekend_contract' => 'Weekend days follow the working days on your contract.',
             'weekend_center' => 'Weekend days follow your center.',
             'weekend_program' => 'Weekend days follow your program\'s centers in your governorate.',
             'weekend_default' => 'Weekend days use the default (Saturday and Sunday).',
@@ -289,6 +292,8 @@ return [
         ],
         'team_calendar' => 'Team calendar',
         'my_balances' => 'My balances',
+        'show_other_balances' => '{1} Show the other balance|[2,*] Show the other :count balances',
+        'hide_other_balances' => 'Hide the other balances',
         'no_balances' => 'You have no leave balances on a running contract.',
         'used_of' => ':used used of :total',
         'no_employee_heading' => 'No employee record',

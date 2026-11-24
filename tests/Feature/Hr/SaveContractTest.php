@@ -3,6 +3,7 @@
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Modules\Core\Models\Center;
 use Modules\Core\Models\User;
 use Modules\Hr\Actions\Contracts\SaveContract;
 use Modules\Hr\Actions\Contracts\TerminateContract;
@@ -71,6 +72,25 @@ test('a contract term longer than a year is refused and nothing is saved', funct
 
     expect(Contract::query()->count())->toBe(0)
         ->and((int) DB::table('positions')->where('id', $this->position->id)->value('exist_emp'))->toBe(0);
+});
+
+test('working days picked one by one replace the range, and never include the centers day off', function () {
+    $center = Center::factory()->create(['weekends' => '5']);
+    $this->position->update(['center_id' => $center->id]);
+
+    // Friday is the center's day off: it cannot be a working day.
+    expect(fn () => app(SaveContract::class)->handle(null, ($this->form)(['work_weekdays' => [5, 6, 0, 1, 3]]), [], $this->hr))
+        ->toThrow(ValidationException::class);
+
+    expect(Contract::query()->count())->toBe(0);
+
+    $contract = app(SaveContract::class)->handle(null, ($this->form)(['work_day_from' => 0, 'work_day_to' => 4, 'work_weekdays' => ['6', '0', '1', '3', '4']]), [], $this->hr);
+
+    expect($contract->fresh()->work_weekdays)->toBe('0,1,3,4,6')
+        ->and($contract->fresh()->workWeekdays())->toBe([0, 1, 3, 4, 6])
+        // One way to state the week or the other, never both.
+        ->and($contract->fresh()->work_day_from)->toBeNull()
+        ->and($contract->fresh()->work_day_to)->toBeNull();
 });
 
 test('a draft employee cannot be given a contract', function () {

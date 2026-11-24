@@ -68,7 +68,7 @@ final class LeaveQuote
     public const INVALID_WINDOW = 'invalid_window';
 
     /**
-     * @param  array<int, array{date: string, reason: 'weekend'|'holiday'}>  $excludedDates
+     * @param  array<int, array{date: string, reason: 'weekend'|'day_off'|'holiday'}>  $excludedDates
      * @param  array<int, array{key: string, params: array<string, int|float|string>}>  $explanation
      * @param  array<int, string>  $warnings
      * @param  array<int, string>  $errors

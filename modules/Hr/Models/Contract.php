@@ -52,6 +52,7 @@ use Modules\Hr\Support\Employees\HrAccess;
  * @property string|null $work_hours_2_to
  * @property int|null $work_day_from
  * @property int|null $work_day_to
+ * @property string|null $work_weekdays
  * @property bool $show_days_per_week
  * @property bool $show_hours_per_week
  * @property bool $show_hours_per_day
@@ -73,7 +74,7 @@ use Modules\Hr\Support\Employees\HrAccess;
  * @property CarbonImmutable|null $updated_at
  */
 #[ObservedBy(HrStatisticsObserver::class)]
-#[Fillable(['employee_id', 'position_id', 'contract_type_id', 'type', 'place', 'start_date', 'end_date', 'termination_reason_id', 'terminated_at', 'reason_of_termination', 'salary', 'currency', 'salary_per', 'work_hours_from', 'work_hours_to', 'work_hours_2_from', 'work_hours_2_to', 'work_days_en', 'work_days_ar', 'weekly_hours', 'schedule_mode', 'work_day_from', 'work_day_to', 'show_days_per_week', 'show_hours_per_week', 'show_hours_per_day', 'show_day_range', 'show_weekend_clause', 'flex_days_per_week', 'flex_hours_per_week', 'flex_hours_per_month', 'flex_varies_by_requirements', 'flex_coordinated_with_manager', 'flex_custom_en', 'flex_custom_ar', 'pay_mode', 'session_duration', 'is_active', 'auto_renew'])]
+#[Fillable(['employee_id', 'position_id', 'contract_type_id', 'type', 'place', 'start_date', 'end_date', 'termination_reason_id', 'terminated_at', 'reason_of_termination', 'salary', 'currency', 'salary_per', 'work_hours_from', 'work_hours_to', 'work_hours_2_from', 'work_hours_2_to', 'work_days_en', 'work_days_ar', 'weekly_hours', 'schedule_mode', 'work_day_from', 'work_day_to', 'work_weekdays', 'show_days_per_week', 'show_hours_per_week', 'show_hours_per_day', 'show_day_range', 'show_weekend_clause', 'flex_days_per_week', 'flex_hours_per_week', 'flex_hours_per_month', 'flex_varies_by_requirements', 'flex_coordinated_with_manager', 'flex_custom_en', 'flex_custom_ar', 'pay_mode', 'session_duration', 'is_active', 'auto_renew'])]
 class Contract extends Model implements TracksActivity
 {
     /** @use HasFactory<ContractFactory> */
@@ -631,6 +632,38 @@ class Contract extends Model implements TracksActivity
         $end_date = Carbon::parse($this->end_date);
 
         return round($start_date->diffInMonths($end_date), 1);
+    }
+
+    /**
+     * The days picked one by one (work_weekdays), Carbon numbering, sorted;
+     * null when the contract states a from-to range (or nothing) instead.
+     *
+     * @return list<int>|null
+     */
+    public function workWeekdays(): ?array
+    {
+        $days = self::parseWeekdays($this->work_weekdays);
+
+        return $days === [] ? null : $days;
+    }
+
+    /**
+     * "0,1,3" (or an array) as sorted, distinct day numbers 0-6.
+     *
+     * @param  string|array<int|string, mixed>|null  $value
+     * @return list<int>
+     */
+    public static function parseWeekdays(string|array|null $value): array
+    {
+        $parts = is_array($value) ? $value : explode(',', (string) $value);
+
+        $days = array_values(array_unique(array_map('intval', array_filter(
+            array_map(fn (mixed $day): string => trim((string) $day), $parts),
+            fn (string $day): bool => $day !== '' && ctype_digit($day) && (int) $day <= 6,
+        ))));
+        sort($days);
+
+        return $days;
     }
 
     public function getWorkHourPerDayAttribute(): int

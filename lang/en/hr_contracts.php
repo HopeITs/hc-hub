@@ -78,6 +78,8 @@ return [
     ],
 
     'form' => [
+        'work_weekdays' => 'Working days, picked one by one',
+        'work_weekdays_help' => "Leave the days empty to use the range above. Every day not ticked counts as a day off for leave. The center's own day off cannot be ticked.",
         'create_title' => 'New contract',
         'edit_title' => 'Edit contract',
         'renew_title' => 'Renew contract',
@@ -134,6 +136,7 @@ return [
     ],
 
     'errors' => [
+        'work_weekdays_center_day_off' => "The center's own day off cannot be a working day.",
         'position_full' => 'This position has no free seat.',
         'employee_incomplete' => 'The employee record is a draft. Complete it before adding a contract.',
         'service_requires_freelance' => 'A service contract must be freelance.',

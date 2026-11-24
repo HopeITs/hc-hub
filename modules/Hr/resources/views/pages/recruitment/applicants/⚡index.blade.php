@@ -161,6 +161,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.applicants')] cl
 @endphp
 
 <x-desk.register class="@container" heading-id="recruitment-applicants-heading" :title="__('hr_recruitment.hub.titles.applicants')" :count="$rows->total()">
+    <p class="max-w-2xl text-sm text-secondary-medium dark:text-ink-muted">{{ __('hr_recruitment.hub.applicants_intro') }}</p>
     <x-slot:figures>{{ __('hr_recruitment.applicant_ui.applicants_hint') }}</x-slot:figures>
 
     <x-slot:actions>

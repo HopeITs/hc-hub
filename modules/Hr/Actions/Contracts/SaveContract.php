@@ -21,8 +21,10 @@ use Modules\Hr\Enums\ScheduleMode;
 use Modules\Hr\Enums\SessionDuration;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Contracts\ContractOptions;
 use Modules\Hr\Support\Contracts\PositionSeats;
+use Modules\Hr\Support\Contracts\WeekendClause;
 use Modules\Hr\Support\Employees\HrAccess;
 
 /**
@@ -113,6 +115,8 @@ class SaveContract
      */
     private function validate(?Contract $contract, array $data, array $tiers, bool $payHidden, ?Contract $renewalSource): void
     {
+        // An empty pick means the from-to range is used.
+        $data['work_weekdays'] = Contract::parseWeekdays($data['work_weekdays'] ?? null) ?: null;
         $category = ContractOptions::category(isset($data['contract_type_id']) ? (int) $data['contract_type_id'] : null);
         $maxEnd = filled($data['start_date'] ?? null) ? Carbon::parse($data['start_date'])->addYear()->toDateString() : null;
         $isFixedSchedule = (int) ($data['schedule_mode'] ?? 0) === ScheduleMode::Fixed->value;
@@ -142,6 +146,9 @@ class SaveContract
             'work_hours_2_to' => ['nullable', 'date_format:H:i', 'required_with:work_hours_2_from', 'after:work_hours_2_from'],
             'work_day_from' => ['nullable', 'integer', 'between:0,6', 'required_with:work_day_to'],
             'work_day_to' => ['nullable', 'integer', 'between:0,6', 'gte:work_day_from', 'required_with:work_day_from'],
+            // The other way to state the week: the days themselves, none of them the place's own day off.
+            'work_weekdays' => ['nullable', 'array', 'min:1', 'max:7', $this->workWeekdaysRule((int) ($data['position_id'] ?? 0))],
+            'work_weekdays.*' => ['integer', 'between:0,6', 'distinct'],
             'flex_days_per_week' => ['nullable', 'integer', 'between:1,7'],
             'flex_hours_per_week' => ['nullable', 'integer', 'min:1', 'max:168'],
             'flex_hours_per_month' => ['nullable', 'integer', 'between:1,300'],
@@ -194,6 +201,7 @@ class SaveContract
         $fixed = (int) $data['schedule_mode'] === ScheduleMode::Fixed->value;
         $nullable = fn (string $key): mixed => filled($data[$key] ?? null) ? $data[$key] : null;
         $int = fn (string $key): ?int => filled($data[$key] ?? null) ? (int) $data[$key] : null;
+        $pickedDays = Contract::parseWeekdays($data['work_weekdays'] ?? null) ?: null;
 
         $payload = [
             'employee_id' => (int) $data['employee_id'],
@@ -215,8 +223,10 @@ class SaveContract
             'work_hours_to' => $fixed ? $nullable('work_hours_to') : null,
             'work_hours_2_from' => $fixed ? $nullable('work_hours_2_from') : null,
             'work_hours_2_to' => $fixed ? $nullable('work_hours_2_to') : null,
-            'work_day_from' => $fixed ? $int('work_day_from') : null,
-            'work_day_to' => $fixed ? $int('work_day_to') : null,
+            // One way to state the week or the other, never both.
+            'work_day_from' => $fixed && $pickedDays === null ? $int('work_day_from') : null,
+            'work_day_to' => $fixed && $pickedDays === null ? $int('work_day_to') : null,
+            'work_weekdays' => $fixed && $pickedDays !== null ? implode(',', $pickedDays) : null,
             'show_days_per_week' => $fixed && (bool) ($data['show_days_per_week'] ?? false),
             'show_hours_per_week' => $fixed && (bool) ($data['show_hours_per_week'] ?? false),
             'show_hours_per_day' => $fixed && (bool) ($data['show_hours_per_day'] ?? false),
@@ -300,6 +310,21 @@ class SaveContract
         return function (string $attribute, mixed $value, Closure $fail): void {
             if (Employee::query()->whereKey($value)->drafts()->exists()) {
                 $fail(__('hr_contracts.errors.employee_incomplete'));
+            }
+        };
+    }
+
+    /**
+     * The place's day off (the center's, or the program centers' for Study Zone) cannot be picked
+     * as a working day: the composer greys it out.
+     */
+    private function workWeekdaysRule(int $positionId): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail) use ($positionId): void {
+            $position = $positionId > 0 ? Position::query()->with(['program:id,slug', 'center:id,city_id,weekends'])->find($positionId) : null;
+
+            if ($position !== null && is_array($value) && app(WeekendClause::class)->clashesWithPlaceDayOff($position, $value)) {
+                $fail(__('hr_contracts.errors.work_weekdays_center_day_off'));
             }
         };
     }

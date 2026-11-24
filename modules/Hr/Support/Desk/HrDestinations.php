@@ -11,6 +11,7 @@ use Modules\Core\Models\User;
 use Modules\Hr\Actions\Recruitment\RecruitmentApproverEligibility;
 use Modules\Hr\Models\InAppFeedback;
 use Modules\Hr\Models\MessageTemplate;
+use Modules\Hr\Models\OnboardingJourney;
 use Modules\Hr\Models\RecruitmentApplicant;
 use Modules\Hr\Models\RecruitmentInterview;
 use Modules\Hr\Models\RecruitmentJobOffer;
@@ -76,6 +77,8 @@ final class HrDestinations implements DestinationSource
 
             // The viewer's own HR pages join their tasks and calendar.
             ['hr.leave.team-calendar', 'team', 'users', 'nav-calendar-range', 'workspace', $can('leaves.view-own', 'leaves.view-all')],
+            // A new volunteer's own journey, while it is open (and two weeks after); staff who never had one never see it.
+            ['hr.onboarding.my-first-days', 'first_days', 'flag', 'nav-list-checks', 'workspace', fn (User $user): bool => $staff($user) && self::inFirstDays($user), 'own' => true],
             ['hr.leave.index', 'leave_requests', 'cal', 'nav-tree-palm', 'workspace', fn (User $user): bool => $staff($user) && $user->can('leaves.view-own'), 'own' => true],
             ['hr.attendance.timesheets', 'attendance', 'cal', 'nav-calendar-check', 'workspace', fn (User $user): bool => $user->can('attendance.view') || ($staff($user) && $user->can('attendance.view-own'))],
             ['hr.attendance.upload', 'attendance_upload', 'file', 'nav-file-plus', 'workspace', $can('attendance.manage'), 'under' => 'hr.attendance.timesheets'],
@@ -110,6 +113,15 @@ final class HrDestinations implements DestinationSource
         }
 
         return $offered;
+    }
+
+    /** Memoized per request: the desk asks it several times per page. */
+    private static function inFirstDays(User $user): bool
+    {
+        return once(static fn (): bool => OnboardingJourney::query()
+            ->where('employee_id', $user->employee_id)
+            ->where(fn ($open) => $open->whereNull('completed_at')->orWhere('completed_at', '>', now()->subDays(14)))
+            ->exists());
     }
 
     /**

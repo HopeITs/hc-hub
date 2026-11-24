@@ -177,6 +177,7 @@ new #[Layout('layouts::desk'), Title('hr_recruitment.hub.titles.requests')] clas
 @endphp
 
 <x-desk.register class="@container" heading-id="recruitment-requests-heading" :title="__('hr_recruitment.hub.titles.requests')" :count="$rows->total()">
+    <p class="max-w-2xl text-sm text-secondary-medium dark:text-ink-muted">{{ __('hr_recruitment.hub.requests_intro').(\Illuminate\Support\Facades\Gate::allows('recruitment-requests.direct-open') ? ' '.__('hr_recruitment.hub.requests_intro_direct') : '') }}</p>
     <x-slot:actions>
         <div class="flex flex-wrap items-center justify-end gap-2">
             @if ($this->may('recruitment-requests.manage'))
