@@ -219,7 +219,7 @@ class RecruitmentRequestSubmissionService
             $payload = (array) ($fresh->draft_payload_json ?? []);
 
             $this->assertComplete($fresh, $payload);
-            if ((int) $fresh->mode === RecruitmentRequestMode::Normal) {
+            if ((int) $fresh->mode === RecruitmentRequestMode::Normal->value) {
                 app(RecruitmentRequestDraftService::class)->assertCurrentScope($actor, $fresh);
             }
             $this->revalidator->assert($fresh, $payload);

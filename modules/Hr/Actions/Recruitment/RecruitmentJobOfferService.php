@@ -2,6 +2,7 @@
 
 namespace Modules\Hr\Actions\Recruitment;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -654,7 +655,7 @@ class RecruitmentJobOfferService
         }
     }
 
-    private function validateExpiry(?string $expiresOn): Carbon
+    private function validateExpiry(?string $expiresOn): CarbonInterface
     {
         if (blank($expiresOn)) {
             return today()->addDays((int) RecruitmentConfig::get('recruitment.offers.validity_days', 7))->endOfDay();

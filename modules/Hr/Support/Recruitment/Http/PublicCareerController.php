@@ -3,6 +3,7 @@
 namespace Modules\Hr\Support\Recruitment\Http;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -62,6 +63,10 @@ class PublicCareerController extends Controller
             return redirect()->to($back);
         }
 
+        // The login page opens in the vacancy's language: the hub keeps a
+        // guest's language in the session (SetLocale), not in the URL.
+        $request->session()->put(SetLocale::SessionKey, $locale);
+
         return redirect()->setIntendedUrl($back)
             ->to(route('login'));
     }
@@ -99,9 +104,9 @@ class PublicCareerController extends Controller
         $email = Str::lower(trim((string) $request->input('invitee_email')));
 
         if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            $error = __('hr::pages.recruitment.careers.invitation.invalid_email');
+            $error = __('hr_recruitment.careers.invitation.invalid_email');
         } elseif (! $invites->hasActiveInvite($campaign, $email)) {
-            $error = __('hr::pages.recruitment.careers.invitation.not_listed');
+            $error = __('hr_recruitment.careers.invitation.not_listed');
         } else {
             $request->session()->put($this->invitationSessionKey($token), $email);
 
