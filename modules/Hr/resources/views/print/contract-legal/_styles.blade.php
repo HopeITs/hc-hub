@@ -3,6 +3,7 @@
     (A4, English and Arabic columns). Ported from HR's contract details
     styles; fonts are the hub's own Somar Sans build.
 --}}
+@use('App\Support\PrintPalette')
 @php
     $font = fn (string $weight): string => \Illuminate\Support\Facades\Vite::asset('resources/fonts/somar-sans/SomarSans-'.$weight.'.woff2');
 @endphp
@@ -12,8 +13,8 @@
     @font-face { font-family: 'somar-black'; src: url('{{ $font('ExtraBold') }}') format('woff2'); font-weight: 900; font-style: normal; }
 
     :root{
-        --main:#58595b;
-        --red:#be1f24;
+        --main:{{ PrintPalette::SecondaryDark }};
+        --red:{{ PrintPalette::Primary }};
     }
 
     .contract-a4{
@@ -25,7 +26,7 @@
            grows past one physical page and the tail (footer/page number)
            spills onto a blank following page when printed. */
         box-sizing:border-box;
-        background-color:#fff;
+        background-color:{{ PrintPalette::Paper }};
         background-image:url('{{ asset('images/hr/contract-header.svg') }}'), url('{{ asset('images/hr/contract-footer.png') }}');
         background-repeat:no-repeat, no-repeat;
         background-position:center 12mm, center calc(100% - 12mm);

@@ -1,4 +1,5 @@
 {{-- The whole annual plan as a plain page for the browser's print-to-PDF (ActivityPlanExportController): the plan, then its execution per centre. --}}
+@use('App\Support\PrintPalette')
 @php
     $mondays = $execution->calendar->mondays();
     $months = collect($mondays)->groupBy(fn ($monday) => $monday->format('Y-m'));
@@ -9,11 +10,11 @@
     <meta charset="utf-8">
     <title>{{ $plan->proposal->name }} · {{ $plan->program?->name }}</title>
     <style>
-        body { font-family: "Somar Sans", Tahoma, sans-serif; color: #232427; margin: 24px; font-size: 12px; line-height: 1.45; }
-        h1 { font-size: 20px; margin: 0 0 4px; } h2 { font-size: 15px; margin: 18px 0 6px; border-bottom: 1px solid #dcddde; padding-bottom: 4px; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 8px; } th, td { border: 1px solid #dcddde; padding: 4px 6px; text-align: start; vertical-align: top; }
-        th { background: #f3f3f4; font-size: 10px; text-transform: uppercase; } .muted { color: #6d6e71; }
-        .wk { padding: 0; width: 10px; } .on { background: #2563a8; } .done { background: #1d7a4c; } .bad { background: #be1f24; } .warn { background: #d6941f; }
+        body { font-family: "Somar Sans", Tahoma, sans-serif; color: {{ PrintPalette::DeskInk }}; margin: 24px; font-size: 12px; line-height: 1.45; }
+        h1 { font-size: 20px; margin: 0 0 4px; } h2 { font-size: 15px; margin: 18px 0 6px; border-bottom: 1px solid {{ PrintPalette::SecondarySoft }}; padding-bottom: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 8px; } th, td { border: 1px solid {{ PrintPalette::SecondarySoft }}; padding: 4px 6px; text-align: start; vertical-align: top; }
+        th { background: {{ PrintPalette::Ground }}; font-size: 10px; text-transform: uppercase; } .muted { color: {{ PrintPalette::SecondaryMedium }}; }
+        .wk { padding: 0; width: 10px; } .on { background: {{ PrintPalette::StatusActive }}; } .done { background: {{ PrintPalette::StatusGood }}; } .bad { background: {{ PrintPalette::Primary }}; } .warn { background: {{ PrintPalette::PrintWarn }}; }
         @media print { .no-print { display: none; } @page { size: landscape; } }
     </style>
 </head>

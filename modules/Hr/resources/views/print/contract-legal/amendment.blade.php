@@ -7,6 +7,7 @@
     never words a term differently from the contract. The bilingual wording is
     legal text printed in both languages at once, so it lives here.
 --}}
+@use('App\Support\PrintPalette')
 @php
     $changed = $amendment->changedFields();
     $emp = $contract->employee;
@@ -44,14 +45,14 @@
     <title>{{ $fileTitle }}</title>
     @include('hr::print.contract-legal._styles')
     <style>
-        html, body { margin: 0; padding: 0; background: #f4f4f5; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        html, body { margin: 0; padding: 0; background: {{ PrintPalette::Ground }}; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         .sheet { padding: 8mm 0; }
-        .print-bar { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px; justify-content: center; padding: 10px 16px; background: rgba(255, 255, 255, .92); border-bottom: 1px solid #dcddde; font-family: 'somar-regular', sans-serif; }
-        .print-bar button, .print-bar a { border-radius: 8px; padding: 6px 14px; font-size: 14px; border: 1px solid #be1f24; text-decoration: none; cursor: pointer; }
-        .print-bar button { background: #be1f24; color: #fff; }
-        .print-bar a { background: #fff; color: #be1f24; }
+        .print-bar { position: sticky; top: 0; z-index: 10; display: flex; gap: 8px; justify-content: center; padding: 10px 16px; background: rgba(255, 255, 255, .92); border-bottom: 1px solid {{ PrintPalette::SecondarySoft }}; font-family: 'somar-regular', sans-serif; }
+        .print-bar button, .print-bar a { border-radius: 8px; padding: 6px 14px; font-size: 14px; border: 1px solid {{ PrintPalette::Primary }}; text-decoration: none; cursor: pointer; }
+        .print-bar button { background: {{ PrintPalette::Primary }}; color: {{ PrintPalette::OnBrand }}; }
+        .print-bar a { background: {{ PrintPalette::Paper }}; color: {{ PrintPalette::Primary }}; }
         @media print {
-            html, body { background: #fff; }
+            html, body { background: {{ PrintPalette::Paper }}; }
             .sheet { padding: 0; }
             .contract-a4 { height: 297mm; box-shadow: none; border-radius: 0; }
         }
