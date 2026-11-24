@@ -412,15 +412,17 @@ function insertHrCity(string $nameEn = 'Aleppo', string $nameAr = 'حلب', bool
  */
 function insertHrSeedReferenceData(): void
 {
-    foreach (range(1, 14) as $id) {
-        Program::factory()->unassigned()->create([
-            'id' => $id,
-            'name' => 'Program '.$id,
-            'code' => 'P'.$id,
-            'slug' => 'program-'.$id,
-            'is_active' => true,
-        ]);
-    }
+    Activity::withoutRecording(function (): void {
+        foreach (range(1, 14) as $id) {
+            Program::factory()->unassigned()->create([
+                'id' => $id,
+                'name' => 'Program '.$id,
+                'code' => 'P'.$id,
+                'slug' => 'program-'.$id,
+                'is_active' => true,
+            ]);
+        }
+    });
 
     foreach (range(1, 17) as $id) {
         City::factory()->create(['id' => $id, 'name_en' => 'City '.$id]);
