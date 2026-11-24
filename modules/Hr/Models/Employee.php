@@ -93,6 +93,7 @@ use Modules\Hr\Observers\HrStatisticsObserver;
 #[ObservedBy(HrStatisticsObserver::class)]
 #[Hidden(['national_number', 'personal_phone', 'digital_id_token'])]
 #[Fillable(['city_id', 'first_name_en', 'first_name_ar', 'last_name_en', 'last_name_ar', 'father_name_en', 'father_name_ar', 'mother_name_en', 'mother_name_ar', 'username', 'national_number', 'actual_dob', 'dob', 'pob_en', 'pob_ar', 'civil_registry_office', 'civil_registry_number', 'gender', 'nationality', 'marital_status', 'children', 'work_phone', 'personal_phone', 'personal_email', 'whatsapp_work', 'telegram_work', 'facebook', 'instagram', 'linkedin', 'address_en', 'address_ar', 'skills', 'interests', 'is_active', 'is_board_member', 'board_member_started_at', 'board_member_end_at', 'joined_at'])]
+#[Hidden(['national_number', 'personal_phone', 'digital_id_token'])]
 class Employee extends Model implements TracksActivity
 {
     /** @use HasFactory<EmployeeFactory> */

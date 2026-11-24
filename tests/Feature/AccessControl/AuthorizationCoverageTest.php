@@ -52,6 +52,8 @@ function authorizationCoverageExemptions(): array
         'resources/views/components/desk/panels/⚡todo.blade.php:rename' => 'Saves only the signed-in user\'s own to-dos.',
         'modules/Tracking/Livewire/Concerns/AnnualPlans/EditsActivityPlan.php:saveMilestone' => 'ManagePlanMilestones::save() refuses anyone who may not manage the plan.',
         'modules/Tracking/Livewire/Concerns/AnnualPlans/EditsActivityPlan.php:deleteMilestone' => 'ManagePlanMilestones::delete() refuses anyone who may not manage the plan.',
+        'modules/Hr/resources/views/pages/news/⚡index.blade.php:restore' => 'change() runs Gate::authorize(\'update\', $news) before ChangeNewsState::restore(), like publish and archive.',
+        'modules/Hr/resources/views/pages/recruitment/indicators/⚡rules.blade.php:save' => 'requirePermission() aborts 403 unless the active role holds recruitment-indicators.manage, before anything is saved.',
     ];
 }
 

@@ -104,7 +104,7 @@ test('no page a viewer may open falls out of the sidebar, whatever their role', 
     $this->seed(RolesAndPermissionsSeeder::class);
 
     $destinations = app(Destinations::class);
-    $reachedElsewhere = ['notifications.index', 'notification-settings.edit', 'hr.statistics.contracts', 'hr.statistics.salaries', 'hr.activity.index', 'hr.attendance.upload', 'hr.leave.team-calendar', 'hr.reports.leaving-reasons', 'hr.reports.recruitment-funnel', 'hr.reports.leave', 'hr.reports.vacancies', 'hr.reports.training', 'hr.reports.profile-completeness'];
+    $reachedElsewhere = ['notifications.index', 'notification-settings.edit', 'admin.notification-settings.edit', 'hr.statistics.contracts', 'hr.statistics.salaries', 'hr.activity.index', 'hr.attendance.upload', 'hr.leave.team-calendar', 'hr.reports.leaving-reasons', 'hr.reports.recruitment-funnel', 'hr.reports.leave', 'hr.reports.vacancies', 'hr.reports.training', 'hr.reports.profile-completeness'];
 
     foreach ($destinations->routes() as $route) {
         expect(Destinations::Groups)->toContain($destinations->find($route)['group']);

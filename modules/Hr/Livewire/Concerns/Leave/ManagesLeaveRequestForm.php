@@ -132,6 +132,7 @@ trait ManagesLeaveRequestForm
     {
         /** @var User $actor */
         $actor = Auth::user();
+        abort_unless($actor->can($this->editingLeaveRequestId === null ? 'leaves.create' : 'leaves.update'), 403);
         $input = $this->requestInput();
 
         if ($this->editingLeaveRequestId !== null) {

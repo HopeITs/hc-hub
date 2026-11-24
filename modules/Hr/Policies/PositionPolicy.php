@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Hr\Policies;
 
 use Modules\Core\Models\User;
+use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Employees\HrAccess;
 
@@ -47,16 +48,27 @@ class PositionPolicy
     }
 
     /**
-     * The suggested-replacements panel of a critical position: HR of its city,
-     * HR Syria, the general manager and the administrators. Never a direct
-     * manager or the candidate, even if the permission were handed out by hand.
+     * The suggested-replacements panel of a critical position: whoever holds
+     * positions.view-replacements (HR of its city, HR Syria, the general manager
+     * and the administrators). Never the position's direct manager or its own
+     * holder, even if the permission were handed out by hand.
      */
     public function viewReplacements(User $user, Position $position): bool
     {
         return $position->is_critical
-            && HrAccess::is($user, 'HR', 'general-manager', 'super-admin')
             && $user->can('positions.view-replacements')
+            && ! $this->managesOrHolds($user, $position)
             && $this->isInActiveCity($user, $position);
+    }
+
+    /** Whether the user sits on the position itself or on the one it reports to. */
+    private function managesOrHolds(User $user, Position $position): bool
+    {
+        return $user->employee_id !== null && Contract::query()
+            ->activeNow()
+            ->where('employee_id', $user->employee_id)
+            ->whereIn('position_id', array_filter([$position->getKey(), $position->direct_manager_id]))
+            ->exists();
     }
 
     private function isInActiveCity(User $user, Position $position): bool

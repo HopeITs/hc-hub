@@ -50,7 +50,12 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.archives')] class exte
     #[Locked]
     public ?int $sharingId = null;
 
-    /** @var list<string> */
+    /**
+     * Employee ids picked in the share dialog (the shared employee picker);
+     * saveShare() maps them to their login accounts.
+     *
+     * @var list<string>
+     */
     public array $shareWith = [];
 
     public bool $showDeleteModal = false;
@@ -227,7 +232,7 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.archives')] class exte
         Gate::authorize('share', $folder);
 
         $this->sharingId = $folder->id;
-        $this->shareWith = $folder->users()->pluck('users.id')->map(fn (mixed $id): string => (string) $id)->all();
+        $this->shareWith = $folder->users()->whereNotNull('users.employee_id')->pluck('users.employee_id')->map(fn (mixed $id): string => (string) $id)->unique()->values()->all();
         $this->showShareModal = true;
     }
 
@@ -241,7 +246,14 @@ new #[Layout('layouts::desk'), Title('hr_employees.titles.archives')] class exte
     {
         $folder = Folder::query()->findOrFail((int) $this->sharingId);
 
-        app(ManageArchive::class)->share(Auth::user(), $folder, array_map('intval', $this->shareWith));
+        $userIds = User::query()
+            ->whereIn('employee_id', array_map('intval', $this->shareWith))
+            ->pluck('id')
+            ->merge($folder->users()->whereNull('users.employee_id')->pluck('users.id'))
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all();
+
+        app(ManageArchive::class)->share(Auth::user(), $folder, $userIds);
 
         $this->closeShare();
         unset($this->folders);

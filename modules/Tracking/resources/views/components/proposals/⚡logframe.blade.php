@@ -529,6 +529,7 @@ new class extends Component {
 
     public function deleteAssumption(): void
     {
+        Gate::authorize('results.update');
         $assumption = Assumption::query()->where('proposal_id', $this->proposalId)->findOrFail((int) $this->assumptionId);
 
         app(SaveAssumption::class)->delete($this->proposal, $assumption);
