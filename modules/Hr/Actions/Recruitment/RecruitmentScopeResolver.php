@@ -907,7 +907,7 @@ class RecruitmentScopeResolver
         }
 
         $step->loadMissing(['workflowInstance', 'workflowStep']);
-        if ((int) $step->workflowInstance?->status !== WorkflowInstanceStatus::Running
+        if ((int) $step->workflowInstance?->status !== WorkflowInstanceStatus::Running->value
             || (int) $step->workflowStep?->step_order !== (int) $step->workflowInstance?->current_step_order) {
             return false;
         }
