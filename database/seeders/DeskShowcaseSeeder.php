@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Activity;
 use Carbon\CarbonImmutable;
+use Database\Seeders\Concerns\SeedsReportTemplates;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
@@ -28,7 +29,6 @@ use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalReviewer;
-use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\StrategicPillar;
 use Modules\Tracking\Models\Strategy;
 use Modules\Tracking\Models\Supervision;
@@ -48,6 +48,8 @@ use Modules\Tracking\Models\TransfersTracking;
  */
 class DeskShowcaseSeeder extends Seeder
 {
+    use SeedsReportTemplates;
+
     public function run(): void
     {
         Model::unguarded(fn () => Activity::withoutRecording(function (): void {
@@ -115,9 +117,11 @@ class DeskShowcaseSeeder extends Seeder
             foreach ($projects->take(5) as $i => $project) {
                 $period = $today->startOfMonth()->subMonths($i + 1)->toDateString();
 
+                $template = $this->reportTemplateFor($project, $admins->first()->id ?? $preparer);
+
                 MonthlyReport::query()->firstOrCreate(
-                    ['project_id' => $project->id, 'period' => $period],
-                    ['status' => MonthlyReportStatus::Submitted, 'prepared_by' => $preparer, 'submitted_by' => $preparer, 'submitted_at' => now()->subDays($i + 1)],
+                    ['report_template_id' => $template->id, 'period' => $period],
+                    ['project_id' => $project->id, 'status' => MonthlyReportStatus::Submitted, 'prepared_by' => $preparer, 'submitted_by' => $preparer, 'submitted_at' => now()->subDays($i + 1)],
                 );
 
                 // Each administrator is the MEAL officer of some of these projects, so To validate has rows.
@@ -133,11 +137,7 @@ class DeskShowcaseSeeder extends Seeder
 
             // Report templates for MEAL to confirm.
             foreach ($projects->take(3) as $project) {
-                $template = ReportTemplate::query()->firstOrCreate(
-                    ['project_id' => $project->id],
-                    ['city_id' => $project->city_id, 'program_id' => $project->program_id, 'center_id' => $project->center_id],
-                );
-                $template->proposals()->syncWithoutDetaching(array_fill_keys($project->proposals()->pluck('proposals.id')->all(), ['joined_at' => $today]));
+                $this->reportTemplateFor($project);
             }
 
             // Strategic pillars on every strategy.

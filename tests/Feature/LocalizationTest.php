@@ -437,7 +437,8 @@ function physicalDirectionClasses(string $source): array
  */
 function literalUiTextAllowlist(): array
 {
-    return ['OP1.2', 'https://', 'email@example.com'];
+    // Keyboard key names, printed on the key itself in every language.
+    return ['OP1.2', 'https://', 'email@example.com', 'Alt', 'Esc'];
 }
 
 /**
@@ -484,7 +485,7 @@ function literalUiText(string $source): array
         if ($line === '' || str_starts_with($line, '@') || str_starts_with($line, '//') || str_starts_with($line, '*')) {
             continue;
         }
-        if (preg_match('/\p{L}/u', $line) === 1) {
+        if (preg_match('/\p{L}/u', $line) === 1 && ! in_array($line, literalUiTextAllowlist(), true)) {
             $found[] = $line;
         }
     }

@@ -18,6 +18,7 @@ use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalStatusNote;
 use Modules\Tracking\Models\Report;
+use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\Task;
 use Modules\Tracking\Models\TransfersTracking;
 use Modules\Tracking\Support\MonthlyReportPeriods;
@@ -261,8 +262,8 @@ trait BuildsCalendarGrid
     protected function scopedMonthlyReports(array $employeeIds, array $preparerUserIds): Builder
     {
         return MonthlyReport::query()
-            ->select(['id', 'slug', 'project_id', 'period', 'status', 'prepared_by', 'revised_due_on'])
-            ->with('project')
+            ->select(['id', 'slug', 'project_id', 'report_template_id', 'period', 'status', 'prepared_by', 'revised_due_on'])
+            ->with(['project', 'template'])
             ->whereHas('lines')
             ->where(fn (Builder $query) => $query
                 ->whereIn('project_id', Project::query()->whereIn('owner_employee_id', $employeeIds)->select('id'))
@@ -272,10 +273,22 @@ trait BuildsCalendarGrid
     /**
      * The day a monthly report is due: its revised deadline when it was
      * returned late, else the configured number of working days
-     * after its month ends, on its project's working calendar.
+     * after its month ends, on its template's working calendar.
      */
     protected function monthlyReportDueOn(MonthlyReport $report): CarbonImmutable
     {
-        return MonthlyReportPeriods::fromLoaded($report->project, new Collection)->effectiveDueDate($report);
+        $template = $report->template;
+
+        return MonthlyReportPeriods::fromLoaded($template, new Collection, $this->templateWorkingDays($template))->effectiveDueDate($report);
+    }
+
+    /**
+     * The template's working days, read once per eager-loaded template.
+     *
+     * @return list<int>|null
+     */
+    protected function templateWorkingDays(ReportTemplate $template): ?array
+    {
+        return once(fn (): ?array => MonthlyReportPeriods::workingDaysOf([$template])[$template->id] ?? null);
     }
 }

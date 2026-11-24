@@ -32,12 +32,13 @@ use Modules\Tracking\Console\Commands\RemindProposalOwners;
 use Modules\Tracking\Console\Commands\ScanPlanMilestones;
 use Modules\Tracking\Console\Commands\SeedIndicatorLibrary;
 use Modules\Tracking\Console\Commands\SendMonthlyDigest;
+use Modules\Tracking\Console\Commands\TemplateBackfillMonthlyReports;
 use Modules\Tracking\Console\TrackingSchedule;
 use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Events\FundingAgreementRecorded;
-use Modules\Tracking\Events\ProjectActivated;
 use Modules\Tracking\Events\ProjectPeriodChanged;
 use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Events\ReportTemplateConfirmed;
 use Modules\Tracking\Listeners\GenerateExpectedTransfersOnAgreementRecorded;
 use Modules\Tracking\Listeners\GenerateMonthlyReportsForProject;
 use Modules\Tracking\Listeners\PrefillReportTemplates;
@@ -118,6 +119,7 @@ class TrackingServiceProvider extends ServiceProvider
             ScanPlanMilestones::class,
             SeedIndicatorLibrary::class,
             SendMonthlyDigest::class,
+            TemplateBackfillMonthlyReports::class,
         ]);
 
         if (! $this->app->routesAreCached()) {
@@ -132,7 +134,7 @@ class TrackingServiceProvider extends ServiceProvider
     protected function registerListeners(): void
     {
         Event::listen(FundingAgreementRecorded::class, GenerateExpectedTransfersOnAgreementRecorded::class.'@handle');
-        Event::listen(ProjectActivated::class, GenerateMonthlyReportsForProject::class.'@handleProjectActivated');
+        Event::listen(ReportTemplateConfirmed::class, GenerateMonthlyReportsForProject::class.'@handleReportTemplateConfirmed');
         Event::listen(ProjectPeriodChanged::class, GenerateMonthlyReportsForProject::class.'@handleProjectPeriodChanged');
         Event::listen(ProposalStatusChanged::class, PrefillReportTemplates::class.'@handle');
         Event::listen(ProposalStatusChanged::class, RebaseProposalPlanOnApproval::class.'@handle');

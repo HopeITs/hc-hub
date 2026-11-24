@@ -16,6 +16,7 @@ use Modules\Tracking\Events\ProposalChangeRequested;
 use Modules\Tracking\Events\ProposalChangeReviewed;
 use Modules\Tracking\Events\ProposalLocationsChanged;
 use Modules\Tracking\Events\ProposalStatusChanged;
+use Modules\Tracking\Events\ReportTemplateConfirmed;
 
 /**
  * The one list of notification events (contracts.md §15). Every movement on
@@ -221,7 +222,7 @@ final class EventCatalog
             ],
             // monthly-reports
             [
-                'monthly_reports.generated' => self::entry('monthly-reports', $now, 'listener', $all),
+                'monthly_reports.generated' => self::entry('monthly-reports', $now, 'listener', $all, event: ReportTemplateConfirmed::class),
                 'monthly_report.due' => self::entry('monthly-reports', $now, 'scanner', $all),
                 'monthly_report.overdue' => self::entry('monthly-reports', $now, 'scanner', $all),
                 'monthly_report.submitted' => self::entry('monthly-reports', $now, 'module_map', $all, activity: 'monthly_report.submitted'),

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Support\Reporting;
 
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,7 @@ use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\ReportTemplate;
+use stdClass;
 
 /**
  * The one wave 4 class that may name `Project` (D-74, D-85, contracts.md
@@ -97,6 +99,84 @@ final class PlaceBridge
         return $this->placesOfRows(
             $proposal->locations()->where('project_id', $projectId)->whereNotNull('program_id')->with('centers')->orderBy('sort')->orderBy('id')->get(),
         );
+    }
+
+    /**
+     * The place of each project with a city and a program, read from its own
+     * columns, in one query: the places "my places" of the report extraction
+     * narrows to (Y-05). A project without a center is an unset place.
+     *
+     * Removed by Y-14, when MEAL coverage is keyed by place.
+     *
+     * @param  list<int>  $projectIds
+     * @return list<ReportPlace>
+     */
+    public function placesOfProjects(array $projectIds): array
+    {
+        if ($projectIds === []) {
+            return [];
+        }
+
+        return array_values(Project::query()
+            ->select(['id', 'city_id', 'program_id', 'center_id'])
+            ->whereKey($projectIds)
+            ->whereNotNull('city_id')
+            ->whereNotNull('program_id')
+            ->orderBy('id')
+            ->get()
+            ->map(fn (Project $project): ReportPlace => new ReportPlace((int) $project->city_id, (int) $project->program_id, $project->center_id === null ? null : (int) $project->center_id, false))
+            ->unique(fn (ReportPlace $place): string => $place->key())
+            ->all());
+    }
+
+    /**
+     * The place of one project, to translate a legacy `?center=<project id>`
+     * matrix link (Y-05). Null for an unknown project or one without a city
+     * or program.
+     *
+     * Removed by Y-17.
+     */
+    public function placeOfProject(int $projectId): ?ReportPlace
+    {
+        return $this->placesOfProjects([$projectId])[0] ?? null;
+    }
+
+    /**
+     * The (proposal, project) pairs the Monthly Matrix's Activities tab shows
+     * (Y-05): proposals with one of the statuses whose period overlaps the
+     * window, linked to a project through `project_proposal`, with the
+     * extraction filter's proposal, donor, city, program, center (Field work
+     * reads as no center), pillar and "my projects" narrowing them through
+     * the project's own columns. The tab stays project-keyed (Y-05 Q2).
+     *
+     * Removed by Y-17, when activity statuses follow the place.
+     *
+     * @param  list<string>  $statuses  proposal status values
+     * @param  list<int>|null  $coveredProjectIds  the "my projects" coverage; null when off
+     * @return Collection<int, stdClass> rows of proposal_id, project_id, project_name, center_id
+     */
+    public function activityLinks(ExtractionFilter $filter, CarbonImmutable $from, CarbonImmutable $to, array $statuses, ?array $coveredProjectIds): Collection
+    {
+        $proposalStart = 'case when pp.actual_date_begin is not null and pp.actual_date_end is not null then pp.actual_date_begin else pp.planned_date_begin end';
+        $proposalEnd = 'case when pp.actual_date_begin is not null and pp.actual_date_end is not null then coalesce(pp.extended_date_end, pp.actual_date_end) else pp.planned_date_end end';
+
+        return DB::table('project_proposal as pl')
+            ->join('proposals as pp', 'pp.id', '=', 'pl.proposal_id')
+            ->join('projects as pr', 'pr.id', '=', 'pl.project_id')
+            ->whereIn('pp.status', $statuses)
+            ->whereRaw("({$proposalStart}) <= ?", [$to->toDateString()])
+            ->whereRaw("({$proposalEnd}) >= ?", [$from->toDateString()])
+            ->when($filter->proposalId !== null, fn ($query) => $query->where('pp.id', $filter->proposalId))
+            ->when($filter->donorId !== null, fn ($query) => $query->where('pp.donor_id', $filter->donorId))
+            ->when($filter->cityId !== null, fn ($query) => $query->where('pr.city_id', $filter->cityId))
+            ->when($filter->programId !== null, fn ($query) => $query->where('pr.program_id', $filter->programId))
+            ->when($filter->centerId !== null, fn ($query) => $query->where('pr.center_id', $filter->centerId))
+            ->when($filter->cityWide || $filter->centerUnset, fn ($query) => $query->whereNull('pr.center_id'))
+            ->when($filter->pillarId !== null, fn ($query) => $query->whereIn('pr.program_id', DB::table('programs')->where('strategic_pillar_id', $filter->pillarId)->select('id')))
+            ->when($coveredProjectIds !== null, fn ($query) => $coveredProjectIds === [] ? $query->whereRaw('1 = 0') : $query->whereIn('pr.id', $coveredProjectIds))
+            ->orderBy('pr.name')
+            ->orderBy('pr.id')
+            ->get(['pl.proposal_id', 'pl.project_id', 'pr.name as project_name', 'pr.center_id']);
     }
 
     /**
@@ -191,7 +271,8 @@ final class PlaceBridge
     }
 
     /**
-     * Projects by id with the columns the queue and the policy read.
+     * Projects by id with the columns the queue, the policy and the monthly
+     * report calendar (working days, Y-03) read.
      *
      * Removed by Y-17.
      *
@@ -205,7 +286,7 @@ final class PlaceBridge
         }
 
         return Project::query()
-            ->select(['id', 'name', 'slug', 'status', 'city_id', 'center_id', 'program_id'])
+            ->select(['id', 'name', 'slug', 'status', 'city_id', 'center_id', 'program_id', 'user_id', 'working_days'])
             ->whereKey($ids)
             ->get()
             ->keyBy('id')
@@ -242,6 +323,57 @@ final class PlaceBridge
         sort($ids);
 
         return $ids;
+    }
+
+    /**
+     * templateIdsOfProject() for many projects in a fixed number of queries
+     * (the Desk templates panel lists every running project).
+     *
+     * Removed by Y-17.
+     *
+     * @param  list<int>  $projectIds
+     * @return array<int, list<int>> project id => template ids, lowest first
+     */
+    public function templateIdsOfProjects(array $projectIds): array
+    {
+        if ($projectIds === []) {
+            return [];
+        }
+
+        $result = array_fill_keys($projectIds, []);
+
+        foreach (ReportTemplate::query()->whereIn('project_id', $projectIds)->get(['id', 'project_id']) as $template) {
+            $result[$template->project_id][] = $template->id;
+        }
+
+        $rows = ProposalLocation::query()->with('centers')->whereIn('project_id', $projectIds)->whereNotNull('program_id')->get();
+
+        if ($rows->isNotEmpty()) {
+            $links = DB::table('proposal_report_template')->whereIn('proposal_id', $rows->pluck('proposal_id')->unique()->all())->get(['proposal_id', 'report_template_id']);
+            $templates = ReportTemplate::query()
+                ->whereKey($links->pluck('report_template_id')->unique()->all())
+                ->get(['id', 'city_id', 'program_id', 'center_id', 'city_wide'])
+                ->keyBy('id');
+
+            foreach ($rows as $row) {
+                $placeKeys = array_map(fn (ReportPlace $place): string => $place->key(), $this->placesOfRows(collect([$row])));
+
+                foreach ($links->where('proposal_id', $row->proposal_id) as $link) {
+                    $template = $templates->get($link->report_template_id);
+
+                    if ($template !== null && in_array($template->place()->key(), $placeKeys, true)) {
+                        $result[$row->project_id][] = $template->id;
+                    }
+                }
+            }
+        }
+
+        return array_map(function (array $ids): array {
+            $ids = array_values(array_unique(array_map(intval(...), $ids)));
+            sort($ids);
+
+            return $ids;
+        }, $result);
     }
 
     /**
