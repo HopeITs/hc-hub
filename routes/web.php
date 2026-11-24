@@ -6,6 +6,7 @@ use App\Http\Controllers\EmployeePickerOptionsController;
 use App\Http\Controllers\MarkNotificationReadController;
 use App\Http\Controllers\MarkTourSeenController;
 use App\Http\Controllers\OpenNotificationController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\SwitchLocaleController;
 use App\Http\Controllers\ToggleDeskItemController;
 use App\Http\Controllers\ToggleNavPinController;
@@ -23,6 +24,13 @@ use Modules\Core\Models\User;
 Route::get('/', fn () => redirect()->route(Auth::check() ? 'dashboard' : 'login'))->name('home');
 
 Route::post('locale', SwitchLocaleController::class)->middleware('throttle:locale')->name('locale.update');
+
+// The service worker reports a push subscription the browser rotated, with no
+// page and so no session or CSRF token (exempted in bootstrap/app.php). The old
+// endpoint and its auth secret are the proof of ownership (owner decision 2026-11-23).
+Route::post('push/renew', [PushSubscriptionController::class, 'renew'])
+    ->middleware('throttle:push-renew')
+    ->name('push.renew');
 
 // Second login step for people who turned on email codes (after the HR password).
 Route::middleware('guest')->controller(EmailTwoFactorController::class)->group(function () {
@@ -61,6 +69,13 @@ Route::middleware(['auth', EnsureTwoFactorIsEnabled::class])->group(function () 
 
     Route::post('notifications/{notification}/read', MarkNotificationReadController::class)
         ->name('notifications.read');
+
+    // This browser's push subscription: always the signed-in user's own rows.
+    Route::controller(PushSubscriptionController::class)->middleware('throttle:push')->group(function () {
+        Route::post('push/subscriptions', 'store')->name('push.store');
+        Route::post('push/subscriptions/sync', 'sync')->name('push.sync');
+        Route::delete('push/subscriptions/current', 'destroyCurrent')->name('push.destroy');
+    });
 
     Route::livewire('admin/users', 'pages::admin.users')
         ->can('viewAny', User::class)

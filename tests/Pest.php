@@ -4,9 +4,11 @@ use App\Enums\FileType;
 use App\Models\Activity;
 use App\Models\Media;
 use App\Models\Permission;
+use App\Models\PushSubscription;
 use App\Models\Role;
 use App\Models\UserNotification;
 use App\Notifications\Alerts\NotificationSettings;
+use App\Notifications\Delivery\PushClient;
 use App\Notifications\NotificationPresenter;
 use App\Support\EmployeeProfile;
 use App\Support\FileKeyring;
@@ -1077,4 +1079,50 @@ function allowTwoLoginsPerEmployee(): void
         DB::connection('schema_changes')->statement('ALTER TABLE users ADD UNIQUE users_employee_id_unique (employee_id)');
         DB::purge('schema_changes');
     });
+}
+
+/**
+ * Turns Web Push on with a dummy VAPID pair and swaps the push service for a
+ * fake that records every send and answers with $statuses in turn (201 once
+ * they run out). Nothing reaches the network.
+ *
+ * @param  list<int>  $statuses
+ */
+function fakePushService(array $statuses = []): FakePushClient
+{
+    config([
+        'webpush.vapid.subject' => 'mailto:it@example.test',
+        'webpush.vapid.public_key' => 'test-public-key',
+        'webpush.vapid.private_key' => 'test-private-key',
+    ]);
+
+    $client = new FakePushClient($statuses);
+    app()->instance(PushClient::class, $client);
+
+    return $client;
+}
+
+/**
+ * The push service as fakePushService() sets it up.
+ */
+final class FakePushClient implements PushClient
+{
+    /**
+     * @var list<array{subscription_id: int, message: array<string, mixed>, options: array<string, mixed>}>
+     */
+    public array $sent = [];
+
+    /**
+     * @param  list<int>  $statuses
+     */
+    public function __construct(private array $statuses = []) {}
+
+    public function send(PushSubscription $subscription, string $payload, array $options = []): array
+    {
+        $this->sent[] = ['subscription_id' => $subscription->id, 'message' => json_decode($payload, true), 'options' => $options];
+        $status = array_shift($this->statuses) ?? 201;
+        $ok = $status >= 200 && $status < 300;
+
+        return ['ok' => $ok, 'status' => $status, 'error' => $ok ? null : "HTTP {$status}", 'expired' => in_array($status, [404, 410], true)];
+    }
 }

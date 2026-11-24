@@ -8,6 +8,8 @@ namespace Modules\Core\Models;
 use App\Concerns\RecordsActivity;
 use App\Http\Middleware\EnsureTwoFactorIsEnabled;
 use App\Models\Media;
+use App\Models\NotificationPreference;
+use App\Models\PushSubscription;
 use App\Models\Role;
 use App\Models\TrustedDevice;
 use App\Models\UserNotification;
@@ -28,6 +30,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -219,6 +222,27 @@ class User extends Authenticatable implements HasLocalePreference, PasskeyUser, 
     public function todos(): HasMany
     {
         return $this->hasMany(UserTodo::class);
+    }
+
+    /**
+     * This user's delivery settings; no row means the defaults
+     * (NotificationPreference::for()).
+     *
+     * @return HasOne<NotificationPreference, $this>
+     */
+    public function notificationPreference(): HasOne
+    {
+        return $this->hasOne(NotificationPreference::class);
+    }
+
+    /**
+     * The browsers and installed apps that receive this user's push.
+     *
+     * @return HasMany<PushSubscription, $this>
+     */
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
     }
 
     /**

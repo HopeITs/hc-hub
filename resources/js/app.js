@@ -47,3 +47,4 @@ import './unsaved';
 
 import './echo';
 import './notifications';
+import './push-notifications';

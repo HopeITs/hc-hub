@@ -19,12 +19,13 @@ namespace Modules\Hr\Support;
  * Not listed: users, programs, cities and centers (Core), the Spatie
  * permission tables (shared with the hub), the framework tables (cache,
  * jobs, sessions, migrations...), HR's two *_bak_20261019 backups, and
- * push_subscriptions, notification_outbox and task_attempts, which nothing
- * in the hub reads (dropped by the drop_unused_hr_tables migration). Also
- * not listed: dashboard_layouts, navigation_preferences, saved_table_views,
- * assistant_conversations and notification_preferences, unread too and
- * parked as zz_drop_* by retire_unused_hr_preference_tables until their
- * final drop is confirmed.
+ * task_attempts, which nothing in the hub reads (dropped by the
+ * drop_unused_hr_tables migration). Also not listed: dashboard_layouts,
+ * navigation_preferences, saved_table_views and assistant_conversations,
+ * unread too and parked as zz_drop_* by retire_unused_hr_preference_tables
+ * until their final drop is confirmed. notification_preferences,
+ * push_subscriptions and notification_outbox are the hub's own now (the
+ * platform's notification delivery), so the HR import never copies them.
  */
 final class HrTables
 {

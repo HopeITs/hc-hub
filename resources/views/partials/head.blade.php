@@ -4,6 +4,13 @@
 <meta name="desk-home" content="{{ parse_url(route('dashboard'), PHP_URL_PATH) ?: '/' }}" />
 @auth
     <meta name="desk-items-url" content="{{ route('desk.items.toggle') }}" />
+    {{-- Web Push for resources/js/push-notifications.js: the public server key (never the private one) only when push is set up, this browser's three endpoints, and whether the arrival sound is on. --}}
+    @php($headNotificationPreference = \App\Models\NotificationPreference::for(auth()->user()))
+    @if (\App\Notifications\Delivery\WebPushSender::configured())
+        <meta name="hc-vapid-key" content="{{ config('webpush.vapid.public_key') }}" />
+    @endif
+    <meta name="hc-push-routes" content="{{ json_encode(['store' => route('push.store'), 'sync' => route('push.sync'), 'destroy' => route('push.destroy')]) }}" />
+    <meta name="hc-notif-sound" content="{{ $headNotificationPreference->enabled && $headNotificationPreference->sound ? '1' : '0' }}" />
 @endauth
 
 <title>

@@ -300,6 +300,12 @@ return [
         'important' => 'مهمة',
         'critical' => 'حرجة',
     ],
+    'notification_channel' => [
+        'in_app' => 'داخل التطبيق',
+        'desktop' => 'الحاسوب',
+        'mobile' => 'الهاتف',
+        'email' => 'البريد الإلكتروني',
+    ],
     'notification_kind' => [
         'action' => 'نشاط',
         'alert' => 'تنبيه',
