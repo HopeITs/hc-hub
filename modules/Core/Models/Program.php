@@ -229,7 +229,8 @@ class Program extends Model implements TracksActivity
 
     public function activityProgramId(): ?int
     {
-        return $this->getKey() === null ? null : (int) $this->getKey();
+        // A deleted program's own row is gone, so activities.program_id (a foreign key) cannot point at it.
+        return $this->getKey() === null || ! $this->exists ? null : (int) $this->getKey();
     }
 
     /**

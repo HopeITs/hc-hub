@@ -114,7 +114,7 @@ test('money refuses to render an amount with no currency', function () {
 
 test('the user chip shows name role and email', function () {
     $user = User::factory()->role('MEAL')->create([
-        'name' => 'Layla Haddad',
+        'employee_id' => insertHrEmployee(firstNameEn: 'Layla', lastNameEn: 'Haddad'),
         'email' => 'layla@example.com',
     ]);
 
