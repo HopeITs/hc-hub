@@ -49,14 +49,6 @@
             "module": "projects"
         },
         {
-            "route": "milestones.index",
-            "label": "Milestones",
-            "icon": "flag",
-            "hero": "nav-flag",
-            "group": "projects_delivery",
-            "module": "milestones"
-        },
-        {
             "route": "results.index",
             "label": "Results Framework",
             "icon": "chart",
@@ -497,6 +489,14 @@
             "module": null
         },
         {
+            "route": "hr.onboarding.my-first-days",
+            "label": "My first days",
+            "icon": "flag",
+            "hero": "nav-list-checks",
+            "group": "workspace",
+            "module": null
+        },
+        {
             "route": "hr.leave.index",
             "label": "My leaves",
             "icon": "cal",
@@ -581,6 +581,14 @@
             "label": "Message templates",
             "icon": "file",
             "hero": "nav-message-circle-question-mark",
+            "group": "administration",
+            "module": null
+        },
+        {
+            "route": "hr.entitlements.index",
+            "label": "Permissions Library",
+            "icon": "check",
+            "hero": "nav-shield-check",
             "group": "administration",
             "module": null
         },
@@ -717,6 +725,12 @@
             "min_rows": 2,
             "icon": "check"
         },
+        "plan-milestones": {
+            "kind": "work",
+            "rows": 4,
+            "min_rows": 2,
+            "icon": "flag"
+        },
         "deliverables": {
             "kind": "work",
             "rows": 4,
@@ -740,12 +754,6 @@
             "rows": 4,
             "min_rows": 2,
             "icon": "file"
-        },
-        "milestones": {
-            "kind": "work",
-            "rows": 4,
-            "min_rows": 2,
-            "icon": "flag"
         },
         "donors": {
             "kind": "money",
@@ -1005,12 +1013,6 @@
             "min_rows": 1,
             "icon": "grid"
         },
-        "a-milestone": {
-            "kind": "actions",
-            "rows": 1,
-            "min_rows": 1,
-            "icon": "grid"
-        },
         "a-report": {
             "kind": "actions",
             "rows": 1,
@@ -1132,12 +1134,6 @@
             "icon": "grid"
         },
         "g-projects": {
-            "kind": "buttons",
-            "rows": 1,
-            "min_rows": 1,
-            "icon": "grid"
-        },
-        "g-milestones": {
             "kind": "buttons",
             "rows": 1,
             "min_rows": 1,
@@ -1527,6 +1523,12 @@
             "min_rows": 1,
             "icon": "grid"
         },
+        "g-hr-entitlements": {
+            "kind": "buttons",
+            "rows": 1,
+            "min_rows": 1,
+            "icon": "grid"
+        },
         "g-hr-activity": {
             "kind": "buttons",
             "rows": 1,
@@ -1656,14 +1658,6 @@
                             "hero": "nav-folder-open",
                             "group": "projects_delivery",
                             "module": "projects"
-                        },
-                        {
-                            "route": "milestones.index",
-                            "label": "Milestones",
-                            "icon": "flag",
-                            "hero": "nav-flag",
-                            "group": "projects_delivery",
-                            "module": "milestones"
                         }
                     ]
                 },
@@ -1817,14 +1811,6 @@
                     "hero": "nav-folder-open",
                     "group": "projects_delivery",
                     "module": "projects"
-                },
-                {
-                    "route": "milestones.index",
-                    "label": "Milestones",
-                    "icon": "flag",
-                    "hero": "nav-flag",
-                    "group": "projects_delivery",
-                    "module": "milestones"
                 },
                 {
                     "route": "results.index",
@@ -1985,7 +1971,6 @@
                 "programs.index",
                 "annual-plans.index",
                 "projects.index",
-                "milestones.index",
                 "results.index",
                 "indicator-library.index",
                 "indicators.index",
@@ -2038,7 +2023,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -2065,7 +2050,7 @@
                     "coming": {
                         "id": "coming",
                         "title": "My agenda",
-                        "description": "Every dated thing that involves you — your tasks, milestones, report deadlines, tranches — by day, with a 14-day load strip.",
+                        "description": "Every dated thing that involves you — your tasks, report deadlines, tranches — by day, with a 14-day load strip.",
                         "icon": "cal",
                         "size": "M",
                         "register": "calendar.index",
@@ -2114,15 +2099,6 @@
                         "icon": "chart",
                         "size": "L",
                         "register": "targets.index",
-                        "kind": "panel"
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "description": "Checkpoints coming up, with their weight in the project.",
-                        "icon": "flag",
-                        "size": "M",
-                        "register": "milestones.index",
                         "kind": "panel"
                     },
                     "hr-news": {
@@ -2350,15 +2326,6 @@
                         "register": "projects.index",
                         "kind": "page"
                     },
-                    "g-milestones": {
-                        "id": "g-milestones",
-                        "title": "Milestones",
-                        "description": "A button that opens Milestones.",
-                        "icon": "nav-flag",
-                        "size": "S",
-                        "register": "milestones.index",
-                        "kind": "page"
-                    },
                     "g-results": {
                         "id": "g-results",
                         "title": "Results Framework",
@@ -2562,6 +2529,11 @@
                         "title": "My reviews",
                         "reason": "Nobody has named you as a reviewer yet."
                     },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
+                    },
                     "deliverables": {
                         "id": "deliverables",
                         "title": "Department deliverables",
@@ -2671,10 +2643,6 @@
                         "size": "L"
                     },
                     {
-                        "panel": "milestones",
-                        "size": "L"
-                    },
-                    {
                         "panel": "projects",
                         "size": "XL"
                     },
@@ -2728,12 +2696,6 @@
                         "panel": "coming",
                         "size": "L",
                         "cols": 6,
-                        "rows": 4
-                    },
-                    {
-                        "panel": "milestones",
-                        "size": "XL",
-                        "cols": 12,
                         "rows": 4
                     },
                     {
@@ -2793,12 +2755,6 @@
                         "rows": 4
                     },
                     {
-                        "panel": "milestones",
-                        "size": "XL",
-                        "cols": 12,
-                        "rows": 4
-                    },
-                    {
                         "panel": "projects",
                         "size": "XL",
                         "cols": 12,
@@ -2816,7 +2772,6 @@
                     "programs.index": "p-programs",
                     "annual-plans.index": "p-annual-plans",
                     "projects.index": "projects",
-                    "milestones.index": "milestones",
                     "results.index": "p-results",
                     "indicator-library.index": "p-indicator-library",
                     "indicators.index": "p-indicators",
@@ -2978,14 +2933,8 @@
                             },
                             {
                                 "panel": "tasks",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 4
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 4
                             },
                             {
@@ -3031,7 +2980,7 @@
                     {
                         "key": "delivery",
                         "title": "Project delivery",
-                        "purpose": "Projects by stage, with milestones and targets",
+                        "purpose": "Projects by stage, with tasks and targets",
                         "core": "projects",
                         "entries": [
                             {
@@ -3042,14 +2991,8 @@
                             },
                             {
                                 "panel": "projects",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 5
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 5
                             },
                             {
@@ -3141,7 +3084,7 @@
                                 "rows": 4
                             },
                             {
-                                "panel": "milestones",
+                                "panel": "coming",
                                 "size": "XL",
                                 "cols": 12,
                                 "rows": 3
@@ -3230,15 +3173,6 @@
                     "icon": "nav-folder-open",
                     "route": "projects.index",
                     "href": "http://hc-hub.test/projects"
-                },
-                "g-milestones": {
-                    "id": "g-milestones",
-                    "key": "milestones",
-                    "kind": "page",
-                    "label": "Milestones",
-                    "icon": "nav-flag",
-                    "route": "milestones.index",
-                    "href": "http://hc-hub.test/milestones"
                 },
                 "g-results": {
                     "id": "g-results",
@@ -3528,14 +3462,6 @@
                             "hero": "nav-folder-open",
                             "group": "projects_delivery",
                             "module": "projects"
-                        },
-                        {
-                            "route": "milestones.index",
-                            "label": "Milestones",
-                            "icon": "flag",
-                            "hero": "nav-flag",
-                            "group": "projects_delivery",
-                            "module": "milestones"
                         }
                     ]
                 },
@@ -3689,14 +3615,6 @@
                     "hero": "nav-folder-open",
                     "group": "projects_delivery",
                     "module": "projects"
-                },
-                {
-                    "route": "milestones.index",
-                    "label": "Milestones",
-                    "icon": "flag",
-                    "hero": "nav-flag",
-                    "group": "projects_delivery",
-                    "module": "milestones"
                 },
                 {
                     "route": "results.index",
@@ -3857,7 +3775,6 @@
                 "programs.index",
                 "annual-plans.index",
                 "projects.index",
-                "milestones.index",
                 "results.index",
                 "indicator-library.index",
                 "indicators.index",
@@ -3910,7 +3827,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -3937,7 +3854,7 @@
                     "coming": {
                         "id": "coming",
                         "title": "My agenda",
-                        "description": "Every dated thing that involves you — your tasks, milestones, report deadlines, tranches — by day, with a 14-day load strip.",
+                        "description": "Every dated thing that involves you — your tasks, report deadlines, tranches — by day, with a 14-day load strip.",
                         "icon": "cal",
                         "size": "M",
                         "register": "calendar.index",
@@ -3986,15 +3903,6 @@
                         "icon": "chart",
                         "size": "L",
                         "register": "targets.index",
-                        "kind": "panel"
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "description": "Checkpoints coming up, with their weight in the project.",
-                        "icon": "flag",
-                        "size": "M",
-                        "register": "milestones.index",
                         "kind": "panel"
                     },
                     "hr-news": {
@@ -4240,15 +4148,6 @@
                         "register": "projects.index",
                         "kind": "page"
                     },
-                    "g-milestones": {
-                        "id": "g-milestones",
-                        "title": "Milestones",
-                        "description": "A button that opens Milestones.",
-                        "icon": "nav-flag",
-                        "size": "S",
-                        "register": "milestones.index",
-                        "kind": "page"
-                    },
                     "g-results": {
                         "id": "g-results",
                         "title": "Results Framework",
@@ -4451,6 +4350,11 @@
                         "id": "reviews",
                         "title": "My reviews",
                         "reason": "Nobody has named you as a reviewer yet."
+                    },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
                     },
                     "deliverables": {
                         "id": "deliverables",
@@ -4694,7 +4598,6 @@
                     "programs.index": "p-programs",
                     "annual-plans.index": "p-annual-plans",
                     "projects.index": "projects",
-                    "milestones.index": "milestones",
                     "results.index": "p-results",
                     "indicator-library.index": "p-indicator-library",
                     "indicators.index": "p-indicators",
@@ -4856,14 +4759,8 @@
                             },
                             {
                                 "panel": "tasks",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 4
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 4
                             },
                             {
@@ -4909,7 +4806,7 @@
                     {
                         "key": "delivery",
                         "title": "Project delivery",
-                        "purpose": "Projects by stage, with milestones and targets",
+                        "purpose": "Projects by stage, with tasks and targets",
                         "core": "projects",
                         "entries": [
                             {
@@ -4920,14 +4817,8 @@
                             },
                             {
                                 "panel": "projects",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 5
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 5
                             },
                             {
@@ -5019,7 +4910,7 @@
                                 "rows": 4
                             },
                             {
-                                "panel": "milestones",
+                                "panel": "coming",
                                 "size": "XL",
                                 "cols": 12,
                                 "rows": 3
@@ -5126,15 +5017,6 @@
                     "icon": "nav-folder-open",
                     "route": "projects.index",
                     "href": "http://hc-hub.test/projects"
-                },
-                "g-milestones": {
-                    "id": "g-milestones",
-                    "key": "milestones",
-                    "kind": "page",
-                    "label": "Milestones",
-                    "icon": "nav-flag",
-                    "route": "milestones.index",
-                    "href": "http://hc-hub.test/milestones"
                 },
                 "g-results": {
                     "id": "g-results",
@@ -5424,14 +5306,6 @@
                             "hero": "nav-folder-open",
                             "group": "projects_delivery",
                             "module": "projects"
-                        },
-                        {
-                            "route": "milestones.index",
-                            "label": "Milestones",
-                            "icon": "flag",
-                            "hero": "nav-flag",
-                            "group": "projects_delivery",
-                            "module": "milestones"
                         }
                     ]
                 },
@@ -5610,14 +5484,6 @@
                     "module": "projects"
                 },
                 {
-                    "route": "milestones.index",
-                    "label": "Milestones",
-                    "icon": "flag",
-                    "hero": "nav-flag",
-                    "group": "projects_delivery",
-                    "module": "milestones"
-                },
-                {
                     "route": "results.index",
                     "label": "Results Framework",
                     "icon": "chart",
@@ -5792,7 +5658,6 @@
                 "programs.index",
                 "annual-plans.index",
                 "projects.index",
-                "milestones.index",
                 "results.index",
                 "indicator-library.index",
                 "indicators.index",
@@ -5847,7 +5712,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -5874,7 +5739,7 @@
                     "coming": {
                         "id": "coming",
                         "title": "My agenda",
-                        "description": "Every dated thing that involves you — your tasks, milestones, report deadlines, tranches — by day, with a 14-day load strip.",
+                        "description": "Every dated thing that involves you — your tasks, report deadlines, tranches — by day, with a 14-day load strip.",
                         "icon": "cal",
                         "size": "M",
                         "register": "calendar.index",
@@ -5932,15 +5797,6 @@
                         "icon": "chart",
                         "size": "L",
                         "register": "targets.index",
-                        "kind": "panel"
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "description": "Checkpoints coming up, with their weight in the project.",
-                        "icon": "flag",
-                        "size": "M",
-                        "register": "milestones.index",
                         "kind": "panel"
                     },
                     "donors": {
@@ -6204,15 +6060,6 @@
                         "register": "projects.index",
                         "kind": "page"
                     },
-                    "g-milestones": {
-                        "id": "g-milestones",
-                        "title": "Milestones",
-                        "description": "A button that opens Milestones.",
-                        "icon": "nav-flag",
-                        "size": "S",
-                        "register": "milestones.index",
-                        "kind": "page"
-                    },
                     "g-results": {
                         "id": "g-results",
                         "title": "Results Framework",
@@ -6429,6 +6276,11 @@
                         "title": "My reviews",
                         "reason": "Nobody has named you as a reviewer yet."
                     },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
+                    },
                     "deliverables": {
                         "id": "deliverables",
                         "title": "Department deliverables",
@@ -6533,10 +6385,6 @@
                         "size": "L"
                     },
                     {
-                        "panel": "milestones",
-                        "size": "XL"
-                    },
-                    {
                         "panel": "projects",
                         "size": "XL"
                     },
@@ -6590,12 +6438,6 @@
                         "panel": "tasks",
                         "size": "L",
                         "cols": 6,
-                        "rows": 4
-                    },
-                    {
-                        "panel": "milestones",
-                        "size": "XL",
-                        "cols": 12,
                         "rows": 4
                     },
                     {
@@ -6655,12 +6497,6 @@
                         "rows": 4
                     },
                     {
-                        "panel": "milestones",
-                        "size": "XL",
-                        "cols": 12,
-                        "rows": 4
-                    },
-                    {
                         "panel": "projects",
                         "size": "XL",
                         "cols": 12,
@@ -6678,7 +6514,6 @@
                     "programs.index": "p-programs",
                     "annual-plans.index": "p-annual-plans",
                     "projects.index": "projects",
-                    "milestones.index": "milestones",
                     "results.index": "p-results",
                     "indicator-library.index": "p-indicator-library",
                     "indicators.index": "p-indicators",
@@ -6842,14 +6677,8 @@
                             },
                             {
                                 "panel": "tasks",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 4
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 4
                             },
                             {
@@ -6921,7 +6750,7 @@
                     {
                         "key": "delivery",
                         "title": "Project delivery",
-                        "purpose": "Projects by stage, with milestones and targets",
+                        "purpose": "Projects by stage, with tasks and targets",
                         "core": "projects",
                         "entries": [
                             {
@@ -6932,14 +6761,8 @@
                             },
                             {
                                 "panel": "projects",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 5
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 5
                             },
                             {
@@ -7057,7 +6880,7 @@
                                 "rows": 4
                             },
                             {
-                                "panel": "milestones",
+                                "panel": "coming",
                                 "size": "XL",
                                 "cols": 12,
                                 "rows": 3
@@ -7173,15 +6996,6 @@
                     "icon": "nav-folder-open",
                     "route": "projects.index",
                     "href": "http://hc-hub.test/projects"
-                },
-                "g-milestones": {
-                    "id": "g-milestones",
-                    "key": "milestones",
-                    "kind": "page",
-                    "label": "Milestones",
-                    "icon": "nav-flag",
-                    "route": "milestones.index",
-                    "href": "http://hc-hub.test/milestones"
                 },
                 "g-results": {
                     "id": "g-results",
@@ -7489,14 +7303,6 @@
                             "hero": "nav-folder-open",
                             "group": "projects_delivery",
                             "module": "projects"
-                        },
-                        {
-                            "route": "milestones.index",
-                            "label": "Milestones",
-                            "icon": "flag",
-                            "hero": "nav-flag",
-                            "group": "projects_delivery",
-                            "module": "milestones"
                         }
                     ]
                 },
@@ -7699,14 +7505,6 @@
                     "module": "projects"
                 },
                 {
-                    "route": "milestones.index",
-                    "label": "Milestones",
-                    "icon": "flag",
-                    "hero": "nav-flag",
-                    "group": "projects_delivery",
-                    "module": "milestones"
-                },
-                {
                     "route": "results.index",
                     "label": "Results Framework",
                     "icon": "chart",
@@ -7905,7 +7703,6 @@
                 "programs.index",
                 "annual-plans.index",
                 "projects.index",
-                "milestones.index",
                 "results.index",
                 "indicator-library.index",
                 "indicators.index",
@@ -7963,7 +7760,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -7990,7 +7787,7 @@
                     "coming": {
                         "id": "coming",
                         "title": "My agenda",
-                        "description": "Every dated thing that involves you — your tasks, milestones, report deadlines, tranches — by day, with a 14-day load strip.",
+                        "description": "Every dated thing that involves you — your tasks, report deadlines, tranches — by day, with a 14-day load strip.",
                         "icon": "cal",
                         "size": "M",
                         "register": "calendar.index",
@@ -8057,15 +7854,6 @@
                         "icon": "file",
                         "size": "M",
                         "register": "donor-reports.index",
-                        "kind": "panel"
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "description": "Checkpoints coming up, with their weight in the project.",
-                        "icon": "flag",
-                        "size": "M",
-                        "register": "milestones.index",
                         "kind": "panel"
                     },
                     "donors": {
@@ -8374,15 +8162,6 @@
                         "register": "projects.index",
                         "kind": "page"
                     },
-                    "g-milestones": {
-                        "id": "g-milestones",
-                        "title": "Milestones",
-                        "description": "A button that opens Milestones.",
-                        "icon": "nav-flag",
-                        "size": "S",
-                        "register": "milestones.index",
-                        "kind": "page"
-                    },
                     "g-results": {
                         "id": "g-results",
                         "title": "Results Framework",
@@ -8625,6 +8404,11 @@
                         "id": "reviews",
                         "title": "My reviews",
                         "reason": "Nobody has named you as a reviewer yet."
+                    },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
                     },
                     "deliverables": {
                         "id": "deliverables",
@@ -8886,7 +8670,6 @@
                     "programs.index": "p-programs",
                     "annual-plans.index": "p-annual-plans",
                     "projects.index": "projects",
-                    "milestones.index": "milestones",
                     "results.index": "p-results",
                     "indicator-library.index": "p-indicator-library",
                     "indicators.index": "p-indicators",
@@ -9053,14 +8836,8 @@
                             },
                             {
                                 "panel": "tasks",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 4
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 4
                             },
                             {
@@ -9150,7 +8927,7 @@
                     {
                         "key": "delivery",
                         "title": "Project delivery",
-                        "purpose": "Projects by stage, with milestones and targets",
+                        "purpose": "Projects by stage, with tasks and targets",
                         "core": "projects",
                         "entries": [
                             {
@@ -9161,14 +8938,8 @@
                             },
                             {
                                 "panel": "projects",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 5
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 5
                             },
                             {
@@ -9286,7 +9057,7 @@
                                 "rows": 4
                             },
                             {
-                                "panel": "milestones",
+                                "panel": "coming",
                                 "size": "XL",
                                 "cols": 12,
                                 "rows": 3
@@ -9429,15 +9200,6 @@
                     "icon": "nav-folder-open",
                     "route": "projects.index",
                     "href": "http://hc-hub.test/projects"
-                },
-                "g-milestones": {
-                    "id": "g-milestones",
-                    "key": "milestones",
-                    "kind": "page",
-                    "label": "Milestones",
-                    "icon": "nav-flag",
-                    "route": "milestones.index",
-                    "href": "http://hc-hub.test/milestones"
                 },
                 "g-results": {
                     "id": "g-results",
@@ -9772,14 +9534,6 @@
                             "hero": "nav-folder-open",
                             "group": "projects_delivery",
                             "module": "projects"
-                        },
-                        {
-                            "route": "milestones.index",
-                            "label": "Milestones",
-                            "icon": "flag",
-                            "hero": "nav-flag",
-                            "group": "projects_delivery",
-                            "module": "milestones"
                         }
                     ]
                 },
@@ -9973,14 +9727,6 @@
                     "hero": "nav-folder-open",
                     "group": "projects_delivery",
                     "module": "projects"
-                },
-                {
-                    "route": "milestones.index",
-                    "label": "Milestones",
-                    "icon": "flag",
-                    "hero": "nav-flag",
-                    "group": "projects_delivery",
-                    "module": "milestones"
                 },
                 {
                     "route": "results.index",
@@ -10181,7 +9927,6 @@
                 "programs.index",
                 "annual-plans.index",
                 "projects.index",
-                "milestones.index",
                 "results.index",
                 "indicator-library.index",
                 "indicators.index",
@@ -10239,7 +9984,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -10266,7 +10011,7 @@
                     "coming": {
                         "id": "coming",
                         "title": "My agenda",
-                        "description": "Every dated thing that involves you — your tasks, milestones, report deadlines, tranches — by day, with a 14-day load strip.",
+                        "description": "Every dated thing that involves you — your tasks, report deadlines, tranches — by day, with a 14-day load strip.",
                         "icon": "cal",
                         "size": "M",
                         "register": "calendar.index",
@@ -10342,15 +10087,6 @@
                         "icon": "file",
                         "size": "M",
                         "register": "donor-reports.index",
-                        "kind": "panel"
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "description": "Checkpoints coming up, with their weight in the project.",
-                        "icon": "flag",
-                        "size": "M",
-                        "register": "milestones.index",
                         "kind": "panel"
                     },
                     "hr-news": {
@@ -10650,15 +10386,6 @@
                         "register": "projects.index",
                         "kind": "page"
                     },
-                    "g-milestones": {
-                        "id": "g-milestones",
-                        "title": "Milestones",
-                        "description": "A button that opens Milestones.",
-                        "icon": "nav-flag",
-                        "size": "S",
-                        "register": "milestones.index",
-                        "kind": "page"
-                    },
                     "g-results": {
                         "id": "g-results",
                         "title": "Results Framework",
@@ -10896,6 +10623,11 @@
                         "id": "reviews",
                         "title": "My reviews",
                         "reason": "Nobody has named you as a reviewer yet."
+                    },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
                     },
                     "deliverables": {
                         "id": "deliverables",
@@ -11162,7 +10894,6 @@
                     "programs.index": "p-programs",
                     "annual-plans.index": "p-annual-plans",
                     "projects.index": "projects",
-                    "milestones.index": "milestones",
                     "results.index": "p-results",
                     "indicator-library.index": "p-indicator-library",
                     "indicators.index": "p-indicators",
@@ -11329,14 +11060,8 @@
                             },
                             {
                                 "panel": "tasks",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 4
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 4
                             },
                             {
@@ -11382,7 +11107,7 @@
                     {
                         "key": "delivery",
                         "title": "Project delivery",
-                        "purpose": "Projects by stage, with milestones and targets",
+                        "purpose": "Projects by stage, with tasks and targets",
                         "core": "projects",
                         "entries": [
                             {
@@ -11393,14 +11118,8 @@
                             },
                             {
                                 "panel": "projects",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 5
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 5
                             },
                             {
@@ -11504,7 +11223,7 @@
                                 "rows": 4
                             },
                             {
-                                "panel": "milestones",
+                                "panel": "coming",
                                 "size": "XL",
                                 "cols": 12,
                                 "rows": 3
@@ -11638,15 +11357,6 @@
                     "icon": "nav-folder-open",
                     "route": "projects.index",
                     "href": "http://hc-hub.test/projects"
-                },
-                "g-milestones": {
-                    "id": "g-milestones",
-                    "key": "milestones",
-                    "kind": "page",
-                    "label": "Milestones",
-                    "icon": "nav-flag",
-                    "route": "milestones.index",
-                    "href": "http://hc-hub.test/milestones"
                 },
                 "g-results": {
                     "id": "g-results",
@@ -11981,14 +11691,6 @@
                             "hero": "nav-folder-open",
                             "group": "projects_delivery",
                             "module": "projects"
-                        },
-                        {
-                            "route": "milestones.index",
-                            "label": "Milestones",
-                            "icon": "flag",
-                            "hero": "nav-flag",
-                            "group": "projects_delivery",
-                            "module": "milestones"
                         }
                     ]
                 },
@@ -12199,14 +11901,6 @@
                     "module": "projects"
                 },
                 {
-                    "route": "milestones.index",
-                    "label": "Milestones",
-                    "icon": "flag",
-                    "hero": "nav-flag",
-                    "group": "projects_delivery",
-                    "module": "milestones"
-                },
-                {
                     "route": "results.index",
                     "label": "Results Framework",
                     "icon": "chart",
@@ -12413,7 +12107,6 @@
                 "programs.index",
                 "annual-plans.index",
                 "projects.index",
-                "milestones.index",
                 "results.index",
                 "indicator-library.index",
                 "indicators.index",
@@ -12472,7 +12165,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -12499,7 +12192,7 @@
                     "coming": {
                         "id": "coming",
                         "title": "My agenda",
-                        "description": "Every dated thing that involves you — your tasks, milestones, report deadlines, tranches — by day, with a 14-day load strip.",
+                        "description": "Every dated thing that involves you — your tasks, report deadlines, tranches — by day, with a 14-day load strip.",
                         "icon": "cal",
                         "size": "M",
                         "register": "calendar.index",
@@ -12584,15 +12277,6 @@
                         "icon": "file",
                         "size": "M",
                         "register": "donor-reports.index",
-                        "kind": "panel"
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "description": "Checkpoints coming up, with their weight in the project.",
-                        "icon": "flag",
-                        "size": "M",
-                        "register": "milestones.index",
                         "kind": "panel"
                     },
                     "donors": {
@@ -12910,15 +12594,6 @@
                         "register": "projects.index",
                         "kind": "page"
                     },
-                    "g-milestones": {
-                        "id": "g-milestones",
-                        "title": "Milestones",
-                        "description": "A button that opens Milestones.",
-                        "icon": "nav-flag",
-                        "size": "S",
-                        "register": "milestones.index",
-                        "kind": "page"
-                    },
                     "g-results": {
                         "id": "g-results",
                         "title": "Results Framework",
@@ -13160,6 +12835,11 @@
                         "id": "reviews",
                         "title": "My reviews",
                         "reason": "Nobody has named you as a reviewer yet."
+                    },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
                     },
                     "deliverables": {
                         "id": "deliverables",
@@ -13409,7 +13089,6 @@
                     "programs.index": "p-programs",
                     "annual-plans.index": "p-annual-plans",
                     "projects.index": "projects",
-                    "milestones.index": "milestones",
                     "results.index": "p-results",
                     "indicator-library.index": "p-indicator-library",
                     "indicators.index": "p-indicators",
@@ -13577,14 +13256,8 @@
                             },
                             {
                                 "panel": "tasks",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 4
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 4
                             },
                             {
@@ -13718,7 +13391,7 @@
                     {
                         "key": "delivery",
                         "title": "Project delivery",
-                        "purpose": "Projects by stage, with milestones and targets",
+                        "purpose": "Projects by stage, with tasks and targets",
                         "core": "projects",
                         "entries": [
                             {
@@ -13729,14 +13402,8 @@
                             },
                             {
                                 "panel": "projects",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 5
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 5
                             },
                             {
@@ -13854,7 +13521,7 @@
                                 "rows": 4
                             },
                             {
-                                "panel": "milestones",
+                                "panel": "coming",
                                 "size": "XL",
                                 "cols": 12,
                                 "rows": 3
@@ -14003,15 +13670,6 @@
                     "icon": "nav-folder-open",
                     "route": "projects.index",
                     "href": "http://hc-hub.test/projects"
-                },
-                "g-milestones": {
-                    "id": "g-milestones",
-                    "key": "milestones",
-                    "kind": "page",
-                    "label": "Milestones",
-                    "icon": "nav-flag",
-                    "route": "milestones.index",
-                    "href": "http://hc-hub.test/milestones"
                 },
                 "g-results": {
                     "id": "g-results",
@@ -14355,14 +14013,6 @@
                             "hero": "nav-folder-open",
                             "group": "projects_delivery",
                             "module": "projects"
-                        },
-                        {
-                            "route": "milestones.index",
-                            "label": "Milestones",
-                            "icon": "flag",
-                            "hero": "nav-flag",
-                            "group": "projects_delivery",
-                            "module": "milestones"
                         }
                     ]
                 },
@@ -14516,14 +14166,6 @@
                     "hero": "nav-folder-open",
                     "group": "projects_delivery",
                     "module": "projects"
-                },
-                {
-                    "route": "milestones.index",
-                    "label": "Milestones",
-                    "icon": "flag",
-                    "hero": "nav-flag",
-                    "group": "projects_delivery",
-                    "module": "milestones"
                 },
                 {
                     "route": "results.index",
@@ -14684,7 +14326,6 @@
                 "programs.index",
                 "annual-plans.index",
                 "projects.index",
-                "milestones.index",
                 "results.index",
                 "indicator-library.index",
                 "indicators.index",
@@ -14737,7 +14378,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -14764,7 +14405,7 @@
                     "coming": {
                         "id": "coming",
                         "title": "My agenda",
-                        "description": "Every dated thing that involves you — your tasks, milestones, report deadlines, tranches — by day, with a 14-day load strip.",
+                        "description": "Every dated thing that involves you — your tasks, report deadlines, tranches — by day, with a 14-day load strip.",
                         "icon": "cal",
                         "size": "M",
                         "register": "calendar.index",
@@ -14813,15 +14454,6 @@
                         "icon": "chart",
                         "size": "L",
                         "register": "targets.index",
-                        "kind": "panel"
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "description": "Checkpoints coming up, with their weight in the project.",
-                        "icon": "flag",
-                        "size": "M",
-                        "register": "milestones.index",
                         "kind": "panel"
                     },
                     "hr-news": {
@@ -15022,15 +14654,6 @@
                         "register": "tasks.index",
                         "kind": "action"
                     },
-                    "a-milestone": {
-                        "id": "a-milestone",
-                        "title": "New milestone",
-                        "description": "A button that opens the form for “New milestone”.",
-                        "icon": "flag",
-                        "size": "S",
-                        "register": "milestones.index",
-                        "kind": "action"
-                    },
                     "a-report": {
                         "id": "a-report",
                         "title": "Record a report",
@@ -15101,15 +14724,6 @@
                         "icon": "nav-folder-open",
                         "size": "S",
                         "register": "projects.index",
-                        "kind": "page"
-                    },
-                    "g-milestones": {
-                        "id": "g-milestones",
-                        "title": "Milestones",
-                        "description": "A button that opens Milestones.",
-                        "icon": "nav-flag",
-                        "size": "S",
-                        "register": "milestones.index",
                         "kind": "page"
                     },
                     "g-results": {
@@ -15315,6 +14929,11 @@
                         "title": "My reviews",
                         "reason": "Nobody has named you as a reviewer yet."
                     },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
+                    },
                     "deliverables": {
                         "id": "deliverables",
                         "title": "Department deliverables",
@@ -15417,6 +15036,10 @@
                     },
                     {
                         "panel": "coming",
+                        "size": "L"
+                    },
+                    {
+                        "panel": "plan-milestones",
                         "size": "L"
                     },
                     {
@@ -15581,7 +15204,6 @@
                     "programs.index": "p-programs",
                     "annual-plans.index": "p-annual-plans",
                     "projects.index": "projects",
-                    "milestones.index": "milestones",
                     "results.index": "p-results",
                     "indicator-library.index": "p-indicator-library",
                     "indicators.index": "p-indicators",
@@ -15743,14 +15365,8 @@
                             },
                             {
                                 "panel": "tasks",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 4
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 4
                             },
                             {
@@ -15796,7 +15412,7 @@
                     {
                         "key": "delivery",
                         "title": "Project delivery",
-                        "purpose": "Projects by stage, with milestones and targets",
+                        "purpose": "Projects by stage, with tasks and targets",
                         "core": "projects",
                         "entries": [
                             {
@@ -15807,14 +15423,8 @@
                             },
                             {
                                 "panel": "projects",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 5
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 5
                             },
                             {
@@ -15906,7 +15516,7 @@
                                 "rows": 4
                             },
                             {
-                                "panel": "milestones",
+                                "panel": "coming",
                                 "size": "XL",
                                 "cols": 12,
                                 "rows": 3
@@ -15968,15 +15578,6 @@
                     "icon": "clipboard-document-check",
                     "route": "tasks.index",
                     "href": "http://hc-hub.test/tasks?quick=create"
-                },
-                "a-milestone": {
-                    "id": "a-milestone",
-                    "key": "milestone",
-                    "kind": "action",
-                    "label": "New milestone",
-                    "icon": "flag",
-                    "route": "milestones.index",
-                    "href": "http://hc-hub.test/milestones?quick=create"
                 },
                 "a-report": {
                     "id": "a-report",
@@ -16049,15 +15650,6 @@
                     "icon": "nav-folder-open",
                     "route": "projects.index",
                     "href": "http://hc-hub.test/projects"
-                },
-                "g-milestones": {
-                    "id": "g-milestones",
-                    "key": "milestones",
-                    "kind": "page",
-                    "label": "Milestones",
-                    "icon": "nav-flag",
-                    "route": "milestones.index",
-                    "href": "http://hc-hub.test/milestones"
                 },
                 "g-results": {
                     "id": "g-results",
@@ -16347,14 +15939,6 @@
                             "hero": "nav-folder-open",
                             "group": "projects_delivery",
                             "module": "projects"
-                        },
-                        {
-                            "route": "milestones.index",
-                            "label": "Milestones",
-                            "icon": "flag",
-                            "hero": "nav-flag",
-                            "group": "projects_delivery",
-                            "module": "milestones"
                         }
                     ]
                 },
@@ -16587,14 +16171,6 @@
                     "hero": "nav-folder-open",
                     "group": "projects_delivery",
                     "module": "projects"
-                },
-                {
-                    "route": "milestones.index",
-                    "label": "Milestones",
-                    "icon": "flag",
-                    "hero": "nav-flag",
-                    "group": "projects_delivery",
-                    "module": "milestones"
                 },
                 {
                     "route": "results.index",
@@ -16835,7 +16411,6 @@
                 "programs.index",
                 "annual-plans.index",
                 "projects.index",
-                "milestones.index",
                 "results.index",
                 "indicator-library.index",
                 "indicators.index",
@@ -16898,7 +16473,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -16925,7 +16500,7 @@
                     "coming": {
                         "id": "coming",
                         "title": "My agenda",
-                        "description": "Every dated thing that involves you — your tasks, milestones, report deadlines, tranches — by day, with a 14-day load strip.",
+                        "description": "Every dated thing that involves you — your tasks, report deadlines, tranches — by day, with a 14-day load strip.",
                         "icon": "cal",
                         "size": "M",
                         "register": "calendar.index",
@@ -17010,15 +16585,6 @@
                         "icon": "file",
                         "size": "M",
                         "register": "donor-reports.index",
-                        "kind": "panel"
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "description": "Checkpoints coming up, with their weight in the project.",
-                        "icon": "flag",
-                        "size": "M",
-                        "register": "milestones.index",
                         "kind": "panel"
                     },
                     "donors": {
@@ -17291,15 +16857,6 @@
                         "register": "projects.index",
                         "kind": "action"
                     },
-                    "a-milestone": {
-                        "id": "a-milestone",
-                        "title": "New milestone",
-                        "description": "A button that opens the form for “New milestone”.",
-                        "icon": "flag",
-                        "size": "S",
-                        "register": "milestones.index",
-                        "kind": "action"
-                    },
                     "a-report": {
                         "id": "a-report",
                         "title": "Record a report",
@@ -17451,15 +17008,6 @@
                         "icon": "nav-folder-open",
                         "size": "S",
                         "register": "projects.index",
-                        "kind": "page"
-                    },
-                    "g-milestones": {
-                        "id": "g-milestones",
-                        "title": "Milestones",
-                        "description": "A button that opens Milestones.",
-                        "icon": "nav-flag",
-                        "size": "S",
-                        "register": "milestones.index",
                         "kind": "page"
                     },
                     "g-results": {
@@ -17740,6 +17288,11 @@
                         "title": "My reviews",
                         "reason": "Nobody has named you as a reviewer yet."
                     },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
+                    },
                     "deliverables": {
                         "id": "deliverables",
                         "title": "Department deliverables",
@@ -17968,7 +17521,6 @@
                     "programs.index": "p-programs",
                     "annual-plans.index": "p-annual-plans",
                     "projects.index": "projects",
-                    "milestones.index": "milestones",
                     "results.index": "p-results",
                     "indicator-library.index": "p-indicator-library",
                     "indicators.index": "p-indicators",
@@ -18140,14 +17692,8 @@
                             },
                             {
                                 "panel": "tasks",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 4
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 4
                             },
                             {
@@ -18281,7 +17827,7 @@
                     {
                         "key": "delivery",
                         "title": "Project delivery",
-                        "purpose": "Projects by stage, with milestones and targets",
+                        "purpose": "Projects by stage, with tasks and targets",
                         "core": "projects",
                         "entries": [
                             {
@@ -18292,14 +17838,8 @@
                             },
                             {
                                 "panel": "projects",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 5
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 5
                             },
                             {
@@ -18417,7 +17957,7 @@
                                 "rows": 4
                             },
                             {
-                                "panel": "milestones",
+                                "panel": "coming",
                                 "size": "XL",
                                 "cols": 12,
                                 "rows": 3
@@ -18503,15 +18043,6 @@
                     "icon": "folder-plus",
                     "route": "projects.index",
                     "href": "http://hc-hub.test/projects?quick=create"
-                },
-                "a-milestone": {
-                    "id": "a-milestone",
-                    "key": "milestone",
-                    "kind": "action",
-                    "label": "New milestone",
-                    "icon": "flag",
-                    "route": "milestones.index",
-                    "href": "http://hc-hub.test/milestones?quick=create"
                 },
                 "a-report": {
                     "id": "a-report",
@@ -18665,15 +18196,6 @@
                     "icon": "nav-folder-open",
                     "route": "projects.index",
                     "href": "http://hc-hub.test/projects"
-                },
-                "g-milestones": {
-                    "id": "g-milestones",
-                    "key": "milestones",
-                    "kind": "page",
-                    "label": "Milestones",
-                    "icon": "nav-flag",
-                    "route": "milestones.index",
-                    "href": "http://hc-hub.test/milestones"
                 },
                 "g-results": {
                     "id": "g-results",
@@ -19117,14 +18639,6 @@
                             "hero": "nav-folder-open",
                             "group": "projects_delivery",
                             "module": "projects"
-                        },
-                        {
-                            "route": "milestones.index",
-                            "label": "Milestones",
-                            "icon": "flag",
-                            "hero": "nav-flag",
-                            "group": "projects_delivery",
-                            "module": "milestones"
                         }
                     ]
                 },
@@ -19472,6 +18986,14 @@
                             "hero": "nav-message-circle-question-mark",
                             "group": "administration",
                             "module": null
+                        },
+                        {
+                            "route": "hr.entitlements.index",
+                            "label": "Permissions Library",
+                            "icon": "check",
+                            "hero": "nav-shield-check",
+                            "group": "administration",
+                            "module": null
                         }
                     ]
                 },
@@ -19547,14 +19069,6 @@
                     "hero": "nav-folder-open",
                     "group": "projects_delivery",
                     "module": "projects"
-                },
-                {
-                    "route": "milestones.index",
-                    "label": "Milestones",
-                    "icon": "flag",
-                    "hero": "nav-flag",
-                    "group": "projects_delivery",
-                    "module": "milestones"
                 },
                 {
                     "route": "results.index",
@@ -20069,6 +19583,14 @@
                     "module": null
                 },
                 {
+                    "route": "hr.entitlements.index",
+                    "label": "Permissions Library",
+                    "icon": "check",
+                    "hero": "nav-shield-check",
+                    "group": "administration",
+                    "module": null
+                },
+                {
                     "route": "hr.activity.index",
                     "label": "Activity archive",
                     "icon": "undo",
@@ -20092,7 +19614,6 @@
                 "programs.index",
                 "annual-plans.index",
                 "projects.index",
-                "milestones.index",
                 "results.index",
                 "indicator-library.index",
                 "indicators.index",
@@ -20157,6 +19678,7 @@
                 "hr.feedback.index",
                 "hr.settings.index",
                 "hr.message-templates.index",
+                "hr.entitlements.index",
                 "hr.activity.index",
                 "hr.employees.me"
             ],
@@ -20192,7 +19714,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -20219,7 +19741,7 @@
                     "coming": {
                         "id": "coming",
                         "title": "My agenda",
-                        "description": "Every dated thing that involves you — your tasks, milestones, report deadlines, tranches — by day, with a 14-day load strip.",
+                        "description": "Every dated thing that involves you — your tasks, report deadlines, tranches — by day, with a 14-day load strip.",
                         "icon": "cal",
                         "size": "M",
                         "register": "calendar.index",
@@ -20306,6 +19828,15 @@
                         "register": "tasks.index",
                         "kind": "panel"
                     },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "description": "Milestones for the plans you manage.",
+                        "icon": "flag",
+                        "size": "L",
+                        "register": null,
+                        "kind": "panel"
+                    },
                     "deliverables": {
                         "id": "deliverables",
                         "title": "Department deliverables",
@@ -20340,15 +19871,6 @@
                         "icon": "file",
                         "size": "M",
                         "register": "donor-reports.index",
-                        "kind": "panel"
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "description": "Checkpoints coming up, with their weight in the project.",
-                        "icon": "flag",
-                        "size": "M",
-                        "register": "milestones.index",
                         "kind": "panel"
                     },
                     "donors": {
@@ -20738,15 +20260,6 @@
                         "register": "projects.index",
                         "kind": "action"
                     },
-                    "a-milestone": {
-                        "id": "a-milestone",
-                        "title": "New milestone",
-                        "description": "A button that opens the form for “New milestone”.",
-                        "icon": "flag",
-                        "size": "S",
-                        "register": "milestones.index",
-                        "kind": "action"
-                    },
                     "a-report": {
                         "id": "a-report",
                         "title": "Record a report",
@@ -20934,15 +20447,6 @@
                         "icon": "nav-folder-open",
                         "size": "S",
                         "register": "projects.index",
-                        "kind": "page"
-                    },
-                    "g-milestones": {
-                        "id": "g-milestones",
-                        "title": "Milestones",
-                        "description": "A button that opens Milestones.",
-                        "icon": "nav-flag",
-                        "size": "S",
-                        "register": "milestones.index",
                         "kind": "page"
                     },
                     "g-results": {
@@ -21521,6 +21025,15 @@
                         "register": "hr.message-templates.index",
                         "kind": "page"
                     },
+                    "g-hr-entitlements": {
+                        "id": "g-hr-entitlements",
+                        "title": "Permissions Library",
+                        "description": "A button that opens Permissions Library.",
+                        "icon": "nav-shield-check",
+                        "size": "S",
+                        "register": "hr.entitlements.index",
+                        "kind": "page"
+                    },
                     "g-hr-activity": {
                         "id": "g-hr-activity",
                         "title": "Activity archive",
@@ -21745,7 +21258,6 @@
                     "programs.index": "p-programs",
                     "annual-plans.index": "p-annual-plans",
                     "projects.index": "projects",
-                    "milestones.index": "milestones",
                     "results.index": "p-results",
                     "indicator-library.index": "p-indicator-library",
                     "indicators.index": "p-indicators",
@@ -21810,6 +21322,7 @@
                     "hr.feedback.index": "g-hr-feedback",
                     "hr.settings.index": "g-hr-settings",
                     "hr.message-templates.index": "g-hr-message-templates",
+                    "hr.entitlements.index": "g-hr-entitlements",
                     "hr.activity.index": "g-hr-activity",
                     "hr.employees.me": "g-hr-employees-me"
                 },
@@ -21984,14 +21497,8 @@
                             },
                             {
                                 "panel": "tasks",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 4
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 4
                             },
                             {
@@ -22131,7 +21638,7 @@
                     {
                         "key": "delivery",
                         "title": "Project delivery",
-                        "purpose": "Projects by stage, with milestones and targets",
+                        "purpose": "Projects by stage, with tasks and targets",
                         "core": "projects",
                         "entries": [
                             {
@@ -22142,14 +21649,8 @@
                             },
                             {
                                 "panel": "projects",
-                                "size": "W",
-                                "cols": 8,
-                                "rows": 5
-                            },
-                            {
-                                "panel": "milestones",
-                                "size": "M",
-                                "cols": 4,
+                                "size": "XL",
+                                "cols": 12,
                                 "rows": 5
                             },
                             {
@@ -22285,7 +21786,7 @@
                                 "rows": 4
                             },
                             {
-                                "panel": "milestones",
+                                "panel": "coming",
                                 "size": "L",
                                 "cols": 6,
                                 "rows": 3
@@ -22377,15 +21878,6 @@
                     "icon": "folder-plus",
                     "route": "projects.index",
                     "href": "http://hc-hub.test/projects?quick=create"
-                },
-                "a-milestone": {
-                    "id": "a-milestone",
-                    "key": "milestone",
-                    "kind": "action",
-                    "label": "New milestone",
-                    "icon": "flag",
-                    "route": "milestones.index",
-                    "href": "http://hc-hub.test/milestones?quick=create"
                 },
                 "a-report": {
                     "id": "a-report",
@@ -22575,15 +22067,6 @@
                     "icon": "nav-folder-open",
                     "route": "projects.index",
                     "href": "http://hc-hub.test/projects"
-                },
-                "g-milestones": {
-                    "id": "g-milestones",
-                    "key": "milestones",
-                    "kind": "page",
-                    "label": "Milestones",
-                    "icon": "nav-flag",
-                    "route": "milestones.index",
-                    "href": "http://hc-hub.test/milestones"
                 },
                 "g-results": {
                     "id": "g-results",
@@ -23160,6 +22643,15 @@
                     "icon": "nav-message-circle-question-mark",
                     "route": "hr.message-templates.index",
                     "href": "http://hc-hub.test/hr/message-templates"
+                },
+                "g-hr-entitlements": {
+                    "id": "g-hr-entitlements",
+                    "key": "hr-entitlements",
+                    "kind": "page",
+                    "label": "Permissions Library",
+                    "icon": "nav-shield-check",
+                    "route": "hr.entitlements.index",
+                    "href": "http://hc-hub.test/hr/entitlements"
                 },
                 "g-hr-activity": {
                     "id": "g-hr-activity",
@@ -23862,7 +23354,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -24510,6 +24002,11 @@
                         "title": "Tasks",
                         "reason": "Your role does not open tasks."
                     },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
+                    },
                     "deliverables": {
                         "id": "deliverables",
                         "title": "Department deliverables",
@@ -24524,11 +24021,6 @@
                         "id": "duties",
                         "title": "Donor reporting",
                         "reason": "Donor reports are built by the people who aggregate reports or manage agreements, or who are responsible for one."
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "reason": "Your role does not open milestones."
                     },
                     "donors": {
                         "id": "donors",
@@ -25455,7 +24947,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -25716,6 +25208,11 @@
                         "title": "Tasks",
                         "reason": "Your role does not open tasks."
                     },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
+                    },
                     "deliverables": {
                         "id": "deliverables",
                         "title": "Department deliverables",
@@ -25730,11 +25227,6 @@
                         "id": "duties",
                         "title": "Donor reporting",
                         "reason": "Donor reports are built by the people who aggregate reports or manage agreements, or who are responsible for one."
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "reason": "Your role does not open milestones."
                     },
                     "donors": {
                         "id": "donors",
@@ -26300,7 +25792,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -26561,6 +26053,11 @@
                         "title": "Tasks",
                         "reason": "Your role does not open tasks."
                     },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
+                    },
                     "deliverables": {
                         "id": "deliverables",
                         "title": "Department deliverables",
@@ -26575,11 +26072,6 @@
                         "id": "duties",
                         "title": "Donor reporting",
                         "reason": "Donor reports are built by the people who aggregate reports or manage agreements, or who are responsible for one."
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "reason": "Your role does not open milestones."
                     },
                     "donors": {
                         "id": "donors",
@@ -27149,7 +26641,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -27410,6 +26902,11 @@
                         "title": "Tasks",
                         "reason": "Your role does not open tasks."
                     },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
+                    },
                     "deliverables": {
                         "id": "deliverables",
                         "title": "Department deliverables",
@@ -27424,11 +26921,6 @@
                         "id": "duties",
                         "title": "Donor reporting",
                         "reason": "Donor reports are built by the people who aggregate reports or manage agreements, or who are responsible for one."
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "reason": "Your role does not open milestones."
                     },
                     "donors": {
                         "id": "donors",
@@ -28123,7 +27615,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -28456,6 +27948,11 @@
                         "title": "Tasks",
                         "reason": "Your role does not open tasks."
                     },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
+                    },
                     "deliverables": {
                         "id": "deliverables",
                         "title": "Department deliverables",
@@ -28470,11 +27967,6 @@
                         "id": "duties",
                         "title": "Donor reporting",
                         "reason": "Donor reports are built by the people who aggregate reports or manage agreements, or who are responsible for one."
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "reason": "Your role does not open milestones."
                     },
                     "donors": {
                         "id": "donors",
@@ -29177,7 +28669,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -29438,6 +28930,11 @@
                         "title": "Tasks",
                         "reason": "Your role does not open tasks."
                     },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
+                    },
                     "deliverables": {
                         "id": "deliverables",
                         "title": "Department deliverables",
@@ -29452,11 +28949,6 @@
                         "id": "duties",
                         "title": "Donor reporting",
                         "reason": "Donor reports are built by the people who aggregate reports or manage agreements, or who are responsible for one."
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "reason": "Your role does not open milestones."
                     },
                     "donors": {
                         "id": "donors",
@@ -29554,10 +29046,6 @@
                     },
                     {
                         "panel": "coming",
-                        "size": "L"
-                    },
-                    {
-                        "panel": "milestones",
                         "size": "L"
                     },
                     {
@@ -29979,7 +29467,7 @@
                     "overdue": {
                         "id": "overdue",
                         "title": "Past the deadline",
-                        "description": "Tasks, milestones and reports of yours that missed their date, oldest first, so nothing late hides.",
+                        "description": "Tasks and reports of yours that missed their date, oldest first, so nothing late hides.",
                         "icon": "flag",
                         "size": "L",
                         "register": null,
@@ -30114,6 +29602,11 @@
                         "title": "Tasks",
                         "reason": "Your role does not open tasks."
                     },
+                    "plan-milestones": {
+                        "id": "plan-milestones",
+                        "title": "Plan milestones",
+                        "reason": "Available to program and project managers."
+                    },
                     "deliverables": {
                         "id": "deliverables",
                         "title": "Department deliverables",
@@ -30133,11 +29626,6 @@
                         "id": "duties",
                         "title": "Donor reporting",
                         "reason": "Donor reports are built by the people who aggregate reports or manage agreements, or who are responsible for one."
-                    },
-                    "milestones": {
-                        "id": "milestones",
-                        "title": "Milestones",
-                        "reason": "Your role does not open milestones."
                     },
                     "donors": {
                         "id": "donors",
@@ -30280,10 +29768,6 @@
                     },
                     {
                         "panel": "coming",
-                        "size": "L"
-                    },
-                    {
-                        "panel": "milestones",
                         "size": "L"
                     },
                     {
