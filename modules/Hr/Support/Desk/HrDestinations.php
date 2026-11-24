@@ -15,6 +15,7 @@ use Modules\Hr\Models\RecruitmentApplicant;
 use Modules\Hr\Models\RecruitmentInterview;
 use Modules\Hr\Models\RecruitmentJobOffer;
 use Modules\Hr\Support\Assistant\HrAssistant;
+use Modules\Hr\Support\Entitlements\Entitlements;
 use Modules\Hr\Support\Inbox\WorkInbox;
 use Modules\Hr\Support\Recruitment\Access;
 use Modules\Hr\Support\Recruitment\RecruitmentConfig;
@@ -88,6 +89,8 @@ final class HrDestinations implements DestinationSource
             // HR's settings sit with the rest of the administration; the old HR log is opened from the Activity log.
             ['hr.settings.index', 'settings', 'grid', 'nav-settings', 'administration', $can('project-basics.view')],
             ['hr.message-templates.index', 'message_templates', 'file', 'nav-message-circle-question-mark', 'administration', fn (User $user): bool => $user->can('viewAny', MessageTemplate::class)],
+            // Professional access tracked outside the system: HR roles and the administrators.
+            ['hr.entitlements.index', 'entitlements', 'check', 'nav-shield-check', 'administration', fn (User $user): bool => app(Entitlements::class)->canManageLibrary($user)],
             ['hr.activity.index', 'activity', 'undo', 'nav-file-clock', 'administration', $can('activity-log.view'), 'under' => 'activity.index'],
 
             ['hr.employees.me', 'my_profile', 'users', 'nav-circle-user', 'you', $staff, 'own' => true],

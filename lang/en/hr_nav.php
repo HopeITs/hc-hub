@@ -38,4 +38,5 @@ return [
     'feedback' => 'Feedback',
     'settings' => 'HR settings',
     'message_templates' => 'Message templates',
+    'entitlements' => 'Permissions Library',
 ];

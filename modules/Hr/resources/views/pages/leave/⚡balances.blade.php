@@ -117,6 +117,8 @@ new #[Layout('layouts::desk'), Title('hr_leave.titles.balances')] class extends 
     public function export(): StreamedResponse
     {
         Gate::authorize('viewAny', LeaveBalance::class);
+        // The button is hidden without it, but a call reaches here all the same.
+        Gate::authorize('leaves.export');
 
         $eligibility = app(LeaveEligibility::class);
         $pricing = app(LeaveRequestPricing::class);

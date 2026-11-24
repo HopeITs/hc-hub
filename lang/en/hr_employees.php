@@ -150,6 +150,7 @@ return [
         'equipment' => 'Equipment',
         'badges' => 'Badges',
         'card' => 'ID card',
+        'entitlements' => 'Professional access',
     ],
 
     'profile' => [

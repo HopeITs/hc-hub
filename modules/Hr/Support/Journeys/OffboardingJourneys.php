@@ -14,7 +14,9 @@ use Modules\Hr\Enums\ContractType as ContractTypeEnum;
 use Modules\Hr\Models\Checklist;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\EmployeeEntitlement;
 use Modules\Hr\Models\OffboardingJourney;
+use Modules\Hr\Support\Entitlements\Entitlements;
 use Modules\Hr\Support\Recruitment\ActivityLogger;
 
 /**
@@ -40,6 +42,20 @@ class OffboardingJourneys
 
     /** Steps that must be done for the journey to be complete; the interview is optional. */
     public const REQUIRED_STEPS = ['equipment', 'contract', 'deactivated', 'access'];
+
+    /**
+     * The steps a departure needs done: the fixed ones, plus the Permissions
+     * Library step when the journey lists it (track 5).
+     *
+     * @param  array<int|string, array{key: string}>  $steps
+     * @return list<string>
+     */
+    public static function requiredKeys(array $steps): array
+    {
+        return collect($steps)->contains(fn (array $step): bool => $step['key'] === 'entitlements')
+            ? [...self::REQUIRED_STEPS, 'entitlements']
+            : self::REQUIRED_STEPS;
+    }
 
     public const STATE_DONE = 'done';
 
@@ -412,7 +428,25 @@ class OffboardingJourneys
             default => 'access-card-on',
         });
 
-        // 5. Exit interview (optional): the one step this journey records.
+        // 5. Permissions Library items still held (granted outside the system) have to be taken back.
+        // Listed only for people who have items on record, so every other journey stays as it was.
+        $library = app(Entitlements::class);
+
+        if ($library->hasAny($employee)) {
+            $held = $library->outstanding($employee);
+
+            $steps[] = $this->step('entitlements', match (true) {
+                $held->isEmpty() => self::STATE_DONE,
+                $contractEnded => self::STATE_TODO,
+                default => self::STATE_WAITING,
+            }, 'hr', due: $endsOn, late: $held->isNotEmpty() && $contractEnded && $this->isPast($deactivateOn, $today), blockedBy: $held->isEmpty() || $contractEnded ? null : 'contract', data: [
+                'outstanding' => $held->count(),
+                'names' => $held->map(fn (EmployeeEntitlement $row): ?string => $row->entitlement?->name)->filter()->values()->all(),
+                'username' => $employee->username,
+            ]);
+        }
+
+        // 6. Exit interview (optional): the one step this journey records.
         $steps[] = $this->step('interview', $journey->exit_interview_held_at !== null ? self::STATE_DONE : self::STATE_TODO, 'hr', data: [
             'optional' => true,
             'held_at' => $journey->exit_interview_held_at,
@@ -446,7 +480,7 @@ class OffboardingJourneys
         }
 
         $steps = collect($this->steps($employee, $latest, $contracts) ?? [])->keyBy('key');
-        $complete = collect(self::REQUIRED_STEPS)->every(fn (string $key): bool => ($steps[$key]['state'] ?? null) === self::STATE_DONE);
+        $complete = collect(self::requiredKeys($steps->all()))->every(fn (string $key): bool => ($steps[$key]['state'] ?? null) === self::STATE_DONE);
 
         if (! $complete) {
             return false;

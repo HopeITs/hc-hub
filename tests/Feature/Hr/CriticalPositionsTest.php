@@ -39,7 +39,9 @@ beforeEach(function () {
     $this->grade = JobLevel::factory()->create(['grade' => 4]);
     $this->contractFields = ['contract_type_id' => 1, 'start_date' => '2024-01-01', 'end_date' => '2026-12-31', 'is_active' => true];
 
-    $this->managerPosition = Position::factory()->create(['city_id' => $this->city->id]);
+    // Titles are fixed: the factory's random job titles can share a word, and a shared word is
+    // enough to push another volunteer over the suggestions' minimum score.
+    $this->managerPosition = Position::factory()->create(['city_id' => $this->city->id, 'title_en' => 'Regional Supervisor', 'title_ar' => 'مشرف إقليمي']);
     $this->manager = User::factory()->create();
     Contract::factory()->create(['employee_id' => $this->manager->employee_id, 'position_id' => $this->managerPosition->id] + $this->contractFields);
 
@@ -54,6 +56,7 @@ beforeEach(function () {
     $this->critical = Position::factory()->create([
         'city_id' => $this->city->id, 'department_id' => $this->department->id, 'job_level_id' => $this->grade->id,
         'direct_manager_id' => $this->managerPosition->id, 'is_critical' => true, 'qualifications' => 'Accounting and budgeting',
+        'title_en' => 'Accounts Controller', 'title_ar' => 'مراقب حسابات',
     ]);
 
     $this->critical = $this->critical->fresh();
@@ -151,7 +154,7 @@ test('internal suggestions are ranked by explainable rules and leave out holders
     Contract::factory()->create(['employee_id' => $sameFit->id, 'position_id' => $closeHeld->id] + $this->contractFields);
 
     $farFit = Employee::factory()->create(['city_id' => $this->city->id, 'is_active' => true]);
-    $farHeld = Position::factory()->create(['city_id' => $this->city->id, 'job_level_id' => JobLevel::factory()->create(['grade' => 9])->id]);
+    $farHeld = Position::factory()->create(['city_id' => $this->city->id, 'job_level_id' => JobLevel::factory()->create(['grade' => 9])->id, 'title_en' => 'Field Driver', 'title_ar' => 'سائق ميداني']);
     Contract::factory()->create(['employee_id' => $farFit->id, 'position_id' => $farHeld->id] + $this->contractFields);
 
     $otherCritical = Employee::factory()->create(['city_id' => $this->city->id, 'is_active' => true]);

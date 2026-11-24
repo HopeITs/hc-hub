@@ -150,6 +150,7 @@ return [
         'equipment' => 'العهدة',
         'badges' => 'الشارات',
         'card' => 'البطاقة',
+        'entitlements' => 'الصلاحيات المهنية',
     ],
 
     'profile' => [

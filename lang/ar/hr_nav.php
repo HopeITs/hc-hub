@@ -38,4 +38,5 @@ return [
     'feedback' => 'الملاحظات',
     'settings' => 'إعدادات الموارد البشرية',
     'message_templates' => 'قوالب الرسائل',
+    'entitlements' => 'مكتبة الصلاحيات',
 ];

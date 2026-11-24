@@ -23,6 +23,7 @@ use Modules\Core\Models\City;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Hr\Console\ApplyContractAmendmentsCommand;
+use Modules\Hr\Console\BackfillEntitlementsCommand;
 use Modules\Hr\Console\CheckContractAmendmentsCommand;
 use Modules\Hr\Console\CopyHrFilesCommand;
 use Modules\Hr\Console\DeactivateExpiredContractsCommand;
@@ -57,6 +58,7 @@ use Modules\Hr\Support\CriticalPositions\NullCandidateAiRanker;
 use Modules\Hr\Support\Desk\HrDestinations;
 use Modules\Hr\Support\Desk\HrPanels;
 use Modules\Hr\Support\Employees\HrEmployeeLookup;
+use Modules\Hr\Support\Entitlements\EntitlementHooks;
 use Modules\Hr\Support\Inbox\DeskAgenda;
 use Modules\Hr\Support\Inbox\HrSubjectLinks;
 use Modules\Hr\Support\Inbox\InboxWorkItems;
@@ -121,6 +123,7 @@ class HrServiceProvider extends ServiceProvider
             ImportHrCommand::class,
             CopyHrFilesCommand::class,
             ApplyContractAmendmentsCommand::class,
+            BackfillEntitlementsCommand::class,
             CheckContractAmendmentsCommand::class,
             SendOrientationReminders::class,
             SendOnboardingStepReminders::class,
@@ -175,6 +178,9 @@ class HrServiceProvider extends ServiceProvider
 
         // Contract writes that start or move an employee journey.
         JourneyHooks::register();
+
+        // Contract writes that claim a seat bring the position's Permissions Library defaults.
+        EntitlementHooks::register();
 
         // A new account on the organisation's domain waits to be added to the all-staff mail list.
         User::created(function (User $user): void {

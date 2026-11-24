@@ -74,6 +74,11 @@ $hrGroups = [
     'badges' => ['view', 'create', 'update', 'delete'],
     'archives' => ['view', 'create', 'update', 'delete', 'share', 'download'],
     'checklists' => ['view-own', 'view-all', 'manage', 'deliver', 'receive'],
+    // Permissions Library (meeting 19/11, track 5): professional access tracked outside the system,
+    // never a Spatie permission of its own. `manage-library` edits the items and their position
+    // defaults (HR, administrators); `assign` adds, marks done and revokes a person's items (HR in
+    // their city, a manager for direct reports only: Modules\Hr\Support\Entitlements\Entitlements).
+    'entitlements' => ['manage-library', 'assign'],
     'recruitment-requests' => ['view', 'manage', 'submit', 'cancel', 'approve', 'reject', 'request-changes', 'direct-open', 'export', 'approve-finance', 'submit-without-manager'],
     'recruitment-vacancies' => ['view', 'manage'],
     'recruitment-campaigns' => ['view', 'manage'],
@@ -407,6 +412,8 @@ return [
             'indicators.record',
             // Their direct reports' timesheets (Modules\Hr\Support\Attendance\Roster).
             'attendance.view',
+            // Their direct reports' Permissions Library items (Entitlements::canAssign).
+            'entitlements.assign',
             ...$aiDrafter,
         ],
         'General Manager' => array_values(array_diff($allPermissions, [
