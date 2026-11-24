@@ -68,8 +68,13 @@ test('a request sent from the calendar is saved without leaving it', function ()
         ->call('requestLeave')
         ->set('leaveBalanceId', (string) $this->balance->id)
         ->set('reason', 'Family visit out of town.')
+        ->call('reviewRequest')
+        ->assertSet('confirmingRequest', true)
         ->call('saveRequest')
         ->assertHasNoErrors()
+        ->assertSet('showRequestModal', true)
+        ->assertSeeHtml('data-leave-submitted')
+        ->call('submitRequest')
         ->assertSet('showRequestModal', false)
         ->assertNoRedirect();
 

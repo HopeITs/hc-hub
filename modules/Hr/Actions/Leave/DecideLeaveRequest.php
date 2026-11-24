@@ -11,13 +11,16 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Modules\Core\Models\User;
 use Modules\Hr\Enums\LeaveRequestStatus;
+use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\LeaveBalance;
 use Modules\Hr\Models\LeaveRequest;
+use Modules\Hr\Support\Leave\LeaveAlternativeEmployees;
 use Modules\Hr\Support\Leave\LeaveContext;
 use Modules\Hr\Support\Leave\LeaveDecisionAlreadyMade;
 use Modules\Hr\Support\Leave\LeaveDecisionAuthority;
 use Modules\Hr\Support\Leave\LeaveNotificationService;
 use Modules\Hr\Support\Leave\LeaveRequestPricing;
+use Modules\Hr\Support\Leave\LeaveWindow;
 
 /**
  * Accept or reject a pending leave request (the old submitDecision()). The
@@ -25,7 +28,8 @@ use Modules\Hr\Support\Leave\LeaveRequestPricing;
  * status and is told it was already decided (LeaveDecisionAlreadyMade). The
  * basis (manager, on behalf, no manager) is stored with the decision.
  * Accepting deducts the request's snapshot from the balance and may not take
- * an annual balance below zero; rejecting needs a reason.
+ * an annual balance below zero; rejecting needs a reason. When accepting, the
+ * decider may name another covering colleague (the requester is told).
  */
 final class DecideLeaveRequest
 {
@@ -35,13 +39,16 @@ final class DecideLeaveRequest
         private readonly LeaveDecisionAuthority $authority,
         private readonly LeaveRequestPricing $pricing,
         private readonly LeaveNotificationService $notifications,
+        private readonly LeaveAlternativeEmployees $alternatives,
     ) {}
 
     /**
+     * @param  string|null  $alternativeEmployeeId  null keeps the request's covering colleague; '' clears it; an id names another (accepting only)
+     *
      * @throws LeaveDecisionAlreadyMade
      * @throws ValidationException
      */
-    public function handle(User $actor, int $leaveRequestId, mixed $status, ?string $rejectReason): LeaveRequest
+    public function handle(User $actor, int $leaveRequestId, mixed $status, ?string $rejectReason, ?string $alternativeEmployeeId = null): LeaveRequest
     {
         $this->assertStillPending($actor, LeaveContext::request($leaveRequestId));
 
@@ -58,7 +65,9 @@ final class DecideLeaveRequest
             ['status' => __('hr_leave.fields.decision'), 'reject_reason' => __('hr_leave.fields.reject_reason')],
         )->validate();
 
-        $decided = DB::transaction(function () use ($actor, $leaveRequestId, $status, $rejectReason): LeaveRequest {
+        $alternativeChange = null;
+
+        $decided = DB::transaction(function () use ($actor, $leaveRequestId, $status, $rejectReason, $alternativeEmployeeId, &$alternativeChange): LeaveRequest {
             $leaveRequest = LeaveContext::request($leaveRequestId, lock: true);
             $leaveRequest->leaveBalance->contract->loadMissing('position.directManager:id');
 
@@ -86,7 +95,16 @@ final class DecideLeaveRequest
                 $hours = $this->pricing->deductionHours($leaveRequest);
                 $this->assertFitsBalance($balance, $hours);
 
-                $leaveRequest->update(['status' => LeaveRequestStatus::Accepted->value, 'reject_reason' => null] + $decision);
+                $previous = $leaveRequest->alternative_employee_id !== null ? (int) $leaveRequest->alternative_employee_id : null;
+                $alternative = $alternativeEmployeeId === null ? $previous : $this->chosenAlternative($leaveRequest, $alternativeEmployeeId);
+
+                // One update, so the activity log keeps the old and the new
+                // alternative beside the acceptance.
+                $leaveRequest->update(['status' => LeaveRequestStatus::Accepted->value, 'reject_reason' => null, 'alternative_employee_id' => $alternative] + $decision);
+
+                if ($alternative !== $previous) {
+                    $alternativeChange = ['from' => $previous, 'to' => $alternative];
+                }
 
                 if ($hours > 0) {
                     $balance->increment('used', $hours);
@@ -100,7 +118,42 @@ final class DecideLeaveRequest
 
         $this->notifications->sendDecision($decided, $actor);
 
+        if ($alternativeChange !== null) {
+            $this->notifications->sendAlternativeChanged($decided, $alternativeChange['from'], $alternativeChange['to'], $actor);
+        }
+
         return $decided;
+    }
+
+    /**
+     * The colleague the decider picked, only from who the request's dialog
+     * lists: the rule, available for the request's own period, or the one it
+     * already names.
+     *
+     * @throws ValidationException
+     */
+    private function chosenAlternative(LeaveRequest $leaveRequest, string $value): ?int
+    {
+        if (trim($value) === '') {
+            return null;
+        }
+
+        $id = (int) $value;
+        $current = $leaveRequest->alternative_employee_id;
+        $requester = $leaveRequest->leaveBalance->contract->employee;
+
+        if ($current !== null && (int) $current === $id) {
+            return $id;
+        }
+
+        $allowed = $requester !== null
+            && $this->alternatives->for($requester, LeaveWindow::fromRequest($leaveRequest))->contains(fn (Employee $employee): bool => (int) $employee->id === $id);
+
+        if (! $allowed) {
+            throw ValidationException::withMessages(['alternative_employee' => __('validation.in', ['attribute' => __('hr_leave.fields.alternative_employee')])]);
+        }
+
+        return $id;
     }
 
     /**

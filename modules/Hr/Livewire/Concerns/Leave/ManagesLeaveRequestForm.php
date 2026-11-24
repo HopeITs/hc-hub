@@ -65,6 +65,13 @@ trait ManagesLeaveRequestForm
     #[Locked]
     public ?string $submissionToken = null;
 
+    /** The priced summary is showing, waiting for "Send request" (the old confirmSave()). */
+    public bool $confirmingRequest = false;
+
+    /** The request just sent: the dialog shows its "submitted" card and the next step. */
+    #[Locked]
+    public ?int $submittedRequestId = null;
+
     /** Form property => the snake_case field SaveLeaveRequest reports. */
     private const REQUEST_FIELDS = [
         'requestType' => 'type',
@@ -125,7 +132,110 @@ trait ManagesLeaveRequestForm
     {
         $this->leaveBalanceId = '';
         $this->alternativeEmployee = '';
+        $this->requestType = LeaveWindow::DAY;
         unset($this->requestEmployee, $this->requestBalances, $this->alternativeOptions);
+    }
+
+    /** Hourly leave is for annual leave only: another type goes back to whole days. */
+    public function updatedLeaveBalanceId(): void
+    {
+        if ($this->requestType === LeaveWindow::HOUR && ! $this->selectedBalanceIsAnnual()) {
+            $this->requestType = LeaveWindow::DAY;
+        }
+
+        $this->dropUnavailableAlternative();
+    }
+
+    public function updatedRequestType(): void
+    {
+        $this->dropUnavailableAlternative();
+    }
+
+    public function updatedStartAt(): void
+    {
+        $this->dropUnavailableAlternative();
+    }
+
+    public function updatedEndAt(): void
+    {
+        $this->dropUnavailableAlternative();
+    }
+
+    public function updatedLeaveDate(): void
+    {
+        $this->dropUnavailableAlternative();
+    }
+
+    public function updatedStartHour(): void
+    {
+        $this->dropUnavailableAlternative();
+    }
+
+    public function updatedEndHour(): void
+    {
+        $this->dropUnavailableAlternative();
+    }
+
+    /**
+     * The colleagues are listed for the period typed, so a choice the new
+     * dates no longer allow is cleared rather than left hidden in the select.
+     */
+    private function dropUnavailableAlternative(): void
+    {
+        unset($this->alternativeOptions);
+
+        if ($this->alternativeEmployee !== '' && ! array_key_exists((int) $this->alternativeEmployee, $this->alternativeOptions)) {
+            $this->alternativeEmployee = '';
+        }
+    }
+
+    private function selectedBalanceIsAnnual(): bool
+    {
+        return (bool) (collect($this->requestBalances)->firstWhere('id', (int) $this->leaveBalanceId)['annual'] ?? false);
+    }
+
+    /**
+     * The dialog's one submit (the button and Enter): review first, send once
+     * the summary is showing, close once the request has been sent.
+     */
+    public function submitRequest(): void
+    {
+        if ($this->submittedRequestId !== null) {
+            $this->closeRequestForm();
+        } elseif ($this->confirmingRequest) {
+            $this->saveRequest();
+        } else {
+            $this->reviewRequest();
+        }
+    }
+
+    /**
+     * Checks everything a write would (each error on
+     * its own field) and shows the priced summary. Nothing is written yet.
+     */
+    public function reviewRequest(): void
+    {
+        /** @var User $actor */
+        $actor = Auth::user();
+
+        try {
+            app(SaveLeaveRequest::class)->check(
+                $actor,
+                $this->requestEmployeeId === '' ? null : (int) $this->requestEmployeeId,
+                $this->requestInput(),
+                $this->editingLeaveRequestId,
+            );
+        } catch (ValidationException $exception) {
+            throw $this->toFormErrors($exception);
+        }
+
+        unset($this->requestPreview);
+        $this->confirmingRequest = true;
+    }
+
+    public function backToRequestForm(): void
+    {
+        $this->confirmingRequest = false;
     }
 
     public function saveRequest(): void
@@ -138,22 +248,45 @@ trait ManagesLeaveRequestForm
             if ($this->editingLeaveRequestId !== null) {
                 app(SaveLeaveRequest::class)->update($actor, $this->editingLeaveRequestId, $input);
                 $message = __('hr_leave.ui.request_updated');
+                $submitted = null;
             } else {
-                app(SaveLeaveRequest::class)->create($actor, $this->requestEmployeeId === '' ? null : (int) $this->requestEmployeeId, $input, $this->submissionToken);
+                $submitted = app(SaveLeaveRequest::class)->create($actor, $this->requestEmployeeId === '' ? null : (int) $this->requestEmployeeId, $input, $this->submissionToken);
                 $message = __('hr_leave.ui.request_sent');
             }
         } catch (ValidationException $exception) {
-            throw ValidationException::withMessages(
-                collect($exception->errors())->mapWithKeys(fn (array $messages, string $key): array => [
-                    (array_search($key, self::REQUEST_FIELDS, true) ?: 'reason') => $messages,
-                ])->all(),
-            );
+            // Whatever the write found that the check could not (a race): back on the form.
+            $this->confirmingRequest = false;
+
+            throw $this->toFormErrors($exception);
         }
 
-        $this->closeRequestForm();
         $this->afterRequestSaved();
 
+        if ($submitted === null) {
+            $this->closeRequestForm();
+        } else {
+            // The dialog stays open on the "submitted" card: what happens next, not only a toast.
+            $this->confirmingRequest = false;
+            $this->submittedRequestId = $submitted->id;
+        }
+
         Flux::toast(variant: 'success', text: $message);
+    }
+
+    /** The request just sent, for the "submitted" card. */
+    #[Computed]
+    public function submittedRequest(): ?LeaveRequest
+    {
+        return $this->submittedRequestId === null ? null : LeaveContext::request($this->submittedRequestId);
+    }
+
+    private function toFormErrors(ValidationException $exception): ValidationException
+    {
+        return ValidationException::withMessages(
+            collect($exception->errors())->mapWithKeys(fn (array $messages, string $key): array => [
+                (array_search($key, self::REQUEST_FIELDS, true) ?: 'reason') => $messages,
+            ])->all(),
+        );
     }
 
     public function closeRequestForm(): void
@@ -198,7 +331,7 @@ trait ManagesLeaveRequestForm
      * The balances offered in the form: the requestable ones, plus the
      * edited request's own (an edit that keeps its type is not asked again).
      *
-     * @return list<array{id: int, label: string, remaining: string}>
+     * @return list<array{id: int, label: string, remaining: string, annual: bool}>
      */
     #[Computed]
     public function requestBalances(): array
@@ -221,20 +354,39 @@ trait ManagesLeaveRequestForm
                 'id' => (int) $balance->id,
                 'label' => (string) $balance->leaveType?->name,
                 'remaining' => LeaveFormat::hours($eligibility->remainingHours($balance), $hoursPerDay),
+                'annual' => $balance->isAnnual(),
             ])
             ->values()
             ->all();
     }
 
-    /** @return array<int, string> id => name */
+    /**
+     * The colleagues who may cover for the period typed so far (rebuilt as the
+     * dates change). An edit keeps the one it was saved with, even if they
+     * have since become busy.
+     *
+     * @return array<int, string> id => name
+     */
     #[Computed]
     public function alternativeOptions(): array
     {
         $employee = $this->requestEmployee;
 
-        return $employee === null ? [] : app(LeaveAlternativeEmployees::class)->for($employee)
+        if ($employee === null) {
+            return [];
+        }
+
+        $options = app(LeaveAlternativeEmployees::class)->for($employee, LeaveRequestDraft::fromArray($this->requestInput())->window())
             ->mapWithKeys(fn (Employee $candidate) => [(int) $candidate->id => $candidate->name])
             ->all();
+
+        $kept = $this->editingLeaveRequestId === null ? null : LeaveRequest::query()->whereKey($this->editingLeaveRequestId)->value('alternative_employee_id');
+
+        if ($kept !== null && ! array_key_exists((int) $kept, $options)) {
+            $options[(int) $kept] = (string) Employee::query()->find($kept)?->name;
+        }
+
+        return $options;
     }
 
     /** Employees HR may file a request for (its governorates, active). @return array<int, string> */
@@ -297,6 +449,8 @@ trait ManagesLeaveRequestForm
         $this->reset(array_keys(self::REQUEST_FIELDS));
         $this->editingLeaveRequestId = null;
         $this->submissionToken = null;
-        unset($this->requestEmployee, $this->requestBalances, $this->alternativeOptions, $this->requestPreview);
+        $this->confirmingRequest = false;
+        $this->submittedRequestId = null;
+        unset($this->requestEmployee, $this->requestBalances, $this->alternativeOptions, $this->requestPreview, $this->submittedRequest);
     }
 }
