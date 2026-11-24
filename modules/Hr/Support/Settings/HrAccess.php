@@ -131,9 +131,10 @@ final class HrAccess
 
     private static function resolveRole(User $user): ?string
     {
-        $active = $user->active_role_id === null
+        $activeRoleId = $user->getAttributes()['active_role_id'] ?? null;
+        $active = $activeRoleId === null
             ? null
-            : Role::query()->whereKey($user->active_role_id)->value('name');
+            : Role::query()->whereKey($activeRoleId)->value('name');
 
         if (is_string($active) && self::isHrRole($active)) {
             return $active;

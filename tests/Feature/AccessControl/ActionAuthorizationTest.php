@@ -120,6 +120,6 @@ it('keeps deletes out of the Livewire form traits', function (string $file) {
 
 it('keeps every soft-refusal action checking the gate', function () {
     foreach (softRefusalActions() as $action) {
-        expect(File::get(app_path("Actions/{$action}")))->toContain('Gate::denies(');
+        expect(File::get(base_path("modules/Tracking/Actions/{$action}")))->toContain('Gate::denies(');
     }
 });
