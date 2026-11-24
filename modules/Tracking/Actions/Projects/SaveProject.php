@@ -18,6 +18,7 @@ use Modules\Hr\Models\Employee;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Jobs\CheckProgramLogframe;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\Locations\ProjectLocationMirror;
 
 /**
  * Create or update a project from the project form (contracts.md §3, §6).
@@ -37,6 +38,8 @@ use Modules\Tracking\Models\Project;
  */
 final class SaveProject
 {
+    public function __construct(private ProjectLocationMirror $mirror) {}
+
     /**
      * `startDate` and `endDate` are only accepted for a project that is no
      * longer a draft. `name` may be blank on create: it defaults to
@@ -116,6 +119,8 @@ final class SaveProject
             if ($input['sectorIds'] !== null) {
                 app(SyncProjectSectors::class)->handle($project, $input['sectorIds'], requireOne: $existing === null);
             }
+
+            $this->mirror->sync($project);
 
             return $project;
         });

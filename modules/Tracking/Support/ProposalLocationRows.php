@@ -10,6 +10,7 @@ use Modules\Tracking\Actions\Proposals\CreateLocationPlaces;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalLocation;
+use Modules\Tracking\Support\Locations\ProjectLocationMirror;
 
 /**
  * The one writer of `proposal_locations` rows (contracts.md §7, W-34a).
@@ -179,6 +180,7 @@ final class ProposalLocationRows
             ]);
             $row->save();
             $this->writeCenters($row, $centerIds);
+            app(ProjectLocationMirror::class)->apply($project);
             $counts['added']++;
 
             return $counts;
@@ -188,6 +190,7 @@ final class ProposalLocationRows
             // A second project on the same city and program (another center):
             // the row keeps its first project and gains the center.
             $this->writeCenters($row, array_values(array_unique([...$row->centerIds(), ...$centerIds])));
+            app(ProjectLocationMirror::class)->apply($project);
             $counts['changed']++;
 
             return $counts;
@@ -199,6 +202,12 @@ final class ProposalLocationRows
             'responsible_employee_id' => $row->responsible_employee_id ?? $project->owner_employee_id,
         ])->save();
         $this->writeCenters($row, array_values(array_unique([...$row->centerIds(), ...$centerIds])));
+
+        // A row that has just taken a project needs the whole mirror, not
+        // only the columns: its sectors, the owner's acknowledgement and the
+        // files have never been written. Approval links its rows through here.
+        app(ProjectLocationMirror::class)->apply($project);
+
         $counts['changed']++;
 
         return $counts;

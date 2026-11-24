@@ -17,6 +17,7 @@ use Modules\Tracking\Events\ProposalStatusChanged;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalStatusNote;
+use Modules\Tracking\Support\Locations\ProjectLocationMirror;
 
 /**
  * Activate an approved, dated project and move its still-approved proposals to
@@ -29,6 +30,8 @@ use Modules\Tracking\Models\ProposalStatusNote;
  */
 final class ActivateProject
 {
+    public function __construct(private ProjectLocationMirror $mirror) {}
+
     /** @var list<string> */
     public const VIAS = ['template_confirmation'];
 
@@ -84,6 +87,8 @@ final class ActivateProject
                 CarbonImmutable::parse($locked->end_date->toDateString()),
                 $via,
             );
+
+            $this->mirror->sync($locked);
         });
 
         $project->refresh();

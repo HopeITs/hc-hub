@@ -11,6 +11,7 @@ use Modules\Tracking\Models\IndicatorProgress;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\Risk;
@@ -60,15 +61,17 @@ function planProgramFor2026(Program $program): void
 test('each current strategy adds up its targets on pace, high risks and late work', function () {
     strategyIndicator($this->program, 100);
     strategyIndicator($this->program, 0);
-    Risk::factory()->rated(3, 3)->create(['project_id' => $this->project->id]);
-    Risk::factory()->rated(1, 2)->create(['project_id' => $this->project->id]);
+    // Y-13 (D-93): a register risk reaches the strategy through its row's program.
+    $row = ProposalLocation::factory()->forProject($this->project)->create();
+    Risk::factory()->onRow($row)->rated(3, 3)->create();
+    Risk::factory()->onRow($row)->rated(1, 2)->create();
     Report::factory()->create([
         'plan_indicator_id' => PlanIndicator::factory()->create(['project_id' => $this->project->id])->id,
         'planned_date' => '2026-05-31',
     ]);
 
     // Another strategy's work never counts here.
-    Risk::factory()->rated(3, 3)->create();
+    Risk::factory()->onRow(ProposalLocation::factory()->forProject(Project::factory()->create())->create())->rated(3, 3)->create();
 
     $user = User::factory()->role('Team Member')->create();
 

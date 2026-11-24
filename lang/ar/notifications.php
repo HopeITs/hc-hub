@@ -962,6 +962,7 @@ return [
             ],
         ],
         'report_template' => [
+            'placement_pending' => 'يحتاج :subject إلى اختيار طريقة إعداد التقرير.',
             'created' => 'أُنشئ قالب تقرير المشروع «:subject»',
             'updated' => 'عدّل :actor قالب تقرير المشروع «:subject»',
             'pending' => [

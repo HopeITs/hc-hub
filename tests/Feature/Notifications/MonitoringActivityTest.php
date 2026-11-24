@@ -7,6 +7,7 @@ use Modules\Tracking\Models\Indicator;
 use Modules\Tracking\Models\IndicatorProgress;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Models\Risk;
 
@@ -15,10 +16,12 @@ test('a risk that happens is critical for the owner, managers, meal and the top 
     $owner = userWithRole('Managers', $ownerEmployee);
     $meal = userWithRole('MEAL');
     $generalManager = userWithRole('General Manager');
-    $risk = Activity::withoutRecording(fn () => Risk::factory()->create([
-        'project_id' => Project::factory()->create(['user_id' => $ownerEmployee])->id,
-        'name' => 'Road closure',
-    ]));
+    // Y-13 (D-93): the risk's direct recipient is the row's responsible employee.
+    $risk = Activity::withoutRecording(fn () => Risk::factory()
+        ->onRow(ProposalLocation::factory()
+            ->forProject(Project::factory()->create())
+            ->create(['responsible_employee_id' => $ownerEmployee]))
+        ->create(['name' => 'Road closure']));
 
     $this->actingAs(userWithRole('Managers'));
     $risk->update(['happened' => true]);

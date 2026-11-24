@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Support;
 
+use App\Support\EmployeeProfile;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\ProposalLocation;

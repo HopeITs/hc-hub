@@ -9,12 +9,15 @@ use App\Support\StoredFiles;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\Locations\ProjectLocationMirror;
 
 /**
  * Add a file to a project, or change an existing file's category and name.
  */
 class SaveProjectFile
 {
+    public function __construct(private ProjectLocationMirror $mirror) {}
+
     /**
      * @param  array<string, mixed>  $validated  keyed by the file form's property names
      */
@@ -33,6 +36,10 @@ class SaveProjectFile
             ['uploaded_at' => now()],
             'project file',
         );
+
+        // The project keeps the file; the row its date picks gets its own
+        // mirrored row (Y-11 slice 2, D-94).
+        $this->mirror->attachFile($project, $file);
 
         return $file;
     }

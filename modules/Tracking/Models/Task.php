@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Collection;
+use Modules\Core\Models\Center;
 use Modules\Core\Models\User;
 use Modules\Tracking\Enums\DeliverableKind;
 use Modules\Tracking\Enums\DeliveryState;
@@ -202,6 +203,7 @@ class Task extends Model implements TracksActivity
 
         $programId = match ($this->activityAttribute('source_type')) {
             'program' => $sourceId,
+            'proposal_location' => ProposalLocation::programIdFor($sourceId),
             'project' => Project::query()->whereKey($sourceId)->value('program_id'),
             default => null,
         };
@@ -297,6 +299,17 @@ class Task extends Model implements TracksActivity
     }
 
     /**
+     * The location row this task is raised against, or null for any other
+     * source (Y-12). Reads the column, so it costs no query.
+     */
+    public function sourceLocationId(): ?int
+    {
+        return $this->activityAttribute('source_type') === 'proposal_location'
+            ? (int) $this->activityAttribute('source_id')
+            : null;
+    }
+
+    /**
      * The project this task's source is, when it is raised against one. Used
      * to bucket tasks under a project card (e.g. on a proposal's Tasks tab).
      */
@@ -317,6 +330,14 @@ class Task extends Model implements TracksActivity
     public function isPaused(?array $pausedProjectIds = null): bool
     {
         $source = $this->loadedSource();
+
+        // A row knows whether one of its own centers is deactivated (Y-11),
+        // so a row-sourced task asks the row. The `project` source stays
+        // readable until Y-18 for tasks the backfill could not map.
+        if ($source instanceof ProposalLocation) {
+            return $source->isPaused();
+        }
+
         $projectId = $source instanceof Project ? $source->id : null;
 
         return $projectId !== null && in_array($projectId, $pausedProjectIds ?? Project::pausedIds(), true);
@@ -333,8 +354,16 @@ class Task extends Model implements TracksActivity
     protected function notPaused(Builder $query): void
     {
         $paused = Project::query()->paused()->select('projects.id');
+        $pausedRows = ProposalLocation::query()
+            ->select('proposal_locations.id')
+            ->where('proposal_locations.city_wide', false)
+            ->whereIn('proposal_locations.id', ProposalLocationCenter::query()
+                ->select('proposal_location_id')
+                ->whereIn('center_id', Center::inactiveIds()));
 
-        $query->where(fn (Builder $inner) => $inner->where('tasks.source_type', '!=', 'project')->orWhereNotIn('tasks.source_id', $paused));
+        $query->where(fn (Builder $inner) => $inner
+            ->where(fn (Builder $project) => $project->where('tasks.source_type', '!=', 'project')->orWhereNotIn('tasks.source_id', $paused))
+            ->where(fn (Builder $row) => $row->where('tasks.source_type', '!=', 'proposal_location')->orWhereNotIn('tasks.source_id', $pausedRows)));
     }
 
     /**

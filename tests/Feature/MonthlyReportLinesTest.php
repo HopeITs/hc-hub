@@ -4,6 +4,9 @@ use App\Models\Activity;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\Program;
+use Modules\Tracking\Actions\MonthlyReports\RefreshMonthlyReportLines;
+use Modules\Tracking\Actions\ReportTemplates\ConfirmReportTemplate;
+use Modules\Tracking\Actions\ReportTemplates\JoinReportTemplate;
 use Modules\Tracking\Enums\CollectionFrequency;
 use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Enums\IndicatorCollector;
@@ -23,6 +26,7 @@ use Modules\Tracking\Models\ReportTemplateLine;
 use Modules\Tracking\Support\MonthlyReportLineBuilder;
 use Modules\Tracking\Support\MonthlyReportPeriods;
 use Modules\Tracking\Support\MonthlyReportPreparers;
+use Modules\Tracking\Support\ReportTemplatePrefiller;
 
 /*
 | The lines of a monthly report (contracts §13 "Lines of month M", §13.1
@@ -405,4 +409,25 @@ test('sequencing is per template: an unsubmitted month of one template never blo
 
     expect(MonthlyReportPeriods::for($second)->canSubmit($secondDecember))->toBeNull()
         ->and(MonthlyReportPeriods::for($first)->months())->toHaveCount(1);
+});
+
+test('join and confirm add shares only when the preparer refreshes a draft', function () {
+    $fixture = placementFixture();
+    $this->actingAs(mealManager());
+    $prefiller = app(ReportTemplatePrefiller::class);
+    $prefiller->prefillForProposal($fixture['proposals'][0]);
+    $template = ReportTemplate::query()->sole();
+    app(ConfirmReportTemplate::class)->handle($template, $template->lines()->pluck('id')->all());
+    $report = $template->monthlyReports()->where('period', '2026-01-01')->sole();
+    app(MonthlyReportLineBuilder::class)->build($report);
+    $prefiller->prefillForProposal($fixture['proposals'][1]);
+
+    app(JoinReportTemplate::class)->handle($fixture['proposals'][1], $template, []);
+    app(ConfirmReportTemplate::class)->handle($template, $template->lines()->where('status', 'pending')->pluck('id')->all());
+    expect($report->lines()->sole()->shares()->count())->toBe(1);
+    $this->actingAs(userWithRole('Managers', $fixture['project']->user_id));
+    app(RefreshMonthlyReportLines::class)->handle($report, MonthlyReportStatus::Draft);
+
+    expect($report->lines()->count())->toBe(1)
+        ->and($report->lines()->sole()->shares()->count())->toBe(2);
 });

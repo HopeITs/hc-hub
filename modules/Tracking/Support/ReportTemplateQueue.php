@@ -13,9 +13,11 @@ use Modules\Core\Models\User;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Enums\ReportTemplateLineStatus;
 use Modules\Tracking\Enums\ReportTemplateStatus;
+use Modules\Tracking\Enums\TemplatePlacementStatus;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ReportTemplate;
 use Modules\Tracking\Models\ReportTemplateLine;
+use Modules\Tracking\Models\ReportTemplatePlacement;
 use Modules\Tracking\Support\Reporting\PlaceBridge;
 
 /**
@@ -30,6 +32,26 @@ use Modules\Tracking\Support\Reporting\PlaceBridge;
  */
 final class ReportTemplateQueue
 {
+    /** @return list<array<string, mixed>> */
+    public static function placementRowsFor(User $user): array
+    {
+        return array_values(ReportTemplatePlacement::query()->manageableBy($user)
+            ->where('status', TemplatePlacementStatus::Pending)
+            ->with(['proposal:id,name,internal_project_number', 'program', 'city'])
+            ->orderBy('id')->get()->map(function (ReportTemplatePlacement $placement): array {
+                return [
+                    'placement' => $placement, 'category' => 'placement', 'template' => null, 'project' => null,
+                    'name' => $placement->proposal->name,
+                    'status' => ReportTemplateStatus::Pending, 'pendingLineCount' => 0, 'annualPlanLineCount' => 0,
+                    'templateProposals' => [], 'proposals' => [['id' => $placement->proposal_id, 'name' => $placement->proposal->name, 'number' => $placement->proposal->internal_project_number]],
+                    'cityId' => $placement->city_id, 'cityName' => $placement->city?->name,
+                    'centerName' => $placement->city_wide ? __('report_templates.queue.field_work')
+                        : Center::remembered($placement->center_id)?->name,
+                    'programName' => $placement->program->name,
+                ];
+            })->values()->all());
+    }
+
     /**
      * The queue rows for this user, pending templates first, then by project name.
      *
@@ -66,7 +88,7 @@ final class ReportTemplateQueue
             ->where(fn (Builder $query) => $query
                 ->where('status', ReportTemplateStatus::Pending->value)
                 ->orWhereHas('lines', fn (Builder $query) => $query->where('status', ReportTemplateLineStatus::Pending->value)))
-            ->with(['program:id', 'proposals:id,name,internal_project_number'])
+            ->with(['program:id', 'proposals:id,name,slug,internal_project_number'])
             ->get();
 
         $bridge = app(PlaceBridge::class);

@@ -16,9 +16,13 @@ use Livewire\Livewire;
 use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Hr\Models\Employee;
+use Modules\Tracking\Console\Commands\BackfillLocationsFromProjects;
 use Modules\Tracking\Console\Commands\BackfillMonthlyReports;
 use Modules\Tracking\Console\Commands\BackfillProjectMembers;
 use Modules\Tracking\Console\Commands\BackfillProposalLocations;
+use Modules\Tracking\Console\Commands\BackfillRiskRows;
+use Modules\Tracking\Console\Commands\BackfillScheduleRows;
+use Modules\Tracking\Console\Commands\BackfillTaskRows;
 use Modules\Tracking\Console\Commands\EnsureAnnualPlans2026;
 use Modules\Tracking\Console\Commands\ImportProgramFramework;
 use Modules\Tracking\Console\Commands\ImportStrategyPillars;
@@ -33,6 +37,7 @@ use Modules\Tracking\Console\Commands\ScanPlanMilestones;
 use Modules\Tracking\Console\Commands\SeedIndicatorLibrary;
 use Modules\Tracking\Console\Commands\SendMonthlyDigest;
 use Modules\Tracking\Console\Commands\TemplateBackfillMonthlyReports;
+use Modules\Tracking\Console\Commands\VerifyLocationMirror;
 use Modules\Tracking\Console\TrackingSchedule;
 use Modules\Tracking\Enums\DonorAttribution;
 use Modules\Tracking\Events\FundingAgreementRecorded;
@@ -103,9 +108,13 @@ class TrackingServiceProvider extends ServiceProvider
         $this->app->make(ModuleRegistry::class)->addWorkItems(ReviewWorkItems::class);
 
         $this->commands([
+            BackfillLocationsFromProjects::class,
             BackfillMonthlyReports::class,
             BackfillProjectMembers::class,
             BackfillProposalLocations::class,
+            BackfillRiskRows::class,
+            BackfillScheduleRows::class,
+            BackfillTaskRows::class,
             EnsureAnnualPlans2026::class,
             ImportProgramFramework::class,
             ImportStrategyPillars::class,
@@ -120,6 +129,7 @@ class TrackingServiceProvider extends ServiceProvider
             SeedIndicatorLibrary::class,
             SendMonthlyDigest::class,
             TemplateBackfillMonthlyReports::class,
+            VerifyLocationMirror::class,
         ]);
 
         if (! $this->app->routesAreCached()) {

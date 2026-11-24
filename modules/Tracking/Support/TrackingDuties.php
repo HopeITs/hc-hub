@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Modules\Core\Models\User;
 use Modules\Tracking\Models\DonorReport;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\ProposalLocation;
 use WeakMap;
 
 /**
@@ -27,6 +28,11 @@ final class TrackingDuties
      * @var list<int>|null
      */
     private ?array $ownedProjectIds = null;
+
+    /**
+     * @var list<int>|null
+     */
+    private ?array $ownedLocationIds = null;
 
     private ?bool $hasReportingDuties = null;
 
@@ -62,6 +68,36 @@ final class TrackingDuties
         return $this->ownedProjectIds = array_values(Project::query()
             ->where(fn (Builder $query) => $query
                 ->where('owner_employee_id', $employeeId)
+                ->when($programIds !== [], fn (Builder $query) => $query->orWhereIn('program_id', $programIds)))
+            ->pluck('id')
+            ->map(fn (mixed $id): int => (int) $id)
+            ->all());
+    }
+
+    /**
+     * Location rows this user answers for: the ones whose responsible is
+     * their HR employee, and every row of a program they manage. The twin of
+     * `ownedProjectIds()` and remembered the same way (Y-11).
+     *
+     * @return list<int>
+     */
+    public function ownedLocationIds(): array
+    {
+        if ($this->ownedLocationIds !== null) {
+            return $this->ownedLocationIds;
+        }
+
+        $employeeId = $this->user->employee_id;
+
+        if ($employeeId === null) {
+            return $this->ownedLocationIds = [];
+        }
+
+        $programIds = $this->user->managedProgramIds();
+
+        return $this->ownedLocationIds = array_values(ProposalLocation::query()
+            ->where(fn (Builder $query) => $query
+                ->where('responsible_employee_id', $employeeId)
                 ->when($programIds !== [], fn (Builder $query) => $query->orWhereIn('program_id', $programIds)))
             ->pluck('id')
             ->map(fn (mixed $id): int => (int) $id)

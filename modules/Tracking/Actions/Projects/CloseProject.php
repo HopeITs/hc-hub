@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\Locations\ProjectLocationMirror;
 
 /**
  * Close an active project (contracts.md §3: active → closed, dates kept).
@@ -21,6 +22,8 @@ use Modules\Tracking\Models\Project;
  */
 final class CloseProject
 {
+    public function __construct(private ProjectLocationMirror $mirror) {}
+
     /**
      * @throws ValidationException when the project is not active
      */
@@ -37,6 +40,8 @@ final class CloseProject
 
             $locked->status = ProjectStatus::Closed;
             $locked->save();
+
+            $this->mirror->sync($locked);
         });
 
         $project->refresh();

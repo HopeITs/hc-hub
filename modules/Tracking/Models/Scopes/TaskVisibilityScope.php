@@ -78,6 +78,7 @@ class TaskVisibilityScope implements Scope
         $departmentId = $user->departmentId();
         $departmentEmployeeIds = $user->departmentEmployeeIds();
         $ownedProjectIds = TrackingDuties::for($user)->ownedProjectIds();
+        $ownedLocationIds = TrackingDuties::for($user)->ownedLocationIds();
         $managedProgramIds = $user->managedProgramIds();
         $isProposalEditor = $user->can('proposals.update');
         $seesFinancialTasks = $isProposalEditor || $user->hasRole(self::FinanceRole);
@@ -86,7 +87,7 @@ class TaskVisibilityScope implements Scope
         $sourceId = $query->qualifyColumn('source_id');
         $taskDepartmentId = $query->qualifyColumn('department_id');
 
-        $query->where(function (Builder $query) use ($user, $departmentId, $departmentEmployeeIds, $ownedProjectIds, $managedProgramIds, $isProposalEditor, $createdBy, $sourceType, $sourceId, $taskDepartmentId): void {
+        $query->where(function (Builder $query) use ($user, $departmentId, $departmentEmployeeIds, $ownedProjectIds, $ownedLocationIds, $managedProgramIds, $isProposalEditor, $createdBy, $sourceType, $sourceId, $taskDepartmentId): void {
             $query->where($createdBy, $user->id);
 
             if ($departmentId !== null) {
@@ -114,6 +115,12 @@ class TaskVisibilityScope implements Scope
 
             if ($ownedProjectIds !== []) {
                 $query->orWhere(fn (Builder $query) => $query->where($sourceType, 'project')->whereIn($sourceId, $ownedProjectIds));
+            }
+
+            // Y-12: the row is where a task lives now. The `project` arm
+            // above stays until Y-18 for tasks the backfill could not map.
+            if ($ownedLocationIds !== []) {
+                $query->orWhere(fn (Builder $query) => $query->where($sourceType, 'proposal_location')->whereIn($sourceId, $ownedLocationIds));
             }
 
             if ($managedProgramIds !== []) {

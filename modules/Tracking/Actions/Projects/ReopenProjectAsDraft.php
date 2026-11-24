@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Modules\Tracking\Enums\ProjectStatus;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Support\Locations\ProjectLocationMirror;
 
 /**
  * Reopen a closed project as a draft when a new proposal links it
@@ -25,6 +26,8 @@ use Modules\Tracking\Models\Project;
  */
 final class ReopenProjectAsDraft
 {
+    public function __construct(private ProjectLocationMirror $mirror) {}
+
     public function handle(Project $project): void
     {
         DB::transaction(function () use ($project): void {
@@ -53,6 +56,8 @@ final class ReopenProjectAsDraft
             $locked->start_date = null;
             $locked->end_date = null;
             $locked->save();
+
+            $this->mirror->sync($locked);
         });
 
         $project->refresh();

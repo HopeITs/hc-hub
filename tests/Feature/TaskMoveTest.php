@@ -6,6 +6,8 @@ use Modules\Core\Models\Program;
 use Modules\Core\Models\User;
 use Modules\Tracking\Actions\Tasks\MoveTask;
 use Modules\Tracking\Models\Project;
+use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Task;
 
 /*
@@ -62,4 +64,41 @@ test('someone who cannot edit the task cannot move it', function () {
 
     expect(fn () => app(MoveTask::class)->handle($this->task, 'program'))->toThrow(AuthorizationException::class)
         ->and($this->task->fresh()->source_type)->toBe('project');
+});
+
+test('a task moves onto a location row of the same program (Y-12)', function () {
+    $proposal = Proposal::factory()->create();
+    $row = ProposalLocation::factory()->create([
+        'proposal_id' => $proposal->id,
+        'program_id' => $this->program->id,
+        'city_wide' => true,
+    ]);
+
+    $move = app(MoveTask::class);
+
+    expect($move->resolveTarget($this->program->id, 'location:'.$row->id))
+        ->toBe(['type' => 'proposal_location', 'id' => $row->id])
+        ->and($move->targetFor('proposal_location', $row->id))->toBe('location:'.$row->id)
+        ->and($move->programIdOfSource('proposal_location', $row->id))->toBe($this->program->id);
+
+    $this->actingAs($this->manager);
+    $move->handle($this->task, 'location:'.$row->id);
+
+    // The subtask follows its parent, as it always has.
+    expect($this->task->fresh()->source_type)->toBe('proposal_location')
+        ->and((int) $this->task->fresh()->source_id)->toBe($row->id)
+        ->and($this->subtask->fresh()->source_type)->toBe('proposal_location')
+        ->and((int) $this->subtask->fresh()->source_id)->toBe($row->id);
+});
+
+test('a row of another program is refused as a move target', function () {
+    $otherProgram = Program::factory()->create();
+    $proposal = Proposal::factory()->create();
+    $foreignRow = ProposalLocation::factory()->create([
+        'proposal_id' => $proposal->id,
+        'program_id' => $otherProgram->id,
+        'city_wide' => true,
+    ]);
+
+    expect(app(MoveTask::class)->resolveTarget($this->program->id, 'location:'.$foreignRow->id))->toBeNull();
 });
