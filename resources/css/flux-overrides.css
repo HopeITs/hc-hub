@@ -54,31 +54,12 @@
 }
 
 /*
- * Directory pages (.admin-directory, .directory-filters, .filter-picker, .filter-menu)
- * and the shared control focus ring. In @layer utilities after Tailwind's own, so
+ * Directory pages (.admin-directory, .directory-filters, .filter-picker, .filter-menu).
+ * The focus ring is global (base.css). In @layer utilities after Tailwind's own, so
  * every selector here (0,2,0 and up) out-ranks Flux's resting and state classes
  * by specificity or order, while a page utility with `!` can still win.
  */
 @layer utilities {
-    input:focus[data-flux-control],
-    textarea:focus[data-flux-control],
-    select:focus[data-flux-control] {
-        outline: 2px solid var(--color-secondary-medium);
-        outline-offset: 2px;
-        box-shadow: none;
-    }
-
-    .dark :is(input, textarea, select):focus[data-flux-control] {
-        outline-color: var(--color-ink-muted);
-    }
-
-    /* Inside a dialog the field you type in carries the red focus ring (sectioned modal v2). */
-    .modal-shell :is(input, textarea, select):focus[data-flux-control],
-    .dark .modal-shell :is(input, textarea, select):focus[data-flux-control],
-    .modal-shell [data-flux-button]:focus-visible {
-        outline-color: var(--color-primary);
-    }
-
     input[type='search']::-webkit-search-cancel-button {
         cursor: pointer;
         filter: grayscale(1) saturate(0) brightness(0.72);
@@ -129,25 +110,11 @@
         color: var(--color-secondary-light);
     }
 
-    .admin-directory [data-flux-control]:focus,
-    .admin-directory [data-flux-control]:focus-visible,
-    .admin-directory [data-flux-button]:focus-visible {
-        box-shadow: none;
-        outline: 2px solid var(--color-secondary-medium);
-        outline-offset: 2px;
-    }
-
     .dark .admin-directory [data-flux-control]::placeholder,
     .dark .admin-directory [data-flux-input]>div,
     .dark .admin-directory [data-flux-clear-button],
     .dark .admin-directory [data-flux-clear-button] [data-flux-icon] {
         color: var(--color-ink-faint);
-    }
-
-    .dark .admin-directory [data-flux-control]:focus,
-    .dark .admin-directory [data-flux-control]:focus-visible,
-    .dark .admin-directory [data-flux-button]:focus-visible {
-        outline-color: var(--color-ink-muted);
     }
 
     /* The tinted-fill filter row treatment: shared by every directory-style index page's toolbar, not just Programs. */
@@ -171,13 +138,6 @@
     .directory-filters [data-flux-control]:focus,
     .directory-filters [data-flux-control]:focus-visible {
         border-color: var(--color-secondary-medium);
-    }
-
-    .directory-filters [data-directory-search]:is(:focus, :focus-visible) {
-        border-color: var(--color-secondary-soft);
-        outline: none;
-        outline-offset: 0;
-        box-shadow: none;
     }
 
     /*
@@ -204,11 +164,6 @@
     .dark .directory-filters [data-flux-control]:focus,
     .dark .directory-filters [data-flux-control]:focus-visible {
         border-color: var(--color-ink-muted);
-    }
-
-    /* As in light, the directory search keeps its resting border while focused. */
-    .dark .directory-filters [data-directory-search]:is(:focus, :focus-visible) {
-        border-color: var(--color-field-line);
     }
 
     /* Chrome paints autofill with a UA background; an inset shadow is the only way to keep the field dark. */
@@ -255,13 +210,6 @@
         background-color: color-mix(in srgb, var(--color-secondary-soft) 38%, var(--color-white));
         box-shadow: none;
         font-size: 0.8125rem;
-    }
-
-    .filter-menu [data-flux-control]:focus,
-    .filter-menu [data-flux-control]:focus-visible {
-        border-color: var(--color-secondary-soft);
-        outline: none;
-        outline-offset: 0;
     }
 
     .dark .filter-picker [data-flux-button] {
@@ -660,11 +608,6 @@ ui-toast-group {
         background-color: color-mix(in srgb, var(--color-ink) 15%, transparent);
     }
 
-    &:focus-visible {
-        outline: 2px solid var(--color-brand);
-        outline-offset: 2px;
-    }
-
     .hc-toast[data-variant='danger'] & {
         background-color: var(--color-brand);
         color: #fff;
@@ -716,11 +659,6 @@ ui-toast-group {
         &:hover {
             background-color: color-mix(in srgb, var(--color-ink) 9%, transparent);
             color: var(--color-ink);
-        }
-
-        &:focus-visible {
-            outline: 2px solid var(--color-brand);
-            outline-offset: 1px;
         }
     }
 
@@ -990,12 +928,10 @@ ui-toast-group {
 
 /*
  * The search box at the top of a dropdown (employee and option pickers) sits
- * inside the open menu already, so it drops the thick shared focus outline
- * and only darkens its own border while typing.
+ * inside the open menu already, so it darkens its own border while typing.
  */
 @layer utilities {
     :is(input.hc-picker-search, .hc-picker-search input):focus[data-flux-control] {
-        outline: none;
         border-color: var(--color-secondary-medium) !important;
     }
 

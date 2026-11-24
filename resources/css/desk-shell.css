@@ -254,7 +254,6 @@
         .dk-top-find .dk-ask:hover, .dk-panels-btn:hover { border-color: var(--line-2); box-shadow: 0 1px 2px rgb(16 24 40 / .05), 0 10px 22px -12px rgb(16 24 40 / .26); }
         .dark .dk-top-find .dk-ask:hover, .dark .dk-panels-btn:hover { box-shadow: none; }
         .dk-top-find .dk-ask:hover svg, .dk-panels-btn:hover svg { color: var(--ink); }
-        .dk-top-find .dk-ask:focus-visible, .dk-panels-btn:focus-visible { outline: none; border-color: var(--ink-3); box-shadow: 0 0 0 3px var(--sunk); }
         .dk-panels-btn { gap: 8px; padding-inline: 14px 17px; color: var(--ink-2); font-size: 14px; font-weight: 700; }
         .dk-panels-btn svg { width: 18px !important; height: 18px !important; stroke-width: 1.8; transition: color .15s; }
         .dk-panels-btn:hover { background: var(--paper); }
@@ -294,10 +293,8 @@
     .dk-me { display: flex; line-height: 0; padding: 0; border: 0; border-radius: var(--radius-round); background: none; cursor: pointer; transition: transform .08s; }
     .dk-me:active { transform: scale(.95); }
     .dk-top .dk-me .dk-avatar { display: block; width: 42px; height: 42px; border-radius: var(--radius-round); transition: filter .15s, box-shadow .15s; }
-    /* No ring on the photo; hover or an open menu only dims it a little. The ring below is for keyboard focus only. */
+    /* No ring on the photo; hover or an open menu only dims it a little. Keyboard focus takes the global ring. */
     .dk-me:hover .dk-avatar, .dk-me[aria-expanded="true"] .dk-avatar { filter: brightness(.92); }
-    .dk-me:focus-visible { outline: none; }
-    .dk-me:focus-visible .dk-avatar { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink-3); }
     .dk-avatar-lg { width: 40px; height: 40px; font-size: 14px; flex: none; }
 
     /* Help and avatar menus: rows with an icon, a label and a hint; they grow out of their button. */
@@ -305,8 +302,7 @@
     [dir="rtl"] .dk-menu { transform-origin: top left; }
     .dk-menu .dk-pop-h { padding: 6px 10px 4px; }
     .dk-menu [role="menuitem"] { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 40px; height: auto; padding: 8px 10px; border: 0; border-radius: var(--radius-control); background: none; color: var(--ink); font: inherit; text-align: start; text-decoration: none; cursor: pointer; }
-    .dk-menu [role="menuitem"]:hover, .dk-menu [role="menuitem"]:focus-visible { background: var(--sunk); outline: none; }
-    .dk-menu [role="menuitem"]:focus-visible { box-shadow: inset 0 0 0 2px var(--line-2); }
+    .dk-menu [role="menuitem"]:hover, .dk-menu [role="menuitem"]:focus-visible { background: var(--sunk); }
     .dk-menu-ic { width: 20px; height: 20px; flex: none; color: var(--ink-3); transition: color .12s; }
     .dk-menu [role="menuitem"]:hover .dk-menu-ic, .dk-menu [role="menuitem"]:focus-visible .dk-menu-ic { color: var(--ink); }
     .dk-menu-t { flex: 1; min-width: 0; display: grid; }
@@ -553,18 +549,6 @@
     @media (max-width: 720px) { .dk-panels-btn { background: var(--sunk); } }
 }
 
-/*
- * Focus is gray everywhere; red is kept for real validation errors only (user decision 2026-10-27).
- * One ring per field: a bare input draws it itself, but an input inside a field box (the box
- * carries the border) leaves it to the box, or the two rings read as an input inside an input.
- */
-@layer components {
-    .dk-scope :is(input, textarea, select):focus-visible { outline: none; border-color: var(--ink-3); box-shadow: 0 0 0 3px var(--sunk); }
-    .dk-scope :is(.form-box, .dk-reg-q, .dk-pf-search, .dk-psearch, .dk-pal-in, .dk-pm, .rules-stepper, .rules-event-search, .rules-chip-add, .task-composer-text, .form-chip) :is(input, textarea, select):focus-visible { border-color: transparent; box-shadow: none; }
-    .dk-reg-q:focus-within, .dk-pf-search:focus-within, .dk-psearch:focus-within { border-color: var(--ink-3); box-shadow: 0 0 0 3px var(--sunk); }
-}
-:where(input, textarea, select, button, a):focus-visible { outline-color: var(--color-secondary-medium); }
-
 /* ---------- Panel filter button and popup ---------- */
 @layer components {
     .dk-pfilter { color: var(--ink-3); }
@@ -609,7 +593,7 @@
     .dk-pf-body { gap: 14px; }
     .dk-pf-search { display: flex; align-items: center; gap: 10px; height: 44px; padding-inline: 14px; border: 1px solid var(--line-2); border-radius: var(--radius-surface); background: var(--tint); color: var(--ink-3); }
     .dk-pf-search:focus-within { border-color: var(--ink-3); background: var(--paper); }
-    .dk-pf-search input { flex: 1; min-width: 0; height: 100%; border: 0 !important; background: none !important; box-shadow: none !important; outline: none; color: var(--ink); font-size: 14px; }
+    .dk-pf-search input { flex: 1; min-width: 0; height: 100%; border: 0 !important; background: none !important; box-shadow: none !important; color: var(--ink); font-size: 14px; }
     .dk-pf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; }
     .dk-pf-grid:empty { display: none; }
 }
@@ -780,5 +764,5 @@
     .dk-psearch { display: flex; align-items: center; gap: 8px; height: 36px; margin: 0 12px 8px; padding-inline: 10px; border: 1px solid var(--line-2); border-radius: var(--radius-control); background: var(--tint); color: var(--ink-3); flex: none; }
     .dk-psearch:focus-within { border-color: var(--ink-3); background: var(--paper); }
     .dk-scope .dk-psearch svg.dk-i { width: 16px; height: 16px; }
-    .dk-psearch input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; outline: none; color: var(--ink); font-size: 13.5px; }
+    .dk-psearch input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; color: var(--ink); font-size: 13.5px; }
 }

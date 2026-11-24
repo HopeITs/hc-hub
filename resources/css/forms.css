@@ -49,11 +49,9 @@
         background-color: var(--color-white);
     }
 
-    /* One gray ring around the box; the input inside draws none (desk-shell.css). */
+    /* The box takes the global field focus (base.css); the input inside draws none. */
     .form-box:focus-within {
-        border-color: var(--color-secondary-medium);
         background-color: var(--color-white);
-        box-shadow: 0 0 0 3px var(--color-sunk);
     }
 
     .form-box[data-invalid] {
@@ -78,7 +76,6 @@
         background: transparent;
         color: inherit;
         font: inherit;
-        outline: none;
     }
 
     textarea.form-box-input {
@@ -129,7 +126,6 @@
     }
 
     .dark .form-box:focus-within {
-        border-color: var(--color-ink-muted);
         background-color: var(--color-surface-2);
     }
 
@@ -232,11 +228,6 @@
         color: var(--color-secondary-dark);
     }
 
-    .modal-shell-close:focus-visible {
-        outline: 2px solid var(--color-secondary-medium);
-        outline-offset: 2px;
-    }
-
     .modal-shell-body {
         flex: 1 1 auto;
         min-height: 0;
@@ -282,11 +273,6 @@
     .modal-shell-error:hover {
         background-color: var(--color-primary);
         color: var(--color-white);
-    }
-
-    .modal-shell-error:focus-visible {
-        outline: 2px solid var(--color-primary);
-        outline-offset: 2px;
     }
 
     .dark .modal-shell-error {
@@ -442,11 +428,6 @@
         color: var(--color-secondary-dark);
     }
 
-    .modal-shell-index-entry:focus-visible {
-        outline: 2px solid var(--color-primary);
-        outline-offset: 1px;
-    }
-
     .modal-shell-index-entry.is-current {
         background-color: var(--color-board-head);
         color: var(--color-secondary-dark);
@@ -576,11 +557,6 @@
         color: var(--color-white);
     }
 
-    .modal-shell-chip:focus-visible {
-        outline: 2px solid var(--color-primary);
-        outline-offset: 1px;
-    }
-
     .dark .modal-shell-index,
     .dark .modal-shell-chips {
         border-color: var(--color-line);
@@ -688,10 +664,6 @@
         color: var(--color-ink);
     }
 
-    .dark .modal-shell-close:focus-visible {
-        outline-color: var(--color-ink-muted);
-    }
-
     @media (width < 40rem) {
         .modal-shell-header,
         .modal-shell-xl .modal-shell-header {
@@ -771,11 +743,6 @@
         background-color: var(--color-white);
         box-shadow: 0 1px 2px rgb(16 24 40 / 0.04), 0 1px 3px rgb(16 24 40 / 0.06);
         transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .form-section-card:focus-within {
-        border-color: var(--color-primary);
-        box-shadow: 0 0 0 1px var(--color-primary), 0 4px 14px rgb(16 24 40 / 0.08);
     }
 
     .form-section[data-invalid] .form-section-card {
@@ -928,11 +895,6 @@
         background-color: var(--color-white);
     }
 
-    .form-section-fold:focus-visible {
-        outline: 2px solid var(--color-primary);
-        outline-offset: 2px;
-    }
-
     .form-section-fold-plus {
         display: grid;
         flex-shrink: 0;
@@ -985,14 +947,10 @@
         box-shadow: var(--shadow-raised);
     }
 
-    .dark .form-section-card:focus-within,
     .dark .form-section[data-invalid] .form-section-card {
         border-color: var(--color-primary);
     }
 
-    .dark .form-section-card:focus-within {
-        box-shadow: 0 0 0 1px var(--color-primary);
-    }
 
     .dark .form-section[data-done]:not([data-invalid]) .form-section-num,
     .dark .form-section-state[data-tone='is-done'] {
@@ -1228,12 +1186,6 @@
         transition: border-color 0.15s, box-shadow 0.15s;
     }
 
-    .confirm-type-input:focus {
-        border-color: var(--color-secondary-dark);
-        outline: none;
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-secondary-dark) 14%, transparent);
-    }
-
     .confirm-type[data-matches] .confirm-type-input {
         border-color: var(--color-secondary-dark);
     }
@@ -1301,7 +1253,6 @@
         color: var(--color-ink);
     }
 
-    .dark .confirm-type-input:focus,
     .dark .confirm-type[data-matches] .confirm-type-input {
         border-color: var(--color-ink-muted);
         box-shadow: 0 0 0 3px rgb(255 255 255 / 0.08);
@@ -1449,11 +1400,6 @@
             0 0 0 1px color-mix(in srgb, var(--color-secondary-dark) 8%, transparent);
     }
 
-    .form-segment:focus-visible {
-        outline: 2px solid var(--color-secondary-medium);
-        outline-offset: 1px;
-    }
-
     .form-segment:disabled {
         cursor: not-allowed;
         opacity: 0.6;
@@ -1478,10 +1424,6 @@
         box-shadow:
             var(--shadow-raised),
             0 0 0 1px var(--color-line-strong);
-    }
-
-    .dark .form-segment:focus-visible {
-        outline-color: var(--color-ink-muted);
     }
 
     /* File field (x-ui.form-file): a dashed drop zone, then the chosen file with its progress. */
@@ -1509,7 +1451,7 @@
     }
 
     .form-file-zone:focus-within {
-        outline: 2px solid var(--color-secondary-medium);
+        outline: 2px solid var(--color-focus);
         outline-offset: 2px;
     }
 
@@ -1609,10 +1551,6 @@
         background-color: var(--color-surface-2);
     }
 
-    .dark .form-file-zone:focus-within {
-        outline-color: var(--color-ink-muted);
-    }
-
     .dark .form-file[data-invalid] .form-file-zone {
         border-color: var(--color-brand-text);
     }
@@ -1686,7 +1624,6 @@
         background: transparent;
         color: var(--color-secondary-dark);
         caret-color: currentColor;
-        outline: none;
         box-shadow: none;
     }
 
@@ -1711,15 +1648,6 @@
     .task-composer-description::placeholder {
         color: var(--color-secondary-light);
         opacity: 1;
-    }
-
-    /* No ring on borderless text; the caret marks focus. Invalid still shows, as an underline. */
-    .task-composer-title:focus,
-    .task-composer-title:focus-visible,
-    .task-composer-description:focus,
-    .task-composer-description:focus-visible {
-        outline: none;
-        box-shadow: none;
     }
 
     .task-composer-title[aria-invalid='true'] {
@@ -1764,7 +1692,7 @@
 
     .form-chip:focus-visible,
     .form-chip:has(input:focus-visible) {
-        outline: 2px solid var(--color-secondary-medium);
+        outline: 2px solid var(--color-focus);
         outline-offset: 2px;
     }
 
@@ -1814,7 +1742,6 @@
         background: transparent;
         color: inherit;
         font: inherit;
-        outline: none;
         box-shadow: none;
         cursor: pointer;
     }
@@ -1845,7 +1772,6 @@
         font: inherit;
         font-variant-numeric: tabular-nums;
         text-align: end;
-        outline: none;
         box-shadow: none;
         appearance: textfield;
         -moz-appearance: textfield;
@@ -1891,11 +1817,6 @@
     .dark .form-chip[data-disabled]:hover {
         border-color: var(--color-line-strong);
         background-color: transparent;
-    }
-
-    .dark .form-chip:focus-visible,
-    .dark .form-chip:has(input:focus-visible) {
-        outline-color: var(--color-ink-muted);
     }
 
     .dark .form-chip[data-invalid] {
@@ -2099,7 +2020,6 @@
     }
 
     .filter-pill:hover { box-shadow: inset 0 0 0 1px var(--color-secondary-light); }
-    .filter-pill:focus-visible { outline: 2px solid var(--color-secondary-medium); outline-offset: 2px; }
 
     .filter-pill[aria-pressed='true'] {
         color: var(--color-white);

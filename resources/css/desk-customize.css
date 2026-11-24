@@ -105,7 +105,7 @@
     .dk-cz-search { display: flex; align-items: center; gap: 8px; height: 40px; padding-inline: 12px; border: 1px solid var(--line-2); border-radius: var(--radius-control); background: var(--paper); color: var(--ink-3); }
     .dk-cz-search:focus-within { border-color: var(--ink-3); }
     .dk-cz-search svg.dk-i { width: 15px; height: 15px; flex: none; }
-    .dk-cz-search input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; outline: none; font-size: 13.5px; color: var(--ink); }
+    .dk-cz-search input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; font-size: 13.5px; color: var(--ink); }
     .dk-cz-search input::placeholder { color: var(--ink-3); }
 
     /* What to add: three tabs, then folding groups with what is left in each. */

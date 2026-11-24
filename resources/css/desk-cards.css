@@ -81,7 +81,6 @@
     .dk-todo-add { display: flex; align-items: center; gap: 4px; flex: none; }
     .dk-todo-input { flex: 1; min-width: 0; height: 36px; padding-inline: 12px; border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--sunk); color: var(--ink); font-family: var(--font); font-size: 14px; transition: border-color .15s ease, background .15s ease; }
     .dk-todo-input::placeholder { color: var(--faint); }
-    .dk-todo-input:focus { outline: none; border-color: var(--ink-3); background: var(--paper); }
     .dk-todo-input[aria-invalid="true"] { border-color: var(--bad); }
     .dk-todo-err { margin: 0; font-size: 12.5px; color: var(--bad); }
     .dk-todo-empty { margin: auto 0; text-align: center; font-size: 13.5px; color: var(--ink-3); }
@@ -132,7 +131,7 @@
      * the old top card aside and lifts the next one. */
     .dk-needs-view { margin-inline-start: 4px; }
     .dk-needs .dk-pb { display: flex; flex-direction: column; }
-    .dk-focus { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; border-radius: var(--radius-control); outline: none; touch-action: pan-y; }
+    .dk-focus { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; border-radius: var(--radius-control); touch-action: pan-y; }
     .dk-focus:focus-visible { box-shadow: 0 0 0 2px var(--ink-2); }
     .dk-focus-track { list-style: none; margin: 0; padding: 0 0 16px; flex: 1; min-height: 0; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
     .dk-focus-card { grid-area: 1 / 1; display: flex; flex-direction: column; gap: 6px; min-height: 0; padding: 20px 24px; border-radius: var(--radius-control); background: var(--sunk); border: 1px solid var(--line); overflow: clip; transform-origin: 50% 100%; transition: transform .42s cubic-bezier(.2, .7, .2, 1), opacity .32s ease; }

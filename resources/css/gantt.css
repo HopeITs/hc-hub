@@ -12,20 +12,11 @@
         color: var(--color-secondary-dark);
     }
 
-    .gantt-editor:focus {
-        outline: 2px solid color-mix(in srgb, var(--color-secondary-medium) 45%, transparent);
-        outline-offset: 0;
-    }
-
     .dark .gantt-editor {
         border-color: var(--color-field-line);
         background: var(--color-surface-2);
         color: var(--color-ink);
         color-scheme: dark;
-    }
-
-    .dark .gantt-editor:focus {
-        outline-color: color-mix(in srgb, var(--color-secondary-medium) 60%, transparent);
     }
 
     /* Gantt baseline: a hatched sliver under the planned bar. */

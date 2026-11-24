@@ -234,7 +234,7 @@
     .dk-pmenu-pop > .dk-pop-h { padding: 6px 10px 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 700; color: var(--ink-3); }
     .dk-pmenu-group { display: grid; gap: 1px; padding-block-end: 4px; margin-block-end: 4px; border-block-end: 1px solid var(--line); }
     .dk-pmenu-pop :is(.dk-pmenu-group > button, > button) { display: flex; align-items: center; gap: 10px; width: 100%; height: 38px; padding-inline: 10px; border: 0; border-radius: var(--radius-control); background: none; color: var(--ink); font: inherit; font-size: 13.5px; font-weight: 600; text-align: start; cursor: pointer; }
-    .dk-pmenu-pop :is(.dk-pmenu-group > button, > button):hover, .dk-pmenu-pop :is(.dk-pmenu-group > button, > button):focus-visible { background: var(--sunk); outline: none; }
+    .dk-pmenu-pop :is(.dk-pmenu-group > button, > button):hover, .dk-pmenu-pop :is(.dk-pmenu-group > button, > button):focus-visible { background: var(--sunk); }
     .dk-pmenu-pop button svg.dk-i { flex: none; width: 16px; height: 16px; color: var(--ink-3); }
     .dk-pmenu-pop > button.dk-danger, .dk-pmenu-pop > button.dk-danger svg.dk-i { color: var(--brand); }
     .dk-tile .dk-pmenu-pop > button[data-panel-pin] { margin-block-end: 4px; }
@@ -274,7 +274,7 @@
     .dk-panel[data-folded="user"]:hover { transform: translateY(-2px); }
     .dk-panel[data-folded="user"] .dk-pc { grid-area: n; justify-self: start; display: block; min-width: 0; height: auto; margin: 6px 0 0; padding: 0; border-radius: 0; background: none; color: var(--ink); font-size: 32px; font-weight: 800; line-height: 1; }
     .dk-panel[data-folded="user"] .dk-unfold { grid-area: go; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid var(--line-2); border-radius: 50%; background: var(--paper); color: var(--ink-2); cursor: pointer; transition: border-color .15s, color .15s, background-color .15s; }
-    .dk-panel[data-folded="user"]:hover .dk-unfold, .dk-panel[data-folded="user"] .dk-unfold:focus-visible { border-color: var(--ink); background: var(--ink); color: var(--paper); outline: none; }
+    .dk-panel[data-folded="user"]:hover .dk-unfold, .dk-panel[data-folded="user"] .dk-unfold:focus-visible { border-color: var(--ink); background: var(--ink); color: var(--paper); }
     .dk-panel[data-folded="user"] .dk-unfold svg.dk-i { width: 14px; height: 14px; }
     @media (prefers-reduced-motion: reduce) { .dk-panel[data-folded="user"]:hover { transform: none; } }
 

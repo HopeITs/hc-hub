@@ -526,7 +526,7 @@
     .dk-prog-search { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding-inline: 12px; border: 1px solid var(--line-2); border-radius: var(--radius-surface); background: var(--paper); color: var(--faint); }
     .dk-prog-search:focus-within { border-color: var(--ink-3); }
     .dk-prog-search svg.dk-i { width: 16px; height: 16px; }
-    .dk-prog-search input { width: 14rem; max-width: 52vw; border: 0; background: none; font-size: 14px; color: var(--ink); outline: none; }
+    .dk-prog-search input { width: 14rem; max-width: 52vw; border: 0; background: none; font-size: 14px; color: var(--ink); }
 
     .dk-prog-group { display: grid; gap: 10px; }
     .dk-prog-group-h { display: inline-flex; align-items: center; gap: 8px; justify-self: start; min-height: 36px; padding: 0 4px; border: 0; background: none; font: inherit; font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-2); cursor: pointer; }
@@ -554,7 +554,7 @@
     .dk-prog-card:has(.dk-prog-card-link:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
     .dk-prog-card-h { display: grid; gap: 4px; min-width: 0; }
     .dk-prog-card-t { display: -webkit-box; min-height: calc(2 * 1.35em); overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 16px; font-weight: 800; line-height: 1.35; color: var(--ink); overflow-wrap: anywhere; }
-    .dk-prog-card-link { color: inherit; text-decoration: none; outline: none; }
+    .dk-prog-card-link { color: inherit; text-decoration: none; }
     .dk-prog-card-link::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
     .dk-prog-card-o { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 13px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .dk-prog-card-o svg.dk-i { width: 14px; height: 14px; flex: none; }
@@ -644,7 +644,7 @@
     .dk-ptk-rail-pick { display: none; }
     .dk-ptk-rail-find { display: flex; flex: none; align-items: center; gap: 6px; min-height: 34px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--radius-control); color: var(--ink-3); }
     .dk-ptk-rail-find svg.dk-i { width: 14px; height: 14px; flex: none; }
-    .dk-ptk-rail-find input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 13px; color: var(--ink); outline: none; }
+    .dk-ptk-rail-find input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: 13px; color: var(--ink); }
     /* The bottom edge fades out, so the next person never peeks in as a sliver of avatar; the padding lets the last one scroll clear of it. */
     .dk-ptk-rail-list { display: grid; flex: 1 1 auto; align-content: start; gap: 2px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding-bottom: 14px; -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 18px), transparent); }
     .dk-ptk-rail-list > li { min-width: 0; }
@@ -743,11 +743,10 @@
     .dk-ptk-foot .dk-prog-more { margin: 0; }
     .dk-ptk-add { display: flex; flex: 1 1 16rem; align-items: center; gap: 8px; min-height: 38px; padding: 0 4px; color: var(--ink-3); }
     .dk-ptk-add svg.dk-i { width: 15px; height: 15px; flex: none; }
-    .dk-ptk-add input { flex: 1; min-width: 0; padding: 6px 0; border: 0; border-bottom: 1px dashed transparent; background: none; font: inherit; font-size: 13.5px; color: var(--ink); outline: none; }
+    .dk-ptk-add input { flex: 1; min-width: 0; padding: 6px 0; border: 0; border-bottom: 1px dashed transparent; background: none; font: inherit; font-size: 13.5px; color: var(--ink); }
     .dk-ptk-add input:focus { border-bottom-color: var(--line-2); }
     .dk-ptk-add-sub { padding: 6px 12px 0; }
     /* The subtask line reads as one more row being typed: no focus ring, no dashed underline. */
-    .dk-ptk-add.dk-ptk-add-sub input:focus, .dk-ptk-add.dk-ptk-add-sub input:focus-visible { border-bottom-color: transparent; outline: none; box-shadow: none; }
 
     /* Title line, list-app style: caret, title, subtask count, and a small button group that shows on row hover. */
     .dk-ptk-caret { display: inline-grid; flex: none; place-items: center; width: 18px; height: 18px; margin-inline-start: -4px; padding: 0; border: 0; border-radius: var(--radius-inset); background: none; color: var(--ink-3); cursor: pointer; }
@@ -760,7 +759,7 @@
     .dk-ptk-subcount { display: inline-flex; flex: none; align-items: center; gap: 3px; min-height: 22px; padding: 0 5px; border: 0; border-radius: var(--radius-control); background: none; font: inherit; font-size: 12px; font-weight: 700; color: var(--ink-3); cursor: pointer; }
     .dk-ptk-subcount:hover { background: var(--sunk); color: var(--ink); }
     .dk-ptk-subcount svg.dk-i { width: 13px; height: 13px; }
-    .dk-ptk-rename { flex: 1; min-width: 0; height: 28px; padding: 0 8px; border: 1px solid var(--line-2); border-radius: var(--radius-control); background: var(--paper); font: inherit; font-size: 14px; font-weight: 700; color: var(--ink); outline: none; }
+    .dk-ptk-rename { flex: 1; min-width: 0; height: 28px; padding: 0 8px; border: 1px solid var(--line-2); border-radius: var(--radius-control); background: var(--paper); font: inherit; font-size: 14px; font-weight: 700; color: var(--ink); }
     .dk-ptk-rename:focus { border-color: var(--ink-3); }
     /* Pinned to the end of the title column and centred in the row, so the buttons sit in the same spot on every row, whatever the title or the line under it. */
     .dk-ptk-hover { position: absolute; top: 50%; inset-inline-end: 4px; display: inline-flex; align-items: center; gap: 1px; padding: 2px; transform: translateY(-50%); border: 1px solid var(--line); border-radius: var(--radius-control); background: var(--paper); box-shadow: 0 1px 2px rgb(16 24 40 / .06); opacity: 0; transition: opacity .12s ease; }
@@ -768,7 +767,7 @@
     .dk-ptk-hbtn { position: relative; display: inline-grid; flex: none; place-items: center; width: 24px; height: 22px; padding: 0; border: 0; border-radius: var(--radius-control); background: none; color: var(--ink-3); cursor: pointer; transition: background-color .1s ease, color .1s ease; }
     .dk-ptk-hbtn + .dk-ptk-hbtn::before { content: ''; position: absolute; inset-block: 5px; inset-inline-start: -1px; width: 1px; background: var(--line); }
     .dk-ptk-hbtn svg.dk-i { width: 14px; height: 14px; stroke-width: 2; }
-    .dk-ptk-hbtn:hover, .dk-ptk-hbtn:focus-visible { background: var(--sunk); color: var(--ink); outline: none; }
+    .dk-ptk-hbtn:hover, .dk-ptk-hbtn:focus-visible { background: var(--sunk); color: var(--ink); }
     .dk-ptk-more { opacity: 0; transition: opacity .12s ease; }
     .dk-ptk-line:hover .dk-ptk-more, .dk-ptk-more:focus-visible, .dk-ptk-more.dk-ptk-more-on { opacity: 1; }
     @media (hover: none) { .dk-ptk-hover, .dk-ptk-more { opacity: 1; } }
@@ -779,7 +778,7 @@
 
     .dk-ptk-menu { position: fixed; z-index: 60; width: 232px; padding: 6px; border: 1px solid var(--line); border-radius: var(--radius-surface); background: var(--paper); box-shadow: 0 1px 2px rgb(16 24 40 / .06), 0 14px 36px rgb(16 24 40 / .16); }
     .dk-ptk-menu-i { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 36px; padding: 0 10px; border: 0; border-radius: var(--radius-control); background: none; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--ink); text-align: start; text-decoration: none; cursor: pointer; transition: background-color .1s ease; }
-    .dk-ptk-menu-i:hover, .dk-ptk-menu-i:focus-visible { background: var(--sunk); outline: none; }
+    .dk-ptk-menu-i:hover, .dk-ptk-menu-i:focus-visible { background: var(--sunk); }
     .dk-ptk-menu-i svg.dk-i { width: 16px; height: 16px; flex: none; color: var(--ink-3); }
     .dk-ptk-menu-i:hover svg.dk-i, .dk-ptk-menu-i:focus-visible svg.dk-i { color: var(--ink); }
     .dk-ptk-menu-sep { height: 1px; margin: 6px 4px; background: var(--line); }

@@ -285,3 +285,42 @@ test('control size tokens exist, compact grows to 44px on touch, and buttons and
         ->toContain('.dk-btn.dk-sm{ height:var(--control-h-compact);')
         ->toMatch('/\.dk-field input[^{]*\{[^}]*min-height:var\(--field-h\);[^}]*border:var\(--border-control\) solid[^}]*font-size:var\(--text-body\)/');
 });
+
+test('one global focus ring: an ink token in both themes, never red, and no stylesheet switches the outline off outside the documented cases', function () {
+    $css = dirname(__DIR__, 2).'/resources/css/';
+    $tokens = file_get_contents($css.'tokens.css');
+    [$light, $dark] = explode('.dark {', $tokens, 2);
+
+    expect($light)->toMatch('/^\s*--color-focus:\s*var\(--color-heading\);$/m')
+        ->and($light)->toMatch('/^\s*--color-focus-ring:\s*color-mix\(in srgb, var\(--color-focus\) 12%, transparent\);$/m')
+        ->and($dark)->toMatch('/^\s*--color-focus:\s*var\(--color-ink\);$/m')
+        ->and($dark)->toMatch('/^\s*--color-focus-ring:\s*color-mix\(in srgb, var\(--color-focus\) 12%, transparent\);$/m')
+        ->and($tokens)->not->toMatch('/--color-focus(-ring)?:[^;]*(primary|brand|#be1f24)/i');
+
+    $base = file_get_contents($css.'base.css');
+
+    expect($base)->toMatch('/^:focus-visible \{\s*outline: 2px solid var\(--color-focus\);\s*outline-offset: 2px;\s*\}/m')
+        ->and($base)->toMatch('/textarea, select\):focus-visible \{\s*outline: none;\s*border-color: var\(--color-focus\);\s*box-shadow: 0 0 0 3px var\(--color-focus-ring\);/');
+
+    // Allowed `outline: none`: the two field rules in base.css (ink border and ring in the same rule, or left to the
+    // field box) and two dialog containers that only ever take programmatic focus (tabindex -1 / focus trap).
+    $allowed = ['base.css' => 2, 'desk-bell.css' => 1, 'desk-customize.css' => 1];
+    $found = [];
+
+    foreach (glob($css.'*.css') as $file) {
+        $count = preg_match_all('/outline:\s*(?:none|0)(?![\d.])/', file_get_contents($file));
+
+        if ($count > 0) {
+            $found[basename($file)] = $count;
+        }
+    }
+
+    ksort($allowed);
+    ksort($found);
+
+    expect($found)->toBe($allowed);
+
+    foreach (glob($css.'*.css') as $file) {
+        expect(file_get_contents($file))->not->toMatch('/:focus(?:-visible|-within)?[^{}]*\{[^{}]*outline[^{}]*(?:--color-primary|--color-brand|--rules-accent)/');
+    }
+});

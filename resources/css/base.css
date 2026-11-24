@@ -111,3 +111,33 @@
         opacity: 0;
     }
 }
+
+/*
+ * One global keyboard focus ring (task 1.5). Unlayered on purpose: it must beat
+ * Flux's own focus utilities and every component rule, so nothing re-declares
+ * focus locally. Ink, never brand red; the dark theme swaps --color-focus.
+ * Hover never triggers it: only :focus-visible, and :focus-within on a field box.
+ */
+:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+}
+
+/* A bare field swaps the outline for an ink border and a 3px ring at 12% ink. */
+:is(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color'], [type='button'], [type='submit'], [type='reset'], [type='image']), textarea, select):focus-visible {
+    outline: none;
+    border-color: var(--color-focus);
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+/* A field box (border on the wrapper, borderless input inside) rings the box once, never the input. */
+:is(.form-box, .task-composer-text, .dk-reg-q, .dk-pf-search, .dk-psearch, .dk-pal-in, .dk-cz-search, .dk-prog-search, .dk-ptk-rail-find, .dk-tc-search, .dk-tc-add-row, .rules-stepper, .rules-event-search, .rules-chip-add):focus-within {
+    border-color: var(--color-focus);
+    box-shadow: 0 0 0 3px var(--color-focus-ring);
+}
+
+:is(.form-box, .form-chip, .task-composer-text, .dk-reg-q, .dk-pf-search, .dk-psearch, .dk-pal-in, .dk-cz-search, .dk-prog-search, .dk-ptk-rail-find, .dk-tc-search, .dk-tc-add-row, .rules-stepper, .rules-event-search, .rules-chip-add) :is(input, textarea, select):focus-visible {
+    outline: none;
+    border-color: transparent;
+    box-shadow: none;
+}

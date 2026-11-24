@@ -26,7 +26,7 @@
 
     .lf-box { width: 15rem; overflow: hidden; border-radius: var(--radius-surface); border: 1px solid var(--color-secondary-soft); background: var(--color-white); box-shadow: var(--shadow-card); transition: border-color .12s, transform .12s; }
     .lf-box:hover { border-color: var(--color-secondary-light); transform: translateY(-1px); }
-    .lf-box:focus-within { outline: 2px solid var(--color-secondary-light); outline-offset: 2px; }
+    .lf-box:focus-within { outline: 2px solid var(--color-focus); outline-offset: 2px; }
     .lf-box[data-status="behind"] { border-color: color-mix(in srgb, var(--color-status-critical) 45%, transparent); }
     .lf-box[data-status="waiting"] { border-color: color-mix(in srgb, var(--color-status-warn) 45%, transparent); }
     .lf-box-text { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }

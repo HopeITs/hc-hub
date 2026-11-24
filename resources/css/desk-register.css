@@ -262,7 +262,7 @@
     .dk-pjl-alert { box-shadow: inset 3px 0 0 var(--bad); }
     [dir="rtl"] .dk-pjl-alert { box-shadow: inset -3px 0 0 var(--bad); }
 
-    .dk-pjl-main { position: relative; min-width: 0; outline: none; border-radius: var(--radius-control); }
+    .dk-pjl-main { position: relative; min-width: 0; border-radius: var(--radius-control); }
     .dk-pjl-main:focus-visible { outline: 2px solid var(--ink-3); outline-offset: 4px; }
     .dk-pjl-name { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14.5px; font-weight: 700; color: var(--ink); }
     .dk-pjl-name > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -280,7 +280,7 @@
     .dk-pjl-acts { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
     .dk-pjl-menu { top: 32px; width: 190px; }
     .dk-pjl-menu button { display: flex; align-items: center; gap: 8px; width: 100%; height: 34px; padding-inline: 8px; border: 0; border-radius: var(--radius-control); background: none; font: inherit; font-size: 13px; font-weight: 600; color: var(--ink); cursor: pointer; text-align: start; }
-    .dk-pjl-menu button:hover, .dk-pjl-menu button:focus-visible { background: var(--sunk); outline: none; }
+    .dk-pjl-menu button:hover, .dk-pjl-menu button:focus-visible { background: var(--sunk); }
 
     /* The preview opens after a short pause so moving the mouse down the list doesn't flash it. */
     .dk-pjl-peek {
@@ -520,7 +520,6 @@
     .dk-tc-add:hover { background: var(--sunk); color: var(--ink); }
     .dk-tc-add-row { display: flex; flex-direction: column; gap: 4px; padding: 4px; border: 1px solid var(--line-2); border-radius: var(--radius-control); background: var(--paper); }
     .dk-tc-add-input { width: 100%; min-width: 0; padding: 2px; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 12px; }
-    .dk-tc-add-input:focus { outline: none; }
 
     /* Day / 4 days / week columns */
     .dk-tc-cols { display: grid; grid-template-columns: repeat(var(--tc-cols), minmax(0, 1fr)); }
@@ -579,7 +578,6 @@
     .dk-tc-search { display: flex; flex: 1; align-items: center; gap: 6px; min-width: 0; height: 34px; padding-inline: 8px; border: 1px solid var(--line-2); border-radius: var(--radius-control); color: var(--ink-3); }
     .dk-tc-search:focus-within { border-color: var(--ink-3); }
     .dk-tc-search input { flex: 1; min-width: 0; border: 0; background: none; color: var(--ink); font: inherit; font-size: 13px; }
-    .dk-tc-search input:focus { outline: none; }
     .dk-tc-sort select { max-width: 128px; height: 34px; padding-inline: 8px; border: 1px solid var(--line-2); border-radius: var(--radius-control); background: var(--paper); color: var(--ink); font: inherit; font-size: 12.5px; }
     .dk-tc-side-list { display: flex; flex-direction: column; gap: 6px; min-height: 64px; }
     .dk-tc-side-empty { padding: 20px 4px; border: 1px dashed var(--line-2); border-radius: var(--radius-control); font-size: 12.5px; color: var(--ink-3); text-align: center; }

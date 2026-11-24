@@ -245,11 +245,6 @@
         transition: border-color 150ms ease, box-shadow 150ms ease;
     }
 
-    .rules-stepper:focus-within {
-        border-color: var(--rules-accent);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--rules-accent) 18%, transparent);
-    }
-
     .rules-stepper:has([aria-invalid='true']) {
         border-color: var(--color-status-critical);
     }
@@ -288,7 +283,6 @@
         font-variant-numeric: tabular-nums;
         text-align: end;
         color: var(--rules-ink);
-        outline: none;
         -moz-appearance: textfield;
         appearance: textfield;
     }
@@ -321,17 +315,11 @@
         font-weight: 700;
         font-variant-numeric: tabular-nums;
         color: var(--rules-ink);
-        outline: none;
         transition: border-color 150ms ease, box-shadow 150ms ease;
     }
 
     .dark .rules-time {
         color-scheme: dark;
-    }
-
-    .rules-time:focus {
-        border-color: var(--rules-accent);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--rules-accent) 18%, transparent);
     }
 
     .rules-time[aria-invalid='true'] {
@@ -380,7 +368,6 @@
 
     .rules-chip-add:focus-within {
         border-style: solid;
-        border-color: var(--rules-accent);
     }
 
     .rules-chip-add input {
@@ -390,7 +377,6 @@
         font-weight: 700;
         font-variant-numeric: tabular-nums;
         color: var(--rules-ink);
-        outline: none;
         appearance: textfield;
     }
 
@@ -451,7 +437,7 @@
     }
 
     .rules-day:has(:focus-visible) {
-        outline: 2px solid var(--rules-accent);
+        outline: 2px solid var(--color-focus);
         outline-offset: 2px;
     }
 
@@ -686,11 +672,6 @@
         color: var(--rules-muted);
     }
 
-    .rules-event-search:focus-within {
-        border-color: var(--rules-accent);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--rules-accent) 18%, transparent);
-    }
-
     .rules-event-search input {
         min-width: 0;
         flex: 1;
@@ -698,7 +679,6 @@
         background: transparent;
         font-size: 0.875rem;
         color: var(--rules-ink);
-        outline: none;
     }
 
     .rules-event-stale {
@@ -760,7 +740,7 @@
     }
 
     .rules-switch input:focus-visible + .rules-switch-track {
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--rules-accent) 30%, transparent);
+        box-shadow: 0 0 0 3px var(--color-focus-ring);
     }
 
     .rules-switch-label {
@@ -810,7 +790,7 @@
     }
 
     .rules-segment input:focus-visible + span {
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--rules-accent) 30%, transparent);
+        box-shadow: 0 0 0 3px var(--color-focus-ring);
     }
 
     .rules-event-roles {

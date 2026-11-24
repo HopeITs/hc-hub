@@ -211,6 +211,10 @@
     --text-caption--letter-spacing: 0.01em;
     --color-heading: #414042;
 
+    /* Keyboard focus: one ink ring everywhere, never brand red (base.css). The ring token is the field halo at 12% ink. */
+    --color-focus: var(--color-heading);
+    --color-focus-ring: color-mix(in srgb, var(--color-focus) 12%, transparent);
+
     /* Tracking Desk: figures stay in Somar Sans with tabular-nums (no mono face), per the approved font set. */
 
     /* Tracking Desk surfaces and ink (light). Dark values live in the .dark block. */
@@ -288,6 +292,8 @@
         --color-sunk: #111214;
         --color-desk-ink: #ececee;
         --color-heading: var(--color-desk-ink);
+        --color-focus: var(--color-ink);
+        --color-focus-ring: color-mix(in srgb, var(--color-focus) 12%, transparent);
         --color-desk-ink-2: #c4c6ca;
         --color-desk-ink-3: #a8aaae;
         --color-desk-faint: #8a8c93;
