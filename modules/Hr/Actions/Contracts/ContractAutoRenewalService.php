@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Hr\Actions\Contracts;
 
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\Hr\Models\Contract;
@@ -28,6 +29,56 @@ class ContractAutoRenewalService
     public function __construct(private LeaveBalanceService $leaveBalances) {}
 
     /**
+     * Does this contract wait for the new year? A contract ending in one of
+     * config('contracts.renew_at_new_year_months') (October to December) is
+     * not renewed the day after it ends, which made renewals of a few days
+     * up to 31 December: it is renewed on 1 January, for the whole year.
+     */
+    public static function waitsForNewYear(Contract $contract): bool
+    {
+        return $contract->end_date !== null
+            && in_array($contract->end_date->month, (array) config('contracts.renew_at_new_year_months', []), true)
+            && $contract->end_date->format('m-d') !== '12-31';
+    }
+
+    /**
+     * The day the renewal of $contract starts: 1 January after it for a
+     * contract that waits for the new year, otherwise the day after it ends.
+     * The one rule the renewal run, the renewal journey and the departure
+     * check (OffboardingJourneys::awaitsAutoRenewal) all read.
+     */
+    public static function renewalStart(Contract $contract): ?CarbonInterface
+    {
+        if ($contract->end_date === null) {
+            return null;
+        }
+
+        return self::waitsForNewYear($contract)
+            ? $contract->end_date->copy()->addYear()->startOfYear()
+            : $contract->end_date->copy()->addDay();
+    }
+
+    /**
+     * Ended, set to auto-renew, and waiting for the new year: the contracts
+     * city HR is told about (ProcessContractAutoRenewalsCommand) so the gap
+     * until 1 January is not a surprise.
+     *
+     * @return Collection<int, Contract>
+     */
+    public function waitingForNewYear(?CarbonInterface $asOf = null): Collection
+    {
+        $asOf ??= today();
+
+        return $this->renewable($asOf)
+            ->with('employee')
+            ->get()
+            ->filter(fn (Contract $contract): bool => $contract->canAutoRenew()
+                && self::waitsForNewYear($contract)
+                && self::renewalStart($contract)->toDateString() > $asOf->toDateString())
+            ->values();
+    }
+
+    /**
      * @return Collection<int, Contract>
      */
     public function process(?CarbonInterface $asOf = null): Collection
@@ -36,13 +87,8 @@ class ContractAutoRenewalService
         /** @var Collection<int, Contract> $renewed */
         $renewed = collect();
 
-        Contract::query()
+        $this->renewable($asOf)
             ->select(['id'])
-            ->where('auto_renew', true)
-            ->where('is_active', false)
-            ->whereNull('terminated_at')
-            ->whereNull('termination_reason_id')
-            ->whereDate('end_date', '<', $asOf->toDateString())
             ->chunkById(100, function (Collection $contracts) use ($renewed, $asOf): void {
                 foreach ($contracts as $contract) {
                     $renewal = $this->renewIfNeeded((int) $contract->id, $asOf);
@@ -76,7 +122,12 @@ class ContractAutoRenewalService
                 return null;
             }
 
-            $start = $source->end_date->addDay()->toDateString();
+            $start = self::renewalStart($source)->toDateString();
+
+            // Ended in October to December: renewed on 1 January, not before.
+            if ($start > $asOf->toDateString()) {
+                return null;
+            }
 
             if ($this->successorExists($source, $start)) {
                 return null;
@@ -105,6 +156,21 @@ class ContractAutoRenewalService
 
             return $renewal->refresh();
         });
+    }
+
+    /**
+     * Ended before $asOf, inactive, auto-renew on and never terminated.
+     *
+     * @return Builder<Contract>
+     */
+    private function renewable(CarbonInterface $asOf): Builder
+    {
+        return Contract::query()
+            ->where('auto_renew', true)
+            ->where('is_active', false)
+            ->whereNull('terminated_at')
+            ->whereNull('termination_reason_id')
+            ->whereDate('end_date', '<', $asOf->toDateString());
     }
 
     /**

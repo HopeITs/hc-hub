@@ -223,6 +223,14 @@ return [
             'title' => 'Contracts renewed',
             'body' => ':count contract(s) were renewed automatically today: :names.',
         ],
+        'leaving-reasons-missing' => [
+            'title' => 'Leavers with no reason recorded',
+            'body' => ':count contract(s) ended more than a month ago with no termination reason. Add it so the leaving report is complete.',
+        ],
+        'contracts-awaiting-new-year' => [
+            'title' => 'Contracts ended, renewing in the new year',
+            'body' => ':count contract(s) have ended and will be renewed automatically on :date: :names.',
+        ],
     ],
 
     // "Don't renew": a new email from a manager to HR (mailto; nothing is sent by the system).

@@ -42,6 +42,7 @@ use Modules\Hr\Console\ProcessContractAutoRenewalsCommand;
 use Modules\Hr\Console\PurgeUploadedPunchesCommand;
 use Modules\Hr\Console\QueueMailListStartersCommand;
 use Modules\Hr\Console\RecountPositionSeatsCommand;
+use Modules\Hr\Console\RemindMissingLeavingReasonsCommand;
 use Modules\Hr\Console\ReportAccountGapsCommand;
 use Modules\Hr\Console\ReportRecruitmentAccessCommand;
 use Modules\Hr\Console\SendAttendanceRemindersCommand;
@@ -137,6 +138,7 @@ class HrServiceProvider extends ServiceProvider
             DeactivateDepartedEmployees::class,
             DeactivateExpiredContractsCommand::class,
             ProcessContractAutoRenewalsCommand::class,
+            RemindMissingLeavingReasonsCommand::class,
             StartProbationReviewsCommand::class,
             SendLeaveDecisionRemindersCommand::class,
             RecountPositionSeatsCommand::class,

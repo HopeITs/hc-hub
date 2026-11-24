@@ -35,6 +35,8 @@ final class HrSchedule implements ScheduleSource
         $schedule->command(DeactivateExpiredContractsCommand::class)->dailyAt('21:30')->withoutOverlapping()->onOneServer();
         $schedule->command(ProcessContractAutoRenewalsCommand::class)->dailyAt('21:35')->withoutOverlapping()->onOneServer();
         $schedule->command(CheckContractAmendmentsCommand::class)->weeklyOn(0, '06:00')->onOneServer();
+        // People who left over a month ago with no termination reason: HR of the city, once a month.
+        $schedule->command(RemindMissingLeavingReasonsCommand::class)->monthlyOn(1, '08:30')->withoutOverlapping()->onOneServer();
 
         // Journeys (as the HR app ran them): expiry warnings and overdue orientations in the
         // morning; renewal journeys, then departed volunteers, after the evening contract runs.

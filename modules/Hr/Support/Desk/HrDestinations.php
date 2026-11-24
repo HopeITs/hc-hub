@@ -20,6 +20,7 @@ use Modules\Hr\Support\Entitlements\Entitlements;
 use Modules\Hr\Support\Inbox\WorkInbox;
 use Modules\Hr\Support\Recruitment\Access;
 use Modules\Hr\Support\Recruitment\RecruitmentConfig;
+use Modules\Hr\Support\Reports\ReportCatalog;
 
 /**
  * The HR pages of the sidebar: every HR page with the permission that opens
@@ -66,6 +67,15 @@ final class HrDestinations implements DestinationSource
             ['hr.statistics.general', 'statistics', 'chart', 'nav-chart-line', 'people', $can('statistics.view')],
             ['hr.statistics.contracts', 'statistics_contracts', 'chart', 'nav-file-text', 'people', $can('statistics.view'), 'under' => 'hr.statistics.general'],
             ['hr.statistics.salaries', 'statistics_salaries', 'chart', 'nav-chart-line', 'people', $can('statistics.view'), 'under' => 'hr.statistics.general'],
+
+            // One link for the reports hub; each report opens from it. A report's own gate is ReportCatalog.
+            ['hr.reports.index', 'reports', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::visibleTo($user) !== []],
+            ['hr.reports.leaving-reasons', 'reports_leaving_reasons', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::allows('leaving-reasons', $user), 'under' => 'hr.reports.index'],
+            ['hr.reports.recruitment-funnel', 'reports_recruitment_funnel', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::allows('recruitment-funnel', $user), 'under' => 'hr.reports.index'],
+            ['hr.reports.leave', 'reports_leave', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::allows('leave', $user), 'under' => 'hr.reports.index'],
+            ['hr.reports.vacancies', 'reports_vacancies', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::allows('vacancies', $user), 'under' => 'hr.reports.index'],
+            ['hr.reports.training', 'reports_training', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::allows('training', $user), 'under' => 'hr.reports.index'],
+            ['hr.reports.profile-completeness', 'reports_profile_completeness', 'chart', 'nav-chart-line', 'people', fn (User $user): bool => ReportCatalog::allows('profile-completeness', $user), 'under' => 'hr.reports.index'],
 
             ['hr.recruitment.requests.index', 'recruitment_requests', 'file', 'nav-file-plus', 'recruitment', $can('recruitment-requests.view')],
             ['hr.recruitment.approvals.pending', 'recruitment_approvals', 'check', 'nav-list-checks', 'recruitment', fn (User $user): bool => Access::hasActivePermission($user, 'recruitment-requests.approve') && self::mayReceiveApprovals($user), 'own' => true],

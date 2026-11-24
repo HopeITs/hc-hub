@@ -10,6 +10,7 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Modules\Core\Models\User;
+use Modules\Hr\Actions\Contracts\ContractAutoRenewalService;
 use Modules\Hr\Enums\ContractType as ContractTypeEnum;
 use Modules\Hr\Models\Checklist;
 use Modules\Hr\Models\Contract;
@@ -139,7 +140,9 @@ class OffboardingJourneys
             return false;
         }
 
-        $successorStart = $contract->end_date->copy()->addDay()->toDateString();
+        // 1 January for a contract ending in October to December, so a volunteer
+        // waiting for the new year is not deactivated meanwhile.
+        $successorStart = ContractAutoRenewalService::renewalStart($contract)->toDateString();
 
         return ! $contracts->contains(fn (Contract $other): bool => $other->id !== $contract->id
             && (int) $other->position_id === (int) $contract->position_id

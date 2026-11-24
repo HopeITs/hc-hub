@@ -42,6 +42,7 @@ test('the schedule is exactly these jobs at these times', function () {
         'hr:send-onboarding-step-reminders | 12 8 * * * | no overlap | one server',
         'hr:send-orientation-reminders | 10 8 * * * | no overlap | one server',
         'hr:track-renewal-journeys | 45 21 * * * | no overlap | one server',
+        'leavers:remind-missing-reasons | 30 8 1 * * | no overlap | one server',
         'leaves:send-decision-reminders | 5 8 * * * | no overlap | one server',
         'mail-lists:queue-starters | 20 8 * * * | no overlap | one server',
         'model:prune --model="App\Models\Activity" --model="App\Models\TrustedDevice" --model="App\Models\UserNotification" | 0 0 * * * | may overlap | every server',

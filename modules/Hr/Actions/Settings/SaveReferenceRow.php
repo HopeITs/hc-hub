@@ -85,7 +85,8 @@ final class SaveReferenceRow
             }
 
             $validated[$field] = match ($spec['type']) {
-                'integer', 'select' => (int) $validated[$field],
+                'integer' => (int) $validated[$field],
+                'select' => is_int(($spec['options'] ?? [null])[0]) ? (int) $validated[$field] : (string) $validated[$field],
                 'decimal' => (float) $validated[$field],
                 default => $validated[$field],
             };

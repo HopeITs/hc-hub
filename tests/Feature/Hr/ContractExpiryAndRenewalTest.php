@@ -121,3 +121,27 @@ test('auto-renewal skips a contract that is still active, switched off, terminat
         ->and($terminated->refresh()->is_active)->toBeFalse()
         ->and($onTrial->refresh()->is_active)->toBeFalse();
 });
+
+test('a contract ending in October to December renews on 1 January, and HR is told once', function () {
+    $city = City::factory()->create();
+    $hr = User::factory()->role('HR-'.strtoupper($city->slug))->create();
+    $employee = Employee::factory()->create(['city_id' => $city->id]);
+    $source = ($this->contract)(['employee_id' => $employee->id, 'auto_renew' => true, 'end_date' => '2026-10-15', 'is_active' => false]);
+
+    $this->travelTo('2026-10-20 21:35:00');
+    $this->artisan(ProcessContractAutoRenewalsCommand::class)->assertSuccessful();
+    $this->artisan(ProcessContractAutoRenewalsCommand::class)->assertSuccessful();
+
+    expect(Contract::query()->where('employee_id', $employee->id)->count())->toBe(1);
+    Notification::assertSentToTimes($hr, JourneyNotice::class, 1);
+    Notification::assertSentTo($hr, JourneyNotice::class, fn (JourneyNotice $notice): bool => $notice->kind === 'contracts-awaiting-new-year'
+        && $notice->params['date'] === '2027-01-01');
+
+    $this->travelTo('2027-01-01 21:35:00');
+    $this->artisan(ProcessContractAutoRenewalsCommand::class)->assertSuccessful();
+
+    $renewal = Contract::query()->where('employee_id', $employee->id)->whereKeyNot($source->id)->sole();
+
+    expect($renewal->start_date->toDateString())->toBe('2027-01-01')
+        ->and($renewal->end_date->toDateString())->toBe('2027-12-31');
+});
