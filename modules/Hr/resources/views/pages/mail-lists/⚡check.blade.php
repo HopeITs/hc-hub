@@ -224,9 +224,9 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.check.title')] class extends
                     <div class="flex flex-wrap items-center gap-2">
                         @if ($result)
                             @if ($result['in_sync'])
-                                <flux:badge size="sm" color="green" icon="check">{{ __('hr_mail_lists.check.in_sync') }}</flux:badge>
+                                <x-ui.tone-badge tone="good" icon="check">{{ __('hr_mail_lists.check.in_sync') }}</x-ui.tone-badge>
                             @else
-                                <flux:badge size="sm" color="amber" icon="exclamation-triangle">{{ __('hr_mail_lists.check.differs') }}</flux:badge>
+                                <x-ui.tone-badge tone="warn" icon="exclamation-triangle">{{ __('hr_mail_lists.check.differs') }}</x-ui.tone-badge>
                             @endif
                         @endif
                         <x-ui.button tone="ghost" size="sm" icon="pencil-square" wire:click="editRule({{ $list->id }})" data-test="mail-list-edit-rule">{{ __('hr_mail_lists.check.edit_rule') }}</x-ui.button>
@@ -260,7 +260,7 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.check.title')] class extends
                                                     @if ($key === 'left' && ! $person['leaving'])
                                                         <x-ui.button tone="ghost" size="sm" icon="user-minus" wire:click="queueRemoval({{ $person['id'] }})" :aria-label="__('hr_mail_lists.check.queue_removal')" data-test="mail-list-queue-removal" />
                                                     @elseif ($person['leaving'])
-                                                        <flux:badge size="sm" color="zinc">{{ __('hr_mail_lists.leaving_tag') }}</flux:badge>
+                                                        <x-ui.tone-badge tone="neutral">{{ __('hr_mail_lists.leaving_tag') }}</x-ui.tone-badge>
                                                     @endif
                                                     <x-ui.button tone="ghost" size="sm" icon="trash" wire:click="removeMember({{ $person['id'] }})" wire:confirm="{{ __('hr_mail_lists.remove_confirm') }}" :aria-label="__('hr_mail_lists.remove')" />
                                                 </span>

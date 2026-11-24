@@ -276,7 +276,7 @@ new #[Layout('layouts::desk'), Title('hr_attendance.devices.title')] class exten
 
 @php
     $muted = 'text-secondary-medium dark:text-ink-muted';
-    $tone = ['online' => 'green', 'late' => 'amber', 'silent' => 'red', 'never' => 'zinc'];
+    $tone = ['online' => 'good', 'late' => 'warn', 'silent' => 'critical', 'never' => 'neutral'];
     $icon = ['online' => 'check', 'late' => 'clock', 'silent' => 'exclamation-triangle', 'never' => 'minus'];
 @endphp
 
@@ -390,9 +390,9 @@ new #[Layout('layouts::desk'), Title('hr_attendance.devices.title')] class exten
                                 </x-ui.data-table.cell>
                                 <x-ui.data-table.cell :label="__('hr_attendance.devices.state')">
                                     @if ($device->isBlocked())
-                                        <flux:badge size="sm" color="red" icon="no-symbol">{{ __('hr_attendance.devices.blocked') }}</flux:badge>
+                                        <x-ui.tone-badge tone="critical" icon="no-symbol">{{ __('hr_attendance.devices.blocked') }}</x-ui.tone-badge>
                                     @else
-                                        <flux:badge size="sm" :color="$tone[$state]" :icon="$icon[$state]">{{ __('hr_attendance.devices.health.'.$state) }}</flux:badge>
+                                        <x-ui.tone-badge :tone="$tone[$state]" :icon="$icon[$state]">{{ __('hr_attendance.devices.health.'.$state) }}</x-ui.tone-badge>
                                     @endif
                                 </x-ui.data-table.cell>
                                 <x-ui.data-table.cell :label="__('hr_attendance.devices.key-title')">
@@ -449,7 +449,7 @@ new #[Layout('layouts::desk'), Title('hr_attendance.devices.title')] class exten
                 <p class="mt-1 text-sm {{ $muted }}">{{ __('hr_attendance.devices.without-help') }}</p>
                 <p class="mt-3 flex flex-wrap gap-2">
                     @foreach ($withoutDevice as $center)
-                        <flux:badge size="sm" color="zinc"><bdi>{{ $center->name }} · {{ $center->city?->name }}</bdi></flux:badge>
+                        <x-ui.tone-badge tone="neutral"><bdi>{{ $center->name }} · {{ $center->city?->name }}</bdi></x-ui.tone-badge>
                     @endforeach
                 </p>
             </x-ui.panel>

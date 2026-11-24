@@ -488,6 +488,7 @@ return [
         'due' => 'Due',
         'officer' => 'Officer',
         'meal' => 'MEAL',
+        'meal_pm' => 'MEAL · PM',
         'pm' => 'PM',
         'returned' => 'Returned',
         'tasks_title' => 'MEAL follow-up tasks',

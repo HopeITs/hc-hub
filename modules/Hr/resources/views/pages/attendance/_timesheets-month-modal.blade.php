@@ -13,7 +13,7 @@
         @endphp
         <div class="grid gap-y-5" data-attendance-month-panel="{{ $pEmployee->id }}">
             <div>
-                <flux:badge size="sm" :color="['open' => 'zinc', 'confirmed' => 'amber', 'approved' => 'sky', 'locked' => 'green'][$panel['state']]">{{ __('hr_attendance.workflow.states.'.$panel['state']) }}</flux:badge>
+                <x-ui.tone-badge :tone="['open' => 'neutral', 'confirmed' => 'warn', 'approved' => 'active', 'locked' => 'good'][$panel['state']]">{{ __('hr_attendance.workflow.states.'.$panel['state']) }}</x-ui.tone-badge>
             </div>
 
             <dl class="grid grid-cols-3 gap-3 text-center">

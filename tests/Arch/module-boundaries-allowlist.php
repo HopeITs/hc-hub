@@ -44,7 +44,7 @@ return [
     'Modules\Tracking must not use Modules\Hr' => [
         'source' => 'Modules\Tracking',
         'forbidden' => 'Modules\Hr',
-        'max' => 52,
+        'max' => 46,
         'allowed' => [
             'Modules\Tracking\TrackingServiceProvider',
             'Modules\Tracking\Actions\Cities\AssignMealCoverage',
@@ -63,7 +63,6 @@ return [
             'Modules\Tracking\Livewire\Concerns\AnnualPlans\FiltersPlanMatrix',
             'Modules\Tracking\Livewire\Concerns\AnnualPlans\ManagesAnnualPlanForm',
             'Modules\Tracking\Livewire\Concerns\BuildsPortfolioGantt',
-            'Modules\Tracking\Livewire\Concerns\BuildsProjectGantt',
             'Modules\Tracking\Livewire\Concerns\Calendar\ManagesCalendarTasks',
             'Modules\Tracking\Livewire\Concerns\Calendar\ScopesCalendarPeople',
             'Modules\Tracking\Livewire\Concerns\FundingAgreements\ReadsAgreementConnections',
@@ -92,7 +91,6 @@ return [
             'Modules\Tracking\Policies\AssignmentPolicy',
             'Modules\Tracking\Support\DonorReportResponsibles',
             'Modules\Tracking\Support\MealCoverage',
-            'Modules\Tracking\Support\ResultsChain',
             'Modules\Tracking\Support\SupervisionMap',
         ],
     ],

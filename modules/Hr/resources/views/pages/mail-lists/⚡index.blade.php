@@ -396,16 +396,16 @@ new #[Layout('layouts::desk'), Title('hr_mail_lists.title')] class extends Compo
                                     <span class="block truncate text-xs {{ $muted }}" dir="ltr">{{ $member['email'] }}</span>
                                     <span class="flex flex-wrap gap-1">
                                         @if ($member['pending'])
-                                            <flux:badge size="sm" color="amber">{{ __('hr_mail_lists.pending_tag') }}</flux:badge>
+                                            <x-ui.tone-badge tone="warn">{{ __('hr_mail_lists.pending_tag') }}</x-ui.tone-badge>
                                         @endif
                                         @if ($canConfirm && $member['leaving'])
-                                            <flux:badge size="sm" color="zinc">{{ __('hr_mail_lists.leaving_tag') }}</flux:badge>
+                                            <x-ui.tone-badge tone="neutral">{{ __('hr_mail_lists.leaving_tag') }}</x-ui.tone-badge>
                                         @endif
                                         @if ($member['former'])
-                                            <flux:badge size="sm" color="zinc">{{ __('hr_mail_lists.former') }}</flux:badge>
+                                            <x-ui.tone-badge tone="neutral">{{ __('hr_mail_lists.former') }}</x-ui.tone-badge>
                                         @endif
                                         @if ($member['external'])
-                                            <flux:badge size="sm" color="sky">{{ __('hr_mail_lists.external') }}</flux:badge>
+                                            <x-ui.tone-badge tone="active">{{ __('hr_mail_lists.external') }}</x-ui.tone-badge>
                                         @endif
                                     </span>
                                 </div>

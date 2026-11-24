@@ -25,7 +25,7 @@
         <x-ui.button type="button" icon="envelope" icon:trailing="chevron-down" x-on:click="open = ! open; if (open) $nextTick(() => $refs.q.focus())" x-bind:aria-expanded="open" aria-haspopup="true">{{ $label ?? __('hr_mail_lists.email_a_list') }}</x-ui.button>
 
         <div x-show="open" x-cloak
-             class="absolute z-30 mt-1 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-white/10 dark:bg-zinc-900 {{ $align === 'end' ? 'end-0' : 'start-0' }}">
+             class="absolute z-30 mt-1 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-lg dark:border-line dark:bg-surface-3 {{ $align === 'end' ? 'end-0' : 'start-0' }}">
             <div class="border-b border-zinc-200 p-2 dark:border-white/10">
                 <input type="search" x-ref="q" x-model="q" dir="auto" placeholder="{{ __('hr_mail_lists.menu_search') }}" aria-label="{{ __('hr_mail_lists.menu_search') }}"
                        class="block w-full rounded-md border border-zinc-200 bg-transparent px-3 py-2 text-sm dark:border-white/10">

@@ -19,7 +19,7 @@
         Sheet::HOLIDAY => ['bg-zinc-100 text-zinc-400 dark:bg-white/[0.04] dark:text-ink-muted', null],
         Sheet::OUTSIDE => ['border border-dashed border-panel-border text-zinc-400 dark:text-ink-muted', null],
     ];
-    $stateColor = ['open' => 'zinc', 'confirmed' => 'amber', 'approved' => 'sky', 'locked' => 'green'];
+    $stateColor = ['open' => 'neutral', 'confirmed' => 'warn', 'approved' => 'active', 'locked' => 'good'];
     $hm = fn (?int $minutes): string => $minutes === null ? '' : intdiv($minutes, 60).':'.str_pad((string) ($minutes % 60), 2, '0', STR_PAD_LEFT);
     $groupLabel = $by === Grouping::DEPARTMENT ? 'hr_attendance.timesheets.no-department' : 'hr_attendance.timesheets.no-project';
 @endphp
@@ -62,7 +62,7 @@
             <h2 id="attendance-city-{{ $block['id'] }}" class="text-lg font-semibold">{{ $block['name'] ?? '—' }}</h2>
             <span class="text-sm {{ $muted }}">{{ trans_choice('hr_attendance.timesheets.people-count', $block['totals']['people'], ['count' => $block['totals']['people']]) }}</span>
             @if ($block['totals']['to_decide'] > 0)
-                <flux:badge size="sm" color="red" icon="exclamation-triangle">{{ trans_choice('hr_attendance.timesheets.to-decide', $block['totals']['to_decide'], ['count' => $block['totals']['to_decide']]) }}</flux:badge>
+                <x-ui.tone-badge tone="critical" icon="exclamation-triangle">{{ trans_choice('hr_attendance.timesheets.to-decide', $block['totals']['to_decide'], ['count' => $block['totals']['to_decide']]) }}</x-ui.tone-badge>
             @endif
             {{-- The mailing list that stands for this city, when there is one. --}}
             @php
@@ -99,9 +99,9 @@
                     </button>
                     <div class="flex flex-wrap items-center gap-3">
                         @if ($group['totals']['to_decide'] > 0)
-                            <flux:badge size="sm" color="red" icon="exclamation-triangle">{{ trans_choice('hr_attendance.timesheets.to-decide', $group['totals']['to_decide'], ['count' => $group['totals']['to_decide']]) }}</flux:badge>
+                            <x-ui.tone-badge tone="critical" icon="exclamation-triangle">{{ trans_choice('hr_attendance.timesheets.to-decide', $group['totals']['to_decide'], ['count' => $group['totals']['to_decide']]) }}</x-ui.tone-badge>
                         @else
-                            <flux:badge size="sm" color="green" icon="check">{{ __('hr_attendance.timesheets.group-ready') }}</flux:badge>
+                            <x-ui.tone-badge tone="good" icon="check">{{ __('hr_attendance.timesheets.group-ready') }}</x-ui.tone-badge>
                         @endif
                         @if ($groupList)
                             <x-ui.button size="sm" icon="envelope" :href="$groupList->mailto()" data-test="attendance-email-group">{{ __('hr_mail_lists.email_group') }}</x-ui.button>
@@ -156,13 +156,13 @@
                                         </td>
                                         <td class="px-3 text-center">
                                             @if ($sheet['totals']['to_decide'] > 0)
-                                                <flux:badge size="sm" color="red">{{ $sheet['totals']['to_decide'] }}</flux:badge>
+                                                <x-ui.tone-badge tone="critical">{{ $sheet['totals']['to_decide'] }}</x-ui.tone-badge>
                                             @else
                                                 <span class="{{ $muted }}">–</span>
                                             @endif
                                         </td>
                                         <td class="px-3 text-center">
-                                            <flux:badge size="sm" :color="$stateColor[$item['state']]">{{ __('hr_attendance.workflow.states.'.$item['state']) }}</flux:badge>
+                                            <x-ui.tone-badge :tone="$stateColor[$item['state']]">{{ __('hr_attendance.workflow.states.'.$item['state']) }}</x-ui.tone-badge>
                                         </td>
                                         @foreach ($sheet['rows'] as $row)
                                             @php

@@ -253,9 +253,9 @@ new #[Layout('layouts::desk'), Title('hr_attendance.titles.upload')] class exten
                             <x-ui.data-table.cell :label="__('hr_attendance.upload.punches')"><span class="tabular-nums">{{ $row['punches'] }}</span></x-ui.data-table.cell>
                             <x-ui.data-table.cell :label="__('hr_attendance.upload.status')">
                                 @if ($row['name'])
-                                    <flux:badge size="sm" color="green" icon="check">{{ __('hr_attendance.upload.matched') }}</flux:badge>
+                                    <x-ui.tone-badge tone="good" icon="check">{{ __('hr_attendance.upload.matched') }}</x-ui.tone-badge>
                                 @else
-                                    <flux:badge size="sm" color="amber" icon="exclamation-triangle">{{ __('hr_attendance.upload.not-matched') }}</flux:badge>
+                                    <x-ui.tone-badge tone="warn" icon="exclamation-triangle">{{ __('hr_attendance.upload.not-matched') }}</x-ui.tone-badge>
                                 @endif
                             </x-ui.data-table.cell>
                         </tr>
