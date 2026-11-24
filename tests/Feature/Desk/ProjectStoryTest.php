@@ -180,6 +180,8 @@ test('the compact embedded proposal hides the tabs until one is picked', functio
     Livewire::actingAs(userWithRole('General Manager'))
         ->test('tracking::proposals.show', ['proposal' => $proposal, 'embedded' => true, 'compact' => true])
         ->assertSeeHtml('data-compact-proposal')
+        // The way to the full proposal is in the head, above the readings, not under them.
+        ->assertSeeHtmlInOrder(['data-embedded-proposal-head', 'data-open-proposal-page', 'data-compact-proposal'])
         ->assertDontSeeHtml('data-tab-panel')
         ->set('tab', 'deadlines')
         ->assertSet('compact', false)

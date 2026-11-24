@@ -82,6 +82,8 @@ return [
             'finish_proposal' => 'مشروعك · أكمل المقترح',
             'send_proposal' => 'مشروعك · أرسل المقترح إلى المانح',
         ],
+        'plan' => 'خطة سنوية أُرسلت إلى الميل',
+        'plan_fix' => 'أرجع الميل خطتك',
         'review' => 'مراجعتك في مرحلة :stage',
         'validate' => 'تقرير :month للاعتماد',
         'approve' => 'أُرسلت لمراجعتك',
@@ -92,6 +94,8 @@ return [
         'recruitment' => 'طلب توظيف · :what',
     ],
     'decision_action' => [
+        'plan' => 'راجِع',
+        'plan_fix' => 'صحّحها',
         'proposal' => 'فتح',
         'review' => 'راجِع',
         'validate' => 'اعتمد',

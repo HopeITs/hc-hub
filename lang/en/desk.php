@@ -82,6 +82,8 @@ return [
             'finish_proposal' => 'Your project · finish the proposal',
             'send_proposal' => 'Your project · send the proposal to the donor',
         ],
+        'plan' => 'Annual plan sent to MEAL',
+        'plan_fix' => 'MEAL sent your plan back',
         'review' => 'Your :stage review',
         'validate' => ':month report to validate',
         'approve' => 'Sent for your review',
@@ -92,6 +94,8 @@ return [
         'recruitment' => 'Recruitment request · :what',
     ],
     'decision_action' => [
+        'plan' => 'Review',
+        'plan_fix' => 'Fix it',
         'proposal' => 'Open',
         'review' => 'Review',
         'validate' => 'Validate',
