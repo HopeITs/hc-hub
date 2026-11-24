@@ -572,7 +572,7 @@
     .dk-pfilter.dk-on:hover { background: var(--brand-hover); }
     .dk-sheet.dk-pf-pop { width: min(480px, calc(100vw - 32px)); height: auto; max-height: calc(100dvh - 48px); z-index: 71; }
     .dk-pf-scrim { z-index: 70; }
-    .dk-pf-pop .dk-field input, .dk-pf-select { height: 42px; width: 100%; padding-inline: 12px; border-radius: var(--radius-control); border: 1px solid var(--line-2); background: var(--paper); color: var(--ink); font-size: 14px; }
+    .dk-pf-pop .dk-field input, .dk-pf-select { height: var(--field-h); width: 100%; padding-inline: 12px; border-radius: var(--radius-control); border: var(--border-control) solid var(--line-2); background: var(--paper); color: var(--ink); font-size: var(--text-body); }
     .dk-pf-pop .dk-sh-f { justify-content: flex-end; }
 }
 

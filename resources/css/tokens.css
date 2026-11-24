@@ -126,6 +126,12 @@
     --radius-control: 0.5rem;
     --radius-surface: 0.75rem;
     --radius-round: 9999px;
+
+    /* Control sizes (decision D6): 44px buttons, 46px fields; the 38px compact button is for desktop toolbars and table rows, 44px on touch (below). */
+    --control-h: 2.75rem;
+    --control-h-compact: 2.375rem;
+    --field-h: 2.875rem;
+    --border-control: 1.5px;
     --color-panel-border: var(--color-line);
 
     /* Graphite dark-mode semantic layer — only referenced behind dark: or inside .dark; light values are equivalents so the utilities exist. */
@@ -223,6 +229,13 @@
     --color-scrim: rgb(24 24 28 / 0.38);
     --color-header-bg: rgb(243 243 244 / 0.88);
     --shadow-overlay: var(--shadow-e3);
+}
+
+/* On a touch screen the compact button grows to the full 44px, so no tap target is smaller than that. */
+@media (pointer: coarse) {
+    :root {
+        --control-h-compact: 2.75rem;
+    }
 }
 
 @layer theme {

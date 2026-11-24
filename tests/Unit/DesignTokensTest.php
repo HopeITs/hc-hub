@@ -260,3 +260,28 @@ test('views reference colours through design tokens rather than raw hex', functi
 
     expect($offenders)->toBe([]);
 });
+
+test('control size tokens exist, compact grows to 44px on touch, and buttons and fields read them', function () {
+    $css = dirname(__DIR__, 2).'/resources/css/';
+    $tokens = file_get_contents($css.'tokens.css');
+
+    expect($tokens)->toContain('--control-h: 2.75rem;')
+        ->toContain('--control-h-compact: 2.375rem;')
+        ->toContain('--field-h: 2.875rem;')
+        ->toContain('--border-control: 1.5px;')
+        ->toMatch('/@media \(pointer: coarse\) \{\s*:root \{\s*--control-h-compact: 2\.75rem;/');
+
+    expect(file_get_contents($css.'flux-overrides.css'))
+        ->toMatch('/\[data-flux-button\]\.h-10 \{\s*height: var\(--control-h\);/')
+        ->toMatch('/\[data-flux-button\]\.h-8 \{\s*height: var\(--control-h-compact\);/')
+        ->toMatch('/\[data-flux-control\]\.h-10[^{]*\{\s*height: var\(--field-h\);\s*border-width: var\(--border-control\);\s*font-size: var\(--text-body\);/')
+        ->toMatch('/\.page-action \{\s*height: var\(--control-h\);/');
+
+    expect(file_get_contents($css.'forms.css'))
+        ->toMatch('/\.form-box \{[^}]*min-height: var\(--field-h\);[^}]*border: var\(--border-control\) solid[^}]*font-size: var\(--text-body\);/s');
+
+    expect(file_get_contents($css.'desk.css'))
+        ->toMatch('/\.dk-btn\{[^}]*height:var\(--control-h\);/')
+        ->toContain('.dk-btn.dk-sm{ height:var(--control-h-compact);')
+        ->toMatch('/\.dk-field input[^{]*\{[^}]*min-height:var\(--field-h\);[^}]*border:var\(--border-control\) solid[^}]*font-size:var\(--text-body\)/');
+});

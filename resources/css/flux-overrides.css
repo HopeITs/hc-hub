@@ -152,7 +152,7 @@
 
     /* The tinted-fill filter row treatment: shared by every directory-style index page's toolbar, not just Programs. */
     .directory-filters [data-flux-control] {
-        min-height: 2.75rem;
+        min-height: var(--field-h);
         border-color: var(--color-secondary-soft);
         background-color: color-mix(in srgb, var(--color-secondary-soft) 38%, var(--color-white));
         transition: border-color 150ms ease, background-color 150ms ease;
@@ -219,7 +219,7 @@
     }
 
     .filter-picker [data-flux-button] {
-        min-height: 2.75rem;
+        min-height: var(--field-h);
         border-color: var(--color-secondary-soft);
         background-color: color-mix(in srgb, var(--color-secondary-soft) 38%, var(--color-white));
         box-shadow: none;
@@ -822,15 +822,50 @@ ui-toast-group {
  */
 @layer utilities {
     /*
+     * Control sizes (decision D6), from the tokens in tokens.css. Flux sizes its
+     * controls with h-10 (base) and h-8 (sm) utilities and exposes no size
+     * attribute, so these key on those two classes: a base button is --control-h,
+     * a base input or select is --field-h with body text and the control border,
+     * and an sm one is the compact height (44px on touch, per the token).
+     * Icon-only xs buttons (h-6) and any size-* / h-*! utility on a page keep winning.
+     */
+    [data-flux-button].h-10 {
+        height: var(--control-h);
+        min-height: var(--control-h);
+    }
+
+    [data-flux-button].h-8 {
+        height: var(--control-h-compact);
+        min-height: var(--control-h-compact);
+    }
+
+    :is(input, select)[data-flux-control].h-10:not([type='checkbox'], [type='radio'], [type='range'], [type='color']) {
+        height: var(--field-h);
+        border-width: var(--border-control);
+        font-size: var(--text-body);
+    }
+
+    :is(input, select)[data-flux-control].h-8:not([type='checkbox'], [type='radio'], [type='range'], [type='color']) {
+        height: var(--control-h-compact);
+        border-width: var(--border-control);
+        font-size: var(--text-body);
+    }
+
+    textarea[data-flux-control] {
+        border-width: var(--border-control);
+        font-size: var(--text-body);
+    }
+
+    /*
      * Page header actions (Filters, Export, Add) share one shape with the
-     * view toggle: 40px tall, 8px corners, 14px semibold. Secondary actions
+     * view toggle: 44px tall, 8px corners, 14px semibold. Secondary actions
      * are white with a soft hairline; red is kept for the one primary action.
      * x-ui.button tone="action" emits only this hook (no !-suffixed tone colours),
      * so these out-rank Flux's size and variant classes by specificity alone.
      */
     [data-flux-button].page-action {
-        height: 2.5rem;
-        min-height: 2.5rem;
+        height: var(--control-h);
+        min-height: var(--control-h);
         border-radius: var(--radius-control);
         padding-inline: 0.875rem;
         gap: 0.5rem;

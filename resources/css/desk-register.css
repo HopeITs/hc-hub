@@ -104,8 +104,8 @@
      * utilities, so these are too, one frame class more specific.
      */
     .dk-scope [data-desk-register-actions] [data-flux-button] {
-        height: 36px !important;
-        min-height: 36px !important;
+        height: var(--control-h-compact) !important;
+        min-height: var(--control-h-compact) !important;
         border-radius: var(--radius-control) !important;
         padding-inline: 14px !important;
         border: 1px solid var(--line-2) !important;
