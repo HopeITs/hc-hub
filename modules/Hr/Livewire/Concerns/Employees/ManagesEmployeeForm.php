@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Locked;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Modules\Core\Models\City;
+use Modules\Hr\Actions\Employees\CreateEmployeeAccount;
 use Modules\Hr\Actions\Employees\SaveEmployee;
 use Modules\Hr\Enums\Gender;
 use Modules\Hr\Enums\MaritalStatus;
@@ -23,20 +24,31 @@ use Modules\Hr\Support\Employees\HrAccess;
  * column, the rules for a complete record and the looser rules for a draft.
  *
  * A draft keeps the uniqueness and format rules (a wrong national number is
- * wrong in a draft too) and only drops "required" from the three choices a
- * new starter may not have given yet: gender, marital status, nationality.
+ * wrong in a draft too) and only drops "required" from the two choices a
+ * new starter may not have given yet: gender and marital status. Nationality
+ * is never required (as in HR).
+ *
+ * The form has two tabs, as in HR: the profile ("information") and contact.
  */
 trait ManagesEmployeeForm
 {
     /** The columns the form writes, in the order of the form. */
     public const FIELDS = [
-        'first_name_ar', 'first_name_en', 'father_name_ar', 'father_name_en', 'last_name_ar', 'last_name_en',
-        'mother_name_ar', 'mother_name_en', 'username', 'city_id', 'national_number', 'nationality', 'gender',
-        'marital_status', 'children', 'dob', 'actual_dob', 'pob_ar', 'pob_en', 'civil_registry_office',
-        'civil_registry_number', 'joined_at', 'work_phone', 'personal_phone', 'personal_email', 'whatsapp_work',
-        'telegram_work', 'facebook', 'instagram', 'linkedin', 'address_ar', 'address_en', 'skills', 'interests',
-        'board_member_started_at', 'board_member_end_at',
+        'first_name_ar', 'first_name_en', 'last_name_ar', 'last_name_en', 'actual_dob', 'city_id', 'gender',
+        'joined_at', 'marital_status', 'children', 'address_ar', 'address_en', 'father_name_ar', 'father_name_en',
+        'mother_name_ar', 'mother_name_en', 'dob', 'nationality', 'national_number', 'pob_ar', 'pob_en',
+        'civil_registry_office', 'civil_registry_number', 'board_member_started_at', 'board_member_end_at',
+        'skills', 'interests', 'username', 'work_phone', 'personal_phone', 'personal_email', 'whatsapp_work',
+        'telegram_work', 'facebook', 'instagram', 'linkedin',
     ];
+
+    /** The fields on the Contact tab: an error in one of them opens that tab. */
+    public const CONTACT_FIELDS = [
+        'username', 'createAccount', 'work_phone', 'personal_phone', 'personal_email', 'whatsapp_work',
+        'telegram_work', 'facebook', 'instagram', 'linkedin',
+    ];
+
+    public const TABS = ['information', 'contact'];
 
     private const DATE_FIELDS = ['dob', 'actual_dob', 'joined_at', 'board_member_started_at', 'board_member_end_at'];
 
@@ -47,6 +59,15 @@ trait ManagesEmployeeForm
     public array $form = [];
 
     public bool $isBoardMember = false;
+
+    public string $activeTab = 'information';
+
+    /** "Create login account": ticked while the employee has a login. */
+    public bool $createAccount = false;
+
+    /** Whether the Contact tab offers the login (an active employee, or one who has a login). */
+    #[Locked]
+    public bool $mayHaveAccount = false;
 
     /** @var TemporaryUploadedFile|null */
     public $photo = null;
@@ -68,8 +89,63 @@ trait ManagesEmployeeForm
         if ($employee === null) {
             $cities = $this->formCityOptions();
             $this->form['city_id'] = count($cities) === 1 ? (string) array_key_first($cities) : '';
-            $this->form['nationality'] = (string) Nationality::Syrian->value;
         }
+
+        $this->readAccountState($employee);
+    }
+
+    protected function readAccountState(?Employee $employee): void
+    {
+        $this->mayHaveAccount = $employee !== null && CreateEmployeeAccount::mayHaveAccount($employee);
+        $this->createAccount = $employee !== null && $employee->account()->exists();
+    }
+
+    public function updatedActiveTab(): void
+    {
+        if (! in_array($this->activeTab, self::TABS, true)) {
+            $this->activeTab = 'information';
+        }
+    }
+
+    /**
+     * Validate, and on failure open the tab that holds the first error.
+     *
+     * @param  array<string, mixed>  $rules
+     * @param  array<string, string>  $messages
+     * @param  array<string, string>  $attributes
+     * @return array<string, mixed>
+     */
+    protected function validateOnTabs(array $rules, array $messages, array $attributes): array
+    {
+        try {
+            return $this->validate($rules, $messages, $attributes);
+        } catch (ValidationException $exception) {
+            $this->activeTab = $this->tabForErrors(array_keys($exception->errors()));
+
+            throw $exception;
+        }
+    }
+
+    /**
+     * The profile tab when any error is on it, otherwise the contact tab.
+     *
+     * @param  list<string>  $keys
+     */
+    protected function tabForErrors(array $keys): string
+    {
+        if ($keys === []) {
+            return $this->activeTab;
+        }
+
+        foreach ($keys as $key) {
+            $field = str_starts_with($key, 'form.') ? substr($key, 5) : $key;
+
+            if (! in_array($field, self::CONTACT_FIELDS, true)) {
+                return 'information';
+            }
+        }
+
+        return 'contact';
     }
 
     /**
@@ -95,7 +171,7 @@ trait ManagesEmployeeForm
     {
         $this->normaliseForm();
 
-        $validated = $this->validate($this->employeeRules($complete), [
+        $validated = $this->validateOnTabs($this->employeeRules($complete), [
             'form.work_phone.regex' => __('hr_employees.validation.phone_format'),
             'form.personal_phone.regex' => __('hr_employees.validation.phone_format'),
             'form.national_number.digits' => __('hr_employees.validation.national_number_syrian'),
@@ -118,6 +194,18 @@ trait ManagesEmployeeForm
         );
 
         $this->employeeId = $employee->id;
+
+        if ($complete && $this->createAccount && $this->mayHaveAccount) {
+            try {
+                app(CreateEmployeeAccount::class)->handle($employee->refresh(), Auth::user());
+            } catch (ValidationException $exception) {
+                $this->activeTab = 'contact';
+
+                throw $exception;
+            }
+        }
+
+        $this->readAccountState($employee);
 
         if ($withPhoto) {
             $this->photo = null;
@@ -143,10 +231,10 @@ trait ManagesEmployeeForm
             'form.father_name_en' => ['required', 'string', 'max:255'],
             'form.mother_name_ar' => ['required', 'string', 'max:255'],
             'form.mother_name_en' => ['required', 'string', 'max:255'],
-            'form.username' => ['required', 'string', 'max:255', Rule::unique('employees', 'username')->ignore($this->employeeId)],
+            'form.username' => ['required', 'string', 'max:255', Rule::unique('employees', 'username')->ignore($this->employeeId), $this->workEmailIsFree(...)],
             'form.city_id' => ['required', 'integer', 'exists:cities,id'],
             'form.national_number' => ['required', 'string', $isSyrian ? 'digits:11' : 'max:255', $this->nationalNumberIsFree(...)],
-            'form.nationality' => $choice(Nationality::class),
+            'form.nationality' => ['nullable', Rule::enum(Nationality::class)],
             'form.gender' => [$complete ? 'required' : 'nullable', Rule::in([Gender::Male->value, Gender::Female->value])],
             'form.marital_status' => $choice(MaritalStatus::class),
             'form.children' => ['nullable', 'integer', 'min:0'],
@@ -225,6 +313,24 @@ trait ManagesEmployeeForm
                 'name' => $existing->name,
                 'city' => City::nameOf($existing->city_id) ?: __('common.unknown_city'),
             ]));
+        }
+    }
+
+    /**
+     * Ticking "Create login account" needs username@hcsyria.org to be free
+     * (or already this employee's own login).
+     */
+    private function workEmailIsFree(string $attribute, mixed $value, Closure $fail): void
+    {
+        if (! $this->createAccount || ! $this->mayHaveAccount || $this->employeeId === null) {
+            return;
+        }
+
+        $email = strtolower(trim((string) $value)).CreateEmployeeAccount::DOMAIN;
+        $accountId = Employee::query()->find($this->employeeId)?->account()->value('id');
+
+        if (! CreateEmployeeAccount::emailIsFree($email, $accountId === null ? null : (int) $accountId)) {
+            $fail(__('hr_employees.validation.work_email_taken', ['email' => $email]));
         }
     }
 
