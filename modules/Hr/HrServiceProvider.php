@@ -47,6 +47,10 @@ use Modules\Hr\Console\ReportRecruitmentAccessCommand;
 use Modules\Hr\Console\SendAttendanceRemindersCommand;
 use Modules\Hr\Console\SendLeaveDecisionRemindersCommand;
 use Modules\Hr\Console\StartProbationReviewsCommand;
+use Modules\Hr\Livewire\Chat\Dock as ChatDock;
+use Modules\Hr\Livewire\Chat\HeaderButton as ChatHeaderButton;
+use Modules\Hr\Livewire\Chat\Page as ChatPage;
+use Modules\Hr\Livewire\Chat\Window as ChatWindow;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
 use Modules\Hr\Models\MailList;
@@ -118,6 +122,7 @@ class HrServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/resources/views', 'hr');
         Livewire::addNamespace('hr', viewPath: __DIR__.'/resources/views/pages');
         $this->registerCoreBridge();
+        $this->registerChat();
 
         $this->commands([
             ImportHrCommand::class,
@@ -269,6 +274,21 @@ class HrServiceProvider extends ServiceProvider
         $modules->addSearch(MailListSearchSource::class);
         $modules->addMetrics(HrMetrics::class);
         $modules->addWorkItems(InboxWorkItems::class);
+    }
+
+    /**
+     * The in-site chat (config/chat.php, off until CHAT_ENABLED): its Livewire
+     * components, used in the app frame as <livewire:hr.chat.dock />, and its
+     * realtime channels. Its pages are routes/chat.php.
+     */
+    private function registerChat(): void
+    {
+        Livewire::component('hr.chat.dock', ChatDock::class);
+        Livewire::component('hr.chat.window', ChatWindow::class);
+        Livewire::component('hr.chat.header-button', ChatHeaderButton::class);
+        Livewire::component('hr.chat.page', ChatPage::class);
+
+        require __DIR__.'/routes/broadcast/chat-channels.php';
     }
 
     /**

@@ -4,6 +4,11 @@
 <meta name="desk-home" content="{{ parse_url(route('dashboard'), PHP_URL_PATH) ?: '/' }}" />
 @auth
     <meta name="desk-items-url" content="{{ route('desk.items.toggle') }}" />
+    @if (config('chat.enabled') && ! \App\Support\Desk\DeskTab::current() && ! \App\Http\Middleware\EnsureTwoFactorIsEnabled::mustEnrol(auth()->user()))
+        {{-- resources/js/chat.js subscribes to the chat channels only when these are here. --}}
+        <meta name="user-id" content="{{ auth()->id() }}" />
+        <meta name="chat-enabled" content="1" />
+    @endif
 @endauth
 
 <title>

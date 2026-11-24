@@ -62,6 +62,10 @@
 
         <div class="dk-top-end">
             <div class="dk-tools" role="group" aria-label="{{ __('navigation.tools') }}" data-desk-tools>
+                @if ($showsInbox && config('chat.enabled'))
+                    <livewire:hr.chat.header-button />
+                @endif
+
                 @if ($showsInbox)
                     <livewire:notifications.bell :can-manage-rules="(bool) $user?->can('notification-settings.manage')" />
                 @endif

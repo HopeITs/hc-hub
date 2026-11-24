@@ -45,6 +45,13 @@
             @endif
         @endif
 
+        @if ($showsInbox && ! $inTab && config('chat.enabled'))
+            {{-- The chat dock (Modules\Hr\Livewire\Chat\Dock): persisted so open tabs survive wire:navigate. --}}
+            @persist('chat-dock')
+                <livewire:hr.chat.dock />
+            @endpersist
+        @endif
+
         @unless ($inTab)
             <x-tour.overlay />
         @endunless
