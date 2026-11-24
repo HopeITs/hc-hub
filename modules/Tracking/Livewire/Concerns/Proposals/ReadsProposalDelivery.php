@@ -64,7 +64,7 @@ trait ReadsProposalDelivery
         $cities = City::query()->whereKey($rows->pluck('city_id')->unique()->all())->get()->keyBy('id');
         $employees = EmployeeProfile::namesByIds($rows->pluck('responsible_employee_id')->filter()->unique()->values()->all());
 
-        return array_values($rows->map(function (ProposalLocation $row) use ($incomplete, $cities, $employees, $locale): array {
+        return array_values($rows->map(function (ProposalLocation $row) use ($incomplete, $cities, $employees): array {
             $status = match (true) {
                 ! isset($incomplete[$row->id]) => 'complete',
                 $row->program_id === null => 'missing_program',
