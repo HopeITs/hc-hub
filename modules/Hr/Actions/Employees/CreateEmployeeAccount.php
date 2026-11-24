@@ -61,16 +61,7 @@ class CreateEmployeeAccount
                 return [self::EMAIL_UPDATED, $email];
             }
 
-            $user = new User;
-            $user->forceFill([
-                'email' => $email,
-                'password' => Hash::make(Str::password(64)),
-                'employee_id' => $employee->id,
-            ])->save();
-
-            if (Role::query()->where('name', 'employee')->exists()) {
-                $user->assignRole('employee');
-            }
+            $this->createLogin($employee, $email);
 
             return [self::ACCOUNT_CREATED, $email];
         });
@@ -80,6 +71,27 @@ class CreateEmployeeAccount
         }
 
         return $outcome;
+    }
+
+    /**
+     * Write the login itself: the work email, an unusable random password and
+     * the role "employee" when it exists. No checks and no event; the caller
+     * has already checked the email is free and fires the event after commit.
+     */
+    public function createLogin(Employee $employee, string $email): User
+    {
+        $user = new User;
+        $user->forceFill([
+            'email' => $email,
+            'password' => Hash::make(Str::password(64)),
+            'employee_id' => $employee->id,
+        ])->save();
+
+        if (Role::query()->where('name', 'employee')->exists()) {
+            $user->assignRole('employee');
+        }
+
+        return $user;
     }
 
     /**
