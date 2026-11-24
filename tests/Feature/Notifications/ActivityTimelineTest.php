@@ -87,12 +87,14 @@ test('the proposal page keeps its activity log closed until it is asked for', fu
     $proposal = Activity::withoutRecording(fn () => Proposal::factory()->create());
 
     $this->actingAs(userWithRole('Super Admin'))
-        ->get(route('proposals.show', $proposal))
+        // The toggle sits in the folded "History & approvals" section; ?ptab=status opens it.
+        ->get(route('proposals.show', ['proposal' => $proposal, 'ptab' => 'status']))
         ->assertSee('data-test="toggle-activity-log"', false)
         ->assertDontSeeLivewire('activity.timeline');
 
     Livewire::actingAs(userWithRole('Super Admin'))
         ->test('tracking::proposals.show', ['proposal' => $proposal])
+        ->call('openSection', 'history')
         ->set('showActivity', true)
         ->assertSeeLivewire('activity.timeline');
 });

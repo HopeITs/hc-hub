@@ -10,6 +10,7 @@ use Modules\Tracking\Models\IndicatorProgress;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\Report;
 use Modules\Tracking\Models\Result;
 use Modules\Tracking\Support\Reporting\PlaceBridge;
@@ -131,7 +132,7 @@ class RealResultsSeeder extends Seeder
 
             PlanIndicator::query()->firstOrCreate(
                 ['source_type' => 'proposal', 'source_id' => $proposalId, 'indicator_id' => $indicatorId, 'project_id' => $projectId],
-                ['target' => $row['target'], 'period' => $row['period'], ...app(PlaceBridge::class)->placeColumnsForTargets(Proposal::query()->whereKey($proposalId)->firstOrFail(), [$projectId])[$projectId]],
+                ['target' => $row['target'], 'period' => $row['period'], 'proposal_location_id' => ProposalLocation::query()->where('proposal_id', $proposalId)->where('project_id', $projectId)->value('id'), ...app(PlaceBridge::class)->placeColumnsForTargets(Proposal::query()->whereKey($proposalId)->firstOrFail(), [$projectId])[$projectId]],
             );
         }
 

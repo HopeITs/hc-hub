@@ -37,6 +37,7 @@ use Modules\Tracking\Models\MonthlyReport;
 use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
+use Modules\Tracking\Models\ProposalLocation;
 use Modules\Tracking\Models\ProposalReviewer;
 use Modules\Tracking\Models\ProposalStatusNote;
 use Modules\Tracking\Models\Report;
@@ -259,7 +260,7 @@ class AlWadiShowcaseSeeder extends Seeder
 
             PlanIndicator::query()->firstOrCreate(
                 ['source_type' => 'proposal', 'source_id' => $proposal->id, 'indicator_id' => $indicator->id, 'project_id' => $project->id],
-                ['target' => $target, 'target_population' => $measure === 'numeric' ? $target : null, 'period' => $period, ...app(PlaceBridge::class)->placeColumnsForTargets($proposal, [$project->id])[$project->id]],
+                ['target' => $target, 'target_population' => $measure === 'numeric' ? $target : null, 'period' => $period, 'proposal_location_id' => ProposalLocation::query()->where('proposal_id', $proposal->id)->where('project_id', $project->id)->value('id'), ...app(PlaceBridge::class)->placeColumnsForTargets($proposal, [$project->id])[$project->id]],
             );
 
             IndicatorProgress::query()->firstOrCreate(

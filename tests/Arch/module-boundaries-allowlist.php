@@ -117,11 +117,10 @@ return [
     'App must not use Modules\Tracking' => [
         'source' => 'App',
         'forbidden' => 'Modules\Tracking',
-        'max' => 46,
+        'max' => 45,
         'allowed' => [
             'App\Console\Commands\PruneStoredFiles',
             'App\Console\Commands\ReencryptSecrets',
-            'App\Http\Middleware\KeepDeskTabOnRedirect',
             'App\Livewire\Concerns\Dashboard\ReadsDashboardAttention',
             'App\Livewire\Concerns\Dashboard\ReadsDashboardWork',
             'App\Livewire\Concerns\Dashboard\ReadsDeskDecisions',

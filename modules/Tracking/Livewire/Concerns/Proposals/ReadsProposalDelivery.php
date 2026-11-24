@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Modules\Tracking\Livewire\Concerns\Proposals;
 
+use App\Support\EmployeeProfile;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
+use Modules\Core\Models\Center;
+use Modules\Core\Models\City;
 use Modules\Tracking\Enums\ReportStatus;
 use Modules\Tracking\Models\DonorProposal;
 use Modules\Tracking\Models\DonorReport;
@@ -59,7 +62,7 @@ trait ReadsProposalDelivery
 
         $incomplete = array_flip(ProposalLocationRows::incompleteRowIds($this->proposal));
         $cities = City::query()->whereKey($rows->pluck('city_id')->unique()->all())->get()->keyBy('id');
-        $employees = Employee::query()->whereKey($rows->pluck('responsible_employee_id')->filter()->unique()->all())->get()->keyBy('id');
+        $employees = EmployeeProfile::namesByIds($rows->pluck('responsible_employee_id')->filter()->unique()->values()->all());
 
         return array_values($rows->map(function (ProposalLocation $row) use ($incomplete, $cities, $employees): array {
             $status = match (true) {
@@ -73,7 +76,7 @@ trait ReadsProposalDelivery
                 'id' => $row->id,
                 'city' => $cities->get($row->city_id)?->name ?? __('common.unknown_city'),
                 'program' => $row->program?->name,
-                'responsible' => $row->responsible_employee_id === null ? null : ($employees->get($row->responsible_employee_id)?->name ?? '#'.$row->responsible_employee_id),
+                'responsible' => $row->responsible_employee_id === null ? null : ($employees[$row->responsible_employee_id] ?? '#'.$row->responsible_employee_id),
                 'centers' => $row->city_wide ? [] : array_map(fn (int $centerId): string => Center::remembered($centerId)?->name ?? '#'.$centerId, $row->centerIds()),
                 'fieldWork' => $row->city_wide,
                 'status' => $status,

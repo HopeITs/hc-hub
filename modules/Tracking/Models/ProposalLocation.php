@@ -193,9 +193,10 @@ class ProposalLocation extends Model
     }
 
     /**
-     * "City · program" for each row, the name a register risk's place carries
-     * (Y-10, Y-13). Cities are read in one query; a row still waiting for its
-     * program shows the city alone. Load `program` on the rows first.
+     * "City · program" for each row, the name a target's location or a
+     * register risk's place carries (Y-10, Y-13). Cities are read in one
+     * query; a row still waiting for its program shows the city alone. Load
+     * `program` on the rows first.
      *
      * @param  iterable<ProposalLocation>  $rows
      * @return array<int, string> row id => label
@@ -214,6 +215,16 @@ class ProposalLocation extends Model
 
             return [$row->id => $program === null ? $city : $city.' · '.$program];
         })->all();
+    }
+
+    /**
+     * The proposal targets of this row (Y-10, D-91): one per indicator.
+     *
+     * @return HasMany<PlanIndicator, $this>
+     */
+    public function targets(): HasMany
+    {
+        return $this->hasMany(PlanIndicator::class, 'proposal_location_id');
     }
 
     /**

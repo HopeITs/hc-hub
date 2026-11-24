@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace Modules\Tracking\Support;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Validation\ValidationException;
 use Modules\Core\Models\User;
 use Modules\Tracking\Actions\Proposals\CreateLocationPlaces;
+use Modules\Tracking\Models\PlanIndicator;
 use Modules\Tracking\Models\Project;
 use Modules\Tracking\Models\Proposal;
 use Modules\Tracking\Models\ProposalLocation;
@@ -28,6 +30,10 @@ use Modules\Tracking\Support\Locations\ProjectLocationMirror;
  * project are owned by the link: a replacement updates them but never
  * deletes them, only UnlinkProposalProject does. After approval only
  * fillEmpty writes: centers or `city_wide` on a row that has neither (D-83).
+ *
+ * Targets follow their row (Y-10): every change of a row's centers,
+ * field-work flag or project calls PlanIndicator::syncPlaceFromRow() in the
+ * same transaction, and a row that carries targets is never removed.
  */
 final class ProposalLocationRows
 {
@@ -76,6 +82,7 @@ final class ProposalLocationRows
 
         foreach ($existing as $key => $row) {
             if (! array_key_exists($key, $sentKeys) && $row->project_id === null) {
+                $this->refuseWhenRowHasTargets($row);
                 $row->delete();
                 $counts['removed']++;
                 unset($existing[$key]);
@@ -135,9 +142,11 @@ final class ProposalLocationRows
 
             if ($sent['city_wide'] ?? false) {
                 $row->forceFill(['city_wide' => true])->save();
+                PlanIndicator::syncPlaceFromRow($row);
                 $counts['changed']++;
             } elseif ($sent['center_ids'] !== []) {
                 $this->writeCenters($row, $sent['center_ids']);
+                PlanIndicator::syncPlaceFromRow($row);
                 $counts['changed']++;
             }
         }
@@ -190,6 +199,7 @@ final class ProposalLocationRows
             // A second project on the same city and program (another center):
             // the row keeps its first project and gains the center.
             $this->writeCenters($row, array_values(array_unique([...$row->centerIds(), ...$centerIds])));
+            PlanIndicator::syncPlaceFromRow($row);
             app(ProjectLocationMirror::class)->apply($project);
             $counts['changed']++;
 
@@ -202,6 +212,7 @@ final class ProposalLocationRows
             'responsible_employee_id' => $row->responsible_employee_id ?? $project->owner_employee_id,
         ])->save();
         $this->writeCenters($row, array_values(array_unique([...$row->centerIds(), ...$centerIds])));
+        PlanIndicator::syncPlaceFromRow($row);
 
         // A row that has just taken a project needs the whole mirror, not
         // only the columns: its sectors, the owner's acknowledgement and the
@@ -223,6 +234,7 @@ final class ProposalLocationRows
         $removed = 0;
 
         foreach ($locked->locations()->where('project_id', $projectId)->get() as $row) {
+            $this->refuseWhenRowHasTargets($row);
             $row->delete();
             $removed++;
         }
@@ -300,6 +312,7 @@ final class ProposalLocationRows
         $isNew = $row->project_id === null && $sent['is_new'];
         $cityWide = $sent['city_wide'] ?? false;
         $centerIds = $cityWide ? [] : $sent['center_ids'];
+        $placeChanged = $row->city_wide !== $cityWide;
 
         if ($row->responsible_employee_id !== $sent['responsible_employee_id'] || $row->is_new !== $isNew || $row->city_wide !== $cityWide) {
             $row->forceFill(['responsible_employee_id' => $sent['responsible_employee_id'], 'is_new' => $isNew, 'city_wide' => $cityWide]);
@@ -317,9 +330,28 @@ final class ProposalLocationRows
         if ($row->centerIds() !== $centerIds) {
             $this->writeCenters($row, $centerIds);
             $changed = true;
+            $placeChanged = true;
+        }
+
+        if ($placeChanged) {
+            PlanIndicator::syncPlaceFromRow($row);
         }
 
         return $changed;
+    }
+
+    /**
+     * A row that carries targets is never removed (Y-10): its targets would
+     * lose their place, and the foreign key restricts it anyway. MEAL clears
+     * the row's targets first.
+     *
+     * @throws ValidationException under `locations`
+     */
+    private function refuseWhenRowHasTargets(ProposalLocation $row): void
+    {
+        if ($row->targets()->exists()) {
+            throw ValidationException::withMessages(['locations' => __('proposals.location_has_targets')]);
+        }
     }
 
     /**

@@ -216,6 +216,11 @@ return [
         'reviewed' => 'Reviewed',
         'approved' => 'Approved',
     ],
+    'assumption_status' => [
+        'holds' => 'Holds',
+        'at_risk' => 'At risk',
+        'broken' => 'Broken',
+    ],
     'activity_kind' => [
         'continuous' => 'Continuous',
         'event' => 'Event',

@@ -18,6 +18,7 @@ use Modules\Core\Models\User;
 use Modules\Hr\Models\Employee;
 use Modules\Tracking\Console\Commands\BackfillLocationsFromProjects;
 use Modules\Tracking\Console\Commands\BackfillMonthlyReports;
+use Modules\Tracking\Console\Commands\BackfillPlanIndicatorRows;
 use Modules\Tracking\Console\Commands\BackfillProjectMembers;
 use Modules\Tracking\Console\Commands\BackfillProposalLocations;
 use Modules\Tracking\Console\Commands\BackfillRiskRows;
@@ -111,6 +112,7 @@ class TrackingServiceProvider extends ServiceProvider
             BackfillLocationsFromProjects::class,
             BackfillMonthlyReports::class,
             BackfillProjectMembers::class,
+            BackfillPlanIndicatorRows::class,
             BackfillProposalLocations::class,
             BackfillRiskRows::class,
             BackfillScheduleRows::class,

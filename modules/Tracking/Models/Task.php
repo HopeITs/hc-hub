@@ -56,6 +56,8 @@ use Modules\Tracking\Observers\ScheduleItemObserver;
  * @property CarbonImmutable|null $start_date
  * @property CarbonImmutable|null $due_date
  * @property CarbonImmutable|null $completed_date
+ * @property string|null $completion_note why it was marked done with checks still open (framework task)
+ * @property int|null $completed_by the user who marked it done (framework task)
  * @property int $progress_percentage
  * @property bool $evidence_required
  * @property int $created_by
@@ -87,6 +89,8 @@ use Modules\Tracking\Observers\ScheduleItemObserver;
     'start_date',
     'due_date',
     'completed_date',
+    'completion_note',
+    'completed_by',
     'progress_percentage',
     'evidence_required',
     'created_by',
