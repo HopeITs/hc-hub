@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Modules\Hr\Actions\Contracts;
 
 use Closure;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -21,9 +22,11 @@ use Modules\Hr\Enums\ScheduleMode;
 use Modules\Hr\Enums\SessionDuration;
 use Modules\Hr\Models\Contract;
 use Modules\Hr\Models\Employee;
+use Modules\Hr\Models\Position;
 use Modules\Hr\Support\Contracts\ContractOptions;
 use Modules\Hr\Support\Contracts\PositionSeats;
 use Modules\Hr\Support\Employees\HrAccess;
+use Modules\Hr\Support\Leave\LeaveRequestPricing;
 
 /**
  * Create, edit or renew a contract (HR's ContractForm::save()).
@@ -38,6 +41,18 @@ use Modules\Hr\Support\Employees\HrAccess;
 class SaveContract
 {
     /**
+     * What an edit may still change once an amendment has been applied; the
+     * schedule and pay then change only through amendments (hc-hr's
+     * ContractForm::keepAmendableTermsOf()).
+     */
+    public const IDENTITY_FIELDS = [
+        'employee_id', 'position_id', 'contract_type_id', 'place', 'is_active', 'auto_renew',
+        'start_date', 'end_date', 'terminated_at', 'termination_reason_id', 'reason_of_termination',
+    ];
+
+    private const TIME_FIELDS = ['work_hours_from', 'work_hours_to', 'work_hours_2_from', 'work_hours_2_to'];
+
+    /**
      * @param  array<string, mixed>  $data  the form's fields (see ManagesContractForm::FIELDS)
      * @param  list<array{condition_en: string, condition_ar: string, amount: mixed}>  $tiers
      */
@@ -48,6 +63,20 @@ class SaveContract
             : Gate::forUser($actor)->authorize($contract === null ? 'create' : 'update', $contract ?? Contract::class);
 
         $payHidden = ! HrAccess::canViewSalary($actor);
+        $termsLocked = $contract !== null && $contract->hasAppliedAmendments();
+
+        if ($termsLocked) {
+            [$data, $tiers] = $this->keepAmendableTermsOf($contract, $data);
+        }
+
+        // The days arrive as checkbox values, or as the stored "0,1,3"; none picked is no list.
+        if (array_key_exists('work_weekdays', $data) && ! is_array($data['work_weekdays'])) {
+            $data['work_weekdays'] = Contract::parseWeekdays($data['work_weekdays']);
+        }
+
+        if (($data['work_weekdays'] ?? null) === []) {
+            $data['work_weekdays'] = null;
+        }
 
         $this->validate($contract, $data, $tiers, $payHidden, $renewalSource);
 
@@ -57,13 +86,30 @@ class SaveContract
             throw ValidationException::withMessages(['form.employee_id' => __('hr_employees.validation.city_scope')]);
         }
 
-        $saved = DB::transaction(function () use ($contract, $data, $tiers, $actor, $renewalSource, $payHidden): Contract {
+        $saved = DB::transaction(function () use ($contract, $data, $tiers, $actor, $renewalSource, $payHidden, $termsLocked): Contract {
             $payload = $this->payload($data, $payHidden, $contract, $renewalSource);
+
+            if ($termsLocked) {
+                $payload = Arr::only($payload, self::IDENTITY_FIELDS);
+            }
 
             if ($this->mayWriteAutoRenew($actor, $contract, $renewalSource)) {
                 $payload['auto_renew'] = (bool) ($data['auto_renew'] ?? false);
             } elseif ($contract === null) {
                 $payload['auto_renew'] = $renewalSource?->auto_renew ?? true;
+            }
+
+            $isEdit = $contract !== null;
+
+            // A reserved draft (an offer not yet signed) is upgraded in place, so
+            // the employee never holds two rows and the seat is counted once.
+            if ($contract === null && $renewalSource === null) {
+                $contract = Contract::query()
+                    ->where('employee_id', (int) $data['employee_id'])
+                    ->where('type', ContractTypeEnum::Draft->value)
+                    ->latest('id')
+                    ->lockForUpdate()
+                    ->first();
             }
 
             $wasHolding = $contract !== null && PositionSeats::holdsSeat($contract->type, $contract->is_active);
@@ -95,7 +141,15 @@ class SaveContract
                 $claim ? (int) $target->position_id : null,
             );
 
-            $this->syncTiers($target, $tiers, $payHidden, $renewalSource);
+            if (! $termsLocked) {
+                $this->syncTiers($target, $tiers, $payHidden, $renewalSource);
+            }
+
+            app(SyncContractLeaveBalances::class)->handle($target);
+
+            if ($isEdit && $target->wasChanged(['end_date', 'terminated_at'])) {
+                app(ContractAmendmentService::class)->cancelForEndedContract($target);
+            }
 
             return $target;
         });
@@ -136,8 +190,11 @@ class SaveContract
                 }
             }],
             'schedule_mode' => ['required', 'integer', Rule::in([ScheduleMode::Fixed->value, ScheduleMode::Flexible->value])],
-            'work_hours_from' => [Rule::requiredIf($isFixedSchedule), 'nullable', 'date_format:H:i'],
-            'work_hours_to' => [Rule::requiredIf($isFixedSchedule), 'nullable', 'date_format:H:i', 'after:work_hours_from'],
+            'work_hours_from' => ['nullable', 'date_format:H:i', 'required_with:work_hours_to'],
+            'work_hours_to' => ['nullable', 'date_format:H:i', 'required_with:work_hours_from', 'after:work_hours_from'],
+            'work_weekdays' => ['nullable', 'array', 'min:1', 'max:7', $this->workDaysAvoidTheDayOff($isFixedSchedule, $data['position_id'] ?? null)],
+            'work_weekdays.*' => ['integer', 'between:0,6', 'distinct'],
+            'show_weekend_clause' => ['boolean'],
             'work_hours_2_from' => ['nullable', 'date_format:H:i', 'required_with:work_hours_2_to'],
             'work_hours_2_to' => ['nullable', 'date_format:H:i', 'required_with:work_hours_2_from', 'after:work_hours_2_from'],
             'work_day_from' => ['nullable', 'integer', 'between:0,6', 'required_with:work_day_to'],
@@ -194,6 +251,7 @@ class SaveContract
         $fixed = (int) $data['schedule_mode'] === ScheduleMode::Fixed->value;
         $nullable = fn (string $key): mixed => filled($data[$key] ?? null) ? $data[$key] : null;
         $int = fn (string $key): ?int => filled($data[$key] ?? null) ? (int) $data[$key] : null;
+        $pickedDays = Contract::parseWeekdays($data['work_weekdays'] ?? null);
 
         $payload = [
             'employee_id' => (int) $data['employee_id'],
@@ -217,6 +275,8 @@ class SaveContract
             'work_hours_2_to' => $fixed ? $nullable('work_hours_2_to') : null,
             'work_day_from' => $fixed ? $int('work_day_from') : null,
             'work_day_to' => $fixed ? $int('work_day_to') : null,
+            'work_weekdays' => $fixed && $pickedDays !== [] ? implode(',', $pickedDays) : null,
+            'show_weekend_clause' => (bool) ($data['show_weekend_clause'] ?? false),
             'show_days_per_week' => $fixed && (bool) ($data['show_days_per_week'] ?? false),
             'show_hours_per_week' => $fixed && (bool) ($data['show_hours_per_week'] ?? false),
             'show_hours_per_day' => $fixed && (bool) ($data['show_hours_per_day'] ?? false),
@@ -285,6 +345,82 @@ class SaveContract
         }
     }
 
+    /**
+     * The form's terms replaced by the ones on file, so validation and the
+     * saved row both see the amended schedule and pay.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array{0: array<string, mixed>, 1: list<array{condition_en: string, condition_ar: string, amount: string}>}
+     */
+    private function keepAmendableTermsOf(Contract $contract, array $data): array
+    {
+        $amendable = array_values(array_diff(array_keys($data), self::IDENTITY_FIELDS));
+
+        return [array_replace($data, $this->termsOf($contract, $amendable)), $this->tiersOf($contract)];
+    }
+
+    /**
+     * "Renew as is": the next contract on the source's terms over the given
+     * period, with its own leave balances (hc-hr's ContractRenewModal).
+     */
+    public function renewAsIs(Contract $source, string $startDate, string $endDate, User $actor): Contract
+    {
+        $source = Contract::query()->findOrFail($source->id);
+        $payHidden = ! HrAccess::canViewSalary($actor);
+
+        $data = [
+            ...$this->termsOf($source, $source->getFillable()),
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'is_active' => true,
+            'terminated_at' => '',
+            'termination_reason_id' => '',
+            'reason_of_termination' => '',
+        ];
+
+        if ((int) $source->type === ContractTypeEnum::Draft->value) {
+            $data['type'] = (string) ContractTypeEnum::FullTime->value;
+        }
+
+        return $this->handle(null, $data, $payHidden ? [] : $this->tiersOf($source), $actor, $source);
+    }
+
+    /**
+     * The stored values of $fields as the form would hold them.
+     *
+     * @param  list<string>  $fields
+     * @return array<string, mixed>
+     */
+    private function termsOf(Contract $contract, array $fields): array
+    {
+        $terms = [];
+
+        foreach ($fields as $field) {
+            $value = $contract->getAttribute($field);
+
+            $terms[$field] = match (true) {
+                is_bool($value) => $value,
+                $value instanceof \DateTimeInterface => $value->format('Y-m-d'),
+                in_array($field, self::TIME_FIELDS, true) => $value === null ? '' : substr((string) $value, 0, 5),
+                default => (string) ($value ?? ''),
+            };
+        }
+
+        return $terms;
+    }
+
+    /**
+     * @return list<array{condition_en: string, condition_ar: string, amount: string}>
+     */
+    private function tiersOf(Contract $contract): array
+    {
+        return $contract->payTiers()
+            ->orderBy('sort_order')
+            ->get(['condition_en', 'condition_ar', 'amount'])
+            ->map(fn ($tier): array => ['condition_en' => (string) $tier->condition_en, 'condition_ar' => (string) $tier->condition_ar, 'amount' => (string) $tier->amount])
+            ->all();
+    }
+
     private function mayWriteAutoRenew(User $actor, ?Contract $contract, ?Contract $renewalSource): bool
     {
         return match (true) {
@@ -299,6 +435,29 @@ class SaveContract
         return function (string $attribute, mixed $value, Closure $fail): void {
             if (Employee::query()->whereKey($value)->drafts()->exists()) {
                 $fail(__('hr_contracts.errors.employee_incomplete'));
+            }
+        };
+    }
+
+    /**
+     * The place's day off (the centre's, or the program centres' for a
+     * position without one) cannot be picked as a working day.
+     */
+    private function workDaysAvoidTheDayOff(bool $isFixedSchedule, mixed $positionId): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail) use ($isFixedSchedule, $positionId): void {
+            $position = $isFixedSchedule && filled($positionId) ? Position::query()->with('center')->find((int) $positionId) : null;
+
+            if ($position === null || ! is_array($value)) {
+                return;
+            }
+
+            [$weekend, $source] = app(LeaveRequestPricing::class)->weekendFor(
+                (new Contract)->setRelation('position', $position)->setRelation('employee', null),
+            );
+
+            if ($source !== 'default' && array_intersect(Contract::parseWeekdays($value), $weekend) !== []) {
+                $fail(__('hr_contracts.errors.work_day_is_day_off'));
             }
         };
     }

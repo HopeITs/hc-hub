@@ -1,14 +1,18 @@
 <?php
 
 use Flux\Flux;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Modules\Hr\Actions\Contracts\DeleteContract;
+use Modules\Hr\Actions\Contracts\SaveContract;
 use Modules\Hr\Actions\Contracts\TerminateContract;
 use Modules\Hr\Actions\Contracts\ToggleAutoRenew;
 use Modules\Hr\Models\Contract;
@@ -27,6 +31,15 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.show')] class extends 
 
     /** @var array{terminated_at: string, termination_reason_id: string, reason_of_termination: string} */
     public array $termination = ['terminated_at' => '', 'termination_reason_id' => '', 'reason_of_termination' => ''];
+
+    public bool $showRenewModal = false;
+
+    /** @var array{start_date: string, end_date: string} */
+    public array $renewal = ['start_date' => '', 'end_date' => ''];
+
+    /** One per opening of the renew modal, so a double click renews once. */
+    #[Locked]
+    public string $renewToken = '';
 
     public function mount(Contract $contract): void
     {
@@ -96,6 +109,95 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.show')] class extends 
         $this->showTerminateModal = false;
         unset($this->contract);
         Flux::toast(variant: 'success', text: __('hr_contracts.toasts.terminated'));
+    }
+
+    public function openRenew(): void
+    {
+        $contract = Contract::query()->findOrFail($this->contractId);
+        Gate::authorize('renew', $contract);
+
+        [$start, $end] = $contract->renewalWindow();
+
+        $this->resetValidation();
+        $this->renewal = ['start_date' => $start, 'end_date' => $end];
+        $this->renewToken = (string) Str::uuid();
+        $this->showRenewModal = true;
+    }
+
+    public function closeRenew(): void
+    {
+        $this->showRenewModal = false;
+    }
+
+    /**
+     * One click: the next contract on the same terms, with its leave
+     * balances. A second click of the same modal lands on the first renewal.
+     */
+    public function renewAsIs(): void
+    {
+        $source = Contract::query()->findOrFail($this->contractId);
+        Gate::authorize('renew', $source);
+        $this->validateRenewal();
+
+        if ($this->renewToken === '') {
+            return;
+        }
+
+        $key = 'hr-contract-renew:'.Auth::id().':'.sha1($this->renewToken);
+
+        try {
+            $renewedId = Cache::lock($key.':lock', 30)->block(10, function () use ($key, $source): int {
+                $alreadyRenewed = Cache::get($key);
+
+                if ($alreadyRenewed !== null) {
+                    return (int) $alreadyRenewed;
+                }
+
+                $renewed = app(SaveContract::class)->renewAsIs($source, $this->renewal['start_date'], $this->renewal['end_date'], Auth::user());
+
+                Cache::put($key, $renewed->id, now()->addDay());
+
+                return $renewed->id;
+            });
+        } catch (LockTimeoutException) {
+            Flux::toast(text: __('hr_contracts.toasts.save_in_progress'));
+
+            return;
+        } catch (\Illuminate\Validation\ValidationException $exception) {
+            throw \Illuminate\Validation\ValidationException::withMessages(
+                collect($exception->errors())->mapWithKeys(fn (array $messages, string $key): array => ['renewal.'.Str::after($key, 'form.') => $messages])->all()
+            );
+        }
+
+        $this->showRenewModal = false;
+        Flux::toast(variant: 'success', text: __('hr_contracts.toasts.renewed'));
+        $this->redirectRoute('hr.contracts.show', ['contract' => $renewedId], navigate: true);
+    }
+
+    /**
+     * The full form, prefilled from this contract over the period picked here.
+     */
+    public function renewWithEdit(): void
+    {
+        Gate::authorize('renew', Contract::query()->findOrFail($this->contractId));
+        $this->validateRenewal();
+
+        $this->redirectRoute('hr.contracts.renew', [
+            'contract' => $this->contractId,
+            'start' => $this->renewal['start_date'],
+            'end' => $this->renewal['end_date'],
+        ], navigate: true);
+    }
+
+    private function validateRenewal(): void
+    {
+        $this->validate([
+            'renewal.start_date' => ['required', 'date_format:Y-m-d'],
+            'renewal.end_date' => ['required', 'date_format:Y-m-d', 'after_or_equal:renewal.start_date'],
+        ], [], [
+            'renewal.start_date' => __('hr_contracts.fields.start_date'),
+            'renewal.end_date' => __('hr_contracts.fields.end_date'),
+        ]);
     }
 
     public function confirmDelete(): void
@@ -182,7 +284,7 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.show')] class extends 
                     @endunless
                 @endcan
                 @can('renew', $contract)
-                    <x-ui.button tone="primary" icon="arrow-path" :href="route('hr.contracts.renew', $contract->id)" wire:navigate data-test="renew-contract">{{ __('hr_contracts.actions.renew') }}</x-ui.button>
+                    <x-ui.button tone="primary" icon="arrow-path" wire:click="openRenew" data-test="renew-contract">{{ __('hr_contracts.actions.renew') }}</x-ui.button>
                 @endcan
                 @can('delete', $contract)
                     <x-ui.button tone="ghost" icon="trash" wire:click="confirmDelete" :aria-label="__('common.delete')" />
@@ -238,6 +340,28 @@ new #[Layout('layouts::desk'), Title('hr_contracts.titles.show')] class extends 
                 <x-ui.form-textarea wire:model="termination.reason_of_termination" :label="__('hr_contracts.fields.reason_of_termination')" rows="3" maxlength="2000" />
             </div>
         @endif
+    </x-ui.modal>
+
+    <x-ui.modal wire:model="showRenewModal" size="md" :title="__('hr_contracts.renew_modal.title')" :description="__('hr_contracts.renew_modal.description')" close="closeRenew">
+        @if ($showRenewModal)
+            <div class="flex flex-col gap-4" data-test="renew-modal">
+                <dl class="grid gap-3 rounded-lg border border-panel-border bg-surface-2 p-3 text-sm">
+                    <x-hr::employees.fact :label="__('hr_contracts.renew_modal.current_period')">
+                        <span class="tabular-nums">{{ $date($contract->start_date) }} – {{ $date($contract->end_date) }}</span>
+                    </x-hr::employees.fact>
+                </dl>
+                <p class="text-sm font-semibold">{{ __('hr_contracts.renew_modal.new_period') }}</p>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <x-ui.form-input wire:model="renewal.start_date" :label="__('hr_contracts.fields.start_date')" type="date" required />
+                    <x-ui.form-input wire:model="renewal.end_date" :label="__('hr_contracts.fields.end_date')" type="date" required />
+                </div>
+            </div>
+        @endif
+
+        <x-slot:actions>
+            <x-ui.button type="button" wire:click="renewWithEdit" icon="pencil-square" data-test="renew-with-edit">{{ __('hr_contracts.actions.renew_with_edit') }}</x-ui.button>
+            <x-ui.button type="button" tone="primary" wire:click="renewAsIs" icon="arrow-path" data-test="renew-as-is">{{ __('hr_contracts.actions.renew_as_is') }}</x-ui.button>
+        </x-slot:actions>
     </x-ui.modal>
 
     <x-ui.confirm-modal
