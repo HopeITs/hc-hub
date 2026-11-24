@@ -99,7 +99,7 @@ test('the panel shows names, center, program and status and no money', function 
         ->assertSee('Hope Center Aleppo');
 });
 
-test('the lookup is one query however many projects match', function () {
+test('the lookup is two queries however many projects match', function () {
     foreach (range(1, 5) as $number) {
         ($this->project)("Cash Transfer {$number}");
     }
@@ -107,5 +107,6 @@ test('the lookup is one query however many projects match', function () {
     DB::enableQueryLog();
     SimilarProjects::find('Cash Transfer', null, $this->centerId);
 
-    expect(DB::getQueryLog())->toHaveCount(1);
+    // The projects query plus one constant eager load of their cities (`cities where id in (...)`), not one per project.
+    expect(DB::getQueryLog())->toHaveCount(2);
 });

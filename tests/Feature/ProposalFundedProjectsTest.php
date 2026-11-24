@@ -84,6 +84,10 @@ test('counting reached milestones does not query once per project', function () 
             $proposal->projects()->attach($project);
         }
 
+        // Creating users above forgets the remembered user directory the activity
+        // timeline names actors from; reload it once so the count sees only the page.
+        User::directory();
+
         $queries = 0;
 
         Livewire::actingAs($user)

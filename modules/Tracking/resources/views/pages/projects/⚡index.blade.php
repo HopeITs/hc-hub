@@ -108,7 +108,7 @@ new #[Layout('layouts::desk'), Title('titles.projects')] class extends Component
             ])
             ->with([
                 'city:id,name_en,name_ar',
-                'program:id,strategy_id',
+                'program:id,name,strategy_id',
                 'program.strategy:id,name',
                 'user:id,first_name_en,last_name_en,first_name_ar,last_name_ar',
                 'ownerAssignment',
